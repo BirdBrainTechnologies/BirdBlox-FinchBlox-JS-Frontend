@@ -1,0 +1,166 @@
+//Static.  Holds a list of blocks and categories.
+
+function BlockList(){
+	BlockList.categories=new Array();
+	var cat=BlockList.categories;
+	cat.push("Hummingbird");
+	cat.push("Motion");
+	cat.push("Looks");
+	cat.push("Sound");
+	cat.push("Pen");
+	cat.push("iPad");
+	cat.push("Control");
+	cat.push("Sensing");
+	cat.push("Operators");
+	cat.push("Variables");
+}
+BlockList.getCatId=function(index){
+	return BlockList.categories[index].toLowerCase();
+}
+BlockList.getCatName=function(index){
+	return BlockList.categories[index];
+}
+BlockList.catCount=function(){
+	return BlockList.categories.length;
+}
+
+BlockList.populateCat_hummingbird=function(category){
+	category.addBlock("b_HBServo");
+	category.addBlock("b_HBMotor");
+	category.addBlock("b_HBVibration");
+	category.addSpace();
+	category.addBlock("b_HBLed");
+	category.addBlock("b_HBTriLed");
+	category.addSpace();
+	category.addBlock("b_HBLight");
+	category.addBlock("b_HBTempC");
+	category.addBlock("b_HBTempF");
+	category.addBlock("b_HBDistCM");
+	category.addBlock("b_HBDistInch");
+	category.addBlock("b_HBKnob");
+	category.addBlock("b_HBSound");
+	category.trimBottom()
+}
+BlockList.populateCat_motion=function(category){
+	category.addBlock("b_Move");
+	category.addBlock("b_TurnRight");
+	category.addBlock("b_TurnLeft");
+	category.addSpace();
+	category.addBlock("b_PointInDirection");
+	category.addBlock("b_PointTowards");
+	category.addSpace();
+	category.addBlock("b_GoToXY");
+	category.addBlock("b_GoTo");
+	category.addBlock("b_GlideToXY");
+	category.addSpace();
+	category.addBlock("b_ChangeXBy");
+	category.addBlock("b_SetXTo");
+	category.addBlock("b_ChangeYBy");
+	category.addBlock("b_SetYTo");
+	category.addSpace();
+	category.addBlock("b_IfOnEdgeBounce");
+	category.addSpace();
+	category.addBlock("b_XPosition");
+	category.addBlock("b_YPosition");
+	category.addBlock("b_Direction");
+}
+BlockList.populateCat_looks=function(category){
+	category.addBlock("b_alert");
+	category.addBlock("b_SetTitleBarColor");
+	category.addSpace();
+	category.addBlock("b_SayForSecs");
+	category.addBlock("b_Say");
+	category.addBlock("b_ThinkForSecs");
+	category.addBlock("b_Think");
+	category.addSpace();
+	category.addBlock("b_ChangeSizeBy");
+	category.addBlock("b_SetSizeTo");
+	category.addBlock("b_Size");
+	category.addSpace();
+	category.addBlock("b_Show");
+	category.addBlock("b_Hide");
+	category.addSpace();
+	category.addBlock("b_GoToFront");
+	category.addBlock("b_GoBackLayers");
+}
+BlockList.populateCat_sound=function(category){
+	
+}
+BlockList.populateCat_pen=function(category){
+	
+}
+BlockList.populateCat_ipad=function(category){
+	category.addBlock("b_DeviceShaken");
+	category.addBlock("b_DeviceLocation");
+	category.addBlock("b_DevicePressure");
+	category.addBlock("b_DeviceRelativeAltitude");
+	category.addBlock("b_DeviceAcceleration");
+	category.addBlock("b_DeviceOrientation");
+}
+BlockList.populateCat_control=function(category){
+	category.addBlock("b_WhenFlagTapped");
+	category.addBlock("b_WhenIAmTapped");
+	category.addBlock("b_WhenIReceive");
+	category.addSpace();
+	category.addBlock("b_Broadcast");
+	category.addBlock("b_BroadcastAndWait");
+	category.addBlock("b_Message");
+	category.addSpace();
+	category.addBlock("b_Wait");
+	category.addBlock("b_WaitUntil");
+	category.addSpace();
+	category.addBlock("b_Forever");
+	category.addBlock("b_Repeat");
+	category.addBlock("b_RepeatUntil");
+	category.addSpace();
+	category.addBlock("b_If");
+	category.addBlock("b_IfElse");
+	category.addSpace();
+	category.addBlock("b_StopAll");
+	category.addBlock("b_StopAllBut");
+}
+BlockList.populateCat_sensing=function(category){
+	category.addBlock("b_Touching");
+	category.addSpace();
+	category.addBlock("b_Ask");
+	category.addBlock("b_Answer");
+	category.addSpace();
+	category.addBlock("b_TouchX");
+	category.addBlock("b_TouchY");
+	category.addSpace();
+	category.addBlock("b_DistanceTo");
+	category.addSpace();
+	category.addBlock("b_ResetTimer");
+	category.addBlock("b_Timer");
+	category.addSpace();
+	category.addBlock("b_CurrentTime");
+	
+}
+BlockList.populateCat_operators=function(category){
+	category.addBlock("b_Add");
+	category.addBlock("b_Subtract");
+	category.addBlock("b_Multiply");
+	category.addBlock("b_Divide");
+	category.addSpace();
+	category.addBlock("b_Round");
+	category.addBlock("b_PickRandom");
+	category.addSpace();
+	category.addBlock("b_LessThan");
+	category.addBlock("b_EqualTo");
+	category.addBlock("b_GreaterThan");
+	category.addSpace();
+	category.addBlock("b_And");
+	category.addBlock("b_Or");
+	category.addBlock("b_Not");
+	category.addSpace();
+	category.addBlock("b_True");
+	category.addBlock("b_False");
+	category.addSpace();
+	category.addBlock("b_LetterOf");
+	category.addBlock("b_LengthOf");
+	category.addBlock("b_join");
+	
+}
+BlockList.populateCat_variables=function(category){
+	
+}
