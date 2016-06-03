@@ -64,6 +64,7 @@ RoundSlot.prototype.edit=function(){
 		var x=this.getAbsX();
 		var y=this.getAbsY();
 		this.select();
+		InputPad.resetPad();
 		InputPad.showNumPad(this,x+this.width/2,y,y+this.height,this.positive,this.integer);
 	}
 }
@@ -73,7 +74,7 @@ RoundSlot.prototype.updateEdit=function(visibleText,Data){
 		this.changeText(visibleText);
 	}
 }
-RoundSlot.prototype.saveEdit=function(Data){
+RoundSlot.prototype.saveNumData=function(Data){
 	if(this.selected){
 		this.enteredData=Data;
 		this.changeText(Data.asString().getValue());

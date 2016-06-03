@@ -30,14 +30,7 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	this.textE=GuiElements.draw.text(0,0,text,size,Button.foreground,font,weight);
 	this.group.appendChild(this.textE);
 	var bbox=this.textE.getBBox();
-	var textW=bbox.width;
-	if(textW==0){
-		GuiElements.layers.temp.appendChild(this.textE);
-		bbox=this.textE.getBBox();
-		textW=bbox.width;
-		this.textE.remove();
-		this.group.appendChild(this.textE);
-	}
+	var textW=GuiElements.measure.textWidth(this.textE);
 	var textX=(this.width-textW)/2;
 	var textY=(this.height+height)/2;
 	GuiElements.move.text(this.textE,textX,textY);
@@ -122,4 +115,7 @@ Button.prototype.release=function(){
 			this.callback();
 		}
 	}
+}
+Button.prototype.remove=function(){
+	this.group.remove();
 }

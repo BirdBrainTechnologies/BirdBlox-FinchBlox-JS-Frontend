@@ -16,19 +16,28 @@ InputPad.setGraphics=function(){
 	InputPad.bsBnH=25;
 	InputPad.okBnH=InputPad.bsBnH;
 	
-	InputPad.width=InputPad.buttonW*3+InputPad.buttonMargin*4;
-	InputPad.height=InputPad.buttonH*5+InputPad.buttonMargin*6;
+	InputPad.BnAreaW=InputPad.buttonW*3+InputPad.buttonMargin*4;
+	InputPad.BnAreaH=InputPad.buttonH*5+InputPad.buttonMargin*6;
+	InputPad.width=InputPad.BnAreaW;
+	InputPad.height=InputPad.BnAreaH;
+	
 	InputPad.longBnW=(InputPad.width-InputPad.buttonMargin*3)/2;
 	InputPad.triOffset=(InputPad.width-InputPad.triangleW)/2;
 	InputPad.halfOffset=InputPad.width/2;
 	InputPad.tallH=InputPad.height+InputPad.triangleH;
+	InputPad.usingNumberPad=false;
+	InputPad.dataIsNumeric=false;
+	InputPad.nonNumericData=null;
+	InputPad.nonNumericText=null;
 }
 InputPad.buildPad=function(){//456,267
-	InputPad.group=GuiElements.create.group(456,267);
-	InputPad.visible=false;
-	InputPad.makeBg();
-	InputPad.bnGroup=GuiElements.create.group(0,0,InputPad.group);
-	InputPad.makeBns();
+	var IP=InputPad;
+	IP.group=GuiElements.create.group(456,267);
+	IP.visible=false;
+	IP.makeBg();
+	IP.bnGroup=GuiElements.create.group(0,0);
+	IP.makeBns();
+	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
 }
 InputPad.makeBg=function(){
 	var IP=InputPad;
@@ -38,9 +47,33 @@ InputPad.makeBg=function(){
 	IP.bgGroup.appendChild(IP.bgRect);
 	IP.bgGroup.appendChild(IP.triangle);
 }
+InputPad.resetPad=function(){//removes any options which may have been added to the pad
+	var IP=InputPad;
+	if(IP.visible){
+		IP.close();
+	}
+	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
+}
+InputPad.addOption=function(text,data){
+	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
+	InputPad.menuBnList.addOption(text,dataFunction);
+}
+InputPad.menuBnSelected=function(text,data){
+	var IP=InputPad;
+	if(Data.type==Data.types.num){
+		IP.displayNum=new DisplayNum(data);
+		IP.dataIsNumeric=true;
+		InputPad.close();
+	}
+	else{
+		IP.dataIsNumeric=false;
+		IP.nonNumericText=text;
+		IP.nonNumericData=data;
+	}
+	IP.close();
+}
 InputPad.makeBns=function(){
 	var IP=InputPad;
-	IP.bnGroup=GuiElements.create.group(0,0,IP.group);
 	var currentNum;
 	var xPos=0;
 	var yPos=0;
@@ -110,15 +143,41 @@ InputPad.bsPressed=function(){
 InputPad.okPressed=function(){
 	InputPad.close();
 }
+InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
+	var IP=InputPad;
+	IP.visible=true;
+	IP.usingNumberPad=false;
+	IP.slot=slot;
+	InputPad.nonNumericData=IP.slot.enteredData;
+	InputPad.nonNumericText=IP.slot.text;
+	this.menuBnList.generateBns();
+	this.width=this.menuBnList.width+2*IP.buttonMargin;
+	this.height=this.menuBnList.height+2*IP.buttonMargin;
+	IP.tallH=IP.height+IP.triangleH;
+	IP.move(x,upperY,lowerY);
+	GuiElements.layers.inputPad.appendChild(IP.group);
+}
 InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	var IP=InputPad;
-	if(IP.visible){
-		IP.close();
-	}
+	IP.usingNumberPad=true;
+	IP.menuBnList.width=IP.buttonW;
+	IP.width=InputPad.BnAreaW;
+	IP.height=InputPad.BnAreaH;
+	IP.tallH=IP.height+IP.triangleH;
+	var IP=InputPad;
 	GuiElements.layers.inputPad.appendChild(IP.group);
+	IP.group.appendChild(IP.bnGroup);
 	IP.visible=true;
 	IP.slot=slot;
-	IP.displayNum=new DisplayNum(slot.getData());
+	if(slot.getData().type==Data.types.num){
+		IP.displayNum=new DisplayNum(slot.getData());
+		IP.dataIsNumeric=true;
+	}
+	else{
+		IP.dataIsNumeric=false;
+		IP.nonNumericData=slot.getData();
+		IP.displayNum=new DisplayNum(0);
+	}
 	if(positive){
 		IP.plusMinusBn.disable();
 	}
@@ -136,6 +195,9 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 }
 InputPad.move=function(x,upperY,lowerY){
 	var IP=InputPad;
+	IP.triOffset=(InputPad.width-InputPad.triangleW)/2;
+	IP.halfOffset=InputPad.width/2;
+	
 	arrowDown=(lowerY+this.tallH>GuiElements.height);
 	var yCoord=lowerY+IP.triangleH;
 	var xCoord=x-IP.halfOffset;
@@ -152,17 +214,31 @@ InputPad.move=function(x,upperY,lowerY){
 		xCoord=0;
 	}
 	if(xCoord+this.width>GuiElements.width){
-		arrowX=IP.width+x-GuiElements.width-IP.triangleW
+		arrowX=IP.width+x-GuiElements.width-IP.triangleW/2;
 		xCoord=GuiElements.width-this.width;
 	}
 	GuiElements.move.group(IP.group,xCoord,yCoord);
 	GuiElements.update.triangle(IP.triangle,arrowX,arrowY,IP.triangleW,IP.triangleH*arrowDir);
+	GuiElements.update.rect(IP.bgRect,0,0,this.width,this.height);
+	this.menuBnList.move(IP.buttonMargin,IP.buttonMargin);
+	this.menuBnList.show();
 }
 InputPad.updateSlot=function(){
-	InputPad.slot.updateEdit(this.displayNum.getString(),this.displayNum.getData());
+	if(InputPad.usingNumberPad){
+		InputPad.slot.updateEdit(this.displayNum.getString(),this.displayNum.getData());
+		InputPad.dataIsNumeric=true;
+	}
 }
 InputPad.close=function(){
-	InputPad.slot.saveEdit(this.displayNum.getData());
-	InputPad.group.remove();
-	InputPad.visible=false;
+	var IP=InputPad;
+	if(InputPad.dataIsNumeric){
+		IP.slot.saveNumData(this.displayNum.getData());
+	}
+	else{
+		IP.slot.saveSelectionData(IP.nonNumericText,IP.nonNumericData);
+	}
+	IP.group.remove();
+	IP.visible=false;
+	IP.menuBnList.hide();
+	IP.bnGroup.remove();
 }

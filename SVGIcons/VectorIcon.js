@@ -25,3 +25,8 @@ VectorIcon.prototype.setColor=function(color){
 	this.color=color;
 	this.pathE.setAttributeNS(null,"fill",this.color);
 }
+VectorIcon.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
+}

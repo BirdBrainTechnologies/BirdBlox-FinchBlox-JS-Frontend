@@ -1,6 +1,6 @@
 function TouchReceiver(){
 	var TR=TouchReceiver;
-	TR.mouse=true;
+	TR.mouse=false;
 	TR.blocksMoving=false;
 	TR.targetType="none";
 	TR.touchDown=false;

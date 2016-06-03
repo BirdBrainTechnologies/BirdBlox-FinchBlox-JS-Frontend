@@ -143,6 +143,7 @@ BlockList.populateCat_operators=function(category){
 	category.addBlock("b_Divide");
 	category.addSpace();
 	category.addBlock("b_Round");
+	category.addBlock("b_mathOfNumber");
 	category.addBlock("b_PickRandom");
 	category.addSpace();
 	category.addBlock("b_LessThan");

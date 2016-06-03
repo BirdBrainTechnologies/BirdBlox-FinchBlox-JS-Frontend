@@ -308,3 +308,29 @@ b_join.prototype.startAction=function(){
 	return true;
 }
 ///////////
+function b_mathOfNumber(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	dS.addOption("abs",new SelectionData("abs"));
+	dS.addOption("ceiling",new SelectionData("ceiling"));
+	dS.addOption("floor",new SelectionData("floor"));
+	dS.addOption("sqrt",new SelectionData("sqrt"));
+	dS.addOption("sin",new SelectionData("sin"));
+	dS.addOption("cos",new SelectionData("cos"));
+	dS.addOption("tan",new SelectionData("tan"));
+	dS.addOption("asin",new SelectionData("asin"));
+	dS.addOption("acos",new SelectionData("acos"));
+	dS.addOption("atan",new SelectionData("atan"));
+	dS.addOption("ln",new SelectionData("ln"));
+	dS.addOption("log",new SelectionData("log"));
+	dS.addOption("e^",new SelectionData("e^"));
+	dS.addOption("10^",new SelectionData("10^"));
+	this.addPart(dS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new NumSlot(this,10));
+}
+b_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
+b_mathOfNumber.prototype.constructor = b_mathOfNumber;
+
+
+

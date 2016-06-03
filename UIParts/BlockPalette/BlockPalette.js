@@ -71,3 +71,7 @@ BlockPalette.getAbsX=function(){
 BlockPalette.getAbsY=function(){
 	return TitleBar.height+BlockPalette.catH;
 }
+BlockPalette.IsStackOverPalette=function(){
+	var move=CodeManager.move;
+	return CodeManager.move.pInRange(move.touchX,move.touchY,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
+}

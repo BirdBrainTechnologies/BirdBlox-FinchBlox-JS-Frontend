@@ -80,7 +80,16 @@ b_Timer.prototype.constructor = b_Timer;
 function b_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"current"));
-	//Dropdown
+	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	dS.addOption("year",new SelectionData("year"));
+	dS.addOption("month",new SelectionData("month"));
+	dS.addOption("date",new SelectionData("date"));
+	dS.addOption("day of the week",new SelectionData("day of the week"));
+	dS.addOption("hour",new SelectionData("hour"));
+	dS.addOption("minute",new SelectionData("minute"));
+	dS.addOption("second",new SelectionData("second"));
+	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
+	this.addPart(dS);
 }
 b_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 b_CurrentTime.prototype.constructor = b_CurrentTime;

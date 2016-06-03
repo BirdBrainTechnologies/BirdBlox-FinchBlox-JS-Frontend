@@ -1,6 +1,8 @@
 function b_WhenFlagTapped(x,y){
 	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when flag tapped"));
+	this.addPart(new LabelText(this,"when"));
+	this.addPart(new BlockIcon(this,VectorPaths.flag,TitleBar.flagFill,"flag",15));
+	this.addPart(new LabelText(this,"tapped"));
 }
 b_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 b_WhenFlagTapped.prototype.constructor = b_WhenFlagTapped;
@@ -199,6 +201,11 @@ b_IfElse.prototype.updateAction=function(){
 function b_WhenIAmTapped(x,y){
 	HatBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"when I am"));
+	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	dS.addOption("tapped",new SelectionData("tapped"));
+	dS.addOption("pressed",new SelectionData("pressed"));
+	dS.addOption("released",new SelectionData("released"));
+	this.addPart(dS);
 }
 b_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
 b_WhenIAmTapped.prototype.constructor = b_WhenIAmTapped;

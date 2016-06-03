@@ -57,12 +57,17 @@ CodeManager.move.update=function(x,y){
 		move.topX=move.offsetX+move.touchX;
 		move.topY=move.offsetY+move.touchY;
 		move.stack.move(move.topX,move.topY);
-		CodeManager.findBestFit();
-		if(CodeManager.fit.found){
-			CodeManager.fit.bestFit.highlight();
+		if(BlockPalette.IsStackOverPalette()){
+			Highlighter.hide();
 		}
 		else{
-			Highlighter.hide();
+			CodeManager.findBestFit();
+			if(CodeManager.fit.found){
+				CodeManager.fit.bestFit.highlight();
+			}
+			else{
+				Highlighter.hide();
+			}
 		}
 	}
 }
@@ -73,13 +78,18 @@ CodeManager.move.end=function(){
 		move.topX=move.offsetX+move.touchX;
 		move.topY=move.offsetY+move.touchY;
 		//move.stack.move(move.topX,move.topY);
-		CodeManager.findBestFit();
-		if(fit.found){
-			fit.bestFit.snap(move.stack.firstBlock);
+		if(BlockPalette.IsStackOverPalette()){
+			move.stack.delete();
 		}
 		else{
-			move.stack.land();
-			move.stack.updateDim();
+			CodeManager.findBestFit();
+			if(fit.found){
+				fit.bestFit.snap(move.stack.firstBlock);
+			}
+			else{
+				move.stack.land();
+				move.stack.updateDim();
+			}
 		}
 		Highlighter.hide();
 		move.moving=false;

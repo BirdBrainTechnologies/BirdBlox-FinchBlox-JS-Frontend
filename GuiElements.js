@@ -26,6 +26,7 @@ GuiElements.setConstants=function(){ //Runs the other static classes so they can
 	BlockPalette.setGraphics();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
+	MenuBnList.setGraphics();
 	InputPad.setGraphics();
 	CodeManager();
 }
@@ -103,10 +104,16 @@ GuiElements.create.text=function(){
 	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text');
 	return textElement;
 }
+GuiElements.create.rect=function(group){
+	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+	if(group!=null){
+		group.appendChild(rect);
+	}
+	return rect;
+}
 GuiElements.draw=function(){};
 GuiElements.draw.rect=function(x,y,width,height,color){
 	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-	if(y==null){crash();}
 	rect.setAttributeNS(null,"x",x);
 	rect.setAttributeNS(null,"y",y);
 	rect.setAttributeNS(null,"width",width);
@@ -147,6 +154,9 @@ GuiElements.update=function(){};
 GuiElements.update.color=function(element,color){
 	element.setAttributeNS(null,"fill",color);
 }
+GuiElements.update.opacity=function(element,opacity){
+	element.setAttributeNS(null,"fill-opacity",opacity);
+}
 GuiElements.update.text=function(textE,newText){
 	textE.textNode.remove();
 	var textNode = document.createTextNode(newText);
@@ -172,6 +182,12 @@ GuiElements.update.trapezoid=function(trapezoid,x,y,width,height,slantW){
 	path+=" z";
 	trapezoid.setAttributeNS(null,"d",path);
 }
+GuiElements.update.rect=function(rect,x,y,width,height){
+	rect.setAttributeNS(null,"x",x);
+	rect.setAttributeNS(null,"y",y);
+	rect.setAttributeNS(null,"width",width);
+	rect.setAttributeNS(null,"height",height);
+}
 GuiElements.move=function(){};
 GuiElements.move.group=function(group,x,y){ //Move a group by changing its transform value
 	group.setAttributeNS(null,"transform","translate("+x+","+y+")");
@@ -181,7 +197,7 @@ GuiElements.move.text=function(text,x,y){
 	text.setAttributeNS(null,"y",y);
 }
 GuiElements.measure=function(){};
-GuiElements.measure.textWidth=function(textE){
+GuiElements.measure.textWidth=function(textE){ //Measures an existing text SVG object
 	if(textE.textContent==""){
 		return 0;
 	}
@@ -199,7 +215,19 @@ GuiElements.measure.textWidth=function(textE){
 	}
 	return textW;
 }
-
+GuiElements.measure.stringWidth=function(text,font,size,weight){
+	var textElement=GuiElements.create.text();
+	textElement.setAttributeNS(null,"font-family",font);
+	textElement.setAttributeNS(null,"font-size",size);
+	if(weight!=null){
+		textElement.setAttributeNS(null,"font-weight",weight);
+	}
+	textElement.setAttributeNS(null,"class","noselect");
+	var textNode = document.createTextNode(text);
+	textElement.textNode=textNode;
+	textElement.appendChild(textNode);
+	return GuiElements.measure.textWidth(textElement);
+}
 GuiElements.createGradient=function(name,color1,color2){
 	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
 	gradient.setAttributeNS(null,"id",name);

@@ -9,6 +9,7 @@ function BlockGraphics(){
 	BlockGraphics.SetLoop();
 	BlockGraphics.SetLabelText();
 	BlockGraphics.SetValueText();
+	BlockGraphics.SetDropSlot();
 	BlockGraphics.SetHighlight();
 	BlockGraphics.CalcCommand();
 	BlockGraphics.CalcPaths();
@@ -101,6 +102,22 @@ BlockGraphics.SetValueText=function(){
 	BlockGraphics.valueText.charHeight=10;
 	BlockGraphics.valueText.selectedFill="#fff";
 	/*BlockGraphics.valueText.charWidth=3;*/
+}
+BlockGraphics.SetDropSlot=function(){
+	BlockGraphics.dropSlot=function(){};
+	BlockGraphics.dropSlot.slotHeight=18;
+	BlockGraphics.dropSlot.slotWidth=25;
+	BlockGraphics.dropSlot.slotHMargin=3;
+	BlockGraphics.dropSlot.triH=6;
+	BlockGraphics.dropSlot.triW=8;
+	//BlockGraphics.dropSlot.menuWidth=100;
+	BlockGraphics.dropSlot.bg="#000";
+	BlockGraphics.dropSlot.bgOpacity=0.25;
+	BlockGraphics.dropSlot.selectedBg="#000";
+	BlockGraphics.dropSlot.selectedBgOpacity=1;
+	BlockGraphics.dropSlot.triFill="#000";
+	BlockGraphics.dropSlot.textFill="#fff";
+	BlockGraphics.dropSlot.selectedTriFill="#fff";
 }
 BlockGraphics.SetHighlight=function(){
 	BlockGraphics.highlight=function(){};

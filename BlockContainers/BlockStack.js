@@ -191,6 +191,11 @@ BlockStack.prototype.land=function(){
 BlockStack.prototype.remove=function(){
 	this.tab.removeStack(this);
 }
+BlockStack.prototype.delete=function(){
+	this.stop();
+	this.group.remove();
+	this.remove();
+}
 BlockStack.prototype.eventFlagClicked=function(){
 	if(!this.isRunning){
 		this.firstBlock.eventFlagClicked();
