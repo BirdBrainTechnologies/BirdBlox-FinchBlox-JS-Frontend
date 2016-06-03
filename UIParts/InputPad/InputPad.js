@@ -148,8 +148,9 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	IP.visible=true;
 	IP.usingNumberPad=false;
 	IP.slot=slot;
-	InputPad.nonNumericData=IP.slot.enteredData;
-	InputPad.nonNumericText=IP.slot.text;
+	IP.dataIsNumeric=false;
+	IP.nonNumericData=IP.slot.enteredData;
+	IP.nonNumericText=IP.slot.text;
 	this.menuBnList.generateBns();
 	this.width=this.menuBnList.width+2*IP.buttonMargin;
 	this.height=this.menuBnList.height+2*IP.buttonMargin;
