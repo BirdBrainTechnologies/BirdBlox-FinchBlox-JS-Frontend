@@ -100,7 +100,7 @@ BlockGraphics.SetValueText=function(){
 	BlockGraphics.valueText.fontWeight="normal";
 	BlockGraphics.valueText.fill="#000000";
 	BlockGraphics.valueText.charHeight=10;
-	BlockGraphics.valueText.selectedFill="#fff";
+	BlockGraphics.valueText.selectedFill="#fff";//#aaa
 	/*BlockGraphics.valueText.charWidth=3;*/
 }
 BlockGraphics.SetDropSlot=function(){

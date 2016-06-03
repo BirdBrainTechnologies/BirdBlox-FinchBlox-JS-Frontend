@@ -1,56 +1,66 @@
-
+/* Block is an abstract class that represents an executable block.  Blocks are nearly always contained within BlockStacks or DisplayStacks.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  This is because BlockStacks must always contain at least one Block, so the Block must be created first.
+ * @constructor
+ * @fix remove the type parameter and use blockShape and instead.
+ * @param {number} type - The shape of the Block.  0=Command, 1=Reporter, 2=Predicate, 4=Hat, 5=Loop, 6=DoubleLoop.
+ * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
+ * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
+ * @param {number} y - The y coord of the Block.
+ * @param {string} category - The Block's category in string form.
+ */
 function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=Predicate Fix! BG
-	this.x=x;
+	this.x=x; //Store coords
 	this.y=y;
-	this.type=type;
-	this.bottomOpen=(type==0||type==4||type==5||type==6);
-	this.topOpen=(type==0||type==5||type==6);
-	this.returnsValue=(returnType!=Block.returnTypes.none);
-	this.returnType=returnType;
-	this.hasBlockSlot1=(type==5||type==6);
-	this.hasBlockSlot2=(type==6);
-	this.hasHat=(type==4);
+	this.type=type; //Fix! remove this property
+	this.bottomOpen=(type==0||type==4||type==5||type==6); //Can Blocks be attached to the bottom of this Block?
+	this.topOpen=(type==0||type==5||type==6); //Can Blocks be attached to the top of this Block?
+	this.returnsValue=(returnType!=Block.returnTypes.none); //Does this Block attack to Slots and return a value?
+	this.returnType=returnType; //What type of value does this Block return?
+	this.hasBlockSlot1=(type==5||type==6); //Is this Block like an if block that has a special BlockSlot?
+	this.hasBlockSlot2=(type==6); //Does it have two BlockSlots?
+	this.hasHat=(type==4); //Is it a HatBlock?
 	
-	this.group=GuiElements.create.group(x,y);
-	this.group.setAttributeNS(null,"id",name);
-	this.parent=null;
-	this.parts=new Array();
-	this.slots=new Array();
-	this.running=0;//Running: 0=Not started 1=Awaiting slots 2=Running 3=Completed
-	//this.isRunning=false;
+	this.group=GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
+	this.parent=null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
+	this.parts=new Array(); //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	this.slots=new Array(); //The slots array just holds the Slots.
+	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
 	this.category=category;
 	
-	this.stack=null;
-	this.path=this.generatePath();
-	this.height=0; //Will be set later
+	this.stack=null; //It has no Stack yet.
+	this.path=this.generatePath(); //This path is the main visual part of the Block.  It is colored according to its category.
+	this.height=0; //Will be set later when the Block's dimensions are updated.
 	this.width=0;
-	this.name=name;
-	this.runMem=function(){};//serves as a place for the block to store info while running
-	
+	this.runMem=function(){}; //serves as a place for the block to store info while running
 	if(this.bottomOpen){
-		this.nextBlock=null;
+		this.nextBlock=null; //Reference to the Block below this one.
 	}
 	if(this.returnsValue){
-		this.resultData=null;
+		this.resultData=null; //Stores the Data to be passed on to the Slot containing this Block.
 	}
 	if(this.hasBlockSlot1){
-		this.topHeight=0;
+		this.topHeight=0; //The height of just the top of the Block (where the LabelText and Slots are)
 		this.blockSlot1=new BlockSlot(this);
 	}
 	if(this.hasBlockSlot2){
-		this.midHeight=0;
-		this.midLabel=new LabelText(this,this.midLabelText);
+		this.midHeight=0; //The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
+		this.midLabel=new LabelText(this,this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2=new BlockSlot(this);
 	}
 }
+/* Sets the possible values for Block.returnTypes.
+ */
 Block.setConstants=function(){
 	Block.returnTypes=function(){};
-	Block.returnTypes.none=0;
+	Block.returnTypes.none=0; //A command Block always is Block.returnTypes.none.
 	Block.returnTypes.num=1;
 	Block.returnTypes.string=2;
 	Block.returnTypes.bool=3;
 	Block.returnTypes.list=4;
 }
+/* Returns the x coord of the Block relative to the screen (not the group it is contained in).
+ * @return {number} - The x coord of the Block relative to the screen.
+ */
 Block.prototype.getAbsX=function(){
 	if(this.stack!=null){
 		return this.x+this.stack.getAbsX();
@@ -59,6 +69,9 @@ Block.prototype.getAbsX=function(){
 		return this.x;
 	}
 }
+/* Returns the y coord of the Block relative to the screen.
+ * @return {number} - The y coord of the Block relative to the screen.
+ */
 Block.prototype.getAbsY=function(){
 	if(this.stack!=null){
 		return this.y+this.stack.getAbsY();
@@ -67,68 +80,85 @@ Block.prototype.getAbsY=function(){
 		return this.y;
 	}
 }
+/* Creates and returns the main SVG path element for the Block.
+ * @return {SVG path} - The main SVG path element for the Block.
+ */
 Block.prototype.generatePath=function(){
-	var obj=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
-	TouchReceiver.addListenersChild(obj,this);
-	return obj;
+	var pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	TouchReceiver.addListenersChild(pathE,this);
+	return pathE;
 }
+/* Adds a part (LabelText, BlockIcon, or Slot) to the Block.
+ * @param {LabelText/BlockIcon/Slot} part - part to add.
+ */
 Block.prototype.addPart=function(part){
 	this.parts.push(part);
-	if(part.isSlot){
+	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
 		this.slots.push(part);
 	}
 }
+/* Moves the Block and sets its this.x and this.y values.
+ * @param {number} x - New x coord.
+ * @param {number} y - New y coord.
+ */
 Block.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
-	GuiElements.move.group(this.group,x,y);
+	GuiElements.move.group(this.group,x,y); //All parts of the Block are contained within its group to allow for easy movement.
 }
+/* Recursively stops the Block, its Slots, and any subsequent Blocks.
+ */
 Block.prototype.stop=function(){
-	this.running=0;
+	this.running=0; //Stop this Block.
 	for(var i=0;i<this.slots.length;i++){
-		this.slots[i].stop();
+		this.slots[i].stop(); //Stop this Block's Slots.
 	}
 	if(this.blockSlot1!=null){
-		this.blockSlot1.stop();
+		this.blockSlot1.stop(); //Stop the BlockSlots.
 	}
 	if(this.blockSlot2!=null){
 		this.blockSlot2.stop();
 	}
 	if(this.bottomOpen&&this.nextBlock!=null){
-		this.nextBlock.stop();
+		this.nextBlock.stop(); //Stop the next Block.
 	}
 }
+/* Updates this currently executing Block and returns either the next Block to execute or its current execution state depending on the type of Block.
+ * @return {Block/boolean} - If this Block returns no value, it returns the next Block to run.  Otherwise, it returns boolean indicating if it has finished generating a vlaue to return.
+ * @fix make the return type more consistent.  Maybe always a boolean.
+ * @fix make the value true mean that it is still running, rather than the other way around. (To make it match Tabs and BlockStacks).
+ */
 Block.prototype.updateRun=function(){
-	if(this.running==0||this.running==3){
-		for(var i=0;i<this.slots.length;i++){
+	if(this.running==0||this.running==3){ //If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
+		for(var i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution.
 			this.slots[i].stop();
 		}
-		this.running=1;
+		this.running=1; //Now the Block is ready to run its Slots.
 	}
-	var rVal;
-	if(this.running==1){
+	var rVal; //The value to return.
+	if(this.running==1){ //If the Block is currently waiting on its Slots...
 		for(var i=0;i<this.slots.length;i++){
-			if(!this.slots[i].updateRun()){
-				if(!this.returnsValue){
-					return this;
+			if(!this.slots[i].updateRun()){ //Check to see if each Slot is done and update the first Slot that isn't done.
+				if(!this.returnsValue){ //If a slot required updating, this block needs to be run again next time.
+					return this; //If this Slot does not return a value, it is expected to return the next Block to run, which is itself.
 				}
 				else{
-					return false;
+					return false; //If this Slot does return a value, it is expected to return a boolean indicating if it has completed its execution.
 				}
 			}
 		}
-		this.running=2;
-		rVal = this.startAction();
+		this.running=2; //If all Slots are done running, the Block itself may now run.
+		rVal = this.startAction(); //This function is overrided by the class of the particular Block. It sets the Block up for execution, and if it is a simple Block, may even complete execution.
 	}
-	else if(this.running==2){
-		rVal = this.updateAction();
+	else if(this.running==2){ //If the Block is currently running, update it.
+		rVal = this.updateAction(); //This function is also overrided and is called repeatedly until the Block is done running.
 	}
 	var rT=Block.returnTypes;
-	if((!this.returnsValue&&rVal!=this)||(this.returnsValue&&rVal==true)){
-		this.running=3;
-		this.clearMem();
+	if((!this.returnsValue&&rVal!=this)||(this.returnsValue&&rVal==true)){ //If the block is done running...
+		this.running=3; //Record that the Block is done.
+		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
-	return rVal;
+	return rVal; //Return either the next Block to run or a boolean indicating if this Block is done.
 }
 Block.prototype.startAction=function(){
 	return this;
