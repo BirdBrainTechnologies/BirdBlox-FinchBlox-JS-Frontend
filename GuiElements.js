@@ -1,5 +1,6 @@
-/* GuiElements is a static class that is in charge of building the UI and initializing the other classes.
- * It contains functions to create and modify elements of the main SVG.  GuiElements is run once the browser has loaded all the js and html files
+/* GuiElements is a static class that builds the UI and initializes the other classes.
+ * It contains functions to create and modify elements of the main SVG.
+ * GuiElements is run once the browser has loaded all the js and html files.
  */
 function GuiElements(){
 	GuiElements.svg=document.getElementById("MainSvg");
@@ -12,15 +13,22 @@ function GuiElements(){
 document.addEventListener('DOMContentLoaded', function() {
     GuiElements();
 }, false);
-/* Many classes have static functions which set constants such as font size, etc. GuiElements.setConstants runs these functions in sequence, thereby initializing them.  Some classes rely on constants from eachother, so the order that they are initialized is important. */
+/* Many classes have static functions which set constants such as font size, etc. 
+ * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
+ * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
 	Data.setConstants();
-	GuiElements.width=window.innerWidth; //Saves the dimensions of the screen so other classes can refer to them.  This assumes that the screen's dimensions never change once loaded.
+	/* Saves the dimensions of the screen so other classes can refer to them.  
+	This assumes that the screen's dimensions never change once loaded. */
+	GuiElements.width=window.innerWidth;
 	GuiElements.height=window.innerHeight;
-	VectorPaths(); //If a class is static and does not build a part of the UI, then its main function is used to initialize its constants.
+	/* If a class is static and does not build a part of the UI, 
+	then its main function is used to initialize its constants. */
+	VectorPaths();
 	BlockList();
 	Colors();
-	TitleBar.setGraphics(); //If the constants are only related to the way the UI looks, the method is called setGraphics().
+	//If the constants are only related to the way the UI looks, the method is called setGraphics().
+	TitleBar.setGraphics();
 	BlockGraphics();
 	Slot.setConstants();
 	Block.setConstants();
@@ -32,7 +40,7 @@ GuiElements.setConstants=function(){
 	InputPad.setGraphics();
 	CodeManager();
 }
-/* Once each class has its constants set, the UI can be built. UI-related classes are called in turn. */
+/* Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI=function(){
 	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
@@ -41,9 +49,13 @@ GuiElements.buildUI=function(){
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	InputPad(); //Builds the inputpad, which is used for number entry and dropdown selection
-	Highlighter(); //Builds the SVG path element for the highlighter, the white ring which shows which slot a block will connect to.
+	/* Builds the SVG path element for the highlighter, 
+	the white ring which shows which slot a Block will connect to. */
+	Highlighter();
 }
-/* Makes an SVG group element (<g>) for each layer of the interface.  Layers are accessible in the form GuiElements.layers.[layerName] */
+/* Makes an SVG group element (<g>) for each layer of the interface.
+ * Layers are accessible in the form GuiElements.layers.[layerName]
+ */
 GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
 	GuiElements.layers=function(){};
@@ -65,7 +77,10 @@ GuiElements.createLayers=function(){
 	layers.stackMenu=create.layer();
 	layers.tabMenu=create.layer();
 }
-/* GuiElements.create contains functions for creating SVG elements.  The element is built with minimal attributes and returned.  It may also be added to a group if included. */
+/* GuiElements.create contains functions for creating SVG elements.
+ * The element is built with minimal attributes and returned.
+ * It may also be added to a group if included.
+ */
 GuiElements.create=function(){};
 /* Makes a group, adds it to a parent group (if present), and returns it.
  * @param {number} x - The x offset of the group.
@@ -92,18 +107,18 @@ GuiElements.create.layer=function(){
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  */
 GuiElements.create.gradient=function(id,color1,color2){ //Creates a gradient and adds to the defs
-	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient'); //Make a gradient.
+	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
 	gradient.setAttributeNS(null,"id",id); //Set attributes.
 	gradient.setAttributeNS(null,"x1","0%");
 	gradient.setAttributeNS(null,"x2","0%");
 	gradient.setAttributeNS(null,"y1","0%");
 	gradient.setAttributeNS(null,"y2","100%");
 	GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
-	var stop1=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create the first stop.
+	var stop1=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
 	stop1.setAttributeNS(null,"offset","0%");
 	stop1.setAttributeNS(null,"style","stop-color:"+color1+";stop-opacity:1");
 	gradient.appendChild(stop1);
-	var stop2=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create the second stop.
+	var stop2=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
 	stop2.setAttributeNS(null,"offset","100%");
 	stop2.setAttributeNS(null,"style","stop-color:"+color2+";stop-opacity:1");
 	gradient.appendChild(stop2);
@@ -123,7 +138,7 @@ GuiElements.create.path=function(group){
  * @return {SVG text} - The text which was created.
  */
 GuiElements.create.text=function(){
-	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create the text.
+	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 	return textElement; //Return the text.
 }
 /* Creates an SVG rect element, adds it to a parent group (if present), and returns it.
@@ -137,7 +152,10 @@ GuiElements.create.rect=function(group){
 	}
 	return rect; //Return the rect.
 }
-/* GuiElements.create contains functions that create SVG elements and assign numerous attributes to them so they are ready to be drawn on the screen. The element is then returned. It may also be added to a group if included. */
+/* GuiElements.create contains functions that create SVG elements and assign thier attributes
+ * so they are ready to be drawn on the screen. The element is then returned. 
+ * It may also be added to a group if included.
+ */
 GuiElements.draw=function(){};
 /* Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
  * @param {number} x - The rect's x coord.
@@ -156,7 +174,7 @@ GuiElements.draw.rect=function(x,y,width,height,color){
 	rect.setAttributeNS(null,"fill",color);
 	return rect; //Return the rect.
 }
-/* Creates a filled, triangular SVG path element at a certain location with specified dimensions and returns it.
+/* Creates a filled, triangular SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles triangle)
@@ -170,7 +188,7 @@ GuiElements.draw.triangle=function(x,y,width,height,color){
 	triangle.setAttributeNS(null,"fill",color); //Set the fill.
 	return triangle; //Return the finished triangle.
 }
-/* Creates a filled, trapezoid-shaped SVG path element at a certain location with specified dimensions and returns it.
+/* Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles trapezoid)
@@ -181,11 +199,11 @@ GuiElements.draw.triangle=function(x,y,width,height,color){
  */
 GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
 	var trapezoid=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description (points).
+	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description.
 	trapezoid.setAttributeNS(null,"fill",color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
 }
-/* Creates a SVG text element with text in it at a certain location with specified formatting and returns it.
+/* Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
  * @param {number} y - The text element's y coord.
  * @param {string} text - The text contained within the element.
@@ -211,7 +229,9 @@ GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
 	textElement.appendChild(textNode);
 	return textElement;
 }
-/* GuiElements.update contains functions that modify the attributes of existing SVG elements.  They do not return anything. */
+/* GuiElements.update contains functions that modify the attributes of existing SVG elements.
+ * They do not return anything.
+ */
 GuiElements.update=function(){};
 /* Changes the fill color (or text color) of any SVG element.
  * @param {SVG element} element - The element to be recolored.
@@ -284,7 +304,9 @@ GuiElements.update.rect=function(rect,x,y,width,height){
 	rect.setAttributeNS(null,"width",width);
 	rect.setAttributeNS(null,"height",height);
 }
-/* GuiElements.move contains functions that move existing SVG elements. They do not return anything. */
+/* GuiElements.move contains functions that move existing SVG elements.
+ * They do not return anything.
+ */
 GuiElements.move=function(){};
 /* Moves a group by changing its transform value.
  * @param {SVG g} group - The group to move.
@@ -303,7 +325,9 @@ GuiElements.move.text=function(text,x,y){
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);
 }
-/* GuiElements.measure contains functions that measure parts of the UI. They return the measurement.*/
+/* GuiElements.measure contains functions that measure parts of the UI.
+ * They return the measurement.
+ */
 GuiElements.measure=function(){};
 /* Measures the width of an existing SVG text element.
  * @param {SVG text} textE - The text element to measure.
@@ -313,7 +337,8 @@ GuiElements.measure.textWidth=function(textE){ //Measures an existing text SVG e
 	if(textE.textContent==""){ //If it has no text, the width is 0.
 		return 0;
 	}
-	var bbox=textE.getBBox(); //Gets the bounding box, but that is 0 if it isn't visible on the screen.
+	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
+	var bbox=textE.getBBox();
 	var textW=bbox.width; //Gets the width of the bounding box.
 	if(textW==0){ //The text element probably is not visible on the screen.
 		var parent=textE.parentNode; //Store the text element's current (hidden) parent.

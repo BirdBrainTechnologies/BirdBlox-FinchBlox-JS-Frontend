@@ -3,7 +3,8 @@
  */
 function TouchReceiver(){
 	var TR=TouchReceiver; //shorthand
-	TR.mouse=false; //Toggle to determine of mouse or touchscreen events should be used.  Use true when debugging on a desktop.
+	//Toggle to determine of mouse or touchscreen events should be used.
+	TR.mouse=false; //Use true when debugging on a desktop.
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?
@@ -19,7 +20,8 @@ function TouchReceiver(){
 	TR.handlerMove=handlerMove;
 	TR.handlerUp=handlerUp;
 	TR.handlerDown=handlerDown;
-	TR.addListeners(); //Add event handlers for handlerMove and handlerUp events to the whole document.
+	 //Add event handlers for handlerMove and handlerUp events to the whole document.
+	TR.addListeners();
 	//TR.test=true;
 }
 /* Adds event handlers for handlerMove and handlerUp events to the whole document.
@@ -148,7 +150,8 @@ TouchReceiver.touchStartBN=function(target,e){
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchDown){
-		if(TR.targetType=="slot"){ //If the user drags a Slot, the block they are dragging should become the target.
+		//If the user drags a Slot, the block they are dragging should become the target.
+		if(TR.targetType=="slot"){
 			TR.target=TR.target.parent; //Now the user is dragging a block.
 			if(TR.target.stack.isDisplayStack){
 				TR.targetType="displayStack";
@@ -157,15 +160,22 @@ TouchReceiver.touchmove=function(e){
 				TR.targetType="stack";
 			}
 		}
-		if(TR.targetType=="displayStack"){ //If the user drags a Block that is in a DisplayStack, the DisplayStack copies to a new BlockStack, which can be dragged.
+		/* If the user drags a Block that is in a DisplayStack, 
+		the DisplayStack copies to a new BlockStack, which can be dragged. */
+		if(TR.targetType=="displayStack"){
 			var x=TR.target.stack.getAbsX(); //Determine where the copied BlockStack should go.
 			var y=TR.target.stack.getAbsY();
-			TR.target=TR.target.stack.duplicate(x,y).firstBlock; //The first block of the duplicated BlockStack is the new target.
+			//The first block of the duplicated BlockStack is the new target.
+			TR.target=TR.target.stack.duplicate(x,y).firstBlock;
 			TR.targetType="stack";
 		}
-		if(TR.targetType=="stack"){ //If the user drags a Block that is a member of a BlockStack, then the BlockStack should move.
-			if(TR.blocksMoving){ //If the CodeManager has not started the movement, this must be done first.
-				CodeManager.move.update(TR.getX(e),TR.getY(e)); //The CodeManager handles moving BlockStacks.
+		/* If the user drags a Block that is a member of a BlockStack, 
+		then the BlockStack should move. */
+		if(TR.targetType=="stack"){
+			//If the CodeManager has not started the movement, this must be done first.
+			if(TR.blocksMoving){
+				//The CodeManager handles moving BlockStacks.
+				CodeManager.move.update(TR.getX(e),TR.getY(e));
 			}
 			else{
 				CodeManager.move.start(TR.target,TR.getX(e),TR.getY(e));
@@ -192,9 +202,12 @@ TouchReceiver.touchend=function(e){
 			TR.target.release(); //Pass message on to button.
 		}
 		else if(TR.targetType=="slot"){
-			TR.target.edit(); //If a Slot is pressed and released without dragging, it is time to edit its value.
-			var d = new Date(); //Prevents a strange bug where iOS makes logs an event multiple times.
-			var n = d.getTime(); //If the interval between two events is super small, the second one will be ignored.
+			//If a Slot is pressed and released without dragging, it is time to edit its value.
+			TR.target.edit();
+			/* Prevents a strange bug where iOS makes logs an event multiple times.
+			If the interval between two events is super small, the second one will be ignored. */
+			var d = new Date();
+			var n = d.getTime();
 			TR.lastTrigger=n; //Stores the time of the last event.
 		}
 	}
@@ -208,7 +221,8 @@ TouchReceiver.addListenersCat=function(element,category){
 	var TR=TouchReceiver;
 	element.category=category; //Teaches the SVG element to know what Category it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
-		TouchReceiver.touchStartCatBN(this.category,e); //When it is touched, the SVG element will tell the TouchReceiver its Category.
+		//When it is touched, the SVG element will tell the TouchReceiver its Category.
+		TouchReceiver.touchStartCatBN(this.category,e);
 	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Block.
@@ -221,7 +235,8 @@ TouchReceiver.addListenersChild=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent; //Teaches the SVG element to know what Block it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
-		TouchReceiver.touchStartStack(this.parent,e); //When it is touched, the SVG element will tell the TouchReceiver its Block.
+		//When it is touched, the SVG element will tell the TouchReceiver its Block.
+		TouchReceiver.touchStartStack(this.parent,e);
 	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Slot.
@@ -232,7 +247,8 @@ TouchReceiver.addListenersSlot=function(element,slot){
 	var TR=TouchReceiver;
 	element.slot=slot; //Teaches the SVG element to know what Slot it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
-		TouchReceiver.touchStartSlot(this.slot,e); //When it is touched, the SVG element will tell the TouchReceiver its Slot.
+		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
+		TouchReceiver.touchStartSlot(this.slot,e);
 	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Button.
@@ -244,6 +260,7 @@ TouchReceiver.addListenersBN=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent; //Teaches the SVG element to know what Button it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
-		TouchReceiver.touchStartBN(this.parent,e); //When it is touched, the SVG element will tell the TouchReceiver its Button.
+		//When it is touched, the SVG element will tell the TouchReceiver its Button.
+		TouchReceiver.touchStartBN(this.parent,e);
 	}, false);
 }
