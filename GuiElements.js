@@ -41,6 +41,10 @@ GuiElements.setConstants=function(){
 	InputPad.setGraphics();
 	CodeManager();
 }
+/* Debugging function which displays information on screen */
+GuiElements.alert=function(message){
+	debug.innerHTML=message;
+}
 /* Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI=function(){
 	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage

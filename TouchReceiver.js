@@ -14,7 +14,7 @@ function TouchReceiver(){
 	var handlerDown="touchstart";
 	if(TR.mouse){
 		handlerMove="mousemove";
-		handlerUp="mouseup";
+		handlerUp="mouseup";   
 		handlerDown="mousedown";
 	}
 	TR.handlerMove=handlerMove;

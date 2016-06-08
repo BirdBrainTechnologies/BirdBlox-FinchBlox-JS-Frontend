@@ -1,6 +1,6 @@
 function b_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Servo"));
+	this.addPart(new LabelText(this,"Hummingbird ServoB"));
 	this.addPart(new NumSlot(this,1,true,true));
 	this.addPart(new NumSlot(this,0));
 }
