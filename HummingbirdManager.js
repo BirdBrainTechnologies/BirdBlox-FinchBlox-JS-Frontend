@@ -1,7 +1,7 @@
 function HummingbirdManager(){
 	var HM=HummingbirdManager;
 	GuiElements.alert("Beginning HB Scan");
-	HM.getHBName();
+	HM.getHBNames();
 }
 HummingbirdManager.encodeHTML=function(val) {
 	var eVal;
@@ -27,23 +27,23 @@ HummingbirdManager.encodeHTML=function(val) {
 	}
 	return eVal.replace(/\%20/g, "+");
 }
-HummingbirdManager.getHBName=function(){
+HummingbirdManager.getHBNames=function(){
 	var HM=HummingbirdManager;
 	var xhttp = new XMLHttpRequest();
 	try {
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4) {
 				if (xhttp.status == 200) {
-					HM.hBName = xhttp.responseText;
+					HM.hBNames = xhttp.responseText;
 					GuiElements.alert(xhttp.responseText);
 				}
 				else {
-					HM.hBName = "Hummingbird";//Temp
+					HM.hBNames = "Hummingbird";//Temp for testing
 					GuiElements.alert("Error: " + xhttp.status);
 				}
 			}
 		};
-		xhttp.open("GET", "TESTlocalhost:22179/hummingbird/discover/", true);
+		xhttp.open("GET", "localhost:22179/hummingbird/discover/", true);
 		xhttp.send();
 	}
 	catch(err){
@@ -52,5 +52,5 @@ HummingbirdManager.getHBName=function(){
 }
 HummingbirdManager.getCommandForHB=function(command){
 	var HM=HummingbirdManager;
-	return "localhost:22179/hummingbird/"+HM.encodeHTML(HM.hBName)+"/"+command;
+	return "localhost:22179/hummingbird/"+HM.encodeHTML(HM.hBNames)+"/"+command;
 }
