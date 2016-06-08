@@ -6,6 +6,42 @@ function b_HBServo(x,y){
 }
 b_HBServo.prototype = Object.create(CommandBlock.prototype);
 b_HBServo.prototype.constructor = b_HBServo;
+b_HBServo.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.port=this.slots[0].getData().getValueWithC(true,true);
+	mem.value=this.slots[1].getData().getValueInR(0,180,true,true);
+	if(mem.port>=1&&mem.port<=4) {
+		mem.command = "out/servo/" + mem.port + "/" + mem.value;
+		mem.finished = false;
+		var xhttp = new XMLHttpRequest();
+		xhttp.runMem = mem;
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				xhttp.runMem.finished = true;
+			}
+		};
+		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
+		xhttp.send();
+		return this;
+	}
+	else{
+		return this.nextBlock;
+	}
+}
+b_HBServo.prototype.updateAction=function(){
+	if(this.runMem.finished==true){
+		return this.nextBlock;
+	}
+	else{
+		return this;
+	}
+}
+
+
+
+
+////////////////////
+
 
 function b_HBMotor(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
