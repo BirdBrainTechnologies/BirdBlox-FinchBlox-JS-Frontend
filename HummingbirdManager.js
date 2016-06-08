@@ -29,18 +29,25 @@ HummingbirdManager.encodeHTML=function(val) {
 HummingbirdManager.getHBName=function(){
 	var HM=HummingbirdManager;
 	var xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4) {
-			if(xhttp.status == 200){
-				HM.hBName=xhttp.responseText;
-				alert(xhttp.responseText);
+	try {
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if (xhttp.status == 200) {
+					HM.hBName = xhttp.responseText;
+					alert(xhttp.responseText);
+				}
+				else {
+					HM.hBName = "Hummingbird";//Temp
+					alert("Error: " + xhttp.status);
+				}
 			}
-			HM.hBName="Hummingbird";//Temp
-			alert("Error: "+xhttp.status);
-		}
-	};
-	xhttp.open("GET", "localhost:22179/hummingbird/discover", true);
-	xhttp.send();
+		};
+		xhttp.open("GET", "localhost:22179/hummingbird/discover", true);
+		xhttp.send();
+	}
+	catch(err){
+		alert(err);
+	}
 }
 HummingbirdManager.getCommandForHB=function(command){
 	var HM=HummingbirdManager;
