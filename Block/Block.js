@@ -124,7 +124,7 @@ Block.prototype.stop=function(){
 	}
 }
 /* Updates this currently executing Block and returns either the next Block to execute or its current execution state depending on the type of Block.
- * @return {Block/boolean} - If this Block returns no value, it returns the next Block to run.  Otherwise, it returns boolean indicating if it has finished generating a vlaue to return.
+ * @return {Block/boolean} - If this Block returns no value, it returns the next Block to run.  Otherwise, it returns boolean indicating if it has finished generating a value to return.
  * @fix make the return type more consistent.  Maybe always a boolean.
  * @fix make the value true mean that it is still running, rather than the other way around. (To make it match Tabs and BlockStacks).
  */
@@ -160,63 +160,96 @@ Block.prototype.updateRun=function(){
 	}
 	return rVal; //Return either the next Block to run or a boolean indicating if this Block is done.
 }
+/* Will be overrided. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
+ * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
+ */
 Block.prototype.startAction=function(){
 	return this;
 }
+/* Will be overrided. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
+ * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
+ */
 Block.prototype.updateAction=function(){
 	return this;
 }
+/* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
+ * Only used if Block returns a value.
+ * Once the Block returns its value, it is done and can reset its state.
+ * @return {Data} - The result of the Block's execution.
+ */
 Block.prototype.getResultData=function(){
-	if(this.running==3){
-		this.running=0;
-		return this.resultData;
+	if(this.running==3){ //Only return data if the Block is done running.
+		this.running=0; //Reset the Block's state. Prevents same data from ever being re-returned
+		return this.resultData; //Access stored result data and return it.
 	}
-	return null;
+	return null; //If called when the block is not done running, return null. This should never happen.
 }
+/* Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
+ * @param {BlockStack} stack - The stack the Blocks will be moved to.
+ */
 Block.prototype.changeStack=function(stack){
-	this.stack=stack;
-	this.group.remove();
-	stack.group.appendChild(this.group);
+	this.stack=stack; //Move this Block to the stack
+	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
+	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
 	for(var i=0;i<this.slots.length;i++){
-		this.slots[i].changeStack(stack);
+		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
 	}
 	if(this.nextBlock!=null){
-		this.nextBlock.changeStack(stack);
+		this.nextBlock.changeStack(stack); //Tell the next block to move.
 	}
 	if(this.blockSlot1!=null){
-		this.blockSlot1.changeStack(stack);
+		this.blockSlot1.changeStack(stack); //If this block is a loop/if tell its contents to move.
 	}
 	if(this.blockSlot2!=null){
-		this.blockSlot2.changeStack(stack);
+		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
 	}
 }
+/* Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
+ * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
+ * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
+ */
 Block.prototype.updateStackDim=function(){
+	//Slots are updated separately by updateStackDimRI.
 	if(this.blockSlot1!=null){
-		this.blockSlot1.updateStackDim();
+		this.blockSlot1.updateStackDim(); //If this block is a loop/if tell its contents to update.
 	}
 	if(this.blockSlot2!=null){
-		this.blockSlot2.updateStackDim();
+		this.blockSlot2.updateStackDim(); //If it has a second BlockSlot, update it too.
 	}
-	this.updateStackDimRI();
+	this.updateStackDimRI(); //Update the stack dimensions using information from this Block.
 	if(this.nextBlock!=null){
-		this.nextBlock.updateStackDim();
+		this.nextBlock.updateStackDim(); //Tell the next block to update.
 	}
 }
+/* Handles more of the recursion for updateStackDim.
+ * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
+ * This allows other functions to avoid unnecessary updates when full recursion is not needed.
+ * updateStackDimO handled the actual updates.
+ */
 Block.prototype.updateStackDimRI=function(){
 	for(var i=0;i<this.slots.length;i++){
-		this.slots[i].updateStackDim();
+		this.slots[i].updateStackDim(); //Pass message on to Slots.
 	}
-	this.updateStackDimO();
+	this.updateStackDimO(); //Update this Block.
 }
+/* Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
+ * It is called recursively by updateStackDim and updateStackDimRI.
+ * The stack has two bounding boxes. Both are used when looking for potential Blocks to snap to.
+ * Reporters/predicates can snap to the large r bounding box.
+ * Commands can snap to the smaller c bounding box.
+ * (the r box is larger because they can be snapped to the middle of other blocks while command blocks can't)
+ * The point of stack bounding boxes is that when looking for potential Blocks to snap only those inside a matching
+ * stack have to be investigated.
+ */
 Block.prototype.updateStackDimO=function(){
-	var sDim=this.stack.dim;
-	var snap=BlockGraphics.command.snap;
-	if(this.bottomOpen||this.topOpen){
-		var cx1=this.x-snap.left;
+	var sDim=this.stack.dim; //Loads the stack's dimension data.
+	var snap=BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
+	if(this.bottomOpen||this.topOpen){ //Only update the c box if this is a command block //Fix! use !this.returnsValue
+		var cx1=this.x-snap.left; //Create bounding rectangle for this particular command Block
 		var cy1=this.y-snap.top;
 		var cx2=this.x+snap.right;
 		var cy2=this.y+this.height+snap.bottom;
-		if(cx1<sDim.cx1){
+		if(cx1<sDim.cx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1=cx1;
 		}
 		if(cy1<sDim.cy1){
@@ -229,72 +262,76 @@ Block.prototype.updateStackDimO=function(){
 			sDim.cy2=cy2;
 		}
 	}
-	{
-		var rx1=this.x;
-		var ry1=this.y;
-		var rx2=this.x+this.width;
-		var ry2=this.y+this.height;
-		if(rx1<sDim.rx1){
-			sDim.rx1=rx1;
-		}
-		if(ry1<sDim.ry1){
-			sDim.ry1=ry1;
-		}
-		if(rx2>sDim.rx2){
-			sDim.rx2=rx2;
-		}
-		if(ry2>sDim.ry2){
-			sDim.ry2=ry2;
-		}
+	var rx1=this.x; //The r bounding box is just the size of the Block itself.
+	var ry1=this.y;
+	var rx2=this.x+this.width;
+	var ry2=this.y+this.height;
+	if(rx1<sDim.rx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+		sDim.rx1=rx1;
 	}
+	if(ry1<sDim.ry1){
+		sDim.ry1=ry1;
+	}
+	if(rx2>sDim.rx2){
+		sDim.rx2=rx2;
+	}
+	if(ry2>sDim.ry2){
+		sDim.ry2=ry2;
+	}
+	//The Stacks dimensions now include the Block.
+	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
 }
+/* Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
+ * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
+ */
 Block.prototype.updateDim=function(){
-	var bG=BlockGraphics.getType(this.type);
-	if(this.topOpen||this.bottomOpen){
-		var bG=BlockGraphics.command;
+	var bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
+	if(this.topOpen||this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
+		var bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
 	var width=0;
-	width+=bG.hMargin;
+	width+=bG.hMargin; //The left margin of the Block.
 	var height=0;
 	for(var i=0;i<this.parts.length;i++){
-		this.parts[i].updateDim();
-		width+=this.parts[i].width;
-		if(this.parts[i].height>height){
+		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
+		width+=this.parts[i].width; //Fill the width of the middle of the Block
+		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
 			height=this.parts[i].height;
 		}
 		if(i<this.parts.length-1){
-			width+=bG.pMargin;
+			width+=bG.pMargin; //Add "part margin" between parts of the Block.
 		}
 	}
-	width+=bG.hMargin;
-	height+=2*bG.vMargin;
-	if(height<bG.height){
+	width+=bG.hMargin; //Add the right margin of the Block.
+	height+=2*bG.vMargin; //Add the bottom and top margins of the Block.
+	if(height<bG.height){ //If the height is less than the min height, fix it.
 		height=bG.height;
 	}
-	if(this.hasBlockSlot1){
-		this.topHeight=height;
-		this.blockSlot1.updateDim();
-		height+=this.blockSlot1.height;
-		height+=BlockGraphics.loop.bottomH;
+	if(this.hasBlockSlot1){ //If it has a BlockSlot update that.
+		this.topHeight=height; //The topHeight is the height of everything avove the BlockSlot.
+		this.blockSlot1.updateDim(); //Update the BlockSlot.
+		height+=this.blockSlot1.height; //The total height, however, includes the BlockSlot.
+		height+=BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
 	}
-	if(this.hasBlockSlot2){
-		this.midLabel.updateDim();
-		this.midHeight=this.midLabel.height;
-		this.midHeight+=2*bG.vMargin;
-		if(this.midHeight<bG.height){
+	if(this.hasBlockSlot2){ //If the Block has a second BlockSlot...
+		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
+		this.midHeight=this.midLabel.height; //Add the Label's height to the total.
+		this.midHeight+=2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
+		if(this.midHeight<bG.height){ //If it's less than the minimum, adjust it.
 			this.midHeight=bG.height;
 		}
-		height+=this.midHeight;
-		this.blockSlot2.updateDim();
-		height+=this.blockSlot2.height;
+		height+=this.midHeight; //Add the midHeight to the total.
+		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
+		height+=this.blockSlot2.height; //Add its height to the total.
 	}
+	//If the Block was a loop or DoubleLoop now we are dealing with its actual properties (not those of command)
 	bG=BlockGraphics.getType(this.type);
-	if(width<bG.width){
+	if(width<bG.width){ //If it is less than the minimum width, adjust it.
 		width=bG.width;
 	}
-	this.resize(width,height);
+	this.resize(width,height); //Resize this Block to the new widths.
 	if(this.nextBlock!=null){
-		this.nextBlock.updateDim();
+		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
 }
 Block.prototype.updateAlign=function(x,y){
