@@ -50,7 +50,7 @@ HummingbirdManager.getHBNames=function(){
 				}
 			}
 		};
-		xhttp.open("GET", "localhost:22179/hummingbird/discover/", true); //Get the names
+		xhttp.open("GET", "http://localhost:22179/hummingbird/names/", true); //Get the names
 		xhttp.send(); //Make the request
 	}
 	catch(err){
@@ -63,5 +63,5 @@ HummingbirdManager.getHBNames=function(){
  */
 HummingbirdManager.getCommandForHB=function(command){
 	var HM=HummingbirdManager;
-	return "localhost:22179/hummingbird/"+HM.encodeHTML(HM.hBNames)+"/"+command;
+	return "http://localhost:22179/hummingbird/"+HM.encodeHTML(HM.hBNames)+"/"+command;
 }

@@ -1,6 +1,6 @@
 function b_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird ServoB"));
+	this.addPart(new LabelText(this,"Hummingbird Servo"));
 	this.addPart(new NumSlot(this,1,true,true));
 	this.addPart(new NumSlot(this,0));
 }
@@ -21,7 +21,8 @@ b_HBServo.prototype.startAction=function(){
 			}
 		};
 		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
-		xhttp.send();
+		//xhttp.send();
+		GuiElements.alert(HummingbirdManager.getCommandForHB(mem.command));
 		return this;
 	}
 	else{
