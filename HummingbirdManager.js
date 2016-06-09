@@ -106,10 +106,10 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 		if(block.runMem.requestStatus.error==false){
 			var result;
 			if(integer){
-				result=parseInt(this.runMem.requestStatus.result);
+				result=parseInt(block.runMem.requestStatus.result);
 			}
 			else{
-				result=parseFloat(this.runMem.requestStatus.result);
+				result=parseFloat(block.runMem.requestStatus.result);
 			}
 			block.resultData=new NumData(result);
 		}

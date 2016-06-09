@@ -44,7 +44,7 @@ HtmlServer.sendHBRequest=function(request,requestStatus){
 					if(reportStatus){
 						xhttp.requestStatus.finished=true;
 						xhttp.requestStatus.result=xhttp.responseText;
-						GuiElements.alert(xhttp.responseText);
+						//GuiElements.alert(xhttp.responseText);
 					}
 				}
 				else {

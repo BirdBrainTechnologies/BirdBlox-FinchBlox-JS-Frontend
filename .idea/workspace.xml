@@ -27,7 +27,7 @@
       <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
+            <state relative-caret-position="289">
               <caret line="20" column="17" selection-start-line="20" selection-start-column="17" selection-end-line="20" selection-end-column="17" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
@@ -39,7 +39,7 @@
       <file leaf-file-name="Block.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Block/Block.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="605">
+            <state relative-caret-position="2822">
               <caret line="175" column="26" selection-start-line="175" selection-start-column="26" selection-end-line="175" selection-end-column="26" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
@@ -51,8 +51,8 @@
       <file leaf-file-name="HummingbirdManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="398">
-              <caret line="109" column="13" selection-start-line="109" selection-start-column="13" selection-end-line="109" selection-end-column="13" />
+            <state relative-caret-position="364">
+              <caret line="107" column="24" selection-start-line="107" selection-start-column="24" selection-end-line="107" selection-end-column="24" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -63,8 +63,8 @@
       <file leaf-file-name="BlockDefs_hummingbird.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="347">
-              <caret line="135" column="1" selection-start-line="135" selection-start-column="1" selection-end-line="135" selection-end-column="1" />
+            <state relative-caret-position="136">
+              <caret line="11" column="44" selection-start-line="11" selection-start-column="44" selection-end-line="11" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -73,7 +73,7 @@
       <file leaf-file-name="BlockDefs_looks.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_looks.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
+            <state relative-caret-position="425">
               <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
               <folding />
             </state>
@@ -84,7 +84,7 @@
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="347">
-              <caret line="46" column="62" selection-start-line="46" selection-start-column="62" selection-end-line="46" selection-end-column="62" />
+              <caret line="46" column="26" selection-start-line="46" selection-start-column="26" selection-end-line="46" selection-end-column="26" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -105,8 +105,8 @@
       <file leaf-file-name="TouchReceiver.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+            <state relative-caret-position="170">
+              <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -146,8 +146,8 @@
         <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/Block/Block.js" />
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_looks.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/TouchReceiver.js" />
         <option value="$PROJECT_DIR$/HummingbirdManager.js" />
@@ -227,6 +227,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -289,8 +291,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -370,12 +370,13 @@
       <updated>1465336942975</updated>
       <workItem from="1465336948442" duration="13445000" />
       <workItem from="1465422714397" duration="1572000" />
-      <workItem from="1465433518863" duration="9104000" />
+      <workItem from="1465433518863" duration="9385000" />
+      <workItem from="1465502428669" duration="2319000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24121000" />
+    <option name="totallyTimeSpent" value="26721000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
@@ -415,6 +416,94 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/GuiElements.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="20" column="17" selection-start-line="20" selection-start-column="17" selection-end-line="20" selection-end-column="17" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Block/Block.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2822">
+          <caret line="175" column="26" selection-start-line="175" selection-start-column="26" selection-end-line="175" selection-end-column="26" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1785">
+          <caret line="109" column="13" selection-start-line="109" selection-start-column="13" selection-end-line="109" selection-end-column="13" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_looks.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="782">
+          <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="46" column="62" selection-start-line="46" selection-start-column="62" selection-end-line="46" selection-end-column="62" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="2" selection-start-line="0" selection-start-column="2" selection-end-line="0" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="34" column="57" selection-start-line="34" selection-start-column="57" selection-end-line="34" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/StringData.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
@@ -504,9 +593,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="15" column="58" selection-start-line="15" selection-start-column="58" selection-end-line="15" selection-end-column="58" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -514,7 +600,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-697">
           <caret line="13" column="45" selection-start-line="13" selection-start-column="4" selection-end-line="13" selection-end-column="45" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -522,7 +607,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="347">
           <caret line="36" column="30" selection-start-line="36" selection-start-column="30" selection-end-line="36" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -544,7 +628,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
+        <state relative-caret-position="289">
           <caret line="20" column="17" selection-start-line="20" selection-start-column="17" selection-end-line="20" selection-end-column="17" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
@@ -554,8 +638,44 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Block/Block.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="605">
+        <state relative-caret-position="2822">
           <caret line="175" column="26" selection-start-line="175" selection-start-column="26" selection-end-line="175" selection-end-column="26" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="347">
+          <caret line="46" column="26" selection-start-line="46" selection-start-column="26" selection-end-line="46" selection-end-column="26" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_looks.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="11" column="44" selection-start-line="11" selection-start-column="44" selection-end-line="11" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="364">
+          <caret line="107" column="24" selection-start-line="107" selection-start-column="24" selection-end-line="107" selection-end-column="24" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
@@ -564,45 +684,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+        <state relative-caret-position="170">
+          <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_looks.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="347">
-          <caret line="135" column="1" selection-start-line="135" selection-start-column="1" selection-end-line="135" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="347">
-          <caret line="46" column="62" selection-start-line="46" selection-start-column="62" selection-end-line="46" selection-end-column="62" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="398">
-          <caret line="109" column="13" selection-start-line="109" selection-start-column="13" selection-end-line="109" selection-end-column="13" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
