@@ -111,7 +111,9 @@ BlockSlot.prototype.stop=function(){
 }
 BlockSlot.prototype.updateRun=function(){
 	if(this.isRunning){
-		this.currentBlock=this.currentBlock.updateRun();
+		if(!this.currentBlock.updateRun()){
+			this.currentBlock=this.currentBlock.nextBlock;
+		}
 		if(this.currentBlock==null){
 			this.isRunning=false;
 		}

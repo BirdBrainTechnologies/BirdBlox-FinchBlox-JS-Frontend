@@ -138,13 +138,8 @@ Block.prototype.updateRun=function(){
 	var rVal; //The value to return.
 	if(this.running==1){ //If the Block is currently waiting on its Slots...
 		for(var i=0;i<this.slots.length;i++){
-			if(!this.slots[i].updateRun()){ //Check to see if each Slot is done and update the first Slot that isn't done.
-				if(!this.returnsValue){ //If a slot required updating, this block needs to be run again next time.
-					return this; //If this Slot does not return a value, it is expected to return the next Block to run, which is itself.
-				}
-				else{
-					return false; //If this Slot does return a value, it is expected to return a boolean indicating if it has completed its execution.
-				}
+			if(this.slots[i].updateRun()){ //Check to see if each Slot is done and update the first Slot that isn't done.
+				return true; //Still running
 			}
 		}
 		this.running=2; //If all Slots are done running, the Block itself may now run.
@@ -154,7 +149,7 @@ Block.prototype.updateRun=function(){
 		rVal = this.updateAction(); //This function is also overrided and is called repeatedly until the Block is done running.
 	}
 	var rT=Block.returnTypes;
-	if((!this.returnsValue&&rVal!=this)||(this.returnsValue&&rVal==true)){ //If the block is done running...
+	if(rVal==false){ //If the block is done running...
 		this.running=3; //Record that the Block is done.
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
@@ -164,19 +159,13 @@ Block.prototype.updateRun=function(){
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.startAction=function(){
-	if(this.returnsValue){
-		return false;
-	}
-	return this;
+	return true; //Still running
 }
 /* Will be overrided. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
-	if(this.returnsValue){
-		return false;
-	}
-	return this;
+	return true; //Still running //Fix! by default this should be true.
 }
 /* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
  * Only used if Block returns a value.

@@ -11,7 +11,7 @@ b_Ask.prototype.startAction=function(){
 	var answer=prompt(question);
 	TouchReceiver.touchend();
 	CodeManager.answer=new StringData(answer);
-	return this.nextBlock;
+	return false; //Done running
 }
 
 
@@ -24,7 +24,7 @@ b_Answer.prototype = Object.create(ReporterBlock.prototype);
 b_Answer.prototype.constructor = b_Answer;
 b_Answer.prototype.startAction=function(){
 	this.resultData=CodeManager.answer;
-	return true;
+	return false; //Done running
 }
 
 

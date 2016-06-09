@@ -91,10 +91,10 @@ Slot.prototype.stop=function(){
 }
 Slot.prototype.updateRun=function(){
 	if(this.running==3){
-		return true;
+		return false; //Done running
 	}
 	if(this.hasChild){
-		if(this.child.updateRun()){
+		if(!this.child.updateRun()){
 			this.running=3;
 			this.resultData=this.convertData(this.child.getResultData());
 			this.resultIsFromChild=true;
@@ -102,13 +102,13 @@ Slot.prototype.updateRun=function(){
 		}
 		else{
 			this.running=2;
-			return false;
+			return true; //Still running
 		}
 	}
 	else{
 		this.running=3;
 		this.resultIsFromChild=false;
-		return true;
+		return false; //Done running
 	}
 }
 Slot.prototype.getData=function(){

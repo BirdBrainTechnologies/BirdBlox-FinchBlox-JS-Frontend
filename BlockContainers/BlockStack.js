@@ -100,7 +100,9 @@ BlockStack.prototype.stop=function(){
 BlockStack.prototype.updateRun=function(){
 	if(this.isRunning){
 		if(this.returnType==Block.returnTypes.none){
-			this.currentBlock=this.currentBlock.updateRun();
+			if(!this.currentBlock.updateRun()){
+				this.currentBlock=this.currentBlock.nextBlock;
+			}
 			if(this.currentBlock==null){
 				this.endRun();
 			}

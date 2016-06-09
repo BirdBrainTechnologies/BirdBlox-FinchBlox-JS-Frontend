@@ -28,18 +28,18 @@ HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
-		return block;
+		return true; //Still running
 	}
 	else{
-		return block.nextBlock;
+		return false; //Done running
 	}
 }
 HummingbirdManager.outputUpdateAction=function(block){
 	if(block.runMem.requestStatus.finished==true){
-		return block.nextBlock;
+		return false; //Done running
 	}
 	else{
-		return block;
+		return true; //Still running
 	}
 }
 HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
@@ -49,11 +49,11 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 		mem.request = "in/sensor/" + mem.port;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
-		return false;
+		return true; //Still running
 	}
 	else{
 		block.resultData=new NumData(defaultValue,false);
-		return true;
+		return false; //Done running
 	}
 }
 HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
@@ -71,9 +71,9 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 		else{
 			block.resultData=new NumData(defaultValue,false);
 		}
-		return true;
+		return false; //Done running
 	}
 	else{
-		return false;
+		return true; //Still running
 	}
 }

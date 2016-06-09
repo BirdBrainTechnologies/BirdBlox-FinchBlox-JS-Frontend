@@ -12,7 +12,7 @@ b_Add.prototype.startAction=function(){
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()+data2.getValue();
 	this.resultData=new NumData(val,isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -31,7 +31,7 @@ b_Subtract.prototype.startAction=function(){
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()-data2.getValue();
 	this.resultData=new NumData(val,isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -50,7 +50,7 @@ b_Multiply.prototype.startAction=function(){
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()*data2.getValue();
 	this.resultData=new NumData(val,isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -75,7 +75,7 @@ b_Divide.prototype.startAction=function(){
 		isValid=false;
 	}
 	this.resultData=new NumData(val,isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -93,7 +93,7 @@ b_Round.prototype.startAction=function(){
 	var isValid=data1.isValid;
 	var val=data1.getValueWithC(false,true);
 	this.resultData=new NumData(val,isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -125,7 +125,7 @@ b_PickRandom.prototype.startAction=function(){
 		rVal = Math.random() * (max - min) + min;
 	}
 	this.resultData=new NumData(rVal);
-	return true;
+	return false; //Done running
 }
 
 
@@ -142,7 +142,7 @@ b_LessThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1<val2);
-	return true;
+	return false; //Done running
 }
 
 
@@ -162,7 +162,7 @@ b_EqualTo.prototype.startAction=function(){
 	var val1=data1.getValue();
 	var val2=data2.getValue();
 	this.resultData=new BoolData(val1==val2&&isValid);
-	return true;
+	return false; //Done running
 }
 
 
@@ -179,7 +179,7 @@ b_GreaterThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1>val2);
-	return true;
+	return false; //Done running
 }
 
 
@@ -196,7 +196,7 @@ b_And.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1&&val2);
-	return true;
+	return false; //Done running
 }
 
 
@@ -213,7 +213,7 @@ b_Or.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1||val2);
-	return true;
+	return false; //Done running
 }
 
 
@@ -228,7 +228,7 @@ b_Not.prototype.constructor = b_Not;
 b_Not.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	this.resultData=new BoolData(!val1);
-	return true;
+	return false; //Done running
 }
 
 
@@ -241,7 +241,7 @@ b_True.prototype = Object.create(PredicateBlock.prototype);
 b_True.prototype.constructor = b_True;
 b_True.prototype.startAction=function(){
 	this.resultData=new BoolData(true);
-	return true;
+	return false; //Done running
 }
 
 
@@ -254,7 +254,7 @@ b_False.prototype = Object.create(PredicateBlock.prototype);
 b_False.prototype.constructor = b_False;
 b_False.prototype.startAction=function(){
 	this.resultData=new BoolData(false);
-	return true;
+	return false; //Done running
 }
 
 
@@ -272,7 +272,7 @@ b_LetterOf.prototype.startAction=function(){
 	var word=this.slots[1].getData().getValue();
 	var index=this.slots[0].getData().getValueWithC(1,word.length,true,true);
 	this.resultData=new StringData(word.substring(index-1,index));
-	return true;
+	return false; //Done running
 }
 
 
@@ -287,7 +287,7 @@ b_LengthOf.prototype.constructor = b_LengthOf;
 b_LengthOf.prototype.startAction=function(){
 	var word=this.slots[0].getData().getValue();
 	this.resultData=new NumData(word.length);
-	return true;
+	return false; //Done running
 }
 
 
@@ -305,7 +305,7 @@ b_join.prototype.startAction=function(){
 	var word1=this.slots[0].getData().getValue();
 	var word2=this.slots[1].getData().getValue();
 	this.resultData=new StringData(word1+word2);
-	return true;
+	return false; //Done running
 }
 ///////////
 function b_mathOfNumber(x,y){

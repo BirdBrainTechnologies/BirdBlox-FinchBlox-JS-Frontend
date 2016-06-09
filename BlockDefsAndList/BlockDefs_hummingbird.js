@@ -161,10 +161,10 @@ b_HBTriLed.prototype.startAction=function(){
 		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
-		return this;
+		return true; //Still running
 	}
 	else{
-		return this.nextBlock;
+		return false; //Done running
 	}
 }
 b_HBTriLed.prototype.updateAction=function(){
@@ -188,10 +188,10 @@ b_HBTempF.prototype.updateAction=function(){
 		if(this.resultData.isValid){
 			this.resultData=new NumData(Math.round(this.runMem.requestStatus.result*1.8+32));
 		}
-		return true;
+		return false; //Done running
 	}
 	else{
-		return false;
+		return true; //Still running
 	}
 }
 
@@ -215,10 +215,10 @@ b_HBDistInch.prototype.updateAction=function(){
 			var result=this.runMem.requestStatus.result;
 			this.resultData=new NumData((result/2.54).toFixed(1)*1);
 		}
-		return true;
+		return false; //Done running
 	}
 	else{
-		return false;
+		return true; //Still running
 	}
 }
 

@@ -10,7 +10,7 @@ b_WhenFlagTapped.prototype.eventFlagClicked=function(){
 	this.stack.startRun();
 }
 b_WhenFlagTapped.prototype.startAction=function(){
-	return this.nextBlock;
+	return false; //Done running
 }
 
 
@@ -30,15 +30,15 @@ b_Wait.prototype.startAction=function(){
 	if(!(mem.delayTime>0)){
 		mem.delayTime=0;
 	}
-	return this;
+	return true; //Still running
 }
 b_Wait.prototype.updateAction=function(){
 	var mem=this.runMem;
 	if(new Date().getTime()-mem.delayTime>=mem.startTime){
-		return this.nextBlock;
+		return false; //Done running
 	}
 	else{
-		return this;
+		return true; //Still running
 	}
 }
 
@@ -54,12 +54,12 @@ b_WaitUntil.prototype.constructor = b_WaitUntil;
 b_WaitUntil.prototype.startAction=function(){
 	var stopWaiting=this.slots[0].getData().getValue();
 	if(stopWaiting){
-		return this.nextBlock;
+		return false; //Done running
 	}
 	else{
 		this.running=0;
 		this.clearMem();
-		return this;
+		return true; //Still running
 	}
 }
 
@@ -73,13 +73,13 @@ b_Forever.prototype = Object.create(LoopBlock.prototype);
 b_Forever.prototype.constructor = b_Forever;
 b_Forever.prototype.startAction=function(){
 	this.blockSlot1.startRun();
-	return this;
+	return true; //Still running
 }
 b_Forever.prototype.updateAction=function(){
 	if(!this.blockSlot1.updateRun()){
 		this.blockSlot1.startRun();
 	}
-	return this;
+	return true; //Still running
 }
 
 
@@ -96,20 +96,20 @@ b_Repeat.prototype.startAction=function(){
 	mem.times=this.slots[0].getData().getValueWithC(true,true);
 	mem.count=0;
 	this.blockSlot1.startRun();
-	return this;
+	return true; //Still running
 }
 b_Repeat.prototype.updateAction=function(){
 	if(!this.blockSlot1.updateRun()){
 		var mem=this.runMem;
 		mem.count++;
 		if(mem.count>=mem.times){
-			return this.nextBlock;
+			return false; //Done running
 		}
 		else{
 			this.blockSlot1.startRun();
 		}
 	}
-	return this;
+	return true; //Still running
 }
 
 
@@ -124,18 +124,18 @@ b_RepeatUntil.prototype.constructor = b_RepeatUntil;
 b_RepeatUntil.prototype.startAction=function(){
 	var stopRepeating=this.slots[0].getData().getValue();
 	if(stopRepeating){
-		return this.nextBlock;
+		return false; //Done running
 	}
 	else{
 		this.blockSlot1.startRun();
-		return this;
+		return true; //Still running
 	}
 }
 b_RepeatUntil.prototype.updateAction=function(){
 	if(!this.blockSlot1.updateRun()){
 		this.running=0;
 	}
-	return this;
+	return true; //Still running
 }
 
 
@@ -151,17 +151,17 @@ b_If.prototype.startAction=function(){
 	var check=this.slots[0].getData().getValue();
 	if(check){
 		this.blockSlot1.startRun();
-		return this;
+		return true; //Still running
 	}
 	else{
-		return this.nextBlock;
+		return false; //Done running
 	}
 }
 b_If.prototype.updateAction=function(){
 	if(!this.blockSlot1.updateRun()){
-		return this.nextBlock;
+		return false; //Done running
 	}
-	return this;
+	return true; //Still running
 }
 
 
@@ -177,25 +177,25 @@ b_IfElse.prototype.startAction=function(){
 	this.runMem.check=this.slots[0].getData().getValue();
 	if(this.runMem.check){
 		this.blockSlot1.startRun();
-		return this;
+		return true; //Still running
 	}
 	else{
 		this.blockSlot2.startRun();
-		return this;
+		return true; //Still running
 	}
 }
 b_IfElse.prototype.updateAction=function(){
 	if(this.runMem.check){
 		if(!this.blockSlot1.updateRun()){
-			return this.nextBlock;
+			return false; //Done running
 		}
 	}
 	else{
 		if(!this.blockSlot2.updateRun()){
-			return this.nextBlock;
+			return false; //Done running
 		}
 	}
-	return this;
+	return true; //Still running
 }
 ///////////
 function b_WhenIAmTapped(x,y){

@@ -44,7 +44,8 @@ GuiElements.setConstants=function(){
 }
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	debug.innerHTML=message;
+	debug.innerHTML=message; //The iPad app does not support alert dialogs
+	//alert(message); //When debugging on a PC this function can be used.
 }
 /* Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI=function(){
