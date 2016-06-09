@@ -62,6 +62,19 @@ RectSlot.prototype.edit=function(){
 		this.changeText(newText);
 	}
 }
+RectSlot.prototype.edit=function(){
+	var question=this.parent.textSummary(this);
+	var currentVal=this.enteredData.getValue();
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			callbackFn.slot.enteredData=new StringData(response);
+			callbackFn.slot.changeText(response);
+		}
+	}
+	callbackFn.slot=this;
+	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn);
+}
+
 RectSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new RectSlot(parentCopy,this.snapType,this.outputType,this.enteredData.getValue());
 	if(this.hasChild){
