@@ -31,7 +31,7 @@ HummingbirdManager.encodeHTML=function(message) {
 		eVal = eVal.replace(/`/g, "%27");
 		eVal = eVal.replace(/&/g, "%26");
 	}
-	return eVal.replace(/\%20/g, "+");
+	return eVal; //.replace(/\%20/g, "+");
 }
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){

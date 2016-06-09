@@ -21,7 +21,7 @@ b_HBServo.prototype.startAction=function(){
 			}
 		};
 		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
-		//xhttp.send();
+		xhttp.send();
 		GuiElements.alert(HummingbirdManager.getCommandForHB(mem.command));
 		return this;
 	}
