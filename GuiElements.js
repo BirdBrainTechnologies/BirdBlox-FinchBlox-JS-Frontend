@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
 	HummingbirdManager();
+	HtmlServer();
 	Data.setConstants();
 	/* Saves the dimensions of the screen so other classes can refer to them.  
 	This assumes that the screen's dimensions never change once loaded. */

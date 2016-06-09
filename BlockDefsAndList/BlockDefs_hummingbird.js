@@ -7,38 +7,11 @@ function b_HBServo(x,y){
 b_HBServo.prototype = Object.create(CommandBlock.prototype);
 b_HBServo.prototype.constructor = b_HBServo;
 b_HBServo.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.port=this.slots[0].getData().getValueWithC(true,true);
-	mem.value=this.slots[1].getData().getValueInR(0,180,true,true);
-	if(mem.port>=1&&mem.port<=4) {
-		mem.command = "out/servo/" + mem.port + "/" + mem.value;
-		mem.finished = false;
-		var xhttp = new XMLHttpRequest();
-		xhttp.runMem = mem;
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4) {
-				xhttp.runMem.finished = true;
-			}
-		};
-		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
-		xhttp.send();
-		GuiElements.alert(HummingbirdManager.getCommandForHB(mem.command));
-		return this;
-	}
-	else{
-		return this.nextBlock;
-	}
+	return HummingbirdManager.outputStartAction(this,"servo",0,180);
 }
 b_HBServo.prototype.updateAction=function(){
-	if(this.runMem.finished==true){
-		return this.nextBlock;
-	}
-	else{
-		return this;
-	}
+	return HummingbirdManager.outputUpdateAction(this);
 }
-
-
 
 function b_HBLight(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
@@ -48,47 +21,12 @@ function b_HBLight(x,y){
 b_HBLight.prototype = Object.create(ReporterBlock.prototype);
 b_HBLight.prototype.constructor = b_HBLight;
 b_HBLight.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.port=this.slots[0].getData().getValueWithC(true,true);
-	if(mem.port>=1&&mem.port<=4) {
-		mem.command = "in/sensor/" + mem.port + "/";
-		mem.finished = false;
-		var xhttp = new XMLHttpRequest();
-		xhttp.runMem = mem;
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4) {
-				if (xhttp.status == 200) {
-					var resultText=xhttp.responseText;
-					xhttp.runMem.result = new NumData(parseInt(resultText));
-					GuiElements.alert("Light: " + resultText);
-				}
-				else{
-					xhttp.runMem.result = new NumData(0);
-					GuiElements.alert("Error: " + xhttp.status); //Show the error in the debug span
-				}
-				xhttp.runMem.finished = true;
-			}
-		};
-		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
-		xhttp.send();
-		//GuiElements.alert(HummingbirdManager.getCommandForHB(mem.command));
-		return false;
-	}
-	else{
-		this.resultData=new NumData(0,false);
-		return true;
-	}
+	return HummingbirdManager.sensorStartAction(this,"sensor",0);
 }
 b_HBLight.prototype.updateAction=function(){
-	if(this.runMem.finished==true){
-		this.resultData=new NumData(this.runMem.result);
-		return true;
-	}
-	else{
-		return false;
-	}
+	return HummingbirdManager.sensorUpdateAction(this,true,0);
 }
-////////////////////
+
 
 
 function b_HBMotor(x,y){
@@ -99,6 +37,12 @@ function b_HBMotor(x,y){
 }
 b_HBMotor.prototype = Object.create(CommandBlock.prototype);
 b_HBMotor.prototype.constructor = b_HBMotor;
+b_HBMotor.prototype.startAction=function(){
+	return HummingbirdManager.outputStartAction(this,"motor",-100,100);
+}
+b_HBMotor.prototype.updateAction=function(){
+	return HummingbirdManager.outputUpdateAction(this);
+}
 
 function b_HBVibration(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
@@ -108,6 +52,12 @@ function b_HBVibration(x,y){
 }
 b_HBVibration.prototype = Object.create(CommandBlock.prototype);
 b_HBVibration.prototype.constructor = b_HBVibration;
+b_HBVibration.prototype.startAction=function(){
+	return HummingbirdManager.outputStartAction(this,"vibration",-100,100);
+}
+b_HBVibration.prototype.updateAction=function(){
+	return HummingbirdManager.outputUpdateAction(this);
+}
 
 function b_HBLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
@@ -117,6 +67,76 @@ function b_HBLed(x,y){
 }
 b_HBLed.prototype = Object.create(CommandBlock.prototype);
 b_HBLed.prototype.constructor = b_HBLed;
+b_HBLed.prototype.startAction=function(){
+	return HummingbirdManager.outputStartAction(this,"led",0,255);
+}
+b_HBLed.prototype.updateAction=function(){
+	return HummingbirdManager.outputUpdateAction(this);
+}
+
+
+
+function b_HBTempC(x,y){
+	ReporterBlock.call(this,x,y,"hummingbird");
+	this.addPart(new LabelText(this,"HB Temperature C"));
+	this.addPart(new NumSlot(this,1,true,true));
+}
+b_HBTempC.prototype = Object.create(ReporterBlock.prototype);
+b_HBTempC.prototype.constructor = b_HBTempC;
+b_HBTempC.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"temperature",0);
+}
+b_HBTempC.prototype.updateAction=function(){
+	return HummingbirdManager.sensorUpdateAction(this,true,0);
+}
+
+
+function b_HBDistCM(x,y){
+	ReporterBlock.call(this,x,y,"hummingbird");
+	this.addPart(new LabelText(this,"HB Distance CM"));
+	this.addPart(new NumSlot(this,1,true,true));
+}
+b_HBDistCM.prototype = Object.create(ReporterBlock.prototype);
+b_HBDistCM.prototype.constructor = b_HBDistCM;
+b_HBDistCM.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"distance",0);
+}
+b_HBDistCM.prototype.updateAction=function(){
+	return HummingbirdManager.sensorUpdateAction(this,false,0);
+}
+
+
+
+function b_HBKnob(x,y){
+	ReporterBlock.call(this,x,y,"hummingbird");
+	this.addPart(new LabelText(this,"Hummingbird Knob"));
+	this.addPart(new NumSlot(this,1,true,true));
+}
+b_HBKnob.prototype = Object.create(ReporterBlock.prototype);
+b_HBKnob.prototype.constructor = b_HBKnob;
+b_HBKnob.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"sensor",0);
+}
+b_HBKnob.prototype.updateAction=function(){
+	return HummingbirdManager.sensorUpdateAction(this,true,0);
+}
+
+function b_HBSound(x,y){
+	ReporterBlock.call(this,x,y,"hummingbird");
+	this.addPart(new LabelText(this,"Hummingbird Sound"));
+	this.addPart(new NumSlot(this,1,true,true));
+}
+b_HBSound.prototype = Object.create(ReporterBlock.prototype);
+b_HBSound.prototype.constructor = b_HBSound;
+b_HBSound.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"sound",0);
+}
+b_HBSound.prototype.updateAction=function(){
+	return HummingbirdManager.sensorUpdateAction(this,false,0);
+}
+////////////////////
+
+
 
 function b_HBTriLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
@@ -132,13 +152,7 @@ function b_HBTriLed(x,y){
 b_HBTriLed.prototype = Object.create(CommandBlock.prototype);
 b_HBTriLed.prototype.constructor = b_HBTriLed;
 
-function b_HBTempC(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB Temperature C"));
-	this.addPart(new NumSlot(this,1,true,true));
-}
-b_HBTempC.prototype = Object.create(ReporterBlock.prototype);
-b_HBTempC.prototype.constructor = b_HBTempC;
+
 
 function b_HBTempF(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
@@ -148,13 +162,7 @@ function b_HBTempF(x,y){
 b_HBTempF.prototype = Object.create(ReporterBlock.prototype);
 b_HBTempF.prototype.constructor = b_HBTempF;
 
-function b_HBDistCM(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB Distance CM"));
-	this.addPart(new NumSlot(this,1,true,true));
-}
-b_HBDistCM.prototype = Object.create(ReporterBlock.prototype);
-b_HBDistCM.prototype.constructor = b_HBDistCM;
+
 
 function b_HBDistInch(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
@@ -164,18 +172,3 @@ function b_HBDistInch(x,y){
 b_HBDistInch.prototype = Object.create(ReporterBlock.prototype);
 b_HBDistInch.prototype.constructor = b_HBDistInch;
 
-function b_HBKnob(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Knob"));
-	this.addPart(new NumSlot(this,1,true,true));
-}
-b_HBKnob.prototype = Object.create(ReporterBlock.prototype);
-b_HBKnob.prototype.constructor = b_HBKnob;
-
-function b_HBSound(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Sound"));
-	this.addPart(new NumSlot(this,1,true,true));
-}
-b_HBSound.prototype = Object.create(ReporterBlock.prototype);
-b_HBSound.prototype.constructor = b_HBSound;

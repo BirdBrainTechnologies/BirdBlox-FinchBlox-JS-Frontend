@@ -44,7 +44,7 @@ b_alert.prototype = Object.create(CommandBlock.prototype);
 b_alert.prototype.constructor = b_alert;
 b_alert.prototype.startAction=function(){
 	var message=this.slots[0].getData().getValue();
-	alert(message);
+	GuiElements.alert(message);
 	TouchReceiver.touchend();
 	return this.nextBlock;
 }

@@ -65,3 +65,60 @@ HummingbirdManager.getCommandForHB=function(command){
 	var HM=HummingbirdManager;
 	return "http://localhost:22179/hummingbird/"+HM.encodeHTML(HM.hBNames)+"/"+command;
 }
+HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
+	var mem=block.runMem;
+	mem.port=block.slots[0].getData().getValueWithC(true,true);
+	mem.value=block.slots[1].getData().getValueInR(minVal,maxVal,false,true);
+	if(mem.port>=1&&mem.port<=4) {
+		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
+		mem.requestStatus=function(){};
+		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
+		return block;
+	}
+	else{
+		return block.nextBlock;
+	}
+}
+HummingbirdManager.outputUpdateAction=function(block){
+	if(block.runMem.requestStatus.finished==true){
+		return block.nextBlock;
+	}
+	else{
+		return block;
+	}
+}
+HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
+	var mem=block.runMem;
+	mem.port=block.slots[0].getData().getValueWithC(true,true);
+	if(mem.port>=1&&mem.port<=4) {
+		mem.request = "in/sensor/" + mem.port;
+		mem.requestStatus=function(){};
+		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
+		return false;
+	}
+	else{
+		block.resultData=new NumData(defaultValue,false);
+		return true;
+	}
+}
+HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
+	if(block.runMem.requestStatus.finished==true){
+		if(block.runMem.requestStatus.error==false){
+			var result;
+			if(integer){
+				result=parseInt(this.runMem.requestStatus.result);
+			}
+			else{
+				result=parseFloat(this.runMem.requestStatus.result);
+			}
+			block.resultData=new NumData(result);
+		}
+		else{
+			block.resultData=new NumData(defaultValue,false);
+		}
+		return true;
+	}
+	else{
+		return false;
+	}
+}

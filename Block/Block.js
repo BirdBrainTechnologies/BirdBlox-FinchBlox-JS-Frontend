@@ -164,12 +164,18 @@ Block.prototype.updateRun=function(){
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.startAction=function(){
+	if(this.returnsValue){
+		return false;
+	}
 	return this;
 }
 /* Will be overrided. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
+	if(this.returnsValue){
+		return false;
+	}
 	return this;
 }
 /* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
