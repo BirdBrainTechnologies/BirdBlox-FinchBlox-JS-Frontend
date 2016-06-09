@@ -40,7 +40,54 @@ b_HBServo.prototype.updateAction=function(){
 
 
 
-
+function b_HBLight(x,y){
+	ReporterBlock.call(this,x,y,"hummingbird");
+	this.addPart(new LabelText(this,"Hummingbird Light"));
+	this.addPart(new NumSlot(this,1,true,true));
+}
+b_HBLight.prototype = Object.create(ReporterBlock.prototype);
+b_HBLight.prototype.constructor = b_HBLight;
+b_HBLight.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.port=this.slots[0].getData().getValueWithC(true,true);
+	if(mem.port>=1&&mem.port<=4) {
+		mem.command = "in/sensor/" + mem.port + "/";
+		mem.finished = false;
+		var xhttp = new XMLHttpRequest();
+		xhttp.runMem = mem;
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if (xhttp.status == 200) {
+					var resultText=xhttp.responseText;
+					xhttp.runMem.result = new NumData(parseInt(resultText));
+					GuiElements.alert("Light: " + resultText);
+				}
+				else{
+					xhttp.runMem.result = new NumData(0);
+					GuiElements.alert("Error: " + xhttp.status); //Show the error in the debug span
+				}
+				xhttp.runMem.finished = true;
+			}
+		};
+		xhttp.open("GET", HummingbirdManager.getCommandForHB(mem.command), true);
+		xhttp.send();
+		//GuiElements.alert(HummingbirdManager.getCommandForHB(mem.command));
+		return false;
+	}
+	else{
+		this.resultData=new NumData(0,false);
+		return true;
+	}
+}
+b_HBLight.prototype.updateAction=function(){
+	if(this.runMem.finished==true){
+		this.resultData=new NumData(this.runMem.result);
+		return true;
+	}
+	else{
+		return false;
+	}
+}
 ////////////////////
 
 
@@ -84,14 +131,6 @@ function b_HBTriLed(x,y){
 }
 b_HBTriLed.prototype = Object.create(CommandBlock.prototype);
 b_HBTriLed.prototype.constructor = b_HBTriLed;
-
-function b_HBLight(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Light"));
-	this.addPart(new NumSlot(this,1,true,true));
-}
-b_HBLight.prototype = Object.create(ReporterBlock.prototype);
-b_HBLight.prototype.constructor = b_HBLight;
 
 function b_HBTempC(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
