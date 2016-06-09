@@ -134,7 +134,7 @@ b_HBSound.prototype.startAction=function(){
 b_HBSound.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
 }
-////////////////////
+
 
 
 
@@ -151,7 +151,26 @@ function b_HBTriLed(x,y){
 }
 b_HBTriLed.prototype = Object.create(CommandBlock.prototype);
 b_HBTriLed.prototype.constructor = b_HBTriLed; //0 to 100 int
-
+b_HBTriLed.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.port=this.slots[0].getData().getValueWithC(true,true);
+	mem.valueR=this.slots[1].getData().getValueInR(0,100,true,true);
+	mem.valueG=this.slots[2].getData().getValueInR(0,100,true,true);
+	mem.valueB=this.slots[3].getData().getValueInR(0,100,true,true);
+	if(mem.port>=1&&mem.port<=4) {
+		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
+		mem.requestStatus=function(){};
+		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
+		return this;
+	}
+	else{
+		return this.nextBlock;
+	}
+}
+b_HBTriLed.prototype.updateAction=function(){
+	return HummingbirdManager.outputUpdateAction(this,true,0);
+}
+////////////////////
 
 
 function b_HBTempF(x,y){
@@ -161,6 +180,22 @@ function b_HBTempF(x,y){
 }
 b_HBTempF.prototype = Object.create(ReporterBlock.prototype);
 b_HBTempF.prototype.constructor = b_HBTempF; //round to int
+b_HBTempF.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"temperature",0); //positive int
+}
+b_HBTempF.prototype.updateAction=function(){
+	if(HummingbirdManager.sensorUpdateAction(this,true,0)){
+		if(this.resultData.isValid){
+			this.resultData=new NumData(Math.round(this.runMem.requestStatus.result*1.8+32));
+		}
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+
 
 
 
@@ -171,4 +206,19 @@ function b_HBDistInch(x,y){
 }
 b_HBDistInch.prototype = Object.create(ReporterBlock.prototype);
 b_HBDistInch.prototype.constructor = b_HBDistInch; //positive float
+b_HBDistInch.prototype.startAction=function(){
+	return HummingbirdManager.sensorStartAction(this,"distance",0); //positive int
+}
+b_HBDistInch.prototype.updateAction=function(){
+	if(HummingbirdManager.sensorUpdateAction(this,true,0)){
+		if(this.resultData.isValid){
+			var result=this.runMem.requestStatus.result;
+			this.resultData=new NumData((result/2.54).toFixed(1)*1);
+		}
+		return true;
+	}
+	else{
+		return false;
+	}
+}
 
