@@ -109,11 +109,6 @@ TouchReceiver.touchStartStack=function(target,e){
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
 	if(!TR.touchDown){
-		var d = new Date();
-		var n = d.getTime();
-		if(n-TR.lastTrigger<5){//prevent repeat events
-			return;
-		}
 		TR.touchDown=true;
 		TR.targetType="slot";
 		TouchReceiver.target=slot; //Store target Slot.
@@ -204,11 +199,6 @@ TouchReceiver.touchend=function(e){
 		else if(TR.targetType=="slot"){
 			//If a Slot is pressed and released without dragging, it is time to edit its value.
 			TR.target.edit();
-			/* Prevents a strange bug where iOS makes logs an event multiple times.
-			If the interval between two events is super small, the second one will be ignored. */
-			var d = new Date();
-			var n = d.getTime();
-			TR.lastTrigger=n; //Stores the time of the last event.
 		}
 	}
 }
