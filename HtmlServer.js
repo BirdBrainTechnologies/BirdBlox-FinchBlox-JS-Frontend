@@ -83,3 +83,33 @@ HtmlServer.getHBRequest=function(request){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
+HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "iPad/dialog/"+HS.encodeHtml(title);
+	request+="/"+HS.encodeHtml(question);
+	var onDialogPresented=function(result){
+		HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
+	}
+	onDialogPresented.callbackFn=callbackFn;
+	onDialogPresented.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onDialogPresented,callbackErr);
+}
+HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "iPad/dialog_response";
+	var onResponseReceived=function(response){
+		if(response=="No Response"){
+			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else if(response=="Cancelled"){
+			onResponseReceived.callbackFn(true);
+		}
+		else{
+			var trimmed=response.substring(1,response.length-1);
+			onResponseReceived.callbackFn(false,trimmed);
+		}
+	}
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
+}

@@ -9,6 +9,37 @@ b_Ask.prototype.constructor = b_Ask;
 b_Ask.prototype.startAction=function(){
 	var question=this.slots[0].getData().getValue();
 	var mem=this.runMem;
+	mem.finished=false;
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			CodeManager.answer = new StringData(response, true);
+		}
+		callbackFn.mem.finished=true;
+	}
+	callbackFn.mem=mem;
+	var callbackErr=function(){
+		callbackErr.mem.finished=true;
+	}
+	callbackErr.mem=mem;
+	HtmlServer.showDialog("Question:",question,"",callbackFn,callbackErr);
+	return true;
+}
+b_Ask.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(mem.finished==true){
+		return false; //Done running
+	}
+	else{
+		return true; //Still running
+	}
+}
+
+
+
+
+b_Ask.prototype.startAction=function(){
+	var question=this.slots[0].getData().getValue();
+	var mem=this.runMem;
 	mem.request = "iPad/dialog/Question:/"+HtmlServer.encodeHtml(question);
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
@@ -21,9 +52,14 @@ b_Ask.prototype.updateAction=function(){
 	if(status.finished==true){
 		if(status.error==false){
 			if(mem.dialogPresented&&status.result!="No Response"){
-				var result=status.result.substring(1,status.result.length-1);
-				CodeManager.answer = new StringData(result, true);
-				return false; //Done running
+				if(status.result=="Cancelled"){
+					return false; //Done running
+				}
+				else {
+					var result = status.result.substring(1, status.result.length - 1);
+					CodeManager.answer = new StringData(result, true);
+					return false; //Done running
+				}
 			}
 			else{
 				mem.dialogPresented=true;
@@ -34,7 +70,6 @@ b_Ask.prototype.updateAction=function(){
 			}
 		}
 		else{
-			CodeManager.answer=new StringData("",false);
 			return false; //Done running
 		}
 	}
