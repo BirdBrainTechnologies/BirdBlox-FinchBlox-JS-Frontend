@@ -92,6 +92,7 @@ BlockList.populateCat_pen=function(category){
 BlockList.populateCat_ipad=function(category){
 	category.addBlock("b_DeviceShaken");
 	category.addBlock("b_DeviceLocation");
+	category.addBlock("b_DeviceSSID");
 	category.addBlock("b_DevicePressure");
 	category.addBlock("b_DeviceRelativeAltitude");
 	category.addBlock("b_DeviceAcceleration");

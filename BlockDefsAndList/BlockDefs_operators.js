@@ -293,7 +293,7 @@ b_LengthOf.prototype.startAction=function(){
 
 
 function b_join(x,y){
-	ReporterBlock.call(this,x,y,"operators");
+	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"join"));
 	this.addPart(new StringSlot(this,"hello "));
 	this.addPart(new LabelText(this,"and"));

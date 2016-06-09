@@ -17,7 +17,7 @@ b_Ask.prototype.startAction=function(){
 
 
 function b_Answer(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"sensing",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"answer"));
 }
 b_Answer.prototype = Object.create(ReporterBlock.prototype);
