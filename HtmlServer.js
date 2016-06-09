@@ -28,47 +28,58 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 }
-HtmlServer.sendHBRequest=function(request,requestStatus){
-	var reportStatus=false;
-	if(requestStatus!=null){
-		reportStatus=true;
-		requestStatus.finished=false;
-		requestStatus.error=false;
-	}
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
 	try {
 		var xhttp = new XMLHttpRequest();
-		xhttp.requestStatus=requestStatus;
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4) {
 				if (xhttp.status == 200) {
-					if(reportStatus){
-						xhttp.requestStatus.finished=true;
-						xhttp.requestStatus.result=xhttp.responseText;
-						//GuiElements.alert(xhttp.responseText);
+					if(callbackFn!=null){
+						callbackFn(xhttp.responseText);
 					}
 				}
 				else {
-					if(reportStatus){
-						xhttp.requestStatus.finished=true;
-						xhttp.requestStatus.error=true;
+					if(callbackErr!=null){
+						callbackErr();
 					}
 				}
 			}
 		};
-		xhttp.open("GET", HtmlServer.getUrlForHB(request), true); //Get the names
-		GuiElements.alert(HtmlServer.getUrlForHB(request));
+		xhttp.open("GET", HtmlServer.getUrlForRequest(request), true); //Get the names
+		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		xhttp.send(); //Make the request
 	}
 	catch(err){
-		if(reportStatus){
-			requestStatus.finished=true;
-			requestStatus.error=true;
+		if(callbackErr!=null){
+			callbackErr();
 		}
 	}
 }
-HtmlServer.getUrlForHB=function(request){
-	return HtmlServer.getUrl(HtmlServer.encodeHtml(HummingbirdManager.hBNames)+"/"+request);
+HtmlServer.sendHBRequest=function(request,requestStatus){
+	HtmlServer.sendRequest(HtmlServer.getHBRequest(request),requestStatus);
 }
-HtmlServer.getUrl=function(request){
-	return "http://localhost:"+HtmlServer.port+"/hummingbird/"+request;
+HtmlServer.sendRequest=function(request,requestStatus){
+	if(requestStatus!=null){
+		requestStatus.error=false;
+		var callbackFn=function(response){
+			callbackFn.requestStatus.finished=true;
+			callbackFn.requestStatus.result=response;
+		}
+		callbackFn.requestStatus=requestStatus;
+		var callbackErr=function(){
+			callbackErr.requestStatus.finished=true;
+			callbackErr.requestStatus.error=true;
+		}
+		callbackErr.requestStatus=requestStatus;
+		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
+	}
+	else{
+		HtmlServer.sendRequestWithCallback(request);
+	}
+}
+HtmlServer.getHBRequest=function(request){
+	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.hBNames)+"/"+request;
+}
+HtmlServer.getUrlForRequest=function(request){
+	return "http://localhost:"+HtmlServer.port+"/"+request;
 }

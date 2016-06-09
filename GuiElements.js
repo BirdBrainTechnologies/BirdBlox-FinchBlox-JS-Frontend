@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	HummingbirdManager();
 	HtmlServer();
 	Data.setConstants();
 	/* Saves the dimensions of the screen so other classes can refer to them.  
@@ -41,6 +40,7 @@ GuiElements.setConstants=function(){
 	MenuBnList.setGraphics();
 	InputPad.setGraphics();
 	CodeManager();
+	HummingbirdManager();
 }
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
