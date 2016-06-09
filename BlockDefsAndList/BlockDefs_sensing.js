@@ -8,11 +8,41 @@ b_Ask.prototype = Object.create(CommandBlock.prototype);
 b_Ask.prototype.constructor = b_Ask;
 b_Ask.prototype.startAction=function(){
 	var question=this.slots[0].getData().getValue();
-	var answer=prompt(question);
-	TouchReceiver.touchend();
-	CodeManager.answer=new StringData(answer);
-	return false; //Done running
+	var mem=this.runMem;
+	mem.request = "iPad/dialog/Question:/"+HtmlServer.encodeHtml(question);
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	mem.dialogPresented=false;
+	return true; //Still running
 }
+b_Ask.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			if(mem.dialogPresented&&status.result!="No Response"){
+				var result=status.result.substring(1,status.result.length-1);
+				CodeManager.answer = new StringData(result, true);
+				return false; //Done running
+			}
+			else{
+				mem.dialogPresented=true;
+				mem.request = "iPad/dialog_response";
+				mem.requestStatus=function(){};
+				HtmlServer.sendRequest(mem.request,mem.requestStatus);
+				return true; //Still running
+			}
+		}
+		else{
+			CodeManager.answer=new StringData("",false);
+			return false; //Done running
+		}
+	}
+	else{
+		return true; //Still running
+	}
+}
+
 
 
 
