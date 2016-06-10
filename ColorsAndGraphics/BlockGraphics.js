@@ -32,6 +32,8 @@ BlockGraphics.SetCommand=function(){
 	BlockGraphics.command.snap.right=20;
 	BlockGraphics.command.snap.top=20;
 	BlockGraphics.command.snap.bottom=20;
+	BlockGraphics.command.shiftX=20;
+	BlockGraphics.command.shiftY=20;
 }
 BlockGraphics.SetReporter=function(){
 	BlockGraphics.reporter=function(){};

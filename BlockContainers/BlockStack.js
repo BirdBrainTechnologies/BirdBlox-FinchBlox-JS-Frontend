@@ -186,9 +186,7 @@ BlockStack.prototype.highlight=function(){
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.isRunning);
 }
 BlockStack.prototype.shiftOver=function(x,y){
-	if(this.firstBlock.returnsValue){
-		this.move(this.x+x,this.y+y);
-	}
+	this.move(this.x+x,this.y+y);
 }
 BlockStack.prototype.duplicate=function(x,y,group){
 	var firstCopyBlock=this.firstBlock.duplicate(x,y);

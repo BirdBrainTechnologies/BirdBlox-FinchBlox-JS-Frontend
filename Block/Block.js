@@ -429,8 +429,10 @@ Block.prototype.highlight=function(){
 	}
 };
 Block.prototype.snap=function(block){
-	if(!this.bottomOpen){
-		alert("Error");
+	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
+	if(!block.bottomOpen&&this.nextBlock!=null){
+		var BG=BlockGraphics.command;
+		this.nextBlock.unsnap().shiftOver(BG.shiftX,block.height+BG.shiftY);
 	}
 	var stack=this.stack;
 	if(stack.isRunning&&!block.stack.isRunning){
@@ -508,7 +510,6 @@ Block.prototype.duplicate=function(x,y){
 	copiedClass.prototype = Object.create(this.constructor.prototype);
 	copiedClass.prototype.constructor = copiedClass;
 	
-	
 	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category);
 	for(var i=0;i<this.parts.length;i++){
 		myCopy.addPart(this.parts[i].duplicate(myCopy));
@@ -523,6 +524,7 @@ Block.prototype.duplicate=function(x,y){
 		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
 		myCopy.nextBlock.parent=myCopy;
 	}
+	myCopy.bottomOpen=this.bottomOpen;
 	return myCopy;
 };
 Block.prototype.textSummary=function(slotToExclude){
