@@ -232,6 +232,10 @@ TouchReceiver.addListenersCat=function(element,category){
 		//When it is touched, the SVG element will tell the TouchReceiver its Category.
 		TouchReceiver.touchStartCatBN(this.category,e);
 	}, false);
+	element.addEventListener("focus", function(e) {
+		//When it gets focus,
+		GuiElements.alert(Math.random());
+	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Block.
  * @param {SVG element} element - The part of the Block the listeners are being applied to.
