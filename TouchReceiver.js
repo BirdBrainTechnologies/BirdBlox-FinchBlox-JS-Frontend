@@ -44,6 +44,7 @@ TouchReceiver.handleMove=function(event){
  * @fix combine with TouchReceiver.touchstart.
  */
 TouchReceiver.handleUp=function(event){
+	event.preventDefault();
 	TouchReceiver.touchend(event);
 }
 /* Removes touch listeners from the document.  Not used anywhere.
@@ -78,6 +79,7 @@ TouchReceiver.getY=function(e){
  */
 TouchReceiver.touchstart=function(e){
 	var TR=TR; //shorthand
+	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){ //prevents multitouch issues.
 		TR.touchDown=true;
 		TR.targetType="none"; //Does not know the target of the touch.
@@ -91,6 +93,7 @@ TouchReceiver.touchstart=function(e){
  */
 TouchReceiver.touchStartStack=function(target,e){
 	var TR=TouchReceiver; //shorthand
+	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){ //prevent multitouch issues.
 		TR.touchDown=true;
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
@@ -108,6 +111,7 @@ TouchReceiver.touchStartStack=function(target,e){
  */
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
+	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){
 		TR.touchDown=true;
 		TR.targetType="slot";
@@ -120,6 +124,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
  */
 TouchReceiver.touchStartCatBN=function(target,e){
 	var TR=TouchReceiver;
+	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){
 		TR.touchDown=true;
 		TR.targetType="category";
@@ -132,6 +137,7 @@ TouchReceiver.touchStartCatBN=function(target,e){
  */
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
+	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){
 		TR.touchDown=true;
 		TR.targetType="button";
@@ -231,10 +237,6 @@ TouchReceiver.addListenersCat=function(element,category){
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Category.
 		TouchReceiver.touchStartCatBN(this.category,e);
-	}, false);
-	element.addEventListener("focus", function(e) {
-		//When it gets focus,
-		GuiElements.alert(Math.random());
 	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Block.
