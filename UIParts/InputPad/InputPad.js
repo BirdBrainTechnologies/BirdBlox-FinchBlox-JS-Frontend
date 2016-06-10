@@ -29,7 +29,7 @@ InputPad.setGraphics=function(){
 	InputPad.dataIsNumeric=false;
 	InputPad.nonNumericData=null;
 	InputPad.nonNumericText=null;
-}
+};
 InputPad.buildPad=function(){//456,267
 	var IP=InputPad;
 	IP.group=GuiElements.create.group(456,267);
@@ -38,7 +38,7 @@ InputPad.buildPad=function(){//456,267
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
 	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
-}
+};
 InputPad.makeBg=function(){
 	var IP=InputPad;
 	IP.bgGroup=GuiElements.create.group(0,0,IP.group);
@@ -46,24 +46,27 @@ InputPad.makeBg=function(){
 	IP.triangle=GuiElements.draw.triangle(IP.triOffset,0,IP.triangleW,IP.triangleH,IP.bg);
 	IP.bgGroup.appendChild(IP.bgRect);
 	IP.bgGroup.appendChild(IP.triangle);
-}
+};
 InputPad.resetPad=function(){//removes any options which may have been added to the pad
 	var IP=InputPad;
 	if(IP.visible){
 		IP.close();
 	}
 	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
-}
+};
 InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
 	InputPad.menuBnList.addOption(text,dataFunction);
-}
+};
 InputPad.menuBnSelected=function(text,data){
 	var IP=InputPad;
-	if(Data.type==Data.types.num){
+	if(data.type==Data.types.num){
 		IP.displayNum=new DisplayNum(data);
 		IP.dataIsNumeric=true;
 		InputPad.close();
+	}
+	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
+		IP.isEditTextCommand=true;
 	}
 	else{
 		IP.dataIsNumeric=false;
@@ -71,7 +74,7 @@ InputPad.menuBnSelected=function(text,data){
 		IP.nonNumericData=data;
 	}
 	IP.close();
-}
+};
 InputPad.makeBns=function(){
 	var IP=InputPad;
 	var currentNum;
@@ -93,60 +96,61 @@ InputPad.makeBns=function(){
 	InputPad.makeDecimalBn(IP.buttonMargin*3+IP.buttonW*2,IP.buttonMargin*4+IP.buttonH*3);
 	InputPad.makeBsBn(IP.buttonMargin,IP.buttonMargin*5+IP.buttonH*4);
 	InputPad.makeOkBn(IP.buttonMargin*2+IP.longBnW,IP.buttonMargin*5+IP.buttonH*4);
-}
+};
 InputPad.makeNumBn=function(x,y,num){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
-}
+};
 InputPad.makePlusMinusBn=function(x,y){
 	var IP=InputPad;
 	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
 	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
-}
+};
 InputPad.makeDecimalBn=function(x,y){
 	var IP=InputPad;
 	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
-}
+};
 InputPad.makeBsBn=function(x,y){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
 	button.addIcon(VectorPaths.backspace,IP.bsBnH);
 	button.setCallbackFunction(InputPad.bsPressed,false);
-}
+};
 InputPad.makeOkBn=function(x,y){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
 	button.addIcon(VectorPaths.checkmark,IP.okBnH);
 	button.setCallbackFunction(InputPad.okPressed,true);
-}
+};
 InputPad.numPressed=function(num){
 	InputPad.displayNum.addDigit(num+"");
 	InputPad.updateSlot();
-}
+};
 InputPad.plusMinusPressed=function(){
 	InputPad.displayNum.switchSign();
 	InputPad.updateSlot();
-}
+};
 InputPad.decimalPressed=function(){
 	InputPad.displayNum.addDecimalPoint();
 	InputPad.updateSlot();
-}
+};
 InputPad.bsPressed=function(){
 	InputPad.displayNum.backspace();
 	InputPad.updateSlot();
-}
+};
 InputPad.okPressed=function(){
 	InputPad.close();
-}
+};
 InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	var IP=InputPad;
 	IP.visible=true;
 	IP.usingNumberPad=false;
+	IP.isEditTextCommand=false;
 	IP.slot=slot;
 	IP.dataIsNumeric=false;
 	IP.nonNumericData=IP.slot.enteredData;
@@ -157,14 +161,24 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	IP.tallH=IP.height+IP.triangleH;
 	IP.move(x,upperY,lowerY);
 	GuiElements.layers.inputPad.appendChild(IP.group);
-}
+};
 InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	var IP=InputPad;
 	IP.usingNumberPad=true;
-	IP.menuBnList.width=IP.buttonW;
+	IP.isEditTextCommand=false;
 	IP.width=InputPad.BnAreaW;
 	IP.height=InputPad.BnAreaH;
 	IP.tallH=IP.height+IP.triangleH;
+	if(!IP.menuBnList.isEmpty()){
+		IP.menuBnList.width=IP.buttonW*3+IP.buttonMargin*2;
+		this.menuBnList.generateBns();
+		this.height+=this.menuBnList.height+IP.buttonMargin;
+		IP.tallH+=this.menuBnList.height+IP.buttonMargin;
+		GuiElements.move.group(IP.bnGroup,0,this.menuBnList.height+IP.buttonMargin);
+	}
+	else{
+		GuiElements.move.group(IP.bnGroup,0,0);
+	}
 	var IP=InputPad;
 	GuiElements.layers.inputPad.appendChild(IP.group);
 	IP.group.appendChild(IP.bnGroup);
@@ -177,7 +191,8 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	else{
 		IP.dataIsNumeric=false;
 		IP.nonNumericData=slot.getData();
-		IP.displayNum=new DisplayNum(0);
+		IP.nonNumericText=IP.slot.text;
+		IP.displayNum=new DisplayNum(new NumData(0));
 	}
 	if(positive){
 		IP.plusMinusBn.disable();
@@ -192,8 +207,7 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 		IP.decimalBn.enable();
 	}
 	InputPad.move(x,upperY,lowerY);
-	InputPad.updateSlot();
-}
+};
 InputPad.move=function(x,upperY,lowerY){
 	var IP=InputPad;
 	IP.triOffset=(InputPad.width-InputPad.triangleW)/2;
@@ -223,16 +237,19 @@ InputPad.move=function(x,upperY,lowerY){
 	GuiElements.update.rect(IP.bgRect,0,0,this.width,this.height);
 	this.menuBnList.move(IP.buttonMargin,IP.buttonMargin);
 	this.menuBnList.show();
-}
+};
 InputPad.updateSlot=function(){
 	if(InputPad.usingNumberPad){
 		InputPad.slot.updateEdit(this.displayNum.getString(),this.displayNum.getData());
 		InputPad.dataIsNumeric=true;
 	}
-}
+};
 InputPad.close=function(){
 	var IP=InputPad;
-	if(InputPad.dataIsNumeric){
+	if(IP.isEditTextCommand){
+		IP.slot.editText();
+	}
+	else if(InputPad.dataIsNumeric){
 		IP.slot.saveNumData(this.displayNum.getData());
 	}
 	else{
@@ -242,4 +259,4 @@ InputPad.close=function(){
 	IP.visible=false;
 	IP.menuBnList.hide();
 	IP.bnGroup.remove();
-}
+};

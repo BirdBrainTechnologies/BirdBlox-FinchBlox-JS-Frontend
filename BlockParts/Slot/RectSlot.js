@@ -66,7 +66,7 @@ RectSlot.prototype.edit=function(){
 	}
 	callbackFn.slot=this;
 	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn);
-}
+};
 
 RectSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new RectSlot(parentCopy,this.snapType,this.outputType,this.enteredData.getValue());

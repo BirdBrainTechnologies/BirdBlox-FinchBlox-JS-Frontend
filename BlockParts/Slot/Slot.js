@@ -27,6 +27,7 @@ Slot.setConstants=function(){
 	Slot.snapTypes.numStrBool=1;
 	Slot.snapTypes.bool=2;
 	Slot.snapTypes.list=3;
+	Slot.snapTypes.any=4;
 	
 	Slot.outputTypes=function(){};
 	Slot.outputTypes.any=0;
@@ -154,6 +155,9 @@ Slot.prototype.checkFit=function(returnType){
 	var snapType=this.snapType;
 	if(snapType==sT.none){
 		return false;
+	}
+	else if(snapType==sT.any){
+		return true;
 	}
 	else if(snapType==sT.numStrBool){
 		return returnType==rT.num||returnType==rT.string||returnType==rT.bool;

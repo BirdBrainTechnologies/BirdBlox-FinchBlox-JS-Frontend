@@ -143,25 +143,53 @@ b_LessThan.prototype.startAction=function(){
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1<val2);
 	return false; //Done running
-}
+};
 
 
 
 function b_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	var rS=new RoundSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,0);
+	rS.addOption("Enter text",new SelectionData("enter_text"));
+	this.addPart(rS);
 	this.addPart(new LabelText(this,"="));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(rS.duplicate(this));
 }
 b_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 b_EqualTo.prototype.constructor = b_EqualTo;
 b_EqualTo.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
 	var val1=data1.getValue();
 	var val2=data2.getValue();
-	this.resultData=new BoolData(val1==val2&&isValid);
+	var string1=data1.asString().getValue();
+	var string2=data2.asString().getValue();
+	var numD1=data1.asNum();
+	var numD2=data2.asNum();
+	var types=Data.types;
+	var isValid=data1.isValid&&data2.isValid;
+	if(data1.type==data2.type){
+		this.resultData=new BoolData(isValid&&val1==val2);
+	}
+	else if(data1.type==types.string||data2.type==types.string){
+		if(string1==string2) {
+			this.resultData = new BoolData(true);
+		}
+		else if(data1.type==types.num||data2.type==types.num){
+			if(numD1.isValid&&numD2.isValid){
+				this.resultData = new BoolData(numD1.getValue()==numD2.getValue());
+			}
+			else{
+				this.resultData = new BoolData(false);
+			}
+		}
+		else{
+			this.resultData = new BoolData(false);
+		}
+	}
+	else{
+		this.resultData = new BoolData(false);
+	}
 	return false; //Done running
 }
 

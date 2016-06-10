@@ -100,3 +100,6 @@ MenuBnList.prototype.computeWidth=function(){
 		}
 	}
 }
+MenuBnList.prototype.isEmpty=function(){
+	return this.bnTextList.length==0;
+}

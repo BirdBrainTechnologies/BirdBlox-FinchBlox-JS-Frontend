@@ -28,7 +28,12 @@ b_TurnLeft.prototype.constructor = b_TurnLeft;
 function b_PointInDirection(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"point in direction"));
-	this.addPart(new NumSlot(this,90));
+	var nS=new NumSlot(this,90);
+	nS.addOption("(90) right",new NumData(90));
+	nS.addOption("(-90) left",new SelectionData(-90));
+	nS.addOption("(0) up",new NumData(0));
+	nS.addOption("(180) down",new NumData(180));
+	this.addPart(nS);
 }
 b_PointInDirection.prototype = Object.create(CommandBlock.prototype);
 b_PointInDirection.prototype.constructor = b_PointInDirection;
@@ -61,7 +66,7 @@ function b_GlideToXY(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"glide"));
 	this.addPart(new NumSlot(this,1,true));
-	this.addPart(new LabelText(this,"secs to x: y:"));
+	this.addPart(new LabelText(this,"secs to x:"));
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"y:"));
 	this.addPart(new NumSlot(this,0));

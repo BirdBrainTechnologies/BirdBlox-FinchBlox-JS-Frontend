@@ -146,7 +146,7 @@ DropSlot.prototype.setSelectionData=function(text,data){
 	if(this.selected){
 		this.deselect();
 	}
-}
+};
 DropSlot.prototype.getData=function(){
 	if(this.running==3){
 		if(this.resultIsFromChild){
