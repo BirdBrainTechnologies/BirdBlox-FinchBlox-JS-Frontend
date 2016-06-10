@@ -116,6 +116,19 @@ Button.prototype.release=function(){
 		}
 	}
 }
+/* Removes the Button's visual highlight without triggering any actions */
+Button.prototype.interrupt=function(){
+	if(this.enabled&&this.pressed){
+		this.pressed=false;
+		this.bgRect.setAttributeNS(null,"fill",Button.bg);
+		if(this.hasText){
+			this.textE.setAttributeNS(null,"fill",Button.foreground);
+		}
+		if(this.hasIcon&&this.iconInverts){
+			this.icon.setColor(Button.foreground);
+		}
+	}
+}
 Button.prototype.remove=function(){
 	this.group.remove();
 }

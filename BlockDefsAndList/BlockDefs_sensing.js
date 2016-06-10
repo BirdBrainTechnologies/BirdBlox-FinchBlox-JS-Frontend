@@ -21,7 +21,7 @@ b_Ask.prototype.startAction=function(){
 		callbackErr.mem.finished=true;
 	}
 	callbackErr.mem=mem;
-	HtmlServer.showDialog("Question:",question," ",callbackFn,callbackErr);
+	HtmlServer.showDialog("Question",question,"",callbackFn,callbackErr);
 	return true;
 }
 b_Ask.prototype.updateAction=function(){

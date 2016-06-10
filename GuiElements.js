@@ -231,6 +231,8 @@ GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
 	}
 	textElement.setAttributeNS(null,"fill",color);
 	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
+	text+=""; //Make text into a string
+	text=text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
 	var textNode = document.createTextNode(text);
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
@@ -259,6 +261,8 @@ GuiElements.update.opacity=function(element,opacity){
  * @param {string} newText - The element's new text.
  */
 GuiElements.update.text=function(textE,newText){
+	newText+=""; //Make newText into a string
+	newText=newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
 	textE.textNode.remove(); //Remove old text.
 	var textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode=textNode; //Adds a reference for easy removal.

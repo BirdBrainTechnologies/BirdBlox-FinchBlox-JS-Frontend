@@ -116,6 +116,19 @@ CodeManager.move.end=function(){
 		move.moving=false; //There are now no moving BlockStacks.
 	}
 }
+/* Drops the BlockStack where it is without attaching it to anything or deleting it.
+ */
+CodeManager.move.interrupt=function(){
+	var move=CodeManager.move; //shorthand
+	if(move.moving) { //Only run if a BlockStack is currently moving.
+		move.topX = move.offsetX + move.touchX;
+		move.topY = move.offsetY + move.touchY;
+		move.stack.land();
+		move.stack.updateDim(); //Fix! this line of code might not be needed.
+		Highlighter.hide(); //Hide any existing highlight.
+		move.moving = false; //There are now no moving BlockStacks.
+	}
+}
 /* Returns a boolean indicating if a point falls within a rectangular region. 
  * Useful for determining which Blocks a moving BlockStack can connect to.
  * @param {number} x1 - The x coord of the point.

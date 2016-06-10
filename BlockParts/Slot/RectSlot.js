@@ -56,13 +56,6 @@ RectSlot.prototype.highlight=function(){//Fix BG
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
 }
 RectSlot.prototype.edit=function(){
-	var newText=prompt(this.parent.textSummary(this));
-	if(newText!=null){
-		this.enteredData=new StringData(newText);
-		this.changeText(newText);
-	}
-}
-RectSlot.prototype.edit=function(){
 	var question=this.parent.textSummary(this);
 	var currentVal=this.enteredData.getValue();
 	var callbackFn=function(cancelled,response){

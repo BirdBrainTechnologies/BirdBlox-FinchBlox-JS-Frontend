@@ -202,6 +202,24 @@ TouchReceiver.touchend=function(e){
 		}
 	}
 }
+/* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
+ * Blocks that are moving should stop moving, but actions should not be triggered.
+ */
+TouchReceiver.touchInterrupt=function(){
+	var TR=TouchReceiver;
+	if(TR.touchDown){ //Only interrupt if there is a finger on the screen.
+		TR.touchDown=false;
+		if(TR.targetType=="stack"){
+			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
+				CodeManager.move.interrupt();
+				TR.blocksMoving=false;
+			}
+		}
+		else if(TR.targetType=="button"){
+			TR.target.interrupt(); //Remove the highlight without triggering the action.
+		}
+	}
+}
 /* Adds handlerDown listeners to the parts of a CategoryBN.
  * @param {SVG element} element - The part of the CategoryBN the listeners are being applied to.
  * @param {Category} category - The category of the CategoryBN.

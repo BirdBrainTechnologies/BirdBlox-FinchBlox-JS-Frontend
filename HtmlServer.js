@@ -5,6 +5,9 @@ function HtmlServer(){
 	HtmlServer.port=22179;
 }
 HtmlServer.encodeHtml=function(message){
+	if(message==""){
+		return "%20"; //Empty strings can't be used in the URL.
+	}
 	var eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
@@ -84,16 +87,23 @@ HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
 HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "iPad/dialog/"+HS.encodeHtml(title);
-	request+="/"+HS.encodeHtml(question);
-	request+="/"+HS.encodeHtml(hint);
-	var onDialogPresented=function(result){
-		HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
+	TouchReceiver.touchInterrupt();
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var newText=prompt(question);
+		callbackFn(newText==null,newText);
 	}
-	onDialogPresented.callbackFn=callbackFn;
-	onDialogPresented.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onDialogPresented,callbackErr);
+	else{
+		var HS=HtmlServer;
+		var request = "iPad/dialog/"+HS.encodeHtml(title);
+		request+="/"+HS.encodeHtml(question);
+		request+="/"+HS.encodeHtml(hint);
+		var onDialogPresented=function(result){
+			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
+		}
+		onDialogPresented.callbackFn=callbackFn;
+		onDialogPresented.callbackErr=callbackErr;
+		HS.sendRequestWithCallback(request,onDialogPresented,callbackErr);
+	}
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
