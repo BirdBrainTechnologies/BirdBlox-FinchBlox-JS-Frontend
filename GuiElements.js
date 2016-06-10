@@ -391,4 +391,11 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
+};
+/* Displays the result of a reporter or predicate Block in a speech bubble next to that block.
+ * @param {string} value - The value to display
+ * @fix This function has not been created yet.
+ */
+GuiElements.displayValue=function(value){
+	GuiElements.alert(value);
 }

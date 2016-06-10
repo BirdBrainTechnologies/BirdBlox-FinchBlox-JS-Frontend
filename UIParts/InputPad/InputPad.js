@@ -236,7 +236,7 @@ InputPad.close=function(){
 		IP.slot.saveNumData(this.displayNum.getData());
 	}
 	else{
-		IP.slot.saveSelectionData(IP.nonNumericText,IP.nonNumericData);
+		IP.slot.setSelectionData(IP.nonNumericText,IP.nonNumericData);
 	}
 	IP.group.remove();
 	IP.visible=false;

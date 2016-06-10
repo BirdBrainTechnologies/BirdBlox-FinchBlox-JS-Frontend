@@ -24,6 +24,7 @@ MenuBnList.setGraphics=function(){
 	MBL.font="Arial";
 	MBL.fontWeight="normal";
 	MBL.charHeight=12;
+	MBL.minWidth=25;
 }
 MenuBnList.prototype.addOption=function(text,func){
 	this.bnsGenerated=false;
@@ -94,5 +95,8 @@ MenuBnList.prototype.computeWidth=function(){
 			}
 		}
 		this.width=longestW+2*MBL.bnHMargin;
+		if(this.width<MBL.minWidth){
+			this.width=MBL.minWidth;
+		}
 	}
 }

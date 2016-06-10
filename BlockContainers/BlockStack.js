@@ -114,8 +114,8 @@ BlockStack.prototype.updateRun=function(){
 			}
 		}
 		else{
-			if(this.currentBlock.updateRun()){
-				GuiElements.displayValue(this.currentBlock.getValue());
+			if(!this.currentBlock.updateRun()){
+				GuiElements.displayValue(this.currentBlock.getResultData().asString().getValue());
 				this.endRun();
 			}
 		}

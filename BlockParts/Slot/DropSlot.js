@@ -140,10 +140,26 @@ DropSlot.prototype.textSummary=function(){
 		return this.enteredData.asString().getValue();
 	}
 }
-DropSlot.prototype.saveSelectionData=function(text,data){
+DropSlot.prototype.setSelectionData=function(text,data){
+	this.enteredData=data;
+	this.changeText(text);
 	if(this.selected){
-		this.enteredData=data;
-		this.changeText(text);
 		this.deselect();
+	}
+}
+DropSlot.prototype.getData=function(){
+	if(this.running==3){
+		if(this.resultIsFromChild){
+			return this.resultData;
+		}
+		else{
+			return this.enteredData;
+		}
+	}
+	if(this.hasChild){
+		return null;
+	}
+	else{
+		return this.enteredData;
 	}
 }
