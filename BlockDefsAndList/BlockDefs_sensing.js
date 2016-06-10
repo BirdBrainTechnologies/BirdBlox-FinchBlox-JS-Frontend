@@ -7,7 +7,50 @@ function b_Ask(x,y){
 b_Ask.prototype = Object.create(CommandBlock.prototype);
 b_Ask.prototype.constructor = b_Ask;
 b_Ask.prototype.startAction=function(){
-	var question=this.slots[0].getData().getValue();
+	var mem=this.runMem;
+	mem.question=this.slots[0].getData().getValue();
+	mem.questionDisplayed=false;
+	if(HtmlServer.dialogVisible){
+		mem.waitingForDialog=true;
+	}
+	else{
+		mem.waitingForDialog=false;
+		if(CodeManager.checkDialogDelay()) {
+			this.showQuestion();
+		}
+	}
+	return true;
+};
+b_Ask.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(mem.waitingForDialog){
+		if(!HtmlServer.dialogVisible){
+			mem.waitingForDialog=false;
+		}
+		return true;
+	}
+	else if(!mem.questionDisplayed){
+		if(CodeManager.checkDialogDelay()) {
+			if(HtmlServer.dialogVisible){
+				mem.waitingForDialog=true;
+			}
+			else{
+				this.showQuestion();
+			}
+		}
+		return true;
+	}
+	else{
+		if(mem.finished==true){
+			CodeManager.updateDialogDelay();
+			return false; //Done running
+		}
+		else{
+			return true; //Still running
+		}
+	}
+};
+b_Ask.prototype.showQuestion=function(){
 	var mem=this.runMem;
 	mem.finished=false;
 	var callbackFn=function(cancelled,response){
@@ -15,23 +58,14 @@ b_Ask.prototype.startAction=function(){
 			CodeManager.answer = new StringData(response, true);
 		}
 		callbackFn.mem.finished=true;
-	}
+	};
 	callbackFn.mem=mem;
 	var callbackErr=function(){
 		callbackErr.mem.finished=true;
-	}
+	};
 	callbackErr.mem=mem;
-	HtmlServer.showDialog("Question",question,"",callbackFn,callbackErr);
-	return true;
-}
-b_Ask.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(mem.finished==true){
-		return false; //Done running
-	}
-	else{
-		return true; //Still running
-	}
+	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr);
+	mem.questionDisplayed=true;
 }
 
 

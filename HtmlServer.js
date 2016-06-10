@@ -3,6 +3,7 @@
  */
 function HtmlServer(){
 	HtmlServer.port=22179;
+	HtmlServer.dialogVisible=false;
 }
 HtmlServer.encodeHtml=function(message){
 	if(message==""){
@@ -88,8 +89,10 @@ HtmlServer.getUrlForRequest=function(request){
 }
 HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
 	if(TouchReceiver.mouse){ //Kept for debugging on a PC
 		var newText=prompt(question);
+		HtmlServer.dialogVisible=false;
 		callbackFn(newText==null,newText);
 	}
 	else{
@@ -102,7 +105,14 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		}
 		onDialogPresented.callbackFn=callbackFn;
 		onDialogPresented.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,callbackErr);
+		var onDialogFail=function(){
+			HtmlServer.dialogVisible=false;
+			if(onDialogFail.callbackErr!=null) {
+				onDialogFail.callbackErr();
+			}
+		}
+		onDialogFail.callbackErr=callbackErr;
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogFail);
 	}
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
@@ -113,9 +123,11 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
 		}
 		else if(response=="Cancelled"){
+			HtmlServer.dialogVisible=false;
 			onResponseReceived.callbackFn(true);
 		}
 		else{
+			HtmlServer.dialogVisible=false;
 			var trimmed=response.substring(1,response.length-1);
 			onResponseReceived.callbackFn(false,trimmed);
 		}

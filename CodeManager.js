@@ -23,6 +23,9 @@ function CodeManager(){
 	CodeManager.updateInterval=10; //How quickly does the update timer fire (in ms)?
 	//Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
 	CodeManager.answer=new StringData("");
+	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
+	CodeManager.repeatDialogDelay=500;
+	CodeManager.lastDialogDisplayTime=null;
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
@@ -216,4 +219,20 @@ CodeManager.startUpdateTimer=function(){
  */
 CodeManager.eventFlagClicked=function(){
 	TabManager.eventFlagClicked();
+}
+/**/
+CodeManager.checkDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+CodeManager.updateDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	CM.lastDialogDisplayTime=now;
 }
