@@ -176,6 +176,7 @@ CodeManager.updateRun=function(){
 /* Recursively stops all Block execution.
  */
 CodeManager.stop=function(){
+	HummingbirdManager.stopHummingbirds(); //Stop any motors and LEDs on the Hummingbirds
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
 }

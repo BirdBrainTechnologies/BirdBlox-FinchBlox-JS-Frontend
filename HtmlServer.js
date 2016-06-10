@@ -87,6 +87,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 	var HS=HtmlServer;
 	var request = "iPad/dialog/"+HS.encodeHtml(title);
 	request+="/"+HS.encodeHtml(question);
+	request+="/"+HS.encodeHtml(hint);
 	var onDialogPresented=function(result){
 		HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
 	}

@@ -77,3 +77,6 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 		return true; //Still running
 	}
 }
+HummingbirdManager.stopHummingbirds=function(){
+	HtmlServer.sendHBRequest("out/stop");
+}
