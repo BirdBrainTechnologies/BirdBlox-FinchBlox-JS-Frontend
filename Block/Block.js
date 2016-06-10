@@ -26,6 +26,7 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 	this.slots=new Array(); //The slots array just holds the Slots.
 	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
 	this.category=category;
+	this.isGlowing=false;
 	
 	this.stack=null; //It has no Stack yet.
 	this.path=this.generatePath(); //This path is the main visual part of the Block.  It is colored according to its category.
@@ -421,7 +422,7 @@ Block.prototype.findBestFit=function(){
 };
 Block.prototype.highlight=function(){
 	if(this.bottomOpen){
-		Highlighter.highlight(this.getAbsX(),this.getAbsY()+this.height,this.width,this.height,0,false);
+		Highlighter.highlight(this.getAbsX(),this.getAbsY()+this.height,this.width,this.height,0,false,this.isGlowing);
 	}
 	else{
 		alert("Error!");
@@ -556,6 +557,7 @@ Block.prototype.getResultData=function(){
 /* Recursively adds a white outline to indicate that the BlockStack is running. */
 Block.prototype.glow=function(){
 	BlockGraphics.update.glow(this.path);
+	this.isGlowing=true;
 	if(this.blockSlot1!=null){
 		this.blockSlot1.glow();
 	}
@@ -569,6 +571,7 @@ Block.prototype.glow=function(){
 /* Recursively removes the outline. */
 Block.prototype.stopGlow=function(){
 	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	this.isGlowing=false;
 	if(this.blockSlot1!=null){
 		this.blockSlot1.stopGlow();
 	}

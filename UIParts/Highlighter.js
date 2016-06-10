@@ -11,14 +11,21 @@ Highlighter.createPath=function(){
 	path.setAttributeNS(null,"fill","none");
 	return path;
 }
-Highlighter.highlight=function(x,y,width,height,type,isSlot){
+Highlighter.highlight=function(x,y,width,height,type,isSlot,isGlowing){
 	var pathD=BlockGraphics.buildPath.highlight(x,y,width,height,type,isSlot);
 	Highlighter.path.setAttributeNS(null,"d",pathD);
 	if(!Highlighter.visible){
 		GuiElements.layers.highlight.appendChild(Highlighter.path);
 		Highlighter.visible=true;
 	}
-}
+	var bG=BlockGraphics.highlight;
+	if(isGlowing!=null&&isGlowing){
+		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeDarkC);
+	}
+	else{
+		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeC);
+	}
+};
 Highlighter.hide=function(){
 	if(Highlighter.visible){
 		Highlighter.path.remove();

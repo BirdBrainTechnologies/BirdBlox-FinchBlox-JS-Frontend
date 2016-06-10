@@ -183,7 +183,7 @@ BlockStack.prototype.snap=function(block){
 	this.updateDim();
 }
 BlockStack.prototype.highlight=function(){
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false);
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.isRunning);
 }
 BlockStack.prototype.shiftOver=function(x,y){
 	if(this.firstBlock.returnsValue){

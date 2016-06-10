@@ -126,6 +126,7 @@ BlockGraphics.SetHighlight=function(){
 	BlockGraphics.highlight.hexEndL=15;
 	BlockGraphics.highlight.slotHexEndL=10;
 	BlockGraphics.highlight.strokeC="#fff";
+	BlockGraphics.highlight.strokeDarkC="#000";
 	BlockGraphics.highlight.strokeW=3;
 	BlockGraphics.highlight.commandL=10;
 }
