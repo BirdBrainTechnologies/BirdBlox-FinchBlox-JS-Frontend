@@ -57,7 +57,7 @@ Block.setConstants=function(){
 	Block.returnTypes.string=2;
 	Block.returnTypes.bool=3;
 	Block.returnTypes.list=4;
-}
+};
 /* Returns the x coord of the Block relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Block relative to the screen.
  */
@@ -68,7 +68,7 @@ Block.prototype.getAbsX=function(){
 	else{
 		return this.x;
 	}
-}
+};
 /* Returns the y coord of the Block relative to the screen.
  * @return {number} - The y coord of the Block relative to the screen.
  */
@@ -79,7 +79,7 @@ Block.prototype.getAbsY=function(){
 	else{
 		return this.y;
 	}
-}
+};
 /* Creates and returns the main SVG path element for the Block.
  * @return {SVG path} - The main SVG path element for the Block.
  */
@@ -87,7 +87,7 @@ Block.prototype.generatePath=function(){
 	var pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
 	TouchReceiver.addListenersChild(pathE,this);
 	return pathE;
-}
+};
 /* Adds a part (LabelText, BlockIcon, or Slot) to the Block.
  * @param {LabelText/BlockIcon/Slot} part - part to add.
  */
@@ -96,7 +96,7 @@ Block.prototype.addPart=function(part){
 	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
 		this.slots.push(part);
 	}
-}
+};
 /* Moves the Block and sets its this.x and this.y values.
  * @param {number} x - New x coord.
  * @param {number} y - New y coord.
@@ -105,7 +105,7 @@ Block.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
 	GuiElements.move.group(this.group,x,y); //All parts of the Block are contained within its group to allow for easy movement.
-}
+};
 /* Recursively stops the Block, its Slots, and any subsequent Blocks.
  */
 Block.prototype.stop=function(){
@@ -122,7 +122,7 @@ Block.prototype.stop=function(){
 	if(this.bottomOpen&&this.nextBlock!=null){
 		this.nextBlock.stop(); //Stop the next Block.
 	}
-}
+};
 /* Updates this currently executing Block and returns either the next Block to execute or its current execution state depending on the type of Block.
  * @return {Block/boolean} - If this Block returns no value, it returns the next Block to run.  Otherwise, it returns boolean indicating if it has finished generating a value to return.
  * @fix make the return type more consistent.  Maybe always a boolean.
@@ -154,19 +154,19 @@ Block.prototype.updateRun=function(){
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
 	return rVal; //Return either the next Block to run or a boolean indicating if this Block is done.
-}
+};
 /* Will be overrided. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.startAction=function(){
 	return true; //Still running
-}
+};
 /* Will be overrided. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
 	return true; //Still running //Fix! by default this should be true.
-}
+};
 /* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
  * Only used if Block returns a value.
  * Once the Block returns its value, it is done and can reset its state.
@@ -178,7 +178,7 @@ Block.prototype.getResultData=function(){
 		return this.resultData; //Access stored result data and return it.
 	}
 	return null; //If called when the block is not done running, return null. This should never happen.
-}
+};
 /* Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
  * @param {BlockStack} stack - The stack the Blocks will be moved to.
  */
@@ -198,7 +198,7 @@ Block.prototype.changeStack=function(stack){
 	if(this.blockSlot2!=null){
 		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
 	}
-}
+};
 /* Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
  * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
  * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
@@ -215,7 +215,7 @@ Block.prototype.updateStackDim=function(){
 	if(this.nextBlock!=null){
 		this.nextBlock.updateStackDim(); //Tell the next block to update.
 	}
-}
+};
 /* Handles more of the recursion for updateStackDim.
  * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
  * This allows other functions to avoid unnecessary updates when full recursion is not needed.
@@ -226,7 +226,7 @@ Block.prototype.updateStackDimRI=function(){
 		this.slots[i].updateStackDim(); //Pass message on to Slots.
 	}
 	this.updateStackDimO(); //Update this Block.
-}
+};
 /* Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
  * It is called recursively by updateStackDim and updateStackDimRI.
  * The stack has two bounding boxes. Both are used when looking for potential Blocks to snap to.
@@ -275,7 +275,7 @@ Block.prototype.updateStackDimO=function(){
 	}
 	//The Stacks dimensions now include the Block.
 	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
-}
+};
 /* Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
  */
@@ -328,7 +328,7 @@ Block.prototype.updateDim=function(){
 	if(this.nextBlock!=null){
 		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
-}
+};
 Block.prototype.updateAlign=function(x,y){
 	this.updateAlignRI(x,y);
 	if(this.hasBlockSlot1){
@@ -342,7 +342,7 @@ Block.prototype.updateAlign=function(x,y){
 		this.nextBlock.updateAlign(this.x,this.y+this.height);
 	}
 	return this.width;
-}
+};
 Block.prototype.updateAlignRI=function(x,y){
 	this.move(x,y);
 	var bG=BlockGraphics.getType(this.type);
@@ -361,7 +361,7 @@ Block.prototype.updateAlignRI=function(x,y){
 			xCoord+=bG.pMargin;
 		}
 	}
-}
+};
 /*Block.prototype.updateAlignO=function(x,y){
 	if(this.type==0){
 		this.move(x,y);
@@ -385,7 +385,7 @@ Block.prototype.resize=function(width,height){
 		midHeight=this.midHeight;
 	}
 	BlockGraphics.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight);
-}
+};
 Block.prototype.findBestFit=function(){
 	var move=CodeManager.move;
 	var fit=CodeManager.fit;
@@ -418,7 +418,7 @@ Block.prototype.findBestFit=function(){
 	if(this.nextBlock!=null){
 		this.nextBlock.findBestFit();
 	}
-}
+};
 Block.prototype.highlight=function(){
 	if(this.bottomOpen){
 		Highlighter.highlight(this.getAbsX(),this.getAbsY()+this.height,this.width,this.height,0,false);
@@ -426,31 +426,39 @@ Block.prototype.highlight=function(){
 	else{
 		alert("Error!");
 	}
-}
+};
 Block.prototype.snap=function(block){
-	if(this.bottomOpen){
-		var upperBlock=this;
-		var lowerBlock=this.nextBlock;//might be null
-		var topStackBlock=block;
-		var bottomStackBlock=block.getLastBlock();
-		
-		upperBlock.nextBlock=topStackBlock;
-		topStackBlock.parent=upperBlock;
-		bottomStackBlock.nextBlock=lowerBlock;
-		if(lowerBlock!=null){
-			lowerBlock.parent=bottomStackBlock;
-		}
+	if(!this.bottomOpen){
+		alert("Error");
+	}
+	var stack=this.stack;
+	if(stack.isRunning&&!block.stack.isRunning){
+		block.glow();
+	}
+	else if(!stack.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
+		block.stack.stop();
+	}
+	else if(stack.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
+		block.stop();
+	}
+	var upperBlock=this;
+	var lowerBlock=this.nextBlock;//might be null
+	var topStackBlock=block;
+	var bottomStackBlock=block.getLastBlock();
 
-		var oldG=block.stack.group;
-		block.stack.remove();
-		block.changeStack(this.stack);
-		oldG.remove();
-		this.stack.updateDim();
+	upperBlock.nextBlock=topStackBlock;
+	topStackBlock.parent=upperBlock;
+	bottomStackBlock.nextBlock=lowerBlock;
+	if(lowerBlock!=null){
+		lowerBlock.parent=bottomStackBlock;
 	}
-	else{
-		alert("Error!");
-	}
-}
+
+	var oldG=block.stack.group;
+	block.stack.remove();
+	block.changeStack(this.stack);
+	oldG.remove();
+	this.stack.updateDim();
+};
 Block.prototype.unsnap=function(){//FIX!
 	if(this.parent!=null){
 		if(this.parent.isSlot||this.parent.isBlockSlot){
@@ -466,7 +474,7 @@ Block.prototype.unsnap=function(){//FIX!
 	}
 	//BlockGraphics.bringToFront(this.stack.group,GuiElements.layers.drag);
 	return this.stack;
-}
+};
 /*Block.prototype.addListeners=function(obj){
 	obj.parent=this;
 	obj.addEventListener('mousedown', function(e) {
@@ -480,7 +488,7 @@ Block.prototype.getLastBlock=function(obj){
 	else{
 		return this.nextBlock.getLastBlock();
 	}
-}
+};
 Block.prototype.addHeights=function(){
 	if(this.nextBlock!=null){
 		return this.height+this.nextBlock.addHeights();
@@ -488,7 +496,7 @@ Block.prototype.addHeights=function(){
 	else{
 		return this.height;
 	}
-}
+};
 /*Block.prototype.setReturnType=function(type){
 	this.returnType=type;
 }*/
@@ -515,7 +523,7 @@ Block.prototype.duplicate=function(x,y){
 		myCopy.nextBlock.parent=myCopy;
 	}
 	return myCopy;
-}
+};
 Block.prototype.textSummary=function(slotToExclude){
 	var summary="";
 	for(var i=0;i<this.parts.length;i++){
@@ -530,18 +538,44 @@ Block.prototype.textSummary=function(slotToExclude){
 		}
 	}
 	return summary;
-}
+};
 Block.prototype.eventFlagClicked=function(){
 	
-}
+};
 Block.prototype.clearMem=function(){
 	this.runMem=new function(){};
 	for(var i=0;i<this.slots.length;i++){
 		this.slots[i].clearMem();
 	}
-}
+};
 Block.prototype.getResultData=function(){
 	var result=this.resultData;
 	this.resultData=null;
 	return result;
-}
+};
+/* Recursively adds a white outline to indicate that the BlockStack is running. */
+Block.prototype.glow=function(){
+	BlockGraphics.update.glow(this.path);
+	if(this.blockSlot1!=null){
+		this.blockSlot1.glow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.glow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.glow();
+	}
+};
+/* Recursively removes the outline. */
+Block.prototype.stopGlow=function(){
+	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	if(this.blockSlot1!=null){
+		this.blockSlot1.stopGlow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.stopGlow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.stopGlow();
+	}
+};

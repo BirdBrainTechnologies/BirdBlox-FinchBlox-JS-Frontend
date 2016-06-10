@@ -256,6 +256,15 @@ GuiElements.update.color=function(element,color){
 GuiElements.update.opacity=function(element,opacity){
 	element.setAttributeNS(null,"fill-opacity",opacity); //Sets the opacity.
 }
+/* Sets an SVG element's stroke
+ * @param {SVG element} element - The element to be modified.
+ * @param {string} color - The element's new color in the form "#fff".
+ * @param {number} strokeW - The width of the stroke
+ */
+GuiElements.update.stroke=function(element,color,strokeW){
+	element.setAttributeNS(null,"stroke",color);
+	element.setAttributeNS(null,"stroke-width",strokeW);
+};
 /* Changes the text of an SVG text element.
  * @param {SVG text} textE - The text element to be modified.
  * @param {string} newText - The element's new text.

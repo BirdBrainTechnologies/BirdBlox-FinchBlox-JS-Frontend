@@ -91,7 +91,7 @@ TouchReceiver.touchstart=function(e){
  * @param {event} e - passed event arguments.
  * @fix rename to touchStartBlock.
  */
-TouchReceiver.touchStartStack=function(target,e){
+TouchReceiver.touchStartBlock=function(target,e){
 	var TR=TouchReceiver; //shorthand
 	e.preventDefault(); //Stops 300 ms delay events
 	if(!TR.touchDown){ //prevent multitouch issues.
@@ -100,7 +100,7 @@ TouchReceiver.touchStartStack=function(target,e){
 			TR.targetType="displayStack";
 		}
 		else{
-			TR.targetType="stack";
+			TR.targetType="block";
 		}
 		TouchReceiver.target=target; //Store target Block.
 	}
@@ -158,7 +158,7 @@ TouchReceiver.touchmove=function(e){
 				TR.targetType="displayStack";
 			}
 			else{
-				TR.targetType="stack";
+				TR.targetType="block";
 			}
 		}
 		/* If the user drags a Block that is in a DisplayStack, 
@@ -168,11 +168,11 @@ TouchReceiver.touchmove=function(e){
 			var y=TR.target.stack.getAbsY();
 			//The first block of the duplicated BlockStack is the new target.
 			TR.target=TR.target.stack.duplicate(x,y).firstBlock;
-			TR.targetType="stack";
+			TR.targetType="block";
 		}
 		/* If the user drags a Block that is a member of a BlockStack, 
 		then the BlockStack should move. */
-		if(TR.targetType=="stack"){
+		if(TR.targetType=="block"){
 			//If the CodeManager has not started the movement, this must be done first.
 			if(TR.blocksMoving){
 				//The CodeManager handles moving BlockStacks.
@@ -193,10 +193,13 @@ TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchDown){ //Prevents multitouch problems.
 		TR.touchDown=false;
-		if(TR.targetType=="stack"){
+		if(TR.targetType=="block"){
 			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
 				CodeManager.move.end();
 				TR.blocksMoving=false;
+			}
+			else{ //The stack was tapped, so it should run.
+				TR.target.stack.startRun();
 			}
 		}
 		else if(TR.targetType=="button"){
@@ -215,7 +218,7 @@ TouchReceiver.touchInterrupt=function(){
 	var TR=TouchReceiver;
 	if(TR.touchDown){ //Only interrupt if there is a finger on the screen.
 		TR.touchDown=false;
-		if(TR.targetType=="stack"){
+		if(TR.targetType=="block"){
 			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
 				CodeManager.move.interrupt();
 				TR.blocksMoving=false;
@@ -250,7 +253,7 @@ TouchReceiver.addListenersChild=function(element,parent){
 	element.parent=parent; //Teaches the SVG element to know what Block it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Block.
-		TouchReceiver.touchStartStack(this.parent,e);
+		TouchReceiver.touchStartBlock(this.parent,e);
 	}, false);
 }
 /* Adds handlerDown listeners to the parts of a Slot.

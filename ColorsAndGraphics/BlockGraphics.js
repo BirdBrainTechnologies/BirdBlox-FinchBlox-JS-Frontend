@@ -11,6 +11,7 @@ function BlockGraphics(){
 	BlockGraphics.SetValueText();
 	BlockGraphics.SetDropSlot();
 	BlockGraphics.SetHighlight();
+	BlockGraphics.SetGlow();
 	BlockGraphics.CalcCommand();
 	BlockGraphics.CalcPaths();
 }
@@ -128,7 +129,11 @@ BlockGraphics.SetHighlight=function(){
 	BlockGraphics.highlight.strokeW=3;
 	BlockGraphics.highlight.commandL=10;
 }
-
+BlockGraphics.SetGlow=function(){
+	BlockGraphics.glow=function(){};
+	BlockGraphics.glow.color="#fff";
+	BlockGraphics.glow.strokeW=2;
+};
 
 BlockGraphics.CalcCommand=function(){
 	var com=BlockGraphics.command;
@@ -337,11 +342,7 @@ BlockGraphics.create.block=function(category,group,returnsValue){
 	var path=GuiElements.create.path(group);
 	var fill=Colors.getGradient(category);
 	path.setAttributeNS(null,"fill",fill);
-	var outline=Colors.getColor(category);
-	if(returnsValue){
-		path.setAttributeNS(null,"stroke",outline);
-		path.setAttributeNS(null,"stroke-width",BlockGraphics.reporter.strokeW);
-	}
+	BlockGraphics.update.stroke(path,category,returnsValue);
 	return path;
 }
 BlockGraphics.create.slot=function(group,type,category){
@@ -418,6 +419,21 @@ BlockGraphics.update.text=function(text,x,y){
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);
 }
+BlockGraphics.update.glow=function(path){
+	var glow=BlockGraphics.glow;
+	path.setAttributeNS(null,"stroke",glow.color);
+	path.setAttributeNS(null,"stroke-width",glow.strokeW);
+};
+BlockGraphics.update.stroke=function(path,category,returnsValue){
+	if(returnsValue){
+		var outline=Colors.getColor(category);
+		path.setAttributeNS(null,"stroke",outline);
+		path.setAttributeNS(null,"stroke-width",BlockGraphics.reporter.strokeW);
+	}
+	else{
+		path.setAttributeNS(null,"stroke-width",0);
+	}
+};
 BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
 	var bG=BlockGraphics.highlight;
 	var pathD;

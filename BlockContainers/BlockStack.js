@@ -2,6 +2,8 @@
 function BlockStack(firstBlock,tab){
 	tab.addStack(this);
 	this.firstBlock=firstBlock;
+	this.firstBlock.stop();
+	this.firstBlock.stopGlow();
 	this.returnType=firstBlock.returnType;
 	this.x=0;
 	this.y=0;
@@ -100,6 +102,10 @@ BlockStack.prototype.stop=function(){
 BlockStack.prototype.updateRun=function(){
 	if(this.isRunning){
 		if(this.returnType==Block.returnTypes.none){
+			if(this.currentBlock.stack!=this){ //If the current Block has been removed, don't run it.
+				this.endRun();
+				return this.isRunning;
+			}
 			if(!this.currentBlock.updateRun()){
 				this.currentBlock=this.currentBlock.nextBlock;
 			}
@@ -116,16 +122,21 @@ BlockStack.prototype.updateRun=function(){
 	}
 	return this.isRunning;
 }
-BlockStack.prototype.startRun=function(){
+BlockStack.prototype.startRun=function(startBlock){
+	if(startBlock==null){
+		startBlock=this.firstBlock;
+	}
 	if(!this.isRunning){
 		this.isRunning=true;
-		this.currentBlock=this.firstBlock;
+		this.currentBlock=startBlock;
+		this.firstBlock.glow();
 		this.tab.startRun();
 	}
-}
+};
 BlockStack.prototype.endRun=function(){
 	this.isRunning=false;
-}
+	this.firstBlock.stopGlow();
+};
 BlockStack.prototype.findBestFitTop=function(){
 	var snap=BlockGraphics.command.snap;
 	var move=CodeManager.move;
@@ -144,6 +155,15 @@ BlockStack.prototype.findBestFitTop=function(){
 	}
 }
 BlockStack.prototype.snap=function(block){
+	if(this.isRunning&&!block.stack.isRunning){
+		block.glow();
+	}
+	else if(!this.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
+		block.stack.stop();
+	}
+	else if(this.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
+		block.stop();
+	}
 	this.move(this.x,this.y-block.stack.dim.rh);
 	
 	var topStackBlock=block;
@@ -159,6 +179,7 @@ BlockStack.prototype.snap=function(block){
 	block.stack.remove();
 	block.changeStack(this);
 	oldG.remove();
+	
 	this.updateDim();
 }
 BlockStack.prototype.highlight=function(){

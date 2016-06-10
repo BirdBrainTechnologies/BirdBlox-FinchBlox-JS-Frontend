@@ -210,3 +210,13 @@ Slot.prototype.convertData=function(data){
 	}
 	return null;
 }
+Slot.prototype.glow=function(){
+	if(this.hasChild){
+		this.child.glow();
+	}
+}
+Slot.prototype.stopGlow=function(){
+	if(this.hasChild){
+		this.child.stopGlow();
+	}
+}

@@ -35,6 +35,16 @@ BlockSlot.prototype.updateAlign=function(x,y){
 	}
 }
 BlockSlot.prototype.snap=function(block){
+	var stack=this.parent.stack;
+	if(stack.isRunning&&!block.stack.isRunning){
+		block.glow();
+	}
+	else if(!stack.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
+		block.stack.stop();
+	}
+	else if(stack.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
+		block.stop();
+	}
 	block.parent=this;
 	if(this.hasChild){
 		var lastBlock=block.getLastBlock();
@@ -111,6 +121,10 @@ BlockSlot.prototype.stop=function(){
 }
 BlockSlot.prototype.updateRun=function(){
 	if(this.isRunning){
+		if(this.currentBlock.stack!=this.parent.stack){ //If the current Block has been removed, don't run it.
+			this.isRunning=false;
+			return this.isRunning;
+		}
 		if(!this.currentBlock.updateRun()){
 			this.currentBlock=this.currentBlock.nextBlock;
 		}
@@ -120,3 +134,13 @@ BlockSlot.prototype.updateRun=function(){
 	}
 	return this.isRunning;
 }
+BlockSlot.prototype.glow=function(){
+	if(this.hasChild){
+		this.child.glow();
+	}
+};
+BlockSlot.prototype.stopGlow=function(){
+	if(this.hasChild){
+		this.child.stopGlow();
+	}
+};
