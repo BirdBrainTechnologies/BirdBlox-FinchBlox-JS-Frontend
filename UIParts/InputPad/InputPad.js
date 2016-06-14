@@ -179,7 +179,13 @@ InputPad.bsPressed=function(){
 	else {
 		IP.removeUndoDelayed();
 		IP.ungray();
-		IP.displayNum.backspace();
+		if(IP.dataIsNumeric) {
+			IP.displayNum.backspace();
+		}
+		else{
+			IP.dataIsNumeric=true;
+			IP.displayNum=new DisplayNum(new NumData(0));
+		}
 		IP.updateSlot();
 	}
 };
@@ -241,7 +247,7 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 		IP.dataIsNumeric=false;
 		IP.nonNumericData=slot.getData();
 		IP.nonNumericText=IP.slot.text;
-		IP.displayNum=new DisplayNum(new NumData(0));
+		IP.grayOutValue();
 	}
 	if(positive){
 		IP.plusMinusBn.disable();
