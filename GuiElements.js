@@ -47,6 +47,12 @@ GuiElements.alert=function(message){
 	debug.innerHTML=message; //The iPad app does not support alert dialogs
 	//alert(message); //When debugging on a PC this function can be used.
 }
+/* Alerts the user that an error has occurred. Should never be called.
+ * @param {string} errMessage - The error's message passed by the function that threw the error.
+ */
+GuiElements.throwError=function(errMessage){
+	GuiElements.alert(errMessage); //Show the error in the debug area.
+}
 /* Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI=function(){
 	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage

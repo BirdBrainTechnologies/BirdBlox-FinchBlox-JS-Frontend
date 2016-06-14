@@ -124,10 +124,8 @@ Block.prototype.stop=function(){
 		this.nextBlock.stop(); //Stop the next Block.
 	}
 };
-/* Updates this currently executing Block and returns either the next Block to execute or its current execution state depending on the type of Block.
- * @return {Block/boolean} - If this Block returns no value, it returns the next Block to run.  Otherwise, it returns boolean indicating if it has finished generating a value to return.
- * @fix make the return type more consistent.  Maybe always a boolean.
- * @fix make the value true mean that it is still running, rather than the other way around. (To make it match Tabs and BlockStacks).
+/* Updates this currently executing Block and returns if the Block is still running
+ * @return {boolean} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun=function(){
 	if(this.running==0||this.running==3){ //If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
@@ -144,10 +142,10 @@ Block.prototype.updateRun=function(){
 			}
 		}
 		this.running=2; //If all Slots are done running, the Block itself may now run.
-		rVal = this.startAction(); //This function is overrided by the class of the particular Block. It sets the Block up for execution, and if it is a simple Block, may even complete execution.
+		rVal = this.startAction(); //This function is overridden by the class of the particular Block. It sets the Block up for execution, and if it is a simple Block, may even complete execution.
 	}
 	else if(this.running==2){ //If the Block is currently running, update it.
-		rVal = this.updateAction(); //This function is also overrided and is called repeatedly until the Block is done running.
+		rVal = this.updateAction(); //This function is also overridden and is called repeatedly until the Block is done running.
 	}
 	var rT=Block.returnTypes;
 	if(rVal==false){ //If the block is done running...
@@ -156,13 +154,13 @@ Block.prototype.updateRun=function(){
 	}
 	return rVal; //Return either the next Block to run or a boolean indicating if this Block is done.
 };
-/* Will be overrided. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
+/* Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.startAction=function(){
 	return true; //Still running
 };
-/* Will be overrided. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
+/* Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
@@ -283,7 +281,7 @@ Block.prototype.updateStackDimO=function(){
 Block.prototype.updateDim=function(){
 	var bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
 	if(this.topOpen||this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
-		var bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
+		bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
 	var width=0;
 	width+=bG.hMargin; //The left margin of the Block.
@@ -330,51 +328,61 @@ Block.prototype.updateDim=function(){
 		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
 };
+/* Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
+ * The BlockStack calls this function after the updateDim function, so all sizes are correct.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * @return {number} - The width of the current block, indicating how much the x should shift over.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
 Block.prototype.updateAlign=function(x,y){
-	this.updateAlignRI(x,y);
-	if(this.hasBlockSlot1){
-		this.blockSlot1.updateAlign(this.x+BlockGraphics.loop.side,this.y+this.topHeight);
+	var bG=BlockGraphics;
+	this.updateAlignRI(x,y); //Update recursively within the block.
+	if(this.hasBlockSlot1){ //Then tell all susequent blocks to align.
+		this.blockSlot1.updateAlign(this.x+bG.loop.side,this.y+this.topHeight);
 	}
 	if(this.hasBlockSlot2){
-		this.blockSlot2.updateAlign(this.x+BlockGraphics.loop.side,this.y+this.topHeight+this.blockSlot1.height+this.midHeight);
-		this.midLabel.updateAlign(BlockGraphics.loop.side,this.topHeight+this.blockSlot1.height+this.midHeight/2);
+		this.blockSlot2.updateAlign(this.x+bG.loop.side,this.y+this.topHeight+this.blockSlot1.height+this.midHeight);
+		this.midLabel.updateAlign(bG.loop.side,this.topHeight+this.blockSlot1.height+this.midHeight/2);
 	}
 	if(this.nextBlock!=null){
 		this.nextBlock.updateAlign(this.x,this.y+this.height);
 	}
 	return this.width;
 };
+/* Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
 Block.prototype.updateAlignRI=function(x,y){
-	this.move(x,y);
+	this.move(x,y); //Move to the desired location
 	var bG=BlockGraphics.getType(this.type);
-	var yCoord=this.height/2;
+	var yCoord=this.height/2; //Compute coords for internal parts.
 	var xCoord=0;
 	if(this.hasBlockSlot1){
-		yCoord=this.topHeight/2;
+		yCoord=this.topHeight/2; //Internal parts measure their y coords from the center of the block.
 	}
 	if(this.bottomOpen||this.topOpen){
 		bG=BlockGraphics.command;
 	}
 	xCoord+=bG.hMargin;
 	for(var i=0;i<this.parts.length;i++){
-		xCoord+=this.parts[i].updateAlign(xCoord,yCoord);
+		xCoord+=this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
 		if(i<this.parts.length-1){
 			xCoord+=BlockGraphics.block.pMargin;
 		}
 	}
 };
-/*Block.prototype.updateAlignO=function(x,y){
-	if(this.type==0){
-		this.move(x,y);
-		//alert(y+"n: "+this.name);
-	}
-	else{
-		this.move(x,y);
-	}
-}*/
+/* Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
+ * @param {number} width - The desired width of the Block.
+ * @param {number} height - The desired height of the Block.
+ */
 Block.prototype.resize=function(width,height){
+	//First set width and height properties.
 	this.width=width;
 	this.height=height;
+	//Then collect other necessary information.
 	var innerHeight1=0;
 	var innerHeight2=0;
 	var midHeight=0;
@@ -385,32 +393,39 @@ Block.prototype.resize=function(width,height){
 		innerHeight2=this.blockSlot2.height;
 		midHeight=this.midHeight;
 	}
+	//Tell BlockGraphics to change the path description to match the new properties.
 	BlockGraphics.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight);
 };
+/* Recursively searches for the Block with best fits the currently moving BlockStack.
+ * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
+ * A command block attempts to find a connection between its bottom and the moving stack's top.
+ * Connections to the top of the stack's findBestFit.
+ */
 Block.prototype.findBestFit=function(){
 	var move=CodeManager.move;
 	var fit=CodeManager.fit;
-	var x=this.getAbsX();
+	var x=this.getAbsX(); //Get coords to compare.
 	var y=this.getAbsY();
-	if(move.topOpen&&this.bottomOpen){
-		var snap=BlockGraphics.command.snap;
+	if(move.topOpen&&this.bottomOpen){ //If a connection between the stack and block are possible...
+		var snap=BlockGraphics.command.snap; //Load snap bounding box
+		//see if corner of moving block falls within the snap bounding box.
 		if(move.pInRange(move.topX,move.topY,x-snap.left,y-snap.top,snap.left+snap.right,snap.top+this.height+snap.bottom)){
-			var xDist=move.topX-x;
+			var xDist=move.topX-x; //If it does, compute the distance with the distance formula.
 			var yDist=move.topY-(y+this.height);
-			var dist=xDist*xDist+yDist*yDist;
-			if(!fit.found||dist<fit.dist){
-				fit.found=true;
+			var dist=xDist*xDist+yDist*yDist; //Technically this is the distance^2.
+			if(!fit.found||dist<fit.dist){ //See if this fit is closer than the current best fit.
+				fit.found=true; //If so, save it and other helpful infromation.
 				fit.bestFit=this;
 				fit.dist=dist;
 			}
 		}
 	}
-	if(move.returnsValue){
+	if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
 		for(var i=0;i<this.slots.length;i++){
 			this.slots[i].findBestFit();
 		}
 	}
-	if(this.hasBlockSlot1){
+	if(this.hasBlockSlot1){ //Pass the message on recursively.
 		this.blockSlot1.findBestFit();
 	}
 	if(this.hasBlockSlot2){
@@ -420,22 +435,28 @@ Block.prototype.findBestFit=function(){
 		this.nextBlock.findBestFit();
 	}
 };
+/* Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
+ * The indicator is a different color/shape depending on the Block's type and if it is running.
+ */
 Block.prototype.highlight=function(){
 	if(this.bottomOpen){
 		Highlighter.highlight(this.getAbsX(),this.getAbsY()+this.height,this.width,this.height,0,false,this.isGlowing);
 	}
-	else{
-		alert("Error!");
+	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
+		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen=false");
 	}
 };
-Block.prototype.snap=function(block){
+/* Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
+ * @param {Block} block - The first Block in the stack to attach to this Block.
+ */
+Block.prototype.snap=function(block){ //Fix! documentation
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
-	if(!block.bottomOpen&&this.nextBlock!=null){
-		var BG=BlockGraphics.command;
-		this.nextBlock.unsnap().shiftOver(BG.shiftX,block.height+BG.shiftY);
+	if(!block.bottomOpen&&this.nextBlock!=null){ //Fix! block.bottomOpen should be for last block.
+		var bG=BlockGraphics.command;
+		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.height+bG.shiftY);
 	}
 	var stack=this.stack;
-	if(stack.isRunning&&!block.stack.isRunning){
+	if(stack.isRunning&&!block.stack.isRunning){ //Fix! remove duplicate code.
 		block.glow();
 	}
 	else if(!stack.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
@@ -444,113 +465,134 @@ Block.prototype.snap=function(block){
 	else if(stack.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
 		block.stop();
 	}
-	var upperBlock=this;
-	var lowerBlock=this.nextBlock;//might be null
-	var topStackBlock=block;
-	var bottomStackBlock=block.getLastBlock();
+	var upperBlock=this; //The Block which will go above the inserted stack.
+	var lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
+	var topStackBlock=block; //The top Block in the stack to be inserted.
+	var bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
 
+	//The top of where the stack is inserted note which Blocks are above/below them.
 	upperBlock.nextBlock=topStackBlock;
 	topStackBlock.parent=upperBlock;
+	//The bottom of where the stack is inserted does the same.
 	bottomStackBlock.nextBlock=lowerBlock;
-	if(lowerBlock!=null){
+	if(lowerBlock!=null){ //There might not be a Block below the inserted stack.
 		lowerBlock.parent=bottomStackBlock;
 	}
 
-	var oldG=block.stack.group;
-	block.stack.remove();
-	block.changeStack(this.stack);
-	oldG.remove();
-	this.stack.updateDim();
+	var oldG=block.stack.group; //Get a handle to the old stack's group
+	block.stack.remove(); //Remove the old stack.
+	block.changeStack(this.stack); //Move the block over into this stack
+	oldG.remove(); //Remove the old stack's group.
+	this.stack.updateDim(); //Update the dimensions now that the movement is complete.
 };
-Block.prototype.unsnap=function(){//FIX!
+/* Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+ * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
+ */
+Block.prototype.unsnap=function(){
+	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
 	if(this.parent!=null){
-		if(this.parent.isSlot||this.parent.isBlockSlot){
-			this.parent.removeChild();
-			this.parent.parent.stack.updateDim();
+		if(this.parent.isSlot||this.parent.isBlockSlot){ //Sees if it is attached to a Slot not another Block.
+			this.parent.removeChild(); //Leave the Slot.
+			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
 		}
-		else{
-			this.parent.nextBlock=null;
-			this.parent.stack.updateDim();
+		else{ //This Block is connected to another Block.
+			this.parent.nextBlock=null; //Disconnect from parent Block.
+			this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
 		}
-		this.parent=null;
+		this.parent=null; //Delete reference to parent Block/Slot/BlockSlot.
+		//Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
 		return new BlockStack(this,this.stack.getTab());
 	}
-	//BlockGraphics.bringToFront(this.stack.group,GuiElements.layers.drag);
+	//If the Block already had no parent, just return this Block's stack.
 	return this.stack;
 };
-/*Block.prototype.addListeners=function(obj){
-	obj.parent=this;
-	obj.addEventListener('mousedown', function(e) {
-		CodeManager.move.start(e,this.parent);
-	}, false);
-}*/
+/* Recursively finds and returns the last Block in this BlockStack.
+ * @return {Block} - The last Block in this BlockStack.
+ */
 Block.prototype.getLastBlock=function(obj){
 	if(this.nextBlock==null){
-		return this;
+		return this; //This Block is the last one.
 	}
 	else{
-		return this.nextBlock.getLastBlock();
+		return this.nextBlock.getLastBlock(); //Try the next Block.
 	}
 };
+/* Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
+ * @return {number} - The height of this Block and all subsequent Blocks.
+ */
 Block.prototype.addHeights=function(){
 	if(this.nextBlock!=null){
-		return this.height+this.nextBlock.addHeights();
+		return this.height+this.nextBlock.addHeights(); //Return this Block's height plus those below it.
 	}
 	else{
-		return this.height;
+		return this.height; //This is the last Block. Return its height.
 	}
 };
-/*Block.prototype.setReturnType=function(type){
-	this.returnType=type;
-}*/
+/* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @return {Block} - This Block's copy.
+ */
 Block.prototype.duplicate=function(x,y){
+	//Uses the constructor of the Block class but has the methods of this specific Block's subclass.
+	//Allows the Block to be constructed without any Slots initially, so they can be duplicated and added on.
 	var copiedClass=function(type,returnType,x1,y1,category){
-		Block.call(this,type,returnType,x1,y1,category);
+		Block.call(this,type,returnType,x1,y1,category); //Call Block constructor.
 	}
-	copiedClass.prototype = Object.create(this.constructor.prototype);
-	copiedClass.prototype.constructor = copiedClass;
+	copiedClass.prototype = Object.create(this.constructor.prototype); //Copy all functions.
+	copiedClass.prototype.constructor = copiedClass; //Only constructor differs.
 	
-	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category);
-	for(var i=0;i<this.parts.length;i++){
+	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category); //Make an empty Block of this Block's type.
+	for(var i=0;i<this.parts.length;i++){ //Copy this Block's parts to the new Block.
 		myCopy.addPart(this.parts[i].duplicate(myCopy));
 	}
-	if(this.blockSlot1!=null){
+	if(this.blockSlot1!=null){ //Copy the contents of its Slots.
 		myCopy.blockSlot1=this.blockSlot1.duplicate(myCopy);
 	}
 	if(this.blockSlot2!=null){
 		myCopy.blockSlot2=this.blockSlot2.duplicate(myCopy);
 	}
-	if(this.nextBlock!=null){
+	if(this.nextBlock!=null){ //Copy subsequent Blocks.
 		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
 		myCopy.nextBlock.parent=myCopy;
 	}
-	myCopy.bottomOpen=this.bottomOpen;
-	return myCopy;
+	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
+	return myCopy; //Return finished Block.
 };
+/* Returns an entirely text-based version of the Block for display in dialogs.
+ * May exclude a slot and replace if with "___".
+ * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
+ * @return {string} - The finished text summary.
+ */
 Block.prototype.textSummary=function(slotToExclude){
 	var summary="";
 	for(var i=0;i<this.parts.length;i++){
 		if(this.parts[i]==slotToExclude){
-			summary+="___";
+			summary+="___"; //Replace slot with underscores.
 		}
 		else{
-			summary+=this.parts[i].textSummary();
+			summary+=this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
 		}
-		if(i<this.parts.length-1){
+		if(i<this.parts.length-1){ //Add space between part descriptions.
 			summary+=" ";
 		}
 	}
 	return summary;
 };
+/* Overridden by subclasses. Alerts Block that the flag was clicked. Most Blocks won't respond to this directly.
+ */
 Block.prototype.eventFlagClicked=function(){
 	
 };
+/* Deletes the Block's running memory (memory reserved for computations related to execution)
+ */
 Block.prototype.clearMem=function(){
-	this.runMem=new function(){};
-	for(var i=0;i<this.slots.length;i++){
-		this.slots[i].clearMem();
+	this.runMem=new function(){}; //Delete all runMem.
+	for(var i=0;i<this.slots.length;i++){ //NOT recursive.
+		this.slots[i].clearMem(); //Removes resultData and resets running state to 0.
 	}
 };
+/* Returns the result of the Block's execution.
+ * The data is then removed to prevent the result from being returned again.
+ */
 Block.prototype.getResultData=function(){
 	var result=this.resultData;
 	this.resultData=null;
@@ -559,7 +601,7 @@ Block.prototype.getResultData=function(){
 /* Recursively adds a white outline to indicate that the BlockStack is running. */
 Block.prototype.glow=function(){
 	BlockGraphics.update.glow(this.path);
-	this.isGlowing=true;
+	this.isGlowing=true; //Used by other classes to determine things like highlight color.
 	if(this.blockSlot1!=null){
 		this.blockSlot1.glow();
 	}
