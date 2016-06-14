@@ -222,3 +222,6 @@ BlockStack.prototype.eventFlagClicked=function(){
 		this.firstBlock.eventFlagClicked();
 	}
 }
+BlockStack.prototype.getLastBlock=function(){
+	return this.firstBlock.getLastBlock();
+}

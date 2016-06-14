@@ -35,6 +35,10 @@ BlockSlot.prototype.updateAlign=function(x,y){
 	}
 }
 BlockSlot.prototype.snap=function(block){
+	if(!block.bottomOpen&&this.child!=null){
+		var BG=BlockGraphics.command;
+		this.child.unsnap().shiftOver(BG.shiftX,block.height+BG.shiftY);
+	}
 	var stack=this.parent.stack;
 	if(stack.isRunning&&!block.stack.isRunning){
 		block.glow();

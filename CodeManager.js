@@ -50,7 +50,7 @@ CodeManager.move.start=function(block,x,y){
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
-		move.bottomOpen=stack.firstBlock.bottomOpen;
+		move.bottomOpen=stack.getLastBlock().bottomOpen;
 		move.topOpen=stack.firstBlock.topOpen;
 		move.returnsValue=stack.firstBlock.returnsValue;
 		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
