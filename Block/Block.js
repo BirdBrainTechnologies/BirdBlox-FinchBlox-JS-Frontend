@@ -295,7 +295,7 @@ Block.prototype.updateDim=function(){
 			height=this.parts[i].height;
 		}
 		if(i<this.parts.length-1){
-			width+=bG.pMargin; //Add "part margin" between parts of the Block.
+			width+=BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 	}
 	width+=bG.hMargin; //Add the right margin of the Block.
@@ -359,7 +359,7 @@ Block.prototype.updateAlignRI=function(x,y){
 	for(var i=0;i<this.parts.length;i++){
 		xCoord+=this.parts[i].updateAlign(xCoord,yCoord);
 		if(i<this.parts.length-1){
-			xCoord+=bG.pMargin;
+			xCoord+=BlockGraphics.block.pMargin;
 		}
 	}
 };

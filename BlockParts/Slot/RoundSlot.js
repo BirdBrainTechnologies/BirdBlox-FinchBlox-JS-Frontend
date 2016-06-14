@@ -16,6 +16,7 @@ RoundSlot.prototype.buildSlot=function(){
 	this.textW=0;
 	this.slotE=this.generateSlot(1);//Fix BG
 	this.textE=this.generateText(this.enteredData.getValue());
+	this.hitBoxE=this.generateHitBox();
 };
 RoundSlot.prototype.moveSlot=function(x,y){
 	var bG=BlockGraphics.getType(1);//Fix BG
@@ -23,6 +24,12 @@ RoundSlot.prototype.moveSlot=function(x,y){
 	var textX=x+bG.slotHMargin;
 	var textY=y+this.textH/2+this.height/2;
 	BlockGraphics.update.text(this.textE,textX,textY);
+	var bGHB=BlockGraphics.hitBox;
+	var hitX=x-bGHB.hMargin;
+	var hitY=y-bGHB.vMargin;
+	var hitW=this.width+bGHB.hMargin*2;
+	var hitH=this.height+bGHB.vMargin*2;
+	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH);
 };
 RoundSlot.prototype.hideSlot=function(){
 	this.slotE.remove();
@@ -39,6 +46,11 @@ RoundSlot.prototype.generateText=function(text){ //Fix BG
 };
 RoundSlot.prototype.generateSlot=function(type){//Fix BG
 	var obj=BlockGraphics.create.slot(this.parent.group,type,this.parent.category);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+};
+RoundSlot.prototype.generateHitBox=function(){
+	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
 	TouchReceiver.addListenersSlot(obj,this);
 	return obj;
 };

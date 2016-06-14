@@ -25,6 +25,7 @@ DropSlot.prototype.buildSlot=function(){
 	this.bgE=this.generateBg();
 	this.triE=this.generateTri();
 	this.textE=this.generateText();
+	this.hitBoxE=this.generateHitBox();
 }
 DropSlot.prototype.generateBg=function(){
 	var bG=BlockGraphics.dropSlot;
@@ -48,6 +49,11 @@ DropSlot.prototype.generateText=function(){ //Fix BG
 	TouchReceiver.addListenersSlot(obj,this);
 	return obj;
 }
+DropSlot.prototype.generateHitBox=function(){
+	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+};
 DropSlot.prototype.moveSlot=function(x,y){
 	var bG=BlockGraphics.dropSlot;
 	GuiElements.update.rect(this.bgE,x,y,this.width,this.height);
@@ -57,6 +63,12 @@ DropSlot.prototype.moveSlot=function(x,y){
 	var triX=x+this.width-bG.slotHMargin-bG.triW;
 	var triY=y+this.height/2-bG.triH/2;
 	GuiElements.update.triangle(this.triE,triX,triY,bG.triW,0-bG.triH);
+	var bGHB=BlockGraphics.hitBox;
+	var hitX=x-bGHB.hMargin;
+	var hitY=y-bGHB.vMargin;
+	var hitW=this.width+bGHB.hMargin*2;
+	var hitH=this.height+bGHB.vMargin*2;
+	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH);
 }
 DropSlot.prototype.hideSlot=function(){
 	this.bgE.remove();

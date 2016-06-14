@@ -1,6 +1,7 @@
 //Static.  Makes block shapes for the SVG.
 
 function BlockGraphics(){
+	BlockGraphics.SetBlock();
 	BlockGraphics.SetCommand();
 	BlockGraphics.SetReporter();
 	BlockGraphics.SetPredicate();
@@ -11,17 +12,22 @@ function BlockGraphics(){
 	BlockGraphics.SetValueText();
 	BlockGraphics.SetDropSlot();
 	BlockGraphics.SetHighlight();
+	BlockGraphics.SetHitBox();
 	BlockGraphics.SetGlow();
 	BlockGraphics.CalcCommand();
 	BlockGraphics.CalcPaths();
 }
+BlockGraphics.SetBlock=function(){
+	BlockGraphics.block=function(){};
+	BlockGraphics.block.pMargin=5; //Margin between parts
+};
 BlockGraphics.SetCommand=function(){
 	BlockGraphics.command=function(){};
 	BlockGraphics.command.height=20;
 	BlockGraphics.command.width=40;
 	BlockGraphics.command.vMargin=5;
 	BlockGraphics.command.hMargin=5;
-	BlockGraphics.command.pMargin=5; //Margin between parts
+	//BlockGraphics.command.pMargin=5; //Margin between parts
 	BlockGraphics.command.bumpOffset=7;
 	BlockGraphics.command.bumpDepth=4;
 	BlockGraphics.command.bumpTopWidth=15;
@@ -41,7 +47,7 @@ BlockGraphics.SetReporter=function(){
 	BlockGraphics.reporter.width=18;//16
 	BlockGraphics.reporter.vMargin=3;
 	BlockGraphics.reporter.hMargin=7;//5
-	BlockGraphics.reporter.pMargin=5; //Margin between parts
+	//BlockGraphics.reporter.pMargin=5; //Margin between parts
 	BlockGraphics.reporter.slotHeight=18;//14
 	BlockGraphics.reporter.slotWidth=18;//14
 	BlockGraphics.reporter.slotHMargin=8;//5 //Margin at side of slot
@@ -57,7 +63,7 @@ BlockGraphics.SetPredicate=function(){
 	BlockGraphics.predicate.width=12;
 	BlockGraphics.predicate.vMargin=3;
 	BlockGraphics.predicate.hMargin=10;
-	BlockGraphics.predicate.pMargin=5; //Margin between parts
+	//BlockGraphics.predicate.pMargin=5; //Margin between parts
 	BlockGraphics.predicate.hexEndL=10;
 	BlockGraphics.predicate.slotHeight=14;
 	BlockGraphics.predicate.slotWidth=25;
@@ -133,6 +139,11 @@ BlockGraphics.SetHighlight=function(){
 	BlockGraphics.highlight.strokeW=3;
 	BlockGraphics.highlight.commandL=10;
 }
+BlockGraphics.SetHitBox=function(){
+	BlockGraphics.hitBox=function(){};
+	BlockGraphics.hitBox.hMargin=BlockGraphics.block.pMargin/2;
+	BlockGraphics.hitBox.vMargin=3;
+};
 BlockGraphics.SetGlow=function(){
 	BlockGraphics.glow=function(){};
 	BlockGraphics.glow.color="#fff";
@@ -361,6 +372,12 @@ BlockGraphics.create.slot=function(group,type,category){
 		path.setAttributeNS(null,"fill",bG.slotFill);
 	}
 	return path;
+}
+BlockGraphics.create.slotHitBox=function(group){
+	var rectE=GuiElements.create.rect(group);
+	rectE.setAttributeNS(null,"fill","#000");
+	GuiElements.update.opacity(rectE,0);
+	return rectE;
 }
 BlockGraphics.create.labelText=function(text,group){
 	var bG=BlockGraphics.labelText;

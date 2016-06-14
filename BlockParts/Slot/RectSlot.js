@@ -10,6 +10,7 @@ RectSlot.prototype.buildSlot=function(){
 	this.textW=0;
 	this.slotE=this.generateSlot(3);//Fix BG
 	this.textE=this.generateText(this.enteredData.getValue());
+	this.hitBoxE=this.generateHitBox();
 }
 RectSlot.prototype.moveSlot=function(x,y){
 	var bG=BlockGraphics.getType(3);//Fix BG
@@ -17,6 +18,12 @@ RectSlot.prototype.moveSlot=function(x,y){
 	var textX=x+this.width/2-this.textW/2;
 	var textY=y+this.textH/2+this.height/2;
 	BlockGraphics.update.text(this.textE,textX,textY);
+	var bGHB=BlockGraphics.hitBox;
+	var hitX=x-bGHB.hMargin;
+	var hitY=y-bGHB.vMargin;
+	var hitW=this.width+bGHB.hMargin*2;
+	var hitH=this.height+bGHB.vMargin*2;
+	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH);
 }
 RectSlot.prototype.hideSlot=function(){
 	this.slotE.remove();
@@ -36,6 +43,11 @@ RectSlot.prototype.generateSlot=function(type){//Fix BG
 	TouchReceiver.addListenersSlot(obj,this);
 	return obj;
 }
+RectSlot.prototype.generateHitBox=function(){
+	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+};
 RectSlot.prototype.changeText=function(text){
 	GuiElements.update.text(this.textE,text);
 	this.parent.stack.updateDim();
