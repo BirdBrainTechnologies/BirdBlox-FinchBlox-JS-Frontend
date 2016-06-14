@@ -4,7 +4,7 @@
 function TouchReceiver(){
 	var TR=TouchReceiver; //shorthand
 	//Toggle to determine of mouse or touchscreen events should be used.
-	TR.mouse=true; //Use true when debugging on a desktop.
+	TR.mouse=false; //Use true when debugging on a desktop.
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?

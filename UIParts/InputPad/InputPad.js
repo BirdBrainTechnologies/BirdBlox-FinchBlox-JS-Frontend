@@ -25,10 +25,19 @@ InputPad.setGraphics=function(){
 	InputPad.triOffset=(InputPad.width-InputPad.triangleW)/2;
 	InputPad.halfOffset=InputPad.width/2;
 	InputPad.tallH=InputPad.height+InputPad.triangleH;
+	
 	InputPad.usingNumberPad=false;
 	InputPad.dataIsNumeric=false;
 	InputPad.nonNumericData=null;
 	InputPad.nonNumericText=null;
+	InputPad.displayNum=null;
+	InputPad.undoAvailable=false;
+	InputPad.undoVisible=false;
+	InputPad.undoData=function(){};
+	InputPad.undoData.dataIsNumeric=false;
+	InputPad.undoData.data=null;
+	InputPad.undoData.text=null;
+	InputPad.valueGrayed=true;
 };
 InputPad.buildPad=function(){//456,267
 	var IP=InputPad;
@@ -58,90 +67,121 @@ InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
 	InputPad.menuBnList.addOption(text,dataFunction);
 };
-InputPad.menuBnSelected=function(text,data){
-	var IP=InputPad;
-	if(data.type==Data.types.num){
-		IP.displayNum=new DisplayNum(data);
-		IP.dataIsNumeric=true;
-		InputPad.close();
-	}
-	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
-		IP.isEditTextCommand=true;
-	}
-	else{
-		IP.dataIsNumeric=false;
-		IP.nonNumericText=text;
-		IP.nonNumericData=data;
-	}
-	IP.close();
-};
-InputPad.makeBns=function(){
-	var IP=InputPad;
-	var currentNum;
-	var xPos=0;
-	var yPos=0;
-	for(var i=0;i<3;i++){
-		yPos+=IP.buttonMargin;
-		xPos=0;
-		for(var j=0;j<3;j++){
-			xPos+=IP.buttonMargin;
-			currentNum=7-i*3+j;
-			InputPad.makeNumBn(xPos,yPos,currentNum);
-			xPos+=IP.buttonW;
-		}
-		yPos+=IP.buttonH;
-	}
-	InputPad.makeNumBn(IP.buttonMargin*2+IP.buttonW,IP.buttonMargin*4+IP.buttonH*3,0);
-	InputPad.makePlusMinusBn(IP.buttonMargin,IP.buttonMargin*4+IP.buttonH*3);
-	InputPad.makeDecimalBn(IP.buttonMargin*3+IP.buttonW*2,IP.buttonMargin*4+IP.buttonH*3);
-	InputPad.makeBsBn(IP.buttonMargin,IP.buttonMargin*5+IP.buttonH*4);
-	InputPad.makeOkBn(IP.buttonMargin*2+IP.longBnW,IP.buttonMargin*5+IP.buttonH*4);
-};
-InputPad.makeNumBn=function(x,y,num){
-	var IP=InputPad;
-	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
-	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
-};
-InputPad.makePlusMinusBn=function(x,y){
-	var IP=InputPad;
-	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
-	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
-};
-InputPad.makeDecimalBn=function(x,y){
-	var IP=InputPad;
-	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
-	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
-};
-InputPad.makeBsBn=function(x,y){
-	var IP=InputPad;
-	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
-	button.addIcon(VectorPaths.backspace,IP.bsBnH);
-	button.setCallbackFunction(InputPad.bsPressed,false);
-};
-InputPad.makeOkBn=function(x,y){
-	var IP=InputPad;
-	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
-	button.addIcon(VectorPaths.checkmark,IP.okBnH);
-	button.setCallbackFunction(InputPad.okPressed,true);
-};
 InputPad.numPressed=function(num){
-	InputPad.displayNum.addDigit(num+"");
-	InputPad.updateSlot();
+	var IP=InputPad;
+	IP.removeUndo();
+	IP.deleteIfGray();
+	IP.displayNum.addDigit(num+"");
+	IP.updateSlot();
+	IP.dataIsNumeric=true;
 };
 InputPad.plusMinusPressed=function(){
-	InputPad.displayNum.switchSign();
-	InputPad.updateSlot();
+	var IP=InputPad;
+	IP.removeUndo();
+	IP.deleteIfGray();
+	IP.displayNum.switchSign();
+	IP.updateSlot();
 };
 InputPad.decimalPressed=function(){
-	InputPad.displayNum.addDecimalPoint();
-	InputPad.updateSlot();
+	var IP=InputPad;
+	IP.removeUndo();
+	IP.deleteIfGray();
+	IP.displayNum.addDecimalPoint();
+	IP.updateSlot();
+};
+InputPad.deleteIfGray=function(){
+	var IP=InputPad;
+	if(IP.valueGrayed){
+		IP.showUndo();
+		IP.dataIsNumeric=true;
+		IP.displayNum=new DisplayNum(new NumData(0));
+		IP.updateSlot();
+		IP.ungray();
+	}
+};
+InputPad.ungray=function(){
+	var IP=InputPad;
+	if(IP.valueGrayed) {
+		IP.slot.ungrayValue();
+		IP.valueGrayed=false;
+	}
+};
+InputPad.grayOutValue=function(){
+	var IP=InputPad;
+	IP.slot.grayOutValue();
+	IP.valueGrayed=true;
+};
+InputPad.showUndo=function(){
+	var IP=InputPad;
+	if(!IP.undoAvailable) {
+		IP.undoAvailable = true;
+		IP.undoData.dataIsNumeric = IP.dataIsNumeric;
+		if (IP.dataIsNumeric) {
+			IP.undoData.data = IP.displayNum.getData();
+		}
+		else {
+			IP.undoData.data = IP.nonNumericData;
+			IP.undoData.text = IP.nonNumericText;
+		}
+		IP.updateBsIcon();
+	}
+};
+InputPad.removeUndo=function(){
+	var IP=InputPad;
+	IP.removeUndoDelayed();
+	IP.updateBsIcon();
+};
+InputPad.removeUndoDelayed=function(){
+	var IP=InputPad;
+	if(IP.undoAvailable) {
+		IP.undoAvailable = false;
+		IP.undoData.data = null;
+		IP.undoData.text = null;
+	}
+};
+InputPad.updateBsIcon=function(){
+	var IP=InputPad;
+	if(IP.undoAvailable!=IP.undoVisible) {
+		if(IP.undoAvailable){
+			IP.bsButton.addIcon(VectorPaths.undo,IP.bsBnH);
+			IP.undoVisible=true;
+		}
+		else{
+			IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
+			IP.undoVisible=false;
+		}
+	}
+};
+InputPad.undo=function(){
+	var IP=InputPad;
+	if(IP.undoAvailable) {
+		IP.dataIsNumeric=IP.undoData.dataIsNumeric;
+		if(IP.dataIsNumeric){
+			IP.displayNum=new DisplayNum(IP.undoData.data);
+		}
+		else{
+			IP.nonNumericData=IP.undoData.data;
+			IP.nonNumericText=IP.undoData.text;
+		}
+		IP.removeUndoDelayed();
+		IP.updateSlot();
+		IP.grayOutValue();
+	}
+}
+InputPad.bsReleased=function(){
+	InputPad.updateBsIcon();
 };
 InputPad.bsPressed=function(){
-	InputPad.displayNum.backspace();
-	InputPad.updateSlot();
+	var IP=InputPad;
+	if(IP.undoAvailable){
+		IP.undo();
+	}
+	else {
+		IP.removeUndoDelayed();
+		IP.ungray();
+		IP.displayNum.backspace();
+		IP.updateSlot();
+	}
 };
 InputPad.okPressed=function(){
 	InputPad.close();
@@ -169,6 +209,8 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	IP.width=InputPad.BnAreaW;
 	IP.height=InputPad.BnAreaH;
 	IP.tallH=IP.height+IP.triangleH;
+	IP.undoAvailable=false;
+	IP.valueGrayed=false;
 	if(!IP.menuBnList.isEmpty()){
 		IP.menuBnList.width=IP.buttonW*3+IP.buttonMargin*2;
 		this.menuBnList.generateBns();
@@ -185,7 +227,14 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	IP.visible=true;
 	IP.slot=slot;
 	if(slot.getData().type==Data.types.num){
-		IP.displayNum=new DisplayNum(slot.getData());
+		var numData=slot.getData();
+		if(numData.getValue()==0){
+			IP.displayNum=new DisplayNum(new NumData(0));
+		}
+		else{
+			IP.displayNum=new DisplayNum(numData);
+			IP.grayOutValue();
+		}
 		IP.dataIsNumeric=true;
 	}
 	else{
@@ -239,9 +288,12 @@ InputPad.move=function(x,upperY,lowerY){
 	this.menuBnList.show();
 };
 InputPad.updateSlot=function(){
-	if(InputPad.usingNumberPad){
-		InputPad.slot.updateEdit(this.displayNum.getString(),this.displayNum.getData());
-		InputPad.dataIsNumeric=true;
+	var IP=InputPad;
+	if(IP.dataIsNumeric){
+		IP.slot.updateEdit(IP.displayNum.getString(),IP.displayNum.getData());
+	}
+	else{
+		IP.slot.updateEdit(IP.nonNumericText,IP.nonNumericData);
 	}
 };
 InputPad.close=function(){
@@ -259,4 +311,76 @@ InputPad.close=function(){
 	IP.visible=false;
 	IP.menuBnList.hide();
 	IP.bnGroup.remove();
+	IP.removeUndo();
+};
+InputPad.menuBnSelected=function(text,data){
+	var IP=InputPad;
+	if(data.type==Data.types.num){
+		IP.displayNum=new DisplayNum(data);
+		IP.dataIsNumeric=true;
+		InputPad.close();
+	}
+	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
+		IP.isEditTextCommand=true;
+	}
+	else{
+		IP.dataIsNumeric=false;
+		IP.nonNumericText=text;
+		IP.nonNumericData=data;
+	}
+	IP.close();
+};
+
+InputPad.makeBns=function(){
+	var IP=InputPad;
+	var currentNum;
+	var xPos=0;
+	var yPos=0;
+	for(var i=0;i<3;i++){
+		yPos+=IP.buttonMargin;
+		xPos=0;
+		for(var j=0;j<3;j++){
+			xPos+=IP.buttonMargin;
+			currentNum=7-i*3+j;
+			InputPad.makeNumBn(xPos,yPos,currentNum);
+			xPos+=IP.buttonW;
+		}
+		yPos+=IP.buttonH;
+	}
+	InputPad.makeNumBn(IP.buttonMargin*2+IP.buttonW,IP.buttonMargin*4+IP.buttonH*3,0);
+	InputPad.makePlusMinusBn(IP.buttonMargin,IP.buttonMargin*4+IP.buttonH*3);
+	InputPad.makeDecimalBn(IP.buttonMargin*3+IP.buttonW*2,IP.buttonMargin*4+IP.buttonH*3);
+	InputPad.makeBsBn(IP.buttonMargin,IP.buttonMargin*5+IP.buttonH*4);
+	InputPad.makeOkBn(IP.buttonMargin*2+IP.longBnW,IP.buttonMargin*5+IP.buttonH*4);
+};
+InputPad.makeNumBn=function(x,y,num){
+	var IP=InputPad;
+	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
+	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
+};
+InputPad.makePlusMinusBn=function(x,y){
+	var IP=InputPad;
+	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
+	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
+};
+InputPad.makeDecimalBn=function(x,y){
+	var IP=InputPad;
+	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
+	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
+};
+InputPad.makeBsBn=function(x,y){
+	var IP=InputPad;
+	IP.bsButton=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
+	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
+	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
+	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
+};
+InputPad.makeOkBn=function(x,y){
+	var IP=InputPad;
+	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
+	button.addIcon(VectorPaths.checkmark,IP.okBnH);
+	button.setCallbackFunction(InputPad.okPressed,true);
 };

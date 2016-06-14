@@ -10,8 +10,8 @@ function Button(x,y,width,height,parent){
 	this.hasText=false;
 	this.hasIcon=false;
 	this.iconInverts=false;
-	this.hasCallback=false;
-	this.callbackDelay=false;
+	this.callback=null;
+	this.delayedCallback=null;
 }
 Button.setGraphics=function(){
 	Button.bg=Colors.darkGray;
@@ -38,6 +38,9 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	TouchReceiver.addListenersBN(this.textE,this);
 }
 Button.prototype.addIcon=function(pathId,height){
+	if(this.hasIcon){
+		this.icon.remove();
+	}
 	this.hasIcon=true;
 	this.iconInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -47,6 +50,9 @@ Button.prototype.addIcon=function(pathId,height){
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 }
 Button.prototype.addColorIcon=function(pathId,height,color){
+	if(this.hasIcon){
+		this.icon.remove();
+	}
 	this.hasIcon=true;
 	this.iconInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -56,10 +62,13 @@ Button.prototype.addColorIcon=function(pathId,height,color){
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 }
 Button.prototype.setCallbackFunction=function(callback,delay){
-	this.callback=callback;
-	this.hasCallback=true;
-	this.callbackDelay=delay;
-}
+	if(delay){
+		this.delayedCallback=callback;
+	}
+	else{
+		this.callback=callback;
+	}
+};
 Button.prototype.disable=function(){
 	if(this.enabled){
 		this.enabled=false;
@@ -96,7 +105,7 @@ Button.prototype.press=function(){
 		if(this.hasIcon&&this.iconInverts){
 			this.icon.setColor(Button.highlightFore);
 		}
-		if(this.hasCallback&&!this.callbackDelay){
+		if(this.callback!=null){
 			this.callback();
 		}
 	}
@@ -111,8 +120,8 @@ Button.prototype.release=function(){
 		if(this.hasIcon&&this.iconInverts){
 			this.icon.setColor(Button.foreground);
 		}
-		if(this.hasCallback&&this.callbackDelay){
-			this.callback();
+		if(this.delayedCallback!=null){
+			this.delayedCallback();
 		}
 	}
 }

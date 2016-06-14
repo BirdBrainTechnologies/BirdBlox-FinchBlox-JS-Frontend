@@ -5,6 +5,7 @@ function VectorIcon(x,y,pathId,color,height,parent){
 	this.height=height;
 	this.pathId=pathId;
 	this.parent=parent;
+	this.pathE=null;
 	this.draw();
 }
 VectorIcon.computeWidth=function(pathId,height){
@@ -29,4 +30,8 @@ VectorIcon.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
 	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
-}
+};
+/* Deletes the icon and removes the path from its parent group. */
+VectorIcon.prototype.remove=function(){
+	this.pathE.remove();
+};

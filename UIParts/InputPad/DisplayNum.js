@@ -1,7 +1,7 @@
 // handles displaying numbers entered using the inputpad
-function DisplayNum(initialVal){
-	this.isNegative=(initialVal.getValue()<0);
-	var asStringData=initialVal.asPositiveString();
+function DisplayNum(initialData){
+	this.isNegative=(initialData.getValue()<0);
+	var asStringData=initialData.asPositiveString();
 	var parts=asStringData.getValue().split(".");
 	this.integerPart=parts[0];
 	if(this.integerPart==""){

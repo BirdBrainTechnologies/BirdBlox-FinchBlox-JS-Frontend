@@ -161,3 +161,11 @@ RoundSlot.prototype.setSelectionData=function(text,data){
 		this.deselect();
 	}
 };
+/* Makes the value text gray to indicate that any key will delete it. */
+RoundSlot.prototype.grayOutValue=function(){
+	GuiElements.update.color(this.textE,BlockGraphics.valueText.grayedFill);
+};
+/* Makes the value text the default edit color again. */
+RoundSlot.prototype.ungrayValue=function(){
+	GuiElements.update.color(this.textE,BlockGraphics.valueText.selectedFill);
+};
