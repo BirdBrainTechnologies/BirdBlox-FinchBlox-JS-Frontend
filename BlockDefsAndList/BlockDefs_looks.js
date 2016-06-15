@@ -1,5 +1,10 @@
-//<test>
-function b_SetTitleBarColor(x,y){
+/* This file contains the implementations for Blocks in the looks category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ * Many of these will use the this.stack.getSprite() method, which is not done yet.
+ */
+
+///// <test> /////
+function B_SetTitleBarColor(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"Set bar color"));
 	this.addPart(new LabelText(this,"R:"));
@@ -9,9 +14,9 @@ function b_SetTitleBarColor(x,y){
 	this.addPart(new LabelText(this,"B:"));
 	this.addPart(new NumSlot(this,0,true,true));
 }
-b_SetTitleBarColor.prototype = Object.create(CommandBlock.prototype);
-b_SetTitleBarColor.prototype.constructor = b_SetTitleBarColor;
-b_SetTitleBarColor.prototype.startAction=function(){
+B_SetTitleBarColor.prototype = Object.create(CommandBlock.prototype);
+B_SetTitleBarColor.prototype.constructor = B_SetTitleBarColor;
+B_SetTitleBarColor.prototype.startAction=function(){
 	var valR=this.slots[0].getData().getValueInR(0,255);
 	var valG=this.slots[1].getData().getValueInR(0,255);
 	var valB=this.slots[2].getData().getValueInR(0,255);
@@ -30,27 +35,30 @@ b_SetTitleBarColor.prototype.startAction=function(){
 	}
 	GuiElements.update.color(TitleBar.bgRect,"#"+colorR+colorG+colorB);
 	return false; //Done running
-}
+};
 
 
 
-
-function b_alert(x,y){
+function B_alert(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"Alert"));
 	this.addPart(new StringSlot(this,"Hi!"));
 }
-b_alert.prototype = Object.create(CommandBlock.prototype);
-b_alert.prototype.constructor = b_alert;
-b_alert.prototype.startAction=function(){
+B_alert.prototype = Object.create(CommandBlock.prototype);
+B_alert.prototype.constructor = B_alert;
+B_alert.prototype.startAction=function(){
 	var message=this.slots[0].getData().getValue();
 	GuiElements.alert(message);
 	TouchReceiver.touchend();
 	return false; //Done running
-}
-//</test>
+};
 
-function b_SayForSecs(x,y){
+
+///// </test> /////
+///// <not implemented> /////
+
+
+function B_SayForSecs(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"say"));
 	this.addPart(new StringSlot(this,"Hello!"));
@@ -58,18 +66,18 @@ function b_SayForSecs(x,y){
 	this.addPart(new NumSlot(this,2,true));
 	this.addPart(new LabelText(this,"secs"));
 }
-b_SayForSecs.prototype = Object.create(CommandBlock.prototype);
-b_SayForSecs.prototype.constructor = b_SayForSecs;
+B_SayForSecs.prototype = Object.create(CommandBlock.prototype);
+B_SayForSecs.prototype.constructor = B_SayForSecs;
 
-function b_Say(x,y){
+function B_Say(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"say"));
 	this.addPart(new StringSlot(this,"Hello!"));
 }
-b_Say.prototype = Object.create(CommandBlock.prototype);
-b_Say.prototype.constructor = b_Say;
+B_Say.prototype = Object.create(CommandBlock.prototype);
+B_Say.prototype.constructor = B_Say;
 
-function b_ThinkForSecs(x,y){
+function B_ThinkForSecs(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"think"));
 	this.addPart(new StringSlot(this,"Hmm..."));
@@ -77,67 +85,67 @@ function b_ThinkForSecs(x,y){
 	this.addPart(new NumSlot(this,2,true));
 	this.addPart(new LabelText(this,"secs"));
 }
-b_ThinkForSecs.prototype = Object.create(CommandBlock.prototype);
-b_ThinkForSecs.prototype.constructor = b_ThinkForSecs;
+B_ThinkForSecs.prototype = Object.create(CommandBlock.prototype);
+B_ThinkForSecs.prototype.constructor = B_ThinkForSecs;
 
-function b_Think(x,y){
+function B_Think(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"think"));
 	this.addPart(new StringSlot(this,"Hmm..."));
 }
-b_Think.prototype = Object.create(CommandBlock.prototype);
-b_Think.prototype.constructor = b_Think;
+B_Think.prototype = Object.create(CommandBlock.prototype);
+B_Think.prototype.constructor = B_Think;
 
-function b_ChangeSizeBy(x,y){
+function B_ChangeSizeBy(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"change size by"));
 	this.addPart(new NumSlot(this,10));
 }
-b_ChangeSizeBy.prototype = Object.create(CommandBlock.prototype);
-b_ChangeSizeBy.prototype.constructor = b_ChangeSizeBy;
+B_ChangeSizeBy.prototype = Object.create(CommandBlock.prototype);
+B_ChangeSizeBy.prototype.constructor = B_ChangeSizeBy;
 
-function b_SetSizeTo(x,y){
+function B_SetSizeTo(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"set size to"));
 	this.addPart(new NumSlot(this,100,true));
 	this.addPart(new LabelText(this,"%"));
 }
-b_SetSizeTo.prototype = Object.create(CommandBlock.prototype);
-b_SetSizeTo.prototype.constructor = b_SetSizeTo;
+B_SetSizeTo.prototype = Object.create(CommandBlock.prototype);
+B_SetSizeTo.prototype.constructor = B_SetSizeTo;
 
-function b_Size(x,y){
+function B_Size(x,y){
 	ReporterBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"size"));
 }
-b_Size.prototype = Object.create(ReporterBlock.prototype);
-b_Size.prototype.constructor = b_Size;
+B_Size.prototype = Object.create(ReporterBlock.prototype);
+B_Size.prototype.constructor = B_Size;
 
-function b_Show(x,y){
+function B_Show(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"show"));
 }
-b_Show.prototype = Object.create(CommandBlock.prototype);
-b_Show.prototype.constructor = b_Show;
+B_Show.prototype = Object.create(CommandBlock.prototype);
+B_Show.prototype.constructor = B_Show;
 
-function b_Hide(x,y){
+function B_Hide(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"hide"));
 }
-b_Hide.prototype = Object.create(CommandBlock.prototype);
-b_Hide.prototype.constructor = b_Hide;
+B_Hide.prototype = Object.create(CommandBlock.prototype);
+B_Hide.prototype.constructor = B_Hide;
 
-function b_GoToFront(x,y){
+function B_GoToFront(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"go to front"));
 }
-b_GoToFront.prototype = Object.create(CommandBlock.prototype);
-b_GoToFront.prototype.constructor = b_GoToFront;
+B_GoToFront.prototype = Object.create(CommandBlock.prototype);
+B_GoToFront.prototype.constructor = B_GoToFront;
 
-function b_GoBackLayers(x,y){
+function B_GoBackLayers(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"go back"));
 	this.addPart(new NumSlot(this,1,true,true));
 	this.addPart(new LabelText(this,"layers"));
 }
-b_GoBackLayers.prototype = Object.create(CommandBlock.prototype);
-b_GoBackLayers.prototype.constructor = b_GoBackLayers;
+B_GoBackLayers.prototype = Object.create(CommandBlock.prototype);
+B_GoBackLayers.prototype.constructor = B_GoBackLayers;

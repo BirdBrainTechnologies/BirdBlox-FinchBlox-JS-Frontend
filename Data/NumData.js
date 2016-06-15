@@ -5,7 +5,7 @@ NumData.prototype = Object.create(Data.prototype);
 NumData.prototype.constructor = NumData;
 NumData.prototype.asNum=function(){
 	return this;
-}
+};
 NumData.prototype.asBool=function(){
 	if(this.getValue()==1){
 		return new BoolData(true,this.isValid);
@@ -16,22 +16,22 @@ NumData.prototype.asBool=function(){
 	else{
 		return new BoolData(false,false);
 	}
-}
+};
 NumData.prototype.asString=function(){
 	if(this.isValid){
 		var num=this.getValue();
 		num=+num.toFixed(10);
-		return new StringData(num+"",this.isValid);
+		return new StringData(num+"",true);
 	}
 	else{
 		return new StringData("not a valid number");
 	}
-}
+};
 NumData.prototype.asPositiveString=function(){ //Converts to a string but avoids scientific notation
 	var num=Math.abs(this.getValue());
 	num=+num.toFixed(10);
-	return new StringData(num+"",this.isValid);
-}
+	return new StringData(num+"",true);
+};
 NumData.prototype.getValueInR=function(min,max,positive,integer){
 	var val=this.getValue();
 	if(positive==true&&val<0){
@@ -47,7 +47,7 @@ NumData.prototype.getValueInR=function(min,max,positive,integer){
 		val=max;
 	}
 	return val;
-}
+};
 NumData.prototype.getValueWithC=function(positive,integer){
 	var val=this.getValue();
 	if(positive==true&&val<0){
@@ -57,4 +57,4 @@ NumData.prototype.getValueWithC=function(positive,integer){
 		val=Math.round(val);
 	}
 	return val;
-}
+};

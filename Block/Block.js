@@ -1,5 +1,7 @@
-/* Block is an abstract class that represents an executable block.  Blocks are nearly always contained within BlockStacks or DisplayStacks.
- * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  This is because BlockStacks must always contain at least one Block, so the Block must be created first.
+/* Block is an abstract class that represents an executable block.
+ * Blocks are nearly always contained within BlockStacks or DisplayStacks.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  
+ * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * @fix remove the type parameter and use blockShape and instead.
  * @param {number} type - The shape of the Block.  0=Command, 1=Reporter, 2=Predicate, 4=Hat, 5=Loop, 6=DoubleLoop.
@@ -29,7 +31,7 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 	this.isGlowing=false;
 	
 	this.stack=null; //It has no Stack yet.
-	this.path=this.generatePath(); //This path is the main visual part of the Block.  It is colored according to its category.
+	this.path=this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
 	this.height=0; //Will be set later when the Block's dimensions are updated.
 	this.width=0;
 	this.runMem=function(){}; //serves as a place for the block to store info while running
@@ -44,7 +46,8 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 		this.blockSlot1=new BlockSlot(this);
 	}
 	if(this.hasBlockSlot2){
-		this.midHeight=0; //The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
+		//The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
+		this.midHeight=0;
 		this.midLabel=new LabelText(this,this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2=new BlockSlot(this);
 	}
@@ -105,7 +108,8 @@ Block.prototype.addPart=function(part){
 Block.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
-	GuiElements.move.group(this.group,x,y); //All parts of the Block are contained within its group to allow for easy movement.
+	//All parts of the Block are contained within its group to allow for easy movement.
+	GuiElements.move.group(this.group,x,y);
 };
 /* Recursively stops the Block, its Slots, and any subsequent Blocks.
  */
@@ -128,7 +132,8 @@ Block.prototype.stop=function(){
  * @return {boolean} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun=function(){
-	if(this.running==0||this.running==3){ //If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
+	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
+	if(this.running==0||this.running==3){
 		for(var i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution.
 			this.slots[i].stop();
 		}
@@ -137,15 +142,19 @@ Block.prototype.updateRun=function(){
 	var rVal; //The value to return.
 	if(this.running==1){ //If the Block is currently waiting on its Slots...
 		for(var i=0;i<this.slots.length;i++){
-			if(this.slots[i].updateRun()){ //Check to see if each Slot is done and update the first Slot that isn't done.
+			//Check to see if each Slot is done and update the first Slot that isn't done.
+			if(this.slots[i].updateRun()){
 				return true; //Still running
 			}
 		}
 		this.running=2; //If all Slots are done running, the Block itself may now run.
-		rVal = this.startAction(); //This function is overridden by the class of the particular Block. It sets the Block up for execution, and if it is a simple Block, may even complete execution.
+		//This function is overridden by the class of the particular Block.
+		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
+		rVal = this.startAction();
 	}
 	else if(this.running==2){ //If the Block is currently running, update it.
-		rVal = this.updateAction(); //This function is also overridden and is called repeatedly until the Block is done running.
+		//This function is also overridden and is called repeatedly until the Block is done running.
+		rVal = this.updateAction();
 	}
 	var rT=Block.returnTypes;
 	if(rVal==false){ //If the block is done running...
@@ -164,7 +173,7 @@ Block.prototype.startAction=function(){
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
-	return true; //Still running //Fix! by default this should be true.
+	return true; //Still running //Fix! by default this should be false.
 };
 /* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
  * Only used if Block returns a value.
@@ -409,7 +418,12 @@ Block.prototype.findBestFit=function(){
 	if(move.topOpen&&this.bottomOpen){ //If a connection between the stack and block are possible...
 		var snap=BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
-		if(move.pInRange(move.topX,move.topY,x-snap.left,y-snap.top,snap.left+snap.right,snap.top+this.height+snap.bottom)){
+		var snapBLeft=x-snap.left;
+		var snapBTop=y-snap.top;
+		var snapBWidth=snap.left+snap.right;
+		var snapBHeight=snap.top+this.height+snap.bottom;
+		//Check if point falls in a rectangular range.
+		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
 			var xDist=move.topX-x; //If it does, compute the distance with the distance formula.
 			var yDist=move.topY-(y+this.height);
 			var dist=xDist*xDist+yDist*yDist; //Technically this is the distance^2.

@@ -1,4 +1,5 @@
 /* Child of Block. The CommandBlock is for Blocks that return booleans.
+ * @constructor
  * @param {number} x - The x coord for the Block.
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.

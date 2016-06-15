@@ -1,4 +1,5 @@
 /* Child of Block. The HatBlock is for Blocks like CommandBlock but which have rounded tops which accept no Blocks.
+ * @constructor
  * @param {number} x - The x coord for the Block.
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.

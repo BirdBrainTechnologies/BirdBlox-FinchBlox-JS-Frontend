@@ -1,69 +1,77 @@
-function b_Add(x,y){
+/* This file contains the implementations for Blocks in the operators category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ */
+
+function B_Add(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"+"));
 	this.addPart(new NumSlot(this,0));
 }
-b_Add.prototype = Object.create(ReporterBlock.prototype);
-b_Add.prototype.constructor = b_Add;
-b_Add.prototype.startAction=function(){
+B_Add.prototype = Object.create(ReporterBlock.prototype);
+B_Add.prototype.constructor = B_Add;
+/* Sets the result to the sum of the Slots. Result is valid only if both inputs are. */
+B_Add.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()+data2.getValue();
 	this.resultData=new NumData(val,isValid);
 	return false; //Done running
-}
+};
 
 
 
-function b_Subtract(x,y){
+function B_Subtract(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,String.fromCharCode(8211)));
 	this.addPart(new NumSlot(this,0));
 }
-b_Subtract.prototype = Object.create(ReporterBlock.prototype);
-b_Subtract.prototype.constructor = b_Subtract;
-b_Subtract.prototype.startAction=function(){
+B_Subtract.prototype = Object.create(ReporterBlock.prototype);
+B_Subtract.prototype.constructor = B_Subtract;
+/* Sets the result to the difference between the Slots. Result is valid only if both inputs are. */
+B_Subtract.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()-data2.getValue();
 	this.resultData=new NumData(val,isValid);
 	return false; //Done running
-}
+};
 
 
 
-function b_Multiply(x,y){
+function B_Multiply(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"*"));
 	this.addPart(new NumSlot(this,0));
 }
-b_Multiply.prototype = Object.create(ReporterBlock.prototype);
-b_Multiply.prototype.constructor = b_Multiply;
-b_Multiply.prototype.startAction=function(){
+B_Multiply.prototype = Object.create(ReporterBlock.prototype);
+B_Multiply.prototype.constructor = B_Multiply;
+/* Sets the result to the product of the Slots. Result is valid only if both inputs are. */
+B_Multiply.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()*data2.getValue();
 	this.resultData=new NumData(val,isValid);
 	return false; //Done running
-}
+};
 
 
 
-function b_Divide(x,y){
+function B_Divide(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"/"));
 	this.addPart(new NumSlot(this,0));
 }
-b_Divide.prototype = Object.create(ReporterBlock.prototype);
-b_Divide.prototype.constructor = b_Divide;
-b_Divide.prototype.startAction=function(){
+B_Divide.prototype = Object.create(ReporterBlock.prototype);
+B_Divide.prototype.constructor = B_Divide;
+/* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2!=0. */
+B_Divide.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
@@ -71,45 +79,49 @@ b_Divide.prototype.startAction=function(){
 	var val2=data2.getValue();
 	var val=val1/val2;
 	if(val2==0){
-		val=0;
+		val=0; //Return invalid 0 if told to divide by 0.
 		isValid=false;
 	}
 	this.resultData=new NumData(val,isValid);
 	return false; //Done running
-}
+};
 
 
 
-
-function b_Round(x,y){
+function B_Round(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"round"));
 	this.addPart(new NumSlot(this,0.5));
 }
-b_Round.prototype = Object.create(ReporterBlock.prototype);
-b_Round.prototype.constructor = b_Round;
-b_Round.prototype.startAction=function(){
+B_Round.prototype = Object.create(ReporterBlock.prototype);
+B_Round.prototype.constructor = B_Round;
+/* Sets the result to the rounded value of the Slot. Is valid only if Slot is. */
+B_Round.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var isValid=data1.isValid;
-	var val=data1.getValueWithC(false,true);
+	var val=data1.getValueWithC(false,true); //Integer
 	this.resultData=new NumData(val,isValid);
 	return false; //Done running
-}
+};
 
 
 
-function b_PickRandom(x,y){
+function B_PickRandom(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"pick random"));
 	this.addPart(new NumSlot(this,1));
 	this.addPart(new LabelText(this,"to"));
 	this.addPart(new NumSlot(this,10));
 }
-b_PickRandom.prototype = Object.create(ReporterBlock.prototype);
-b_PickRandom.prototype.constructor = b_PickRandom;
-b_PickRandom.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
-	var val2=this.slots[1].getData().getValue();
+/* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
+B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
+B_PickRandom.prototype.constructor = B_PickRandom;
+B_PickRandom.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val1=data1.getValue();
+	var val2=data2.getValue();
 	var integer = (val1===(val1|0)&&val2===(val2|0));
 	var rVal;
 	var min=val1;
@@ -124,21 +136,22 @@ b_PickRandom.prototype.startAction=function(){
 	else{
 		rVal = Math.random() * (max - min) + min;
 	}
-	this.resultData=new NumData(rVal);
+	this.resultData=new NumData(rVal,isValid);
 	return false; //Done running
-}
+};
 
 
 
-function b_LessThan(x,y){
+function B_LessThan(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"<"));
 	this.addPart(new NumSlot(this,0));
 }
-b_LessThan.prototype = Object.create(PredicateBlock.prototype);
-b_LessThan.prototype.constructor = b_LessThan;
-b_LessThan.prototype.startAction=function(){
+B_LessThan.prototype = Object.create(PredicateBlock.prototype);
+B_LessThan.prototype.constructor = B_LessThan;
+/* Result is a valid boolean indicating is Slot1<Slot2. */
+B_LessThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1<val2);
@@ -147,7 +160,7 @@ b_LessThan.prototype.startAction=function(){
 
 
 
-function b_EqualTo(x,y){//needs to work with strings
+function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
 	var rS=new RoundSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,0);
 	rS.addOption("Enter text",new SelectionData("enter_text"));
@@ -155,9 +168,10 @@ function b_EqualTo(x,y){//needs to work with strings
 	this.addPart(new LabelText(this,"="));
 	this.addPart(rS.duplicate(this));
 }
-b_EqualTo.prototype = Object.create(PredicateBlock.prototype);
-b_EqualTo.prototype.constructor = b_EqualTo;
-b_EqualTo.prototype.startAction=function(){
+B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
+B_EqualTo.prototype.constructor = B_EqualTo;
+/* Compares data of any type to determine equality. Result is always valid. */
+B_EqualTo.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
 	var val1=data1.getValue();
@@ -168,175 +182,188 @@ b_EqualTo.prototype.startAction=function(){
 	var numD2=data2.asNum();
 	var types=Data.types;
 	var isValid=data1.isValid&&data2.isValid;
-	if(data1.type==data2.type){
-		this.resultData=new BoolData(isValid&&val1==val2);
+	if(data1.type==data2.type){ //If the types match, just compare directly.
+		this.resultData=new BoolData(isValid&&val1==val2); //Invalid data is never equal.
 	}
-	else if(data1.type==types.string||data2.type==types.string){
-		if(string1==string2) {
+	else if(data1.type==types.string||data2.type==types.string){ //If one is a string...
+		if(string1==string2) { //If both strings match, result is true.
 			this.resultData = new BoolData(true);
 		}
-		else if(data1.type==types.num||data2.type==types.num){
-			if(numD1.isValid&&numD2.isValid){
-				this.resultData = new BoolData(numD1.getValue()==numD2.getValue());
+		else if(data1.type==types.num||data2.type==types.num){ //Still the numbers could match like "3.0"=3.
+			if(numD1.isValid&&numD2.isValid){ //If both are valid numbers...
+				this.resultData = new BoolData(numD1.getValue()==numD2.getValue()); //Compare numerical values.
 			}
 			else{
-				this.resultData = new BoolData(false);
+				this.resultData = new BoolData(false); //A string and unequal/invalid number are not equal.
 			}
 		}
 		else{
-			this.resultData = new BoolData(false);
+			this.resultData = new BoolData(false); //Two unequal, nonnumerical strings are unequal.
 		}
 	}
 	else{
-		this.resultData = new BoolData(false);
+		this.resultData = new BoolData(false); //If the types don't match and neither is a string, they are unequal.
 	}
 	return false; //Done running
-}
+};
 
 
 
-function b_GreaterThan(x,y){
+function B_GreaterThan(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,">"));
 	this.addPart(new NumSlot(this,0));
 }
-b_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
-b_GreaterThan.prototype.constructor = b_GreaterThan;
-b_GreaterThan.prototype.startAction=function(){
+B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
+B_GreaterThan.prototype.constructor = B_GreaterThan;
+/* Result is a valid boolean indicating is Slot1>Slot2. */
+B_GreaterThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1>val2);
 	return false; //Done running
-}
+};
 
 
 
-function b_And(x,y){
+function B_And(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new BoolSlot(this));
 	this.addPart(new LabelText(this,"and"));
 	this.addPart(new BoolSlot(this));
 }
-b_And.prototype = Object.create(PredicateBlock.prototype);
-b_And.prototype.constructor = b_And;
-b_And.prototype.startAction=function(){
+B_And.prototype = Object.create(PredicateBlock.prototype);
+B_And.prototype.constructor = B_And;
+/* Result is true if both are true. Always valid. */
+B_And.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1&&val2);
 	return false; //Done running
-}
+};
 
 
 
-function b_Or(x,y){
+function B_Or(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new BoolSlot(this));
 	this.addPart(new LabelText(this,"or"));
 	this.addPart(new BoolSlot(this));
 }
-b_Or.prototype = Object.create(PredicateBlock.prototype);
-b_Or.prototype.constructor = b_Or;
-b_Or.prototype.startAction=function(){
+B_Or.prototype = Object.create(PredicateBlock.prototype);
+B_Or.prototype.constructor = B_Or;
+/* Result is true if either is true. Always valid. */
+B_Or.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
 	this.resultData=new BoolData(val1||val2);
 	return false; //Done running
-}
+};
 
 
 
-function b_Not(x,y){
+function B_Not(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"not"));
 	this.addPart(new BoolSlot(this));
 }
-b_Not.prototype = Object.create(PredicateBlock.prototype);
-b_Not.prototype.constructor = b_Not;
-b_Not.prototype.startAction=function(){
+B_Not.prototype = Object.create(PredicateBlock.prototype);
+B_Not.prototype.constructor = B_Not;
+/* Result is true if Slot is false. Always valid. */
+B_Not.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	this.resultData=new BoolData(!val1);
 	return false; //Done running
-}
+};
 
 
 
-function b_True(x,y){
+function B_True(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"true"));
 }
-b_True.prototype = Object.create(PredicateBlock.prototype);
-b_True.prototype.constructor = b_True;
-b_True.prototype.startAction=function(){
+B_True.prototype = Object.create(PredicateBlock.prototype);
+B_True.prototype.constructor = B_True;
+/* Result is true. */
+B_True.prototype.startAction=function(){
 	this.resultData=new BoolData(true);
 	return false; //Done running
-}
+};
 
 
 
-function b_False(x,y){
+function B_False(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"false"));
 }
-b_False.prototype = Object.create(PredicateBlock.prototype);
-b_False.prototype.constructor = b_False;
-b_False.prototype.startAction=function(){
+B_False.prototype = Object.create(PredicateBlock.prototype);
+B_False.prototype.constructor = B_False;
+/* Result is false. */
+B_False.prototype.startAction=function(){
 	this.resultData=new BoolData(false);
 	return false; //Done running
-}
+};
 
 
 
-function b_LetterOf(x,y){
+function B_LetterOf(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"letter"));
 	this.addPart(new NumSlot(this,1,true,true));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new StringSlot(this,"world"));
 }
-b_LetterOf.prototype = Object.create(ReporterBlock.prototype);
-b_LetterOf.prototype.constructor = b_LetterOf;
-b_LetterOf.prototype.startAction=function(){
+B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
+B_LetterOf.prototype.constructor = B_LetterOf;
+/* Result is nth letter of word. Makes n and integer in range. Always valid. */
+B_LetterOf.prototype.startAction=function(){
 	var word=this.slots[1].getData().getValue();
-	var index=this.slots[0].getData().getValueWithC(1,word.length,true,true);
+	var index=this.slots[0].getData().getValueInR(1,word.length,true,true);
 	this.resultData=new StringData(word.substring(index-1,index));
 	return false; //Done running
-}
+};
 
 
 
-function b_LengthOf(x,y){
+function B_LengthOf(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"length of"));
 	this.addPart(new StringSlot(this,"world"));
 }
-b_LengthOf.prototype = Object.create(ReporterBlock.prototype);
-b_LengthOf.prototype.constructor = b_LengthOf;
-b_LengthOf.prototype.startAction=function(){
+B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
+B_LengthOf.prototype.constructor = B_LengthOf;
+/* Result is length of word. Always valid. */
+B_LengthOf.prototype.startAction=function(){
 	var word=this.slots[0].getData().getValue();
 	this.resultData=new NumData(word.length);
 	return false; //Done running
-}
+};
 
 
 
-function b_join(x,y){
+function B_join(x,y){
 	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"join"));
 	this.addPart(new StringSlot(this,"hello "));
 	this.addPart(new LabelText(this,"and"));
 	this.addPart(new StringSlot(this,"world"));
 }
-b_join.prototype = Object.create(ReporterBlock.prototype);
-b_join.prototype.constructor = b_join;
-b_join.prototype.startAction=function(){
+B_join.prototype = Object.create(ReporterBlock.prototype);
+B_join.prototype.constructor = B_join;
+/* Result is Slots concatenated. Always valid. */
+B_join.prototype.startAction=function(){
 	var word1=this.slots[0].getData().getValue();
 	var word2=this.slots[1].getData().getValue();
 	this.resultData=new StringData(word1+word2);
 	return false; //Done running
-}
-///////////
-function b_mathOfNumber(x,y){
+};
+
+
+///// <not implemented> /////
+
+
+function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
 	dS.addOption("abs",new SelectionData("abs"));
@@ -357,8 +384,8 @@ function b_mathOfNumber(x,y){
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new NumSlot(this,10));
 }
-b_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
-b_mathOfNumber.prototype.constructor = b_mathOfNumber;
+B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
+B_mathOfNumber.prototype.constructor = B_mathOfNumber;
 
 
 

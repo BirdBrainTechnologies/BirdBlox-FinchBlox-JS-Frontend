@@ -1,86 +1,99 @@
-function b_Ask(x,y){
+/* This file contains the implementations for Blocks in the sensing category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ * Many of these will use the this.stack.getSprite() method, which is not done yet.
+ */
+
+function B_Ask(x,y){
 	CommandBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"ask"));
 	this.addPart(new StringSlot(this,"what's your name?"));
 	this.addPart(new LabelText(this,"and wait"));
 }
-b_Ask.prototype = Object.create(CommandBlock.prototype);
-b_Ask.prototype.constructor = b_Ask;
-b_Ask.prototype.startAction=function(){
+B_Ask.prototype = Object.create(CommandBlock.prototype);
+B_Ask.prototype.constructor = B_Ask;
+/* Show a dialog with the question unless another dialog is already visible or has been displayed recently. */
+B_Ask.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.question=this.slots[0].getData().getValue();
-	mem.questionDisplayed=false;
-	if(HtmlServer.dialogVisible){
-		mem.waitingForDialog=true;
+	mem.question=this.slots[0].getData().getValue(); //Form the question
+	mem.questionDisplayed=false; //Has the dialog request been issued yet?
+	if(HtmlServer.dialogVisible){ //If there is already a dialog, we will wait until it is closed.
+		mem.waitingForDialog=true; //We are waiting.
 	}
 	else{
-		mem.waitingForDialog=false;
-		if(CodeManager.checkDialogDelay()) {
-			this.showQuestion();
+		mem.waitingForDialog=false; //We are not waiting for a dialog to disappear.
+		//There is a delay between repeated dialogs to give the user time to stop the program.
+		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
+			this.showQuestion(); //Show the dialog.
 		}
 	}
 	return true;
 };
-b_Ask.prototype.updateAction=function(){
+/* Waits until the dialog has been displayed and completed. */
+B_Ask.prototype.updateAction=function(){
 	var mem=this.runMem;
-	if(mem.waitingForDialog){
-		if(!HtmlServer.dialogVisible){
-			mem.waitingForDialog=false;
+	if(mem.waitingForDialog){ //If we are waiting for a dialog to close...
+		if(!HtmlServer.dialogVisible){ //...And the dialog is closed...
+			mem.waitingForDialog=false; //...Then we can stop waiting.
 		}
-		return true;
+		return true; //Still running.
 	}
-	else if(!mem.questionDisplayed){
-		if(CodeManager.checkDialogDelay()) {
-			if(HtmlServer.dialogVisible){
+	else if(!mem.questionDisplayed){ //If the question has not yet been displayed...
+		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
+			if(HtmlServer.dialogVisible){ //Make sure there still isn't a dialog visible.
 				mem.waitingForDialog=true;
 			}
 			else{
-				this.showQuestion();
+				this.showQuestion(); //Display the question.
 			}
 		}
-		return true;
+		return true; //Still running.
 	}
 	else{
-		if(mem.finished==true){
-			CodeManager.updateDialogDelay();
+		if(mem.finished==true){ //Question has been answered.
+			CodeManager.updateDialogDelay(); //Tell CodeManager to reset the dialog delay clock.
 			return false; //Done running
 		}
-		else{
+		else{ //Waiting on answer from user.
 			return true; //Still running
 		}
 	}
 };
-b_Ask.prototype.showQuestion=function(){
+B_Ask.prototype.showQuestion=function(){
 	var mem=this.runMem;
-	mem.finished=false;
+	mem.finished=false; //Will be changed once answered.
 	var callbackFn=function(cancelled,response){
-		if(!cancelled){
-			CodeManager.answer = new StringData(response, true);
+		if(cancelled){
+			CodeManager.answer = new StringData("", true); //"" is the default answer.
 		}
-		callbackFn.mem.finished=true;
+		else{
+			CodeManager.answer = new StringData(response, true); //Store the user's anser in the CodeManager.
+		}
+		callbackFn.mem.finished=true; //Done waiting.
 	};
 	callbackFn.mem=mem;
-	var callbackErr=function(){
-		callbackErr.mem.finished=true;
+	var callbackErr=function(){ //If an error occurs...
+		CodeManager.answer = new StringData("", true); //"" is the default answer.
+		callbackErr.mem.finished=true; //Done waiting.
 	};
 	callbackErr.mem=mem;
-	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr);
-	mem.questionDisplayed=true;
-}
+	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr); //Make the request.
+	mem.questionDisplayed=true; //Prevents displaying twice.
+};
 
 
 
 
-function b_Answer(x,y){
+function B_Answer(x,y){
 	ReporterBlock.call(this,x,y,"sensing",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"answer"));
 }
-b_Answer.prototype = Object.create(ReporterBlock.prototype);
-b_Answer.prototype.constructor = b_Answer;
-b_Answer.prototype.startAction=function(){
+B_Answer.prototype = Object.create(ReporterBlock.prototype);
+/* Result is whatever is stored in CodeManager. */
+B_Answer.prototype.constructor = B_Answer;
+B_Answer.prototype.startAction=function(){
 	this.resultData=CodeManager.answer;
 	return false; //Done running
-}
+};
 
 
 
@@ -88,51 +101,51 @@ b_Answer.prototype.startAction=function(){
 
 ///////////
 
-function b_Touching(x,y){
+function B_Touching(x,y){
 	PredicateBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"touching?"));
 }
-b_Touching.prototype = Object.create(PredicateBlock.prototype);
-b_Touching.prototype.constructor = b_Touching;
+B_Touching.prototype = Object.create(PredicateBlock.prototype);
+B_Touching.prototype.constructor = B_Touching;
 
 
 
-function b_TouchX(x,y){
+function B_TouchX(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"touch x"));
 }
-b_TouchX.prototype = Object.create(ReporterBlock.prototype);
-b_TouchX.prototype.constructor = b_TouchX;
+B_TouchX.prototype = Object.create(ReporterBlock.prototype);
+B_TouchX.prototype.constructor = B_TouchX;
 
-function b_TouchY(x,y){
+function B_TouchY(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"touch y"));
 }
-b_TouchY.prototype = Object.create(ReporterBlock.prototype);
-b_TouchY.prototype.constructor = b_TouchY;
+B_TouchY.prototype = Object.create(ReporterBlock.prototype);
+B_TouchY.prototype.constructor = B_TouchY;
 
-function b_DistanceTo(x,y){
+function B_DistanceTo(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"distance to"));
 }
-b_DistanceTo.prototype = Object.create(ReporterBlock.prototype);
-b_DistanceTo.prototype.constructor = b_DistanceTo;
+B_DistanceTo.prototype = Object.create(ReporterBlock.prototype);
+B_DistanceTo.prototype.constructor = B_DistanceTo;
 
-function b_ResetTimer(x,y){
+function B_ResetTimer(x,y){
 	CommandBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"reset timer"));
 }
-b_ResetTimer.prototype = Object.create(CommandBlock.prototype);
-b_ResetTimer.prototype.constructor = b_ResetTimer;
+B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
+B_ResetTimer.prototype.constructor = B_ResetTimer;
 
-function b_Timer(x,y){
+function B_Timer(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"timer"));
 }
-b_Timer.prototype = Object.create(ReporterBlock.prototype);
-b_Timer.prototype.constructor = b_Timer;
+B_Timer.prototype = Object.create(ReporterBlock.prototype);
+B_Timer.prototype.constructor = B_Timer;
 
-function b_CurrentTime(x,y){
+function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"sensing");
 	this.addPart(new LabelText(this,"current"));
 	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
@@ -146,5 +159,5 @@ function b_CurrentTime(x,y){
 	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
 	this.addPart(dS);
 }
-b_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
-b_CurrentTime.prototype.constructor = b_CurrentTime;
+B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
+B_CurrentTime.prototype.constructor = B_CurrentTime;
