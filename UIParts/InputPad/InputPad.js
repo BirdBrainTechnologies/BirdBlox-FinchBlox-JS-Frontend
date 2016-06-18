@@ -324,7 +324,6 @@ InputPad.menuBnSelected=function(text,data){
 	if(data.type==Data.types.num){
 		IP.displayNum=new DisplayNum(data);
 		IP.dataIsNumeric=true;
-		InputPad.close();
 	}
 	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
 		IP.isEditTextCommand=true;
