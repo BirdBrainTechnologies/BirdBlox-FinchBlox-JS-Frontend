@@ -119,7 +119,6 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
 	var request = "iPad/dialog_response";
 	var onResponseReceived=function(response){
-		GuiElements.alert("r"+response+"r");
 		if(response=="No Response"){
 			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
 		}
