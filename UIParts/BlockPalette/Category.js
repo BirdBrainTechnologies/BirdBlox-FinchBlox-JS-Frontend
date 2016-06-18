@@ -94,12 +94,14 @@ Category.prototype.updateScroll=function(x,y){
 };
 Category.prototype.scroll=function(x,y){
 	if(this.scrolling) {
+		var minX=Math.min(this.x,this.minX);
+		x = Math.max(minX,x);
+		x = Math.min(this.maxX,x);
+		var minY=Math.min(this.y,this.minY);
+		y = Math.max(minY,y);
+		y = Math.min(this.maxY,y);
 		this.x=x;
 		this.y=y;
-		this.x = Math.max(this.minX,this.x);
-		this.x = Math.min(this.maxX,this.x);
-		this.y= Math.max(this.minY,this.y);
-		this.y = Math.min(this.maxY,this.y);
 		GuiElements.move.group(this.group, this.x, this.y);
 	}
 };
