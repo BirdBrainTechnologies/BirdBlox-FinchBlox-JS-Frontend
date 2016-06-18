@@ -83,6 +83,7 @@ BlockList.populateCat_motion=function(category){
 	category.addBlock("B_XPosition");
 	category.addBlock("B_YPosition");
 	category.addBlock("B_Direction");
+	category.trimBottom();
 }
 BlockList.populateCat_looks=function(category){
 	category.addBlock("B_alert");
@@ -102,6 +103,7 @@ BlockList.populateCat_looks=function(category){
 	category.addSpace();
 	category.addBlock("B_GoToFront");
 	category.addBlock("B_GoBackLayers");
+	category.trimBottom();
 }
 BlockList.populateCat_sound=function(category){
 	
@@ -117,6 +119,7 @@ BlockList.populateCat_ipad=function(category){
 	category.addBlock("B_DeviceRelativeAltitude");
 	category.addBlock("B_DeviceAcceleration");
 	category.addBlock("B_DeviceOrientation");
+	category.trimBottom();
 }
 BlockList.populateCat_control=function(category){
 	category.addBlock("B_WhenFlagTapped");
@@ -139,6 +142,7 @@ BlockList.populateCat_control=function(category){
 	category.addSpace();
 	category.addBlock("B_StopAll");
 	category.addBlock("B_StopAllBut");
+	category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){
 	category.addBlock("B_Touching");
@@ -155,6 +159,7 @@ BlockList.populateCat_sensing=function(category){
 	category.addBlock("B_Timer");
 	category.addSpace();
 	category.addBlock("B_CurrentTime");
+	category.trimBottom();
 	
 }
 BlockList.populateCat_operators=function(category){
@@ -181,6 +186,7 @@ BlockList.populateCat_operators=function(category){
 	category.addBlock("B_LetterOf");
 	category.addBlock("B_LengthOf");
 	category.addBlock("B_join");
+	category.trimBottom();
 	
 }
 BlockList.populateCat_variables=function(category){

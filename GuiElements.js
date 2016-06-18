@@ -175,7 +175,7 @@ GuiElements.draw=function(){};
  * @param {number} y - The rect's y coord.
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
- * @param {string} color - The rect's fill color in the form "#fff".
+ * @param {string} color - (optional) The rect's fill color in the form "#fff".
  * @return {SVG rect} - The rect which was created.
  */
 GuiElements.draw.rect=function(x,y,width,height,color){
@@ -184,7 +184,9 @@ GuiElements.draw.rect=function(x,y,width,height,color){
 	rect.setAttributeNS(null,"y",y);
 	rect.setAttributeNS(null,"width",width);
 	rect.setAttributeNS(null,"height",height);
-	rect.setAttributeNS(null,"fill",color);
+	if(color!=null) {
+		rect.setAttributeNS(null, "fill", color);
+	}
 	return rect; //Return the rect.
 }
 /* Creates a filled, triangular SVG path element with specified dimensions and returns it.
@@ -350,7 +352,27 @@ GuiElements.move.group=function(group,x,y){
 GuiElements.move.text=function(text,x,y){
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);
-}
+};
+/* Creates a clipping path (crops item) of the specified size and adds to the element if provided.
+ * @param {string} id - The id to use for the clipping path.
+ * @param {number} x - The x coord of the clipping path.
+ * @param {number} y - The y coord of the clipping path.
+ * @param {number} width - The width of the clipping path.
+ * @param {number} height - The height of the clipping path.
+ * @param {SVG element} element - (optional) The element the path should be added to.
+ * @return {SVG clipPath} - The finished clipping path.
+ */
+GuiElements.clip=function(id,x,y,width,height,element){
+	var clipPath=document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
+	var clipRect=GuiElements.draw.rect(x,y,width,height);
+	clipPath.appendChild(clipRect);
+	clipPath.setAttributeNS(null,"id",id);
+	GuiElements.defs.appendChild(clipPath);
+	if(element!=null){
+		element.setAttributeNS(null,"clip-path","url(#"+id+")");
+	}
+	return clipPath;
+};
 /* GuiElements.measure contains functions that measure parts of the UI.
  * They return the measurement.
  */

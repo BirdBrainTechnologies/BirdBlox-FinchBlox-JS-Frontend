@@ -130,7 +130,7 @@ TouchReceiver.touchStartCatBN=function(target,e){
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
 	}
-}
+};
 /* Handles new touch events for Buttons.  Stores the target Button.
  * @param {Button} target - The Button that was touched.
  * @param {event} e - passed event arguments.
@@ -144,7 +144,19 @@ TouchReceiver.touchStartBN=function(target,e){
 		target.press(); //Changes the button's appearance and may trigger an action.
 		TR.target=target;
 	}
-}
+};
+/* Handles new touch events for the backgund of the palette.
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartPalette=function(e){
+	var TR=TouchReceiver;
+	e.preventDefault(); //Stops 300 ms delay events
+	if(!TR.touchDown){
+		TR.touchDown=true;
+		TR.targetType="palette";
+		TR.target=null; //The type is all that is important. There is only one palette.
+	}
+};
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
@@ -183,8 +195,17 @@ TouchReceiver.touchmove=function(e){
 				TR.blocksMoving=true;
 			}
 		}
+		//If the user drags the palette, it should scroll.
+		if(TR.targetType=="palette"){
+			if(!BlockPalette.scrolling){
+				BlockPalette.startScoll(TR.getX(e),TR.getY(e));
+			}
+			else{
+				BlockPalette.updateScroll(TR.getX(e),TR.getY(e));
+			}
+		}
 	}
-}
+};
 /* Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  * @fix DateTime is no longer necessary to prevent repeat events.
@@ -209,8 +230,11 @@ TouchReceiver.touchend=function(e){
 			//If a Slot is pressed and released without dragging, it is time to edit its value.
 			TR.target.edit();
 		}
+		else if(TR.targetType=="palette"){
+			BlockPalette.endScroll();
+		}
 	}
-}
+};
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
  * Blocks that are moving should stop moving, but actions should not be triggered.
  */
@@ -227,8 +251,11 @@ TouchReceiver.touchInterrupt=function(){
 		else if(TR.targetType=="button"){
 			TR.target.interrupt(); //Remove the highlight without triggering the action.
 		}
+		else if(TR.targetType=="palette"){
+			BlockPalette.endScroll();
+		}
 	}
-}
+};
 /* Adds handlerDown listeners to the parts of a CategoryBN.
  * @param {SVG element} element - The part of the CategoryBN the listeners are being applied to.
  * @param {Category} category - The category of the CategoryBN.
@@ -241,7 +268,7 @@ TouchReceiver.addListenersCat=function(element,category){
 		//When it is touched, the SVG element will tell the TouchReceiver its Category.
 		TouchReceiver.touchStartCatBN(this.category,e);
 	}, false);
-}
+};
 /* Adds handlerDown listeners to the parts of a Block.
  * @param {SVG element} element - The part of the Block the listeners are being applied to.
  * @param {Block} parent - The Block the SVG element belongs to.
@@ -255,7 +282,7 @@ TouchReceiver.addListenersChild=function(element,parent){
 		//When it is touched, the SVG element will tell the TouchReceiver its Block.
 		TouchReceiver.touchStartBlock(this.parent,e);
 	}, false);
-}
+};
 /* Adds handlerDown listeners to the parts of a Slot.
  * @param {SVG element} element - The part of the Slot the listeners are being applied to.
  * @param {Slot} slot - The Slot the SVG element belongs to.
@@ -267,7 +294,7 @@ TouchReceiver.addListenersSlot=function(element,slot){
 		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
 		TouchReceiver.touchStartSlot(this.slot,e);
 	}, false);
-}
+};
 /* Adds handlerDown listeners to the parts of a Button.
  * @param {SVG element} element - The part of the Button the listeners are being applied to.
  * @param {Button} parent - The Button the SVG element belongs to.
@@ -280,4 +307,13 @@ TouchReceiver.addListenersBN=function(element,parent){
 		//When it is touched, the SVG element will tell the TouchReceiver its Button.
 		TouchReceiver.touchStartBN(this.parent,e);
 	}, false);
-}
+};
+/* Adds handlerDown listeners to the background of the Palette. Used for scrolling.
+ */
+TouchReceiver.addListenersPalette=function(element){
+	var TR=TouchReceiver;
+	element.addEventListener(TR.handlerDown, function(e) {
+		//When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartPalette(e);
+	}, false);
+};

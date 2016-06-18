@@ -1,10 +1,11 @@
-function DisplayStack(firstBlock,group){
+function DisplayStack(firstBlock,group,category){
 	//this.index=CodeManager.addStack(this); //Universal codeManager needed
 	this.firstBlock=firstBlock;
 	this.type=firstBlock.type;
 	this.x=firstBlock.getAbsX();
 	this.y=firstBlock.getAbsY();
 	this.group=GuiElements.create.group(this.x,this.y,group);
+	this.category=category;
 	this.firstBlock.changeStack(this);
 	this.dim=function(){};
 	this.dim.cw; //Dimensions of regions command blocks can be attached to.
@@ -43,10 +44,10 @@ DisplayStack.prototype.updateDim=function() {
 	this.dim.ry1+=this.getAbsY();
 }
 DisplayStack.prototype.getAbsX=function(){
-	return this.x+BlockPalette.getAbsX();
+	return this.x+this.category.getAbsX();
 }
 DisplayStack.prototype.getAbsY=function(){//Fix
-	return this.y+BlockPalette.getAbsY();
+	return this.y+this.category.getAbsY();
 }
 //DisplayStack.prototype.findBestFit=function()
 DisplayStack.prototype.move=function(x,y){

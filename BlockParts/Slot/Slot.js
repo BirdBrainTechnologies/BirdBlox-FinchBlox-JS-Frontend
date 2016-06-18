@@ -80,7 +80,7 @@ Slot.prototype.updateAlign=function(x,y){
 	else{
 		this.x=x; //Sets this Slot's x.
 		this.y=y-this.height/2; //Converts y to make it relative to top of Block.
-		this.moveSlot(xCoord,yCoord); //Implemented by subclasses. Moves all parts of the Slot to new location.
+		this.moveSlot(this.x,this.y); //Implemented by subclasses. Moves all parts of the Slot to new location.
 		return this.width;
 	}
 };
