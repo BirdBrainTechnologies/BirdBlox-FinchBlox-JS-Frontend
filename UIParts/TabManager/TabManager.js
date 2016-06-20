@@ -4,7 +4,9 @@ function TabManager(){
 	TM.tabList=new Array();
 	TM.activeTab=null;
 	TM.createInitialTab();
+	TabManager.createTabSpaceBg();
 	TM.isRunning=false;
+	TM.scrolling=false;
 }
 TabManager.setGraphics=function(){
 	var TM=TabManager;
@@ -26,6 +28,12 @@ TabManager.setGraphics=function(){
 	TM.tabAreaX=BlockPalette.width;
 	TM.tabAreaY=TitleBar.height;
 	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
+
+	TM.tabSpaceX=BlockPalette.width;
+	TM.tabSpaceY=TitleBar.height+TM.tabAreaHeight;
+	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
+	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
+	TM.spaceScrollMargin=50;
 }
 TabManager.buildTabBar=function(){
 	var TM=TabManager;
@@ -33,7 +41,13 @@ TabManager.buildTabBar=function(){
 	GuiElements.layers.TabsBg.appendChild(TM.bgRect);
 	TM.tabBarG=GuiElements.create.group(TM.tabAreaX,TM.tabAreaY);
 	GuiElements.layers.TabsBg.appendChild(TM.tabBarG);
-}
+};
+TabManager.createTabSpaceBg=function(){
+	var TM=TabManager;
+	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
+	TouchReceiver.addListenersTabSpace(TM.bgRect)
+	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
+};
 TabManager.updatePositions=function(){
 	var x=0;
 	for(var i=0;i<TabManager.tabList.length;i++){
@@ -86,3 +100,23 @@ TabManager.startRun=function(){
 	TabManager.isRunning=true;
 	CodeManager.startUpdateTimer();
 }
+TabManager.startScoll=function(x,y){
+	var TM=TabManager;
+	if(!TM.scrolling){
+		TM.scrolling=true;
+		TM.activeTab.startScroll(x,y);
+	}
+};
+TabManager.updateScroll=function (x,y){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.activeTab.updateScroll(x,y);
+	}
+};
+TabManager.endScroll=function(){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.scrolling=false;
+		TM.activeTab.endScroll();
+	}
+};

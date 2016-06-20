@@ -113,7 +113,7 @@ GuiElements.create.group=function(x,y,parent){
 GuiElements.create.layer=function(){
 	var layer=GuiElements.create.group(0,0,GuiElements.svg);
 	return layer;
-}
+};
 /* Creates a linear SVG gradient and adds it to the SVG defs.
  * @param {text} id - The id of the gradient (needed to reference it later).
  * @param {string} color1 - color in form "#fff" of the top of the gradient.

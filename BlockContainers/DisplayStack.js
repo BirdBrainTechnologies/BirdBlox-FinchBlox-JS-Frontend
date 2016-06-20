@@ -81,8 +81,9 @@ DisplayStack.prototype.endRun=function(){
 	this.isRunning=false;
 }
 DisplayStack.prototype.duplicate=function(x,y){
+	var tab=TabManager.activeTab;
 	var firstCopyBlock=this.firstBlock.duplicate(x,y);
-	var copyStack=new BlockStack(firstCopyBlock,TabManager.activeTab);
+	var copyStack=new BlockStack(firstCopyBlock,tab);
 	return copyStack;
 }
 //DisplayStack.prototype.findBestFitTop=function()

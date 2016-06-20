@@ -157,6 +157,15 @@ TouchReceiver.touchStartPalette=function(e){
 		TR.target=null; //The type is all that is important. There is only one palette.
 	}
 };
+TouchReceiver.touchStartTabSpace=function(e){
+	var TR=TouchReceiver;
+	e.preventDefault(); //Stops 300 ms delay events
+	if(!TR.touchDown){
+		TR.touchDown=true;
+		TR.targetType="tabSpace";
+		TR.target=null;
+	}
+};
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
@@ -204,6 +213,15 @@ TouchReceiver.touchmove=function(e){
 				BlockPalette.updateScroll(TR.getX(e),TR.getY(e));
 			}
 		}
+		//If the user drags the tab space, it should scroll.
+		if(TR.targetType=="tabSpace"){
+			if(!TabManager.scrolling){
+				TabManager.startScoll(TR.getX(e),TR.getY(e));
+			}
+			else{
+				TabManager.updateScroll(TR.getX(e),TR.getY(e));
+			}
+		}
 	}
 };
 /* Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
@@ -233,6 +251,9 @@ TouchReceiver.touchend=function(e){
 		else if(TR.targetType=="palette"){
 			BlockPalette.endScroll();
 		}
+		else if(TR.targetType=="tabSpace"){
+			TabManager.endScroll();
+		}
 	}
 };
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
@@ -253,6 +274,9 @@ TouchReceiver.touchInterrupt=function(){
 		}
 		else if(TR.targetType=="palette"){
 			BlockPalette.endScroll();
+		}
+		else if(TR.targetType=="tabSpace"){
+			TabManager.endScroll();
 		}
 	}
 };
@@ -315,5 +339,14 @@ TouchReceiver.addListenersPalette=function(element){
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartPalette(e);
+	}, false);
+};
+/* Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
+ */
+TouchReceiver.addListenersTabSpace=function(element){
+	var TR=TouchReceiver;
+	element.addEventListener(TR.handlerDown, function(e) {
+		//When it is touched, the SVG element will tell the TabManager.
+		TouchReceiver.touchStartTabSpace(e);
 	}, false);
 };

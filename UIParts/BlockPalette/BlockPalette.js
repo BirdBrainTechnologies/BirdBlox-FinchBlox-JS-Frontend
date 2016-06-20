@@ -91,7 +91,7 @@ BlockPalette.updateScroll=function (x,y){
 		BP.selectedCat.updateScroll(x,y);
 	}
 };
-BlockPalette.endScroll=function(x,y){
+BlockPalette.endScroll=function(){
 	var BP=BlockPalette;
 	if(BP.scrolling){
 		BP.scrolling=false;

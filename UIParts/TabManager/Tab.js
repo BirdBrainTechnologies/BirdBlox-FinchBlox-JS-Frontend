@@ -10,6 +10,16 @@ function Tab(sprite,name){
 	TabManager.addTab(this);
 	this.stackList=new Array();
 	this.isRunning=false;
+	this.scrolling=false;
+	this.scrollXOffset=0;
+	this.scrollYOffset=0;
+	this.dim=function(){};
+	this.dim.x1=0;
+	this.dim.y1=0;
+	this.dim.x2=0;
+	this.dim.y2=0;
+	this.dim.width=0;
+	this.dim.height=0;
 }
 Tab.prototype.generatePath=function(){
 	var TM=TabManager;
@@ -63,12 +73,24 @@ Tab.prototype.removeStack=function(stack){
 Tab.prototype.getSprite=function(){
 	return this.sprite;
 }
+Tab.prototype.relToAbsX=function(x){
+	return x+this.scrollX;
+};
+Tab.prototype.relToAbsY=function(y){
+	return y+this.scrollY;
+};
+Tab.prototype.absToRelX=function(x){
+	return x-this.scrollX;
+};
+Tab.prototype.absToRelY=function(y){
+	return y-this.scrollY;
+};
 Tab.prototype.getAbsX=function(){
-	return this.scrollX;
-}
+	return this.relToAbsX(0);
+};
 Tab.prototype.getAbsY=function(){
-	return this.scrollY;
-}
+	return this.relToAbsY(0);
+};
 Tab.prototype.findBestFit=function(){
 	var stacks=this.stackList;
 	for(var i=0;i<stacks.length;i++){
@@ -104,3 +126,84 @@ Tab.prototype.startRun=function(){
 	this.isRunning=true;
 	TabManager.startRun();
 }
+Tab.prototype.startScroll=function(x,y){
+	if(!this.scrolling) {
+		this.scrolling = true;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		this.updateTabDim();
+	}
+};
+Tab.prototype.updateScroll=function(x,y){
+	if(this.scrolling) {
+		this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
+	}
+};
+Tab.prototype.scroll=function(x,y) {
+	this.scrollX=x;
+	this.scrollY=y;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	/*var dim=this.dim;
+	var x1=x+dim.xDiff;
+	var y1=y+dim.yDiff;
+
+
+	var newObjX=this.scrollOneVal(dim.x1+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
+	//var newObjY=this.scrollOneVal(dim.y1+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
+	this.scrollX=newObjX-dim.xDiff-this.scrollX;
+	//this.scrollY=newObjY-dim.yDiff-this.scrollY;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);*/
+};
+Tab.prototype.endScroll=function(){
+	this.scrolling=false;
+};
+Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
+	return targetX;
+	var minX;
+	var maxX;
+	if(objectW<containerW){
+		if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
+			GuiElements.alert("Test1");
+			return objectX;
+		}
+		GuiElements.alert("Test2");
+		minX=Math.min(containerX,objectX);
+		maxX=Math.max(containerX+containerW-objectW,objectX);
+	}
+	else{
+		GuiElements.alert("Test3");
+		minX=Math.min(containerX+containerW-objectW,objectX);
+		maxX=Math.max(containerX,objectX);
+	}
+	var rVal=targetX;
+	return rVal;
+	rVal=Math.min(rVal,maxX);
+	rVal=Math.max(rVal,minX);
+};
+Tab.prototype.updateTabDim=function(){
+	var dim=this.dim;
+	dim.width=0;
+	dim.height=0;
+	dim.x1=null;
+	dim.y1=null;
+	dim.x2=null;
+	dim.y2=null;
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		stacks[i].updateTabDim();
+	}
+	if(dim.x1==null){
+		dim.x1=0;
+		dim.y1=0;
+		dim.x2=0;
+		dim.y2=0;
+	}
+	dim.x1-=TabManager.spaceScrollMargin;
+	dim.y1-=TabManager.spaceScrollMargin;
+	dim.x2+=TabManager.spaceScrollMargin;
+	dim.y2+=TabManager.spaceScrollMargin;
+	dim.width=dim.x2-dim.x1;
+	dim.height=dim.y2-dim.y1;
+	dim.xDiff=this.dim.x1-this.scrollX;
+	dim.yDiff=this.dim.y1-this.scrollY;
+};
