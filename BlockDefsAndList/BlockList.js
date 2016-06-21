@@ -41,68 +41,68 @@ BlockList.catCount=function(){
 /* The following functions populate a Category for the BlockPalette.
  * @param {Category} category - the Category object to populate.
  * Each function has the same structure.
- * Blocks are added with category.addBlock(blockNameAsString) and spaces between groups with category.addSpace().
+ * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 BlockList.populateCat_hummingbird=function(category){
-	category.addBlock("B_HBServo");
-	category.addBlock("B_HBMotor");
-	category.addBlock("B_HBVibration");
+	category.addBlockByName("B_HBServo");
+	category.addBlockByName("B_HBMotor");
+	category.addBlockByName("B_HBVibration");
 	category.addSpace();
-	category.addBlock("B_HBLed");
-	category.addBlock("B_HBTriLed");
+	category.addBlockByName("B_HBLed");
+	category.addBlockByName("B_HBTriLed");
 	category.addSpace();
-	category.addBlock("B_HBLight");
-	category.addBlock("B_HBTempC");
-	category.addBlock("B_HBTempF");
-	category.addBlock("B_HBDistCM");
-	category.addBlock("B_HBDistInch");
-	category.addBlock("B_HBKnob");
-	category.addBlock("B_HBSound");
+	category.addBlockByName("B_HBLight");
+	category.addBlockByName("B_HBTempC");
+	category.addBlockByName("B_HBTempF");
+	category.addBlockByName("B_HBDistCM");
+	category.addBlockByName("B_HBDistInch");
+	category.addBlockByName("B_HBKnob");
+	category.addBlockByName("B_HBSound");
 	category.trimBottom();
 };
 BlockList.populateCat_motion=function(category){
-	category.addBlock("B_Move");
-	category.addBlock("B_TurnRight");
-	category.addBlock("B_TurnLeft");
+	category.addBlockByName("B_Move");
+	category.addBlockByName("B_TurnRight");
+	category.addBlockByName("B_TurnLeft");
 	category.addSpace();
-	category.addBlock("B_PointInDirection");
-	category.addBlock("B_PointTowards");
+	category.addBlockByName("B_PointInDirection");
+	category.addBlockByName("B_PointTowards");
 	category.addSpace();
-	category.addBlock("B_GoToXY");
-	category.addBlock("B_GoTo");
-	category.addBlock("B_GlideToXY");
+	category.addBlockByName("B_GoToXY");
+	category.addBlockByName("B_GoTo");
+	category.addBlockByName("B_GlideToXY");
 	category.addSpace();
-	category.addBlock("B_ChangeXBy");
-	category.addBlock("B_SetXTo");
-	category.addBlock("B_ChangeYBy");
-	category.addBlock("B_SetYTo");
+	category.addBlockByName("B_ChangeXBy");
+	category.addBlockByName("B_SetXTo");
+	category.addBlockByName("B_ChangeYBy");
+	category.addBlockByName("B_SetYTo");
 	category.addSpace();
-	category.addBlock("B_IfOnEdgeBounce");
+	category.addBlockByName("B_IfOnEdgeBounce");
 	category.addSpace();
-	category.addBlock("B_XPosition");
-	category.addBlock("B_YPosition");
-	category.addBlock("B_Direction");
+	category.addBlockByName("B_XPosition");
+	category.addBlockByName("B_YPosition");
+	category.addBlockByName("B_Direction");
 	category.trimBottom();
 }
 BlockList.populateCat_looks=function(category){
-	category.addBlock("B_alert");
-	category.addBlock("B_SetTitleBarColor");
+	category.addBlockByName("B_alert");
+	category.addBlockByName("B_SetTitleBarColor");
 	category.addSpace();
-	category.addBlock("B_SayForSecs");
-	category.addBlock("B_Say");
-	category.addBlock("B_ThinkForSecs");
-	category.addBlock("B_Think");
+	category.addBlockByName("B_SayForSecs");
+	category.addBlockByName("B_Say");
+	category.addBlockByName("B_ThinkForSecs");
+	category.addBlockByName("B_Think");
 	category.addSpace();
-	category.addBlock("B_ChangeSizeBy");
-	category.addBlock("B_SetSizeTo");
-	category.addBlock("B_Size");
+	category.addBlockByName("B_ChangeSizeBy");
+	category.addBlockByName("B_SetSizeTo");
+	category.addBlockByName("B_Size");
 	category.addSpace();
-	category.addBlock("B_Show");
-	category.addBlock("B_Hide");
+	category.addBlockByName("B_Show");
+	category.addBlockByName("B_Hide");
 	category.addSpace();
-	category.addBlock("B_GoToFront");
-	category.addBlock("B_GoBackLayers");
+	category.addBlockByName("B_GoToFront");
+	category.addBlockByName("B_GoBackLayers");
 	category.trimBottom();
 }
 BlockList.populateCat_sound=function(category){
@@ -112,83 +112,96 @@ BlockList.populateCat_pen=function(category){
 	
 }
 BlockList.populateCat_ipad=function(category){
-	category.addBlock("B_DeviceShaken");
-	category.addBlock("B_DeviceLocation");
-	category.addBlock("B_DeviceSSID");
-	category.addBlock("B_DevicePressure");
-	category.addBlock("B_DeviceRelativeAltitude");
-	category.addBlock("B_DeviceAcceleration");
-	category.addBlock("B_DeviceOrientation");
+	category.addBlockByName("B_DeviceShaken");
+	category.addBlockByName("B_DeviceLocation");
+	category.addBlockByName("B_DeviceSSID");
+	category.addBlockByName("B_DevicePressure");
+	category.addBlockByName("B_DeviceRelativeAltitude");
+	category.addBlockByName("B_DeviceAcceleration");
+	category.addBlockByName("B_DeviceOrientation");
 	category.trimBottom();
 }
 BlockList.populateCat_control=function(category){
-	category.addBlock("B_WhenFlagTapped");
-	category.addBlock("B_WhenIAmTapped");
-	category.addBlock("B_WhenIReceive");
+	category.addBlockByName("B_WhenFlagTapped");
+	category.addBlockByName("B_WhenIAmTapped");
+	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
-	category.addBlock("B_Broadcast");
-	category.addBlock("B_BroadcastAndWait");
-	category.addBlock("B_Message");
+	category.addBlockByName("B_Broadcast");
+	category.addBlockByName("B_BroadcastAndWait");
+	category.addBlockByName("B_Message");
 	category.addSpace();
-	category.addBlock("B_Wait");
-	category.addBlock("B_WaitUntil");
+	category.addBlockByName("B_Wait");
+	category.addBlockByName("B_WaitUntil");
 	category.addSpace();
-	category.addBlock("B_Forever");
-	category.addBlock("B_Repeat");
-	category.addBlock("B_RepeatUntil");
+	category.addBlockByName("B_Forever");
+	category.addBlockByName("B_Repeat");
+	category.addBlockByName("B_RepeatUntil");
 	category.addSpace();
-	category.addBlock("B_If");
-	category.addBlock("B_IfElse");
+	category.addBlockByName("B_If");
+	category.addBlockByName("B_IfElse");
 	category.addSpace();
-	category.addBlock("B_StopAll");
-	category.addBlock("B_StopAllBut");
+	category.addBlockByName("B_StopAll");
+	category.addBlockByName("B_StopAllBut");
 	category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){
-	category.addBlock("B_Touching");
+	category.addBlockByName("B_Touching");
 	category.addSpace();
-	category.addBlock("B_Ask");
-	category.addBlock("B_Answer");
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Answer");
 	category.addSpace();
-	category.addBlock("B_TouchX");
-	category.addBlock("B_TouchY");
+	category.addBlockByName("B_TouchX");
+	category.addBlockByName("B_TouchY");
 	category.addSpace();
-	category.addBlock("B_DistanceTo");
+	category.addBlockByName("B_DistanceTo");
 	category.addSpace();
-	category.addBlock("B_ResetTimer");
-	category.addBlock("B_Timer");
+	category.addBlockByName("B_ResetTimer");
+	category.addBlockByName("B_Timer");
 	category.addSpace();
-	category.addBlock("B_CurrentTime");
+	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
 	
 }
 BlockList.populateCat_operators=function(category){
-	category.addBlock("B_Add");
-	category.addBlock("B_Subtract");
-	category.addBlock("B_Multiply");
-	category.addBlock("B_Divide");
+	category.addBlockByName("B_Add");
+	category.addBlockByName("B_Subtract");
+	category.addBlockByName("B_Multiply");
+	category.addBlockByName("B_Divide");
 	category.addSpace();
-	category.addBlock("B_Round");
-	category.addBlock("B_mathOfNumber");
-	category.addBlock("B_PickRandom");
+	category.addBlockByName("B_Round");
+	category.addBlockByName("B_mathOfNumber");
+	category.addBlockByName("B_PickRandom");
 	category.addSpace();
-	category.addBlock("B_LessThan");
-	category.addBlock("B_EqualTo");
-	category.addBlock("B_GreaterThan");
+	category.addBlockByName("B_LessThan");
+	category.addBlockByName("B_EqualTo");
+	category.addBlockByName("B_GreaterThan");
 	category.addSpace();
-	category.addBlock("B_And");
-	category.addBlock("B_Or");
-	category.addBlock("B_Not");
+	category.addBlockByName("B_And");
+	category.addBlockByName("B_Or");
+	category.addBlockByName("B_Not");
 	category.addSpace();
-	category.addBlock("B_True");
-	category.addBlock("B_False");
+	category.addBlockByName("B_True");
+	category.addBlockByName("B_False");
 	category.addSpace();
-	category.addBlock("B_LetterOf");
-	category.addBlock("B_LengthOf");
-	category.addBlock("B_join");
+	category.addBlockByName("B_LetterOf");
+	category.addBlockByName("B_LengthOf");
+	category.addBlockByName("B_join");
 	category.trimBottom();
 	
 }
+// @fix Write Documentation.
 BlockList.populateCat_variables=function(category){
-	
-}
+	var callbackFn=function(){
+		CodeManager.newVariable();
+	};
+	category.addButton("Create variable",150,25,callbackFn);
+	category.addSpace();
+	var variables=CodeManager.variableList;
+	if(variables.length>0){
+		for(var i=0;i<variables.length;i++){
+			category.addVariableBlock(variables[i]);
+		}
+		category.addBlockByName("B_SetTo");
+		category.addBlockByName("B_ChangeBy");
+	}
+};

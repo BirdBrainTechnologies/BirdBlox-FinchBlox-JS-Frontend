@@ -568,6 +568,9 @@ Block.prototype.duplicate=function(x,y){
 		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
 		myCopy.nextBlock.parent=myCopy;
 	}
+	if(this.variable!=null){ //Copy variable data if this is a variable Block.
+		myCopy.variable=this.variable;
+	}
 	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
 	return myCopy; //Return finished Block.
 };

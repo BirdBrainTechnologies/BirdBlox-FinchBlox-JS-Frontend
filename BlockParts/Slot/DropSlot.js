@@ -121,6 +121,7 @@ DropSlot.prototype.edit=function(){
 		var y=this.getAbsY();
 		this.select();
 		InputPad.resetPad();
+		this.populateList(); //Loads any dynamic options.
 		for(var i=0;i<this.optionsText.length;i++){
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
@@ -174,4 +175,8 @@ DropSlot.prototype.getData=function(){
 	else{
 		return this.enteredData;
 	}
+}
+DropSlot.prototype.clearOptions=function(){
+	this.optionsText=new Array();
+	this.optionsData=new Array();
 }

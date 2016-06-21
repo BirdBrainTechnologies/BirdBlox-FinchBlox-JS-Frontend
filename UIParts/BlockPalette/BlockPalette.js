@@ -22,6 +22,10 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.mainHMargin=10;
 	BlockPalette.blockMargin=5;
 	BlockPalette.sectionMargin=10;
+
+	BlockPalette.bnDefaultFont="Arial";
+	BlockPalette.bnDefaultFontSize=16;
+	BlockPalette.bnDefaultFontCharHeight=12;
 }
 BlockPalette.createCatBg=function(){
 	var BP=BlockPalette;

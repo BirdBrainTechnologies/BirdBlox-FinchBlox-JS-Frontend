@@ -15,7 +15,8 @@ function CodeManager(){
 	move.width=0; //The width of the BlockStack.
 	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
 	move.returnType;
-	
+
+	CodeManager.variableList=new Array();
 	CodeManager.isRunning=false; //Are at least some Blocks currently executing?
 	//Stores information used when determine which slot is closest to the moving stack.
 	CodeManager.fit=function(){};
@@ -236,3 +237,25 @@ CodeManager.updateDialogDelay=function(){
 	var now=new Date().getTime();
 	CM.lastDialogDisplayTime=now;
 }
+/* @fix Write documentation.
+ */
+CodeManager.addVariable=function(variable){
+	CodeManager.variableList.push(variable);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeVariable=function(variable){
+	var index=CodeManager.variableList.indexOf(variable);
+	CodeManager.variableList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newVariable=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled) {
+			new Variable(result);
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+};

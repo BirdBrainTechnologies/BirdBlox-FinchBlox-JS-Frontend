@@ -98,3 +98,6 @@ DisplayStack.prototype.getSprite=function(){
 		return null;
 	}
 }
+DisplayStack.prototype.delete=function(){
+	this.group.remove();
+};

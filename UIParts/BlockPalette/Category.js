@@ -14,6 +14,8 @@ function Category(buttonX,buttonY,index){
 	this.lastHadStud=false;
 	this.button=this.createButton();
 	this.blocks=new Array();
+	this.displayStacks=new Array();
+	this.buttons=new Array();
 	this.fillGroup();
 	this.scrolling=false;
 	this.scrollXOffset=0;
@@ -29,8 +31,33 @@ Category.prototype.createGroup=function(){
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
 }
-Category.prototype.addBlock=function(blockName){
+Category.prototype.clearGroup=function(){
+	for(var i=0;i<this.displayStacks.length;i++){
+		this.displayStacks[i].delete();
+	}
+	this.blocks=new Array();
+	this.displayStacks=new Array();
+	for(var i=0;i<this.buttons.length;i++){
+		this.buttons[i].remove();
+	}
+	this.buttons=new Array();
+	this.currentBlockX=BlockPalette.mainHMargin;
+	this.currentBlockY=BlockPalette.mainVMargin;
+	this.lastHadStud=false;
+};
+Category.prototype.refreshGroup=function(){
+	this.clearGroup();
+	this.fillGroup();
+};
+Category.prototype.addBlockByName=function(blockName){
 	var block=new window[blockName](this.currentBlockX,this.currentBlockY);
+	this.addBlock(block);
+}
+Category.prototype.addVariableBlock=function(variable){
+	var block=new B_Variable(this.currentBlockX,this.currentBlockY,variable);
+	this.addBlock(block);
+}
+Category.prototype.addBlock=function(block){
 	this.blocks.push(block);
 	if(this.lastHadStud&&!block.topOpen){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
@@ -40,8 +67,9 @@ Category.prototype.addBlock=function(blockName){
 		this.currentBlockY+=BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX,this.currentBlockY);
 	}
-	this.displayStack=new DisplayStack(block,this.group,this);
-	height=this.displayStack.firstBlock.height;
+	var displayStack=new DisplayStack(block,this.group,this);
+	this.displayStacks.push(displayStack);
+	height=displayStack.firstBlock.height;
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.lastHadStud=false;
@@ -49,9 +77,19 @@ Category.prototype.addBlock=function(blockName){
 		this.lastHadStud=true;
 	}
 }
+
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
+Category.prototype.addButton=function(text,width,height,callback){
+	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
+	var BP=BlockPalette;
+	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
+	button.setCallbackFunction(callback,true);
+	this.currentBlockY+=height;
+	this.currentBlockY+=BlockPalette.blockMargin;
+	this.buttons.push(button);
+};
 Category.prototype.trimBottom=function(){
 	if(this.lastHadStud){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
