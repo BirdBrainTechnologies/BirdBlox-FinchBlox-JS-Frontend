@@ -217,7 +217,7 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 
 
 function B_DeviceLocation(x,y){
-	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.list);
+	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
 	var dS=new DropSlot(this);
 	dS.addOption("Latitude",new SelectionData(0));
