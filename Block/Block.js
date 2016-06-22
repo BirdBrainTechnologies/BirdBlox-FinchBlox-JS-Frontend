@@ -571,6 +571,9 @@ Block.prototype.duplicate=function(x,y){
 	if(this.variable!=null){ //Copy variable data if this is a variable Block.
 		myCopy.variable=this.variable;
 	}
+	if(this.list!=null){ //Copy list data if this is a list Block.
+		myCopy.list=this.list;
+	}
 	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
 	return myCopy; //Return finished Block.
 };

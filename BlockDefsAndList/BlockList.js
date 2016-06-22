@@ -201,7 +201,28 @@ BlockList.populateCat_variables=function(category){
 		for(var i=0;i<variables.length;i++){
 			category.addVariableBlock(variables[i]);
 		}
+		category.addSpace();
 		category.addBlockByName("B_SetTo");
 		category.addBlockByName("B_ChangeBy");
+	}
+	callbackFn=function(){
+		CodeManager.newList();
+	};
+	category.addSpace();
+	category.addButton("Create list",150,25,callbackFn);
+	category.addSpace();
+	var lists=CodeManager.listList;
+	if(lists.length>0){
+		for(var i=0;i<lists.length;i++){
+			category.addListBlock(lists[i]);
+		}
+		category.addSpace();
+		category.addBlockByName("B_AddToList");
+		category.addBlockByName("B_DeleteItemOfList");
+		category.addBlockByName("B_InsertItemAtOfList");
+		category.addBlockByName("B_ReplaceItemOfListWith");
+		category.addBlockByName("B_ItemOfList");
+		category.addBlockByName("B_LengthOfList");
+		category.addBlockByName("B_ListContainsItem");
 	}
 };

@@ -52,11 +52,15 @@ Category.prototype.refreshGroup=function(){
 Category.prototype.addBlockByName=function(blockName){
 	var block=new window[blockName](this.currentBlockX,this.currentBlockY);
 	this.addBlock(block);
-}
+};
 Category.prototype.addVariableBlock=function(variable){
 	var block=new B_Variable(this.currentBlockX,this.currentBlockY,variable);
 	this.addBlock(block);
-}
+};
+Category.prototype.addListBlock=function(list){
+	var block=new B_List(this.currentBlockX,this.currentBlockY,list);
+	this.addBlock(block);
+};
 Category.prototype.addBlock=function(block){
 	this.blocks.push(block);
 	if(this.lastHadStud&&!block.topOpen){
@@ -82,6 +86,9 @@ Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
 Category.prototype.addButton=function(text,width,height,callback){
+	if(this.lastHadStud){
+		this.currentBlockY+=BlockGraphics.command.bumpDepth;
+	}
 	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
 	var BP=BlockPalette;
 	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
@@ -89,6 +96,7 @@ Category.prototype.addButton=function(text,width,height,callback){
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.buttons.push(button);
+	this.lastHadStud=false;
 };
 Category.prototype.trimBottom=function(){
 	if(this.lastHadStud){

@@ -174,37 +174,8 @@ B_EqualTo.prototype.constructor = B_EqualTo;
 B_EqualTo.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var string1=data1.asString().getValue();
-	var string2=data2.asString().getValue();
-	var numD1=data1.asNum();
-	var numD2=data2.asNum();
-	var types=Data.types;
-	var isValid=data1.isValid&&data2.isValid;
-	if(data1.type==data2.type){ //If the types match, just compare directly.
-		this.resultData=new BoolData(isValid&&val1==val2); //Invalid data is never equal.
-	}
-	else if(data1.type==types.string||data2.type==types.string){ //If one is a string...
-		if(string1==string2) { //If both strings match, result is true.
-			this.resultData = new BoolData(true);
-		}
-		else if(data1.type==types.num||data2.type==types.num){ //Still the numbers could match like "3.0"=3.
-			if(numD1.isValid&&numD2.isValid){ //If both are valid numbers...
-				this.resultData = new BoolData(numD1.getValue()==numD2.getValue()); //Compare numerical values.
-			}
-			else{
-				this.resultData = new BoolData(false); //A string and unequal/invalid number are not equal.
-			}
-		}
-		else{
-			this.resultData = new BoolData(false); //Two unequal, nonnumerical strings are unequal.
-		}
-	}
-	else{
-		this.resultData = new BoolData(false); //If the types don't match and neither is a string, they are unequal.
-	}
-	return false; //Done running
+	this.resultData=Data.checkEquality(data1,data2);
+	return false;
 };
 
 

@@ -22,7 +22,7 @@ Colors.setCategory=function(){
 	Colors.sensing="#019EFF";
 	Colors.operators="#44FF00";
 	Colors.variables="#FF5B00";
-	Colors.lists="#f00";
+	Colors.lists="#FF0000";
 }
 Colors.setMultipliers=function(){
 	Colors.gradStart=1;
@@ -35,16 +35,20 @@ Colors.createGradients=function(){
 	Colors.createGradientSet("gradient_dark_",Colors.gradDarkStart,Colors.gradDarkEnd);
 }
 Colors.createGradientSet=function(name,multStart,multEnd){
-	var darken=Colors.darkenColor;
 	var categoryCount=BlockList.catCount();
 	for(var i=0; i<categoryCount;i++){
-		var category=BlockList.getCatId(i);
-		var color=Colors[category];
-		var color1=darken(color,multStart);
-		var color2=darken(color,multEnd);
-		GuiElements.create.gradient(name+category,color1,color2);
+		var catId=BlockList.getCatId(i);
+		var color=Colors[catId];
+		Colors.createGradientFromColorAndMults(name,catId,color,multStart,multEnd);
 	}
-}
+	Colors.createGradientFromColorAndMults(name,"lists",Colors.lists,multStart,multEnd);
+};
+Colors.createGradientFromColorAndMults=function(name,catId,color,multStart,multEnd){
+	var darken=Colors.darkenColor;
+	var color1=darken(color,multStart);
+	var color2=darken(color,multEnd);
+	GuiElements.create.gradient(name+catId,color1,color2);
+};
 Colors.darkenColor=function(color,amt){
 	// Source:
 	// stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors

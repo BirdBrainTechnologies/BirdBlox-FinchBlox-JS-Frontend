@@ -16,9 +16,9 @@ BoolData.prototype.asBool=function(){
 }
 BoolData.prototype.asString=function(){
 	if(this.getValue()){
-		return new StringData("true",this.isValid);
+		return new StringData("true",true);
 	}
 	else{
-		return new StringData("false",this.isValid);
+		return new StringData("false",true);
 	}
 }

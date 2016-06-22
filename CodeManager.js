@@ -17,6 +17,7 @@ function CodeManager(){
 	move.returnType;
 
 	CodeManager.variableList=new Array();
+	CodeManager.listList=new Array();
 	CodeManager.isRunning=false; //Are at least some Blocks currently executing?
 	//Stores information used when determine which slot is closest to the moving stack.
 	CodeManager.fit=function(){};
@@ -258,4 +259,26 @@ CodeManager.newVariable=function(){
 		}
 	};
 	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.addList=function(list){
+	CodeManager.listList.push(list);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeList=function(list){
+	var index=CodeManager.listList.indexOf(list);
+	CodeManager.listList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newList=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled) {
+			new List(result);
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
 };
