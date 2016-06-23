@@ -95,8 +95,81 @@ B_Answer.prototype.startAction=function(){
 	return false; //Done running
 };
 
+function B_ResetTimer(x,y){
+	CommandBlock.call(this,x,y,"sensing");
+	this.addPart(new LabelText(this,"reset timer"));
+}
+B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
+B_ResetTimer.prototype.constructor = B_ResetTimer;
+B_ResetTimer.prototype.startAction=function(){
+	var now=new Date().getTime();
+	CodeManager.timerForSensingBlock=now;
+	return false;
+};
 
+function B_Timer(x,y){
+	ReporterBlock.call(this,x,y,"sensing");
+	this.addPart(new LabelText(this,"timer"));
+}
+B_Timer.prototype = Object.create(ReporterBlock.prototype);
+B_Timer.prototype.constructor = B_Timer;
+B_Timer.prototype.startAction=function(){
+	var now=new Date().getTime();
+	var start=CodeManager.timerForSensingBlock;
+	this.resultData=new NumData(Math.round((now-start)/100)/10);
+	return false;
+};
 
+function B_CurrentTime(x,y){
+	ReporterBlock.call(this,x,y,"sensing");
+	this.addPart(new LabelText(this,"current"));
+	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	dS.addOption("year",new SelectionData("year"));
+	dS.addOption("month",new SelectionData("month"));
+	dS.addOption("date",new SelectionData("date"));
+	dS.addOption("day of the week",new SelectionData("day of the week"));
+	dS.addOption("hour",new SelectionData("hour"));
+	dS.addOption("minute",new SelectionData("minute"));
+	dS.addOption("second",new SelectionData("second"));
+	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
+	dS.setSelectionData("date",new SelectionData("date"));
+	this.addPart(dS);
+}
+B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
+B_CurrentTime.prototype.constructor = B_CurrentTime;
+B_CurrentTime.prototype.startAction=function(){
+	var unitD=this.slots[0].getData();
+	if(unitD==null){
+		this.resultData=new NumData(0,false);
+		return false;
+	}
+	var unit=unitD.getValue();
+	if(unit=="year"){
+		this.resultData=new NumData(new Date().getFullYear());
+	}
+	else if(unit=="month"){
+		this.resultData=new NumData(new Date().getMonth()+1);
+	}
+	else if(unit=="date"){
+		this.resultData=new NumData(new Date().getDate());
+	}
+	else if(unit=="day of the week"){
+		this.resultData=new NumData(new Date().getDay()+1);
+	}
+	else if(unit=="hour"){
+		this.resultData=new NumData(new Date().getHours());
+	}
+	else if(unit=="minute"){
+		this.resultData=new NumData(new Date().getMinutes());
+	}
+	else if(unit=="second"){
+		this.resultData=new NumData(new Date().getSeconds());
+	}
+	else if(unit=="time in milliseconds"){
+		this.resultData=new NumData(new Date().getTime());
+	}
+	return false;
+};
 
 
 ///////////
@@ -130,34 +203,3 @@ function B_DistanceTo(x,y){
 }
 B_DistanceTo.prototype = Object.create(ReporterBlock.prototype);
 B_DistanceTo.prototype.constructor = B_DistanceTo;
-
-function B_ResetTimer(x,y){
-	CommandBlock.call(this,x,y,"sensing");
-	this.addPart(new LabelText(this,"reset timer"));
-}
-B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
-B_ResetTimer.prototype.constructor = B_ResetTimer;
-
-function B_Timer(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
-	this.addPart(new LabelText(this,"timer"));
-}
-B_Timer.prototype = Object.create(ReporterBlock.prototype);
-B_Timer.prototype.constructor = B_Timer;
-
-function B_CurrentTime(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
-	this.addPart(new LabelText(this,"current"));
-	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
-	dS.addOption("year",new SelectionData("year"));
-	dS.addOption("month",new SelectionData("month"));
-	dS.addOption("date",new SelectionData("date"));
-	dS.addOption("day of the week",new SelectionData("day of the week"));
-	dS.addOption("hour",new SelectionData("hour"));
-	dS.addOption("minute",new SelectionData("minute"));
-	dS.addOption("second",new SelectionData("second"));
-	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
-	this.addPart(dS);
-}
-B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
-B_CurrentTime.prototype.constructor = B_CurrentTime;

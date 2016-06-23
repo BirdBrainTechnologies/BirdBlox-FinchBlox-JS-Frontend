@@ -28,6 +28,7 @@ function CodeManager(){
 	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
 	CodeManager.repeatDialogDelay=500;
 	CodeManager.lastDialogDisplayTime=null;
+	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
