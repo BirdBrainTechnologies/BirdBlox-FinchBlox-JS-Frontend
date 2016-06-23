@@ -225,4 +225,5 @@ BlockList.populateCat_variables=function(category){
 		category.addBlockByName("B_LengthOfList");
 		category.addBlockByName("B_ListContainsItem");
 	}
+	category.trimBottom();
 };
