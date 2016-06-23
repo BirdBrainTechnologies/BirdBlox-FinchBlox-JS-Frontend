@@ -9,7 +9,7 @@ function BlockPalette(){
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.width=253;
-	BlockPalette.catH=170;
+	BlockPalette.catH=115; //170
 	BlockPalette.catVMargin=13;
 	BlockPalette.catHMargin=13;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;

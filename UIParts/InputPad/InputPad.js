@@ -58,9 +58,7 @@ InputPad.makeBg=function(){
 };
 InputPad.resetPad=function(){//removes any options which may have been added to the pad
 	var IP=InputPad;
-	if(IP.visible){
-		IP.close();
-	}
+	IP.close();
 	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
 };
 InputPad.addOption=function(text,data){
@@ -303,21 +301,23 @@ InputPad.updateSlot=function(){
 	}
 };
 InputPad.close=function(){
-	var IP=InputPad;
-	if(IP.isEditTextCommand){
-		IP.slot.editText();
+	var IP = InputPad;
+	if(IP.visible) {
+		if (IP.isEditTextCommand) {
+			IP.slot.editText();
+		}
+		else if (InputPad.dataIsNumeric) {
+			IP.slot.saveNumData(this.displayNum.getData());
+		}
+		else {
+			IP.slot.setSelectionData(IP.nonNumericText, IP.nonNumericData);
+		}
+		IP.group.remove();
+		IP.visible = false;
+		IP.menuBnList.hide();
+		IP.bnGroup.remove();
+		IP.removeUndo();
 	}
-	else if(InputPad.dataIsNumeric){
-		IP.slot.saveNumData(this.displayNum.getData());
-	}
-	else{
-		IP.slot.setSelectionData(IP.nonNumericText,IP.nonNumericData);
-	}
-	IP.group.remove();
-	IP.visible=false;
-	IP.menuBnList.hide();
-	IP.bnGroup.remove();
-	IP.removeUndo();
 };
 InputPad.menuBnSelected=function(text,data){
 	var IP=InputPad;

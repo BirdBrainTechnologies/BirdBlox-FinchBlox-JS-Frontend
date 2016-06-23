@@ -7,10 +7,10 @@ function BlockList(){
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
 	cat.push("Hummingbird"); //Capitalized in the way they are displayed on screen.
-	cat.push("Motion");
-	cat.push("Looks");
-	cat.push("Sound");
-	cat.push("Pen");
+	//cat.push("Motion");
+	//cat.push("Looks");
+	//cat.push("Sound");
+	//cat.push("Pen");
 	cat.push("iPad");
 	cat.push("Control");
 	cat.push("Sensing");
@@ -145,16 +145,16 @@ BlockList.populateCat_control=function(category){
 	category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){
-	category.addBlockByName("B_Touching");
-	category.addSpace();
+	//category.addBlockByName("B_Touching");
+	//category.addSpace();
 	category.addBlockByName("B_Ask");
 	category.addBlockByName("B_Answer");
 	category.addSpace();
-	category.addBlockByName("B_TouchX");
-	category.addBlockByName("B_TouchY");
-	category.addSpace();
-	category.addBlockByName("B_DistanceTo");
-	category.addSpace();
+	//category.addBlockByName("B_TouchX");
+	//category.addBlockByName("B_TouchY");
+	//category.addSpace();
+	//category.addBlockByName("B_DistanceTo");
+	//category.addSpace();
 	category.addBlockByName("B_ResetTimer");
 	category.addBlockByName("B_Timer");
 	category.addSpace();

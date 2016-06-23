@@ -113,6 +113,7 @@ function B_DeleteItemOfList(x,y){
 	var nS=new NumSlot(this,1,true,true);
 	nS.addOption("last",new SelectionData("last"));
 	nS.addOption("random",new SelectionData("random"));
+	nS.addOption("all",new SelectionData("all"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this));
@@ -125,9 +126,14 @@ B_DeleteItemOfList.prototype.startAction=function(){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
 		var array=list.getData().getValue();
-		if(indexD.isValid){
-			var index=indexD.getValueInR(1,array.length,true,true)-1;
-			array.splice(index,1);
+		if(indexD.type==Data.types.selection&&indexD.getValue()=="all"){
+			list.setData(new ListData());
+		}
+		else {
+			var index = list.getIndex(indexD);
+			if (index != null) {
+				array.splice(index, 1);
+			}
 		}
 	}
 	return false;
@@ -156,7 +162,18 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 		var list=listD.getValue();
 		var array=list.getData().getValue();
 		var itemD=this.slots[0].getData();
-		var index=indexD.getValueInR(1,array.length,true,true)-1;
+		var index=list.getIndex(indexD);
+		if(index==null){
+			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
+				if(itemD.isValid){
+					array.push(itemD);
+				}
+				else{
+					array.push(new StringData(itemD.asString()));
+				}
+			}
+			return false;
+		}
 		if(itemD.isValid){
 			array.splice(index, 0, itemD);
 		}
@@ -190,7 +207,10 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 		var list=listD.getValue();
 		var array=list.getData().getValue();
 		var itemD=this.slots[2].getData();
-		var index=indexD.getValueInR(1,array.length,true,true)-1;
+		var index=list.getIndex(indexD);
+		if(index==null){
+			return false;
+		}
 		if(itemD.isValid){
 			array[index]=itemD;
 		}
@@ -221,8 +241,13 @@ B_ItemOfList.prototype.startAction=function(){
 		var indexD = this.slots[0].getData();
 		var list = listD.getValue();
 		var array = list.getData().getValue();
-		var index = indexD.getValueInR(1, array.length, true, true) - 1;
-		this.resultData = array[index];
+		var index=list.getIndex(indexD);
+		if(index==null){
+			this.resultData = new StringData("", false);
+		}
+		else {
+			this.resultData = array[index];
+		}
 	}
 	else {
 		this.resultData = new StringData("", false);

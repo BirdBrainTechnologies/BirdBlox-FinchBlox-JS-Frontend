@@ -200,6 +200,7 @@ TouchReceiver.touchmove=function(e){
 				CodeManager.move.update(TR.getX(e),TR.getY(e));
 			}
 			else{
+				InputPad.close(); //Close InputPad if visible.
 				CodeManager.move.start(TR.target,TR.getX(e),TR.getY(e));
 				TR.blocksMoving=true;
 			}
@@ -207,6 +208,7 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the palette, it should scroll.
 		if(TR.targetType=="palette"){
 			if(!BlockPalette.scrolling){
+				InputPad.close(); //Close InputPad if visible.
 				BlockPalette.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{
@@ -216,6 +218,7 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the tab space, it should scroll.
 		if(TR.targetType=="tabSpace"){
 			if(!TabManager.scrolling){
+				InputPad.close(); //Close InputPad if visible.
 				TabManager.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{

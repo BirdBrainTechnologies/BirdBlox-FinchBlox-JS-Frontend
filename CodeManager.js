@@ -253,12 +253,25 @@ CodeManager.removeVariable=function(variable){
  */
 CodeManager.newVariable=function(){
 	var callbackFn=function(cancelled,result) {
-		if(!cancelled) {
+		result=result.trim();
+		if(!cancelled&&CodeManager.checkVarName(result)) {
 			new Variable(result);
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
 	};
 	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+};
+CodeManager.checkVarName=function(name){
+	if(name.length>0){
+		var variables=CodeManager.variableList;
+		for(var i=0;i<variables.length;i++){
+			if(variables[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
 };
 /* @fix Write documentation.
  */
@@ -275,10 +288,23 @@ CodeManager.removeList=function(list){
  */
 CodeManager.newList=function(){
 	var callbackFn=function(cancelled,result) {
-		if(!cancelled) {
+		result=result.trim();
+		if(!cancelled&&CodeManager.checkListName(result)) {
 			new List(result);
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
 	};
 	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+};
+CodeManager.checkListName=function(name){
+	if(name.length>0){
+		var lists=CodeManager.listList;
+		for(var i=0;i<lists.length;i++){
+			if(lists[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
 };

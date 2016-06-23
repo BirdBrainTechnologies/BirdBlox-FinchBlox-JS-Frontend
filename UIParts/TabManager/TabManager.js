@@ -63,7 +63,7 @@ TabManager.removeTab=function(tab){
 }
 TabManager.createInitialTab=function(){
 	var TM=TabManager;
-	var t=new Tab(null,"Arrow");
+	var t=new Tab(null,"Scripts");
 	TM.activateTab(TM.tabList[0]);
 	TM.updatePositions();
 }
