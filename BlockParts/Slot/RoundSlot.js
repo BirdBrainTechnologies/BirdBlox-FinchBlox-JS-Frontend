@@ -6,14 +6,14 @@
  * @param {Block} parent - The Block this Slot is a part of.
  * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the RoundSlot.
  * @param {number [any,num,string,bool,list] outputType - The type of Data the RoundSlot should convert to.
- * @param {number} value - The initial number stored in the Slot.
+ * @param {number} data - The initial data stored in the Slot. Could be string, num, or selection data.
  * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
  * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
  */
-function RoundSlot(parent,snapType,outputType,value,positive,integer){
+function RoundSlot(parent,snapType,outputType,data,positive,integer){
 	Slot.call(this,parent,Slot.inputTypes.num,snapType,outputType); //Call constructor.
 	//Entered data stores the data that has been entered using the InputPad.
-	this.enteredData=new NumData(value); //Set entered data to initial value.
+	this.enteredData=data; //Set entered data to initial value.
 	this.positive=positive; //Store other properties.
 	this.integer=integer;
 	this.buildSlot(); //Create the SVG elements that make up the Slot.
@@ -21,6 +21,7 @@ function RoundSlot(parent,snapType,outputType,value,positive,integer){
 	//Declare arrays for special options to list above the NumPad (i.e. "last" for "Item _ of Array" blocks)
 	this.optionsText=new Array(); //The text of the special option.
 	this.optionsData=new Array(); //The Data representing that option (never visible to the user).
+	this.dropColumns=1; //The number of columns to show in the drop down.
 }
 RoundSlot.prototype = Object.create(Slot.prototype);
 RoundSlot.prototype.constructor = RoundSlot;
@@ -127,7 +128,7 @@ RoundSlot.prototype.edit=function(){
 		var x=this.getAbsX(); //Get coords relative to the screen.
 		var y=this.getAbsY();
 		this.select(); //Change appearance to reflect editing.
-		InputPad.resetPad(); //Prepare the InputPad for editing.
+		InputPad.resetPad(this.dropColumns); //Prepare the InputPad for editing with the correct number of columns.
 		for(var i=0;i<this.optionsText.length;i++){ //Add special options to the inputPad (if any).
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
@@ -192,9 +193,9 @@ RoundSlot.prototype.saveNumData=function(data){
  * @return {RoundSlot} - A copy of the RoundSlot.
  */
 RoundSlot.prototype.duplicate=function(parentCopy){
-	var value=this.enteredData.getValue();
+	var data=this.enteredData;
 	//Use constructor.
-	var myCopy=new RoundSlot(parentCopy,this.snapType,this.outputType,value,this.positive,this.integer);
+	var myCopy=new RoundSlot(parentCopy,this.snapType,this.outputType,data,this.positive,this.integer);
 	for(var i=0;i<this.optionsText.length;i++){ //Copy special options.
 		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
 	}
@@ -202,6 +203,7 @@ RoundSlot.prototype.duplicate=function(parentCopy){
 		myCopy.child=this.child.duplicate(0,0);
 		myCopy.hasChild=true;
 	}
+	myCopy.dropColumns=this.dropColumns;
 	return myCopy;
 };
 /* Selects the Slot for editing and changes its appearance.

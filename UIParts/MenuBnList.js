@@ -1,13 +1,13 @@
-function MenuBnList(parentGroup,x,y,bnVmargin,width){
+function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 	this.x=x;
 	this.y=y;
-	this.width;
-	if(this.width==null){
+	this.width=width;
+	if(width==null){
 		this.width=null;
 	}
 	this.height=0;
 	this.bnHeight=MenuBnList.bnHeight;
-	this.bnVmargin=bnVmargin;
+	this.bnMargin=bnMargin;
 	this.bnsGenerated=false;
 	this.bnTextList=new Array();
 	this.bnFunctionsList=new Array();
@@ -15,11 +15,15 @@ function MenuBnList(parentGroup,x,y,bnVmargin,width){
 	this.group=GuiElements.create.group(x,y);
 	this.parentGroup=parentGroup;
 	this.visible=false;
+	if(columns==null){
+		columns=1;
+	}
+	this.columns=columns;
 }
 MenuBnList.setGraphics=function(){
 	var MBL=MenuBnList;
 	MBL.bnHeight=25;
-	MBL.bnHMargin=5; //only used when width not specified
+	MBL.bnHMargin=5; //only used when width not specified.
 	MBL.fontSize=16;
 	MBL.font="Arial";
 	MBL.fontWeight="normal";
@@ -50,18 +54,35 @@ MenuBnList.prototype.hide=function(){
 	}
 }
 MenuBnList.prototype.generateBns=function(){
-	this.computeWidth();
+	var columns=this.columns;
+	this.computeWidth(columns);
 	if(!this.bnsGenerated){
 		this.clearBnsArray();
 		var currentY=0;
-		for(var i=0;i<this.bnTextList.length;i++){
-			this.bns.push(this.generateBn(0,currentY,this.bnTextList[i],this.bnFunctionsList[i]));
-			currentY+=this.bnHeight;
-			if(i<this.bnTextList.length-1){
-				currentY+=this.bnVmargin;
+		var currentX=0;
+		var column=0;
+		var count=this.bnTextList.length;
+		var bnWidth=0;
+		for(var i=0;i<count;i++){
+			if(column==columns){
+				column=0;
+				currentX=0;
+				currentY+=this.bnHeight+this.bnMargin;
 			}
+			if(column==0) {
+				bnWidth = (this.width + this.bnMargin) / columns - this.bnMargin;
+				var remainingBns=count-i;
+				if(remainingBns<columns){
+					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
+				}
+			}
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			currentX+=bnWidth+this.bnMargin;
+			column++;
 		}
+		currentY+=this.bnHeight;
 		this.height=currentY;
+		this.bnsGenerated=true;
 	}
 }
 MenuBnList.prototype.clearBnsArray=function(){
@@ -72,9 +93,9 @@ MenuBnList.prototype.clearBnsArray=function(){
 	}
 	this.bns=new Array();
 }
-MenuBnList.prototype.generateBn=function(x,y,text,func){
+MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var MBL=MenuBnList;
-	var bn=new Button(x,y,this.width,this.bnHeight,this.group);
+	var bn=new Button(x,y,width,this.bnHeight,this.group);
 	bn.addText(text,MBL.font,MBL.fontSize,MBL.fontWeight,MBL.charHeight);
 	bn.setCallbackFunction(func,true);
 	return bn;
@@ -85,19 +106,18 @@ MenuBnList.prototype.move=function(x,y){
 	GuiElements.move.group(this.group,x,y);
 }
 MenuBnList.prototype.computeWidth=function(){
-	if(this.width==null){
-		var MBL=MenuBnList;
-		var longestW=0;
-		for(var i=0;i<this.bnTextList.length;i++){
-			var currentW=GuiElements.measure.stringWidth(this.bnTextList[i],MBL.font,MBL.fontSize,MBL.fontWeight);
-			if(currentW>longestW){
-				longestW=currentW;
-			}
+	var columns=this.columns;
+	var MBL=MenuBnList;
+	var longestW=0;
+	for(var i=0;i<this.bnTextList.length;i++){
+		var currentW=GuiElements.measure.stringWidth(this.bnTextList[i],MBL.font,MBL.fontSize,MBL.fontWeight);
+		if(currentW>longestW){
+			longestW=currentW;
 		}
-		this.width=longestW+2*MBL.bnHMargin;
-		if(this.width<MBL.minWidth){
-			this.width=MBL.minWidth;
-		}
+	}
+	this.width=columns*longestW+columns*2*MBL.bnHMargin+(columns-1)*this.bnMargin;
+	if(this.width<MBL.minWidth){
+		this.width=MBL.minWidth;
 	}
 }
 MenuBnList.prototype.isEmpty=function(){

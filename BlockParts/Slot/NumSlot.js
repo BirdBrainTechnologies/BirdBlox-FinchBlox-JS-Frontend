@@ -15,7 +15,7 @@ function NumSlot(parent,value,positive,integer){
 		integer=false;
 	}
 	//Make RoundSlot.
-	RoundSlot.call(this,parent,Slot.snapTypes.numStrBool,Slot.outputTypes.num,value,positive,integer);
+	RoundSlot.call(this,parent,Slot.snapTypes.numStrBool,Slot.outputTypes.num,new NumData(value),positive,integer);
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;

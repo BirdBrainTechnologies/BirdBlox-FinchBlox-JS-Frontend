@@ -9,6 +9,7 @@ function DropSlot(parent,snapType){
 	this.selected=false;
 	this.optionsText=new Array();
 	this.optionsData=new Array();
+	this.dropColumns=1; //The number of columns to show in the drop down.
 }
 DropSlot.prototype = Object.create(Slot.prototype);
 DropSlot.prototype.constructor = DropSlot;
@@ -109,6 +110,7 @@ DropSlot.prototype.duplicate=function(parentCopy){
 	}
 	myCopy.enteredData=this.enteredData;
 	myCopy.changeText(this.text);
+	myCopy.dropColumns=this.dropColumns;
 	return myCopy;
 }
 DropSlot.prototype.highlight=function(){//Fix BG
@@ -120,7 +122,7 @@ DropSlot.prototype.edit=function(){
 		var x=this.getAbsX();
 		var y=this.getAbsY();
 		this.select();
-		InputPad.resetPad();
+		InputPad.resetPad(this.dropColumns);
 		this.populateList(); //Loads any dynamic options.
 		for(var i=0;i<this.optionsText.length;i++){
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);

@@ -280,7 +280,9 @@ GuiElements.update.stroke=function(element,color,strokeW){
 GuiElements.update.text=function(textE,newText){
 	newText+=""; //Make newText into a string
 	newText=newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	textE.textNode.remove(); //Remove old text.
+	if(textE.textNode!=null) {
+		textE.textNode.remove(); //Remove old text.
+	}
 	var textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode=textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.

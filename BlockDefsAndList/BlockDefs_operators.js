@@ -162,7 +162,7 @@ B_LessThan.prototype.startAction=function(){
 
 function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
-	var rS=new RoundSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,0);
+	var rS=new RoundSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
 	rS.addOption("Enter text",new SelectionData("enter_text"));
 	this.addPart(rS);
 	this.addPart(new LabelText(this,"="));
@@ -174,7 +174,7 @@ B_EqualTo.prototype.constructor = B_EqualTo;
 B_EqualTo.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
-	this.resultData=Data.checkEquality(data1,data2);
+	this.resultData=new BoolData(Data.checkEquality(data1,data2));
 	return false;
 };
 
@@ -331,32 +331,96 @@ B_join.prototype.startAction=function(){
 };
 
 
-///// <not implemented> /////
-
 
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
-	dS.addOption("abs",new SelectionData("abs"));
-	dS.addOption("ceiling",new SelectionData("ceiling"));
-	dS.addOption("floor",new SelectionData("floor"));
-	dS.addOption("sqrt",new SelectionData("sqrt"));
 	dS.addOption("sin",new SelectionData("sin"));
 	dS.addOption("cos",new SelectionData("cos"));
 	dS.addOption("tan",new SelectionData("tan"));
+
 	dS.addOption("asin",new SelectionData("asin"));
 	dS.addOption("acos",new SelectionData("acos"));
 	dS.addOption("atan",new SelectionData("atan"));
+
 	dS.addOption("ln",new SelectionData("ln"));
-	dS.addOption("log",new SelectionData("log"));
 	dS.addOption("e^",new SelectionData("e^"));
+	dS.addOption("ceiling",new SelectionData("ceiling"));
+
+	dS.addOption("log",new SelectionData("log"));
 	dS.addOption("10^",new SelectionData("10^"));
+	dS.addOption("floor",new SelectionData("floor"));
+
+	dS.addOption("abs",new SelectionData("abs"));
+	dS.addOption("sqrt",new SelectionData("sqrt"));
+
+	dS.dropColumns=3;
+	dS.setSelectionData("sqrt",new SelectionData("sqrt"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new NumSlot(this,10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;
-
-
-
+B_mathOfNumber.prototype.startAction=function(){
+	var operator=this.slots[0].getData().getValue();
+	var data=this.slots[1].getData();
+	var value=data.getValue();
+	var isValid=data.isValid;
+	if(operator=="sin"){
+		value=Math.sin(value/180*Math.PI);
+	}
+	else if(operator=="cos"){
+		value=Math.cos(value/180*Math.PI);
+	}
+	else if(operator=="tan"){
+		value=Math.tan(value/180*Math.PI);
+		if(Math.abs(value)>1000000000){
+			value=1/0;
+		}
+	}
+	else if(operator=="asin"){
+		value=Math.asin(value)/Math.PI*180;
+	}
+	else if(operator=="acos"){
+		value=Math.acos(value)/Math.PI*180;
+	}
+	else if(operator=="atan"){
+		value=Math.atan(value)/Math.PI*180;
+	}
+	else if(operator=="ln"){
+		value=Math.log(value);
+	}
+	else if(operator=="log") {
+		try {
+			value = Math.log10(value);
+		}
+		catch(e){
+			value=Math.log(10) / Math.log(value);
+		}
+	}
+	else if(operator=="e^"){
+		value=Math.exp(value);
+	}
+	else if(operator=="10^"){
+		value=Math.pow(10,value);
+	}
+	else if(operator=="ceiling"){
+		value=Math.ceil(value);
+	}
+	else if(operator=="floor"){
+		value=Math.floor(value);
+	}
+	else if(operator=="abs"){
+		value=Math.abs(value);
+	}
+	else if(operator=="sqrt"){
+		value=Math.sqrt(value);
+	}
+	if(!isFinite(value)||isNaN(value)){
+		value=0;
+		isValid=false;
+	}
+	this.resultData=new NumData(value,isValid);
+	return false;
+};

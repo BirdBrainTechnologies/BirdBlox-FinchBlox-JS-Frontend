@@ -56,10 +56,10 @@ InputPad.makeBg=function(){
 	IP.bgGroup.appendChild(IP.bgRect);
 	IP.bgGroup.appendChild(IP.triangle);
 };
-InputPad.resetPad=function(){//removes any options which may have been added to the pad
+InputPad.resetPad=function(columns){//removes any options which may have been added to the pad
 	var IP=InputPad;
 	IP.close();
-	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin);
+	IP.menuBnList=new MenuBnList(IP.group,IP.buttonMargin,IP.buttonMargin,IP.buttonMargin,null,columns);
 };
 InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
@@ -165,7 +165,7 @@ InputPad.undo=function(){
 		IP.updateSlot();
 		IP.grayOutValue();
 	}
-}
+};
 InputPad.bsReleased=function(){
 	InputPad.updateBsIcon();
 };

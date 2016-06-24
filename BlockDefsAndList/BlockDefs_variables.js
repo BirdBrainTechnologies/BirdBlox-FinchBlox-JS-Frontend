@@ -19,7 +19,7 @@ function B_SetTo(x,y){
 	this.addPart(new LabelText(this,"set"));
 	this.addPart(new VarDropSlot(this));
 	this.addPart(new LabelText(this,"to"));
-	var rS=new RoundSlot(this,Slot.snapTypes.numStrBool,Slot.outputTypes.any,0);
+	var rS=new RoundSlot(this,Slot.snapTypes.numStrBool,Slot.outputTypes.any,new NumData(0));
 	rS.addOption("Enter text",new SelectionData("enter_text"));
 	this.addPart(rS);
 }

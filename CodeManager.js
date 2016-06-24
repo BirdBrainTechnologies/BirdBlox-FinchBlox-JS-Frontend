@@ -254,8 +254,8 @@ CodeManager.removeVariable=function(variable){
  */
 CodeManager.newVariable=function(){
 	var callbackFn=function(cancelled,result) {
-		result=result.trim();
 		if(!cancelled&&CodeManager.checkVarName(result)) {
+			result=result.trim();
 			new Variable(result);
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
@@ -263,6 +263,7 @@ CodeManager.newVariable=function(){
 	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
 };
 CodeManager.checkVarName=function(name){
+	name=name.trim();
 	if(name.length>0){
 		var variables=CodeManager.variableList;
 		for(var i=0;i<variables.length;i++){
@@ -289,8 +290,8 @@ CodeManager.removeList=function(list){
  */
 CodeManager.newList=function(){
 	var callbackFn=function(cancelled,result) {
-		result=result.trim();
 		if(!cancelled&&CodeManager.checkListName(result)) {
+			result=result.trim();
 			new List(result);
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
@@ -298,6 +299,7 @@ CodeManager.newList=function(){
 	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
 };
 CodeManager.checkListName=function(name){
+	name=name.trim();
 	if(name.length>0){
 		var lists=CodeManager.listList;
 		for(var i=0;i<lists.length;i++){

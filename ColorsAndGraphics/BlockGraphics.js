@@ -400,9 +400,7 @@ BlockGraphics.create.valueText=function(text,group){
 	textElement.setAttributeNS(null,"font-weight",bG.fontWeight);
 	textElement.setAttributeNS(null,"fill",bG.fill);
 	textElement.setAttributeNS(null,"class","noselect");
-	var textNode = document.createTextNode(text);
-	textElement.textNode=textNode;
-	textElement.appendChild(textNode);
+	GuiElements.update.text(textElement,text);
 	group.appendChild(textElement);
 	return textElement;
 }
