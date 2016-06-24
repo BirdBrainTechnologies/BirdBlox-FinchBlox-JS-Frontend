@@ -8,6 +8,7 @@ function GuiElements(){
 	GuiElements.setConstants();
 	GuiElements.createLayers();
 	GuiElements.buildUI();
+	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,6 +40,8 @@ GuiElements.setConstants=function(){
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
 	InputPad.setGraphics();
+	BubbleOverlay.setGraphics();
+	ResultBubble.setConstants();
 	CodeManager();
 	HummingbirdManager();
 }
@@ -426,6 +429,39 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
  * @param {string} value - The value to display
  * @fix This function has not been created yet.
  */
-GuiElements.displayValue=function(value){
-	GuiElements.alert(value);
-}
+GuiElements.displayValue=function(value,x,y,width,height){
+	var midX=x+width/2;
+	var upperY=y;
+	var lowerY=y+height;
+	new ResultBubble(midX,upperY,lowerY,value);
+};
+/* GuiElements.overlay contains functions that keep track of overlays present on the screen.
+ */
+GuiElements.overlay=function(){};
+/* Sets the currently visible overlay and closes any existing overlays.
+ * @param the overlay which will be visible.
+ */
+GuiElements.overlay.set=function(overlay){
+	var GE=GuiElements;
+	if(GE.currentOverlay!=null){
+		GE.currentOverlay.close();
+	}
+	GE.currentOverlay=overlay;
+};
+/* Called by a closing overlay to indicate that it is no longer visible.
+ * @param the overlay which is no longer visible.
+ */
+GuiElements.overlay.remove=function(overlay){
+	var GE=GuiElements;
+	if(GE.currentOverlay==overlay){
+		GE.currentOverlay=null;
+	}
+};
+/* Called to force any currently visible overlays to close.
+ */
+GuiElements.overlay.close=function(){
+	var GE=GuiElements;
+	if(GE.currentOverlay!=null){
+		GE.currentOverlay.close();
+	}
+};

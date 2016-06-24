@@ -129,6 +129,7 @@ TouchReceiver.touchStartCatBN=function(target,e){
 		TR.touchDown=true;
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
+		GuiElements.overlay.close(); //Close any visible overlays.
 	}
 };
 /* Handles new touch events for Buttons.  Stores the target Button.
@@ -200,7 +201,7 @@ TouchReceiver.touchmove=function(e){
 				CodeManager.move.update(TR.getX(e),TR.getY(e));
 			}
 			else{
-				InputPad.close(); //Close InputPad if visible.
+				GuiElements.overlay.close(); //Close any visible overlays.
 				CodeManager.move.start(TR.target,TR.getX(e),TR.getY(e));
 				TR.blocksMoving=true;
 			}
@@ -208,7 +209,7 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the palette, it should scroll.
 		if(TR.targetType=="palette"){
 			if(!BlockPalette.scrolling){
-				InputPad.close(); //Close InputPad if visible.
+				GuiElements.overlay.close(); //Close any visible overlays.
 				BlockPalette.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{
@@ -218,7 +219,7 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the tab space, it should scroll.
 		if(TR.targetType=="tabSpace"){
 			if(!TabManager.scrolling){
-				InputPad.close(); //Close InputPad if visible.
+				GuiElements.overlay.close(); //Close any visible overlays.
 				TabManager.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{

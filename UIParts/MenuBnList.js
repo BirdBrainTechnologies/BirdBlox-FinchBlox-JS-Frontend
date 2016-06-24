@@ -106,18 +106,20 @@ MenuBnList.prototype.move=function(x,y){
 	GuiElements.move.group(this.group,x,y);
 }
 MenuBnList.prototype.computeWidth=function(){
-	var columns=this.columns;
-	var MBL=MenuBnList;
-	var longestW=0;
-	for(var i=0;i<this.bnTextList.length;i++){
-		var currentW=GuiElements.measure.stringWidth(this.bnTextList[i],MBL.font,MBL.fontSize,MBL.fontWeight);
-		if(currentW>longestW){
-			longestW=currentW;
+	if(this.width==null) {
+		var columns = this.columns;
+		var MBL = MenuBnList;
+		var longestW = 0;
+		for (var i = 0; i < this.bnTextList.length; i++) {
+			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], MBL.font, MBL.fontSize, MBL.fontWeight);
+			if (currentW > longestW) {
+				longestW = currentW;
+			}
 		}
-	}
-	this.width=columns*longestW+columns*2*MBL.bnHMargin+(columns-1)*this.bnMargin;
-	if(this.width<MBL.minWidth){
-		this.width=MBL.minWidth;
+		this.width = columns * longestW + columns * 2 * MBL.bnHMargin + (columns - 1) * this.bnMargin;
+		if (this.width < MBL.minWidth) {
+			this.width = MBL.minWidth;
+		}
 	}
 }
 MenuBnList.prototype.isEmpty=function(){
