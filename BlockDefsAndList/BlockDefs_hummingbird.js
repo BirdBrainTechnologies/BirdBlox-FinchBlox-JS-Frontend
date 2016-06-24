@@ -117,10 +117,10 @@ B_HBDistCM.prototype.constructor = B_HBDistCM;
 /* Generic Hummingbird input functions. */
 B_HBDistCM.prototype.startAction=function(){
 	return HummingbirdManager.sensorStartAction(this,"distance",0); //positive int
-}
+};
 B_HBDistCM.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
-}
+};
 
 
 
@@ -210,7 +210,7 @@ B_HBTempF.prototype.startAction=function(){
 };
 /* Waits for the request to finish then converts C to F. */
 B_HBTempF.prototype.updateAction=function(){
-	if(HummingbirdManager.sensorUpdateAction(this,true,0)){
+	if(!HummingbirdManager.sensorUpdateAction(this,true,0)){
 		if(this.resultData.isValid){
 			this.resultData=new NumData(Math.round(this.runMem.requestStatus.result*1.8+32)); //Rounded to Integer
 		}
@@ -236,7 +236,7 @@ B_HBDistInch.prototype.startAction=function(){
 };
 /* Waits for the request to finish then converts cm to in. */
 B_HBDistInch.prototype.updateAction=function(){
-	if(HummingbirdManager.sensorUpdateAction(this,true,0)){
+	if(!HummingbirdManager.sensorUpdateAction(this,true,0)){
 		if(this.resultData.isValid){
 			var result=this.runMem.requestStatus.result;
 			this.resultData=new NumData((result/2.54).toFixed(1)*1); //Rounded to 1 decimal place. "*1" converts to num.
