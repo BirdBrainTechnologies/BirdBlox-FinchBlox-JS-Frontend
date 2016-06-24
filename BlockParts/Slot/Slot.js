@@ -98,11 +98,15 @@ Slot.prototype.snap=function(block){
 	this.hasChild=true;
 	this.child=block; //Set child.
 	this.hideSlot(); //Slot graphics are covered and should be hidden.
-	var oldG=block.stack.group; //Old group can be deleted.
-	block.stack.remove(); //Fix! use delete() instead.
-	block.changeStack(this.parent.stack); //Move Block into this stack.
-	oldG.remove();
-	this.parent.stack.updateDim(); //Update parent's dimensions.
+	if(block.stack!=null) {
+		var oldG = block.stack.group; //Old group can be deleted.
+		block.stack.remove(); //Fix! use delete() instead.
+		block.changeStack(this.parent.stack); //Move Block into this stack.
+		oldG.remove();
+	}
+	if(this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update parent's dimensions.
+	}
 };
 /* Recursively changes the stack of the Slot's children.
  * @param {BlockStack} stack - The stack to change to.

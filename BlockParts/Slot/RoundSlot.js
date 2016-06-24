@@ -200,8 +200,7 @@ RoundSlot.prototype.duplicate=function(parentCopy){
 		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
 	}
 	if(this.hasChild){ //Copy child
-		myCopy.child=this.child.duplicate(0,0);
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	myCopy.dropColumns=this.dropColumns;
 	return myCopy;

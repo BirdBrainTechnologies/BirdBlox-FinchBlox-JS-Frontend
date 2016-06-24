@@ -65,8 +65,7 @@ HexSlot.prototype.duplicate=function(parentCopy){
 	//Use constructor.
 	var myCopy=new HexSlot(parentCopy,this.snapType);
 	if(this.hasChild){ //Copy child
-		myCopy.child=this.child.duplicate(0,0);
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	return myCopy;
 };

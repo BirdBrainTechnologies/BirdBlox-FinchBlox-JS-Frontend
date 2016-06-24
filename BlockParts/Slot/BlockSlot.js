@@ -40,14 +40,16 @@ BlockSlot.prototype.snap=function(block){
 		this.child.unsnap().shiftOver(BG.shiftX,block.height+BG.shiftY);
 	}
 	var stack=this.parent.stack;
-	if(stack.isRunning&&!block.stack.isRunning){
-		block.glow();
-	}
-	else if(!stack.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
-		block.stack.stop();
-	}
-	else if(stack.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
-		block.stop();
+	if(stack!=null&&block.stack!=null) {
+		if (stack.isRunning && !block.stack.isRunning) {
+			block.glow();
+		}
+		else if (!stack.isRunning && block.stack.isRunning) { //Blocks that are added are stopped.
+			block.stack.stop();
+		}
+		else if (stack.isRunning && block.isRunning) { //The added block is stopped, but still glows as part of a running stack.
+			block.stop();
+		}
 	}
 	block.parent=this;
 	if(this.hasChild){
@@ -58,11 +60,15 @@ BlockSlot.prototype.snap=function(block){
 	}
 	this.hasChild=true;
 	this.child=block;
-	var oldG=block.stack.group;
-	block.stack.remove();
-	block.changeStack(this.parent.stack);
-	oldG.remove();
-	this.parent.stack.updateDim();
+	if(block.stack!=null) {
+		var oldG = block.stack.group;
+		block.stack.remove();
+		block.changeStack(this.parent.stack);
+		oldG.remove();
+	}
+	if(stack!=null) {
+		this.parent.stack.updateDim();
+	}
 }
 BlockSlot.prototype.changeStack=function(stack){
 	if(this.hasChild){
@@ -106,8 +112,7 @@ BlockSlot.prototype.highlight=function(){
 BlockSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new BlockSlot(parentCopy);
 	if(this.hasChild){
-		myCopy.child=this.child.duplicate(0,0);
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	return myCopy;
 }

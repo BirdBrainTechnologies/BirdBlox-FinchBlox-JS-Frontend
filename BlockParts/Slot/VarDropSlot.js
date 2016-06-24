@@ -23,4 +23,4 @@ VarDropSlot.prototype.duplicate=function(parentCopy){
 	myCopy.enteredData=this.enteredData;
 	myCopy.changeText(this.text);
 	return myCopy;
-}
+};

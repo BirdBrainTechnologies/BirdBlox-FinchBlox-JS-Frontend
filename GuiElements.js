@@ -42,6 +42,7 @@ GuiElements.setConstants=function(){
 	InputPad.setGraphics();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
+	BlockContextMenu.setGraphics();
 	CodeManager();
 	HummingbirdManager();
 }

@@ -141,8 +141,7 @@ RectSlot.prototype.duplicate=function(parentCopy){
 	//Use constructor.
 	var myCopy=new RectSlot(parentCopy,this.snapType,this.outputType,this.enteredData.getValue());
 	if(this.hasChild){ //Copy child
-		myCopy.child=this.child.duplicate(0,0);
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	return myCopy;
 };

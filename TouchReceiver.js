@@ -5,10 +5,16 @@ function TouchReceiver(){
 	var TR=TouchReceiver; //shorthand
 	//Toggle to determine of mouse or touchscreen events should be used.
 	TR.mouse=false; //Use true when debugging on a desktop.
+	TR.longTouchInterval=300; //The number of ms before a touch is considered a long touch.
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?
+	TR.longTouch=false; //Has the event already been handled by a long touch event?
 	TR.target=null; //The object being interacted with.
+	TR.startX=0; //The x coord of the initial touch.
+	TR.startY=0; //The y coord of the initial touch.
+	TR.longTouchTimer=null; //Triggers long touch events.
+	TR.timerRunning=false; //Indicates if the long touch timer is running.
 	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
 	var handlerUp="touchend";
 	var handlerDown="touchstart";
@@ -78,14 +84,20 @@ TouchReceiver.getY=function(e){
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchstart=function(e){
-	var TR=TR; //shorthand
+	var TR=TouchReceiver; //shorthand
 	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){ //prevents multitouch issues.
+	var startTouch=!TR.touchDown;
+	if(startTouch){ //prevents multitouch issues.
+		TR.stopLongTouchTimer();
 		TR.touchDown=true;
 		TR.targetType="none"; //Does not know the target of the touch.
 		TR.target=null;
+		TR.longTouch=false;
+		TR.startX=TR.getX(e);
+		TR.startY=TR.getY(e);
 	}
-}
+	return startTouch;
+};
 /* Handles new touch events for Blocks.  Stores the target Block.
  * @param {Blocks} target - The Block that was touched.
  * @param {event} e - passed event arguments.
@@ -93,14 +105,13 @@ TouchReceiver.touchstart=function(e){
  */
 TouchReceiver.touchStartBlock=function(target,e){
 	var TR=TouchReceiver; //shorthand
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){ //prevent multitouch issues.
-		TR.touchDown=true;
+	if(TR.touchstart(e)){ //prevent multitouch issues.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
 			TR.targetType="displayStack";
 		}
 		else{
 			TR.targetType="block";
+			TR.setLongTouchTimer();
 		}
 		TouchReceiver.target=target; //Store target Block.
 	}
@@ -111,11 +122,10 @@ TouchReceiver.touchStartBlock=function(target,e){
  */
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){
-		TR.touchDown=true;
+	if(TR.touchstart(e)){
 		TR.targetType="slot";
 		TouchReceiver.target=slot; //Store target Slot.
+		TR.setLongTouchTimer();
 	}
 }
 /* Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
@@ -124,9 +134,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
  */
 TouchReceiver.touchStartCatBN=function(target,e){
 	var TR=TouchReceiver;
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){
-		TR.touchDown=true;
+	if(TR.touchstart(e)){
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
 		GuiElements.overlay.close(); //Close any visible overlays.
@@ -138,9 +146,7 @@ TouchReceiver.touchStartCatBN=function(target,e){
  */
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){
-		TR.touchDown=true;
+	if(TR.touchstart(e)){
 		TR.targetType="button";
 		target.press(); //Changes the button's appearance and may trigger an action.
 		TR.target=target;
@@ -151,18 +157,14 @@ TouchReceiver.touchStartBN=function(target,e){
  */
 TouchReceiver.touchStartPalette=function(e){
 	var TR=TouchReceiver;
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){
-		TR.touchDown=true;
+	if(TR.touchstart(e)){
 		TR.targetType="palette";
 		TR.target=null; //The type is all that is important. There is only one palette.
 	}
 };
 TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
-	e.preventDefault(); //Stops 300 ms delay events
-	if(!TR.touchDown){
-		TR.touchDown=true;
+	if(TR.touchstart(e)){
 		TR.targetType="tabSpace";
 		TR.target=null;
 	}
@@ -172,7 +174,7 @@ TouchReceiver.touchStartTabSpace=function(e){
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchDown){
+	if(TR.touchDown&&!TR.longTouch){
 		//If the user drags a Slot, the block they are dragging should become the target.
 		if(TR.targetType=="slot"){
 			TR.target=TR.target.parent; //Now the user is dragging a block.
@@ -234,7 +236,9 @@ TouchReceiver.touchmove=function(e){
  */
 TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchDown){ //Prevents multitouch problems.
+	var touchWasDown=TR.touchDown;
+	TR.touchDown=false;
+	if(touchWasDown&&!TR.longTouch){ //Prevents multitouch problems.
 		TR.touchDown=false;
 		if(TR.targetType=="block"){
 			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
@@ -265,7 +269,9 @@ TouchReceiver.touchend=function(e){
  */
 TouchReceiver.touchInterrupt=function(){
 	var TR=TouchReceiver;
-	if(TR.touchDown){ //Only interrupt if there is a finger on the screen.
+	var touchWasDown=TR.touchDown;
+	TR.touchDown=false;
+	if(touchWasDown&&!TR.longTouch){ //Only interrupt if there is a finger on the screen.
 		TR.touchDown=false;
 		if(TR.targetType=="block"){
 			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
@@ -282,6 +288,43 @@ TouchReceiver.touchInterrupt=function(){
 		else if(TR.targetType=="tabSpace"){
 			TabManager.endScroll();
 		}
+	}
+};
+/* @fix Write documentation. */
+TouchReceiver.touchLong=function(){
+	var TR = TouchReceiver;
+	TR.stopLongTouchTimer();
+	if(TR.touchDown){
+		if(TR.targetType=="slot"){
+			TR.target=TR.target.parent; //Now the user is holding a block.
+			if(TR.target.stack.isDisplayStack){
+				TR.targetType="displayStack";
+			}
+			else{
+				TR.targetType="block";
+			}
+		}
+		if(TR.targetType=="block"){
+			if(!TR.blocksMoving){
+				TR.longTouch=true;
+				new BlockContextMenu(TR.target,TR.startX,TR.startY);
+			}
+		}
+	}
+};
+TouchReceiver.setLongTouchTimer=function() {
+	var TR = TouchReceiver;
+	TR.stopLongTouchTimer();
+	TR.longTouchTimer = self.setInterval(function () {
+		TouchReceiver.touchLong();
+	}, TR.longTouchInterval);
+	TR.timerRunning=true;
+};
+TouchReceiver.stopLongTouchTimer=function(){
+	var TR = TouchReceiver;
+	if(TR.timerRunning){
+		TR.longTouchTimer = window.clearInterval(this.longTouchTimer);
+		TR.timerRunning=false;
 	}
 };
 /* Adds handlerDown listeners to the parts of a CategoryBN.

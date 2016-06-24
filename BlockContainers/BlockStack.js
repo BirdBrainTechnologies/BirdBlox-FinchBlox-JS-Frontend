@@ -15,7 +15,7 @@ function BlockStack(firstBlock,tab){
 	this.firstBlock.stopGlow(); //Removes visual indicator of execution.
 	this.returnType=firstBlock.returnType; //The BlockStack returns the same type of value as its first Block.
 	this.tab=tab;
-	this.x=this.tab.absToRelX(firstBlock.getAbsX()); //Fix! getAbs won't work once scrolling is enabled.
+	this.x=this.tab.absToRelX(firstBlock.getAbsX());
 	this.y=this.tab.absToRelY(firstBlock.getAbsY());
 	this.tabGroup=tab.mainG; //Stores the SVG group element of the Tab it is within.
 	this.group=GuiElements.create.group(this.x,this.y,this.tabGroup); //Creates a group for the BlockStack.

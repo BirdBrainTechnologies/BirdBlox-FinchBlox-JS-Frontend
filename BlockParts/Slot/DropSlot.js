@@ -105,8 +105,7 @@ DropSlot.prototype.duplicate=function(parentCopy){
 		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
 	}
 	if(this.hasChild){
-		myCopy.child=this.child.duplicate(0,0);
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	myCopy.enteredData=this.enteredData;
 	myCopy.changeText(this.text);
