@@ -46,7 +46,7 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	var mem=block.runMem;
 	mem.port=block.slots[0].getData().getValueWithC(true,true);
 	if(mem.port>=1&&mem.port<=4) {
-		mem.request = "in/sensor/" + mem.port;
+		mem.request = "in/"+urlPart+"/" + mem.port;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
 		return true; //Still running
