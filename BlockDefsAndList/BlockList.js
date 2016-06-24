@@ -123,13 +123,13 @@ BlockList.populateCat_ipad=function(category){
 }
 BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_WhenFlagTapped");
-	category.addBlockByName("B_WhenIAmTapped");
-	category.addBlockByName("B_WhenIReceive");
+	//category.addBlockByName("B_WhenIAmTapped");
+	//category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
-	category.addBlockByName("B_Broadcast");
-	category.addBlockByName("B_BroadcastAndWait");
-	category.addBlockByName("B_Message");
-	category.addSpace();
+	//category.addBlockByName("B_Broadcast");
+	//category.addBlockByName("B_BroadcastAndWait");
+	//category.addBlockByName("B_Message");
+	//category.addSpace();
 	category.addBlockByName("B_Wait");
 	category.addBlockByName("B_WaitUntil");
 	category.addSpace();
@@ -140,9 +140,9 @@ BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_If");
 	category.addBlockByName("B_IfElse");
 	category.addSpace();
-	category.addBlockByName("B_StopAll");
-	category.addBlockByName("B_StopAllBut");
-	category.trimBottom();
+	//category.addBlockByName("B_StopAll");
+	//category.addBlockByName("B_StopAllBut");
+	//category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){
 	//category.addBlockByName("B_Touching");
