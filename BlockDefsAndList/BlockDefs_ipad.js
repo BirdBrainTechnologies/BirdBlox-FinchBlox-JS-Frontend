@@ -257,7 +257,18 @@ B_DeviceLocation.prototype.updateAction=function(){
 /////////////////
 
 
-
+function B_Display(x,y){
+	CommandBlock.call(this,x,y,"ipad");
+	this.addPart(new LabelText(this,"Display"));
+	this.addPart(new StringSlot(this,"hello"));
+}
+B_Display.prototype = Object.create(CommandBlock.prototype);
+B_Display.prototype.constructor = B_Display;
+B_Display.prototype.startAction=function(){
+	var message=this.slots[0].getData().getValue();
+	DisplayBox.displayText(message);
+	return false; //Done running
+};
 
 
 

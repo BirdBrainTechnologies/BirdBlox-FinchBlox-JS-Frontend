@@ -198,6 +198,7 @@ CodeManager.stop=function(){
 	HummingbirdManager.stopHummingbirds(); //Stop any motors and LEDs on the Hummingbirds
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
+	DisplayBox.hide(); //Hide any messages being displayed.
 }
 /* Stops the update timer.
  */

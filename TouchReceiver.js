@@ -162,11 +162,21 @@ TouchReceiver.touchStartPalette=function(e){
 		TR.target=null; //The type is all that is important. There is only one palette.
 	}
 };
+/* @fix Write documentation. */
 TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
 		TR.targetType="tabSpace";
 		TR.target=null;
+	}
+};
+/* @fix Write documentation. */
+TouchReceiver.touchStartDisplayBox=function(e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)){
+		TR.targetType="displayBox";
+		TR.target=null;
+		DisplayBox.hide();
 	}
 };
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
@@ -395,5 +405,15 @@ TouchReceiver.addListenersTabSpace=function(element){
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TabManager.
 		TouchReceiver.touchStartTabSpace(e);
+	}, false);
+};
+/* Adds handlerDown listeners to the parts of the displayBox.
+ * @param {SVG element} element - The part of the displayBox the listeners are being applied to.
+ */
+TouchReceiver.addListenersDisplayBox=function(element){
+	var TR=TouchReceiver;
+	element.addEventListener(TR.handlerDown, function(e) {
+		//When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartDisplayBox(e);
 	}, false);
 };

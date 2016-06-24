@@ -43,6 +43,7 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
+	DisplayBox.setGraphics();
 	CodeManager();
 	HummingbirdManager();
 }
@@ -66,6 +67,7 @@ GuiElements.buildUI=function(){
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	InputPad(); //Builds the inputpad, which is used for number entry and dropdown selection
+	DisplayBox(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
@@ -88,10 +90,10 @@ GuiElements.createLayers=function(){
 	layers.titleBg=create.layer();
 	layers.titlebar=create.layer();
 	layers.stage=create.layer();
+	layers.display=create.layer();
 	layers.drag=create.layer();
 	layers.highlight=create.layer();
-	layers.inputPad=create.layer();
-	layers.stackMenu=create.layer();
+	layers.overlay=create.layer();
 	layers.tabMenu=create.layer();
 }
 /* GuiElements.create contains functions for creating SVG elements.
@@ -291,6 +293,21 @@ GuiElements.update.text=function(textE,newText){
 	textE.textNode=textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
 }
+/* Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
+ * Adds "..." if characters are removed.
+ * @param {SVG text} textE - The text element to be modified.
+ * @param {string} text - The element's new text.
+ * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
+ */
+GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
+	GuiElements.update.text(textE,text);
+	var currentWidth=GuiElements.measure.textWidth(textE);
+	while(currentWidth>=maxWidth){
+		text=text.slice(0,-1);
+		GuiElements.update.text(textE,text+"...");
+		currentWidth=GuiElements.measure.textWidth(textE);
+	}
+};
 /* Changes the path description of an SVG path object to make it a triangle.
  * @param {SVG path} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.

@@ -119,6 +119,7 @@ BlockList.populateCat_ipad=function(category){
 	category.addBlockByName("B_DeviceRelativeAltitude");
 	category.addBlockByName("B_DeviceAcceleration");
 	category.addBlockByName("B_DeviceOrientation");
+	category.addBlockByName("B_Display");
 	category.trimBottom();
 }
 BlockList.populateCat_control=function(category){
