@@ -36,7 +36,7 @@ List.prototype.getIndex=function(indexData){
 		return null;
 	}
 	var indexV=indexData.getValue();
-	var min=0;
+	var min=1;
 	var max=array.length;
 	if(indexData.type==Data.types.selection){
 		if(indexV=="last"){

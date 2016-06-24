@@ -66,7 +66,7 @@ function B_Divide(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new NumSlot(this,0));
 	this.addPart(new LabelText(this,"/"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,1));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
@@ -291,7 +291,12 @@ B_LetterOf.prototype.constructor = B_LetterOf;
 B_LetterOf.prototype.startAction=function(){
 	var word=this.slots[1].getData().getValue();
 	var index=this.slots[0].getData().getValueInR(1,word.length,true,true);
-	this.resultData=new StringData(word.substring(index-1,index));
+	if(word.length>0) {
+		this.resultData = new StringData(word.substring(index - 1, index));
+	}
+	else{
+		this.resultData = new StringData(""); //Letter of empty string is empty string.
+	}
 	return false; //Done running
 };
 

@@ -22,9 +22,11 @@ HummingbirdManager.getHBNames=function(){
 }
 HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	var mem=block.runMem;
-	mem.port=block.slots[0].getData().getValueWithC(true,true);
-	mem.value=block.slots[1].getData().getValueInR(minVal,maxVal,false,true);
-	if(mem.port>=1&&mem.port<=4) {
+	mem.portD=block.slots[0].getData();
+	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
+	mem.valueD=block.slots[1].getData();
+	mem.value=mem.valueD.getValueInR(minVal,maxVal,false,true);
+	if(mem.port>=1&&mem.port<=4&&mem.valueD.isValid&&mem.portD.isValid) {
 		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
@@ -44,8 +46,9 @@ HummingbirdManager.outputUpdateAction=function(block){
 }
 HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	var mem=block.runMem;
-	mem.port=block.slots[0].getData().getValueWithC(true,true);
-	if(mem.port>=1&&mem.port<=4) {
+	mem.portD=block.slots[0].getData();
+	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
+	if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
 		mem.request = "in/"+urlPart+"/" + mem.port;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);

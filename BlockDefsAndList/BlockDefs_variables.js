@@ -99,7 +99,7 @@ B_AddToList.prototype.startAction=function(){
 			array.push(itemD);
 		}
 		else{
-			array.push(new StringData(itemD.asString(),true));
+			array.push(itemD.asString());
 		}
 	}
 	return false;
@@ -163,13 +163,13 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 		var array=list.getData().getValue();
 		var itemD=this.slots[0].getData();
 		var index=list.getIndex(indexD);
-		if(index==null){
+		if(index==null||indexD.getValue()>array.length){
 			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
 				if(itemD.isValid){
 					array.push(itemD);
 				}
 				else{
-					array.push(new StringData(itemD.asString()));
+					array.push(itemD.asString());
 				}
 			}
 			return false;
@@ -178,7 +178,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 			array.splice(index, 0, itemD);
 		}
 		else{
-			array.splice(index, 0, new StringData(itemD.asString(),true));
+			array.splice(index, 0, itemD.asString());
 		}
 	}
 	return false;
@@ -215,7 +215,7 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 			array[index]=itemD;
 		}
 		else{
-			array[index]=new StringData(itemD.asString(),true);
+			array[index]=itemD.asString();
 		}
 	}
 	return false;

@@ -7,7 +7,7 @@ function B_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
 	this.addPart(new LabelText(this,"Hummingbird Servo"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,0,true)); //Positive
 }
 B_HBServo.prototype = Object.create(CommandBlock.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -176,11 +176,18 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 /* Sends a request if the port is an integer from 1 to 4. */
 B_HBTriLed.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.port=this.slots[0].getData().getValueWithC(true,true); //Positive integer.
-	mem.valueR=this.slots[1].getData().getValueInR(0,100,true,true); //Positive integer.
-	mem.valueG=this.slots[2].getData().getValueInR(0,100,true,true); //Positive integer.
-	mem.valueB=this.slots[3].getData().getValueInR(0,100,true,true); //Positive integer.
-	if(mem.port>=1&&mem.port<=4) { //Only run if port is valid.
+	mem.portD=this.slots[0].getData();
+	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
+	mem.dataR=this.slots[1].getData();
+	mem.dataG=this.slots[2].getData();
+	mem.dataB=this.slots[3].getData();
+
+	mem.valueR=mem.dataR.getValueInR(0,100,true,true); //Positive integer.
+	mem.valueG=mem.dataG.getValueInR(0,100,true,true); //Positive integer.
+	mem.valueB=mem.dataB.getValueInR(0,100,true,true); //Positive integer.
+	mem.isValid=mem.dataR.isValid&&mem.dataG.isValid&&mem.dataB.isValid;
+
+	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
 		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
 		mem.requestStatus=function(){};
 		HtmlServer.sendHBRequest(mem.request,mem.requestStatus); //Send the request.

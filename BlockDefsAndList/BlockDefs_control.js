@@ -104,10 +104,16 @@ B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.times=this.slots[0].getData().getValueWithC(true,true);
+	mem.timesD=this.slots[0].getData();
+	mem.times=mem.timesD.getValueWithC(true,true);
 	mem.count=0;
-	this.blockSlot1.startRun();
-	return true; //Still running
+	if(mem.times>0&&mem.timesD.isValid) {
+		this.blockSlot1.startRun();
+		return true; //Still running
+	}
+	else{
+		return false;
+	}
 };
 /* Update contents. When they finish, increment counter and possibly run them again. */
 B_Repeat.prototype.updateAction=function(){
