@@ -1,7 +1,10 @@
 //@fix Write documentation.
 
-function ListDropSlot(parent){
-	DropSlot.call(this,parent,Slot.snapTypes.none);
+function ListDropSlot(parent,snapType){
+	if(snapType==null){
+		snapType=Slot.snapTypes.none
+	}
+	DropSlot.call(this,parent,snapType);
 	var lists=CodeManager.listList;
 	if(lists.length>0){
 		var lastList=lists[lists.length-1];
@@ -19,7 +22,7 @@ ListDropSlot.prototype.populateList=function(){
 	}
 };
 ListDropSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new ListDropSlot(parentCopy);
+	var myCopy=new ListDropSlot(parentCopy,this.snapType);
 	myCopy.enteredData=this.enteredData;
 	myCopy.changeText(this.text);
 	return myCopy;

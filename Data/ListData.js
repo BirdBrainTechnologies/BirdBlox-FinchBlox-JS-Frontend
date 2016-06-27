@@ -43,3 +43,35 @@ ListData.prototype.asBool=function(){
 ListData.prototype.asList=function(){
 	return this;
 };
+ListData.prototype.getIndex=function(indexData){
+	var array=this.getValue();
+	if(array.length==0){
+		return null;
+	}
+	if(indexData==null){
+		return null;
+	}
+	var indexV=indexData.getValue();
+	var min=1;
+	var max=array.length;
+	if(indexData.type==Data.types.selection){
+		if(indexV=="last"){
+			return array.length-1;
+		}
+		else if(indexV=="random"){
+			return Math.floor(Math.random() * array.length);
+		}
+		else{
+			return null;
+		}
+	}
+	else if(indexData.type==Data.types.num){
+		if(!indexData.isValid){
+			return null;
+		}
+		return indexData.getValueInR(min,max,true,true)-1;
+	}
+	else{
+		return null;
+	}
+};

@@ -88,6 +88,32 @@ B_Divide.prototype.startAction=function(){
 
 
 
+function B_Mod(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,0.5));
+	this.addPart(new LabelText(this,"mod"));
+	this.addPart(new NumSlot(this,0.5));
+}
+B_Mod.prototype = Object.create(ReporterBlock.prototype);
+B_Mod.prototype.constructor = B_Mod;
+/* Sets the result to the first Slot mod the second Slot. Valid if Slots are valid and second isn't 0. */
+B_Mod.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val1=data1.getValue();
+	var val2=data2.getValue();
+	var result=val1%val2;
+	if(val2==0){
+		result=0;
+		isValid=false;
+	}
+	this.resultData=new NumData(result,isValid);
+	return false; //Done running
+};
+
+
+
 function B_Round(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"round"));
@@ -332,6 +358,51 @@ B_join.prototype.startAction=function(){
 	var word1=this.slots[0].getData().getValue();
 	var word2=this.slots[1].getData().getValue();
 	this.resultData=new StringData(word1+word2);
+	return false; //Done running
+};
+
+
+
+function B_Split(x,y){
+	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
+	this.addPart(new LabelText(this,"split"));
+	this.addPart(new StringSlot(this,"hello world"));
+	this.addPart(new LabelText(this,"by"));
+	var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+	dS.addOption("Enter text",new SelectionData("enter_text"));
+	dS.addOption("letter",new SelectionData("letter"));
+	dS.addOption("whitespace",new SelectionData("whitespace"));
+	dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+	this.addPart(dS);
+}
+B_Split.prototype = Object.create(ReporterBlock.prototype);
+B_Split.prototype.constructor = B_Split;
+/* Returns a list made from splitting the string by the provided character. */
+B_Split.prototype.startAction=function(){
+	var string1=this.slots[0].getData().getValue();
+	var splitD=this.slots[1].getData();
+	var resultArray;
+	if(splitD.type==Data.types.string){
+		var splitStr=splitD.getValue();
+		resultArray=string1.split(splitStr);
+	}
+	else if(splitD.type==Data.types.selection){
+		var selection=splitD.getValue();
+		if(selection=="letter"){
+			resultArray=string1.split("");
+		}
+		else if(selection=="whitespace"){
+			resultArray=string1.split(/\s+/);
+		}
+	}
+	else{
+		resultArray=new Array();
+	}
+	var dataArray=new Array(resultArray.length);
+	for(var i=0;i<resultArray.length;i++){
+		dataArray[i]=new StringData(resultArray[i]);
+	}
+	this.resultData=new ListData(dataArray);
 	return false; //Done running
 };
 

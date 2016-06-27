@@ -129,6 +129,32 @@ DropSlot.prototype.edit=function(){
 		InputPad.showDropdown(this,x+this.width/2,y,y+this.height);
 	}
 }
+/* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
+ * Only used for special DropSlots.
+ */
+DropSlot.prototype.editText=function(){
+	//Builds a text-based representation of the Block with "___" in place of this Slot.
+	var question=this.parent.textSummary(this);
+	//Get the current value for the hint text.
+	var currentVal=this.enteredData.getValue();
+	//The callback function changes the text.
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			callbackFn.slot.enteredData=new StringData(response);
+			callbackFn.slot.changeText(response);
+		}
+		//callbackFn.slot.deselect();
+	};
+	callbackFn.slot=this;
+	//The error function cancels any change.
+	var callbackErr=function(){
+
+	};
+	callbackErr.slot=this;
+	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn,callbackErr);
+	//Visually deselect the Slot.
+	callbackFn.slot.deselect();
+};
 DropSlot.prototype.select=function(){
 	var bG=BlockGraphics.dropSlot;
 	this.selected=true;

@@ -125,12 +125,13 @@ B_DeleteItemOfList.prototype.startAction=function(){
 	if(listD!=null&&listD.type == Data.types.selection){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
-		var array=list.getData().getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
 		if(indexD.type==Data.types.selection&&indexD.getValue()=="all"){
 			list.setData(new ListData());
 		}
 		else {
-			var index = list.getIndex(indexD);
+			var index = listData.getIndex(indexD);
 			if (index != null) {
 				array.splice(index, 1);
 			}
@@ -160,9 +161,10 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 	if(listD!=null&&listD.type == Data.types.selection){
 		var indexD=this.slots[1].getData();
 		var list=listD.getValue();
-		var array=list.getData().getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
 		var itemD=this.slots[0].getData();
-		var index=list.getIndex(indexD);
+		var index=listData.getIndex(indexD);
 		if(index==null||indexD.getValue()>array.length){
 			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
 				if(itemD.isValid){
@@ -205,9 +207,10 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 	if(listD!=null&&listD.type == Data.types.selection){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
-		var array=list.getData().getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
 		var itemD=this.slots[2].getData();
-		var index=list.getIndex(indexD);
+		var index=listData.getIndex(indexD);
 		if(index==null){
 			return false;
 		}
@@ -222,6 +225,40 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 };
 
 
+
+function B_CopyListToList(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"copy"));
+	this.addPart(new ListDropSlot(this,Slot.snapTypes.list));
+	this.addPart(new LabelText(this,"to"));
+	this.addPart(new ListDropSlot(this));
+}
+B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
+B_CopyListToList.prototype.constructor = B_CopyListToList;
+B_CopyListToList.prototype.startAction=function(){
+	var listD1=this.slots[0].getData();
+	var listD2=this.slots[1].getData();
+	if(listD1!=null&&listD2!=null){
+		var listDataToCopy;
+		if(listD1.type==Data.types.selection){
+			listDataToCopy=listD1.getValue().getData();
+		}
+		else if(listD1.type==Data.types.list){
+			listDataToCopy=listD1;
+		}
+		else{
+			return false;
+		}
+		if(listD2.type==Data.types.selection){
+			var listToCopyTo=listD2.getValue();
+			listToCopyTo.setData(listDataToCopy.duplicate());
+		}
+	}
+	return false;
+};
+
+
+
 //Done
 function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
@@ -231,28 +268,37 @@ function B_ItemOfList(x,y){
 	nS.addOption("random",new SelectionData("random"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this));
+	this.addPart(new ListDropSlot(this,Slot.snapTypes.list));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
 B_ItemOfList.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
+	var indexD;
 	if(listD!=null&&listD.type == Data.types.selection) {
-		var indexD = this.slots[0].getData();
+		indexD = this.slots[0].getData();
 		var list = listD.getValue();
-		var array = list.getData().getValue();
-		var index=list.getIndex(indexD);
-		if(index==null){
-			this.resultData = new StringData("", false);
-		}
-		else {
-			this.resultData = array[index];
-		}
+		var listData=list.getData();
+		this.resultData=this.getItemOfList(listData,indexD);
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		indexD = this.slots[0].getData();
+		this.resultData=this.getItemOfList(listD,indexD);
 	}
 	else {
 		this.resultData = new StringData("", false);
 	}
 	return false;
+};
+B_ItemOfList.prototype.getItemOfList=function(listData,indexD){
+	var array = listData.getValue();
+	var index=listData.getIndex(indexD);
+	if(index==null){
+		return new StringData("", false);
+	}
+	else {
+		return array[index];
+	}
 };
 
 
@@ -260,7 +306,7 @@ B_ItemOfList.prototype.startAction=function(){
 function B_LengthOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"length of"));
-	this.addPart(new ListDropSlot(this));
+	this.addPart(new ListDropSlot(this,Slot.snapTypes.list));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
@@ -270,6 +316,9 @@ B_LengthOfList.prototype.startAction=function(){
 		var list = listD.getValue();
 		var array = list.getData().getValue();
 		this.resultData = new NumData(array.length);
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		this.resultData = new NumData(listD.getValue().length);
 	}
 	else {
 		this.resultData = new NumData(0,false);
@@ -281,7 +330,7 @@ B_LengthOfList.prototype.startAction=function(){
 //Done
 function B_ListContainsItem(x,y){
 	PredicateBlock.call(this,x,y,"lists");
-	this.addPart(new ListDropSlot(this));
+	this.addPart(new ListDropSlot(this,Slot.snapTypes.list));
 	this.addPart(new LabelText(this,"contains"));
 	this.addPart(new StringSlot(this,"thing"));
 }
@@ -289,19 +338,28 @@ B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
 B_ListContainsItem.prototype.startAction=function(){
 	var listD=this.slots[0].getData();
+	var itemD;
 	if(listD!=null&&listD.type == Data.types.selection) {
 		var list = listD.getValue();
-		var array = list.getData().getValue();
-		var itemD=this.slots[1].getData();
-		this.resultData = new BoolData(false,true);
-		for(var i=0;i<array.length;i++){
-			if(Data.checkEquality(itemD,array[i])){
-				this.resultData = new BoolData(true,true);
-			}
-		}
+		var listData=list.getData();
+		itemD=this.slots[1].getData();
+		this.resultData=this.checkListContainsItem(listData,itemD);
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		itemD=this.slots[1].getData();
+		this.resultData=this.checkListContainsItem(listD,itemD);
 	}
 	else {
 		this.resultData = new BoolData(false,true);
 	}
 	return false;
+};
+B_ListContainsItem.prototype.checkListContainsItem=function(listData,itemD){
+	var array = listData.getValue();
+	for(var i=0;i<array.length;i++){
+		if(Data.checkEquality(itemD,array[i])){
+			return new BoolData(true,true);
+		}
+	}
+	return new BoolData(false,true);
 };

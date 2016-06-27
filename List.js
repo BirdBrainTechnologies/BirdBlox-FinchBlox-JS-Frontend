@@ -26,6 +26,7 @@ List.prototype.remove=function(){
 	this.data=null;
 	CodeManager.removeList(this);
 };
+/*
 List.prototype.getIndex=function(indexData){
 	var listData=this.data;
 	var array=listData.getValue();
@@ -58,4 +59,4 @@ List.prototype.getIndex=function(indexData){
 	else{
 		return null;
 	}
-};
+};*/

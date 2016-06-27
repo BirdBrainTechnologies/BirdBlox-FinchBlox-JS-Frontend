@@ -169,6 +169,7 @@ BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_Multiply");
 	category.addBlockByName("B_Divide");
 	category.addSpace();
+	category.addBlockByName("B_Mod");
 	category.addBlockByName("B_Round");
 	category.addBlockByName("B_mathOfNumber");
 	category.addBlockByName("B_PickRandom");
@@ -187,6 +188,7 @@ BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_LetterOf");
 	category.addBlockByName("B_LengthOf");
 	category.addBlockByName("B_join");
+	category.addBlockByName("B_Split");
 	category.trimBottom();
 	
 }
@@ -222,9 +224,10 @@ BlockList.populateCat_variables=function(category){
 		category.addBlockByName("B_DeleteItemOfList");
 		category.addBlockByName("B_InsertItemAtOfList");
 		category.addBlockByName("B_ReplaceItemOfListWith");
-		category.addBlockByName("B_ItemOfList");
-		category.addBlockByName("B_LengthOfList");
-		category.addBlockByName("B_ListContainsItem");
+		category.addBlockByName("B_CopyListToList");
 	}
+	category.addBlockByName("B_ItemOfList");
+	category.addBlockByName("B_LengthOfList");
+	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
 };
