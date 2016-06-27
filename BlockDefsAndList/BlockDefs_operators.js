@@ -90,9 +90,9 @@ B_Divide.prototype.startAction=function(){
 
 function B_Mod(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0.5));
+	this.addPart(new NumSlot(this,17));
 	this.addPart(new LabelText(this,"mod"));
-	this.addPart(new NumSlot(this,0.5));
+	this.addPart(new NumSlot(this,10));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
@@ -103,7 +103,7 @@ B_Mod.prototype.startAction=function(){
 	var isValid=data1.isValid&&data2.isValid;
 	var val1=data1.getValue();
 	var val2=data2.getValue();
-	var result=val1%val2;
+	var result=((val1%val2)+val2)%val2;
 	if(val2==0){
 		result=0;
 		isValid=false;
