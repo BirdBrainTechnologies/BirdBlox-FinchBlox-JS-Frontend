@@ -189,6 +189,8 @@ BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_LengthOf");
 	category.addBlockByName("B_join");
 	category.addBlockByName("B_Split");
+	category.addSpace();
+	category.addBlockByName("B_IsAType");
 	category.trimBottom();
 	
 }

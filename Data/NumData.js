@@ -1,6 +1,5 @@
 function NumData(value,isValid){
-	//Only use functions that exist.
-	if((value.isFinite&&!value.isFinite())||(value.isNaN&&value.isNaN())){
+	if(isNaN(value)||!isFinite(value)){
 		value=0;
 		isValid=false;
 	}

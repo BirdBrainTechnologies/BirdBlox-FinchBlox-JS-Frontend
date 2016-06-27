@@ -408,6 +408,67 @@ B_Split.prototype.startAction=function(){
 
 
 
+function B_IsAType(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"is"));
+	this.addPart(new RectSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,"5"));
+	this.addPart(new LabelText(this,"a"));
+	var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+	dS.addOption("number",new SelectionData("number"));
+	dS.addOption("text",new SelectionData("text"));
+	dS.addOption("boolean",new SelectionData("boolean"));
+	dS.addOption("list",new SelectionData("list"));
+	dS.addOption("invalid number",new SelectionData("invalid_num"));
+	dS.setSelectionData("number",new SelectionData("number"));
+	this.addPart(dS);
+	this.addPart(new LabelText(this,"?"));
+}
+B_IsAType.prototype = Object.create(PredicateBlock.prototype);
+B_IsAType.prototype.constructor = B_IsAType;
+/* Result is Slots concatenated. Always valid. */
+B_IsAType.prototype.startAction=function(){
+	var data=this.slots[0].getData();
+	var selection=this.slots[1].getData().getValue();
+	var types=Data.types;
+	if(selection=="number"){
+		if(data.type==types.num&&data.isValid){
+			this.resultData=new BoolData(true);
+		}
+		else if(data.type==types.string&&data.isNumber()){
+			this.resultData=new BoolData(true);
+		}
+		else{
+			this.resultData=new BoolData(false);
+		}
+	}
+	else if(selection=="text"){
+		this.resultData=new BoolData(data.type==types.string&&!data.isNumber());
+	}
+	else if(selection=="boolean"){
+		this.resultData=new BoolData(data.type==types.bool);
+	}
+	else if(selection=="list"){
+		this.resultData=new BoolData(data.type==types.list);
+	}
+	else if(selection=="invalid_num"){
+		if(data.type==types.num&&!data.isValid){
+			this.resultData=new BoolData(true);
+		}
+		else if(data.type==types.string&&data.getValue()==(new NumData(0/0).asString().getValue())){
+			this.resultData=new BoolData(true);
+		}
+		else{
+			this.resultData=new BoolData(false);
+		}
+	}
+	else{
+		this.resultData=new BoolData(false);
+	}
+	return false;
+};
+
+
+
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
