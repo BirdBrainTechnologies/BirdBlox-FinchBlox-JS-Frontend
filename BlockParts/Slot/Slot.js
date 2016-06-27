@@ -296,6 +296,10 @@ Slot.prototype.convertData=function(data){
 	//Should not be called.
 	return null;
 };
+/* Overridden by subclasses. Checks if a given message is still in use by any of the DropSlots. */
+Slot.prototype.checkBroadcastMessageAvailable=function(message){
+	return false;
+};
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */

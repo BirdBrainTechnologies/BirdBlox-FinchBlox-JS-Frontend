@@ -79,6 +79,29 @@ TabManager.eventFlagClicked=function(){
 		TabManager.tabList[i].eventFlagClicked();
 	}
 }
+TabManager.eventBroadcast=function(message){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		TabManager.tabList[i].eventBroadcast(message);
+	}
+};
+TabManager.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		for(var i=0;i<TabManager.tabList.length;i++){
+			if(TabManager.tabList[i].eventBroadcast(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+TabManager.checkBroadcastMessageAvailable=function(message){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
 TabManager.updateRun=function(){	
 	if(!this.isRunning){
 		return false;

@@ -602,6 +602,39 @@ Block.prototype.textSummary=function(slotToExclude){
 Block.prototype.eventFlagClicked=function(){
 	
 };
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.eventBroadcast=function(message){
+
+};
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.checkBroadcastRunning=function(message){
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots. */
+Block.prototype.checkBroadcastMessageAvailable=function(message){
+	var rVal=false;
+	for(var i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
 /* Deletes the Block's running memory (memory reserved for computations related to execution)
  */
 Block.prototype.clearMem=function(){

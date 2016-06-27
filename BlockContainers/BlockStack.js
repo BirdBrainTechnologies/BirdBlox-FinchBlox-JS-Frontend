@@ -365,6 +365,24 @@ BlockStack.prototype.eventFlagClicked=function(){
 		this.firstBlock.eventFlagClicked();
 	}
 };
+/* Passes broadcast message to first Block in BlockStack.
+ */
+BlockStack.prototype.eventBroadcast=function(message){
+	this.firstBlock.eventBroadcast();
+};
+/* Checks if a broadcast is still running for the broadcast and wait Block.
+ */
+BlockStack.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		return this.firstBlock.checkBroadcastRunning(message);
+	}
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots.
+ */
+BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
+	return this.firstBlock.checkBroadcastMessageAvailable(message);
+};
 /* Recursively returns the last Block in the BlockStack.
  * @return {Block} - The last Block in the BlockStack.
  */

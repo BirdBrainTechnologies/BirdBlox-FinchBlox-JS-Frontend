@@ -102,7 +102,33 @@ Tab.prototype.eventFlagClicked=function(){
 	for(var i=0;i<stacks.length;i++){
 		stacks[i].eventFlagClicked();
 	}
-}
+};
+Tab.prototype.eventBroadcast=function(message){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		stacks[i].eventBroadcast(message);
+	}
+};
+Tab.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		var stacks=this.stackList;
+		for(var i=0;i<stacks.length;i++){
+			if(stacks[i].checkBroadcastRunning(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+Tab.prototype.checkBroadcastMessageAvailable=function(message){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
 		return false;
