@@ -302,11 +302,24 @@ GuiElements.update.text=function(textE,newText){
 GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
 	GuiElements.update.text(textE,text);
 	var currentWidth=GuiElements.measure.textWidth(textE);
-	while(currentWidth>=maxWidth){
-		text=text.slice(0,-1);
-		GuiElements.update.text(textE,text+"...");
-		currentWidth=GuiElements.measure.textWidth(textE);
+	if(currentWidth<maxWidth||text==""){
+		return;
 	}
+	var chars=1;
+	var maxChars=text.length;
+	var currentText;
+	while(chars<=maxChars){
+		currentText=text.substring(0,chars);
+		GuiElements.update.text(textE,currentText+"...");
+		currentWidth=GuiElements.measure.textWidth(textE);
+		if(currentWidth>maxWidth){
+			chars--;
+			break;
+		}
+		chars++;
+	}
+	currentText=text.substring(0,chars);
+	GuiElements.update.text(textE,currentText+"...");
 };
 /* Changes the path description of an SVG path object to make it a triangle.
  * @param {SVG path} pathE - The path element to be modified.

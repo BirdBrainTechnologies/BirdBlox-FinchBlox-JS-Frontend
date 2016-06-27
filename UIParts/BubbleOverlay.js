@@ -1,6 +1,10 @@
-function BubbleOverlay(color, margin, innerGroup, parent){
+function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
+	if(hMargin==null){
+		hMargin=0;
+	}
 	this.bgColor=color;
 	this.margin=margin;
+	this.hMargin=hMargin;
 	this.innerGroup=innerGroup;
 	this.parent=parent;
 	this.layerG=GuiElements.layers.overlay;
@@ -69,13 +73,19 @@ BubbleOverlay.prototype.display=function(x,upperY,lowerY,innerWidth,innerHeight)
 		yCoord=upperY-tallH;
 		arrowY=height;
 	}
-	if(xCoord<0){
-		arrowX+=xCoord;
-		xCoord=0;
+	if(xCoord<this.hMargin){
+		arrowX+=xCoord-this.hMargin;
+		xCoord=this.hMargin;
 	}
-	if(xCoord+width>GuiElements.width){
-		arrowX=width+x-GuiElements.width-BubbleOverlay.triangleW/2;
-		xCoord=GuiElements.width-width;
+	if(xCoord+width>GuiElements.width-this.hMargin){
+		arrowX=width+x-GuiElements.width-BubbleOverlay.triangleW/2+this.hMargin;
+		xCoord=GuiElements.width-width-this.hMargin;
+	}
+	if(arrowX<0){
+		arrowX=0;
+	}
+	if(arrowX>width-BubbleOverlay.triangleW){
+		arrowX=width-BubbleOverlay.triangleW;
 	}
 	GuiElements.move.group(this.group,xCoord,yCoord);
 	GuiElements.update.triangle(this.triangle,arrowX,arrowY,BubbleOverlay.triangleW,BubbleOverlay.triangleH*arrowDir);
