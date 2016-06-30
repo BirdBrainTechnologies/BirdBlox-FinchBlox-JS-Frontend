@@ -413,7 +413,7 @@ function B_IsAType(x,y){
 	this.addPart(new LabelText(this,"is"));
 	this.addPart(new RectSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,"5"));
 	this.addPart(new LabelText(this,"a"));
-	var dS=new DropSlot(this,Slot.snapTypes.none);
+	var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
 	dS.addOption("number",new SelectionData("number"));
 	dS.addOption("text",new SelectionData("text"));
 	dS.addOption("boolean",new SelectionData("boolean"));
@@ -428,7 +428,13 @@ B_IsAType.prototype.constructor = B_IsAType;
 /* Result is Slots concatenated. Always valid. */
 B_IsAType.prototype.startAction=function(){
 	var data=this.slots[0].getData();
-	var selection=this.slots[1].getData().getValue();
+	var selectionD=this.slots[1].getData();
+	var selection=selectionD.getValue();
+	if(selectionD.type==Data.types.string){
+		if(selection=="invalid number"){
+			selection="invalid_num";
+		}
+	}
 	var types=Data.types;
 	if(selection=="number"){
 		if(data.type==types.num&&data.isValid){

@@ -199,10 +199,8 @@ Tab.prototype.endScroll=function(){
 Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
 	var minX;
 	var maxX;
-	GuiElements.alert((containerX+containerW-objectW)+","+objectX);
 	if(objectW<containerW){
 		if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
-			//GuiElements.alert("Test1");
 			return objectX;
 		}
 		minX=Math.min(containerX,objectX);
