@@ -195,7 +195,7 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	var IP=InputPad;
 	IP.visible=true;
 	IP.usingNumberPad=false;
-	IP.isEditTextCommand=false;
+	IP.specialCommand="";
 	IP.slot=slot;
 	IP.dataIsNumeric=false;
 	IP.nonNumericData=IP.slot.enteredData;
@@ -213,7 +213,7 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	var IP=InputPad;
 	IP.usingNumberPad=true;
-	IP.isEditTextCommand=false;
+	IP.specialCommand="";
 	IP.width=InputPad.BnAreaW;
 	IP.height=InputPad.BnAreaH;
 	/*IP.tallH=IP.height+IP.triangleH;*/
@@ -310,8 +310,11 @@ InputPad.updateSlot=function(){
 InputPad.close=function(){
 	var IP = InputPad;
 	if(IP.visible) {
-		if (IP.isEditTextCommand) {
+		if (IP.specialCommand=="enter_text") {
 			IP.slot.editText();
+		}
+		else if (IP.specialCommand=="new_message") {
+			CodeManager.newBroadcastMessage(IP.slot);
 		}
 		else if (InputPad.dataIsNumeric) {
 			IP.slot.saveNumData(IP.displayNum.getData());
@@ -334,7 +337,10 @@ InputPad.menuBnSelected=function(text,data){
 		IP.dataIsNumeric=true;
 	}
 	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
-		IP.isEditTextCommand=true;
+		IP.specialCommand="enter_text";
+	}
+	else if(data.type==Data.types.selection&&data.getValue()=="new_message"){
+		IP.specialCommand="new_message";
 	}
 	else{
 		IP.dataIsNumeric=false;

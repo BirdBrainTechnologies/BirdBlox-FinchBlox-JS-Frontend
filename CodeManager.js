@@ -18,6 +18,7 @@ function CodeManager(){
 
 	CodeManager.variableList=new Array();
 	CodeManager.listList=new Array();
+	CodeManager.broadcastList=new Array(); //A list of broadcast messages in use.
 	CodeManager.isRunning=false; //Are at least some Blocks currently executing?
 	//Stores information used when determine which slot is closest to the moving stack.
 	CodeManager.fit=function(){};
@@ -25,6 +26,7 @@ function CodeManager(){
 	CodeManager.updateInterval=10; //How quickly does the update timer fire (in ms)?
 	//Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
 	CodeManager.answer=new StringData("");
+	CodeManager.message=new StringData(""); //Stores the broadcast message.
 	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
 	CodeManager.repeatDialogDelay=500;
 	CodeManager.lastDialogDisplayTime=null;
@@ -299,6 +301,8 @@ CodeManager.newList=function(){
 	};
 	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
 };
+/* @fix Write documentation.
+ */
 CodeManager.checkListName=function(name){
 	name=name.trim();
 	if(name.length>0){
@@ -311,4 +315,63 @@ CodeManager.checkListName=function(name){
 		return true;
 	}
 	return false;
+};
+/* @fix Write documentation.
+ */
+CodeManager.newBroadcastMessage=function(slot){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&result.length>0){
+			result=result.trim();
+			CodeManager.addBroadcastMessage(result);
+			slot.setSelectionData('"'+result+'"',new StringData(result));
+		}
+		else{
+			slot.deselect();
+		}
+	};
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastMessage=function(message){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(messages[i]==message){
+			return false;
+		}
+	}
+	return true;
+};
+/* @fix Write documentation.
+ */
+CodeManager.addBroadcastMessage=function(message){
+	if(CodeManager.checkBroadcastMessage(message)){
+		CodeManager.broadcastList.push(message);
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeUnusedMessages=function(){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
+			messages.splice(i,1);
+		}
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.updateAvailableMessages=function(){
+	CodeManager.broadcastList=new Array();
+	TabManager.updateAvailableMessages();
+};
+/* @fix Write documentation.
+ */
+CodeManager.eventBroadcast=function(message){
+	TabManager.eventBroadcast(message);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastRunning=function(message){
+	return TabManager.checkBroadcastRunning(message);
 };

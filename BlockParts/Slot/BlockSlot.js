@@ -127,7 +127,7 @@ BlockSlot.prototype.stop=function(){
 		this.child.stop();
 	}
 	this.isRunning=false;
-}
+};
 BlockSlot.prototype.updateRun=function(){
 	if(this.isRunning){
 		if(this.currentBlock.stack!=this.parent.stack){ //If the current Block has been removed, don't run it.
@@ -151,5 +151,19 @@ BlockSlot.prototype.glow=function(){
 BlockSlot.prototype.stopGlow=function(){
 	if(this.hasChild){
 		this.child.stopGlow();
+	}
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots. */
+BlockSlot.prototype.checkBroadcastMessageAvailable=function(message){
+	if(this.hasChild){
+		return this.child.checkBroadcastMessageAvailable(message);
+	}
+	return false;
+};
+/* Recursively updates the available broadcast messages.
+ */
+BlockSlot.prototype.updateAvailableMessages=function(){
+	if(this.hasChild){
+		this.child.updateAvailableMessages();
 	}
 };

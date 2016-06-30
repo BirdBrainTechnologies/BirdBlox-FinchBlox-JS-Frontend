@@ -34,6 +34,7 @@ function BlockStack(firstBlock,tab){
 	this.isRunning=false;
 	this.currentBlock=null; //Keeps track of which Block in the BlockStack is currently executing.
 	this.isDisplayStack=false;
+	this.runningBroadcastMessage=""; //Keeps track of if this stack's execution was started by a broadcast.
 	this.move(this.x,this.y);
 	this.flying=false; //BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 }
@@ -208,10 +209,14 @@ BlockStack.prototype.updateRun=function(){
 /* Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
  * @param {Block} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
  */
-BlockStack.prototype.startRun=function(startBlock){
+BlockStack.prototype.startRun=function(startBlock,broadcastMessage){
 	if(startBlock==null){
 		startBlock=this.firstBlock; //Set parameter to default.
 	}
+	if(broadcastMessage==null){
+		broadcastMessage="";
+	}
+	this.runningBroadcastMessage=broadcastMessage;
 	if(!this.isRunning){ //Only start if not already running.
 		this.isRunning=true;
 		this.currentBlock=startBlock;
@@ -368,13 +373,13 @@ BlockStack.prototype.eventFlagClicked=function(){
 /* Passes broadcast message to first Block in BlockStack.
  */
 BlockStack.prototype.eventBroadcast=function(message){
-	this.firstBlock.eventBroadcast();
+	this.firstBlock.eventBroadcast(message);
 };
 /* Checks if a broadcast is still running for the broadcast and wait Block.
  */
 BlockStack.prototype.checkBroadcastRunning=function(message){
 	if(this.isRunning){
-		return this.firstBlock.checkBroadcastRunning(message);
+		return this.runningBroadcastMessage==message;
 	}
 	return false;
 };
@@ -382,6 +387,11 @@ BlockStack.prototype.checkBroadcastRunning=function(message){
  */
 BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
 	return this.firstBlock.checkBroadcastMessageAvailable(message);
+};
+/* Recursively updates the available broadcast messages.
+ */
+BlockStack.prototype.updateAvailableMessages=function(){
+	this.firstBlock.updateAvailableMessages();
 };
 /* Recursively returns the last Block in the BlockStack.
  * @return {Block} - The last Block in the BlockStack.

@@ -612,7 +612,6 @@ Block.prototype.checkBroadcastRunning=function(message){
 };
 /* Recursively checks if a given message is still in use by any of the DropSlots. */
 Block.prototype.checkBroadcastMessageAvailable=function(message){
-	var rVal=false;
 	for(var i=0;i<this.slots.length;i++){
 		if(this.slots[i].checkBroadcastMessageAvailable(message)){
 			return true;
@@ -634,6 +633,22 @@ Block.prototype.checkBroadcastMessageAvailable=function(message){
 		}
 	}
 	return false;
+};
+/* Recursively updates the available broadcast messages.
+ */
+Block.prototype.updateAvailableMessages=function(){
+	for(var i=0;i<this.slots.length;i++){
+		this.slots[i].updateAvailableMessages();
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.updateAvailableMessages();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.updateAvailableMessages();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.updateAvailableMessages();
+	}
 };
 /* Deletes the Block's running memory (memory reserved for computations related to execution)
  */

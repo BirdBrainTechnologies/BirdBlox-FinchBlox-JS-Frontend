@@ -87,7 +87,7 @@ TabManager.eventBroadcast=function(message){
 TabManager.checkBroadcastRunning=function(message){
 	if(this.isRunning){
 		for(var i=0;i<TabManager.tabList.length;i++){
-			if(TabManager.tabList[i].eventBroadcast(message)){
+			if(TabManager.tabList[i].checkBroadcastRunning(message)){
 				return true;
 			}
 		}
@@ -101,6 +101,11 @@ TabManager.checkBroadcastMessageAvailable=function(message){
 		}
 	}
 	return false;
+};
+TabManager.updateAvailableMessages=function(){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		TabManager.tabList[i].updateAvailableMessages();
+	}
 };
 TabManager.updateRun=function(){	
 	if(!this.isRunning){

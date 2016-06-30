@@ -129,6 +129,12 @@ Tab.prototype.checkBroadcastMessageAvailable=function(message){
 	}
 	return false;
 };
+Tab.prototype.updateAvailableMessages=function(){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		stacks[i].updateAvailableMessages();
+	}
+};
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
 		return false;

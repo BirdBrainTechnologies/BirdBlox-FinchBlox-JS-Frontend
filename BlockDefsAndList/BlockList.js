@@ -125,12 +125,12 @@ BlockList.populateCat_ipad=function(category){
 BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_WhenFlagTapped");
 	//category.addBlockByName("B_WhenIAmTapped");
-	//category.addBlockByName("B_WhenIReceive");
+	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
-	//category.addBlockByName("B_Broadcast");
-	//category.addBlockByName("B_BroadcastAndWait");
-	//category.addBlockByName("B_Message");
-	//category.addSpace();
+	category.addBlockByName("B_Broadcast");
+	category.addBlockByName("B_BroadcastAndWait");
+	category.addBlockByName("B_Message");
+	category.addSpace();
 	category.addBlockByName("B_Wait");
 	category.addBlockByName("B_WaitUntil");
 	category.addSpace();

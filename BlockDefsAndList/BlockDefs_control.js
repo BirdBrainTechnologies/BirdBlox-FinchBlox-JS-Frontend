@@ -23,6 +23,30 @@ B_WhenFlagTapped.prototype.startAction=function(){
 
 
 
+function B_WhenIReceive(x,y){
+	HatBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"when I receive"));
+	this.addPart(new BroadcastDropSlot(this,true));
+}
+B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
+B_WhenIReceive.prototype.constructor = B_WhenIReceive;
+B_WhenIReceive.prototype.eventBroadcast=function(message){
+	var myMessage=this.slots[0].getData();
+	if(myMessage!=null){
+		var myMessageStr=myMessage.getValue();
+		if(myMessageStr=="any_message"||myMessageStr==message){
+			this.stack.stop();
+			this.stack.startRun(null,message);
+		}
+	}
+};
+/* Does nothing. */
+B_WhenIReceive.prototype.startAction=function(){
+	return false; //Done running. This Block does nothing except respond to an event.
+};
+
+
+
 function B_Wait(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"wait"));
@@ -232,27 +256,49 @@ function B_WhenIAmTapped(x,y){
 B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
 
-function B_WhenIReceive(x,y){
-	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when I receive"));
-}
-B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
-B_WhenIReceive.prototype.constructor = B_WhenIReceive;
+
 
 function B_Broadcast(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"broadcast"));
+	this.addPart(new BroadcastDropSlot(this,false));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
+/* Broadcast the message if one has been selected. */
+B_Broadcast.prototype.startAction=function(){
+	var message=this.slots[0].getData();
+	if(message!=null){
+		CodeManager.message=new StringData(message.getValue());
+		CodeManager.eventBroadcast(message.getValue());
+	}
+	return true;
+};
+B_Broadcast.prototype.updateAction=function(){
+	return false;
+};
 
 function B_BroadcastAndWait(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"broadcast"));
+	this.addPart(new BroadcastDropSlot(this,false));
 	this.addPart(new LabelText(this,"and wait"));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
+B_BroadcastAndWait.prototype.startAction=function(){
+	var message=this.slots[0].getData();
+	if(message!=null){
+		this.runMem.message=message.getValue();
+		CodeManager.message=new StringData(this.runMem.message);
+		CodeManager.eventBroadcast(this.runMem.message);
+	}
+	return true;
+};
+B_BroadcastAndWait.prototype.updateAction=function(){
+	var hi=CodeManager.checkBroadcastRunning(this.runMem.message);
+	return hi;
+};
 
 function B_Message(x,y){
 	ReporterBlock.call(this,x,y,"control",Block.returnTypes.string);
@@ -260,6 +306,10 @@ function B_Message(x,y){
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
+B_Message.prototype.startAction=function(){
+	this.resultData=CodeManager.message;
+	return false;
+};
 
 
 

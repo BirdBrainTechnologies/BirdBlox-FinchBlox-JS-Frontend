@@ -300,6 +300,10 @@ Slot.prototype.convertData=function(data){
 Slot.prototype.checkBroadcastMessageAvailable=function(message){
 	return false;
 };
+/* Overridden by subclasses. Updates the available broadcast messages. */
+Slot.prototype.updateAvailableMessages=function(){
+
+};
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */
