@@ -140,9 +140,8 @@ BlockList.populateCat_control=function(category){
 	category.addSpace();
 	category.addBlockByName("B_If");
 	category.addBlockByName("B_IfElse");
-	//category.addSpace();
-	//category.addBlockByName("B_StopAll");
-	//category.addBlockByName("B_StopAllBut");
+	category.addSpace();
+	category.addBlockByName("B_Stop");
 	category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){

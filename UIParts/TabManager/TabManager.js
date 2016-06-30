@@ -124,6 +124,11 @@ TabManager.stop=function(){
 	}
 	this.isRunning=false;
 }
+TabManager.stopAllButStack=function(stack){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		TabManager.tabList[i].stopAllButStack(stack);
+	}
+};
 TabManager.startRun=function(){
 	TabManager.isRunning=true;
 	CodeManager.startUpdateTimer();

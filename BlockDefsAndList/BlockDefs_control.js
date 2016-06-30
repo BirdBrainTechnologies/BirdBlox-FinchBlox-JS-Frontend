@@ -313,22 +313,30 @@ B_Message.prototype.startAction=function(){
 
 
 
-
-
-
-
-
-
-function B_StopAll(x,y){//No bottom slot
-	CommandBlock.call(this,x,y,"control",false);
+function B_Stop(x,y){//No bottom slot
+	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
+	var dS=new DropSlot(this,Slot.snapTypes.none);
+	dS.addOption("all",new SelectionData("all"));
+	dS.addOption("this script",new SelectionData("this_script"));
+	//dS.addOption("this block",new SelectionData("this_block"));
+	dS.addOption("all but this script",new SelectionData("all_but_this_script"));
+	//dS.addOption("other scripts in sprite",new SelectionData("other_scripts_in_sprite"));
+	dS.setSelectionData("all",new SelectionData("all"));
+	this.addPart(dS);
 }
-B_StopAll.prototype = Object.create(CommandBlock.prototype);
-B_StopAll.prototype.constructor = B_StopAll;
-
-function B_StopAllBut(x,y){
-	CommandBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"stop"));
-}
-B_StopAllBut.prototype = Object.create(CommandBlock.prototype);
-B_StopAllBut.prototype.constructor = B_StopAllBut;
+B_Stop.prototype = Object.create(CommandBlock.prototype);
+B_Stop.prototype.constructor = B_Stop;
+B_Stop.prototype.startAction=function(){
+	var selection=this.slots[0].getData().getValue();
+	if(selection=="all"){
+		CodeManager.stop();
+	}
+	else if(selection=="this_script"){
+		this.stack.stop();
+	}
+	else if(selection=="all_but_this_script"){
+		TabManager.stopAllButStack(this.stack);
+	}
+	return false;
+};

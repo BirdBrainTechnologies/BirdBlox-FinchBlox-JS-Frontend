@@ -154,6 +154,14 @@ Tab.prototype.stop=function(){
 	}
 	this.isRunning=false;
 }
+Tab.prototype.stopAllButStack=function(stack){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i]!=stack) {
+			stacks[i].stop();
+		}
+	}
+};
 Tab.prototype.startRun=function(){
 	this.isRunning=true;
 	TabManager.startRun();
