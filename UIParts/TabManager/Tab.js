@@ -180,45 +180,42 @@ Tab.prototype.updateScroll=function(x,y){
 	}
 };
 Tab.prototype.scroll=function(x,y) {
-	this.scrollX=x;
-	this.scrollY=y;
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
-	/*var dim=this.dim;
+	//this.scrollX=x;
+	//this.scrollY=y;
+	//GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	var dim=this.dim;
 	var x1=x+dim.xDiff;
 	var y1=y+dim.yDiff;
 
-
-	var newObjX=this.scrollOneVal(dim.x1+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
-	//var newObjY=this.scrollOneVal(dim.y1+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
-	this.scrollX=newObjX-dim.xDiff-this.scrollX;
-	//this.scrollY=newObjY-dim.yDiff-this.scrollY;
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);*/
+	var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
+	var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
+	this.scrollX=newObjX-dim.xDiff;
+	this.scrollY=newObjY-dim.yDiff;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
 };
 Tab.prototype.endScroll=function(){
 	this.scrolling=false;
 };
 Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
-	return targetX;
 	var minX;
 	var maxX;
+	GuiElements.alert((containerX+containerW-objectW)+","+objectX);
 	if(objectW<containerW){
 		if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
-			GuiElements.alert("Test1");
+			//GuiElements.alert("Test1");
 			return objectX;
 		}
-		GuiElements.alert("Test2");
 		minX=Math.min(containerX,objectX);
 		maxX=Math.max(containerX+containerW-objectW,objectX);
 	}
 	else{
-		GuiElements.alert("Test3");
 		minX=Math.min(containerX+containerW-objectW,objectX);
 		maxX=Math.max(containerX,objectX);
 	}
 	var rVal=targetX;
-	return rVal;
 	rVal=Math.min(rVal,maxX);
 	rVal=Math.max(rVal,minX);
+	return rVal;
 };
 Tab.prototype.updateTabDim=function(){
 	var dim=this.dim;
@@ -244,6 +241,6 @@ Tab.prototype.updateTabDim=function(){
 	dim.y2+=TabManager.spaceScrollMargin;
 	dim.width=dim.x2-dim.x1;
 	dim.height=dim.y2-dim.y1;
-	dim.xDiff=this.dim.x1-this.scrollX;
-	dim.yDiff=this.dim.y1-this.scrollY;
+	dim.xDiff=this.dim.x1;
+	dim.yDiff=this.dim.y1;
 };
