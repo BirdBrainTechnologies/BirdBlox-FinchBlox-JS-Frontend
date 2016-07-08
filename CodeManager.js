@@ -382,6 +382,8 @@ CodeManager.createXml=function(){
 	var project=xmlDoc.getElementsByTagName("project")[0];
 	XmlWriter.setAttribute(project,"name","autoSave");
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
+	XmlWriter.setAttribute(project,"created",new Date().getTime());
+	XmlWriter.setAttribute(project,"modified",new Date().getTime());
 	var variables=XmlWriter.createElement(xmlDoc,"variables");
 	for(var i=0;i<CM.variableList.length;i++){
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
@@ -394,7 +396,4 @@ CodeManager.createXml=function(){
 	project.appendChild(lists);
 	project.appendChild(TabManager.createXml(xmlDoc));
 	return xmlDoc;
-};
-CodeManager.autoSave=function(){
-	XmlWriter.download(CodeManager.createXml(),"autoSave");
 };

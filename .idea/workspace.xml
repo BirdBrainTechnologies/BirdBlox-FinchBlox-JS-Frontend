@@ -2,26 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Block/Block.js" afterPath="$PROJECT_DIR$/Block/Block.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Block/DoubleLoopBlock.js" afterPath="$PROJECT_DIR$/Block/DoubleLoopBlock.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockContainers/BlockStack.js" afterPath="$PROJECT_DIR$/BlockContainers/BlockStack.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/BlockSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/BlockSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/RectSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/RectSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/Data.js" afterPath="$PROJECT_DIR$/Data/Data.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/ListData.js" afterPath="$PROJECT_DIR$/Data/ListData.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/List.js" afterPath="$PROJECT_DIR$/List.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TabManager/Tab.js" afterPath="$PROJECT_DIR$/UIParts/TabManager/Tab.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TabManager/TabManager.js" afterPath="$PROJECT_DIR$/UIParts/TabManager/TabManager.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TitleBar.js" afterPath="$PROJECT_DIR$/UIParts/TitleBar.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Variable.js" afterPath="$PROJECT_DIR$/Variable.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/version.txt" afterPath="$PROJECT_DIR$/version.txt" />
     </list>
     <ignored path="Git.iws" />
@@ -268,8 +251,8 @@
       <file leaf-file-name="CodeManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CodeManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="390" column="38" selection-start-line="390" selection-start-column="38" selection-end-line="390" selection-end-column="38" />
+            <state relative-caret-position="636">
+              <caret line="398" column="2" selection-start-line="398" selection-start-column="2" selection-end-line="398" selection-end-column="2" />
               <folding>
                 <element signature="e#847#877#0" expanded="false" />
                 <element signature="e#2198#2533#0" expanded="false" />
@@ -320,11 +303,41 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TouchReceiver.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TitleBar.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="442">
+              <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/SaveManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="85">
+              <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="5" selection-end-column="2" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HummingbirdDragAndDrop.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="527">
+              <caret line="43" column="52" selection-start-line="43" selection-start-column="52" selection-end-line="43" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TouchReceiver.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="16" column="33" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+            <state relative-caret-position="51">
+              <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
               <folding>
                 <element signature="e#219#230#0" expanded="false" />
                 <element signature="e#1158#1242#0" expanded="false" />
@@ -442,7 +455,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="version.txt" pinned="false" current-in-tab="true">
+      <file leaf-file-name="version.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/version.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
@@ -555,120 +568,8 @@
       <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="415">
-              <caret line="52" column="59" selection-start-line="52" selection-start-column="59" selection-end-line="52" selection-end-column="59" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TitleBar.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
-              <caret line="33" column="30" selection-start-line="33" selection-start-column="30" selection-end-line="33" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BlockStack.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockContainers/BlockStack.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="704">
-              <caret line="425" column="45" selection-start-line="425" selection-start-column="45" selection-end-line="425" selection-end-column="45" />
-              <folding>
-                <element signature="e#1387#1454#0" expanded="false" />
-                <element signature="e#2313#2421#0" expanded="false" />
-                <element signature="e#2464#3282#0" expanded="false" />
-                <element signature="e#2496#2547#0" expanded="false" />
-                <element signature="e#3284#3505#0" expanded="false" />
-                <element signature="e#3548#3714#0" expanded="false" />
-                <element signature="e#3566#3624#0" expanded="false" />
-                <element signature="e#3630#3712#0" expanded="false" />
-                <element signature="e#3758#3924#0" expanded="false" />
-                <element signature="e#3776#3834#0" expanded="false" />
-                <element signature="e#3840#3922#0" expanded="false" />
-                <element signature="e#3926#4147#0" expanded="false" />
-                <element signature="e#4190#4357#0" expanded="false" />
-                <element signature="e#4208#4266#0" expanded="false" />
-                <element signature="e#4272#4355#0" expanded="false" />
-                <element signature="e#4401#4568#0" expanded="false" />
-                <element signature="e#4419#4477#0" expanded="false" />
-                <element signature="e#4483#4566#0" expanded="false" />
-                <element signature="e#4570#4703#0" expanded="false" />
-                <element signature="e#4743#4773#0" expanded="false" />
-                <element signature="e#4775#4908#0" expanded="false" />
-                <element signature="e#4948#4978#0" expanded="false" />
-                <element signature="e#4980#5135#0" expanded="false" />
-                <element signature="e#5179#6413#0" expanded="false" />
-                <element signature="e#5296#5382#0" expanded="false" />
-                <element signature="e#5503#5532#0" expanded="false" />
-                <element signature="e#5655#5966#0" expanded="false" />
-                <element signature="e#5924#5963#0" expanded="false" />
-                <element signature="e#6090#6411#0" expanded="false" />
-                <element signature="e#6369#6408#0" expanded="false" />
-                <element signature="e#6415#6615#0" expanded="false" />
-                <element signature="e#6655#6721#0" expanded="false" />
-                <element signature="e#6723#6971#0" expanded="false" />
-                <element signature="e#7014#7098#0" expanded="false" />
-                <element signature="e#7100#7200#0" expanded="false" />
-                <element signature="e#7344#7555#0" expanded="false" />
-                <element signature="e#7597#8709#0" expanded="false" />
-                <element signature="e#7618#8683#0" expanded="false" />
-                <element signature="e#7729#8206#0" expanded="false" />
-                <element signature="e#7767#7892#0" expanded="false" />
-                <element signature="e#8022#8079#0" expanded="false" />
-                <element signature="e#8177#8202#0" expanded="false" />
-                <element signature="e#8213#8680#0" expanded="false" />
-                <element signature="e#8296#8676#0" expanded="false" />
-                <element signature="e#8711#8922#0" expanded="false" />
-                <element signature="e#9391#9506#0" expanded="false" />
-                <element signature="e#9545#9600#0" expanded="false" />
-                <element signature="e#9602#9796#0" expanded="false" />
-                <element signature="e#9843#11060#0" expanded="false" />
-                <element signature="e#10077#10240#0" expanded="false" />
-                <element signature="e#10712#11058#0" expanded="false" />
-                <element signature="e#10870#11055#0" expanded="false" />
-                <element signature="e#11062#11264#0" expanded="false" />
-                <element signature="e#11306#12499#0" expanded="false" />
-                <element signature="e#11381#11422#0" expanded="false" />
-                <element signature="e#11471#11534#0" expanded="false" />
-                <element signature="e#11576#11670#0" expanded="false" />
-                <element signature="e#11672#11857#0" expanded="false" />
-                <element signature="e#12108#12145#0" expanded="false" />
-                <element signature="e#12501#12615#0" expanded="false" />
-                <element signature="e#12657#12742#0" expanded="false" />
-                <element signature="e#12744#12924#0" expanded="false" />
-                <element signature="e#12969#13003#0" expanded="false" />
-                <element signature="e#13005#13171#0" expanded="false" />
-                <element signature="e#13222#13395#0" expanded="false" />
-                <element signature="e#13397#13566#0" expanded="false" />
-                <element signature="e#13605#13626#0" expanded="false" />
-                <element signature="e#13628#13860#0" expanded="false" />
-                <element signature="e#13902#13935#0" expanded="false" />
-                <element signature="e#13937#14032#0" expanded="false" />
-                <element signature="e#14068#14439#0" expanded="false" />
-                <element signature="e#14315#14355#0" expanded="false" />
-                <element signature="e#14441#14496#0" expanded="false" />
-                <element signature="e#14533#14878#0" expanded="false" />
-                <element signature="e#14880#14925#0" expanded="false" />
-                <element signature="e#14964#14996#0" expanded="false" />
-                <element signature="e#14998#15071#0" expanded="false" />
-                <element signature="e#15110#15191#0" expanded="false" />
-                <element signature="e#16214#16329#0" expanded="false" />
-                <element signature="e#16374#16417#0" expanded="false" />
-                <element signature="e#16419#16426#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="XmlWriter.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/XmlWriter.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="595">
-              <caret line="35" column="30" selection-start-line="35" selection-start-column="30" selection-end-line="35" selection-end-column="30" />
+            <state relative-caret-position="483">
+              <caret line="56" column="30" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -682,7 +583,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_data.js" />
         <option value="$PROJECT_DIR$/UIParts/Button.js" />
         <option value="$PROJECT_DIR$/BlockContainers/DisplayStack.js" />
         <option value="$PROJECT_DIR$/ColorsAndGraphics/Colors.js" />
@@ -726,13 +626,14 @@
         <option value="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" />
         <option value="$PROJECT_DIR$/Variable.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/BlockSlot.js" />
-        <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
         <option value="$PROJECT_DIR$/XmlWriter.js" />
-        <option value="$PROJECT_DIR$/UIParts/TitleBar.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
-        <option value="$PROJECT_DIR$/TouchReceiver.js" />
+        <option value="$PROJECT_DIR$/SaveManager.js" />
+        <option value="$PROJECT_DIR$/UIParts/TitleBar.js" />
+        <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
         <option value="$PROJECT_DIR$/version.txt" />
+        <option value="$PROJECT_DIR$/TouchReceiver.js" />
       </list>
     </option>
   </component>
@@ -1082,12 +983,12 @@
       <workItem from="1467242793677" duration="8880000" />
       <workItem from="1467326119273" duration="6846000" />
       <workItem from="1467837925371" duration="10198000" />
-      <workItem from="1467928005925" duration="7190000" />
+      <workItem from="1467928005925" duration="8277000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="259444000" />
+    <option name="totallyTimeSpent" value="260531000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
@@ -1129,7 +1030,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/BlockContextMenu.js" />
     <entry file="file://$PROJECT_DIR$/UIParts/BlockContextMenu.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -1169,14 +1069,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
           <caret line="69" column="0" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2193">
-          <caret line="132" column="24" selection-start-line="132" selection-start-column="24" selection-end-line="132" selection-end-column="24" />
           <folding />
         </state>
       </provider>
@@ -1678,14 +1570,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="43" column="8" selection-start-line="43" selection-start-column="8" selection-end-line="43" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DropSlot.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="636">
@@ -1715,14 +1599,6 @@
             <element signature="e#5924#5947#0" expanded="false" />
             <element signature="e#6235#6300#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="33" column="30" selection-start-line="33" selection-start-column="30" selection-end-line="33" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -2142,16 +2018,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HtmlServer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="415">
-          <caret line="52" column="59" selection-start-line="52" selection-start-column="59" selection-end-line="52" selection-end-column="59" />
+        <state relative-caret-position="483">
+          <caret line="56" column="30" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="602">
+          <caret line="165" column="58" selection-start-line="165" selection-start-column="58" selection-end-line="165" selection-end-column="58" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CodeManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="390" column="38" selection-start-line="390" selection-start-column="38" selection-end-line="390" selection-end-column="38" />
+        <state relative-caret-position="636">
+          <caret line="398" column="2" selection-start-line="398" selection-start-column="2" selection-end-line="398" selection-end-column="2" />
           <folding>
             <element signature="e#847#877#0" expanded="false" />
             <element signature="e#2198#2533#0" expanded="false" />
@@ -2201,10 +2085,42 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SaveManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="5" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="527">
+          <caret line="43" column="52" selection-start-line="43" selection-start-column="52" selection-end-line="43" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="16" column="33" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+        <state relative-caret-position="51">
+          <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
           <folding>
             <element signature="e#219#230#0" expanded="false" />
             <element signature="e#1158#1242#0" expanded="false" />
@@ -2318,14 +2234,6 @@
             <element signature="e#14682#14886#0" expanded="false" />
             <element signature="e#14761#14875#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-          <folding />
         </state>
       </provider>
     </entry>
