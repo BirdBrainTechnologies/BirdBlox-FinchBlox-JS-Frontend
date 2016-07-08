@@ -75,3 +75,14 @@ ListData.prototype.getIndex=function(indexData){
 		return null;
 	}
 };
+ListData.prototype.createXml=function(xmlDoc){
+	var data=XmlWriter.createElement(xmlDoc,"data");
+	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
+	XmlWriter.setAttribute(data,"isValid",this.isValid);
+	var value=xmlDoc.createElement("value");
+	for(var i=0;i<this.value.length;i++){
+		value.appendChild(this.value[i].createXml(xmlDoc));
+	}
+	data.appendChild(value);
+	return data;
+};

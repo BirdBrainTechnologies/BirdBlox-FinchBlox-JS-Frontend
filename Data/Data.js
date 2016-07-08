@@ -61,3 +61,38 @@ Data.checkEquality=function(data1,data2){
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
+
+Data.prototype.createXml=function(xmlDoc){
+	var data=XmlWriter.createElement(xmlDoc,"data");
+	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
+	XmlWriter.setAttribute(data,"isValid",this.isValid);
+	var value=XmlWriter.createElement(xmlDoc,"value");
+	var valueString=this.getValue()+"";
+	if(this.getValue().constructor.name=="Variable"){
+		valueString=this.getValue().name;
+	}
+	else if(this.getValue().constructor.name=="List"){
+		valueString=this.getValue().name;
+	}
+	var valueText=XmlWriter.createTextNode(xmlDoc,valueString);
+	value.appendChild(valueText);
+	data.appendChild(value);
+	return data;
+};
+Data.prototype.getDataTypeName=function(){
+	if(this.type==Data.types.num){
+		return "num";
+	}
+	else if(this.type==Data.types.bool){
+		return "bool";
+	}
+	else if(this.type==Data.types.string){
+		return "string";
+	}
+	else if(this.type==Data.types.list){
+		return "list";
+	}
+	else if(this.type==Data.types.selection){
+		return "selection";
+	}
+};

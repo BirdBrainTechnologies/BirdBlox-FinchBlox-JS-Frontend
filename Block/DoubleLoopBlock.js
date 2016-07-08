@@ -14,11 +14,12 @@ DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
 DoubleLoopBlock.prototype.duplicate=function(x,y){ //Must be overridden to set midLabelText with constructor.
 	var copiedClass=function(x1,y1,category,midLabelText){
 		DoubleLoopBlock.call(this,x1,y1,category,midLabelText);
-	}
+	};
 	copiedClass.prototype = Object.create(this.constructor.prototype);
 	copiedClass.prototype.constructor = copiedClass;
 	
 	var myCopy=new copiedClass(x,y,this.category,this.midLabelText);
+	myCopy.blockTypeName=this.blockTypeName;
 	myCopy.bottomOpen=this.bottomOpen;
 	for(var i=0;i<this.parts.length;i++){
 		myCopy.addPart(this.parts[i].duplicate(myCopy));

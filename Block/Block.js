@@ -11,6 +11,8 @@
  * @param {string} category - The Block's category in string form.
  */
 function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=Predicate Fix! BG
+	this.blockTypeName=this.constructor.name; //Keeps track of what type of Block this is.
+
 	this.x=x; //Store coords
 	this.y=y;
 	this.type=type; //Fix! remove this property
@@ -550,11 +552,12 @@ Block.prototype.duplicate=function(x,y){
 	//Allows the Block to be constructed without any Slots initially, so they can be duplicated and added on.
 	var copiedClass=function(type,returnType,x1,y1,category){
 		Block.call(this,type,returnType,x1,y1,category); //Call Block constructor.
-	}
+	};
 	copiedClass.prototype = Object.create(this.constructor.prototype); //Copy all functions.
 	copiedClass.prototype.constructor = copiedClass; //Only constructor differs.
-	
+
 	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category); //Make an empty Block of this Block's type.
+	myCopy.blockTypeName=this.blockTypeName;
 	for(var i=0;i<this.parts.length;i++){ //Copy this Block's parts to the new Block.
 		myCopy.addPart(this.parts[i].duplicate(myCopy));
 	}
@@ -693,4 +696,29 @@ Block.prototype.stopGlow=function(){
 	if(this.bottomOpen&&this.nextBlock!=null){
 		this.nextBlock.stopGlow();
 	}
+};
+
+Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
+	xmlBlocks.appendChild(this.createXml(xmlDoc));
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.writeToXml(xmlDoc,xmlBlocks);
+	}
+};
+Block.prototype.createXml=function(xmlDoc){
+	var block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	var slots=XmlWriter.createElement(xmlDoc,"slots");
+	for(var i=0;i<this.slots.length;i++){
+		slots.appendChild(this.slots[i].createXml(xmlDoc));
+	}
+	block.appendChild(slots);
+	if(this.blockSlot1!=null){
+		var blockSlots=XmlWriter.createElement(xmlDoc,"blockSlots");
+		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
+		if(this.blockSlot2!=null){
+			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
+		}
+		block.appendChild(blockSlots);
+	}
+	return block;
 };

@@ -24,3 +24,9 @@ Variable.prototype.remove=function(){
 	this.data=null;
 	CodeManager.removeVariable(this);
 };
+Variable.prototype.createXml=function(xmlDoc) {
+	var variable =XmlWriter.createElement(xmlDoc,"variable");
+	XmlWriter.setAttribute(variable,"name", this.name);
+	variable.appendChild(this.data.createXml(xmlDoc));
+	return variable;
+};

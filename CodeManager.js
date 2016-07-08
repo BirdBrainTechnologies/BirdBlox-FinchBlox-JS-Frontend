@@ -375,3 +375,26 @@ CodeManager.eventBroadcast=function(message){
 CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
+
+CodeManager.createXml=function(){
+	var CM=CodeManager;
+	var xmlDoc = XmlWriter.newDoc("project");
+	var project=xmlDoc.getElementsByTagName("project")[0];
+	XmlWriter.setAttribute(project,"name","autoSave");
+	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
+	var variables=XmlWriter.createElement(xmlDoc,"variables");
+	for(var i=0;i<CM.variableList.length;i++){
+		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
+	}
+	project.appendChild(variables);
+	var lists=XmlWriter.createElement(xmlDoc,"lists");
+	for(i=0;i<CM.listList.length;i++){
+		lists.appendChild(CM.listList[i].createXml(xmlDoc));
+	}
+	project.appendChild(lists);
+	project.appendChild(TabManager.createXml(xmlDoc));
+	return xmlDoc;
+};
+CodeManager.autoSave=function(){
+	XmlWriter.download(CodeManager.createXml(),"autoSave");
+};

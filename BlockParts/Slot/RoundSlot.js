@@ -282,3 +282,17 @@ RoundSlot.prototype.grayOutValue=function(){
 RoundSlot.prototype.ungrayValue=function(){
 	GuiElements.update.color(this.textE,BlockGraphics.valueText.selectedFill);
 };
+
+RoundSlot.prototype.createXml=function(xmlDoc){
+	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	XmlWriter.setAttribute(slot,"type","RoundSlot");
+	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
+	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+	slot.appendChild(enteredData);
+	if(this.hasChild){
+		var child=XmlWriter.createElement(xmlDoc,"child");
+		child.appendChild(this.child.createXml(xmlDoc));
+		slot.appendChild(child);
+	}
+	return slot;
+};

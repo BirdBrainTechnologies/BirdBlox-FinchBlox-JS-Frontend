@@ -419,3 +419,13 @@ BlockStack.prototype.updateTabDim=function(){
 		dim.y2=y2;
 	}
 };
+/* @fix Write documentation. */
+BlockStack.prototype.createXml=function(xmlDoc){
+	var stack=XmlWriter.createElement(xmlDoc,"stack");
+	XmlWriter.setAttribute(stack,"x",this.x);
+	XmlWriter.setAttribute(stack,"y",this.y);
+	var blocks=XmlWriter.createElement(xmlDoc,"blocks");
+	this.firstBlock.writeToXml(xmlDoc,blocks);
+	stack.appendChild(blocks);
+	return stack;
+};

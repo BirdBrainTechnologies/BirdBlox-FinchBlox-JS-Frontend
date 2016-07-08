@@ -96,3 +96,14 @@ HexSlot.prototype.getData=function(){
 	GuiElements.throwError("Called HexSlot.getData() when running="+this.running);
 	return null;
 };
+
+HexSlot.prototype.createXml=function(xmlDoc){
+	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	XmlWriter.setAttribute(slot,"type","HexSlot");
+	if(this.hasChild){
+		var child=XmlWriter.createElement(xmlDoc,"child");
+		child.appendChild(this.child.createXml(xmlDoc));
+		slot.appendChild(child);
+	}
+	return slot;
+};

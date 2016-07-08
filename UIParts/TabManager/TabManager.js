@@ -153,3 +153,11 @@ TabManager.endScroll=function(){
 		TM.activeTab.endScroll();
 	}
 };
+TabManager.createXml=function(xmlDoc){
+	var TM=TabManager;
+	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
+	for(var i=0;i<TM.tabList.length;i++){
+		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
+	}
+	return tabs;
+};

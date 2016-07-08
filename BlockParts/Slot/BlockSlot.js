@@ -167,3 +167,13 @@ BlockSlot.prototype.updateAvailableMessages=function(){
 		this.child.updateAvailableMessages();
 	}
 };
+
+BlockSlot.prototype.createXml=function(xmlDoc){
+	var blockSlot=XmlWriter.createElement(xmlDoc,"blockSlot");
+	if(this.hasChild){
+		var child=XmlWriter.createElement(xmlDoc,"child");
+		child.appendChild(this.child.createXml(xmlDoc));
+		blockSlot.appendChild(child);
+	}
+	return blockSlot;
+};

@@ -242,3 +242,15 @@ Tab.prototype.updateTabDim=function(){
 	dim.xDiff=this.dim.x1;
 	dim.yDiff=this.dim.y1;
 };
+Tab.prototype.createXml=function(xmlDoc){
+	var tab=XmlWriter.createElement(xmlDoc,"tab");
+	XmlWriter.setAttribute(tab,"name",this.name);
+	XmlWriter.setAttribute(tab,"x",this.scrollXOffset);
+	XmlWriter.setAttribute(tab,"y",this.scrollYOffset);
+	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
+	for(var i=0;i<this.stackList.length;i++){
+		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
+	}
+	tab.appendChild(stacks);
+	return tab;
+};

@@ -26,6 +26,12 @@ List.prototype.remove=function(){
 	this.data=null;
 	CodeManager.removeList(this);
 };
+List.prototype.createXml=function(xmlDoc) {
+	var list = XmlWriter.createElement(xmlDoc, "list");
+	XmlWriter.setAttribute(list, "name", this.name);
+	list.appendChild(this.data.createXml(xmlDoc));
+	return list;
+};
 /*
 List.prototype.getIndex=function(indexData){
 	var listData=this.data;

@@ -7,6 +7,7 @@ function GuiElements(){
 	GuiElements.defs=document.getElementById("SvgDefs");
 	GuiElements.setConstants();
 	GuiElements.createLayers();
+	GuiElements.getAppVersion();
 	GuiElements.buildUI();
 	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 }
@@ -494,5 +495,21 @@ GuiElements.overlay.close=function(){
 	var GE=GuiElements;
 	if(GE.currentOverlay!=null){
 		GE.currentOverlay.close();
+	}
+};
+/* Loads the version number from version.txt */
+GuiElements.getAppVersion=function(){
+	GuiElements.appVersion=""; //Temp value until ajax completes.
+	try {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4&&xhttp.status == 200) {
+				GuiElements.appVersion=xhttp.responseText;
+			}
+		};
+		xhttp.open("GET", "version.txt", true); //Get the names
+		xhttp.send(); //Make the request
+	}
+	catch(err){
 	}
 };
