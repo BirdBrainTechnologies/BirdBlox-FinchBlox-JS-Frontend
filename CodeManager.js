@@ -30,6 +30,8 @@ function CodeManager(){
 	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
 	CodeManager.repeatDialogDelay=500;
 	CodeManager.lastDialogDisplayTime=null;
+	CodeManager.repeatHBOutDelay=67;
+	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
@@ -241,7 +243,20 @@ CodeManager.updateDialogDelay=function(){
 	var CM=CodeManager;
 	var now=new Date().getTime();
 	CM.lastDialogDisplayTime=now;
-}
+};
+CodeManager.checkHBOutputDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	if(CM.lastHBOutputSendTime==null||now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime){
+		return true;
+	}
+	else{
+		return false;
+	}
+};
+CodeManager.updateHBOutputDelay=function(){
+	CodeManager.lastHBOutputSendTime=new Date().getTime();
+};
 /* @fix Write documentation.
  */
 CodeManager.addVariable=function(variable){

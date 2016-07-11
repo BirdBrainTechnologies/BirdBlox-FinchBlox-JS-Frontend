@@ -29,21 +29,39 @@ HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	if(mem.port>=1&&mem.port<=4&&mem.valueD.isValid&&mem.portD.isValid) {
 		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
 		mem.requestStatus=function(){};
-		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
+		if(CodeManager.checkHBOutputDelay()) {
+			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
+			CodeManager.updateHBOutputDelay();
+			mem.sent=true;
+		}
+		else{
+			mem.sent=false;
+		}
 		return true; //Still running
 	}
 	else{
 		return false; //Done running
 	}
-}
+};
 HummingbirdManager.outputUpdateAction=function(block){
-	if(block.runMem.requestStatus.finished==true){
-		return false; //Done running
+	var mem=block.runMem;
+	if(mem.sent){
+		if(block.runMem.requestStatus.finished==true){
+			return false; //Done running
+		}
+		else{
+			return true; //Still running
+		}
 	}
 	else{
+		if(CodeManager.checkHBOutputDelay()){
+			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
+			CodeManager.updateHBOutputDelay();
+			mem.sent=true;
+		}
 		return true; //Still running
 	}
-}
+};
 HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	var mem=block.runMem;
 	mem.portD=block.slots[0].getData();
@@ -58,7 +76,7 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 		block.resultData=new NumData(defaultValue,false);
 		return false; //Done running
 	}
-}
+};
 HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 	if(block.runMem.requestStatus.finished==true){
 		if(block.runMem.requestStatus.error==false){
