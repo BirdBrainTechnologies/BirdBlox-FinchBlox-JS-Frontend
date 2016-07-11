@@ -22,3 +22,9 @@ SaveManager.reloadTest=function(){
 	XmlWriter.downloadDoc(xmlDoc,"autoSave");
 	SaveManager.loadFile(file);
 };
+SaveManager.listTest=function(){
+	var callbackFn=function(response){
+		GuiElements.alert(response);
+	};
+	HtmlServer.sendRequestWithCallback("files",callbackFn);
+};

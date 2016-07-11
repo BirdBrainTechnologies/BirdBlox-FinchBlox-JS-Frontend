@@ -32,7 +32,10 @@ TitleBar.makeButtons=function(){
 	TB.stopBn=new Button(TB.stopBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
-	TB.saveBn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.saveBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.saveBn.setCallbackFunction(SaveManager.reloadTest,true);
+	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
+	TB.test1Bn.setCallbackFunction(SaveManager.reloadTest,true);
+	TB.test2Bn=new Button(TB.flagBnX-2*TB.buttonW-4*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.test2Bn.addIcon(VectorPaths.file,TB.bnIconH);
+	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
 }
