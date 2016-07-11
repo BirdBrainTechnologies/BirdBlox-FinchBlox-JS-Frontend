@@ -184,7 +184,7 @@ TouchReceiver.touchStartDisplayBox=function(e){
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchDown&&!TR.longTouch){
+	if(TR.touchDown&&!TR.longTouch&&(TR.startX!=TR.getX(e)||TR.startY!=TR.getY(e))){
 		//If the user drags a Slot, the block they are dragging should become the target.
 		if(TR.targetType=="slot"){
 			TR.target=TR.target.parent; //Now the user is dragging a block.

@@ -31,6 +31,7 @@ function CodeManager(){
 	CodeManager.repeatDialogDelay=500;
 	CodeManager.lastDialogDisplayTime=null;
 	CodeManager.repeatHBOutDelay=67;
+	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
 }
@@ -192,10 +193,17 @@ CodeManager.findBestFit=function(){
  * Stops the update timer if all Blocks are finished.
  */
 CodeManager.updateRun=function(){
+	var CM=CodeManager;
+	var startingReservation=CM.reservedStackHBoutput;
 	if(!TabManager.updateRun()){ //A recursive call.  Returns true if any Blocks are running.
-		CodeManager.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
+		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
 	}
-}
+	var now=new Date().getTime();
+	var timeExpired=now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime;
+	if(CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput==startingReservation&&timeExpired) {
+		CM.reservedStackHBoutput = null;
+	}
+};
 /* Recursively stops all Block execution.
  */
 CodeManager.stop=function(){
@@ -244,13 +252,20 @@ CodeManager.updateDialogDelay=function(){
 	var now=new Date().getTime();
 	CM.lastDialogDisplayTime=now;
 };
-CodeManager.checkHBOutputDelay=function(){
+CodeManager.checkHBOutputDelay=function(stack){
 	var CM=CodeManager;
 	var now=new Date().getTime();
-	if(CM.lastHBOutputSendTime==null||now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime){
+	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
+	if(CM.lastHBOutputSendTime==null||(now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime&&!stackReserved)){
+		if(CM.reservedStackHBoutput==stack){
+			CM.reservedStackHBoutput=null;
+		}
 		return true;
 	}
 	else{
+		if(CM.reservedStackHBoutput==null){
+			CM.reservedStackHBoutput=stack;
+		}
 		return false;
 	}
 };

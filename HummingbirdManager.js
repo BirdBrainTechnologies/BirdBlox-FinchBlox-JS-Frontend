@@ -29,7 +29,7 @@ HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	if(mem.port>=1&&mem.port<=4&&mem.valueD.isValid&&mem.portD.isValid) {
 		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
 		mem.requestStatus=function(){};
-		if(CodeManager.checkHBOutputDelay()) {
+		if(CodeManager.checkHBOutputDelay(block.stack)) {
 			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
@@ -54,7 +54,7 @@ HummingbirdManager.outputUpdateAction=function(block){
 		}
 	}
 	else{
-		if(CodeManager.checkHBOutputDelay()){
+		if(CodeManager.checkHBOutputDelay(block.stack)){
 			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;

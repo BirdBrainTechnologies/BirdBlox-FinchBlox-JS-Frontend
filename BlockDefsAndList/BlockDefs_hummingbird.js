@@ -190,7 +190,7 @@ B_HBTriLed.prototype.startAction=function(){
 	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
 		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
 		mem.requestStatus=function(){};
-		if(CodeManager.checkHBOutputDelay()){
+		if(CodeManager.checkHBOutputDelay(this.stack)){
 			HtmlServer.sendHBRequest(mem.request,mem.requestStatus); //Send the request.
 			mem.sent=true;
 			CodeManager.updateHBOutputDelay();
