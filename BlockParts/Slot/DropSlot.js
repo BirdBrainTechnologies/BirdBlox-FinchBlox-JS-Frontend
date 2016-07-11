@@ -211,7 +211,7 @@ DropSlot.prototype.clearOptions=function(){
 DropSlot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","DropSlot");
-
+	XmlWriter.setAttribute(slot,"text",this.text);
 	if(this.enteredData!=null){
 		var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
 		enteredData.appendChild(this.enteredData.createXml(xmlDoc));
@@ -223,4 +223,29 @@ DropSlot.prototype.createXml=function(xmlDoc){
 		slot.appendChild(child);
 	}
 	return slot;
+};
+DropSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
 };

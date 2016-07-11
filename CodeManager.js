@@ -278,6 +278,15 @@ CodeManager.checkVarName=function(name){
 	}
 	return false;
 };
+CodeManager.findVar=function(name){
+	var variables=CodeManager.variableList;
+	for(var i=0;i<variables.length;i++){
+		if(variables[i].getName()==name){
+			return variables[i];
+		}
+	}
+	return null;
+};
 /* @fix Write documentation.
  */
 CodeManager.addList=function(list){
@@ -315,6 +324,15 @@ CodeManager.checkListName=function(name){
 		return true;
 	}
 	return false;
+};
+CodeManager.findList=function(name){
+	var lists=CodeManager.listList;
+	for(var i=0;i<lists.length;i++){
+		if(lists[i].getName()==name){
+			return lists[i];
+		}
+	}
+	return null;
 };
 /* @fix Write documentation.
  */
@@ -396,4 +414,32 @@ CodeManager.createXml=function(){
 	project.appendChild(lists);
 	project.appendChild(TabManager.createXml(xmlDoc));
 	return xmlDoc;
+};
+CodeManager.importXml=function(projectNode){
+	CodeManager.deleteAll();
+	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
+	if(variablesNode!=null) {
+		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
+		for (var i = 0; i < variableNodes.length; i++) {
+			Variable.importXml(variableNodes[i]);
+		}
+	}
+	var listsNode=XmlWriter.findSubElement(projectNode,"lists");
+	if(listsNode!=null) {
+		var listNodes = XmlWriter.findSubElements(listsNode, "list");
+		for (i = 0; i < listNodes.length; i++) {
+			List.importXml(listNodes[i]);
+		}
+	}
+	BlockPalette.getCategory("variables").refreshGroup();
+	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
+	if(tabsNode!=null){
+		TabManager.importXml(tabsNode);
+	}
+};
+CodeManager.deleteAll=function(){
+	var CM=CodeManager;
+	CM.stop();
+	TabManager.deleteAll();
+	CodeManager();
 };

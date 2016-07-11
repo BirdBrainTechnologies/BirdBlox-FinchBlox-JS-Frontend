@@ -107,3 +107,18 @@ HexSlot.prototype.createXml=function(xmlDoc){
 	}
 	return slot;
 };
+HexSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="HexSlot"){
+		return this;
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};

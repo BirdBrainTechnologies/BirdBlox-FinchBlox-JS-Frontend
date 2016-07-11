@@ -62,3 +62,7 @@ NumData.prototype.getValueWithC=function(positive,integer){
 	}
 	return val;
 };
+NumData.importXml=function(dataNode){
+	var value=XmlWriter.getTextNode(dataNode,"value",0,true);
+	return new NumData(value);
+};

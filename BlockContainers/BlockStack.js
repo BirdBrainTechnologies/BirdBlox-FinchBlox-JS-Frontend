@@ -429,3 +429,36 @@ BlockStack.prototype.createXml=function(xmlDoc){
 	stack.appendChild(blocks);
 	return stack;
 };
+/* @fix Write documentation. */
+BlockStack.importXml=function(stackNode,tab){
+	var x=XmlWriter.getAttribute(stackNode,"x",0,true);
+	var y=XmlWriter.getAttribute(stackNode,"y",0,true);
+	var blocksNode=XmlWriter.findSubElement(stackNode,"blocks");
+	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
+	if(blockNodes.length>0){
+		var firstBlock=null;
+		var i=0;
+		while(firstBlock==null&&i<blockNodes.length){
+			firstBlock=Block.importXml(blockNodes[i]);
+			i++;
+		}
+		if(firstBlock==null){
+			return null;
+		}
+		var stack=new BlockStack(firstBlock,tab);
+		stack.move(x,y);
+		var previousBlock=firstBlock;
+		while(i<blockNodes.length) {
+			var newBlock = Block.importXml(blockNodes[i]);
+			if (newBlock != null) {
+				previousBlock.snap(newBlock);
+				previousBlock = newBlock;
+			}
+			i++;
+		}
+		stack.updateDim();
+	}
+	else{
+		return null;
+	}
+};

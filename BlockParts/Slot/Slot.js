@@ -305,7 +305,7 @@ Slot.prototype.updateAvailableMessages=function(){
 
 };
 
-Slot.prototype.createXml=function(xmlDoc){
+/*Slot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","Slot");
 	if(this.hasChild){
@@ -314,7 +314,7 @@ Slot.prototype.createXml=function(xmlDoc){
 		slot.appendChild(child);
 	}
 	return slot;
-};
+};*/
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */

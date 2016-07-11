@@ -472,14 +472,16 @@ Block.prototype.snap=function(block){ //Fix! documentation
 		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.height+bG.shiftY);
 	}
 	var stack=this.stack;
-	if(stack.isRunning&&!block.stack.isRunning){ //Fix! remove duplicate code.
-		block.glow();
-	}
-	else if(!stack.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
-		block.stack.stop();
-	}
-	else if(stack.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
-		block.stop();
+	if(block.stack!=null) {
+		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code.
+			block.glow();
+		}
+		else if (!stack.isRunning && block.stack.isRunning) { //Blocks that are added are stopped.
+			block.stack.stop();
+		}
+		else if (stack.isRunning && block.isRunning) { //The added block is stopped, but still glows as part of a running stack.
+			block.stop();
+		}
 	}
 	var upperBlock=this; //The Block which will go above the inserted stack.
 	var lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
@@ -494,11 +496,15 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	if(lowerBlock!=null){ //There might not be a Block below the inserted stack.
 		lowerBlock.parent=bottomStackBlock;
 	}
-
-	var oldG=block.stack.group; //Get a handle to the old stack's group
-	block.stack.remove(); //Remove the old stack.
+	var oldG=null;
+	if(block.stack!=null) {
+		oldG=block.stack.group; //Get a handle to the old stack's group
+		block.stack.remove(); //Remove the old stack.
+	}
 	block.changeStack(this.stack); //Move the block over into this stack
-	oldG.remove(); //Remove the old stack's group.
+	if(oldG!=null) {
+		oldG.remove(); //Remove the old stack's group.
+	}
 	this.stack.updateDim(); //Update the dimensions now that the movement is complete.
 };
 /* Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
@@ -719,6 +725,40 @@ Block.prototype.createXml=function(xmlDoc){
 			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
 		}
 		block.appendChild(blockSlots);
+	}
+	return block;
+};
+Block.importXml=function(blockNode){
+	var type=XmlWriter.getAttribute(blockNode,"type");
+	var block;
+	try {
+		if (type.substring(0, 2) == "B_") {
+			if(window[type].importXml!=null){
+				return window[type].importXml(blockNode);
+			}
+			else {
+				block = new window[type](0, 0);
+			}
+		}
+		else{
+			return null;
+		}
+	}
+	catch(e) {
+		return null;
+	}
+	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	var slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
+	for(var i=0;i<slotNodes.length&&i<block.slots.length;i++){
+		block.slots[i].importXml(slotNodes[i]);
+	}
+	var blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
+	var blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	if(block.blockSlot1!=null&&blockSlotNodes.length>=1){
+		block.blockSlot1.importXml(blockSlotNodes[0]);
+	}
+	if(block.blockSlot2!=null&&blockSlotNodes.length>=2){
+		block.blockSlot1.importXml(blockSlotNodes[1]);
 	}
 	return block;
 };

@@ -32,6 +32,20 @@ List.prototype.createXml=function(xmlDoc) {
 	list.appendChild(this.data.createXml(xmlDoc));
 	return list;
 };
+List.importXml=function(listNode){
+	var name=XmlWriter.getAttribute(listNode,"name");
+	if(name!=null){
+		var dataNode=XmlWriter.findSubElement(listNode,"data");
+		var data=new ListData();
+		if(dataNode!=null){
+			var newData=Data.importXml(dataNode);
+			if(newData!=null){
+				data=newData;
+			}
+		}
+		return new List(name,data);
+	}
+};
 /*
 List.prototype.getIndex=function(indexData){
 	var listData=this.data;

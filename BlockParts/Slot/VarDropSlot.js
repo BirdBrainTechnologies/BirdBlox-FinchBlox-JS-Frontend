@@ -24,3 +24,21 @@ VarDropSlot.prototype.duplicate=function(parentCopy){
 	myCopy.changeText(this.text);
 	return myCopy;
 };
+VarDropSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			var variable=CodeManager.findVar(data.getValue());
+			if(variable!=null) {
+				this.setSelectionData(variable.getName(), new SelectionData(variable));
+			}
+		}
+	}
+	return this;
+};

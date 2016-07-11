@@ -86,3 +86,15 @@ ListData.prototype.createXml=function(xmlDoc){
 	data.appendChild(value);
 	return data;
 };
+ListData.importXml=function(dataNode){
+	var valueNode=XmlWriter.findSubElement(dataNode,"value");
+	var dataNodes=XmlWriter.findSubElements(valueNode,"data");
+	var valueArray=[];
+	for(var i=0;i<dataNodes.length;i++){
+		var dataEntry=Data.importXml(dataNodes[i]);
+		if(dataEntry!=null){
+			valueArray.push(dataEntry);
+		}
+	}
+	return new ListData(valueArray);
+};

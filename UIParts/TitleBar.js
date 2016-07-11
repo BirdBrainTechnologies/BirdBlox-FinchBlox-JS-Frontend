@@ -34,5 +34,5 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 	TB.saveBn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.saveBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.saveBn.setCallbackFunction(SaveManager.autoSave,true);
+	TB.saveBn.setCallbackFunction(SaveManager.reloadTest,true);
 }

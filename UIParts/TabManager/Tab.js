@@ -69,7 +69,7 @@ Tab.prototype.addStack=function(stack){
 Tab.prototype.removeStack=function(stack){
 	var index=this.stackList.indexOf(stack);
 	this.stackList.splice(index,1);
-}
+};
 Tab.prototype.getSprite=function(){
 	return this.sprite;
 }
@@ -245,12 +245,38 @@ Tab.prototype.updateTabDim=function(){
 Tab.prototype.createXml=function(xmlDoc){
 	var tab=XmlWriter.createElement(xmlDoc,"tab");
 	XmlWriter.setAttribute(tab,"name",this.name);
-	XmlWriter.setAttribute(tab,"x",this.scrollXOffset);
-	XmlWriter.setAttribute(tab,"y",this.scrollYOffset);
+	XmlWriter.setAttribute(tab,"x",this.scrollX);
+	XmlWriter.setAttribute(tab,"y",this.scrollY);
 	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
 	for(var i=0;i<this.stackList.length;i++){
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
 	}
 	tab.appendChild(stacks);
 	return tab;
+};
+Tab.importXml=function(tabNode){
+	var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
+	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
+	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
+	var tab=new Tab(null,name);
+	tab.scrollX=x;
+	tab.scrollY=y;
+	GuiElements.move.group(tab.mainG,tab.scrollX,tab.scrollY);
+	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
+	if(stacksNode!=null){
+		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
+		for(var i=0;i<stackNodes.length;i++){
+			BlockStack.importXml(stackNodes[i],tab);
+		}
+	}
+	return tab;
+};
+Tab.prototype.delete=function(){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		stacks[i].delete();
+	}
+	this.textE.remove();
+	this.pathE.remove();
+	this.mainG.remove();
 };

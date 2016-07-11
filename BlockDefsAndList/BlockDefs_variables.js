@@ -11,6 +11,20 @@ B_Variable.prototype.startAction=function(){
 	this.resultData=this.variable.getData();
 	return false;
 };
+B_Variable.prototype.createXml=function(xmlDoc){
+	var block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	XmlWriter.setAttribute(block,"variable",this.variable.getName());
+	return block;
+};
+B_Variable.importXml=function(blockNode){
+	var variableName=XmlWriter.getAttribute(blockNode,"variable");
+	var variable=CodeManager.findVar(variableName);
+	if(variable!=null){
+		return new B_Variable(0,0,variable);
+	}
+	return null;
+};
 
 
 
@@ -76,6 +90,20 @@ B_List.prototype.constructor = B_List;
 B_List.prototype.startAction=function(){
 	this.resultData=this.list.getData().asString();
 	return false;
+};
+B_List.prototype.createXml=function(xmlDoc){
+	var block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	XmlWriter.setAttribute(block,"list",this.list.getName());
+	return block;
+};
+B_List.importXml=function(blockNode){
+	var listName=XmlWriter.getAttribute(blockNode,"list");
+	var list=CodeManager.findList(listName);
+	if(list!=null){
+		return new B_List(0,0,list);
+	}
+	return null;
 };
 
 

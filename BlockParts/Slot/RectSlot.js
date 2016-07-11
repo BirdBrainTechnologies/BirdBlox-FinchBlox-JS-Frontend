@@ -90,7 +90,9 @@ RectSlot.prototype.generateHitBox=function(){
  */
 RectSlot.prototype.changeText=function(text){
 	GuiElements.update.text(this.textE,text); //Update text.
-	this.parent.stack.updateDim(); //Update dimensions.
+	if(this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update dimensions.
+	}
 };
 /* Computes the dimensions of the SVG elements making up the Slot.
  * Only called if has no child.
@@ -195,4 +197,29 @@ RectSlot.prototype.createXml=function(xmlDoc){
 		slot.appendChild(child);
 	}
 	return slot;
+};
+RectSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="RectSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=data.asString().getValue();
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
 };

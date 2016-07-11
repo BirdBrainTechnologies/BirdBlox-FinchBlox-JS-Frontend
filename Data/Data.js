@@ -79,6 +79,14 @@ Data.prototype.createXml=function(xmlDoc){
 	data.appendChild(value);
 	return data;
 };
+Data.importXml=function(dataNode){
+	var typeName=XmlWriter.getAttribute(dataNode,"type");
+	var type=Data.getDataTypeFromName(typeName);
+	if(type==null){
+		return null;
+	}
+	return type.importXml(dataNode);
+};
 Data.prototype.getDataTypeName=function(){
 	if(this.type==Data.types.num){
 		return "num";
@@ -94,5 +102,28 @@ Data.prototype.getDataTypeName=function(){
 	}
 	else if(this.type==Data.types.selection){
 		return "selection";
+	}
+	else{
+		return null;
+	}
+};
+Data.getDataTypeFromName=function(typeName){
+	if(typeName=="num"){
+		return NumData;
+	}
+	else if(typeName=="bool"){
+		return BoolData;
+	}
+	else if(typeName=="string"){
+		return StringData;
+	}
+	else if(typeName=="list"){
+		return ListData;
+	}
+	else if(typeName=="selection"){
+		return SelectionData;
+	}
+	else{
+		return null;
 	}
 };

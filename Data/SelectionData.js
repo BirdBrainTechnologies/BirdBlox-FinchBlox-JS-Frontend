@@ -3,3 +3,7 @@ function SelectionData(value,isValid){
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
+SelectionData.importXml=function(dataNode){
+	var value=XmlWriter.getTextNode(dataNode,"value");
+	return new SelectionData(value);
+};

@@ -177,3 +177,13 @@ BlockSlot.prototype.createXml=function(xmlDoc){
 	}
 	return blockSlot;
 };
+BlockSlot.prototype.importXml=function(blockSlotNode){
+	var childNode=XmlWriter.findSubElement(blockSlotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+};

@@ -27,3 +27,7 @@ StringData.prototype.isNumber=function(){ //Checks to see if the number can be c
 	var numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/  //from https://en.wikipedia.org/wiki/Regular_expression
 	return numberRE.test(this.getValue());
 }
+StringData.importXml=function(dataNode){
+	var value=XmlWriter.getTextNode(dataNode,"value","");
+	return new StringData(value);
+};

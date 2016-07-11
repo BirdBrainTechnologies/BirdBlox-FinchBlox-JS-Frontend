@@ -27,3 +27,30 @@ ListDropSlot.prototype.duplicate=function(parentCopy){
 	myCopy.changeText(this.text);
 	return myCopy;
 };
+ListDropSlot.prototype.importXml=function(slotNode){
+	this.setSelectionData("",null);
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			var list=CodeManager.findList(data.getValue());
+			if(list!=null) {
+				this.setSelectionData(list.getName(), new SelectionData(list));
+			}
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};

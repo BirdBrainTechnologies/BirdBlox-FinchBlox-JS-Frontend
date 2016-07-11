@@ -14,6 +14,7 @@ function RoundSlot(parent,snapType,outputType,data,positive,integer){
 	Slot.call(this,parent,Slot.inputTypes.num,snapType,outputType); //Call constructor.
 	//Entered data stores the data that has been entered using the InputPad.
 	this.enteredData=data; //Set entered data to initial value.
+	this.text=this.enteredData.asString().getValue();
 	this.positive=positive; //Store other properties.
 	this.integer=integer;
 	this.buildSlot(); //Create the SVG elements that make up the Slot.
@@ -31,7 +32,7 @@ RoundSlot.prototype.buildSlot=function(){
 	this.textH=BlockGraphics.valueText.charHeight; //Used for center alignment.
 	this.textW=0; //Will be calculated later.
 	this.slotE=this.generateSlot();//Fix! BG
-	this.textE=this.generateText(this.enteredData.getValue());
+	this.textE=this.generateText(this.text);
 	this.hitBoxE=this.generateHitBox(); //Creates an invisible box for receiving touches.
 };
 /* Moves the Slot's SVG elements to the specified location.
@@ -97,7 +98,9 @@ RoundSlot.prototype.generateHitBox=function(){
 RoundSlot.prototype.changeText=function(text){
 	this.text=text; //Store value
 	GuiElements.update.text(this.textE,text); //Update text.
-	this.parent.stack.updateDim(); //Update dimensions.
+	if(this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update dimensions.
+	}
 };
 /* Computes the dimensions of the SVG elements making up the Slot.
  * Only called if has no child.
@@ -202,6 +205,7 @@ RoundSlot.prototype.duplicate=function(parentCopy){
 	if(this.hasChild){ //Copy child
 		myCopy.snap(this.child.duplicate(0,0));
 	}
+	myCopy.changeText(this.text);
 	myCopy.dropColumns=this.dropColumns;
 	return myCopy;
 };
@@ -286,6 +290,7 @@ RoundSlot.prototype.ungrayValue=function(){
 RoundSlot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","RoundSlot");
+	XmlWriter.setAttribute(slot,"text",this.text);
 	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
 	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
 	slot.appendChild(enteredData);
@@ -295,4 +300,29 @@ RoundSlot.prototype.createXml=function(xmlDoc){
 		slot.appendChild(child);
 	}
 	return slot;
+};
+RoundSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="RoundSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
 };
