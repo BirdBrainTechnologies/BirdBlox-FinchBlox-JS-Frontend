@@ -35,7 +35,8 @@ function TouchReceiver(){
 TouchReceiver.addListeners=function(){
 	var TR=TouchReceiver;
 	document.body.addEventListener(TR.handlerMove,TouchReceiver.handleMove,false);
-	document.body.addEventListener(TR.handlerUp,TouchReceiver.handleUp,false); 
+	document.body.addEventListener(TR.handlerUp,TouchReceiver.handleUp,false);
+	document.body.addEventListener(TR.handlerDown,TouchReceiver.handleDocumentDown,false);
 }
 /* Handles movement events and prevents drag gestures from scrolling document.
  * @param {event} event - passed event arguments.
@@ -53,13 +54,11 @@ TouchReceiver.handleUp=function(event){
 	event.preventDefault();
 	TouchReceiver.touchend(event);
 }
-/* Removes touch listeners from the document.  Not used anywhere.
- * @fix maybe delete this function.
- */
-TouchReceiver.removeListeners=function(){
-	document.body.removeEventListener(TR.handlerMove, TouchReceiver.handleMove);
-	document.body.removeEventListener(TR.handlerMove, TouchReceiver.handleUp);
-}
+TouchReceiver.handleDocumentDown=function(event){
+	if(TouchReceiver.touchstart(event)){
+		GuiElements.overlay.close(); //Close any visible overlays.
+	}
+};
 /* Returns the touch x coord from the event arguments
  * @param {event} event - passed event arguments.
  * @return {number} - x coord.
@@ -86,6 +85,7 @@ TouchReceiver.getY=function(e){
 TouchReceiver.touchstart=function(e){
 	var TR=TouchReceiver; //shorthand
 	e.preventDefault(); //Stops 300 ms delay events
+	e.stopPropagation();
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
 		TR.stopLongTouchTimer();
@@ -106,6 +106,7 @@ TouchReceiver.touchstart=function(e){
 TouchReceiver.touchStartBlock=function(target,e){
 	var TR=TouchReceiver; //shorthand
 	if(TR.touchstart(e)){ //prevent multitouch issues.
+		GuiElements.overlay.close(); //Close any visible overlays.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
 			TR.targetType="displayStack";
 		}
@@ -123,6 +124,9 @@ TouchReceiver.touchStartBlock=function(target,e){
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		if(slot.selected!=true){
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
 		TR.targetType="slot";
 		TouchReceiver.target=slot; //Store target Slot.
 		TR.setLongTouchTimer();
@@ -135,6 +139,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
 TouchReceiver.touchStartCatBN=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
 		GuiElements.overlay.close(); //Close any visible overlays.
@@ -147,6 +152,9 @@ TouchReceiver.touchStartCatBN=function(target,e){
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		if(!target.isOverlayPart){
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
 		TR.targetType="button";
 		target.press(); //Changes the button's appearance and may trigger an action.
 		TR.target=target;
@@ -158,6 +166,7 @@ TouchReceiver.touchStartBN=function(target,e){
 TouchReceiver.touchStartPalette=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="palette";
 		TR.target=null; //The type is all that is important. There is only one palette.
 	}
@@ -166,6 +175,7 @@ TouchReceiver.touchStartPalette=function(e){
 TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="tabSpace";
 		TR.target=null;
 	}
@@ -174,9 +184,17 @@ TouchReceiver.touchStartTabSpace=function(e){
 TouchReceiver.touchStartDisplayBox=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
+		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="displayBox";
 		TR.target=null;
 		DisplayBox.hide();
+	}
+};
+/* @fix Write documentation. */
+TouchReceiver.touchStartOverlayPart=function(e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)){
+
 	}
 };
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
@@ -213,7 +231,6 @@ TouchReceiver.touchmove=function(e){
 				CodeManager.move.update(TR.getX(e),TR.getY(e));
 			}
 			else{
-				GuiElements.overlay.close(); //Close any visible overlays.
 				CodeManager.move.start(TR.target,TR.getX(e),TR.getY(e));
 				TR.blocksMoving=true;
 			}
@@ -221,7 +238,6 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the palette, it should scroll.
 		if(TR.targetType=="palette"){
 			if(!BlockPalette.scrolling){
-				GuiElements.overlay.close(); //Close any visible overlays.
 				BlockPalette.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{
@@ -231,7 +247,6 @@ TouchReceiver.touchmove=function(e){
 		//If the user drags the tab space, it should scroll.
 		if(TR.targetType=="tabSpace"){
 			if(!TabManager.scrolling){
-				GuiElements.overlay.close(); //Close any visible overlays.
 				TabManager.startScoll(TR.getX(e),TR.getY(e));
 			}
 			else{
@@ -415,5 +430,14 @@ TouchReceiver.addListenersDisplayBox=function(element){
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartDisplayBox(e);
+	}, false);
+};
+/* Adds handlerDown listeners to the parts of any overlay that do not already have handlers.
+ * @param {SVG element} element - The part the listeners are being applied to.
+ */
+TouchReceiver.addListenersOverlayPart=function(element){
+	var TR=TouchReceiver;
+	element.addEventListener(TR.handlerDown, function(e) {
+		TouchReceiver.touchStartOverlayPart(e);
 	}, false);
 };

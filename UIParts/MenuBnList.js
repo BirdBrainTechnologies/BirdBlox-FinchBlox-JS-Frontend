@@ -19,6 +19,7 @@ function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 		columns=1;
 	}
 	this.columns=columns;
+	this.isOverlayPart=false;
 }
 MenuBnList.setGraphics=function(){
 	var MBL=MenuBnList;
@@ -97,6 +98,7 @@ MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var bn=new Button(x,y,width,this.bnHeight,this.group);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
+	bn.isOverlayPart=this.isOverlayPart;
 	return bn;
 }
 MenuBnList.prototype.move=function(x,y){

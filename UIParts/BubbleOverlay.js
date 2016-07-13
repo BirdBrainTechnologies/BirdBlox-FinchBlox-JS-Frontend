@@ -22,6 +22,7 @@ BubbleOverlay.prototype.buildBubble=function(){
 };
 BubbleOverlay.prototype.buildGroups=function(){
 	this.group=GuiElements.create.group(0,0);
+	TouchReceiver.addListenersOverlayPart(this.group);
 	this.bgGroup=GuiElements.create.group(0,0,this.group);
 	this.group.appendChild(this.innerGroup);
 	GuiElements.move.group(this.innerGroup,this.margin,this.margin);

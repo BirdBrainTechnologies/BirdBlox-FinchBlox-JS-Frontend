@@ -2,11 +2,12 @@ function Menu(button){
 	this.x=button.x;
 	this.y=button.y+button.height;
 	this.group=GuiElements.create.group(this.x,this.y);
-
+	TouchReceiver.addListenersOverlayPart(this.group);
 	var bnM=Menu.bnMargin;
 	this.bgRect=GuiElements.create.rect(this.group);
 	GuiElements.update.color(this.bgRect,Menu.bgColor);
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,Menu.defaultWidth);
+	this.menuBnList.isOverlayPart=true;
 	this.visible=false;
 	var callbackFn=function(){
 		callbackFn.menu.open();
@@ -45,6 +46,7 @@ Menu.prototype.open=function(){
 		GuiElements.layers.overlay.appendChild(this.group);
 		this.visible=true;
 		GuiElements.overlay.set(this);
+		this.button.isOverlayPart=true;
 	}
 };
 Menu.prototype.close=function(){
@@ -53,5 +55,6 @@ Menu.prototype.close=function(){
 		this.visible=false;
 		GuiElements.overlay.remove(this);
 		this.button.unToggle();
+		this.button.isOverlayPart=false;
 	}
 };

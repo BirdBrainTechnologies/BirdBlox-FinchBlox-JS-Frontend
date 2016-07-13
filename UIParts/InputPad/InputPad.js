@@ -48,6 +48,7 @@ InputPad.buildPad=function(){
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
 	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
+	IP.menuBnList.isOverlayPart=true;
 };
 /*InputPad.makeBg=function(){
 	var IP=InputPad;
@@ -61,6 +62,7 @@ InputPad.resetPad=function(columns){//removes any options which may have been ad
 	var IP=InputPad;
 	IP.close();
 	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin,null,columns);
+	IP.menuBnList.isOverlayPart=true;
 };
 InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
@@ -382,18 +384,21 @@ InputPad.makeNumBn=function(x,y,num){
 	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
+	button.isOverlayPart=true;
 };
 InputPad.makePlusMinusBn=function(x,y){
 	var IP=InputPad;
 	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
 	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
+	IP.plusMinusBn.isOverlayPart=true;
 };
 InputPad.makeDecimalBn=function(x,y){
 	var IP=InputPad;
 	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
+	IP.decimalBn.isOverlayPart=true;
 };
 InputPad.makeBsBn=function(x,y){
 	var IP=InputPad;
@@ -401,10 +406,12 @@ InputPad.makeBsBn=function(x,y){
 	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
 	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
 	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
+	IP.bsButton.isOverlayPart=true;
 };
 InputPad.makeOkBn=function(x,y){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
 	button.addIcon(VectorPaths.checkmark,IP.okBnH);
 	button.setCallbackFunction(InputPad.okPressed,true);
+	button.isOverlayPart=true;
 };

@@ -19,6 +19,7 @@ BlockContextMenu.prototype.showMenu=function(){
 	};
 	func.BCM=this;
 	this.menuBnList.addOption("Duplicate",func);
+	this.menuBnList.isOverlayPart=true;
 	this.menuBnList.show();
 	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
 	this.bubbleOverlay.display(this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
