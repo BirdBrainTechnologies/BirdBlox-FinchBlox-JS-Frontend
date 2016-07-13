@@ -370,14 +370,12 @@ CodeManager.findList=function(name){
 /* @fix Write documentation.
  */
 CodeManager.newBroadcastMessage=function(slot){
+	slot.deselect();
 	var callbackFn=function(cancelled,result) {
 		if(!cancelled&&result.length>0){
 			result=result.trim();
 			CodeManager.addBroadcastMessage(result);
 			slot.setSelectionData('"'+result+'"',new StringData(result));
-		}
-		else{
-			slot.deselect();
 		}
 	};
 	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
