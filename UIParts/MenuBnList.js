@@ -110,7 +110,7 @@ MenuBnList.prototype.computeWidth=function(){
 		var MBL = MenuBnList;
 		var longestW = 0;
 		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.font, Button.fontSize, Button.fontWeight);
+			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
