@@ -1,6 +1,7 @@
 function TitleBar(){
 	TitleBar.createBar();
 	TitleBar.makeButtons();
+	TitleBar.makeTitleText();
 }
 TitleBar.setGraphics=function(){
 	var TB=TitleBar;
@@ -11,19 +12,24 @@ TitleBar.setGraphics=function(){
 	TB.bg=Colors.black;
 	TB.flagFill="#0f0";
 	TB.stopFill="#f00";
+	TB.titleColor=Colors.white;
+	TB.font="Arial";
+	TB.fontWeight="Bold";
+	TB.fontSize=16;
+	TB.fontCharHeight=12;
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
 	TB.fileBnX=TB.buttonMargin;
-}
+};
 TitleBar.createBar=function(){
 	var TB=TitleBar;
 	TB.width=GuiElements.width;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
-}
+};
 TitleBar.makeButtons=function(){
 	var TB=TitleBar;
 	var TBLayer=GuiElements.layers.titlebar;
@@ -44,5 +50,17 @@ TitleBar.makeButtons=function(){
 	TB.test2Bn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
 	*/
-
+};
+TitleBar.makeTitleText=function(){
+	var TB=TitleBar;
+	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
+	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
+};
+TitleBar.setText=function(text){
+	/*var TB=TitleBar;
+	GuiElements.update.text(TB.titleLabel,text);
+	var width=GuiElements.measure.textWidth(TB.titleLabel);
+	var x=GuiElements.width/2-width/2;
+	var y=TB.height/2+TB.fontCharHeight/2;
+	GuiElements.move.text(TB.titleLabel,x,y);*/
 };

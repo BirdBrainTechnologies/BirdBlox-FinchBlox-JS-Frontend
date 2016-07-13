@@ -1,5 +1,6 @@
 function SaveManager(){
-
+	SaveManager.fileName="";
+	SaveManager.modified=false;
 }
 SaveManager.autoSave=function(){
 	XmlWriter.downloadDoc(CodeManager.createXml(),"autoSave");
@@ -28,24 +29,45 @@ SaveManager.listTest=function(){
 	};
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
 };
-
 SaveManager.save=function(){
+	var callbackFn=function(response) {
+		SaveManager.fileName=response;
+		SaveManager.markSaved();
+	};
 	XmlWriter.downloadDoc(CodeManager.createXml(),"save");
+	HtmlServer.sendRequestWithCallback("filename",callbackFn);
 };
 SaveManager.open=function(fileName){
-	fileName=fileName.replace(".xml","");
+	fileName=fileName.substring(0,fileName.length-4);
 	var callbackFn=function(response){
 		SaveManager.loadFile(response);
+		var callbackFn2=function(response) {
+			SaveManager.fileName=response;
+			SaveManager.markSaved();
+		};
+		HtmlServer.sendRequestWithCallback("filename",callbackFn2);
 	};
 	HtmlServer.sendRequestWithCallback("load/"+fileName,callbackFn);
 };
 SaveManager.saveAs=function(){
 	var callbackFn=function(response){
-		XmlWriter.downloadDoc(CodeManager.createXml(),"save");
+		SaveManager.save();
 	};
 	HtmlServer.sendRequestWithCallback("new",callbackFn);
 };
 SaveManager.new=function(){
 	HtmlServer.sendRequestWithCallback("new");
+	SaveManager.fileName="New project";
+	SaveManager.markSaved();
 	SaveManager.loadFile("<project><tabs></tabs></project>");
+};
+SaveManager.markEdited=function(){
+	if(!SaveManager.modified){
+		TitleBar.setText(SaveManager.fileName+"*");
+		SaveManager.modified=true;
+	}
+};
+SaveManager.markSaved=function(){
+	SaveManager.modified=false;
+	TitleBar.setText(SaveManager.fileName);
 };

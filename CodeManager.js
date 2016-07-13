@@ -125,8 +125,9 @@ CodeManager.move.end=function(){
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
+		SaveManager.markEdited();
 	}
-}
+};
 /* Drops the BlockStack where it is without attaching it to anything or deleting it.
  */
 CodeManager.move.interrupt=function(){
@@ -290,6 +291,7 @@ CodeManager.newVariable=function(){
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
 			new Variable(result);
+			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
 	};
@@ -335,6 +337,7 @@ CodeManager.newList=function(){
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
 			new List(result);
+			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
 		}
 	};

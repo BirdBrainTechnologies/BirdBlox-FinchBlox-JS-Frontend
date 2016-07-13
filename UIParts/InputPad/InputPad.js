@@ -71,6 +71,7 @@ InputPad.numPressed=function(num){
 	IP.removeUndo();
 	IP.deleteIfGray();
 	IP.displayNum.addDigit(num+"");
+	SaveManager.markEdited();
 	IP.updateSlot();
 	IP.dataIsNumeric=true;
 };
@@ -79,6 +80,7 @@ InputPad.plusMinusPressed=function(){
 	IP.removeUndo();
 	IP.deleteIfGray();
 	IP.displayNum.switchSign();
+	SaveManager.markEdited();
 	IP.updateSlot();
 };
 InputPad.decimalPressed=function(){
@@ -86,6 +88,7 @@ InputPad.decimalPressed=function(){
 	IP.removeUndo();
 	IP.deleteIfGray();
 	IP.displayNum.addDecimalPoint();
+	SaveManager.markEdited();
 	IP.updateSlot();
 };
 InputPad.deleteIfGray=function(){
@@ -187,6 +190,7 @@ InputPad.bsPressed=function(){
 		}
 		IP.updateSlot();
 	}
+	SaveManager.markEdited();
 };
 InputPad.okPressed=function(){
 	InputPad.close();
@@ -347,6 +351,7 @@ InputPad.menuBnSelected=function(text,data){
 		IP.nonNumericText=text;
 		IP.nonNumericData=data;
 	}
+	SaveManager.markEdited();
 	IP.close();
 };
 

@@ -78,6 +78,9 @@ MenuBnList.prototype.generateBns=function(){
 		}
 		currentY+=this.bnHeight;
 		this.height=currentY;
+		if(count==0){
+			this.height=0;
+		}
 		this.bnsGenerated=true;
 	}
 }

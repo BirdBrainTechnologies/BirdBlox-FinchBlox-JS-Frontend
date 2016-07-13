@@ -129,6 +129,7 @@ RectSlot.prototype.edit=function(){
 		if(!cancelled){
 			callbackFn.slot.enteredData=new StringData(response);
 			callbackFn.slot.changeText(response);
+			SaveManager.markEdited();
 		}
 	};
 	callbackFn.slot=this;

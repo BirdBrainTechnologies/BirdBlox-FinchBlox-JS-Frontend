@@ -69,6 +69,7 @@ GuiElements.buildUI=function(){
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	TouchReceiver(); //Adds touch event handlers to the SVG
 	TitleBar(); //Creates the title bar and the buttons contained within it.
+
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	InputPad(); //Builds the inputpad, which is used for number entry and dropdown selection
@@ -76,7 +77,8 @@ GuiElements.buildUI=function(){
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
-}
+	SaveManager.new();
+};
 /* Makes an SVG group element (<g>) for each layer of the interface.
  * Layers are accessible in the form GuiElements.layers.[layerName]
  */

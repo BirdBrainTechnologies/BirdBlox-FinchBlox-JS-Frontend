@@ -46,6 +46,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
 					if(callbackErr!=null){
 						callbackErr();
 					}
+					GuiElements.alert("HTML error: "+xhttp.status);
 				}
 			}
 		};
