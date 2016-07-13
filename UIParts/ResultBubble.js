@@ -8,7 +8,7 @@ function ResultBubble(x,upperY,lowerY,text){
 	group.appendChild(textE);
 	this.bubbleOverlay=new BubbleOverlay(RB.bgColor,RB.margin,group,this,RB.hMargin);
 	this.bubbleOverlay.display(x,upperY,lowerY,width,height);
-	this.vanishTimer = self.setInterval(function () { GuiElements.overlay.close() }, RB.lifetime);
+	/*this.vanishTimer = self.setInterval(function () { GuiElements.overlay.close() }, RB.lifetime);*/
 }
 ResultBubble.setConstants=function(){
 	var RB=ResultBubble;
@@ -19,10 +19,10 @@ ResultBubble.setConstants=function(){
 	RB.fontWeight="normal";
 	RB.charHeight=12;
 	RB.margin=4;
-	RB.lifetime=3000;
+	/*RB.lifetime=3000;*/
 	RB.hMargin=20;
 };
 ResultBubble.prototype.close=function(){
 	this.bubbleOverlay.hide();
-	this.vanishTimer = window.clearInterval(this.vanishTimer);
+	/*this.vanishTimer = window.clearInterval(this.vanishTimer);*/
 };
