@@ -178,6 +178,10 @@ BlockGraphics.CalcPaths=function(){
 	path4+=" "+(0-com.bumpOffset)+",0";
 	path4+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
 	path4+=" ";
+	var path4NoBump=",0";
+	path4NoBump+=" "+(0-com.bumpSlantWidth-com.bumpBottomWidth-com.bumpSlantWidth-com.bumpOffset)+",0";
+	path4NoBump+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
+	path4NoBump+=" ";
 	var path5="";
 	path5+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+com.cornerRadius+" "+(0-com.cornerRadius);
 	path5+=" z";
@@ -185,8 +189,9 @@ BlockGraphics.CalcPaths=function(){
 	com.path2=path2;
 	com.path3=path3;
 	com.path4=path4;
+	com.path4NoBump=path4NoBump;
 	com.path5=path5;
-}
+};
 BlockGraphics.getType=function(type){
 	switch(type){
 		case 0:
@@ -292,7 +297,10 @@ BlockGraphics.buildPath.hat=function(x,y,width,height){
 	path+="z";
 	return path;
 }
-BlockGraphics.buildPath.loop=function(x,y,width,height,innerHeight){
+BlockGraphics.buildPath.loop=function(x,y,width,height,innerHeight,bottomOpen){
+	if(bottomOpen==null){
+		bottomOpen=true;
+	}
 	var path="";
 	var loop=BlockGraphics.loop;
 	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
@@ -314,7 +322,12 @@ BlockGraphics.buildPath.loop=function(x,y,width,height,innerHeight){
 	path+=loop.bottomH-2*BlockGraphics.command.cornerRadius;
 	path+=BlockGraphics.command.path3;
 	path+=(BlockGraphics.command.extraWidth-width);
-	path+=BlockGraphics.command.path4+"l 0,";
+	if(bottomOpen){
+		path+=BlockGraphics.command.path4+"l 0,";
+	}
+	else{
+		path+=BlockGraphics.command.path4NoBump+"l 0,";
+	}
 	path+=(0-height+2*BlockGraphics.command.cornerRadius);
 	path+=BlockGraphics.command.path5;
 	return path;
@@ -406,7 +419,7 @@ BlockGraphics.create.valueText=function(text,group){
 }
 
 BlockGraphics.update=function(){}
-BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight1,innerHeight2,midHeight){
+BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight1,innerHeight2,midHeight,bottomOpen){
 	var pathD;
 	switch(type){
 		case 0:
@@ -425,7 +438,7 @@ BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight
 			pathD=BlockGraphics.buildPath.hat(x,y,width,height);
 			break;
 		case 5:
-			pathD=BlockGraphics.buildPath.loop(x,y,width,height,innerHeight1);
+			pathD=BlockGraphics.buildPath.loop(x,y,width,height,innerHeight1,bottomOpen);
 			break;
 		case 6:
 			pathD=BlockGraphics.buildPath.doubleLoop(x,y,width,height,innerHeight1,innerHeight2,midHeight);
@@ -433,7 +446,7 @@ BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight
 	}
 	path.setAttributeNS(null,"d",pathD);
 	return path;
-}
+};
 BlockGraphics.update.text=function(text,x,y){
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);

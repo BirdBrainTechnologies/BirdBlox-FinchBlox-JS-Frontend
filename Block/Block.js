@@ -390,6 +390,7 @@ Block.prototype.updateAlignRI=function(x,y){
  * @param {number} height - The desired height of the Block.
  */
 Block.prototype.resize=function(width,height){
+	var BG=BlockGraphics;
 	//First set width and height properties.
 	this.width=width;
 	this.height=height;
@@ -405,7 +406,7 @@ Block.prototype.resize=function(width,height){
 		midHeight=this.midHeight;
 	}
 	//Tell BlockGraphics to change the path description to match the new properties.
-	BlockGraphics.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight);
+	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
 };
 /* Recursively searches for the Block with best fits the currently moving BlockStack.
  * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
