@@ -398,6 +398,15 @@ GuiElements.move.text=function(text,x,y){
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);
 };
+/* Moves an SVG element.
+ * @param {SVG element} element - The element to move.
+ * @param {number} x - The new x coord of the element.
+ * @param {number} y - The new y coord of the element.
+ */
+GuiElements.move.element=function(element,x,y){
+	element.setAttributeNS(null,"x",x);
+	element.setAttributeNS(null,"y",y);
+};
 /* Creates a clipping path (crops item) of the specified size and adds to the element if provided.
  * @param {string} id - The id to use for the clipping path.
  * @param {number} x - The x coord of the clipping path.
@@ -407,7 +416,8 @@ GuiElements.move.text=function(text,x,y){
  * @param {SVG element} element - (optional) The element the path should be added to.
  * @return {SVG clipPath} - The finished clipping path.
  */
-GuiElements.clip=function(id,x,y,width,height,element){
+GuiElements.clip=function(x,y,width,height,element){
+	var id=Math.random()+"";
 	var clipPath=document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
 	var clipRect=GuiElements.draw.rect(x,y,width,height);
 	clipPath.appendChild(clipRect);

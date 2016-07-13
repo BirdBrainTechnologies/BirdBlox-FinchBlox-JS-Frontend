@@ -14,7 +14,6 @@ FileMenu.prototype.optionNew=function(){
 	SaveManager.new();
 };
 FileMenu.prototype.optionOpen=function(){
-	//new OpenDialog("sadsadsa\nsdfdsfdsf");
 	var callbackFn=function(response){
 		new OpenDialog(response);
 	};

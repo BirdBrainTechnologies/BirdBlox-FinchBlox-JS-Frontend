@@ -197,6 +197,16 @@ TouchReceiver.touchStartOverlayPart=function(e){
 
 	}
 };
+TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)) {
+		if(!target.isOverlayPart) {
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="menuBnList";
+		TouchReceiver.target=target; //Store target Slot.
+	}
+};
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
@@ -253,6 +263,23 @@ TouchReceiver.touchmove=function(e){
 				TabManager.updateScroll(TR.getX(e),TR.getY(e));
 			}
 		}
+		//If the user drags a button and it has a menuBnList, it should scroll it.
+		if(TR.targetType=="button"){
+			if(TR.target.menuBnList!=null&&TR.target.menuBnList.scrollable){
+				TR.targetType="menuBnList";
+				TR.target.interrupt();
+				TR.target=TR.target.menuBnList;
+			}
+		}
+		//If the user drags a menuBnList, it should scroll.
+		if(TR.targetType=="menuBnList"){
+			if(!TR.target.scrolling&&TR.target.scrollable){
+				TR.target.startScroll(TR.getY(e));
+			}
+			else{
+				TR.target.updateScroll(TR.getY(e));
+			}
+		}
 	}
 };
 /* Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
@@ -286,6 +313,9 @@ TouchReceiver.touchend=function(e){
 		}
 		else if(TR.targetType=="tabSpace"){
 			TabManager.endScroll();
+		}
+		else if(TR.targetType=="menuBnList"){
+			TR.target.endScroll();
 		}
 	}
 };
@@ -439,5 +469,12 @@ TouchReceiver.addListenersOverlayPart=function(element){
 	var TR=TouchReceiver;
 	element.addEventListener(TR.handlerDown, function(e) {
 		TouchReceiver.touchStartOverlayPart(e);
+	}, false);
+};
+TouchReceiver.addListenersMenuBnListScrollRect=function(element,parent){
+	var TR=TouchReceiver;
+	element.parent=parent;
+	element.addEventListener(TR.handlerDown, function(e) {
+		TouchReceiver.touchStartMenuBnListScrollRect(this.parent,e);
 	}, false);
 };

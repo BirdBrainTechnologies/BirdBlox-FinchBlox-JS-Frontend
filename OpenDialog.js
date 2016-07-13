@@ -33,11 +33,15 @@ OpenDialog.setConstants=function(){
 OpenDialog.prototype.makeMenuBnList=function(){
 	var bnM=OpenDialog.bnMargin;
 	var menuBnList=new MenuBnList(this.group,bnM,bnM+OpenDialog.titleBarH,bnM,OpenDialog.width-2*bnM);
+	menuBnList.setMaxHeight(this.calcMaxHeight());
 	for(var i=0;i<this.files.length-1;i++){
 		this.addBnListOption(this.files[i],menuBnList);
 	}
 	menuBnList.show();
 	return menuBnList;
+};
+OpenDialog.prototype.calcMaxHeight=function(){
+	return GuiElements.height-OpenDialog.titleBarH-OpenDialog.cancelBnHeight-OpenDialog.bnMargin*3;
 };
 OpenDialog.prototype.addBnListOption=function(file,menuBnList){
 	var dialog=this;

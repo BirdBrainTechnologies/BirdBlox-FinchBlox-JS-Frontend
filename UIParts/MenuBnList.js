@@ -20,6 +20,12 @@ function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 	}
 	this.columns=columns;
 	this.isOverlayPart=false;
+	this.internalHeight=0;
+	this.scrolling=false;
+	this.scrollYOffset=0;
+	this.scrollY=0;
+	this.scrollable=false;
+	this.maxHeight=null;
 }
 MenuBnList.setGraphics=function(){
 	var MBL=MenuBnList;
@@ -27,6 +33,12 @@ MenuBnList.setGraphics=function(){
 	MBL.bnHMargin=5; //only used when width not specified.
 	MBL.minWidth=25;
 }
+MenuBnList.prototype.setMaxHeight=function(maxHeight){
+	this.maxHeight=maxHeight;
+	this.clippingPath=GuiElements.clip(0,0,GuiElements.width,maxHeight,this.group);
+	this.clipRect=this.clippingPath.childNodes[0];
+	this.scrollRect=this.makeScrollRect();
+};
 MenuBnList.prototype.addOption=function(text,func){
 	this.bnsGenerated=false;
 	this.bnTextList.push(text);
@@ -48,6 +60,9 @@ MenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
 		this.group.remove();
+		if(this.maxHeight!=null) {
+			this.clippingPath.remove();
+		}
 	}
 }
 MenuBnList.prototype.generateBns=function(){
@@ -78,13 +93,19 @@ MenuBnList.prototype.generateBns=function(){
 			column++;
 		}
 		currentY+=this.bnHeight;
-		this.height=currentY;
+		this.internalHeight=currentY;
 		if(count==0){
-			this.height=0;
+			this.internalHeight=0;
 		}
+		this.height=this.internalHeight;
+		if(this.maxHeight!=null){
+			this.height=Math.min(this.internalHeight,this.maxHeight);
+		}
+		this.scrollable=this.height!=this.internalHeight;
+		this.updateScrollRect();
 		this.bnsGenerated=true;
 	}
-}
+};
 MenuBnList.prototype.clearBnsArray=function(){
 	if(this.bns!=null){
 		for(var i=0;i<this.bns.length;i++){
@@ -99,13 +120,17 @@ MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
 	bn.isOverlayPart=this.isOverlayPart;
+	bn.menuBnList=this;
 	return bn;
 }
 MenuBnList.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
-	GuiElements.move.group(this.group,x,y);
-}
+	GuiElements.move.group(this.group,x,y+this.scrollY);
+	if(this.maxHeight!=null){
+		GuiElements.move.element(this.clipRect,0,(0-this.scrollY));
+	}
+};
 MenuBnList.prototype.computeWidth=function(){
 	if(this.width==null) {
 		var columns = this.columns;
@@ -123,6 +148,41 @@ MenuBnList.prototype.computeWidth=function(){
 		}
 	}
 }
+MenuBnList.prototype.makeScrollRect=function(){
+	var rectE=GuiElements.create.rect(this.group);
+	rectE.setAttributeNS(null,"fill","#000");
+	GuiElements.update.opacity(rectE,0);
+	TouchReceiver.addListenersMenuBnListScrollRect(rectE,this);
+	return rectE;
+};
+MenuBnList.prototype.updateScrollRect=function(){
+	if(this.maxHeight!=null) {
+		GuiElements.update.rect(this.scrollRect, 0, 0, this.width, this.internalHeight);
+	}
+};
 MenuBnList.prototype.isEmpty=function(){
 	return this.bnTextList.length==0;
-}
+};
+MenuBnList.prototype.startScroll=function(y){
+	if(!this.scrolling){
+		this.scrollYOffset = this.scrollY - y;
+		this.scrolling=true;
+	}
+};
+MenuBnList.prototype.updateScroll=function(y){
+	if(this.scrolling){
+		this.scroll(this.scrollYOffset + y);
+		this.scrolling=true;
+	}
+};
+MenuBnList.prototype.endScroll=function(){
+	if(this.scrolling){
+		this.scrolling=false;
+	}
+};
+MenuBnList.prototype.scroll=function(scrollY){
+	this.scrollY=scrollY;
+	this.scrollY=Math.min(0,this.scrollY);
+	this.scrollY=Math.max(this.height-this.internalHeight,this.scrollY);
+	this.move(this.x,this.y);
+};

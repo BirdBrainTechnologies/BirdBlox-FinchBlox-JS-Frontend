@@ -206,6 +206,8 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	IP.dataIsNumeric=false;
 	IP.nonNumericData=IP.slot.enteredData;
 	IP.nonNumericText=IP.slot.text;
+	var Vmargins=IP.bubbleOverlay.getVPadding();
+	IP.menuBnList.setMaxHeight(Math.max(upperY-Vmargins,GuiElements.height-lowerY-Vmargins));
 	IP.menuBnList.generateBns();
 	IP.width=IP.menuBnList.width;//+2*IP.buttonMargin;
 	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;

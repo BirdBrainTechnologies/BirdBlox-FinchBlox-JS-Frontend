@@ -93,3 +93,6 @@ BubbleOverlay.prototype.display=function(x,upperY,lowerY,innerWidth,innerHeight)
 	GuiElements.update.rect(this.bgRect,0,0,width,height);
 	this.show();
 };
+BubbleOverlay.prototype.getVPadding=function() {
+	return this.margin*2+BubbleOverlay.triangleH;
+};

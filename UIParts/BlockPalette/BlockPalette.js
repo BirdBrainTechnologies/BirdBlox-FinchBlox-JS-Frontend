@@ -38,7 +38,7 @@ BlockPalette.createPalBg=function(){
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	TouchReceiver.addListenersPalette(BP.palRect);
-	GuiElements.clip("blockPaletteClip",0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
+	GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
 }
 BlockPalette.createCategories=function(){
 	var catCount=BlockList.catCount();

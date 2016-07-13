@@ -16,6 +16,7 @@ function Button(x,y,width,height,parent){
 	this.toggleFunction=null;
 	this.toggled=false;
 	this.isOverlayPart=false;
+	this.menuBnList=null;
 }
 Button.setGraphics=function(){
 	Button.bg=Colors.darkGray;
