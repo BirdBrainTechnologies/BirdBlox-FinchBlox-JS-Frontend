@@ -24,10 +24,6 @@ MenuBnList.setGraphics=function(){
 	var MBL=MenuBnList;
 	MBL.bnHeight=25;
 	MBL.bnHMargin=5; //only used when width not specified.
-	MBL.fontSize=16;
-	MBL.font="Arial";
-	MBL.fontWeight="normal";
-	MBL.charHeight=12;
 	MBL.minWidth=25;
 }
 MenuBnList.prototype.addOption=function(text,func){
@@ -96,7 +92,7 @@ MenuBnList.prototype.clearBnsArray=function(){
 MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var MBL=MenuBnList;
 	var bn=new Button(x,y,width,this.bnHeight,this.group);
-	bn.addText(text,MBL.font,MBL.fontSize,MBL.fontWeight,MBL.charHeight);
+	bn.addText(text);
 	bn.setCallbackFunction(func,true);
 	return bn;
 }
@@ -111,7 +107,7 @@ MenuBnList.prototype.computeWidth=function(){
 		var MBL = MenuBnList;
 		var longestW = 0;
 		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], MBL.font, MBL.fontSize, MBL.fontWeight);
+			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.font, Button.fontSize, Button.fontWeight);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}

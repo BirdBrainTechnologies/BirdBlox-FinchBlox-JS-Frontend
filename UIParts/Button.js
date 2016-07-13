@@ -12,6 +12,9 @@ function Button(x,y,width,height,parent){
 	this.iconInverts=false;
 	this.callback=null;
 	this.delayedCallback=null;
+	this.toggles=false;
+	this.toggleFunction=null;
+	this.toggled=false;
 }
 Button.setGraphics=function(){
 	Button.bg=Colors.darkGray;
@@ -20,6 +23,11 @@ Button.setGraphics=function(){
 	Button.highlightFore=Colors.darkGray;
 	Button.disabledBg=Colors.darkGray;
 	Button.disabledFore=Colors.Black;
+
+	Button.defaultFontSize=16;
+	Button.defaultFont="Arial";
+	Button.defaultFontWeight="normal";
+	Button.defaultCharHeight=12;
 }
 Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
@@ -27,7 +35,22 @@ Button.prototype.buildBg=function(){
 	TouchReceiver.addListenersBN(this.bgRect,this);
 }
 Button.prototype.addText=function(text,font,size,weight,height){
-	this.textE=GuiElements.draw.text(0,0,text,size,Button.foreground,font,weight);
+	if(font==null){
+		font=Button.defaultFont;
+	}
+	if(size==null){
+		size=Button.defaultFontSize;
+	}
+	if(weight==null){
+		weight=Button.defaultFontWeight;
+	}
+	if(height==null){
+		height=Button.defaultCharHeight;
+	}
+	
+	
+	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
+	GuiElements.update.textLimitWidth(this.textE,text,this.width);
 	this.group.appendChild(this.textE);
 	var bbox=this.textE.getBBox();
 	var textW=GuiElements.measure.textWidth(this.textE);
@@ -69,6 +92,10 @@ Button.prototype.setCallbackFunction=function(callback,delay){
 		this.callback=callback;
 	}
 };
+Button.prototype.setToggleFunction=function(callback){
+	this.toggleFunction=callback;
+	this.toggles=true;
+};
 Button.prototype.disable=function(){
 	if(this.enabled){
 		this.enabled=false;
@@ -81,7 +108,7 @@ Button.prototype.disable=function(){
 			this.icon.setColor(Button.disabledFore);
 		}
 	}
-}
+};
 Button.prototype.enable=function(){
 	if(!this.enabled){
 		this.enabled=true;
@@ -94,7 +121,7 @@ Button.prototype.enable=function(){
 			this.icon.setColor(Button.foreground);
 		}
 	}
-}
+};
 Button.prototype.press=function(){
 	if(this.enabled&&!this.pressed){
 		this.pressed=true;
@@ -109,25 +136,36 @@ Button.prototype.press=function(){
 			this.callback();
 		}
 	}
-}
+};
 Button.prototype.release=function(){
 	if(this.enabled&&this.pressed){
 		this.pressed=false;
-		this.bgRect.setAttributeNS(null,"fill",Button.bg);
-		if(this.hasText){
-			this.textE.setAttributeNS(null,"fill",Button.foreground);
+		if(!this.toggles||this.toggled) {
+			this.bgRect.setAttributeNS(null, "fill", Button.bg);
+			if (this.hasText) {
+				this.textE.setAttributeNS(null, "fill", Button.foreground);
+			}
+			if (this.hasIcon && this.iconInverts) {
+				this.icon.setColor(Button.foreground);
+			}
 		}
-		if(this.hasIcon&&this.iconInverts){
-			this.icon.setColor(Button.foreground);
+		if(this.toggles&&this.toggled){
+			this.toggled=false;
+			this.toggleFunction();
 		}
-		if(this.delayedCallback!=null){
-			this.delayedCallback();
+		else {
+			if (this.delayedCallback != null) {
+				this.delayedCallback();
+			}
+			if (this.toggles && !this.toggled) {
+				this.toggled = true;
+			}
 		}
 	}
-}
+};
 /* Removes the Button's visual highlight without triggering any actions */
 Button.prototype.interrupt=function(){
-	if(this.enabled&&this.pressed){
+	if(this.enabled&&this.pressed&&!this.toggled){
 		this.pressed=false;
 		this.bgRect.setAttributeNS(null,"fill",Button.bg);
 		if(this.hasText){
@@ -137,7 +175,20 @@ Button.prototype.interrupt=function(){
 			this.icon.setColor(Button.foreground);
 		}
 	}
-}
+};
+Button.prototype.unToggle=function(){
+	if(this.enabled&&this.toggled){
+		this.bgRect.setAttributeNS(null, "fill", Button.bg);
+		if (this.hasText) {
+			this.textE.setAttributeNS(null, "fill", Button.foreground);
+		}
+		if (this.hasIcon && this.iconInverts) {
+			this.icon.setColor(Button.foreground);
+		}
+	}
+	this.toggled=false;
+	this.pressed=false;
+};
 Button.prototype.remove=function(){
 	this.group.remove();
-}
+};

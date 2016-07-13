@@ -10,6 +10,7 @@ function GuiElements(){
 	GuiElements.getAppVersion();
 	GuiElements.buildUI();
 	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
+	GuiElements.dialogBlock=null;
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
@@ -25,6 +26,7 @@ GuiElements.setConstants=function(){
 	This assumes that the screen's dimensions never change once loaded. */
 	GuiElements.width=window.innerWidth;
 	GuiElements.height=window.innerHeight;
+	GuiElements.blockerOpacity=0.5;
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -40,17 +42,19 @@ GuiElements.setConstants=function(){
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
+	Menu.setGraphics();
 	InputPad.setGraphics();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
+	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
 	CodeManager();
 	HummingbirdManager();
 }
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	debug.innerHTML=message; //The iPad app does not support alert dialogs
+	//debug.innerHTML=message; //The iPad app does not support alert dialogs
 	//alert(message); //When debugging on a PC this function can be used.
 };
 /* Alerts the user that an error has occurred. Should never be called.
@@ -96,6 +100,8 @@ GuiElements.createLayers=function(){
 	layers.highlight=create.layer();
 	layers.overlay=create.layer();
 	layers.tabMenu=create.layer();
+	layers.dialogBlock=create.layer();
+	layers.dialog=create.layer();
 }
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -511,5 +517,21 @@ GuiElements.getAppVersion=function(){
 		xhttp.send(); //Make the request
 	}
 	catch(err){
+	}
+};
+/* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
+GuiElements.blockInteraction=function(){
+	if(GuiElements.dialogBlock==null) {
+		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
+		GuiElements.update.opacity(rect,GuiElements.blockerOpacity);
+		GuiElements.layers.dialogBlock.appendChild(rect);
+		TouchReceiver.touchInterrupt();
+		GuiElements.dialogBlock=rect;
+	}
+};
+GuiElements.unblockInteraction=function() {
+	if(GuiElements.dialogBlock!=null) {
+		GuiElements.dialogBlock.remove();
+		GuiElements.dialogBlock=null;
 	}
 };

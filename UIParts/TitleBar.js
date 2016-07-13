@@ -16,6 +16,7 @@ TitleBar.setGraphics=function(){
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
+	TB.fileBnX=TB.buttonMargin;
 }
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -32,10 +33,16 @@ TitleBar.makeButtons=function(){
 	TB.stopBn=new Button(TB.stopBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
+	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
+	TB.fileMenu=new FileMenu(TB.fileBn);
+	/*
 	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.test1Bn.setCallbackFunction(SaveManager.reloadTest,true);
 	TB.test2Bn=new Button(TB.flagBnX-2*TB.buttonW-4*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test2Bn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
-}
+	*/
+
+};

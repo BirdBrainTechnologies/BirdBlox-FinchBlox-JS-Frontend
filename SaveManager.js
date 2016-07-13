@@ -28,3 +28,24 @@ SaveManager.listTest=function(){
 	};
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
 };
+
+SaveManager.save=function(){
+	XmlWriter.downloadDoc(CodeManager.createXml(),"save");
+};
+SaveManager.open=function(fileName){
+	fileName=fileName.replace(".xml","");
+	var callbackFn=function(response){
+		SaveManager.loadFile(response);
+	};
+	HtmlServer.sendRequestWithCallback("load/"+fileName,callbackFn);
+};
+SaveManager.saveAs=function(){
+	var callbackFn=function(response){
+		XmlWriter.downloadDoc(CodeManager.createXml(),"save");
+	};
+	HtmlServer.sendRequestWithCallback("new",callbackFn);
+};
+SaveManager.new=function(){
+	HtmlServer.sendRequestWithCallback("new");
+	SaveManager.loadFile("<project><tabs></tabs></project>");
+};
