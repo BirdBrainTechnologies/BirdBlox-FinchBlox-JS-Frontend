@@ -46,7 +46,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
 					if(callbackErr!=null){
 						callbackErr();
 					}
-					GuiElements.alert("HTML error: "+xhttp.status);
+					//GuiElements.alert("HTML error: "+xhttp.status);
 				}
 			}
 		};
@@ -137,3 +137,17 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 }
+HtmlServer.getFileName=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var onResponseReceived=function(response){
+		if(response=="File has no name."){
+			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
+};

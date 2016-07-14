@@ -1,6 +1,7 @@
 function SaveManager(){
 	SaveManager.fileName="";
 	SaveManager.modified=false;
+	SaveManager.named=false;
 }
 SaveManager.autoSave=function(){
 	XmlWriter.downloadDoc(CodeManager.createXml(),"autoSave");
@@ -30,19 +31,19 @@ SaveManager.listTest=function(){
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
 };
 SaveManager.save=function(){
-	/*var callbackFn=function(response) {
+	XmlWriter.openDocInTab(CodeManager.createXml());
+	var callbackFn=function(response) {
 		SaveManager.fileName=response;
 		SaveManager.markSaved();
-	};*/
-	XmlWriter.openDocInTab(CodeManager.createXml());
-	GuiElements.alert("Saving...");
-	//HtmlServer.sendRequestWithCallback("filename",callbackFn);
+	};
+	HtmlServer.getFileName(callbackFn);
 };
 SaveManager.open=function(fileName){
 	var callbackFn=function(response){
 		SaveManager.loadFile(response);
 		var callbackFn2=function(response) {
 			SaveManager.fileName=response;
+			SaveManager.named=true;
 			SaveManager.markSaved();
 		};
 		HtmlServer.sendRequestWithCallback("filename",callbackFn2);
@@ -51,6 +52,7 @@ SaveManager.open=function(fileName){
 };
 SaveManager.saveAs=function(){
 	HtmlServer.sendRequestWithCallback("new");
+	SaveManager.named=false;
 	var now=new Date().getTime();
 	while(new Date().getTime()-now<50){
 
@@ -60,16 +62,27 @@ SaveManager.saveAs=function(){
 SaveManager.new=function(){
 	HtmlServer.sendRequestWithCallback("new");
 	SaveManager.fileName="New project";
+	SaveManager.named=false;
 	SaveManager.markSaved();
 	SaveManager.loadFile("<project><tabs></tabs></project>");
 };
 SaveManager.markEdited=function(){
 	if(!SaveManager.modified){
-		TitleBar.setText(SaveManager.fileName+"*");
 		SaveManager.modified=true;
+		if(SaveManager.named) {
+			TitleBar.setText(SaveManager.fileName + "*");
+		}
+		else{
+			TitleBar.setText("");
+		}
 	}
 };
 SaveManager.markSaved=function(){
 	SaveManager.modified=false;
-	TitleBar.setText(SaveManager.fileName);
+	if(SaveManager.named) {
+		TitleBar.setText(SaveManager.fileName);
+	}
+	else{
+		TitleBar.setText("");
+	}
 };

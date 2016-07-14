@@ -28,8 +28,8 @@ Menu.setGraphics=function(){
 };
 Menu.prototype.addOption=function(text,func){
 	var callbackFn=function(){
-		callbackFn.func.call(callbackFn.menu);
 		callbackFn.menu.close();
+		callbackFn.func.call(callbackFn.menu);
 	};
 	callbackFn.menu=this;
 	callbackFn.func=func;

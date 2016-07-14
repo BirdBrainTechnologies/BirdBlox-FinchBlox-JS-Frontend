@@ -57,10 +57,10 @@ TitleBar.makeTitleText=function(){
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 TitleBar.setText=function(text){
-	/*var TB=TitleBar;
+	var TB=TitleBar;
 	GuiElements.update.text(TB.titleLabel,text);
 	var width=GuiElements.measure.textWidth(TB.titleLabel);
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;
-	GuiElements.move.text(TB.titleLabel,x,y);*/
+	GuiElements.move.text(TB.titleLabel,x,y);
 };
