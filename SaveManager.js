@@ -38,7 +38,6 @@ SaveManager.save=function(){
 	HtmlServer.sendRequestWithCallback("filename",callbackFn);
 };
 SaveManager.open=function(fileName){
-	fileName=fileName.substring(0,fileName.length-4);
 	var callbackFn=function(response){
 		SaveManager.loadFile(response);
 		var callbackFn2=function(response) {
