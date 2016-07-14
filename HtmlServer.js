@@ -51,7 +51,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
 			}
 		};
 		xhttp.open("GET", HtmlServer.getUrlForRequest(request), true); //Get the names
-		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+		//GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		xhttp.send(); //Make the request
 	}
 	catch(err){
@@ -150,4 +150,57 @@ HtmlServer.getFileName=function(callbackFn,callbackErr){
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
+};
+HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCancel,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=confirm(question);
+		HtmlServer.dialogVisible=false;
+		if(firstIsCancel){
+			result=!result;
+		}
+		if(result){
+			callbackFn("1");
+		}
+		else{
+			callbackFn("2");
+		}
+	}
+	else {
+		var HS = HtmlServer;
+		var request = "iPad/choice/" + HS.encodeHtml(title);
+		request += "/" + HS.encodeHtml(question);
+		request += "/" + HS.encodeHtml(option1);
+		request += "/" + HS.encodeHtml(option2);
+		var onDialogPresented = function (result) {
+			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
+		};
+		onDialogPresented.callbackFn = callbackFn;
+		onDialogPresented.callbackErr = callbackErr;
+		var onDialogFail = function () {
+			HtmlServer.dialogVisible = false;
+			if (onDialogFail.callbackErr != null) {
+				onDialogFail.callbackErr();
+			}
+		};
+		onDialogFail.callbackErr = callbackErr;
+		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
+	}
+};
+HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "iPad/choice_response";
+	var onResponseReceived=function(response){
+		if(response=="0"){
+			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			HtmlServer.dialogVisible=false;
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };

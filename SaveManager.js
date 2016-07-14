@@ -2,6 +2,8 @@ function SaveManager(){
 	SaveManager.fileName="";
 	SaveManager.modified=false;
 	SaveManager.named=false;
+	SaveManager.requestTimer=null;
+	SaveManager.timerRunning=false;
 }
 SaveManager.autoSave=function(){
 	XmlWriter.downloadDoc(CodeManager.createXml(),"autoSave");
@@ -30,25 +32,33 @@ SaveManager.listTest=function(){
 	};
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
 };
-SaveManager.save=function(){
+SaveManager.save=function(updateTitle){
+	if(updateTitle==null){
+		updateTitle=true;
+	}
 	XmlWriter.openDocInTab(CodeManager.createXml());
-	var callbackFn=function(response) {
-		SaveManager.fileName=response;
-		SaveManager.markSaved();
-	};
-	HtmlServer.getFileName(callbackFn);
-};
-SaveManager.open=function(fileName){
-	var callbackFn=function(response){
-		SaveManager.loadFile(response);
-		var callbackFn2=function(response) {
-			SaveManager.fileName=response;
-			SaveManager.named=true;
+	GuiElements.alert("**********Save!************");
+	if(updateTitle) {
+		var callbackFn = function (response) {
+			SaveManager.fileName = response;
 			SaveManager.markSaved();
 		};
-		HtmlServer.sendRequestWithCallback("filename",callbackFn2);
-	};
-	HtmlServer.sendRequestWithCallback("load/"+fileName,callbackFn);
+		HtmlServer.getFileName(callbackFn);
+	}
+};
+SaveManager.open=function(fileName){
+	SaveManager.checkPromptSave(function() {
+		var callbackFn = function (response) {
+			SaveManager.loadFile(response);
+			var callbackFn2 = function (response) {
+				SaveManager.fileName = response;
+				SaveManager.named = true;
+				SaveManager.markSaved();
+			};
+			HtmlServer.sendRequestWithCallback("filename", callbackFn2);
+		};
+		HtmlServer.sendRequestWithCallback("load/" + fileName, callbackFn);
+	});
 };
 SaveManager.saveAs=function(){
 	HtmlServer.sendRequestWithCallback("new");
@@ -60,11 +70,13 @@ SaveManager.saveAs=function(){
 	SaveManager.save();
 };
 SaveManager.new=function(){
-	HtmlServer.sendRequestWithCallback("new");
-	SaveManager.fileName="New project";
-	SaveManager.named=false;
-	SaveManager.markSaved();
-	SaveManager.loadFile("<project><tabs></tabs></project>");
+	SaveManager.checkPromptSave(function() {
+		HtmlServer.sendRequestWithCallback("new");
+		SaveManager.fileName = "New project";
+		SaveManager.named = false;
+		SaveManager.markSaved();
+		SaveManager.loadFile("<project><tabs></tabs></project>");
+	});
 };
 SaveManager.markEdited=function(){
 	if(!SaveManager.modified){
@@ -84,5 +96,43 @@ SaveManager.markSaved=function(){
 	}
 	else{
 		TitleBar.setText("");
+	}
+};
+SaveManager.checkPromptSave=function(nextAction){
+	if(SaveManager.modified){
+		var callbackFn2=function(response){
+			callbackFn2.status.finished=true;
+			callbackFn2.status.result=response;
+		};
+		callbackFn2.status=function(){};
+		callbackFn2.status.finished=false;
+		var question="Would you like to save changes to your project?";
+		HtmlServer.showChoiceDialog("Save changes",question,"Don't Save","Save",true,callbackFn2);
+		var callbackFn=function(response) {
+			if(response=="2"){
+				SaveManager.save(false);
+			}
+			nextAction();
+		};
+		SaveManager.waitForRequest(callbackFn2.status,callbackFn);
+	}
+	else{
+		nextAction();
+	}
+};
+SaveManager.waitForRequest=function(status,callbackFn){
+	if(!SaveManager.timerRunning){
+		SaveManager.currentRequestStatus=status;
+		SaveManager.currentCallbackFn=callbackFn;
+		SaveManager.requestTimer = self.setInterval(function () { SaveManager.checkRequestStatus() }, 5000);
+		SaveManager.timerRunning=true;
+	}		
+};
+SaveManager.checkRequestStatus=function(){
+	if(SaveManager.currentRequestStatus.finished==true) {
+		SaveManager.requestTimer = window.clearInterval(SaveManager.requestTimer);
+		SaveManager.timerRunning=false;
+		SaveManager.currentCallbackFn(SaveManager.currentRequestStatus.result);
+		SaveManager.timerRunning=false;
 	}
 };

@@ -51,6 +51,7 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	CodeManager();
 	HummingbirdManager();
+	SaveManager();
 }
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
