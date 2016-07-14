@@ -39,9 +39,12 @@ XmlWriter.unEscape=function(string) {
 	return string;
 };
 XmlWriter.downloadDoc=function(xmlDoc,name){
-  window.open('data:text/xml,' + encodeURIComponent(XmlWriter.docToText(xmlDoc)));
+  window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
 	//var blob = new Blob([XmlWriter.docToText(xmlDoc)], {type: "text/plain;charset=utf-8"});
 	//saveAs(blob, name+".xml");
+};
+XmlWriter.openDocInTab=function(xmlDoc){
+	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
 };
 XmlWriter.openDoc=function(xmlString){
 	var parser = new DOMParser();

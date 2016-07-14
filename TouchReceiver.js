@@ -4,7 +4,7 @@
 function TouchReceiver(){
 	var TR=TouchReceiver; //shorthand
 	//Toggle to determine of mouse or touchscreen events should be used.
-	TR.mouse=false; //Use true when debugging on a desktop.
+	TR.mouse=true; //Use true when debugging on a desktop.
 	TR.longTouchInterval=300; //The number of ms before a touch is considered a long touch.
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.

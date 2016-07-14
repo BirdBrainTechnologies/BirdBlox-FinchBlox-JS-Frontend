@@ -34,7 +34,7 @@ SaveManager.save=function(){
 		SaveManager.fileName=response;
 		SaveManager.markSaved();
 	};
-	XmlWriter.downloadDoc(CodeManager.createXml(),"save");
+	XmlWriter.openDocInTab(CodeManager.createXml());
 	HtmlServer.sendRequestWithCallback("filename",callbackFn);
 };
 SaveManager.open=function(fileName){
