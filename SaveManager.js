@@ -30,12 +30,13 @@ SaveManager.listTest=function(){
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
 };
 SaveManager.save=function(){
-	var callbackFn=function(response) {
+	/*var callbackFn=function(response) {
 		SaveManager.fileName=response;
 		SaveManager.markSaved();
-	};
+	};*/
 	XmlWriter.openDocInTab(CodeManager.createXml());
-	HtmlServer.sendRequestWithCallback("filename",callbackFn);
+	GuiElements.alert("Saving...");
+	//HtmlServer.sendRequestWithCallback("filename",callbackFn);
 };
 SaveManager.open=function(fileName){
 	var callbackFn=function(response){
@@ -49,10 +50,12 @@ SaveManager.open=function(fileName){
 	HtmlServer.sendRequestWithCallback("load/"+fileName,callbackFn);
 };
 SaveManager.saveAs=function(){
-	var callbackFn=function(response){
-		SaveManager.save();
-	};
-	HtmlServer.sendRequestWithCallback("new",callbackFn);
+	HtmlServer.sendRequestWithCallback("new");
+	var now=new Date().getTime();
+	while(new Date().getTime()-now<50){
+
+	}
+	SaveManager.save();
 };
 SaveManager.new=function(){
 	HtmlServer.sendRequestWithCallback("new");

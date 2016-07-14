@@ -54,7 +54,7 @@ GuiElements.setConstants=function(){
 }
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	//debug.innerHTML=message; //The iPad app does not support alert dialogs
+	debug.innerHTML=message; //The iPad app does not support alert dialogs
 	//alert(message); //When debugging on a PC this function can be used.
 };
 /* Alerts the user that an error has occurred. Should never be called.
