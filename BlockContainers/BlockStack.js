@@ -462,3 +462,19 @@ BlockStack.importXml=function(stackNode,tab){
 		return null;
 	}
 };
+BlockStack.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+BlockStack.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+BlockStack.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+BlockStack.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+BlockStack.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	this.firstBlock[functionName].apply(this.firstBlock,args);
+};

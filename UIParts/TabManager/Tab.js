@@ -280,3 +280,27 @@ Tab.prototype.delete=function(){
 	this.pathE.remove();
 	this.mainG.remove();
 };
+Tab.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Tab.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Tab.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Tab.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Tab.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		var currentStack=stacks[i];
+		var currentL=stacks.length;
+		currentStack[functionName].apply(currentStack,args);
+		if(currentL!=stacks.length){
+			i--;
+		}
+	}
+};

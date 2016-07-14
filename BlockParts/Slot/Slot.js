@@ -304,7 +304,24 @@ Slot.prototype.checkBroadcastMessageAvailable=function(message){
 Slot.prototype.updateAvailableMessages=function(){
 
 };
-
+Slot.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Slot.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Slot.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Slot.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Slot.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	if(this.hasChild){
+		this.child[functionName].apply(this.child,args);
+	}
+};
 /*Slot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","Slot");

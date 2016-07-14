@@ -46,6 +46,28 @@ List.importXml=function(listNode){
 		return new List(name,data);
 	}
 };
+List.prototype.rename=function(){
+	var callbackFn=function(cancelled,response){
+		if(!cancelled&&CodeManager.checkListName(response)){
+			callbackFn.list.name=response;
+			CodeManager.renameList(callbackFn.list);
+		}
+	};
+	callbackFn.list=this;
+	HtmlServer.showDialog("Rename list","Enter list name",this.name,callbackFn);
+};
+List.prototype.delete=function(){
+	var callbackFn=function(response){
+		if(response=="2"){
+			callbackFn.list.remove();
+			CodeManager.deleteList(callbackFn.list);
+		}
+	};
+	callbackFn.list=this;
+	var question="Are you sure you would like to delete the list \""+this.name+"\"? ";
+	question+="This will delete all copies of this block.";
+	HtmlServer.showChoiceDialog("Delete list",question,"Don't delete","Delete",true,callbackFn);
+};
 /*
 List.prototype.getIndex=function(indexData){
 	var listData=this.data;

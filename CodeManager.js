@@ -474,3 +474,19 @@ CodeManager.deleteAll=function(){
 	TabManager.deleteAll();
 	CodeManager();
 };
+CodeManager.renameVariable=function(variable){
+	TabManager.renameVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteVariable=function(variable){
+	TabManager.deleteVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.renameList=function(list){
+	TabManager.renameList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteList=function(list){
+	TabManager.deleteList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};

@@ -54,3 +54,13 @@ ListDropSlot.prototype.importXml=function(slotNode){
 	}
 	return this;
 };
+ListDropSlot.prototype.renameList=function(list){
+	if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		this.changeText(list.getName());
+	}
+};
+ListDropSlot.prototype.deleteList=function(list){
+	if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		this.setSelectionData("",null);
+	}
+};

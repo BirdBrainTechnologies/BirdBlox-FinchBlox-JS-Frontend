@@ -14,15 +14,54 @@ BlockContextMenu.prototype.showMenu=function(){
 	var BCM=BlockContextMenu;
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
-	var func=function(){
-		func.BCM.duplicate();
-	};
-	func.BCM=this;
-	this.menuBnList.addOption("Duplicate",func);
 	this.menuBnList.isOverlayPart=true;
+	this.addOptions();
 	this.menuBnList.show();
 	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
 	this.bubbleOverlay.display(this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
+};
+BlockContextMenu.prototype.addOptions=function(){
+	if(this.block.stack.isDisplayStack){
+		if(this.block.blockTypeName=="B_Variable"){
+			var funcRen=function(){
+				funcRen.block.renameVar();
+				funcRen.BCM.close();
+			};
+			funcRen.block=this.block;
+			funcRen.BCM=this;
+			this.menuBnList.addOption("Rename", funcRen);
+			var funcDel=function(){
+				funcDel.block.deleteVar();
+				funcDel.BCM.close();
+			};
+			funcDel.block=this.block;
+			funcDel.BCM=this;
+			this.menuBnList.addOption("Delete", funcDel);
+		}
+		if(this.block.blockTypeName=="B_List"){
+			var funcRen=function(){
+				funcRen.block.renameLi();
+				funcRen.BCM.close();
+			};
+			funcRen.block=this.block;
+			funcRen.BCM=this;
+			this.menuBnList.addOption("Rename", funcRen);
+			var funcDel=function(){
+				funcDel.block.deleteLi();
+				funcDel.BCM.close();
+			};
+			funcDel.block=this.block;
+			funcDel.BCM=this;
+			this.menuBnList.addOption("Delete", funcDel);
+		}
+	}
+	else {
+		var funcDup = function () {
+			funcDup.BCM.duplicate();
+		};
+		funcDup.BCM = this;
+		this.menuBnList.addOption("Duplicate", funcDup);
+	}
 };
 BlockContextMenu.prototype.duplicate=function(){
 	var BCM=BlockContextMenu;

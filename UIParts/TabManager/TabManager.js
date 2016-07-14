@@ -119,9 +119,7 @@ TabManager.updateRun=function(){
 	return this.isRunning;
 }
 TabManager.stop=function(){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		TabManager.tabList[i].stop();
-	}
+	TabManager.passRecursively("stop");
 	this.isRunning=false;
 }
 TabManager.stopAllButStack=function(stack){
@@ -195,4 +193,23 @@ TabManager.deleteAll=function(){
 	TM.activeTab=null;
 	TM.isRunning=false;
 	TM.scrolling=false;
+};
+TabManager.renameVariable=function(variable){
+	TabManager.passRecursively("renameVariable",variable);
+};
+TabManager.deleteVariable=function(variable){
+	TabManager.passRecursively("deleteVariable",variable);
+};
+TabManager.renameList=function(list){
+	TabManager.passRecursively("renameList",list);
+};
+TabManager.deleteList=function(list){
+	TabManager.passRecursively("deleteList",list);
+};
+TabManager.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	for(var i=0;i<TabManager.tabList.length;i++){
+		var currentList=TabManager.tabList[i];
+		currentList[functionName].apply(currentList,args);
+	}
 };

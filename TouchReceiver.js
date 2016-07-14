@@ -109,6 +109,7 @@ TouchReceiver.touchStartBlock=function(target,e){
 		GuiElements.overlay.close(); //Close any visible overlays.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
 			TR.targetType="displayStack";
+			TR.setLongTouchTimer();
 		}
 		else{
 			TR.targetType="block";
@@ -116,7 +117,7 @@ TouchReceiver.touchStartBlock=function(target,e){
 		}
 		TouchReceiver.target=target; //Store target Block.
 	}
-}
+};
 /* Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
  * @param {event} e - passed event arguments.
@@ -357,6 +358,12 @@ TouchReceiver.touchLong=function(){
 			}
 			else{
 				TR.targetType="block";
+			}
+		}
+		if(TR.targetType=="displayStack"){
+			if(!TR.blocksMoving&&(TR.target.blockTypeName=="B_Variable"||TR.target.blockTypeName=="B_List")){
+				TR.longTouch=true;
+				new BlockContextMenu(TR.target,TR.startX,TR.startY);
 			}
 		}
 		if(TR.targetType=="block"){

@@ -38,3 +38,6 @@ LabelText.prototype.duplicate=function(parentCopy){
 LabelText.prototype.textSummary=function(){
 	return this.text;
 }
+LabelText.prototype.remove=function(){
+	this.textE.remove();
+};

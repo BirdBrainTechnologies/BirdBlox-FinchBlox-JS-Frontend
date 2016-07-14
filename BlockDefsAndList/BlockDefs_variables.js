@@ -17,6 +17,26 @@ B_Variable.prototype.createXml=function(xmlDoc){
 	XmlWriter.setAttribute(block,"variable",this.variable.getName());
 	return block;
 };
+B_Variable.prototype.renameVar=function(){
+	this.variable.rename();	
+};
+B_Variable.prototype.deleteVar=function(){
+	this.variable.delete();
+};
+B_Variable.prototype.renameVariable=function(variable){
+	if(variable==this.variable){
+		this.parts[0].remove();
+		this.parts[0]=new LabelText(this,this.variable.getName());
+		if(this.stack!=null){
+			this.stack.updateDim();
+		}
+	}
+};
+B_Variable.prototype.deleteVariable=function(variable){
+	if(variable==this.variable){
+		this.unsnap().delete();
+	}
+};
 B_Variable.importXml=function(blockNode){
 	var variableName=XmlWriter.getAttribute(blockNode,"variable");
 	var variable=CodeManager.findVar(variableName);
@@ -25,6 +45,7 @@ B_Variable.importXml=function(blockNode){
 	}
 	return null;
 };
+
 
 
 
@@ -104,6 +125,26 @@ B_List.importXml=function(blockNode){
 		return new B_List(0,0,list);
 	}
 	return null;
+};
+B_List.prototype.renameLi=function(){
+	this.list.rename();
+};
+B_List.prototype.deleteLi=function(){
+	this.list.delete();
+};
+B_List.prototype.renameList=function(list){
+	if(list==this.list){
+		this.parts[0].remove();
+		this.parts[0]=new LabelText(this,this.list.getName());
+		if(this.stack!=null){
+			this.stack.updateDim();
+		}
+	}
+};
+B_List.prototype.deleteList=function(list){
+	if(list==this.list){
+		this.unsnap().delete();
+	}
 };
 
 

@@ -37,7 +37,7 @@ SaveManager.save=function(updateTitle){
 		updateTitle=true;
 	}
 	XmlWriter.openDocInTab(CodeManager.createXml());
-	GuiElements.alert("**********Save!************");
+	GuiElements.alert("**********Save************");
 	if(updateTitle) {
 		var callbackFn = function (response) {
 			SaveManager.fileName = response;

@@ -763,3 +763,31 @@ Block.importXml=function(blockNode){
 	}
 	return block;
 };
+Block.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Block.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Block.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Block.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Block.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	for(var i=0;i<this.slots.length;i++){
+		var currentSlot=this.slots[i];
+		currentSlot[functionName].apply(currentSlot,args);
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1[functionName].apply(this.blockSlot1,args);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2[functionName].apply(this.blockSlot2,args);
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock[functionName].apply(this.nextBlock,args);
+	}
+};

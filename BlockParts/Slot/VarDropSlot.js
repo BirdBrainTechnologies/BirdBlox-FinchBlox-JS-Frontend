@@ -42,3 +42,13 @@ VarDropSlot.prototype.importXml=function(slotNode){
 	}
 	return this;
 };
+VarDropSlot.prototype.renameVariable=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		this.changeText(variable.getName());
+	}
+};
+VarDropSlot.prototype.deleteVariable=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		this.setSelectionData("",null);
+	}
+};

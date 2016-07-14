@@ -187,3 +187,21 @@ BlockSlot.prototype.importXml=function(blockSlotNode){
 		}
 	}
 };
+BlockSlot.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+BlockSlot.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+BlockSlot.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+BlockSlot.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+BlockSlot.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	if(this.hasChild){
+		this.child[functionName].apply(this.child,args);
+	}
+};
