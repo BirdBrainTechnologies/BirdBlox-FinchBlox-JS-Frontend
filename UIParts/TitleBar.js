@@ -42,6 +42,9 @@ TitleBar.makeButtons=function(){
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.fileMenu=new FileMenu(TB.fileBn);
+	TB.debugBn=new Button(TB.fileBnX+TB.buttonW+2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.debugBn.addText("Debug");
+	TB.debugMenu=new DebugMenu(TB.debugBn);
 	/*
 	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
