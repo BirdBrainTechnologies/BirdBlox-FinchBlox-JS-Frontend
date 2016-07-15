@@ -39,15 +39,14 @@ SaveManager.save=function(updateTitle){
 	//XmlWriter.openDocInTab(CodeManager.createXml());
 	//HtmlServer.sendRequestWithCallback("save/<project><tabs></tabs></project>")
 	var xmlDoc=CodeManager.createXml();
-	HtmlServer.sendRequestWithCallback("save/" + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)), null, null, "POST")
-
-	if(updateTitle) {
+	HtmlServer.sendRequestWithCallback("save/filename", null, null,true,XmlWriter.docToText(xmlDoc));
+	/*if(updateTitle) {
 		var callbackFn = function (response) {
 			SaveManager.fileName = response;
 			SaveManager.markSaved();
 		};
 		HtmlServer.getFileName(callbackFn);
-	}
+	}*/
 };
 SaveManager.open=function(fileName){
 	SaveManager.checkPromptSave(function() {

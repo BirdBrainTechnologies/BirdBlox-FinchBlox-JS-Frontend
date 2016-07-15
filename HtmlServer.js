@@ -32,7 +32,14 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 }
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,requestType){
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	if(isPost == null) {
+		isPost=false;
+	}
+	var requestType="GET";
+	if(isPost){
+		requestType="POST";
+	}
 	try {
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
@@ -50,19 +57,22 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,reque
 				}
 			}
 		};
-		if(requestType == null) {
-			requestType = "GET"
-		}
 		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
+		if(isPost){
+			xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhttp.send("data="+HtmlServer.encodeHtml(postData));
+		}
+		else{
+			xhttp.send(); //Make the request
+		}
 		//GuiElements.alert(HtmlServer.getUrlForRequest(request));
-		xhttp.send(); //Make the request
 	}
 	catch(err){
 		if(callbackErr!=null){
 			callbackErr();
 		}
 	}
-}
+};
 HtmlServer.sendHBRequest=function(request,requestStatus){
 	HtmlServer.sendRequest(HtmlServer.getHBRequest(request),requestStatus);
 }
