@@ -37,8 +37,8 @@ SaveManager.save=function(updateTitle){
 		updateTitle=true;
 	}
 	//XmlWriter.openDocInTab(CodeManager.createXml());
-	HtmlServer.sendRequestWithCallback("save/<project><tabs></tabs></project>")
-	//HtmlServer.sendRequestWithCallback("save/" + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)), null, null, "POST")
+	//HtmlServer.sendRequestWithCallback("save/<project><tabs></tabs></project>")
+	HtmlServer.sendRequestWithCallback("save/" + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)))
 
 	if(updateTitle) {
 		var callbackFn = function (response) {
