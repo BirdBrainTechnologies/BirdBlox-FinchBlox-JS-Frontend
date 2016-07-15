@@ -37,7 +37,7 @@ SaveManager.save=function(updateTitle){
 		updateTitle=true;
 	}
 	XmlWriter.openDocInTab(CodeManager.createXml());
-	GuiElements.alert("**********Save************");
+	
 	if(updateTitle) {
 		var callbackFn = function (response) {
 			SaveManager.fileName = response;
@@ -61,7 +61,7 @@ SaveManager.open=function(fileName){
 	});
 };
 SaveManager.saveAs=function(){
-	HtmlServer.sendRequestWithCallback("new");
+	HtmlServer.sendRequestWithCallback("saveAsNew");
 	SaveManager.named=false;
 	var now=new Date().getTime();
 	while(new Date().getTime()-now<50){
@@ -126,7 +126,7 @@ SaveManager.waitForRequest=function(status,callbackFn){
 		SaveManager.currentCallbackFn=callbackFn;
 		SaveManager.requestTimer = self.setInterval(function () { SaveManager.checkRequestStatus() }, 5000);
 		SaveManager.timerRunning=true;
-	}		
+	}
 };
 SaveManager.checkRequestStatus=function(){
 	if(SaveManager.currentRequestStatus.finished==true) {
