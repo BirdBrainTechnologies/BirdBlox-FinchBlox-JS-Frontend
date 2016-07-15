@@ -775,6 +775,52 @@ Block.prototype.renameList=function(list){
 Block.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
+Block.prototype.checkVariableUsed=function(variable){
+	for(var i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Block.prototype.checkListUsed=function(list){
+	for(var i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
 Block.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	for(var i=0;i<this.slots.length;i++){

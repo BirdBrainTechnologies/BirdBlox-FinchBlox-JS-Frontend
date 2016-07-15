@@ -490,3 +490,9 @@ CodeManager.deleteList=function(list){
 	TabManager.deleteList(list);
 	BlockPalette.getCategory("variables").refreshGroup();
 };
+CodeManager.checkVariableUsed=function(variable){
+	return TabManager.checkVariableUsed(variable);
+};
+CodeManager.checkListUsed=function(list){
+	return TabManager.checkListUsed(list);
+};

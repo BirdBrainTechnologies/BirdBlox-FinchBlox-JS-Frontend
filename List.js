@@ -57,16 +57,22 @@ List.prototype.rename=function(){
 	HtmlServer.showDialog("Rename list","Enter list name",this.name,callbackFn);
 };
 List.prototype.delete=function(){
-	var callbackFn=function(response){
-		if(response=="2"){
-			callbackFn.list.remove();
-			CodeManager.deleteList(callbackFn.list);
-		}
-	};
-	callbackFn.list=this;
-	var question="Are you sure you would like to delete the list \""+this.name+"\"? ";
-	question+="This will delete all copies of this block.";
-	HtmlServer.showChoiceDialog("Delete list",question,"Don't delete","Delete",true,callbackFn);
+	if(CodeManager.checkListUsed(this)) {
+		var callbackFn = function (response) {
+			if (response == "2") {
+				callbackFn.list.remove();
+				CodeManager.deleteList(callbackFn.list);
+			}
+		};
+		callbackFn.list = this;
+		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
+		question += "This will delete all copies of this block.";
+		HtmlServer.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+	}
+	else{
+		this.remove();
+		CodeManager.deleteList(this);
+	}
 };
 /*
 List.prototype.getIndex=function(indexData){

@@ -58,9 +58,20 @@ ListDropSlot.prototype.renameList=function(list){
 	if(this.enteredData!=null&&this.enteredData.getValue()==list){
 		this.changeText(list.getName());
 	}
+	this.passRecursively("renameList",list);
 };
 ListDropSlot.prototype.deleteList=function(list){
 	if(this.enteredData!=null&&this.enteredData.getValue()==list){
 		this.setSelectionData("",null);
 	}
+	this.passRecursively("deleteList",list);
+};
+ListDropSlot.prototype.checkListUsed=function(list){
+	if(this.hasChild){
+		return DropSlot.prototype.checkListUsed.call(this,list);
+	}
+	else if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		return true;
+	}
+	return false;
 };

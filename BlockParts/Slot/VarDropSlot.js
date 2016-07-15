@@ -52,3 +52,9 @@ VarDropSlot.prototype.deleteVariable=function(variable){
 		this.setSelectionData("",null);
 	}
 };
+VarDropSlot.prototype.checkVariableUsed=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		return true;
+	}
+	return false;
+};

@@ -37,6 +37,12 @@ B_Variable.prototype.deleteVariable=function(variable){
 		this.unsnap().delete();
 	}
 };
+B_Variable.prototype.checkVariableUsed=function(variable){
+	if(variable==this.variable){
+		return true;
+	}
+	return false;
+};
 B_Variable.importXml=function(blockNode){
 	var variableName=XmlWriter.getAttribute(blockNode,"variable");
 	var variable=CodeManager.findVar(variableName);
@@ -145,6 +151,12 @@ B_List.prototype.deleteList=function(list){
 	if(list==this.list){
 		this.unsnap().delete();
 	}
+};
+B_List.prototype.checkListUsed=function(list){
+	if(list==this.list){
+		return true;
+	}
+	return false;
 };
 
 

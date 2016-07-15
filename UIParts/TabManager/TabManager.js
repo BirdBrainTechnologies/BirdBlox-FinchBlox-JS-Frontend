@@ -75,14 +75,10 @@ TabManager.activateTab=function(tab){
 	TabManager.activeTab=tab;
 }
 TabManager.eventFlagClicked=function(){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		TabManager.tabList[i].eventFlagClicked();
-	}
-}
+	TabManager.passRecursively("eventFlagClicked");
+};
 TabManager.eventBroadcast=function(message){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		TabManager.tabList[i].eventBroadcast(message);
-	}
+	TabManager.passRecursively("eventBroadcast",message);
 };
 TabManager.checkBroadcastRunning=function(message){
 	if(this.isRunning){
@@ -103,9 +99,7 @@ TabManager.checkBroadcastMessageAvailable=function(message){
 	return false;
 };
 TabManager.updateAvailableMessages=function(){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		TabManager.tabList[i].updateAvailableMessages();
-	}
+	TabManager.passRecursively("updateAvailableMessages");
 };
 TabManager.updateRun=function(){	
 	if(!this.isRunning){
@@ -123,9 +117,7 @@ TabManager.stop=function(){
 	this.isRunning=false;
 }
 TabManager.stopAllButStack=function(stack){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		TabManager.tabList[i].stopAllButStack(stack);
-	}
+	TabManager.passRecursively("stopAllButStack",stack);
 };
 TabManager.startRun=function(){
 	TabManager.isRunning=true;
@@ -205,6 +197,22 @@ TabManager.renameList=function(list){
 };
 TabManager.deleteList=function(list){
 	TabManager.passRecursively("deleteList",list);
+};
+TabManager.checkVariableUsed=function(variable){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.checkListUsed=function(list){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
 };
 TabManager.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);

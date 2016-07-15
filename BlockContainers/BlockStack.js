@@ -474,6 +474,13 @@ BlockStack.prototype.renameList=function(list){
 BlockStack.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
+BlockStack.prototype.checkVariableUsed=function(variable){
+	return this.firstBlock.checkVariableUsed(variable);
+};
+BlockStack.prototype.checkListUsed=function(list){
+	return this.firstBlock.checkListUsed(list);
+};
+
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);

@@ -50,14 +50,20 @@ Variable.prototype.rename=function(){
 	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,callbackFn);
 };
 Variable.prototype.delete=function(){
-	var callbackFn=function(response){
-		if(response=="2"){
-			callbackFn.variable.remove();
-			CodeManager.deleteVariable(callbackFn.variable);
-		}
-	};
-	callbackFn.variable=this;
-	var question="Are you sure you would like to delete the variable \""+this.name+"\"? ";
-	question+="This will delete all copies of this block.";
-	HtmlServer.showChoiceDialog("Delete variable",question,"Don't delete","Delete",true,callbackFn);
+	if(CodeManager.checkVariableUsed(this)) {
+		var callbackFn = function (response) {
+			if (response == "2") {
+				callbackFn.variable.remove();
+				CodeManager.deleteVariable(callbackFn.variable);
+			}
+		};
+		callbackFn.variable = this;
+		var question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
+		question += "This will delete all copies of this block.";
+		HtmlServer.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+	}
+	else{
+		this.remove();
+		CodeManager.deleteVariable(this);
+	}
 };

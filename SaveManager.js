@@ -39,7 +39,7 @@ SaveManager.save=function(updateTitle){
 	//XmlWriter.openDocInTab(CodeManager.createXml());
 	//HtmlServer.sendRequestWithCallback("save/<project><tabs></tabs></project>")
 	var xmlDoc=CodeManager.createXml();
-	HtmlServer.sendRequestWithCallback("save/filename", null, null,true,XmlWriter.docToText(xmlDoc));
+	HtmlServer.sendRequestWithCallback("save/file", null, null,true,XmlWriter.docToText(xmlDoc));
 	/*if(updateTitle) {
 		var callbackFn = function (response) {
 			SaveManager.fileName = response;

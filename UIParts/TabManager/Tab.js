@@ -92,22 +92,13 @@ Tab.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
 Tab.prototype.findBestFit=function(){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].findBestFit();
-	}
-}
+	this.passRecursively("findBestFit");
+};
 Tab.prototype.eventFlagClicked=function(){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].eventFlagClicked();
-	}
+	this.passRecursively("eventFlagClicked");
 };
 Tab.prototype.eventBroadcast=function(message){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].eventBroadcast(message);
-	}
+	this.passRecursively("eventBroadcast",message);
 };
 Tab.prototype.checkBroadcastRunning=function(message){
 	if(this.isRunning){
@@ -130,10 +121,7 @@ Tab.prototype.checkBroadcastMessageAvailable=function(message){
 	return false;
 };
 Tab.prototype.updateAvailableMessages=function(){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].updateAvailableMessages();
-	}
+	this.passRecursively("updateAvailableMessages");
 };
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
@@ -148,10 +136,7 @@ Tab.prototype.updateRun=function(){
 	return this.isRunning;
 }
 Tab.prototype.stop=function(){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].stop();
-	}
+	this.passRecursively("stop");
 	this.isRunning=false;
 }
 Tab.prototype.stopAllButStack=function(stack){
@@ -223,10 +208,7 @@ Tab.prototype.updateTabDim=function(){
 	dim.y1=null;
 	dim.x2=null;
 	dim.y2=null;
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].updateTabDim();
-	}
+	this.passRecursively("updateTabDim");
 	if(dim.x1==null){
 		dim.x1=0;
 		dim.y1=0;
@@ -272,10 +254,7 @@ Tab.importXml=function(tabNode){
 	return tab;
 };
 Tab.prototype.delete=function(){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		stacks[i].delete();
-	}
+	this.passRecursively("delete");
 	this.textE.remove();
 	this.pathE.remove();
 	this.mainG.remove();
@@ -291,6 +270,24 @@ Tab.prototype.renameList=function(list){
 };
 Tab.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
+};
+Tab.prototype.checkVariableUsed=function(variable){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.checkListUsed=function(list){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
 };
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);

@@ -199,6 +199,18 @@ BlockSlot.prototype.renameList=function(list){
 BlockSlot.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
+BlockSlot.prototype.checkVariableUsed=function(variable){
+	if(this.hasChild){
+		return this.child.checkVariableUsed(variable);
+	}
+	return false;
+};
+BlockSlot.prototype.checkListUsed=function(list){
+	if(this.hasChild){
+		return this.child.checkListUsed(list);
+	}
+	return false;
+};
 BlockSlot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){

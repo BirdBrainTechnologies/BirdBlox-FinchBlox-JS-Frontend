@@ -322,6 +322,18 @@ Slot.prototype.passRecursively=function(functionName){
 		this.child[functionName].apply(this.child,args);
 	}
 };
+Slot.prototype.checkVariableUsed=function(variable){
+	if(this.hasChild){
+		return this.child.checkVariableUsed(variable);
+	}
+	return false;
+};
+Slot.prototype.checkListUsed=function(list){
+	if(this.hasChild){
+		return this.child.checkListUsed(list);
+	}
+	return false;
+};
 /*Slot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","Slot");
