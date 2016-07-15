@@ -32,7 +32,7 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 }
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,requestType){
 	try {
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
@@ -50,7 +50,10 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr){
 				}
 			}
 		};
-		xhttp.open("GET", HtmlServer.getUrlForRequest(request), true); //Get the names
+		if(requestType == null) {
+			requestType = "GET"
+		}
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
 		//GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		xhttp.send(); //Make the request
 	}

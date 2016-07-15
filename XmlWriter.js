@@ -44,9 +44,7 @@ XmlWriter.downloadDoc=function(xmlDoc,name){
 	//saveAs(blob, name+".xml");
 };
 XmlWriter.openDocInTab=function(xmlDoc){
-	GuiElements.alert("**********WINDOW.OPEN************");
 	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
-	GuiElements.alert("**********WINDOW.FINISHED************");
 };
 XmlWriter.openDoc=function(xmlString){
 	var parser = new DOMParser();
