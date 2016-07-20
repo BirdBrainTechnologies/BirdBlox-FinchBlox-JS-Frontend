@@ -17,7 +17,7 @@ FileMenu.prototype.optionOpen=function(){
 	var callbackFn=function(response){
 		new OpenDialog(response);
 	};
-	HtmlServer.sendRequestWithCallback("files",callbackFn);
+	HtmlServer.sendRequestWithCallback("data/files",callbackFn);
 };
 FileMenu.prototype.optionSave=function(){
 	SaveManager.save();
