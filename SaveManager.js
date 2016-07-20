@@ -56,8 +56,9 @@ SaveManager.save=function(nextAction){
 };
 SaveManager.saveAs=function(nextAction){
 	var callbackFn=function(cancelled,response){
-		if(!cancelled){
-			SaveManager.checkOverwriteAndSave(response,callbackFn.nextAction);
+		response=SaveManager.cleanFileName(response);
+		if(!cancelled&&response.length>0) {
+			SaveManager.checkOverwriteAndSave(response, callbackFn.nextAction);
 		}
 	};
 	callbackFn.nextAction=nextAction;
@@ -116,7 +117,21 @@ SaveManager.loadFile=function(xmlString){
 		CodeManager.importXml(project);
 	}
 };
-/////////////////////////
+SaveManager.cleanFileName=function(fileName){
+	var illegalChars="#%&{}\\<>*?/ $!'\":@+`|=\n.";
+	fileName=fileName.trim();
+	for(var i=0;i<illegalChars.length;i++){
+		fileName=fileName.split(illegalChars.charAt(i)).join();
+	}
+	if(fileName.length>30){
+		fileName=fileName.substring(0,30);
+	}
+	fileName=fileName.trim();
+	return fileName;
+};
+
+
+
 SaveManager.autoSave=function(){
 	XmlWriter.downloadDoc(CodeManager.createXml(),"autoSave");
 };
