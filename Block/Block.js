@@ -502,11 +502,15 @@ Block.prototype.snap=function(block){ //Fix! documentation
 		oldG=block.stack.group; //Get a handle to the old stack's group
 		block.stack.remove(); //Remove the old stack.
 	}
-	block.changeStack(this.stack); //Move the block over into this stack
+	if(this.stack!=null) {
+		block.changeStack(this.stack); //Move the block over into this stack
+	}
 	if(oldG!=null) {
 		oldG.remove(); //Remove the old stack's group.
 	}
-	this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+	if(this.stack!=null) {
+		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+	}
 };
 /* Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
@@ -759,7 +763,7 @@ Block.importXml=function(blockNode){
 		block.blockSlot1.importXml(blockSlotNodes[0]);
 	}
 	if(block.blockSlot2!=null&&blockSlotNodes.length>=2){
-		block.blockSlot1.importXml(blockSlotNodes[1]);
+		block.blockSlot2.importXml(blockSlotNodes[1]);
 	}
 	return block;
 };

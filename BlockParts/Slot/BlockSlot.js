@@ -171,19 +171,34 @@ BlockSlot.prototype.updateAvailableMessages=function(){
 BlockSlot.prototype.createXml=function(xmlDoc){
 	var blockSlot=XmlWriter.createElement(xmlDoc,"blockSlot");
 	if(this.hasChild){
-		var child=XmlWriter.createElement(xmlDoc,"child");
-		child.appendChild(this.child.createXml(xmlDoc));
-		blockSlot.appendChild(child);
+		var blocks=XmlWriter.createElement(xmlDoc,"blocks");
+		this.child.writeToXml(xmlDoc,blocks);
+		blockSlot.appendChild(blocks);
 	}
 	return blockSlot;
 };
 BlockSlot.prototype.importXml=function(blockSlotNode){
-	var childNode=XmlWriter.findSubElement(blockSlotNode,"child");
-	var blockNode=XmlWriter.findSubElement(childNode,"block");
-	if(blockNode!=null) {
-		var childBlock = Block.importXml(blockNode);
-		if (childBlock != null) {
-			this.snap(childBlock);
+	var blocksNode=XmlWriter.findSubElement(blockSlotNode,"blocks");
+	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
+	if(blockNodes.length>0){
+		var firstBlock=null;
+		var i=0;
+		while(firstBlock==null&&i<blockNodes.length){
+			firstBlock=Block.importXml(blockNodes[i]);
+			i++;
+		}
+		if(firstBlock==null){
+			return;
+		}
+		this.snap(firstBlock);
+		var previousBlock=firstBlock;
+		while(i<blockNodes.length) {
+			var newBlock = Block.importXml(blockNodes[i]);
+			if (newBlock != null) {
+				previousBlock.snap(newBlock);
+				previousBlock = newBlock;
+			}
+			i++;
 		}
 	}
 };

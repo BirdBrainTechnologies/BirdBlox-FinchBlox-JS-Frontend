@@ -114,7 +114,7 @@ SaveManager.loadFile=function(xmlString){
 	if(xmlString.length>0) {
 		if(xmlString.charAt(0)=="%"){
 			xmlString=decodeURIComponent(xmlString);
-			HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
+			//HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
 		}
 		var xmlDoc = XmlWriter.openDoc(xmlString);
 		var project = XmlWriter.findElement(xmlDoc, "project");
