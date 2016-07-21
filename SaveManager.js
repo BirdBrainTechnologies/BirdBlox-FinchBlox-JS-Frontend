@@ -34,13 +34,15 @@ SaveManager.checkPromptSave=function(nextAction){
 				SaveManager.save(callbackFn.nextAction);
 			}
 			else{
-				callbackFn.nextAction();
+				if(callbackFn.nextAction!=null) {
+					callbackFn.nextAction();
+				}
 			}
 		};
 		callbackFn.nextAction=nextAction;
 		HtmlServer.showChoiceDialog("Save changes",question,"Don't Save","Save",true,callbackFn);
 	}
-	else{
+	else if(nextAction!=null) {
 		nextAction();
 	}
 };
@@ -58,40 +60,44 @@ SaveManager.saveAs=function(nextAction){
 	var callbackFn=function(cancelled,response){
 		response=SaveManager.cleanFileName(response);
 		if(!cancelled&&response.length>0) {
-			SaveManager.checkOverwriteAndSave(response, callbackFn.nextAction);
+			SaveManager.checkOverwrite(response,function(){
+				SaveManager.fileName=response;
+				SaveManager.named=true;
+				SaveManager.save(callbackFn.nextAction);
+			},function(){
+				SaveManager.saveAs(callbackFn.nextAction);
+			});
 		}
 	};
 	callbackFn.nextAction=nextAction;
 	HtmlServer.showDialog("Save","Enter a file name","",callbackFn);
 };
-SaveManager.checkOverwriteAndSave=function(checkName,nextAction){
+SaveManager.checkOverwrite=function(checkName,successAction,failAction){
 	var callbackFn=function(response){
 		if(response.split("\n").indexOf(checkName)!=-1){
-			SaveManager.overwritePrompt(callbackFn.checkName,callbackFn.nextAction);
+			SaveManager.overwritePrompt(callbackFn.checkName,callbackFn.successAction,callbackFn.failAction);
 		}
 		else{
-			SaveManager.fileName=callbackFn.checkName;
-			SaveManager.named=true;
-			SaveManager.save(callbackFn.nextAction);
+			callbackFn.successAction();
 		}
 	};
 	callbackFn.checkName=checkName;
-	callbackFn.nextAction=nextAction;
+	callbackFn.successAction=successAction;
+	callbackFn.failAction=failAction;
 	HtmlServer.sendRequestWithCallback("data/files",callbackFn);
 };
-SaveManager.overwritePrompt=function(checkName,nextAction){
+SaveManager.overwritePrompt=function(checkName,successAction,failAction){
 	var callbackFn=function(response){
 		if(response==2){
-			SaveManager.fileName=callbackFn.checkName;
-			SaveManager.named=true;
-			SaveManager.save(callbackFn.nextAction);
+			callbackFn.successAction();
 		}
 		else{
-			SaveManager.saveAs(callbackFn.nextAction);
+			callbackFn.failAction();
 		}
 	};
 	callbackFn.checkName=checkName;
-	callbackFn.nextAction=nextAction;
+	callbackFn.successAction=successAction;
+	callbackFn.failAction=failAction;
 	var question="There is already a file named \""+checkName+"\". Would you like to replace it?";
 	HtmlServer.showChoiceDialog("Confirm overwrite",question,"Don't replace","Replace",true,callbackFn);
 };
@@ -129,7 +135,54 @@ SaveManager.cleanFileName=function(fileName){
 	fileName=fileName.trim();
 	return fileName;
 };
-
+SaveManager.renamePrompt=function(){
+	var currentName=SaveManager.fileName;
+	if(!SaveManager.named){
+		currentName="";
+	}
+	var callbackFn=function(cancelled,response){
+		response=SaveManager.cleanFileName(response);
+		if(!cancelled&&response.length>0) {
+			SaveManager.checkOverwrite(response,function(){
+				SaveManager.rename(response);
+			},SaveManager.renamePrompt);
+		}
+	};
+	HtmlServer.showDialog("Rename","Enter a file name",currentName,callbackFn);
+};
+SaveManager.rename=function(newName){
+	var callbackFn=function(){
+		SaveManager.fileName=callbackFn.newName;
+		SaveManager.named=true;
+		SaveManager.save(null);
+	};
+	callbackFn.newName=newName;
+	HtmlServer.sendRequestWithCallback("data/rename/"+SaveManager.fileName+"/"+newName,callbackFn);
+};
+SaveManager.promptForDelete=function(){
+	if(!SaveManager.named&&!SaveManager.modified){
+		return;
+	}
+	var callbackFn=function(response){
+		if(response==2){
+			SaveManager.modified=false;
+			if(SaveManager.named){
+				SaveManager.delete();
+			}
+			else{
+				SaveManager.new();
+			}
+		}
+	};
+	var question="Are you sure you want to delete \""+SaveManager.fileName+"\"?";
+	HtmlServer.showChoiceDialog("Delete",question,"Cancel","Delete",true,callbackFn,null);
+};
+SaveManager.delete=function(){
+	var callbackFn=function(){
+		SaveManager.new();
+	};
+	HtmlServer.sendRequestWithCallback("data/delete/"+SaveManager.fileName,callbackFn);
+};
 
 
 SaveManager.autoSave=function(){

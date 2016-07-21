@@ -4,6 +4,8 @@ function FileMenu(button){
 	this.addOption("Open", this.optionOpen);
 	this.addOption("Save", this.optionSave);
 	this.addOption("Save as", this.optionSaveAs);
+	this.addOption("Rename", this.optionRename);
+	this.addOption("Delete", this.optionDelete);
 	this.addOption("Import", this.optionImport);
 	this.addOption("Export", this.optionExport);
 	this.buildMenu();
@@ -24,6 +26,12 @@ FileMenu.prototype.optionSave=function(){
 };
 FileMenu.prototype.optionSaveAs=function(){
 	SaveManager.saveAs();
+};
+FileMenu.prototype.optionRename=function(){
+	SaveManager.renamePrompt();
+};
+FileMenu.prototype.optionDelete=function(){
+	SaveManager.promptForDelete();
 };
 FileMenu.prototype.optionImport=function(){
 
