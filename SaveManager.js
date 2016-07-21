@@ -128,7 +128,7 @@ SaveManager.cleanFileName=function(fileName){
 	var illegalChars="#%&{}\\<>*?/ $!'\":@+`|=\n.";
 	fileName=fileName.trim();
 	for(var i=0;i<illegalChars.length;i++){
-		fileName=fileName.split(illegalChars.charAt(i)).join();
+		fileName=fileName.split(illegalChars.charAt(i)).join("");
 	}
 	if(fileName.length>30){
 		fileName=fileName.substring(0,30);
