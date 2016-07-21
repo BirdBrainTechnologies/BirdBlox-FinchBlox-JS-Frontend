@@ -3,6 +3,7 @@ function DebugMenu(button){
 	this.addOption("Version", this.optionVersion);
 	this.addOption("Screen size", this.optionScreenSize);
 	this.addOption("Pixels", this.optionPixelSize);
+	this.addOption("AutoSave", SaveManager.autoSave);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);

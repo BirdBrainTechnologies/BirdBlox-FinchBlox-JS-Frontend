@@ -184,10 +184,15 @@ SaveManager.delete=function(){
 	};
 	HtmlServer.sendRequestWithCallback("data/delete/"+SaveManager.fileName,callbackFn);
 };
-
-
 SaveManager.autoSave=function(){
-	XmlWriter.downloadDoc(CodeManager.createXml(),"autoSave");
+	if(SaveManager.named){
+		SaveManager.save();
+	}
+	else{
+		var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+		HtmlServer.sendRequestWithCallback("data/autoSave",null, null,true,xmlDocText);
+		SaveManager.markSaved();
+	}
 };
 
 SaveManager.loadTest=function(){
