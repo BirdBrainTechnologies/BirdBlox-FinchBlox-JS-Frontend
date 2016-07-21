@@ -194,3 +194,8 @@ Button.prototype.unToggle=function(){
 Button.prototype.remove=function(){
 	this.group.remove();
 };
+Button.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	GuiElements.move.group(this.group,this.x,this.y);
+};

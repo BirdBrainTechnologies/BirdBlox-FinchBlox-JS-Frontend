@@ -27,6 +27,13 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.bnDefaultFontSize=16;
 	BlockPalette.bnDefaultFontCharHeight=12;
 }
+BlockPalette.updateZoom=function(){
+	var BP=BlockPalette;
+	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
+	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
+	var clipRect=BP.clippingPath.childNodes[0];
+	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
+};
 BlockPalette.createCatBg=function(){
 	var BP=BlockPalette;
 	BP.catRect=GuiElements.draw.rect(0,BP.catY,BP.width,BP.catH,BP.catBg);
@@ -38,7 +45,7 @@ BlockPalette.createPalBg=function(){
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	TouchReceiver.addListenersPalette(BP.palRect);
-	GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
+	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
 }
 BlockPalette.createCategories=function(){
 	var catCount=BlockList.catCount();

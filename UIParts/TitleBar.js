@@ -23,6 +23,7 @@ TitleBar.setGraphics=function(){
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
 	TB.fileBnX=TB.buttonMargin;
+	TB.viewBnX=TB.fileBnX+2*TB.buttonMargin+TB.buttonW;
 };
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -42,7 +43,10 @@ TitleBar.makeButtons=function(){
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.fileMenu=new FileMenu(TB.fileBn);
-	TB.debugBn=new Button(TB.fileBnX+TB.buttonW+2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.viewBn.addText("View");
+	TB.viewMenu=new ViewMenu(TB.viewBn);
+	TB.debugBn=new Button(TB.viewBnX+TB.buttonW+2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.debugBn.addText("Debug");
 	TB.debugMenu=new DebugMenu(TB.debugBn);
 	/*
@@ -62,6 +66,17 @@ TitleBar.makeTitleText=function(){
 TitleBar.setText=function(text){
 	var TB=TitleBar;
 	GuiElements.update.text(TB.titleLabel,text);
+	var width=GuiElements.measure.textWidth(TB.titleLabel);
+	var x=GuiElements.width/2-width/2;
+	var y=TB.height/2+TB.fontCharHeight/2;
+	GuiElements.move.text(TB.titleLabel,x,y);
+};
+TitleBar.updateZoom=function(){
+	var TB=TitleBar;
+	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
+	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
+	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
+	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
 	var width=GuiElements.measure.textWidth(TB.titleLabel);
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;

@@ -24,9 +24,10 @@ GuiElements.setConstants=function(){
 	Data.setConstants();
 	/* Saves the dimensions of the screen so other classes can refer to them.  
 	This assumes that the screen's dimensions never change once loaded. */
-	GuiElements.width=window.innerWidth;
-	GuiElements.height=window.innerHeight;
 	GuiElements.blockerOpacity=0.5;
+	GuiElements.zoomFactor=1;
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -52,7 +53,7 @@ GuiElements.setConstants=function(){
 	CodeManager();
 	HummingbirdManager();
 	SaveManager();
-}
+};
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
 	debug.innerHTML=message; //The iPad app does not support alert dialogs
@@ -85,6 +86,8 @@ GuiElements.buildUI=function(){
  */
 GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
+	GuiElements.zoomGroup=create.group(0,0,GuiElements.svg);
+	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
 	GuiElements.layers=function(){};
 	var layers=GuiElements.layers;
 	layers.temp=create.layer();
@@ -127,7 +130,7 @@ GuiElements.create.group=function(x,y,parent){
 }
 /* Creates a group, adds it to the main SVG, and returns it. */
 GuiElements.create.layer=function(){
-	var layer=GuiElements.create.group(0,0,GuiElements.svg);
+	var layer=GuiElements.create.group(0,0,GuiElements.zoomGroup);
 	return layer;
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
@@ -378,6 +381,10 @@ GuiElements.update.rect=function(rect,x,y,width,height){
 	rect.setAttributeNS(null,"width",width);
 	rect.setAttributeNS(null,"height",height);
 }
+/* Used for zooming the main zoomGroup which holds the ui */
+GuiElements.update.zoom=function(group,scale){
+	group.setAttributeNS(null,"transform","scale("+scale+")");
+};
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything.
  */
@@ -547,4 +554,14 @@ GuiElements.unblockInteraction=function() {
 		GuiElements.dialogBlock.remove();
 		GuiElements.dialogBlock=null;
 	}
+};
+/* Tells UI parts that zoom has changed. */
+GuiElements.updateZoom=function(){
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
+	TabManager.updateZoom();
+	DisplayBox.updateZoom();
+	TitleBar.updateZoom();
+	BlockPalette.updateZoom();
 };

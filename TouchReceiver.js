@@ -65,20 +65,20 @@ TouchReceiver.handleDocumentDown=function(event){
  */
 TouchReceiver.getX=function(e){
 	if(TouchReceiver.mouse){ //Depends on if a desktop or touchscreen is being used.
-		return e.clientX;
+		return e.clientX/GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX;
-}
+	return e.touches[0].pageX/GuiElements.zoomFactor;
+};
 /* Returns the touch y coord from the event arguments
  * @param {event} event - passed event arguments.
  * @return {number} - y coord.
  */
 TouchReceiver.getY=function(e){
 	if(TouchReceiver.mouse){ //Depends on if a desktop or touchscreen is being used.
-		return e.clientY;
+		return e.clientY/GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageY;
-}
+	return e.touches[0].pageY/GuiElements.zoomFactor;
+};
 /* Handles new touch events.  Does not know which element was touched.
  * @param {event} e - passed event arguments.
  */

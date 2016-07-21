@@ -26,13 +26,19 @@ Menu.setGraphics=function(){
 	Menu.bnMargin=5;
 	Menu.bgColor=Colors.black;
 };
-Menu.prototype.addOption=function(text,func){
+Menu.prototype.addOption=function(text,func,close){
+	if(close==null){
+		close=true;
+	}
 	var callbackFn=function(){
-		callbackFn.menu.close();
+		if(callbackFn.close) {
+			callbackFn.menu.close();
+		}
 		callbackFn.func.call(callbackFn.menu);
 	};
 	callbackFn.menu=this;
 	callbackFn.func=func;
+	callbackFn.close=close;
 	this.menuBnList.addOption(text,callbackFn);
 };
 Menu.prototype.buildMenu=function(){

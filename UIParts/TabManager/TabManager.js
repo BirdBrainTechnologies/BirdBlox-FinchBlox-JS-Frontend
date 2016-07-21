@@ -34,11 +34,11 @@ TabManager.setGraphics=function(){
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	TM.spaceScrollMargin=50;
-}
+};
 TabManager.buildTabBar=function(){
 	var TM=TabManager;
-	TM.bgRect=GuiElements.draw.rect(0,0,TM.bgWidth,TM.bgHeight,TM.bg);
-	GuiElements.layers.TabsBg.appendChild(TM.bgRect);
+	TM.tabBgRect=GuiElements.draw.rect(0,0,TM.bgWidth,TM.bgHeight,TM.bg);
+	GuiElements.layers.TabsBg.appendChild(TM.tabBgRect);
 	TM.tabBarG=GuiElements.create.group(TM.tabAreaX,TM.tabAreaY);
 	GuiElements.layers.TabsBg.appendChild(TM.tabBarG);
 };
@@ -220,4 +220,12 @@ TabManager.passRecursively=function(functionName){
 		var currentList=TabManager.tabList[i];
 		currentList[functionName].apply(currentList,args);
 	}
+};
+TabManager.updateZoom=function(){
+	var TM=TabManager;
+	TM.bgWidth=GuiElements.width;
+	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
+	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
+	GuiElements.update.rect(TM.tabBgRect,0,0,TM.bgWidth,TM.bgHeight);
+	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
 };
