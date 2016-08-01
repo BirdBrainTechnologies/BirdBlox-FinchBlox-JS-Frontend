@@ -124,12 +124,10 @@ ConnectMultipleHBDialog.prototype.createRow=function(index,y,hummingbird){
 	hBButton.addText(hummingbird.name,CMHBD.font,CMHBD.fontSize,CMHBD.fontWeight,CMHBD.fontCharHeight);
 
 	renButton.setCallbackFunction(function(){
-		hummingbird.promptRename();
-		ConnectMultipleHBDialog.reloadDialog();
+		hummingbird.promptRename(ConnectMultipleHBDialog.reloadDialog);
 	},true);
 	xButton.setCallbackFunction(function(){
-		hummingbird.disconnect();
-		ConnectMultipleHBDialog.reloadDialog();
+		hummingbird.disconnect(ConnectMultipleHBDialog.reloadDialog);
 	},true)
 };
 ConnectMultipleHBDialog.prototype.createPlusBn=function(){

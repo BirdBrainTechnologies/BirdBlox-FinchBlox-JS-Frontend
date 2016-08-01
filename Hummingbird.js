@@ -1,7 +1,7 @@
 function Hummingbird(name){
 	this.name=name;
 }
-Hummingbird.prototype.promptRename=function(){
+Hummingbird.prototype.promptRename=function(callbackFn){
 	var thisHB=this;
 	HtmlServer.showDialog("Rename","Enter new name",this.name,function(cancelled,result){
 		if(!cancelled) {
@@ -11,23 +11,23 @@ Hummingbird.prototype.promptRename=function(){
 			}
 			result = result.trim();
 			if (result.length > 0) {
-				thisHB.rename(result);
+				thisHB.rename(result,callbackFn);
 			}
 		}
 	});
 };
-Hummingbird.prototype.rename=function(newName){
+Hummingbird.prototype.rename=function(newName,callbackFn){
 	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/rename/"+HtmlServer.encodeHtml(newName);
-	HtmlServer.sendRequestWithCallback(request);
+	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	this.name=newName;
 };
-Hummingbird.prototype.disconnect=function(){
+Hummingbird.prototype.disconnect=function(callbackFn){
 	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/disconnect";
-	HtmlServer.sendRequestWithCallback(request);
+	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	HummingbirdManager.removeHB(this);
 };
-Hummingbird.prototype.connect=function(){
+Hummingbird.prototype.connect=function(callbackFn){
 	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/connect";
-	HtmlServer.sendRequestWithCallback(request);
+	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	HummingbirdManager.connectedHBs.push(this);
 };
