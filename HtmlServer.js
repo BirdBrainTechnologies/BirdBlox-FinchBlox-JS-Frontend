@@ -96,7 +96,7 @@ HtmlServer.sendRequest=function(request,requestStatus){
 	}
 }
 HtmlServer.getHBRequest=function(request){
-	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.hBNames)+"/"+request;
+	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[0].name)+"/"+request; //FixMulti!
 }
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
