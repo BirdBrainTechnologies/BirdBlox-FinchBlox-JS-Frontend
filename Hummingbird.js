@@ -22,8 +22,12 @@ Hummingbird.prototype.rename=function(newName){
 	this.name=newName;
 };
 Hummingbird.prototype.disconnect=function(){
-	HummingbirdManager.disconnectHB(this);
+	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/disconnect";
+	HtmlServer.sendRequestWithCallback(request);
+	HummingbirdManager.removeHB(this);
 };
 Hummingbird.prototype.connect=function(){
-	HummingbirdManager.connectHB(this);
+	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/connect";
+	HtmlServer.sendRequestWithCallback(request);
+	HummingbirdManager.connectedHBs.push(this);
 };
