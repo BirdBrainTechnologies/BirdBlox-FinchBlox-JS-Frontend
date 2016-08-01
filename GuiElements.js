@@ -25,6 +25,14 @@ GuiElements.setConstants=function(){
 	/* Saves the dimensions of the screen so other classes can refer to them.  
 	This assumes that the screen's dimensions never change once loaded. */
 	GuiElements.blockerOpacity=0.5;
+	var callbackFn=function(result){
+		var numResult=parseFloat(result);
+		if(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom) {
+			GuiElements.zoomFactor = numResult;
+		}
+		GuiElements.updateZoom();
+	};
+	HtmlServer.getSetting("zoom",callbackFn);
 	GuiElements.zoomFactor=1;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
@@ -564,4 +572,5 @@ GuiElements.updateZoom=function(){
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
+	HtmlServer.setSetting("zoom",GuiElements.zoomFactor);
 };

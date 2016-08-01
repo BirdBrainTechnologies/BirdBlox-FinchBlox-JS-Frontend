@@ -217,3 +217,9 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };
+HtmlServer.getSetting=function(key,callbackFn,callbackErr){
+	HtmlServer.sendRequestWithCallback("settings/get/"+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+};
+HtmlServer.setSetting=function(key,value){
+	HtmlServer.sendRequestWithCallback("settings/set/"+HtmlServer.encodeHtml(key)+"/"+HtmlServer.encodeHtml(value));
+};

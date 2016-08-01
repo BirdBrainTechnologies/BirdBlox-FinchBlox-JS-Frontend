@@ -4,6 +4,7 @@ function DebugMenu(button){
 	this.addOption("Screen size", this.optionScreenSize);
 	this.addOption("Pixels", this.optionPixelSize);
 	this.addOption("AutoSave", SaveManager.autoSave);
+	this.addOption("ZoomSetting", this.optionZoom);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
@@ -21,4 +22,9 @@ DebugMenu.prototype.optionScreenSize=function(){
 };
 DebugMenu.prototype.optionPixelSize=function(){
 	GuiElements.alert(GuiElements.height+" "+GuiElements.width);
+};
+DebugMenu.prototype.optionZoom=function(){
+	HtmlServer.getSetting("zoom",function(response){
+		GuiElements.alert("Zoom: "+(response));
+	});
 };
