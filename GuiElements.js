@@ -42,6 +42,7 @@ GuiElements.setConstants=function(){
 	BlockList();
 	Colors();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
+	HBStatusLight.setConstants();
 	TitleBar.setGraphics();
 	BlockGraphics();
 	Slot.setConstants();
@@ -56,6 +57,7 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
+	ConnectOneHBDialog.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
 	CodeManager();
@@ -245,6 +247,17 @@ GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
 	trapezoid.setAttributeNS(null,"fill",color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
 }
+GuiElements.draw.circle=function(cx,cy,radius,color,group){
+	var circle=document.createElementNS("http://www.w3.org/2000/svg",'circle');
+	circle.setAttributeNS(null,"cx",cx);
+	circle.setAttributeNS(null,"cy",cy);
+	circle.setAttributeNS(null,"r",radius);
+	circle.setAttributeNS(null,"fill",color);
+	if(group!=null){
+		group.appendChild(circle);
+	}
+	return circle;
+};
 /* Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
  * @param {number} y - The text element's y coord.

@@ -7,19 +7,26 @@ function HummingbirdManager(){
 	var HM=HummingbirdManager;
 	GuiElements.alert("Beginning HB Scan"); //For debugging purposes.
 	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
+	HM.connectedHBs=[new Hummingbird("HB1")];
 }
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
+	var HM=HummingbirdManager;
 	var callbackFn=function(response){
-		HummingbirdManager.hBNames = response; //Save the names of the Hummingbirds
+		HM.hBNames = response; //Save the names of the Hummingbirds
+		HM.connectedHBs=[new Hummingbird(HM.hBNames)];
 		GuiElements.alert(response); //Show them in the debug span
-	}
+	};
 	var callbackErr=function(){
-		HummingbirdManager.hBNames = "Hummingbird";//Temp for testing
+		HM.hBNames = "Hummingbird";//Temp for testing
 		GuiElements.alert("Error connecting to HB"); //Show the error in the debug span
-	}
+	};
 	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn,callbackErr);
-}
+};
+HummingbirdManager.getConnectedHBs=function(){
+	var HM=HummingbirdManager;
+	return HM.connectedHBs;
+};
 HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	var mem=block.runMem;
 	mem.portD=block.slots[0].getData();
@@ -101,3 +108,61 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 HummingbirdManager.stopHummingbirds=function(){
 	HtmlServer.sendHBRequest("out/stop");
 }
+
+
+/////////////Multi-support//////////////////
+HummingbirdManager.disconnectHB=function(hummingbird){
+	var name=hummingbird.name;
+	var index=HummingbirdManager.connectedHBs.indexOf(hummingbird);
+	HummingbirdManager.connectedHBs.splice(index,1);
+	for(var i=0;i<HummingbirdManager.connectedHBs.length;i++){
+		if(HummingbirdManager.connectedHBs[i].name==name){
+			return;
+		}
+	}
+	var request="hummingbird/"+HtmlServer.encodeHtml(name)+"/disconnect";
+	HtmlServer.sendRequestWithCallback(request);
+};
+HummingbirdManager.showConnectOneDialog=function(){
+	new ConnectOneHBDialog();
+};
+HummingbirdManager.disconnectAll=function(){
+	var HM=HummingbirdManager;
+	for(var i=0;i<HM.connectedHBs.length;i++){
+		HM.disconnectHB(HM.connectedHBs[i]);
+	}
+};
+HummingbirdManager.connectOneHB=function(hBName){
+	var HM=HummingbirdManager;
+	HM.disconnectAll();
+	var newHB=new Hummingbird(hBName);
+	newHB.connect();
+	HM.hBNames=hBName; //Fix!
+};
+HummingbirdManager.connectHB=function(hummingbird){
+	var HM=HummingbirdManager;
+	var name=hummingbird.name;
+	HM.connectedHBs.push(hummingbird);
+	for(var i=0;i<HM.connectedHBs.length-1;i++){
+		if(HM.connectedHBs[i].name==name){
+			return;
+		}
+	}
+	var request="hummingbird/"+HtmlServer.encodeHtml(name)+"/connect";
+	HtmlServer.sendRequestWithCallback(request);
+};
+
+
+/*HummingbirdManager.loadConnectedHBs=function(){
+	var HM=HummingbirdManager;
+	HtmlServer.sendRequestWithCallback("hummingbird/names",function(result){
+		if(result!=null&&result!=""){
+			HM.connectedHBs=result.split("\n");
+		}
+		else{
+			HM.connectedHBs=[];
+		}
+	},function(){
+		HM.connectedHBs=[];
+	});
+};*/

@@ -5,6 +5,7 @@ function DebugMenu(button){
 	this.addOption("Pixels", this.optionPixelSize);
 	this.addOption("AutoSave", SaveManager.autoSave);
 	this.addOption("ZoomSetting", this.optionZoom);
+	this.addOption("HB names", this.optionHBs);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
@@ -26,5 +27,10 @@ DebugMenu.prototype.optionPixelSize=function(){
 DebugMenu.prototype.optionZoom=function(){
 	HtmlServer.getSetting("zoom",function(response){
 		GuiElements.alert("Zoom: "+(response));
+	});
+};
+DebugMenu.prototype.optionHBs=function(){
+	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
+		GuiElements.alert("Names: "+response.split("\n").join(","));
 	});
 };

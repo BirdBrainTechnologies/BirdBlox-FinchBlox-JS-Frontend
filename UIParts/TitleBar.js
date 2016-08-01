@@ -22,8 +22,10 @@ TitleBar.setGraphics=function(){
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.fileBnX=TB.buttonMargin;
-	TB.viewBnX=TB.fileBnX+2*TB.buttonMargin+TB.buttonW;
+	TB.statusX=TB.buttonMargin;
+	TB.hummingbirdBnX=TB.statusX+TB.buttonMargin+HBStatusLight.radius*2;
+	TB.fileBnX=TB.hummingbirdBnX+TB.buttonMargin+TB.buttonW;
+	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
 };
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -40,13 +42,19 @@ TitleBar.makeButtons=function(){
 	TB.stopBn=new Button(TB.stopBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
+
+	TB.hBStatusLight=new HBStatusLight(TB.statusX,TB.height/2,TBLayer,function(){return false});
+	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.hummingbirdBn.addText("Hummingbird");
+	TB.hummingbirdMenu=new HummingbirdMenu(TB.hummingbirdBn);
+
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addText("View");
 	TB.viewMenu=new ViewMenu(TB.viewBn);
-	TB.debugBn=new Button(TB.viewBnX+TB.buttonW+2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.debugBn=new Button(TB.viewBnX+TB.buttonW+TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.debugBn.addText("Debug");
 	TB.debugMenu=new DebugMenu(TB.debugBn);
 	/*

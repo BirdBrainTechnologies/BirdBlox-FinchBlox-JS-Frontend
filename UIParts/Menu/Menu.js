@@ -1,13 +1,16 @@
-function Menu(button){
+function Menu(button,reloadOnOpen){
+	if(reloadOnOpen==null){
+		reloadOnOpen=false;
+	}
+	this.reloadOnOpen=reloadOnOpen;
 	this.x=button.x;
 	this.y=button.y+button.height;
 	this.group=GuiElements.create.group(this.x,this.y);
 	TouchReceiver.addListenersOverlayPart(this.group);
-	var bnM=Menu.bnMargin;
 	this.bgRect=GuiElements.create.rect(this.group);
 	GuiElements.update.color(this.bgRect,Menu.bgColor);
-	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,Menu.defaultWidth);
-	this.menuBnList.isOverlayPart=true;
+	this.menuBnList=null;
+	this.createMenuBnList();
 	this.visible=false;
 	var callbackFn=function(){
 		callbackFn.menu.open();
@@ -25,6 +28,14 @@ Menu.setGraphics=function(){
 	Menu.defaultWidth=100;
 	Menu.bnMargin=5;
 	Menu.bgColor=Colors.black;
+};
+Menu.prototype.createMenuBnList=function(){
+	if(this.menuBnList!=null){
+		this.menuBnList.hide();
+	}
+	var bnM=Menu.bnMargin;
+	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,Menu.defaultWidth);
+	this.menuBnList.isOverlayPart=true;
 };
 Menu.prototype.addOption=function(text,func,close){
 	if(close==null){
@@ -47,8 +58,19 @@ Menu.prototype.buildMenu=function(){
 	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
 	this.menuBnList.show();
 };
+Menu.prototype.previewOpen=function(){
+	return true;
+};
+Menu.prototype.loadOptions=function(){
+
+};
 Menu.prototype.open=function(){
-	if(!this.visible) {
+	if(!this.visible&&this.previewOpen()) {
+		if(this.reloadOnOpen){
+			this.createMenuBnList();
+			this.loadOptions();
+			this.buildMenu();
+		}
 		GuiElements.layers.overlay.appendChild(this.group);
 		this.visible=true;
 		GuiElements.overlay.set(this);
