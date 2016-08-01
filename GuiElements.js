@@ -53,11 +53,13 @@ GuiElements.setConstants=function(){
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
 	Menu.setGraphics();
+	HummingbirdMenu.setGraphics();
 	InputPad.setGraphics();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
 	ConnectOneHBDialog.setConstants();
+	ConnectMultipleHBDialog.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
 	CodeManager();

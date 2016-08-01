@@ -1,4 +1,8 @@
-function Menu(button,reloadOnOpen){
+function Menu(button,reloadOnOpen,width){
+	if(width==null){
+		width=Menu.defaultWidth;
+	}
+	this.width=width;
 	if(reloadOnOpen==null){
 		reloadOnOpen=false;
 	}
@@ -23,6 +27,8 @@ function Menu(button,reloadOnOpen){
 	callbackFn.menu=this;
 	button.setToggleFunction(callbackFn);
 	this.button=button;
+	this.alternateFn=null;
+	this.scheduleAlternate=false;
 }
 Menu.setGraphics=function(){
 	Menu.defaultWidth=100;
@@ -34,7 +40,7 @@ Menu.prototype.createMenuBnList=function(){
 		this.menuBnList.hide();
 	}
 	var bnM=Menu.bnMargin;
-	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,Menu.defaultWidth);
+	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
 	this.menuBnList.isOverlayPart=true;
 };
 Menu.prototype.addOption=function(text,func,close){
@@ -65,16 +71,23 @@ Menu.prototype.loadOptions=function(){
 
 };
 Menu.prototype.open=function(){
-	if(!this.visible&&this.previewOpen()) {
-		if(this.reloadOnOpen){
-			this.createMenuBnList();
-			this.loadOptions();
-			this.buildMenu();
+	if(!this.visible) {
+		if(this.previewOpen()) {
+			if (this.reloadOnOpen) {
+				this.createMenuBnList();
+				this.loadOptions();
+				this.buildMenu();
+			}
+			GuiElements.layers.overlay.appendChild(this.group);
+			this.visible = true;
+			GuiElements.overlay.set(this);
+			this.button.isOverlayPart = true;
+			this.scheduleAlternate=false;
 		}
-		GuiElements.layers.overlay.appendChild(this.group);
-		this.visible=true;
-		GuiElements.overlay.set(this);
-		this.button.isOverlayPart=true;
+		else{
+			this.button.toggled=true;
+			this.scheduleAlternate=true;
+		}
 	}
 };
 Menu.prototype.close=function(){
@@ -85,4 +98,11 @@ Menu.prototype.close=function(){
 		this.button.unToggle();
 		this.button.isOverlayPart=false;
 	}
+	else if(this.scheduleAlternate){
+		this.scheduleAlternate=false;
+		this.alternateFn();
+	}
+};
+Menu.prototype.addAlternateFn=function(alternateFn){
+	this.alternateFn=alternateFn;
 };

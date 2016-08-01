@@ -100,6 +100,9 @@ ConnectOneHBDialog.prototype.discoverHBs=function(){
 	});
 };
 ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
+	if(TouchReceiver.touchDown){
+		return;
+	}
 	var COHBD=ConnectOneHBDialog;
 	var hBArray=newHBs.split("\n");
 	if(newHBs==""){
@@ -125,6 +128,7 @@ ConnectOneHBDialog.selectHB=function(hBName){
 	ConnectOneHBDialog.currentCOHBD.closeDialog();
 	HummingbirdManager.connectOneHB(hBName);
 };
+
 /*
 
 OpenDialog.prototype.addBnListOption=function(file,menuBnList){

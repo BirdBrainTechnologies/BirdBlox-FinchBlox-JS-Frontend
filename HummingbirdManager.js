@@ -143,6 +143,9 @@ HummingbirdManager.connectOneHB=function(hBName){
 	newHB.connect();
 	HM.hBNames=hBName; //Fix!
 };
+HummingbirdManager.showConnectMultipleDialog=function(){
+	new ConnectMultipleHBDialog();
+};
 /*HummingbirdManager.connectHB=function(hummingbird){
 	var HM=HummingbirdManager;
 	var name=hummingbird.name;

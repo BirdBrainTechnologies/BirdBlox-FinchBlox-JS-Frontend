@@ -43,7 +43,7 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.hBStatusLight=new HBStatusLight(TB.statusX,TB.height/2,TBLayer,function(){return false});
+	TB.hBStatusLight=new HBStatusLight(TB.statusX,TB.height/2,TBLayer,"hummingbird/totalStatus");
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addText("Hummingbird");
 	TB.hummingbirdMenu=new HummingbirdMenu(TB.hummingbirdBn);

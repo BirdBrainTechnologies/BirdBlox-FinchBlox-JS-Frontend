@@ -1,9 +1,13 @@
 function HummingbirdMenu(button){
-	Menu.call(this,button,true);
+	Menu.call(this,button,true,HummingbirdMenu.width);
+	this.addAlternateFn(HummingbirdManager.showConnectMultipleDialog);
 	//this.currentHB="";
 }
 HummingbirdMenu.prototype = Object.create(Menu.prototype);
 HummingbirdMenu.prototype.constructor = ViewMenu;
+HummingbirdMenu.setGraphics=function(){
+	HummingbirdMenu.width=150;
+};
 HummingbirdMenu.prototype.loadOptions=function(){
 	var connectedHBs=HummingbirdManager.getConnectedHBs();
 	if(connectedHBs.length>0){
@@ -17,6 +21,7 @@ HummingbirdMenu.prototype.loadOptions=function(){
 		});
 	}
 	this.addOption("Connect", HummingbirdManager.showConnectOneDialog);
+	this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
 };
 HummingbirdMenu.prototype.previewOpen=function(){
 	return (HummingbirdManager.getConnectedHBs().length<=1);
