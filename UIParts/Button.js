@@ -9,6 +9,7 @@ function Button(x,y,width,height,parent){
 	this.enabled=true;
 	this.hasText=false;
 	this.hasIcon=false;
+	this.hasImage=false;
 	this.iconInverts=false;
 	this.callback=null;
 	this.delayedCallback=null;
@@ -66,6 +67,9 @@ Button.prototype.addIcon=function(pathId,height){
 	if(this.hasIcon){
 		this.icon.remove();
 	}
+	if(this.hasImage){
+		this.imageE.remove();
+	}
 	this.hasIcon=true;
 	this.iconInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -74,6 +78,21 @@ Button.prototype.addIcon=function(pathId,height){
 	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 }
+Button.prototype.addImage=function(imageData,height){
+	if(this.hasIcon){
+		this.icon.remove();
+	}
+	if(this.hasImage){
+		this.imageE.remove();
+	}
+	var imageW=imageData.width/imageData.height*height;
+	var imageX=(this.width-imageW)/2;
+	var imageY=(this.height-height)/2;
+	this.imageE=GuiElements.draw.image(imageData.lightName,imageX,imageY,imageW,height,this.group);
+	this.imageData=imageData;
+	this.hasImage=true;
+	TouchReceiver.addListenersBN(this.imageE,this);
+};
 Button.prototype.addColorIcon=function(pathId,height,color){
 	if(this.hasIcon){
 		this.icon.remove();
@@ -115,25 +134,13 @@ Button.prototype.enable=function(){
 	if(!this.enabled){
 		this.enabled=true;
 		this.pressed=false;
-		this.bgRect.setAttributeNS(null,"fill",Button.bg);
-		if(this.hasText){
-			this.textE.setAttributeNS(null,"fill",Button.foreground);
-		}
-		if(this.hasIcon&&this.iconInverts){
-			this.icon.setColor(Button.foreground);
-		}
+		this.setColor(false);
 	}
 };
 Button.prototype.press=function(){
 	if(this.enabled&&!this.pressed){
 		this.pressed=true;
-		this.bgRect.setAttributeNS(null,"fill",Button.highlightBg);
-		if(this.hasText){
-			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
-		}
-		if(this.hasIcon&&this.iconInverts){
-			this.icon.setColor(Button.highlightFore);
-		}
+		this.setColor(true);
 		if(this.callback!=null){
 			this.callback();
 		}
@@ -143,13 +150,7 @@ Button.prototype.release=function(){
 	if(this.enabled&&this.pressed){
 		this.pressed=false;
 		if(!this.toggles||this.toggled) {
-			this.bgRect.setAttributeNS(null, "fill", Button.bg);
-			if (this.hasText) {
-				this.textE.setAttributeNS(null, "fill", Button.foreground);
-			}
-			if (this.hasIcon && this.iconInverts) {
-				this.icon.setColor(Button.foreground);
-			}
+			this.setColor(false);
 		}
 		if(this.toggles&&this.toggled){
 			this.toggled=false;
@@ -169,24 +170,12 @@ Button.prototype.release=function(){
 Button.prototype.interrupt=function(){
 	if(this.enabled&&this.pressed&&!this.toggled){
 		this.pressed=false;
-		this.bgRect.setAttributeNS(null,"fill",Button.bg);
-		if(this.hasText){
-			this.textE.setAttributeNS(null,"fill",Button.foreground);
-		}
-		if(this.hasIcon&&this.iconInverts){
-			this.icon.setColor(Button.foreground);
-		}
+		this.setColor(false);
 	}
 };
 Button.prototype.unToggle=function(){
 	if(this.enabled&&this.toggled){
-		this.bgRect.setAttributeNS(null, "fill", Button.bg);
-		if (this.hasText) {
-			this.textE.setAttributeNS(null, "fill", Button.foreground);
-		}
-		if (this.hasIcon && this.iconInverts) {
-			this.icon.setColor(Button.foreground);
-		}
+		this.setColor(false);
 	}
 	this.toggled=false;
 	this.pressed=false;
@@ -198,4 +187,30 @@ Button.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
 	GuiElements.move.group(this.group,this.x,this.y);
+};
+Button.prototype.setColor=function(isPressed){
+	if(isPressed) {
+		this.bgRect.setAttributeNS(null,"fill",Button.highlightBg);
+		if(this.hasText){
+			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
+		}
+		if(this.hasIcon&&this.iconInverts){
+			this.icon.setColor(Button.highlightFore);
+		}
+		if(this.hasImage){
+			GuiElements.update.image(this.imageE,this.imageData.darkName);
+		}
+	}
+	else{
+		this.bgRect.setAttributeNS(null, "fill", Button.bg);
+		if (this.hasText) {
+			this.textE.setAttributeNS(null, "fill", Button.foreground);
+		}
+		if (this.hasIcon && this.iconInverts) {
+			this.icon.setColor(Button.foreground);
+		}
+		if(this.hasImage){
+			GuiElements.update.image(this.imageE,this.imageData.lightName);
+		}
+	}
 };

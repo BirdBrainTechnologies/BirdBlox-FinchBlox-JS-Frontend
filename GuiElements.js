@@ -39,6 +39,7 @@ GuiElements.setConstants=function(){
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
+	ImageLists();
 	BlockList();
 	Colors();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
@@ -185,6 +186,10 @@ GuiElements.create.text=function(){
 	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 	return textElement; //Return the text.
 }
+GuiElements.create.image=function(){
+	var imageElement=document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
+	return imageElement; //Return the text.
+};
 /* Creates an SVG rect element, adds it to a parent group (if present), and returns it.
  * @param {SVG g} title - (optional) The parent group to add the group to.
  * @return {SVG rect} - The rect which was created.
@@ -259,6 +264,20 @@ GuiElements.draw.circle=function(cx,cy,radius,color,group){
 		group.appendChild(circle);
 	}
 	return circle;
+};
+GuiElements.draw.image=function(imageName,x,y,width,height,parent){
+	var imageElement=GuiElements.create.image();
+	imageElement.setAttributeNS(null,"x",x);
+	imageElement.setAttributeNS(null,"y",y);
+	imageElement.setAttributeNS(null,"width",width);
+	imageElement.setAttributeNS(null,"height",height);
+	//imageElement.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+imageName+".png");
+	imageElement.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+imageName+".png" );
+	imageElement.setAttributeNS(null, 'visibility', 'visible');
+	if(parent!=null) {
+		parent.appendChild(imageElement);
+	}
+	return imageElement;
 };
 /* Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
@@ -407,6 +426,10 @@ GuiElements.update.rect=function(rect,x,y,width,height){
 /* Used for zooming the main zoomGroup which holds the ui */
 GuiElements.update.zoom=function(group,scale){
 	group.setAttributeNS(null,"transform","scale("+scale+")");
+};
+GuiElements.update.image=function(imageE,newImageName){
+	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
+	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything.

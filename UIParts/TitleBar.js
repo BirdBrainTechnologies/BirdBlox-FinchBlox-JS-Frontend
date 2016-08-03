@@ -45,7 +45,7 @@ TitleBar.makeButtons=function(){
 
 	TB.hBStatusLight=new HBStatusLight(TB.statusX,TB.height/2,TBLayer,"hummingbird/totalStatus");
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.hummingbirdBn.addText("Hummingbird");
+	TB.hummingbirdBn.addImage(ImageLists.hBIcon,TB.bnIconH);
 	TB.hummingbirdMenu=new HummingbirdMenu(TB.hummingbirdBn);
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
