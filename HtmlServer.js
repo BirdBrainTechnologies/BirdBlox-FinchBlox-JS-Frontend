@@ -74,8 +74,16 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 };
 HtmlServer.sendHBRequest=function(request,requestStatus){
-	HtmlServer.sendRequest(HtmlServer.getHBRequest(request),requestStatus);
-}
+	if(HummingbirdManager.connectedHBs.length>0) {
+		HtmlServer.sendRequest(HtmlServer.getHBRequest(request), requestStatus);
+	}
+	else{
+		if(requestStatus!=null) {
+			requestStatus.finished = true;
+			requestStatus.error = true;
+		}
+	}
+};
 HtmlServer.sendRequest=function(request,requestStatus){
 	if(requestStatus!=null){
 		requestStatus.error=false;

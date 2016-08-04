@@ -7,14 +7,16 @@ function HummingbirdManager(){
 	var HM=HummingbirdManager;
 	GuiElements.alert("Beginning HB Scan"); //For debugging purposes.
 	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
-	HM.connectedHBs=[new Hummingbird("HB1")];
+	HM.connectedHBs=[];
 }
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
 	var HM=HummingbirdManager;
 	var callbackFn=function(response){
 		HM.hBNames = response; //Save the names of the Hummingbirds
-		HM.connectedHBs=[new Hummingbird(HM.hBNames)];
+		if(response!="") {
+			HM.connectedHBs = [new Hummingbird(response)];
+		}
 		GuiElements.alert(response); //Show them in the debug span
 	};
 	var callbackErr=function(){
