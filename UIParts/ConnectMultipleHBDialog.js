@@ -128,7 +128,13 @@ ConnectMultipleHBDialog.prototype.createRow=function(index,y,hummingbird){
 	},true);
 	xButton.setCallbackFunction(function(){
 		hummingbird.disconnect(ConnectMultipleHBDialog.reloadDialog);
-	},true)
+	},true);
+	var overlayX=GuiElements.width/2;
+	var overlayUpY=y+this.y;
+	var overlayLowY=overlayUpY+CMHBD.buttonH;
+	hBButton.setCallbackFunction(function(){
+		new HBConnectionList(overlayX,overlayUpY,overlayLowY,hummingbird);
+	},true);
 };
 ConnectMultipleHBDialog.prototype.createPlusBn=function(){
 	var CMHBD=ConnectMultipleHBDialog;
@@ -137,6 +143,12 @@ ConnectMultipleHBDialog.prototype.createPlusBn=function(){
 	var width=this.width-4*CMHBD.bnM-2*CMHBD.smallBnWidth;
 	var button=new Button(x,y,width,CMHBD.buttonH,this.group);
 	button.addText("+",CMHBD.font,CMHBD.plusFontSize,CMHBD.fontWeight,CMHBD.plusCharHeight);
+	var overlayX=GuiElements.width/2;
+	var overlayUpY=y+this.y;
+	var overlayLowY=overlayUpY+CMHBD.buttonH;
+	button.setCallbackFunction(function(){
+		new HBConnectionList(overlayX,overlayUpY,overlayLowY,null);
+	},true);
 	return button;
 };
 ConnectMultipleHBDialog.reloadDialog=function(){

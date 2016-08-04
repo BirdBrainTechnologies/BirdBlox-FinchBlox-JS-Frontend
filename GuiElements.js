@@ -61,6 +61,7 @@ GuiElements.setConstants=function(){
 	BlockContextMenu.setGraphics();
 	ConnectOneHBDialog.setConstants();
 	ConnectMultipleHBDialog.setConstants();
+	HBConnectionList.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
 	CodeManager();
@@ -117,10 +118,10 @@ GuiElements.createLayers=function(){
 	layers.display=create.layer();
 	layers.drag=create.layer();
 	layers.highlight=create.layer();
-	layers.overlay=create.layer();
 	layers.tabMenu=create.layer();
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
+	layers.overlay=create.layer();
 }
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.

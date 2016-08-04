@@ -146,6 +146,22 @@ HummingbirdManager.connectOneHB=function(hBName){
 HummingbirdManager.showConnectMultipleDialog=function(){
 	new ConnectMultipleHBDialog();
 };
+HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
+	var HM=HummingbirdManager;
+	var index=-1;
+	if(oldHB!=null){
+		oldHB.disconnect(null,false);
+		index = HummingbirdManager.connectedHBs.indexOf(oldHB);
+	}
+	var newHB=new Hummingbird(newHBName);
+	if(index==-1){
+		newHB.connect(callbackFn);
+	}
+	else{
+		HM.hBNames[index]=newHB;
+		newHB.connect(callbackFn,false);
+	}
+};
 /*HummingbirdManager.connectHB=function(hummingbird){
 	var HM=HummingbirdManager;
 	var name=hummingbird.name;

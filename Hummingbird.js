@@ -21,13 +21,23 @@ Hummingbird.prototype.rename=function(newName,callbackFn){
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	this.name=newName;
 };
-Hummingbird.prototype.disconnect=function(callbackFn){
+Hummingbird.prototype.disconnect=function(callbackFn,removeFromManager){
+	if(removeFromManager==null){
+		removeFromManager=true;
+	}
 	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/disconnect";
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
-	HummingbirdManager.removeHB(this);
+	if(removeFromManager) {
+		HummingbirdManager.removeHB(this);
+	}
 };
-Hummingbird.prototype.connect=function(callbackFn){
+Hummingbird.prototype.connect=function(callbackFn,addToManager){
+	if(addToManager==null){
+		addToManager=true;
+	}
 	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/connect";
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
-	HummingbirdManager.connectedHBs.push(this);
+	if(addToManager) {
+		HummingbirdManager.connectedHBs.push(this);
+	}
 };

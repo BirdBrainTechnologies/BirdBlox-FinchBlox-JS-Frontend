@@ -108,15 +108,19 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 	if(newHBs==""){
 		hBArray=[];
 	}
+	var oldScroll=0;
 	if(this.menuBnList!=null){
+		oldScroll=this.menuBnList.scrollY;
 		this.menuBnList.hide();
 	}
 	var bnM=COHBD.bnMargin;
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
+	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
 	for(var i=0;i<hBArray.length;i++){
 		this.addBnListOption(hBArray[i]);
 	}
 	this.menuBnList.show();
+	this.menuBnList.scroll(oldScroll);
 };
 ConnectOneHBDialog.prototype.addBnListOption=function(hBName){
 	var COHBD=ConnectOneHBDialog;
