@@ -3,7 +3,7 @@ function ViewMenu(button){
 	Menu.call(this,button);
 	this.addOption("Zoom in", this.optionZoomIn,false);
 	this.addOption("Zoom out", this.optionZoomOut,false);
-	this.addOption("Reset zoom", this.optionResetZoom,false);
+	this.addOption("Reset zoom", this.optionResetZoom,true);
 	this.buildMenu();
 }
 ViewMenu.prototype = Object.create(Menu.prototype);

@@ -20,14 +20,18 @@ TitleBar.setGraphics=function(){
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
-	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.statusX=TB.buttonMargin;
-	TB.hummingbirdBnX=TB.statusX+TB.buttonMargin+HBStatusLight.radius*2;
-	TB.fileBnX=TB.hummingbirdBnX+TB.buttonMargin+TB.buttonW;
-	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
 };
 TitleBar.createBar=function(){
+	var TB=TitleBar;
+	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
+	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
+
+	TB.fileBnX=TB.buttonMargin;
+	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
+
+	TB.hummingbirdBnX=BlockPalette.width-TB.buttonMargin-TB.buttonW;
+	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-HBStatusLight.radius*2;
+
 	var TB=TitleBar;
 	TB.width=GuiElements.width;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
@@ -54,7 +58,7 @@ TitleBar.makeButtons=function(){
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addText("View");
 	TB.viewMenu=new ViewMenu(TB.viewBn);
-	TB.debugBn=new Button(TB.viewBnX+TB.buttonW+TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.debugBn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.debugBn.addText("Debug");
 	TB.debugMenu=new DebugMenu(TB.debugBn);
 	/*

@@ -65,7 +65,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		else{
 			xhttp.send(); //Make the request
 		}
-		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+		//GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
 	catch(err){
 		if(callbackErr!=null){

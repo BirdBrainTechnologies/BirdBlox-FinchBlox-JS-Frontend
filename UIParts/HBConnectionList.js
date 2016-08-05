@@ -20,7 +20,7 @@ HBConnectionList.setConstants=function(){
 HBConnectionList.prototype.discoverHBs=function(){
 	var thisHBCL=this;
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
-		thisHBCL.updateHBList(response+"\nFake HB");
+		thisHBCL.updateHBList((response+"\nFake HB").trim());
 	},function(){
 		thisHBCL.updateHBList("Fake HB1\nFake HB2");
 	});
