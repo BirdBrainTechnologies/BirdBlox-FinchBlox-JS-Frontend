@@ -108,7 +108,11 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 	}
 }
 HummingbirdManager.stopHummingbirds=function(){
-	HtmlServer.sendRequest("hummingbird/out/stop");
+	//HtmlServer.sendRequest("hummingbird/out/stop");
+	var HM=HummingbirdManager;
+	for(var i=0;i<HM.connectedHBs.length;i++){
+		HtmlServer.sendHBRequest(i,"out/stop");
+	}
 };
 
 
