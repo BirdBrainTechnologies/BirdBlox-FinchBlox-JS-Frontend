@@ -15,7 +15,9 @@ function ConnectMultipleHBDialog(){
 	this.bgRect=this.makeBgRect();
 	this.titleRect=this.createTitleRect();
 	this.titleText=this.createTitleLabel();
-	this.plusBn=this.createPlusBn();
+	if(this.hBList.length<10) {
+		this.plusBn = this.createPlusBn();
+	}
 	this.doneBn=this.makeDoneBn();
 	this.createRows();
 	GuiElements.layers.dialog.appendChild(this.group);
@@ -48,6 +50,9 @@ ConnectMultipleHBDialog.setConstants=function(){
 ConnectMultipleHBDialog.prototype.computeHeight=function(){
 	var CMHBD=ConnectMultipleHBDialog;
 	var count=this.hBList.length;
+	if(count==10){
+		count--;
+	}
 	return CMHBD.titleBarH+(count+2)*CMHBD.buttonH+(count+3)*CMHBD.bnM;
 };
 ConnectMultipleHBDialog.prototype.makeBgRect=function(){

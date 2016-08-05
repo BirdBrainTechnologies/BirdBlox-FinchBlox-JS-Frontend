@@ -4,6 +4,7 @@
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
+	HtmlServer.logHttp=false;
 }
 HtmlServer.encodeHtml=function(message){
 	if(message==""){
@@ -65,7 +66,9 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		else{
 			xhttp.send(); //Make the request
 		}
-		//GuiElements.alert(HtmlServer.getUrlForRequest(request));
+		if(HtmlServer.logHttp) {
+			GuiElements.alert(HtmlServer.getUrlForRequest(request));
+		}
 	}
 	catch(err){
 		if(callbackErr!=null){

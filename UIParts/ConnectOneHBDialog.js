@@ -96,7 +96,16 @@ ConnectOneHBDialog.prototype.closeDialog=function(){
 ConnectOneHBDialog.prototype.discoverHBs=function(){
 	var thisCOHBD=this;
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
+		var hBString=response;
+		if(HummingbirdManager.allowVirtualHBs){
+			response+="\nVirtual HB";
+			response=response.trim();
+		}
 		thisCOHBD.updateHBList(response);
+	},function(){
+		if(HummingbirdManager.allowVirtualHBs){
+			thisCOHBD.updateHBList("Virtual HB1\nVirtual HB2");
+		}
 	});
 };
 ConnectOneHBDialog.prototype.updateHBList=function(newHBs){

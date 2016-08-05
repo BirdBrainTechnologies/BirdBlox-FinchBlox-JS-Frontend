@@ -1,7 +1,10 @@
 function DebugMenu(button){
-	Menu.call(this,button);
+	Menu.call(this,button,false,130);
 	this.addOption("Version", this.optionVersion);
 	this.addOption("HB names", this.optionHBs);
+	this.addOption("Log HTTP", this.optionLogHttp);
+	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
+	this.addOption("Clear log", this.optionClearLog);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
@@ -29,4 +32,13 @@ DebugMenu.prototype.optionHBs=function(){
 	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
 		GuiElements.alert("Names: "+response.split("\n").join(","));
 	});
+};
+DebugMenu.prototype.optionLogHttp=function(){
+	HtmlServer.logHttp=true;
+};
+DebugMenu.prototype.optionVirtualHBs=function(){
+	HummingbirdManager.allowVirtualHBs=true;
+};
+DebugMenu.prototype.optionClearLog=function(){
+	GuiElements.alert("");
 };

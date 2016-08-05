@@ -8,6 +8,7 @@ function HummingbirdManager(){
 	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
+	HM.allowVirtualHBs=false;
 }
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
@@ -17,11 +18,7 @@ HummingbirdManager.getHBNames=function(){
 			HM.connectedHBs = [new Hummingbird(response)];
 		}
 	};
-	var callbackErr=function(){
-		HM.connectedHBs = [new Hummingbird("HB1")];
-		GuiElements.alert("Error connecting to HB"); //Show the error in the debug span
-	};
-	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn,callbackErr);
+	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn);
 };
 HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;

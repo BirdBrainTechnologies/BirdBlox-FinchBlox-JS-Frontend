@@ -20,9 +20,16 @@ HBConnectionList.setConstants=function(){
 HBConnectionList.prototype.discoverHBs=function(){
 	var thisHBCL=this;
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
-		thisHBCL.updateHBList((response+"\nVirtual HB").trim());
+		var hBString=response;
+		if(HummingbirdManager.allowVirtualHBs){
+			response+="\nVirtual HB";
+			response=response.trim();
+		}
+		thisHBCL.updateHBList(response);
 	},function(){
-		thisHBCL.updateHBList("Virtual HB1\nVirtual HB2");
+		if(HummingbirdManager.allowVirtualHBs){
+			thisHBCL.updateHBList("Virtual HB1\nVirtual HB2");
+		}
 	});
 };
 HBConnectionList.prototype.updateHBList=function(newHBs){
