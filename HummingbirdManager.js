@@ -5,7 +5,6 @@
  */
 function HummingbirdManager(){
 	var HM=HummingbirdManager;
-	GuiElements.alert("Beginning HB Scan"); //For debugging purposes.
 	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
