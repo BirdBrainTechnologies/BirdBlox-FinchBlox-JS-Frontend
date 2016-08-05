@@ -74,15 +74,17 @@ HBDropSlot.prototype.showHBDropDowns=function(){
 	this.switchToSlot();
 };
 HBDropSlot.prototype.countHBsInUse=function(){
-	if(this.labelMode){
-		return 1;
+	if (this.getData() != null) {
+		return this.getData().getValue() + 1;
 	}
 	else {
-		if (this.getData() != null) {
-			return this.getData().getValue() + 1;
-		}
-		else {
-			return 1;
-		}
+		return 1;
+	}
+};
+HBDropSlot.prototype.importXml=function(slotNode) {
+	DropSlot.prototype.importXml.call(this,slotNode);
+	this.enteredData=new SelectionData(parseInt(this.enteredData.getValue()));
+	if(this.enteredData.getValue()<0){
+		this.setSelectionData(this.hBPrefix+1,new SelectionData(0));
 	}
 };

@@ -478,7 +478,7 @@ CodeManager.importXml=function(projectNode){
 	if(tabsNode!=null){
 		TabManager.importXml(tabsNode);
 	}
-	Hummingbird.updateSelectableHBs();
+	HummingbirdManager.updateSelectableHBs();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;

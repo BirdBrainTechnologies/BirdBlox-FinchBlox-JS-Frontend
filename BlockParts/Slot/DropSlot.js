@@ -78,6 +78,7 @@ DropSlot.prototype.hideSlot=function(){
 		this.bgE.remove();
 		this.textE.remove();
 		this.triE.remove();
+		this.hitBoxE.remove();
 	}
 }
 DropSlot.prototype.showSlot=function(){
@@ -86,6 +87,7 @@ DropSlot.prototype.showSlot=function(){
 		this.parent.group.appendChild(this.bgE);
 		this.parent.group.appendChild(this.triE);
 		this.parent.group.appendChild(this.textE);
+		this.parent.group.appendChild(this.hitBoxE);
 	}
 }
 DropSlot.prototype.changeText=function(text){
