@@ -20,6 +20,7 @@ function ConnectMultipleHBDialog(){
 	this.createRows();
 	GuiElements.layers.dialog.appendChild(this.group);
 	GuiElements.blockInteraction();
+	HtmlServer.sendRequestWithCallback("hummingbird/discover");
 }
 ConnectMultipleHBDialog.setConstants=function(){
 	var CMHBD=ConnectMultipleHBDialog;
@@ -124,10 +125,12 @@ ConnectMultipleHBDialog.prototype.createRow=function(index,y,hummingbird){
 	hBButton.addText(hummingbird.name,CMHBD.font,CMHBD.fontSize,CMHBD.fontWeight,CMHBD.fontCharHeight);
 
 	renButton.setCallbackFunction(function(){
-		hummingbird.promptRename(ConnectMultipleHBDialog.reloadDialog);
+		hummingbird.promptRename();
+		ConnectMultipleHBDialog.reloadDialog();
 	},true);
 	xButton.setCallbackFunction(function(){
-		hummingbird.disconnect(ConnectMultipleHBDialog.reloadDialog);
+		hummingbird.disconnect();
+		ConnectMultipleHBDialog.reloadDialog();
 	},true);
 	var overlayX=GuiElements.width/2;
 	var overlayUpY=y+this.y;
