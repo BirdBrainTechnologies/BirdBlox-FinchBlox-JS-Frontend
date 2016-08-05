@@ -16,13 +16,15 @@ function HBStatusLight(x,centerY,parent,request){
 HBStatusLight.setConstants=function(){
 	var HBSL=HBStatusLight;
 	HBSL.greenColor="#0f0";
-	HBSL.redColor="#f00";
+	HBSL.redColor="#f00"
+	HBSL.startColor=Colors.black;
+	HBSL.offColor=Colors.darkGray;
 	HBSL.radius=6;
 	HBSL.updateInterval=300;
 };
 HBStatusLight.prototype.generateCircle=function(){
 	var HBSL=HBStatusLight;
-	return GuiElements.draw.circle(this.cx,this.cy,HBSL.radius,Colors.black,this.parentGroup);
+	return GuiElements.draw.circle(this.cx,this.cy,HBSL.radius,HBSL.startColor,this.parentGroup);
 };
 HBStatusLight.prototype.updateStatus=function(){
 	var HBSL=HBStatusLight;
@@ -30,6 +32,9 @@ HBStatusLight.prototype.updateStatus=function(){
 	HtmlServer.sendRequestWithCallback(this.request,function(result){
 		if(result=="1"){
 			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.greenColor);
+		}
+		else if(result=="2"){
+			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.offColor);
 		}
 		else{
 			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.redColor);
