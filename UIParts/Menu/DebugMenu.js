@@ -1,10 +1,6 @@
 function DebugMenu(button){
 	Menu.call(this,button);
 	this.addOption("Version", this.optionVersion);
-	this.addOption("Screen size", this.optionScreenSize);
-	this.addOption("Pixels", this.optionPixelSize);
-	this.addOption("AutoSave", SaveManager.autoSave);
-	this.addOption("ZoomSetting", this.optionZoom);
 	this.addOption("HB names", this.optionHBs);
 	this.buildMenu();
 }

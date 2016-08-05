@@ -14,14 +14,11 @@ function HummingbirdManager(){
 HummingbirdManager.getHBNames=function(){
 	var HM=HummingbirdManager;
 	var callbackFn=function(response){
-		HM.hBNames = response; //Save the names of the Hummingbirds
 		if(response!="") {
 			HM.connectedHBs = [new Hummingbird(response)];
 		}
-		GuiElements.alert(response); //Show them in the debug span
 	};
 	var callbackErr=function(){
-		HM.hBNames = "Hummingbird";//Temp for testing
 		HM.connectedHBs = [new Hummingbird("HB1")];
 		GuiElements.alert("Error connecting to HB"); //Show the error in the debug span
 	};
@@ -147,7 +144,6 @@ HummingbirdManager.connectOneHB=function(hBName){
 	HM.disconnectAll();
 	var newHB=new Hummingbird(hBName);
 	newHB.connect();
-	HM.hBNames=hBName; //Fix!
 };
 HummingbirdManager.showConnectMultipleDialog=function(){
 	new ConnectMultipleHBDialog();
@@ -164,7 +160,7 @@ HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
 		newHB.connect(callbackFn);
 	}
 	else{
-		HM.hBNames[index]=newHB;
+		HM.connectedHBs[index]=newHB;
 		newHB.connect(callbackFn,false);
 	}
 };
