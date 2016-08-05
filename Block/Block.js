@@ -825,6 +825,28 @@ Block.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
+Block.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+};
+Block.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+};
+Block.prototype.countHBsInUse=function(){
+	var largest=1;
+	for(var i=0;i<this.slots.length;i++){
+		largest=Math.max(largest,this.slots[i].countHBsInUse());
+	}
+	if(this.blockSlot1!=null){
+		largest=Math.max(largest,this.blockSlot1.countHBsInUse());
+	}
+	if(this.blockSlot2!=null){
+		largest=Math.max(largest,this.blockSlot2.countHBsInUse());
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		largest=Math.max(largest,this.nextBlock.countHBsInUse());
+	}
+	return largest;
+};
 Block.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	for(var i=0;i<this.slots.length;i++){

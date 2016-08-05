@@ -419,6 +419,17 @@ CodeManager.updateAvailableMessages=function(){
 CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
+CodeManager.hideHBDropDowns=function(){
+	TabManager.hideHBDropDowns();
+	BlockPalette.hideHBDropDowns();
+};
+CodeManager.showHBDropDowns=function(){
+	TabManager.showHBDropDowns();
+	BlockPalette.showHBDropDowns();
+};
+CodeManager.countHBsInUse=function(){
+	return TabManager.countHBsInUse();
+};
 /* @fix Write documentation.
  */
 CodeManager.checkBroadcastRunning=function(message){
@@ -467,6 +478,7 @@ CodeManager.importXml=function(projectNode){
 	if(tabsNode!=null){
 		TabManager.importXml(tabsNode);
 	}
+	Hummingbird.updateSelectableHBs();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;

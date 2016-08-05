@@ -5,7 +5,8 @@
 
 function B_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Servo"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"Servo"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true)); //Positive
 }
@@ -23,7 +24,8 @@ B_HBServo.prototype.updateAction=function(){
 
 function B_HBLight(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Light"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"Light"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBLight.prototype = Object.create(ReporterBlock.prototype);
@@ -40,7 +42,8 @@ B_HBLight.prototype.updateAction=function(){
 
 function B_HBMotor(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Motor"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"Motor"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0));
 }
@@ -56,7 +59,8 @@ B_HBMotor.prototype.updateAction=function(){
 
 function B_HBVibration(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Vibration"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"Vibration"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true)); //Positive
 }
@@ -74,7 +78,8 @@ B_HBVibration.prototype.updateAction=function(){
 
 function B_HBLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird LED"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true)); //Positive
 }
@@ -92,7 +97,8 @@ B_HBLed.prototype.updateAction=function(){
 
 function B_HBTempC(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB Temperature C"));
+	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new LabelText(this,"Temperature C"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBTempC.prototype = Object.create(ReporterBlock.prototype);
@@ -109,7 +115,8 @@ B_HBTempC.prototype.updateAction=function(){
 
 function B_HBDistCM(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB Distance CM"));
+	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new LabelText(this,"Distance CM"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBDistCM.prototype = Object.create(ReporterBlock.prototype);
@@ -126,7 +133,8 @@ B_HBDistCM.prototype.updateAction=function(){
 
 function B_HBKnob(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Knob"));
+	this.addPart(new HBDropSlot(this));
+	this.addPart(new LabelText(this,"Knob"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBKnob.prototype = Object.create(ReporterBlock.prototype);
@@ -143,7 +151,8 @@ B_HBKnob.prototype.updateAction=function(){
 
 function B_HBSound(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"Hummingbird Sound"));
+	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new LabelText(this,"Sound"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBSound.prototype = Object.create(ReporterBlock.prototype);
@@ -162,7 +171,8 @@ B_HBSound.prototype.updateAction=function(){
 
 function B_HBTriLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB TRI-LED"));
+	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new LabelText(this,"TRI-LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"R"));
 	this.addPart(new NumSlot(this,0,true)); //Positive.
@@ -176,11 +186,12 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 /* Sends a request if the port is an integer from 1 to 4. */
 B_HBTriLed.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.portD=this.slots[0].getData();
+	mem.hBIndex=this.slots[0].getData().getValue();
+	mem.portD=this.slots[1].getData();
 	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
-	mem.dataR=this.slots[1].getData();
-	mem.dataG=this.slots[2].getData();
-	mem.dataB=this.slots[3].getData();
+	mem.dataR=this.slots[2].getData();
+	mem.dataG=this.slots[3].getData();
+	mem.dataB=this.slots[4].getData();
 
 	mem.valueR=mem.dataR.getValueInR(0,100,true,true); //Positive integer.
 	mem.valueG=mem.dataG.getValueInR(0,100,true,true); //Positive integer.
@@ -191,7 +202,7 @@ B_HBTriLed.prototype.startAction=function(){
 		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
 		mem.requestStatus=function(){};
 		if(CodeManager.checkHBOutputDelay(this.stack)){
-			HtmlServer.sendHBRequest(mem.request,mem.requestStatus); //Send the request.
+			HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus); //Send the request.
 			mem.sent=true;
 			CodeManager.updateHBOutputDelay();
 		}
@@ -213,7 +224,8 @@ B_HBTriLed.prototype.updateAction=function(){
 
 function B_HBTempF(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new LabelText(this,"HB Temperature F"));
+	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new LabelText(this,"Temperature F"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
 B_HBTempF.prototype = Object.create(ReporterBlock.prototype);

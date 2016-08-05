@@ -6,7 +6,11 @@ function HBStatusLight(x,centerY,parent,request){
 	this.circleE=this.generateCircle();
 	var thisStatusLight=this;
 	this.request=request;
-	this.updateTimer = self.setInterval(function () { thisStatusLight.updateStatus() }, HBSL.updateInterval);
+	if(!TouchReceiver.mouse) {
+		this.updateTimer = self.setInterval(function () {
+			thisStatusLight.updateStatus()
+		}, HBSL.updateInterval);
+	}
 	thisStatusLight.updateStatus();
 }
 HBStatusLight.setConstants=function(){

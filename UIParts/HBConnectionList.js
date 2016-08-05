@@ -21,6 +21,8 @@ HBConnectionList.prototype.discoverHBs=function(){
 	var thisHBCL=this;
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
 		thisHBCL.updateHBList(response);
+	},function(){
+		thisHBCL.updateHBList("Hi\nThere");
 	});
 };
 HBConnectionList.prototype.updateHBList=function(newHBs){

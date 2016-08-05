@@ -73,9 +73,9 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		}
 	}
 };
-HtmlServer.sendHBRequest=function(request,requestStatus){
-	if(HummingbirdManager.connectedHBs.length>0) {
-		HtmlServer.sendRequest(HtmlServer.getHBRequest(request), requestStatus);
+HtmlServer.sendHBRequest=function(hBIndex,request,requestStatus){
+	if(HummingbirdManager.connectedHBs.length>hBIndex) {
+		HtmlServer.sendRequest(HtmlServer.getHBRequest(hBIndex,request), requestStatus);
 	}
 	else{
 		if(requestStatus!=null) {
@@ -103,8 +103,8 @@ HtmlServer.sendRequest=function(request,requestStatus){
 		HtmlServer.sendRequestWithCallback(request);
 	}
 }
-HtmlServer.getHBRequest=function(request){
-	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[0].name)+"/"+request; //FixMulti!
+HtmlServer.getHBRequest=function(hBIndex,request){
+	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name)+"/"+request;
 }
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;

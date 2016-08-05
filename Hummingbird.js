@@ -30,6 +30,7 @@ Hummingbird.prototype.disconnect=function(callbackFn,removeFromManager){
 	if(removeFromManager) {
 		HummingbirdManager.removeHB(this);
 	}
+	HummingbirdManager.updateSelectableHBs();
 };
 Hummingbird.prototype.connect=function(callbackFn,addToManager){
 	if(addToManager==null){
@@ -40,4 +41,5 @@ Hummingbird.prototype.connect=function(callbackFn,addToManager){
 	if(addToManager) {
 		HummingbirdManager.connectedHBs.push(this);
 	}
+	HummingbirdManager.updateSelectableHBs();
 };

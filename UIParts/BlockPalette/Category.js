@@ -176,3 +176,13 @@ Category.prototype.getAbsX=function(){
 Category.prototype.getAbsY=function(){
 	return this.y;
 };
+Category.prototype.showHBDropDowns=function(){
+	for(var i=0;i<this.displayStacks.length;i++){
+		this.displayStacks[i].showHBDropDowns();
+	}
+};
+Category.prototype.hideHBDropDowns=function(){
+	for(var i=0;i<this.displayStacks.length;i++){
+		this.displayStacks[i].hideHBDropDowns();
+	}
+};

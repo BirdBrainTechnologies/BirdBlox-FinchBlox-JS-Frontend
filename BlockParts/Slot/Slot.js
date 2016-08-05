@@ -316,6 +316,18 @@ Slot.prototype.renameList=function(list){
 Slot.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
+Slot.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+};
+Slot.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+};
+Slot.prototype.countHBsInUse=function(){
+	if(this.hasChild){
+		return this.child.countHBsInUse();
+	}
+	return 0;
+};
 Slot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){

@@ -214,6 +214,19 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
+TabManager.hideHBDropDowns=function(){
+	TabManager.passRecursively("hideHBDropDowns");
+};
+TabManager.showHBDropDowns=function(){
+	TabManager.passRecursively("showHBDropDowns");
+};
+TabManager.countHBsInUse=function(){
+	var largest=1;
+	for(var i=0;i<TabManager.tabList.length;i++){
+		largest=Math.max(largest,TabManager.tabList[i].countHBsInUse());
+	}
+	return largest;
+};
 TabManager.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	for(var i=0;i<TabManager.tabList.length;i++){

@@ -7,6 +7,7 @@ function HummingbirdManager(){
 	var HM=HummingbirdManager;
 	GuiElements.alert("Beginning HB Scan"); //For debugging purposes.
 	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
+	HM.selectableHBs=0;
 	HM.connectedHBs=[];
 }
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
@@ -21,6 +22,7 @@ HummingbirdManager.getHBNames=function(){
 	};
 	var callbackErr=function(){
 		HM.hBNames = "Hummingbird";//Temp for testing
+		HM.connectedHBs = [new Hummingbird("HB1")];
 		GuiElements.alert("Error connecting to HB"); //Show the error in the debug span
 	};
 	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn,callbackErr);
@@ -31,15 +33,16 @@ HummingbirdManager.getConnectedHBs=function(){
 };
 HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	var mem=block.runMem;
-	mem.portD=block.slots[0].getData();
+	mem.hBIndex=block.slots[0].getData().getValue();
+	mem.portD=block.slots[1].getData();
 	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
-	mem.valueD=block.slots[1].getData();
+	mem.valueD=block.slots[2].getData();
 	mem.value=mem.valueD.getValueInR(minVal,maxVal,false,true);
 	if(mem.port>=1&&mem.port<=4&&mem.valueD.isValid&&mem.portD.isValid) {
 		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
 		mem.requestStatus=function(){};
 		if(CodeManager.checkHBOutputDelay(block.stack)) {
-			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
+			HtmlServer.sendHBRequest(mem.hBIndex,mem.request, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
@@ -64,7 +67,7 @@ HummingbirdManager.outputUpdateAction=function(block){
 	}
 	else{
 		if(CodeManager.checkHBOutputDelay(block.stack)){
-			HtmlServer.sendHBRequest(mem.request, mem.requestStatus);
+			HtmlServer.sendHBRequest(mem.hBIndex,mem.request, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
@@ -73,12 +76,13 @@ HummingbirdManager.outputUpdateAction=function(block){
 };
 HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	var mem=block.runMem;
-	mem.portD=block.slots[0].getData();
+	mem.hBIndex=block.slots[0].getData().getValue();
+	mem.portD=block.slots[1].getData();
 	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
 	if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
 		mem.request = "in/"+urlPart+"/" + mem.port;
 		mem.requestStatus=function(){};
-		HtmlServer.sendHBRequest(mem.request,mem.requestStatus);
+		HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus);
 		return true; //Still running
 	}
 	else{
@@ -108,8 +112,8 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 	}
 }
 HummingbirdManager.stopHummingbirds=function(){
-	HtmlServer.sendHBRequest("out/stop");
-}
+	HtmlServer.sendRequest("hummingbird/out/stop");
+};
 
 
 /////////////Multi-support//////////////////
@@ -162,6 +166,22 @@ HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
 	else{
 		HM.hBNames[index]=newHB;
 		newHB.connect(callbackFn,false);
+	}
+};
+HummingbirdManager.getSelectableHBCount=function(){
+	return HummingbirdManager.selectableHBs;
+};
+HummingbirdManager.updateSelectableHBs=function(){
+	var HM=HummingbirdManager;
+	var oldCount=HM.selectableHBs;
+	var inUse=CodeManager.countHBsInUse();
+	var newCount=Math.max(HM.connectedHBs.length,inUse);
+	HM.selectableHBs=newCount;
+	if(newCount<=1&&oldCount>1){
+		CodeManager.hideHBDropDowns();
+	}
+	else if(newCount>1&&oldCount<=1){
+		CodeManager.showHBDropDowns();
 	}
 };
 /*HummingbirdManager.connectHB=function(hummingbird){

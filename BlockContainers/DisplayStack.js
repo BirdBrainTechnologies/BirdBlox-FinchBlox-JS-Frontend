@@ -101,3 +101,15 @@ DisplayStack.prototype.getSprite=function(){
 DisplayStack.prototype.delete=function(){
 	this.group.remove();
 };
+DisplayStack.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+	this.updateDim();
+};
+DisplayStack.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+	this.updateDim();
+};
+DisplayStack.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	this.firstBlock[functionName].apply(this.firstBlock,args);
+};

@@ -10,6 +10,7 @@ function DropSlot(parent,snapType){
 	this.optionsText=new Array();
 	this.optionsData=new Array();
 	this.dropColumns=1; //The number of columns to show in the drop down.
+	this.slotVisible=true;
 }
 DropSlot.prototype = Object.create(Slot.prototype);
 DropSlot.prototype.constructor = DropSlot;
@@ -72,14 +73,20 @@ DropSlot.prototype.moveSlot=function(x,y){
 	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH);
 }
 DropSlot.prototype.hideSlot=function(){
-	this.bgE.remove();
-	this.textE.remove();
-	this.triE.remove();
+	if(this.slotVisible) {
+		this.slotVisible=false;
+		this.bgE.remove();
+		this.textE.remove();
+		this.triE.remove();
+	}
 }
 DropSlot.prototype.showSlot=function(){
-	this.parent.group.appendChild(this.bgE);
-	this.parent.group.appendChild(this.triE);
-	this.parent.group.appendChild(this.textE);
+	if(!this.slotVisible) {
+		this.slotVisible=true;
+		this.parent.group.appendChild(this.bgE);
+		this.parent.group.appendChild(this.triE);
+		this.parent.group.appendChild(this.textE);
+	}
 }
 DropSlot.prototype.changeText=function(text){
 	this.text=text;

@@ -226,6 +226,18 @@ BlockSlot.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
+BlockSlot.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+};
+BlockSlot.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+};
+BlockSlot.prototype.countHBsInUse=function(){
+	if(this.hasChild){
+		return this.countHBsInUse();
+	}
+	return 0;
+};
 BlockSlot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){

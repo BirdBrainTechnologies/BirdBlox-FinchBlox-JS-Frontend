@@ -9,6 +9,7 @@ function LabelText(parent,text){
 	this.parent=parent;
 	this.textE=this.generateText(text);
 	this.isSlot=false;
+	this.visible=true;
 }
 LabelText.prototype.updateAlign=function(x,y){
 	this.move(x,y+this.height/2);
@@ -38,6 +39,18 @@ LabelText.prototype.duplicate=function(parentCopy){
 LabelText.prototype.textSummary=function(){
 	return this.text;
 }
+LabelText.prototype.show=function(){
+	if(!this.visible){
+		this.parent.group.appendChild(this.textE);
+		this.visible=true;
+	}
+};
+LabelText.prototype.hide=function(){
+	if(this.visible){
+		this.textE.remove();
+		this.visible=false;
+	}
+};
 LabelText.prototype.remove=function(){
 	this.textE.remove();
 };

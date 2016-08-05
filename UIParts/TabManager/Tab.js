@@ -289,6 +289,20 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
+Tab.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+};
+Tab.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+};
+Tab.prototype.countHBsInUse=function(){
+	var largest=1;
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		largest=Math.max(largest,stacks[i].countHBsInUse());
+	}
+	return largest;
+};
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	var stacks=this.stackList;

@@ -109,3 +109,13 @@ BlockPalette.endScroll=function(){
 		BP.selectedCat.endScroll();
 	}
 };
+BlockPalette.showHBDropDowns=function(){
+	for(var i=0;i<BlockPalette.categories.length;i++){
+		BlockPalette.categories[i].showHBDropDowns();
+	}
+};
+BlockPalette.hideHBDropDowns=function(){
+	for(var i=0;i<BlockPalette.categories.length;i++){
+		BlockPalette.categories[i].hideHBDropDowns();
+	}
+};

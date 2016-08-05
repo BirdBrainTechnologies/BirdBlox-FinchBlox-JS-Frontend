@@ -480,7 +480,17 @@ BlockStack.prototype.checkVariableUsed=function(variable){
 BlockStack.prototype.checkListUsed=function(list){
 	return this.firstBlock.checkListUsed(list);
 };
-
+BlockStack.prototype.hideHBDropDowns=function(){
+	this.passRecursively("hideHBDropDowns");
+	this.updateDim();
+};
+BlockStack.prototype.showHBDropDowns=function(){
+	this.passRecursively("showHBDropDowns");
+	this.updateDim();
+};
+BlockStack.prototype.countHBsInUse=function(){
+	return this.firstBlock.countHBsInUse();
+};
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);
