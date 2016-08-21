@@ -440,7 +440,11 @@ CodeManager.createXml=function(){
 	var CM=CodeManager;
 	var xmlDoc = XmlWriter.newDoc("project");
 	var project=xmlDoc.getElementsByTagName("project")[0];
-	XmlWriter.setAttribute(project,"name","autoSave");
+	var fileName="project";
+	if(SaveManager.named){
+		fileName=SaveManager.fileName;
+	}
+	XmlWriter.setAttribute(project,"name",fileName);
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
 	XmlWriter.setAttribute(project,"created",new Date().getTime());
 	XmlWriter.setAttribute(project,"modified",new Date().getTime());

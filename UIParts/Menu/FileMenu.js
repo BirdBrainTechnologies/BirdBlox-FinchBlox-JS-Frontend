@@ -7,7 +7,8 @@ function FileMenu(button){
 	this.addOption("Rename", this.optionRename);
 	this.addOption("Delete", this.optionDelete);
 	//this.addOption("Import", this.optionImport);
-	//this.addOption("Export", this.optionExport);
+	this.addOption("Export", this.optionExport);
+	this.addOption("Enable debugging", this.optionEnableDebug);
 	this.buildMenu();
 }
 FileMenu.prototype = Object.create(Menu.prototype);
@@ -37,5 +38,8 @@ FileMenu.prototype.optionImport=function(){
 
 };
 FileMenu.prototype.optionExport=function(){
-	//SaveManager.reloadTest();
+	SaveManager.export();
+};
+FileMenu.prototype.optionEnableDebug=function(){
+	TitleBar.enableDebug();
 };

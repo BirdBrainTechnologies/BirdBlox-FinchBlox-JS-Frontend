@@ -56,6 +56,23 @@ SaveManager.save=function(nextAction){
 		SaveManager.saveAs(nextAction);
 	}
 };
+SaveManager.export=function(){
+	var fileName;
+	if(SaveManager.named){
+		fileName=SaveManager.fileName;
+	}
+	else{
+		fileName="project";
+	}
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	HtmlServer.sendRequestWithCallback("data/export/"+SaveManager.fileName,null, null,true,xmlDocText);
+};
+SaveManager.import=function(fileName,projectData){
+	SaveManager.loadFile(projectData);
+	SaveManager.fileName = fileName;
+	SaveManager.named = true;
+	SaveManager.markEdited();
+};
 SaveManager.saveAs=function(nextAction){
 	var callbackFn=function(cancelled,response){
 		response=SaveManager.cleanFileName(response);

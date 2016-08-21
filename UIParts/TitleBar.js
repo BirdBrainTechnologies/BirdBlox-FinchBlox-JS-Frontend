@@ -31,8 +31,8 @@ TitleBar.createBar=function(){
 
 	TB.hummingbirdBnX=BlockPalette.width-TB.buttonMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-HBStatusLight.radius*2;
+	TB.debugX=TB.flagBnX-TB.buttonW-2*TB.buttonMargin;
 
-	var TB=TitleBar;
 	TB.width=GuiElements.width;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
@@ -58,9 +58,7 @@ TitleBar.makeButtons=function(){
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addText("View");
 	TB.viewMenu=new ViewMenu(TB.viewBn);
-	TB.debugBn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.debugBn.addText("Debug");
-	TB.debugMenu=new DebugMenu(TB.debugBn);
+	TB.debugBn=null;
 	/*
 	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
@@ -83,12 +81,24 @@ TitleBar.setText=function(text){
 	var y=TB.height/2+TB.fontCharHeight/2;
 	GuiElements.move.text(TB.titleLabel,x,y);
 };
+TitleBar.enableDebug=function(){
+	var TB=TitleBar;
+	if(TB.debugBn==null) {
+		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+		TB.debugBn.addText("Debug");
+		TB.debugMenu = new DebugMenu(TB.debugBn);
+	}
+};
 TitleBar.updateZoom=function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
+	TB.debugX=TB.flagBnX-TB.buttonW-2*TB.buttonMargin;
 	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
 	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
+	if(TB.debugBn!=null) {
+		TB.debugBn.move(TB.debugX, TB.buttonMargin);
+	}
 	var width=GuiElements.measure.textWidth(TB.titleLabel);
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;
