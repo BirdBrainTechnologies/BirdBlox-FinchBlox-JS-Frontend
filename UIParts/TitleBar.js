@@ -83,6 +83,7 @@ TitleBar.setText=function(text){
 };
 TitleBar.enableDebug=function(){
 	var TB=TitleBar;
+	var TBLayer=GuiElements.layers.titlebar;
 	if(TB.debugBn==null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 		TB.debugBn.addText("Debug");
@@ -98,6 +99,7 @@ TitleBar.updateZoom=function(){
 	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
 	if(TB.debugBn!=null) {
 		TB.debugBn.move(TB.debugX, TB.buttonMargin);
+		TB.debugMenu.move();
 	}
 	var width=GuiElements.measure.textWidth(TB.titleLabel);
 	var x=GuiElements.width/2-width/2;

@@ -35,6 +35,11 @@ Menu.setGraphics=function(){
 	Menu.bnMargin=5;
 	Menu.bgColor=Colors.black;
 };
+Menu.prototype.move=function(){
+	this.x=this.button.x;
+	this.y=this.button.y+this.button.height;
+	GuiElements.move.group(this.group,this.x,this.y);
+};
 Menu.prototype.createMenuBnList=function(){
 	if(this.menuBnList!=null){
 		this.menuBnList.hide();
