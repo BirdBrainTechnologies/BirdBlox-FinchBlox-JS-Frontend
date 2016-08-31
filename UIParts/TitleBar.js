@@ -56,7 +56,7 @@ TitleBar.makeButtons=function(){
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.viewBn.addText("View");
+	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
 	TB.viewMenu=new ViewMenu(TB.viewBn);
 	TB.debugBn=null;
 	/*
