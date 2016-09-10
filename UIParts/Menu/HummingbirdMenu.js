@@ -21,7 +21,6 @@ HummingbirdMenu.prototype.loadOptions=function(){
 		});
 	}
 	this.addOption("Connect", HummingbirdManager.showConnectOneDialog);
-	this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
 	HtmlServer.sendRequestWithCallback("hummingbird/discover");
 };
 HummingbirdMenu.prototype.previewOpen=function(){

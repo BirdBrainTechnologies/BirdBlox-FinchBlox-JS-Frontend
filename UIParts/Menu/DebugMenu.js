@@ -5,6 +5,7 @@ function DebugMenu(button){
 	this.addOption("Log HTTP", this.optionLogHttp);
 	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
 	this.addOption("Clear log", this.optionClearLog);
+	this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
