@@ -479,9 +479,7 @@ CodeManager.importXml=function(projectNode){
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
-	if(tabsNode!=null){
-		TabManager.importXml(tabsNode);
-	}
+	TabManager.importXml(tabsNode);
 	HummingbirdManager.updateSelectableHBs();
 };
 CodeManager.deleteAll=function(){

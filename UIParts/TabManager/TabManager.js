@@ -154,10 +154,12 @@ TabManager.createXml=function(xmlDoc){
 };
 TabManager.importXml=function(tabsNode){
 	var TM=TabManager;
-	var tabNodes=XmlWriter.findSubElements(tabsNode,"tab");
-	var active=XmlWriter.getAttribute(tabsNode,"active");
-	for(var i =0;i<tabNodes.length;i++){
-		Tab.importXml(tabNodes[i]);
+	if(tabsNode!=null) {
+		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		var active = XmlWriter.getAttribute(tabsNode, "active");
+		for (var i = 0; i < tabNodes.length; i++) {
+			Tab.importXml(tabNodes[i]);
+		}
 	}
 	TM.updatePositions();
 	if(TM.tabList.length==0){

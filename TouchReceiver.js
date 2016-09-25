@@ -422,10 +422,10 @@ TouchReceiver.addListenersChild=function(element,parent){
  */
 TouchReceiver.addListenersSlot=function(element,slot){
 	var TR=TouchReceiver;
-	element.slot=slot; //Teaches the SVG element to know what Slot it belongs to.
+	element.slotRef=slot; //Teaches the SVG element to know what Slot it belongs to.
 	element.addEventListener(TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
-		TouchReceiver.touchStartSlot(this.slot,e);
+		TouchReceiver.touchStartSlot(this.slotRef,e);
 	}, false);
 };
 /* Adds handlerDown listeners to the parts of a Button.

@@ -38,7 +38,7 @@ FileMenu.prototype.optionImport=function(){
 
 };
 FileMenu.prototype.optionExport=function(){
-	SaveManager.export();
+	SaveManager.exportPrompt();
 };
 FileMenu.prototype.optionEnableDebug=function(){
 	TitleBar.enableDebug();
