@@ -8,6 +8,7 @@ TitleBar.setGraphics=function(){
 	TB.height=50;
 	TB.buttonMargin=7;
 	TB.buttonW=60;
+	TB.longButtonW=85;
 	TB.bnIconMargin=3;
 	TB.bg=Colors.black;
 	TB.flagFill="#0f0";
@@ -31,7 +32,7 @@ TitleBar.createBar=function(){
 
 	TB.hummingbirdBnX=BlockPalette.width-TB.buttonMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-HBStatusLight.radius*2;
-	TB.debugX=TB.flagBnX-TB.buttonW-2*TB.buttonMargin;
+	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 
 	TB.width=GuiElements.width;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
@@ -85,8 +86,8 @@ TitleBar.enableDebug=function(){
 	var TB=TitleBar;
 	var TBLayer=GuiElements.layers.titlebar;
 	if(TB.debugBn==null) {
-		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-		TB.debugBn.addText("Debug");
+		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+		TB.debugBn.addText("Advanced");
 		TB.debugMenu = new DebugMenu(TB.debugBn);
 	}
 };
@@ -94,7 +95,7 @@ TitleBar.updateZoom=function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.buttonW-2*TB.buttonMargin;
+	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
 	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
 	if(TB.debugBn!=null) {
