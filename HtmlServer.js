@@ -66,7 +66,8 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		else{
 			xhttp.send(); //Make the request
 		}
-		if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&request.indexOf("discover")<0&&request.indexOf("status")<0) {  //Avoid logging totalStatus; its called repeatedly.
+		if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+			request.indexOf("discover")<0&&request.indexOf("status")<0) {
 			GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		}
 	}

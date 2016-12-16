@@ -74,7 +74,7 @@ SaveManager.import=function(fileName,projectData){
 	SaveManager.loadFile(projectData);
 	SaveManager.fileName = fileName;
 	SaveManager.named = true;
-	SaveManager.markSaved();
+	SaveManager.markEdited();
 };
 SaveManager.saveAs=function(nextAction){
 	var callbackFn=function(cancelled,response){
