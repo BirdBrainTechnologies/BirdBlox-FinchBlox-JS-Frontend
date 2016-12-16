@@ -170,14 +170,14 @@ DropSlot.prototype.select=function(){
 	GuiElements.update.color(this.bgE,bG.selectedBg);
 	GuiElements.update.opacity(this.bgE,bG.selectedBgOpacity);
 	GuiElements.update.color(this.triE,bG.selectedTriFill);
-}
+};
 DropSlot.prototype.deselect=function(){
 	var bG=BlockGraphics.dropSlot;
 	this.selected=false;
 	GuiElements.update.color(this.bgE,bG.bg);
 	GuiElements.update.opacity(this.bgE,bG.bgOpacity);
 	GuiElements.update.color(this.triE,bG.triFill);
-}
+};
 DropSlot.prototype.textSummary=function(){
 	if(this.hasChild){
 		return "[...]";
@@ -186,9 +186,9 @@ DropSlot.prototype.textSummary=function(){
 		if(this.enteredData==null){
 			return "[ ]";
 		}
-		return this.enteredData.asString().getValue();
+		return "["+this.enteredData.asString().getValue()+"]";
 	}
-}
+};
 DropSlot.prototype.setSelectionData=function(text,data){
 	this.enteredData=data;
 	this.changeText(text);
