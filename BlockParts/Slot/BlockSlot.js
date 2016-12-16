@@ -234,7 +234,7 @@ BlockSlot.prototype.showHBDropDowns=function(){
 };
 BlockSlot.prototype.countHBsInUse=function(){
 	if(this.hasChild){
-		return this.countHBsInUse();
+		return this.child.countHBsInUse();
 	}
 	return 0;
 };

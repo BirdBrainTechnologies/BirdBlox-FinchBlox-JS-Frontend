@@ -180,6 +180,27 @@ HummingbirdManager.updateSelectableHBs=function(){
 		CodeManager.showHBDropDowns();
 	}
 };
+HummingbirdManager.displayDebugInfo=function(){
+	var HM=HummingbirdManager;
+	var info="";
+	info+="Selectable count: "+HM.selectableHBs+"\n";
+	info+="Connected HBs\n";
+	for(var i=0;i<HM.connectedHBs.length;i++){
+		info+="HB"+i+": "+HM.connectedHBs[i].name+"\n";
+	}
+	HtmlServer.showChoiceDialog("Hummingbird Debug",info,"Ok","Ok",true,function(){});
+};
+HummingbirdManager.recountAndDisplayHBs=function(){
+	var inUse=CodeManager.countHBsInUse();
+	HtmlServer.showChoiceDialog("Hummingbird in use: "+inUse,"Hummingbird in use: "+inUse,"Ok","Ok",true,function(){});
+};
+HummingbirdManager.displayiOSHBNames=function(){
+	var HM=HummingbirdManager;
+	var callbackFn=function(response){
+		HtmlServer.showChoiceDialog("Hummingbirds iOS","Hummingbirds iOS\n"+response,"Ok","Ok",true,function(){});
+	};
+	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn);
+};
 /*HummingbirdManager.connectHB=function(hummingbird){
 	var HM=HummingbirdManager;
 	var name=hummingbird.name;

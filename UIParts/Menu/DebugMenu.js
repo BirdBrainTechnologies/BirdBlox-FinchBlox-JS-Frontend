@@ -6,6 +6,9 @@ function DebugMenu(button){
 	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
 	this.addOption("Clear log", this.optionClearLog);
 	this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
+	this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
+	this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
+	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
 	this.buildMenu();
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
