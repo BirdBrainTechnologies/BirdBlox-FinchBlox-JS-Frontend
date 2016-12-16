@@ -191,8 +191,8 @@ HummingbirdManager.displayDebugInfo=function(){
 	HtmlServer.showChoiceDialog("Hummingbird Debug",info,"Ok","Ok",true,function(){});
 };
 HummingbirdManager.recountAndDisplayHBs=function(){
-	var inUse=CodeManager.countHBsInUse();
-	HtmlServer.showChoiceDialog("Hummingbird in use: "+inUse,"Hummingbird in use: "+inUse,"Ok","Ok",true,function(){});
+	HummingbirdManager.updateSelectableHBs();
+	HummingbirdManager.displayDebugInfo();
 };
 HummingbirdManager.displayiOSHBNames=function(){
 	var HM=HummingbirdManager;
