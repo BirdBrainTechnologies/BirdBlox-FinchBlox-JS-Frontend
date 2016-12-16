@@ -25,6 +25,9 @@ ListDropSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new ListDropSlot(parentCopy,this.snapType);
 	myCopy.enteredData=this.enteredData;
 	myCopy.changeText(this.text);
+	if(this.hasChild){
+		myCopy.snap(this.child.duplicate(0,0));
+	}
 	return myCopy;
 };
 ListDropSlot.prototype.importXml=function(slotNode){

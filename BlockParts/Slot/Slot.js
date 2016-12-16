@@ -255,8 +255,7 @@ Slot.prototype.getAbsY=function(){//Fix for tabs
 Slot.prototype.duplicate=function(parentCopy){
 	var myCopy=new Slot(parentCopy,this.inputType,this.snapType,this.outputType);
 	if(this.hasChild){
-		myCopy.child=this.child.duplicate(0,0); //Copy child at 0,0. Doesn't matter where because will updateAlign().
-		myCopy.hasChild=true;
+		myCopy.snap(this.child.duplicate(0,0));
 	}
 	return myCopy;
 };
