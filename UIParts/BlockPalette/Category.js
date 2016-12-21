@@ -73,7 +73,7 @@ Category.prototype.addBlock=function(block){
 	}
 	var displayStack=new DisplayStack(block,this.group,this);
 	this.displayStacks.push(displayStack);
-	height=displayStack.firstBlock.height;
+	var height=displayStack.firstBlock.height;
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.lastHadStud=false;
@@ -96,6 +96,18 @@ Category.prototype.addButton=function(text,width,height,callback){
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.buttons.push(button);
+	this.lastHadStud=false;
+};
+Category.prototype.addLabel=function(text){
+	var BP=BlockPalette;
+	var x=this.currentBlockX;
+	var y=this.currentBlockY;
+	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
+	this.group.appendChild(labelE);
+	var height=GuiElements.measure.textHeight(labelE);
+	GuiElements.move.element(labelE,x,y+height);
+	this.currentBlockY+=height;
+	this.currentBlockY+=BlockPalette.blockMargin;
 	this.lastHadStud=false;
 };
 Category.prototype.trimBottom=function(){

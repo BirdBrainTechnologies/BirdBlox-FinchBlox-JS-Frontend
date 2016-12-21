@@ -296,8 +296,7 @@ B_BroadcastAndWait.prototype.startAction=function(){
 	return true;
 };
 B_BroadcastAndWait.prototype.updateAction=function(){
-	var hi=CodeManager.checkBroadcastRunning(this.runMem.message);
-	return hi;
+	return CodeManager.checkBroadcastRunning(this.runMem.message);
 };
 
 function B_Message(x,y){

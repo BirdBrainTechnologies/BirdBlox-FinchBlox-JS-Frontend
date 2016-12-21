@@ -15,6 +15,7 @@ BubbleOverlay.setGraphics=function(){
 	BubbleOverlay.triangleW=15;
 	BubbleOverlay.triangleH=7;
 	BubbleOverlay.minW=25;
+	BubbleOverlay.overlap=1;
 };
 BubbleOverlay.prototype.buildBubble=function(){
 	this.buildGroups();
@@ -52,34 +53,35 @@ BubbleOverlay.prototype.close=function(){
 	this.parent.close();
 };
 BubbleOverlay.prototype.display=function(x,upperY,lowerY,innerWidth,innerHeight){
+	var BO=BubbleOverlay;
 	var width=innerWidth+2*this.margin;
-	if(width<BubbleOverlay.minW){
-		width=BubbleOverlay.minW;
+	if(width<BO.minW){
+		width=BO.minW;
 	}
 	var height=innerHeight+2*this.margin;
 	GuiElements.move.group(this.innerGroup,(width-innerWidth)/2,(height-innerHeight)/2);
 
-	var triOffset=(width-BubbleOverlay.triangleW)/2;
+	var triOffset=(width-BO.triangleW)/2;
 	var halfOffset=width/2;
-	var tallH=height+BubbleOverlay.triangleH;
+	var tallH=height+BO.triangleH;
 
 	var arrowDown=(lowerY+tallH>GuiElements.height);
-	var yCoord=lowerY+BubbleOverlay.triangleH;
+	var yCoord=lowerY+BO.triangleH;
 	var xCoord=x-halfOffset;
 	var arrowDir=1;
 	var arrowX=triOffset;
-	var arrowY=0;
+	var arrowY=BO.overlap;
 	if(arrowDown){
 		arrowDir=-1;
 		yCoord=upperY-tallH;
-		arrowY=height;
+		arrowY=height-BO.overlap;
 	}
 	if(xCoord<this.hMargin){
 		arrowX+=xCoord-this.hMargin;
 		xCoord=this.hMargin;
 	}
 	if(xCoord+width>GuiElements.width-this.hMargin){
-		arrowX=width+x-GuiElements.width-BubbleOverlay.triangleW/2+this.hMargin;
+		arrowX=width+x-GuiElements.width-BO.triangleW/2+this.hMargin;
 		xCoord=GuiElements.width-width-this.hMargin;
 	}
 	if(arrowX<0){
@@ -89,7 +91,7 @@ BubbleOverlay.prototype.display=function(x,upperY,lowerY,innerWidth,innerHeight)
 		arrowX=width-BubbleOverlay.triangleW;
 	}
 	GuiElements.move.group(this.group,xCoord,yCoord);
-	GuiElements.update.triangle(this.triangle,arrowX,arrowY,BubbleOverlay.triangleW,BubbleOverlay.triangleH*arrowDir);
+	GuiElements.update.triangle(this.triangle,arrowX,arrowY,BO.triangleW,(BO.triangleH+BO.overlap)*arrowDir);
 	GuiElements.update.rect(this.bgRect,0,0,width,height);
 	this.show();
 };

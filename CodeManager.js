@@ -27,6 +27,9 @@ function CodeManager(){
 	//Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
 	CodeManager.answer=new StringData("");
 	CodeManager.message=new StringData(""); //Stores the broadcast message.
+	CodeManager.sound=function(){};
+	CodeManager.sound.tempo=60; //Default tempo is 60 bpm for sound blocks.
+	CodeManager.sound.volume=50; //Default volume if 50%.
 	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
 	CodeManager.repeatDialogDelay=500;
 	CodeManager.lastDialogDisplayTime=null;
@@ -48,11 +51,12 @@ CodeManager.move=function(){};
 CodeManager.move.start=function(block,x,y){
 	var move=CodeManager.move; //shorthand
 	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
+		GuiElements.overlay.close(); //Close any visible overlays.
 		move.moving=true; //Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
 		var stack=block.unsnap();
-		stack.fly(); //Make the new BlockStack fly (moves it the the drag layer).
+		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
 		move.height=stack.dim.rh; //Store the BlockStack's dimensions.
 		move.width=stack.dim.rw;
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
@@ -63,7 +67,9 @@ CodeManager.move.start=function(block,x,y){
 		move.returnsValue=stack.firstBlock.returnsValue;
 		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
 		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
-		
+
+		move.touchX=x; //Store coords
+		move.touchY=y;
 		move.offsetX=stack.getAbsX()-x; //Store offset.
 		move.offsetY=stack.getAbsY()-y;
 		move.stack=stack; //Store stack.
@@ -509,4 +515,25 @@ CodeManager.checkVariableUsed=function(variable){
 };
 CodeManager.checkListUsed=function(list){
 	return TabManager.checkListUsed(list);
+};
+CodeManager.beatsToMs=function(beats){
+	var tempo=CodeManager.sound.tempo;
+	var res=beats/tempo*60*1000;
+	if(isNaN(res)||!isFinite(res)){
+		return 0;
+	}
+	return res;
+};
+CodeManager.setSoundTempo=function(newTempo){
+	if(isFinite(newTempo)&&!isNaN(newTempo)){
+		if(newTempo>=500){
+			CodeManager.sound.tempo=500;
+		}
+		else if(newTempo<=20){
+			CodeManager.sound.tempo=20;
+		}
+		else{
+			CodeManager.sound.tempo=newTempo;
+		}
+	}
 };

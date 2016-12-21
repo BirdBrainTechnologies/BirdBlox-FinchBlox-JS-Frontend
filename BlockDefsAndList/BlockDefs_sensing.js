@@ -4,7 +4,7 @@
  */
 
 function B_Ask(x,y){
-	CommandBlock.call(this,x,y,"sensing");
+	CommandBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"ask"));
 	this.addPart(new StringSlot(this,"what's your name?"));
 	this.addPart(new LabelText(this,"and wait"));
@@ -84,7 +84,7 @@ B_Ask.prototype.showQuestion=function(){
 
 
 function B_Answer(x,y){
-	ReporterBlock.call(this,x,y,"sensing",Block.returnTypes.string);
+	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"answer"));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
@@ -96,7 +96,7 @@ B_Answer.prototype.startAction=function(){
 };
 
 function B_ResetTimer(x,y){
-	CommandBlock.call(this,x,y,"sensing");
+	CommandBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"reset timer"));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
@@ -108,7 +108,7 @@ B_ResetTimer.prototype.startAction=function(){
 };
 
 function B_Timer(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"timer"));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
@@ -121,7 +121,7 @@ B_Timer.prototype.startAction=function(){
 };
 
 function B_CurrentTime(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"current"));
 	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
 	dS.addOption("year",new SelectionData("year"));
@@ -175,7 +175,7 @@ B_CurrentTime.prototype.startAction=function(){
 ///////////
 
 function B_Touching(x,y){
-	PredicateBlock.call(this,x,y,"sensing");
+	PredicateBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"touching?"));
 }
 B_Touching.prototype = Object.create(PredicateBlock.prototype);
@@ -184,21 +184,21 @@ B_Touching.prototype.constructor = B_Touching;
 
 
 function B_TouchX(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"touch x"));
 }
 B_TouchX.prototype = Object.create(ReporterBlock.prototype);
 B_TouchX.prototype.constructor = B_TouchX;
 
 function B_TouchY(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"touch y"));
 }
 B_TouchY.prototype = Object.create(ReporterBlock.prototype);
 B_TouchY.prototype.constructor = B_TouchY;
 
 function B_DistanceTo(x,y){
-	ReporterBlock.call(this,x,y,"sensing");
+	ReporterBlock.call(this,x,y,"ipad");
 	this.addPart(new LabelText(this,"distance to"));
 }
 B_DistanceTo.prototype = Object.create(ReporterBlock.prototype);

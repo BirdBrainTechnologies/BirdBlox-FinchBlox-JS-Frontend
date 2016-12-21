@@ -7,14 +7,16 @@ function BlockList(){
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
 	cat.push("Hummingbird"); //Capitalized in the way they are displayed on screen.
+	cat.push("Operators");
+	cat.push("Sound");
+	cat.push("iPad");
 	//cat.push("Motion");
 	//cat.push("Looks");
-	//cat.push("Sound");
 	//cat.push("Pen");
-	cat.push("iPad");
+
 	cat.push("Control");
-	cat.push("Sensing");
-	cat.push("Operators");
+	//cat.push("Sensing");
+
 	cat.push("Variables");
 }
 /* Returns the id for a category given its index in the category list. Ids are lowercase.
@@ -106,8 +108,20 @@ BlockList.populateCat_looks=function(category){
 	category.trimBottom();
 }
 BlockList.populateCat_sound=function(category){
-	
-}
+	category.addLabel("Coming soon! Sounds don't work yet.");
+	category.addSpace();
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlaySoundUntilDone");
+	category.addBlockByName("B_StopAllSounds");
+	category.addSpace();
+	category.addBlockByName("B_RestForBeats");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.addSpace();
+	category.addBlockByName("B_ChangeTempoBy");
+	category.addBlockByName("B_SetTempoTo");
+	category.addBlockByName("B_Tempo");
+	category.trimBottom();
+};
 BlockList.populateCat_pen=function(category){
 	
 }
@@ -119,9 +133,18 @@ BlockList.populateCat_ipad=function(category){
 	category.addBlockByName("B_DeviceRelativeAltitude");
 	category.addBlockByName("B_DeviceAcceleration");
 	category.addBlockByName("B_DeviceOrientation");
+	category.addSpace();
 	category.addBlockByName("B_Display");
+	category.addSpace();
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Answer");
+	category.addSpace();
+	category.addBlockByName("B_ResetTimer");
+	category.addBlockByName("B_Timer");
+	category.addSpace();
+	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
-}
+};
 BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_WhenFlagTapped");
 	//category.addBlockByName("B_WhenIAmTapped");
@@ -145,22 +168,7 @@ BlockList.populateCat_control=function(category){
 	category.trimBottom();
 }
 BlockList.populateCat_sensing=function(category){
-	//category.addBlockByName("B_Touching");
-	//category.addSpace();
-	category.addBlockByName("B_Ask");
-	category.addBlockByName("B_Answer");
-	category.addSpace();
-	//category.addBlockByName("B_TouchX");
-	//category.addBlockByName("B_TouchY");
-	//category.addSpace();
-	//category.addBlockByName("B_DistanceTo");
-	//category.addSpace();
-	category.addBlockByName("B_ResetTimer");
-	category.addBlockByName("B_Timer");
-	category.addSpace();
-	category.addBlockByName("B_CurrentTime");
-	category.trimBottom();
-	
+
 }
 BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_Add");

@@ -8,7 +8,7 @@ function B_HBServo(x,y){
 	this.addPart(new HBDropSlot(this));
 	this.addPart(new LabelText(this,"Servo"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
-	this.addPart(new NumSlot(this,0,true)); //Positive
+	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
 }
 B_HBServo.prototype = Object.create(CommandBlock.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -45,7 +45,7 @@ function B_HBMotor(x,y){
 	this.addPart(new HBDropSlot(this));
 	this.addPart(new LabelText(this,"Motor"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,0, false, true)); //Integer
 }
 B_HBMotor.prototype = Object.create(CommandBlock.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -62,7 +62,7 @@ function B_HBVibration(x,y){
 	this.addPart(new HBDropSlot(this));
 	this.addPart(new LabelText(this,"Vibration"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
-	this.addPart(new NumSlot(this,0,true)); //Positive
+	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
 }
 B_HBVibration.prototype = Object.create(CommandBlock.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -81,7 +81,7 @@ function B_HBLed(x,y){
 	this.addPart(new HBDropSlot(this));
 	this.addPart(new LabelText(this,"LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
-	this.addPart(new NumSlot(this,0,true)); //Positive
+	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
 }
 B_HBLed.prototype = Object.create(CommandBlock.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -175,11 +175,11 @@ function B_HBTriLed(x,y){
 	this.addPart(new LabelText(this,"TRI-LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"R"));
-	this.addPart(new NumSlot(this,0,true)); //Positive.
+	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"G"));
-	this.addPart(new NumSlot(this,0,true)); //Positive.
+	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"B"));
-	this.addPart(new NumSlot(this,0,true)); //Positive.
+	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
 }
 B_HBTriLed.prototype = Object.create(CommandBlock.prototype);
 B_HBTriLed.prototype.constructor = B_HBTriLed;

@@ -468,9 +468,10 @@ Block.prototype.highlight=function(){
  */
 Block.prototype.snap=function(block){ //Fix! documentation
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
-	if(!block.bottomOpen&&this.nextBlock!=null){ //Fix! block.bottomOpen should be for last block.
+	var bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
 		var bG=BlockGraphics.command;
-		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.height+bG.shiftY);
+		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.stack.getHeight()+bG.shiftY);
 	}
 	var stack=this.stack;
 	if(block.stack!=null) {
@@ -487,7 +488,6 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	var upperBlock=this; //The Block which will go above the inserted stack.
 	var lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
 	var topStackBlock=block; //The top Block in the stack to be inserted.
-	var bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
 
 	//The top of where the stack is inserted note which Blocks are above/below them.
 	upperBlock.nextBlock=topStackBlock;

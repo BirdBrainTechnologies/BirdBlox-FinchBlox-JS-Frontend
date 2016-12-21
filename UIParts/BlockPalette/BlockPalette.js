@@ -26,6 +26,11 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.bnDefaultFont="Arial";
 	BlockPalette.bnDefaultFontSize=16;
 	BlockPalette.bnDefaultFontCharHeight=12;
+
+	BlockPalette.labelFont="Arial";
+	BlockPalette.labelFontSize=13;
+	BlockPalette.labelFontCharHeight=12;
+	BlockPalette.labelColor=Colors.white;
 }
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;

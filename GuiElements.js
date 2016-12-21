@@ -42,6 +42,7 @@ GuiElements.setConstants=function(){
 	ImageLists();
 	BlockList();
 	Colors();
+	Sounds();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	HBStatusLight.setConstants();
 	TitleBar.setGraphics();
@@ -492,24 +493,42 @@ GuiElements.measure=function(){};
  * @return {number} - The width of the text element.
  */
 GuiElements.measure.textWidth=function(textE){ //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE,false);
+};
+GuiElements.measure.textHeight=function(textE){ //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE,true);
+};
+/* Measures the width/height of an existing SVG text element.
+ * @param {SVG text} textE - The text element to measure.
+ * @param {bool} height - true/false for width/height, respectively.
+ * @return {number} - The width/height of the text element.
+ */
+GuiElements.measure.textDim=function(textE, height){ //Measures an existing text SVG element
 	if(textE.textContent==""){ //If it has no text, the width is 0.
 		return 0;
 	}
 	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
 	var bbox=textE.getBBox();
-	var textW=bbox.width; //Gets the width of the bounding box.
-	if(textW==0){ //The text element probably is not visible on the screen.
+	var textD=bbox.width; //Gets the width of the bounding box.
+	if(height){
+		textD=bbox.height; //Gets the height of the bounding box.
+	}
+	if(textD==0){ //The text element probably is not visible on the screen.
 		var parent=textE.parentNode; //Store the text element's current (hidden) parent.
 		GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
 		bbox=textE.getBBox(); //Now get its bounding box.
-		textW=bbox.width;
+		textD=bbox.width;
+		if(height){
+			textD=bbox.height;
+		}
 		textE.remove(); //Remove it from the temp layer.
 		if(parent!=null){
 			parent.appendChild(textE); //Add it back to its old parent.
 		}
 	}
-	return textW; //Return the width.
-}
+	return textD; //Return the width/height.
+};
+
 /* Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
  * @param {string} font - The font family of the text element.

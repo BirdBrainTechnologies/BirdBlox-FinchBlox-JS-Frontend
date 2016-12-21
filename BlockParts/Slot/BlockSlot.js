@@ -35,9 +35,9 @@ BlockSlot.prototype.updateAlign=function(x,y){
 	}
 }
 BlockSlot.prototype.snap=function(block){
-	if(!block.bottomOpen&&this.child!=null){
+	if(!block.getLastBlock().bottomOpen&&this.child!=null){
 		var BG=BlockGraphics.command;
-		this.child.unsnap().shiftOver(BG.shiftX,block.height+BG.shiftY);
+		this.child.unsnap().shiftOver(BG.shiftX,block.stack.getHeight()+BG.shiftY);
 	}
 	var stack=this.parent.stack;
 	if(stack!=null&&block.stack!=null) {

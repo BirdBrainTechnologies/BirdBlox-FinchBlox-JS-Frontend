@@ -23,7 +23,7 @@ BlockGraphics.SetBlock=function(){
 };
 BlockGraphics.SetCommand=function(){
 	BlockGraphics.command=function(){};
-	BlockGraphics.command.height=20;
+	BlockGraphics.command.height=27;
 	BlockGraphics.command.width=40;
 	BlockGraphics.command.vMargin=5;
 	BlockGraphics.command.hMargin=5;
@@ -43,8 +43,8 @@ BlockGraphics.SetCommand=function(){
 }
 BlockGraphics.SetReporter=function(){
 	BlockGraphics.reporter=function(){};
-	BlockGraphics.reporter.height=18;//16
-	BlockGraphics.reporter.width=18;//16
+	BlockGraphics.reporter.height=22;//16
+	BlockGraphics.reporter.width=22;//16
 	BlockGraphics.reporter.vMargin=3;
 	BlockGraphics.reporter.hMargin=7;//5
 	//BlockGraphics.reporter.pMargin=5; //Margin between parts
@@ -59,7 +59,7 @@ BlockGraphics.SetReporter=function(){
 }
 BlockGraphics.SetPredicate=function(){
 	BlockGraphics.predicate=function(){};
-	BlockGraphics.predicate.height=18;//16
+	BlockGraphics.predicate.height=22;//16
 	BlockGraphics.predicate.width=12;
 	BlockGraphics.predicate.vMargin=3;
 	BlockGraphics.predicate.hMargin=10;
