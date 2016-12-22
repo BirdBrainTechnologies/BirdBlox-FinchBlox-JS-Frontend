@@ -2,8 +2,9 @@
 1. [Overview](#overview)
 2. [Bluetooth pairing system](#bluetooth-pairing-system)
 3. [List of requests](#list-of-requests)
+4. [Overview (for frontend developers)]
 
-## Overview
+## Overview (for backend developers)
 
 This is the code for the BirdBlox JavaScript frontend.
 It is responsible for handling all the UI, block execution,
@@ -493,3 +494,198 @@ the backend should call the JS function:
 The frontend will then load and display the file.  Do not
 save the file, as the front end will take care of this
 if necessary.
+
+## Overview (for frontend developers)
+1. [UI Overview](#ui-overview)
+2. [Block execution](#block-execution)
+3. [Defining Blocks](#defining-blocks)
+4. [Data types](#data-types)
+5. [Categories](#categories)
+
+Before reading this section, you may want to read the [overview for 
+frontend developers]() and the [Bluetooth pairing system]() to understand
+how the backend will be interacting with the application.
+
+### UI Overview
+
+All the UI for the frontend is generated dynamically when the application
+is loaded.  In fact, the only HTML file in the project consists primarily
+of script tags linking to the .js files, and a single SVG tag, which 
+the rest of the UI is housed within.  Using an SVG instead of a canvas
+or other html elements means that the interface is sharp on high-resolution
+screens and looks the same on all devices.
+
+The UI initializes starting from the file GuiElements.js.  A number
+of groups are created as layers for the UI, and then GuiElements
+goes through two initialization phases.  During the first, GuiElements
+sets and computes the values of constants (elements widths, etc.) which
+are then used during the second phase when elements of the UI are actually
+drawn.  This means that constants set in the first phase (for example
+the width of the sidebar) can be used by other classes during the drawing
+phase, even if they appear before the class where the constant was set
+Since classes in JS are essentially functions, the constant setting
+phase of most classes is triggered by running a sub-function called 
+setGraphics or setConstants, then the drawing phase is triggered 
+by running the class's function itself.  See BlockPalette.js for an 
+example of this.  All constant values used in the UI (block dimensions,
+colors, fonts, etc.) are stored in a SetConstants or a similar function.
+No values are hardcoded into the main code.
+
+### Block execution
+
+Most messages passed to blocks (stop, flag, broadcast events, etc.) are
+passed recursively.  They originate in CodeManager.js, which calls
+TabManager.js (which deals with the tab bar at the top of the screen)
+It then passages the message to all its tabs.  Each tab calls functions
+in that tab's BlockStacks.  Each BlockStack in turn tells the first Block
+in that stack, which tells the next block, etc.  At the same time, Blocks
+pass messages to their Slots and BlockSlots (found in loops and if statements).
+Slots pass messages to the Blocks connected to them, and BlockSlots to the 
+first Block within them.
+
+Block execution occurs similarly, with a timer (housed in CodeManager) 
+firing repeatedly and triggering updates in each Tab, BlockStack, and
+whichever block is currently executing within that stack.  Each BlockStack has a
+pointer to the currently executing Block within it.  When a Block's execution
+is updated using Block.updateRun().  For Command Blocks (blocks which are
+rectangular and don't return a value), this function returns the next Block
+to run.  For Reporter and Predicate Blocks (which return a value), the
+updateRun() function returns true/false to indicate if it is still
+running.  
+
+### Defining Blocks
+
+Blocks are defined in the various BlockDefs files for each category.
+These definitions determine how the Block looks and what it does
+when executed.  
+
+When the Block is told to update, it first updates all of the Blocks
+in its Slots.  When they have finished, the Block runs Block.startAction().
+This function defines the Block's actual behavior and is overridden by
+classes derived from the Block class.  It returns `false` if the
+Block is done executing, and `true` if it still needs to be updated.
+Block.updateAction() is called on subsequent passes, until the Block
+finally returns `false`.  
+
+Here's an example from the Wait Block (defined in BlockDefs_control.js)
+
+```javascript
+function B_Wait(x,y){
+      //Derived from CommandBlock
+      //Category ("control") determines colors
+    CommandBlock.call(this,x,y,"control");
+      //Build Block out of things found in the BlockParts folder
+    this.addPart(new LabelText(this,"wait"));
+    this.addPart(new NumSlot(this,1,true)); //Must be positive.
+    this.addPart(new LabelText(this,"secs"));
+}
+B_Wait.prototype = Object.create(CommandBlock.prototype);
+B_Wait.prototype.constructor = B_Wait;
+/* Records current time. */
+B_Wait.prototype.startAction=function(){
+      //Each Block has runMem to store information for that execution
+    var mem=this.runMem;
+    mem.startTime=new Date().getTime();
+      //Extract a positive value from first slot
+    mem.delayTime=this.slots[0].getData().getValueWithC(true)*1000;
+    return true; //Still running
+};
+/* Waits until current time exceeds stored time plus delay. */
+B_Wait.prototype.updateAction=function(){
+    var mem=this.runMem;
+    if(new Date().getTime()>=mem.startTime+mem.delayTime){
+        return false; //Done running
+    }
+    else{
+        return true; //Still running
+    }
+};
+```
+Here's an example of a reporter with a DropSlot
+```javascript
+function B_Split(x,y){
+      //Split is a ReporterBlock that returns a list
+    ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
+      //Add parts with default values
+    this.addPart(new LabelText(this,"split"));
+    this.addPart(new StringSlot(this,"hello world"));
+    this.addPart(new LabelText(this,"by"));
+      //New DropSlot which numbers, strings, and bools can snap to
+    var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+      //Add options to select from
+      //"enter_text" is a special option; tells InputPad to show prompt dialog
+    dS.addOption("Enter text",new SelectionData("enter_text"));
+    dS.addOption("letter",new SelectionData("letter"));
+    dS.addOption("whitespace",new SelectionData("whitespace"));
+    dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+    this.addPart(dS);
+}
+B_Split.prototype = Object.create(ReporterBlock.prototype);
+B_Split.prototype.constructor = B_Split;
+/* Returns a list made from splitting the string by the provided character. */
+B_Split.prototype.startAction=function(){
+    var string1=this.slots[0].getData().getValue();
+    var splitD=this.slots[1].getData();
+    var resultArray;
+      //...
+      // Code which sets resultArray
+      //...
+    var dataArray=new Array(resultArray.length);
+    for(var i=0;i<resultArray.length;i++){
+        dataArray[i]=new StringData(resultArray[i]);
+    }
+      //Return value specified in this.resultData
+    this.resultData=new ListData(dataArray);
+    return false; //Done running
+};
+```
+
+In summary, `this.slots[i].getData()` is used to access data from Slots,
+`this.runMem` is temporary storage that persists during a Block's execution,
+and `this.resultData` is used to return a value.  
+
+Global variables (like `tempo` for sounds) are all stored in 
+CodeManager.js.
+
+### Data types
+
+Data in BirdBlox is automatically cast from strings, to numbers, to booleans
+as the connections between blocks require.  For example, if the string
+"3" is stored in a variable and the number 1 is added to it with the 
+addition block, "3" is automatically converted to 3, which one is added
+to, returning 4.  To enable this, a number of Data classes are used including
+StringData, NumData, BoolData, ListData (for arrays), and SelectionData 
+(used internally when picking from DropSlots).  
+
+Each Data class has functions
+`.asNum()`, `.asString()`, `.asList()`.  So in theory, a ListData
+could be converted into a BoolData.  However, while all conversions 
+will successfully execute, conversions that make no sense are marked as
+invalid by setting `.isValid` to false.
+
+All values stored in Slots and returned by Blocks are wrapped in these
+Data classes.  To extract these values, call `.getValue()`, or if
+you are not sure that the data is the correct type (a NumData, for example),
+you can call `data.AsNum().getValue()` to be sure that a valid number
+will be returned.  
+
+NumData also has special functions 
+`.getValueInR(num min, num max, bool positive, bool integer)` and
+`.getValueWithC(bool positive, bool integer)` to get a number in a 
+certain range or with specific constraints, respectively.  Note that
+slots such as NumSlots and BoolSlots automatically take care of running
+`.asNum()` or `.asBool()` when `slots[i].getData()` is called.  However,
+if your number must be in a specific range or be an integer, `.getValueWithC`
+still should be used instead of `.getValue()`.
+
+### Categories
+
+To add a new Block to a category, simply open BlockList.js and add
+an entry in the corresponding `BlockList.populateCat_[category name]()`
+function.  Blocks will appear in order.
+
+To reorder categories, adjust the code in the `BlockList()` function in 
+BlockList.js to reflect the new ordering.
+
+To change the color of a category, check out the `Colors.setCategory()`
+function in Colors.js 
