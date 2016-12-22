@@ -1,8 +1,8 @@
 # BirdBlox
-1. [Overview](#overview)
+1. [Overview (for backend developers)](#overview-for-backend-developers)
 2. [Bluetooth pairing system](#bluetooth-pairing-system)
 3. [List of requests](#list-of-requests)
-4. [Overview (for frontend developers)]
+4. [Overview (for frontend developers)](#overview-for-frontend-developers)
 
 ## Overview (for backend developers)
 
@@ -80,6 +80,7 @@ be done by the backend later asynchronously.
 4. [Dialogs](#dialogs)
 5. [Settings](#settings)
 6. [File management](#file-management)
+7. [Sound blocks](#sound-blocks)
 
 ### Bluetooth connections
 
@@ -494,6 +495,39 @@ the backend should call the JS function:
 The frontend will then load and display the file.  Do not
 save the file, as the front end will take care of this
 if necessary.
+
+### Sound blocks
+
+#### Play sound
+
+    Get request format:
+    http://localhost:22179/sound/play/[sound id]
+    Example:
+    http://localhost:22179/sound/play/bell_ring
+
+Plays a sound from the pre-determined sound library.  Sounds
+should be able to overlap with each other, if this request
+is made while another sound is playing.  Sound ids are lowercase
+ and use underscores instead of spaces.  They are used internally,
+ while friendly names are presented to the user.
+
+#### Stop sounds
+
+    Get request format:
+    http://localhost:22179/sound/stop
+
+Stops library sounds that are currently playing.  Does not stop
+note sounds.
+
+#### Play note
+
+    Get request format:
+    http://localhost:22179/sound/note/[note number]/[duration in ms]
+    Examples:
+    http://localhost:22179/sound/note/3/4000
+
+Plays a note for the specified duration in ms.  Notes are numbered
+the same way they are in Snap!.
 
 ## Overview (for frontend developers)
 1. [UI Overview](#ui-overview)
