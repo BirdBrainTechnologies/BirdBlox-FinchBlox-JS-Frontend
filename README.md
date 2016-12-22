@@ -1,4 +1,9 @@
 # BirdBlox
+1. [Overview](#overview)
+2. [Bluetooth pairing system](#bluetooth-pairing-system)
+3. [List of requests](#list-of-requests)
+
+## Overview
 
 This is the code for the BirdBlox JavaScript frontend.
 It is responsible for handling all the UI, block execution,
@@ -6,7 +11,7 @@ etc. for the BirdBlox application.  It is designed to run
 inside of a containing application (iOS or Android apps, 
 for example).  Anything the js code can't do by itself 
 (issuing bluetooth commands, showing dialogs, etc.) is 
-passed onto the containing application (backend) in the 
+passed on to the containing application (backend) in the 
 form of get/post requests.
 
 The responsibilities of the backend are the following:
@@ -68,6 +73,12 @@ and then the Bluetooth connection/disconnection itself may
 be done by the backend later asynchronously.
 
 ## List of requests
+1. [Bluetooth connections](#bluetooth-connections)
+2. [Hummingbird blocks](#hummingbird-blocks)
+3. [Device blocks](#device-blocks)
+4. [Dialogs](#dialogs)
+5. [Settings](#settings)
+6. [File management](#file-management)
 
 ### Bluetooth connections
 
@@ -313,21 +324,6 @@ barometer
 
 \[Response\]: Returns a string indicating the device's orientation.
 
-#### Device Orientation
-
-    Get request format:
-    http://localhost:22179/iPad/orientation
-    Example responses:
-    Faceup
-    Landscape: home button on left
-    Landscape: home button on right
-    Portrait: home button on bottom
-    Portrait: home button on top
-    Facedown
-    In between
-
-\[Response\]: Returns a string indicating the device's orientation.
-
 ### Dialogs
 
 When the frontend would like to show a dialog, it will use a get request
@@ -384,7 +380,7 @@ escaped, even single quotes.
 For choice dialogs:
 
     Get request format:
-    http://localhost:22179/iPad/choiceresponse
+    http://localhost:22179/iPad/choice_response
     Example responses:
     0
     1
@@ -444,9 +440,9 @@ does not exist.
 #### Rename file
 
     Get request format:
-    http://localhost:22179/rename/[filename]/[new filename]
+    http://localhost:22179/data/rename/[filename]/[new filename]
     Example:
-    http://localhost:22179/rename/MyProject/HBProject
+    http://localhost:22179/data/rename/MyProject/HBProject
 
 When this command is run, rename the specified file.  Overwrite the
 new file name, if it exists.  If the specified file does not exist,
