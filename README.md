@@ -22,7 +22,7 @@ The responsibilities of the backend are the following:
   if an internet connection is present.
 * Cache the frontend locally, so the app can be used 
   without an internet connection.
-* Connect to and communicate with bluetooth-enabled robots
+* Connect to and communicate with bluetooth-enabled robots.
 * Provide sensor information (accelerometers, etc.) from the
   device to the frontend when requested.
 * Display dialogs when requested.
@@ -30,7 +30,7 @@ The responsibilities of the backend are the following:
 * Save, open, and delete files to app storage.
 * Export/import files to/from other applications on the
   device.
-* Save/access key-value pairs used to store settings
+* Save/access key-value pairs used to store settings.
 
 Communication between the frontend and backend occurs primarily
 through get requests issued by the frontend.  Post requests
@@ -42,7 +42,7 @@ reverse direction is required.
 
 The backend and frontend communicate about specific Bluetooth devices 
 using the devices' names.  To ensure consistent naming, the backend
-should create a list of encountered Bluetooth device ids and their assigned names
+should create a list of encountered Bluetooth device ids and their assigned names.
 When a device is discovered, the backend should add its unique id to 
 the list, along with its name.  If a device already has that name,
 the second device should have a "2" appended to it, etc. to ensure
@@ -51,7 +51,7 @@ that all devices the backend has seen have a unique name.
 The backend and frontend will use the names on this list to refer to
 specific devices.  A device's name on the list should be changed only
 when the frontend issues a "rename hummingbird" request.  Anywhere
-[HB name] is used throughout this document, it is referring to the name
+`[HB name]` is used throughout this document, it is referring to the name
 on this list.
 
 The frontend will also initialize bluetooth scans using the `discover`
@@ -67,7 +67,7 @@ it on the list).  If it encounters this lost BLE device during a
 scan ("discovery") in the future, it should reconnect to it.
 The `names` request returns this list.
 
-The frontend will use commands connect/disconnect commands to
+The frontend will use connect/disconnect commands to
 request that BLE devices be added/removed from the connected 
 devices list.  The list modification should occur immediately,
 and then the Bluetooth connection/disconnection itself may
@@ -107,7 +107,7 @@ An empty string should be returned if no devices have been found.
     
 This request should add a hummingbird to the connection (names) list.
 If the provided HB name does not appear on the master list of encountered 
-hummingbirds, and this its Bluetooth id cannot be determined, simply ignore
+hummingbirds, and its Bluetooth id cannot be determined, simply ignore
 this get request.
 
 #### Disconnect from a device
@@ -118,7 +118,7 @@ this get request.
     http://localhost:22179/hummingbird/My%20HB/disconnect
     
 This request should remove the hummingbird from the connection list and
-disconnect it.  It should remain, however on the 
+disconnect it.  It should remain, however, on the 
 list of encountered devices.  If the provided HB name has not been
 encountered before or is not connected, ignore the request.
 
@@ -132,7 +132,7 @@ encountered before or is not connected, ignore the request.
 When this request is received, the backend should rename the 
 specified device.  If the device is not currently connected, 
 the request should be ignored.  The list of encountered devices
-to reflect the new name.
+should update to reflect the new name.
 
 #### Hummingbird status
 
@@ -537,7 +537,8 @@ the same way they are in Snap!.
 5. [Categories](#categories)
 
 Before reading this section, you may want to read the [overview for 
-frontend developers]() and the [Bluetooth pairing system]() to understand
+backend developers](#overview-for-backend-developers) and the 
+[Bluetooth pairing system](#bluetooth-pairing-system) to understand
 how the backend will be interacting with the application.
 
 ### UI Overview
@@ -556,7 +557,7 @@ sets and computes the values of constants (elements widths, etc.) which
 are then used during the second phase when elements of the UI are actually
 drawn.  This means that constants set in the first phase (for example
 the width of the sidebar) can be used by other classes during the drawing
-phase, even if they appear before the class where the constant was set
+phase, even if they appear before the class where the constant was set.
 Since classes in JS are essentially functions, the constant setting
 phase of most classes is triggered by running a sub-function called 
 setGraphics or setConstants, then the drawing phase is triggered 
@@ -570,7 +571,7 @@ No values are hardcoded into the main code.
 Most messages passed to blocks (stop, flag, broadcast events, etc.) are
 passed recursively.  They originate in CodeManager.js, which calls
 TabManager.js (which deals with the tab bar at the top of the screen)
-It then passages the message to all its tabs.  Each tab calls functions
+It then passes the message to all its tabs.  Each tab calls functions
 in that tab's BlockStacks.  Each BlockStack in turn tells the first Block
 in that stack, which tells the next block, etc.  At the same time, Blocks
 pass messages to their Slots and BlockSlots (found in loops and if statements).
@@ -683,7 +684,7 @@ CodeManager.js.
 
 ### Data types
 
-Data in BirdBlox is automatically cast from strings, to numbers, to booleans
+Data in BirdBlox is automatically cast to strings, numbers, or booleans
 as the connections between blocks require.  For example, if the string
 "3" is stored in a variable and the number 1 is added to it with the 
 addition block, "3" is automatically converted to 3, which one is added
@@ -693,7 +694,7 @@ StringData, NumData, BoolData, ListData (for arrays), and SelectionData
 
 Each Data class has functions
 `.asNum()`, `.asString()`, `.asList()`.  So in theory, a ListData
-could be converted into a BoolData.  However, while all conversions 
+could be converted into a BoolData, for example.  However, while all conversions 
 will successfully execute, conversions that make no sense are marked as
 invalid by setting `.isValid` to false.
 
