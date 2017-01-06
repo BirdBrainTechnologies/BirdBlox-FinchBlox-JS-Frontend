@@ -18,10 +18,12 @@ form of get/post requests.
 The responsibilities of the backend are the following:
 * Display the HTML/JS frontend in some sort of webview
   that the user can interact with.
-* Re-download the frontend each time the app is opened,
-  if an internet connection is present.
+* Download the frontend the first time the app is opened.
 * Cache the frontend locally, so the app can be used 
   without an internet connection.
+* Download the file version.txt each time the frontend is
+  opened, and re-download all files if the number in the 
+  version.txt file has increased.
 * Connect to and communicate with bluetooth-enabled robots.
 * Provide sensor information (accelerometers, etc.) from the
   device to the frontend when requested.

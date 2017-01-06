@@ -10,7 +10,7 @@ Colors.setCommon=function(){
 	Colors.lightGray="#3d3d3d";
 	Colors.darkGray="#262626";
 	Colors.black="#000";
-}
+};
 Colors.setCategory=function(){
 	Colors.hummingbird="#FF9600";
 	Colors.motion="#0000FF";
@@ -23,17 +23,17 @@ Colors.setCategory=function(){
 	Colors.operators="#44FF00";
 	Colors.variables="#FF5B00";
 	Colors.lists="#FF0000";
-}
+};
 Colors.setMultipliers=function(){
 	Colors.gradStart=1;
 	Colors.gradEnd=0.5;
 	Colors.gradDarkStart=0.25;
 	Colors.gradDarkEnd=0.5;
-}
+};
 Colors.createGradients=function(){
 	Colors.createGradientSet("gradient_",Colors.gradStart,Colors.gradEnd);
 	Colors.createGradientSet("gradient_dark_",Colors.gradDarkStart,Colors.gradDarkEnd);
-}
+};
 Colors.createGradientSet=function(name,multStart,multEnd){
 	var categoryCount=BlockList.catCount();
 	for(var i=0; i<categoryCount;i++){
@@ -58,10 +58,10 @@ Colors.darkenColor=function(color,amt){
 		result="0"+result;
 	}
 	return "#"+result;
-}
+};
 Colors.getColor=function(category){
 	return Colors[category];
-}
+};
 Colors.getGradient=function(category){
 	return "url(#gradient_"+category+")";
-}
+};

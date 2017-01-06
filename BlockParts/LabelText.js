@@ -1,4 +1,4 @@
-LabelText //Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
+//Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
 
 function LabelText(parent,text){
 	this.text=text;
@@ -14,7 +14,7 @@ function LabelText(parent,text){
 LabelText.prototype.updateAlign=function(x,y){
 	this.move(x,y+this.height/2);
 	return this.width;
-}
+};
 LabelText.prototype.updateDim=function(){
 	if(this.width==0){
 		GuiElements.layers.temp.appendChild(this.textE);
@@ -22,23 +22,23 @@ LabelText.prototype.updateDim=function(){
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}
-}
+};
 LabelText.prototype.generateText=function(text){
 	var obj=BlockGraphics.create.labelText(text,this.parent.group);
 	TouchReceiver.addListenersChild(obj,this.parent);
 	return obj;
-}
+};
 LabelText.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
 	BlockGraphics.update.text(this.textE,x,y);
-}
+};
 LabelText.prototype.duplicate=function(parentCopy){
 	return new LabelText(parentCopy,this.text);
-}
+};
 LabelText.prototype.textSummary=function(){
 	return this.text;
-}
+};
 LabelText.prototype.show=function(){
 	if(!this.visible){
 		this.parent.group.appendChild(this.textE);
