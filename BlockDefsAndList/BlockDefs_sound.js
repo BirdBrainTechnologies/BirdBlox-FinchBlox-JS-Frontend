@@ -144,9 +144,9 @@ B_RestForBeats.prototype.updateAction=function(){
 function B_PlayNoteForBeats(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play note"));
-	this.addPart(new NumSlot(this,20,true,true)); //Positive integer
+	this.addPart(new NumSlot(this,60,true,true)); //Positive integer
 	this.addPart(new LabelText(this,"for"));
-	this.addPart(new NumSlot(this,0.2,true)); //Positive
+	this.addPart(new NumSlot(this,1,true)); //Positive
 	this.addPart(new LabelText(this,"beats"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
