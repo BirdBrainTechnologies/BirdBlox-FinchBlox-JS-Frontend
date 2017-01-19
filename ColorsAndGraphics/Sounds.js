@@ -12,14 +12,15 @@ Sounds.loadNames=function(parentCallback){
 		HtmlServer.sendRequest("server/log/LOG:Got_Names"+Sounds.names.length);
 		for (var i = 0; i < Sounds.names.length; i++) {
 			var request = "sound/duration/" + Sounds.getSoundName(i);
-			var callback = function(duration) {
-				HtmlServer.sendRequest("server/log/LOG:Got_duration"+ Sounds.getSoundName(i));
+			var durationCallback = [];
+			durationCallback[i] = function(duration) {
+				HtmlServer.sendRequest("server/log/LOG:Got_duration:" + i + ":"+ Sounds.getSoundName(i));
 				Sounds.durations[i] = duration;
 				if(i == Sounds.names.length - 1) {
 					parentCallback();
 				}
 			}
-			HtmlServer.sendRequestWithCallback(request,callback);
+			HtmlServer.sendRequestWithCallback(request,durationCallback[i]);
 		}	
 	};
 	HtmlServer.sendRequestWithCallback(request, callback);
