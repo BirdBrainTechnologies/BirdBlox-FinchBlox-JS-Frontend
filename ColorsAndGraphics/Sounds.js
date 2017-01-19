@@ -2,6 +2,7 @@ function Sounds() {
 	Sounds.names = [];
 	Sounds.durations = [];
 	Sounds.loadNames();
+	Sounds.isDoneLoading = false;
 }
 
 Sounds.loadNames=function(){
@@ -14,6 +15,9 @@ Sounds.loadNames=function(){
 			var callback = function(duration) {
 				HtmlServer.sendRequest("server/log/LOG:Got_duration");
 				Sounds.durations[i] = duration;
+				if(i == Sounds.names.length - 1) {
+					Sounds.isDoneLoading = true;
+				}
 			}
 			HtmlServer.sendRequestWithCallback(request,callback);
 		}	
