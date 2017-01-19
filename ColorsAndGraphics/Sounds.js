@@ -8,15 +8,14 @@ Sounds.loadNames=function(){
 	var request = "sound/names";
 	var callback = function(response) {
 		Sounds.names = response.split("\n")
+		HtmlServer.sendRequest("server/log/LOG:" + Sounds.names.toString());
 		Sounds.loadDurations();
 	};
 	HtmlServer.sendRequestWithCallback(request, callback);
 };
 
 Sounds.loadDurations=function(){
-	var callback = function(index, duration) {
-		Sounds.durations[index] = duration;
-	}
+	HtmlServer.sendRequest("server/log/LOG:Loading Durations");
 	for (var i = 0; i < Sound.names.length; i++) {
 		var request = "sound/duration/" + Sounds.getSoundName(i);
 		var callback = function(duration) {
