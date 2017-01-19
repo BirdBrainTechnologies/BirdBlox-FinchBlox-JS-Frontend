@@ -37,7 +37,7 @@ Sounds.getSoundCount=function(){
 	return Sounds.names.length;
 };
 Sounds.indexFromName=function(soundName){
-	return Sounds.names.indexOf(soundId);
+	return Sounds.names.indexOf(soundName);
 };
 Sounds.checkNameIsValid=function(soundName){
 	return Sounds.indexFromName(soundName)>=0;
