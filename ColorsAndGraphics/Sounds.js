@@ -8,22 +8,18 @@ Sounds.loadNames=function(){
 	var request = "sound/names";
 	var callback = function(response) {
 		Sounds.names = response.split("\n")
-		HtmlServer.sendRequest("server/log/LOG:" + Sounds.names.toString());
-		Sounds.loadDurations();
+		HtmlServer.sendRequest("server/log/LOG:Got_Names"+Sounds.names.length);
+		for (var i = 0; i < Sounds.names.length; i++) {
+			var request = "sound/duration/" + Sounds.getSoundName(i);
+			var callback = function(duration) {
+				HtmlServer.sendRequest("server/log/LOG:Got_duration");
+				Sounds.durations[i] = duration;
+			}
+			HtmlServer.sendRequestWithCallback(request,callback);
+		}	
 	};
 	HtmlServer.sendRequestWithCallback(request, callback);
 };
-
-Sounds.loadDurations=function(){
-	HtmlServer.sendRequest("server/log/LOG:Loading Durations");
-	for (var i = 0; i < Sound.names.length; i++) {
-		var request = "sound/duration/" + Sounds.getSoundName(i);
-		var callback = function(duration) {
-			Sounds.durations[i] = duration;
-		}
-		HtmlServer.sendRequestWithCallback(request,callback);
-	}	
-}
 
 Sounds.getSoundDuration=function(index){
 	return Sounds.durations[index];
