@@ -1,12 +1,10 @@
 function Sounds(callback) {
 	Sounds.names = [];
 	Sounds.durations = [];
-	Sounds.loadNames();
-	Sounds.isDoneLoading = false;
-	callback();
+	Sounds.loadNames(callback);
 }
 
-Sounds.loadNames=function(){
+Sounds.loadNames=function(parentCallback){
 	var request = "sound/names";
 	var callback = function(response) {
 		Sounds.names = response.split("\n")
@@ -17,7 +15,7 @@ Sounds.loadNames=function(){
 				HtmlServer.sendRequest("server/log/LOG:Got_duration");
 				Sounds.durations[i] = duration;
 				if(i == Sounds.names.length - 1) {
-					Sounds.isDoneLoading = true;
+					parentCallback();
 				}
 			}
 			HtmlServer.sendRequestWithCallback(request,callback);
