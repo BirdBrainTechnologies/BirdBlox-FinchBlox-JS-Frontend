@@ -40,8 +40,8 @@ GuiElements.setConstants=function(){
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
-	var callback = function() {
-	BlockList();
+	var callback = function() {BlockList();}
+	Sounds(callback);
 	Colors();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	HBStatusLight.setConstants();
@@ -68,9 +68,6 @@ GuiElements.setConstants=function(){
 	CodeManager();
 	HummingbirdManager();
 	SaveManager();
-	}
-	//this is because Sounds makes calls to the server we need to wait for
-	Sounds(callback);
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
