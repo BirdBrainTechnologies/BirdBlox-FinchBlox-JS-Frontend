@@ -4,7 +4,7 @@ function B_PlaySound(x,y){
 	this.addPart(new LabelText(this,"play sound"));
 	var dS=new DropSlot(this);
 	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundId(i)));
+		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
 	this.addPart(dS);
 }
@@ -15,10 +15,10 @@ B_PlaySound.prototype.startAction=function(){
 	if(soundData==null){
 		return false;
 	}
-	var soundId=soundData.getValue();
-	if(Sounds.checkIdIsValid(soundId)){
+	var soundName=soundData.getValue();
+	if(Sounds.checkNameIsValid(soundName)){
 		var mem=this.runMem;
-		mem.request = "sound/play/"+soundId;
+		mem.request = "sound/play/"+soundName;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
 		return true; //Still running
@@ -42,7 +42,7 @@ function B_PlaySoundUntilDone(x,y){
 	this.addPart(new LabelText(this,"play sound until done"));
 	var dS=new DropSlot(this);
 	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundId(i)));
+		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
 	this.addPart(dS);
 }
@@ -53,13 +53,13 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 	if(soundData==null){
 		return false;
 	}
-	var soundId=soundData.getValue();
-	var soundIndex=Sounds.indexFromId(soundId);
+	var soundName=soundData.getValue();
+	var soundIndex=Sounds.indexFromName(soundName);
 	if(soundIndex>=0){
 		var mem=this.runMem;
 		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
 		mem.timerStarted=false;
-		mem.request = "sound/play/"+soundId;
+		mem.request = "sound/play/"+soundName;
 		mem.cancel=false;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
