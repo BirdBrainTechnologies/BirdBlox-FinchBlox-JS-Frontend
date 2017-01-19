@@ -1,10 +1,10 @@
-function Sounds(callback) {
+function Sounds() {
 	Sounds.names = [];
 	Sounds.durations = [];
-	Sounds.loadNames(callback);
+	Sounds.loadNames();
 }
 
-Sounds.loadNames=function(parentCallback){
+Sounds.loadNames=function(){
 	var request = "sound/names";
 	var callback = function(response) {
 		Sounds.names = response.split("\n")
@@ -18,7 +18,6 @@ Sounds.loadNames=function(parentCallback){
 			}
 			HtmlServer.sendRequestWithCallback(request,durationCallback);
 		}
-		parentCallback();
 	};
 	HtmlServer.sendRequestWithCallback(request, callback);
 };
