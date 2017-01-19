@@ -1,8 +1,9 @@
-function Sounds() {
+function Sounds(callback) {
 	Sounds.names = [];
 	Sounds.durations = [];
 	Sounds.loadNames();
 	Sounds.isDoneLoading = false;
+	callback();
 }
 
 Sounds.loadNames=function(){
