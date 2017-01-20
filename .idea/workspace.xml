@@ -110,8 +110,8 @@
       <file leaf-file-name="Sounds.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ColorsAndGraphics/Sounds.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="476">
-              <caret line="28" column="40" lean-forward="true" selection-start-line="28" selection-start-column="40" selection-end-line="28" selection-end-column="40" />
+            <state relative-caret-position="306">
+              <caret line="18" column="43" lean-forward="false" selection-start-line="18" selection-start-column="43" selection-end-line="18" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -120,8 +120,8 @@
       <file leaf-file-name="BlockDefs_sound.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="4" column="28" lean-forward="false" selection-start-line="4" selection-start-column="15" selection-end-line="4" selection-end-column="28" />
+            <state relative-caret-position="901">
+              <caret line="85" column="60" lean-forward="false" selection-start-line="85" selection-start-column="47" selection-end-line="85" selection-end-column="60" />
               <folding />
             </state>
           </provider>
@@ -228,9 +228,9 @@
         <option value="$PROJECT_DIR$/ColorsAndGraphics/Colors.js" />
         <option value="$PROJECT_DIR$/BlockParts/LabelText.js" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js" />
         <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js" />
         <option value="$PROJECT_DIR$/ColorsAndGraphics/Sounds.js" />
         <option value="$PROJECT_DIR$/version.txt" />
       </list>
@@ -494,7 +494,7 @@
       <workItem from="1483374685433" duration="6000" />
       <workItem from="1483726024204" duration="704000" />
       <workItem from="1484924909533" duration="249000" />
-      <workItem from="1484925182739" duration="2177000" />
+      <workItem from="1484925182739" duration="3234000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -517,11 +517,18 @@
       <option name="project" value="LOCAL" />
       <updated>1484926803809</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="adjusted how sound durations are imported">
+      <created>1484927376929</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1484927376929</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="508556000" />
+    <option name="totallyTimeSpent" value="509613000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="953" y="0" width="974" height="1047" extended-state="0" />
@@ -583,7 +590,8 @@
     <MESSAGE value="Added a custom dropslot for sound blocks" />
     <MESSAGE value="undid a change that caused the app to fail to load" />
     <MESSAGE value="Properly imported SoundDropSlot" />
-    <option name="LAST_COMMIT_MESSAGE" value="Properly imported SoundDropSlot" />
+    <MESSAGE value="adjusted how sound durations are imported" />
+    <option name="LAST_COMMIT_MESSAGE" value="adjusted how sound durations are imported" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1057,16 +1065,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="4" column="28" lean-forward="false" selection-start-line="4" selection-start-column="15" selection-end-line="4" selection-end-column="28" />
+        <state relative-caret-position="901">
+          <caret line="85" column="60" lean-forward="false" selection-start-line="85" selection-start-column="47" selection-end-line="85" selection-end-column="60" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ColorsAndGraphics/Sounds.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="28" column="40" lean-forward="true" selection-start-line="28" selection-start-column="40" selection-end-line="28" selection-end-column="40" />
+        <state relative-caret-position="306">
+          <caret line="18" column="43" lean-forward="false" selection-start-line="18" selection-start-column="43" selection-end-line="18" selection-end-column="43" />
           <folding />
         </state>
       </provider>
