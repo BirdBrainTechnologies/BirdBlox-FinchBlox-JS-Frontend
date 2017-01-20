@@ -16,7 +16,7 @@ Sounds.loadNames=function(){
 			var request = "sound/duration/" + Sounds.getSoundName(i);
 			var durationCallback = function(duration) {
 				//HtmlServer.sendRequest("server/log/LOG:Got_duration:" + index + ":"+ duration);
-				Sounds.durations[index] = duration;
+				Sounds.durations[index] = Number(duration);
 			};
 			HtmlServer.sendRequestWithCallback(request,durationCallback);
 		}
