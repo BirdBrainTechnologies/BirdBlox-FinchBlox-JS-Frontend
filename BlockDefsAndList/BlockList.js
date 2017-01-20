@@ -108,7 +108,7 @@ BlockList.populateCat_looks=function(category){
 	category.trimBottom();
 }
 BlockList.populateCat_sound=function(category){
-	category.addLabel("Coming soon! Sounds don't work yet.");
+	category.addLabel("Work in Progress");
 	category.addSpace();
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlaySoundUntilDone");
