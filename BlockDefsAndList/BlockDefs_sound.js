@@ -2,7 +2,7 @@
 function B_PlaySound(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play sound"));
-	var dS=new DropSlot(this);
+	var dS=new SoundDropSlot(this);
 	for(var i=0;i<Sounds.getSoundCount();i++){
 		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
@@ -40,7 +40,7 @@ B_PlaySound.prototype.updateAction=function(){
 function B_PlaySoundUntilDone(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play sound until done"));
-	var dS=new DropSlot(this);
+	var dS=new SoundDropSlot(this);
 	for(var i=0;i<Sounds.getSoundCount();i++){
 		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
