@@ -10,13 +10,12 @@ Sounds.loadNames=function(){
 		Sounds.names = response.split("\n");
 		Sounds.names = Sounds.names.filter(function(n){ return n != "" });
 		Sounds.durations = Array.apply(null, new Array(Sounds.names.length)).map(Number.prototype.valueOf,0);
-		HtmlServer.sendRequest("server/log/LOG:Got_Names"+Sounds.names.length);
 
 		for (var i = 0; i < Sounds.names.length; i++) {
 			const index = i;
 			var request = "sound/duration/" + Sounds.getSoundName(i);
 			var durationCallback = function(duration) {
-				HtmlServer.sendRequest("server/log/LOG:Got_duration:" + index + ":"+ duration);
+				//HtmlServer.sendRequest("server/log/LOG:Got_duration:" + index + ":"+ duration);
 				Sounds.durations[index] = duration;
 			};
 			HtmlServer.sendRequestWithCallback(request,durationCallback);
