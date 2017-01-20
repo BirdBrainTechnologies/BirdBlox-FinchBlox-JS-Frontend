@@ -83,12 +83,12 @@ B_PlaySoundUntilDone.prototype.updateAction=function(){
 			return true; //Still running
 		}
 	}
-	if(new Date().getTime()>=mem.startTime+mem.soundDuration){
+	if(new Date().getTime() >= (mem.startTime+mem.soundDuration)){
         HtmlServer.sendRequest("server/log/LOG:DoneRunning:");
         return false; //Done running
 	}
 	else{
-        HtmlServer.sendRequest("server/log/LOG:StillRunning:" + new Date().getTime() + "<" + mem.startTime+mem.soundDuration);
+        HtmlServer.sendRequest("server/log/LOG:StillRunning:" + new Date().getTime() + "LESSTHAN" + (mem.startTime+mem.soundDuration));
         return true; //Still running
 	}
 };

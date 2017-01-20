@@ -120,8 +120,8 @@
       <file leaf-file-name="BlockDefs_sound.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="677">
-              <caret line="91" column="36" lean-forward="true" selection-start-line="91" selection-start-column="36" selection-end-line="91" selection-end-column="36" />
+            <state relative-caret-position="116">
+              <caret line="90" column="133" lean-forward="false" selection-start-line="90" selection-start-column="133" selection-end-line="90" selection-end-column="133" />
               <folding />
             </state>
           </provider>
@@ -508,7 +508,7 @@
       <workItem from="1483374685433" duration="6000" />
       <workItem from="1483726024204" duration="704000" />
       <workItem from="1484924909533" duration="249000" />
-      <workItem from="1484925182739" duration="5312000" />
+      <workItem from="1484925182739" duration="5668000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -552,11 +552,18 @@
       <option name="project" value="LOCAL" />
       <updated>1484930155296</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="More logging">
+      <created>1484930658023</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1484930658023</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="511691000" />
+    <option name="totallyTimeSpent" value="512047000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="953" y="0" width="974" height="1047" extended-state="0" />
@@ -621,7 +628,8 @@
     <MESSAGE value="adjusted how sound durations are imported" />
     <MESSAGE value="Modified some logging code" />
     <MESSAGE value="Tweaks to getting duration" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tweaks to getting duration" />
+    <MESSAGE value="More logging" />
+    <option name="LAST_COMMIT_MESSAGE" value="More logging" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1103,8 +1111,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="677">
-          <caret line="91" column="36" lean-forward="true" selection-start-line="91" selection-start-column="36" selection-end-line="91" selection-end-column="36" />
+        <state relative-caret-position="116">
+          <caret line="90" column="133" lean-forward="false" selection-start-line="90" selection-start-column="133" selection-end-line="90" selection-end-column="133" />
           <folding />
         </state>
       </provider>
