@@ -58,7 +58,7 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 	if(soundIndex>=0){
 		var mem=this.runMem;
 		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
-        HtmlServer.sendRequest("server/log/LOG:SoundIs:" + mem.soundDuration);
+        //HtmlServer.sendRequest("server/log/LOG:SoundIs:" + mem.soundDuration);
         mem.timerStarted=false;
 		mem.request = "sound/play/"+soundName;
 		mem.cancel=false;
