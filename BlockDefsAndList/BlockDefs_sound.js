@@ -69,23 +69,28 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 };
 /* Wait for the request to finish. */
 B_PlaySoundUntilDone.prototype.updateAction=function(){
-    var mem=this.runMem;
-    if(!mem.timerStarted){
-        var status=mem.requestStatus;
-        if(status.finished==true){
-            mem.startTime=new Date().getTime();
-            mem.timerStarted=true;
-        }
-        else{
-            return true; //Still running
-        }
-    }
-    if(new Date().getTime()>=mem.startTime+mem.soundDuration){
+	var mem=this.runMem;
+	if(mem.cancel){
+		return false;
+	}
+	if(!mem.timerStarted){
+		var status=mem.requestStatus;
+		if(status.finished==true){
+			mem.startTime=new Date().getTime();
+			mem.timerStarted=true;
+		}
+		else{
+			return true; //Still running
+		}
+	}
+	if(new Date().getTime()>=mem.startTime+mem.soundDuration){
+        HtmlServer.sendRequest("server/log/LOG:DoneRunning:");
         return false; //Done running
-    }
-    else{
+	}
+	else{
+        HtmlServer.sendRequest("server/log/LOG:StillRunning:" + new Date().getTime() + "<" + mem.startTime+mem.soundDuration);
         return true; //Still running
-    }
+	}
 };
 B_PlaySoundUntilDone.prototype.stopAllSounds=function(){
 	if(this.runMem!=null) {
