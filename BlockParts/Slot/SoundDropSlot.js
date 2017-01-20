@@ -5,7 +5,7 @@ function SoundDropSlot(parent){
 }
 SoundDropSlot.prototype = Object.create(DropSlot.prototype);
 SoundDropSlot.prototype.constructor = SoundDropSlot;
-/*
+
 SoundDropSlot.prototype.populateList=function(){
     this.clearOptions();
     for(var i=0;i<Sounds.getSoundCount();i++){
@@ -19,4 +19,3 @@ SoundDropSlot.prototype.duplicate=function(parentCopy){
     myCopy.changeText(this.text);
     return myCopy;
 };
-*/
