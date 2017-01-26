@@ -58,7 +58,6 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 	if(soundIndex>=0){
 		var mem=this.runMem;
 		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
-        //HtmlServer.sendRequest("server/log/LOG:SoundIs:" + mem.soundDuration);
         mem.timerStarted=false;
 		mem.request = "sound/play/"+soundName;
 		mem.cancel=false;
@@ -85,11 +84,9 @@ B_PlaySoundUntilDone.prototype.updateAction=function(){
 		}
 	}
 	if(new Date().getTime() >= (mem.startTime+mem.soundDuration)){
-        HtmlServer.sendRequest("server/log/LOG:DoneRunning:");
         return false; //Done running
 	}
 	else{
-        HtmlServer.sendRequest("server/log/LOG:StillRunning:" + new Date().getTime() + "LESSTHAN" + (mem.startTime+mem.soundDuration));
         return true; //Still running
 	}
 };
