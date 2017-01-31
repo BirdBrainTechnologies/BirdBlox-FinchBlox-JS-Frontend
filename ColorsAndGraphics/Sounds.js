@@ -41,3 +41,13 @@ Sounds.indexFromName=function(soundName){
 Sounds.checkNameIsValid=function(soundName){
 	return Sounds.indexFromName(soundName)>=0;
 };
+
+// Stops all sounds and tones
+Sounds.stopAllSounds=function(){
+	var request = "sound/stop_all"
+	var errCallback = function() {
+		// TODO(ttsun): Handle error
+		GuiElements.alert("Error stopping all sounds.")
+	}
+	HtmlServer.sendRequestWithCallback(request, null, errCallback);
+}
