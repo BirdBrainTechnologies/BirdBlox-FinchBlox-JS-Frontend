@@ -218,6 +218,9 @@ CodeManager.stop=function(){
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
 	DisplayBox.hide(); //Hide any messages being displayed.
+	Sounds.stopAllSounds() // Stops all sounds and tones
+	                       // Note: Tones are not allowed to be async, so they 
+	                       // must be stopped manually
 }
 /* Stops the update timer.
  */
