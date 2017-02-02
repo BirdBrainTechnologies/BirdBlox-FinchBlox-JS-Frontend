@@ -108,8 +108,6 @@ BlockList.populateCat_looks=function(category){
 	category.trimBottom();
 }
 BlockList.populateCat_sound=function(category){
-	category.addLabel("Work in Progress");
-	category.addSpace();
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlaySoundUntilDone");
 	category.addBlockByName("B_StopAllSounds");
