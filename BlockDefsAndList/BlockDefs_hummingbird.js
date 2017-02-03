@@ -258,7 +258,7 @@ B_HBDistInch.prototype = Object.create(ReporterBlock.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch; //positive float
 /* Generic Hummingbird input start. */
 B_HBDistInch.prototype.startAction=function(){
-    HtmlServer.sendRequest("server/log/LOG:Sending_Distance_Request:");
+    HtmlServer.sendRequest("server/log/LOG:Sending_Distance_Request");
     return HummingbirdManager.sensorStartAction(this,"distance",0); //positive int
 };
 /* Waits for the request to finish then converts cm to in. */
@@ -268,11 +268,11 @@ B_HBDistInch.prototype.updateAction=function(){
 			var result=this.runMem.requestStatus.result;
 			this.resultData=new NumData((result/2.54).toFixed(1)*1); //Rounded to 1 decimal place. "*1" converts to num.
 		}
-        HtmlServer.sendRequest("server/log/LOG:Distance_Done:");
+        HtmlServer.sendRequest("server/log/LOG:Distance_Done");
         return false; //Done running
 	}
 	else{
-        HtmlServer.sendRequest("server/log/LOG:Distance Waiting:");
+        HtmlServer.sendRequest("server/log/LOG:Distance Waiting");
         return true; //Still running
 	}
 };
