@@ -71,15 +71,15 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	var mem=block.runMem;
 	mem.hBIndex=block.slots[0].getData().getValue();
 	mem.portD=block.slots[1].getData();
-	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
-	if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
+    mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
+    if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
 		mem.request = "in/"+urlPart+"/" + mem.port;
 		mem.requestStatus=function(){};
-		HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus);
-		return true; //Still running
+        HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus);
+        return true; //Still running
 	}
 	else{
-		block.resultData=new NumData(defaultValue,false);
+        block.resultData=new NumData(defaultValue,false);
 		return false; //Done running
 	}
 };
