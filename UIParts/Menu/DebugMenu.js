@@ -20,7 +20,7 @@ DebugMenu.prototype.optionVersion=function(){
 	GuiElements.alert("Version: "+GuiElements.appVersion);
 };
 DebugMenu.prototype.optionScreenSize=function(){
-	HtmlServer.sendRequestWithCallback("iPad/screenSize",function(response){
+	HtmlServer.sendRequestWithCallback("tablet/screenSize",function(response){
 		GuiElements.alert("Size: "+response);
 	});
 };
