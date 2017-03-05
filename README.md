@@ -268,17 +268,17 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Shaken
 
     Get request format:
-    http://localhost:22179/iPad/shake
+    http://localhost:22179/tablet/shake
     Example response:
     1
 
-\[Response\]: 1 if shaken since last time `/iPad/shake` was called, 
+\[Response\]: 1 if shaken since last time `/tablet/shake` was called, 
 0 otherwise.
 
 #### Device Location
 
     Get request format:
-    http://localhost:22179/iPad/location
+    http://localhost:22179/tablet/location
     Example response:
     20.17589 -70.85694
 
@@ -287,7 +287,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device SSID
 
     Get request format:
-    http://localhost:22179/iPad/ssid
+    http://localhost:22179/tablet/ssid
     Example response:
     MyWiFiNetworkName
 
@@ -296,7 +296,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Pressure
 
     Get request format:
-    http://localhost:22179/iPad/pressure
+    http://localhost:22179/tablet/pressure
     Example response:
     94.81456
 
@@ -305,7 +305,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Relative Altitude
 
     Get request format:
-    http://localhost:22179/iPad/altitude
+    http://localhost:22179/tablet/altitude
     Example response:
     -1.256
 
@@ -316,7 +316,7 @@ barometer
 #### Device Orientation
 
     Get request format:
-    http://localhost:22179/iPad/orientation
+    http://localhost:22179/tablet/orientation
     Example responses:
     Faceup
     Landscape: home button on left
@@ -338,9 +338,9 @@ and if so, what the response was.
 For dialogs requesting a typed response:
 
     Get request format:
-    http://localhost:22179/iPad/dialog/[title]/[question]/[hint]
+    http://localhost:22179/tablet/dialog/[title]/[question]/[hint]
     Example:
-    http://localhost:22179/iPad/dialog/Name/What%20is%20your%20name%3F/name
+    http://localhost:22179/tablet/dialog/Name/What%20is%20your%20name%3F/name
     
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -353,9 +353,9 @@ just ignore them.
 For dialogs with 2 choices (like yes/no):
 
     Get request format:
-    http://localhost:22179/iPad/choice/[title]/[question]/[option1]/[option2]
+    http://localhost:22179/tablet/choice/[title]/[question]/[option1]/[option2]
     Example:
-    http://localhost:22179/iPad/choice/Save/Save%20changes%3F/Yes/No
+    http://localhost:22179/tablet/choice/Save/Save%20changes%3F/Yes/No
 
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -368,7 +368,7 @@ on their status.
 For typed dialogs:
 
     Get request format:
-    http://localhost:22179/iPad/dialog_response
+    http://localhost:22179/tablet/dialog_response
     Example responses:
     No Response
     Cancelled
@@ -384,7 +384,7 @@ escaped, even single quotes.
 For choice dialogs:
 
     Get request format:
-    http://localhost:22179/iPad/choice_response
+    http://localhost:22179/tablet/choice_response
     Example responses:
     0
     1

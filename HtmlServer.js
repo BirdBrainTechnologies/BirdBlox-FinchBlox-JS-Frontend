@@ -123,7 +123,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 	}
 	else{
 		var HS=HtmlServer;
-		var request = "iPad/dialog/"+HS.encodeHtml(title);
+		var request = "tablet/dialog/"+HS.encodeHtml(title);
 		request+="/"+HS.encodeHtml(question);
 		request+="/"+HS.encodeHtml(hint);
 		var onDialogPresented=function(result){
@@ -143,7 +143,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
-	var request = "iPad/dialog_response";
+	var request = "tablet/dialog_response";
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
 			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
@@ -194,7 +194,7 @@ HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCance
 	}
 	else {
 		var HS = HtmlServer;
-		var request = "iPad/choice/" + HS.encodeHtml(title);
+		var request = "tablet/choice/" + HS.encodeHtml(title);
 		request += "/" + HS.encodeHtml(question);
 		request += "/" + HS.encodeHtml(option1);
 		request += "/" + HS.encodeHtml(option2);
@@ -215,7 +215,7 @@ HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCance
 };
 HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
-	var request = "iPad/choice_response";
+	var request = "tablet/choice_response";
 	var onResponseReceived=function(response){
 		if(response=="0"){
 			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);

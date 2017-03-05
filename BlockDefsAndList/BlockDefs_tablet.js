@@ -1,9 +1,9 @@
-/* This file contains the implementations for Blocks in the ipad category.
+/* This file contains the implementations for Blocks in the tablet category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
 
 function B_DeviceShaken(x,y){
-	PredicateBlock.call(this,x,y,"ipad");
+	PredicateBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Device Shaken"));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
@@ -11,7 +11,7 @@ B_DeviceShaken.prototype.constructor = B_DeviceShaken;
 /* Make the request. */
 B_DeviceShaken.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/shake";
+	mem.request = "tablet/shake";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
 	return true; //Still running
@@ -37,7 +37,7 @@ B_DeviceShaken.prototype.updateAction=function(){
 
 
 function B_DeviceSSID(x,y){
-	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.string);
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"Device SSID"));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
@@ -45,7 +45,7 @@ B_DeviceSSID.prototype.constructor = B_DeviceSSID;
 /* Make the request. */
 B_DeviceSSID.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/ssid";
+	mem.request = "tablet/ssid";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
 	return true; //Still running
@@ -71,7 +71,7 @@ B_DeviceSSID.prototype.updateAction=function(){
 
 
 function B_DevicePressure(x,y){
-	ReporterBlock.call(this,x,y,"ipad");
+	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Device Pressure"));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
@@ -79,7 +79,7 @@ B_DevicePressure.prototype.constructor = B_DevicePressure;
 /* Make the request. */
 B_DevicePressure.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/pressure";
+	mem.request = "tablet/pressure";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
 	return true; //Still running
@@ -105,7 +105,7 @@ B_DevicePressure.prototype.updateAction=function(){
 
 
 function B_DeviceRelativeAltitude(x,y){
-	ReporterBlock.call(this,x,y,"ipad");
+	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Device Relative Altitude"));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
@@ -113,7 +113,7 @@ B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
 /* Make the request. */
 B_DeviceRelativeAltitude.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/altitude";
+	mem.request = "tablet/altitude";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
 	return true; //Still running
@@ -140,7 +140,7 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 
 
 function B_DeviceOrientation(x,y){
-	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.string);
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"Device Orientation"));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
@@ -148,7 +148,7 @@ B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
 /* Make the request. */
 B_DeviceOrientation.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/orientation";
+	mem.request = "tablet/orientation";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
 	return true; //Still running
@@ -174,7 +174,7 @@ B_DeviceOrientation.prototype.updateAction=function(){
 
 
 function B_DeviceAcceleration(x,y){
-	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.num);
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
 	var dS=new DropSlot(this);
 	dS.addOption("X",new SelectionData(0));
@@ -189,7 +189,7 @@ B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
 /* Make the request. */
 B_DeviceAcceleration.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/acceleration";
+	mem.request = "tablet/acceleration";
 	mem.requestStatus=function(){};
 	mem.axis=this.slots[0].getData().getValue();
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
@@ -217,7 +217,7 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 
 
 function B_DeviceLocation(x,y){
-	ReporterBlock.call(this,x,y,"ipad",Block.returnTypes.num);
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
 	var dS=new DropSlot(this);
 	dS.addOption("Latitude",new SelectionData(0));
@@ -230,7 +230,7 @@ B_DeviceLocation.prototype.constructor = B_DeviceLocation;
 /* Make the request. */
 B_DeviceLocation.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "iPad/location";
+	mem.request = "tablet/location";
 	mem.requestStatus=function(){};
 	mem.axis=this.slots[0].getData().getValue();
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
@@ -258,7 +258,7 @@ B_DeviceLocation.prototype.updateAction=function(){
 
 
 function B_Display(x,y){
-	CommandBlock.call(this,x,y,"ipad");
+	CommandBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Display"));
 	this.addPart(new StringSlot(this,"hello"));
 }

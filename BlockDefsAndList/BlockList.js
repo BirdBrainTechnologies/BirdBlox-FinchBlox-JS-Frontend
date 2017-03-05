@@ -9,7 +9,7 @@ function BlockList(){
 	cat.push("Hummingbird"); //Capitalized in the way they are displayed on screen.
 	cat.push("Operators");
 	cat.push("Sound");
-	cat.push("iPad");
+	cat.push("Tablet");
 	//cat.push("Motion");
 	//cat.push("Looks");
 	//cat.push("Pen");
@@ -123,7 +123,7 @@ BlockList.populateCat_sound=function(category){
 BlockList.populateCat_pen=function(category){
 	
 }
-BlockList.populateCat_ipad=function(category){
+BlockList.populateCat_tablet=function(category){
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
