@@ -62,11 +62,13 @@ GuiElements.setConstants=function(){
 	BlockContextMenu.setGraphics();
 	ConnectOneHBDialog.setConstants();
 	ConnectMultipleHBDialog.setConstants();
+	DiscoverDialog.setConstants();
 	HBConnectionList.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
 	CodeManager();
 	HummingbirdManager();
+	FlutterManager();
 	SaveManager();
 };
 /* Debugging function which displays information on screen */

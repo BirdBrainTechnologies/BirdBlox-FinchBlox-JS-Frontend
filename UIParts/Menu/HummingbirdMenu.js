@@ -20,7 +20,8 @@ HummingbirdMenu.prototype.loadOptions=function(){
 			currentHB.disconnect();
 		});
 	}
-	this.addOption("Connect", HummingbirdManager.showConnectOneDialog);
+	this.addOption("Connect HB", HummingbirdManager.showConnectOneDialog);
+	this.addOption("Connect Flutter", FlutterManager.ShowDiscoverDialog);
 	HtmlServer.sendRequestWithCallback("hummingbird/discover");
 };
 HummingbirdMenu.prototype.previewOpen=function(){
