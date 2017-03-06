@@ -49,7 +49,6 @@ DiscoverDialog.setConstants = function(){
 
 DiscoverDialog.prototype.showDialog = function() {
 	let Class = DiscoverDialog;
-	let inst = this;
 	// Creates svg elements
 	this.group = GuiElements.create.group(this.x,this.y);
 	this.bgRect = this.makeBgRect();
@@ -58,8 +57,8 @@ DiscoverDialog.prototype.showDialog = function() {
 	this.titleText = this.createTitleLabel();
 	GuiElements.layers.dialog.appendChild(this.group);
 	GuiElements.blockInteraction();
-	this.updateTimer = self.setInterval(function() { inst.discoverDevices() }, Class.updateInterval);
-	this.updateDeviceList("test");
+	this.updateTimer = self.setInterval(this.discoverDevices.bind(this), Class.updateInterval);
+	this.discoverDevices();
 };
 
 DiscoverDialog.prototype.closeDialog = function(){
