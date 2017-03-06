@@ -1,6 +1,6 @@
 function FlutterManager() {
 	let mgr = FlutterManager;
-	mgr.connectedDevices = [];
+	mgr.connectedDevices = {};
 }
 
 FlutterManager.ShowDiscoverDialog = function() {
@@ -21,11 +21,28 @@ FlutterManager.DiscoverDevices = function(successFn, errorFn) {
 }
 
 /**
- * Connects a device.
+ * Connects a device and adds it to a list of connected devices.
  *
  * @class      ConnectDevice 
  * @param      {string}  deviceName  The device name
  */
 FlutterManager.ConnectDevice = function(deviceName) {
-	FlutterManager.connectedDevices.push(deviceName);
+	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName);
+	FlutterManager.connectedDevices[deviceName].connect();
+}
+
+FlutterManager.DisconnectDevice = function(deviceName) {
+	FlutterManager.connectedDevices[deviceName].disconnect();
+	delete FlutterManager.connectedDevices[deviceName];
+}
+
+/**
+ * Gets a device by name.
+ *
+ * @class      GetDeviceByName
+ * @param      {string}  deviceName  The device name
+ * @return     {Flutter}  The device by name.
+ */
+FlutterManager.GetDeviceByName = function(deviceName) {
+	return FlutterManager.connectedDevices[deviceName];
 }
