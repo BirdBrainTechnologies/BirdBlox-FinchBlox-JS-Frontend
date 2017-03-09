@@ -558,38 +558,31 @@ Block.prototype.addHeights=function(){
 /* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicate=function(x,y){
-	//Uses the constructor of the Block class but has the methods of this specific Block's subclass.
-	//Allows the Block to be constructed without any Slots initially, so they can be duplicated and added on.
-	var copiedClass=function(type,returnType,x1,y1,category){
-		Block.call(this,type,returnType,x1,y1,category); //Call Block constructor.
-	};
-	copiedClass.prototype = Object.create(this.constructor.prototype); //Copy all functions.
-	copiedClass.prototype.constructor = copiedClass; //Only constructor differs.
+Block.prototype.duplicate = function(x, y) {
+	let blockCopy = new this.constructor(x, y); // Calls constructor of calling object
 
-	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category); //Make an empty Block of this Block's type.
-	myCopy.blockTypeName=this.blockTypeName;
-	for(var i=0;i<this.parts.length;i++){ //Copy this Block's parts to the new Block.
-		myCopy.addPart(this.parts[i].duplicate(myCopy));
+	// Copy the contents of its Slots.
+	if (this.blockSlot1 != null) { 
+		blockCopy.blockSlot1 = this.blockSlot1.duplicate(blockCopy);
 	}
-	if(this.blockSlot1!=null){ //Copy the contents of its Slots.
-		myCopy.blockSlot1=this.blockSlot1.duplicate(myCopy);
+	if (this.blockSlot2 != null) {
+		blockCopy.blockSlot2 = this.blockSlot2.duplicate(blockCopy);
 	}
-	if(this.blockSlot2!=null){
-		myCopy.blockSlot2=this.blockSlot2.duplicate(myCopy);
+	// Copy subsequent Blocks.
+	if (this.nextBlock != null) {  
+		blockCopy.nextBlock = this.nextBlock.duplicate(0, 0);
+		blockCopy.nextBlock.parent = blockCopy;
 	}
-	if(this.nextBlock!=null){ //Copy subsequent Blocks.
-		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
-		myCopy.nextBlock.parent=myCopy;
+	// Copy variable data if this is a variable Block.
+	if (this.variable != null) {  
+		blockCopy.variable = this.variable;
 	}
-	if(this.variable!=null){ //Copy variable data if this is a variable Block.
-		myCopy.variable=this.variable;
+	// Copy list data if this is a list Block.
+	if (this.list != null) {  
+		blockCopy.list = this.list;
 	}
-	if(this.list!=null){ //Copy list data if this is a list Block.
-		myCopy.list=this.list;
-	}
-	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
-	return myCopy; //Return finished Block.
+
+	return blockCopy;  // Return finished Block.
 };
 /* Returns an entirely text-based version of the Block for display in dialogs.
  * May exclude a slot and replace if with "___".
