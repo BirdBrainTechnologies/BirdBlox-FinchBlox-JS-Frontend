@@ -1,11 +1,10 @@
-function HBStatusLight(x,centerY,parent,request){
+function HBStatusLight(x,centerY,parent){
 	var HBSL=HBStatusLight;
 	this.cx=x+HBSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	var thisStatusLight=this;
-	this.request=request;
 	if(!TouchReceiver.mouse) {
 		this.updateTimer = self.setInterval(function () {
 			thisStatusLight.updateStatus()
@@ -27,21 +26,27 @@ HBStatusLight.prototype.generateCircle=function(){
 	return GuiElements.draw.circle(this.cx,this.cy,HBSL.radius,HBSL.startColor,this.parentGroup);
 };
 HBStatusLight.prototype.updateStatus=function(){
-	var HBSL=HBStatusLight;
-	var thisStatusLight=this;
-	HtmlServer.sendRequestWithCallback(this.request,function(result){
-		if(result=="1"){
-			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.greenColor);
-		}
-		else if(result=="2"){
-			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.offColor);
-		}
-		else{
-			GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.redColor);
-		}
-	},function(){
-		GuiElements.update.color(thisStatusLight.circleE,HBStatusLight.redColor);
-	});
+	if (HummingbirdManager.GetDeviceCount() > 0) {
+		HummingbirdManager.UpdateConnectionStatus();
+	}
+	if (FlutterManager.GetDeviceCount() > 0) {
+		FlutterManager.UpdateConnectionStatus();
+	}
+	let hbStatus = HummingbirdManager.GetConnectionStatus();
+	let flutterStatus = FlutterManager.GetConnectionStatus();
+
+	let overallStatus = Math.min(hbStatus, flutterStatus);  // Lower status means more error
+	switch(overallStatus) {
+		case 0:
+			GuiElements.update.color(this.circleE,HBStatusLight.redColor);
+			break;
+		case 1:
+			GuiElements.update.color(this.circleE,HBStatusLight.greenColor);
+			break;
+		case 2:
+			GuiElements.update.color(this.circleE,HBStatusLight.offColor);
+			break;
+	}
 };
 HBStatusLight.prototype.remove=function(){
 	this.circleE.remove();

@@ -1,6 +1,11 @@
 function FlutterManager() {
 	let mgr = FlutterManager;
 	mgr.connectedDevices = {};
+	mgr.connectionStatus = 2;
+	// 0 - At least 1 disconnected
+	// 1 - Every device is OK
+	// 2 - Nothing connected
+	mgr.UpdateConnectionStatus();
 }
 
 FlutterManager.ShowDiscoverDialog = function() {
@@ -14,6 +19,21 @@ FlutterManager.GetDeviceName = function(shorten) {
 	} else {
 		return "Flutter";
 	}
+}
+
+FlutterManager.GetConnectionStatus = function() {
+	return FlutterManager.connectionStatus;
+}
+
+FlutterManager.UpdateConnectionStatus = function() {
+	HtmlServer.sendRequestWithCallback("flutter/totalStatus", function(result) {
+		FlutterManager.connectionStatus = parseInt(result);
+		if (isNaN(FlutterManager.connectionStatus)) {
+			FlutterManager.connectionStatus = 0;
+		}
+	},function(){
+		FlutterManager.connectionStatus = 0;
+	});
 }
 
 FlutterManager.GetDeviceCount = function() {
@@ -57,6 +77,7 @@ FlutterManager.ConnectDevice = function(deviceName) {
 	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName);
 	FlutterManager.connectedDevices[deviceName].connect();
 	BlockPalette.getCategory("robots").refreshGroup();
+	FlutterManager.UpdateConnectionStatus();
 }
 
 /**
@@ -68,6 +89,7 @@ FlutterManager.DisconnectDevice = function(deviceName) {
 	FlutterManager.connectedDevices[deviceName].disconnect();
 	delete FlutterManager.connectedDevices[deviceName];
 	BlockPalette.getCategory("robots").refreshGroup();
+	FlutterManager.UpdateConnectionStatus();
 }
 
 /**

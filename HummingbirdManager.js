@@ -9,6 +9,11 @@ function HummingbirdManager(){
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
 	HM.allowVirtualHBs=false;
+	HM.connectionStatus = 2;
+	// 0 - At least 1 disconnected
+	// 1 - Every device is OK
+	// 2 - Nothing connected
+	HM.UpdateConnectionStatus();
 }
 
 HummingbirdManager.GetDeviceName = function(shorten) {
@@ -32,6 +37,21 @@ HummingbirdManager.getHBNames=function(){
 HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;
 	return HM.connectedHBs;
+};
+
+HummingbirdManager.GetConnectionStatus = function() {
+	return HummingbirdManager.connectionStatus;
+};
+
+HummingbirdManager.UpdateConnectionStatus = function() {
+	HtmlServer.sendRequestWithCallback("hummingbird/totalStatus", function(result) {
+		HummingbirdManager.connectionStatus = parseInt(result);
+		if (isNaN(HummingbirdManager.connectionStatus)) {
+			HummingbirdManager.connectionStatus = 0;
+		}
+	},function(){
+		HummingbirdManager.connectionStatus = 0;
+	});
 };
 HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	var mem=block.runMem;
@@ -192,6 +212,7 @@ HummingbirdManager.updateSelectableHBs=function(){
 		CodeManager.showDeviceDropDowns();
 	}
 	BlockPalette.getCategory("robots").refreshGroup();
+	HummingbirdManager.UpdateConnectionStatus();
 };
 HummingbirdManager.displayDebugInfo=function(){
 	var HM=HummingbirdManager;
