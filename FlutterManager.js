@@ -56,6 +56,7 @@ FlutterManager.DiscoverDevices = function(successFn, errorFn) {
 FlutterManager.ConnectDevice = function(deviceName) {
 	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName);
 	FlutterManager.connectedDevices[deviceName].connect();
+	BlockPalette.getCategory("robots").refreshGroup();
 }
 
 /**
@@ -66,6 +67,7 @@ FlutterManager.ConnectDevice = function(deviceName) {
 FlutterManager.DisconnectDevice = function(deviceName) {
 	FlutterManager.connectedDevices[deviceName].disconnect();
 	delete FlutterManager.connectedDevices[deviceName];
+	BlockPalette.getCategory("robots").refreshGroup();
 }
 
 /**

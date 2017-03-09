@@ -177,7 +177,7 @@ HummingbirdManager.getSelectableHBCount=function(){
 	return HummingbirdManager.selectableHBs;
 };
 HummingbirdManager.GetDeviceCount = function() {
-	return HummingbirdManager.selectableHBs;
+	return HummingbirdManager.connectedHBs.length;
 }
 HummingbirdManager.updateSelectableHBs=function(){
 	var HM=HummingbirdManager;
@@ -191,6 +191,7 @@ HummingbirdManager.updateSelectableHBs=function(){
 	else if(newCount>1&&oldCount<=1){
 		CodeManager.showDeviceDropDowns();
 	}
+	BlockPalette.getCategory("robots").refreshGroup();
 };
 HummingbirdManager.displayDebugInfo=function(){
 	var HM=HummingbirdManager;
