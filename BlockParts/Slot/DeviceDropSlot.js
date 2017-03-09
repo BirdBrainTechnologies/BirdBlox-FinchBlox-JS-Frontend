@@ -84,7 +84,6 @@ DeviceDropSlot.prototype.countHBsInUse = function() {
 	}
 };
 
-// TODO: Backwards compatibility? (Used to be called HBDropSlot)
 DeviceDropSlot.prototype.importXml = function(slotNode) {
 	DropSlot.prototype.importXml.call(this, slotNode);
 	this.enteredData = new SelectionData(parseInt(this.enteredData.getValue()));
