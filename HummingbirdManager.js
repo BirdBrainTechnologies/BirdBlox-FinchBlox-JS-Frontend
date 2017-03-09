@@ -10,6 +10,15 @@ function HummingbirdManager(){
 	HM.connectedHBs=[];
 	HM.allowVirtualHBs=false;
 }
+
+HummingbirdManager.GetDeviceName = function(shorten) {
+	if (shorten) {
+		return "HB";
+	} else {
+		return "Hummingbird";
+	}
+}
+
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
 	var HM=HummingbirdManager;
@@ -167,6 +176,9 @@ HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
 HummingbirdManager.getSelectableHBCount=function(){
 	return HummingbirdManager.selectableHBs;
 };
+HummingbirdManager.GetDeviceCount = function() {
+	return HummingbirdManager.selectableHBs;
+}
 HummingbirdManager.updateSelectableHBs=function(){
 	var HM=HummingbirdManager;
 	var oldCount=HM.selectableHBs;
