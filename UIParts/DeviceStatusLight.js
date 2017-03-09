@@ -1,5 +1,5 @@
-function HBStatusLight(x,centerY,parent){
-	var HBSL=HBStatusLight;
+function DeviceStatusLight(x,centerY,parent){
+	var HBSL=DeviceStatusLight;
 	this.cx=x+HBSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
@@ -12,8 +12,8 @@ function HBStatusLight(x,centerY,parent){
 	}
 	thisStatusLight.updateStatus();
 }
-HBStatusLight.setConstants=function(){
-	var HBSL=HBStatusLight;
+DeviceStatusLight.setConstants=function(){
+	var HBSL=DeviceStatusLight;
 	HBSL.greenColor="#0f0";
 	HBSL.redColor="#f00"
 	HBSL.startColor=Colors.black;
@@ -21,11 +21,11 @@ HBStatusLight.setConstants=function(){
 	HBSL.radius=6;
 	HBSL.updateInterval=300;
 };
-HBStatusLight.prototype.generateCircle=function(){
-	var HBSL=HBStatusLight;
+DeviceStatusLight.prototype.generateCircle=function(){
+	var HBSL=DeviceStatusLight;
 	return GuiElements.draw.circle(this.cx,this.cy,HBSL.radius,HBSL.startColor,this.parentGroup);
 };
-HBStatusLight.prototype.updateStatus=function(){
+DeviceStatusLight.prototype.updateStatus=function(){
 	if (HummingbirdManager.GetDeviceCount() > 0) {
 		HummingbirdManager.UpdateConnectionStatus();
 	}
@@ -38,17 +38,17 @@ HBStatusLight.prototype.updateStatus=function(){
 	let overallStatus = Math.min(hbStatus, flutterStatus);  // Lower status means more error
 	switch(overallStatus) {
 		case 0:
-			GuiElements.update.color(this.circleE,HBStatusLight.redColor);
+			GuiElements.update.color(this.circleE,DeviceStatusLight.redColor);
 			break;
 		case 1:
-			GuiElements.update.color(this.circleE,HBStatusLight.greenColor);
+			GuiElements.update.color(this.circleE,DeviceStatusLight.greenColor);
 			break;
 		case 2:
-			GuiElements.update.color(this.circleE,HBStatusLight.offColor);
+			GuiElements.update.color(this.circleE,DeviceStatusLight.offColor);
 			break;
 	}
 };
-HBStatusLight.prototype.remove=function(){
+DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();
 	this.updateTimer=window.clearInterval(this.updateTimer);
 };

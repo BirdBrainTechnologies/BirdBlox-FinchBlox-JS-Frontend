@@ -44,7 +44,7 @@ GuiElements.setConstants=function(){
 	BlockList();
 	Colors();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
-	HBStatusLight.setConstants();
+	DeviceStatusLight.setConstants();
 	TitleBar.setGraphics();
 	BlockGraphics();
 	Slot.setConstants();
