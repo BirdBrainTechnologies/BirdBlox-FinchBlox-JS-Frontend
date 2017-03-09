@@ -29,7 +29,7 @@ B_FlutterServo.prototype.updateAction = function() {
 
 function B_FlutterTriLed(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this, FlutterManager, true));
 	this.addPart(new LabelText(this, "TRI-LED"));
 	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
