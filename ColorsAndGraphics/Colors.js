@@ -12,18 +12,21 @@ Colors.setCommon=function(){
 	Colors.black="#000";
 };
 Colors.setCategory=function(){
-	Colors.hummingbird="#FF9600";
-	Colors.flutter="#FF9600";
-	Colors.motion="#0000FF";
-	Colors.looks="#8800FF";
-	Colors.sound="#EE00FF"; //FF0088
-	Colors.pen="#00CC99";
-	Colors.tablet="#019EFF"; //7F7F7F
-	Colors.control="#FFCC00";
-	Colors.sensing="#019EFF";
-	Colors.operators="#44FF00";
-	Colors.variables="#FF5B00";
-	Colors.lists="#FF0000";
+	Colors.categoryColors = {
+		"robots": "#FF9600",
+		"hummingbird": "#FF9600",
+		"flutter": "#FF9600",
+		"motion": "#0000FF",
+		"looks": "#8800FF",
+		"sound": "#EE00FF", //FF0088
+		"pen": "#00CC99",
+		"tablet": "#019EFF", //7F7F7F
+		"control": "#FFCC00",
+		"sensing": "#019EFF",
+		"operators": "#44FF00",
+		"variables": "#FF5B00",
+		"lists": "#FF0000",
+	};
 };
 Colors.setMultipliers=function(){
 	Colors.gradStart=1;
@@ -36,13 +39,10 @@ Colors.createGradients=function(){
 	Colors.createGradientSet("gradient_dark_",Colors.gradDarkStart,Colors.gradDarkEnd);
 };
 Colors.createGradientSet=function(name,multStart,multEnd){
-	var categoryCount=BlockList.catCount();
-	for(var i=0; i<categoryCount;i++){
-		var catId=BlockList.getCatId(i);
-		var color=Colors[catId];
-		Colors.createGradientFromColorAndMults(name,catId,color,multStart,multEnd);
-	}
-	Colors.createGradientFromColorAndMults(name,"lists",Colors.lists,multStart,multEnd);
+	Object.keys(Colors.categoryColors).map(function(category) {
+		let color = Colors.categoryColors[category];
+		Colors.createGradientFromColorAndMults(name,category,color,multStart,multEnd);
+	});
 };
 Colors.createGradientFromColorAndMults=function(name,catId,color,multStart,multEnd){
 	var darken=Colors.darkenColor;
@@ -61,7 +61,7 @@ Colors.darkenColor=function(color,amt){
 	return "#"+result;
 };
 Colors.getColor=function(category){
-	return Colors[category];
+	return Colors.categoryColors[category];
 };
 Colors.getGradient=function(category){
 	return "url(#gradient_"+category+")";
