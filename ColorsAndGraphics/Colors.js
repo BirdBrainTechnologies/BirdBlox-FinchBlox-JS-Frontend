@@ -13,6 +13,7 @@ Colors.setCommon=function(){
 };
 Colors.setCategory=function(){
 	Colors.hummingbird="#FF9600";
+	Colors.flutter="#FF9600";
 	Colors.motion="#0000FF";
 	Colors.looks="#8800FF";
 	Colors.sound="#EE00FF"; //FF0088

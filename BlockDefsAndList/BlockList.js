@@ -7,6 +7,7 @@ function BlockList(){
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
 	cat.push("Hummingbird"); //Capitalized in the way they are displayed on screen.
+	cat.push("Flutter");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
@@ -61,6 +62,19 @@ BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBDistInch");
 	category.addBlockByName("B_HBKnob");
 	category.addBlockByName("B_HBSound");
+	category.trimBottom();
+};
+BlockList.populateCat_flutter=function(category){
+	category.addBlockByName("B_FlutterServo");
+	category.addBlockByName("B_FlutterTriLed");
+	category.addSpace();
+	category.addBlockByName("B_FlutterLight");
+	category.addBlockByName("B_FlutterTempC");
+	category.addBlockByName("B_FlutterTempF");
+	category.addBlockByName("B_FlutterDistCM");
+	category.addBlockByName("B_FlutterDistInch");
+	category.addBlockByName("B_FlutterKnob");
+	category.addBlockByName("B_FlutterSound");
 	category.trimBottom();
 };
 BlockList.populateCat_motion=function(category){

@@ -62,3 +62,58 @@ Flutter.prototype.connect = function(successFn) {
 Flutter.prototype.getName = function() {
 	return this.name;
 };
+
+Flutter.prototype.readSensor = function(context, sensorType, port) {
+	if (context.sent) {
+		return (context.requestStatus.finished != true);  // Return true if not finished
+	} else {
+		let request = "flutter/" + HtmlServer.encodeHtml(this.name) + "/in/" + sensorType + "/" + port;
+		context.requestStatus = {};
+		HtmlServer.sendRequest(request, context.requestStatus);
+		context.sent = true;
+		return true;  // Still running
+	}
+};
+
+Flutter.prototype.setServoOrSave = function(shouldSend, context, port, value) {
+	if (context.sent) {
+		return (context.requestStatus.finished != true);  // Return true if not finished
+	} else {
+		if (context.request == null) {
+			// TODO: Validation
+			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/servo/";
+			context.request = requestPrefix + port + "/" + value;
+			context.requestStatus = {};
+		}
+		if (shouldSend) {
+			context.sent = true;
+			HtmlServer.sendRequest(context.request, context.requestStatus);
+			return true;  // Still running
+		} else {
+			context.sent = false;
+			return true;  // Still running
+		}
+	}
+};
+
+
+Flutter.prototype.setTriLEDOrSave = function(shouldSend, context, port, valueR, valueG, valueB) {
+	if (context.sent) {
+		return (context.requestStatus.finished != true);  // Return true if not finished
+	} else {
+		if (context.request == null) {
+			// TODO: Validation
+			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/triled/";
+			context.request = requestPrefix + port + "/" + valueR + "/" + valueG + "/" + valueB;
+			context.requestStatus = {};
+		}
+		if (shouldSend) {
+			context.sent = true;
+			HtmlServer.sendRequest(context.request, context.requestStatus);
+			return true;  // Still running
+		} else {
+			context.sent = false;
+			return true;  // Still running
+		}
+	}
+};
