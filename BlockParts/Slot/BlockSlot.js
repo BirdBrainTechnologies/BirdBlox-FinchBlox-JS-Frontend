@@ -226,11 +226,11 @@ BlockSlot.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-BlockSlot.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+BlockSlot.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 };
-BlockSlot.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+BlockSlot.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 };
 BlockSlot.prototype.countHBsInUse=function(){
 	if(this.hasChild){

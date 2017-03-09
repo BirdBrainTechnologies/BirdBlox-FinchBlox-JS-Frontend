@@ -186,10 +186,10 @@ HummingbirdManager.updateSelectableHBs=function(){
 	var newCount=Math.max(HM.connectedHBs.length,inUse);
 	HM.selectableHBs=newCount;
 	if(newCount<=1&&oldCount>1){
-		CodeManager.hideHBDropDowns();
+		CodeManager.hideDeviceDropDowns();
 	}
 	else if(newCount>1&&oldCount<=1){
-		CodeManager.showHBDropDowns();
+		CodeManager.showDeviceDropDowns();
 	}
 };
 HummingbirdManager.displayDebugInfo=function(){

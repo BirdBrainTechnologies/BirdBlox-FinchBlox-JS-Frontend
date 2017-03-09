@@ -1,7 +1,7 @@
 /* Output Blocks */
 function B_FlutterServo(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new HBDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this, FlutterManager));
 	this.addPart(new LabelText(this, "Servo"));
 	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
 	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
@@ -29,7 +29,7 @@ B_FlutterServo.prototype.updateAction = function() {
 
 function B_FlutterTriLed(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new HBDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this, FlutterManager));
 	this.addPart(new LabelText(this, "TRI-LED"));
 	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
@@ -67,7 +67,7 @@ function B_FlutterSensorBase(x, y, sensorType, displayName) {
 	ReporterBlock.call(this, x, y, "flutter");
 	this.sensorType = sensorType;
 	this.displayName = displayName;
-	this.addPart(new HBDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this, FlutterManager));
 	this.addPart(new LabelText(this, displayName));
 	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
 }

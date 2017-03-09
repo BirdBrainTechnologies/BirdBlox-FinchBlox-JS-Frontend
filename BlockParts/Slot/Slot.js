@@ -315,11 +315,11 @@ Slot.prototype.renameList=function(list){
 Slot.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
-Slot.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+Slot.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 };
-Slot.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+Slot.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 };
 Slot.prototype.countHBsInUse=function(){
 	if(this.hasChild){

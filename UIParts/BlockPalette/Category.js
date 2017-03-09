@@ -188,13 +188,13 @@ Category.prototype.getAbsX=function(){
 Category.prototype.getAbsY=function(){
 	return this.y;
 };
-Category.prototype.showHBDropDowns=function(){
+Category.prototype.showDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showHBDropDowns();
+		this.displayStacks[i].showDeviceDropDowns();
 	}
 };
-Category.prototype.hideHBDropDowns=function(){
+Category.prototype.hideDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideHBDropDowns();
+		this.displayStacks[i].hideDeviceDropDowns();
 	}
 };

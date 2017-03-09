@@ -1,4 +1,4 @@
-function HBDropSlot(parent, DeviceManager, shortText) {
+function DeviceDropSlot(parent, DeviceManager, shortText) {
 	if (shortText == null) {
 		shortText = false;
 	}
@@ -17,9 +17,9 @@ function HBDropSlot(parent, DeviceManager, shortText) {
 	}
 }
 
-HBDropSlot.prototype = Object.create(DropSlot.prototype);
-HBDropSlot.prototype.constructor = HBDropSlot;
-HBDropSlot.prototype.populateList = function() {
+DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
+DeviceDropSlot.prototype.constructor = DeviceDropSlot;
+DeviceDropSlot.prototype.populateList = function() {
 	this.clearOptions();
 	var deviceCount = this.DeviceManager.GetDeviceCount();
 	for (var i = 0; i < deviceCount; i++) {
@@ -27,14 +27,14 @@ HBDropSlot.prototype.populateList = function() {
 	}
 };
 
-HBDropSlot.prototype.duplicate = function(parentCopy) {
-	var myCopy = new HBDropSlot(parentCopy, this.DeviceManager, this.shortText);
+DeviceDropSlot.prototype.duplicate = function(parentCopy) {
+	var myCopy = new DeviceDropSlot(parentCopy, this.DeviceManager, this.shortText);
 	myCopy.enteredData = this.enteredData;
 	myCopy.changeText(this.text);
 	return myCopy;
 };
 
-HBDropSlot.prototype.switchToLabel = function() {
+DeviceDropSlot.prototype.switchToLabel = function() {
 	if (!this.labelMode) {
 		this.labelMode = true;
 		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
@@ -43,7 +43,7 @@ HBDropSlot.prototype.switchToLabel = function() {
 	}
 };
 
-HBDropSlot.prototype.switchToSlot = function() {
+DeviceDropSlot.prototype.switchToSlot = function() {
 	if (this.labelMode) {
 		this.labelMode = false;
 		this.labelText.hide();
@@ -51,7 +51,7 @@ HBDropSlot.prototype.switchToSlot = function() {
 	}
 };
 
-HBDropSlot.prototype.updateAlign = function(x, y) {
+DeviceDropSlot.prototype.updateAlign = function(x, y) {
 	if (this.labelMode) {
 		return LabelText.prototype.updateAlign.call(this.labelText, x, y);
 	} else {
@@ -59,7 +59,7 @@ HBDropSlot.prototype.updateAlign = function(x, y) {
 	}
 };
 
-HBDropSlot.prototype.updateDim = function() {
+DeviceDropSlot.prototype.updateDim = function() {
 	if (this.labelMode) {
 		LabelText.prototype.updateDim.call(this.labelText);
 		this.width = this.labelText.width;
@@ -68,15 +68,15 @@ HBDropSlot.prototype.updateDim = function() {
 	}
 };
 
-HBDropSlot.prototype.hideHBDropDowns = function() {
+DeviceDropSlot.prototype.hideDeviceDropDowns = function() {
 	this.switchToLabel();
 };
 
-HBDropSlot.prototype.showHBDropDowns = function() {
+DeviceDropSlot.prototype.showDeviceDropDowns = function() {
 	this.switchToSlot();
 };
 
-HBDropSlot.prototype.countHBsInUse = function() {
+DeviceDropSlot.prototype.countHBsInUse = function() {
 	if (this.getData() != null) {
 		return this.getData().getValue() + 1;
 	} else {
@@ -84,7 +84,8 @@ HBDropSlot.prototype.countHBsInUse = function() {
 	}
 };
 
-HBDropSlot.prototype.importXml = function(slotNode) {
+// TODO: Backwards compatibility? (Used to be called HBDropSlot)
+DeviceDropSlot.prototype.importXml = function(slotNode) {
 	DropSlot.prototype.importXml.call(this, slotNode);
 	this.enteredData = new SelectionData(parseInt(this.enteredData.getValue()));
 	if (this.enteredData.getValue() < 0) {

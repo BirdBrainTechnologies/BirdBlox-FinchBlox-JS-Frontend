@@ -818,11 +818,11 @@ Block.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Block.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+Block.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 };
-Block.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+Block.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 };
 Block.prototype.countHBsInUse=function(){
 	var largest=1;
