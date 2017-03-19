@@ -575,11 +575,12 @@ Block.prototype.duplicate = function(x, y) {
 	}
 	// Copy variable data if this is a variable Block.
 	if (this.variable != null) {  
-		blockCopy.variable = this.variable;
+		blockCopy.setVar(this.variable);
 	}
 	// Copy list data if this is a list Block.
 	if (this.list != null) {  
 		blockCopy.list = this.list;
+		blockCopy.setList(this.list);
 	}
 
 	return blockCopy;  // Return finished Block.
