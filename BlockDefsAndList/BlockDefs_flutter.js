@@ -127,6 +127,13 @@ B_FlutterKnob.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterKnob.prototype.constructor = B_FlutterKnob;
 
 
+function B_FlutterSoil(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "soil", "Soil");
+}
+B_FlutterSoil.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterSoil.prototype.constructor = B_FlutterSoil;
+
+
 function B_FlutterSound(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "sound", "Sound");
 }
