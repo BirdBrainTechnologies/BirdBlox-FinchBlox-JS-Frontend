@@ -37,7 +37,7 @@ ConnectMultipleHBDialog.setConstants=function(){
 	CMHBD.buttonH=30;
 	CMHBD.bnM=7;
 	CMHBD.smallBnWidth=30;
-	CMHBD.statusToBnM=CMHBD.smallBnWidth+CMHBD.bnM-HBStatusLight.radius*2;
+	CMHBD.statusToBnM=CMHBD.smallBnWidth+CMHBD.bnM-DeviceStatusLight.radius*2;
 	CMHBD.editIconH=15;
 
 	CMHBD.fontSize=16;
@@ -109,9 +109,10 @@ ConnectMultipleHBDialog.prototype.createRow=function(index,y,hummingbird){
 	var CMHBD=ConnectMultipleHBDialog;
 	var x=CMHBD.bnM;
 	var request="hummingbird/"+HtmlServer.encodeHtml(hummingbird.name)+"/status";
-	var statusLight=new HBStatusLight(x,y+CMHBD.buttonH/2,this.group,request);
+	// TODO: Fix status light to work with multiple devices
+	var statusLight=new DeviceStatusLight(x,y+CMHBD.buttonH/2,this.group);
 	this.statusLights.push(statusLight);
-	x+=HBStatusLight.radius*2;
+	x+=DeviceStatusLight.radius*2;
 	var textE=GuiElements.draw.text(0,0,index,CMHBD.fontSize,CMHBD.fontColor,CMHBD.font,CMHBD.fontWeight);
 	var textW=GuiElements.measure.textWidth(textE);
 	var textX=x+CMHBD.statusToBnM/2-textW/2;

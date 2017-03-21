@@ -6,7 +6,8 @@ function BlockList(){
 	BlockList.categories=new Array();
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
-	cat.push("Hummingbird"); //Capitalized in the way they are displayed on screen.
+	// Catetory names should be capitalized in the way they should be displayed on screen.
+	cat.push("Robots"); 
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
@@ -46,6 +47,24 @@ BlockList.catCount=function(){
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
+BlockList.populateCat_robots = function(category) {
+	if (HummingbirdManager.GetDeviceCount() > 0 || FlutterManager.GetDeviceCount() > 0) {
+		if (FlutterManager.GetDeviceCount() > 0) {
+			category.addLabel("Flutter");
+			category.addSpace();
+			BlockList.populateCat_flutter(category);
+			category.addSpace();
+		}
+		if (HummingbirdManager.GetDeviceCount() > 0) {
+			category.addLabel("Hummingbird");
+			category.addSpace();
+			BlockList.populateCat_hummingbird(category);
+			category.addSpace();
+		}
+	} else {
+		category.addLabel("Connect a robot first...");
+	}
+}
 BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBServo");
 	category.addBlockByName("B_HBMotor");
@@ -61,6 +80,20 @@ BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBDistInch");
 	category.addBlockByName("B_HBKnob");
 	category.addBlockByName("B_HBSound");
+	category.trimBottom();
+};
+BlockList.populateCat_flutter=function(category){
+	category.addBlockByName("B_FlutterServo");
+	category.addBlockByName("B_FlutterTriLed");
+	category.addSpace();
+	category.addBlockByName("B_FlutterLight");
+	category.addBlockByName("B_FlutterTempC");
+	category.addBlockByName("B_FlutterTempF");
+	category.addBlockByName("B_FlutterDistCM");
+	category.addBlockByName("B_FlutterDistInch");
+	category.addBlockByName("B_FlutterKnob");
+	category.addBlockByName("B_FlutterSound");
+	category.addBlockByName("B_FlutterSoil");
 	category.trimBottom();
 };
 BlockList.populateCat_motion=function(category){

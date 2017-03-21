@@ -5,7 +5,7 @@
 
 function B_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"Servo"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
@@ -24,7 +24,7 @@ B_HBServo.prototype.updateAction=function(){
 
 function B_HBLight(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"Light"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -42,7 +42,7 @@ B_HBLight.prototype.updateAction=function(){
 
 function B_HBMotor(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"Motor"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0, false, true)); //Integer
@@ -59,7 +59,7 @@ B_HBMotor.prototype.updateAction=function(){
 
 function B_HBVibration(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"Vibration"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
@@ -78,7 +78,7 @@ B_HBVibration.prototype.updateAction=function(){
 
 function B_HBLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
@@ -97,7 +97,7 @@ B_HBLed.prototype.updateAction=function(){
 
 function B_HBTempC(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Temperature C"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -115,7 +115,7 @@ B_HBTempC.prototype.updateAction=function(){
 
 function B_HBDistCM(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Distance CM"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -133,7 +133,7 @@ B_HBDistCM.prototype.updateAction=function(){
 
 function B_HBKnob(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
 	this.addPart(new LabelText(this,"Knob"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -151,7 +151,7 @@ B_HBKnob.prototype.updateAction=function(){
 
 function B_HBSound(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Sound"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -171,7 +171,7 @@ B_HBSound.prototype.updateAction=function(){
 
 function B_HBTriLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
 	this.addPart(new LabelText(this,"TRI-LED"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"R"));
@@ -224,7 +224,7 @@ B_HBTriLed.prototype.updateAction=function(){
 
 function B_HBTempF(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new HBDropSlot(this,true));
+	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Temperature F"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }
@@ -251,7 +251,7 @@ B_HBTempF.prototype.updateAction=function(){
 
 function B_HBDistInch(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-    this.addPart(new HBDropSlot(this,true));
+    this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
     this.addPart(new LabelText(this,"HB Distance Inch"));
 	this.addPart(new NumSlot(this,1,true,true)); //Positive integer.
 }

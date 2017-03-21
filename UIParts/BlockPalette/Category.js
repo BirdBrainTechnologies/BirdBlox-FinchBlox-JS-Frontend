@@ -16,6 +16,7 @@ function Category(buttonX,buttonY,index){
 	this.blocks=new Array();
 	this.displayStacks=new Array();
 	this.buttons=new Array();
+	this.labels=new Array();
 	this.fillGroup();
 	this.scrolling=false;
 	this.scrollXOffset=0;
@@ -41,6 +42,10 @@ Category.prototype.clearGroup=function(){
 		this.buttons[i].remove();
 	}
 	this.buttons=new Array();
+	for(var i=0;i<this.labels.length;i++){
+		this.group.removeChild(this.labels[i]);
+	}
+	this.labels=new Array();
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -104,6 +109,7 @@ Category.prototype.addLabel=function(text){
 	var y=this.currentBlockY;
 	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
 	this.group.appendChild(labelE);
+	this.labels.push(labelE);
 	var height=GuiElements.measure.textHeight(labelE);
 	GuiElements.move.element(labelE,x,y+height);
 	this.currentBlockY+=height;
@@ -188,13 +194,13 @@ Category.prototype.getAbsX=function(){
 Category.prototype.getAbsY=function(){
 	return this.y;
 };
-Category.prototype.showHBDropDowns=function(){
+Category.prototype.showDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showHBDropDowns();
+		this.displayStacks[i].showDeviceDropDowns();
 	}
 };
-Category.prototype.hideHBDropDowns=function(){
+Category.prototype.hideDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideHBDropDowns();
+		this.displayStacks[i].hideDeviceDropDowns();
 	}
 };

@@ -480,12 +480,12 @@ BlockStack.prototype.checkVariableUsed=function(variable){
 BlockStack.prototype.checkListUsed=function(list){
 	return this.firstBlock.checkListUsed(list);
 };
-BlockStack.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+BlockStack.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 	this.updateDim();
 };
-BlockStack.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+BlockStack.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 	this.updateDim();
 };
 BlockStack.prototype.countHBsInUse=function(){

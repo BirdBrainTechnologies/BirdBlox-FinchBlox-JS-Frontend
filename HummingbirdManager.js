@@ -9,7 +9,21 @@ function HummingbirdManager(){
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
 	HM.allowVirtualHBs=false;
+	HM.connectionStatus = 2;
+	// 0 - At least 1 disconnected
+	// 1 - Every device is OK
+	// 2 - Nothing connected
+	HM.UpdateConnectionStatus();
 }
+
+HummingbirdManager.GetDeviceName = function(shorten) {
+	if (shorten) {
+		return "HB";
+	} else {
+		return "Hummingbird";
+	}
+}
+
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
 	var HM=HummingbirdManager;
@@ -23,6 +37,21 @@ HummingbirdManager.getHBNames=function(){
 HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;
 	return HM.connectedHBs;
+};
+
+HummingbirdManager.GetConnectionStatus = function() {
+	return HummingbirdManager.connectionStatus;
+};
+
+HummingbirdManager.UpdateConnectionStatus = function() {
+	HtmlServer.sendRequestWithCallback("hummingbird/totalStatus", function(result) {
+		HummingbirdManager.connectionStatus = parseInt(result);
+		if (isNaN(HummingbirdManager.connectionStatus)) {
+			HummingbirdManager.connectionStatus = 0;
+		}
+	},function(){
+		HummingbirdManager.connectionStatus = 0;
+	});
 };
 HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	var mem=block.runMem;
@@ -167,6 +196,9 @@ HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
 HummingbirdManager.getSelectableHBCount=function(){
 	return HummingbirdManager.selectableHBs;
 };
+HummingbirdManager.GetDeviceCount = function() {
+	return HummingbirdManager.connectedHBs.length;
+}
 HummingbirdManager.updateSelectableHBs=function(){
 	var HM=HummingbirdManager;
 	var oldCount=HM.selectableHBs;
@@ -174,11 +206,13 @@ HummingbirdManager.updateSelectableHBs=function(){
 	var newCount=Math.max(HM.connectedHBs.length,inUse);
 	HM.selectableHBs=newCount;
 	if(newCount<=1&&oldCount>1){
-		CodeManager.hideHBDropDowns();
+		CodeManager.hideDeviceDropDowns();
 	}
 	else if(newCount>1&&oldCount<=1){
-		CodeManager.showHBDropDowns();
+		CodeManager.showDeviceDropDowns();
 	}
+	BlockPalette.getCategory("robots").refreshGroup();
+	HummingbirdManager.UpdateConnectionStatus();
 };
 HummingbirdManager.displayDebugInfo=function(){
 	var HM=HummingbirdManager;

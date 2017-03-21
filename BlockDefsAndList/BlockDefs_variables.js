@@ -2,8 +2,10 @@
 
 function B_Variable(x,y,variable){
 	ReporterBlock.call(this,x,y,"variables",Block.returnTypes.string);
-	this.variable=variable;
-	this.addPart(new LabelText(this,this.variable.getName()));
+	if (variable != null) {
+		this.variable=variable;
+		this.addPart(new LabelText(this,this.variable.getName()));
+	}
 }
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
@@ -17,6 +19,12 @@ B_Variable.prototype.createXml=function(xmlDoc){
 	XmlWriter.setAttribute(block,"variable",this.variable.getName());
 	return block;
 };
+B_Variable.prototype.setVar=function(variable){
+	if (variable != null) {
+		this.variable=variable;
+		this.addPart(new LabelText(this,this.variable.getName()));
+	}
+}
 B_Variable.prototype.renameVar=function(){
 	this.variable.rename();	
 };
@@ -109,8 +117,10 @@ B_ChangeBy.prototype.startAction=function(){
 //Done
 function B_List(x,y,list){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
-	this.list=list;
-	this.addPart(new LabelText(this,this.list.getName()));
+	if (list != null) {
+		this.list=list;
+		this.addPart(new LabelText(this,this.list.getName()));
+	}
 }
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
@@ -124,6 +134,12 @@ B_List.prototype.createXml=function(xmlDoc){
 	XmlWriter.setAttribute(block,"list",this.list.getName());
 	return block;
 };
+B_Variable.prototype.setList=function(list){
+	if (list != null) {
+		this.list=list;
+		this.addPart(new LabelText(this,this.list.getName()));
+	}
+}
 B_List.importXml=function(blockNode){
 	var listName=XmlWriter.getAttribute(blockNode,"list");
 	var list=CodeManager.findList(listName);

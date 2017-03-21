@@ -13,16 +13,23 @@ HummingbirdMenu.prototype.loadOptions=function(){
 	if(connectedHBs.length>0){
 		var currentHB=connectedHBs[0];
 		this.addOption(currentHB.name,function(){},false);
-		this.addOption("Rename", function(){
+		this.addOption("Rename HB", function(){
 			currentHB.promptRename();
 		});
-		this.addOption("Disconnect", function(){
+		this.addOption("Disconnect HB", function(){
 			currentHB.disconnect();
+		});
+	}
+	if (FlutterManager.GetDeviceCount() > 0) {
+		let firstDevice = FlutterManager.GetConnectedDevices()[0];
+		// TODO: Show all connected devices
+		this.addOption(firstDevice.getName());
+		this.addOption("Disconnect Flutter", function() {
+			FlutterManager.DisconnectDevice(firstDevice.getName());
 		});
 	}
 	this.addOption("Connect HB", HummingbirdManager.showConnectOneDialog);
 	this.addOption("Connect Flutter", FlutterManager.ShowDiscoverDialog);
-	HtmlServer.sendRequestWithCallback("hummingbird/discover");
 };
 HummingbirdMenu.prototype.previewOpen=function(){
 	return (HummingbirdManager.getConnectedHBs().length<=1);

@@ -216,11 +216,11 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
-TabManager.hideHBDropDowns=function(){
-	TabManager.passRecursively("hideHBDropDowns");
+TabManager.hideDeviceDropDowns=function(){
+	TabManager.passRecursively("hideDeviceDropDowns");
 };
-TabManager.showHBDropDowns=function(){
-	TabManager.passRecursively("showHBDropDowns");
+TabManager.showDeviceDropDowns=function(){
+	TabManager.passRecursively("showDeviceDropDowns");
 };
 TabManager.countHBsInUse=function(){
 	var largest=1;

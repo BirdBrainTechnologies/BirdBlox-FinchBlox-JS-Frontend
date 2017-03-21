@@ -101,12 +101,12 @@ DisplayStack.prototype.getSprite=function(){
 DisplayStack.prototype.delete=function(){
 	this.group.remove();
 };
-DisplayStack.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+DisplayStack.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 	this.updateDim();
 };
-DisplayStack.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+DisplayStack.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 	this.updateDim();
 };
 DisplayStack.prototype.passRecursively=function(functionName){

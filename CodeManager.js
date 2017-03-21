@@ -428,13 +428,13 @@ CodeManager.updateAvailableMessages=function(){
 CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
-CodeManager.hideHBDropDowns=function(){
-	TabManager.hideHBDropDowns();
-	BlockPalette.hideHBDropDowns();
+CodeManager.hideDeviceDropDowns=function(){
+	TabManager.hideDeviceDropDowns();
+	BlockPalette.hideDeviceDropDowns();
 };
-CodeManager.showHBDropDowns=function(){
-	TabManager.showHBDropDowns();
-	BlockPalette.showHBDropDowns();
+CodeManager.showDeviceDropDowns=function(){
+	TabManager.showDeviceDropDowns();
+	BlockPalette.showDeviceDropDowns();
 };
 CodeManager.countHBsInUse=function(){
 	return TabManager.countHBsInUse();

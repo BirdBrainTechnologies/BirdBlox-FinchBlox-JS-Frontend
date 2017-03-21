@@ -30,7 +30,7 @@ DiscoverDialog.selectDevice = function(deviceName){
 DiscoverDialog.setConstants = function(){
 	let Class = DiscoverDialog;
 	Class.instance = null;
-	Class.updateInterval = 1000;
+	Class.updateInterval = 500;
 
 	Class.titleBarColor = Colors.lightGray;
 	Class.titleBarFontC = Colors.white;

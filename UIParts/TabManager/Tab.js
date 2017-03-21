@@ -289,11 +289,11 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Tab.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+Tab.prototype.hideDeviceDropDowns=function(){
+	this.passRecursively("hideDeviceDropDowns");
 };
-Tab.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+Tab.prototype.showDeviceDropDowns=function(){
+	this.passRecursively("showDeviceDropDowns");
 };
 Tab.prototype.countHBsInUse=function(){
 	var largest=1;
