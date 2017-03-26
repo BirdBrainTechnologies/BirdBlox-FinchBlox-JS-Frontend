@@ -1,3 +1,4 @@
+"use strict";
 //Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
 
 function Colors(){

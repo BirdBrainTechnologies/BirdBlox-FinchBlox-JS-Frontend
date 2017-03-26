@@ -1,3 +1,5 @@
+"use strict";
+
 function Flutter(name) {
 	this.name = name;
 }

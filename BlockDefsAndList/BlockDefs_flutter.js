@@ -1,3 +1,4 @@
+"use strict";
 /* Output Blocks */
 function B_FlutterServo(x, y) {
 	CommandBlock.call(this, x, y, "flutter");

@@ -1,3 +1,5 @@
+"use strict";
+
 function FlutterManager() {
 	let mgr = FlutterManager;
 	mgr.connectedDevices = {};

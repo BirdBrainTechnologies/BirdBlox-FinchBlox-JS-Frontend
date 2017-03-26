@@ -1,3 +1,5 @@
+"use strict";
+
 function DiscoverDialog(){
 	let Class = DiscoverDialog;
 	this.width = Class.width;

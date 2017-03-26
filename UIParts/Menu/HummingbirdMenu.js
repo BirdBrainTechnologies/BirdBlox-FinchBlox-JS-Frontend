@@ -1,3 +1,5 @@
+"use strict";
+
 function HummingbirdMenu(button){
 	Menu.call(this,button,true,HummingbirdMenu.width);
 	this.addAlternateFn(HummingbirdManager.showConnectMultipleDialog);
