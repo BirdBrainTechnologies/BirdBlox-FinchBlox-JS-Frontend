@@ -162,6 +162,7 @@ GuiElements.createLayers=function(){
 
             // Handle pinch
             this.hammer.on('pinchstart pinchmove', function(ev){
+            	console.log("Pinch to zoom");
                 // On pinch start remember initial zoom
                 if (ev.type === 'pinchstart') {
                     initialScale = instance.getZoom();

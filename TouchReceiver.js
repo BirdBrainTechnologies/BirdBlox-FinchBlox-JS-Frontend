@@ -227,8 +227,8 @@ TouchReceiver.touchmove=function(e){
 		/* If the user drags a Block that is in a DisplayStack, 
 		the DisplayStack copies to a new BlockStack, which can be dragged. */
 		if(TR.targetType=="displayStack"){
-			var x=TR.target.stack.getAbsX(); //Determine where the copied BlockStack should go.
-			var y=TR.target.stack.getAbsY();
+			var x=TR.target.stack.getAbsX()/GuiElements.svgPanZoom.getZoom(); //Determine where the copied BlockStack should go.
+			var y=TR.target.stack.getAbsY()/GuiElements.svgPanZoom.getZoom();
 			//The first block of the duplicated BlockStack is the new target.
 			TR.target=TR.target.stack.duplicate(x,y).firstBlock;
 			TR.targetType="block";
@@ -237,12 +237,14 @@ TouchReceiver.touchmove=function(e){
 		then the BlockStack should move. */
 		if(TR.targetType=="block"){
 			//If the CodeManager has not started the movement, this must be done first.
+			let x = TR.getX(e) / GuiElements.svgPanZoom.getZoom();
+			let y = TR.getY(e) / GuiElements.svgPanZoom.getZoom();
 			if(TR.blocksMoving){
 				//The CodeManager handles moving BlockStacks.
-				CodeManager.move.update(TR.getX(e),TR.getY(e));
+				CodeManager.move.update(x,y);
 			}
 			else{
-				CodeManager.move.start(TR.target,TR.getX(e),TR.getY(e));
+				CodeManager.move.start(TR.target,x,y);
 				TR.blocksMoving=true;
 			}
 		}
@@ -256,14 +258,14 @@ TouchReceiver.touchmove=function(e){
 			}
 		}
 		//If the user drags the tab space, it should scroll.
-		if(TR.targetType=="tabSpace"){
-			if(!TabManager.scrolling){
-				TabManager.startScoll(TR.getX(e),TR.getY(e));
-			}
-			else{
-				TabManager.updateScroll(TR.getX(e),TR.getY(e));
-			}
-		}
+		// if(TR.targetType=="tabSpace"){
+		// 	if(!TabManager.scrolling){
+		// 		TabManager.startScoll(TR.getX(e),TR.getY(e));
+		// 	}
+		// 	else{
+		// 		TabManager.updateScroll(TR.getX(e),TR.getY(e));
+		// 	}
+		// }
 		//If the user drags a button and it has a menuBnList, it should scroll it.
 		if(TR.targetType=="button"){
 			if(TR.target.menuBnList!=null&&TR.target.menuBnList.scrollable){
