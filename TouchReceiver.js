@@ -85,7 +85,7 @@ TouchReceiver.getY=function(e){
 TouchReceiver.touchstart=function(e){
 	var TR=TouchReceiver; //shorthand
 	e.preventDefault(); //Stops 300 ms delay events
-	e.stopPropagation();
+	// e.stopPropagation();
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
 		TR.stopLongTouchTimer();
