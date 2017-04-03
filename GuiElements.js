@@ -144,31 +144,30 @@ GuiElements.createLayers=function(){
 
             // Handle double tap
             this.hammer.on('doubletap', function(ev){
-                instance.zoomIn()
+                instance.zoomAtPointBy(1.2, ev.center);
             });
 
             // Handle pan
             this.hammer.on('panstart panmove', function(ev){
                 // On pan start reset panned variables
                 if (ev.type === 'panstart') {
-                    pannedX = 0
-                    pannedY = 0
+                    pannedX = 0;
+                    pannedY = 0;
                 }
                 // Pan only the difference
-                instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
-                pannedX = ev.deltaX
-                pannedY = ev.deltaY
+                instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY});
+                pannedX = ev.deltaX;
+                pannedY = ev.deltaY;
             });
 
             // Handle pinch
             this.hammer.on('pinchstart pinchmove', function(ev){
-            	console.log("Pinch to zoom");
                 // On pinch start remember initial zoom
                 if (ev.type === 'pinchstart') {
                     initialScale = instance.getZoom();
-                    instance.zoom(initialScale * ev.scale);
+                    instance.zoomAtPoint(initialScale * ev.scale, ev.center);
                 }
-                instance.zoom(initialScale * ev.scale);
+                instance.zoomAtPoint(initialScale * ev.scale, ev.center);
             });
 
             // Prevent moving the page on some devices when panning over SVG
@@ -180,11 +179,13 @@ GuiElements.createLayers=function(){
     }
 	GuiElements.layers.activeTab.addEventListener("DOMSubtreeModified", function(){
 	    GuiElements.svgPanZoom = svgPanZoom(GuiElements.svg, {
+          	zoomEnabled: true,
 	    	fit: false,
 	    	contian: false,
 	        viewportSelector: GuiElements.layers.activeTab,
-	        // customEventsHandler: eventsHandler,
+	        customEventsHandler: eventsHandler,
 	        eventsListenerElement: GuiElements.layers.aTabBg,
+	        controlIconsEnabled: true,
 	    });
 	});
 
