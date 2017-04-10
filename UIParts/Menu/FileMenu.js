@@ -8,7 +8,7 @@ function FileMenu(button){
 	this.addOption("Delete", this.optionDelete);
 	//this.addOption("Import", this.optionImport);
 	this.addOption("Export", this.optionExport);
-	this.addOption("Advanced", this.optionEnableDebug);
+	this.addOption("Debug", this.optionEnableDebug);
 	this.buildMenu();
 }
 FileMenu.prototype = Object.create(Menu.prototype);
