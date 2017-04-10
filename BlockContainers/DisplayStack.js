@@ -44,10 +44,10 @@ DisplayStack.prototype.updateDim=function() {
 	this.dim.ry1+=this.getAbsY();
 }
 DisplayStack.prototype.getAbsX=function(){
-	return this.x+this.category.getAbsX();
+	return this.x+this.category.getAbsX()-GuiElements.svgPanZoom.getPan().x;
 }
 DisplayStack.prototype.getAbsY=function(){//Fix
-	return this.y+this.category.getAbsY();
+	return this.y+this.category.getAbsY()-GuiElements.svgPanZoom.getPan().y;
 }
 //DisplayStack.prototype.findBestFit=function()
 DisplayStack.prototype.move=function(x,y){
