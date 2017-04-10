@@ -4,7 +4,7 @@ function B_FlutterServo(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
 	this.addPart(new DeviceDropSlot(this, FlutterManager));
 	this.addPart(new LabelText(this, "Servo"));
-	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
+	this.addPart(new PortSlot(this, 3)); //Positive integer.
 	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
 }
 B_FlutterServo.prototype = Object.create(CommandBlock.prototype);
@@ -32,7 +32,7 @@ function B_FlutterTriLed(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
 	this.addPart(new DeviceDropSlot(this, FlutterManager, true));
 	this.addPart(new LabelText(this, "TRI-LED"));
-	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
+	this.addPart(new PortSlot(this, 3)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
 	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "G"));
@@ -70,7 +70,7 @@ function B_FlutterSensorBase(x, y, sensorType, displayName) {
 	this.displayName = displayName;
 	this.addPart(new DeviceDropSlot(this, FlutterManager));
 	this.addPart(new LabelText(this, displayName));
-	this.addPart(new NumSlot(this, 1, true, true)); //Positive integer.
+	this.addPart(new PortSlot(this, 3)); //Positive integer.
 }
 B_FlutterSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FlutterSensorBase.constructor = B_FlutterSensorBase;
