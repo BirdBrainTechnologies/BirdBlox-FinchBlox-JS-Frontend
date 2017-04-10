@@ -186,7 +186,7 @@ GuiElements.createLayers=function(){
 	        viewportSelector: GuiElements.layers.activeTab,
 	        customEventsHandler: eventsHandler,
 	        eventsListenerElement: GuiElements.layers.aTabBg,
-	        controlIconsEnabled: true,
+	        controlIconsEnabled: false,
 	    });
 	});
 
