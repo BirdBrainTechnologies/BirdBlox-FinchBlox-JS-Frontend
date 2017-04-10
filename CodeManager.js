@@ -67,11 +67,14 @@ CodeManager.move.start=function(block,x,y){
 		move.returnsValue=stack.firstBlock.returnsValue;
 		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
 		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
+		
+		let canvasX = x / GuiElements.svgPanZoom.getZoom();
+		let canvasY = y / GuiElements.svgPanZoom.getZoom();
 
 		move.touchX=x; //Store coords
 		move.touchY=y;
-		move.offsetX=stack.getAbsX()-x; //Store offset.
-		move.offsetY=stack.getAbsY()-y;
+		move.offsetX=stack.getAbsX()-canvasX; //Store offset.
+		move.offsetY=stack.getAbsY()-canvasY;
 		move.stack=stack; //Store stack.
 	}
 }
@@ -83,16 +86,19 @@ CodeManager.move.start=function(block,x,y){
 CodeManager.move.update=function(x,y){
 	var move=CodeManager.move; //shorthand
 	if(move.moving){ //Only update if a BlockStack is currently moving.
-		move.touchX=x;
-		move.touchY=y;
-		move.topX=move.offsetX+move.touchX;
-		move.topY=move.offsetY+move.touchY;
+		let canvasX = x / GuiElements.svgPanZoom.getZoom();
+		let canvasY = y / GuiElements.svgPanZoom.getZoom();
+
+		move.touchX = x;
+		move.touchY = y;
+		move.topX = move.offsetX+canvasX;
+		move.topY = move.offsetY+canvasY;
+
 		move.stack.move(move.topX,move.topY); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if(BlockPalette.IsStackOverPalette()){
+		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
-		}
-		else{
+		} else {
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(CodeManager.fit.found){
@@ -110,13 +116,14 @@ CodeManager.move.end=function(){
 	var move=CodeManager.move; //shorthand
 	var fit=CodeManager.fit; //shorthand
 	if(move.moving){ //Only run if a BlockStack is currently moving.
-		move.topX=move.offsetX+move.touchX;
-		move.topY=move.offsetY+move.touchY;
+		let canvasX = move.touchX / GuiElements.svgPanZoom.getZoom();
+		let canvasY = move.touchY / GuiElements.svgPanZoom.getZoom();
+		move.topX=move.offsetX+canvasX;
+		move.topY=move.offsetY+canvasY;
 		//If the BlockStack overlaps with the BlockPalette, delete it.
-		if(BlockPalette.IsStackOverPalette()){
+		if(BlockPalette.IsStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
-		}
-		else{
+		} else {
 			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(fit.found){

@@ -227,18 +227,18 @@ TouchReceiver.touchmove=function(e){
 		/* If the user drags a Block that is in a DisplayStack, 
 		the DisplayStack copies to a new BlockStack, which can be dragged. */
 		if(TR.targetType=="displayStack"){
-			var x=TR.target.stack.getAbsX()/GuiElements.svgPanZoom.getZoom(); //Determine where the copied BlockStack should go.
-			var y=TR.target.stack.getAbsY()/GuiElements.svgPanZoom.getZoom();
+			var canvasX=TR.target.stack.getAbsX()/GuiElements.svgPanZoom.getZoom(); //Determine where the copied BlockStack should go.
+			var canvasY=TR.target.stack.getAbsY()/GuiElements.svgPanZoom.getZoom();
 			//The first block of the duplicated BlockStack is the new target.
-			TR.target=TR.target.stack.duplicate(x,y).firstBlock;
+			TR.target=TR.target.stack.duplicate(canvasX,canvasY).firstBlock;
 			TR.targetType="block";
 		}
 		/* If the user drags a Block that is a member of a BlockStack, 
 		then the BlockStack should move. */
 		if(TR.targetType=="block"){
 			//If the CodeManager has not started the movement, this must be done first.
-			let x = TR.getX(e) / GuiElements.svgPanZoom.getZoom();
-			let y = TR.getY(e) / GuiElements.svgPanZoom.getZoom();
+			let x = TR.getX(e);
+			let y = TR.getY(e);
 			if(TR.blocksMoving){
 				//The CodeManager handles moving BlockStacks.
 				CodeManager.move.update(x,y);
