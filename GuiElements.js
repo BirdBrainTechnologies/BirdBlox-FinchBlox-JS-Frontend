@@ -124,7 +124,7 @@ GuiElements.createLayers=function(){
 	layers.tabMenu=create.layer();
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
-	layers.overlay=create.layer();
+	layers.overlay=create.group(0,0,layers.activeTab);
 
 	let eventsHandler = {
         haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel'],
