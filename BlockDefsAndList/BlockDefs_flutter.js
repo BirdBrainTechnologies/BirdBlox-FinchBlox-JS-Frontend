@@ -50,12 +50,17 @@ B_FlutterTriLed.prototype.startAction = function() {
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
-	let port = this.slots[1].getData().getValueWithC(true, true); // Positive integer.
+	let port = this.slots[1].getData().getValue(); // Positive integer.
 	let valueR = this.slots[2].getData().getValueInR(0, 100, true, true); //Positive integer.
 	let valueG = this.slots[3].getData().getValueInR(0, 100, true, true); //Positive integer.
 	let valueB = this.slots[4].getData().getValueInR(0, 100, true, true); //Positive integer.
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return flutter.setTriLEDOrSave(shouldSend, mem, port, valueR, valueG, valueB);
+	if (port != null && port > 0 && port < 4) {
+		return flutter.setTriLEDOrSave(shouldSend, mem, port, valueR, valueG, valueB);
+	} else {
+		this.resultData = new StringData("Invalid port number");
+		return false; // Invalid port, exit early
+	}
 };
 /* Waits for the request to finish. */
 B_FlutterTriLed.prototype.updateAction = function() {
