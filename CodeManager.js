@@ -98,7 +98,9 @@ CodeManager.move.update=function(x,y){
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
+			BlockPalette.ShowTrash();
 		} else {
+			BlockPalette.HideTrash();
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(CodeManager.fit.found){
@@ -139,6 +141,7 @@ CodeManager.move.end=function(){
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
 		SaveManager.markEdited();
+		BlockPalette.HideTrash();
 	}
 };
 /* Drops the BlockStack where it is without attaching it to anything or deleting it.
