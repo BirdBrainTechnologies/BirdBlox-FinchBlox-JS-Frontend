@@ -1,3 +1,5 @@
+"use strict";
+
 /* CodeManager is a static class that controls block execution.
  * It also moves the BlockStack that the user is dragging.
  */

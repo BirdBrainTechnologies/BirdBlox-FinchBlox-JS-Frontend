@@ -1,3 +1,5 @@
+"use strict";
+
 function PortSlot(parent, maxPorts) {
 	DropSlot.call(this, parent, Slot.snapTypes.none);
 	this.maxPorts = maxPorts;

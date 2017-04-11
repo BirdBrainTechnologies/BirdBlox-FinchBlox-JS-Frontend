@@ -1,3 +1,5 @@
+"use strict";
+
 /* TouchReceiver is a static class that handles all touch events.
  * It adds touch event handlers and keeps track of what types of objects are being touched/dragged.
  */

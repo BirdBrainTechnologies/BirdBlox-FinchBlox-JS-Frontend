@@ -1,3 +1,5 @@
+"use strict";
+
 /* GuiElements is a static class that builds the UI and initializes the other classes.
  * It contains functions to create and modify elements of the main SVG.
  * GuiElements is run once the browser has loaded all the js and html files.

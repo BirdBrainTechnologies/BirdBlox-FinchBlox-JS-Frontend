@@ -1,3 +1,5 @@
+"use strict";
+
 function BlockPalette(){
 	BlockPalette.categories=new Array();
 	BlockPalette.selectedCat=null;
