@@ -77,9 +77,10 @@ FlutterManager.DiscoverDevices = function(successFn, errorFn) {
  */
 FlutterManager.ConnectDevice = function(deviceName) {
 	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName);
-	FlutterManager.connectedDevices[deviceName].connect();
-	BlockPalette.getCategory("robots").refreshGroup();
-	FlutterManager.UpdateConnectionStatus();
+	FlutterManager.connectedDevices[deviceName].connect(function() {
+		BlockPalette.getCategory("robots").refreshGroup();
+		FlutterManager.UpdateConnectionStatus();		
+	});
 }
 
 /**
@@ -88,10 +89,11 @@ FlutterManager.ConnectDevice = function(deviceName) {
  * @param      {String}  deviceName  Name of the device to disconnect
  */
 FlutterManager.DisconnectDevice = function(deviceName) {
-	FlutterManager.connectedDevices[deviceName].disconnect();
-	delete FlutterManager.connectedDevices[deviceName];
-	BlockPalette.getCategory("robots").refreshGroup();
-	FlutterManager.UpdateConnectionStatus();
+	FlutterManager.connectedDevices[deviceName].disconnect(function() {
+		delete FlutterManager.connectedDevices[deviceName];
+		BlockPalette.getCategory("robots").refreshGroup();
+		FlutterManager.UpdateConnectionStatus();		
+	});
 }
 
 /**
