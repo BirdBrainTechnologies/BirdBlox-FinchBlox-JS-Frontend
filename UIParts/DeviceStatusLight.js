@@ -1,3 +1,5 @@
+"use strict";
+
 function DeviceStatusLight(x,centerY,parent){
 	var HBSL=DeviceStatusLight;
 	this.cx=x+HBSL.radius;

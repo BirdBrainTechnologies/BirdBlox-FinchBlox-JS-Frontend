@@ -1,3 +1,5 @@
+"use strict";
+
 /* GuiElements is a static class that builds the UI and initializes the other classes.
  * It contains functions to create and modify elements of the main SVG.
  * GuiElements is run once the browser has loaded all the js and html files.
@@ -119,12 +121,77 @@ GuiElements.createLayers=function(){
 	layers.titlebar=create.layer();
 	layers.stage=create.layer();
 	layers.display=create.layer();
-	layers.drag=create.layer();
-	layers.highlight=create.layer();
+	layers.drag=create.group(0,0,layers.activeTab);
+	layers.highlight=create.group(0,0,layers.activeTab);
 	layers.tabMenu=create.layer();
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
+	layers.canvasOverlay=create.group(0,0,layers.activeTab);
 	layers.overlay=create.layer();
+
+	let eventsHandler = {
+        haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel'],
+        init: function(options) {
+            var instance = options.instance;
+            var initialScale = 1;
+            var pannedX = 0;
+            var pannedY = 0;
+            // Init Hammer
+            // Listen only for pointer and touch events
+            this.hammer = Hammer(options.eventsListenerElement, {
+                inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+            });
+
+            // Enable pinch
+            this.hammer.get('pinch').set({enable: true});
+
+            // Handle double tap
+            this.hammer.on('doubletap', function(ev){
+                instance.zoomAtPointBy(1.2, ev.center);
+            });
+
+            // Handle pan
+            this.hammer.on('panstart panmove', function(ev){
+                // On pan start reset panned variables
+                if (ev.type === 'panstart') {
+                    pannedX = 0;
+                    pannedY = 0;
+                }
+                // Pan only the difference
+                instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY});
+                pannedX = ev.deltaX;
+                pannedY = ev.deltaY;
+            });
+
+            // Handle pinch
+            this.hammer.on('pinchstart pinchmove', function(ev){
+                // On pinch start remember initial zoom
+                if (ev.type === 'pinchstart') {
+                    initialScale = instance.getZoom();
+                    instance.zoomAtPoint(initialScale * ev.scale, ev.center);
+                }
+                instance.zoomAtPoint(initialScale * ev.scale, ev.center);
+            });
+
+            // Prevent moving the page on some devices when panning over SVG
+            options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+        },
+        destroy: function(){
+            this.hammer.destroy()
+        }
+    }
+	GuiElements.layers.activeTab.addEventListener("DOMSubtreeModified", function(){
+	    GuiElements.svgPanZoom = svgPanZoom(GuiElements.svg, {
+          	zoomEnabled: true,
+	    	fit: false,
+	    	contian: false,
+	        viewportSelector: GuiElements.layers.activeTab,
+	        customEventsHandler: eventsHandler,
+	        eventsListenerElement: GuiElements.layers.aTabBg,
+	        controlIconsEnabled: false,
+	    });
+	});
+
 }
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.

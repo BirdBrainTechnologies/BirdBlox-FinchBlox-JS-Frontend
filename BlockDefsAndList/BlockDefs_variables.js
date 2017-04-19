@@ -134,7 +134,7 @@ B_List.prototype.createXml=function(xmlDoc){
 	XmlWriter.setAttribute(block,"list",this.list.getName());
 	return block;
 };
-B_Variable.prototype.setList=function(list){
+B_List.prototype.setList=function(list){
 	if (list != null) {
 		this.list=list;
 		this.addPart(new LabelText(this,this.list.getName()));

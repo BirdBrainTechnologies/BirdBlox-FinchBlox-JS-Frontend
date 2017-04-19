@@ -1,4 +1,4 @@
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
+function BubbleOverlay(color, margin, innerGroup, parent, hMargin, onCanvas){
 	if(hMargin==null){
 		hMargin=0;
 	}
@@ -7,7 +7,11 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
 	this.hMargin=hMargin;
 	this.innerGroup=innerGroup;
 	this.parent=parent;
-	this.layerG=GuiElements.layers.overlay;
+	if (!onCanvas) {
+		this.layerG=GuiElements.layers.overlay;
+	} else {
+		this.layerG=GuiElements.layers.canvasOverlay;
+	}
 	this.visible=false;
 	this.buildBubble();
 }
@@ -76,14 +80,15 @@ BubbleOverlay.prototype.display=function(x,upperY,lowerY,innerWidth,innerHeight)
 		yCoord=upperY-tallH;
 		arrowY=height-BO.overlap;
 	}
-	if(xCoord<this.hMargin){
-		arrowX+=xCoord-this.hMargin;
-		xCoord=this.hMargin;
-	}
-	if(xCoord+width>GuiElements.width-this.hMargin){
-		arrowX=width+x-GuiElements.width-BO.triangleW/2+this.hMargin;
-		xCoord=GuiElements.width-width-this.hMargin;
-	}
+	// TODO(tsun): Fix this sizing issue if off the side of the screen
+	// if(xCoord<this.hMargin){
+	// 	arrowX+=xCoord-this.hMargin;
+	// 	xCoord=this.hMargin;
+	// }
+	// if(xCoord+width>GuiElements.width-this.hMargin){
+	// 	arrowX=width+x-GuiElements.width-BO.triangleW/2+this.hMargin;
+	// 	xCoord=GuiElements.width-width-this.hMargin;
+	// }
 	if(arrowX<0){
 		arrowX=0;
 	}

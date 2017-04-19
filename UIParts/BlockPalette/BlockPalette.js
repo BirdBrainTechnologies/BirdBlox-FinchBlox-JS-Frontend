@@ -1,3 +1,5 @@
+"use strict";
+
 function BlockPalette(){
 	BlockPalette.categories=new Array();
 	BlockPalette.selectedCat=null;
@@ -31,6 +33,14 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.labelFontSize=13;
 	BlockPalette.labelFontCharHeight=12;
 	BlockPalette.labelColor=Colors.white;
+
+	BlockPalette.trash = null;
+	BlockPalette.trashImg = {
+		name: "trash",
+		width: 104,
+		height: 120
+	};
+	BlockPalette.trashOpacity = 0.8;
 }
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
@@ -90,9 +100,35 @@ BlockPalette.selectFirstCat=function(){
 BlockPalette.getAbsY=function(){
 	return TitleBar.height+BlockPalette.catH;
 }*/
-BlockPalette.IsStackOverPalette=function(){
-	var move=CodeManager.move;
-	return CodeManager.move.pInRange(move.touchX,move.touchY,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
+BlockPalette.IsStackOverPalette=function(x,y){
+	return CodeManager.move.pInRange(x,y,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
+}
+BlockPalette.ShowTrash=function() {
+	let BP = BlockPalette;
+	if (!BP.trash) {
+		BP.trash = GuiElements.create.group(0,0);
+		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+
+		// Create trash icon
+		let img = BP.trashImg;
+		let imgX = BP.width/2 - img.width/2;  // Center X
+		let imgY = BP.y + BP.height/2 - img.height/2;  // Center Y
+		let trashIcon = GuiElements.draw.image(img.name, imgX, imgY, img.width, img.height);
+
+		// Add to group and update opacity
+		BP.trash.appendChild(trashBg);
+		BP.trash.appendChild(trashIcon);
+		GuiElements.update.opacity(BP.trash, BP.trashOpacity);
+
+		GuiElements.layers.palette.appendChild(BP.trash);
+	}
+}
+BlockPalette.HideTrash=function() {
+	let BP = BlockPalette;
+	if (BP.trash) {
+		GuiElements.layers.palette.removeChild(BP.trash);
+		BP.trash = null;
+	}
 }
 BlockPalette.startScoll=function(x,y){
 	var BP=BlockPalette;

@@ -56,7 +56,7 @@ Tab.prototype.updatePosition=function(x){
 	return x+this.width;
 }
 Tab.prototype.activate=function(){
-	GuiElements.layers.activeTab.appendChild(this.mainG);
+	GuiElements.layers.activeTab.insertBefore(this.mainG, GuiElements.layers.drag);
 	GuiElements.update.color(this.pathE,TabManager.activeTabFill);
 }
 Tab.prototype.deactivate=function(){
@@ -152,53 +152,53 @@ Tab.prototype.startRun=function(){
 	TabManager.startRun();
 }
 Tab.prototype.startScroll=function(x,y){
-	if(!this.scrolling) {
-		this.scrolling = true;
-		this.scrollXOffset = this.scrollX - x;
-		this.scrollYOffset = this.scrollY - y;
-		this.updateTabDim();
-	}
+	// if(!this.scrolling) {
+	// 	this.scrolling = true;
+	// 	this.scrollXOffset = this.scrollX - x;
+	// 	this.scrollYOffset = this.scrollY - y;
+	// 	this.updateTabDim();
+	// }
 };
 Tab.prototype.updateScroll=function(x,y){
-	if(this.scrolling) {
-		this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
-	}
+	// if(this.scrolling) {
+	// 	this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
+	// }
 };
 Tab.prototype.scroll=function(x,y) {
 	//this.scrollX=x;
 	//this.scrollY=y;
 	//GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
-	var dim=this.dim;
-	var x1=x+dim.xDiff;
-	var y1=y+dim.yDiff;
+	// var dim=this.dim;
+	// var x1=x+dim.xDiff;
+	// var y1=y+dim.yDiff;
 
-	var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
-	var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
-	this.scrollX=newObjX-dim.xDiff;
-	this.scrollY=newObjY-dim.yDiff;
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	// var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
+	// var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
+	// this.scrollX=newObjX-dim.xDiff;
+	// this.scrollY=newObjY-dim.yDiff;
+	// GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
 };
 Tab.prototype.endScroll=function(){
-	this.scrolling=false;
+	// this.scrolling=false;
 };
 Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
-	var minX;
-	var maxX;
-	if(objectW<containerW){
-		if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
-			return objectX;
-		}
-		minX=Math.min(containerX,objectX);
-		maxX=Math.max(containerX+containerW-objectW,objectX);
-	}
-	else{
-		minX=Math.min(containerX+containerW-objectW,objectX);
-		maxX=Math.max(containerX,objectX);
-	}
-	var rVal=targetX;
-	rVal=Math.min(rVal,maxX);
-	rVal=Math.max(rVal,minX);
-	return rVal;
+	// var minX;
+	// var maxX;
+	// if(objectW<containerW){
+	// 	if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
+	// 		return objectX;
+	// 	}
+	// 	minX=Math.min(containerX,objectX);
+	// 	maxX=Math.max(containerX+containerW-objectW,objectX);
+	// }
+	// else{
+	// 	minX=Math.min(containerX+containerW-objectW,objectX);
+	// 	maxX=Math.max(containerX,objectX);
+	// }
+	// var rVal=targetX;
+	// rVal=Math.min(rVal,maxX);
+	// rVal=Math.max(rVal,minX);
+	// return rVal;
 };
 Tab.prototype.updateTabDim=function(){
 	var dim=this.dim;
