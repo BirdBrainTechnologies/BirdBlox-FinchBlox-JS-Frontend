@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
+	DebugOptions();
 	HtmlServer();
 	Data.setConstants();
 	/* Saves the dimensions of the screen so other classes can refer to them.  
@@ -99,6 +100,7 @@ GuiElements.buildUI=function(){
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager.new();
+	DebugOptions.applyActions();
 };
 /* Makes an SVG group element (<g>) for each layer of the interface.
  * Layers are accessible in the form GuiElements.layers.[layerName]

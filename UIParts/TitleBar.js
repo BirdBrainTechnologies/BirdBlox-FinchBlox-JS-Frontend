@@ -5,9 +5,9 @@ function TitleBar(){
 }
 TitleBar.setGraphics=function(){
 	var TB=TitleBar;
-	TB.height=50;
+	TB.height=54;
 	TB.buttonMargin=7;
-	TB.buttonW=60;
+	TB.buttonW=64;
 	TB.longButtonW=85;
 	TB.bnIconMargin=3;
 	TB.bg=Colors.black;
@@ -87,9 +87,13 @@ TitleBar.enableDebug=function(){
 	var TBLayer=GuiElements.layers.titlebar;
 	if(TB.debugBn==null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
-		TB.debugBn.addText("Advanced");
+		TB.debugBn.addText("Debug");
 		TB.debugMenu = new DebugMenu(TB.debugBn);
 	}
+};
+TitleBar.hideDebug = function(){
+	TitleBar.debugBn.remove();
+	TitleBar.debugBn = null;
 };
 TitleBar.updateZoom=function(){
 	var TB=TitleBar;

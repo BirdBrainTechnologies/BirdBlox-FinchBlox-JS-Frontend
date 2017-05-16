@@ -237,7 +237,7 @@ BlockList.populateCat_variables=function(category){
 	var callbackFn=function(){
 		CodeManager.newVariable();
 	};
-	category.addButton("Create variable",150,25,callbackFn);
+	category.addButton("Create variable",callbackFn);
 	category.addSpace();
 	var variables=CodeManager.variableList;
 	if(variables.length>0){
@@ -252,7 +252,7 @@ BlockList.populateCat_variables=function(category){
 		CodeManager.newList();
 	};
 	category.addSpace();
-	category.addButton("Create list",150,25,callbackFn);
+	category.addButton("Create list",callbackFn);
 	category.addSpace();
 	var lists=CodeManager.listList;
 	if(lists.length>0){

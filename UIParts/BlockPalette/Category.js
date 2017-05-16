@@ -90,7 +90,9 @@ Category.prototype.addBlock=function(block){
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
-Category.prototype.addButton=function(text,width,height,callback){
+Category.prototype.addButton=function(text,callback){
+	var width = BlockPalette.insideBnW;
+	var height = BlockPalette.insideBnH;
 	if(this.lastHadStud){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
 	}

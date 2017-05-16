@@ -1,5 +1,6 @@
 function DebugMenu(button){
 	Menu.call(this,button,false,130);
+	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
 	this.addOption("HB names", this.optionHBs);
 	this.addOption("Log HTTP", this.optionLogHttp);
