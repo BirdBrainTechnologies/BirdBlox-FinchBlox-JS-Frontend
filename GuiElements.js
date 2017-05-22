@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	Colors();
 	DebugOptions();
 	HtmlServer();
 	Data.setConstants();
@@ -46,7 +45,7 @@ GuiElements.setConstants=function(){
 	ImageLists();
 	Sounds();
 	BlockList();
-
+	Colors();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphics();
