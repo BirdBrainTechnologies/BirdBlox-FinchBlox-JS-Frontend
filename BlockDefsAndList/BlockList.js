@@ -7,7 +7,7 @@ function BlockList(){
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
 	// Catetory names should be capitalized in the way they should be displayed on screen.
-	cat.push("Robots"); 
+	cat.push("Robots123");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");

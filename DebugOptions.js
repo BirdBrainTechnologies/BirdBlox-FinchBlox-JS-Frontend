@@ -5,8 +5,8 @@ function DebugOptions(){
 	DO.enabled = true;
 
 	DO.mouse = false;
-	DO.addVirtualHB = true;
-	DO.addVirtualFlutter = false;
+	DO.addVirtualHB = false;
+	DO.addVirtualFlutter = true;
 
 	if(DO.enabled){
 		DO.applyConstants();
@@ -23,5 +23,8 @@ DebugOptions.applyActions = function(){
 	if(DO.addVirtualHB){
 		let virHB = new Hummingbird("Virtual HB");
 		virHB.connect();
+	}
+	if(DO.addVirtualFlutter){
+		FlutterManager.ConnectDevice("Virtual F");
 	}
 };

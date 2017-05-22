@@ -1,8 +1,4 @@
-function Tab(sprite,name){
-	this.name=name;
-	this.sprite=sprite;
-	this.textE=this.generateText(this.name);
-	this.pathE=this.generatePath();
+function Tab(){
 	this.mainG=GuiElements.create.group(0,0);
 	this.scrollX=0;
 	this.scrollY=0;
@@ -21,47 +17,8 @@ function Tab(sprite,name){
 	this.dim.width=0;
 	this.dim.height=0;
 }
-Tab.prototype.generatePath=function(){
-	var TM=TabManager;
-	var pathE=GuiElements.create.path();
-	GuiElements.update.color(pathE,TM.hiddenTabFill);
-	return pathE;
-}
-Tab.prototype.generateText=function(text){
-	var TM=TabManager;
-	var textE=GuiElements.draw.text(0,0,text,TM.labelFontSize,TM.labelFill,TM.labelFont,"normal");
-	this.textHeight=TM.labelFontCharH;
-	return textE;
-}
-Tab.prototype.updatePosition=function(x){
-	var TM=TabManager;
-	this.textWidth=GuiElements.measure.textWidth(this.textE);
-	this.width=this.textWidth+TM.tabSlantWidth*2+TM.tabHMargin*2;
-	this.height=TM.tabAreaHeight;
-	this.textY=this.textHeight/2+this.height/2;
-	if(this.width<TM.tabMinW){
-		this.width=TM.tabMinW;
-		this.textX=this.width/2-this.textWidth/2;
-	}
-	else{
-		this.textX=x+TM.tabSlantWidth+TM.tabHMargin;
-	}
-	GuiElements.update.trapezoid(this.pathE,x,0,this.width,this.height,TM.tabSlantWidth);
-	GuiElements.move.text(this.textE,this.textX,this.textY);
-	if(!this.visible){
-		TM.tabBarG.appendChild(this.pathE);
-		TM.tabBarG.appendChild(this.textE);
-		this.visible=true;
-	}
-	return x+this.width;
-}
 Tab.prototype.activate=function(){
 	GuiElements.layers.activeTab.insertBefore(this.mainG, GuiElements.layers.drag);
-	GuiElements.update.color(this.pathE,TabManager.activeTabFill);
-}
-Tab.prototype.deactivate=function(){
-	this.mainG.remove();
-	GuiElements.update.color(this.pathE,TabManager.hiddenTabFill);
 }
 Tab.prototype.addStack=function(stack){
 	this.stackList.push(stack);
@@ -255,8 +212,6 @@ Tab.importXml=function(tabNode){
 };
 Tab.prototype.delete=function(){
 	this.passRecursively("delete");
-	this.textE.remove();
-	this.pathE.remove();
 	this.mainG.remove();
 };
 Tab.prototype.renameVariable=function(variable){
