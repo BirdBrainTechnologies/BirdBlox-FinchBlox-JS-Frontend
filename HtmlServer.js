@@ -136,7 +136,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		var onDialogFail=function(){
 			//GuiElements.alert("dialog failed...");
 			HtmlServer.dialogVisible=false;
-			if(onDialogFail.callbackErr!=null) {22
+			if(onDialogFail.callbackErr!=null) {
 				onDialogFail.callbackErr();
 			}
 		}
@@ -167,7 +167,7 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	}
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
+	HS.sendRequestWithCallback(request,onResponseReceived,onResponseReceived);
 }
 HtmlServer.getFileName=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
