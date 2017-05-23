@@ -97,7 +97,7 @@ HtmlServer.sendRequest=function(request,requestStatus){
 		}
 		callbackFn.requestStatus=requestStatus;
 		var callbackErr=function(){
-			callbackErr.requestStatus.finished=true; 
+			callbackErr.requestStatus.finished=true;
 			callbackErr.requestStatus.error=true;
 		}
 		callbackErr.requestStatus=requestStatus;
@@ -147,15 +147,18 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
 			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+			GuiElements.alert("No resp");
 		}
 		else if(response=="Cancelled"){
 			HtmlServer.dialogVisible=false;
 			onResponseReceived.callbackFn(true);
+			GuiElements.alert("Cancelled");
 		}
 		else{
 			HtmlServer.dialogVisible=false;
 			var trimmed=response.substring(1,response.length-1);
 			onResponseReceived.callbackFn(false,trimmed);
+			GuiElements.alert("Done");
 		}
 	}
 	onResponseReceived.callbackFn=callbackFn;
