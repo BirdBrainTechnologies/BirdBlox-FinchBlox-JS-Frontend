@@ -114,6 +114,7 @@ HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
 HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
+	GuiElements.alert("Hello!...");
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	GuiElements.alert("Showing...");
