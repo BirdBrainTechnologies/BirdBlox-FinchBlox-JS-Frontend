@@ -413,7 +413,7 @@ function B_IsAType(x,y){
 	this.addPart(new LabelText(this,"is"));
 	this.addPart(new RectSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,"5"));
 	this.addPart(new LabelText(this,"a"));
-	var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+	var dS=new DropSlot(this,Slot.snapTypes.none);
 	dS.addOption("number",new SelectionData("number"));
 	dS.addOption("text",new SelectionData("text"));
 	dS.addOption("boolean",new SelectionData("boolean"));

@@ -99,7 +99,7 @@ B_WaitUntil.prototype.startAction=function(){
 
 function B_Forever(x,y){
 	LoopBlock.call(this,x,y,"control",false); //Bottom is not open.
-	this.addPart(new LabelText(this,"forever"));
+	this.addPart(new LabelText(this,"repeat forever"));
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;

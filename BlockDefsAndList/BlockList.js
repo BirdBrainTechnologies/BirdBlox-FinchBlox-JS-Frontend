@@ -7,7 +7,7 @@ function BlockList(){
 	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
 	var cat=BlockList.categories;
 	// Catetory names should be capitalized in the way they should be displayed on screen.
-	cat.push("Robots"); 
+	cat.push("Robots");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
@@ -237,7 +237,7 @@ BlockList.populateCat_variables=function(category){
 	var callbackFn=function(){
 		CodeManager.newVariable();
 	};
-	category.addButton("Create variable",150,25,callbackFn);
+	category.addButton("Create variable",callbackFn);
 	category.addSpace();
 	var variables=CodeManager.variableList;
 	if(variables.length>0){
@@ -252,7 +252,7 @@ BlockList.populateCat_variables=function(category){
 		CodeManager.newList();
 	};
 	category.addSpace();
-	category.addButton("Create list",150,25,callbackFn);
+	category.addButton("Create list",callbackFn);
 	category.addSpace();
 	var lists=CodeManager.listList;
 	if(lists.length>0){

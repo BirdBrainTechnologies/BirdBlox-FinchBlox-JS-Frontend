@@ -196,6 +196,12 @@ DropSlot.prototype.setSelectionData=function(text,data){
 		this.deselect();
 	}
 };
+/* Saves the Data from the InputPad to the Slot, updates the text, and deselects the Slot.
+ * @param {Data} data - The Data to save to the Slot.
+ */
+DropSlot.prototype.saveNumData=function(data){
+	this.setSelectionData(data.asString().getValue(), data);
+};
 DropSlot.prototype.getData=function(){
 	if(this.running==3){
 		if(this.resultIsFromChild){

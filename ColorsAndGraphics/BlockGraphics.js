@@ -19,14 +19,14 @@ function BlockGraphics(){
 }
 BlockGraphics.SetBlock=function(){
 	BlockGraphics.block=function(){};
-	BlockGraphics.block.pMargin=5; //Margin between parts
+	BlockGraphics.block.pMargin=7; //Margin between parts
 };
 BlockGraphics.SetCommand=function(){
 	BlockGraphics.command=function(){};
-	BlockGraphics.command.height=27;
+	BlockGraphics.command.height=34; //27
 	BlockGraphics.command.width=40;
 	BlockGraphics.command.vMargin=5;
-	BlockGraphics.command.hMargin=5;
+	BlockGraphics.command.hMargin=7;
 	//BlockGraphics.command.pMargin=5; //Margin between parts
 	BlockGraphics.command.bumpOffset=7;
 	BlockGraphics.command.bumpDepth=4;
@@ -43,14 +43,14 @@ BlockGraphics.SetCommand=function(){
 }
 BlockGraphics.SetReporter=function(){
 	BlockGraphics.reporter=function(){};
-	BlockGraphics.reporter.height=22;//16
-	BlockGraphics.reporter.width=22;//16
-	BlockGraphics.reporter.vMargin=3;
-	BlockGraphics.reporter.hMargin=7;//5
+	BlockGraphics.reporter.height=30;//22
+	BlockGraphics.reporter.width=27;//22
+	BlockGraphics.reporter.vMargin=6;
+	BlockGraphics.reporter.hMargin=10;//5
 	//BlockGraphics.reporter.pMargin=5; //Margin between parts
-	BlockGraphics.reporter.slotHeight=18;//14
-	BlockGraphics.reporter.slotWidth=18;//14
-	BlockGraphics.reporter.slotHMargin=8;//5 //Margin at side of slot
+	BlockGraphics.reporter.slotHeight=22;//18
+	BlockGraphics.reporter.slotWidth=22;//18
+	BlockGraphics.reporter.slotHMargin=10;//5 //Margin at side of slot
 	//BlockGraphics.reporter.slotStrokeC="none";
 	//BlockGraphics.reporter.slotStrokeW=1;
 	BlockGraphics.reporter.strokeW=1;
@@ -59,22 +59,22 @@ BlockGraphics.SetReporter=function(){
 }
 BlockGraphics.SetPredicate=function(){
 	BlockGraphics.predicate=function(){};
-	BlockGraphics.predicate.height=22;//16
-	BlockGraphics.predicate.width=12;
-	BlockGraphics.predicate.vMargin=3;
+	BlockGraphics.predicate.height=30;//16
+	BlockGraphics.predicate.width=27;
+	BlockGraphics.predicate.vMargin=6;
 	BlockGraphics.predicate.hMargin=10;
 	//BlockGraphics.predicate.pMargin=5; //Margin between parts
 	BlockGraphics.predicate.hexEndL=10;
-	BlockGraphics.predicate.slotHeight=14;
+	BlockGraphics.predicate.slotHeight=18;
 	BlockGraphics.predicate.slotWidth=25;
 	BlockGraphics.predicate.slotHMargin=5;
 	BlockGraphics.predicate.slotHexEndL=7;
 }
 BlockGraphics.SetString=function(){
 	BlockGraphics.string=function(){};
-	BlockGraphics.string.slotHeight=18;//14
-	BlockGraphics.string.slotWidth=20;//5
-	BlockGraphics.string.slotHMargin=3;//2
+	BlockGraphics.string.slotHeight=22;//14
+	BlockGraphics.string.slotWidth=22;//5
+	BlockGraphics.string.slotHMargin=4;//2
 	//BlockGraphics.string.slotHMargin=5;
 }
 BlockGraphics.SetHat=function(){
@@ -115,9 +115,9 @@ BlockGraphics.SetValueText=function(){
 }
 BlockGraphics.SetDropSlot=function(){
 	BlockGraphics.dropSlot=function(){};
-	BlockGraphics.dropSlot.slotHeight=18;
+	BlockGraphics.dropSlot.slotHeight=22;
 	BlockGraphics.dropSlot.slotWidth=25;
-	BlockGraphics.dropSlot.slotHMargin=3;
+	BlockGraphics.dropSlot.slotHMargin=5;
 	BlockGraphics.dropSlot.triH=6;
 	BlockGraphics.dropSlot.triW=8;
 	//BlockGraphics.dropSlot.menuWidth=100;

@@ -11,9 +11,9 @@ function BlockPalette(){
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.width=253;
-	BlockPalette.catH=115; //170
-	BlockPalette.catVMargin=13;
-	BlockPalette.catHMargin=13;
+	BlockPalette.catH=132; //170
+	BlockPalette.catVMargin=10;
+	BlockPalette.catHMargin=10;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
 	BlockPalette.catY=TitleBar.height;
 	BlockPalette.y=BlockPalette.catY+BlockPalette.catH;
@@ -24,6 +24,8 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.mainHMargin=10;
 	BlockPalette.blockMargin=5;
 	BlockPalette.sectionMargin=10;
+	BlockPalette.insideBnH = 38; // Dimensions for buttons within a category
+	BlockPalette.insideBnW = 150;
 
 	BlockPalette.bnDefaultFont="Arial";
 	BlockPalette.bnDefaultFontSize=16;
@@ -41,7 +43,7 @@ BlockPalette.setGraphics=function(){
 		height: 120
 	};
 	BlockPalette.trashOpacity = 0.8;
-}
+};
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;

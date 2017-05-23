@@ -29,9 +29,9 @@ function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 }
 MenuBnList.setGraphics=function(){
 	var MBL=MenuBnList;
-	MBL.bnHeight=25;
-	MBL.bnHMargin=5; //only used when width not specified.
-	MBL.minWidth=25;
+	MBL.bnHeight=34; //25
+	MBL.bnHMargin=10; //only used when width not specified.
+	MBL.minWidth=40;
 }
 MenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
