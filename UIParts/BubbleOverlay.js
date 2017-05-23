@@ -76,6 +76,7 @@ BubbleOverlay.prototype.display2=function(x1,y1,x2,y2,innerWidth,innerHeight){
 	var attemptL = longW - x1;
 	var attemptR = x2 + longW - GuiElements.width;
 	var min = Math.min(attemptT, attemptB, attemptL, attemptR);
+	var vertical = attemptT <= min || attemptB <= min;
 
 
 
