@@ -141,7 +141,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 			}
 		}
 		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogFail);
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
 	}
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
@@ -167,7 +167,7 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	}
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,onResponseReceived);
+	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 }
 HtmlServer.getFileName=function(callbackFn,callbackErr){
 	var HS=HtmlServer;

@@ -6,7 +6,7 @@
 
 function B_WhenFlagTapped(x,y){
 	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"whenHi"));
+	this.addPart(new LabelText(this,"when"));
 	this.addPart(new BlockIcon(this,VectorPaths.flag,TitleBar.flagFill,"flag",15));
 	this.addPart(new LabelText(this,"tapped"));
 }
@@ -25,7 +25,7 @@ B_WhenFlagTapped.prototype.startAction=function(){
 
 function B_WhenIReceive(x,y){
 	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when I receiveABC"));
+	this.addPart(new LabelText(this,"when I receive"));
 	this.addPart(new BroadcastDropSlot(this,true));
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
