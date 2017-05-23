@@ -6,6 +6,7 @@ function TabManager(){
 	TabManager.createTabSpaceBg();
 	TM.isRunning=false;
 	TM.scrolling=false;
+	TM.zooming = false;
 }
 TabManager.setGraphics=function(){
 	var TM=TabManager;
@@ -119,6 +120,26 @@ TabManager.endScroll=function(){
 	if(TM.scrolling){
 		TM.scrolling=false;
 		TM.activeTab.endScroll();
+	}
+};
+TabManager.startZoom = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(!TM.zooming){
+		TM.zooming=true;
+		TM.activeTab.startZoom(x1, y1, x2, y2);
+	}
+};
+TabManager.updateZoom = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.activeTab.updateScroll(x1, y1, x2, y2);
+	}
+};
+TabManager.endZoom = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.scrolling = false;
+		TM.activeTab.endZoom(x1, y1, x2, y2);
 	}
 };
 TabManager.createXml=function(xmlDoc){

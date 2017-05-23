@@ -2,7 +2,7 @@
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	DO.mouse = true;
 	DO.addVirtualHB = false;
