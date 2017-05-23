@@ -29,13 +29,20 @@ GuiElements.setConstants=function(){
 	This assumes that the screen's dimensions never change once loaded. */
 	GuiElements.blockerOpacity=0.5;
 	var callbackFn=function(result){
+		GuiElements.alert("Dealing with zoom from settings");
 		var numResult=parseFloat(result);
 		if(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom) {
+			GuiElements.alert("Zoom from settings was valid: " + numResult);
 			GuiElements.zoomFactor = numResult;
+			GuiElements.updateZoom();
 		}
-		GuiElements.updateZoom();
+		else{
+			GuiElements.alert("Zoom from settings was invalid.  Requesting dimensions");
+			HtmlServer.sendRequestWithCallback("properties/dims",GuiElements.computeAndSetZoom);
+		}
 	};
 	HtmlServer.getSetting("zoom",callbackFn);
+	GuiElements.alert("Reading zoom from settings");
 	GuiElements.zoomFactor=1;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
@@ -702,4 +709,26 @@ GuiElements.updateZoom=function(){
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
 	HtmlServer.setSetting("zoom",GuiElements.zoomFactor);
+};
+/* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
+ * @param {string} response - The response from properties/dims
+ */
+GuiElements.computeAndSetZoom=function(response){
+	GuiElements.alert("Got dimensions from device.  Computing zoom.");
+	var parts = response.split(",");
+	if(parts.length==2) {
+		var widthCm = parseFloat(parts[0]);
+		var heightCm = parseFloat(parts[1]);
+		var diagCm = Math.sqrt(widthCm * widthCm + heightCm * heightCm);
+		var widthPx = window.innerWidth;
+		var heightPx = window.innerHeight;
+		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
+		var zoom = (diagPx * 24.638) / (1280 * diagCm);
+		GuiElements.alert("Computed zoom to: " + zoom);
+		if (zoom <= ViewMenu.maxZoom && zoom >= ViewMenu.minZoom) {
+			GuiElements.alert("Zoom is valid and computed to: " + zoom);
+			GuiElements.zoomFactor = zoom;
+			GuiElements.updateZoom();
+		}
+	}
 };
