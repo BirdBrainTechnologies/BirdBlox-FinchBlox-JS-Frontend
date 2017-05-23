@@ -14,12 +14,14 @@ function DebugOptions(){
 }
 DebugOptions.applyConstants = function(){
 	var DO = DebugOptions;
+	if(!DO.enabled) return;
 	if(DO.mouse){
 		TouchReceiver.mouse = true;
 	}
 };
 DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
+	if(!DO.enabled) return;
 	if(DO.addVirtualHB){
 		let virHB = new Hummingbird("Virtual HB");
 		virHB.connect();
