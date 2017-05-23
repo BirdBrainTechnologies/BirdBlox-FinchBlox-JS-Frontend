@@ -141,7 +141,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 			}
 		}
 		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogFail);
 	}
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
@@ -150,7 +150,11 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	GuiElements.alert("dialog getting resp...");
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
-			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+			HS.sendRequestWithCallback(request,onResponseReceived,function(){
+				GuiElements.alert("Error2");
+				HtmlServer.dialogVisible=false;
+				callbackErr();
+			});
 			GuiElements.alert("No resp");
 		}
 		else if(response=="Cancelled"){
@@ -167,7 +171,11 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	}
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		GuiElements.alert("Error1");
+		HtmlServer.dialogVisible=false;
+		callbackErr();
+	});
 }
 HtmlServer.getFileName=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
