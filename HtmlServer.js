@@ -114,7 +114,6 @@ HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
 HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
-	GuiElements.alert("Hello!...");
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	GuiElements.alert("Showing...");
@@ -129,11 +128,13 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		request+="/"+HS.encodeHtml(question);
 		request+="/"+HS.encodeHtml(hint);
 		var onDialogPresented=function(result){
+			GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
 		}
 		onDialogPresented.callbackFn=callbackFn;
 		onDialogPresented.callbackErr=callbackErr;
 		var onDialogFail=function(){
+			GuiElements.alert("dialog failed...");
 			HtmlServer.dialogVisible=false;
 			if(onDialogFail.callbackErr!=null) {
 				onDialogFail.callbackErr();
@@ -146,6 +147,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
 	var request = "tablet/dialog_response";
+	GuiElements.alert("dialog getting resp...");
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
 			HtmlServer.getDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
