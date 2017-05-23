@@ -32,8 +32,11 @@ GuiElements.setConstants=function(){
 		var numResult=parseFloat(result);
 		if(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom) {
 			GuiElements.zoomFactor = numResult;
+			GuiElements.updateZoom();
 		}
-		GuiElements.updateZoom();
+		else{
+			HtmlServer.sendRequestWithCallback("properties/dims",GuiElements.computeAndSetZoom);
+		}
 	};
 	HtmlServer.getSetting("zoom",callbackFn);
 	GuiElements.zoomFactor=1;
@@ -702,4 +705,21 @@ GuiElements.updateZoom=function(){
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
 	HtmlServer.setSetting("zoom",GuiElements.zoomFactor);
+};
+/* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
+ * @param {string} response - The response from properties/dims
+ */
+GuiElements.computeAndSetZoom=function(response){
+	var parts = response.split(",");
+	var widthCm = parseFloat(parts[0]);
+	var heightCm = parseFloat(parts[1]);
+	var diagCm = Math.sqrt(widthCm * widthCm + heightCm * heightCm);
+	var widthPx = window.innerWidth;
+	var heightPx = window.innerHeight;
+	var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
+	var zoom = (diagPx * 24.638) / (1280 * diagCm);
+	if(zoom<=ViewMenu.maxZoom&&zoom>=ViewMenu.minZoom){
+		GuiElements.zoomFactor=zoom;
+		GuiElements.updateZoom();
+	}
 };
