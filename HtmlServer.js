@@ -141,7 +141,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 			}
 		}
 		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogFail);
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
 	}
 }
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
