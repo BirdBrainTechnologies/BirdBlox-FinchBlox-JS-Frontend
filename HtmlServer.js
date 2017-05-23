@@ -54,7 +54,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 					if(callbackErr!=null){
 						callbackErr();
 					}
-					GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
+					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
 			}
 		};
@@ -128,7 +128,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		request+="/"+HS.encodeHtml(question);
 		request+="/"+HS.encodeHtml(hint);
 		var onDialogPresented=function(result){
-			GuiElements.alert("dialog presented...");
+			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
 		}
 		onDialogPresented.callbackFn=callbackFn;
@@ -151,28 +151,28 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
 			HS.sendRequestWithCallback(request,onResponseReceived,function(){
-				GuiElements.alert("Error2");
+				//GuiElements.alert("Error2");
 				HtmlServer.dialogVisible=false;
 				callbackErr();
 			});
-			GuiElements.alert("No resp");
+			//GuiElements.alert("No resp");
 		}
 		else if(response=="Cancelled"){
 			HtmlServer.dialogVisible=false;
 			onResponseReceived.callbackFn(true);
-			GuiElements.alert("Cancelled");
+			//GuiElements.alert("Cancelled");
 		}
 		else{
 			HtmlServer.dialogVisible=false;
 			var trimmed=response.substring(1,response.length-1);
 			onResponseReceived.callbackFn(false,trimmed);
-			GuiElements.alert("Done");
+			//GuiElements.alert("Done");
 		}
 	}
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		GuiElements.alert("Error1");
+		//GuiElements.alert("Error1");
 		HtmlServer.dialogVisible=false;
 		callbackErr();
 	});
