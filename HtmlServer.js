@@ -116,7 +116,7 @@ HtmlServer.getUrlForRequest=function(request){
 HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
-	GuiElements.alert("Showing...");
+	//GuiElements.alert("Showing...");
 	if(TouchReceiver.mouse){ //Kept for debugging on a PC
 		var newText=prompt(question);
 		HtmlServer.dialogVisible=false;
