@@ -97,7 +97,7 @@ HtmlServer.sendRequest=function(request,requestStatus){
 		}
 		callbackFn.requestStatus=requestStatus;
 		var callbackErr=function(){
-			callbackErr.requestStatus.finished=true;
+			callbackErr.requestStatus.finished=true; 
 			callbackErr.requestStatus.error=true;
 		}
 		callbackErr.requestStatus=requestStatus;
