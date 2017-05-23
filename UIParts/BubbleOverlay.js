@@ -77,6 +77,7 @@ BubbleOverlay.prototype.display2=function(x1,y1,x2,y2,innerWidth,innerHeight){
 	var attemptR = x2 + longW - GuiElements.width;
 
 
+
 	var triOffset=(width-BO.triangleW)/2;
 	var halfOffset=width/2;
 	var tallH=height+BO.triangleH;
