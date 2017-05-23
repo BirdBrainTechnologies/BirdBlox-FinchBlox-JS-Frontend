@@ -134,9 +134,9 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		onDialogPresented.callbackFn=callbackFn;
 		onDialogPresented.callbackErr=callbackErr;
 		var onDialogFail=function(){
-			GuiElements.alert("dialog failed...");
+			//GuiElements.alert("dialog failed...");
 			HtmlServer.dialogVisible=false;
-			if(onDialogFail.callbackErr!=null) {
+			if(onDialogFail.callbackErr!=null) {22
 				onDialogFail.callbackErr();
 			}
 		}
