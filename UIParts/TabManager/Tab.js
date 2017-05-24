@@ -35,16 +35,16 @@ Tab.prototype.getSprite=function(){
 	return this.sprite;
 }
 Tab.prototype.relToAbsX=function(x){
-	return x+this.scrollX;
+	return x * this.zoomFactor + this.scrollX;
 };
 Tab.prototype.relToAbsY=function(y){
-	return y+this.scrollY;
+	return y * this.zoomFactor+this.scrollY;
 };
 Tab.prototype.absToRelX=function(x){
-	return x-this.scrollX;
+	return x / this.zoomFactor-this.scrollX;
 };
 Tab.prototype.absToRelY=function(y){
-	return y-this.scrollY;
+	return y / this.zoomFactor-this.scrollY;
 };
 Tab.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
