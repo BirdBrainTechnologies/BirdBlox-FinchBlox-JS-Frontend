@@ -338,7 +338,7 @@ BlockStack.prototype.fly=function(){
 	var absY=this.getAbsY();
 	this.flying=true; //Record that this BlockStack is flying.
 	//Move to ensure that position on screen does not change.
-	this.move(absX,absY);
+	this.move(absX / TabManager.getActiveZoom(),absY / TabManager.getActiveZoom());
 };
 /* Moves this BlockStack back into its Tab's group.
  */
