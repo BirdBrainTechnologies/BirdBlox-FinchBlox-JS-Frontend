@@ -167,9 +167,7 @@ Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,container
 	// return rVal;
 };
 Tab.prototype.startZooming = function(x1, y1, x2, y2){
-	GuiElements.alert("Already zooming");
 	if(!this.zooming) {
-		GuiElements.alert("Starting!");
 		this.zooming = true;
 		var x = (x1 + x2) / 2;
 		var y = (y1 + y2) / 2;
@@ -179,11 +177,9 @@ Tab.prototype.startZooming = function(x1, y1, x2, y2){
 		var deltaY = y2 - y1;
 		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.startZoom = this.zoomFactor;
-		GuiElements.alert("Started!");
 	}
 };
 Tab.prototype.updateZooming = function(x1, y1, x2, y2){
-	GuiElements.alert("Trying update!");
 	if(this.zooming){
 		var x = (x1 + x2) / 2;
 		var y = (y1 + y2) / 2;
@@ -196,10 +192,6 @@ Tab.prototype.updateZooming = function(x1, y1, x2, y2){
 		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
 		GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
 		GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
-		GuiElements.alert("updated zoom, dist:" + dist + " ");
-	}
-	else {
-		GuiElements.alert("Not zooming!!");
 	}
 };
 Tab.prototype.endZooming = function(){
