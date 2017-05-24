@@ -15,8 +15,12 @@ function TouchReceiver(){
 	TR.target=null; //The object being interacted with.
 	TR.startX=0; //The x coord of the initial touch.
 	TR.startY=0; //The y coord of the initial touch.
+	TR.startX2=0; //The x coord of the second touch.
+	TR.startY2=0; //The y coord of the second touch.
 	TR.longTouchTimer=null; //Triggers long touch events.
 	TR.timerRunning=false; //Indicates if the long touch timer is running.
+	TR.zooming = false; //There are not two touches on the screen.
+	TR.dragging = false;
 	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
 	var handlerUp="touchend";
 	var handlerDown="touchstart";
@@ -39,7 +43,7 @@ TouchReceiver.addListeners=function(){
 	document.body.addEventListener(TR.handlerMove,TouchReceiver.handleMove,false);
 	document.body.addEventListener(TR.handlerUp,TouchReceiver.handleUp,false);
 	document.body.addEventListener(TR.handlerDown,TouchReceiver.handleDocumentDown,false);
-}
+};
 /* Handles movement events and prevents drag gestures from scrolling document.
  * @param {event} event - passed event arguments.
  * @fix combine with TouchReceiver.touchmove.
@@ -47,7 +51,7 @@ TouchReceiver.addListeners=function(){
 TouchReceiver.handleMove=function(event){
 	event.preventDefault(); //Prevent document scrolling.
 	TouchReceiver.touchmove(event); //Deal with movement.
-}
+};
 /* Handles new touch events.
  * @param {event} event - passed event arguments.
  * @fix combine with TouchReceiver.touchstart.
@@ -55,7 +59,7 @@ TouchReceiver.handleMove=function(event){
 TouchReceiver.handleUp=function(event){
 	event.preventDefault();
 	TouchReceiver.touchend(event);
-}
+};
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
 		GuiElements.overlay.close(); //Close any visible overlays.
@@ -83,6 +87,7 @@ TouchReceiver.getY=function(e){
 };
 /* Handles new touch events.  Does not know which element was touched.
  * @param {event} e - passed event arguments.
+ * @return {boolean} - returns true iff !TR.touchDown
  */
 TouchReceiver.touchstart=function(e){
 	var TR=TouchReceiver; //shorthand
@@ -91,6 +96,7 @@ TouchReceiver.touchstart=function(e){
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
 		TR.stopLongTouchTimer();
+		TR.dragging = true;
 		TR.touchDown=true;
 		TR.targetType="none"; //Does not know the target of the touch.
 		TR.target=null;
@@ -99,6 +105,32 @@ TouchReceiver.touchstart=function(e){
 		TR.startY=TR.getY(e);
 	}
 	return startTouch;
+};
+TouchReceiver.checkStartZoom=function(e){
+	var TR=TouchReceiver; //shorthand
+	if(!TR.zooming && !TR.mouse && e.touches.length >= 2){
+		if((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling){
+			TR.zooming = true;
+			TR.startX = e.touches[0].pageX;
+			TR.startY = e.touches[0].pageY;
+			TR.startX2 = e.touches[1].pageX;
+			TR.startY2 = e.touches[1].pageY;
+			TabManager.startZoom(TR.startX, TR.startY, TR.startX2, TR.startY2);
+		}
+	}
+};
+TouchReceiver.targetIsInTabSpace=function(){
+	var TR=TouchReceiver; //shorthand
+	if(TR.target == "tabSpace"){
+		return true;
+	}
+	else if(TR.target == "block"){
+		return true;
+	}
+	else if(TR.target == "slot"){
+		return !TR.target.parent.stack.isDisplayStack;
+	}
+	return false;
 };
 /* Handles new touch events for Blocks.  Stores the target Block.
  * @param {Blocks} target - The Block that was touched.
@@ -134,7 +166,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
 		TouchReceiver.target=slot; //Store target Slot.
 		TR.setLongTouchTimer();
 	}
-}
+};
 /* Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
  * @param {Category} target - The Category of the CategoryBN that was touched.
  * @param {event} e - passed event arguments.
@@ -163,7 +195,7 @@ TouchReceiver.touchStartBN=function(target,e){
 		TR.target=target;
 	}
 };
-/* Handles new touch events for the backgund of the palette.
+/* Handles new touch events for the background of the palette.
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartPalette=function(e){
@@ -216,73 +248,89 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchDown&&!TR.longTouch&&(TR.startX!=TR.getX(e)||TR.startY!=TR.getY(e))){
-		//If the user drags a Slot, the block they are dragging should become the target.
-		if(TR.targetType=="slot"){
-			TR.target=TR.target.parent; //Now the user is dragging a block.
-			if(TR.target.stack.isDisplayStack){
-				TR.targetType="displayStack";
+		TR.dragging = true;
+		if(TR.zooming){
+			//If we are currently zooming, we update the zoom.
+			if(e.touches.length < 2){
+				TR.touchend(e);
 			}
 			else{
-				TR.targetType="block";
+				var x1 = e.touches[0].pageX;
+				var y1 = e.touches[0].pageY;
+				var x2 = e.touches[0].pageX;
+				var y2 = e.touches[0].pageY;
+				TabManager.updateZoom(x1, y1, x2, y2);
 			}
 		}
-		/* If the user drags a Block that is in a DisplayStack, 
-		the DisplayStack copies to a new BlockStack, which can be dragged. */
-		if(TR.targetType=="displayStack"){
-			var canvasX=TR.target.stack.getAbsX()/GuiElements.svgPanZoom.getZoom(); //Determine where the copied BlockStack should go.
-			var canvasY=TR.target.stack.getAbsY()/GuiElements.svgPanZoom.getZoom();
-			//The first block of the duplicated BlockStack is the new target.
-			TR.target=TR.target.stack.duplicate(canvasX,canvasY).firstBlock;
-			TR.targetType="block";
-		}
-		/* If the user drags a Block that is a member of a BlockStack, 
-		then the BlockStack should move. */
-		if(TR.targetType=="block"){
-			//If the CodeManager has not started the movement, this must be done first.
-			let x = TR.getX(e);
-			let y = TR.getY(e);
-			if(TR.blocksMoving){
-				//The CodeManager handles moving BlockStacks.
-				CodeManager.move.update(x,y);
+		else {
+			//If the user drags a Slot, the block they are dragging should become the target.
+			if (TR.targetType == "slot") {
+				TR.target = TR.target.parent; //Now the user is dragging a block.
+				if (TR.target.stack.isDisplayStack) {
+					TR.targetType = "displayStack";
+				}
+				else {
+					TR.targetType = "block";
+				}
 			}
-			else{
-				CodeManager.move.start(TR.target,x,y);
-				TR.blocksMoving=true;
+			/* If the user drags a Block that is in a DisplayStack,
+			 the DisplayStack copies to a new BlockStack, which can be dragged. */
+			if (TR.targetType == "displayStack") {
+				var canvasX = TR.target.stack.getAbsX() / TabManager.getActiveZoom(); //Determine where the copied BlockStack should go.
+				var canvasY = TR.target.stack.getAbsY() / TabManager.getActiveZoom();
+				//The first block of the duplicated BlockStack is the new target.
+				TR.target = TR.target.stack.duplicate(canvasX, canvasY).firstBlock;
+				TR.targetType = "block";
 			}
-		}
-		//If the user drags the palette, it should scroll.
-		if(TR.targetType=="palette"){
-			if(!BlockPalette.scrolling){
-				BlockPalette.startScoll(TR.getX(e),TR.getY(e));
+			/* If the user drags a Block that is a member of a BlockStack,
+			 then the BlockStack should move. */
+			if (TR.targetType == "block") {
+				//If the CodeManager has not started the movement, this must be done first.
+				let x = TR.getX(e);
+				let y = TR.getY(e);
+				if (TR.blocksMoving) {
+					//The CodeManager handles moving BlockStacks.
+					CodeManager.move.update(x, y);
+				}
+				else {
+					CodeManager.move.start(TR.target, x, y);
+					TR.blocksMoving = true;
+				}
 			}
-			else{
-				BlockPalette.updateScroll(TR.getX(e),TR.getY(e));
+			//If the user drags the palette, it should scroll.
+			if (TR.targetType == "palette") {
+				if (!BlockPalette.scrolling) {
+					BlockPalette.startScroll(TR.getX(e), TR.getY(e));
+				}
+				else {
+					BlockPalette.updateScroll(TR.getX(e), TR.getY(e));
+				}
 			}
-		}
-		//If the user drags the tab space, it should scroll.
-		// if(TR.targetType=="tabSpace"){
-		// 	if(!TabManager.scrolling){
-		// 		TabManager.startScoll(TR.getX(e),TR.getY(e));
-		// 	}
-		// 	else{
-		// 		TabManager.updateScroll(TR.getX(e),TR.getY(e));
-		// 	}
-		// }
-		//If the user drags a button and it has a menuBnList, it should scroll it.
-		if(TR.targetType=="button"){
-			if(TR.target.menuBnList!=null&&TR.target.menuBnList.scrollable){
-				TR.targetType="menuBnList";
-				TR.target.interrupt();
-				TR.target=TR.target.menuBnList;
+			//If the user drags the tab space, it should scroll.
+			if (TR.targetType == "tabSpace") {
+				if (!TabManager.scrolling) {
+					TabManager.startScroll(TR.getX(e), TR.getY(e));
+				}
+				else {
+					TabManager.updateScroll(TR.getX(e), TR.getY(e));
+				}
 			}
-		}
-		//If the user drags a menuBnList, it should scroll.
-		if(TR.targetType=="menuBnList"){
-			if(!TR.target.scrolling&&TR.target.scrollable){
-				TR.target.startScroll(TR.getY(e));
+			//If the user drags a button and it has a menuBnList, it should scroll it.
+			if (TR.targetType == "button") {
+				if (TR.target.menuBnList != null && TR.target.menuBnList.scrollable) {
+					TR.targetType = "menuBnList";
+					TR.target.interrupt();
+					TR.target = TR.target.menuBnList;
+				}
 			}
-			else{
-				TR.target.updateScroll(TR.getY(e));
+			//If the user drags a menuBnList, it should scroll.
+			if (TR.targetType == "menuBnList") {
+				if (!TR.target.scrolling && TR.target.scrollable) {
+					TR.target.startScroll(TR.getY(e));
+				}
+				else {
+					TR.target.updateScroll(TR.getY(e));
+				}
 			}
 		}
 	}
@@ -295,8 +343,26 @@ TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
 	var touchWasDown=TR.touchDown;
 	TR.touchDown=false;
-	if(touchWasDown&&!TR.longTouch){ //Prevents multitouch problems.
+	if(TR.zooming){
+		if(e.touches.length == 0){
+			TabManager.endZoom();
+			TR.zooming = false;
+		}
+		else if(e.touches.length == 1){
+			//Switch from zooming to panning
+			TabManager.endZoom();
+			TR.zooming = false;
+			TR.targetType = "tabSpace";
+			TR.target=null;
+			TabManager.startScroll(TR.getX(e),TR.getY(e));
+		}
+		else if(e.touches.length > 1){
+			//No action necessary
+		}
+	}
+	else if(touchWasDown&&!TR.longTouch){ //Prevents multitouch problems.
 		TR.touchDown=false;
+		TR.dragging = false;
 		if(TR.targetType=="block"){
 			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
 				CodeManager.move.end();
@@ -354,7 +420,7 @@ TouchReceiver.touchInterrupt=function(){
 TouchReceiver.touchLong=function(){
 	var TR = TouchReceiver;
 	TR.stopLongTouchTimer();
-	if(TR.touchDown){
+	if(TR.touchDown && !TR.zooming){
 		if(TR.targetType=="slot"){
 			TR.target=TR.target.parent; //Now the user is holding a block.
 			if(TR.target.stack.isDisplayStack){

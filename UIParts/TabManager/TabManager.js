@@ -102,7 +102,7 @@ TabManager.startRun=function(){
 	TabManager.isRunning=true;
 	CodeManager.startUpdateTimer();
 }
-TabManager.startScoll=function(x,y){
+TabManager.startScroll=function(x,y){
 	var TM=TabManager;
 	if(!TM.scrolling){
 		TM.scrolling=true;
@@ -135,11 +135,11 @@ TabManager.updateZoom = function(x1, y1, x2, y2){
 		TM.activeTab.updateScroll(x1, y1, x2, y2);
 	}
 };
-TabManager.endZoom = function(x1, y1, x2, y2){
+TabManager.endZoom = function(){
 	var TM=TabManager;
 	if(TM.zooming){
 		TM.scrolling = false;
-		TM.activeTab.endZoom(x1, y1, x2, y2);
+		TM.activeTab.endZoom();
 	}
 };
 TabManager.createXml=function(xmlDoc){
@@ -243,4 +243,10 @@ TabManager.updateZoom=function(){
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	GuiElements.update.rect(TM.tabBgRect,0,0,TM.bgWidth,TM.bgHeight);
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+};
+TabManager.getActiveZoom = function(){
+	if(TabManager.activateTab == null){
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
 };

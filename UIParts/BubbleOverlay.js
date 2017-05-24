@@ -1,4 +1,4 @@
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin, onCanvas){
+function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
 	if(hMargin==null){
 		hMargin=0;
 	}
@@ -7,11 +7,7 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin, onCanvas){
 	this.hMargin=hMargin;
 	this.innerGroup=innerGroup;
 	this.parent=parent;
-	if (!onCanvas) {
-		this.layerG=GuiElements.layers.overlay;
-	} else {
-		this.layerG=GuiElements.layers.canvasOverlay;
-	}
+	this.layerG=GuiElements.layers.overlay;
 	this.visible=false;
 	this.buildBubble();
 }

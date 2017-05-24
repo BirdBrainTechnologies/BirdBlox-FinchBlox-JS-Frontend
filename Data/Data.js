@@ -7,7 +7,7 @@ function Data(type,value,isValid){
 	}
 }
 Data.setConstants=function(){
-	Data.types=new function(){};
+	Data.types=function(){};
 	Data.types.num=0;
 	Data.types.bool=1;
 	Data.types.string=2;

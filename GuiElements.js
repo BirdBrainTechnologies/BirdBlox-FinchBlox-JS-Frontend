@@ -454,10 +454,16 @@ GuiElements.move=function(){};
  * @param {SVG g} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
+ * @param {number} zoom - (Optional) The amount the group should be scaled.
  */
-GuiElements.move.group=function(group,x,y){
-	group.setAttributeNS(null,"transform","translate("+x+","+y+")");
-}
+GuiElements.move.group=function(group,x,y,zoom){
+	if(zoom == null) {
+		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
+	}
+	else{
+		group.setAttributeNS(null, "transform", "matrix(" + zoom + ",0,0," + zoom + "," + x + "," + y + ")");
+	}
+};
 /* Moves an SVG text element.
  * @param {SVG text} text - The text to move.
  * @param {number} x - The new x coord of the text.

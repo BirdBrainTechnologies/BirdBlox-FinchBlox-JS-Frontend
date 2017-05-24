@@ -69,9 +69,9 @@ CodeManager.move.start=function(block,x,y){
 		move.returnsValue=stack.firstBlock.returnsValue;
 		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
 		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
-		
-		let canvasX = x / GuiElements.svgPanZoom.getZoom();
-		let canvasY = y / GuiElements.svgPanZoom.getZoom();
+
+		let canvasX = x / TabManager.getActiveZoom();
+		let canvasY = y / TabManager.getActiveZoom();
 
 		move.touchX=x; //Store coords
 		move.touchY=y;
@@ -88,8 +88,8 @@ CodeManager.move.start=function(block,x,y){
 CodeManager.move.update=function(x,y){
 	var move=CodeManager.move; //shorthand
 	if(move.moving){ //Only update if a BlockStack is currently moving.
-		let canvasX = x / GuiElements.svgPanZoom.getZoom();
-		let canvasY = y / GuiElements.svgPanZoom.getZoom();
+		let canvasX = x / TabManager.getActiveZoom();
+		let canvasY = y / TabManager.getActiveZoom();
 
 		move.touchX = x;
 		move.touchY = y;
@@ -120,8 +120,8 @@ CodeManager.move.end=function(){
 	var move=CodeManager.move; //shorthand
 	var fit=CodeManager.fit; //shorthand
 	if(move.moving){ //Only run if a BlockStack is currently moving.
-		let canvasX = move.touchX / GuiElements.svgPanZoom.getZoom();
-		let canvasY = move.touchY / GuiElements.svgPanZoom.getZoom();
+		let canvasX = move.touchX / TabManager.getActiveZoom();
+		let canvasY = move.touchY / TabManager.getActiveZoom();
 		move.topX=move.offsetX+canvasX;
 		move.topY=move.offsetY+canvasY;
 		//If the BlockStack overlaps with the BlockPalette, delete it.

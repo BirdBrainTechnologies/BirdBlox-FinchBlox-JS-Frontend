@@ -22,8 +22,8 @@ function Tab(){
 	this.dim.height=0;*/
 }
 Tab.prototype.activate=function(){
-	GuiElements.layers.activeTab.insertBefore(this.mainG, GuiElements.layers.drag);
-}
+	GuiElements.layers.activeTab.appendChild(this.mainG);
+};
 Tab.prototype.addStack=function(stack){
 	this.stackList.push(stack);
 }
@@ -124,7 +124,7 @@ Tab.prototype.updateScroll=function(x,y){
 	if(this.scrolling) {
 		this.scrollX=this.scrollXOffset + x;
 		this.scrollY=this.scrollYOffset + y;
-		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
 		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
 	}
 };
@@ -169,6 +169,8 @@ Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,container
 Tab.prototype.startZoom = function(x1, y1, x2, y2){
 	if(!this.zooming) {
 		this.zooming = true;
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
 		this.scrollXOffset = this.scrollX - x;
 		this.scrollYOffset = this.scrollY - y;
 		var deltaX = x2 - x1;
@@ -179,12 +181,15 @@ Tab.prototype.startZoom = function(x1, y1, x2, y2){
 };
 Tab.prototype.updateZoom = function(x1, y1, x2, y2){
 	if(this.zooming){
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
 		var deltaX = x2 - x1;
 		var deltaY = y2 - y1;
 		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
-		this.scrollX=this.scrollXOffset + x;
-		this.scrollY=this.scrollYOffset + y;
+		this.scrollX=this.scrollXOffset * this.zoomFactor + x;
+		this.scrollY=this.scrollYOffset * this.zoomFactor + y;
+		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
 	}
 };
 Tab.prototype.endZoom = function(){
@@ -304,4 +309,7 @@ Tab.prototype.passRecursively=function(functionName){
 			i--;
 		}
 	}
+};
+Tab.prototype.getZoom=function(){
+	return this.zoomFactor;
 };

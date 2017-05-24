@@ -44,11 +44,13 @@ DisplayStack.prototype.updateDim=function() {
 	this.dim.ry1+=this.getAbsY();
 }
 DisplayStack.prototype.getAbsX=function(){
-	return this.x+this.category.getAbsX()-GuiElements.svgPanZoom.getPan().x;
-}
-DisplayStack.prototype.getAbsY=function(){//Fix
-	return this.y+this.category.getAbsY()-GuiElements.svgPanZoom.getPan().y;
-}
+	//TODO: zoom
+	return this.x+this.category.getAbsX();
+};
+DisplayStack.prototype.getAbsY=function(){
+	//TODO: zoom
+	return this.y+this.category.getAbsY();
+};
 //DisplayStack.prototype.findBestFit=function()
 DisplayStack.prototype.move=function(x,y){
 	this.x=x;
