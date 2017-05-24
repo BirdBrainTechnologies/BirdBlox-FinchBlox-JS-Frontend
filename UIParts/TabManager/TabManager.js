@@ -52,7 +52,7 @@ TabManager.activateTab=function(tab){
 	}
 	tab.activate();
 	TabManager.activeTab=tab;
-}
+};
 TabManager.eventFlagClicked=function(){
 	TabManager.passRecursively("eventFlagClicked");
 };
@@ -122,24 +122,24 @@ TabManager.endScroll=function(){
 		TM.activeTab.endScroll();
 	}
 };
-TabManager.startZoom = function(x1, y1, x2, y2){
+TabManager.startZooming = function(x1, y1, x2, y2){
 	var TM=TabManager;
 	if(!TM.zooming){
-		TM.zooming=true;
-		TM.activeTab.startZoom(x1, y1, x2, y2);
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
 	}
 };
-TabManager.updateZoom = function(x1, y1, x2, y2){
+TabManager.updateZooming = function(x1, y1, x2, y2){
 	var TM=TabManager;
 	if(TM.zooming){
-		TM.activeTab.updateScroll(x1, y1, x2, y2);
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
 	}
 };
-TabManager.endZoom = function(){
+TabManager.endZooming = function(){
 	var TM=TabManager;
 	if(TM.zooming){
-		TM.scrolling = false;
-		TM.activeTab.endZoom();
+		TM.zooming = false;
+		TM.activeTab.endZooming();
 	}
 };
 TabManager.createXml=function(xmlDoc){

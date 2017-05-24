@@ -96,7 +96,7 @@ TouchReceiver.touchstart=function(e){
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
 		TR.stopLongTouchTimer();
-		TR.dragging = true;
+		TR.dragging = false;
 		TR.touchDown=true;
 		TR.targetType="none"; //Does not know the target of the touch.
 		TR.target=null;
@@ -107,29 +107,44 @@ TouchReceiver.touchstart=function(e){
 	return startTouch;
 };
 TouchReceiver.checkStartZoom=function(e){
-	var TR=TouchReceiver; //shorthand
-	if(!TR.zooming && !TR.mouse && e.touches.length >= 2){
-		if((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling){
-			TR.zooming = true;
-			TR.startX = e.touches[0].pageX;
-			TR.startY = e.touches[0].pageY;
-			TR.startX2 = e.touches[1].pageX;
-			TR.startY2 = e.touches[1].pageY;
-			TabManager.startZoom(TR.startX, TR.startY, TR.startX2, TR.startY2);
+	try {
+		var TR=TouchReceiver; //shorthand
+		GuiElements.alert("checking zoom");
+		if(!TR.zooming && !TR.mouse && e.touches.length >= 2){
+			if((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling){
+				GuiElements.alert("starting zoom");
+
+				if(TabManager.scrolling){
+					TabManager.endScroll();
+				}
+				TR.zooming = true;
+				TR.startX = e.touches[0].pageX;
+				TR.startY = e.touches[0].pageY;
+				TR.startX2 = e.touches[1].pageX;
+				TR.startY2 = e.touches[1].pageY;
+				TabManager.startZooming(TR.startX, TR.startY, TR.startX2, TR.startY2);
+			}
+			else{
+				GuiElements.alert("failed second check:"+(!TR.dragging) + "," + (TR.targetIsInTabSpace()) + "," + TabManager.scrolling + "," + TR.targetType);
+			}
 		}
+	}
+	catch(err) {
+		GuiElements.alert("Err!!!:" + err.message);
 	}
 };
 TouchReceiver.targetIsInTabSpace=function(){
 	var TR=TouchReceiver; //shorthand
-	if(TR.target == "tabSpace"){
+	if(TR.targetType == "tabSpace"){
 		return true;
 	}
-	else if(TR.target == "block"){
+	else if(TR.targetType == "block"){
 		return true;
 	}
-	else if(TR.target == "slot"){
+	else if(TR.targetType == "slot"){
 		return !TR.target.parent.stack.isDisplayStack;
 	}
+	GuiElements.alert("touch outside space");
 	return false;
 };
 /* Handles new touch events for Blocks.  Stores the target Block.
@@ -139,6 +154,9 @@ TouchReceiver.targetIsInTabSpace=function(){
  */
 TouchReceiver.touchStartBlock=function(target,e){
 	var TR=TouchReceiver; //shorthand
+	if(!target.stack.isDisplayStack) {
+		TR.checkStartZoom(e);
+	}
 	if(TR.touchstart(e)){ //prevent multitouch issues.
 		GuiElements.overlay.close(); //Close any visible overlays.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
@@ -209,6 +227,7 @@ TouchReceiver.touchStartPalette=function(e){
 /* @fix Write documentation. */
 TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
+	TR.checkStartZoom(e);
 	if(TR.touchstart(e)){
 		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="tabSpace";
@@ -252,14 +271,16 @@ TouchReceiver.touchmove=function(e){
 		if(TR.zooming){
 			//If we are currently zooming, we update the zoom.
 			if(e.touches.length < 2){
+				GuiElements.alert("can't move, ending zoom");
 				TR.touchend(e);
 			}
 			else{
+				GuiElements.alert("updating zoom");
 				var x1 = e.touches[0].pageX;
 				var y1 = e.touches[0].pageY;
-				var x2 = e.touches[0].pageX;
-				var y2 = e.touches[0].pageY;
-				TabManager.updateZoom(x1, y1, x2, y2);
+				var x2 = e.touches[1].pageX;
+				var y2 = e.touches[1].pageY;
+				TabManager.updateZooming(x1, y1, x2, y2);
 			}
 		}
 		else {
@@ -341,26 +362,28 @@ TouchReceiver.touchmove=function(e){
  */
 TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
-	var touchWasDown=TR.touchDown;
-	TR.touchDown=false;
 	if(TR.zooming){
 		if(e.touches.length == 0){
-			TabManager.endZoom();
+			GuiElements.alert("ending zoom");
+			TabManager.endZooming();
 			TR.zooming = false;
+			TR.touchDown=false;
 		}
 		else if(e.touches.length == 1){
 			//Switch from zooming to panning
-			TabManager.endZoom();
+			GuiElements.alert("zoom to pan");
+			TabManager.endZooming();
 			TR.zooming = false;
 			TR.targetType = "tabSpace";
 			TR.target=null;
 			TabManager.startScroll(TR.getX(e),TR.getY(e));
 		}
 		else if(e.touches.length > 1){
+			GuiElements.alert("still zooming");
 			//No action necessary
 		}
 	}
-	else if(touchWasDown&&!TR.longTouch){ //Prevents multitouch problems.
+	else if(TR.touchDown&&!TR.longTouch){ //Prevents multitouch problems.
 		TR.touchDown=false;
 		TR.dragging = false;
 		if(TR.targetType=="block"){
