@@ -147,7 +147,6 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
 	var request = "tablet/dialog_response";
-	GuiElements.alert("dialog getting resp...");
 	var onResponseReceived=function(response){
 		if(response=="No Response"){
 			HS.sendRequestWithCallback(request,onResponseReceived,function(){
@@ -172,9 +171,10 @@ HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		//GuiElements.alert("Error1");
 		HtmlServer.dialogVisible=false;
-		callbackErr();
+		if(callbackErr != null) {
+			callbackErr();
+		}
 	});
 }
 HtmlServer.getFileName=function(callbackFn,callbackErr){

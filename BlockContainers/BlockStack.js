@@ -15,8 +15,12 @@ function BlockStack(firstBlock,tab){
 	this.firstBlock.stopGlow(); //Removes visual indicator of execution.
 	this.returnType=firstBlock.returnType; //The BlockStack returns the same type of value as its first Block.
 	this.tab=tab;
-	this.x=this.tab.absToRelX(firstBlock.getAbsX());
-	this.y=this.tab.absToRelY(firstBlock.getAbsY());
+	this.x = 0;
+	this.y = 0;
+	var blockX = firstBlock.getAbsX();
+	var blockY = firstBlock.getAbsY();
+	this.x=this.setAbsX(firstBlock.getAbsX());
+	this.y=this.setAbsY(firstBlock.getAbsY());
 	this.tabGroup=tab.mainG; //Stores the SVG group element of the Tab it is within.
 	this.group=GuiElements.create.group(this.x,this.y,this.tabGroup); //Creates a group for the BlockStack.
 	this.firstBlock.changeStack(this); //Moves all Blocks into the BlockStack.
@@ -66,18 +70,18 @@ BlockStack.prototype.updateDim=function() {
  */
 BlockStack.prototype.relToAbsX=function(x){
 	if(this.flying){
-		return x+this.x; //Not in a Tab; return just the x.
+		return CodeManager.dragRelToAbsX(x+this.x);
 	}
 	else{
-		return x+this.x+this.tab.getAbsX(); //In a Tab; return x plus Tab's offset.
+		return this.tab.relToAbsX(x+this.x); //In a Tab; return x plus Tab's offset.
 	}
 };
 BlockStack.prototype.relToAbsY=function(y){
 	if(this.flying){
-		return y+this.y; //Not in a Tab; return just the y.
+		return CodeManager.dragRelToAbsY(y+this.y); //Not in a Tab; scale by dragLayer's scale
 	}
 	else{
-		return y+this.y+this.tab.getAbsY(); //In a Tab; return y plus Tab's offset.
+		return this.tab.relToAbsY(y+this.y); //In a Tab; return y plus Tab's offset.
 	}
 };
 /* Converts a coordinate relative to the screen to one relative to the inside of the stack.
@@ -86,18 +90,18 @@ BlockStack.prototype.relToAbsY=function(y){
  */
 BlockStack.prototype.absToRelX=function(x){
 	if(this.flying){
-		return x-this.x; //Not in a Tab; return just the x.
+		return CodeManager.dragAbsToRelX(x)-this.x;
 	}
 	else{
-		return x-this.x-this.tab.getAbsX(); //In a Tab; return x minus Tab's offset.
+		return this.tab.absToRelX(x)-this.x; //In a Tab; return x minus Tab's offset.
 	}
 };
 BlockStack.prototype.absToRelY=function(y){
 	if(this.flying){
-		return y-this.y; //Not in a Tab; return just the y.
+		return CodeManager.dragAbsToRelY(y)-this.y;
 	}
 	else{
-		return y-this.y-this.tab.getAbsY(); //In a Tab; return y minus Tab's offset.
+		return this.tab.absToRelY(y)-this.y; //In a Tab; return y minus Tab's offset.
 	}
 };
 /* Returns the x coord of the BlockStack relative to the screen.
@@ -111,6 +115,12 @@ BlockStack.prototype.getAbsX=function(){
  */
 BlockStack.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
+};
+BlockStack.prototype.setAbsX=function(x){
+	return this.x + this.absToRelX(x);
+};
+BlockStack.prototype.setAbsY=function(y){
+	return this.y + this.absToRelY(y);
 };
 /* Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
  * Returns no values but stores results on CodeManager.fit.
@@ -129,18 +139,24 @@ BlockStack.prototype.findBestFit=function(){
 	//Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
 	if(move.topOpen){
 		//Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
-		var absCx=this.relToAbsX(this.dim.cx1);
-		var absCy=this.relToAbsY(this.dim.cy1);
-		if(move.pInRange(move.topX,move.topY,absCx,absCy,this.dim.cw,this.dim.ch)){
+		let absCx=this.relToAbsX(this.dim.cx1);
+		let absCy=this.relToAbsY(this.dim.cy1);
+		let absW = this.relToAbsX(this.dim.cw) - absCx;
+		let absH = this.relToAbsY(this.dim.ch) - absCy;
+		if(move.pInRange(move.topX,move.topY,absCx,absCy,absW,absH)){
 			this.firstBlock.findBestFit();
 		}
 	}
 	//Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
 	if(move.returnsValue){
 		//Only check if the BlockStack's bounding box overlaps with this BlockStack's bounding box.
-		var absRx=this.relToAbsX(this.dim.rx1);
-		var absRy=this.relToAbsY(this.dim.ry1);
-		if(move.rInRange(move.topX,move.topY,move.width,move.height,absRx,absRy,this.dim.rw,this.dim.rh)){
+		let absRx=this.relToAbsX(this.dim.rx1);
+		let absRy=this.relToAbsY(this.dim.ry1);
+		let absW = this.relToAbsX(this.dim.rw) - absRx;
+		let absH = this.relToAbsY(this.dim.rh) - absRy;
+		var width = move.bottomX - move.topX;
+		var height = move.bottomY - move.topY;
+		if(move.rInRange(move.topX,move.topY,width,height,absRx,absRy,absW,absH)){
 			this.firstBlock.findBestFit();
 		}
 	}
@@ -197,8 +213,8 @@ BlockStack.prototype.updateRun=function(){
 				var value=this.currentBlock.getResultData().asString().getValue();
 				var x=this.currentBlock.getAbsX();
 				var y=this.currentBlock.getAbsY();
-				var width=this.currentBlock.width;
-				var height=this.currentBlock.height;
+				var width=this.currentBlock.relToAbsX(this.currentBlock.width) - x;
+				var height=this.currentBlock.relToAbsY(this.currentBlock.height) - y;
 				GuiElements.displayValue(value,x,y,width,height);
 				this.endRun(); //Execution is done.
 			}
@@ -240,20 +256,21 @@ BlockStack.prototype.findBestFitTop=function(){
 	var fit=CodeManager.fit;
 	var x=this.firstBlock.getAbsX(); //Uses screen coordinates.
 	var y=this.firstBlock.getAbsY();
+	var height = this.relToAbsY(this.firstBlock.height) - y;
 	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
 	 * the snap bounding box of the first Block in the BlockStack. */
 	//Gets the bottom-left corner of the moving BlockStack.
 	var moveBottomLeftX=move.topX;
-	var moveBottomLeftY=move.topY+move.height;
+	var moveBottomLeftY=move.bottomY;
 	//Gets the snap bounding box of the first Block.
 	var snapBLeft=x-snap.left;
 	var snapBTop=y-snap.top;
 	var snapBWidth=snap.left+snap.right;
-	var snapBHeight=snap.top+this.firstBlock.height+snap.bottom;
+	var snapBHeight=snap.top+height+snap.bottom;
 	//Checks if the point falls in the box.
 	if(move.pInRange(moveBottomLeftX,moveBottomLeftY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
 		var xDist=move.topX-x;
-		var yDist=(move.topY+move.height)-y;
+		var yDist=move.bottomY-y;
 		var dist=xDist*xDist+yDist*yDist; //Computes the distance.
 		if(!fit.found||dist<fit.dist){ //Compares it to existing fit.
 			fit.found=true;
@@ -338,7 +355,7 @@ BlockStack.prototype.fly=function(){
 	var absY=this.getAbsY();
 	this.flying=true; //Record that this BlockStack is flying.
 	//Move to ensure that position on screen does not change.
-	this.move(absX,absY);
+	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
 };
 /* Moves this BlockStack back into its Tab's group.
  */

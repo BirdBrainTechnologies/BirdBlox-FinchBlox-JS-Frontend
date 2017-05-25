@@ -6,6 +6,7 @@ function TabManager(){
 	TabManager.createTabSpaceBg();
 	TM.isRunning=false;
 	TM.scrolling=false;
+	TM.zooming = false;
 }
 TabManager.setGraphics=function(){
 	var TM=TabManager;
@@ -51,7 +52,7 @@ TabManager.activateTab=function(tab){
 	}
 	tab.activate();
 	TabManager.activeTab=tab;
-}
+};
 TabManager.eventFlagClicked=function(){
 	TabManager.passRecursively("eventFlagClicked");
 };
@@ -101,7 +102,7 @@ TabManager.startRun=function(){
 	TabManager.isRunning=true;
 	CodeManager.startUpdateTimer();
 }
-TabManager.startScoll=function(x,y){
+TabManager.startScroll=function(x,y){
 	var TM=TabManager;
 	if(!TM.scrolling){
 		TM.scrolling=true;
@@ -119,6 +120,26 @@ TabManager.endScroll=function(){
 	if(TM.scrolling){
 		TM.scrolling=false;
 		TM.activeTab.endScroll();
+	}
+};
+TabManager.startZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(!TM.zooming){
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.updateZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.endZooming = function(){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.zooming = false;
+		TM.activeTab.endZooming();
 	}
 };
 TabManager.createXml=function(xmlDoc){
@@ -216,10 +237,14 @@ TabManager.passRecursively=function(functionName){
 };
 TabManager.updateZoom=function(){
 	var TM=TabManager;
-	TM.bgWidth=GuiElements.width;
 	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
-	GuiElements.update.rect(TM.tabBgRect,0,0,TM.bgWidth,TM.bgHeight);
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+};
+TabManager.getActiveZoom = function(){
+	if(TabManager.activateTab == null){
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
 };

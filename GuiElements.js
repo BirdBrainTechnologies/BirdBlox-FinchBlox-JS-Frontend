@@ -16,7 +16,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
-    GuiElements();
+	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -130,78 +130,13 @@ GuiElements.createLayers=function(){
 	layers.titlebar=create.layer();
 	layers.stage=create.layer();
 	layers.display=create.layer();
-	layers.drag=create.group(0,0,layers.activeTab);
-	layers.highlight=create.group(0,0,layers.activeTab);
+	layers.drag=create.layer();
+	layers.highlight=create.layer();
 	layers.tabMenu=create.layer();
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
-	layers.canvasOverlay=create.group(0,0,layers.activeTab);
 	layers.overlay=create.layer();
-
-	let eventsHandler = {
-        haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel'],
-        init: function(options) {
-            var instance = options.instance;
-            var initialScale = 1;
-            var pannedX = 0;
-            var pannedY = 0;
-            // Init Hammer
-            // Listen only for pointer and touch events
-            this.hammer = Hammer(options.eventsListenerElement, {
-                inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
-            });
-
-            // Enable pinch
-            this.hammer.get('pinch').set({enable: true});
-
-            // Handle double tap
-            this.hammer.on('doubletap', function(ev){
-                instance.zoomAtPointBy(1.2, ev.center);
-            });
-
-            // Handle pan
-            this.hammer.on('panstart panmove', function(ev){
-                // On pan start reset panned variables
-                if (ev.type === 'panstart') {
-                    pannedX = 0;
-                    pannedY = 0;
-                }
-                // Pan only the difference
-                instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY});
-                pannedX = ev.deltaX;
-                pannedY = ev.deltaY;
-            });
-
-            // Handle pinch
-            this.hammer.on('pinchstart pinchmove', function(ev){
-                // On pinch start remember initial zoom
-                if (ev.type === 'pinchstart') {
-                    initialScale = instance.getZoom();
-                    instance.zoomAtPoint(initialScale * ev.scale, ev.center);
-                }
-                instance.zoomAtPoint(initialScale * ev.scale, ev.center);
-            });
-
-            // Prevent moving the page on some devices when panning over SVG
-            options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
-        },
-        destroy: function(){
-            this.hammer.destroy()
-        }
-    }
-	GuiElements.layers.activeTab.addEventListener("DOMSubtreeModified", function(){
-	    GuiElements.svgPanZoom = svgPanZoom(GuiElements.svg, {
-          	zoomEnabled: true,
-	    	fit: false,
-	    	contian: false,
-	        viewportSelector: GuiElements.layers.activeTab,
-	        customEventsHandler: eventsHandler,
-	        eventsListenerElement: GuiElements.layers.aTabBg,
-	        controlIconsEnabled: false,
-	    });
-	});
-
-}
+};
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
  * It may also be added to a group if included.
@@ -295,6 +230,7 @@ GuiElements.draw=function(){};
  * @return {SVG rect} - The rect which was created.
  */
 GuiElements.draw.rect=function(x,y,width,height,color){
+	DebugOptions.validateNumbers(x, y, width, height);
 	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	rect.setAttributeNS(null,"x",x); //Set its attributes.
 	rect.setAttributeNS(null,"y",y);
@@ -314,6 +250,7 @@ GuiElements.draw.rect=function(x,y,width,height,color){
  * @return {SVG path} - The path which was created.
  */
 GuiElements.draw.triangle=function(x,y,width,height,color){
+	DebugOptions.validateNumbers(x, y, width, height);
 	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangle(triangle,x,y,width,height); //Set its path description (points).
 	triangle.setAttributeNS(null,"fill",color); //Set the fill.
@@ -329,12 +266,14 @@ GuiElements.draw.triangle=function(x,y,width,height,color){
  * @return {SVG path} - The path which was created.
  */
 GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
+	DebugOptions.validateNumbers(x, y, width, height, slantW);
 	var trapezoid=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description.
 	trapezoid.setAttributeNS(null,"fill",color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
 }
 GuiElements.draw.circle=function(cx,cy,radius,color,group){
+	DebugOptions.validateNumbers(cx, cy, radius);
 	var circle=document.createElementNS("http://www.w3.org/2000/svg",'circle');
 	circle.setAttributeNS(null,"cx",cx);
 	circle.setAttributeNS(null,"cy",cy);
@@ -346,6 +285,7 @@ GuiElements.draw.circle=function(cx,cy,radius,color,group){
 	return circle;
 };
 GuiElements.draw.image=function(imageName,x,y,width,height,parent){
+	DebugOptions.validateNumbers(x, y, width, height);
 	var imageElement=GuiElements.create.image();
 	imageElement.setAttributeNS(null,"x",x);
 	imageElement.setAttributeNS(null,"y",y);
@@ -370,6 +310,7 @@ GuiElements.draw.image=function(imageName,x,y,width,height,parent){
  * @return {SVG text} - The text element which was created.
  */
 GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
+	DebugOptions.validateNumbers(x, y);
 	var textElement=GuiElements.create.text();
 	textElement.setAttributeNS(null,"x",x);
 	textElement.setAttributeNS(null,"y",y);
@@ -464,6 +405,7 @@ GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
  * @param {number} height - The path's new height. (negative will make it point down)
  */
 GuiElements.update.triangle=function(pathE,x,y,width,height){
+	DebugOptions.validateNumbers(x, y, width, height);
 	var xshift=width/2;
 	var path="";
 	path+="m "+x+","+y; //Draws bottom-left point.
@@ -481,6 +423,7 @@ GuiElements.update.triangle=function(pathE,x,y,width,height){
  * @param {number} slantW - The amount the trapezoid slopes in.
  */
 GuiElements.update.trapezoid=function(pathE,x,y,width,height,slantW){
+	DebugOptions.validateNumbers(x, y, width, height, slantW);
 	var shortW=width-2*slantW; //The width of the top of the trapezoid.
 	var path="";
 	path+="m "+x+","+(y+height); //Draws the points.
@@ -498,6 +441,7 @@ GuiElements.update.trapezoid=function(pathE,x,y,width,height,slantW){
  * @param {number} height - The rect's new height.
  */
 GuiElements.update.rect=function(rect,x,y,width,height){
+	DebugOptions.validateNumbers(x, y, width, height);
 	rect.setAttributeNS(null,"x",x);
 	rect.setAttributeNS(null,"y",y);
 	rect.setAttributeNS(null,"width",width);
@@ -505,6 +449,7 @@ GuiElements.update.rect=function(rect,x,y,width,height){
 }
 /* Used for zooming the main zoomGroup which holds the ui */
 GuiElements.update.zoom=function(group,scale){
+	DebugOptions.validateNumbers(scale);
 	group.setAttributeNS(null,"transform","scale("+scale+")");
 };
 GuiElements.update.image=function(imageE,newImageName){
@@ -519,16 +464,24 @@ GuiElements.move=function(){};
  * @param {SVG g} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
+ * @param {number} zoom - (Optional) The amount the group should be scaled.
  */
-GuiElements.move.group=function(group,x,y){
-	group.setAttributeNS(null,"transform","translate("+x+","+y+")");
-}
+GuiElements.move.group=function(group,x,y,zoom){
+	DebugOptions.validateNumbers(x,y);
+	if(zoom == null) {
+		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
+	}
+	else{
+		group.setAttributeNS(null, "transform", "matrix(" + zoom + ",0,0," + zoom + "," + x + "," + y + ")");
+	}
+};
 /* Moves an SVG text element.
  * @param {SVG text} text - The text to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
 GuiElements.move.text=function(text,x,y){
+	DebugOptions.validateNumbers(x,y);
 	text.setAttributeNS(null,"x",x);
 	text.setAttributeNS(null,"y",y);
 };
@@ -538,6 +491,7 @@ GuiElements.move.text=function(text,x,y){
  * @param {number} y - The new y coord of the element.
  */
 GuiElements.move.element=function(element,x,y){
+	DebugOptions.validateNumbers(x,y);
 	element.setAttributeNS(null,"x",x);
 	element.setAttributeNS(null,"y",y);
 };
@@ -551,6 +505,7 @@ GuiElements.move.element=function(element,x,y){
  * @return {SVG clipPath} - The finished clipping path.
  */
 GuiElements.clip=function(x,y,width,height,element){
+	DebugOptions.validateNumbers(x,y,width,height);
 	var id=Math.random()+"";
 	var clipPath=document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
 	var clipRect=GuiElements.draw.rect(x,y,width,height);
@@ -732,3 +687,4 @@ GuiElements.computeAndSetZoom=function(response){
 		}
 	}
 };
+

@@ -47,7 +47,7 @@ Sounds.stopAllSounds=function(){
 	var request = "sound/stop_all"
 	var errCallback = function() {
 		// TODO(ttsun): Handle error
-		GuiElements.alert("Error stopping all sounds.")
+		//GuiElements.alert("Error stopping all sounds.")
 	}
 	HtmlServer.sendRequestWithCallback(request, null, errCallback);
 }

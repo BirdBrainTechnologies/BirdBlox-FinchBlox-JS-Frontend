@@ -12,7 +12,9 @@ Highlighter.createPath=function(){
 	return path;
 }
 Highlighter.highlight=function(x,y,width,height,type,isSlot,isGlowing){
-	var pathD=BlockGraphics.buildPath.highlight(x,y,width,height,type,isSlot);
+	var myX = CodeManager.dragAbsToRelX(x);
+	var myY = CodeManager.dragAbsToRelX(y);
+	var pathD=BlockGraphics.buildPath.highlight(myX, myY, width,height,type,isSlot);
 	Highlighter.path.setAttributeNS(null,"d",pathD);
 	if(!Highlighter.visible){
 		GuiElements.layers.highlight.appendChild(Highlighter.path);
@@ -31,4 +33,4 @@ Highlighter.hide=function(){
 		Highlighter.path.remove();
 		Highlighter.visible=false;
 	}
-}
+};

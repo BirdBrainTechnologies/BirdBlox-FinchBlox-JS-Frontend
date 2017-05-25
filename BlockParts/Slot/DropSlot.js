@@ -124,18 +124,19 @@ DropSlot.prototype.duplicate=function(parentCopy){
 DropSlot.prototype.highlight=function(){//Fix BG
 	var isSlot=!this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
-}
+};
 DropSlot.prototype.edit=function(){
 	if(!this.selected){
-		var x=this.getAbsX();
-		var y=this.getAbsY();
+		var x = this.relToAbsX(this.width/2); //Get coords relative to the screen.
+		var y1 = this.getAbsY();
+		var y2 = this.relToAbsY(this.height);
 		this.select();
 		InputPad.resetPad(this.dropColumns);
 		this.populateList(); //Loads any dynamic options.
 		for(var i=0;i<this.optionsText.length;i++){
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
-		InputPad.showDropdown(this,x+this.width/2,y,y+this.height);
+		InputPad.showDropdown(this,x, y1, y2);
 	}
 }
 /* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.

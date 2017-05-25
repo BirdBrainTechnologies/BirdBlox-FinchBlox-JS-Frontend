@@ -44,7 +44,7 @@ InputPad.buildPad=function(){
 	IP.group=GuiElements.create.group(0,0);
 	IP.visible=false;
 	/*IP.makeBg();*/
-	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP,null,true);
+	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP);
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
 	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);

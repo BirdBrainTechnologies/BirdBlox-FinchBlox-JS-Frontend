@@ -128,15 +128,16 @@ RoundSlot.prototype.highlight=function(){
  */
 RoundSlot.prototype.edit=function(){
 	if(!this.selected){
-		var x=this.getAbsX(); //Get coords relative to the screen.
-		var y=this.getAbsY();
+		var x = this.relToAbsX(this.width/2); //Get coords relative to the screen.
+		var y1 = this.getAbsY();
+		var y2 = this.relToAbsY(this.height);
 		this.select(); //Change appearance to reflect editing.
 		InputPad.resetPad(this.dropColumns); //Prepare the InputPad for editing with the correct number of columns.
 		for(var i=0;i<this.optionsText.length;i++){ //Add special options to the inputPad (if any).
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
 		//Show the NumPad at the proper location.
-		InputPad.showNumPad(this,x+this.width/2,y,y+this.height,this.positive,this.integer);
+		InputPad.showNumPad(this,x, y1, y2,this.positive,this.integer);
 	}
 };
 /* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
