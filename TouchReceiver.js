@@ -85,6 +85,12 @@ TouchReceiver.getY=function(e){
 	}
 	return e.touches[0].pageY/GuiElements.zoomFactor;
 };
+TouchReceiver.getTouchX=function(e, i){
+	return e.touches[i].pageX/GuiElements.zoomFactor;
+};
+TouchReceiver.getTouchY=function(e, i){
+	return e.touches[i].pageY/GuiElements.zoomFactor;
+};
 /* Handles new touch events.  Does not know which element was touched.
  * @param {event} e - passed event arguments.
  * @return {boolean} - returns true iff !TR.touchDown
@@ -115,10 +121,10 @@ TouchReceiver.checkStartZoom=function(e){
 				TabManager.endScroll();
 			}
 			TR.zooming = true;
-			TR.startX = e.touches[0].pageX;
-			TR.startY = e.touches[0].pageY;
-			TR.startX2 = e.touches[1].pageX;
-			TR.startY2 = e.touches[1].pageY;
+			TR.startX = TR.getTouchX(e, 0);
+			TR.startY = TR.getTouchY(e, 0);
+			TR.startX2 = TR.getTouchX(e, 1);
+			TR.startY2 = TR.getTouchY(e, 1);
 			TabManager.startZooming(TR.startX, TR.startY, TR.startX2, TR.startY2);
 		}
 	}
@@ -263,10 +269,10 @@ TouchReceiver.touchmove=function(e){
 				TR.touchend(e);
 			}
 			else{
-				var x1 = e.touches[0].pageX;
-				var y1 = e.touches[0].pageY;
-				var x2 = e.touches[1].pageX;
-				var y2 = e.touches[1].pageY;
+				var x1 = TR.getTouchX(e, 0);
+				var y1 = TR.getTouchY(e, 0);
+				var x2 = TR.getTouchX(e, 1);
+				var y2 = TR.getTouchY(e, 1);
 				TabManager.updateZooming(x1, y1, x2, y2);
 			}
 		}
