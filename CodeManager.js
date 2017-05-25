@@ -13,8 +13,8 @@ function CodeManager(){
 	move.touchY=0; //The y coord of the user's finger.
 	move.topX=0; //The top-left corner's x coord of the BlockStack being moved.
 	move.topY=0; //The top-left corner's y-coord of the BlockStack being moved.
-	move.height=0; //The height of the BlockStack (used to determine overlap with slots).
-	move.width=0; //The width of the BlockStack.
+	move.bottomX=0; //The bottom-right corner
+	move.bottomY=0;
 	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
 	move.returnType;
 
@@ -59,8 +59,8 @@ CodeManager.move.start=function(block,x,y){
 		containing only the Block and the Blocks below it. */
 		var stack=block.unsnap();
 		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
-		move.height=stack.dim.rh; //Store the BlockStack's dimensions.
-		move.width=stack.dim.rw;
+		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
+		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
@@ -70,13 +70,10 @@ CodeManager.move.start=function(block,x,y){
 		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
 		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
 
-		let canvasX = x / TabManager.getActiveZoom();
-		let canvasY = y / TabManager.getActiveZoom();
-
 		move.touchX=x; //Store coords
 		move.touchY=y;
-		move.offsetX=stack.getAbsX()-canvasX; //Store offset.
-		move.offsetY=stack.getAbsY()-canvasY;
+		move.offsetX=stack.getAbsX()-x; //Store offset.
+		move.offsetY=stack.getAbsY()-y;
 		move.stack=stack; //Store stack.
 	}
 }
@@ -88,15 +85,13 @@ CodeManager.move.start=function(block,x,y){
 CodeManager.move.update=function(x,y){
 	var move=CodeManager.move; //shorthand
 	if(move.moving){ //Only update if a BlockStack is currently moving.
-		let canvasX = x / TabManager.getActiveZoom();
-		let canvasY = y / TabManager.getActiveZoom();
-
 		move.touchX = x;
 		move.touchY = y;
-		move.topX = move.offsetX+canvasX;
-		move.topY = move.offsetY+canvasY;
-
-		move.stack.move(move.topX,move.topY); //Move the BlockStack to the correct location.
+		move.topX = move.offsetX+x;
+		move.topY = move.offsetY+y;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
+		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
@@ -120,10 +115,10 @@ CodeManager.move.end=function(){
 	var move=CodeManager.move; //shorthand
 	var fit=CodeManager.fit; //shorthand
 	if(move.moving){ //Only run if a BlockStack is currently moving.
-		let canvasX = move.touchX / TabManager.getActiveZoom();
-		let canvasY = move.touchY / TabManager.getActiveZoom();
-		move.topX=move.offsetX+canvasX;
-		move.topY=move.offsetY+canvasY;
+		move.topX = move.offsetX+move.touchX;
+		move.topY = move.offsetY+move.touchY;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.IsStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
@@ -551,4 +546,16 @@ CodeManager.setSoundTempo=function(newTempo){
 			CodeManager.sound.tempo=newTempo;
 		}
 	}
+};
+CodeManager.dragAbsToRelX=function(x){
+	return x / TabManager.getActiveZoom();
+};
+CodeManager.dragAbsToRelY=function(y){
+	return y / TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsX=function(x){
+	return x * TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsY=function(y){
+	return y * TabManager.getActiveZoom();
 };

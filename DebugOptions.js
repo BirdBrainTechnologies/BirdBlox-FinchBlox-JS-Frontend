@@ -8,6 +8,8 @@ function DebugOptions(){
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
 	DO.showVersion = true;
+	DO.logErrors = true;
+	DO.errorLocked = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -31,5 +33,35 @@ DebugOptions.applyActions = function(){
 	}
 	if(DO.showVersion){
 		GuiElements.alert("Version: "+GuiElements.appVersion);
+	}
+};
+DebugOptions.shouldLogErrors=function(){
+	return DebugOptions.logErrors && DebugOptions.enabled;
+};
+DebugOptions.safeFunc = function(func){
+	if(DebugOptions.shouldLogErrors()){
+		return function(){
+			try {
+				if(!DebugOptions.errorLocked) {
+					func.apply(this, arguments);
+				}
+			}
+			catch(err) {
+				DebugOptions.errorLocked = true;
+				GuiElements.alert("ERROR: " + err.message);
+				HtmlServer.showChoiceDialog("ERROR",err.message,"OK","OK",true);
+			}
+		}
+	}
+	else{
+		return func;
+	}
+};
+DebugOptions.validateNumbers = function(){
+	if(!DebugOptions.shouldLogErrors()) return;
+	for(let i = 0; i < arguments.length; i++){
+		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
+			throw "Invalid Number";
+		}
 	}
 };

@@ -65,27 +65,41 @@ Block.setConstants=function(){
 	Block.returnTypes.bool=3;
 	Block.returnTypes.list=4;
 };
+Block.prototype.relToAbsX=function(x){
+	if(this.stack!=null) {
+		return this.stack.relToAbsX(x + this.x);
+	}
+	return x + this.x;
+};
+Block.prototype.relToAbsY=function(y){
+	if(this.stack!=null) {
+		return this.stack.relToAbsY(y + this.y);
+	}
+	return y + this.y;
+};
+Block.prototype.absToRelX=function(x){
+	if(this.stack!=null) {
+		return this.stack.absToRelX(x) - this.x;
+	}
+	return x - this.x;
+};
+Block.prototype.absToRelY=function(y){
+	if(this.stack!=null) {
+		return this.stack.absToRelY(y) - this.y;
+	}
+	return y - this.y;
+};
 /* Returns the x coord of the Block relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Block relative to the screen.
  */
 Block.prototype.getAbsX=function(){
-	if(this.stack!=null){
-		return this.x+this.stack.getAbsX();
-	}
-	else{
-		return this.x;
-	}
+	return this.relToAbsX(0);
 };
 /* Returns the y coord of the Block relative to the screen.
  * @return {number} - The y coord of the Block relative to the screen.
  */
 Block.prototype.getAbsY=function(){
-	if(this.stack!=null){
-		return this.y+this.stack.getAbsY();
-	}
-	else{
-		return this.y;
-	}
+	return this.relToAbsY(0);
 };
 /* Creates and returns the main SVG path element for the Block.
  * @return {SVG path} - The main SVG path element for the Block.
@@ -419,13 +433,14 @@ Block.prototype.findBestFit=function(){
 	var fit=CodeManager.fit;
 	var x=this.getAbsX(); //Get coords to compare.
 	var y=this.getAbsY();
+	var height = this.relToAbsY(this.height) - y;
 	if(move.topOpen&&this.bottomOpen){ //If a connection between the stack and block are possible...
 		var snap=BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
 		var snapBLeft=x-snap.left;
 		var snapBTop=y-snap.top;
 		var snapBWidth=snap.left+snap.right;
-		var snapBHeight=snap.top+this.height+snap.bottom;
+		var snapBHeight=snap.top+height+snap.bottom;
 		//Check if point falls in a rectangular range.
 		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
 			var xDist=move.topX-x; //If it does, compute the distance with the distance formula.
@@ -458,7 +473,7 @@ Block.prototype.findBestFit=function(){
  */
 Block.prototype.highlight=function(){
 	if(this.bottomOpen){
-		Highlighter.highlight(this.getAbsX(),this.getAbsY()+this.height,this.width,this.height,0,false,this.isGlowing);
+		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
 	}
 	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
 		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen=false");

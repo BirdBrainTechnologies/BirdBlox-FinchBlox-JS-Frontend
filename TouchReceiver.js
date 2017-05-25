@@ -40,9 +40,9 @@ function TouchReceiver(){
  */
 TouchReceiver.addListeners=function(){
 	var TR=TouchReceiver;
-	document.body.addEventListener(TR.handlerMove,TouchReceiver.handleMove,false);
-	document.body.addEventListener(TR.handlerUp,TouchReceiver.handleUp,false);
-	document.body.addEventListener(TR.handlerDown,TouchReceiver.handleDocumentDown,false);
+	TR.addEventListenerSafe(document.body, TR.handlerMove,TouchReceiver.handleMove,false);
+	TR.addEventListenerSafe(document.body, TR.handlerUp,TouchReceiver.handleUp,false);
+	TR.addEventListenerSafe(document.body, TR.handlerDown,TouchReceiver.handleDocumentDown,false);
 };
 /* Handles movement events and prevents drag gestures from scrolling document.
  * @param {event} event - passed event arguments.
@@ -284,10 +284,10 @@ TouchReceiver.touchmove=function(e){
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType == "displayStack") {
-				var canvasX = TR.target.stack.getAbsX() / TabManager.getActiveZoom(); //Determine where the copied BlockStack should go.
-				var canvasY = TR.target.stack.getAbsY() / TabManager.getActiveZoom();
+				var x = TR.target.stack.getAbsX();
+				var y = TR.target.stack.getAbsY();
 				//The first block of the duplicated BlockStack is the new target.
-				TR.target = TR.target.stack.duplicate(canvasX, canvasY).firstBlock;
+				TR.target = TR.target.stack.duplicate(x, y).firstBlock;
 				TR.targetType = "block";
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
@@ -396,6 +396,9 @@ TouchReceiver.touchend=function(e){
 			TR.target.endScroll();
 		}
 	}
+	else{
+		TR.touchDown = false;
+	}
 };
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
  * Blocks that are moving should stop moving, but actions should not be triggered.
@@ -474,7 +477,7 @@ TouchReceiver.stopLongTouchTimer=function(){
 TouchReceiver.addListenersCat=function(element,category){
 	var TR=TouchReceiver;
 	element.category=category; //Teaches the SVG element to know what Category it belongs to.
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Category.
 		TouchReceiver.touchStartCatBN(this.category,e);
 	}, false);
@@ -488,7 +491,7 @@ TouchReceiver.addListenersCat=function(element,category){
 TouchReceiver.addListenersChild=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent; //Teaches the SVG element to know what Block it belongs to.
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Block.
 		TouchReceiver.touchStartBlock(this.parent,e);
 	}, false);
@@ -500,7 +503,7 @@ TouchReceiver.addListenersChild=function(element,parent){
 TouchReceiver.addListenersSlot=function(element,slot){
 	var TR=TouchReceiver;
 	element.slotRef=slot; //Teaches the SVG element to know what Slot it belongs to.
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
 		TouchReceiver.touchStartSlot(this.slotRef,e);
 	}, false);
@@ -513,7 +516,7 @@ TouchReceiver.addListenersSlot=function(element,slot){
 TouchReceiver.addListenersBN=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent; //Teaches the SVG element to know what Button it belongs to.
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Button.
 		TouchReceiver.touchStartBN(this.parent,e);
 	}, false);
@@ -522,7 +525,7 @@ TouchReceiver.addListenersBN=function(element,parent){
  */
 TouchReceiver.addListenersPalette=function(element){
 	var TR=TouchReceiver;
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartPalette(e);
 	}, false);
@@ -531,7 +534,7 @@ TouchReceiver.addListenersPalette=function(element){
  */
 TouchReceiver.addListenersTabSpace=function(element){
 	var TR=TouchReceiver;
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TabManager.
 		TouchReceiver.touchStartTabSpace(e);
 	}, false);
@@ -541,7 +544,7 @@ TouchReceiver.addListenersTabSpace=function(element){
  */
 TouchReceiver.addListenersDisplayBox=function(element){
 	var TR=TouchReceiver;
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartDisplayBox(e);
 	}, false);
@@ -551,14 +554,17 @@ TouchReceiver.addListenersDisplayBox=function(element){
  */
 TouchReceiver.addListenersOverlayPart=function(element){
 	var TR=TouchReceiver;
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartOverlayPart(e);
 	}, false);
 };
 TouchReceiver.addListenersMenuBnListScrollRect=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent;
-	element.addEventListener(TR.handlerDown, function(e) {
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartMenuBnListScrollRect(this.parent,e);
 	}, false);
+};
+TouchReceiver.addEventListenerSafe=function(element,type, func){
+	element.addEventListener(type, DebugOptions.safeFunc(func), false);
 };

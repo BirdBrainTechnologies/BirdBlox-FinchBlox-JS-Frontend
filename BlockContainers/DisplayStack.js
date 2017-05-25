@@ -43,13 +43,23 @@ DisplayStack.prototype.updateDim=function() {
 	this.dim.rx1+=this.getAbsX();
 	this.dim.ry1+=this.getAbsY();
 }
+DisplayStack.prototype.relToAbsX=function(x){
+	return this.category.relToAbsX(x+this.x);
+};
+DisplayStack.prototype.relToAbsY=function(y){
+	return this.category.relToAbsY(y+this.y);
+};
+DisplayStack.prototype.absToRelX=function(x){
+	return this.category.absToRelX(x)-this.x;
+};
+DisplayStack.prototype.absToRelY=function(y){
+	return this.category.absToRelY(y)-this.y;
+};
 DisplayStack.prototype.getAbsX=function(){
-	//TODO: zoom
-	return this.x+this.category.getAbsX();
+	return this.relToAbsX(0);
 };
 DisplayStack.prototype.getAbsY=function(){
-	//TODO: zoom
-	return this.y+this.category.getAbsY();
+	return this.relToAbsY(0);
 };
 //DisplayStack.prototype.findBestFit=function()
 DisplayStack.prototype.move=function(x,y){
@@ -87,7 +97,7 @@ DisplayStack.prototype.duplicate=function(x,y){
 	var firstCopyBlock=this.firstBlock.duplicate(x,y);
 	var copyStack=new BlockStack(firstCopyBlock,tab);
 	return copyStack;
-}
+};
 //DisplayStack.prototype.findBestFitTop=function()
 //DisplayStack.prototype.snap=function(block)
 //DisplayStack.prototype.highlight=function()

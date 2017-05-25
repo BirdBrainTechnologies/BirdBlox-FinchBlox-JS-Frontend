@@ -190,11 +190,23 @@ Category.prototype.setMinCoords=function(){
 	var hScrollRange=this.width-BlockPalette.width;
 	this.minX=this.maxX-hScrollRange;
 };
+Category.prototype.relToAbsX=function(x){
+	return x + this.x;
+};
+Category.prototype.relToAbsY=function(y){
+	return y + this.y;
+};
+Category.prototype.absToRelX=function(x){
+	return x - this.x;
+};
+Category.prototype.absToRelY=function(y){
+	return y - this.y;
+};
 Category.prototype.getAbsX=function(){
-	return this.x;
+	return this.relToAbsX(0);
 };
 Category.prototype.getAbsY=function(){
-	return this.y;
+	return this.relToAbsY(0);
 };
 Category.prototype.showDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){

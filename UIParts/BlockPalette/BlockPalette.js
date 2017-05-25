@@ -132,7 +132,7 @@ BlockPalette.HideTrash=function() {
 		BP.trash = null;
 	}
 }
-BlockPalette.startScoll=function(x,y){
+BlockPalette.startScroll=function(x,y){
 	var BP=BlockPalette;
 	if(!BP.scrolling){
 		BP.scrolling=true;

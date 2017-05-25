@@ -26,5 +26,4 @@ ViewMenu.prototype.optionZoomOut=function(){
 ViewMenu.prototype.optionResetZoom=function(){
 	GuiElements.zoomFactor=1;
 	GuiElements.updateZoom();
-	GuiElements.svgPanZoom.reset();
 };

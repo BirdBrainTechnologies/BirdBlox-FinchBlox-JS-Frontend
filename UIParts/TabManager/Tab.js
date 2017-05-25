@@ -9,17 +9,11 @@ function Tab(){
 	this.isRunning=false;
 	this.scrolling=false;
 	this.zooming = false;
-	this.scrollXOffset=0;
-	this.scrollYOffset=0;
+	this.scrollXOffset=50;
+	this.scrollYOffset=100;
 	this.zoomStartDist=null;
 	this.startZoom = null;
-	/*this.dim=function(){};
-	this.dim.x1=0;
-	this.dim.y1=0;
-	this.dim.x2=0;
-	this.dim.y2=0;
-	this.dim.width=0;
-	this.dim.height=0;*/
+	this.updateTransform();
 }
 Tab.prototype.activate=function(){
 	GuiElements.layers.activeTab.appendChild(this.mainG);
@@ -38,13 +32,13 @@ Tab.prototype.relToAbsX=function(x){
 	return x * this.zoomFactor + this.scrollX;
 };
 Tab.prototype.relToAbsY=function(y){
-	return y * this.zoomFactor+this.scrollY;
+	return y * this.zoomFactor + this.scrollY;
 };
 Tab.prototype.absToRelX=function(x){
-	return x / this.zoomFactor-this.scrollX;
+	return (x - this.scrollX) / this.zoomFactor;
 };
 Tab.prototype.absToRelY=function(y){
-	return y / this.zoomFactor-this.scrollY;
+	return (y - this.scrollY) / this.zoomFactor;
 };
 Tab.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
@@ -189,10 +183,13 @@ Tab.prototype.updateZooming = function(x1, y1, x2, y2){
 		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
 		this.scrollX=this.scrollXOffset * dist / this.zoomStartDist + x;
 		this.scrollY=this.scrollYOffset * dist / this.zoomStartDist + y;
-		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
-		GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
-		GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
+		this.updateTransform();
 	}
+};
+Tab.prototype.updateTransform=function(){
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
 };
 Tab.prototype.endZooming = function(){
 	this.zooming = false;

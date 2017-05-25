@@ -186,9 +186,13 @@ Slot.prototype.findBestFit=function(){
 	var fit=CodeManager.fit;
 	var x=this.getAbsX(); //Use coords relative to screen.
 	var y=this.getAbsY();
+	var myHeight = this.relToAbsY(this.height) - y;
+	var myWidth = this.relToAbsX(this.width) - x;
 	var typeMatches=this.checkFit(move.returnType); //Is the BlockStack's type compatible with the Slot?
 	//Does the bounding box of the BlockStack overlap with the bounding box of the Slot?
-	var locationMatches=move.rInRange(move.topX,move.topY,move.width,move.height,x,y,this.width,this.height);
+	var width = move.bottomX - move.topX;
+	var height = move.bottomY - move.topY;
+	var locationMatches=move.rInRange(move.topX,move.topY,width,height,x,y,myWidth,myHeight);
 	if(typeMatches&&locationMatches){
 		var xDist=move.touchX-(x+this.width/2); //Compute the distance.
 		var yDist=move.touchY-(y+this.height/2);
@@ -236,17 +240,29 @@ Slot.prototype.checkFit=function(returnType){
 		return false;
 	}
 };
+Slot.prototype.relToAbsX=function(x){
+	return this.parent.relToAbsX(x+this.x);
+};
+Slot.prototype.relToAbsY=function(y){
+	return this.parent.relToAbsY(y+this.y);
+};
+Slot.prototype.absToRelX=function(x){
+	return this.parent.absToRelX(x)-this.x;
+};
+Slot.prototype.absToRelY=function(y){
+	return this.parent.absToRelY(y)-this.y;
+};
 /* Returns the x coord of the Slot relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Slot relative to the screen.
  */
 Slot.prototype.getAbsX=function(){
-	return this.x+this.parent.getAbsX();
+	return this.relToAbsX(0);
 };
 /* Returns the y coord of the Slot relative to the screen (not the group it is contained in).
  * @return {number} - The y coord of the Slot relative to the screen.
  */
 Slot.prototype.getAbsY=function(){//Fix for tabs
-	return this.y+this.parent.getAbsY();
+	return this.relToAbsY(0);
 };
 /* Recursively copies the Slot and its children. Overridden by subclasses.
  * @param {Block} parentCopy - A copy of the Slot's parent.
