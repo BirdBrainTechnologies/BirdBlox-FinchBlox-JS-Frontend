@@ -128,7 +128,8 @@ RoundSlot.prototype.highlight=function(){
  */
 RoundSlot.prototype.edit=function(){
 	if(!this.selected){
-		var x = this.relToAbsX(this.width/2); //Get coords relative to the screen.
+		var x1 = this.getAbsX();
+		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
 		var y1 = this.getAbsY();
 		var y2 = this.relToAbsY(this.height);
 		this.select(); //Change appearance to reflect editing.
@@ -137,7 +138,7 @@ RoundSlot.prototype.edit=function(){
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
 		//Show the NumPad at the proper location.
-		InputPad.showNumPad(this,x, y1, y2,this.positive,this.integer);
+		InputPad.showNumPad(this,x1, x2, y1, y2,this.positive,this.integer);
 	}
 };
 /* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.

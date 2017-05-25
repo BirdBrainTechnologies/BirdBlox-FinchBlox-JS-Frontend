@@ -13,6 +13,8 @@ function DebugMenu(button){
 	this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
 	this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
 	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
+	this.addOption("Throw error", function(){ImNotAFunction();});
+	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 	this.buildMenu();
 	this.lastRequest = "";
 	this.lastResponse = "";

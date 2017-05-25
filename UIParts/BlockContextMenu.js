@@ -18,7 +18,7 @@ BlockContextMenu.prototype.showMenu=function(){
 	this.addOptions();
 	this.menuBnList.show();
 	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
-	this.bubbleOverlay.display(this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
+	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
 };
 BlockContextMenu.prototype.addOptions=function(){
 	if(this.block.stack.isDisplayStack){

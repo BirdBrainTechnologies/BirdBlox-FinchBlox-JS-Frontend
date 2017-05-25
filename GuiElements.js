@@ -255,7 +255,14 @@ GuiElements.draw.triangle=function(x,y,width,height,color){
 	GuiElements.update.triangle(triangle,x,y,width,height); //Set its path description (points).
 	triangle.setAttributeNS(null,"fill",color); //Set the fill.
 	return triangle; //Return the finished triangle.
-}
+};
+GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
+	DebugOptions.validateNumbers(x, y, width, height);
+	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.triangleFromPoint(triangle,x,y,width,height); //Set its path description (points).
+	triangle.setAttributeNS(null,"fill",color); //Set the fill.
+	return triangle; //Return the finished triangle.
+};
 /* Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
@@ -413,7 +420,26 @@ GuiElements.update.triangle=function(pathE,x,y,width,height){
 	path+=" "+xshift+","+(height); //Draws bottom-right point.
 	path+=" z"; //Closes path.
 	pathE.setAttributeNS(null,"d",path); //Sets path description.
-}
+};
+GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical){
+	DebugOptions.validateNumbers(x, y, width, height);
+	if(vertical == null){
+		vertical = 0;
+	}
+
+	var xshift=width/2;
+	var path="";
+	path+="m "+x+","+y; //Draws top-middle point.
+	if(vertical) {
+		path += " " + xshift + "," + (height);
+		path += " " + (0 - width) + ",0";
+	} else{
+		path += " " + (height) + "," + xshift;
+		path += " 0," + (0 - width);
+	}
+	path+=" z"; //Closes path.
+	pathE.setAttributeNS(null,"d",path); //Sets path description.
+};
 /* Changes the path description of an SVG path object to make it a trapezoid.
  * @param {SVG path} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.
@@ -587,10 +613,11 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
  * @fix This function has not been created yet.
  */
 GuiElements.displayValue=function(value,x,y,width,height){
-	var midX=x+width/2;
+	var leftX = x;
+	var rightX = x + width;
 	var upperY=y;
 	var lowerY=y+height;
-	new ResultBubble(midX,upperY,lowerY,value);
+	new ResultBubble(leftX, rightX,upperY,lowerY,value);
 };
 /* GuiElements.overlay contains functions that keep track of overlays present on the screen.
  */
