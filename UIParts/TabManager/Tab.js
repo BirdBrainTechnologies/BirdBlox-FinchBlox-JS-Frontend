@@ -181,8 +181,10 @@ Tab.prototype.updateZooming = function(x1, y1, x2, y2){
 		var deltaY = y2 - y1;
 		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
-		this.scrollX=this.scrollXOffset * dist / this.zoomStartDist + x;
-		this.scrollY=this.scrollYOffset * dist / this.zoomStartDist + y;
+		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+		var zoomRatio = this.zoomFactor / this.startZoom;
+		this.scrollX=this.scrollXOffset * zoomRatio + x;
+		this.scrollY=this.scrollYOffset * zoomRatio + y;
 		this.updateTransform();
 	}
 };
