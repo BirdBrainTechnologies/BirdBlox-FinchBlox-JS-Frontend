@@ -3,7 +3,7 @@ function HBConnectionList(x,upperY,lowerY,hBToReplace){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=null;
 	this.bubbleOverlay=new BubbleOverlay(HBCL.bgColor,HBCL.bnMargin,this.group,this);
-	this.bubbleOverlay.display(x,upperY,lowerY,HBCL.width,HBCL.height);
+	this.bubbleOverlay.display(x,x,upperY,lowerY,HBCL.width,HBCL.height);
 	var thisHBCL=this;
 	this.updateTimer = self.setInterval(function () { thisHBCL.discoverHBs() }, HBCL.updateInterval);
 	this.hBToReplace=hBToReplace;

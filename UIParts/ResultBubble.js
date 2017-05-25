@@ -1,4 +1,4 @@
-function ResultBubble(x,upperY,lowerY,text){
+function ResultBubble(leftX,rightX,upperY,lowerY,text){
 	var RB=ResultBubble;
 	var height=RB.charHeight;
 	var textE=GuiElements.draw.text(0,height,text,RB.fontSize,RB.fontColor,RB.font,RB.fontWeight);
@@ -7,7 +7,7 @@ function ResultBubble(x,upperY,lowerY,text){
 	var group=GuiElements.create.group(0,0);
 	group.appendChild(textE);
 	this.bubbleOverlay=new BubbleOverlay(RB.bgColor,RB.margin,group,this,RB.hMargin);
-	this.bubbleOverlay.display(x,upperY,lowerY,width,height);
+	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
 	/*this.vanishTimer = self.setInterval(function () { GuiElements.overlay.close() }, RB.lifetime);*/
 }
 ResultBubble.setConstants=function(){

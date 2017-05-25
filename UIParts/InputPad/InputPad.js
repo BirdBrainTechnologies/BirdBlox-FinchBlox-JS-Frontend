@@ -197,7 +197,7 @@ InputPad.bsPressed=function(){
 InputPad.okPressed=function(){
 	InputPad.close();
 };
-InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
+InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth){
 	var IP=InputPad;
 	IP.visible=true;
 	IP.usingNumberPad=false;
@@ -213,12 +213,12 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;
 	//IP.menuBnList.move(0,0);
 	IP.menuBnList.show();
-	IP.bubbleOverlay.display(x,upperY,lowerY,IP.width,IP.height);
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
 	/*IP.tallH=IP.height+IP.triangleH;
 	IP.move(x,upperY,lowerY);
 	GuiElements.layers.inputPad.appendChild(IP.group);*/
 };
-InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
+InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
 	var IP=InputPad;
 	IP.usingNumberPad=true;
 	IP.specialCommand="";
@@ -273,7 +273,7 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	else{
 		IP.decimalBn.enable();
 	}
-	IP.bubbleOverlay.display(x,upperY,lowerY,IP.width,IP.height);
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
 	/*InputPad.move(x,upperY,lowerY);*/
 };
 /*InputPad.move=function(x,upperY,lowerY){

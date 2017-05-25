@@ -8,7 +8,9 @@ function DebugOptions(){
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
 	DO.showVersion = true;
+	DO.showDebugMenu = true;
 	DO.logErrors = true;
+	DO.lockErrors = true;
 	DO.errorLocked = false;
 	if(DO.enabled){
 		DO.applyConstants();
@@ -34,6 +36,9 @@ DebugOptions.applyActions = function(){
 	if(DO.showVersion){
 		GuiElements.alert("Version: "+GuiElements.appVersion);
 	}
+	if(DO.showDebugMenu){
+		TitleBar.enableDebug();
+	}
 };
 DebugOptions.shouldLogErrors=function(){
 	return DebugOptions.logErrors && DebugOptions.enabled;
@@ -42,7 +47,7 @@ DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){
 		return function(){
 			try {
-				if(!DebugOptions.errorLocked) {
+				if(!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
 					func.apply(this, arguments);
 				}
 			}
@@ -61,7 +66,14 @@ DebugOptions.validateNumbers = function(){
 	if(!DebugOptions.shouldLogErrors()) return;
 	for(let i = 0; i < arguments.length; i++){
 		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
-			throw "Invalid Number";
+			throw new UserException("Invalid Number");
 		}
 	}
 };
+DebugOptions.stopErrorLocking = function(){
+	DebugOptions.lockErrors = false;
+};
+function UserException(message) {
+	this.message = message;
+	this.name = 'UserException';
+}
