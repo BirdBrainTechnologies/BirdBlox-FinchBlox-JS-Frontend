@@ -37,6 +37,8 @@ GuiElements.loadInitialSettings=function(callback){
 			checkIfDone();
 		});
 		GuiElements.configureZoom(function () {
+			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 			GuiElements.load.zoom = true;
 			checkIfDone();
 		});
@@ -58,9 +60,6 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
-
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 
 	GuiElements.blockerOpacity=0.5;
 };
@@ -766,11 +765,11 @@ GuiElements.configureZoom = function(callback){
 			GE.zoomMultiple = 1;
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			callback();
-		});
+		}, "1");
 	},function(){
 		GE.alert("Error reading dims");
 		callback();
-	});
+	}, null, null, "200,200");
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
