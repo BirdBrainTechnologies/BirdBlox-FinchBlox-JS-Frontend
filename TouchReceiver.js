@@ -238,6 +238,8 @@ TouchReceiver.touchStartDisplayBox=function(e){
 		TR.targetType="displayBox";
 		TR.target=null;
 		DisplayBox.hide();
+		TR.touchDown = false;
+		e.stopPropagation();
 	}
 };
 /* @fix Write documentation. */
