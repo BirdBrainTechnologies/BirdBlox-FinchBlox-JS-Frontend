@@ -96,14 +96,14 @@ BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
 	else{
 		y = (y1 + y2) / 2;
 		topLeftY = this.fitLocationToRange(y, height, GuiElements.height);
-		if(attemptR <= min){
-			topLeftX = x2 + BO.triangleH;
-			x = x2;
-		}
-		else{
+		if(attemptL <= min){
 			topLeftX = x1 - longW;
 			x = x1;
 			triangleDir = -1;
+		}
+		else{
+			topLeftX = x2 + BO.triangleH;
+			x = x2;
 		}
 	}
 	var triX = x - topLeftX;
