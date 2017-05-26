@@ -98,6 +98,7 @@ ConnectMultipleHBDialog.prototype.closeDialog=function(){
 		this.statusLights[i].remove();
 	}
 	ConnectMultipleHBDialog.currentCOHBD=null;
+	HtmlServer.sendRequestWithCallback("/hummingbird/stopDiscover");
 };
 ConnectMultipleHBDialog.prototype.createRows=function(){
 	var CMHBD=ConnectMultipleHBDialog;

@@ -33,11 +33,7 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 }
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData,resp){
-	/*if(resp!=null) {
-		callbackFn(resp);
-		return;
-	}*/
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	if(isPost == null) {
 		isPost=false;
 	}
@@ -248,11 +244,7 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };
-HtmlServer.getSetting=function(key,callbackFn,callbackErr, resp){
-	/*if(resp!=null) {
-		callbackFn(resp);
-		return;
-	}*/
+HtmlServer.getSetting=function(key,callbackFn,callbackErr){
 	HtmlServer.sendRequestWithCallback("settings/get/"+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };
 HtmlServer.setSetting=function(key,value){
