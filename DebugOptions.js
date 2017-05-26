@@ -13,7 +13,7 @@ function DebugOptions(){
 	DO.lockErrors = false;
 	DO.errorLocked = false;
 	DO.skipInitSettings = false;
-	DO.blockLogging = true;
+	DO.blockLogging = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -21,9 +21,6 @@ function DebugOptions(){
 DebugOptions.applyConstants = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
-	if(DO.mouse){
-		TouchReceiver.mouse = true;
-	}
 };
 DebugOptions.applyActions = function(){
 	var DO = DebugOptions;

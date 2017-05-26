@@ -7,11 +7,13 @@
 function GuiElements(){
 	GuiElements.svg=document.getElementById("MainSvg");
 	GuiElements.defs=document.getElementById("SvgDefs");
-	GuiElements.setConstants();
-	GuiElements.createLayers();
-	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
-	GuiElements.dialogBlock=null;
+	DebugOptions();
+	HtmlServer();
 	GuiElements.loadInitialSettings(function(){
+		GuiElements.setConstants();
+		GuiElements.createLayers();
+		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
+		GuiElements.dialogBlock=null;
 		GuiElements.buildUI();
 	});
 }
@@ -65,7 +67,6 @@ GuiElements.setGuiConstants=function(){
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	DebugOptions();
 	HtmlServer();
 	Data.setConstants();
 	GuiElements.setGuiConstants();
