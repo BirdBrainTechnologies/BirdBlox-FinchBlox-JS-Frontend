@@ -7,8 +7,6 @@
 function GuiElements(){
 	GuiElements.svg=document.getElementById("MainSvg");
 	GuiElements.defs=document.getElementById("SvgDefs");
-	DebugOptions();
-	HtmlServer();
 	GuiElements.loadInitialSettings(function(){
 		GuiElements.setConstants();
 		GuiElements.createLayers();
@@ -22,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){
+	DebugOptions();
+	HtmlServer();
+	GuiElements.setGuiConstants();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
