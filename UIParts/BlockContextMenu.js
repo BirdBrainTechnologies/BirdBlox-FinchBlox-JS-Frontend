@@ -63,7 +63,7 @@ BlockContextMenu.prototype.addOptions=function(){
 		funcDup.BCM = this;
 		this.menuBnList.addOption("Duplicate", funcDup);
 		this.menuBnList.addOption("Delete",function(){
-			BCM.block.stack.delete();
+			BCM.block.unsnap().delete();
 			BCM.close();
 		})
 	}
