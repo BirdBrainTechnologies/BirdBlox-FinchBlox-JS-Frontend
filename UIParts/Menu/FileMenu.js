@@ -9,7 +9,9 @@ function FileMenu(button){
 	//this.addOption("Import", this.optionImport);
 	this.addOption("Export", this.optionExport);
 	this.addOption("Debug", this.optionEnableDebug);
-	this.addOption("Exit", this.optionExit);
+	if(GuiElements.isKindle) {
+		this.addOption("Exit", this.optionExit);
+	}
 	this.buildMenu();
 }
 FileMenu.prototype = Object.create(Menu.prototype);
