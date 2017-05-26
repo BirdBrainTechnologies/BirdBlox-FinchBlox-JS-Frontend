@@ -11,7 +11,7 @@ function OverflowArrows(){
 OverflowArrows.prototype.makeTriangle=function(){
 	var OA = OverflowArrows;
 	var tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.black);
+	GuiElements.update.color(tri, Colors.white);
 	GuiElements.update.opacity(tri, OA.opacity);
 	GuiElements.makeClickThrough(tri);
 	return tri;
