@@ -18,6 +18,27 @@ function GuiElements(){
 document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+GuiElements.setGuiConstants=function(){
+	GuiElements.minZoom=0.33;
+	GuiElements.maxZoom=3;
+	GuiElements.minZoomMult=0.8;
+	GuiElements.maxZoomMult=1.6;
+	GuiElements.zoomAmount=0.2;
+	GuiElements.defaultZoomMm = 246.38;
+	GuiElements.defaultZoomPx = 1280;
+	GuiElements.defaultZoomMultiple = 1.3;
+
+	GuiElements.zoomFactor = 1;
+	GuiElements.computedZoom = 1; //The computed default zoom amount for the device
+	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
+
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+
+	GuiElements.blockerOpacity=0.5;
+
+
+};
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
@@ -25,29 +46,7 @@ GuiElements.setConstants=function(){
 	DebugOptions();
 	HtmlServer();
 	Data.setConstants();
-	/* Saves the dimensions of the screen so other classes can refer to them.  
-	This assumes that the screen's dimensions never change once loaded. */
-	GuiElements.blockerOpacity=0.5;
-	var callbackFn=function(result){
-		GuiElements.alert("Dealing with zoom from settings");
-		var numResult=parseFloat(result);
-		if(false&&(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom)) {
-			GuiElements.alert("Zoom from settings was valid: " + numResult);
-			GuiElements.zoomFactor = numResult;
-			GuiElements.updateZoom();
-		}
-		else{
-			GuiElements.alert("Zoom from settings was invalid.  Requesting dimensions");
-			HtmlServer.sendRequestWithCallback("properties/dims",GuiElements.computeAndSetZoom);
-		}
-	};
-	HtmlServer.getSetting("zoom",callbackFn);
-	GuiElements.alert("Reading zoom from settings");
-	GuiElements.zoomFactor=1;
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
-	GuiElements.defaultZoomMm = 246.38;
-	GuiElements.defaultZoomPx = 1280;
+	GuiElements.setGuiConstants();
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -700,12 +699,35 @@ GuiElements.updateZoom=function(){
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
-	HtmlServer.setSetting("zoom",GuiElements.zoomFactor);
+	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
+};
+GuiElements.configureZoom = function(){
+	var GE = GuiElements;
+	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+		GE.computedZoom = GE.computeZoomFromDims();
+		HtmlServer.getSetting("zoom",function(result){
+			GE.alert("Dealing with zoom from settings");
+			GE.zoomMultiple = parseFloat(result);
+			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom){
+				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				GE.zoomMultiple = 1;
+				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			}
+			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom){
+				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				GE.zoomMultiple = 1;
+				GE.computedZoom = 1;
+				GE.zoomFactor = 1;
+			}
+			GuiElements.updateZoom();
+		});
+	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
- * @param {string} response - The response from properties/dims
+ * @param {string} dims - The response from properties/dims
  */
-GuiElements.computeAndSetZoom=function(response){
+GuiElements.computeZoomFromDims=function(dims){
 	GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	var parts = response.split(",");
 	if(parts.length==2) {
@@ -717,11 +739,10 @@ GuiElements.computeAndSetZoom=function(response){
 		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
 		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
 		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
-		if (zoom <= ViewMenu.maxZoom && zoom >= ViewMenu.minZoom) {
-			GuiElements.alert("Zoom is valid and computed to: " + zoom);
-			GuiElements.zoomFactor = zoom;
-			GuiElements.updateZoom();
-		}
+		return zoom * GuiElements.defaultZoomMultiple;
+	}
+	else{
+		return 1;
 	}
 };
 
