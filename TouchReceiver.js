@@ -21,6 +21,7 @@ function TouchReceiver(){
 	TR.timerRunning=false; //Indicates if the long touch timer is running.
 	TR.zooming = false; //There are not two touches on the screen.
 	TR.dragging = false;
+	TR.moveThreshold = 10;
 	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
 	var handlerUp="touchend";
 	var handlerDown="touchstart";
@@ -261,8 +262,9 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchDown&&!TR.longTouch&&(TR.startX!=TR.getX(e)||TR.startY!=TR.getY(e))){
+	if(TR.touchDown&&TR.hasMovedOutsideThreshold(e)){
 		TR.dragging = true;
+		GuiElements.overlay.close();
 		if(TR.zooming){
 			//If we are currently zooming, we update the zoom.
 			if(e.touches.length < 2){
@@ -348,6 +350,13 @@ TouchReceiver.touchmove=function(e){
 			}
 		}
 	}
+};
+TouchReceiver.hasMovedOutsideThreshold=function(e){
+	var TR = TouchReceiver;
+	if(!TR.touchDown) return false;
+	var distX = TR.startX-TR.getX(e);
+	var distY = TR.startY-TR.getY(e);
+	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
 };
 /* Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
