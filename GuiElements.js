@@ -722,7 +722,13 @@ GuiElements.configureZoom = function(){
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			GuiElements.updateZoom();
+		},function(){
+			GE.alert("Error reading zoom from settings");
+			GE.zoomMultiple = 1;
+			GuiElements.updateZoom();
 		});
+	},function(){
+		GE.alert("Error reading dims");
 	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
