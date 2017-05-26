@@ -68,9 +68,7 @@ GuiElements.setGuiConstants=function(){
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	HtmlServer();
 	Data.setConstants();
-	GuiElements.setGuiConstants();
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
