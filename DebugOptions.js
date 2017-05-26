@@ -70,6 +70,14 @@ DebugOptions.validateNumbers = function(){
 		}
 	}
 };
+DebugOptions.validateNonNull = function(){
+	if(!DebugOptions.shouldLogErrors()) return;
+	for(let i = 0; i < arguments.length; i++){
+		if(arguments[i] == null){
+			throw new UserException("Null parameter");
+		}
+	}
+};
 DebugOptions.stopErrorLocking = function(){
 	DebugOptions.lockErrors = false;
 };

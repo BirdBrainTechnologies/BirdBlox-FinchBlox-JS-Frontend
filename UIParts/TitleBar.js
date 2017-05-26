@@ -6,7 +6,7 @@ function TitleBar(){
 TitleBar.setGraphics=function(){
 	var TB=TitleBar;
 	TB.height=54;
-	TB.buttonMargin=7;
+	TB.buttonMargin=Button.defaultMargin;
 	TB.buttonW=64;
 	TB.longButtonW=85;
 	TB.bnIconMargin=3;

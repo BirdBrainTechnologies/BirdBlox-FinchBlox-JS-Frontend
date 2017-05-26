@@ -4,7 +4,7 @@ function InputPad(){
 InputPad.setGraphics=function(){
 	InputPad.buttonW=50;
 	InputPad.buttonH=40;
-	InputPad.buttonMargin=8;
+	InputPad.buttonMargin=Button.defaultMargin;
 	/*InputPad.triangleW=15;
 	InputPad.triangleH=7;*/
 	InputPad.fontSize=34;

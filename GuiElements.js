@@ -53,13 +53,13 @@ GuiElements.setConstants=function(){
 	Sounds();
 	BlockList();
 	Colors();
+	Button.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphics();
 	BlockGraphics();
 	Slot.setConstants();
 	Block.setConstants();
-	Button.setGraphics();
 	BlockPalette.setGraphics();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
@@ -167,6 +167,7 @@ GuiElements.create.layer=function(){
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  */
 GuiElements.create.gradient=function(id,color1,color2){ //Creates a gradient and adds to the defs
+	DebugOptions.validateNonNull(color1, color2);
 	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
 	gradient.setAttributeNS(null,"id",id); //Set attributes.
 	gradient.setAttributeNS(null,"x1","0%");
@@ -250,6 +251,7 @@ GuiElements.draw.rect=function(x,y,width,height,color){
  * @return {SVG path} - The path which was created.
  */
 GuiElements.draw.triangle=function(x,y,width,height,color){
+	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
 	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangle(triangle,x,y,width,height); //Set its path description (points).
@@ -257,6 +259,7 @@ GuiElements.draw.triangle=function(x,y,width,height,color){
 	return triangle; //Return the finished triangle.
 };
 GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
+	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
 	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangleFromPoint(triangle,x,y,width,height); //Set its path description (points).
@@ -273,6 +276,7 @@ GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
  * @return {SVG path} - The path which was created.
  */
 GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
+	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
 	var trapezoid=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description.
@@ -280,6 +284,7 @@ GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
 	return trapezoid; //Return the finished trapezoid.
 }
 GuiElements.draw.circle=function(cx,cy,radius,color,group){
+	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(cx, cy, radius);
 	var circle=document.createElementNS("http://www.w3.org/2000/svg",'circle');
 	circle.setAttributeNS(null,"cx",cx);
@@ -317,6 +322,7 @@ GuiElements.draw.image=function(imageName,x,y,width,height,parent){
  * @return {SVG text} - The text element which was created.
  */
 GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
+	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	var textElement=GuiElements.create.text();
 	textElement.setAttributeNS(null,"x",x);
@@ -344,6 +350,7 @@ GuiElements.update=function(){};
  * @param {string} color - The element's new color in the form "#fff".
  */
 GuiElements.update.color=function(element,color){
+	DebugOptions.validateNonNull(color);
 	element.setAttributeNS(null,"fill",color); //Recolors the element.
 }
 /* Changes the fill opacity of any SVG element.
@@ -359,6 +366,7 @@ GuiElements.update.opacity=function(element,opacity){
  * @param {number} strokeW - The width of the stroke
  */
 GuiElements.update.stroke=function(element,color,strokeW){
+	DebugOptions.validateNonNull(color);
 	element.setAttributeNS(null,"stroke",color);
 	element.setAttributeNS(null,"stroke-width",strokeW);
 };

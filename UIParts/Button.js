@@ -25,7 +25,9 @@ Button.setGraphics=function(){
 	Button.highlightBg=Colors.white;
 	Button.highlightFore=Colors.darkGray;
 	Button.disabledBg=Colors.darkGray;
-	Button.disabledFore=Colors.Black;
+	Button.disabledFore=Colors.black;
+
+	Button.defaultMargin = 5;
 
 	Button.defaultFontSize=16;
 	Button.defaultFont="Arial";

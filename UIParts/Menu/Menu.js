@@ -32,7 +32,7 @@ function Menu(button,reloadOnOpen,width){
 }
 Menu.setGraphics=function(){
 	Menu.defaultWidth=100;
-	Menu.bnMargin=5;
+	Menu.bnMargin=Button.defaultMargin;
 	Menu.bgColor=Colors.black;
 };
 Menu.prototype.move=function(){
