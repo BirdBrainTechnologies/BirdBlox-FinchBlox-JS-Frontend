@@ -28,16 +28,16 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.defaultZoomPx = 1280;
 	GuiElements.defaultZoomMultiple = 1.3;
 
-	GuiElements.zoomFactor = 1;
-	GuiElements.computedZoom = 1; //The computed default zoom amount for the device
+	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
+	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 
 	GuiElements.blockerOpacity=0.5;
 
-
+	GuiElements.configureZoom();
 };
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -692,6 +692,7 @@ GuiElements.unblockInteraction=function() {
 };
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
+	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
@@ -717,8 +718,8 @@ GuiElements.configureZoom = function(){
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom){
 				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
-				GE.computedZoom = 1;
-				GE.zoomFactor = 1;
+				GE.computedZoom = GE.defaultZoomMultiple;
+				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			GuiElements.updateZoom();
 		});
