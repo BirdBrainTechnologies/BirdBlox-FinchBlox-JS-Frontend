@@ -14,13 +14,20 @@ function Tab(){
 	this.zoomStartDist=null;
 	this.startZoom = null;
 	this.updateTransform();
+	this.overFlowArr = new OverflowArrows();
+	this.dim={};
+	this.dim.x1=0;
+	this.dim.y1=0;
+	this.dim.x2=0;
+	this.dim.y2=0;
 }
 Tab.prototype.activate=function(){
 	GuiElements.layers.activeTab.appendChild(this.mainG);
+	this.overFlowArr.show();
 };
 Tab.prototype.addStack=function(stack){
 	this.stackList.push(stack);
-}
+};
 Tab.prototype.removeStack=function(stack){
 	var index=this.stackList.indexOf(stack);
 	this.stackList.splice(index,1);
@@ -111,7 +118,7 @@ Tab.prototype.startScroll=function(x,y){
 		this.scrolling = true;
 		this.scrollXOffset = this.scrollX - x;
 		this.scrollYOffset = this.scrollY - y;
-		//this.updateTabDim();
+		this.updateTabDim();
 	}
 };
 Tab.prototype.updateScroll=function(x,y){
@@ -119,6 +126,7 @@ Tab.prototype.updateScroll=function(x,y){
 		this.scrollX=this.scrollXOffset + x;
 		this.scrollY=this.scrollYOffset + y;
 		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+		this.updateArrowsShift();
 		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
 	}
 };
@@ -171,6 +179,7 @@ Tab.prototype.startZooming = function(x1, y1, x2, y2){
 		var deltaY = y2 - y1;
 		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.startZoom = this.zoomFactor;
+		this.updateTabDim();
 	}
 };
 Tab.prototype.updateZooming = function(x1, y1, x2, y2){
@@ -186,6 +195,7 @@ Tab.prototype.updateZooming = function(x1, y1, x2, y2){
 		this.scrollX=this.scrollXOffset * zoomRatio + x;
 		this.scrollY=this.scrollYOffset * zoomRatio + y;
 		this.updateTransform();
+		this.updateArrowsShift();
 	}
 };
 Tab.prototype.updateTransform=function(){
@@ -197,7 +207,6 @@ Tab.prototype.endZooming = function(){
 	this.zooming = false;
 };
 Tab.prototype.updateTabDim=function(){
-	/*
 	var dim=this.dim;
 	dim.width=0;
 	dim.height=0;
@@ -212,15 +221,6 @@ Tab.prototype.updateTabDim=function(){
 		dim.x2=0;
 		dim.y2=0;
 	}
-	dim.x1-=TabManager.spaceScrollMargin;
-	dim.y1-=TabManager.spaceScrollMargin;
-	dim.x2+=TabManager.spaceScrollMargin;
-	dim.y2+=TabManager.spaceScrollMargin;
-	dim.width=dim.x2-dim.x1;
-	dim.height=dim.y2-dim.y1;
-	dim.xDiff=this.dim.x1;
-	dim.yDiff=this.dim.y1;
-	*/
 };
 Tab.prototype.createXml=function(xmlDoc){
 	var tab=XmlWriter.createElement(xmlDoc,"tab");
@@ -313,4 +313,23 @@ Tab.prototype.passRecursively=function(functionName){
 };
 Tab.prototype.getZoom=function(){
 	return this.zoomFactor;
+};
+Tab.prototype.updateZoom=function(){
+	this.overFlowArr.updateZoom();
+	this.updateArrows();
+};
+Tab.prototype.updateArrows=function(){
+	this.updateTabDim();
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+Tab.prototype.updateArrowsShift=function(){
+	var x1 = this.relToAbsX(this.dim.x1)
+	var y1 = this.relToAbsY(this.dim.y1)
+	var x2 = this.relToAbsX(this.dim.x2)
+	var y2 = this.relToAbsY(this.dim.y2)
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };

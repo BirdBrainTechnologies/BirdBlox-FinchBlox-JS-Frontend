@@ -7,45 +7,67 @@
 function GuiElements(){
 	GuiElements.svg=document.getElementById("MainSvg");
 	GuiElements.defs=document.getElementById("SvgDefs");
-	GuiElements.setConstants();
-	GuiElements.createLayers();
-	GuiElements.getAppVersion();
-	GuiElements.buildUI();
-	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
-	GuiElements.dialogBlock=null;
+	GuiElements.loadInitialSettings(function(){
+		GuiElements.setConstants();
+		GuiElements.createLayers();
+		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
+		GuiElements.dialogBlock=null;
+		GuiElements.buildUI();
+	});
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+GuiElements.loadInitialSettings=function(callback){
+	DebugOptions();
+	HtmlServer();
+	GuiElements.setGuiConstants();
+	GuiElements.load = {};
+	GuiElements.load.version = false;
+	GuiElements.load.zoom = false;
+	if(!DebugOptions.shouldSkipInitSettings()) {
+		var checkIfDone = function () {
+			if (GuiElements.load.version && GuiElements.load.zoom) {
+				callback();
+			}
+		};
+		GuiElements.getAppVersion(function () {
+			GuiElements.load.version = true;
+			checkIfDone();
+		});
+		GuiElements.configureZoom(function () {
+			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+			GuiElements.load.zoom = true;
+			checkIfDone();
+		});
+	}
+	else{
+		callback();
+	}
+};
+GuiElements.setGuiConstants=function(){
+	GuiElements.minZoom=0.33;
+	GuiElements.maxZoom=3;
+	GuiElements.minZoomMult=0.8;
+	GuiElements.maxZoomMult=1.6;
+	GuiElements.zoomAmount=0.1;
+	GuiElements.defaultZoomMm = 246.38;
+	GuiElements.defaultZoomPx = 1280;
+	GuiElements.defaultZoomMultiple = 1;
+
+	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
+	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
+	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
+
+	GuiElements.blockerOpacity=0.5;
+};
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	DebugOptions();
-	HtmlServer();
 	Data.setConstants();
-	/* Saves the dimensions of the screen so other classes can refer to them.  
-	This assumes that the screen's dimensions never change once loaded. */
-	GuiElements.blockerOpacity=0.5;
-	var callbackFn=function(result){
-		GuiElements.alert("Dealing with zoom from settings");
-		var numResult=parseFloat(result);
-		if(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom) {
-			GuiElements.alert("Zoom from settings was valid: " + numResult);
-			GuiElements.zoomFactor = numResult;
-			GuiElements.updateZoom();
-		}
-		else{
-			GuiElements.alert("Zoom from settings was invalid.  Requesting dimensions");
-			HtmlServer.sendRequestWithCallback("properties/dims",GuiElements.computeAndSetZoom);
-		}
-	};
-	HtmlServer.getSetting("zoom",callbackFn);
-	GuiElements.alert("Reading zoom from settings");
-	GuiElements.zoomFactor=1;
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -76,6 +98,7 @@ GuiElements.setConstants=function(){
 	HBConnectionList.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
+	OverflowArrows.setConstants();
 	CodeManager();
 	HummingbirdManager();
 	FlutterManager();
@@ -83,8 +106,13 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	debug.innerHTML=message; //The iPad app does not support alert dialogs
-	//alert(message); //When debugging on a PC this function can be used.
+	if(DebugOptions.blockLogging == null){
+		DebugOptions.blockLogging = true;
+	}
+	if(!DebugOptions.blockLogging) {
+		debug.innerHTML = message; //The iPad app does not support alert dialogs
+		//alert(message); //When debugging on a PC this function can be used.
+	}
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -128,6 +156,7 @@ GuiElements.createLayers=function(){
 	layers.categories=create.layer();
 	layers.titleBg=create.layer();
 	layers.titlebar=create.layer();
+	layers.overflowArr = create.layer();
 	layers.stage=create.layer();
 	layers.display=create.layer();
 	layers.drag=create.layer();
@@ -490,6 +519,9 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
+GuiElements.makeClickThrough = function(svgE){
+	svgE.style.pointerEvents = "none";
+};
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything.
  */
@@ -658,19 +690,24 @@ GuiElements.overlay.close=function(){
 	}
 };
 /* Loads the version number from version.txt */
-GuiElements.getAppVersion=function(){
+GuiElements.getAppVersion=function(callback){
 	GuiElements.appVersion=""; //Temp value until ajax completes.
 	try {
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4&&xhttp.status == 200) {
 				GuiElements.appVersion=xhttp.responseText;
+				callback();
+			}
+			else if(xhttp.readyState == 4){
+				callback();
 			}
 		};
 		xhttp.open("GET", "version.txt", true); //Get the names
 		xhttp.send(); //Make the request
 	}
 	catch(err){
+		callback();
 	}
 };
 /* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
@@ -691,6 +728,7 @@ GuiElements.unblockInteraction=function() {
 };
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
+	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
@@ -698,28 +736,61 @@ GuiElements.updateZoom=function(){
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
-	HtmlServer.setSetting("zoom",GuiElements.zoomFactor);
+	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
+};
+GuiElements.configureZoom = function(callback){
+	var GE = GuiElements;
+	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+		GE.computedZoom = GE.computeZoomFromDims(response);
+		GuiElements.alert("Requesting zoom from settings.");
+		HtmlServer.getSetting("zoom",function(result){
+			GE.alert("Dealing with zoom from settings");
+			GE.zoomMultiple = parseFloat(result);
+			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				GE.zoomMultiple = 1;
+				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			}
+			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+				GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
+				GE.zoomMultiple = 1;
+				GE.computedZoom = GE.defaultZoomMultiple;
+				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			}
+			GuiElements.alert("Computed zoom: " + GE.computedZoom);
+			callback();
+		},function(){
+			GE.alert("Error reading zoom from settings");
+			GE.zoomMultiple = 1;
+			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			callback();
+		}, "1");
+	},function(){
+		GE.alert("Error reading dims");
+		callback();
+	}, null, null, "200,200");
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
- * @param {string} response - The response from properties/dims
+ * @param {string} dims - The response from properties/dims
  */
-GuiElements.computeAndSetZoom=function(response){
+GuiElements.computeZoomFromDims=function(dims){
 	GuiElements.alert("Got dimensions from device.  Computing zoom.");
-	var parts = response.split(",");
+	GuiElements.alert("received dims: " + dims);
+	var parts = dims.split(",");
 	if(parts.length==2) {
-		var widthCm = parseFloat(parts[0]);
-		var heightCm = parseFloat(parts[1]);
-		var diagCm = Math.sqrt(widthCm * widthCm + heightCm * heightCm);
+		var widthMm = parseFloat(parts[0]);
+		var heightMm = parseFloat(parts[1]);
+		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
 		var widthPx = window.innerWidth;
 		var heightPx = window.innerHeight;
 		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		var zoom = (diagPx * 24.638) / (1280 * diagCm);
-		GuiElements.alert("Computed zoom to: " + zoom);
-		if (zoom <= ViewMenu.maxZoom && zoom >= ViewMenu.minZoom) {
-			GuiElements.alert("Zoom is valid and computed to: " + zoom);
-			GuiElements.zoomFactor = zoom;
-			GuiElements.updateZoom();
-		}
+		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
+		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
+		return zoom * GuiElements.defaultZoomMultiple;
+	}
+	else{
+		return 1;
 	}
 };
 

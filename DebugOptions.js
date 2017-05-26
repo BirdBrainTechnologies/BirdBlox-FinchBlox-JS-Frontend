@@ -7,11 +7,13 @@ function DebugOptions(){
 	DO.mouse = false;
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
-	DO.showVersion = true;
+	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
-	DO.lockErrors = true;
+	DO.lockErrors = false;
 	DO.errorLocked = false;
+	DO.skipInitSettings = false;
+	DO.blockLogging = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -19,9 +21,6 @@ function DebugOptions(){
 DebugOptions.applyConstants = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
-	if(DO.mouse){
-		TouchReceiver.mouse = true;
-	}
 };
 DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
@@ -42,6 +41,10 @@ DebugOptions.applyActions = function(){
 };
 DebugOptions.shouldLogErrors=function(){
 	return DebugOptions.logErrors && DebugOptions.enabled;
+};
+DebugOptions.shouldSkipInitSettings=function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.mouse || DO.skipInitSettings);
 };
 DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){
@@ -80,6 +83,9 @@ DebugOptions.validateNonNull = function(){
 };
 DebugOptions.stopErrorLocking = function(){
 	DebugOptions.lockErrors = false;
+};
+DebugOptions.enableLogging = function(){
+	DebugOptions.blockLogging = false;
 };
 function UserException(message) {
 	this.message = message;
