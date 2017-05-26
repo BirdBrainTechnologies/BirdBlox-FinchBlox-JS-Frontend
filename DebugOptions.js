@@ -7,13 +7,13 @@ function DebugOptions(){
 	DO.mouse = false;
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
-	DO.showVersion = true;
+	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
 	DO.lockErrors = false;
 	DO.errorLocked = false;
 	DO.skipInitSettings = false;
-	DO.blockLogging = true;
+	DO.blockLogging = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
