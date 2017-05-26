@@ -31,7 +31,7 @@ GuiElements.setConstants=function(){
 	var callbackFn=function(result){
 		GuiElements.alert("Dealing with zoom from settings");
 		var numResult=parseFloat(result);
-		if(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom) {
+		if(false&&(numResult<=ViewMenu.maxZoom&&numResult>=ViewMenu.minZoom)) {
 			GuiElements.alert("Zoom from settings was valid: " + numResult);
 			GuiElements.zoomFactor = numResult;
 			GuiElements.updateZoom();
@@ -46,6 +46,8 @@ GuiElements.setConstants=function(){
 	GuiElements.zoomFactor=1;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+	GuiElements.defaultZoomCm = 24.638;
+	GuiElements.defaultZoomPx = 1280;
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -713,8 +715,8 @@ GuiElements.computeAndSetZoom=function(response){
 		var widthPx = window.innerWidth;
 		var heightPx = window.innerHeight;
 		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		var zoom = (diagPx * 24.638) / (1280 * diagCm);
-		GuiElements.alert("Computed zoom to: " + zoom);
+		var zoom = (diagPx * GuiElements.defaultZoomCm) / (GuiElements.defaultZoomPx * diagCm);
+		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagCm:" + diagCm);
 		if (zoom <= ViewMenu.maxZoom && zoom >= ViewMenu.minZoom) {
 			GuiElements.alert("Zoom is valid and computed to: " + zoom);
 			GuiElements.zoomFactor = zoom;

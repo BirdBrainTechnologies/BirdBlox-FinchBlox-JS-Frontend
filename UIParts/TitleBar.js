@@ -97,6 +97,8 @@ TitleBar.hideDebug = function(){
 };
 TitleBar.updateZoom=function(){
 	var TB=TitleBar;
+	TB.width=GuiElements.width;
+	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
 	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
