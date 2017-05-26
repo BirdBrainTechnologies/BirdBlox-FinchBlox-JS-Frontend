@@ -117,7 +117,7 @@ TouchReceiver.checkStartZoom=function(e){
 	var TR=TouchReceiver; //shorthand
 	if(!TR.zooming && !TR.mouse && e.touches.length >= 2){
 		if((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling){
-
+			TR.dragging = true;
 			if(TabManager.scrolling){
 				TabManager.endScroll();
 			}
@@ -262,9 +262,9 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchDown&&TR.hasMovedOutsideThreshold(e)){
+	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
-		GuiElements.overlay.close();
+		GuiElements.overlay.close(true);
 		TR.longTouch = false;
 		if(TR.zooming){
 			//If we are currently zooming, we update the zoom.

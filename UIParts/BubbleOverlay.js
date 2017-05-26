@@ -48,9 +48,10 @@ BubbleOverlay.prototype.hide=function(){
 		GuiElements.overlay.remove(this);
 	}
 };
-BubbleOverlay.prototype.close=function(){
-	this.hide();
-	this.parent.close();
+BubbleOverlay.prototype.close=function(onlyOnDrag){
+	if(this.parent.close(onlyOnDrag)!=true){
+		this.hide();
+	}
 };
 BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
 	DebugOptions.validateNumbers(x1,x2,y1,y2,innerWidth,innerHeight);
@@ -126,50 +127,6 @@ BubbleOverlay.prototype.fitLocationToRange = function(center, width, range){
 		res = range - width;
 	}
 	return res;
-};
-BubbleOverlay.prototype.display2=function(x,upperY,lowerY,innerWidth,innerHeight){
-	var BO=BubbleOverlay;
-	var width=innerWidth+2*this.margin;
-	if(width<BO.minW){
-		width=BO.minW;
-	}
-	var height=innerHeight+2*this.margin;
-	GuiElements.move.group(this.innerGroup,(width-innerWidth)/2,(height-innerHeight)/2);
-
-	var triOffset=(width-BO.triangleW)/2;
-	var halfOffset=width/2;
-	var tallH=height+BO.triangleH;
-
-	var arrowDown=(lowerY+tallH>GuiElements.height);
-	var yCoord=lowerY+BO.triangleH;
-	var xCoord=x-halfOffset;
-	var arrowDir=1;
-	var arrowX=triOffset;
-	var arrowY=BO.overlap;
-	if(arrowDown){
-		arrowDir=-1;
-		yCoord=upperY-tallH;
-		arrowY=height-BO.overlap;
-	}
-	// TODO(tsun): Fix this sizing issue if off the side of the screen
-	// if(xCoord<this.hMargin){
-	// 	arrowX+=xCoord-this.hMargin;
-	// 	xCoord=this.hMargin;
-	// }
-	// if(xCoord+width>GuiElements.width-this.hMargin){
-	// 	arrowX=width+x-GuiElements.width-BO.triangleW/2+this.hMargin;
-	// 	xCoord=GuiElements.width-width-this.hMargin;
-	// }
-	if(arrowX<0){
-		arrowX=0;
-	}
-	if(arrowX>width-BubbleOverlay.triangleW){
-		arrowX=width-BubbleOverlay.triangleW;
-	}
-	GuiElements.move.group(this.group,xCoord,yCoord);
-	GuiElements.update.triangle(this.triangle,arrowX,arrowY,BO.triangleW,(BO.triangleH+BO.overlap)*arrowDir);
-	GuiElements.update.rect(this.bgRect,0,0,width,height);
-	this.show();
 };
 BubbleOverlay.prototype.getVPadding=function() {
 	return this.margin*2+BubbleOverlay.triangleH;
