@@ -41,6 +41,7 @@ function BlockStack(firstBlock,tab){
 	this.runningBroadcastMessage=""; //Keeps track of if this stack's execution was started by a broadcast.
 	this.move(this.x,this.y);
 	this.flying=false; //BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
+	this.tab.updateArrows();
 }
 /* Recursively updates the this.dim values, the dimensions of the Blocks, and and the Blocks' alignment.
  */
@@ -356,6 +357,7 @@ BlockStack.prototype.fly=function(){
 	this.flying=true; //Record that this BlockStack is flying.
 	//Move to ensure that position on screen does not change.
 	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
+	this.tab.updateArrows();
 };
 /* Moves this BlockStack back into its Tab's group.
  */
@@ -367,6 +369,7 @@ BlockStack.prototype.land=function(){
 	this.flying=false;
 	//Move to ensure that position on screen does not change.
 	this.move(this.tab.absToRelX(absX),this.tab.absToRelY(absY));
+	this.tab.updateArrows();
 };
 /* Removes the stack from the Tab's list.
  */
@@ -379,6 +382,7 @@ BlockStack.prototype.delete=function(){
 	this.stop();
 	this.group.remove();
 	this.remove(); //Remove from Tab's list.
+	this.tab.updateArrows();
 };
 /* Passes message to first Block in BlockStack that the flag was tapped.
  */
@@ -420,6 +424,7 @@ BlockStack.prototype.getLastBlock=function(){
 
  */
 BlockStack.prototype.updateTabDim=function(){
+	if(this.flying) return;
 	var dim=this.tab.dim;
 	if(dim.x1==null||this.x<dim.x1){
 		dim.x1=this.x;

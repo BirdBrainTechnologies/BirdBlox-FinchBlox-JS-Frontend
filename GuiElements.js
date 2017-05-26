@@ -23,19 +23,24 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load = {};
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
-	var checkIfDone = function(){
-		if(GuiElements.load.version && GuiElements.load.zoom){
-			callback();
-		}
-	};
-	GuiElements.getAppVersion(function(){
-		GuiElements.load.version = true;
-		checkIfDone();
-	});
-	GuiElements.configureZoom(function(){
-		GuiElements.load.zoom = true;
-		checkIfDone();
-	});
+	if(!DebugOptions.shouldSkipInitSettings()) {
+		var checkIfDone = function () {
+			if (GuiElements.load.version && GuiElements.load.zoom) {
+				callback();
+			}
+		};
+		GuiElements.getAppVersion(function () {
+			GuiElements.load.version = true;
+			checkIfDone();
+		});
+		GuiElements.configureZoom(function () {
+			GuiElements.load.zoom = true;
+			checkIfDone();
+		});
+	}
+	else{
+		callback();
+	}
 };
 GuiElements.setGuiConstants=function(){
 	GuiElements.minZoom=0.33;
@@ -94,6 +99,7 @@ GuiElements.setConstants=function(){
 	HBConnectionList.setConstants();
 	OpenDialog.setConstants();
 	DisplayBox.setGraphics();
+	OverflowArrows.setConstants();
 	CodeManager();
 	HummingbirdManager();
 	FlutterManager();
@@ -101,8 +107,10 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	debug.innerHTML=message; //The iPad app does not support alert dialogs
-	//alert(message); //When debugging on a PC this function can be used.
+	if(!DebugOptions.blockLogging) {
+		debug.innerHTML = message; //The iPad app does not support alert dialogs
+		//alert(message); //When debugging on a PC this function can be used.
+	}
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -146,6 +154,7 @@ GuiElements.createLayers=function(){
 	layers.categories=create.layer();
 	layers.titleBg=create.layer();
 	layers.titlebar=create.layer();
+	layers.overflowArr = create.layer();
 	layers.stage=create.layer();
 	layers.display=create.layer();
 	layers.drag=create.layer();
@@ -507,6 +516,9 @@ GuiElements.update.zoom=function(group,scale){
 GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
+};
+GuiElements.makeClickThrough = function(svgE){
+	svgE.style.pointerEvents = "none";
 };
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything.

@@ -10,8 +10,10 @@ function DebugOptions(){
 	DO.showVersion = true;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
-	DO.lockErrors = true;
+	DO.lockErrors = false;
 	DO.errorLocked = false;
+	DO.skipInitSettings = true;
+	DO.blockLogging = true;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -42,6 +44,10 @@ DebugOptions.applyActions = function(){
 };
 DebugOptions.shouldLogErrors=function(){
 	return DebugOptions.logErrors && DebugOptions.enabled;
+};
+DebugOptions.shouldSkipInitSettings=function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.mouse || DO.skipInitSettings);
 };
 DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){
@@ -80,6 +86,9 @@ DebugOptions.validateNonNull = function(){
 };
 DebugOptions.stopErrorLocking = function(){
 	DebugOptions.lockErrors = false;
+};
+DebugOptions.enableLogging = function(){
+	DebugOptions.blockLogging = false;
 };
 function UserException(message) {
 	this.message = message;

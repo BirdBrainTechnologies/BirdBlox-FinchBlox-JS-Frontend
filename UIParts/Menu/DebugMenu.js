@@ -1,5 +1,6 @@
 function DebugMenu(button){
 	Menu.call(this,button,false,130);
+	this.addOption("Enable logging", DebugOptions.enableLogging);
 	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
 	this.addOption("Set JS Url", this.optionSetJsUrl);

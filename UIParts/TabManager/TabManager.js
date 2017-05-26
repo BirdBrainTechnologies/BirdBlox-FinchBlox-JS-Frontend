@@ -243,6 +243,7 @@ TabManager.updateZoom=function(){
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
 };
 TabManager.getActiveZoom = function(){
 	if(TabManager.activateTab == null){
