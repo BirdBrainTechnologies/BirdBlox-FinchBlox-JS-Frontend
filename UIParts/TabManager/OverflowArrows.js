@@ -18,10 +18,10 @@ OverflowArrows.prototype.makeTriangle=function(){
 };
 OverflowArrows.setConstants=function(){
 	var OA = OverflowArrows;
-	OA.triangleW = 20;
-	OA.triangleH = 10;
+	OA.triangleW = 25;
+	OA.triangleH = 15;
 	OA.margin = 15;
-	OA.opacity = 0.3;
+	OA.opacity = 0.5;
 };
 OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
 	if(left == right) {
