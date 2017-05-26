@@ -18,8 +18,7 @@ B_FlutterServo.prototype.startAction = function() {
 	let mem = this.runMem;
 	mem.flutter = flutter;
 	let port = this.slots[1].getData().getValue(); // Positive integer.
-	let value = this.slots[2].getData().getValue(); // [0,180]
-	// TODO: error checking?
+	let value = this.slots[2].getData().getValueInR(0, 180); // [0,180]
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
 	return flutter.setServoOrSave(shouldSend, mem, port, value);
 };
@@ -67,6 +66,45 @@ B_FlutterTriLed.prototype.updateAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
 	return this.runMem.flutter.setTriLEDOrSave(shouldSend, this.runMem);
 };
+
+
+
+
+function B_FlutterBuzzer(x, y) {
+	CommandBlock.call(this, x, y, "flutter");
+	this.addPart(new DeviceDropSlot(this, FlutterManager));
+	this.addPart(new LabelText(this, "Buzzer"));
+	this.addPart(new LabelText(this, "Volume"));
+	this.addPart(new NumSlot(this, 20, true, true)); //Positive integer.
+	this.addPart(new LabelText(this, "Frequency"));
+	this.addPart(new NumSlot(this, 10000, true, true)); //Positive integer.
+}
+B_FlutterServo.prototype = Object.create(CommandBlock.prototype);
+B_FlutterServo.prototype.constructor = B_FlutterServo;
+/* Generic flutter single output functions. */
+B_FlutterServo.prototype.startAction = function() {
+	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
+	if (flutter == null) {
+		return false; // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	mem.flutter = flutter;
+
+	let volume = this.slots[1].getData().getValueInR(0, 100);
+	let frequency = this.slots[2].getData().getValueInR(0, 20000);
+
+	// TODO: error checking?
+	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
+	return flutter.setBuzzerOrSave(shouldSend, mem, volume, frequency);
+};
+B_FlutterServo.prototype.updateAction = function() {
+	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
+	return this.runMem.flutter.setBuzzerOrSave(shouldSend, this.runMem);
+};
+
+
+
+
 
 /* Input Blocks */
 function B_FlutterSensorBase(x, y, sensorType, displayName) {
