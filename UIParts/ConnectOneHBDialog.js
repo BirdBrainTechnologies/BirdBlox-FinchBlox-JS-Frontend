@@ -92,6 +92,7 @@ ConnectOneHBDialog.prototype.closeDialog=function(){
 	GuiElements.unblockInteraction();
 	ConnectOneHBDialog.currentCOHBD=null;
 	this.updateTimer = window.clearInterval(this.updateTimer);
+	HtmlServer.sendRequestWithCallback("/hummingbird/stopDiscover");
 };
 ConnectOneHBDialog.prototype.discoverHBs=function(){
 	var thisCOHBD=this;

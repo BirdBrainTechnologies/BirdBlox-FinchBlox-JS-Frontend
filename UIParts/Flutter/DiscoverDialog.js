@@ -64,6 +64,7 @@ DiscoverDialog.prototype.showDialog = function() {
 };
 
 DiscoverDialog.prototype.closeDialog = function(){
+	HtmlServer.sendRequestWithCallback("/flutter/stopDiscover");
 	this.group.remove();
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
