@@ -12,6 +12,8 @@ TabManager.setGraphics=function(){
 	var TM=TabManager;
 	TM.bg=Colors.black;
 
+	TM.minZoom = 0.2;
+	TM.maxZoom = 5;
 
 	TM.tabAreaX=BlockPalette.width;
 	TM.tabAreaY=TitleBar.height;
