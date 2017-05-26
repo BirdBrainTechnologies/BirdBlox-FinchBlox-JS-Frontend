@@ -6,7 +6,7 @@
 
 function B_WhenFlagTapped(x,y){
 	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"whenABC"));
+	this.addPart(new LabelText(this,"when"));
 	this.addPart(new BlockIcon(this,VectorPaths.flag,TitleBar.flagFill,"flag",15));
 	this.addPart(new LabelText(this,"tapped"));
 }

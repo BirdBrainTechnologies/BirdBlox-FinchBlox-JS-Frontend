@@ -26,7 +26,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.zoomAmount=0.2;
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
-	GuiElements.defaultZoomMultiple = 1.3;
+	GuiElements.defaultZoomMultiple = 1;
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
