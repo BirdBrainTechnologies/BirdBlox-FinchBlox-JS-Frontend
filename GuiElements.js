@@ -9,15 +9,34 @@ function GuiElements(){
 	GuiElements.defs=document.getElementById("SvgDefs");
 	GuiElements.setConstants();
 	GuiElements.createLayers();
-	GuiElements.getAppVersion();
-	GuiElements.buildUI();
 	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 	GuiElements.dialogBlock=null;
+	GuiElements.loadInitialSettings(function(){
+		GuiElements.buildUI();
+	});
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+GuiElements.loadInitialSettings=function(callback){
+	GuiElements.load = {};
+	GuiElements.load.version = false;
+	GuiElements.load.zoom = false;
+	var checkIfDone = function(){
+		if(GuiElements.load.version && GuiElements.load.zoom){
+			callback();
+		}
+	};
+	GuiElements.getAppVersion(function(){
+		GuiElements.load.version = true;
+		checkIfDone();
+	});
+	GuiElements.configureZoom(function(){
+		GuiElements.load.zoom = true;
+		checkIfDone();
+	});
+};
 GuiElements.setGuiConstants=function(){
 	GuiElements.minZoom=0.33;
 	GuiElements.maxZoom=3;
@@ -36,8 +55,6 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 
 	GuiElements.blockerOpacity=0.5;
-
-	GuiElements.configureZoom();
 };
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -659,19 +676,24 @@ GuiElements.overlay.close=function(){
 	}
 };
 /* Loads the version number from version.txt */
-GuiElements.getAppVersion=function(){
+GuiElements.getAppVersion=function(callback){
 	GuiElements.appVersion=""; //Temp value until ajax completes.
 	try {
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4&&xhttp.status == 200) {
 				GuiElements.appVersion=xhttp.responseText;
+				callback();
+			}
+			else if(xhttp.readyState == 4){
+				callback();
 			}
 		};
 		xhttp.open("GET", "version.txt", true); //Get the names
 		xhttp.send(); //Make the request
 	}
 	catch(err){
+		callback();
 	}
 };
 /* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
@@ -702,7 +724,7 @@ GuiElements.updateZoom=function(){
 	BlockPalette.updateZoom();
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 };
-GuiElements.configureZoom = function(){
+GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;
 	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
 		GE.computedZoom = GE.computeZoomFromDims(response);
@@ -722,14 +744,16 @@ GuiElements.configureZoom = function(){
 				GE.computedZoom = GE.defaultZoomMultiple;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			GuiElements.updateZoom();
+			callback();
 		},function(){
 			GE.alert("Error reading zoom from settings");
 			GE.zoomMultiple = 1;
-			GuiElements.updateZoom();
+			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
+			callback();
 		});
 	},function(){
 		GE.alert("Error reading dims");
+		callback();
 	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
