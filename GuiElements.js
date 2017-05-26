@@ -7,12 +7,11 @@
 function GuiElements(){
 	GuiElements.svg=document.getElementById("MainSvg");
 	GuiElements.defs=document.getElementById("SvgDefs");
-	HtmlServer();
+	GuiElements.setConstants();
+	GuiElements.createLayers();
+	GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
+	GuiElements.dialogBlock=null;
 	GuiElements.loadInitialSettings(function(){
-		GuiElements.setConstants();
-		GuiElements.createLayers();
-		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
-		GuiElements.dialogBlock=null;
 		GuiElements.buildUI();
 	});
 }
