@@ -46,7 +46,7 @@ GuiElements.setConstants=function(){
 	GuiElements.zoomFactor=1;
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
-	GuiElements.defaultZoomCm = 24.638;
+	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
 	/* If a class is static and does not build a part of the UI, 
 	then its main function is used to initialize its constants. */
@@ -709,14 +709,14 @@ GuiElements.computeAndSetZoom=function(response){
 	GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	var parts = response.split(",");
 	if(parts.length==2) {
-		var widthCm = parseFloat(parts[0]);
-		var heightCm = parseFloat(parts[1]);
-		var diagCm = Math.sqrt(widthCm * widthCm + heightCm * heightCm);
+		var widthMm = parseFloat(parts[0]);
+		var heightMm = parseFloat(parts[1]);
+		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
 		var widthPx = window.innerWidth;
 		var heightPx = window.innerHeight;
 		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		var zoom = (diagPx * GuiElements.defaultZoomCm) / (GuiElements.defaultZoomPx * diagCm);
-		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagCm:" + diagCm);
+		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
+		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		if (zoom <= ViewMenu.maxZoom && zoom >= ViewMenu.minZoom) {
 			GuiElements.alert("Zoom is valid and computed to: " + zoom);
 			GuiElements.zoomFactor = zoom;
