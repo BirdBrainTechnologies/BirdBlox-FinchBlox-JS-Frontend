@@ -750,12 +750,12 @@ GuiElements.configureZoom = function(callback){
 			GE.zoomMultiple = parseFloat(result);
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
+				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;

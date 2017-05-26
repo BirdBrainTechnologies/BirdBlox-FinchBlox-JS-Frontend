@@ -25,8 +25,8 @@
       <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="400">
-              <caret line="781" column="32" selection-start-line="781" selection-start-column="32" selection-end-line="781" selection-end-column="32" />
+            <state relative-caret-position="334">
+              <caret line="752" column="18" selection-start-line="752" selection-start-column="18" selection-end-line="752" selection-end-column="18" />
               <folding>
                 <element signature="e#15#254#0" expanded="false" />
                 <element signature="e#695#748#0" expanded="false" />
@@ -147,8 +147,18 @@
                 <element signature="e#29950#30022#0" expanded="false" />
                 <element signature="e#30026#30069#0" expanded="false" />
                 <element signature="e#30103#30542#0" expanded="false" />
-                <element signature="e#31883#32048#0" expanded="false" />
+                <element signature="e#31887#32052#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="660">
+              <caret line="96" column="38" selection-start-line="96" selection-start-column="29" selection-end-line="96" selection-end-column="38" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -910,7 +920,7 @@
       <workItem from="1495631502847" duration="21379000" />
       <workItem from="1495725139670" duration="13568000" />
       <workItem from="1495748208559" duration="15209000" />
-      <workItem from="1495806497711" duration="15361000" />
+      <workItem from="1495806497711" duration="15515000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1007,7 +1017,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="631546000" />
+    <option name="totallyTimeSpent" value="631700000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1085,14 +1095,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/ColorsAndGraphics/BlockGraphics.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1056">
-          <caret line="48" column="37" selection-start-line="48" selection-start-column="37" selection-end-line="48" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9394">
@@ -2504,10 +2506,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="96" column="38" selection-start-line="96" selection-start-column="29" selection-end-line="96" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="781" column="32" selection-start-line="781" selection-start-column="32" selection-end-line="781" selection-end-column="32" />
+        <state relative-caret-position="334">
+          <caret line="752" column="18" selection-start-line="752" selection-start-column="18" selection-end-line="752" selection-end-column="18" />
           <folding>
             <element signature="e#15#254#0" expanded="false" />
             <element signature="e#695#748#0" expanded="false" />
@@ -2628,7 +2638,7 @@
             <element signature="e#29950#30022#0" expanded="false" />
             <element signature="e#30026#30069#0" expanded="false" />
             <element signature="e#30103#30542#0" expanded="false" />
-            <element signature="e#31883#32048#0" expanded="false" />
+            <element signature="e#31887#32052#0" expanded="false" />
           </folding>
         </state>
       </provider>
