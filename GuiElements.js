@@ -705,7 +705,7 @@ GuiElements.updateZoom=function(){
 GuiElements.configureZoom = function(){
 	var GE = GuiElements;
 	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
-		GE.computedZoom = GE.computeZoomFromDims();
+		GE.computedZoom = (DebugOptions.safeFunc(GE.computeZoomFromDims()))();
 		HtmlServer.getSetting("zoom",function(result){
 			GE.alert("Dealing with zoom from settings");
 			GE.zoomMultiple = parseFloat(result);
