@@ -48,10 +48,10 @@ GuiElements.loadInitialSettings=function(callback){
 	}
 };
 GuiElements.setGuiConstants=function(){
-	GuiElements.minZoom=0.33;
-	GuiElements.maxZoom=3;
-	GuiElements.minZoomMult=0.8;
-	GuiElements.maxZoomMult=1.6;
+	GuiElements.minZoom=0.25;
+	GuiElements.maxZoom=4;
+	GuiElements.minZoomMult=0.5;
+	GuiElements.maxZoomMult=2;
 	GuiElements.zoomAmount=0.1;
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
