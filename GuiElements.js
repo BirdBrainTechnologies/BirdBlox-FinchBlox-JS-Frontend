@@ -745,23 +745,23 @@ GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;
 	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
 		GE.computedZoom = GE.computeZoomFromDims(response);
-		//GuiElements.alert("Requesting zoom from settings.");
+		GuiElements.alert("Requesting zoom from settings.");
 		HtmlServer.getSetting("zoom",function(result){
-			//GE.alert("Dealing with zoom from settings");
+			GE.alert("Dealing with zoom from settings");
 			GE.zoomMultiple = parseFloat(result);
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
+				GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			//GuiElements.alert("Computed zoom: " + GE.computedZoom);
+			GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
 		},function(){
 			GE.alert("Error reading zoom from settings");

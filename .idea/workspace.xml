@@ -25,8 +25,8 @@
       <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="24" column="34" selection-start-line="24" selection-start-column="34" selection-end-line="24" selection-end-column="34" />
+            <state relative-caret-position="308">
+              <caret line="763" column="12" selection-start-line="763" selection-start-column="12" selection-end-line="763" selection-end-column="12" />
               <folding>
                 <element signature="e#15#254#0" expanded="false" />
                 <element signature="e#663#716#0" expanded="false" />
@@ -147,7 +147,7 @@
                 <element signature="e#29982#30054#0" expanded="false" />
                 <element signature="e#30058#30101#0" expanded="false" />
                 <element signature="e#30135#30574#0" expanded="false" />
-                <element signature="e#31923#32088#0" expanded="false" />
+                <element signature="e#31913#32078#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -920,7 +920,7 @@
       <workItem from="1495631502847" duration="21379000" />
       <workItem from="1495725139670" duration="13568000" />
       <workItem from="1495748208559" duration="15209000" />
-      <workItem from="1495806497711" duration="16222000" />
+      <workItem from="1495806497711" duration="16302000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1017,7 +1017,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="632407000" />
+    <option name="totallyTimeSpent" value="632487000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -2516,8 +2516,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="24" column="34" selection-start-line="24" selection-start-column="34" selection-end-line="24" selection-end-column="34" />
+        <state relative-caret-position="308">
+          <caret line="763" column="12" selection-start-line="763" selection-start-column="12" selection-end-line="763" selection-end-column="12" />
           <folding>
             <element signature="e#15#254#0" expanded="false" />
             <element signature="e#663#716#0" expanded="false" />
@@ -2638,7 +2638,7 @@
             <element signature="e#29982#30054#0" expanded="false" />
             <element signature="e#30058#30101#0" expanded="false" />
             <element signature="e#30135#30574#0" expanded="false" />
-            <element signature="e#31923#32088#0" expanded="false" />
+            <element signature="e#31913#32078#0" expanded="false" />
           </folding>
         </state>
       </provider>
