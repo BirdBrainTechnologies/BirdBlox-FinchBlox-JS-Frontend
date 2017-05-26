@@ -650,15 +650,11 @@ GuiElements.overlay.remove=function(overlay){
 	}
 };
 /* Called to force any currently visible overlays to close.
- * @param {bool} onlyOnDrag - true iff the dialog is being requested to close due to a drag motion.
  */
-GuiElements.overlay.close=function(onlyOnDrag){
-	if(onlyOnDrag == null){
-		onlyOnDrag = false;
-	}
+GuiElements.overlay.close=function(){
 	var GE=GuiElements;
 	if(GE.currentOverlay!=null){
-		GE.currentOverlay.close(onlyOnDrag);
+		GE.currentOverlay.close();
 	}
 };
 /* Loads the version number from version.txt */

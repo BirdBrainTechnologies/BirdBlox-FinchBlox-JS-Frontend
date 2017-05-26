@@ -315,8 +315,7 @@ InputPad.updateSlot=function(){
 		IP.slot.updateEdit(IP.nonNumericText,IP.nonNumericData);
 	}
 };
-InputPad.close=function(onlyOnDrag){
-	if(onlyOnDrag) return true;
+InputPad.close=function(){
 	var IP = InputPad;
 	if(IP.visible) {
 		if (IP.specialCommand=="enter_text") {

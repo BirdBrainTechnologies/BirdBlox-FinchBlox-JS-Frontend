@@ -6,7 +6,7 @@ function BlockContextMenu(block,x,y){
 }
 BlockContextMenu.setGraphics=function(){
 	var BCM=BlockContextMenu;
-	BCM.bnMargin=8;
+	BCM.bnMargin=Button.defaultMargin;
 	BCM.bgColor=Colors.black;
 	BCM.blockShift=20;
 };
@@ -56,11 +56,16 @@ BlockContextMenu.prototype.addOptions=function(){
 		}
 	}
 	else {
+		var BCM = this;
 		var funcDup = function () {
 			funcDup.BCM.duplicate();
 		};
 		funcDup.BCM = this;
 		this.menuBnList.addOption("Duplicate", funcDup);
+		this.menuBnList.addOption("Delete",function(){
+			BCM.block.stack.delete();
+			BCM.close();
+		})
 	}
 };
 BlockContextMenu.prototype.duplicate=function(){

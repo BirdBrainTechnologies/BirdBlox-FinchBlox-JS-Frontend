@@ -48,10 +48,9 @@ BubbleOverlay.prototype.hide=function(){
 		GuiElements.overlay.remove(this);
 	}
 };
-BubbleOverlay.prototype.close=function(onlyOnDrag){
-	if(this.parent.close(onlyOnDrag)!=true){
-		this.hide();
-	}
+BubbleOverlay.prototype.close=function(){
+	this.hide();
+	this.parent.close();
 };
 BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
 	DebugOptions.validateNumbers(x1,x2,y1,y2,innerWidth,innerHeight);
