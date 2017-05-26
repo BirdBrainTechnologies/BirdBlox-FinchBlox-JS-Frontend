@@ -264,7 +264,7 @@ TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
-		GuiElements.overlay.close();
+		GuiElements.overlay.close(true);
 		TR.longTouch = false;
 		if(TR.zooming){
 			//If we are currently zooming, we update the zoom.

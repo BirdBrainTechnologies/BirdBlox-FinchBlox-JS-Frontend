@@ -95,7 +95,8 @@ Menu.prototype.open=function(){
 		}
 	}
 };
-Menu.prototype.close=function(){
+Menu.prototype.close=function(onlyOnDrag){
+	if(onlyOnDrag) return;
 	if(this.visible){
 		this.group.remove();
 		this.visible=false;
