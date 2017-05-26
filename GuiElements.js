@@ -756,6 +756,7 @@ GuiElements.configureZoom = function(callback){
 				GE.computedZoom = GE.defaultZoomMultiple;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
+			GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
 		},function(){
 			GE.alert("Error reading zoom from settings");

@@ -13,7 +13,7 @@ function DebugOptions(){
 	DO.lockErrors = false;
 	DO.errorLocked = false;
 	DO.skipInitSettings = false;
-	DO.blockLogging = true;
+	DO.blockLogging = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
