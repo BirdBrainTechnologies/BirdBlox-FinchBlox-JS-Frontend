@@ -2,7 +2,7 @@ function Tab(){
 	this.mainG=GuiElements.create.group(0,0);
 	this.scrollX=0;
 	this.scrollY=0;
-	this.zoomFactor = 2;
+	this.zoomFactor = 1;
 	this.visible=false;
 	TabManager.addTab(this);
 	this.stackList=new Array();
