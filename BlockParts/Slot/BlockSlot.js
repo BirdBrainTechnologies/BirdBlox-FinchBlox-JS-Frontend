@@ -11,11 +11,11 @@ function BlockSlot(parent){
 	this.currentBlock=null;
 }
 BlockSlot.prototype.getAbsX=function(){
-	return this.x+this.parent.stack.getAbsX();
-}
+	return this.parent.stack.relToAbsX(this.x);
+};
 BlockSlot.prototype.getAbsY=function(){
-	return this.y+this.parent.stack.getAbsY();
-}
+	return this.parent.stack.relToAbsY(this.y);
+};
 BlockSlot.prototype.updateDim=function(){
 	var bG=BlockGraphics.getType(this.type);
 	if(this.hasChild){
@@ -108,7 +108,7 @@ BlockSlot.prototype.findBestFit=function(){
 }
 BlockSlot.prototype.highlight=function(){
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.parent.isGlowing);
-}
+};
 BlockSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new BlockSlot(parentCopy);
 	if(this.hasChild){

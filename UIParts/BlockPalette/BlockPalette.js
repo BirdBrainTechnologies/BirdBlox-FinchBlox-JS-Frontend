@@ -10,22 +10,22 @@ function BlockPalette(){
 	BlockPalette.scrolling=false;
 }
 BlockPalette.setGraphics=function(){
+	BlockPalette.mainVMargin=10;
+	BlockPalette.mainHMargin=Button.defaultMargin;
+	BlockPalette.blockMargin=5;
+	BlockPalette.sectionMargin=10;
+	BlockPalette.insideBnH = 38; // Dimensions for buttons within a category
+	BlockPalette.insideBnW = 150;
+
 	BlockPalette.width=253;
-	BlockPalette.catH=132; //170
-	BlockPalette.catVMargin=10;
-	BlockPalette.catHMargin=10;
+	BlockPalette.catVMargin=Button.defaultMargin;
+	BlockPalette.catHMargin=Button.defaultMargin;
+	BlockPalette.catH=30*3 + BlockPalette.catVMargin*4; //132
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
 	BlockPalette.catY=TitleBar.height;
 	BlockPalette.y=BlockPalette.catY+BlockPalette.catH;
 	BlockPalette.bg=Colors.black;
 	BlockPalette.catBg=Colors.darkGray;
-	
-	BlockPalette.mainVMargin=10;
-	BlockPalette.mainHMargin=10;
-	BlockPalette.blockMargin=5;
-	BlockPalette.sectionMargin=10;
-	BlockPalette.insideBnH = 38; // Dimensions for buttons within a category
-	BlockPalette.insideBnW = 150;
 
 	BlockPalette.bnDefaultFont="Arial";
 	BlockPalette.bnDefaultFontSize=16;

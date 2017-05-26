@@ -2,9 +2,9 @@
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
-	DO.mouse = false;
+	DO.mouse = true;
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
 	DO.showVersion = true;
@@ -67,6 +67,14 @@ DebugOptions.validateNumbers = function(){
 	for(let i = 0; i < arguments.length; i++){
 		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
 			throw new UserException("Invalid Number");
+		}
+	}
+};
+DebugOptions.validateNonNull = function(){
+	if(!DebugOptions.shouldLogErrors()) return;
+	for(let i = 0; i < arguments.length; i++){
+		if(arguments[i] == null){
+			throw new UserException("Null parameter");
 		}
 	}
 };
