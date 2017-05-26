@@ -736,7 +736,7 @@ GuiElements.configureZoom = function(){
  */
 GuiElements.computeZoomFromDims=function(dims){
 	GuiElements.alert("Got dimensions from device.  Computing zoom.");
-	var parts = response.split(",");
+	var parts = dims.split(",");
 	if(parts.length==2) {
 		var widthMm = parseFloat(parts[0]);
 		var heightMm = parseFloat(parts[1]);
