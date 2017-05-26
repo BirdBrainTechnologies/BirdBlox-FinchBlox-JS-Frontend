@@ -746,7 +746,7 @@ GuiElements.configureZoom = function(callback){
 		GE.computedZoom = GE.computeZoomFromDims(response);
 		GuiElements.alert("Requesting zoom from settings.");
 		HtmlServer.getSetting("zoom",function(result){
-			GE.alert("Dealing with zoom from settings");
+			//GE.alert("Dealing with zoom from settings");
 			GE.zoomMultiple = parseFloat(result);
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
