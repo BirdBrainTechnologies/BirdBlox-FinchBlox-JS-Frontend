@@ -22,7 +22,11 @@ HummingbirdManager.GetDeviceName = function(shorten) {
 	} else {
 		return "Hummingbird";
 	}
-}
+};
+
+HummingbirdManager.getConnectionInstructions = function(){
+	return null;
+};
 
 /* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
 HummingbirdManager.getHBNames=function(){
