@@ -1,7 +1,7 @@
 "use strict";
 
 function HummingbirdMenu(button){
-	Menu.call(this,button,true,HummingbirdMenu.width);
+	Menu.call(this,button,HummingbirdMenu.width);
 	this.addAlternateFn(HummingbirdManager.showConnectMultipleDialog);
 	//this.currentHB="";
 }

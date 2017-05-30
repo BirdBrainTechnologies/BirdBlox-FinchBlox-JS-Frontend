@@ -66,6 +66,9 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+
 	GuiElements.blockerOpacity=0.5;
 
 	GuiElements.isKindle = false;

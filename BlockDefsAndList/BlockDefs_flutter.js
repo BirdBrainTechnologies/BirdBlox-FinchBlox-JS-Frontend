@@ -72,17 +72,17 @@ B_FlutterTriLed.prototype.updateAction = function() {
 
 function B_FlutterBuzzer(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this, FlutterManager, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
 	this.addPart(new NumSlot(this, 20, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "Frequency"));
 	this.addPart(new NumSlot(this, 10000, true, true)); //Positive integer.
 }
-B_FlutterServo.prototype = Object.create(CommandBlock.prototype);
-B_FlutterServo.prototype.constructor = B_FlutterServo;
+B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
 /* Generic flutter single output functions. */
-B_FlutterServo.prototype.startAction = function() {
+B_FlutterBuzzer.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
 		return false; // Flutter was invalid, exit early
@@ -97,7 +97,7 @@ B_FlutterServo.prototype.startAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
 	return flutter.setBuzzerOrSave(shouldSend, mem, volume, frequency);
 };
-B_FlutterServo.prototype.updateAction = function() {
+B_FlutterBuzzer.prototype.updateAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
 	return this.runMem.flutter.setBuzzerOrSave(shouldSend, this.runMem);
 };
