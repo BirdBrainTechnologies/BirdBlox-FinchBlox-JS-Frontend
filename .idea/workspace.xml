@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FlutterManager.js" afterPath="$PROJECT_DIR$/FlutterManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/version.txt" afterPath="$PROJECT_DIR$/version.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,11 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+            <state relative-caret-position="440">
+              <caret line="20" column="33" selection-start-line="20" selection-start-column="33" selection-end-line="20" selection-end-column="33" />
               <folding>
                 <element signature="e#516#865#0" expanded="false" />
                 <element signature="e#587#655#0" expanded="false" />
@@ -55,18 +53,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="902">
-              <caret line="56" column="17" selection-start-line="56" selection-start-column="17" selection-end-line="56" selection-end-column="17" />
+            <state relative-caret-position="450">
+              <caret line="92" column="43" selection-start-line="92" selection-start-column="43" selection-end-line="92" selection-end-column="43" />
               <folding>
                 <element signature="e#691#796#0" expanded="false" />
                 <element signature="e#2200#2438#0" expanded="false" />
-                <element signature="e#3372#3389#0" expanded="false" />
-                <element signature="e#3609#3762#0" expanded="false" />
-                <element signature="e#3812#4222#0" expanded="false" />
-                <element signature="e#4089#4128#0" expanded="false" />
+                <element signature="e#2495#2618#0" expanded="false" />
+                <element signature="e#3331#3348#0" expanded="false" />
+                <element signature="e#3568#3721#0" expanded="false" />
+                <element signature="e#3771#4181#0" expanded="false" />
+                <element signature="e#4048#4087#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -75,7 +74,7 @@
       <file leaf-file-name="FlutterManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/FlutterManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
+            <state relative-caret-position="86">
               <caret line="34" column="2" selection-start-line="34" selection-start-column="2" selection-end-line="34" selection-end-column="2" />
               <folding>
                 <element signature="n#!!block;n#FlutterManager#0" expanded="false" />
@@ -107,7 +106,7 @@
       <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="768">
+            <state relative-caret-position="966">
               <caret line="254" column="55" selection-start-line="254" selection-start-column="55" selection-end-line="254" selection-end-column="55" />
               <folding>
                 <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
@@ -593,10 +592,10 @@
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/HummingbirdManager.js" />
-        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
         <option value="$PROJECT_DIR$/FlutterManager.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/version.txt" />
+        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
       </list>
     </option>
   </component>
@@ -1089,7 +1088,7 @@
       <workItem from="1495748208559" duration="15209000" />
       <workItem from="1495806497711" duration="22491000" />
       <workItem from="1496111957259" duration="744000" />
-      <workItem from="1496153387734" duration="12557000" />
+      <workItem from="1496153387734" duration="12927000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1186,7 +1185,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="651977000" />
+    <option name="totallyTimeSpent" value="652347000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -2166,21 +2165,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="902">
-          <caret line="56" column="17" selection-start-line="56" selection-start-column="17" selection-end-line="56" selection-end-column="17" />
-          <folding>
-            <element signature="e#691#796#0" expanded="false" />
-            <element signature="e#2200#2438#0" expanded="false" />
-            <element signature="e#3372#3389#0" expanded="false" />
-            <element signature="e#3609#3762#0" expanded="false" />
-            <element signature="e#3812#4222#0" expanded="false" />
-            <element signature="e#4089#4128#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="594">
@@ -2191,39 +2175,46 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/FlutterManager.js">
+    <entry file="file://$PROJECT_DIR$/version.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="34" column="2" selection-start-line="34" selection-start-column="2" selection-end-line="34" selection-end-column="2" />
+        <state relative-caret-position="0">
+          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="20" column="33" selection-start-line="20" selection-start-column="33" selection-end-line="20" selection-end-column="33" />
           <folding>
-            <element signature="n#!!block;n#FlutterManager#0" expanded="false" />
-            <element signature="e#126#156#0" expanded="false" />
-            <element signature="e#291#332#0" expanded="false" />
-            <element signature="e#669#713#0" expanded="false" />
-            <element signature="e#767#1053#0" expanded="false" />
-            <element signature="e#845#995#0" expanded="false" />
-            <element signature="e#947#992#0" expanded="false" />
-            <element signature="e#1006#1049#0" expanded="false" />
-            <element signature="e#1099#1163#0" expanded="false" />
-            <element signature="e#1274#1494#0" expanded="false" />
-            <element signature="e#1416#1467#0" expanded="false" />
-            <element signature="e#1544#1695#0" expanded="false" />
-            <element signature="e#1624#1675#0" expanded="false" />
-            <element signature="e#2168#2309#0" expanded="false" />
-            <element signature="e#2362#2606#0" expanded="false" />
-            <element signature="e#2500#2602#0" expanded="false" />
-            <element signature="e#2608#2760#0" expanded="false" />
-            <element signature="e#2816#3045#0" expanded="false" />
-            <element signature="e#2885#3041#0" expanded="false" />
-            <element signature="e#3047#3181#0" expanded="false" />
-            <element signature="e#3236#3292#0" expanded="false" />
+            <element signature="e#516#865#0" expanded="false" />
+            <element signature="e#587#655#0" expanded="false" />
+            <element signature="e#681#730#0" expanded="false" />
+            <element signature="e#750#811#0" expanded="false" />
+            <element signature="e#833#863#0" expanded="false" />
+            <element signature="e#1137#1523#0" expanded="false" />
+            <element signature="e#1174#1496#0" expanded="false" />
+            <element signature="e#1195#1493#0" expanded="false" />
+            <element signature="e#1204#1314#0" expanded="false" />
+            <element signature="e#1268#1309#0" expanded="false" />
+            <element signature="e#1329#1489#0" expanded="false" />
+            <element signature="e#1502#1521#0" expanded="false" />
+            <element signature="e#1566#1765#0" expanded="false" />
+            <element signature="e#1655#1763#0" expanded="false" />
+            <element signature="e#1709#1760#0" expanded="false" />
+            <element signature="e#1808#1981#0" expanded="false" />
+            <element signature="e#1897#1979#0" expanded="false" />
+            <element signature="e#1925#1976#0" expanded="false" />
+            <element signature="e#2025#2062#0" expanded="false" />
+            <element signature="n#!!block;n#UserException#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HtmlServer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="768">
+        <state relative-caret-position="966">
           <caret line="254" column="55" selection-start-line="254" selection-start-column="55" selection-end-line="254" selection-end-column="55" />
           <folding>
             <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
@@ -2274,39 +2265,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
+    <entry file="file://$PROJECT_DIR$/FlutterManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-          <folding />
+        <state relative-caret-position="86">
+          <caret line="34" column="2" selection-start-line="34" selection-start-column="2" selection-end-line="34" selection-end-column="2" />
+          <folding>
+            <element signature="n#!!block;n#FlutterManager#0" expanded="false" />
+            <element signature="e#126#156#0" expanded="false" />
+            <element signature="e#291#332#0" expanded="false" />
+            <element signature="e#669#713#0" expanded="false" />
+            <element signature="e#767#1053#0" expanded="false" />
+            <element signature="e#845#995#0" expanded="false" />
+            <element signature="e#947#992#0" expanded="false" />
+            <element signature="e#1006#1049#0" expanded="false" />
+            <element signature="e#1099#1163#0" expanded="false" />
+            <element signature="e#1274#1494#0" expanded="false" />
+            <element signature="e#1416#1467#0" expanded="false" />
+            <element signature="e#1544#1695#0" expanded="false" />
+            <element signature="e#1624#1675#0" expanded="false" />
+            <element signature="e#2168#2309#0" expanded="false" />
+            <element signature="e#2362#2606#0" expanded="false" />
+            <element signature="e#2500#2602#0" expanded="false" />
+            <element signature="e#2608#2760#0" expanded="false" />
+            <element signature="e#2816#3045#0" expanded="false" />
+            <element signature="e#2885#3041#0" expanded="false" />
+            <element signature="e#3047#3181#0" expanded="false" />
+            <element signature="e#3236#3292#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+        <state relative-caret-position="450">
+          <caret line="92" column="43" selection-start-line="92" selection-start-column="43" selection-end-line="92" selection-end-column="43" />
           <folding>
-            <element signature="e#516#865#0" expanded="false" />
-            <element signature="e#587#655#0" expanded="false" />
-            <element signature="e#681#730#0" expanded="false" />
-            <element signature="e#750#811#0" expanded="false" />
-            <element signature="e#833#863#0" expanded="false" />
-            <element signature="e#1137#1523#0" expanded="false" />
-            <element signature="e#1174#1496#0" expanded="false" />
-            <element signature="e#1195#1493#0" expanded="false" />
-            <element signature="e#1204#1314#0" expanded="false" />
-            <element signature="e#1268#1309#0" expanded="false" />
-            <element signature="e#1329#1489#0" expanded="false" />
-            <element signature="e#1502#1521#0" expanded="false" />
-            <element signature="e#1566#1765#0" expanded="false" />
-            <element signature="e#1655#1763#0" expanded="false" />
-            <element signature="e#1709#1760#0" expanded="false" />
-            <element signature="e#1808#1981#0" expanded="false" />
-            <element signature="e#1897#1979#0" expanded="false" />
-            <element signature="e#1925#1976#0" expanded="false" />
-            <element signature="e#2025#2062#0" expanded="false" />
-            <element signature="n#!!block;n#UserException#0" expanded="false" />
+            <element signature="e#691#796#0" expanded="false" />
+            <element signature="e#2200#2438#0" expanded="false" />
+            <element signature="e#2495#2618#0" expanded="false" />
+            <element signature="e#3331#3348#0" expanded="false" />
+            <element signature="e#3568#3721#0" expanded="false" />
+            <element signature="e#3771#4181#0" expanded="false" />
+            <element signature="e#4048#4087#0" expanded="false" />
           </folding>
         </state>
       </provider>
