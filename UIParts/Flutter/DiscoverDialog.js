@@ -84,7 +84,6 @@ DiscoverDialog.prototype.discoverDevices = function() {
 };
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	deviceList = "hello\nworld\nhi\nthere";
 	if(TouchReceiver.touchDown){
 		return;
 	}
