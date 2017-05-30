@@ -135,7 +135,7 @@ Category.prototype.select=function(){
 	if(BlockPalette.selectedCat!=null){
 		BlockPalette.selectedCat.deselect();
 	}
-	GuiElements.layers.palette.appendChild(this.group);
+	BlockPalette.showCategoryGroup(this.group);
 	BlockPalette.selectedCat=this;
 	this.button.select();
 }
