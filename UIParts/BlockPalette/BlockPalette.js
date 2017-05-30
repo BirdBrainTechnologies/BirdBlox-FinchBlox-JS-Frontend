@@ -39,7 +39,6 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.trash = null;
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
-	BlockPalette.trashBgMargin = 5;
 	BlockPalette.trashColor = Colors.white;
 };
 BlockPalette.updateZoom=function(){
@@ -60,14 +59,8 @@ BlockPalette.createPalBg=function(){
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	TouchReceiver.addListenersPalette(BP.palRect);
-
-	BP.layerBlockPal = GuiElements.create.group(0, 0, GuiElements.layers.palette);
-	BP.layerTrash = GuiElements.create.group(0, 0, GuiElements.layers.palette);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
-};
-BlockPalette.showCategoryGroup=function(group){
-	BlockPalette.layerBlockPal.appendChild(group);
-};
+}
 BlockPalette.createCategories=function(){
 	var catCount=BlockList.catCount();
 	var firstColumn=true;
@@ -113,9 +106,9 @@ BlockPalette.ShowTrash=function() {
 	let BP = BlockPalette;
 	if (!BP.trash) {
 		BP.trash = GuiElements.create.group(0,0);
-		let margin = BP.trashBgMargin;
-		//let trashBg = GuiElements.draw.rect(-margin, BP.y - margin, BP.width + margin * 2, BP.height + margin * 2, BP.bg);
-		//BP.trash.appendChild(trashBg);
+		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+		GuiElements.update.opacity(trashBg, BP.trashOpacity);
+		BP.trash.appendChild(trashBg);
 
 		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
 		let imgX = BP.width/2 - trashWidth/2;  // Center X
@@ -127,6 +120,7 @@ BlockPalette.ShowTrash=function() {
 	}
 };
 BlockPalette.HideTrash=function() {
+	return;
 	let BP = BlockPalette;
 	if (BP.trash) {
 		GuiElements.layers.palette.removeChild(BP.trash);
