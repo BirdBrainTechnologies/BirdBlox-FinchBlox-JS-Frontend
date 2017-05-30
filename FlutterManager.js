@@ -14,18 +14,25 @@ FlutterManager.ShowDiscoverDialog = function() {
 	DiscoverDialog.show(FlutterManager);
 }
 
-
+/**
+ * @param shorten {bool}
+ * @returns {string}
+ */
 FlutterManager.GetDeviceName = function(shorten) {
 	if (shorten) {
 		return "F";
 	} else {
 		return "Flutter";
 	}
-}
+};
+
+FlutterManager.getConnectionInstructions = function(){
+	return "Press the \"find me\" button on your flutter";
+};
 
 FlutterManager.GetConnectionStatus = function() {
 	return FlutterManager.connectionStatus;
-}
+};
 
 FlutterManager.UpdateConnectionStatus = function() {
 	HtmlServer.sendRequestWithCallback("flutter/totalStatus", function(result) {
@@ -36,7 +43,7 @@ FlutterManager.UpdateConnectionStatus = function() {
 	},function(){
 		FlutterManager.connectionStatus = 0;
 	});
-}
+};
 
 FlutterManager.GetDeviceCount = function() {
 	return Object.keys(FlutterManager.connectedDevices).length;

@@ -42,6 +42,7 @@ DiscoverDialog.setConstants = function(){
 	Class.cancelBnWidth = 100;
 	Class.cancelBnHeight = MenuBnList.bnHeight;
 	Class.bnMargin = 5;
+	Class.instrTextMargin = 5;
 
 	Class.fontSize = 16;
 	Class.font = "Arial";
@@ -57,6 +58,12 @@ DiscoverDialog.prototype.showDialog = function() {
 	this.cancelBn = this.makeCancelBn();
 	this.titleRect = this.createTitleRect();
 	this.titleText = this.createTitleLabel();
+	var connectionInstr = Class.deviceManagerClass.getConnectionInstructions();
+	this.menuBnListY = Class.titleBarH + Class.bnMargin;
+	if(connectionInstr != null) {
+		this.instrText = this.createInstructionText(connectionInstr);
+		this.menuBnListY = Class.titleBarH+Class.charHeight + Class.instrTextMargin + Class.bnMargin;
+	}
 	GuiElements.layers.dialog.appendChild(this.group);
 	GuiElements.blockInteraction();
 	this.updateTimer = self.setInterval(this.discoverDevices.bind(this), Class.updateInterval);
@@ -73,10 +80,11 @@ DiscoverDialog.prototype.closeDialog = function(){
 };
 
 DiscoverDialog.prototype.discoverDevices = function() {
-	DiscoverDialog.deviceManagerClass.DiscoverDevices(this.updateDeviceList.bind(this), null);
+	DiscoverDialog.deviceManagerClass.DiscoverDevices(this.updateDeviceList.bind(this), this.updateDeviceList.bind(this));
 };
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
+	deviceList = "hello\nworld\nhi\nthere";
 	if(TouchReceiver.touchDown){
 		return;
 	}
@@ -92,8 +100,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 		this.menuBnList.hide();
 	}
 	let bnM = Class.bnMargin;
-	this.menuBnList=new MenuBnList(this.group, bnM, bnM+Class.titleBarH, bnM, this.width-bnM*2);
-	this.menuBnList.setMaxHeight(this.height-Class.titleBarH-Class.cancelBnHeight-Class.bnMargin*3);
+	this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
+	this.menuBnList.setMaxHeight(this.height-this.menuBnListY-Class.cancelBnHeight-Class.bnMargin*2);
 	for(let i=0; i<deviceArr.length; i++){
 		this.addBnListOption(deviceArr[i]);
 	}
@@ -137,10 +145,20 @@ DiscoverDialog.prototype.createTitleRect=function(){
 	return rect;
 };
 DiscoverDialog.prototype.createTitleLabel=function(){
-	var COHBD=DiscoverDialog;
-	var textE=GuiElements.draw.text(0,0,"Connect",COHBD.fontSize,COHBD.titleBarFontC,COHBD.font,COHBD.fontWeight);
-	var x=COHBD.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=COHBD.titleBarH/2+COHBD.charHeight/2;
+	var Class=DiscoverDialog;
+	var text = "Connect " + Class.deviceManagerClass.GetDeviceName();
+	var textE=GuiElements.draw.text(0,0,text,Class.fontSize,Class.titleBarFontC,Class.font,Class.fontWeight);
+	var x=Class.width/2-GuiElements.measure.textWidth(textE)/2;
+	var y=Class.titleBarH/2+Class.charHeight/2;
+	GuiElements.move.text(textE,x,y);
+	this.group.appendChild(textE);
+	return textE;
+};
+DiscoverDialog.prototype.createInstructionText=function(text){
+	var Class=DiscoverDialog;
+	var textE = GuiElements.draw.text(0,0,text,Class.fontSize,Class.titleBarFontC,Class.font,Class.fontWeight);
+	var x=Class.width/2-GuiElements.measure.textWidth(textE)/2;
+	var y=Class.titleBarH+Class.charHeight + Class.instrTextMargin;
 	GuiElements.move.text(textE,x,y);
 	this.group.appendChild(textE);
 	return textE;

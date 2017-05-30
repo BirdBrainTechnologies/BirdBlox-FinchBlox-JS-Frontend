@@ -120,7 +120,6 @@ BlockPalette.ShowTrash=function() {
 	}
 };
 BlockPalette.HideTrash=function() {
-	return;
 	let BP = BlockPalette;
 	if (BP.trash) {
 		GuiElements.layers.palette.removeChild(BP.trash);

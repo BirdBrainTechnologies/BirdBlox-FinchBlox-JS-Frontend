@@ -124,9 +124,10 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 	}
 	else{
 		var HS=HtmlServer;
-		var request = "tablet/dialog/"+HS.encodeHtml(title);
-		request+="/"+HS.encodeHtml(question);
-		request+="/"+HS.encodeHtml(hint);
+		var request = "tablet/dialog";
+		request+="?title=" + HS.encodeHtml(title);
+		request+="&question="+HS.encodeHtml(question);
+		request+="&holder="+HS.encodeHtml(hint);
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
@@ -209,10 +210,11 @@ HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCance
 	}
 	else {
 		var HS = HtmlServer;
-		var request = "tablet/choice/" + HS.encodeHtml(title);
-		request += "/" + HS.encodeHtml(question);
-		request += "/" + HS.encodeHtml(option1);
-		request += "/" + HS.encodeHtml(option2);
+		var request = "tablet/choice";
+		request += "?title=" + HS.encodeHtml(title);
+		request += "&question=" + HS.encodeHtml(question);
+		request += "&button1=" + HS.encodeHtml(option1);
+		request += "&button2=" + HS.encodeHtml(option2);
 		var onDialogPresented = function (result) {
 			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
 		};
@@ -245,8 +247,11 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/get/"+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+	HtmlServer.sendRequestWithCallback("settings/getSetting?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };
 HtmlServer.setSetting=function(key,value){
-	HtmlServer.sendRequestWithCallback("settings/set/"+HtmlServer.encodeHtml(key)+"/"+HtmlServer.encodeHtml(value));
+	var request = "settings/setSetting";
+	request += "?key=" + HtmlServer.encodeHtml(key);
+	request += "&value" + HtmlServer.encodeHtml(value);
+	HtmlServer.sendRequestWithCallback(request);
 };
