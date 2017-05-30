@@ -98,6 +98,27 @@ Flutter.prototype.setServoOrSave = function(shouldSend, context, port, value) {
 	}
 };
 
+Flutter.prototype.setBuzzerOrSave = function(shouldSend, context, volume, frequency) {
+	if (context.sent) {
+		return (context.requestStatus.finished != true);  // Return true if not finished
+	} else {
+		if (context.request == null) {
+			// TODO: Validation
+			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/buzzer/";
+			context.request = requestPrefix + volume + "/" + frequency;
+			context.requestStatus = {};
+		}
+		if (shouldSend) {
+			context.sent = true;
+			HtmlServer.sendRequest(context.request, context.requestStatus);
+			return true;  // Still running
+		} else {
+			context.sent = false;
+			return true;  // Still running
+		}
+	}
+};
+
 
 Flutter.prototype.setTriLEDOrSave = function(shouldSend, context, port, valueR, valueG, valueB) {
 	if (context.sent) {

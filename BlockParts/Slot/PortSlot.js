@@ -16,7 +16,7 @@ PortSlot.prototype.constructor = PortSlot;
 /* PortSlot.prototype.populateList=function(){
 }; */
 PortSlot.prototype.duplicate=function(parentBlock){
-    let clone = new PortSlot(parentBlock);
+    let clone = new PortSlot(parentBlock, this.maxPorts);
     clone.enteredData=this.enteredData;
     clone.changeText(this.text);
     return clone;

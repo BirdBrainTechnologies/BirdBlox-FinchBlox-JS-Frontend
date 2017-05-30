@@ -1,12 +1,13 @@
 function ViewMenu(button){
 	Menu.call(this,button);
-	this.addOption("Zoom in", this.optionZoomIn,false);
-	this.addOption("Zoom out", this.optionZoomOut,false);
-	this.addOption("Reset zoom", this.optionResetZoom,true);
-	this.buildMenu();
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
+ViewMenu.prototype.loadOptions = function() {
+	this.addOption("Zoom in", this.optionZoomIn,false);
+	this.addOption("Zoom out", this.optionZoomOut,false);
+	this.addOption("Reset zoom", this.optionResetZoom,true);
+};
 ViewMenu.prototype.optionZoomIn=function(){
 	GuiElements.zoomMultiple+=GuiElements.zoomAmount;
 	GuiElements.zoomMultiple=Math.min(GuiElements.zoomMultiple,GuiElements.maxZoomMult);

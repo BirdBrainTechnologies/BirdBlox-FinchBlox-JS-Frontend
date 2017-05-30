@@ -85,6 +85,7 @@ BlockList.populateCat_hummingbird=function(category){
 BlockList.populateCat_flutter=function(category){
 	category.addBlockByName("B_FlutterServo");
 	category.addBlockByName("B_FlutterTriLed");
+	category.addBlockByName("B_FlutterBuzzer");
 	category.addSpace();
 	category.addBlockByName("B_FlutterLight");
 	category.addBlockByName("B_FlutterTempC");

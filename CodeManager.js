@@ -15,6 +15,7 @@ function CodeManager(){
 	move.topY=0; //The top-left corner's y-coord of the BlockStack being moved.
 	move.bottomX=0; //The bottom-right corner
 	move.bottomY=0;
+	move.showTrash = false; //The trash can only shows if the blocks originated from the tabSpace
 	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
 	move.returnType;
 
@@ -62,6 +63,7 @@ CodeManager.move.start=function(block,x,y){
 		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
 		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
+		move.showTrash = !BlockPalette.IsStackOverPalette(x, y);
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
 		move.bottomOpen=stack.getLastBlock().bottomOpen;
@@ -95,7 +97,9 @@ CodeManager.move.update=function(x,y){
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
-			BlockPalette.ShowTrash();
+			if(move.showTrash) {
+				BlockPalette.ShowTrash();
+			}
 		} else {
 			BlockPalette.HideTrash();
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
@@ -108,7 +112,7 @@ CodeManager.move.update=function(x,y){
 			}
 		}
 	}
-}
+};
 /* Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
  */
 CodeManager.move.end=function(){

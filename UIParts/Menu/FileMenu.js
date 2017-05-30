@@ -1,5 +1,9 @@
 function FileMenu(button){
 	Menu.call(this,button);
+}
+FileMenu.prototype = Object.create(Menu.prototype);
+FileMenu.prototype.constructor = FileMenu;
+FileMenu.prototype.loadOptions = function(){
 	this.addOption("New", this.optionNew);
 	this.addOption("Open", this.optionOpen);
 	this.addOption("Save", this.optionSave);
@@ -9,11 +13,10 @@ function FileMenu(button){
 	//this.addOption("Import", this.optionImport);
 	this.addOption("Export", this.optionExport);
 	this.addOption("Debug", this.optionEnableDebug);
-	this.addOption("Exit", this.optionExit);
-	this.buildMenu();
-}
-FileMenu.prototype = Object.create(Menu.prototype);
-FileMenu.prototype.constructor = FileMenu;
+	if(GuiElements.isKindle) {
+		this.addOption("Exit", this.optionExit);
+	}
+};
 FileMenu.prototype.optionNew=function(){
 	SaveManager.new();
 };

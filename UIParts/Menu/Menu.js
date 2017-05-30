@@ -1,12 +1,9 @@
-function Menu(button,reloadOnOpen,width){
+function Menu(button,width){
 	if(width==null){
 		width=Menu.defaultWidth;
 	}
+	DebugOptions.validateNumbers(width);
 	this.width=width;
-	if(reloadOnOpen==null){
-		reloadOnOpen=false;
-	}
-	this.reloadOnOpen=reloadOnOpen;
 	this.x=button.x;
 	this.y=button.y+button.height;
 	this.group=GuiElements.create.group(this.x,this.y);
@@ -14,7 +11,6 @@ function Menu(button,reloadOnOpen,width){
 	this.bgRect=GuiElements.create.rect(this.group);
 	GuiElements.update.color(this.bgRect,Menu.bgColor);
 	this.menuBnList=null;
-	this.createMenuBnList();
 	this.visible=false;
 	var callbackFn=function(){
 		callbackFn.menu.open();
@@ -47,6 +43,8 @@ Menu.prototype.createMenuBnList=function(){
 	var bnM=Menu.bnMargin;
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
 	this.menuBnList.isOverlayPart=true;
+	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+	this.menuBnList.setMaxHeight(maxH);
 };
 Menu.prototype.addOption=function(text,func,close){
 	if(close==null){
@@ -78,11 +76,9 @@ Menu.prototype.loadOptions=function(){
 Menu.prototype.open=function(){
 	if(!this.visible) {
 		if(this.previewOpen()) {
-			if (this.reloadOnOpen) {
-				this.createMenuBnList();
-				this.loadOptions();
-				this.buildMenu();
-			}
+			this.createMenuBnList();
+			this.loadOptions();
+			this.buildMenu();
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.visible = true;
 			GuiElements.overlay.set(this);

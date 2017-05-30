@@ -37,12 +37,9 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.labelColor=Colors.white;
 
 	BlockPalette.trash = null;
-	BlockPalette.trashImg = {
-		name: "trash",
-		width: 104,
-		height: 120
-	};
 	BlockPalette.trashOpacity = 0.8;
+	BlockPalette.trashHeight = 120;
+	BlockPalette.trashColor = Colors.white;
 };
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
@@ -110,28 +107,26 @@ BlockPalette.ShowTrash=function() {
 	if (!BP.trash) {
 		BP.trash = GuiElements.create.group(0,0);
 		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
-
-		// Create trash icon
-		let img = BP.trashImg;
-		let imgX = BP.width/2 - img.width/2;  // Center X
-		let imgY = BP.y + BP.height/2 - img.height/2;  // Center Y
-		let trashIcon = GuiElements.draw.image(img.name, imgX, imgY, img.width, img.height);
-
-		// Add to group and update opacity
+		GuiElements.update.opacity(trashBg, BP.trashOpacity);
 		BP.trash.appendChild(trashBg);
-		BP.trash.appendChild(trashIcon);
-		GuiElements.update.opacity(BP.trash, BP.trashOpacity);
 
+		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
+		let imgX = BP.width/2 - trashWidth/2;  // Center X
+		let imgY = BP.y + BP.height/2 - BP.trashHeight/2;  // Center Y
+		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
+
+		// Add to group
 		GuiElements.layers.palette.appendChild(BP.trash);
 	}
-}
+};
 BlockPalette.HideTrash=function() {
+	return;
 	let BP = BlockPalette;
 	if (BP.trash) {
 		GuiElements.layers.palette.removeChild(BP.trash);
 		BP.trash = null;
 	}
-}
+};
 BlockPalette.startScroll=function(x,y){
 	var BP=BlockPalette;
 	if(!BP.scrolling){

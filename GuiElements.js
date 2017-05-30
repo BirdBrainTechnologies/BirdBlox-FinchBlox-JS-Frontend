@@ -26,9 +26,10 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load = {};
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
+	GuiElements.load.os = false;
 	if(!DebugOptions.shouldSkipInitSettings()) {
 		var checkIfDone = function () {
-			if (GuiElements.load.version && GuiElements.load.zoom) {
+			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os) {
 				callback();
 			}
 		};
@@ -42,6 +43,10 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.load.zoom = true;
 			checkIfDone();
 		});
+		GuiElements.getOsVersion(function(){
+			GuiElements.load.os = true;
+			checkIfDone();
+		})
 	}
 	else{
 		callback();
@@ -61,7 +66,12 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+
 	GuiElements.blockerOpacity=0.5;
+
+	GuiElements.isKindle = false;
 };
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -709,6 +719,18 @@ GuiElements.getAppVersion=function(callback){
 	catch(err){
 		callback();
 	}
+};
+GuiElements.getOsVersion=function(callback){
+	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
+		GuiElements.osVersion = resp;
+		var parts = resp.split(" ");
+		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
+		callback();
+	}, function(){
+		GuiElements.osVersion="";
+		GuiElements.isKindle = false;
+		callback();
+	});
 };
 /* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
 GuiElements.blockInteraction=function(){

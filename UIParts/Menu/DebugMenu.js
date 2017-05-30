@@ -1,5 +1,11 @@
 function DebugMenu(button){
-	Menu.call(this,button,false,130);
+	Menu.call(this,button,130);
+	this.lastRequest = "";
+	this.lastResponse = "";
+}
+DebugMenu.prototype = Object.create(Menu.prototype);
+DebugMenu.prototype.constructor = DebugMenu;
+DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Enable logging", DebugOptions.enableLogging);
 	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
@@ -16,12 +22,7 @@ function DebugMenu(button){
 	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
 	this.addOption("Throw error", function(){ImNotAFunction();});
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
-	this.buildMenu();
-	this.lastRequest = "";
-	this.lastResponse = "";
-}
-DebugMenu.prototype = Object.create(Menu.prototype);
-DebugMenu.prototype.constructor = DebugMenu;
+};
 DebugMenu.prototype.optionNew=function(){
 	SaveManager.new();
 };
