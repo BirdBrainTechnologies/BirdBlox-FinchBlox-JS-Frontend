@@ -1,10 +1,11 @@
-/* BlockStack is a class that holds a stack of Blocks.
+/**
+ * BlockStack is a class that holds a stack of Blocks.
  * BlockStacks move, execute, and snap the Blocks within them.
  * They pass messages onto their Blocks, which are passed on recursively.
  * Blocks are initially created outside a BlockStacks, but are immediately moved into one.
  * Empty BlockStacks are not allowed because each BlockStack must have a non-null firstBlock property.
  * @constructor
- * @param {firstBlock} Block - The first Block in the BlockStack.
+ * @param {Block} firstBlock - The first Block in the BlockStack.
  * The firstBlock is automatically moved along with subsequent Blocks into the BlockStack.
  * @param {Tab} tab - The tab the BlockStack lives within.
  */
@@ -65,7 +66,8 @@ BlockStack.prototype.updateDim=function() {
 	this.dim.rw=this.dim.rx2-this.dim.rx1;
 	this.dim.rh=this.dim.ry2-this.dim.ry1;
 };
-/* Converts a coordinate relative to the inside of the stack to one relative to the screen.
+/**
+ * Converts a coordinate relative to the inside of the stack to one relative to the screen.
  * @param {number} x - The coord relative to the inside fo the stack.
  * @return {number} - The coord relative to the screen.
  */
@@ -85,7 +87,8 @@ BlockStack.prototype.relToAbsY=function(y){
 		return this.tab.relToAbsY(y+this.y); //In a Tab; return y plus Tab's offset.
 	}
 };
-/* Converts a coordinate relative to the screen to one relative to the inside of the stack.
+/**
+ * Converts a coordinate relative to the screen to one relative to the inside of the stack.
  * @param {number} x - The coord relative to the screen.
  * @return {number} - The coord relative to the inside fo the stack.
  */
@@ -105,13 +108,15 @@ BlockStack.prototype.absToRelY=function(y){
 		return this.tab.absToRelY(y)-this.y; //In a Tab; return y minus Tab's offset.
 	}
 };
-/* Returns the x coord of the BlockStack relative to the screen.
+/**
+ * Returns the x coord of the BlockStack relative to the screen.
  * @return The x coord of the BlockStack relative to the screen.
  */
 BlockStack.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
 };
-/* Returns the y coord of the BlockStack relative to the screen.
+/**
+ * Returns the y coord of the BlockStack relative to the screen.
  * @return The y coord of the BlockStack relative to the screen.
  */
 BlockStack.prototype.getAbsY=function(){
@@ -162,7 +167,8 @@ BlockStack.prototype.findBestFit=function(){
 		}
 	}
 };
-/* Moves this BlockStack to a new location relative to the Tab. Updates this.x and this.y accordingly.
+/**
+ * Moves this BlockStack to a new location relative to the Tab. Updates this.x and this.y accordingly.
  * @param {number} x - the x coord to move to.
  * @param {number} y - the y coord to move to.
  */
@@ -171,7 +177,8 @@ BlockStack.prototype.move=function(x,y){
 	this.y=y;
 	GuiElements.move.group(this.group,x,y);
 };
-/* Moves the BlockStack to a certain location on the screen.
+/**
+ * Moves the BlockStack to a certain location on the screen.
  * @param {number} x - The x coord relative to the screen where the BlockStack should move.
  * @param {number} y - The y coord relative to the screen where the BlockStack should move.
  */
@@ -188,7 +195,8 @@ BlockStack.prototype.stop=function(){
 		this.endRun(); //Removes glow and sets isRunning.
 	}
 };
-/* Updates the execution of the BlockStack and its contents. Returns boolean to indicate if still running.
+/**
+ * Updates the execution of the BlockStack and its contents. Returns boolean to indicate if still running.
  * @return {boolean} - Indicates if the BlockStack is currently running and still requires updating.
  */
 BlockStack.prototype.updateRun=function(){
@@ -223,7 +231,8 @@ BlockStack.prototype.updateRun=function(){
 	}
 	return this.isRunning;
 };
-/* Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
+/**
+ * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
  * @param {Block} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
  */
 BlockStack.prototype.startRun=function(startBlock,broadcastMessage){
@@ -280,7 +289,8 @@ BlockStack.prototype.findBestFitTop=function(){
 		}
 	}
 };
-/* Recursively attaches the provided Block and its subsequent Blocks to the top of this BlockStack.
+/**
+ * Recursively attaches the provided Block and its subsequent Blocks to the top of this BlockStack.
  * @param {Block} block - The Block to attach to this BlockStack.
  * @fix - Remove redundant code.
  */
@@ -318,14 +328,16 @@ BlockStack.prototype.snap=function(block){ //Fix! remove redundant code.
 BlockStack.prototype.highlight=function(){
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.isRunning);
 };
-/* Shifts this BlockStack by the specified amount.
+/**
+ * Shifts this BlockStack by the specified amount.
  * @param {number} x - The amount to shift in the x direction.
  * @param {number} y - The amount to shift in the y direction.
  */
 BlockStack.prototype.shiftOver=function(x,y){
 	this.move(this.x+x,this.y+y);
 };
-/* Recursively copies this BlockStack and all its contents to a new BlockStack. Returns the new BlcokStack.
+/**
+ * Recursively copies this BlockStack and all its contents to a new BlockStack. Returns the new BlcokStack.
  * @return {BlockStack} - The newly-copied BlockStack.
  */
 BlockStack.prototype.duplicate=function(x,y,group){
@@ -340,7 +352,8 @@ BlockStack.prototype.duplicate=function(x,y,group){
 BlockStack.prototype.getTab=function(){
 	return this.tab;
 };
-/* Returns the Sprite this BlockStack and its Blocks are associated with. Called by this BlockStack's Blocks.
+/**
+ * Returns the Sprite this BlockStack and its Blocks are associated with. Called by this BlockStack's Blocks.
  * Used in Block implementations.
  * @return {Sprite} - The Sprite this BlockStack and its Blocks are associated with.
  */
@@ -414,7 +427,8 @@ BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
 BlockStack.prototype.updateAvailableMessages=function(){
 	this.firstBlock.updateAvailableMessages();
 };
-/* Recursively returns the last Block in the BlockStack.
+/**
+ * Recursively returns the last Block in the BlockStack.
  * @return {Block} - The last Block in the BlockStack.
  */
 BlockStack.prototype.getLastBlock=function(){
@@ -441,7 +455,7 @@ BlockStack.prototype.updateTabDim=function(){
 		dim.y2=y2;
 	}
 };
-/* @fix Write documentation. */
+/* TODO: Write documentation. */
 BlockStack.prototype.createXml=function(xmlDoc){
 	var stack=XmlWriter.createElement(xmlDoc,"stack");
 	XmlWriter.setAttribute(stack,"x",this.x);
@@ -451,7 +465,7 @@ BlockStack.prototype.createXml=function(xmlDoc){
 	stack.appendChild(blocks);
 	return stack;
 };
-/* @fix Write documentation. */
+/* TODO: Write documentation. */
 BlockStack.importXml=function(stackNode,tab){
 	var x=XmlWriter.getAttribute(stackNode,"x",0,true);
 	var y=XmlWriter.getAttribute(stackNode,"y",0,true);

@@ -153,14 +153,14 @@ Block.prototype.stop=function(){
 Block.prototype.updateRun=function(){
 	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
 	if(this.running==0||this.running==3){
-		for(var i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution.
+		for(let i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution
 			this.slots[i].stop();
 		}
 		this.running=1; //Now the Block is ready to run its Slots.
 	}
 	var rVal; //The value to return.
 	if(this.running==1){ //If the Block is currently waiting on its Slots...
-		for(var i=0;i<this.slots.length;i++){
+		for(let i=0;i<this.slots.length;i++){
 			//Check to see if each Slot is done and update the first Slot that isn't done.
 			if(this.slots[i].updateRun()){
 				return true; //Still running
@@ -180,7 +180,7 @@ Block.prototype.updateRun=function(){
 		this.running=3; //Record that the Block is done.
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
-	return rVal; //Return either the next Block to run or a boolean indicating if this Block is done.
+	return rVal; //Return a boolean indicating if this Block is done.
 };
 /* Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.

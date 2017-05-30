@@ -252,6 +252,6 @@ HtmlServer.getSetting=function(key,callbackFn,callbackErr){
 HtmlServer.setSetting=function(key,value){
 	var request = "settings/setSetting";
 	request += "?key=" + HtmlServer.encodeHtml(key);
-	request += "&value" + HtmlServer.encodeHtml(value);
+	request += "&value=" + HtmlServer.encodeHtml(value);
 	HtmlServer.sendRequestWithCallback(request);
 };
