@@ -43,7 +43,7 @@ FlutterManager.UpdateConnectionStatus = function() {
 	},function(){
 		FlutterManager.connectionStatus = 0;
 	});
-}
+};
 
 FlutterManager.GetDeviceCount = function() {
 	return Object.keys(FlutterManager.connectedDevices).length;
