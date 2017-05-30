@@ -57,6 +57,7 @@ DiscoverDialog.prototype.showDialog = function() {
 	this.cancelBn = this.makeCancelBn();
 	this.titleRect = this.createTitleRect();
 	this.titleText = this.createTitleLabel();
+
 	GuiElements.layers.dialog.appendChild(this.group);
 	GuiElements.blockInteraction();
 	this.updateTimer = self.setInterval(this.discoverDevices.bind(this), Class.updateInterval);
@@ -77,6 +78,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 };
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
+	deviceList = "hello\nworld\nhi\nthere";
 	if(TouchReceiver.touchDown){
 		return;
 	}
