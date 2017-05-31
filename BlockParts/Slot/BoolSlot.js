@@ -4,9 +4,9 @@
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of.
  */
-function BoolSlot(parent){
+function BoolSlot(parent,key){
 	//Make HexSlot.
-	HexSlot.call(this,parent,Slot.snapTypes.bool);
+	HexSlot.call(this,parent,key,Slot.snapTypes.bool);
 }
 BoolSlot.prototype = Object.create(HexSlot.prototype);
 BoolSlot.prototype.constructor = BoolSlot;

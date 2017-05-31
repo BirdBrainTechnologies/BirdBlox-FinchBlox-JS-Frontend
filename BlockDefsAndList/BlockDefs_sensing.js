@@ -6,7 +6,7 @@
 function B_Ask(x,y){
 	CommandBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"ask"));
-	this.addPart(new StringSlot(this,"what's your name?"));
+	this.addPart(new StringSlot(this,"StrS_msg","what's your name?"));
 	this.addPart(new LabelText(this,"and wait"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
@@ -102,8 +102,7 @@ function B_ResetTimer(x,y){
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
 B_ResetTimer.prototype.startAction=function(){
-	var now=new Date().getTime();
-	CodeManager.timerForSensingBlock=now;
+	CodeManager.timerForSensingBlock=new Date().getTime();
 	return false;
 };
 
@@ -123,7 +122,7 @@ B_Timer.prototype.startAction=function(){
 function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"current"));
-	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	var dS=new DropSlot(this,"DS_interval",null,Slot.snapTypes.bool);
 	dS.addOption("year",new SelectionData("year"));
 	dS.addOption("month",new SelectionData("month"));
 	dS.addOption("date",new SelectionData("date"));

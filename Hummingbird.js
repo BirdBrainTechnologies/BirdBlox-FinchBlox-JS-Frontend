@@ -16,16 +16,11 @@ Hummingbird.prototype.promptRename=function(callbackFn){
 		}
 	});
 };
-Hummingbird.prototype.rename=function(newName,callbackFn){
-	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/rename/"+HtmlServer.encodeHtml(newName);
-	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
-	this.name=newName;
-};
 Hummingbird.prototype.disconnect=function(callbackFn,removeFromManager){
 	if(removeFromManager==null){
 		removeFromManager=true;
 	}
-	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/disconnect";
+	var request="hummingbird/disconnect?name="+HtmlServer.encodeHtml(this.name);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(removeFromManager) {
 		HummingbirdManager.removeHB(this);
@@ -36,7 +31,7 @@ Hummingbird.prototype.connect=function(callbackFn,addToManager){
 	if(addToManager==null){
 		addToManager=true;
 	}
-	var request="hummingbird/"+HtmlServer.encodeHtml(this.name)+"/connect";
+	var request="hummingbird/connect?name="+HtmlServer.encodeHtml(this.name);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(addToManager) {
 		HummingbirdManager.connectedHBs.push(this);

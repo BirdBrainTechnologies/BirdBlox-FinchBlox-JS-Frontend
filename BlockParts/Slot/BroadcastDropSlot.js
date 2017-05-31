@@ -1,6 +1,6 @@
 //@fix Write documentation.
 
-function BroadcastDropSlot(parent,isHatBlock){
+function BroadcastDropSlot(parent,key,isHatBlock){
 	if(isHatBlock==null){
 		isHatBlock=false;
 	}
@@ -9,7 +9,7 @@ function BroadcastDropSlot(parent,isHatBlock){
 		snapType=Slot.snapTypes.none;
 	}
 	this.isHatBlock=isHatBlock;
-	DropSlot.call(this,parent,snapType);
+	DropSlot.call(this,parent,key,snapType);
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
 BroadcastDropSlot.prototype.constructor = BroadcastDropSlot;

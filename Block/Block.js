@@ -118,7 +118,8 @@ Block.prototype.addPart=function(part){
 		this.slots.push(part);
 	}
 };
-/* Moves the Block and sets its this.x and this.y values.
+/**
+ * Moves the Block and sets its this.x and this.y values.
  * @param {number} x - New x coord.
  * @param {number} y - New y coord.
  */
@@ -128,9 +129,8 @@ Block.prototype.move=function(x,y){
 	//All parts of the Block are contained within its group to allow for easy movement.
 	GuiElements.move.group(this.group,x,y);
 };
-/* Recursively stops the Block, its Slots, and any subsequent Blocks.
- */
-/* Recursively stops the Block, its Slots, and any subsequent Blocks.
+/**
+ * Recursively stops the Block, its Slots, and any subsequent Blocks.
  */
 Block.prototype.stop=function(){
 	this.running=0; //Stop this Block.
@@ -147,7 +147,8 @@ Block.prototype.stop=function(){
 		this.nextBlock.stop(); //Stop the next Block.
 	}
 };
-/* Updates this currently executing Block and returns if the Block is still running
+/**
+ * Updates this currently executing Block and returns if the Block is still running
  * @return {boolean} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun=function(){
@@ -184,19 +185,22 @@ Block.prototype.updateRun=function(){
 	}
 	return rVal; //Return a boolean indicating if this Block is done.
 };
-/* Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
+/**
+ * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.startAction=function(){
 	return true; //Still running
 };
-/* Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
+/**
+ * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
 	return true; //Still running //Fix! by default this should be false.
 };
-/* Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
+/**
+ * Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
  * Only used if Block returns a value.
  * Once the Block returns its value, it is done and can reset its state.
  * @return {Data} - The result of the Block's execution.
@@ -208,7 +212,8 @@ Block.prototype.getResultData=function(){
 	}
 	return null; //If called when the block is not done running, return null. This should never happen.
 };
-/* Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
+/**
+ * Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
  * @param {BlockStack} stack - The stack the Blocks will be moved to.
  */
 Block.prototype.changeStack=function(stack){
@@ -228,7 +233,8 @@ Block.prototype.changeStack=function(stack){
 		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
 	}
 };
-/* Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
+/**
+ * Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
  * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
  * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
  */
@@ -245,7 +251,8 @@ Block.prototype.updateStackDim=function(){
 		this.nextBlock.updateStackDim(); //Tell the next block to update.
 	}
 };
-/* Handles more of the recursion for updateStackDim.
+/**
+ * Handles more of the recursion for updateStackDim.
  * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
  * This allows other functions to avoid unnecessary updates when full recursion is not needed.
  * updateStackDimO handled the actual updates.
@@ -256,7 +263,8 @@ Block.prototype.updateStackDimRI=function(){
 	}
 	this.updateStackDimO(); //Update this Block.
 };
-/* Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
+/**
+ * Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
  * It is called recursively by updateStackDim and updateStackDimRI.
  * The stack has two bounding boxes. Both are used when looking for potential Blocks to snap to.
  * Reporters/predicates can snap to the large r bounding box.
@@ -305,7 +313,8 @@ Block.prototype.updateStackDimO=function(){
 	//The Stacks dimensions now include the Block.
 	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
 };
-/* Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
+/**
+ * Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
  */
 Block.prototype.updateDim=function(){
@@ -358,7 +367,8 @@ Block.prototype.updateDim=function(){
 		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
 };
-/* Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
+/**
+ * Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
  * The BlockStack calls this function after the updateDim function, so all sizes are correct.
  * @param {number} x - The x coord this block should have when completed.
  * @param {number} y - The y coord the block should have.
@@ -380,7 +390,8 @@ Block.prototype.updateAlign=function(x,y){
 	}
 	return this.width;
 };
-/* Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
+/**
+ * Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
  * @param {number} x - The x coord this block should have when completed.
  * @param {number} y - The y coord the block should have.
  * y is measured from the top for all Blocks, x is measured from the left.
@@ -404,7 +415,8 @@ Block.prototype.updateAlignRI=function(x,y){
 		}
 	}
 };
-/* Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
+/**
+ * Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
  * @param {number} width - The desired width of the Block.
  * @param {number} height - The desired height of the Block.
  */
@@ -427,7 +439,8 @@ Block.prototype.resize=function(width,height){
 	//Tell BlockGraphics to change the path description to match the new properties.
 	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
 };
-/* Recursively searches for the Block with best fits the currently moving BlockStack.
+/**
+ * Recursively searches for the Block with best fits the currently moving BlockStack.
  * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.
@@ -472,7 +485,8 @@ Block.prototype.findBestFit=function(){
 		this.nextBlock.findBestFit();
 	}
 };
-/* Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
+/**
+ * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
  */
 Block.prototype.highlight=function(){
@@ -483,7 +497,8 @@ Block.prototype.highlight=function(){
 		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen=false");
 	}
 };
-/* Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
+/**
+ * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
  * @param {Block} block - The first Block in the stack to attach to this Block.
  */
 Block.prototype.snap=function(block){ //Fix! documentation
@@ -532,7 +547,8 @@ Block.prototype.snap=function(block){ //Fix! documentation
 		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
 	}
 };
-/* Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+/**
+ * Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
  */
 Block.prototype.unsnap=function(){
@@ -553,7 +569,8 @@ Block.prototype.unsnap=function(){
 	//If the Block already had no parent, just return this Block's stack.
 	return this.stack;
 };
-/* Recursively finds and returns the last Block in this BlockStack.
+/**
+ * Recursively finds and returns the last Block in this BlockStack.
  * @return {Block} - The last Block in this BlockStack.
  */
 Block.prototype.getLastBlock=function(obj){
@@ -564,7 +581,8 @@ Block.prototype.getLastBlock=function(obj){
 		return this.nextBlock.getLastBlock(); //Try the next Block.
 	}
 };
-/* Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
+/**
+ * Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
  * @return {number} - The height of this Block and all subsequent Blocks.
  */
 Block.prototype.addHeights=function(){
@@ -578,39 +596,47 @@ Block.prototype.addHeights=function(){
 /* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicate = function(x, y) {
-	//Uses the constructor of the Block class but has the methods of this specific Block's subclass.
-	//Allows the Block to be constructed without any Slots initially, so they can be duplicated and added on.
-	var copiedClass=function(type,returnType,x1,y1,category){
-		Block.call(this,type,returnType,x1,y1,category); //Call Block constructor.
-	};
-	copiedClass.prototype = Object.create(this.constructor.prototype); //Copy all functions.
-	copiedClass.prototype.constructor = copiedClass; //Only constructor differs.
-
-	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category); //Make an empty Block of this Block's type.
-	myCopy.blockTypeName=this.blockTypeName;
-	for(var i=0;i<this.parts.length;i++){ //Copy this Block's parts to the new Block.
-		myCopy.addPart(this.parts[i].duplicate(myCopy));
+/**
+ * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @param {number} x - The new Block's x coord.
+ * @param {number} y - The new Block's y coord.
+ * @return {Block} - This Block's copy.
+ */
+Block.prototype.duplicate = function(x, y){
+	var myCopy = null;
+	if(this.variable != null){ //Copy variable data if this is a variable Block.
+		myCopy = new this.constructor(x, y, this.variable);
 	}
-	if(this.blockSlot1!=null){ //Copy the contents of its Slots.
-		myCopy.blockSlot1=this.blockSlot1.duplicate(myCopy);
+	else if(this.list != null){
+		myCopy = new this.constructor(x, y, this.list);
+	}
+	else {
+		myCopy = new this.constructor(x, y);
+	}
+	myCopy.copyFrom(this);
+	return myCopy;
+};
+/**
+ * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ */
+Block.prototype.copyFrom = function(block){
+	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	for(var i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
+		this.slots[i].copyFrom(block.slots[i]);
+	}
+	if(this.blockSlot1!=null){ //Copy the contents of its BlockSlots.
+		this.blockSlot1.copyFrom(block.blockSlot1);
 	}
 	if(this.blockSlot2!=null){
-		myCopy.blockSlot2=this.blockSlot2.duplicate(myCopy);
+		this.blockSlot2.copyFrom(block.blockSlot2);
 	}
-	if(this.nextBlock!=null){ //Copy subsequent Blocks.
-		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
-		myCopy.nextBlock.parent=myCopy;
+	if(block.nextBlock!=null){ //Copy subsequent Blocks.
+		this.nextBlock=block.nextBlock.duplicate(0,0);
+		this.nextBlock.parent=this;
 	}
-	if(this.variable!=null){ //Copy variable data if this is a variable Block.
-		myCopy.variable=this.variable;
-	}
-	if(this.list!=null){ //Copy list data if this is a list Block.
-		myCopy.list=this.list;
-	}
-	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
-	return myCopy; //Return finished Block.
 };
+
 /* Returns an entirely text-based version of the Block for display in dialogs.
  * May exclude a slot and replace if with "___".
  * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
@@ -739,6 +765,7 @@ Block.prototype.createXml=function(xmlDoc){
 	var block=XmlWriter.createElement(xmlDoc,"block");
 	XmlWriter.setAttribute(block,"type",this.blockTypeName);
 	var slots=XmlWriter.createElement(xmlDoc,"slots");
+	XmlWriter.setAttribute(slots,"keyVal","true");
 	for(var i=0;i<this.slots.length;i++){
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
 	}
@@ -772,20 +799,38 @@ Block.importXml=function(blockNode){
 	catch(e) {
 		return null;
 	}
-	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	block.copyFromXml(blockNode);
+	return block;
+};
+Block.prototype.importSlotXml = function(slotsNode){
+	var keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
 	var slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
-	for(var i=0;i<slotNodes.length&&i<block.slots.length;i++){
-		block.slots[i].importXml(slotNodes[i]);
+	if(keyVal){
+		for(let i=0;i<this.slots.length;i++){
+			let key = this.slots[i].getKey();
+			let slot = XmlWriter.findNodeByKey(slotNodes, key);
+			if(slot != null) {
+				this.slots[i].importXml(slot);
+			}
+		}
 	}
+	else{
+		for(let i=0;i<slotNodes.length&&i<this.slots.length;i++){
+			this.slots[i].importXml(slotNodes[i]);
+		}
+	}
+};
+Block.prototype.copyFromXml = function(blockNode){
+	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	this.importSlotXml(slotsNode);
 	var blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
 	var blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
-	if(block.blockSlot1!=null&&blockSlotNodes.length>=1){
-		block.blockSlot1.importXml(blockSlotNodes[0]);
+	if(this.blockSlot1!=null&&blockSlotNodes.length>=1){
+		this.blockSlot1.importXml(blockSlotNodes[0]);
 	}
-	if(block.blockSlot2!=null&&blockSlotNodes.length>=2){
-		block.blockSlot2.importXml(blockSlotNodes[1]);
+	if(this.blockSlot2!=null&&blockSlotNodes.length>=2){
+		this.blockSlot2.importXml(blockSlotNodes[1]);
 	}
-	return block;
 };
 Block.prototype.renameVariable=function(variable){
 	this.passRecursively("renameVariable",variable);

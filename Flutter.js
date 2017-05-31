@@ -22,26 +22,12 @@ Flutter.prototype.promptRename = function(callbackFn) {
 };
 
 /**
- * Renames the Flutter
- *
- * @param      {String}  newName    The new name
- * @param      {String}  successFn  The success function
- */
-Flutter.prototype.rename = function(newName, successFn) {
-	let oldNameEncoded = HtmlServer.encodeHtml(this.name);
-	let newNameEncoded = HtmlServer.encodeHtml(newName);
-	let request = "flutter/" + oldNameEncoded + "/rename/" + newNameEncoded;
-	HtmlServer.sendRequestWithCallback(request, successFn, successFn);
-	this.name = newName;
-};
-
-/**
  * Disconnects from a flutter
  *
  * @param      {Function}  successFn  The success function
  */
 Flutter.prototype.disconnect = function(successFn) {
-	let request = "flutter/" + HtmlServer.encodeHtml(this.name) + "/disconnect";
+	let request = "flutter/disconnect?name=" + HtmlServer.encodeHtml(this.name);
 	HtmlServer.sendRequestWithCallback(request, successFn, successFn);
 };
 
@@ -52,7 +38,7 @@ Flutter.prototype.disconnect = function(successFn) {
  * @param      {function}  successFn  The success function
  */
 Flutter.prototype.connect = function(successFn) {
-	let request = "flutter/" + HtmlServer.encodeHtml(this.name) + "/connect";
+	let request = "flutter/connect?name=" + HtmlServer.encodeHtml(this.name);
 	HtmlServer.sendRequestWithCallback(request, successFn, successFn);
 };
 
@@ -69,7 +55,7 @@ Flutter.prototype.readSensor = function(context, sensorType, port) {
 	if (context.sent) {
 		return (context.requestStatus.finished != true);  // Return true if not finished
 	} else {
-		let request = "flutter/" + HtmlServer.encodeHtml(this.name) + "/in/" + sensorType + "/" + port;
+		let request = "flutter/in?name=" + HtmlServer.encodeHtml(this.name) + "&port=" + port;
 		context.requestStatus = {};
 		HtmlServer.sendRequest(request, context.requestStatus);
 		context.sent = true;
@@ -92,8 +78,8 @@ Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/servo/";
-			mem.request = requestPrefix + port + "/" + value;
+			let requestPrefix = "flutter/out/servo?name=" + HtmlServer.encodeHtml(this.name);
+			mem.request = requestPrefix + "&port=" + port + "&angle=" + value;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {
@@ -122,8 +108,8 @@ Flutter.prototype.setBuzzerOrSave = function(shouldSend, block, volume, frequenc
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/buzzer/";
-			mem.request = requestPrefix + volume + "/" + frequency;
+			let requestPrefix = "flutter/out/buzzer?name=" + HtmlServer.encodeHtml(this.name);
+			mem.request = requestPrefix + "&volume=" + volume + "&frequency=" + frequency;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {
@@ -153,8 +139,8 @@ Flutter.prototype.setTriLEDOrSave = function(shouldSend, block, port, valueR, va
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/triled/";
-			mem.request = requestPrefix + port + "/" + valueR + "/" + valueG + "/" + valueB;
+			let requestPrefix = "flutter/out/triled?name=" + HtmlServer.encodeHtml(this.name);
+			mem.request = requestPrefix + "&port=" + port + "&red=" + valueR + "&green=" + valueG + "&blue=" + valueB;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {

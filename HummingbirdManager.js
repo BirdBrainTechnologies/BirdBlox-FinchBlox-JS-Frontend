@@ -57,7 +57,7 @@ HummingbirdManager.UpdateConnectionStatus = function() {
 		HummingbirdManager.connectionStatus = 0;
 	});
 };
-HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
+HummingbirdManager.outputStartAction=function(block,urlPart,valueLabel,minVal,maxVal){
 	var mem=block.runMem;
 	mem.hBIndex=block.slots[0].getData().getValue();
 	mem.portD=block.slots[1].getData();
@@ -65,10 +65,11 @@ HummingbirdManager.outputStartAction=function(block,urlPart,minVal,maxVal){
 	mem.valueD=block.slots[2].getData();
 	mem.value=mem.valueD.getValueInR(minVal,maxVal,false,true);
 	if(mem.port>=1&&mem.port<=4&&mem.valueD.isValid&&mem.portD.isValid) {
-		mem.request = "out/"+urlPart+"/" + mem.port + "/" + mem.value;
+		mem.request = "out/" + urlPart;
+		mem.params = "&port=" + mem.port + "&" + valueLabel + "=" + mem.value;
 		mem.requestStatus=function(){};
 		if(CodeManager.checkHBOutputDelay(block.stack)) {
-			HtmlServer.sendHBRequest(mem.hBIndex,mem.request, mem.requestStatus);
+			HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.params, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
@@ -96,7 +97,7 @@ HummingbirdManager.outputUpdateAction=function(block){
 	}
 	else{
 		if(CodeManager.checkHBOutputDelay(block.stack)){
-			HtmlServer.sendHBRequest(mem.hBIndex,mem.request, mem.requestStatus);
+			HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.params, mem.requestStatus);
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
@@ -109,9 +110,10 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	mem.portD=block.slots[1].getData();
     mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
     if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
-		mem.request = "in/"+urlPart+"/" + mem.port;
-		mem.requestStatus=function(){};
-        HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus);
+    	var request = "in";
+		var params = "&port=" + mem.port;
+		mem.requestStatus={};
+        HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus);
         return true; //Still running
 	}
 	else{
@@ -146,7 +148,7 @@ HummingbirdManager.stopHummingbirds=function(){
 	//HtmlServer.sendRequest("hummingbird/out/stop");
 	var HM=HummingbirdManager;
 	for(var i=0;i<HM.connectedHBs.length;i++){
-		HtmlServer.sendHBRequest(i,"out/stop");
+		HtmlServer.sendHBRequest(i,"out/stop","");
 	}
 };
 

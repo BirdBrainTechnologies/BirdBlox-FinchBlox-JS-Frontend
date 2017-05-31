@@ -178,7 +178,7 @@ B_DeviceOrientation.prototype.updateAction=function(){
 function B_DeviceAcceleration(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
-	var dS=new DropSlot(this);
+	var dS=new DropSlot(this,"DS_axis");
 	dS.addOption("X",new SelectionData(0));
 	dS.addOption("Y",new SelectionData(1));
 	dS.addOption("Z",new SelectionData(2));
@@ -221,7 +221,7 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 function B_DeviceLocation(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
-	var dS=new DropSlot(this);
+	var dS=new DropSlot(this,"DS_dir");
 	dS.addOption("Latitude",new SelectionData(0));
 	dS.addOption("Longitude",new SelectionData(1));
 	dS.setSelectionData("Latitude",new SelectionData(0));
@@ -262,7 +262,7 @@ B_DeviceLocation.prototype.updateAction=function(){
 function B_Display(x,y){
 	CommandBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Display"));
-	this.addPart(new StringSlot(this,"hello"));
+	this.addPart(new StringSlot(this,"StrS_msg","hello"));
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;

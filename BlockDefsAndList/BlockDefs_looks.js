@@ -8,11 +8,11 @@ function B_SetTitleBarColor(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"Set bar color"));
 	this.addPart(new LabelText(this,"R:"));
-	this.addPart(new NumSlot(this,0,true,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",0,true,true));
 	this.addPart(new LabelText(this,"G:"));
-	this.addPart(new NumSlot(this,0,true,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",0,true,true));
 	this.addPart(new LabelText(this,"B:"));
-	this.addPart(new NumSlot(this,0,true,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",0,true,true));
 }
 B_SetTitleBarColor.prototype = Object.create(CommandBlock.prototype);
 B_SetTitleBarColor.prototype.constructor = B_SetTitleBarColor;
@@ -42,7 +42,7 @@ B_SetTitleBarColor.prototype.startAction=function(){
 function B_alert(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"Alert"));
-	this.addPart(new StringSlot(this,"Hi!"));
+	this.addPart(new StringSlot(this,"TEMPKEY","Hi!"));
 }
 B_alert.prototype = Object.create(CommandBlock.prototype);
 B_alert.prototype.constructor = B_alert;
@@ -61,9 +61,9 @@ B_alert.prototype.startAction=function(){
 function B_SayForSecs(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"say"));
-	this.addPart(new StringSlot(this,"Hello!"));
+	this.addPart(new StringSlot(this,"TEMPKEY","Hello!"));
 	this.addPart(new LabelText(this,"for"));
-	this.addPart(new NumSlot(this,2,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",2,true));
 	this.addPart(new LabelText(this,"secs"));
 }
 B_SayForSecs.prototype = Object.create(CommandBlock.prototype);
@@ -72,7 +72,7 @@ B_SayForSecs.prototype.constructor = B_SayForSecs;
 function B_Say(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"say"));
-	this.addPart(new StringSlot(this,"Hello!"));
+	this.addPart(new StringSlot(this,"TEMPKEY","Hello!"));
 }
 B_Say.prototype = Object.create(CommandBlock.prototype);
 B_Say.prototype.constructor = B_Say;
@@ -80,9 +80,9 @@ B_Say.prototype.constructor = B_Say;
 function B_ThinkForSecs(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"think"));
-	this.addPart(new StringSlot(this,"Hmm..."));
+	this.addPart(new StringSlot(this,"TEMPKEY","Hmm..."));
 	this.addPart(new LabelText(this,"for"));
-	this.addPart(new NumSlot(this,2,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",2,true));
 	this.addPart(new LabelText(this,"secs"));
 }
 B_ThinkForSecs.prototype = Object.create(CommandBlock.prototype);
@@ -91,7 +91,7 @@ B_ThinkForSecs.prototype.constructor = B_ThinkForSecs;
 function B_Think(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"think"));
-	this.addPart(new StringSlot(this,"Hmm..."));
+	this.addPart(new StringSlot(this,"TEMPKEY","Hmm..."));
 }
 B_Think.prototype = Object.create(CommandBlock.prototype);
 B_Think.prototype.constructor = B_Think;
@@ -99,7 +99,7 @@ B_Think.prototype.constructor = B_Think;
 function B_ChangeSizeBy(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"change size by"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"TEMPKEY",10));
 }
 B_ChangeSizeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeSizeBy.prototype.constructor = B_ChangeSizeBy;
@@ -107,7 +107,7 @@ B_ChangeSizeBy.prototype.constructor = B_ChangeSizeBy;
 function B_SetSizeTo(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"set size to"));
-	this.addPart(new NumSlot(this,100,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",100,true));
 	this.addPart(new LabelText(this,"%"));
 }
 B_SetSizeTo.prototype = Object.create(CommandBlock.prototype);
@@ -144,7 +144,7 @@ B_GoToFront.prototype.constructor = B_GoToFront;
 function B_GoBackLayers(x,y){
 	CommandBlock.call(this,x,y,"looks");
 	this.addPart(new LabelText(this,"go back"));
-	this.addPart(new NumSlot(this,1,true,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",1,true,true));
 	this.addPart(new LabelText(this,"layers"));
 }
 B_GoBackLayers.prototype = Object.create(CommandBlock.prototype);

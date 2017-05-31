@@ -57,7 +57,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4) {
-				if (xhttp.status == 200) {
+				if (200 <= xhttp.status && xhttp.status <= 299) {
 					if(callbackFn!=null){
 						callbackFn(xhttp.responseText);
 					}
@@ -72,7 +72,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		};
 		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
 		if(isPost){
-			xhttp.setRequestHeader("Content-type", "application/raw");
+			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
 			xhttp.send(postData);
 		}
 		else{
@@ -85,9 +85,9 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		}
 	}
 };
-HtmlServer.sendHBRequest=function(hBIndex,request,requestStatus){
+HtmlServer.sendHBRequest=function(hBIndex,request,params,requestStatus){
 	if(HummingbirdManager.connectedHBs.length>hBIndex) {
-		HtmlServer.sendRequest(HtmlServer.getHBRequest(hBIndex,request), requestStatus);
+		HtmlServer.sendRequest(HtmlServer.getHBRequest(hBIndex,request,params), requestStatus);
 	}
 	else{
 		if(requestStatus!=null) {
@@ -115,9 +115,14 @@ HtmlServer.sendRequest=function(request,requestStatus){
 		HtmlServer.sendRequestWithCallback(request);
 	}
 }
-HtmlServer.getHBRequest=function(hBIndex,request){
-	return "hummingbird/"+HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name)+"/"+request;
-}
+HtmlServer.getHBRequest=function(hBIndex,request,params){
+	DebugOptions.validateNonNull(params);
+	var res = "hummingbird/";
+	res += request;
+	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name);
+	res += params;
+	return params;
+};
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }

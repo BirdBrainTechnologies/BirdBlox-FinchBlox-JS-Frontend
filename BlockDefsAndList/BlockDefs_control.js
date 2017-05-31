@@ -26,7 +26,7 @@ B_WhenFlagTapped.prototype.startAction=function(){
 function B_WhenIReceive(x,y){
 	HatBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"when I receive"));
-	this.addPart(new BroadcastDropSlot(this,true));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",true));
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
@@ -50,7 +50,7 @@ B_WhenIReceive.prototype.startAction=function(){
 function B_Wait(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"wait"));
-	this.addPart(new NumSlot(this,1,true)); //Must be positive.
+	this.addPart(new NumSlot(this,"NumS_dur",1,true)); //Must be positive.
 	this.addPart(new LabelText(this,"secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
@@ -78,7 +78,7 @@ B_Wait.prototype.updateAction=function(){
 function B_WaitUntil(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"wait until"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
@@ -121,7 +121,7 @@ B_Forever.prototype.updateAction=function(){
 function B_Repeat(x,y){
 	LoopBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"repeat"));
-	this.addPart(new NumSlot(this,10,true,true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_count",10,true,true)); //Positive integer.
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
@@ -159,7 +159,7 @@ B_Repeat.prototype.updateAction=function(){
 function B_RepeatUntil(x,y){
 	LoopBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"repeat until"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
@@ -188,7 +188,7 @@ B_RepeatUntil.prototype.updateAction=function(){
 function B_If(x,y){
 	LoopBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"if"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
@@ -213,7 +213,7 @@ B_If.prototype.updateAction=function(){
 function B_IfElse(x,y){
 	DoubleLoopBlock.call(this,x,y,"control","else");
 	this.addPart(new LabelText(this,"if"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
 B_IfElse.prototype.constructor = B_IfElse;
@@ -243,25 +243,14 @@ B_IfElse.prototype.updateAction=function(){
 	}
 	return true; //Still running
 };
-///// <Not implemented> /////
-function B_WhenIAmTapped(x,y){
-	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when I am"));
-	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
-	dS.addOption("tapped",new SelectionData("tapped"));
-	dS.addOption("pressed",new SelectionData("pressed"));
-	dS.addOption("released",new SelectionData("released"));
-	this.addPart(dS);
-}
-B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
-B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
+
 
 
 
 function B_Broadcast(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"broadcast"));
-	this.addPart(new BroadcastDropSlot(this,false));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",false));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
@@ -281,7 +270,7 @@ B_Broadcast.prototype.updateAction=function(){
 function B_BroadcastAndWait(x,y){
 	CommandBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"broadcast"));
-	this.addPart(new BroadcastDropSlot(this,false));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",false));
 	this.addPart(new LabelText(this,"and wait"));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
@@ -315,7 +304,7 @@ B_Message.prototype.startAction=function(){
 function B_Stop(x,y){//No bottom slot
 	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
-	var dS=new DropSlot(this,Slot.snapTypes.none);
+	var dS=new DropSlot(this,"DS_act",Slot.snapTypes.none);
 	dS.addOption("all",new SelectionData("all"));
 	dS.addOption("this script",new SelectionData("this_script"));
 	//dS.addOption("this block",new SelectionData("this_block"));
@@ -339,3 +328,22 @@ B_Stop.prototype.startAction=function(){
 	}
 	return false;
 };
+
+
+
+
+///// <Not implemented> /////
+function B_WhenIAmTapped(x,y){
+	HatBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"when I am"));
+	var dS=new DropSlot(this,"DS_act",null,Slot.snapTypes.bool);
+	dS.addOption("tapped",new SelectionData("tapped"));
+	dS.addOption("pressed",new SelectionData("pressed"));
+	dS.addOption("released",new SelectionData("released"));
+	this.addPart(dS);
+}
+B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
+B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
+
+
+

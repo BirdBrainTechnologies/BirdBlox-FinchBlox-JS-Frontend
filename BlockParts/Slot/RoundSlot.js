@@ -10,8 +10,8 @@
  * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
  * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
  */
-function RoundSlot(parent,snapType,outputType,data,positive,integer){
-	Slot.call(this,parent,Slot.inputTypes.num,snapType,outputType); //Call constructor.
+function RoundSlot(parent,key,snapType,outputType,data,positive,integer){
+	Slot.call(this,parent,key,Slot.inputTypes.num,snapType,outputType); //Call constructor.
 	//Entered data stores the data that has been entered using the InputPad.
 	this.enteredData=data; //Set entered data to initial value.
 	this.text=this.enteredData.asString().getValue();
@@ -193,23 +193,17 @@ RoundSlot.prototype.saveNumData=function(data){
 		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
 	}
 };
-/* Recursively copies the RoundSlot and its children.
- * @param {Block} parentCopy - A copy of the RoundSlot's parent.
- * @return {RoundSlot} - A copy of the RoundSlot.
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {RoundSlot} slot - The slot to copy from
  */
-RoundSlot.prototype.duplicate=function(parentCopy){
-	var data=this.enteredData;
-	//Use constructor.
-	var myCopy=new RoundSlot(parentCopy,this.snapType,this.outputType,data,this.positive,this.integer);
-	for(var i=0;i<this.optionsText.length;i++){ //Copy special options.
-		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
+RoundSlot.prototype.copyFrom=function(slot){
+	var data = slot.enteredData;
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
 	}
-	if(this.hasChild){ //Copy child
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	myCopy.changeText(this.text);
-	myCopy.dropColumns=this.dropColumns;
-	return myCopy;
 };
 /* Selects the Slot for editing and changes its appearance.
  */
@@ -290,17 +284,12 @@ RoundSlot.prototype.ungrayValue=function(){
 };
 
 RoundSlot.prototype.createXml=function(xmlDoc){
-	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
 	XmlWriter.setAttribute(slot,"type","RoundSlot");
-	XmlWriter.setAttribute(slot,"text",this.text);
 	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
 	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
 	slot.appendChild(enteredData);
-	if(this.hasChild){
-		var child=XmlWriter.createElement(xmlDoc,"child");
-		child.appendChild(this.child.createXml(xmlDoc));
-		slot.appendChild(child);
-	}
+	XmlWriter.setAttribute(slot,"text",this.text);
 	return slot;
 };
 RoundSlot.prototype.importXml=function(slotNode){

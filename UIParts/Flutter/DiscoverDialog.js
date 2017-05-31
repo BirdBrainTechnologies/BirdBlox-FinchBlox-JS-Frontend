@@ -88,10 +88,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 		return;
 	}
 	let Class = DiscoverDialog;
-	let deviceArr = [];
-	if (deviceList != "") {
-		deviceArr = deviceList.split("\n");
-	}
+	let deviceArr = JSON.parse(deviceList);
 
 	let oldScrollY = 0;
 	if(this.menuBnList != null){
@@ -102,7 +99,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-this.menuBnListY-Class.cancelBnHeight-Class.bnMargin*2);
 	for(let i=0; i<deviceArr.length; i++){
-		this.addBnListOption(deviceArr[i]);
+		this.addBnListOption(deviceArr[i].id);
 	}
 	this.menuBnList.show();
 	this.menuBnList.scroll(oldScrollY);

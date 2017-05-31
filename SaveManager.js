@@ -63,12 +63,9 @@ SaveManager.export=function(){
 	var fileName;
 	if(SaveManager.named){
 		fileName=SaveManager.fileName;
+		var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+		HtmlServer.sendRequestWithCallback("data/export?filename="+fileName);
 	}
-	else{
-		fileName="project";
-	}
-	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-	HtmlServer.sendRequestWithCallback("data/export?filename="+fileName,null, null,true,xmlDocText);
 };
 SaveManager.import=function(fileName,projectData){
 	SaveManager.loadFile(projectData);

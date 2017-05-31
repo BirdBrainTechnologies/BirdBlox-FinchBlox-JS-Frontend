@@ -7,7 +7,7 @@
  * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
  * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
  */
-function NumSlot(parent,value,positive,integer){
+function NumSlot(parent,key,value,positive,integer){
 	if(positive==null){ //Optional parameters are false by default.
 		positive=false;
 	}
@@ -15,7 +15,7 @@ function NumSlot(parent,value,positive,integer){
 		integer=false;
 	}
 	//Make RoundSlot.
-	RoundSlot.call(this,parent,Slot.snapTypes.numStrBool,Slot.outputTypes.num,new NumData(value),positive,integer);
+	RoundSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.num,new NumData(value),positive,integer);
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
