@@ -753,9 +753,6 @@ Block.prototype.createXml=function(xmlDoc){
 	}
 	return block;
 };
-Block.prototype.importXml=function(blockNode){
-	return new this.constructor(0, 0);
-};
 Block.importXml=function(blockNode){
 	var type=XmlWriter.getAttribute(blockNode,"type");
 	var block;
