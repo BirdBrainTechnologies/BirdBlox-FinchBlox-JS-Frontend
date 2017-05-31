@@ -20,9 +20,10 @@ SoundDropSlot.prototype.duplicate=function(parentCopy){
 	return myCopy;
 };
 SoundDropSlot.prototype.edit=function(){
+	var me = this;
 	DropSlot.prototype.edit.call(this, function(){
-		if(this.enteredData != null) {
-			var soundName = this.enteredData.getValue();
+		if(me.enteredData != null) {
+			var soundName = me.enteredData.getValue();
 			if(Sounds.checkNameIsValid(soundName)){
 				var request = "sound/play/"+soundName;
 				HtmlServer.sendRequestWithCallback(request);
