@@ -907,8 +907,13 @@ Block.prototype.throwError = function(message){
 Block.setDisplaySuffix = function(Class, suffix){
 	Class.prototype.displayResult = function(){
 		if(this.running >= 2) {
-			var value = this.getResultData().asString().getValue();
-			this.displayValue(value + " " + suffix, false);
+			if(this.getResultData().isValid) {
+				var value = this.getResultData().asString().getValue();
+				this.displayValue(value + " " + suffix, false);
+			}
+			else{
+				this.displayValue(this.getResultData().asString().getValue(), false);
+			}
 		}
 	};
 };
