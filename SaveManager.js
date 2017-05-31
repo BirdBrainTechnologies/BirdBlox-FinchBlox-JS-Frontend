@@ -12,7 +12,7 @@ SaveManager.open=function(fileName){
 			SaveManager.markSaved();
 		};
 		callbackFn.fileName=fileName;
-		HtmlServer.sendRequestWithCallback("data/load/" + fileName, callbackFn);
+		HtmlServer.sendRequestWithCallback("data/load?filename=" + fileName, callbackFn);
 	};
 	SaveManager.checkPromptSave(callbackFnOpen);
 };
@@ -49,7 +49,7 @@ SaveManager.checkPromptSave=function(nextAction){
 SaveManager.save=function(nextAction){
 	if(SaveManager.named){
 		var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-		HtmlServer.sendRequestWithCallback("data/save/"+SaveManager.fileName,nextAction, null,true,xmlDocText);
+		HtmlServer.sendRequestWithCallback("data/save?filename="+SaveManager.fileName,nextAction, null,true,xmlDocText);
 		SaveManager.markSaved();
 	}
 	else{
@@ -68,7 +68,7 @@ SaveManager.export=function(){
 		fileName="project";
 	}
 	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-	HtmlServer.sendRequestWithCallback("data/export/"+fileName,null, null,true,xmlDocText);
+	HtmlServer.sendRequestWithCallback("data/export?filename="+fileName,null, null,true,xmlDocText);
 };
 SaveManager.import=function(fileName,projectData){
 	SaveManager.loadFile(projectData);
@@ -178,7 +178,10 @@ SaveManager.rename=function(newName){
 		SaveManager.save(null);
 	};
 	callbackFn.newName=newName;
-	HtmlServer.sendRequestWithCallback("data/rename/"+SaveManager.fileName+"/"+newName,callbackFn);
+	var request = "data/rename/";
+	request += "?oldFilename=" + SaveManager.fileName;
+	request += "&newFilename=" + newName;
+	HtmlServer.sendRequestWithCallback(request,callbackFn);
 };
 SaveManager.promptForDelete=function(){
 	if(!SaveManager.named&&!SaveManager.modified){
@@ -202,7 +205,7 @@ SaveManager.delete=function(){
 	var callbackFn=function(){
 		SaveManager.new();
 	};
-	HtmlServer.sendRequestWithCallback("data/delete/"+SaveManager.fileName,callbackFn);
+	HtmlServer.sendRequestWithCallback("data/delete?filename="+SaveManager.fileName,callbackFn);
 };
 SaveManager.autoSave=function(){
 	if(SaveManager.named){

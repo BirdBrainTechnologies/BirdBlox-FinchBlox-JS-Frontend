@@ -147,7 +147,7 @@ TabManager.endZooming = function(){
 TabManager.createXml=function(xmlDoc){
 	var TM=TabManager;
 	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
-	XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
+	//XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
 	for(var i=0;i<TM.tabList.length;i++){
 		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
 	}
@@ -157,7 +157,7 @@ TabManager.importXml=function(tabsNode){
 	var TM=TabManager;
 	if(tabsNode!=null) {
 		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
-		var active = XmlWriter.getAttribute(tabsNode, "active");
+		//var active = XmlWriter.getAttribute(tabsNode, "active");
 		for (var i = 0; i < tabNodes.length; i++) {
 			Tab.importXml(tabNodes[i]);
 		}
@@ -166,16 +166,7 @@ TabManager.importXml=function(tabsNode){
 	if(TM.tabList.length==0){
 		TM.createInitialTab();
 	}
-	else if(active==null){
-		TM.activateTab(TM.tabList[0]);
-	}
 	else{
-		for(i=0;i<TM.tabList.length;i++){
-			if(TM.tabList[i].name==active){
-				TM.activateTab(TM.tabList[i]);
-				return;
-			}
-		}
 		TM.activateTab(TM.tabList[0]);
 	}
 };

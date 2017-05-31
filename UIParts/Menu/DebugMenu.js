@@ -7,6 +7,8 @@ DebugMenu.prototype = Object.create(Menu.prototype);
 DebugMenu.prototype.constructor = DebugMenu;
 DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Enable logging", DebugOptions.enableLogging);
+	this.addOption("Load file", this.loadFile);
+	this.addOption("Download file", this.downloadFile);
 	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
 	this.addOption("Set JS Url", this.optionSetJsUrl);
@@ -22,6 +24,18 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
 	this.addOption("Throw error", function(){ImNotAFunction();});
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
+};
+DebugMenu.prototype.loadFile=function(){
+	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
+		if(!cancelled){
+			SaveManager.loadFile(resp);
+		}
+	});
+};
+DebugMenu.prototype.downloadFile = function(){
+	var xml = XmlWriter.docToText(CodeManager.createXml());
+	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+	window.open(url, '_blank');
 };
 DebugMenu.prototype.optionNew=function(){
 	SaveManager.new();

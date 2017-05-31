@@ -4,7 +4,7 @@ function DebugOptions(){
 	var DO = DebugOptions;
 	DO.enabled = true;
 
-	DO.mouse = false;
+	DO.mouse = true;
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = true;
 	DO.showVersion = false;
@@ -97,6 +97,7 @@ DebugOptions.stopErrorLocking = function(){
 DebugOptions.enableLogging = function(){
 	DebugOptions.blockLogging = false;
 };
+
 function UserException(message) {
 	this.message = message;
 	this.name = 'UserException';

@@ -224,9 +224,10 @@ Tab.prototype.updateTabDim=function(){
 };
 Tab.prototype.createXml=function(xmlDoc){
 	var tab=XmlWriter.createElement(xmlDoc,"tab");
-	XmlWriter.setAttribute(tab,"name",this.name);
+	//XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab,"x",this.scrollX);
 	XmlWriter.setAttribute(tab,"y",this.scrollY);
+	XmlWriter.setAttribute(tab,"zoom",this.zoomFactor);
 	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
 	for(var i=0;i<this.stackList.length;i++){
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
@@ -235,13 +236,15 @@ Tab.prototype.createXml=function(xmlDoc){
 	return tab;
 };
 Tab.importXml=function(tabNode){
-	var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
+	//var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
 	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
 	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
-	var tab=new Tab(null,name);
+	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	var tab=new Tab();
 	tab.scrollX=x;
 	tab.scrollY=y;
-	GuiElements.move.group(tab.mainG,tab.scrollX,tab.scrollY);
+	tab.zoomFactor = zoom;
+	tab.updateTransform();
 	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
 	if(stacksNode!=null){
 		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
@@ -249,6 +252,7 @@ Tab.importXml=function(tabNode){
 			BlockStack.importXml(stackNodes[i],tab);
 		}
 	}
+	tab.updateArrows();
 	return tab;
 };
 Tab.prototype.delete=function(){

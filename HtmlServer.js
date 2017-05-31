@@ -72,8 +72,8 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		};
 		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
 		if(isPost){
-			xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			xhttp.send("data="+HtmlServer.encodeHtml(postData));
+			xhttp.setRequestHeader("Content-type", "application/raw");
+			xhttp.send(postData);
 		}
 		else{
 			xhttp.send(); //Make the request
