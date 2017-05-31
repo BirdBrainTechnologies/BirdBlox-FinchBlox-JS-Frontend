@@ -97,6 +97,7 @@ DebugOptions.stopErrorLocking = function(){
 DebugOptions.enableLogging = function(){
 	DebugOptions.blockLogging = false;
 };
+
 function UserException(message) {
 	this.message = message;
 	this.name = 'UserException';
