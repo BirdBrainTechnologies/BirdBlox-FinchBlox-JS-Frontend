@@ -1,7 +1,7 @@
 //@fix Write documentation.
 
-function VarDropSlot(parent){
-	DropSlot.call(this,parent,Slot.snapTypes.none);
+function VarDropSlot(key, parent){
+	DropSlot.call(this,key, parent,Slot.snapTypes.none);
 	var variables=CodeManager.variableList;
 	if(variables.length>0){
 		var lastVar=variables[variables.length-1];
@@ -17,12 +17,6 @@ VarDropSlot.prototype.populateList=function(){
 		var currentVar=variables[i];
 		this.addOption(currentVar.getName(),new SelectionData(currentVar));
 	}
-};
-VarDropSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new VarDropSlot(parentCopy);
-	myCopy.enteredData=this.enteredData;
-	myCopy.changeText(this.text);
-	return myCopy;
 };
 VarDropSlot.prototype.importXml=function(slotNode){
 	var type=XmlWriter.getAttribute(slotNode,"type");

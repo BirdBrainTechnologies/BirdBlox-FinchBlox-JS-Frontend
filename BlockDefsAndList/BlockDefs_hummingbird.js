@@ -5,16 +5,16 @@
 
 function B_HBServo(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"Servo"));
-	this.addPart(new PortSlot(this, 4));
-	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 4));
+	this.addPart(new NumSlot(this,"NumS_angle",0,true,true)); //Positive integer.
 }
 B_HBServo.prototype = Object.create(CommandBlock.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
 /* Generic Hummingbird single output functions. */
 B_HBServo.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"servo",0,180); //0 to 180
+	return HummingbirdManager.outputStartAction(this,"servo","angle",0,180); //0 to 180
 };
 B_HBServo.prototype.updateAction=function(){
 	return HummingbirdManager.outputUpdateAction(this);
@@ -24,9 +24,9 @@ B_HBServo.prototype.updateAction=function(){
 
 function B_HBLight(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"Light"));
-	this.addPart(new PortSlot(this, 4)); //Four sensor ports.
+	this.addPart(new PortSlot(this,"PortS_1", 4)); //Four sensor ports.
 }
 B_HBLight.prototype = Object.create(ReporterBlock.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
@@ -42,16 +42,16 @@ B_HBLight.prototype.updateAction=function(){
 
 function B_HBMotor(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"Motor"));
-	this.addPart(new PortSlot(this, 2));
-	this.addPart(new NumSlot(this,0, false, true)); //Integer
+	this.addPart(new PortSlot(this,"PortS_1", 2));
+	this.addPart(new NumSlot(this,"NumS_amt",0, false, true)); //Integer
 }
 B_HBMotor.prototype = Object.create(CommandBlock.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
 /* Generic Hummingbird single output functions. */
 B_HBMotor.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"motor",-100,100); //-100 to 100
+	return HummingbirdManager.outputStartAction(this,"motor","speed",-100,100); //-100 to 100
 };
 B_HBMotor.prototype.updateAction=function(){
 	return HummingbirdManager.outputUpdateAction(this);
@@ -59,16 +59,16 @@ B_HBMotor.prototype.updateAction=function(){
 
 function B_HBVibration(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"Vibration"));
-	this.addPart(new PortSlot(this, 2));
-	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 2));
+	this.addPart(new NumSlot(this,"NumS_amt",0,true, true)); //Positive integer.
 }
 B_HBVibration.prototype = Object.create(CommandBlock.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
 /* Generic Hummingbird single output functions. */
 B_HBVibration.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"vibration",0,100); //0 to 100
+	return HummingbirdManager.outputStartAction(this,"vibration","intensity",0,100); //0 to 100
 };
 B_HBVibration.prototype.updateAction=function(){
 	return HummingbirdManager.outputUpdateAction(this);
@@ -78,16 +78,16 @@ B_HBVibration.prototype.updateAction=function(){
 
 function B_HBLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"LED"));
-	this.addPart(new PortSlot(this, 4));
-	this.addPart(new NumSlot(this,0,true, true)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 4));
+	this.addPart(new NumSlot(this,"NumS_amt",0,true, true)); //Positive integer.
 }
 B_HBLed.prototype = Object.create(CommandBlock.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
 /* Generic Hummingbird single output functions. */
 B_HBLed.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"led",0,100); //0 to 100
+	return HummingbirdManager.outputStartAction(this,"led","intensity",0,100); //0 to 100
 };
 B_HBLed.prototype.updateAction=function(){
 	return HummingbirdManager.outputUpdateAction(this);
@@ -97,9 +97,9 @@ B_HBLed.prototype.updateAction=function(){
 
 function B_HBTempC(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Temperature C"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBTempC.prototype = Object.create(ReporterBlock.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
@@ -117,9 +117,9 @@ Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 function B_HBDistCM(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Distance CM"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBDistCM.prototype = Object.create(ReporterBlock.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -136,9 +136,9 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 function B_HBKnob(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
 	this.addPart(new LabelText(this,"Knob"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBKnob.prototype = Object.create(ReporterBlock.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
@@ -154,9 +154,9 @@ B_HBKnob.prototype.updateAction=function(){
 
 function B_HBSound(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Sound"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBSound.prototype = Object.create(ReporterBlock.prototype);
 B_HBSound.prototype.constructor = B_HBSound;
@@ -174,15 +174,15 @@ B_HBSound.prototype.updateAction=function(){
 
 function B_HBTriLed(x,y){
 	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
 	this.addPart(new LabelText(this,"TRI-LED"));
-	this.addPart(new PortSlot(this, 2));
+	this.addPart(new PortSlot(this,"PortS_1", 2));
 	this.addPart(new LabelText(this,"R"));
-	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_r",0,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"G"));
-	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_g",0,true,true)); //Positive integer.
 	this.addPart(new LabelText(this,"B"));
-	this.addPart(new NumSlot(this,0,true,true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_b",0,true,true)); //Positive integer.
 }
 B_HBTriLed.prototype = Object.create(CommandBlock.prototype);
 B_HBTriLed.prototype.constructor = B_HBTriLed;
@@ -202,10 +202,15 @@ B_HBTriLed.prototype.startAction=function(){
 	mem.isValid=mem.dataR.isValid&&mem.dataG.isValid&&mem.dataB.isValid;
 
 	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
-		mem.request = "out/triled/"+mem.port+"/"+mem.valueR+"/"+mem.valueG+"/"+mem.valueB;
-		mem.requestStatus=function(){};
+		var request = "triled";
+		var params = "";
+		params += "&port=" + mem.port;
+		params += "&red=" + mem.valueR;
+		params += "&green=" + mem.valueG;
+		params += "&blue=" + mem.valueB;
+		mem.requestStatus={};
 		if(CodeManager.checkHBOutputDelay(this.stack)){
-			HtmlServer.sendHBRequest(mem.hBIndex,mem.request,mem.requestStatus); //Send the request.
+			HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus); //Send the request.
 			mem.sent=true;
 			CodeManager.updateHBOutputDelay();
 		}
@@ -227,9 +232,9 @@ B_HBTriLed.prototype.updateAction=function(){
 
 function B_HBTempF(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
 	this.addPart(new LabelText(this,"Temperature F"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBTempF.prototype = Object.create(ReporterBlock.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
@@ -255,9 +260,9 @@ Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 function B_HBDistInch(x,y){
 	ReporterBlock.call(this,x,y,"hummingbird");
-    this.addPart(new DeviceDropSlot(this, HummingbirdManager, true));
+    this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
     this.addPart(new LabelText(this,"HB Distance Inch"));
-	this.addPart(new PortSlot(this, 4));
+	this.addPart(new PortSlot(this,"PortS_1", 4));
 }
 B_HBDistInch.prototype = Object.create(ReporterBlock.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch; //positive float

@@ -5,8 +5,8 @@
  * @param {Block} parent - The Block this Slot is a part of.
  * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the RoundSlot.
  */
-function HexSlot(parent,snapType){
-	Slot.call(this,parent,Slot.inputTypes.bool,snapType,Slot.outputTypes.bool); //Call constructor.
+function HexSlot(parent,key,snapType){
+	Slot.call(this,parent,key,Slot.inputTypes.bool,snapType,Slot.outputTypes.bool); //Call constructor.
 	this.buildSlot(); //Create the SVG elements that make up the Slot.
 }
 HexSlot.prototype = Object.create(Slot.prototype);
@@ -57,18 +57,6 @@ HexSlot.prototype.highlight=function(){
 	var isSlot=!this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,2,isSlot);
 };
-/* Recursively copies the HexSlot and its children.
- * @param {Block} parentCopy - A copy of the HexSlot's parent.
- * @return {HexSlot} - A copy of the HexSlot.
- */
-HexSlot.prototype.duplicate=function(parentCopy){
-	//Use constructor.
-	var myCopy=new HexSlot(parentCopy,this.snapType);
-	if(this.hasChild){ //Copy child
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	return myCopy;
-};
 /* Returns a text-based version of the Slot for display in dialogs.
  * @return {string} - The text-based summary of the Slot.
  */
@@ -98,13 +86,8 @@ HexSlot.prototype.getData=function(){
 };
 
 HexSlot.prototype.createXml=function(xmlDoc){
-	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	var slot = Slot.prototype.call(this, xmlDoc);
 	XmlWriter.setAttribute(slot,"type","HexSlot");
-	if(this.hasChild){
-		var child=XmlWriter.createElement(xmlDoc,"child");
-		child.appendChild(this.child.createXml(xmlDoc));
-		slot.appendChild(child);
-	}
 	return slot;
 };
 HexSlot.prototype.importXml=function(slotNode){

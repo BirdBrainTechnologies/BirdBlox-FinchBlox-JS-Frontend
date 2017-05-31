@@ -2,10 +2,10 @@
 /* Output Blocks */
 function B_FlutterServo(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", FlutterManager));
 	this.addPart(new LabelText(this, "Servo"));
-	this.addPart(new PortSlot(this, 3)); //Positive integer.
-	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 3)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_angle", 0, true, true)); //Positive integer.
 }
 B_FlutterServo.prototype = Object.create(CommandBlock.prototype);
 B_FlutterServo.prototype.constructor = B_FlutterServo;
@@ -29,15 +29,15 @@ B_FlutterServo.prototype.updateAction = function() {
 
 function B_FlutterTriLed(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this, FlutterManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", FlutterManager, true));
 	this.addPart(new LabelText(this, "TRI-LED"));
-	this.addPart(new PortSlot(this, 3)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 3)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
-	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_r", 0, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "G"));
-	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_g", 0, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "B"));
-	this.addPart(new NumSlot(this, 0, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_b", 0, true, true)); //Positive integer.
 }
 B_FlutterTriLed.prototype = Object.create(CommandBlock.prototype);
 B_FlutterTriLed.prototype.constructor = B_FlutterTriLed;
@@ -75,12 +75,12 @@ B_FlutterTriLed.prototype.updateAction = function() {
 
 function B_FlutterBuzzer(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this, FlutterManager, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", FlutterManager, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this, 20, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_vol", 20, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this, 10000, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this,"NumS_freq", 10000, true, true)); //Positive integer.
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
@@ -114,9 +114,9 @@ function B_FlutterSensorBase(x, y, sensorType, displayName) {
 	ReporterBlock.call(this, x, y, "flutter");
 	this.sensorType = sensorType;
 	this.displayName = displayName;
-	this.addPart(new DeviceDropSlot(this, FlutterManager));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", FlutterManager));
 	this.addPart(new LabelText(this, displayName));
-	this.addPart(new PortSlot(this, 3)); //Positive integer.
+	this.addPart(new PortSlot(this,"PortS_1", 3)); //Positive integer.
 }
 B_FlutterSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FlutterSensorBase.constructor = B_FlutterSensorBase;
@@ -152,7 +152,7 @@ B_FlutterSensorBase.prototype.updateAction = function() {
 		return false; // Done
 	}
 	return true; // Still running
-}
+};
 
 function B_FlutterLight(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "light", "Light");

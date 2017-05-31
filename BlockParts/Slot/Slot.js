@@ -1,4 +1,5 @@
-/* Slot is an abstract class that represents a space on a Block where data can be entered and Block attached.
+/**
+ * Slot is an abstract class that represents a space on a Block where data can be entered and Block attached.
  * Every Slot has a parent Block which it relies on heavily.
  * Slots can be edited in different ways, as indicated by their shape.
  * Slots can accept different types of Blocks and can automatically convert Data into a certain type.
@@ -6,11 +7,14 @@
  * Slots must implement updateDimNR(); moveSlot(x,y); hideSlot(); showSlot(); highlight(); buildSlot();
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
- * @param {number [none,num,string,drop]} inputType - The type of Data which can be directly entered into the Slot.
- * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the Slot.
- * @param {number [any,num,string,bool,list] - The type of Data the Slot should convert to before outputting.
+ * @param {number} inputType - [none,num,string,drop] The type of Data which can be directly entered into the Slot.
+ * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the Slot.
+ * @param {number} outputType - [any,num,string,bool,list] The type of Data the Slot should convert to before outputting.
+ * @param {String} key - The name of the Slot
  */
-function Slot(parent,inputType,snapType,outputType){
+function Slot(parent,key, inputType,snapType,outputType){
+	DebugOptions.validateNonNull(key);
+	DebugOptions.assert(key.includes("_"));
 	//Store data passed by constructor.
 	this.inputType=inputType;
 	this.snapType=snapType;
@@ -26,6 +30,7 @@ function Slot(parent,inputType,snapType,outputType){
 	this.running=0; //Running: 0=Not started 2=Running 3=Completed
 	this.resultIsFromChild=false; //The result to return comes from a child Block, not a direct input.
 	this.resultData=null; //passed to Block for use in implementation.
+	this.key = key;
 }
 Slot.setConstants=function(){
 	//The type of Data which can be directly entered into the Slot.
@@ -264,17 +269,6 @@ Slot.prototype.getAbsX=function(){
 Slot.prototype.getAbsY=function(){//Fix for tabs
 	return this.relToAbsY(0);
 };
-/* Recursively copies the Slot and its children. Overridden by subclasses.
- * @param {Block} parentCopy - A copy of the Slot's parent.
- * @return {Slot} - A copy of the Slot.
- */
-Slot.prototype.duplicate=function(parentCopy){
-	var myCopy=new Slot(parentCopy,this.inputType,this.snapType,this.outputType);
-	if(this.hasChild){
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	return myCopy;
-};
 /**
  * Copies data and blocks from a Slot into this Slot
  * @param {Slot} slot - The slot to copy from
@@ -370,16 +364,17 @@ Slot.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-/*Slot.prototype.createXml=function(xmlDoc){
+Slot.prototype.createXml=function(xmlDoc){
 	var slot=XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","Slot");
+	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
 		var child=XmlWriter.createElement(xmlDoc,"child");
 		child.appendChild(this.child.createXml(xmlDoc));
 		slot.appendChild(child);
 	}
 	return slot;
-};*/
+};
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */
@@ -400,3 +395,6 @@ Slot.prototype.stopGlow=function(){
 	}
 };
 */
+Slot.prototype.getKey = function(){
+	return this.key;
+};

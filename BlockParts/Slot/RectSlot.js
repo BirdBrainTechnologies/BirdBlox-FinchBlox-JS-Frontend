@@ -7,8 +7,8 @@
  * @param {number [any,num,string,bool,list] outputType - The type of Data the RoundSlot should convert to.
  * @param {string} value - The initial string stored in the Slot.
  */
-function RectSlot(parent,snapType,outputType,value){
-	Slot.call(this,parent,Slot.inputTypes.string,snapType,outputType); //Call constructor.
+function RectSlot(parent,key,snapType,outputType,value){
+	Slot.call(this,parent,key,Slot.inputTypes.string,snapType,outputType); //Call constructor.
 	this.enteredData=new StringData(value); //Set entered data to initial value.
 	this.buildSlot(); //Create the SVG elements that make up the Slot.
 }
@@ -136,18 +136,6 @@ RectSlot.prototype.edit=function(){
 	//Show the dialog.
 	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn);
 };
-/* Recursively copies the RectSlot and its children.
- * @param {Block} parentCopy - A copy of the RectSlot's parent.
- * @return {RectSlot} - A copy of the RectSlot.
- */
-RectSlot.prototype.duplicate=function(parentCopy){
-	//Use constructor.
-	var myCopy=new RectSlot(parentCopy,this.snapType,this.outputType,this.enteredData.getValue());
-	if(this.hasChild){ //Copy child
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	return myCopy;
-};
 /**
  * Copies data and blocks from a Slot into this Slot
  * @param {RectSlot} slot - The slot to copy from
@@ -199,7 +187,7 @@ RectSlot.prototype.getData=function(){
 };
 
 RectSlot.prototype.createXml=function(xmlDoc){
-	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
 	XmlWriter.setAttribute(slot,"type","RectSlot");
 	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
 	enteredData.appendChild(this.enteredData.createXml(xmlDoc));

@@ -613,7 +613,7 @@ function B_Wait(x,y){
     CommandBlock.call(this,x,y,"control");
       //Build Block out of things found in the BlockParts folder
     this.addPart(new LabelText(this,"wait"));
-    this.addPart(new NumSlot(this,1,true)); //Must be positive.
+    this.addPart(new NumSlot(this,"TEMPKEY",1,true)); //Must be positive.
     this.addPart(new LabelText(this,"secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
@@ -645,10 +645,10 @@ function B_Split(x,y){
     ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
       //Add parts with default values
     this.addPart(new LabelText(this,"split"));
-    this.addPart(new StringSlot(this,"hello world"));
+    this.addPart(new StringSlot(this,"TEMPKEY","hello world"));
     this.addPart(new LabelText(this,"by"));
       //New DropSlot which numbers, strings, and bools can snap to
-    var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+    var dS=new DropSlot(this,"TEMPKEY",Slot.snapTypes.numStrBool);
       //Add options to select from
       //"enter_text" is a special option; tells InputPad to show prompt dialog
     dS.addOption("Enter text",new SelectionData("enter_text"));

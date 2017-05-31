@@ -1,8 +1,8 @@
-function DropSlot(parent,snapType){
+function DropSlot(parent,key,snapType){
 	if(snapType==null){
 		snapType=Slot.snapTypes.none;
 	}
-	Slot.call(this,parent,Slot.inputTypes.drop,snapType,Slot.outputTypes.any);
+	Slot.call(this,parent,key,Slot.inputTypes.drop,snapType,Slot.outputTypes.any);
 	this.enteredData=null;
 	this.text="";
 	this.buildSlot();
@@ -240,18 +240,13 @@ DropSlot.prototype.clearOptions=function(){
 }
 
 DropSlot.prototype.createXml=function(xmlDoc){
-	var slot=XmlWriter.createElement(xmlDoc,"slot");
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
 	XmlWriter.setAttribute(slot,"type","DropSlot");
 	XmlWriter.setAttribute(slot,"text",this.text);
 	if(this.enteredData!=null){
 		var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
 		enteredData.appendChild(this.enteredData.createXml(xmlDoc));
 		slot.appendChild(enteredData);
-	}
-	if(this.hasChild){
-		var child=XmlWriter.createElement(xmlDoc,"child");
-		child.appendChild(this.child.createXml(xmlDoc));
-		slot.appendChild(child);
 	}
 	return slot;
 };

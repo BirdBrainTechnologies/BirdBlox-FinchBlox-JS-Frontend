@@ -2,7 +2,7 @@
 function B_PlaySound(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play sound"));
-	var dS=new SoundDropSlot(this);
+	var dS=new SoundDropSlot(this,"SDS_1");
 	for(var i=0;i<Sounds.getSoundCount();i++){
 		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
@@ -40,7 +40,7 @@ B_PlaySound.prototype.updateAction=function(){
 function B_PlaySoundUntilDone(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play sound until done"));
-	var dS=new SoundDropSlot(this);
+	var dS=new SoundDropSlot(this,"SDS_1");
 	for(var i=0;i<Sounds.getSoundCount();i++){
 		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
 	}
@@ -118,7 +118,7 @@ B_StopAllSounds.prototype.updateAction=function(){
 function B_RestForBeats(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"rest for"));
-	this.addPart(new NumSlot(this,0.2,true)); //Positive
+	this.addPart(new NumSlot(this,"NumS_dur",0.2,true)); //Positive
 	this.addPart(new LabelText(this,"beats"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -144,9 +144,9 @@ B_RestForBeats.prototype.updateAction=function(){
 function B_PlayNoteForBeats(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"play note"));
-	this.addPart(new NumSlot(this,60,true,true)); //Positive integer
+	this.addPart(new NumSlot(this,"NumS_note",60,true,true)); //Positive integer
 	this.addPart(new LabelText(this,"for"));
-	this.addPart(new NumSlot(this,1,true)); //Positive
+	this.addPart(new NumSlot(this,"NumS_dur",1,true)); //Positive
 	this.addPart(new LabelText(this,"beats"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -185,7 +185,7 @@ B_PlayNoteForBeats.prototype.updateAction=function(){
 function B_ChangeTempoBy(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"change tempo by"));
-	this.addPart(new NumSlot(this,20));
+	this.addPart(new NumSlot(this,"NumS_amt",20));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
@@ -201,7 +201,7 @@ B_ChangeTempoBy.prototype.startAction=function(){
 function B_SetTempoTo(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"set tempo to"));
-	this.addPart(new NumSlot(this,60,true)); //Positive
+	this.addPart(new NumSlot(this,"NumS_tempo",60,true)); //Positive
 	this.addPart(new LabelText(this,"bpm"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);

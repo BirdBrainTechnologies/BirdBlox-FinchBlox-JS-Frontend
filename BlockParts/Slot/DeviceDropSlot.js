@@ -1,9 +1,9 @@
-function DeviceDropSlot(parent, DeviceManager, shortText) {
+function DeviceDropSlot(parent, key, DeviceManager, shortText) {
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
-	DropSlot.call(this, parent, Slot.snapTypes.none);
+	DropSlot.call(this, parent, key, Slot.snapTypes.none);
 	this.prefixText = DeviceManager.GetDeviceName(shortText) + " ";
 	this.DeviceManager = DeviceManager;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());

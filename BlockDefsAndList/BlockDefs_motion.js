@@ -8,7 +8,7 @@
 function B_Move(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"move"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"TEMPKEY",10));
 	this.addPart(new LabelText(this,"steps"));
 }
 B_Move.prototype = Object.create(CommandBlock.prototype);
@@ -17,7 +17,7 @@ B_Move.prototype.constructor = B_Move;
 function B_TurnRight(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"turn right"));
-	this.addPart(new NumSlot(this,15));
+	this.addPart(new NumSlot(this,"TEMPKEY",15));
 	this.addPart(new LabelText(this,"degrees"));
 }
 B_TurnRight.prototype = Object.create(CommandBlock.prototype);
@@ -26,7 +26,7 @@ B_TurnRight.prototype.constructor = B_TurnRight;
 function B_TurnLeft(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"turn left"));
-	this.addPart(new NumSlot(this,15));
+	this.addPart(new NumSlot(this,"TEMPKEY",15));
 	this.addPart(new LabelText(this,"degrees"));
 }
 B_TurnLeft.prototype = Object.create(CommandBlock.prototype);
@@ -35,7 +35,7 @@ B_TurnLeft.prototype.constructor = B_TurnLeft;
 function B_PointInDirection(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"point in direction"));
-	var nS=new NumSlot(this,90);
+	var nS=new NumSlot(this,"TEMPKEY",90);
 	nS.addOption("(90) right",new NumData(90));
 	nS.addOption("(-90) left",new SelectionData(-90));
 	nS.addOption("(0) up",new NumData(0));
@@ -55,9 +55,9 @@ B_PointTowards.prototype.constructor = B_PointTowards;
 function B_GoToXY(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"go to x:"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 	this.addPart(new LabelText(this,"y:"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 }
 B_GoToXY.prototype = Object.create(CommandBlock.prototype);
 B_GoToXY.prototype.constructor = B_GoToXY;
@@ -72,11 +72,11 @@ B_GoTo.prototype.constructor = B_GoTo;
 function B_GlideToXY(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"glide"));
-	this.addPart(new NumSlot(this,1,true));
+	this.addPart(new NumSlot(this,"TEMPKEY",1,true));
 	this.addPart(new LabelText(this,"secs to x:"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 	this.addPart(new LabelText(this,"y:"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 }
 B_GlideToXY.prototype = Object.create(CommandBlock.prototype);
 B_GlideToXY.prototype.constructor = B_GlideToXY;
@@ -84,7 +84,7 @@ B_GlideToXY.prototype.constructor = B_GlideToXY;
 function B_ChangeXBy(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"change x by"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"TEMPKEY",10));
 }
 B_ChangeXBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeXBy.prototype.constructor = B_ChangeXBy;
@@ -92,7 +92,7 @@ B_ChangeXBy.prototype.constructor = B_ChangeXBy;
 function B_SetXTo(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"set x to"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 }
 B_SetXTo.prototype = Object.create(CommandBlock.prototype);
 B_SetXTo.prototype.constructor = B_SetXTo;
@@ -100,7 +100,7 @@ B_SetXTo.prototype.constructor = B_SetXTo;
 function B_ChangeYBy(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"change y by"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"TEMPKEY",10));
 }
 B_ChangeYBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeYBy.prototype.constructor = B_ChangeYBy;
@@ -108,7 +108,7 @@ B_ChangeYBy.prototype.constructor = B_ChangeYBy;
 function B_SetYTo(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"set y to"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"TEMPKEY",0));
 }
 B_SetYTo.prototype = Object.create(CommandBlock.prototype);
 B_SetYTo.prototype.constructor = B_SetYTo;

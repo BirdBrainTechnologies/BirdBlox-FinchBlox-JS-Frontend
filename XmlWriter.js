@@ -137,3 +137,12 @@ XmlWriter.docToText=function(xmlDoc){
 	var serializer = new XMLSerializer();
 	return serializer.serializeToString(xmlDoc);
 };
+XmlWriter.findNodeByKey = function(nodes, key){
+	for(var i = 0; i < nodes.length; i++){
+		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+		if(nodeKey == key){
+			return nodes[i];
+		}
+	}
+	return null;
+};

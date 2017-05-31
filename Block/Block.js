@@ -596,39 +596,6 @@ Block.prototype.addHeights=function(){
 /* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicateOld = function(x, y) {
-	//Uses the constructor of the Block class but has the methods of this specific Block's subclass.
-	//Allows the Block to be constructed without any Slots initially, so they can be duplicated and added on.
-	var copiedClass=function(type,returnType,x1,y1,category){
-		Block.call(this,type,returnType,x1,y1,category); //Call Block constructor.
-	};
-	copiedClass.prototype = Object.create(this.constructor.prototype); //Copy all functions.
-	copiedClass.prototype.constructor = copiedClass; //Only constructor differs.
-
-	var myCopy=new copiedClass(this.type,this.returnType,x,y,this.category); //Make an empty Block of this Block's type.
-	myCopy.blockTypeName=this.blockTypeName;
-	for(var i=0;i<this.parts.length;i++){ //Copy this Block's parts to the new Block.
-		myCopy.addPart(this.parts[i].duplicate(myCopy));
-	}
-	if(this.blockSlot1!=null){ //Copy the contents of its Slots.
-		myCopy.blockSlot1=this.blockSlot1.duplicate(myCopy);
-	}
-	if(this.blockSlot2!=null){
-		myCopy.blockSlot2=this.blockSlot2.duplicate(myCopy);
-	}
-	if(this.nextBlock!=null){ //Copy subsequent Blocks.
-		myCopy.nextBlock=this.nextBlock.duplicate(0,0);
-		myCopy.nextBlock.parent=myCopy;
-	}
-	if(this.variable!=null){ //Copy variable data if this is a variable Block.
-		myCopy.variable=this.variable;
-	}
-	if(this.list!=null){ //Copy list data if this is a list Block.
-		myCopy.list=this.list;
-	}
-	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
-	return myCopy; //Return finished Block.
-};
 /**
  * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @param {number} x - The new Block's x coord.
@@ -798,6 +765,7 @@ Block.prototype.createXml=function(xmlDoc){
 	var block=XmlWriter.createElement(xmlDoc,"block");
 	XmlWriter.setAttribute(block,"type",this.blockTypeName);
 	var slots=XmlWriter.createElement(xmlDoc,"slots");
+	XmlWriter.setAttribute(slots,"keyVal","true");
 	for(var i=0;i<this.slots.length;i++){
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
 	}
@@ -831,20 +799,38 @@ Block.importXml=function(blockNode){
 	catch(e) {
 		return null;
 	}
-	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	block.copyFromXml(blockNode);
+	return block;
+};
+Block.prototype.importSlotXml = function(slotsNode){
+	var keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
 	var slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
-	for(var i=0;i<slotNodes.length&&i<block.slots.length;i++){
-		block.slots[i].importXml(slotNodes[i]);
+	if(keyVal){
+		for(let i=0;i<this.slots.length;i++){
+			let key = this.slots[i].getKey();
+			let slot = XmlWriter.findNodeByKey(slotNodes, key);
+			if(slot != null) {
+				this.slots[i].importXml(slot);
+			}
+		}
 	}
+	else{
+		for(let i=0;i<slotNodes.length&&i<this.slots.length;i++){
+			this.slots[i].importXml(slotNodes[i]);
+		}
+	}
+};
+Block.prototype.copyFromXml = function(blockNode){
+	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	this.importSlotXml(slotsNode);
 	var blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
 	var blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
-	if(block.blockSlot1!=null&&blockSlotNodes.length>=1){
-		block.blockSlot1.importXml(blockSlotNodes[0]);
+	if(this.blockSlot1!=null&&blockSlotNodes.length>=1){
+		this.blockSlot1.importXml(blockSlotNodes[0]);
 	}
-	if(block.blockSlot2!=null&&blockSlotNodes.length>=2){
-		block.blockSlot2.importXml(blockSlotNodes[1]);
+	if(this.blockSlot2!=null&&blockSlotNodes.length>=2){
+		this.blockSlot2.importXml(blockSlotNodes[1]);
 	}
-	return block;
 };
 Block.prototype.renameVariable=function(variable){
 	this.passRecursively("renameVariable",variable);

@@ -4,9 +4,9 @@
 
 function B_Add(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,"+"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_2",0));
 }
 B_Add.prototype = Object.create(ReporterBlock.prototype);
 B_Add.prototype.constructor = B_Add;
@@ -24,9 +24,9 @@ B_Add.prototype.startAction=function(){
 
 function B_Subtract(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,String.fromCharCode(8211)));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_2",0));
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
@@ -44,9 +44,9 @@ B_Subtract.prototype.startAction=function(){
 
 function B_Multiply(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,"*"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_2",0));
 }
 B_Multiply.prototype = Object.create(ReporterBlock.prototype);
 B_Multiply.prototype.constructor = B_Multiply;
@@ -64,9 +64,9 @@ B_Multiply.prototype.startAction=function(){
 
 function B_Divide(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,"/"));
-	this.addPart(new NumSlot(this,1));
+	this.addPart(new NumSlot(this,"NumS_2",1));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
@@ -90,9 +90,9 @@ B_Divide.prototype.startAction=function(){
 
 function B_Mod(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,17));
+	this.addPart(new NumSlot(this,"NumS_1",17));
 	this.addPart(new LabelText(this,"mod"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"NumS_2",10));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
@@ -117,7 +117,7 @@ B_Mod.prototype.startAction=function(){
 function B_Round(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"round"));
-	this.addPart(new NumSlot(this,0.5));
+	this.addPart(new NumSlot(this,"NumS_1",0.5));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
@@ -135,9 +135,9 @@ B_Round.prototype.startAction=function(){
 function B_PickRandom(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"pick random"));
-	this.addPart(new NumSlot(this,1));
+	this.addPart(new NumSlot(this,"NumS_min",1));
 	this.addPart(new LabelText(this,"to"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"NumS_max",10));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
@@ -170,9 +170,9 @@ B_PickRandom.prototype.startAction=function(){
 
 function B_LessThan(x,y){
 	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,"<"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_2",0));
 }
 B_LessThan.prototype = Object.create(PredicateBlock.prototype);
 B_LessThan.prototype.constructor = B_LessThan;
@@ -188,11 +188,14 @@ B_LessThan.prototype.startAction=function(){
 
 function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
-	var rS=new RoundSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
+	var rS=new RoundSlot(this,"RndS_item1",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
 	rS.addOption("Enter text",new SelectionData("enter_text"));
+	var rS2=new RoundSlot(this,"RndS_item2",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
+	rS2.addOption("Enter text",new SelectionData("enter_text"));
+
 	this.addPart(rS);
 	this.addPart(new LabelText(this,"="));
-	this.addPart(rS.duplicate(this));
+	this.addPart(rS2);
 }
 B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
@@ -208,9 +211,9 @@ B_EqualTo.prototype.startAction=function(){
 
 function B_GreaterThan(x,y){
 	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_1",0));
 	this.addPart(new LabelText(this,">"));
-	this.addPart(new NumSlot(this,0));
+	this.addPart(new NumSlot(this,"NumS_2",0));
 }
 B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
 B_GreaterThan.prototype.constructor = B_GreaterThan;
@@ -226,9 +229,9 @@ B_GreaterThan.prototype.startAction=function(){
 
 function B_And(x,y){
 	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_1"));
 	this.addPart(new LabelText(this,"and"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_2"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
@@ -244,9 +247,9 @@ B_And.prototype.startAction=function(){
 
 function B_Or(x,y){
 	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_1"));
 	this.addPart(new LabelText(this,"or"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_2"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
@@ -263,7 +266,7 @@ B_Or.prototype.startAction=function(){
 function B_Not(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"not"));
-	this.addPart(new BoolSlot(this));
+	this.addPart(new BoolSlot(this,"BoolS_1"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
@@ -307,9 +310,9 @@ B_False.prototype.startAction=function(){
 function B_LetterOf(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"letter"));
-	this.addPart(new NumSlot(this,1,true,true));
+	this.addPart(new NumSlot(this,"NumS_idx",1,true,true));
 	this.addPart(new LabelText(this,"of"));
-	this.addPart(new StringSlot(this,"world"));
+	this.addPart(new StringSlot(this,"StrS_text","world"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -331,7 +334,7 @@ B_LetterOf.prototype.startAction=function(){
 function B_LengthOf(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"length of"));
-	this.addPart(new StringSlot(this,"world"));
+	this.addPart(new StringSlot(this,"StrS_text","world"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -347,9 +350,9 @@ B_LengthOf.prototype.startAction=function(){
 function B_join(x,y){
 	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"join"));
-	this.addPart(new StringSlot(this,"hello "));
+	this.addPart(new StringSlot(this,"StrS_1","hello "));
 	this.addPart(new LabelText(this,"and"));
-	this.addPart(new StringSlot(this,"world"));
+	this.addPart(new StringSlot(this,"StrS_2","world"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -366,9 +369,9 @@ B_join.prototype.startAction=function(){
 function B_Split(x,y){
 	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
 	this.addPart(new LabelText(this,"split"));
-	this.addPart(new StringSlot(this,"hello world"));
+	this.addPart(new StringSlot(this,"StrS_1","hello world"));
 	this.addPart(new LabelText(this,"by"));
-	var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+	var dS=new DropSlot(this,"DS_separator",Slot.snapTypes.numStrBool);
 	dS.addOption("Enter text",new SelectionData("enter_text"));
 	dS.addOption("letter",new SelectionData("letter"));
 	dS.addOption("whitespace",new SelectionData("whitespace"));
@@ -411,9 +414,9 @@ B_Split.prototype.startAction=function(){
 function B_IsAType(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"is"));
-	this.addPart(new RectSlot(this,Slot.snapTypes.any,Slot.outputTypes.any,"5"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
 	this.addPart(new LabelText(this,"a"));
-	var dS=new DropSlot(this,Slot.snapTypes.none);
+	var dS=new DropSlot(this,"DS_type",Slot.snapTypes.none);
 	dS.addOption("number",new SelectionData("number"));
 	dS.addOption("text",new SelectionData("text"));
 	dS.addOption("boolean",new SelectionData("boolean"));
@@ -477,7 +480,7 @@ B_IsAType.prototype.startAction=function(){
 
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	var dS=new DropSlot(this,null,Slot.snapTypes.bool);
+	var dS=new DropSlot(this,"DS_operation",null,Slot.snapTypes.bool);
 	dS.addOption("sin",new SelectionData("sin"));
 	dS.addOption("cos",new SelectionData("cos"));
 	dS.addOption("tan",new SelectionData("tan"));
@@ -501,7 +504,7 @@ function B_mathOfNumber(x,y){
 	dS.setSelectionData("sqrt",new SelectionData("sqrt"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"of"));
-	this.addPart(new NumSlot(this,10));
+	this.addPart(new NumSlot(this,"NumS_val",10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;

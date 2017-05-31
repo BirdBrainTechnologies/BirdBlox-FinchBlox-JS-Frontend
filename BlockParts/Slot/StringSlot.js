@@ -5,9 +5,9 @@
  * @param {Block} parent - The Block this Slot is a part of.
  * @param {string} value - The initial string stored in the Slot.
  */
-function StringSlot(parent,value){
+function StringSlot(parent,key,value){
 	//Make RectSlot.
-	RectSlot.call(this,parent,Slot.snapTypes.numStrBool,Slot.outputTypes.string,value);
+	RectSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.string,value);
 }
 StringSlot.prototype = Object.create(RectSlot.prototype);
 StringSlot.prototype.constructor = StringSlot;
