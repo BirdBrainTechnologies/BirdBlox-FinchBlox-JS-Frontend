@@ -128,6 +128,9 @@ DropSlot.prototype.duplicate=function(parentCopy){
 DropSlot.prototype.copyFrom=function(slot){
 	this.enteredData = slot.enteredData;
 	this.changeText(slot.text);
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
 };
 DropSlot.prototype.highlight=function(){//Fix BG
 	var isSlot=!this.hasChild;

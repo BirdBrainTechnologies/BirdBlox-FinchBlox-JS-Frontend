@@ -219,6 +219,9 @@ RoundSlot.prototype.copyFrom=function(slot){
 	var data = slot.enteredData;
 	this.enteredData = data;
 	this.changeText(data.asString().getValue());
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
 };
 /* Selects the Slot for editing and changes its appearance.
  */

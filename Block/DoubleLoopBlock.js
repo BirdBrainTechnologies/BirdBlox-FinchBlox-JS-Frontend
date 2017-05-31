@@ -11,7 +11,7 @@ function DoubleLoopBlock(x,y,category,midLabelText){
 }
 DoubleLoopBlock.prototype = Object.create(Block.prototype);
 DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
-DoubleLoopBlock.prototype.duplicate=function(x,y){ //Must be overridden to set midLabelText with constructor.
+DoubleLoopBlock.prototype.duplicate2=function(x,y){ //Must be overridden to set midLabelText with constructor.
 	var copiedClass=function(x1,y1,category,midLabelText){
 		DoubleLoopBlock.call(this,x1,y1,category,midLabelText);
 	};
@@ -35,4 +35,4 @@ DoubleLoopBlock.prototype.duplicate=function(x,y){ //Must be overridden to set m
 		myCopy.nextBlock.parent=myCopy;
 	}
 	return myCopy;
-}
+};

@@ -115,7 +115,12 @@ BlockSlot.prototype.duplicate=function(parentCopy){
 		myCopy.snap(this.child.duplicate(0,0));
 	}
 	return myCopy;
-}
+};
+BlockSlot.prototype.copyFrom=function(blockSlot){
+	if(blockSlot.hasChild){
+		this.snap(blockSlot.child.duplicate(0,0));
+	}
+};
 BlockSlot.prototype.startRun=function(){
 	if(!this.isRunning&&this.hasChild){
 		this.isRunning=true;

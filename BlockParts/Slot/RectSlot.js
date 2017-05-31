@@ -156,6 +156,9 @@ RectSlot.prototype.copyFrom=function(slot){
 	var data = slot.enteredData;
 	this.enteredData = data;
 	this.changeText(data.asString().getValue());
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
 };
 /* Returns a text-based version of the Slot for display in dialogs.
  * @return {string} - The text-based summary of the Slot.

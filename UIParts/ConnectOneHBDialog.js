@@ -99,7 +99,7 @@ ConnectOneHBDialog.prototype.discoverHBs=function(){
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
 		var hBString=response;
 		if(HummingbirdManager.allowVirtualHBs){
-			response+="\nVirtual HB";
+			//response+="\nVirtual HB";
 			response=response.trim();
 		}
 		thisCOHBD.updateHBList(response);
@@ -113,11 +113,8 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 	if(TouchReceiver.touchDown){
 		return;
 	}
+	var hBArray = JSON.parse(newHBs);
 	var COHBD=ConnectOneHBDialog;
-	var hBArray=newHBs.split("\n");
-	if(newHBs==""){
-		hBArray=[];
-	}
 	var oldScroll=0;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.scrollY;
@@ -127,7 +124,7 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
 	for(var i=0;i<hBArray.length;i++){
-		this.addBnListOption(hBArray[i]);
+		this.addBnListOption(hBArray[i].id);
 	}
 	this.menuBnList.show();
 	this.menuBnList.scroll(oldScroll);
