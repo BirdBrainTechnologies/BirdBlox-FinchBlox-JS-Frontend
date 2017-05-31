@@ -19,6 +19,15 @@ SoundDropSlot.prototype.duplicate=function(parentCopy){
 	myCopy.changeText(this.text);
 	return myCopy;
 };
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {SoundDropSlot} slot - The slot to copy from
+ */
+SoundDropSlot.prototype.copyFrom=function(slot){
+	var data = slot.enteredData;
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
+};
 SoundDropSlot.prototype.edit=function(){
 	var me = this;
 	DropSlot.prototype.edit.call(this, function(){
