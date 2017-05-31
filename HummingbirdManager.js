@@ -85,6 +85,9 @@ HummingbirdManager.outputUpdateAction=function(block){
 	var mem=block.runMem;
 	if(mem.sent){
 		if(block.runMem.requestStatus.finished==true){
+			if(block.runMem.requestStatus.error) {
+				block.throwError("Hummingbird not connected");
+			}
 			return false; //Done running
 		}
 		else{
@@ -113,6 +116,7 @@ HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
 	}
 	else{
         block.resultData=new NumData(defaultValue,false);
+		block.throwError("Invalid port number");
 		return false; //Done running
 	}
 };
@@ -130,6 +134,7 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 		}
 		else{
 			block.resultData=new NumData(defaultValue,false);
+			block.throwError("Hummingbird not connected");
 		}
 		return false; //Done running
 	}

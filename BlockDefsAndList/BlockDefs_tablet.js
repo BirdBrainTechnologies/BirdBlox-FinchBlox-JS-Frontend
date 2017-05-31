@@ -102,6 +102,10 @@ B_DevicePressure.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
+B_DevicePressure.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " kPa");
+};
 
 
 function B_DeviceRelativeAltitude(x,y){
@@ -135,6 +139,10 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 	else{
 		return true; //Still running
 	}
+};
+B_DeviceRelativeAltitude.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " m");
 };
 
 
@@ -213,7 +221,10 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
-
+B_DeviceAcceleration.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " G's");
+};
 
 
 function B_DeviceLocation(x,y){

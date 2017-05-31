@@ -110,6 +110,10 @@ B_HBTempC.prototype.startAction=function(){
 B_HBTempC.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
 };
+B_HBTempC.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " ºC");
+};
 
 
 
@@ -127,6 +131,10 @@ B_HBDistCM.prototype.startAction=function(){
 };
 B_HBDistCM.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
+};
+B_HBDistCM.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " cm");
 };
 
 
@@ -246,7 +254,10 @@ B_HBTempF.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
-
+B_HBTempF.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " ºF");
+};
 
 
 function B_HBDistInch(x,y){
@@ -274,4 +285,7 @@ B_HBDistInch.prototype.updateAction=function(){
         return true; //Still running
 	}
 };
-
+B_HBDistInch.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " inches");
+};

@@ -219,12 +219,7 @@ BlockStack.prototype.updateRun=function(){
 		else{ //Procedure for Blocks that return a value.
 			if(!this.currentBlock.updateRun()){
 				//When it is done running, display the result.
-				var value=this.currentBlock.getResultData().asString().getValue();
-				var x=this.currentBlock.getAbsX();
-				var y=this.currentBlock.getAbsY();
-				var width=this.currentBlock.relToAbsX(this.currentBlock.width) - x;
-				var height=this.currentBlock.relToAbsY(this.currentBlock.height) - y;
-				GuiElements.displayValue(value,x,y,width,height);
+				this.currentBlock.displayResult();
 				this.endRun(); //Execution is done.
 			}
 		}

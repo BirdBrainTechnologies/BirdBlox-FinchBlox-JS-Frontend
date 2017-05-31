@@ -77,65 +77,92 @@ Flutter.prototype.readSensor = function(context, sensorType, port) {
 	}
 };
 
-Flutter.prototype.setServoOrSave = function(shouldSend, context, port, value) {
-	if (context.sent) {
-		return (context.requestStatus.finished != true);  // Return true if not finished
+Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
+	var mem = block.runMem;
+	if (mem.sent) {
+		if(mem.requestStatus.finished){
+			if(mem.requestStatus.error){
+				block.throwError("Flutter not connected");
+			}
+			return false;
+		}
+		else{
+			return true;
+		}
 	} else {
-		if (context.request == null) {
+		if (mem.request == null) {
 			// TODO: Validation
 			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/servo/";
-			context.request = requestPrefix + port + "/" + value;
-			context.requestStatus = {};
+			mem.request = requestPrefix + port + "/" + value;
+			mem.requestStatus = {};
 		}
 		if (shouldSend) {
-			context.sent = true;
-			HtmlServer.sendRequest(context.request, context.requestStatus);
+			mem.sent = true;
+			HtmlServer.sendRequest(mem.request, mem.requestStatus);
 			return true;  // Still running
 		} else {
-			context.sent = false;
+			mem.sent = false;
 			return true;  // Still running
 		}
 	}
 };
 
-Flutter.prototype.setBuzzerOrSave = function(shouldSend, context, volume, frequency) {
-	if (context.sent) {
-		return (context.requestStatus.finished != true);  // Return true if not finished
+Flutter.prototype.setBuzzerOrSave = function(shouldSend, block, volume, frequency) {
+	var mem = block.runMem;
+	if (mem.sent) {
+		if(mem.requestStatus.finished){
+			if(mem.requestStatus.error){
+				block.throwError("Flutter not connected");
+			}
+			return false;
+		}
+		else{
+			return true;
+		}
 	} else {
-		if (context.request == null) {
+		if (mem.request == null) {
 			// TODO: Validation
 			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/buzzer/";
-			context.request = requestPrefix + volume + "/" + frequency;
-			context.requestStatus = {};
+			mem.request = requestPrefix + volume + "/" + frequency;
+			mem.requestStatus = {};
 		}
 		if (shouldSend) {
-			context.sent = true;
-			HtmlServer.sendRequest(context.request, context.requestStatus);
+			mem.sent = true;
+			HtmlServer.sendRequest(mem.request, mem.requestStatus);
 			return true;  // Still running
 		} else {
-			context.sent = false;
+			mem.sent = false;
 			return true;  // Still running
 		}
 	}
 };
 
 
-Flutter.prototype.setTriLEDOrSave = function(shouldSend, context, port, valueR, valueG, valueB) {
-	if (context.sent) {
-		return (context.requestStatus.finished != true);  // Return true if not finished
+Flutter.prototype.setTriLEDOrSave = function(shouldSend, block, port, valueR, valueG, valueB) {
+	var mem = block.runMem;
+	if (mem.sent) {
+		if(mem.requestStatus.finished){
+			if(mem.requestStatus.error){
+				block.throwError("Flutter not connected");
+			}
+			return false;
+		}
+		else{
+			return true;
+		}
 	} else {
-		if (context.request == null) {
+		if (mem.request == null) {
 			// TODO: Validation
 			let requestPrefix = "flutter/" + HtmlServer.encodeHtml(this.name) + "/out/triled/";
-			context.request = requestPrefix + port + "/" + valueR + "/" + valueG + "/" + valueB;
-			context.requestStatus = {};
+			mem.request = requestPrefix + port + "/" + valueR + "/" + valueG + "/" + valueB;
+			mem.requestStatus = {};
 		}
 		if (shouldSend) {
-			context.sent = true;
-			HtmlServer.sendRequest(context.request, context.requestStatus);
+			mem.sent = true;
+			HtmlServer.sendRequest(mem.request, mem.requestStatus);
 			return true;  // Still running
 		} else {
-			context.sent = false;
+			mem.sent = false;
 			return true;  // Still running
 		}
 	}

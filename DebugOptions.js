@@ -5,8 +5,8 @@ function DebugOptions(){
 	DO.enabled = true;
 
 	DO.mouse = false;
-	DO.addVirtualHB = false;
-	DO.addVirtualFlutter = true;
+	DO.addVirtualHB = true;
+	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
@@ -79,6 +79,11 @@ DebugOptions.validateNonNull = function(){
 		if(arguments[i] == null){
 			throw new UserException("Null parameter");
 		}
+	}
+};
+DebugOptions.assert = function(bool){
+	if(!bool && DebugOptions.shouldLogErrors()){
+		throw new UserException("Assertion Failure");
 	}
 };
 DebugOptions.stopErrorLocking = function(){

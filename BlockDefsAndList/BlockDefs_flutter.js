@@ -45,6 +45,8 @@ B_FlutterTriLed.prototype.constructor = B_FlutterTriLed;
 B_FlutterTriLed.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
+		this.resultData = new NumData(0, false);
+		block.throwError("Flutter not connected");
 		return false; // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
@@ -57,7 +59,8 @@ B_FlutterTriLed.prototype.startAction = function() {
 	if (port != null && port > 0 && port < 4) {
 		return flutter.setTriLEDOrSave(shouldSend, mem, port, valueR, valueG, valueB);
 	} else {
-		this.resultData = new StringData("Invalid port number");
+		this.resultData = new NumData(0, false);
+		block.throwError("Invalid port number");
 		return false; // Invalid port, exit early
 	}
 };
@@ -120,7 +123,8 @@ B_FlutterSensorBase.constructor = B_FlutterSensorBase;
 B_FlutterSensorBase.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
-		this.resultData = new StringData("Flutter not connected");
+		this.resultData = new NumData(0, false);
+		block.throwError("Flutter not connected");
 		return false; // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
@@ -129,19 +133,25 @@ B_FlutterSensorBase.prototype.startAction = function() {
 	if (port != null && port > 0 && port < 4) {
 		return flutter.readSensor(mem, this.sensorType, port);
 	} else {
-		this.resultData = new StringData("Invalid port number");
+		this.resultData = new NumData(0, false);
+		block.throwError("Invalid port number");
 		return false; // Invalid port, exit early
 	}
-}
+};
 B_FlutterSensorBase.prototype.updateAction = function() {
 	if (this.runMem.flutter == null) {
 		return false; // Exited early
 	}
 	if (this.runMem.flutter.readSensor(this.runMem) == false) {
-		this.resultData = new NumData(parseInt(this.runMem.requestStatus.result));
+		if(this.runMem.requestStatus.error){
+			this.resultData = new NumData(0, false);
+			block.throwError("Flutter not connected");
+		} else {
+			this.resultData = new NumData(parseInt(this.runMem.requestStatus.result));
+		}
 		return false; // Done
 	}
-	return true; // Still running	
+	return true; // Still running
 }
 
 function B_FlutterLight(x, y) {
@@ -155,6 +165,10 @@ function B_FlutterTempC(x, y) {
 }
 B_FlutterTempC.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterTempC.prototype.constructor = B_FlutterTempC;
+B_FlutterTempC.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " ºC");
+};
 
 
 function B_FlutterDistCM(x, y) {
@@ -162,6 +176,10 @@ function B_FlutterDistCM(x, y) {
 }
 B_FlutterDistCM.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistCM.prototype.constructor = B_FlutterDistCM;
+B_FlutterDistCM.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " cm");
+};
 
 
 function B_FlutterKnob(x, y) {
@@ -203,6 +221,10 @@ B_FlutterTempF.prototype.updateAction = function() {
 		return true; //Still running
 	}
 };
+B_FlutterTempF.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " ºF");
+};
 
 function B_FlutterDistInch(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "distance", "Distance Inch");
@@ -222,4 +244,8 @@ B_FlutterDistInch.prototype.updateAction = function() {
 	} else {
 		return true; //Still running
 	}
+};
+B_FlutterDistInch.prototype.displayResult = function(){
+	var value=this.getResultData().asString().getValue();
+	this.displayValue(value + " inches");
 };

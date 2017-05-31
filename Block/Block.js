@@ -881,3 +881,24 @@ Block.prototype.passRecursively=function(functionName){
 		this.nextBlock[functionName].apply(this.nextBlock,args);
 	}
 };
+Block.prototype.displayResult = function(){
+	if(this.running == 2) {
+		var value = this.getResultData().asString().getValue();
+		this.displayValue(value, false);
+	}
+};
+Block.prototype.displayValue = function(message, error){
+	var x=this.getAbsX();
+	var y=this.getAbsY();
+	var width=this.relToAbsX(this.width) - x;
+	var height=this.relToAbsY(this.height) - y;
+	GuiElements.displayValue(message,x,y,width,height, error);
+};
+Block.prototype.throwError = function(message){
+	if(this.running == 2) {
+		this.displayValue(message, true);
+		if (this.stack != null) {
+			this.stack.stop();
+		}
+	}
+};
