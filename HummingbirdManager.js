@@ -104,14 +104,14 @@ HummingbirdManager.outputUpdateAction=function(block){
 		return true; //Still running
 	}
 };
-HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
+HummingbirdManager.sensorStartAction=function(block,sensor,defaultValue){
 	var mem=block.runMem;
 	mem.hBIndex=block.slots[0].getData().getValue();
 	mem.portD=block.slots[1].getData();
     mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
     if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
     	var request = "in";
-		var params = "&port=" + mem.port;
+		var params = "&port=" + mem.port + "&sensor=" + sensor;
 		mem.requestStatus={};
         HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus);
         return true; //Still running
