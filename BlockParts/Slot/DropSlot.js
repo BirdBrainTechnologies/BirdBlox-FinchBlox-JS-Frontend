@@ -269,3 +269,12 @@ DropSlot.prototype.importXml=function(slotNode){
 	}
 	return this;
 };
+DropSlot.prototype.updateEdit=function(visibleText,data){
+	if(this.selected){ //Only can edit if the Slot is selected.
+		this.enteredData=data;
+		this.changeText(visibleText);
+	}
+	else{
+		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
+	}
+};

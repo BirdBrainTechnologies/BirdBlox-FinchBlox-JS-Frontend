@@ -190,7 +190,7 @@ RoundSlot.prototype.saveNumData=function(data){
 		this.deselect();
 	}
 	else{
-		GuiElements.throwError("Attempt to call saveNumData on Slot that is not selected.");
+		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
 	}
 };
 /* Recursively copies the RoundSlot and its children.
