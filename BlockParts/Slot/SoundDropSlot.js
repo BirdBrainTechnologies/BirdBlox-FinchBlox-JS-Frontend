@@ -26,7 +26,14 @@ SoundDropSlot.prototype.edit=function(){
 			if(Sounds.checkNameIsValid(soundName)){
 				var request = "sound/play/"+soundName;
 				HtmlServer.sendRequestWithCallback(request);
+				GuiElements.alert("sent: " + request);
 			}
+			else{
+				GuiElements.alert("Bad sound: " + soundName);
+			}
+		}
+		else{
+			GuiElements.alert("No data");
 		}
 	});
 };
