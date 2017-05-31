@@ -125,7 +125,10 @@ DropSlot.prototype.highlight=function(){//Fix BG
 	var isSlot=!this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
 };
-DropSlot.prototype.edit=function(){
+DropSlot.prototype.edit=function(previewFn){
+	if(previewFn == null){
+		previewFn = null;
+	}
 	if(!this.selected){
 		var x1 = this.getAbsX();
 		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
@@ -137,9 +140,9 @@ DropSlot.prototype.edit=function(){
 		for(var i=0;i<this.optionsText.length;i++){
 			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
 		}
-		InputPad.showDropdown(this,x1, x2, y1, y2);
+		InputPad.showDropdown(this,x1, x2, y1, y2, null, previewFn);
 	}
-}
+};
 /* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
  * Only used for special DropSlots.
  */

@@ -49,6 +49,7 @@ InputPad.buildPad=function(){
 	IP.makeBns();
 	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
 	IP.menuBnList.isOverlayPart=true;
+	IP.previewFn = null;
 };
 /*InputPad.makeBg=function(){
 	var IP=InputPad;
@@ -63,6 +64,7 @@ InputPad.resetPad=function(columns){//removes any options which may have been ad
 	IP.close();
 	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin,null,columns);
 	IP.menuBnList.isOverlayPart=true;
+	IP.previewFn = null;
 };
 InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
@@ -197,8 +199,9 @@ InputPad.bsPressed=function(){
 InputPad.okPressed=function(){
 	InputPad.close();
 };
-InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth){
+InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth, previewFn){
 	var IP=InputPad;
+	IP.previewFn = previewFn;
 	IP.visible=true;
 	IP.usingNumberPad=false;
 	IP.specialCommand="";
@@ -220,6 +223,7 @@ InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth){
 };
 InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
 	var IP=InputPad;
+	IP.previewFn = null;
 	IP.usingNumberPad=true;
 	IP.specialCommand="";
 	IP.width=InputPad.BnAreaW;
@@ -356,7 +360,13 @@ InputPad.menuBnSelected=function(text,data){
 		IP.nonNumericData=data;
 	}
 	SaveManager.markEdited();
-	IP.close();
+	if(IP.previewFn != null){
+		IP.slot.updateSlot();
+		IP.previewFn();
+	}
+	else {
+		IP.close();
+	}
 };
 
 InputPad.makeBns=function(){
