@@ -57,7 +57,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function () {
 			if (xhttp.readyState == 4) {
-				if (xhttp.status == 200) {
+				if (200 <= xhttp.status && xhttp.status <= 299) {
 					if(callbackFn!=null){
 						callbackFn(xhttp.responseText);
 					}
@@ -72,7 +72,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		};
 		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
 		if(isPost){
-			xhttp.setRequestHeader("Content-type", "application/raw");
+			xhttp.setRequestHeader("Content-type", "text/plain");
 			xhttp.send(postData);
 		}
 		else{

@@ -611,6 +611,38 @@ Block.prototype.duplicate = function(x, y) {
 	myCopy.bottomOpen=this.bottomOpen; //Set properties not set by constructor.
 	return myCopy; //Return finished Block.
 };
+/**
+ * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @param {number} x - The new Block's x coord.
+ * @param {number} y - The new Block's y coord.
+ * @return {Block} - This Block's copy.
+ */
+Block.prototype.duplicate2 = function(x, y){
+	var myCopy = new this.constructor(x, y);
+	myCopy.copyFrom(this);
+	return myCopy;
+};
+/**
+ * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ */
+Block.prototype.copyFrom = function(block){
+	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	for(var i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
+		this.slots[i].copyFrom(block.slots[i]);
+	}
+	if(this.blockSlot1!=null){ //Copy the contents of its BlockSlots.
+		this.blockSlot1.copyFrom(block.blockSlot1);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.copyFrom(block.blockSlot2);
+	}
+	if(this.nextBlock!=null){ //Copy subsequent Blocks.
+		this.nextBlock=block.nextBlock.duplicate(0,0);
+		this.nextBlock.parent=this;
+	}
+};
+
 /* Returns an entirely text-based version of the Block for display in dialogs.
  * May exclude a slot and replace if with "___".
  * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".

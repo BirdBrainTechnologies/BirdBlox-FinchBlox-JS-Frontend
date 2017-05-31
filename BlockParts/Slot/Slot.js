@@ -275,6 +275,10 @@ Slot.prototype.duplicate=function(parentCopy){
 	}
 	return myCopy;
 };
+
+Slot.prototype.copyFrom = function(slot){
+
+};
 /* Clears the result data of the Slot and resets its running state. Is called by Block's clearMem function.
  */
 Slot.prototype.clearMem=function(){
