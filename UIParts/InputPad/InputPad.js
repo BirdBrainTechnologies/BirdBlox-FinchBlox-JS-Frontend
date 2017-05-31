@@ -361,7 +361,7 @@ InputPad.menuBnSelected=function(text,data){
 	}
 	SaveManager.markEdited();
 	if(IP.previewFn != null){
-		IP.slot.updateSlot();
+		IP.updateSlot();
 		IP.previewFn();
 	}
 	else {
