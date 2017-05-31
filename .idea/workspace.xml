@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdManager.js" afterPath="$PROJECT_DIR$/HummingbirdManager.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Flutter.js" afterPath="$PROJECT_DIR$/Flutter.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -280,11 +280,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Flutter.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Flutter.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Flutter.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="308">
-              <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+            <state relative-caret-position="374">
+              <caret line="59" column="63" selection-start-line="59" selection-start-column="63" selection-end-line="59" selection-end-column="63" />
               <folding>
                 <element signature="n#!!block;n#Flutter#0" expanded="false" />
                 <element signature="e#160#498#0" expanded="false" />
@@ -294,24 +294,24 @@
                 <element signature="e#444#487#0" expanded="false" />
                 <element signature="e#501#600#0" expanded="false" />
                 <element signature="e#1106#1201#0" expanded="false" />
-                <element signature="e#1765#2431#0" expanded="false" />
-                <element signature="e#1807#1978#0" expanded="false" />
-                <element signature="e#1841#1947#0" expanded="false" />
-                <element signature="e#1873#1926#0" expanded="false" />
-                <element signature="e#1954#1975#0" expanded="false" />
-                <element signature="e#1984#2429#0" expanded="false" />
-                <element signature="e#2013#2223#0" expanded="false" />
-                <element signature="e#2242#2360#0" expanded="false" />
-                <element signature="e#2366#2426#0" expanded="false" />
-                <element signature="e#3294#4001#0" expanded="false" />
-                <element signature="e#3336#3507#0" expanded="false" />
-                <element signature="e#3370#3476#0" expanded="false" />
-                <element signature="e#3402#3455#0" expanded="false" />
-                <element signature="e#3483#3504#0" expanded="false" />
-                <element signature="e#3513#3999#0" expanded="false" />
-                <element signature="e#3542#3793#0" expanded="false" />
-                <element signature="e#3812#3930#0" expanded="false" />
-                <element signature="e#3936#3996#0" expanded="false" />
+                <element signature="e#1791#2457#0" expanded="false" />
+                <element signature="e#1833#2004#0" expanded="false" />
+                <element signature="e#1867#1973#0" expanded="false" />
+                <element signature="e#1899#1952#0" expanded="false" />
+                <element signature="e#1980#2001#0" expanded="false" />
+                <element signature="e#2010#2455#0" expanded="false" />
+                <element signature="e#2039#2249#0" expanded="false" />
+                <element signature="e#2268#2386#0" expanded="false" />
+                <element signature="e#2392#2452#0" expanded="false" />
+                <element signature="e#3320#4027#0" expanded="false" />
+                <element signature="e#3362#3533#0" expanded="false" />
+                <element signature="e#3396#3502#0" expanded="false" />
+                <element signature="e#3428#3481#0" expanded="false" />
+                <element signature="e#3509#3530#0" expanded="false" />
+                <element signature="e#3539#4025#0" expanded="false" />
+                <element signature="e#3568#3819#0" expanded="false" />
+                <element signature="e#3838#3956#0" expanded="false" />
+                <element signature="e#3962#4022#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -330,8 +330,8 @@
       <file leaf-file-name="BlockDefs_flutter.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_flutter.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="89" column="26" selection-start-line="89" selection-start-column="26" selection-end-line="89" selection-end-column="26" />
+            <state relative-caret-position="308">
+              <caret line="14" column="26" selection-start-line="14" selection-start-column="26" selection-end-line="14" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -377,11 +377,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HummingbirdManager.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="HummingbirdManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="506">
-              <caret line="113" column="62" selection-start-line="113" selection-start-column="62" selection-end-line="113" selection-end-column="62" />
+            <state relative-caret-position="462">
+              <caret line="111" column="53" selection-start-line="111" selection-start-column="53" selection-end-line="111" selection-end-column="53" />
               <folding>
                 <element signature="n#!!block;n#HummingbirdManager#0" expanded="false" />
                 <element signature="e#547#577#0" expanded="false" />
@@ -589,12 +589,12 @@
         <option value="$PROJECT_DIR$/Block/DoubleLoopBlock.js" />
         <option value="$PROJECT_DIR$/Block/Block.js" />
         <option value="$PROJECT_DIR$/Hummingbird.js" />
-        <option value="$PROJECT_DIR$/Flutter.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/version.txt" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/HummingbirdManager.js" />
+        <option value="$PROJECT_DIR$/Flutter.js" />
       </list>
     </option>
   </component>
@@ -965,7 +965,7 @@
       <workItem from="1496111957259" duration="744000" />
       <workItem from="1496153387734" duration="15726000" />
       <workItem from="1496186212919" duration="15470000" />
-      <workItem from="1496237506626" duration="26371000" />
+      <workItem from="1496237506626" duration="26710000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1062,7 +1062,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="696987000" />
+    <option name="totallyTimeSpent" value="697326000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -2612,49 +2612,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_flutter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="89" column="26" selection-start-line="89" selection-start-column="26" selection-end-line="89" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Flutter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#Flutter#0" expanded="false" />
-            <element signature="e#160#498#0" expanded="false" />
-            <element signature="e#270#494#0" expanded="false" />
-            <element signature="e#290#491#0" expanded="false" />
-            <element signature="e#346#390#0" expanded="false" />
-            <element signature="e#444#487#0" expanded="false" />
-            <element signature="e#501#600#0" expanded="false" />
-            <element signature="e#1106#1201#0" expanded="false" />
-            <element signature="e#1765#2431#0" expanded="false" />
-            <element signature="e#1807#1978#0" expanded="false" />
-            <element signature="e#1841#1947#0" expanded="false" />
-            <element signature="e#1873#1926#0" expanded="false" />
-            <element signature="e#1954#1975#0" expanded="false" />
-            <element signature="e#1984#2429#0" expanded="false" />
-            <element signature="e#2013#2223#0" expanded="false" />
-            <element signature="e#2242#2360#0" expanded="false" />
-            <element signature="e#2366#2426#0" expanded="false" />
-            <element signature="e#3294#4001#0" expanded="false" />
-            <element signature="e#3336#3507#0" expanded="false" />
-            <element signature="e#3370#3476#0" expanded="false" />
-            <element signature="e#3402#3455#0" expanded="false" />
-            <element signature="e#3483#3504#0" expanded="false" />
-            <element signature="e#3513#3999#0" expanded="false" />
-            <element signature="e#3542#3793#0" expanded="false" />
-            <element signature="e#3812#3930#0" expanded="false" />
-            <element signature="e#3936#3996#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Hummingbird.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
@@ -2733,8 +2690,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HummingbirdManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="506">
-          <caret line="113" column="62" selection-start-line="113" selection-start-column="62" selection-end-line="113" selection-end-column="62" />
+        <state relative-caret-position="462">
+          <caret line="111" column="53" selection-start-line="111" selection-start-column="53" selection-end-line="111" selection-end-column="53" />
           <folding>
             <element signature="n#!!block;n#HummingbirdManager#0" expanded="false" />
             <element signature="e#547#577#0" expanded="false" />
@@ -2796,6 +2753,49 @@
             <element signature="e#7530#7643#0" expanded="false" />
             <element signature="e#7717#8082#0" expanded="false" />
             <element signature="e#8085#8393#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_flutter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="14" column="26" selection-start-line="14" selection-start-column="26" selection-end-line="14" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Flutter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="59" column="63" selection-start-line="59" selection-start-column="63" selection-end-line="59" selection-end-column="63" />
+          <folding>
+            <element signature="n#!!block;n#Flutter#0" expanded="false" />
+            <element signature="e#160#498#0" expanded="false" />
+            <element signature="e#270#494#0" expanded="false" />
+            <element signature="e#290#491#0" expanded="false" />
+            <element signature="e#346#390#0" expanded="false" />
+            <element signature="e#444#487#0" expanded="false" />
+            <element signature="e#501#600#0" expanded="false" />
+            <element signature="e#1106#1201#0" expanded="false" />
+            <element signature="e#1791#2457#0" expanded="false" />
+            <element signature="e#1833#2004#0" expanded="false" />
+            <element signature="e#1867#1973#0" expanded="false" />
+            <element signature="e#1899#1952#0" expanded="false" />
+            <element signature="e#1980#2001#0" expanded="false" />
+            <element signature="e#2010#2455#0" expanded="false" />
+            <element signature="e#2039#2249#0" expanded="false" />
+            <element signature="e#2268#2386#0" expanded="false" />
+            <element signature="e#2392#2452#0" expanded="false" />
+            <element signature="e#3320#4027#0" expanded="false" />
+            <element signature="e#3362#3533#0" expanded="false" />
+            <element signature="e#3396#3502#0" expanded="false" />
+            <element signature="e#3428#3481#0" expanded="false" />
+            <element signature="e#3509#3530#0" expanded="false" />
+            <element signature="e#3539#4025#0" expanded="false" />
+            <element signature="e#3568#3819#0" expanded="false" />
+            <element signature="e#3838#3956#0" expanded="false" />
+            <element signature="e#3962#4022#0" expanded="false" />
           </folding>
         </state>
       </provider>

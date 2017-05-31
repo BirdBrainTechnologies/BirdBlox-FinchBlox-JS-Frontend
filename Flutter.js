@@ -55,7 +55,7 @@ Flutter.prototype.readSensor = function(context, sensorType, port) {
 	if (context.sent) {
 		return (context.requestStatus.finished != true);  // Return true if not finished
 	} else {
-		let request = "flutter/in?name=" + HtmlServer.encodeHtml(this.name) + "&port=" + port;
+		let request = "flutter/in?name=" + HtmlServer.encodeHtml(this.name) + "&port=" + port + "&sensor=" + sensorType;
 		context.requestStatus = {};
 		HtmlServer.sendRequest(request, context.requestStatus);
 		context.sent = true;
