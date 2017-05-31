@@ -121,7 +121,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 	res += request;
 	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name);
 	res += params;
-	return params;
+	return res;
 };
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
