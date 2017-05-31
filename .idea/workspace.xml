@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Flutter.js" afterPath="$PROJECT_DIR$/Flutter.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -280,11 +280,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Flutter.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Flutter.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Flutter.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="59" column="63" selection-start-line="59" selection-start-column="63" selection-end-line="59" selection-end-column="63" />
+            <state relative-caret-position="400">
+              <caret line="109" column="31" selection-start-line="109" selection-start-column="31" selection-end-line="109" selection-end-column="31" />
               <folding>
                 <element signature="n#!!block;n#Flutter#0" expanded="false" />
                 <element signature="e#160#498#0" expanded="false" />
@@ -349,7 +349,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="132">
@@ -372,6 +372,41 @@
                 <element signature="e#1872#1923#0" expanded="false" />
                 <element signature="e#2326#2363#0" expanded="false" />
                 <element signature="n#!!block;n#UserException#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HexSlot.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/HexSlot.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="308">
+              <caret line="17" column="2" selection-start-line="17" selection-start-column="2" selection-end-line="17" selection-end-column="2" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+                <element signature="e#727#761#0" expanded="false" />
+                <element signature="e#800#836#0" expanded="false" />
+                <element signature="e#838#997#0" expanded="false" />
+                <element signature="e#1038#1124#0" expanded="false" />
+                <element signature="e#1126#1199#0" expanded="false" />
+                <element signature="e#1237#1262#0" expanded="false" />
+                <element signature="e#1264#1337#0" expanded="false" />
+                <element signature="e#1375#1422#0" expanded="false" />
+                <element signature="e#1424#1603#0" expanded="false" />
+                <element signature="e#1645#1814#0" expanded="false" />
+                <element signature="e#1816#1918#0" expanded="false" />
+                <element signature="e#1959#2095#0" expanded="false" />
+                <element signature="e#2097#2216#0" expanded="false" />
+                <element signature="e#2255#2373#0" expanded="false" />
+                <element signature="e#2375#2504#0" expanded="false" />
+                <element signature="e#2545#2735#0" expanded="false" />
+                <element signature="e#2617#2682#0" expanded="false" />
+                <element signature="e#2688#2733#0" expanded="false" />
+                <element signature="e#2737#2877#0" expanded="false" />
+                <element signature="e#2914#3239#0" expanded="false" />
+                <element signature="e#2936#3143#0" expanded="false" />
+                <element signature="e#3007#3039#0" expanded="false" />
+                <element signature="e#3046#3140#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -581,7 +616,6 @@
         <option value="$PROJECT_DIR$/BlockParts/Slot/ListDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/PortSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/RectSlot.js" />
         <option value="$PROJECT_DIR$/XmlWriter.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" />
@@ -590,11 +624,12 @@
         <option value="$PROJECT_DIR$/Block/Block.js" />
         <option value="$PROJECT_DIR$/Hummingbird.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js" />
-        <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/version.txt" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/HummingbirdManager.js" />
         <option value="$PROJECT_DIR$/Flutter.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" />
+        <option value="$PROJECT_DIR$/DebugOptions.js" />
       </list>
     </option>
   </component>
@@ -965,7 +1000,7 @@
       <workItem from="1496111957259" duration="744000" />
       <workItem from="1496153387734" duration="15726000" />
       <workItem from="1496186212919" duration="15470000" />
-      <workItem from="1496237506626" duration="26710000" />
+      <workItem from="1496237506626" duration="28464000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1062,7 +1097,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="697326000" />
+    <option name="totallyTimeSpent" value="699080000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1135,7 +1170,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="56" />
+      <option name="time" value="57" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1725,39 +1760,6 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/HexSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="99" column="25" selection-start-line="99" selection-start-column="25" selection-end-line="99" selection-end-column="25" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="e#727#761#0" expanded="false" />
-            <element signature="e#800#836#0" expanded="false" />
-            <element signature="e#838#997#0" expanded="false" />
-            <element signature="e#1038#1124#0" expanded="false" />
-            <element signature="e#1126#1199#0" expanded="false" />
-            <element signature="e#1237#1262#0" expanded="false" />
-            <element signature="e#1264#1337#0" expanded="false" />
-            <element signature="e#1375#1422#0" expanded="false" />
-            <element signature="e#1424#1603#0" expanded="false" />
-            <element signature="e#1645#1814#0" expanded="false" />
-            <element signature="e#1816#1918#0" expanded="false" />
-            <element signature="e#1959#2095#0" expanded="false" />
-            <element signature="e#2097#2216#0" expanded="false" />
-            <element signature="e#2255#2373#0" expanded="false" />
-            <element signature="e#2375#2504#0" expanded="false" />
-            <element signature="e#2545#2735#0" expanded="false" />
-            <element signature="e#2617#2682#0" expanded="false" />
-            <element signature="e#2688#2733#0" expanded="false" />
-            <element signature="e#2737#2877#0" expanded="false" />
-            <element signature="e#2914#3239#0" expanded="false" />
-            <element signature="e#2936#3143#0" expanded="false" />
-            <element signature="e#3007#3039#0" expanded="false" />
-            <element signature="e#3046#3140#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -2578,40 +2580,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
-          <folding>
-            <element signature="e#545#894#0" expanded="false" />
-            <element signature="e#616#684#0" expanded="false" />
-            <element signature="e#710#759#0" expanded="false" />
-            <element signature="e#779#840#0" expanded="false" />
-            <element signature="e#862#892#0" expanded="false" />
-            <element signature="e#1300#1686#0" expanded="false" />
-            <element signature="e#1337#1659#0" expanded="false" />
-            <element signature="e#1358#1656#0" expanded="false" />
-            <element signature="e#1367#1477#0" expanded="false" />
-            <element signature="e#1431#1472#0" expanded="false" />
-            <element signature="e#1492#1652#0" expanded="false" />
-            <element signature="e#1665#1684#0" expanded="false" />
-            <element signature="e#1729#1928#0" expanded="false" />
-            <element signature="e#1818#1926#0" expanded="false" />
-            <element signature="e#1872#1923#0" expanded="false" />
-            <element signature="e#2326#2363#0" expanded="false" />
-            <element signature="n#!!block;n#UserException#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Hummingbird.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
@@ -2767,8 +2735,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Flutter.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="59" column="63" selection-start-line="59" selection-start-column="63" selection-end-line="59" selection-end-column="63" />
+        <state relative-caret-position="400">
+          <caret line="109" column="31" selection-start-line="109" selection-start-column="31" selection-end-line="109" selection-end-column="31" />
           <folding>
             <element signature="n#!!block;n#Flutter#0" expanded="false" />
             <element signature="e#160#498#0" expanded="false" />
@@ -2796,6 +2764,73 @@
             <element signature="e#3568#3819#0" expanded="false" />
             <element signature="e#3838#3956#0" expanded="false" />
             <element signature="e#3962#4022#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="3" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/HexSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="17" column="2" selection-start-line="17" selection-start-column="2" selection-end-line="17" selection-end-column="2" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#727#761#0" expanded="false" />
+            <element signature="e#800#836#0" expanded="false" />
+            <element signature="e#838#997#0" expanded="false" />
+            <element signature="e#1038#1124#0" expanded="false" />
+            <element signature="e#1126#1199#0" expanded="false" />
+            <element signature="e#1237#1262#0" expanded="false" />
+            <element signature="e#1264#1337#0" expanded="false" />
+            <element signature="e#1375#1422#0" expanded="false" />
+            <element signature="e#1424#1603#0" expanded="false" />
+            <element signature="e#1645#1814#0" expanded="false" />
+            <element signature="e#1816#1918#0" expanded="false" />
+            <element signature="e#1959#2095#0" expanded="false" />
+            <element signature="e#2097#2216#0" expanded="false" />
+            <element signature="e#2255#2373#0" expanded="false" />
+            <element signature="e#2375#2504#0" expanded="false" />
+            <element signature="e#2545#2735#0" expanded="false" />
+            <element signature="e#2617#2682#0" expanded="false" />
+            <element signature="e#2688#2733#0" expanded="false" />
+            <element signature="e#2737#2877#0" expanded="false" />
+            <element signature="e#2914#3239#0" expanded="false" />
+            <element signature="e#2936#3143#0" expanded="false" />
+            <element signature="e#3007#3039#0" expanded="false" />
+            <element signature="e#3046#3140#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+          <folding>
+            <element signature="e#545#894#0" expanded="false" />
+            <element signature="e#616#684#0" expanded="false" />
+            <element signature="e#710#759#0" expanded="false" />
+            <element signature="e#779#840#0" expanded="false" />
+            <element signature="e#862#892#0" expanded="false" />
+            <element signature="e#1300#1686#0" expanded="false" />
+            <element signature="e#1337#1659#0" expanded="false" />
+            <element signature="e#1358#1656#0" expanded="false" />
+            <element signature="e#1367#1477#0" expanded="false" />
+            <element signature="e#1431#1472#0" expanded="false" />
+            <element signature="e#1492#1652#0" expanded="false" />
+            <element signature="e#1665#1684#0" expanded="false" />
+            <element signature="e#1729#1928#0" expanded="false" />
+            <element signature="e#1818#1926#0" expanded="false" />
+            <element signature="e#1872#1923#0" expanded="false" />
+            <element signature="e#2326#2363#0" expanded="false" />
+            <element signature="n#!!block;n#UserException#0" expanded="false" />
           </folding>
         </state>
       </provider>
