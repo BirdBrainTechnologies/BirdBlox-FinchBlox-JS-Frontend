@@ -121,6 +121,14 @@ DropSlot.prototype.duplicate=function(parentCopy){
 	myCopy.dropColumns=this.dropColumns;
 	return myCopy;
 }
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {DropSlot} slot - The slot to copy from
+ */
+DropSlot.prototype.copyFrom=function(slot){
+	this.enteredData = slot.enteredData;
+	this.changeText(slot.text);
+};
 DropSlot.prototype.highlight=function(){//Fix BG
 	var isSlot=!this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
