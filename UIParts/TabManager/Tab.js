@@ -227,6 +227,7 @@ Tab.prototype.createXml=function(xmlDoc){
 	XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab,"x",this.scrollX);
 	XmlWriter.setAttribute(tab,"y",this.scrollY);
+	XmlWriter.setAttribute(tab,"this.zoomFactor");
 	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
 	for(var i=0;i<this.stackList.length;i++){
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
