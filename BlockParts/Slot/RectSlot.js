@@ -154,8 +154,8 @@ RectSlot.prototype.duplicate=function(parentCopy){
  */
 RectSlot.prototype.copyFrom=function(slot){
 	var data = slot.enteredData;
-	callbackFn.slot.enteredData=new StringData(response);
-	callbackFn.slot.changeText(response);
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
 };
 /* Returns a text-based version of the Slot for display in dialogs.
  * @return {string} - The text-based summary of the Slot.

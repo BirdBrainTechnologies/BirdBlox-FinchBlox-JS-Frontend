@@ -211,6 +211,15 @@ RoundSlot.prototype.duplicate=function(parentCopy){
 	myCopy.dropColumns=this.dropColumns;
 	return myCopy;
 };
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {RoundSlot} slot - The slot to copy from
+ */
+RoundSlot.prototype.copyFrom=function(slot){
+	var data = slot.enteredData;
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
+};
 /* Selects the Slot for editing and changes its appearance.
  */
 RoundSlot.prototype.select=function(){
