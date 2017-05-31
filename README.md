@@ -398,9 +398,9 @@ and `2` for the second option.
 #### Read setting
 
     Get request format:
-    http://localhost:22179/settings/getSetting?key=[key]
+    http://localhost:22179/settings/get?key=[key]
     Example:
-    http://localhost:22179/settings/getSetting?key=zoom
+    http://localhost:22179/settings/get?key=zoom
     Example responses:
     1.5999999999999999
     Default
@@ -410,9 +410,9 @@ and `2` for the second option.
 #### Write setting
 
     Get request format:
-    http://localhost:22179/settings/setSetting?key=[key]&value=[value]
+    http://localhost:22179/settings/set?key=[key]&value=[value]
     Example:
-    http://localhost:22179/settings/setSetting?key=zoom&value=1
+    http://localhost:22179/settings/set?key=zoom&value=1
 
 ### File Management
 
