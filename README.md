@@ -338,9 +338,9 @@ and if so, what the response was.
 For dialogs requesting a typed response:
 
     Get request format:
-    http://localhost:22179/tablet/dialog/[title]/[question]/[hint]
+    http://localhost:22179/tablet/dialog?title=[title]&question=[question]&holder=[hint]
     Example:
-    http://localhost:22179/tablet/dialog/Name/What%20is%20your%20name%3F/name
+    http://localhost:22179/tablet/dialog?title=Name&question=What%20is%20your%20name%3F&holder=name
     
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -353,9 +353,9 @@ just ignore them.
 For dialogs with 2 choices (like yes/no):
 
     Get request format:
-    http://localhost:22179/tablet/choice/[title]/[question]/[option1]/[option2]
+    http://localhost:22179/tablet/choice?title=[title]&question=[question]&button1=[option1]&button2=[option2]
     Example:
-    http://localhost:22179/tablet/choice/Save/Save%20changes%3F/Yes/No
+    http://localhost:22179/tablet/choice?title=Save&question=Save%20changes%3F&button1=Yes&button2=No
 
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -398,9 +398,9 @@ and `2` for the second option.
 #### Read setting
 
     Get request format:
-    http://localhost:22179/settings/get/[key]
+    http://localhost:22179/settings/getSetting?key=[key]
     Example:
-    http://localhost:22179/settings/get/zoom
+    http://localhost:22179/settings/getSetting?key=zoom
     Example responses:
     1.5999999999999999
     Default
@@ -410,9 +410,9 @@ and `2` for the second option.
 #### Write setting
 
     Get request format:
-    http://localhost:22179/settings/set/[key]/[value]
+    http://localhost:22179/settings/setSetting?key=[key]&value=[value]
     Example:
-    http://localhost:22179/settings/set/zoom/1
+    http://localhost:22179/settings/setSetting?key=zoom&value=1
 
 ### File Management
 
