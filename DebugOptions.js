@@ -14,6 +14,7 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.skipInitSettings = false;
 	DO.blockLogging = false;
+	DO.skipHtmlRequests = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -45,6 +46,10 @@ DebugOptions.shouldLogErrors=function(){
 DebugOptions.shouldSkipInitSettings=function(){
 	var DO = DebugOptions;
 	return DO.enabled && (DO.mouse || DO.skipInitSettings);
+};
+DebugOptions.shouldSkipHtmlRequests = function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
 DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){

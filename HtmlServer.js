@@ -34,6 +34,18 @@ HtmlServer.encodeHtml=function(message){
 	return eVal; //.replace(/\%20/g, "+");
 }
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+		request.indexOf("discover")<0&&request.indexOf("status")<0) {
+		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+	}
+	if(DebugOptions.shouldSkipHtmlRequests()) {
+		setTimeout(function () {
+			if(callbackErr != null) {
+				callbackErr();
+			}
+		}, 100);
+		return;
+	}
 	if(isPost == null) {
 		isPost=false;
 	}
@@ -65,10 +77,6 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		}
 		else{
 			xhttp.send(); //Make the request
-		}
-		if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-			request.indexOf("discover")<0&&request.indexOf("status")<0) {
-			GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		}
 	}
 	catch(err){

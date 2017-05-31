@@ -20,11 +20,11 @@ B_FlutterServo.prototype.startAction = function() {
 	let port = this.slots[1].getData().getValue(); // Positive integer.
 	let value = this.slots[2].getData().getValueInR(0, 180); // [0,180]
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return flutter.setServoOrSave(shouldSend, mem, port, value);
+	return flutter.setServoOrSave(shouldSend, this, port, value);
 };
 B_FlutterServo.prototype.updateAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return this.runMem.flutter.setServoOrSave(shouldSend, this.runMem);
+	return this.runMem.flutter.setServoOrSave(shouldSend, this);
 };
 
 function B_FlutterTriLed(x, y) {
@@ -46,7 +46,7 @@ B_FlutterTriLed.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
 		this.resultData = new NumData(0, false);
-		block.throwError("Flutter not connected");
+		this.throwError("Flutter not connected");
 		return false; // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
@@ -57,17 +57,17 @@ B_FlutterTriLed.prototype.startAction = function() {
 	let valueB = this.slots[4].getData().getValueInR(0, 100, true, true); //Positive integer.
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
 	if (port != null && port > 0 && port < 4) {
-		return flutter.setTriLEDOrSave(shouldSend, mem, port, valueR, valueG, valueB);
+		return flutter.setTriLEDOrSave(shouldSend, this, port, valueR, valueG, valueB);
 	} else {
 		this.resultData = new NumData(0, false);
-		block.throwError("Invalid port number");
+		this.throwError("Invalid port number");
 		return false; // Invalid port, exit early
 	}
 };
 /* Waits for the request to finish. */
 B_FlutterTriLed.prototype.updateAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return this.runMem.flutter.setTriLEDOrSave(shouldSend, this.runMem);
+	return this.runMem.flutter.setTriLEDOrSave(shouldSend, this);
 };
 
 
@@ -98,11 +98,11 @@ B_FlutterBuzzer.prototype.startAction = function() {
 
 	// TODO: error checking?
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return flutter.setBuzzerOrSave(shouldSend, mem, volume, frequency);
+	return flutter.setBuzzerOrSave(shouldSend, this, volume, frequency);
 };
 B_FlutterBuzzer.prototype.updateAction = function() {
 	let shouldSend = CodeManager.checkHBOutputDelay(this.stack);
-	return this.runMem.flutter.setBuzzerOrSave(shouldSend, this.runMem);
+	return this.runMem.flutter.setBuzzerOrSave(shouldSend, this);
 };
 
 
@@ -124,7 +124,7 @@ B_FlutterSensorBase.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
 		this.resultData = new NumData(0, false);
-		block.throwError("Flutter not connected");
+		this.throwError("Flutter not connected");
 		return false; // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
@@ -134,7 +134,7 @@ B_FlutterSensorBase.prototype.startAction = function() {
 		return flutter.readSensor(mem, this.sensorType, port);
 	} else {
 		this.resultData = new NumData(0, false);
-		block.throwError("Invalid port number");
+		this.throwError("Invalid port number");
 		return false; // Invalid port, exit early
 	}
 };
@@ -145,7 +145,7 @@ B_FlutterSensorBase.prototype.updateAction = function() {
 	if (this.runMem.flutter.readSensor(this.runMem) == false) {
 		if(this.runMem.requestStatus.error){
 			this.resultData = new NumData(0, false);
-			block.throwError("Flutter not connected");
+			this.throwError("Flutter not connected");
 		} else {
 			this.resultData = new NumData(parseInt(this.runMem.requestStatus.result));
 		}

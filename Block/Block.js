@@ -897,7 +897,6 @@ Block.prototype.displayValue = function(message, error){
 	GuiElements.displayValue(message,x,y,width,height, error);
 };
 Block.prototype.throwError = function(message){
-	return;
 	if(this.running >= 2) {
 		this.displayValue(message, true);
 		if (this.stack != null) {
@@ -909,7 +908,7 @@ Block.setDisplaySuffix = function(Class, suffix){
 	Class.prototype.displayResult = function(){
 		if(this.running >= 2) {
 			var value = this.getResultData().asString().getValue();
-			this.displayValue(value + " " + suffix + "!", false);
+			this.displayValue(value + " " + suffix, false);
 		}
 	};
 };
