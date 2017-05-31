@@ -882,7 +882,7 @@ Block.prototype.passRecursively=function(functionName){
 	}
 };
 Block.prototype.displayResult = function(){
-	if(this.running == 2) {
+	if(this.running >= 2) {
 		var value = this.getResultData().asString().getValue();
 		this.displayValue(value, false);
 	}
@@ -895,7 +895,7 @@ Block.prototype.displayValue = function(message, error){
 	GuiElements.displayValue(message,x,y,width,height, error);
 };
 Block.prototype.throwError = function(message){
-	if(this.running == 2) {
+	if(this.running >= 2) {
 		this.displayValue(message, true);
 		if (this.stack != null) {
 			this.stack.stop();
