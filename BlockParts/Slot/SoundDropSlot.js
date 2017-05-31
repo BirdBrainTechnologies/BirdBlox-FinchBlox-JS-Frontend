@@ -40,7 +40,7 @@ SoundDropSlot.prototype.edit=function(){
 		}
 	});
 };
-SoundDropSlot.prototype.select=function(){
-	DropSlot.call(this);
+SoundDropSlot.prototype.deselect=function(){
+	DropSlot.prototype.deselect.call(this);
 	HtmlServer.sendRequestWithCallback("sound/stop");
 };

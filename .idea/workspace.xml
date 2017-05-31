@@ -275,7 +275,7 @@
       <file leaf-file-name="BlockDefs_sound.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
+            <state relative-caret-position="50">
               <caret line="115" column="0" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
               <folding />
             </state>
@@ -285,8 +285,8 @@
       <file leaf-file-name="SoundDropSlot.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="768">
-              <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
+            <state relative-caret-position="724">
+              <caret line="44" column="53" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
               <folding />
             </state>
           </provider>
@@ -323,8 +323,8 @@
       <file leaf-file-name="DropSlot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DropSlot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="356">
-              <caret line="171" column="20" selection-start-line="171" selection-start-column="20" selection-end-line="171" selection-end-column="20" />
+            <state relative-caret-position="312">
+              <caret line="178" column="27" selection-start-line="178" selection-start-column="27" selection-end-line="178" selection-end-column="27" />
               <folding>
                 <element signature="e#557#627#0" expanded="false" />
                 <element signature="e#670#700#0" expanded="false" />
@@ -348,13 +348,10 @@
                 <element signature="e#5069#5225#0" expanded="false" />
                 <element signature="e#5087#5190#0" expanded="false" />
                 <element signature="e#5319#5324#0" expanded="false" />
-                <element signature="e#5793#5994#0" expanded="false" />
                 <element signature="e#6037#6199#0" expanded="false" />
                 <element signature="e#6057#6079#0" expanded="false" />
                 <element signature="e#6085#6197#0" expanded="false" />
                 <element signature="e#6115#6137#0" expanded="false" />
-                <element signature="e#6256#6349#0" expanded="false" />
-                <element signature="e#6324#6347#0" expanded="false" />
                 <element signature="e#6351#6499#0" expanded="false" />
                 <element signature="e#6545#6606#0" expanded="false" />
                 <element signature="e#6645#6849#0" expanded="false" />
@@ -1025,7 +1022,7 @@
       <workItem from="1495806497711" duration="22491000" />
       <workItem from="1496111957259" duration="744000" />
       <workItem from="1496153387734" duration="15726000" />
-      <workItem from="1496186212919" duration="14047000" />
+      <workItem from="1496186212919" duration="14305000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1122,7 +1119,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="669193000" />
+    <option name="totallyTimeSpent" value="669451000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -2483,32 +2480,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="84" column="54" selection-start-line="84" selection-start-column="12" selection-end-line="84" selection-end-column="54" />
-          <folding>
-            <element signature="e#545#894#0" expanded="false" />
-            <element signature="e#616#684#0" expanded="false" />
-            <element signature="e#710#759#0" expanded="false" />
-            <element signature="e#779#840#0" expanded="false" />
-            <element signature="e#862#892#0" expanded="false" />
-            <element signature="e#1300#1686#0" expanded="false" />
-            <element signature="e#1337#1659#0" expanded="false" />
-            <element signature="e#1358#1656#0" expanded="false" />
-            <element signature="e#1367#1477#0" expanded="false" />
-            <element signature="e#1431#1472#0" expanded="false" />
-            <element signature="e#1492#1652#0" expanded="false" />
-            <element signature="e#1665#1684#0" expanded="false" />
-            <element signature="e#1729#1928#0" expanded="false" />
-            <element signature="e#1818#1926#0" expanded="false" />
-            <element signature="e#1872#1923#0" expanded="false" />
-            <element signature="e#2326#2363#0" expanded="false" />
-            <element signature="n#!!block;n#UserException#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="720">
@@ -2574,7 +2545,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sound.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
+        <state relative-caret-position="50">
           <caret line="115" column="0" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
           <folding />
         </state>
@@ -2582,8 +2553,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DropSlot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="171" column="20" selection-start-line="171" selection-start-column="20" selection-end-line="171" selection-end-column="20" />
+        <state relative-caret-position="312">
+          <caret line="178" column="27" selection-start-line="178" selection-start-column="27" selection-end-line="178" selection-end-column="27" />
           <folding>
             <element signature="e#557#627#0" expanded="false" />
             <element signature="e#670#700#0" expanded="false" />
@@ -2607,13 +2578,10 @@
             <element signature="e#5069#5225#0" expanded="false" />
             <element signature="e#5087#5190#0" expanded="false" />
             <element signature="e#5319#5324#0" expanded="false" />
-            <element signature="e#5793#5994#0" expanded="false" />
             <element signature="e#6037#6199#0" expanded="false" />
             <element signature="e#6057#6079#0" expanded="false" />
             <element signature="e#6085#6197#0" expanded="false" />
             <element signature="e#6115#6137#0" expanded="false" />
-            <element signature="e#6256#6349#0" expanded="false" />
-            <element signature="e#6324#6347#0" expanded="false" />
             <element signature="e#6351#6499#0" expanded="false" />
             <element signature="e#6545#6606#0" expanded="false" />
             <element signature="e#6645#6849#0" expanded="false" />
@@ -2636,10 +2604,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="526">
+          <caret line="84" column="54" selection-start-line="84" selection-start-column="12" selection-end-line="84" selection-end-column="54" />
+          <folding>
+            <element signature="e#545#894#0" expanded="false" />
+            <element signature="e#616#684#0" expanded="false" />
+            <element signature="e#710#759#0" expanded="false" />
+            <element signature="e#779#840#0" expanded="false" />
+            <element signature="e#862#892#0" expanded="false" />
+            <element signature="e#1300#1686#0" expanded="false" />
+            <element signature="e#1337#1659#0" expanded="false" />
+            <element signature="e#1358#1656#0" expanded="false" />
+            <element signature="e#1367#1477#0" expanded="false" />
+            <element signature="e#1431#1472#0" expanded="false" />
+            <element signature="e#1492#1652#0" expanded="false" />
+            <element signature="e#1665#1684#0" expanded="false" />
+            <element signature="e#1729#1928#0" expanded="false" />
+            <element signature="e#1818#1926#0" expanded="false" />
+            <element signature="e#1872#1923#0" expanded="false" />
+            <element signature="e#2326#2363#0" expanded="false" />
+            <element signature="n#!!block;n#UserException#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="768">
-          <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
+        <state relative-caret-position="724">
+          <caret line="44" column="53" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
           <folding />
         </state>
       </provider>
