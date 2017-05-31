@@ -662,12 +662,15 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
  * @param {string} value - The value to display
  * @fix This function has not been created yet.
  */
-GuiElements.displayValue=function(value,x,y,width,height){
+GuiElements.displayValue=function(value,x,y,width,height, error){
+	if(error == null){
+		error = false;
+	}
 	var leftX = x;
 	var rightX = x + width;
 	var upperY=y;
 	var lowerY=y+height;
-	new ResultBubble(leftX, rightX,upperY,lowerY,value);
+	new ResultBubble(leftX, rightX,upperY,lowerY,value, error);
 };
 /* GuiElements.overlay contains functions that keep track of overlays present on the screen.
  */

@@ -71,7 +71,7 @@ DiscoverDialog.prototype.showDialog = function() {
 };
 
 DiscoverDialog.prototype.closeDialog = function(){
-	HtmlServer.sendRequestWithCallback("/flutter/stopDiscover");
+	HtmlServer.sendRequestWithCallback("flutter/stopDiscover");
 	this.group.remove();
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
@@ -80,7 +80,7 @@ DiscoverDialog.prototype.closeDialog = function(){
 };
 
 DiscoverDialog.prototype.discoverDevices = function() {
-	DiscoverDialog.deviceManagerClass.DiscoverDevices(this.updateDeviceList.bind(this), this.updateDeviceList.bind(this));
+	DiscoverDialog.deviceManagerClass.DiscoverDevices(this.updateDeviceList.bind(this), null);
 };
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){

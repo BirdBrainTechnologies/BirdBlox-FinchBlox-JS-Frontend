@@ -34,6 +34,18 @@ HtmlServer.encodeHtml=function(message){
 	return eVal; //.replace(/\%20/g, "+");
 }
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+		request.indexOf("discover")<0&&request.indexOf("status")<0) {
+		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+	}
+	if(DebugOptions.shouldSkipHtmlRequests()) {
+		setTimeout(function () {
+			if(callbackErr != null) {
+				callbackErr();
+			}
+		}, 100);
+		return;
+	}
 	if(isPost == null) {
 		isPost=false;
 	}
@@ -65,10 +77,6 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		}
 		else{
 			xhttp.send(); //Make the request
-		}
-		if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-			request.indexOf("discover")<0&&request.indexOf("status")<0) {
-			GuiElements.alert(HtmlServer.getUrlForRequest(request));
 		}
 	}
 	catch(err){
@@ -247,11 +255,11 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/getSetting?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };
 HtmlServer.setSetting=function(key,value){
-	var request = "settings/setSetting";
+	var request = "settings/set";
 	request += "?key=" + HtmlServer.encodeHtml(key);
-	request += "&value" + HtmlServer.encodeHtml(value);
+	request += "&value=" + HtmlServer.encodeHtml(value);
 	HtmlServer.sendRequestWithCallback(request);
 };

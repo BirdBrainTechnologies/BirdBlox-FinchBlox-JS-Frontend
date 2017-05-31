@@ -102,6 +102,7 @@ B_DevicePressure.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
+Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 
 function B_DeviceRelativeAltitude(x,y){
@@ -136,6 +137,7 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
+Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 
 
@@ -213,7 +215,7 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
-
+Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 
 function B_DeviceLocation(x,y){

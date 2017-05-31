@@ -6,7 +6,7 @@ function DebugOptions(){
 
 	DO.mouse = false;
 	DO.addVirtualHB = false;
-	DO.addVirtualFlutter = false;
+	DO.addVirtualFlutter = true;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
@@ -14,6 +14,7 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.skipInitSettings = false;
 	DO.blockLogging = false;
+	DO.skipHtmlRequests = false;
 	if(DO.enabled){
 		DO.applyConstants();
 	}
@@ -45,6 +46,10 @@ DebugOptions.shouldLogErrors=function(){
 DebugOptions.shouldSkipInitSettings=function(){
 	var DO = DebugOptions;
 	return DO.enabled && (DO.mouse || DO.skipInitSettings);
+};
+DebugOptions.shouldSkipHtmlRequests = function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
 DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){
@@ -79,6 +84,11 @@ DebugOptions.validateNonNull = function(){
 		if(arguments[i] == null){
 			throw new UserException("Null parameter");
 		}
+	}
+};
+DebugOptions.assert = function(bool){
+	if(!bool && DebugOptions.shouldLogErrors()){
+		throw new UserException("Assertion Failure");
 	}
 };
 DebugOptions.stopErrorLocking = function(){

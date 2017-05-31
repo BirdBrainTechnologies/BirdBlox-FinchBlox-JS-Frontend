@@ -247,7 +247,7 @@ CodeManager.stopUpdateTimer=function(){
 CodeManager.startUpdateTimer=function(){
 	if(!CodeManager.isRunning){ //If the timer is not running...
 		//...Start the timer.
-		CodeManager.updateTimer = self.setInterval(function () { CodeManager.updateRun() }, CodeManager.updateInterval);
+		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
 		CodeManager.isRunning=true;
 	}
 }
