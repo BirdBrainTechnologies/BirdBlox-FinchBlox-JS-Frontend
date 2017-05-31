@@ -24,14 +24,16 @@ SoundDropSlot.prototype.edit=function(){
 	DropSlot.prototype.edit.call(this, function(){
 		if(me.enteredData != null) {
 			var soundName = me.enteredData.getValue();
-			if(Sounds.checkNameIsValid(soundName)){
-				var request = "sound/play/"+soundName;
-				HtmlServer.sendRequestWithCallback(request);
-				GuiElements.alert("sent: " + request);
-			}
-			else{
-				GuiElements.alert("Bad sound: " + soundName);
-			}
+			HtmlServer.sendRequestWithCallback("sound/stop", function(){
+				if(Sounds.checkNameIsValid(soundName)){
+					var request = "sound/play/"+soundName;
+					HtmlServer.sendRequestWithCallback(request);
+					GuiElements.alert("sent: " + request);
+				}
+				else{
+					GuiElements.alert("Bad sound: " + soundName);
+				}
+			});
 		}
 		else{
 			GuiElements.alert("No data");
