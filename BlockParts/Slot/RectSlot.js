@@ -148,6 +148,13 @@ RectSlot.prototype.duplicate=function(parentCopy){
 	}
 	return myCopy;
 };
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {RectSlot} slot - The slot to copy from
+ */
+RectSlot.prototype.copyFrom=function(slot){
+
+};
 /* Returns a text-based version of the Slot for display in dialogs.
  * @return {string} - The text-based summary of the Slot.
  * @fix redundant with RoundSlot.

@@ -275,9 +275,14 @@ Slot.prototype.duplicate=function(parentCopy){
 	}
 	return myCopy;
 };
-
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {Slot} slot - The slot to copy from
+ */
 Slot.prototype.copyFrom = function(slot){
-
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
 };
 /* Clears the result data of the Slot and resets its running state. Is called by Block's clearMem function.
  */
