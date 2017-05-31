@@ -215,7 +215,7 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
-Block.setDisplaySuffix(B_DeviceAcceleration, "G's");
+Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 
 function B_DeviceLocation(x,y){
