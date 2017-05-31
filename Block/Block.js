@@ -177,7 +177,9 @@ Block.prototype.updateRun=function(){
 	}
 	var rT=Block.returnTypes;
 	if(rVal==false){ //If the block is done running...
-		this.running=3; //Record that the Block is done.
+		if(this.running != 0) {
+			this.running = 3; //Record that the Block is done.
+		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
 	return rVal; //Return a boolean indicating if this Block is done.
@@ -895,10 +897,19 @@ Block.prototype.displayValue = function(message, error){
 	GuiElements.displayValue(message,x,y,width,height, error);
 };
 Block.prototype.throwError = function(message){
+	return;
 	if(this.running >= 2) {
 		this.displayValue(message, true);
 		if (this.stack != null) {
 			this.stack.stop();
 		}
 	}
+};
+Block.setDisplaySuffix = function(Class, suffix){
+	Class.prototype.displayResult = function(){
+		if(this.running >= 2) {
+			var value = this.getResultData().asString().getValue();
+			this.displayValue(value + " " + suffix + "!", false);
+		}
+	};
 };

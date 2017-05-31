@@ -165,10 +165,8 @@ function B_FlutterTempC(x, y) {
 }
 B_FlutterTempC.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterTempC.prototype.constructor = B_FlutterTempC;
-B_FlutterTempC.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " ºC");
-};
+Block.setDisplaySuffix(B_FlutterTempC, String.fromCharCode(176) + "C");
+
 
 
 function B_FlutterDistCM(x, y) {
@@ -176,10 +174,7 @@ function B_FlutterDistCM(x, y) {
 }
 B_FlutterDistCM.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistCM.prototype.constructor = B_FlutterDistCM;
-B_FlutterDistCM.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " cm");
-};
+Block.setDisplaySuffix(B_FlutterDistCM, "cm");
 
 
 function B_FlutterKnob(x, y) {
@@ -221,10 +216,8 @@ B_FlutterTempF.prototype.updateAction = function() {
 		return true; //Still running
 	}
 };
-B_FlutterTempF.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " ºF");
-};
+Block.setDisplaySuffix(B_FlutterTempF, String.fromCharCode(176) + "F");
+
 
 function B_FlutterDistInch(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "distance", "Distance Inch");
@@ -245,7 +238,4 @@ B_FlutterDistInch.prototype.updateAction = function() {
 		return true; //Still running
 	}
 };
-B_FlutterDistInch.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " inches");
-};
+Block.setDisplaySuffix(B_FlutterDistInch, "inches");

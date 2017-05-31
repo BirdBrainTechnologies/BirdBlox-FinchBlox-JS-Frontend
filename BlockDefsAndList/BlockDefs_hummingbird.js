@@ -110,10 +110,8 @@ B_HBTempC.prototype.startAction=function(){
 B_HBTempC.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
 };
-B_HBTempC.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " ºC");
-};
+Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
+
 
 
 
@@ -132,10 +130,7 @@ B_HBDistCM.prototype.startAction=function(){
 B_HBDistCM.prototype.updateAction=function(){
 	return HummingbirdManager.sensorUpdateAction(this,true,0);
 };
-B_HBDistCM.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " cm");
-};
+Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 
 
@@ -254,10 +249,8 @@ B_HBTempF.prototype.updateAction=function(){
 		return true; //Still running
 	}
 };
-B_HBTempF.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " ºF");
-};
+Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
+
 
 
 function B_HBDistInch(x,y){
@@ -285,7 +278,4 @@ B_HBDistInch.prototype.updateAction=function(){
         return true; //Still running
 	}
 };
-B_HBDistInch.prototype.displayResult = function(){
-	var value=this.getResultData().asString().getValue();
-	this.displayValue(value + " inches");
-};
+Block.setDisplaySuffix(B_HBDistInch, "inches");
