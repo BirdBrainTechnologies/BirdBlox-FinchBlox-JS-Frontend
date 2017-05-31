@@ -255,10 +255,10 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
 };
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/getSetting?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };
 HtmlServer.setSetting=function(key,value){
-	var request = "settings/setSetting";
+	var request = "settings/set";
 	request += "?key=" + HtmlServer.encodeHtml(key);
 	request += "&value=" + HtmlServer.encodeHtml(value);
 	HtmlServer.sendRequestWithCallback(request);
