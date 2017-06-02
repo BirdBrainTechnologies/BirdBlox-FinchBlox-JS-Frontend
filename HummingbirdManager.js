@@ -125,14 +125,14 @@ HummingbirdManager.sensorStartAction=function(block,sensor,defaultValue){
 HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 	if(block.runMem.requestStatus.finished==true){
 		if(block.runMem.requestStatus.error==false){
-			var result;
-			if(integer){
-				result=parseInt(block.runMem.requestStatus.result);
+			var result = new StringData(block.runMem.requestStatus.result);
+			if(result.isNumber()){
+				block.resultData = result.asNum();
 			}
 			else{
-				result=parseFloat(block.runMem.requestStatus.result);
+				GuiElements.alert("Got this response, which is not a number: \"" + block.runMem.requestStatus.result + "\"");
+				block.resultData=new NumData(defaultValue, false);
 			}
-			block.resultData=new NumData(result);
 		}
 		else{
 			block.resultData=new NumData(defaultValue,false);

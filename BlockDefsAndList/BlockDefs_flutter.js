@@ -141,6 +141,8 @@ B_FlutterSensorBase.prototype.startAction = function() {
 };
 B_FlutterSensorBase.prototype.updateAction = function() {
 	if (this.runMem.flutter == null) {
+		GuiElements.alert("flutter is null");
+		block.resultData = new NumData(0, false);
 		return false; // Exited early
 	}
 	if (this.runMem.flutter.readSensor(this.runMem) == false) {
@@ -148,7 +150,14 @@ B_FlutterSensorBase.prototype.updateAction = function() {
 			this.resultData = new NumData(0, false);
 			this.throwError("Flutter not connected");
 		} else {
-			this.resultData = new NumData(parseInt(this.runMem.requestStatus.result));
+			var result = new StringData(this.runMem.requestStatus.result);
+			if(result.isNumber()){
+				this.resultData = result.asNum();
+			}
+			else{
+				GuiElements.alert("Got this response, which is not a number: \"" + this.runMem.requestStatus.result + "\"");
+				this.resultData=new NumData(0, false);
+			}
 		}
 		return false; // Done
 	}

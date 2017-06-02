@@ -97,12 +97,12 @@ HtmlServer.sendHBRequest=function(hBIndex,request,params,requestStatus){
 	}
 };
 HtmlServer.sendRequest=function(request,requestStatus){
-	 /*
+	/*
 	 setTimeout(function(){
 		requestStatus.error = false;
 		requestStatus.finished = true;
 		requestStatus.result = "7";
-	}, 50);
+	}, 300);
 	return;
 	*/
 	if(requestStatus!=null){
