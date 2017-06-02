@@ -97,6 +97,10 @@ DebugOptions.stopErrorLocking = function(){
 DebugOptions.enableLogging = function(){
 	DebugOptions.blockLogging = false;
 };
+DebugOptions.throw = function(message){
+	if(!DebugOptions.shouldLogErrors()) return;
+	throw new UserException(message);
+};
 
 function UserException(message) {
 	this.message = message;

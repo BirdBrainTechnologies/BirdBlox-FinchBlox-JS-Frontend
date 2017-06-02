@@ -85,6 +85,10 @@ Tab.prototype.checkBroadcastMessageAvailable=function(message){
 Tab.prototype.updateAvailableMessages=function(){
 	this.passRecursively("updateAvailableMessages");
 };
+/**
+ *
+ * @returns {*}
+ */
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
 		return false;

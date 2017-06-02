@@ -82,6 +82,9 @@ TabManager.checkBroadcastMessageAvailable=function(message){
 TabManager.updateAvailableMessages=function(){
 	TabManager.passRecursively("updateAvailableMessages");
 };
+/**
+ * @returns {ExecutionStatus}
+ */
 TabManager.updateRun=function(){	
 	if(!this.isRunning){
 		return false;
@@ -91,8 +94,12 @@ TabManager.updateRun=function(){
 		rVal=TabManager.tabList[i].updateRun()||rVal;
 	}
 	this.isRunning=rVal;
-	return this.isRunning;
-}
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
 TabManager.stop=function(){
 	TabManager.passRecursively("stop");
 	this.isRunning=false;
