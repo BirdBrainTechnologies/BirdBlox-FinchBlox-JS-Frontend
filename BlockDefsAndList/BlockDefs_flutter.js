@@ -129,6 +129,7 @@ B_FlutterSensorBase.prototype.startAction = function() {
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
+	mem.sent = false;
 	let port = this.slots[1].getData().getValue();
 	if (port != null && port > 0 && port < 4) {
 		return flutter.readSensor(mem, this.sensorType, port);

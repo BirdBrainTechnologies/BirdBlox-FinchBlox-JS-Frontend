@@ -134,6 +134,7 @@ Block.prototype.move=function(x,y){
  */
 Block.prototype.stop=function(){
 	this.running=0; //Stop this Block.
+	this.runMem = {}; //Clear memory
 	for(var i=0;i<this.slots.length;i++){
 		this.slots[i].stop(); //Stop this Block's Slots.
 	}

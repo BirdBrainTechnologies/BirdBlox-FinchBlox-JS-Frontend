@@ -84,7 +84,7 @@ Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
 		}
 		if (shouldSend) {
 			mem.sent = true;
-			HtmlServer.sendRequest(mem.request, mem.requestStatus);
+			HtmlServer.sendRequest(mem.request, mem.requestStatus, 30);
 			return true;  // Still running
 		} else {
 			mem.sent = false;

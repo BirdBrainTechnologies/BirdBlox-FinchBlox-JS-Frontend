@@ -96,7 +96,13 @@ HtmlServer.sendHBRequest=function(hBIndex,request,params,requestStatus){
 		}
 	}
 };
-HtmlServer.sendRequest=function(request,requestStatus){
+HtmlServer.sendRequest=function(request,requestStatus, defaultVal){
+	setTimeout(function(){
+		requestStatus.error = false;
+		requestStatus.finished = true;
+		requestStatus.result = "7";
+	}, 50);
+	return;
 	if(requestStatus!=null){
 		requestStatus.error=false;
 		var callbackFn=function(response){

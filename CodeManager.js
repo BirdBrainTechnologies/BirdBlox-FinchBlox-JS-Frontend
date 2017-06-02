@@ -274,7 +274,7 @@ CodeManager.updateDialogDelay=function(){
 	CM.lastDialogDisplayTime=now;
 };
 CodeManager.checkHBOutputDelay=function(stack){
-	return true;
+	//return true;
 	var CM=CodeManager;
 	var now=new Date().getTime();
 	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
