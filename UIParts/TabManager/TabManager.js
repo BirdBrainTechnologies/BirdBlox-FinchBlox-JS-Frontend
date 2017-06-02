@@ -94,11 +94,7 @@ TabManager.updateRun=function(){
 		rVal=TabManager.tabList[i].updateRun()||rVal;
 	}
 	this.isRunning=rVal;
-	if(this.isRunning){
-		return new ExecutionStatusRunning();
-	} else{
-		return new ExecutionStatusDone();
-	}
+	return this.isRunning;
 };
 TabManager.stop=function(){
 	TabManager.passRecursively("stop");
