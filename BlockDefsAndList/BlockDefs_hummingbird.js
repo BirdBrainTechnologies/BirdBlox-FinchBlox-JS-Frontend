@@ -202,7 +202,7 @@ B_HBTriLed.prototype.startAction=function(){
 	mem.isValid=mem.dataR.isValid&&mem.dataG.isValid&&mem.dataB.isValid;
 
 	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
-		var request = "triled";
+		var request = "out/triled";
 		var params = "";
 		params += "&port=" + mem.port;
 		params += "&red=" + mem.valueR;

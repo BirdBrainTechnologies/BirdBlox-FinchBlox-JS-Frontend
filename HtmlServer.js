@@ -110,12 +110,12 @@ HtmlServer.sendRequest=function(request,requestStatus){
 		var callbackFn=function(response){
 			callbackFn.requestStatus.finished=true;
 			callbackFn.requestStatus.result=response;
-		}
+		};
 		callbackFn.requestStatus=requestStatus;
 		var callbackErr=function(){
 			callbackErr.requestStatus.finished=true;
 			callbackErr.requestStatus.error=true;
-		}
+		};
 		callbackErr.requestStatus=requestStatus;
 		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
 	}
