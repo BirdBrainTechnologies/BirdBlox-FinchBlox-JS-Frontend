@@ -105,7 +105,7 @@ ConnectOneHBDialog.prototype.discoverHBs=function(){
 		thisCOHBD.updateHBList(response);
 	},function(){
 		if(HummingbirdManager.allowVirtualHBs){
-			thisCOHBD.updateHBList("Virtual HB1\nVirtual HB2");
+			thisCOHBD.updateHBList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
 		}
 	});
 };

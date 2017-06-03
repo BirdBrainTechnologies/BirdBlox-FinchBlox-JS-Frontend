@@ -28,7 +28,7 @@ HBConnectionList.prototype.discoverHBs=function(){
 		thisHBCL.updateHBList(response);
 	},function(){
 		if(HummingbirdManager.allowVirtualHBs){
-			thisHBCL.updateHBList("Virtual HB1\nVirtual HB2");
+			thisHBCL.updateHBList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
 		}
 	});
 };

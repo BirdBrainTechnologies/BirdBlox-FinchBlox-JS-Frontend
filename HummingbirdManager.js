@@ -42,9 +42,15 @@ HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;
 	return HM.connectedHBs;
 };
-
+/**
+ * @returns {number}
+ */
 HummingbirdManager.GetConnectionStatus = function() {
-	return HummingbirdManager.connectionStatus;
+	if(HummingbirdManager.GetDeviceCount() == 0){
+		return 2;
+	} else {
+		return HummingbirdManager.connectionStatus;
+	}
 };
 
 HummingbirdManager.UpdateConnectionStatus = function() {

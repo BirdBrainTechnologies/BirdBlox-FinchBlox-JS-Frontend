@@ -30,8 +30,15 @@ FlutterManager.getConnectionInstructions = function(){
 	return "Press the \"find me\" button on your flutter";
 };
 
+/**
+ * @returns {number}
+ */
 FlutterManager.GetConnectionStatus = function() {
-	return FlutterManager.connectionStatus;
+	if(FlutterManager.GetDeviceCount() == 0){
+		return 2;
+	} else {
+		return FlutterManager.connectionStatus;
+	}
 };
 
 FlutterManager.UpdateConnectionStatus = function() {

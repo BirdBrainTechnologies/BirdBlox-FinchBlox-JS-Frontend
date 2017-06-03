@@ -15,9 +15,6 @@ HummingbirdMenu.prototype.loadOptions=function(){
 	if(connectedHBs.length > 0){
 		var currentHB = connectedHBs[0];
 		this.addOption(currentHB.name,function(){},false);
-		this.addOption("Rename HB", function(){
-			currentHB.promptRename();
-		});
 		this.addOption("Disconnect HB", function(){
 			currentHB.disconnect();
 		});

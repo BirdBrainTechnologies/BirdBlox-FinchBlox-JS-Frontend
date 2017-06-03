@@ -7,7 +7,7 @@ function DeviceStatusLight(x,centerY,parent){
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	var thisStatusLight=this;
-	if(!TouchReceiver.mouse) {
+	if(true||!TouchReceiver.mouse) {
 		this.updateTimer = self.setInterval(function () {
 			thisStatusLight.updateStatus()
 		}, HBSL.updateInterval);
@@ -17,7 +17,7 @@ function DeviceStatusLight(x,centerY,parent){
 DeviceStatusLight.setConstants=function(){
 	var HBSL=DeviceStatusLight;
 	HBSL.greenColor="#0f0";
-	HBSL.redColor="#f00"
+	HBSL.redColor="#f00";
 	HBSL.startColor=Colors.black;
 	HBSL.offColor=Colors.darkGray;
 	HBSL.radius=6;
