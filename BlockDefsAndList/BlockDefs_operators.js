@@ -16,8 +16,7 @@ B_Add.prototype.startAction=function(){
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()+data2.getValue();
-	this.resultData=new NumData(val,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(val,isValid));
 };
 
 
@@ -36,8 +35,7 @@ B_Subtract.prototype.startAction=function(){
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()-data2.getValue();
-	this.resultData=new NumData(val,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(val,isValid));
 };
 
 
@@ -56,8 +54,7 @@ B_Multiply.prototype.startAction=function(){
 	var data2=this.slots[1].getData();
 	var isValid=data1.isValid&&data2.isValid;
 	var val=data1.getValue()*data2.getValue();
-	this.resultData=new NumData(val,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(val,isValid));
 };
 
 
@@ -82,8 +79,7 @@ B_Divide.prototype.startAction=function(){
 		val=0; //Return invalid 0 if told to divide by 0.
 		isValid=false;
 	}
-	this.resultData=new NumData(val,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(val,isValid));
 };
 
 
@@ -108,8 +104,7 @@ B_Mod.prototype.startAction=function(){
 		result=0;
 		isValid=false;
 	}
-	this.resultData=new NumData(result,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(result,isValid));
 };
 
 
@@ -126,8 +121,7 @@ B_Round.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var isValid=data1.isValid;
 	var val=data1.getValueWithC(false,true); //Integer
-	this.resultData=new NumData(val,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(val,isValid));
 };
 
 
@@ -162,8 +156,7 @@ B_PickRandom.prototype.startAction=function(){
 	else{
 		rVal = Math.random() * (max - min) + min;
 	}
-	this.resultData=new NumData(rVal,isValid);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(rVal,isValid));
 };
 
 
@@ -180,8 +173,7 @@ B_LessThan.prototype.constructor = B_LessThan;
 B_LessThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
-	this.resultData=new BoolData(val1<val2);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(val1<val2));
 };
 
 
@@ -203,8 +195,7 @@ B_EqualTo.prototype.constructor = B_EqualTo;
 B_EqualTo.prototype.startAction=function(){
 	var data1=this.slots[0].getData();
 	var data2=this.slots[1].getData();
-	this.resultData=new BoolData(Data.checkEquality(data1,data2));
-	return false;
+	return new ExecutionStatusResult(new BoolData(Data.checkEquality(data1,data2)));
 };
 
 
@@ -221,8 +212,7 @@ B_GreaterThan.prototype.constructor = B_GreaterThan;
 B_GreaterThan.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
-	this.resultData=new BoolData(val1>val2);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(val1>val2));
 };
 
 
@@ -239,8 +229,7 @@ B_And.prototype.constructor = B_And;
 B_And.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
-	this.resultData=new BoolData(val1&&val2);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(val1&&val2));
 };
 
 
@@ -257,8 +246,7 @@ B_Or.prototype.constructor = B_Or;
 B_Or.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
 	var val2=this.slots[1].getData().getValue();
-	this.resultData=new BoolData(val1||val2);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(val1||val2));
 };
 
 
@@ -273,8 +261,7 @@ B_Not.prototype.constructor = B_Not;
 /* Result is true if Slot is false. Always valid. */
 B_Not.prototype.startAction=function(){
 	var val1=this.slots[0].getData().getValue();
-	this.resultData=new BoolData(!val1);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(!val1));
 };
 
 
@@ -287,8 +274,7 @@ B_True.prototype = Object.create(PredicateBlock.prototype);
 B_True.prototype.constructor = B_True;
 /* Result is true. */
 B_True.prototype.startAction=function(){
-	this.resultData=new BoolData(true);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(true));
 };
 
 
@@ -301,8 +287,7 @@ B_False.prototype = Object.create(PredicateBlock.prototype);
 B_False.prototype.constructor = B_False;
 /* Result is false. */
 B_False.prototype.startAction=function(){
-	this.resultData=new BoolData(false);
-	return false; //Done running
+	return new ExecutionStatusResult(new BoolData(false));
 };
 
 
@@ -321,12 +306,11 @@ B_LetterOf.prototype.startAction=function(){
 	var word=this.slots[1].getData().getValue();
 	var index=this.slots[0].getData().getValueInR(1,word.length,true,true);
 	if(word.length>0) {
-		this.resultData = new StringData(word.substring(index - 1, index));
+		return new ExecutionStatusResult(StringData(word.substring(index - 1, index)));
 	}
 	else{
-		this.resultData = new StringData(""); //Letter of empty string is empty string.
+		return new ExecutionStatusResult(StringData("")); //Letter of empty string is empty string.
 	}
-	return false; //Done running
 };
 
 
@@ -341,8 +325,7 @@ B_LengthOf.prototype.constructor = B_LengthOf;
 /* Result is length of word. Always valid. */
 B_LengthOf.prototype.startAction=function(){
 	var word=this.slots[0].getData().getValue();
-	this.resultData=new NumData(word.length);
-	return false; //Done running
+	return new ExecutionStatusResult(new NumData(word.length));
 };
 
 
@@ -360,8 +343,7 @@ B_join.prototype.constructor = B_join;
 B_join.prototype.startAction=function(){
 	var word1=this.slots[0].getData().getValue();
 	var word2=this.slots[1].getData().getValue();
-	this.resultData=new StringData(word1+word2);
-	return false; //Done running
+	return new ExecutionStatusResult(new StringData(word1+word2));
 };
 
 
@@ -399,14 +381,13 @@ B_Split.prototype.startAction=function(){
 		}
 	}
 	else{
-		resultArray=new Array();
+		resultArray=[];
 	}
 	var dataArray=new Array(resultArray.length);
 	for(var i=0;i<resultArray.length;i++){
 		dataArray[i]=new StringData(resultArray[i]);
 	}
-	this.resultData=new ListData(dataArray);
-	return false; //Done running
+	return new ExecutionStatusResult(new ListData(dataArray));
 };
 
 
@@ -441,39 +422,38 @@ B_IsAType.prototype.startAction=function(){
 	var types=Data.types;
 	if(selection=="number"){
 		if(data.type==types.num&&data.isValid){
-			this.resultData=new BoolData(true);
+			return new ExecutionStatusResult(new BoolData(true));
 		}
 		else if(data.type==types.string&&data.isNumber()){
-			this.resultData=new BoolData(true);
+			return new ExecutionStatusResult(new BoolData(true));
 		}
 		else{
-			this.resultData=new BoolData(false);
+			return new ExecutionStatusResult(new BoolData(false));
 		}
 	}
 	else if(selection=="text"){
-		this.resultData=new BoolData(data.type==types.string&&!data.isNumber());
+		return new ExecutionStatusResult(new BoolData(data.type==types.string&&!data.isNumber()));
 	}
 	else if(selection=="boolean"){
-		this.resultData=new BoolData(data.type==types.bool);
+		return new ExecutionStatusResult(new BoolData(data.type==types.bool));
 	}
 	else if(selection=="list"){
-		this.resultData=new BoolData(data.type==types.list);
+		return new ExecutionStatusResult(new BoolData(data.type==types.list));
 	}
 	else if(selection=="invalid_num"){
 		if(data.type==types.num&&!data.isValid){
-			this.resultData=new BoolData(true);
+			return new ExecutionStatusResult(new BoolData(true));
 		}
 		else if(data.type==types.string&&data.getValue()==(new NumData(0/0).asString().getValue())){
-			this.resultData=new BoolData(true);
+			return new ExecutionStatusResult(new BoolData(true));
 		}
 		else{
-			this.resultData=new BoolData(false);
+			return new ExecutionStatusResult(new BoolData(false));
 		}
 	}
 	else{
-		this.resultData=new BoolData(false);
+		return new ExecutionStatusResult(new BoolData(false));
 	}
-	return false;
 };
 
 
@@ -567,6 +547,5 @@ B_mathOfNumber.prototype.startAction=function(){
 		value=0;
 		isValid=false;
 	}
-	this.resultData=new NumData(value,isValid);
-	return false;
+	return new ExecutionStatusResult(new NumData(value,isValid));
 };

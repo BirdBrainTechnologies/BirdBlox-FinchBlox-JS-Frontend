@@ -13,7 +13,7 @@ B_PlaySound.prototype.constructor = B_PlaySound;
 B_PlaySound.prototype.startAction=function(){
 	var soundData=this.slots[0].getData();
 	if(soundData==null){
-		return false;
+		return new ExecutionStatusDone();
 	}
 	var soundName=soundData.getValue();
 	if(Sounds.checkNameIsValid(soundName)){
@@ -21,19 +21,19 @@ B_PlaySound.prototype.startAction=function(){
 		mem.request = "sound/play/"+soundName;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 /* Wait for the request to finish. */
 B_PlaySound.prototype.updateAction=function(){
 	var mem=this.runMem;
 	var status=mem.requestStatus;
 	if(status.finished==true){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -51,7 +51,7 @@ B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 B_PlaySoundUntilDone.prototype.startAction=function(){
 	var soundData=this.slots[0].getData();
 	if(soundData==null){
-		return false;
+		return new ExecutionStatusDone();
 	}
 	var soundName=soundData.getValue();
 	var soundIndex=Sounds.indexFromName(soundName);
@@ -63,15 +63,15 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 		mem.cancel=false;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 /* Wait for the request to finish. */
 B_PlaySoundUntilDone.prototype.updateAction=function(){
 	var mem=this.runMem;
 	if(mem.cancel){
-		return false;
+		return new ExecutionStatusDone();
 	}
 	if(!mem.timerStarted){
 		var status=mem.requestStatus;
@@ -80,14 +80,14 @@ B_PlaySoundUntilDone.prototype.updateAction=function(){
 			mem.timerStarted=true;
 		}
 		else{
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 	if(new Date().getTime() >= (mem.startTime+mem.soundDuration)){
-        return false; //Done running
+        return new ExecutionStatusDone(); //Done running
 	}
 	else{
-        return true; //Still running
+        return new ExecutionStatusRunning(); //Still running
 	}
 };
 B_PlaySoundUntilDone.prototype.stopAllSounds=function(){
@@ -108,7 +108,7 @@ B_StopAllSounds.prototype.startAction=function(){
 	mem.request = "sound/stop";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 B_StopAllSounds.prototype.updateAction=function(){
 	return !this.runMem.requestStatus.finished;
@@ -128,15 +128,15 @@ B_RestForBeats.prototype.startAction=function(){
 	mem.startTime=new Date().getTime();
 	var beats=this.slots[0].getData().getValueWithC(true); //Positive
 	mem.delayTime=CodeManager.beatsToMs(beats);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 B_RestForBeats.prototype.updateAction=function(){
 	var mem=this.runMem;
 	if(new Date().getTime()>=mem.startTime+mem.delayTime){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -160,7 +160,7 @@ B_PlayNoteForBeats.prototype.startAction=function(){
 	mem.timerStarted=false;
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 B_PlayNoteForBeats.prototype.updateAction=function(){
 	var mem=this.runMem;
@@ -171,14 +171,14 @@ B_PlayNoteForBeats.prototype.updateAction=function(){
 			mem.timerStarted=true;
 		}
 		else{
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 	if(new Date().getTime()>=mem.startTime+mem.soundDuration){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -195,7 +195,7 @@ B_ChangeTempoBy.prototype.startAction=function(){
 		var newTempo = CodeManager.sound.tempo +slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 function B_SetTempoTo(x,y){
@@ -212,7 +212,7 @@ B_SetTempoTo.prototype.startAction=function(){
 		var newTempo = slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 function B_Tempo(x,y){
@@ -222,6 +222,5 @@ function B_Tempo(x,y){
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
 B_Tempo.prototype.startAction=function(){
-	this.resultData=new NumData(CodeManager.sound.tempo);
-	return false;
+	return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
 };

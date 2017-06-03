@@ -86,8 +86,7 @@ Tab.prototype.updateAvailableMessages=function(){
 	this.passRecursively("updateAvailableMessages");
 };
 /**
- *
- * @returns {*}
+ * @returns {ExecutionStatus}
  */
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
@@ -96,11 +95,15 @@ Tab.prototype.updateRun=function(){
 	var stacks=this.stackList;
 	var rVal=false;
 	for(var i=0;i<stacks.length;i++){
-		rVal=stacks[i].updateRun()||rVal;
+		rVal = stacks[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning=rVal;
-	return this.isRunning;
-}
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
 Tab.prototype.stop=function(){
 	this.passRecursively("stop");
 	this.isRunning=false;

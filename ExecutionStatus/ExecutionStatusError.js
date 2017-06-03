@@ -6,11 +6,9 @@
  * @classdesc Execution status of a block with an error
  * @class
  * @augments ExecutionStatus
- * @param {string} error - The description of the error that occurred
  */
-function ExecutionStatusError(error){
-	/** @type {string} */
-	this.error = error;
+function ExecutionStatusError(){
+
 }
 ExecutionStatusError.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusError.constructor = ExecutionStatusError;
@@ -19,10 +17,4 @@ ExecutionStatusError.constructor = ExecutionStatusError;
  */
 ExecutionStatusError.prototype.hasError = function(){
 	return true;
-};
-/**
- * @inheritDoc
- */
-ExecutionStatusError.prototype.getError = function(){
-	return this.error;
 };

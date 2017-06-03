@@ -15,6 +15,6 @@ ExecutionStatusRunning.constructor = ExecutionStatus;
 /**
  * @inheritDoc
  */
-ExecutionStatus.isRunning = function(){
+ExecutionStatusRunning.prototype.isRunning = function(){
 	return true;
 };

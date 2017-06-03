@@ -76,10 +76,10 @@ HummingbirdManager.outputStartAction=function(block,urlPart,valueLabel,minVal,ma
 		else{
 			mem.sent=false;
 		}
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 };
 HummingbirdManager.outputUpdateAction=function(block){
@@ -87,12 +87,13 @@ HummingbirdManager.outputUpdateAction=function(block){
 	if(mem.sent){
 		if(block.runMem.requestStatus.finished==true){
 			if(block.runMem.requestStatus.error) {
-				block.throwError("Hummingbird not connected");
+				block.displayError("Hummingbird not connected");
+				return new ExecutionStatusError();
 			}
-			return false; //Done running
+			return new ExecutionStatusDone(); //Done running
 		}
 		else{
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 	else{
@@ -101,7 +102,7 @@ HummingbirdManager.outputUpdateAction=function(block){
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 HummingbirdManager.sensorStartAction=function(block,sensor,defaultValue){
@@ -114,12 +115,11 @@ HummingbirdManager.sensorStartAction=function(block,sensor,defaultValue){
 		var params = "&port=" + mem.port + "&sensor=" + sensor;
 		mem.requestStatus={};
         HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus);
-        return true; //Still running
+        return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-        block.resultData=new NumData(defaultValue,false);
-		block.throwError("Invalid port number");
-		return false; //Done running
+		block.displayError("Invalid port number");
+		return new ExecutionStatusError();
 	}
 };
 HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
@@ -127,23 +127,22 @@ HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 		if(block.runMem.requestStatus.error==false){
 			var result = new StringData(block.runMem.requestStatus.result);
 			if(result.isNumber()){
-				block.resultData = result.asNum();
+				return new ExecutionStatusResult(result.asNum());
 			}
 			else{
 				GuiElements.alert("Got this response, which is not a number: \"" + block.runMem.requestStatus.result + "\"");
-				block.resultData=new NumData(defaultValue, false);
+				return new ExecutionStatusResult(new NumData(defaultValue, false));
 			}
 		}
 		else{
-			block.resultData=new NumData(defaultValue,false);
-			block.throwError("Hummingbird not connected");
+			block.displayError("Hummingbird not connected");
+			return new ExecutionStatusError();
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
-}
+};
 HummingbirdManager.stopHummingbirds=function(){
 	//HtmlServer.sendRequest("hummingbird/out/stop");
 	var HM=HummingbirdManager;

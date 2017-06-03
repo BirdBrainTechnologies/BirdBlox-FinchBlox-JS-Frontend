@@ -17,6 +17,6 @@ ExecutionStatusResult.constructor = ExecutionStatusResult;
 /**
  * @inheritDoc
  */
-ExecutionStatusResult.prototype.getResultData = function(){
+ExecutionStatusResult.prototype.getResult = function(){
 	return this.result;
 };

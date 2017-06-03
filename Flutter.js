@@ -59,7 +59,7 @@ Flutter.prototype.readSensor = function(context, sensorType, port) {
 		context.requestStatus = {};
 		HtmlServer.sendRequest(request, context.requestStatus);
 		context.sent = true;
-		return true;  // Still running
+		return new ExecutionStatusRunning();  // Still running
 	}
 };
 
@@ -68,12 +68,13 @@ Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
@@ -85,10 +86,10 @@ Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
 		if (shouldSend) {
 			mem.sent = true;
 			HtmlServer.sendRequest(mem.request, mem.requestStatus, 30);
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };
@@ -98,12 +99,13 @@ Flutter.prototype.setBuzzerOrSave = function(shouldSend, block, volume, frequenc
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
@@ -115,10 +117,10 @@ Flutter.prototype.setBuzzerOrSave = function(shouldSend, block, volume, frequenc
 		if (shouldSend) {
 			mem.sent = true;
 			HtmlServer.sendRequest(mem.request, mem.requestStatus);
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };
@@ -129,12 +131,13 @@ Flutter.prototype.setTriLEDOrSave = function(shouldSend, block, port, valueR, va
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
@@ -146,10 +149,10 @@ Flutter.prototype.setTriLEDOrSave = function(shouldSend, block, port, valueR, va
 		if (shouldSend) {
 			mem.sent = true;
 			HtmlServer.sendRequest(mem.request, mem.requestStatus);
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };

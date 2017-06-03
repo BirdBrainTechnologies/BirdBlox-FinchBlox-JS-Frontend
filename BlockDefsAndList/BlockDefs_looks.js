@@ -34,7 +34,7 @@ B_SetTitleBarColor.prototype.startAction=function(){
 		colorB="0"+colorB;
 	}
 	GuiElements.update.color(TitleBar.bgRect,"#"+colorR+colorG+colorB);
-	return false; //Done running
+	return new ExecutionStatusDone(); //Done running
 };
 
 
@@ -50,7 +50,7 @@ B_alert.prototype.startAction=function(){
 	var message=this.slots[0].getData().getValue();
 	GuiElements.alert(message);
 	TouchReceiver.touchend();
-	return false; //Done running
+	return new ExecutionStatusDone(); //Done running
 };
 
 

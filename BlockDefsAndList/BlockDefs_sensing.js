@@ -26,7 +26,7 @@ B_Ask.prototype.startAction=function(){
 			this.showQuestion(); //Show the dialog.
 		}
 	}
-	return true;
+	return new ExecutionStatusRunning();
 };
 /* Waits until the dialog has been displayed and completed. */
 B_Ask.prototype.updateAction=function(){
@@ -35,7 +35,7 @@ B_Ask.prototype.updateAction=function(){
 		if(!HtmlServer.dialogVisible){ //...And the dialog is closed...
 			mem.waitingForDialog=false; //...Then we can stop waiting.
 		}
-		return true; //Still running.
+		return new ExecutionStatusRunning(); //Still running.
 	}
 	else if(!mem.questionDisplayed){ //If the question has not yet been displayed...
 		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
@@ -46,15 +46,15 @@ B_Ask.prototype.updateAction=function(){
 				this.showQuestion(); //Display the question.
 			}
 		}
-		return true; //Still running.
+		return new ExecutionStatusRunning(); //Still running.
 	}
 	else{
 		if(mem.finished==true){ //Question has been answered.
 			CodeManager.updateDialogDelay(); //Tell CodeManager to reset the dialog delay clock.
-			return false; //Done running
+			return new ExecutionStatusDone(); //Done running
 		}
 		else{ //Waiting on answer from user.
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 };
@@ -91,8 +91,7 @@ B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
 B_Answer.prototype.constructor = B_Answer;
 B_Answer.prototype.startAction=function(){
-	this.resultData=CodeManager.answer;
-	return false; //Done running
+	return new ExecutionStatusResult(CodeManager.answer);
 };
 
 function B_ResetTimer(x,y){
@@ -103,7 +102,7 @@ B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
 B_ResetTimer.prototype.startAction=function(){
 	CodeManager.timerForSensingBlock=new Date().getTime();
-	return false;
+	return new ExecutionStatusDone();
 };
 
 function B_Timer(x,y){
@@ -115,8 +114,7 @@ B_Timer.prototype.constructor = B_Timer;
 B_Timer.prototype.startAction=function(){
 	var now=new Date().getTime();
 	var start=CodeManager.timerForSensingBlock;
-	this.resultData=new NumData(Math.round((now-start)/100)/10);
-	return false;
+	return new ExecutionStatusResult(new NumData(Math.round((now-start)/100)/10));
 };
 
 function B_CurrentTime(x,y){
@@ -139,35 +137,34 @@ B_CurrentTime.prototype.constructor = B_CurrentTime;
 B_CurrentTime.prototype.startAction=function(){
 	var unitD=this.slots[0].getData();
 	if(unitD==null){
-		this.resultData=new NumData(0,false);
-		return false;
+		return new ExecutionStatusResult(new NumData(0,false));
 	}
 	var unit=unitD.getValue();
 	if(unit=="year"){
-		this.resultData=new NumData(new Date().getFullYear());
+		return new ExecutionStatusResult(new NumData(new Date().getFullYear()));
 	}
 	else if(unit=="month"){
-		this.resultData=new NumData(new Date().getMonth()+1);
+		return new ExecutionStatusResult(new NumData(new Date().getMonth()+1));
 	}
 	else if(unit=="date"){
-		this.resultData=new NumData(new Date().getDate());
+		return new ExecutionStatusResult(new NumData(new Date().getDate()));
 	}
 	else if(unit=="day of the week"){
-		this.resultData=new NumData(new Date().getDay()+1);
+		return new ExecutionStatusResult(new NumData(new Date().getDay()+1));
 	}
 	else if(unit=="hour"){
-		this.resultData=new NumData(new Date().getHours());
+		return new ExecutionStatusResult(new NumData(new Date().getHours()));
 	}
 	else if(unit=="minute"){
-		this.resultData=new NumData(new Date().getMinutes());
+		return new ExecutionStatusResult(new NumData(new Date().getMinutes()));
 	}
 	else if(unit=="second"){
-		this.resultData=new NumData(new Date().getSeconds());
+		return new ExecutionStatusResult(new NumData(new Date().getSeconds()));
 	}
 	else if(unit=="time in milliseconds"){
-		this.resultData=new NumData(new Date().getTime());
+		return new ExecutionStatusResult(new NumData(new Date().getTime()));
 	}
-	return false;
+	return new ExecutionStatusResult(new NumData(0, false));
 };
 
 

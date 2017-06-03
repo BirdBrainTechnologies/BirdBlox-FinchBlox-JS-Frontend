@@ -10,5 +10,5 @@
 function ExecutionStatusDone(){
 
 }
-ExecutionStatusError.prototype = Object.create(ExecutionStatus.prototype);
-ExecutionStatusError.constructor = ExecutionStatusError;
+ExecutionStatusDone.prototype = Object.create(ExecutionStatus.prototype);
+ExecutionStatusDone.constructor = ExecutionStatusDone;

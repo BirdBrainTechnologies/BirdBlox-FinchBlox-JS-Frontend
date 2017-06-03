@@ -91,10 +91,14 @@ TabManager.updateRun=function(){
 	}
 	var rVal=false;
 	for(var i=0;i<TabManager.tabList.length;i++){
-		rVal=TabManager.tabList[i].updateRun()||rVal;
+		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning=rVal;
-	return this.isRunning;
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusDone();
+	}
 };
 TabManager.stop=function(){
 	TabManager.passRecursively("stop");
