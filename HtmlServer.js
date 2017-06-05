@@ -239,7 +239,17 @@ HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCance
 		var onDialogPresented = function (result) {
 			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
 		};
-		onDialogPresented.callbackFn = callbackFn;
+		onDialogPresented.callbackFn = function(result){
+			if(result == "0") {
+				if(firstIsCancel){
+					callbackFn("1");
+				} else{
+					callbackFn("2");
+				}
+			} else {
+				callbackFn(result);
+			}
+		};
 		onDialogPresented.callbackErr = callbackErr;
 		var onDialogFail = function () {
 			HtmlServer.dialogVisible = false;

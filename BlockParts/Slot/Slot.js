@@ -382,6 +382,9 @@ Slot.prototype.createXml=function(xmlDoc){
 	}
 	return slot;
 };
+Slot.prototype.importXml = function(slotNode) {
+	//Abstract
+};
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */
@@ -404,4 +407,10 @@ Slot.prototype.stopGlow=function(){
 */
 Slot.prototype.getKey = function(){
 	return this.key;
+};
+Slot.prototype.showSlot = function(){
+	//Abstract
+};
+Slot.prototype.hideSlot = function(){
+	//Abstract
 };
