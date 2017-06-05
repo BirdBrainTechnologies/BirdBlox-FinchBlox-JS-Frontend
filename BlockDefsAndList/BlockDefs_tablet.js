@@ -202,9 +202,9 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 			var parts = status.result.split(" ");
 			var result;
 			if(mem.axis == "total") {
-				let x = parseFloat(0);
-				let y = parseFloat(1);
-				let z = parseFloat(2);
+				let x = parseFloat(parts[0]);
+				let y = parseFloat(parts[1]);
+				let z = parseFloat(parts[2]);
 				result = Math.sqrt(x*x + y*y + z*z);
 			} else {
 				result = parseFloat(parts[mem.axis]);

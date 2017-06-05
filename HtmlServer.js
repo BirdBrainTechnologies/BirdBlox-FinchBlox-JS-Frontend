@@ -213,13 +213,13 @@ HtmlServer.getFileName=function(callbackFn,callbackErr){
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
 };
-HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCancel,callbackFn,callbackErr){
+HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	if(TouchReceiver.mouse){ //Kept for debugging on a PC
 		var result=confirm(question);
 		HtmlServer.dialogVisible=false;
-		if(firstIsCancel){
+		if(swapIfMouse){
 			result=!result;
 		}
 		if(result){
@@ -239,17 +239,7 @@ HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCance
 		var onDialogPresented = function (result) {
 			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
 		};
-		onDialogPresented.callbackFn = function(result){
-			if(result == "0") {
-				if(firstIsCancel){
-					callbackFn("1");
-				} else{
-					callbackFn("2");
-				}
-			} else {
-				callbackFn(result);
-			}
-		};
+		onDialogPresented.callbackFn = callbackFn;
 		onDialogPresented.callbackErr = callbackErr;
 		var onDialogFail = function () {
 			HtmlServer.dialogVisible = false;
