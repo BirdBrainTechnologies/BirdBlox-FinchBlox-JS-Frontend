@@ -124,20 +124,20 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
 	for(var i=0;i<hBArray.length;i++){
-		this.addBnListOption(hBArray[i].id);
+		this.addBnListOption(hBArray[i].name, hBArray[i].id);
 	}
 	this.menuBnList.show();
 	this.menuBnList.scroll(oldScroll);
 };
-ConnectOneHBDialog.prototype.addBnListOption=function(hBName){
+ConnectOneHBDialog.prototype.addBnListOption=function(hBName, hBId){
 	var COHBD=ConnectOneHBDialog;
 	this.menuBnList.addOption(hBName,function(){
-		COHBD.selectHB(hBName);
+		COHBD.selectHB(hBName, hBId);
 	});
 };
-ConnectOneHBDialog.selectHB=function(hBName){
+ConnectOneHBDialog.selectHB=function(hBName, hBId){
 	ConnectOneHBDialog.currentCOHBD.closeDialog();
-	HummingbirdManager.connectOneHB(hBName);
+	HummingbirdManager.connectOneHB(hBName, hBId);
 };
 
 /*

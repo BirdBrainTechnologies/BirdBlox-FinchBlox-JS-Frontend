@@ -127,7 +127,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 	DebugOptions.validateNonNull(params);
 	var res = "hummingbird/";
 	res += request;
-	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name);
+	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
 	res += params;
 	return res;
 };

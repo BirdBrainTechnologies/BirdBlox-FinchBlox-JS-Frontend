@@ -27,7 +27,7 @@ DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
 	if(DO.addVirtualHB){
-		let virHB = new Hummingbird("Virtual HB");
+		let virHB = new Hummingbird("Virtual HB","idOfVirtualHb");
 		virHB.connect();
 	}
 	if(DO.addVirtualFlutter){

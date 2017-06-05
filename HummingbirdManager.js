@@ -5,7 +5,6 @@
  */
 function HummingbirdManager(){
 	var HM=HummingbirdManager;
-	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
 	HM.allowVirtualHBs=false;
@@ -28,16 +27,6 @@ HummingbirdManager.getConnectionInstructions = function(){
 	return null;
 };
 
-/* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
-HummingbirdManager.getHBNames=function(){
-	var HM=HummingbirdManager;
-	var callbackFn=function(response){
-		if(response!="") {
-			HM.connectedHBs = [new Hummingbird(response)];
-		}
-	};
-	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn);
-};
 HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;
 	return HM.connectedHBs;
@@ -184,23 +173,23 @@ HummingbirdManager.disconnectAll=function(){
 		HM.connectedHBs[0].disconnect();
 	}
 };
-HummingbirdManager.connectOneHB=function(hBName){
+HummingbirdManager.connectOneHB=function(hBName, hbId){
 	var HM=HummingbirdManager;
 	HM.disconnectAll();
-	var newHB=new Hummingbird(hBName);
+	var newHB=new Hummingbird(hBName, hbId);
 	newHB.connect();
 };
 HummingbirdManager.showConnectMultipleDialog=function(){
 	new ConnectMultipleHBDialog();
 };
-HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
+HummingbirdManager.replaceHBConnection=function(oldHB, newHbName, newHbId, callbackFn){
 	var HM=HummingbirdManager;
 	var index=-1;
 	if(oldHB!=null){
 		oldHB.disconnect(null,false);
 		index = HummingbirdManager.connectedHBs.indexOf(oldHB);
 	}
-	var newHB=new Hummingbird(newHBName);
+	var newHB=new Hummingbird(newHbName, newHbId);
 	if(index==-1){
 		newHB.connect(callbackFn);
 	}
@@ -236,7 +225,7 @@ HummingbirdManager.displayDebugInfo=function(){
 	info+="Selectable count: "+HM.selectableHBs+"\n";
 	info+="Connected HBs\n";
 	for(var i=0;i<HM.connectedHBs.length;i++){
-		info+="HB"+i+": "+HM.connectedHBs[i].name+"\n";
+		info+="HB"+i+" name: "+HM.connectedHBs[i].name+" id:"+HM.connectedHBs[i].id + "\n";
 	}
 	HtmlServer.showChoiceDialog("Hummingbird Debug",info,"Ok","Ok",true,function(){});
 };
