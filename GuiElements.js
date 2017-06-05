@@ -17,7 +17,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
-	(DebugOptions.safeFunc(GuiElements))();
+	//(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();

@@ -27,3 +27,7 @@ path{
 	-ms-user-select: none;			 
 	user-select: none;	                                 
 }
+.testf {
+	overflow-y: scroll; /* has to be scroll, not auto */
+	-webkit-overflow-scrolling: touch;
+}
