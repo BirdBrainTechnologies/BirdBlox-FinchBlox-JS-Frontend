@@ -134,6 +134,7 @@ Block.prototype.move=function(x,y){
  */
 Block.prototype.stop=function(){
 	this.running=0; //Stop this Block.
+	this.runMem = {}; //Clear memory
 	for(var i=0;i<this.slots.length;i++){
 		this.slots[i].stop(); //Stop this Block's Slots.
 	}
@@ -149,7 +150,7 @@ Block.prototype.stop=function(){
 };
 /**
  * Updates this currently executing Block and returns if the Block is still running
- * @return {boolean} - Indicates if the Block is still running and should be updated again.
+ * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun=function(){
 	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
@@ -159,45 +160,48 @@ Block.prototype.updateRun=function(){
 		}
 		this.running=1; //Now the Block is ready to run its Slots.
 	}
-	var rVal; //The value to return.
+	var myExecStatus; //The value to return.
 	if(this.running==1){ //If the Block is currently waiting on its Slots...
 		for(let i=0;i<this.slots.length;i++){
 			//Check to see if each Slot is done and update the first Slot that isn't done.
-			if(this.slots[i].updateRun()){
-				return true; //Still running
+			let slotExecStatus = this.slots[i].updateRun();
+			if(slotExecStatus.isRunning()){
+				return new ExecutionStatusRunning();
+			} else if(slotExecStatus.hasError()) {
+				this.running = 3;
+				return slotExecStatus;
 			}
 		}
 		this.running=2; //If all Slots are done running, the Block itself may now run.
 		//This function is overridden by the class of the particular Block.
 		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
-		rVal = this.startAction();
+		myExecStatus = this.startAction();
 	}
 	else if(this.running==2){ //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
-		rVal = this.updateAction();
+		myExecStatus = this.updateAction();
 	}
-	var rT=Block.returnTypes;
-	if(rVal==false){ //If the block is done running...
+	if(!myExecStatus.isRunning()){ //If the block is done running...
 		if(this.running != 0) {
-			this.running = 3; //Record that the Block is done.
+			this.running = 3; //Record that the Block is done, provided that it was started
 		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
-	return rVal; //Return a boolean indicating if this Block is done.
+	return myExecStatus; //Return a boolean indicating if this Block is done.
 };
 /**
  * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
- * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
+ * @return {ExecutionStatus} - indicating if it has finished.
  */
 Block.prototype.startAction=function(){
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /**
  * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
- * @return {Block/boolean} - The next Block to run or a boolean indicating if it has finished.
+ * @return {ExecutionStatus} - The next Block to run or a boolean indicating if it has finished.
  */
 Block.prototype.updateAction=function(){
-	return true; //Still running //Fix! by default this should be false.
+	return new ExecutionStatusRunning(); //Still running //Fix! by default this should be false.
 };
 /**
  * Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
@@ -928,11 +932,9 @@ Block.prototype.passRecursively=function(functionName){
 		this.nextBlock[functionName].apply(this.nextBlock,args);
 	}
 };
-Block.prototype.displayResult = function(){
-	if(this.running >= 2) {
-		var value = this.getResultData().asString().getValue();
-		this.displayValue(value, false);
-	}
+Block.prototype.displayResult = function(data){
+	var value = data.asString().getValue();
+	this.displayValue(value, false);
 };
 Block.prototype.displayValue = function(message, error){
 	var x=this.getAbsX();
@@ -941,25 +943,17 @@ Block.prototype.displayValue = function(message, error){
 	var height=this.relToAbsY(this.height) - y;
 	GuiElements.displayValue(message,x,y,width,height, error);
 };
-Block.prototype.throwError = function(message){
-	if(this.running >= 2) {
-		this.displayValue(message, true);
-		if (this.stack != null) {
-			this.stack.stop();
-		}
-	}
+Block.prototype.displayError = function(message){
+	this.displayValue(message, true);
 };
 Block.setDisplaySuffix = function(Class, suffix){
-	Class.prototype.displayResult = function(){
-		if(this.running >= 2) {
-			var resultData = this.getResultData();
-			if(resultData.isValid) {
-				var value = resultData.asString().getValue();
-				this.displayValue(value + " " + suffix, false);
-			}
-			else{
-				this.displayValue(resultData.asString().getValue(), false);
-			}
+	Class.prototype.displayResult = function(data){
+		if(data.isValid) {
+			var value = data.asString().getValue();
+			this.displayValue(value + " " + suffix, false);
+		}
+		else{
+			this.displayValue(data.asString().getValue(), false);
 		}
 	};
 };

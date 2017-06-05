@@ -197,7 +197,7 @@ BlockStack.prototype.stop=function(){
 };
 /**
  * Updates the execution of the BlockStack and its contents. Returns boolean to indicate if still running.
- * @return {boolean} - Indicates if the BlockStack is currently running and still requires updating.
+ * @return {ExecutionStatus}
  */
 BlockStack.prototype.updateRun=function(){
 	if(this.isRunning){
@@ -205,26 +205,47 @@ BlockStack.prototype.updateRun=function(){
 		if(this.returnType==Block.returnTypes.none){
 			if(this.currentBlock.stack!=this){ //If the current Block has been removed, don't run it.
 				this.endRun(); //Stop execution.
-				return this.isRunning;
+				return new ExecutionStatusDone();
 			}
-			//Update the current Block. If it is done running, then next time update the next Block.
-			if(!this.currentBlock.updateRun()){
-				this.currentBlock=this.currentBlock.nextBlock;
+			//Update the current Block.
+			let execStatus = this.currentBlock.updateRun();
+			if(!execStatus.isRunning()){
+				//If the block threw a error, display it
+				if(execStatus.hasError()){
+					this.endRun();
+					return new ExecutionStatusDone();
+				} else{
+					//Otherwise, the next block will run next.
+					this.currentBlock=this.currentBlock.nextBlock;
+				}
 			}
 			//If the end of the BlockStack has been reached, end execution.
-			if(this.currentBlock==null){
+			if(this.currentBlock!=null){
+				return new ExecutionStatusRunning();
+			} else{
 				this.endRun();
+				return new ExecutionStatusDone();
 			}
 		}
 		else{ //Procedure for Blocks that return a value.
-			if(!this.currentBlock.updateRun()){
+			let execStatus = this.currentBlock.updateRun();
+			if(execStatus.isRunning()){
+				return new ExecutionStatusRunning();
+			}
+			else if(execStatus.hasError()){
+				this.endRun();
+				return new ExecutionStatusDone();
+			}
+			else{
 				//When it is done running, display the result.
-				this.currentBlock.displayResult();
+				this.currentBlock.displayResult(execStatus.getResult());
 				this.endRun(); //Execution is done.
+				return new ExecutionStatusDone();
 			}
 		}
+	} else{
+		return new ExecutionStatusDone();
 	}
-	return this.isRunning;
 };
 /**
  * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.

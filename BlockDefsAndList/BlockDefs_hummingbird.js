@@ -202,7 +202,7 @@ B_HBTriLed.prototype.startAction=function(){
 	mem.isValid=mem.dataR.isValid&&mem.dataG.isValid&&mem.dataB.isValid;
 
 	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
-		var request = "triled";
+		var request = "out/triled";
 		var params = "";
 		params += "&port=" + mem.port;
 		params += "&red=" + mem.valueR;
@@ -217,10 +217,10 @@ B_HBTriLed.prototype.startAction=function(){
 		else{
 			mem.sent=false;
 		}
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 };
 /* Waits for the request to finish. */
@@ -244,14 +244,17 @@ B_HBTempF.prototype.startAction=function(){
 };
 /* Waits for the request to finish then converts C to F. */
 B_HBTempF.prototype.updateAction=function(){
-	if(!HummingbirdManager.sensorUpdateAction(this,true,0)){
-		if(this.resultData.isValid){
-			this.resultData=new NumData(Math.round(this.runMem.requestStatus.result*1.8+32)); //Rounded to Integer
+	var status = HummingbirdManager.sensorUpdateAction(this,true,0)
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultC = status.getResult();
+		if(resultC != null && resultC.isValid) {
+			let result=new NumData(Math.round(resultC.getValue()*1.8+32));
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
 		}
-		return false; //Done running
-	}
-	else{
-		return true; //Still running
 	}
 };
 Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
@@ -272,15 +275,17 @@ B_HBDistInch.prototype.startAction=function(){
 };
 /* Waits for the request to finish then converts cm to in. */
 B_HBDistInch.prototype.updateAction=function(){
-	if(!HummingbirdManager.sensorUpdateAction(this,true,0)){
-		if(this.resultData.isValid){
-			var result=this.runMem.requestStatus.result;
-			this.resultData=new NumData((result/2.54).toFixed(1)*1); //Rounded to 1 decimal place. "*1" converts to num.
+	var status = HummingbirdManager.sensorUpdateAction(this,true,0)
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultMm = status.getResult();
+		if(resultMm != null && resultMm.isValid) {
+			let result=new NumData((resultMm.getValue()/2.54).toFixed(1)*1);
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
 		}
-        return false; //Done running
-	}
-	else{
-        return true; //Still running
 	}
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");

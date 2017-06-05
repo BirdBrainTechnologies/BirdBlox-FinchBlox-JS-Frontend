@@ -86,7 +86,7 @@ HexSlot.prototype.getData=function(){
 };
 
 HexSlot.prototype.createXml=function(xmlDoc){
-	var slot = Slot.prototype.call(this, xmlDoc);
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
 	XmlWriter.setAttribute(slot,"type","HexSlot");
 	return slot;
 };

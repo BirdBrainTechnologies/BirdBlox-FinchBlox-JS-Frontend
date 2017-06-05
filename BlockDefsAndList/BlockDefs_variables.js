@@ -10,8 +10,7 @@ function B_Variable(x,y,variable){
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
 B_Variable.prototype.startAction=function(){
-	this.resultData=this.variable.getData();
-	return false;
+	return new ExecutionStatusResult(this.variable.getData());
 };
 B_Variable.prototype.createXml=function(xmlDoc){
 	var block=XmlWriter.createElement(xmlDoc,"block");
@@ -47,9 +46,9 @@ B_Variable.prototype.deleteVariable=function(variable){
 };
 B_Variable.prototype.checkVariableUsed=function(variable){
 	if(variable==this.variable){
-		return true;
+		return new ExecutionStatusRunning();
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 B_Variable.importXml=function(blockNode){
 	var variableName=XmlWriter.getAttribute(blockNode,"variable");
@@ -85,7 +84,7 @@ B_SetTo.prototype.startAction=function(){
 			variable.setData(data);
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -110,7 +109,7 @@ B_ChangeBy.prototype.startAction=function(){
 		var newD=new NumData(newV,isValid);
 		variable.setData(newD);
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -125,8 +124,7 @@ function B_List(x,y,list){
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
 B_List.prototype.startAction=function(){
-	this.resultData=this.list.getData().asString();
-	return false;
+	return new ExecutionStatusResult(this.list.getData().asString());
 };
 B_List.prototype.createXml=function(xmlDoc){
 	var block=XmlWriter.createElement(xmlDoc,"block");
@@ -170,9 +168,9 @@ B_List.prototype.deleteList=function(list){
 };
 B_List.prototype.checkListUsed=function(list){
 	if(list==this.list){
-		return true;
+		return new ExecutionStatusRunning();
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -199,7 +197,7 @@ B_AddToList.prototype.startAction=function(){
 			array.push(itemD.asString());
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -234,7 +232,7 @@ B_DeleteItemOfList.prototype.startAction=function(){
 			}
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -271,7 +269,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 					array.push(itemD.asString());
 				}
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		if(itemD.isValid){
 			array.splice(index, 0, itemD);
@@ -280,7 +278,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 			array.splice(index, 0, itemD.asString());
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -309,7 +307,7 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 		var itemD=this.slots[2].getData();
 		var index=listData.getIndex(indexD);
 		if(index==null){
-			return false;
+			return new ExecutionStatusDone();
 		}
 		if(itemD.isValid){
 			array[index]=itemD;
@@ -318,7 +316,7 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 			array[index]=itemD.asString();
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -344,14 +342,14 @@ B_CopyListToList.prototype.startAction=function(){
 			listDataToCopy=listD1;
 		}
 		else{
-			return false;
+			return new ExecutionStatusDone();
 		}
 		if(listD2.type==Data.types.selection){
 			var listToCopyTo=listD2.getValue();
 			listToCopyTo.setData(listDataToCopy.duplicate());
 		}
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
@@ -376,16 +374,15 @@ B_ItemOfList.prototype.startAction=function(){
 		indexD = this.slots[0].getData();
 		var list = listD.getValue();
 		var listData=list.getData();
-		this.resultData=this.getItemOfList(listData,indexD);
+		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
 	}
 	else if(listD!=null&&listD.type == Data.types.list){
 		indexD = this.slots[0].getData();
-		this.resultData=this.getItemOfList(listD,indexD);
+		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
 	}
 	else {
-		this.resultData = new StringData("", false);
+		return new ExecutionStatusResult(new StringData("", false));
 	}
-	return false;
 };
 B_ItemOfList.prototype.getItemOfList=function(listData,indexD){
 	var array = listData.getValue();
@@ -412,15 +409,14 @@ B_LengthOfList.prototype.startAction=function(){
 	if(listD!=null&&listD.type == Data.types.selection) {
 		var list = listD.getValue();
 		var array = list.getData().getValue();
-		this.resultData = new NumData(array.length);
+		return new ExecutionStatusResult(new NumData(array.length));
 	}
 	else if(listD!=null&&listD.type == Data.types.list){
-		this.resultData = new NumData(listD.getValue().length);
+		return new ExecutionStatusResult(new NumData(listD.getValue().length));
 	}
 	else {
-		this.resultData = new NumData(0,false);
+		return new ExecutionStatusResult(new NumData(0,false));
 	}
-	return false;
 };
 
 
@@ -440,16 +436,15 @@ B_ListContainsItem.prototype.startAction=function(){
 		var list = listD.getValue();
 		var listData=list.getData();
 		itemD=this.slots[1].getData();
-		this.resultData=this.checkListContainsItem(listData,itemD);
+		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
 	}
 	else if(listD!=null&&listD.type == Data.types.list){
 		itemD=this.slots[1].getData();
-		this.resultData=this.checkListContainsItem(listD,itemD);
+		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
 	}
 	else {
-		this.resultData = new BoolData(false,true);
+		return new ExecutionStatusResult(new BoolData(false,true));
 	}
-	return false;
 };
 B_ListContainsItem.prototype.checkListContainsItem=function(listData,itemD){
 	var array = listData.getValue();

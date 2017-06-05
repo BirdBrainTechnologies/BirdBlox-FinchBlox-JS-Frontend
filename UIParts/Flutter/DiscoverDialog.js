@@ -24,9 +24,9 @@ DiscoverDialog.show = function(deviceManagerClass) {
 	Class.instance.showDialog();
 };
 
-DiscoverDialog.selectDevice = function(deviceName){
+DiscoverDialog.selectDevice = function(deviceName, deviceId){
 	DiscoverDialog.instance.closeDialog();
-	DiscoverDialog.deviceManagerClass.ConnectDevice(deviceName);
+	DiscoverDialog.deviceManagerClass.ConnectDevice(deviceName, deviceId);
 };
 
 DiscoverDialog.setConstants = function(){
@@ -99,7 +99,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-this.menuBnListY-Class.cancelBnHeight-Class.bnMargin*2);
 	for(let i=0; i<deviceArr.length; i++){
-		this.addBnListOption(deviceArr[i].id);
+		this.addBnListOption(deviceArr[i].name, deviceArr[i].id);
 	}
 	this.menuBnList.show();
 	this.menuBnList.scroll(oldScrollY);
@@ -107,10 +107,10 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 
 /* UI Creation */
 
-DiscoverDialog.prototype.addBnListOption=function(hBName){
+DiscoverDialog.prototype.addBnListOption=function(hBName, hBId){
 	let Class = DiscoverDialog;
 	this.menuBnList.addOption(hBName,function(){
-		Class.selectDevice(hBName);
+		Class.selectDevice(hBName, hBId);
 	});
 };
 DiscoverDialog.prototype.makeBgRect=function(){

@@ -54,7 +54,9 @@ Menu.prototype.addOption=function(text,func,close){
 		if(callbackFn.close) {
 			callbackFn.menu.close();
 		}
-		callbackFn.func.call(callbackFn.menu);
+		if(callbackFn.func != null) {
+			callbackFn.func.call(callbackFn.menu);
+		}
 	};
 	callbackFn.menu=this;
 	callbackFn.func=func;

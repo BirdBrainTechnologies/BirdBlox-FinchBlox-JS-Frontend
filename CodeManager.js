@@ -213,7 +213,7 @@ CodeManager.findBestFit=function(){
 CodeManager.updateRun=function(){
 	var CM=CodeManager;
 	var startingReservation=CM.reservedStackHBoutput;
-	if(!TabManager.updateRun()){ //A recursive call.  Returns true if any Blocks are running.
+	if(!TabManager.updateRun().isRunning()){ //A recursive call.  Returns true if any Blocks are running.
 		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
 	}
 	var now=new Date().getTime();
@@ -274,6 +274,7 @@ CodeManager.updateDialogDelay=function(){
 	CM.lastDialogDisplayTime=now;
 };
 CodeManager.checkHBOutputDelay=function(stack){
+	//return true;
 	var CM=CodeManager;
 	var now=new Date().getTime();
 	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;

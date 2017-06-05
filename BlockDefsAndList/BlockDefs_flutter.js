@@ -13,7 +13,7 @@ B_FlutterServo.prototype.constructor = B_FlutterServo;
 B_FlutterServo.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
-		return false; // Flutter was invalid, exit early
+		return new ExecutionStatusDone(); // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
@@ -45,9 +45,8 @@ B_FlutterTriLed.prototype.constructor = B_FlutterTriLed;
 B_FlutterTriLed.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
-		this.resultData = new NumData(0, false);
-		this.throwError("Flutter not connected");
-		return false; // Flutter was invalid, exit early
+		this.displayError("Flutter not connected");
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
@@ -59,9 +58,8 @@ B_FlutterTriLed.prototype.startAction = function() {
 	if (port != null && port > 0 && port < 4) {
 		return flutter.setTriLEDOrSave(shouldSend, this, port, valueR, valueG, valueB);
 	} else {
-		this.resultData = new NumData(0, false);
-		this.throwError("Invalid port number");
-		return false; // Invalid port, exit early
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
 	}
 };
 /* Waits for the request to finish. */
@@ -88,7 +86,7 @@ B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
 B_FlutterBuzzer.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
-		return false; // Flutter was invalid, exit early
+		return new ExecutionStatusDone(); // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
@@ -123,35 +121,41 @@ B_FlutterSensorBase.constructor = B_FlutterSensorBase;
 B_FlutterSensorBase.prototype.startAction = function() {
 	let flutter = FlutterManager.GetDeviceByIndex(this.slots[0].getData().getValue());
 	if (flutter == null) {
-		this.resultData = new NumData(0, false);
-		this.throwError("Flutter not connected");
-		return false; // Flutter was invalid, exit early
+		this.displayError("Flutter not connected");
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
 	let mem = this.runMem;
 	mem.flutter = flutter;
+	mem.sent = false;
 	let port = this.slots[1].getData().getValue();
 	if (port != null && port > 0 && port < 4) {
 		return flutter.readSensor(mem, this.sensorType, port);
 	} else {
-		this.resultData = new NumData(0, false);
-		this.throwError("Invalid port number");
-		return false; // Invalid port, exit early
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
 	}
 };
 B_FlutterSensorBase.prototype.updateAction = function() {
 	if (this.runMem.flutter == null) {
-		return false; // Exited early
+		this.displayError("Flutter not connected");
+		return new ExecutionStatusError(); // Exited early
 	}
 	if (this.runMem.flutter.readSensor(this.runMem) == false) {
 		if(this.runMem.requestStatus.error){
-			this.resultData = new NumData(0, false);
-			this.throwError("Flutter not connected");
+			this.displayError("Flutter not connected");
+			return new ExecutionStatusError();
 		} else {
-			this.resultData = new NumData(parseInt(this.runMem.requestStatus.result));
+			var result = new StringData(this.runMem.requestStatus.result);
+			if(result.isNumber()){
+				return new ExecutionStatusResult(result.asNum());
+			}
+			else{
+				GuiElements.alert("Got this response, which is not a number: \"" + this.runMem.requestStatus.result + "\"");
+				return new ExecutionStatusResult(new NumData(0, false));
+			}
 		}
-		return false; // Done
 	}
-	return true; // Still running
+	return new ExecutionStatusRunning(); // Still running
 };
 
 function B_FlutterLight(x, y) {
@@ -205,15 +209,13 @@ B_FlutterTempF.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterTempF.prototype.constructor = B_FlutterTempF;
 /* Waits for the request to finish then converts C to F. */
 B_FlutterTempF.prototype.updateAction = function() {
-	if (!B_FlutterSensorBase.prototype.updateAction.call(this)) {
-		if (this.resultData.isValid) {
-			let tempInC = this.runMem.requestStatus.result;
-			let tempInF = Math.round(tempInC * 1.8 + 32);
-			this.resultData = new NumData(tempInF); //Rounded to Integer
-		}
-		return false; //Done running
-	} else {
-		return true; //Still running
+	let baseStatus = B_FlutterSensorBase.prototype.updateAction.call(this);
+	if(baseStatus.hasError() || baseStatus.isRunning()){
+		return baseStatus;
+	} else{
+		let tempInC = baseStatus.getResult().getValue();
+		let tempInF = Math.round(tempInC * 1.8 + 32);
+		return new ExecutionStatusResult(new NumData(tempInF)); //Rounded to Integer
 	}
 };
 Block.setDisplaySuffix(B_FlutterTempF, String.fromCharCode(176) + "F");
@@ -226,16 +228,13 @@ B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_FlutterDistInch.prototype.updateAction = function() {
-	if (!B_FlutterSensorBase.prototype.updateAction.call(this)) {
-		if (this.resultData.isValid) {
-			let distInCM = this.runMem.requestStatus.result;
-			// Rounded to 1 decimal place. "*1" converts to num.
-			let distInInches = (distInCM / 2.54).toFixed(1) * 1;
-			this.resultData = new NumData(distInInches);
-		}
-		return false; //Done running
-	} else {
-		return true; //Still running
+	let baseStatus = B_FlutterSensorBase.prototype.updateAction.call(this);
+	if(baseStatus.hasError() || baseStatus.isRunning()){
+		return baseStatus;
+	} else{
+		let distInCM = baseStatus.getResult().getValue();
+		let distInInches = (distInCM / 2.54).toFixed(1) * 1;
+		return new ExecutionStatusResult(new NumData(distInInches)); //Rounded to Integer
 	}
 };
 Block.setDisplaySuffix(B_FlutterDistInch, "inches");

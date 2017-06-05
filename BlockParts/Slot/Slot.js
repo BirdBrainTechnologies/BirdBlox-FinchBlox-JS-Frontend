@@ -129,30 +129,37 @@ Slot.prototype.stop=function(){
 		this.child.stop(); //Stop children.
 	}
 };
-/* Update's the Slot's execution. Returns if it is still running.
- * @return {boolean} - Is the Slot still running?
+/**
+ * Update's the Slot's execution. Returns if it is still running.
+ * @return {ExecutionStatus} - Is the Slot still running or has crashed?
  */
 Slot.prototype.updateRun=function(){
 	if(this.running==3){ //If the Slot has finished running, no need to update.
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	if(this.hasChild){
-		if(!this.child.updateRun()){ //Update the child first until it is done.
-			this.running=3; //Copy data from child and finish execution.
-			this.resultData=this.convertData(this.child.getResultData()); //Convert it to the proper type.
-			this.resultIsFromChild=true;
-			return false; //Done running
+		let childExecStatus = this.child.updateRun();
+		if(!childExecStatus.isRunning()){ //Update the child first until it is done.
+			if(childExecStatus.hasError()){
+				this.running=3;
+				return childExecStatus;
+			} else{
+				this.running=3; //Copy data from child and finish execution.
+				this.resultData=this.convertData(childExecStatus.getResult()); //Convert it to the proper type.
+				this.resultIsFromChild=true;
+				return new ExecutionStatusDone();
+			}
 		}
 		else{
 			this.running=2; //Waiting for child to finish.
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 	else{
 		//The result is not from the child, so the getData function will figure out what to do.
 		this.running=3;
 		this.resultIsFromChild=false;
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 };
 /* Overridden by subclasses. Returns the result of the Slot's execution.
@@ -375,6 +382,9 @@ Slot.prototype.createXml=function(xmlDoc){
 	}
 	return slot;
 };
+Slot.prototype.importXml = function(slotNode) {
+	//Abstract
+};
 /* Recursively tells children to glow. No longer used.
  * @fix delete this.
  */
@@ -397,4 +407,10 @@ Slot.prototype.stopGlow=function(){
 */
 Slot.prototype.getKey = function(){
 	return this.key;
+};
+Slot.prototype.showSlot = function(){
+	//Abstract
+};
+Slot.prototype.hideSlot = function(){
+	//Abstract
 };

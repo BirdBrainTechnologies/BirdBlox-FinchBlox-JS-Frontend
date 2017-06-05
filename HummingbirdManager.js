@@ -5,7 +5,6 @@
  */
 function HummingbirdManager(){
 	var HM=HummingbirdManager;
-	HM.getHBNames(); //Gets the names of the Hummingbirds and stores them.
 	HM.selectableHBs=0;
 	HM.connectedHBs=[];
 	HM.allowVirtualHBs=false;
@@ -28,23 +27,19 @@ HummingbirdManager.getConnectionInstructions = function(){
 	return null;
 };
 
-/* Gets the names of the connected Hummingbirds and saves them to HummingbirdManager.hBNames */
-HummingbirdManager.getHBNames=function(){
-	var HM=HummingbirdManager;
-	var callbackFn=function(response){
-		if(response!="") {
-			HM.connectedHBs = [new Hummingbird(response)];
-		}
-	};
-	HtmlServer.sendRequestWithCallback("hummingbird/names",callbackFn);
-};
 HummingbirdManager.getConnectedHBs=function(){
 	var HM=HummingbirdManager;
 	return HM.connectedHBs;
 };
-
+/**
+ * @returns {number}
+ */
 HummingbirdManager.GetConnectionStatus = function() {
-	return HummingbirdManager.connectionStatus;
+	if(HummingbirdManager.GetDeviceCount() == 0){
+		return 2;
+	} else {
+		return HummingbirdManager.connectionStatus;
+	}
 };
 
 HummingbirdManager.UpdateConnectionStatus = function() {
@@ -76,10 +71,10 @@ HummingbirdManager.outputStartAction=function(block,urlPart,valueLabel,minVal,ma
 		else{
 			mem.sent=false;
 		}
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 };
 HummingbirdManager.outputUpdateAction=function(block){
@@ -87,12 +82,13 @@ HummingbirdManager.outputUpdateAction=function(block){
 	if(mem.sent){
 		if(block.runMem.requestStatus.finished==true){
 			if(block.runMem.requestStatus.error) {
-				block.throwError("Hummingbird not connected");
+				block.displayError("Hummingbird not connected");
+				return new ExecutionStatusError();
 			}
-			return false; //Done running
+			return new ExecutionStatusDone(); //Done running
 		}
 		else{
-			return true; //Still running
+			return new ExecutionStatusRunning(); //Still running
 		}
 	}
 	else{
@@ -101,49 +97,47 @@ HummingbirdManager.outputUpdateAction=function(block){
 			CodeManager.updateHBOutputDelay();
 			mem.sent=true;
 		}
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
-HummingbirdManager.sensorStartAction=function(block,urlPart,defaultValue){
+HummingbirdManager.sensorStartAction=function(block,sensor,defaultValue){
 	var mem=block.runMem;
 	mem.hBIndex=block.slots[0].getData().getValue();
 	mem.portD=block.slots[1].getData();
     mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
     if(mem.port>=1&&mem.port<=4&&mem.portD.isValid) {
     	var request = "in";
-		var params = "&port=" + mem.port;
+		var params = "&port=" + mem.port + "&sensor=" + sensor;
 		mem.requestStatus={};
         HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus);
-        return true; //Still running
+        return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-        block.resultData=new NumData(defaultValue,false);
-		block.throwError("Invalid port number");
-		return false; //Done running
+		block.displayError("Invalid port number");
+		return new ExecutionStatusError();
 	}
 };
 HummingbirdManager.sensorUpdateAction=function(block,integer,defaultValue){
 	if(block.runMem.requestStatus.finished==true){
 		if(block.runMem.requestStatus.error==false){
-			var result;
-			if(integer){
-				result=parseInt(block.runMem.requestStatus.result);
+			var result = new StringData(block.runMem.requestStatus.result);
+			if(result.isNumber()){
+				return new ExecutionStatusResult(result.asNum());
 			}
 			else{
-				result=parseFloat(block.runMem.requestStatus.result);
+				GuiElements.alert("Got this response, which is not a number: \"" + block.runMem.requestStatus.result + "\"");
+				return new ExecutionStatusResult(new NumData(defaultValue, false));
 			}
-			block.resultData=new NumData(result);
 		}
 		else{
-			block.resultData=new NumData(defaultValue,false);
-			block.throwError("Hummingbird not connected");
+			block.displayError("Hummingbird not connected");
+			return new ExecutionStatusError();
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
-}
+};
 HummingbirdManager.stopHummingbirds=function(){
 	//HtmlServer.sendRequest("hummingbird/out/stop");
 	var HM=HummingbirdManager;
@@ -179,23 +173,23 @@ HummingbirdManager.disconnectAll=function(){
 		HM.connectedHBs[0].disconnect();
 	}
 };
-HummingbirdManager.connectOneHB=function(hBName){
+HummingbirdManager.connectOneHB=function(hBName, hbId){
 	var HM=HummingbirdManager;
 	HM.disconnectAll();
-	var newHB=new Hummingbird(hBName);
+	var newHB=new Hummingbird(hBName, hbId);
 	newHB.connect();
 };
 HummingbirdManager.showConnectMultipleDialog=function(){
 	new ConnectMultipleHBDialog();
 };
-HummingbirdManager.replaceHBConnection=function(oldHB, newHBName,callbackFn){
+HummingbirdManager.replaceHBConnection=function(oldHB, newHbName, newHbId, callbackFn){
 	var HM=HummingbirdManager;
 	var index=-1;
 	if(oldHB!=null){
 		oldHB.disconnect(null,false);
 		index = HummingbirdManager.connectedHBs.indexOf(oldHB);
 	}
-	var newHB=new Hummingbird(newHBName);
+	var newHB=new Hummingbird(newHbName, newHbId);
 	if(index==-1){
 		newHB.connect(callbackFn);
 	}
@@ -231,7 +225,7 @@ HummingbirdManager.displayDebugInfo=function(){
 	info+="Selectable count: "+HM.selectableHBs+"\n";
 	info+="Connected HBs\n";
 	for(var i=0;i<HM.connectedHBs.length;i++){
-		info+="HB"+i+": "+HM.connectedHBs[i].name+"\n";
+		info+="HB"+i+" name: "+HM.connectedHBs[i].name+" id:"+HM.connectedHBs[i].id + "\n";
 	}
 	HtmlServer.showChoiceDialog("Hummingbird Debug",info,"Ok","Ok",true,function(){});
 };

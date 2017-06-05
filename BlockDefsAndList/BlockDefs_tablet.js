@@ -14,7 +14,7 @@ B_DeviceShaken.prototype.startAction=function(){
 	mem.request = "tablet/shake";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
 B_DeviceShaken.prototype.updateAction=function(){
@@ -22,15 +22,14 @@ B_DeviceShaken.prototype.updateAction=function(){
 	var status=mem.requestStatus;
 	if(status.finished==true){
 		if(status.error==false){
-			this.resultData=new BoolData(status.result=="1",true);
+			return new ExecutionStatusResult(new BoolData(status.result=="1",true));
 		}
 		else{
-			this.resultData=new BoolData(false,false); //false is default.
+			return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -48,7 +47,7 @@ B_DeviceSSID.prototype.startAction=function(){
 	mem.request = "tablet/ssid";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
 B_DeviceSSID.prototype.updateAction=function(){
@@ -56,15 +55,14 @@ B_DeviceSSID.prototype.updateAction=function(){
 	var status=mem.requestStatus;
 	if(status.finished==true){
 		if(status.error==false){
-			this.resultData=new StringData(status.result,true);
+			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			this.resultData=new StringData("",false); //"" is default.
+			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -82,7 +80,7 @@ B_DevicePressure.prototype.startAction=function(){
 	mem.request = "tablet/pressure";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
 B_DevicePressure.prototype.updateAction=function(){
@@ -91,15 +89,14 @@ B_DevicePressure.prototype.updateAction=function(){
 	if(status.finished==true){
 		if(status.error==false){
 			var result=parseFloat(status.result);
-			this.resultData=new NumData(result,true);
+			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			this.resultData=new NumData(0,false); //0 is default.
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 Block.setDisplaySuffix(B_DevicePressure, "kPa");
@@ -117,7 +114,7 @@ B_DeviceRelativeAltitude.prototype.startAction=function(){
 	mem.request = "tablet/altitude";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
 B_DeviceRelativeAltitude.prototype.updateAction=function(){
@@ -126,15 +123,14 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 	if(status.finished==true){
 		if(status.error==false){
 			var result=parseFloat(status.result);
-			this.resultData=new NumData(result,true);
+			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			this.resultData=new NumData(0,false); //0 is default.
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
@@ -153,7 +149,7 @@ B_DeviceOrientation.prototype.startAction=function(){
 	mem.request = "tablet/orientation";
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
 B_DeviceOrientation.prototype.updateAction=function(){
@@ -161,15 +157,14 @@ B_DeviceOrientation.prototype.updateAction=function(){
 	var status=mem.requestStatus;
 	if(status.finished==true){
 		if(status.error==false){
-			this.resultData=new StringData(status.result,true);
+			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			this.resultData=new StringData("",false); //"" is default.
+			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -182,6 +177,7 @@ function B_DeviceAcceleration(x,y){
 	dS.addOption("X",new SelectionData(0));
 	dS.addOption("Y",new SelectionData(1));
 	dS.addOption("Z",new SelectionData(2));
+	dS.addOption("Total",new SelectionData("total"));
 	dS.setSelectionData("X",new SelectionData(0));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"Acceleration"));
@@ -195,7 +191,7 @@ B_DeviceAcceleration.prototype.startAction=function(){
 	mem.requestStatus=function(){};
 	mem.axis=this.slots[0].getData().getValue();
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. Then get the correct axis. */
 B_DeviceAcceleration.prototype.updateAction=function(){
@@ -203,16 +199,24 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 	var status=mem.requestStatus;
 	if(status.finished==true){
 		if(status.error==false){
-			var result = status.result.split(" ")[mem.axis]; //Values separated by spaces.
-			this.resultData=new NumData(parseFloat(result),true);
+			var parts = status.result.split(" ");
+			var result;
+			if(mem.axis == "total") {
+				let x = parseFloat(parts[0]);
+				let y = parseFloat(parts[1]);
+				let z = parseFloat(parts[2]);
+				result = Math.sqrt(x*x + y*y + z*z);
+			} else {
+				result = parseFloat(parts[mem.axis]);
+			}
+			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			this.resultData=new NumData(0,false); //0 is default.
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
@@ -236,7 +240,7 @@ B_DeviceLocation.prototype.startAction=function(){
 	mem.requestStatus=function(){};
 	mem.axis=this.slots[0].getData().getValue();
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. Then get the correct axis. */
 B_DeviceLocation.prototype.updateAction=function(){
@@ -245,15 +249,14 @@ B_DeviceLocation.prototype.updateAction=function(){
 	if(status.finished==true){
 		if(status.error==false){
 			var result = status.result.split(" ")[mem.axis];
-			this.resultData=new NumData(parseFloat(result),true);
+			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
 		}
 		else{
-			this.resultData=new NumData(0,false); //0 is default.
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
 		}
-		return false; //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 /////////////////
@@ -269,7 +272,7 @@ B_Display.prototype.constructor = B_Display;
 B_Display.prototype.startAction=function(){
 	var message=this.slots[0].getData().getValue();
 	DisplayBox.displayText(message);
-	return false; //Done running
+	return new ExecutionStatusDone(); //Done running
 };
 
 

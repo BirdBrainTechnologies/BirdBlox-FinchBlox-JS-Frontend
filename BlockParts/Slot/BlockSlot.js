@@ -137,17 +137,27 @@ BlockSlot.prototype.updateRun=function(){
 	if(this.isRunning){
 		if(this.currentBlock.stack!=this.parent.stack){ //If the current Block has been removed, don't run it.
 			this.isRunning=false;
-			return this.isRunning;
+			return new ExecutionStatusDone();
 		}
-		if(!this.currentBlock.updateRun()){
-			this.currentBlock=this.currentBlock.nextBlock;
+		let execStatus = this.currentBlock.updateRun();
+		if(!execStatus.isRunning()){
+			if(execStatus.hasError()){
+				this.isRunning=false;
+				return execStatus;
+			} else {
+				this.currentBlock = this.currentBlock.nextBlock;
+			}
 		}
-		if(this.currentBlock==null){
-			this.isRunning=false;
+		if(this.currentBlock!=null){
+			return new ExecutionStatusRunning();
+		} else{
+			this.isRunning = false;
+			return new ExecutionStatusDone();
 		}
+	} else{
+		return new ExecutionStatusDone();
 	}
-	return this.isRunning;
-}
+};
 BlockSlot.prototype.glow=function(){
 	if(this.hasChild){
 		this.child.glow();

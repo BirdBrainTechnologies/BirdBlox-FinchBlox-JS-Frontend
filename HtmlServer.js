@@ -97,17 +97,25 @@ HtmlServer.sendHBRequest=function(hBIndex,request,params,requestStatus){
 	}
 };
 HtmlServer.sendRequest=function(request,requestStatus){
+	/*
+	 setTimeout(function(){
+		requestStatus.error = false;
+		requestStatus.finished = true;
+		requestStatus.result = "7";
+	}, 300);
+	return;
+	*/
 	if(requestStatus!=null){
 		requestStatus.error=false;
 		var callbackFn=function(response){
 			callbackFn.requestStatus.finished=true;
 			callbackFn.requestStatus.result=response;
-		}
+		};
 		callbackFn.requestStatus=requestStatus;
 		var callbackErr=function(){
 			callbackErr.requestStatus.finished=true;
 			callbackErr.requestStatus.error=true;
-		}
+		};
 		callbackErr.requestStatus=requestStatus;
 		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
 	}
@@ -119,9 +127,9 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 	DebugOptions.validateNonNull(params);
 	var res = "hummingbird/";
 	res += request;
-	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].name);
+	res += "?name=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
 	res += params;
-	return params;
+	return res;
 };
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
@@ -205,13 +213,13 @@ HtmlServer.getFileName=function(callbackFn,callbackErr){
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
 };
-HtmlServer.showChoiceDialog=function(title,question,option1,option2,firstIsCancel,callbackFn,callbackErr){
+HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	if(TouchReceiver.mouse){ //Kept for debugging on a PC
 		var result=confirm(question);
 		HtmlServer.dialogVisible=false;
-		if(firstIsCancel){
+		if(swapIfMouse){
 			result=!result;
 		}
 		if(result){

@@ -1,7 +1,8 @@
 "use strict";
 
-function Flutter(name) {
+function Flutter(name, id) {
 	this.name = name;
+	this.id = id;
 }
 
 // TODO: Move this function somewhere else?
@@ -27,7 +28,7 @@ Flutter.prototype.promptRename = function(callbackFn) {
  * @param      {Function}  successFn  The success function
  */
 Flutter.prototype.disconnect = function(successFn) {
-	let request = "flutter/disconnect?name=" + HtmlServer.encodeHtml(this.name);
+	let request = "flutter/disconnect?name=" + HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request, successFn, successFn);
 };
 
@@ -38,7 +39,7 @@ Flutter.prototype.disconnect = function(successFn) {
  * @param      {function}  successFn  The success function
  */
 Flutter.prototype.connect = function(successFn) {
-	let request = "flutter/connect?name=" + HtmlServer.encodeHtml(this.name);
+	let request = "flutter/connect?name=" + HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request, successFn, successFn);
 };
 
@@ -55,11 +56,11 @@ Flutter.prototype.readSensor = function(context, sensorType, port) {
 	if (context.sent) {
 		return (context.requestStatus.finished != true);  // Return true if not finished
 	} else {
-		let request = "flutter/in?name=" + HtmlServer.encodeHtml(this.name) + "&port=" + port;
+		let request = "flutter/in?name=" + HtmlServer.encodeHtml(this.id) + "&port=" + port + "&sensor=" + sensorType;
 		context.requestStatus = {};
 		HtmlServer.sendRequest(request, context.requestStatus);
 		context.sent = true;
-		return true;  // Still running
+		return new ExecutionStatusRunning();  // Still running
 	}
 };
 
@@ -68,27 +69,28 @@ Flutter.prototype.setServoOrSave = function(shouldSend, block, port, value) {
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/out/servo?name=" + HtmlServer.encodeHtml(this.name);
+			let requestPrefix = "flutter/out/servo?name=" + HtmlServer.encodeHtml(this.id);
 			mem.request = requestPrefix + "&port=" + port + "&angle=" + value;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {
 			mem.sent = true;
-			HtmlServer.sendRequest(mem.request, mem.requestStatus);
-			return true;  // Still running
+			HtmlServer.sendRequest(mem.request, mem.requestStatus, 30);
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };
@@ -98,27 +100,28 @@ Flutter.prototype.setBuzzerOrSave = function(shouldSend, block, volume, frequenc
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/out/buzzer?name=" + HtmlServer.encodeHtml(this.name);
+			let requestPrefix = "flutter/out/buzzer?name=" + HtmlServer.encodeHtml(this.id);
 			mem.request = requestPrefix + "&volume=" + volume + "&frequency=" + frequency;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {
 			mem.sent = true;
 			HtmlServer.sendRequest(mem.request, mem.requestStatus);
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };
@@ -129,27 +132,28 @@ Flutter.prototype.setTriLEDOrSave = function(shouldSend, block, port, valueR, va
 	if (mem.sent) {
 		if(mem.requestStatus.finished){
 			if(mem.requestStatus.error){
-				block.throwError("Flutter not connected");
+				block.displayError("Flutter not connected");
+				return new ExecutionStatusError();
 			}
-			return false;
+			return new ExecutionStatusDone();
 		}
 		else{
-			return true;
+			return new ExecutionStatusRunning();
 		}
 	} else {
 		if (mem.request == null) {
 			// TODO: Validation
-			let requestPrefix = "flutter/out/triled?name=" + HtmlServer.encodeHtml(this.name);
+			let requestPrefix = "flutter/out/triled?name=" + HtmlServer.encodeHtml(this.id);
 			mem.request = requestPrefix + "&port=" + port + "&red=" + valueR + "&green=" + valueG + "&blue=" + valueB;
 			mem.requestStatus = {};
 		}
 		if (shouldSend) {
 			mem.sent = true;
 			HtmlServer.sendRequest(mem.request, mem.requestStatus);
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		} else {
 			mem.sent = false;
-			return true;  // Still running
+			return new ExecutionStatusRunning();  // Still running
 		}
 	}
 };

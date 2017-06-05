@@ -33,7 +33,7 @@ SaveManager.checkPromptSave=function(nextAction){
 			if(response=="2"){
 				SaveManager.save(callbackFn.nextAction);
 			}
-			else{
+			else if(response=="1"){
 				if(callbackFn.nextAction!=null) {
 					callbackFn.nextAction();
 				}
@@ -105,10 +105,10 @@ SaveManager.checkOverwrite=function(checkName,successAction,failAction){
 };
 SaveManager.overwritePrompt=function(checkName,successAction,failAction){
 	var callbackFn=function(response){
-		if(response==2){
+		if(response=="2"){
 			callbackFn.successAction();
 		}
-		else{
+		else if(response=="1"){
 			callbackFn.failAction();
 		}
 	};

@@ -1,5 +1,6 @@
-function Hummingbird(name){
+function Hummingbird(name, id){
 	this.name=name;
+	this.id = id;
 }
 Hummingbird.prototype.promptRename=function(callbackFn){
 	var thisHB=this;
@@ -20,7 +21,7 @@ Hummingbird.prototype.disconnect=function(callbackFn,removeFromManager){
 	if(removeFromManager==null){
 		removeFromManager=true;
 	}
-	var request="hummingbird/disconnect?name="+HtmlServer.encodeHtml(this.name);
+	var request="hummingbird/disconnect?name="+HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(removeFromManager) {
 		HummingbirdManager.removeHB(this);
@@ -31,7 +32,7 @@ Hummingbird.prototype.connect=function(callbackFn,addToManager){
 	if(addToManager==null){
 		addToManager=true;
 	}
-	var request="hummingbird/connect?name="+HtmlServer.encodeHtml(this.name);
+	var request="hummingbird/connect?name="+HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(addToManager) {
 		HummingbirdManager.connectedHBs.push(this);

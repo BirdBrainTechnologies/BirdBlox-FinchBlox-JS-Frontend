@@ -18,7 +18,7 @@ B_WhenFlagTapped.prototype.eventFlagClicked=function(){
 };
 /* Does nothing. */
 B_WhenFlagTapped.prototype.startAction=function(){
-	return false; //Done running. This Block does nothing except respond to an event.
+	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
 };
 
 
@@ -42,7 +42,7 @@ B_WhenIReceive.prototype.eventBroadcast=function(message){
 };
 /* Does nothing. */
 B_WhenIReceive.prototype.startAction=function(){
-	return false; //Done running. This Block does nothing except respond to an event.
+	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
 };
 
 
@@ -60,16 +60,16 @@ B_Wait.prototype.startAction=function(){
 	var mem=this.runMem;
 	mem.startTime=new Date().getTime();
 	mem.delayTime=this.slots[0].getData().getValueWithC(true)*1000;
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
 B_Wait.prototype.updateAction=function(){
 	var mem=this.runMem;
 	if(new Date().getTime()>=mem.startTime+mem.delayTime){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -86,12 +86,12 @@ B_WaitUntil.prototype.constructor = B_WaitUntil;
 B_WaitUntil.prototype.startAction=function(){
 	var stopWaiting=this.slots[0].getData().getValue();
 	if(stopWaiting){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
 		this.running=0; //startAction will be run next time, giving Slots ability to recalculate.
 		this.clearMem(); //runMem and previous values of Slots will be removed.
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 
@@ -106,14 +106,19 @@ B_Forever.prototype.constructor = B_Forever;
 /* Begins executing contents. */
 B_Forever.prototype.startAction=function(){
 	this.blockSlot1.startRun();
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Continues executing contents. If contents are done, runs them again. */
 B_Forever.prototype.updateAction=function(){
-	if(!this.blockSlot1.updateRun()){
-		this.blockSlot1.startRun();
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()) {
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else{
+			this.blockSlot1.startRun();
+		}
 	}
-	return true; //Still running. Never stops.
+	return new ExecutionStatusRunning(); //Still running. Never stops.
 };
 
 
@@ -133,25 +138,30 @@ B_Repeat.prototype.startAction=function(){
 	mem.count=0;
 	if(mem.times>0&&mem.timesD.isValid) {
 		this.blockSlot1.startRun();
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-		return false;
+		return new ExecutionStatusDone();
 	}
 };
 /* Update contents. When they finish, increment counter and possibly run them again. */
 B_Repeat.prototype.updateAction=function(){
-	if(!this.blockSlot1.updateRun()){
-		var mem=this.runMem;
-		mem.count++;
-		if(mem.count>=mem.times){
-			return false; //Done running
-		}
-		else{
-			this.blockSlot1.startRun();
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()){
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else {
+			var mem = this.runMem;
+			mem.count++;
+			if (mem.count >= mem.times) {
+				return new ExecutionStatusDone(); //Done running
+			}
+			else {
+				this.blockSlot1.startRun();
+			}
 		}
 	}
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 
 
@@ -167,20 +177,25 @@ B_RepeatUntil.prototype.constructor = B_RepeatUntil;
 B_RepeatUntil.prototype.startAction=function(){
 	var stopRepeating=this.slots[0].getData().getValue();
 	if(stopRepeating){
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 	else{
 		this.blockSlot1.startRun();
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 /* Updates contents until completed. Then resets Block to condition can be checked again. */
 B_RepeatUntil.prototype.updateAction=function(){
-	if(!this.blockSlot1.updateRun()){
-		this.running=0; //startAction will be run next time, giving Slots ability to recalculate.
-		this.clearMem(); //runMem and previous values of Slots will be removed.
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()){
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else {
+			this.running=0; //startAction will be run next time, giving Slots ability to recalculate.
+			this.clearMem(); //runMem and previous values of Slots will be removed.
+		}
 	}
-	return true; //Still running
+	return new ExecutionStatusRunning(); //Still running
 };
 
 
@@ -197,10 +212,10 @@ B_If.prototype.startAction=function(){
 	var check=this.slots[0].getData().getValue();
 	if(check){
 		this.blockSlot1.startRun();
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
-		return false; //Done running
+		return new ExecutionStatusDone(); //Done running
 	}
 };
 /* Continues executing contents until completed. */
@@ -222,26 +237,21 @@ B_IfElse.prototype.startAction=function(){
 	this.runMem.check=this.slots[0].getData().getValue();
 	if(this.runMem.check){
 		this.blockSlot1.startRun();
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 	else{
 		this.blockSlot2.startRun();
-		return true; //Still running
+		return new ExecutionStatusRunning(); //Still running
 	}
 };
 /* Continues executing one of two BlockSlots until completion. */
 B_IfElse.prototype.updateAction=function(){
 	if(this.runMem.check){
-		if(!this.blockSlot1.updateRun()){
-			return false; //Done running
-		}
+		return this.blockSlot1.updateRun();
 	}
 	else{
-		if(!this.blockSlot2.updateRun()){
-			return false; //Done running
-		}
+		return this.blockSlot2.updateRun();
 	}
-	return true; //Still running
 };
 
 
@@ -261,10 +271,10 @@ B_Broadcast.prototype.startAction=function(){
 		CodeManager.message=new StringData(message.getValue());
 		CodeManager.eventBroadcast(message.getValue());
 	}
-	return true;
+	return new ExecutionStatusRunning();
 };
 B_Broadcast.prototype.updateAction=function(){
-	return false;
+	return new ExecutionStatusDone();
 };
 
 function B_BroadcastAndWait(x,y){
@@ -282,10 +292,14 @@ B_BroadcastAndWait.prototype.startAction=function(){
 		CodeManager.message=new StringData(this.runMem.message);
 		CodeManager.eventBroadcast(this.runMem.message);
 	}
-	return true;
+	return new ExecutionStatusRunning();
 };
 B_BroadcastAndWait.prototype.updateAction=function(){
-	return CodeManager.checkBroadcastRunning(this.runMem.message);
+	if(CodeManager.checkBroadcastRunning(this.runMem.message)){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
 };
 
 function B_Message(x,y){
@@ -295,8 +309,7 @@ function B_Message(x,y){
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
 B_Message.prototype.startAction=function(){
-	this.resultData=CodeManager.message;
-	return false;
+	return new ExecutionStatusResult(CodeManager.message);
 };
 
 
@@ -326,7 +339,7 @@ B_Stop.prototype.startAction=function(){
 	else if(selection=="all_but_this_script"){
 		TabManager.stopAllButStack(this.stack);
 	}
-	return false;
+	return new ExecutionStatusDone();
 };
 
 
