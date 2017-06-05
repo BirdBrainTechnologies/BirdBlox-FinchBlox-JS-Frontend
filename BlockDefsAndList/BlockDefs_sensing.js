@@ -166,36 +166,3 @@ B_CurrentTime.prototype.startAction=function(){
 	}
 	return new ExecutionStatusResult(new NumData(0, false));
 };
-
-
-///////////
-
-function B_Touching(x,y){
-	PredicateBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"touching?"));
-}
-B_Touching.prototype = Object.create(PredicateBlock.prototype);
-B_Touching.prototype.constructor = B_Touching;
-
-
-
-function B_TouchX(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"touch x"));
-}
-B_TouchX.prototype = Object.create(ReporterBlock.prototype);
-B_TouchX.prototype.constructor = B_TouchX;
-
-function B_TouchY(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"touch y"));
-}
-B_TouchY.prototype = Object.create(ReporterBlock.prototype);
-B_TouchY.prototype.constructor = B_TouchY;
-
-function B_DistanceTo(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"distance to"));
-}
-B_DistanceTo.prototype = Object.create(ReporterBlock.prototype);
-B_DistanceTo.prototype.constructor = B_DistanceTo;

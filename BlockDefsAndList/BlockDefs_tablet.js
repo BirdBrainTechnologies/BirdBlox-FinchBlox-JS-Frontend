@@ -177,6 +177,7 @@ function B_DeviceAcceleration(x,y){
 	dS.addOption("X",new SelectionData(0));
 	dS.addOption("Y",new SelectionData(1));
 	dS.addOption("Z",new SelectionData(2));
+	dS.addOption("Total",new SelectionData("total"));
 	dS.setSelectionData("X",new SelectionData(0));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"Acceleration"));
@@ -198,8 +199,17 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 	var status=mem.requestStatus;
 	if(status.finished==true){
 		if(status.error==false){
-			var result = status.result.split(" ")[mem.axis]; //Values separated by spaces.
-			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
+			var parts = status.result.split(" ");
+			var result;
+			if(mem.axis == "total") {
+				let x = parseFloat(0);
+				let y = parseFloat(1);
+				let z = parseFloat(2);
+				result = Math.sqrt(x*x + y*y + z*z);
+			} else {
+				result = parseFloat(parts[mem.axis]);
+			}
+			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
 			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
