@@ -88,9 +88,10 @@ FlutterManager.DiscoverDevices = function(successFn, errorFn) {
  * Connects a device and adds it to a list of connected devices
  *
  * @param      {string}  deviceName  Name of the device to connect
+ * @param      {string}  deviceId    Bluetooth mac / id of the device
  */
-FlutterManager.ConnectDevice = function(deviceName) {
-	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName);
+FlutterManager.ConnectDevice = function(deviceName, deviceId) {
+	FlutterManager.connectedDevices[deviceName] = new Flutter(deviceName, deviceId);
 	FlutterManager.connectedDevices[deviceName].connect(function() {
 		BlockPalette.getCategory("robots").refreshGroup();
 		FlutterManager.UpdateConnectionStatus();		
