@@ -143,6 +143,6 @@ SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
 	bn.isOverlayPart=this.isOverlayPart;
-	bn.menuBnList=this;
+	bn.smoothMenuBnList=this;
 	return bn;
 };

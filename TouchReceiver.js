@@ -259,6 +259,17 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 		TouchReceiver.target=target; //Store target Slot.
 	}
 };
+TouchReceiver.touchStartSmoothMenuBnListScrollRect=function(target,e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)) {
+		if(!target.isOverlayPart) {
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="smoothMenuBnList";
+		TouchReceiver.target=target; //Store target Slot.
+	}
+};
+
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
@@ -342,6 +353,10 @@ TouchReceiver.touchmove=function(e){
 					TR.targetType = "menuBnList";
 					TR.target.interrupt();
 					TR.target = TR.target.menuBnList;
+				} else if (TR.target.smoothMenuBnList != null) {
+					TR.targetType = "smoothMenuBnList";
+					TR.target.interrupt();
+					TR.target = TR.target.menuBnList;
 				}
 			}
 			//If the user drags a menuBnList, it should scroll.
@@ -352,6 +367,10 @@ TouchReceiver.touchmove=function(e){
 				else {
 					TR.target.updateScroll(TR.getY(e));
 				}
+			}
+
+			if (TR.targetType == "smoothMenuBnList") {
+
 			}
 		}
 	}
@@ -414,6 +433,9 @@ TouchReceiver.touchend=function(e){
 		}
 		else if(TR.targetType=="menuBnList"){
 			TR.target.endScroll();
+		}
+		else if(TR.targetType=="smoothMenuBnList"){
+
 		}
 	}
 	else{
@@ -583,6 +605,13 @@ TouchReceiver.addListenersMenuBnListScrollRect=function(element,parent){
 	element.parent=parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartMenuBnListScrollRect(this.parent,e);
+	}, false);
+};
+TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
+	var TR=TouchReceiver;
+	element.parent=parent;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartSmoothMenuBnListScrollRect(this.parent,e);
 	}, false);
 };
 TouchReceiver.addEventListenerSafe=function(element,type, func){
