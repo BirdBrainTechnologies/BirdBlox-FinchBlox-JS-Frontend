@@ -42,6 +42,7 @@ Menu.prototype.createMenuBnList=function(){
 	}
 	var bnM=Menu.bnMargin;
 	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
+	//	this.menuBnList=new SmoothMenuBnList(this.group,bnM,bnM,this.width);
 	this.menuBnList.isOverlayPart=true;
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);

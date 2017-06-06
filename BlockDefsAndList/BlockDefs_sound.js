@@ -18,7 +18,7 @@ B_PlaySound.prototype.startAction=function(){
 	var soundName=soundData.getValue();
 	if(Sounds.checkNameIsValid(soundName)){
 		var mem=this.runMem;
-		mem.request = "sound/play/"+soundName;
+		mem.request = "sound/play?filename="+soundName;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
 		return new ExecutionStatusRunning(); //Still running
@@ -59,7 +59,7 @@ B_PlaySoundUntilDone.prototype.startAction=function(){
 		var mem=this.runMem;
 		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
         mem.timerStarted=false;
-		mem.request = "sound/play/"+soundName;
+		mem.request = "sound/play?filename="+soundName;
 		mem.cancel=false;
 		mem.requestStatus=function(){};
 		HtmlServer.sendRequest(mem.request,mem.requestStatus);
@@ -156,7 +156,7 @@ B_PlayNoteForBeats.prototype.startAction=function(){
 	var note=this.slots[0].getData().getValueWithC(true,true);
 	var beats=this.slots[1].getData().getValueWithC(true); //Positive
 	mem.soundDuration=CodeManager.beatsToMs(beats);
-	mem.request = "sound/note/"+note+"/"+mem.soundDuration;
+	mem.request = "sound/note?note="+note+"&duration="+mem.soundDuration;
 	mem.timerStarted=false;
 	mem.requestStatus=function(){};
 	HtmlServer.sendRequest(mem.request,mem.requestStatus);
