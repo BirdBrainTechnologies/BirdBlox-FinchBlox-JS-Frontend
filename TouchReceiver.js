@@ -8,7 +8,7 @@ function TouchReceiver(){
 	//Toggle to determine of mouse or touchscreen events should be used.
 	TR.mouse = false || (DebugOptions.mouse && DebugOptions.enabled); //Use true when debugging on a desktop.
 	TR.longTouchInterval=700; //The number of ms before a touch is considered a long touch.
-	TR.fixScrollingInterval = 200;
+	TR.fixScrollingInterval = 100;
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?
@@ -652,7 +652,7 @@ TouchReceiver.createScrollFixTimer = function(div){
 			div.scrollTop = 1;
 		}
 		else if (div.scrollHeight - height - 1 <= div.scrollTop) {
-			div.scrollTop -= 1;
+			div.scrollTop = div.scrollHeight - height - 2;
 		}
 	};
 	fixScroll();
