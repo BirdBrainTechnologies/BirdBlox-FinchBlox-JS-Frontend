@@ -58,7 +58,7 @@ TouchReceiver.handleMove=function(event){
  */
 TouchReceiver.handleUp=function(event){
 	TouchReceiver.touchend(event);
-	GuiElements.alert("");
+	//GuiElements.alert("");
 };
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
@@ -101,7 +101,7 @@ TouchReceiver.touchstart=function(e, preventD){
 	}
 	var TR=TouchReceiver; //shorthand
 	if(preventD) {
-		GuiElements.alert("Prevented 1");
+		//GuiElements.alert("Prevented 1");
 		e.preventDefault(); //Stops 300 ms delay events
 	}
 	// e.stopPropagation();
@@ -388,7 +388,7 @@ TouchReceiver.touchmove=function(e){
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
 	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
 	if(shouldPreventDefault){
-		GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
+		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
 	}
 };
@@ -460,7 +460,7 @@ TouchReceiver.touchend=function(e){
 		TR.touchDown = false;
 	}
 	if(shouldPreventDefault) {
-		GuiElements.alert("Prevented 3");
+		//GuiElements.alert("Prevented 3");
 		e.preventDefault();
 	}
 };

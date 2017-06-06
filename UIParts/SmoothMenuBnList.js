@@ -2,7 +2,7 @@
  * Created by Tom on 6/5/2017.
  */
 
-function SmoothMenuBnList(parentGroup,x,y,width){
+function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.x=x;
 	this.y=y;
 	this.width=width;
@@ -19,6 +19,7 @@ function SmoothMenuBnList(parentGroup,x,y,width){
 
 	this.build();
 	this.parentGroup=parentGroup;
+	this.parent = parent;
 
 	this.visible=false;
 	this.isOverlayPart=false;
@@ -62,6 +63,7 @@ SmoothMenuBnList.prototype.show=function(){
 	if(!this.visible){
 		this.visible=true;
 		this.parentGroup.appendChild(this.foreignObject);
+		this.updatePosition();
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
@@ -107,7 +109,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		}
 		this.scrollable=this.height!=this.internalHeight;
 		this.bnsGenerated=true;
-		GuiElements.update.smoothScrollBnList(this.foreignObject, this.scrollDiv, this.svg, this.x, this.y, this.width, this.height, this.internalHeight);
+		this.updatePosition();
 	}
 };
 SmoothMenuBnList.prototype.computeWidth=function(){
@@ -145,4 +147,18 @@ SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	bn.isOverlayPart=this.isOverlayPart;
 	bn.smoothMenuBnList=this;
 	return bn;
+};
+SmoothMenuBnList.prototype.updatePosition = function(){
+	if(this.visible) {
+
+		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
+		var realX = this.parent.relToAbsX(this.x);
+		var realY = this.parent.relToAbsY(this.y);
+		realX = GuiElements.relToAbsX(realX);
+		realY = GuiElements.relToAbsY(realY);
+
+		GuiElements.update.smoothScrollBnList(this.foreignObject, this.scrollDiv, this.svg, realX, realY, this.width,
+			this.height, this.internalHeight);
+		GuiElements.alert("x:"+realX+" y:"+realY);
+	}
 };

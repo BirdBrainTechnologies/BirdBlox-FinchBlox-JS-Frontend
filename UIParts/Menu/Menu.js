@@ -42,7 +42,7 @@ Menu.prototype.createMenuBnList=function(){
 	}
 	var bnM=Menu.bnMargin;
 	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
-	this.menuBnList=new SmoothMenuBnList(this.group,bnM,bnM,this.width);
+	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
 	this.menuBnList.isOverlayPart=true;
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
@@ -110,4 +110,10 @@ Menu.prototype.close=function(onlyOnDrag){
 };
 Menu.prototype.addAlternateFn=function(alternateFn){
 	this.alternateFn=alternateFn;
+};
+Menu.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+Menu.prototype.relToAbsY = function(y){
+	return y + this.y;
 };

@@ -559,13 +559,13 @@ GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, x, y, width
 	foreignObj.setAttributeNS(null,"width",width);
 	foreignObj.setAttributeNS(null,"height",height);
 
-
 	div.style.width = width + "px";
 	div.style.height = height + "px";
 
 	svg.setAttribute('width', width + "px");
 	svg.setAttribute('height', innerHeight + "px");
 };
+
 GuiElements.makeClickThrough = function(svgE){
 	svgE.style.pointerEvents = "none";
 };
@@ -675,6 +675,7 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
 	return textD; //Return the width/height.
 };
 
+
 /* Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
  * @param {string} font - The font family of the text element.
@@ -694,6 +695,20 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
+};
+GuiElements.measure.position = function(element) {
+	var top = 0, left = 0;
+	do {
+		top += element.offsetTop  || 0;
+		left += element.offsetLeft || 0;
+		element = element.offsetParent;
+	} while(element);
+
+	return {
+		top: top,
+		left: left
+	};
+	/* https://stackoverflow.com/questions/1480133/how-can-i-get-an-objects-absolute-position-on-the-page-in-javascript */
 };
 /* Displays the result of a reporter or predicate Block in a speech bubble next to that block.
  * @param {string} value - The value to display
@@ -855,4 +870,11 @@ GuiElements.computeZoomFromDims=function(dims){
 		return 1;
 	}
 };
+GuiElements.relToAbsX = function(x){
+	return x * GuiElements.zoomFactor;
+};
+GuiElements.relToAbsY = function(y){
+	return y * GuiElements.zoomFactor;
+};
+
 
