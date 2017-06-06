@@ -47,7 +47,8 @@ InputPad.buildPad=function(){
 	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP);
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
-	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
+	//IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
+	IP.menuBnList=new SmoothMenuBnList(IP, IP.group,0,0);
 	IP.menuBnList.isOverlayPart=true;
 	IP.previewFn = null;
 };
@@ -62,7 +63,11 @@ InputPad.buildPad=function(){
 InputPad.resetPad=function(columns){//removes any options which may have been added to the pad
 	var IP=InputPad;
 	IP.close();
-	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin,null,columns);
+	if(columns == 1){
+		IP.menuBnList = new SmoothMenuBnList(IP, IP.group, 0, 0);
+	} else {
+		IP.menuBnList = new MenuBnList(IP.group, 0, 0, IP.buttonMargin, null, columns);
+	}
 	IP.menuBnList.isOverlayPart=true;
 	IP.previewFn = null;
 };
@@ -215,8 +220,8 @@ InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth, previe
 	IP.width=IP.menuBnList.width;//+2*IP.buttonMargin;
 	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;
 	//IP.menuBnList.move(0,0);
-	IP.menuBnList.show();
 	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
+	IP.menuBnList.show();
 	/*IP.tallH=IP.height+IP.triangleH;
 	IP.move(x,upperY,lowerY);
 	GuiElements.layers.inputPad.appendChild(IP.group);*/
@@ -278,6 +283,9 @@ InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
 		IP.decimalBn.enable();
 	}
 	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
+	if(IP.menuBnList.updatePosition != null){
+		IP.menuBnList.updatePosition();
+	}
 	/*InputPad.move(x,upperY,lowerY);*/
 };
 /*InputPad.move=function(x,upperY,lowerY){
@@ -426,4 +434,12 @@ InputPad.makeOkBn=function(x,y){
 	button.addIcon(VectorPaths.checkmark,IP.okBnH);
 	button.setCallbackFunction(InputPad.okPressed,true);
 	button.isOverlayPart=true;
+};
+InputPad.relToAbsX = function(x){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsX(IP.buttonMargin + x)
+};
+InputPad.relToAbsY = function(y){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsY(IP.buttonMargin + y)
 };

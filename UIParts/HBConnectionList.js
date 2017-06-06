@@ -43,6 +43,7 @@ HBConnectionList.prototype.updateHBList=function(newHBs){
 		this.menuBnList.hide();
 	}
 	this.menuBnList=new MenuBnList(this.group,0,0,HBCL.bnMargin,HBCL.width);
+	//this.menuBnList=new SmoothMenuBnList(this, this.group,0,0,HBCL.width);
 	this.menuBnList.isOverlayPart=true;
 	this.menuBnList.setMaxHeight(HBCL.height);
 	var hBArray=newHBs.split("\n");

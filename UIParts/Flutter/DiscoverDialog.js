@@ -96,7 +96,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 		this.menuBnList.hide();
 	}
 	let bnM = Class.bnMargin;
-	this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
+	//this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
+	this.menuBnList=new SmoothMenuBnList(this, this.group, bnM, this.menuBnListY, this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-this.menuBnListY-Class.cancelBnHeight-Class.bnMargin*2);
 	for(let i=0; i<deviceArr.length; i++){
 		this.addBnListOption(deviceArr[i].name, deviceArr[i].id);
@@ -158,4 +159,10 @@ DiscoverDialog.prototype.createInstructionText=function(text){
 	GuiElements.move.text(textE,x,y);
 	this.group.appendChild(textE);
 	return textE;
+};
+DiscoverDialog.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+DiscoverDialog.prototype.relToAbsY = function(y){
+	return y + this.y;
 };

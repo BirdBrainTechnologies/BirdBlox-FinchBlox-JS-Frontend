@@ -81,6 +81,7 @@ SmoothMenuBnList.prototype.hide=function(){
 };
 SmoothMenuBnList.prototype.generateBns=function(){
 	var columns=1;
+	this.computeWidth();
 	if(!this.bnsGenerated){
 		this.clearBnsArray();
 		var currentY=0;

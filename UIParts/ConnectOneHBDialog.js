@@ -121,7 +121,8 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 		this.menuBnList.hide();
 	}
 	var bnM=COHBD.bnMargin;
-	this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
+	//this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
+	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM+COHBD.titleBarH,this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
 	for(var i=0;i<hBArray.length;i++){
 		this.addBnListOption(hBArray[i].name, hBArray[i].id);
@@ -139,7 +140,12 @@ ConnectOneHBDialog.selectHB=function(hBName, hBId){
 	ConnectOneHBDialog.currentCOHBD.closeDialog();
 	HummingbirdManager.connectOneHB(hBName, hBId);
 };
-
+ConnectOneHBDialog.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+ConnectOneHBDialog.prototype.relToAbsY = function(y){
+	return y + this.y;
+};
 /*
 
 OpenDialog.prototype.addBnListOption=function(file,menuBnList){
