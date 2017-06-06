@@ -386,7 +386,7 @@ TouchReceiver.touchmove=function(e){
 		}
 	}
 	if(shouldPreventDefault){
-		GuiElements.alert("Prevented 2 t:" + TR.targetType);
+		GuiElements.alert("Prevented 2 t:" + TR.targetType + "," + TR.target.smoothMenuBnList);
 		e.preventDefault();
 	}
 };
