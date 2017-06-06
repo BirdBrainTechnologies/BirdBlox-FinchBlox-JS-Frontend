@@ -559,8 +559,8 @@ GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, zoomG, x, y
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);
 
-	div.style.width = width + "px";
-	div.style.height = height + "px";
+	div.style.width = (width * zoom) + "px";
+	div.style.height = (height * zoom) + "px";
 
 	svg.setAttribute('width', width * zoom + "px");
 	svg.setAttribute('height', (innerHeight * zoom) + "px");
