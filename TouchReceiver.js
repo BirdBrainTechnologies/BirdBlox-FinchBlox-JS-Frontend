@@ -58,6 +58,7 @@ TouchReceiver.handleMove=function(event){
  */
 TouchReceiver.handleUp=function(event){
 	TouchReceiver.touchend(event);
+	GuiElements.alert("");
 };
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
@@ -100,6 +101,7 @@ TouchReceiver.touchstart=function(e, preventD){
 	}
 	var TR=TouchReceiver; //shorthand
 	if(preventD) {
+		GuiElements.alert("Prevented 1");
 		e.preventDefault(); //Stops 300 ms delay events
 	}
 	// e.stopPropagation();
@@ -384,6 +386,7 @@ TouchReceiver.touchmove=function(e){
 		}
 	}
 	if(shouldPreventDefault){
+		GuiElements.alert("Prevented 2");
 		e.preventDefault();
 	}
 };
@@ -455,6 +458,7 @@ TouchReceiver.touchend=function(e){
 		TR.touchDown = false;
 	}
 	if(shouldPreventDefault) {
+		GuiElements.alert("Prevented 3");
 		e.preventDefault();
 	}
 };
