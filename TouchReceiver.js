@@ -655,6 +655,8 @@ TouchReceiver.createScrollFixTimer = function(div){
 			div.scrollTop = div.scrollHeight - height - 2;
 		}
 	};
-	fixScroll();
+	if (div.scrollTop <= 0) {
+		div.scrollTop = 1;
+	}
 	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };
