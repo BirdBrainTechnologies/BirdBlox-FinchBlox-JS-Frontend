@@ -65,7 +65,7 @@ SmoothMenuBnList.prototype.show=function(){
 		this.visible=true;
 		GuiElements.layers.div.appendChild(this.scrollDiv);
 		this.updatePosition();
-		if(GuiElements.isIos) {
+		if(GuiElements.isIos && this.scrollable) {
 			this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
 		}
 	}
@@ -157,7 +157,6 @@ SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
 };
 SmoothMenuBnList.prototype.updatePosition = function(){
 	if(this.visible) {
-
 		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
 		var realX = this.parent.relToAbsX(this.x);
 		var realY = this.parent.relToAbsY(this.y);
@@ -166,7 +165,7 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 		var zoom = GuiElements.zoomFactor;
 
 		GuiElements.update.smoothScrollBnList(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
-			this.height, this.internalHeight, zoom);
+			this.height, this.internalHeight, zoom, this.scrollable);
 		GuiElements.alert("x:"+realX+" y:"+realY);
 	}
 };

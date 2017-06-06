@@ -265,7 +265,7 @@ GuiElements.create.svg = function(group){
 };
 GuiElements.create.scrollDiv = function(group){
 	var div = document.createElement("div");
-	div.classList.add('smoothScroll');
+	div.style.position = "absolute";
 	if(group != null){
 		group.appendChild(div);
 	}
@@ -555,11 +555,19 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, height, innerHeight, zoom) {
+GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, height, innerHeight, zoom, scrollable) {
 	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
+
+	if(scrollable) {
+		div.classList.add("smoothScroll");
+		div.classList.remove("noScroll");
+	} else {
+		div.classList.add("noScroll");
+		div.classList.remove("smoothScroll");
+	}
 
 	div.style.top = y + "px";
 	div.style.left = x + "px";
