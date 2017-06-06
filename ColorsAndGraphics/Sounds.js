@@ -13,7 +13,7 @@ Sounds.loadNames=function(){
 
 		for (var i = 0; i < Sounds.names.length; i++) {
 			const index = i;
-			var request = "sound/duration/" + Sounds.getSoundName(i);
+			var request = "sound/duration?filename=" + Sounds.getSoundName(i);
 			var durationCallback = function(duration) {
 				//HtmlServer.sendRequest("server/log/LOG:Got_duration:" + index + ":"+ duration);
 				Sounds.durations[index] = Number(duration);
@@ -44,7 +44,7 @@ Sounds.checkNameIsValid=function(soundName){
 
 // Stops all sounds and tones
 Sounds.stopAllSounds=function(){
-	var request = "sound/stop_all"
+	var request = "sound/stopAll"
 	var errCallback = function() {
 		// TODO(ttsun): Handle error
 		//GuiElements.alert("Error stopping all sounds.")

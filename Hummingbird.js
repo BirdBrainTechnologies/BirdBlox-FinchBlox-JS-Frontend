@@ -21,7 +21,7 @@ Hummingbird.prototype.disconnect=function(callbackFn,removeFromManager){
 	if(removeFromManager==null){
 		removeFromManager=true;
 	}
-	var request="hummingbird/disconnect?name="+HtmlServer.encodeHtml(this.id);
+	var request="hummingbird/disconnect?id="+HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(removeFromManager) {
 		HummingbirdManager.removeHB(this);
@@ -32,7 +32,7 @@ Hummingbird.prototype.connect=function(callbackFn,addToManager){
 	if(addToManager==null){
 		addToManager=true;
 	}
-	var request="hummingbird/connect?name="+HtmlServer.encodeHtml(this.id);
+	var request="hummingbird/connect?id="+HtmlServer.encodeHtml(this.id);
 	HtmlServer.sendRequestWithCallback(request,callbackFn,callbackFn);
 	if(addToManager) {
 		HummingbirdManager.connectedHBs.push(this);

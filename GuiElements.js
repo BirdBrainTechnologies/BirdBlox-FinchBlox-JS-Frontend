@@ -17,7 +17,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
-	//(DebugOptions.safeFunc(GuiElements))();
+	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
@@ -96,6 +96,7 @@ GuiElements.setConstants=function(){
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
+	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	HummingbirdMenu.setGraphics();
 	InputPad.setGraphics();
@@ -240,10 +241,41 @@ GuiElements.create.path=function(group){
 GuiElements.create.text=function(){
 	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 	return textElement; //Return the text.
-}
+};
 GuiElements.create.image=function(){
 	var imageElement=document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
 	return imageElement; //Return the text.
+};
+GuiElements.create.foreignObject = function(group){
+	var obj = document.createElementNS("http://www.w3.org/2000/svg", 'foreignObject');
+	if(group != null){
+		group.appendChild(obj);
+	}
+	return obj;
+};
+GuiElements.create.svg = function(group){
+	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+	if(group != null){
+		group.appendChild(svg);
+	}
+	return svg;
+};
+GuiElements.create.body = function(group){
+	var body = document.createElement("body");
+	body.classList.add('subBody');
+	if(group != null){
+		group.appendChild(body);
+	}
+	return body;
+};
+GuiElements.create.scrollDiv = function(group){
+	var div = document.createElement("div");
+	div.classList.add('smoothScroll');
+	if(group != null){
+		group.appendChild(div);
+	}
+	return div;
 };
 /* Creates an SVG rect element, adds it to a parent group (if present), and returns it.
  * @param {SVG g} title - (optional) The parent group to add the group to.
@@ -528,6 +560,18 @@ GuiElements.update.zoom=function(group,scale){
 GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
+};
+GuiElements.update.smoothScrollBnList=function(foreignObj, body, div, svg, x, y, width, height, innerHeight) {
+	foreignObj.setAttributeNS(null,"x",x);
+	foreignObj.setAttributeNS(null,"y",y);
+	foreignObj.setAttributeNS(null,"width",width);
+	foreignObj.setAttributeNS(null,"height",height);
+
+	div.style.width = width + "px";
+	div.style.height = height + "px";
+
+	svg.setAttribute('width', width + "px");
+	svg.setAttribute('height', innerHeight + "px");
 };
 GuiElements.makeClickThrough = function(svgE){
 	svgE.style.pointerEvents = "none";

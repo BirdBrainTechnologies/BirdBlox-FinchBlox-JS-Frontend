@@ -1,7 +1,7 @@
 /*
 color:textColor;
 */
-body
+.mainBody
 {
     background-color:#aaa;
 }
@@ -27,7 +27,14 @@ path{
 	-ms-user-select: none;			 
 	user-select: none;	                                 
 }
-.testf {
+.smoothScroll {
 	overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
 }
+.subBody
+{
+    padding:0px;
+    margin:0px;
+}
+.subBody::-webkit-scrollbar { width: 0 !important }

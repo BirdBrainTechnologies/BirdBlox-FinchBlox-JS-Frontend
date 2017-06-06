@@ -20,7 +20,7 @@ SoundDropSlot.prototype.edit=function(){
 			var soundName = me.enteredData.getValue();
 			HtmlServer.sendRequestWithCallback("sound/stop", function(){
 				if(Sounds.checkNameIsValid(soundName)){
-					var request = "sound/play/"+soundName;
+					var request = "sound/play?filename="+soundName;
 					HtmlServer.sendRequestWithCallback(request);
 					GuiElements.alert("sent: " + request);
 				}
