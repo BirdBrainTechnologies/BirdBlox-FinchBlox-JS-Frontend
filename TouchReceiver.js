@@ -8,6 +8,7 @@ function TouchReceiver(){
 	//Toggle to determine of mouse or touchscreen events should be used.
 	TR.mouse = false || (DebugOptions.mouse && DebugOptions.enabled); //Use true when debugging on a desktop.
 	TR.longTouchInterval=700; //The number of ms before a touch is considered a long touch.
+	TR.fixScrollingInterval = 200;
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?
@@ -638,4 +639,16 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
 };
 TouchReceiver.addEventListenerSafe=function(element,type, func){
 	element.addEventListener(type, DebugOptions.safeFunc(func), false);
+};
+TouchReceiver.createScrollFixTimer = function(div){
+	var fixScroll = function() {
+		if (div.scrollTop === 0) {
+			div.scrollTop = 1;
+		}
+		else if (div.scrollHeight - div.scrollTop === div.style.height) {
+			div.scrollTop -= 1;
+		}
+	};
+	fixScroll();
+	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };

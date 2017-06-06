@@ -65,12 +65,14 @@ SmoothMenuBnList.prototype.show=function(){
 		this.visible=true;
 		GuiElements.layers.div.appendChild(this.scrollDiv);
 		this.updatePosition();
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
 		GuiElements.layers.div.removeChild(this.scrollDiv);
+		window.clearInterval(this.fixScrollTimer);
 	}
 };
 SmoothMenuBnList.prototype.generateBns=function(){

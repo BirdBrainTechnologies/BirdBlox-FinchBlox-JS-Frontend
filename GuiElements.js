@@ -565,8 +565,8 @@ GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, hei
 	div.style.width = (width * zoom) + "px";
 	div.style.height = (height * zoom) + "px";
 
-	svg.setAttribute('width', width * zoom + "px");
-	svg.setAttribute('height', (innerHeight * zoom) + "px");
+	svg.setAttribute('width', width * zoom);
+	svg.setAttribute('height', innerHeight * zoom);
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
