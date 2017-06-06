@@ -50,7 +50,7 @@ TouchReceiver.addListeners=function(){
  * @fix combine with TouchReceiver.touchmove.
  */
 TouchReceiver.handleMove=function(event){
-	event.preventDefault(); //Prevent document scrolling.
+	//event.preventDefault(); //Prevent document scrolling.
 	TouchReceiver.touchmove(event); //Deal with movement.
 };
 /* Handles new touch events.
@@ -58,7 +58,7 @@ TouchReceiver.handleMove=function(event){
  * @fix combine with TouchReceiver.touchstart.
  */
 TouchReceiver.handleUp=function(event){
-	event.preventDefault();
+	//event.preventDefault();
 	TouchReceiver.touchend(event);
 };
 TouchReceiver.handleDocumentDown=function(event){
@@ -98,7 +98,7 @@ TouchReceiver.getTouchY=function(e, i){
  */
 TouchReceiver.touchstart=function(e){
 	var TR=TouchReceiver; //shorthand
-	e.preventDefault(); //Stops 300 ms delay events
+	//e.preventDefault(); //Stops 300 ms delay events
 	// e.stopPropagation();
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
