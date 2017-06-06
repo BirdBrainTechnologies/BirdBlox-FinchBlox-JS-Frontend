@@ -385,6 +385,8 @@ TouchReceiver.touchmove=function(e){
 			}
 		}
 	}
+	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
+	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
 	if(shouldPreventDefault){
 		GuiElements.alert("Prevented 2 t:" + TR.targetType + "," + TR.target.smoothMenuBnList);
 		e.preventDefault();
