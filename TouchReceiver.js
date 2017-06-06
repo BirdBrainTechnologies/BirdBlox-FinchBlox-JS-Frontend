@@ -367,7 +367,7 @@ TouchReceiver.touchmove=function(e){
 				} else if (TR.target.smoothMenuBnList != null) {
 					TR.targetType = "smoothMenuBnList";
 					TR.target.interrupt();
-					TR.target = TR.target.menuBnList;
+					TR.target = TR.target.smoothMenuBnList;
 				}
 			}
 			//If the user drags a menuBnList, it should scroll.
@@ -386,7 +386,7 @@ TouchReceiver.touchmove=function(e){
 		}
 	}
 	if(shouldPreventDefault){
-		GuiElements.alert("Prevented 2");
+		GuiElements.alert("Prevented 2 t:" + TR.targetType);
 		e.preventDefault();
 	}
 };
