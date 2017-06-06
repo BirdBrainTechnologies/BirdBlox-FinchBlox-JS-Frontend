@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" afterPath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js" afterPath="$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/HBConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/HBConnectionList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/OpenDialog.js" afterPath="$PROJECT_DIR$/UIParts/OpenDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -28,11 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="132">
-              <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+            <state relative-caret-position="176">
+              <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
               <folding>
                 <element signature="e#726#775#0" expanded="false" />
                 <element signature="e#878#908#0" expanded="false" />
@@ -40,6 +36,110 @@
                 <element signature="e#1681#1700#0" expanded="false" />
                 <element signature="e#2342#2379#0" expanded="false" />
                 <element signature="n#!!block;n#UserException#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="281">
+              <caret line="104" column="15" selection-start-line="104" selection-start-column="15" selection-end-line="104" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConnectOneHBDialog.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="220">
+              <caret line="91" column="31" selection-start-line="91" selection-start-column="31" selection-end-line="91" selection-end-column="31" />
+              <folding>
+                <element signature="n#!!block;n#ConnectOneHBDialog#0" expanded="false" />
+                <element signature="e#91#131#0" expanded="false" />
+                <element signature="e#830#1240#0" expanded="false" />
+                <element signature="e#1292#1449#0" expanded="false" />
+                <element signature="e#1505#1820#0" expanded="false" />
+                <element signature="e#1724#1778#0" expanded="false" />
+                <element signature="e#1874#2288#0" expanded="false" />
+                <element signature="e#2155#2194#0" expanded="false" />
+                <element signature="e#2345#2510#0" expanded="false" />
+                <element signature="e#2568#2902#0" expanded="false" />
+                <element signature="e#3314#3724#0" expanded="false" />
+                <element signature="e#3414#3585#0" expanded="false" />
+                <element signature="e#3481#3546#0" expanded="false" />
+                <element signature="e#3596#3720#0" expanded="false" />
+                <element signature="e#3638#3717#0" expanded="false" />
+                <element signature="e#3784#4477#0" expanded="false" />
+                <element signature="e#3814#3828#0" expanded="false" />
+                <element signature="e#3939#4006#0" expanded="false" />
+                <element signature="e#4354#4414#0" expanded="false" />
+                <element signature="e#4546#4663#0" expanded="false" />
+                <element signature="e#4623#4659#0" expanded="false" />
+                <element signature="e#4868#4891#0" expanded="false" />
+                <element signature="e#4945#4968#0" expanded="false" />
+                <element signature="e#4970#5429#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="308">
+              <caret line="77" column="5" selection-start-line="77" selection-start-column="5" selection-end-line="77" selection-end-column="5" />
+              <folding>
+                <element signature="n#!!block;n#DiscoverDialog#0" expanded="false" />
+                <element signature="e#238#339#0" expanded="false" />
+                <element signature="e#391#638#0" expanded="false" />
+                <element signature="e#482#518#0" expanded="false" />
+                <element signature="e#859#1319#0" expanded="false" />
+                <element signature="e#1371#2168#0" expanded="false" />
+                <element signature="e#1799#1963#0" expanded="false" />
+                <element signature="e#2573#2668#0" expanded="false" />
+                <element signature="e#2735#3454#0" expanded="false" />
+                <element signature="e#2765#2779#0" expanded="false" />
+                <element signature="e#2900#2970#0" expanded="false" />
+                <element signature="e#3326#3390#0" expanded="false" />
+                <element signature="e#3457#3474#0" expanded="false" />
+                <element signature="e#3539#3658#0" expanded="false" />
+                <element signature="e#3614#3654#0" expanded="false" />
+                <element signature="e#3706#3859#0" expanded="false" />
+                <element signature="e#3909#4319#0" expanded="false" />
+                <element signature="e#4186#4225#0" expanded="false" />
+                <element signature="e#4372#4533#0" expanded="false" />
+                <element signature="e#4587#4979#0" expanded="false" />
+                <element signature="e#5042#5389#0" expanded="false" />
+                <element signature="e#5439#5462#0" expanded="false" />
+                <element signature="e#5512#5535#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SmoothMenuBnList.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/SmoothMenuBnList.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-990">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding>
+                <element signature="e#659#791#0" expanded="false" />
+                <element signature="e#838#1136#0" expanded="false" />
+                <element signature="e#1197#1227#0" expanded="false" />
+                <element signature="e#1285#1443#0" expanded="false" />
+                <element signature="e#1357#1396#0" expanded="false" />
+                <element signature="e#1402#1441#0" expanded="false" />
+                <element signature="e#3144#3661#0" expanded="false" />
+                <element signature="e#3168#3659#0" expanded="false" />
+                <element signature="e#3284#3490#0" expanded="false" />
+                <element signature="e#3455#3486#0" expanded="false" />
+                <element signature="e#3621#3656#0" expanded="false" />
+                <element signature="e#3708#3746#0" expanded="false" />
+                <element signature="e#3976#4167#0" expanded="false" />
+                <element signature="e#4811#4838#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -114,14 +214,14 @@
         <option value="$PROJECT_DIR$/UIParts/Menu/Menu.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
-        <option value="$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/HBConnectionList.js" />
-        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
-        <option value="$PROJECT_DIR$/UIParts/OpenDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
+        <option value="$PROJECT_DIR$/UIParts/OpenDialog.js" />
+        <option value="$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js" />
+        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
       </list>
     </option>
   </component>
@@ -470,7 +570,7 @@
       <workItem from="1496413003454" duration="21053000" />
       <workItem from="1496449294947" duration="1610000" />
       <workItem from="1496669442528" duration="20960000" />
-      <workItem from="1496757876623" duration="22672000" />
+      <workItem from="1496757876623" duration="23008000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -567,7 +667,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="768450000" />
+    <option name="totallyTimeSpent" value="768786000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1910,30 +2010,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="142" column="0" selection-start-line="142" selection-start-column="0" selection-end-line="147" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="457">
-          <caret line="168" column="0" selection-start-line="168" selection-start-column="0" selection-end-line="168" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="413">
-          <caret line="110" column="10" selection-start-line="110" selection-start-column="10" selection-end-line="110" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-396">
@@ -1976,30 +2052,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/SmoothMenuBnList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="83" column="24" selection-start-line="83" selection-start-column="24" selection-end-line="83" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc;n#SmoothMenuBnList#0" expanded="false" />
-            <element signature="e#659#791#0" expanded="false" />
-            <element signature="e#838#1136#0" expanded="false" />
-            <element signature="e#1197#1227#0" expanded="false" />
-            <element signature="e#1285#1443#0" expanded="false" />
-            <element signature="e#1357#1396#0" expanded="false" />
-            <element signature="e#1402#1441#0" expanded="false" />
-            <element signature="e#3144#3661#0" expanded="false" />
-            <element signature="e#3168#3659#0" expanded="false" />
-            <element signature="e#3284#3490#0" expanded="false" />
-            <element signature="e#3455#3486#0" expanded="false" />
-            <element signature="e#3621#3656#0" expanded="false" />
-            <element signature="e#3708#3746#0" expanded="false" />
-            <element signature="e#3976#4167#0" expanded="false" />
-            <element signature="e#4811#4838#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/BubbleOverlay.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2723">
@@ -2018,8 +2070,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DebugOptions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+        <state relative-caret-position="176">
+          <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
           <folding>
             <element signature="e#726#775#0" expanded="false" />
             <element signature="e#878#908#0" expanded="false" />
@@ -2027,6 +2079,102 @@
             <element signature="e#1681#1700#0" expanded="false" />
             <element signature="e#2342#2379#0" expanded="false" />
             <element signature="n#!!block;n#UserException#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/SmoothMenuBnList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-990">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#659#791#0" expanded="false" />
+            <element signature="e#838#1136#0" expanded="false" />
+            <element signature="e#1197#1227#0" expanded="false" />
+            <element signature="e#1285#1443#0" expanded="false" />
+            <element signature="e#1357#1396#0" expanded="false" />
+            <element signature="e#1402#1441#0" expanded="false" />
+            <element signature="e#3144#3661#0" expanded="false" />
+            <element signature="e#3168#3659#0" expanded="false" />
+            <element signature="e#3284#3490#0" expanded="false" />
+            <element signature="e#3455#3486#0" expanded="false" />
+            <element signature="e#3621#3656#0" expanded="false" />
+            <element signature="e#3708#3746#0" expanded="false" />
+            <element signature="e#3976#4167#0" expanded="false" />
+            <element signature="e#4811#4838#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="281">
+          <caret line="104" column="15" selection-start-line="104" selection-start-column="15" selection-end-line="104" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="91" column="31" selection-start-line="91" selection-start-column="31" selection-end-line="91" selection-end-column="31" />
+          <folding>
+            <element signature="n#!!block;n#ConnectOneHBDialog#0" expanded="false" />
+            <element signature="e#91#131#0" expanded="false" />
+            <element signature="e#830#1240#0" expanded="false" />
+            <element signature="e#1292#1449#0" expanded="false" />
+            <element signature="e#1505#1820#0" expanded="false" />
+            <element signature="e#1724#1778#0" expanded="false" />
+            <element signature="e#1874#2288#0" expanded="false" />
+            <element signature="e#2155#2194#0" expanded="false" />
+            <element signature="e#2345#2510#0" expanded="false" />
+            <element signature="e#2568#2902#0" expanded="false" />
+            <element signature="e#3314#3724#0" expanded="false" />
+            <element signature="e#3414#3585#0" expanded="false" />
+            <element signature="e#3481#3546#0" expanded="false" />
+            <element signature="e#3596#3720#0" expanded="false" />
+            <element signature="e#3638#3717#0" expanded="false" />
+            <element signature="e#3784#4477#0" expanded="false" />
+            <element signature="e#3814#3828#0" expanded="false" />
+            <element signature="e#3939#4006#0" expanded="false" />
+            <element signature="e#4354#4414#0" expanded="false" />
+            <element signature="e#4546#4663#0" expanded="false" />
+            <element signature="e#4623#4659#0" expanded="false" />
+            <element signature="e#4868#4891#0" expanded="false" />
+            <element signature="e#4945#4968#0" expanded="false" />
+            <element signature="e#4970#5429#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="77" column="5" selection-start-line="77" selection-start-column="5" selection-end-line="77" selection-end-column="5" />
+          <folding>
+            <element signature="n#!!block;n#DiscoverDialog#0" expanded="false" />
+            <element signature="e#238#339#0" expanded="false" />
+            <element signature="e#391#638#0" expanded="false" />
+            <element signature="e#482#518#0" expanded="false" />
+            <element signature="e#859#1319#0" expanded="false" />
+            <element signature="e#1371#2168#0" expanded="false" />
+            <element signature="e#1799#1963#0" expanded="false" />
+            <element signature="e#2573#2668#0" expanded="false" />
+            <element signature="e#2735#3454#0" expanded="false" />
+            <element signature="e#2765#2779#0" expanded="false" />
+            <element signature="e#2900#2970#0" expanded="false" />
+            <element signature="e#3326#3390#0" expanded="false" />
+            <element signature="e#3457#3474#0" expanded="false" />
+            <element signature="e#3539#3658#0" expanded="false" />
+            <element signature="e#3614#3654#0" expanded="false" />
+            <element signature="e#3706#3859#0" expanded="false" />
+            <element signature="e#3909#4319#0" expanded="false" />
+            <element signature="e#4186#4225#0" expanded="false" />
+            <element signature="e#4372#4533#0" expanded="false" />
+            <element signature="e#4587#4979#0" expanded="false" />
+            <element signature="e#5042#5389#0" expanded="false" />
+            <element signature="e#5439#5462#0" expanded="false" />
+            <element signature="e#5512#5535#0" expanded="false" />
           </folding>
         </state>
       </provider>

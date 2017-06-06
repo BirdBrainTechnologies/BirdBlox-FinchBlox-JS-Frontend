@@ -98,6 +98,9 @@ OpenDialog.prototype.updateGroupPosition=function(){
 OpenDialog.prototype.closeDialog=function(){
 	OpenDialog.currentDialog=null;
 	this.group.remove();
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 };

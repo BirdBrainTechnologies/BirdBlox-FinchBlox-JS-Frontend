@@ -88,6 +88,9 @@ ConnectOneHBDialog.prototype.createTitleLabel=function(){
 };
 ConnectOneHBDialog.prototype.closeDialog=function(){
 	this.group.remove();
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 	ConnectOneHBDialog.currentCOHBD=null;

@@ -73,6 +73,9 @@ DiscoverDialog.prototype.showDialog = function() {
 DiscoverDialog.prototype.closeDialog = function(){
 	HtmlServer.sendRequestWithCallback("flutter/stopDiscover");
 	this.group.remove();
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 	DiscoverDialog.instance = null;
