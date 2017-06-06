@@ -204,6 +204,9 @@ TouchReceiver.touchStartCatBN=function(target,e){
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
 	var shouldPreventDefault = target.smoothMenuBnList == null;
+	if(!shouldPreventDefault){
+		e.stopPropagation();
+	}
 	if(TR.touchstart(e, shouldPreventDefault)){
 		if(!target.isOverlayPart){
 			GuiElements.overlay.close(); //Close any visible overlays.
@@ -271,6 +274,7 @@ TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 		}
 		TR.targetType="smoothMenuBnList";
 		TouchReceiver.target=target; //Store target.
+		e.stopPropagation();
 	}
 };
 
