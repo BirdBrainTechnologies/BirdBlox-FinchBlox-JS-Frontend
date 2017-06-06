@@ -261,14 +261,6 @@ GuiElements.create.svg = function(group){
 	}
 	return svg;
 };
-GuiElements.create.body = function(group){
-	var body = document.createElement("body");
-	body.classList.add('subBody');
-	if(group != null){
-		group.appendChild(body);
-	}
-	return body;
-};
 GuiElements.create.scrollDiv = function(group){
 	var div = document.createElement("div");
 	div.classList.add('smoothScroll');
@@ -561,11 +553,12 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(foreignObj, body, div, svg, x, y, width, height, innerHeight) {
+GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, x, y, width, height, innerHeight) {
 	foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width);
 	foreignObj.setAttributeNS(null,"height",height);
+
 
 	div.style.width = width + "px";
 	div.style.height = height + "px";

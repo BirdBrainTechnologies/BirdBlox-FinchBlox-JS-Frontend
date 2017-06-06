@@ -50,7 +50,6 @@ TouchReceiver.addListeners=function(){
  * @fix combine with TouchReceiver.touchmove.
  */
 TouchReceiver.handleMove=function(event){
-	//event.preventDefault(); //Prevent document scrolling.
 	TouchReceiver.touchmove(event); //Deal with movement.
 };
 /* Handles new touch events.
@@ -58,7 +57,6 @@ TouchReceiver.handleMove=function(event){
  * @fix combine with TouchReceiver.touchstart.
  */
 TouchReceiver.handleUp=function(event){
-	//event.preventDefault();
 	TouchReceiver.touchend(event);
 };
 TouchReceiver.handleDocumentDown=function(event){
@@ -96,9 +94,14 @@ TouchReceiver.getTouchY=function(e, i){
  * @param {event} e - passed event arguments.
  * @return {boolean} - returns true iff !TR.touchDown
  */
-TouchReceiver.touchstart=function(e){
+TouchReceiver.touchstart=function(e, preventD){
+	if(preventD == null){
+		preventD = true;
+	}
 	var TR=TouchReceiver; //shorthand
-	//e.preventDefault(); //Stops 300 ms delay events
+	if(preventD) {
+		e.preventDefault(); //Stops 300 ms delay events
+	}
 	// e.stopPropagation();
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
@@ -200,7 +203,8 @@ TouchReceiver.touchStartCatBN=function(target,e){
  */
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
+	var shouldPreventDefault = target.smoothMenuBnList == null;
+	if(TR.touchstart(e, shouldPreventDefault)){
 		if(!target.isOverlayPart){
 			GuiElements.overlay.close(); //Close any visible overlays.
 		}
@@ -259,14 +263,14 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 		TouchReceiver.target=target; //Store target Slot.
 	}
 };
-TouchReceiver.touchStartSmoothMenuBnListScrollRect=function(target,e){
+TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 	var TR=TouchReceiver;
-	if(TR.touchstart(e)) {
+	if(TR.touchstart(e, false)) {
 		if(!target.isOverlayPart) {
 			GuiElements.overlay.close(); //Close any visible overlays.
 		}
 		TR.targetType="smoothMenuBnList";
-		TouchReceiver.target=target; //Store target Slot.
+		TouchReceiver.target=target; //Store target.
 	}
 };
 
@@ -275,6 +279,7 @@ TouchReceiver.touchStartSmoothMenuBnListScrollRect=function(target,e){
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
+	var shouldPreventDefault = true;
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
 		if(TR.longTouch) {
@@ -370,9 +375,12 @@ TouchReceiver.touchmove=function(e){
 			}
 
 			if (TR.targetType == "smoothMenuBnList") {
-
+				shouldPreventDefault = false;
 			}
 		}
+	}
+	if(shouldPreventDefault){
+		e.preventDefault();
 	}
 };
 TouchReceiver.hasMovedOutsideThreshold=function(e){
@@ -388,6 +396,7 @@ TouchReceiver.hasMovedOutsideThreshold=function(e){
  */
 TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
+	var shouldPreventDefault = true;
 	if(TR.zooming){
 		if(e.touches.length == 0){
 			TabManager.endZooming();
@@ -435,11 +444,14 @@ TouchReceiver.touchend=function(e){
 			TR.target.endScroll();
 		}
 		else if(TR.targetType=="smoothMenuBnList"){
-
+			shouldPreventDefault = false;
 		}
 	}
 	else{
 		TR.touchDown = false;
+	}
+	if(shouldPreventDefault) {
+		e.preventDefault();
 	}
 };
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
@@ -611,7 +623,7 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
 	var TR=TouchReceiver;
 	element.parent=parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		TouchReceiver.touchStartSmoothMenuBnListScrollRect(this.parent,e);
+		TouchReceiver.touchStartSmoothMenuBnList(this.parent,e);
 	}, false);
 };
 TouchReceiver.addEventListenerSafe=function(element,type, func){

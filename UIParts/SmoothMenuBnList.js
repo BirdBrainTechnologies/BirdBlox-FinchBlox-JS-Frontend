@@ -40,8 +40,8 @@ SmoothMenuBnList.setGraphics=function(){
 };
 SmoothMenuBnList.prototype.build = function(){
 	this.foreignObject = GuiElements.create.foreignObject();
-	this.body = GuiElements.create.body(this.foreignObject);
-	this.scrollDiv = GuiElements.create.scrollDiv(this.body);
+	this.scrollDiv = GuiElements.create.scrollDiv(this.foreignObject);
+	TouchReceiver.addListenersSmoothMenuBnListScrollRect(this.scrollDiv, this);
 	this.svg = GuiElements.create.svg(this.scrollDiv);
 };
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
@@ -107,7 +107,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		}
 		this.scrollable=this.height!=this.internalHeight;
 		this.bnsGenerated=true;
-		GuiElements.update.smoothScrollBnList(this.foreignObject, this.body, this.scrollDiv, this.svg, this.x, this.y, this.width, this.height, this.internalHeight);
+		GuiElements.update.smoothScrollBnList(this.foreignObject, this.scrollDiv, this.svg, this.x, this.y, this.width, this.height, this.internalHeight);
 	}
 };
 SmoothMenuBnList.prototype.computeWidth=function(){
