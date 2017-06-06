@@ -35,6 +35,9 @@ Menu.prototype.move=function(){
 	this.x=this.button.x;
 	this.y=this.button.y+this.button.height;
 	GuiElements.move.group(this.group,this.x,this.y);
+	if(this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
 };
 Menu.prototype.createMenuBnList=function(){
 	if(this.menuBnList!=null){

@@ -553,17 +553,19 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, x, y, width, height, innerHeight) {
+GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, zoomG, x, y, width, height, innerHeight, zoom) {
 	foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
-	foreignObj.setAttributeNS(null,"width",width);
-	foreignObj.setAttributeNS(null,"height",height);
+	foreignObj.setAttributeNS(null,"width",width * zoom);
+	foreignObj.setAttributeNS(null,"height",height * zoom);
 
 	div.style.width = width + "px";
 	div.style.height = height + "px";
 
-	svg.setAttribute('width', width + "px");
-	svg.setAttribute('height', innerHeight + "px");
+	svg.setAttribute('width', width * zoom + "px");
+	svg.setAttribute('height', (innerHeight * zoom) + "px");
+
+	GuiElements.update.zoom(zoomG, zoom);
 };
 
 GuiElements.makeClickThrough = function(svgE){
