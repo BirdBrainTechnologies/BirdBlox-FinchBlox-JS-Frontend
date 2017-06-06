@@ -642,10 +642,12 @@ TouchReceiver.addEventListenerSafe=function(element,type, func){
 };
 TouchReceiver.createScrollFixTimer = function(div){
 	var fixScroll = function() {
-		if (div.scrollTop === 0) {
+		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
+		if(TouchReceiver.touchDown) return;
+		if (div.scrollTop <= 0) {
 			div.scrollTop = 1;
 		}
-		else if (div.scrollHeight - div.scrollTop === div.style.height) {
+		else if (div.scrollHeight - height - 1 <= div.scrollTop) {
 			div.scrollTop -= 1;
 		}
 	};
