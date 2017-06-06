@@ -40,8 +40,8 @@ SmoothMenuBnList.setGraphics=function(){
 	SMBL.minWidth=40;
 };
 SmoothMenuBnList.prototype.build = function(){
-	this.foreignObject = GuiElements.create.foreignObject();
-	this.scrollDiv = GuiElements.create.scrollDiv(this.foreignObject);
+	//this.foreignObject = GuiElements.create.foreignObject();
+	this.scrollDiv = GuiElements.create.scrollDiv();
 	TouchReceiver.addListenersSmoothMenuBnListScrollRect(this.scrollDiv, this);
 	this.svg = GuiElements.create.svg(this.scrollDiv);
 	this.zoomG = GuiElements.create.group(0, 0, this.svg);
@@ -63,14 +63,14 @@ SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
 	if(!this.visible){
 		this.visible=true;
-		this.parentGroup.appendChild(this.foreignObject);
+		GuiElements.layers.div.appendChild(this.scrollDiv);
 		this.updatePosition();
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
-		this.foreignObject.remove();
+		GuiElements.layers.div.removeChild(this.scrollDiv);
 	}
 };
 SmoothMenuBnList.prototype.generateBns=function(){
@@ -159,7 +159,7 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 		realY = GuiElements.relToAbsY(realY);
 		var zoom = GuiElements.zoomFactor;
 
-		GuiElements.update.smoothScrollBnList(this.foreignObject, this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
+		GuiElements.update.smoothScrollBnList(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
 			this.height, this.internalHeight, zoom);
 		GuiElements.alert("x:"+realX+" y:"+realY);
 	}

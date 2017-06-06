@@ -39,10 +39,23 @@ path{
 	overflow-y: scroll; /* has to be scroll, not auto */
     overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
+    position:absolute;
 }
 .subBody
 {
     padding:0px;
     margin:0px;
 }
-.subBody::-webkit-scrollbar { width: 0 !important }
+#divLayer {
+    position:absolute;
+    top:0px;
+    right:0px;
+    left:0px;
+    bottom:0px;
+    height:100%;
+    width:100%;
+    pointer-events: none;
+}
+#divLayer div {
+    pointer-events: auto;
+}

@@ -71,7 +71,6 @@ Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;
 	mBL.generateBns();
 	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
-	this.menuBnList.show();
 };
 Menu.prototype.previewOpen=function(){
 	return true;
@@ -86,6 +85,7 @@ Menu.prototype.open=function(){
 			this.loadOptions();
 			this.buildMenu();
 			GuiElements.layers.overlay.appendChild(this.group);
+			this.menuBnList.show();
 			this.visible = true;
 			GuiElements.overlay.set(this);
 			this.button.isOverlayPart = true;
@@ -101,6 +101,7 @@ Menu.prototype.close=function(onlyOnDrag){
 	if(onlyOnDrag) return;
 	if(this.visible){
 		this.group.remove();
+		this.menuBnList.hide();
 		this.visible=false;
 		GuiElements.overlay.remove(this);
 		this.button.unToggle();

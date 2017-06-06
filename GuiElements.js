@@ -155,7 +155,7 @@ GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
 	GuiElements.zoomGroup=create.group(0,0,GuiElements.svg);
 	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
-	GuiElements.layers=function(){};
+	GuiElements.layers={};
 	var layers=GuiElements.layers;
 	layers.temp=create.layer();
 	layers.aTabBg=create.layer();
@@ -176,6 +176,7 @@ GuiElements.createLayers=function(){
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
 	layers.overlay=create.layer();
+	layers.div = document.getElementById("divLayer");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -553,12 +554,14 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(foreignObj, div, svg, zoomG, x, y, width, height, innerHeight, zoom) {
-	foreignObj.setAttributeNS(null,"x",x);
+GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, height, innerHeight, zoom) {
+	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width * zoom);
-	foreignObj.setAttributeNS(null,"height",height * zoom);
+	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
+	div.style.top = y + "px";
+	div.style.left = x + "px";
 	div.style.width = (width * zoom) + "px";
 	div.style.height = (height * zoom) + "px";
 
