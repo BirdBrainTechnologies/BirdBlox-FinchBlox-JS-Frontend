@@ -65,14 +65,18 @@ SmoothMenuBnList.prototype.show=function(){
 		this.visible=true;
 		GuiElements.layers.div.appendChild(this.scrollDiv);
 		this.updatePosition();
-		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		if(GuiElements.isIos) {
+			this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		}
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
 		GuiElements.layers.div.removeChild(this.scrollDiv);
-		window.clearInterval(this.fixScrollTimer);
+		if(this.fixScrollTimer != null) {
+			window.clearInterval(this.fixScrollTimer);
+		}
 	}
 };
 SmoothMenuBnList.prototype.generateBns=function(){
@@ -165,4 +169,7 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 			this.height, this.internalHeight, zoom);
 		GuiElements.alert("x:"+realX+" y:"+realY);
 	}
+};
+SmoothMenuBnList.prototype.updateZoom = function(){
+	this.updatePosition();
 };

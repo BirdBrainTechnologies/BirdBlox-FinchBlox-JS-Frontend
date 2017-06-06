@@ -72,6 +72,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.blockerOpacity=0.5;
 
 	GuiElements.isKindle = false;
+	GuiElements.isIos = false;
 };
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -785,6 +786,7 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.osVersion = resp;
 		var parts = resp.split(" ");
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
+		GuiElements.isIos = (parts.length >= 1 && parts[0] == "iOS");
 		callback();
 	}, function(){
 		GuiElements.osVersion="";

@@ -121,3 +121,8 @@ Menu.prototype.relToAbsX = function(x){
 Menu.prototype.relToAbsY = function(y){
 	return y + this.y;
 };
+Menu.prototype.updateZoom = function(){
+	if(this.menuBnList != null){
+		this.menuBnList.updateZoom();
+	}
+};
