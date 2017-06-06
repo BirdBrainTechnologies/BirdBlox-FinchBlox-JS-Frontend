@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DebugOptions.js" afterPath="$PROJECT_DIR$/DebugOptions.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MyCSS.css" afterPath="$PROJECT_DIR$/MyCSS.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TouchReceiver.js" afterPath="$PROJECT_DIR$/TouchReceiver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,15 +45,15 @@
       <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+            <state relative-caret-position="132">
+              <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
               <folding>
-                <element signature="e#725#774#0" expanded="false" />
-                <element signature="e#794#855#0" expanded="false" />
-                <element signature="e#877#907#0" expanded="false" />
-                <element signature="e#1446#1487#0" expanded="false" />
-                <element signature="e#1680#1699#0" expanded="false" />
-                <element signature="e#2341#2378#0" expanded="false" />
+                <element signature="e#726#775#0" expanded="false" />
+                <element signature="e#795#856#0" expanded="false" />
+                <element signature="e#878#908#0" expanded="false" />
+                <element signature="e#1447#1488#0" expanded="false" />
+                <element signature="e#1681#1700#0" expanded="false" />
+                <element signature="e#2342#2379#0" expanded="false" />
                 <element signature="n#!!block;n#UserException#0" expanded="false" />
               </folding>
             </state>
@@ -491,11 +487,11 @@
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/Hummingbird.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/Menu.js" />
-        <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" />
         <option value="$PROJECT_DIR$/TouchReceiver.js" />
+        <option value="$PROJECT_DIR$/DebugOptions.js" />
       </list>
     </option>
   </component>
@@ -844,7 +840,7 @@
       <workItem from="1496413003454" duration="21053000" />
       <workItem from="1496449294947" duration="1610000" />
       <workItem from="1496669442528" duration="20960000" />
-      <workItem from="1496757876623" duration="8026000" />
+      <workItem from="1496757876623" duration="8124000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -941,7 +937,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="753804000" />
+    <option name="totallyTimeSpent" value="753902000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -2456,15 +2452,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DebugOptions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+        <state relative-caret-position="132">
+          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
           <folding>
-            <element signature="e#725#774#0" expanded="false" />
-            <element signature="e#794#855#0" expanded="false" />
-            <element signature="e#877#907#0" expanded="false" />
-            <element signature="e#1446#1487#0" expanded="false" />
-            <element signature="e#1680#1699#0" expanded="false" />
-            <element signature="e#2341#2378#0" expanded="false" />
+            <element signature="e#726#775#0" expanded="false" />
+            <element signature="e#795#856#0" expanded="false" />
+            <element signature="e#878#908#0" expanded="false" />
+            <element signature="e#1447#1488#0" expanded="false" />
+            <element signature="e#1681#1700#0" expanded="false" />
+            <element signature="e#2342#2379#0" expanded="false" />
             <element signature="n#!!block;n#UserException#0" expanded="false" />
           </folding>
         </state>
