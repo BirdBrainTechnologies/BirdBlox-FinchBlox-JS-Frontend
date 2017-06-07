@@ -6,12 +6,13 @@ function DebugOptions(){
 
 	DO.mouse = false;
 	DO.addVirtualHB = false;
-	DO.addVirtualFlutter = true;
+	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
 	DO.lockErrors = false;
 	DO.errorLocked = false;
+	DO.logHttp = true;
 	DO.skipInitSettings = false;
 	DO.blockLogging = false;
 	DO.skipHtmlRequests = false;
@@ -50,6 +51,10 @@ DebugOptions.shouldSkipInitSettings=function(){
 DebugOptions.shouldSkipHtmlRequests = function(){
 	var DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
+};
+DebugOptions.shouldLogHttp=function(){
+	var DO = DebugOptions;
+	return DO.enabled && DO.logHttp;
 };
 DebugOptions.safeFunc = function(func){
 	if(DebugOptions.shouldLogErrors()){

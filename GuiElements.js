@@ -13,6 +13,7 @@ function GuiElements(){
 		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 		GuiElements.dialogBlock=null;
 		GuiElements.buildUI();
+		HtmlServer.sendFinishedLoadingRequest();
 	});
 }
 /* Runs GuiElements once all resources are loaded. */
@@ -834,23 +835,23 @@ GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;
 	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
 		GE.computedZoom = GE.computeZoomFromDims(response);
-		GuiElements.alert("Requesting zoom from settings.");
+		//GuiElements.alert("Requesting zoom from settings.");
 		HtmlServer.getSetting("zoom",function(result){
 			GE.alert("Dealing with zoom from settings");
 			GE.zoomMultiple = parseFloat(result);
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
+				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
+				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			GuiElements.alert("Computed zoom: " + GE.computedZoom);
+			//GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
 		},function(){
 			GE.alert("Error reading zoom from settings");
@@ -867,8 +868,8 @@ GuiElements.configureZoom = function(callback){
  * @param {string} dims - The response from properties/dims
  */
 GuiElements.computeZoomFromDims=function(dims){
-	GuiElements.alert("Got dimensions from device.  Computing zoom.");
-	GuiElements.alert("received dims: " + dims);
+	//GuiElements.alert("Got dimensions from device.  Computing zoom.");
+	//GuiElements.alert("received dims: " + dims);
 	var parts = dims.split(",");
 	if(parts.length==2) {
 		var widthMm = parseFloat(parts[0]);
@@ -878,7 +879,7 @@ GuiElements.computeZoomFromDims=function(dims){
 		var heightPx = window.innerHeight;
 		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
 		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
-		GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
+		//GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		return zoom * GuiElements.defaultZoomMultiple;
 	}
 	else{
