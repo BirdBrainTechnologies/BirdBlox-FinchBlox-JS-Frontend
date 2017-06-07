@@ -8,6 +8,7 @@ function TouchReceiver(){
 	//Toggle to determine of mouse or touchscreen events should be used.
 	TR.mouse = false || (DebugOptions.mouse && DebugOptions.enabled); //Use true when debugging on a desktop.
 	TR.longTouchInterval=700; //The number of ms before a touch is considered a long touch.
+	TR.fixScrollingInterval = 100;
 	TR.blocksMoving=false; //No BlockStacks are currently moving.
 	TR.targetType="none"; //Stores the type of object being interacted with.
 	TR.touchDown=false; //Is a finger currently on the screen?
@@ -50,7 +51,6 @@ TouchReceiver.addListeners=function(){
  * @fix combine with TouchReceiver.touchmove.
  */
 TouchReceiver.handleMove=function(event){
-	event.preventDefault(); //Prevent document scrolling.
 	TouchReceiver.touchmove(event); //Deal with movement.
 };
 /* Handles new touch events.
@@ -58,8 +58,8 @@ TouchReceiver.handleMove=function(event){
  * @fix combine with TouchReceiver.touchstart.
  */
 TouchReceiver.handleUp=function(event){
-	event.preventDefault();
 	TouchReceiver.touchend(event);
+	//GuiElements.alert("");
 };
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
@@ -96,9 +96,15 @@ TouchReceiver.getTouchY=function(e, i){
  * @param {event} e - passed event arguments.
  * @return {boolean} - returns true iff !TR.touchDown
  */
-TouchReceiver.touchstart=function(e){
+TouchReceiver.touchstart=function(e, preventD){
+	if(preventD == null){
+		preventD = true;
+	}
 	var TR=TouchReceiver; //shorthand
-	e.preventDefault(); //Stops 300 ms delay events
+	if(preventD) {
+		//GuiElements.alert("Prevented 1");
+		e.preventDefault(); //Stops 300 ms delay events
+	}
 	// e.stopPropagation();
 	var startTouch=!TR.touchDown;
 	if(startTouch){ //prevents multitouch issues.
@@ -200,7 +206,11 @@ TouchReceiver.touchStartCatBN=function(target,e){
  */
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
+	var shouldPreventDefault = target.smoothMenuBnList == null;
+	if(!shouldPreventDefault){
+		e.stopPropagation();
+	}
+	if(TR.touchstart(e, shouldPreventDefault)){
 		if(!target.isOverlayPart){
 			GuiElements.overlay.close(); //Close any visible overlays.
 		}
@@ -259,11 +269,24 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 		TouchReceiver.target=target; //Store target Slot.
 	}
 };
+TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e, false)) {
+		if(!target.isOverlayPart) {
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="smoothMenuBnList";
+		TouchReceiver.target=target; //Store target.
+		e.stopPropagation();
+	}
+};
+
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
+	var shouldPreventDefault = true;
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
 		if(TR.longTouch) {
@@ -342,6 +365,10 @@ TouchReceiver.touchmove=function(e){
 					TR.targetType = "menuBnList";
 					TR.target.interrupt();
 					TR.target = TR.target.menuBnList;
+				} else if (TR.target.smoothMenuBnList != null) {
+					TR.targetType = "smoothMenuBnList";
+					TR.target.interrupt();
+					TR.target = TR.target.smoothMenuBnList;
 				}
 			}
 			//If the user drags a menuBnList, it should scroll.
@@ -353,7 +380,17 @@ TouchReceiver.touchmove=function(e){
 					TR.target.updateScroll(TR.getY(e));
 				}
 			}
+
+			if (TR.targetType == "smoothMenuBnList") {
+				shouldPreventDefault = false;
+			}
 		}
+	}
+	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
+	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
+	if(shouldPreventDefault){
+		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
+		e.preventDefault();
 	}
 };
 TouchReceiver.hasMovedOutsideThreshold=function(e){
@@ -369,6 +406,7 @@ TouchReceiver.hasMovedOutsideThreshold=function(e){
  */
 TouchReceiver.touchend=function(e){
 	var TR=TouchReceiver;
+	var shouldPreventDefault = true;
 	if(TR.zooming){
 		if(e.touches.length == 0){
 			TabManager.endZooming();
@@ -415,9 +453,16 @@ TouchReceiver.touchend=function(e){
 		else if(TR.targetType=="menuBnList"){
 			TR.target.endScroll();
 		}
+		else if(TR.targetType=="smoothMenuBnList"){
+			shouldPreventDefault = false;
+		}
 	}
 	else{
 		TR.touchDown = false;
+	}
+	if(shouldPreventDefault) {
+		//GuiElements.alert("Prevented 3");
+		e.preventDefault();
 	}
 };
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
@@ -585,6 +630,33 @@ TouchReceiver.addListenersMenuBnListScrollRect=function(element,parent){
 		TouchReceiver.touchStartMenuBnListScrollRect(this.parent,e);
 	}, false);
 };
+TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
+	var TR=TouchReceiver;
+	element.parent=parent;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartSmoothMenuBnList(this.parent,e);
+	}, false);
+};
 TouchReceiver.addEventListenerSafe=function(element,type, func){
 	element.addEventListener(type, DebugOptions.safeFunc(func), false);
+};
+TouchReceiver.createScrollFixTimer = function(div){
+	var mem = {};
+	mem.last = null;
+	var fixScroll = function() {
+		var still = mem.last == null || mem.last == div.scrollTop;
+		mem.last = div.scrollTop;
+		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
+		if(TouchReceiver.touchDown || !still) return;
+		if (div.scrollTop <= 0) {
+			div.scrollTop = 1;
+		}
+		else if (div.scrollHeight - height - 1 <= div.scrollTop) {
+			div.scrollTop = div.scrollHeight - height - 2;
+		}
+	};
+	if (div.scrollTop <= 0) {
+		div.scrollTop = 1;
+	}
+	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };

@@ -104,6 +104,7 @@ TitleBar.updateZoom=function(){
 	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
 	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
+	TB.viewMenu.updateZoom();
 	if(TB.debugBn!=null) {
 		TB.debugBn.move(TB.debugX, TB.buttonMargin);
 		TB.debugMenu.move();

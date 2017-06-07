@@ -72,6 +72,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.blockerOpacity=0.5;
 
 	GuiElements.isKindle = false;
+	GuiElements.isIos = false;
 };
 /* Many classes have static functions which set constants such as font size, etc. 
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -155,7 +156,7 @@ GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
 	GuiElements.zoomGroup=create.group(0,0,GuiElements.svg);
 	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
-	GuiElements.layers=function(){};
+	GuiElements.layers={};
 	var layers=GuiElements.layers;
 	layers.temp=create.layer();
 	layers.aTabBg=create.layer();
@@ -176,6 +177,7 @@ GuiElements.createLayers=function(){
 	layers.dialogBlock=create.layer();
 	layers.dialog=create.layer();
 	layers.overlay=create.layer();
+	layers.div = document.getElementById("divLayer");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -261,17 +263,9 @@ GuiElements.create.svg = function(group){
 	}
 	return svg;
 };
-GuiElements.create.body = function(group){
-	var body = document.createElement("body");
-	body.classList.add('subBody');
-	if(group != null){
-		group.appendChild(body);
-	}
-	return body;
-};
 GuiElements.create.scrollDiv = function(group){
 	var div = document.createElement("div");
-	div.classList.add('smoothScroll');
+	div.style.position = "absolute";
 	if(group != null){
 		group.appendChild(div);
 	}
@@ -561,18 +555,31 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(foreignObj, body, div, svg, x, y, width, height, innerHeight) {
-	foreignObj.setAttributeNS(null,"x",x);
+GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, height, innerHeight, zoom, scrollable) {
+	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
-	foreignObj.setAttributeNS(null,"width",width);
-	foreignObj.setAttributeNS(null,"height",height);
+	foreignObj.setAttributeNS(null,"width",width * zoom);
+	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	div.style.width = width + "px";
-	div.style.height = height + "px";
+	if(scrollable) {
+		div.classList.add("smoothScroll");
+		div.classList.remove("noScroll");
+	} else {
+		div.classList.add("noScroll");
+		div.classList.remove("smoothScroll");
+	}
 
-	svg.setAttribute('width', width + "px");
-	svg.setAttribute('height', innerHeight + "px");
+	div.style.top = y + "px";
+	div.style.left = x + "px";
+	div.style.width = (width * zoom) + "px";
+	div.style.height = (height * zoom) + "px";
+
+	svg.setAttribute('width', width * zoom);
+	svg.setAttribute('height', innerHeight * zoom);
+
+	GuiElements.update.zoom(zoomG, zoom);
 };
+
 GuiElements.makeClickThrough = function(svgE){
 	svgE.style.pointerEvents = "none";
 };
@@ -682,6 +689,7 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
 	return textD; //Return the width/height.
 };
 
+
 /* Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
  * @param {string} font - The font family of the text element.
@@ -701,6 +709,20 @@ GuiElements.measure.stringWidth=function(text,font,size,weight){
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
+};
+GuiElements.measure.position = function(element) {
+	var top = 0, left = 0;
+	do {
+		top += element.offsetTop  || 0;
+		left += element.offsetLeft || 0;
+		element = element.offsetParent;
+	} while(element);
+
+	return {
+		top: top,
+		left: left
+	};
+	/* https://stackoverflow.com/questions/1480133/how-can-i-get-an-objects-absolute-position-on-the-page-in-javascript */
 };
 /* Displays the result of a reporter or predicate Block in a speech bubble next to that block.
  * @param {string} value - The value to display
@@ -772,6 +794,7 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.osVersion = resp;
 		var parts = resp.split(" ");
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
+		GuiElements.isIos = (parts.length >= 1 && parts[0] == "iOS");
 		callback();
 	}, function(){
 		GuiElements.osVersion="";
@@ -862,4 +885,11 @@ GuiElements.computeZoomFromDims=function(dims){
 		return 1;
 	}
 };
+GuiElements.relToAbsX = function(x){
+	return x * GuiElements.zoomFactor;
+};
+GuiElements.relToAbsY = function(y){
+	return y * GuiElements.zoomFactor;
+};
+
 

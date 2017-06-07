@@ -20,6 +20,7 @@ function ConnectOneHBDialog(){
 	var thisCOHBD =this;
 	this.updateTimer = self.setInterval(function () { thisCOHBD.discoverHBs() }, COHBD.updateInterval);
 	this.discoverHBs();
+	this.visible = true;
 }
 ConnectOneHBDialog.setConstants=function(){
 	var COHBD=ConnectOneHBDialog;
@@ -88,6 +89,10 @@ ConnectOneHBDialog.prototype.createTitleLabel=function(){
 };
 ConnectOneHBDialog.prototype.closeDialog=function(){
 	this.group.remove();
+	this.visible = false;
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 	ConnectOneHBDialog.currentCOHBD=null;
@@ -110,24 +115,26 @@ ConnectOneHBDialog.prototype.discoverHBs=function(){
 	});
 };
 ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
-	if(TouchReceiver.touchDown){
+	if(TouchReceiver.touchDown || !this.visible){
 		return;
 	}
 	var hBArray = JSON.parse(newHBs);
 	var COHBD=ConnectOneHBDialog;
 	var oldScroll=0;
 	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.scrollY;
+		oldScroll=this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	var bnM=COHBD.bnMargin;
-	this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
+	//this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
+	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM+COHBD.titleBarH,this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
 	for(var i=0;i<hBArray.length;i++){
 		this.addBnListOption(hBArray[i].name, hBArray[i].id);
 	}
+
 	this.menuBnList.show();
-	this.menuBnList.scroll(oldScroll);
+	this.menuBnList.setScroll(oldScroll);
 };
 ConnectOneHBDialog.prototype.addBnListOption=function(hBName, hBId){
 	var COHBD=ConnectOneHBDialog;
@@ -139,7 +146,12 @@ ConnectOneHBDialog.selectHB=function(hBName, hBId){
 	ConnectOneHBDialog.currentCOHBD.closeDialog();
 	HummingbirdManager.connectOneHB(hBName, hBId);
 };
-
+ConnectOneHBDialog.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+ConnectOneHBDialog.prototype.relToAbsY = function(y){
+	return y + this.y;
+};
 /*
 
 OpenDialog.prototype.addBnListOption=function(file,menuBnList){

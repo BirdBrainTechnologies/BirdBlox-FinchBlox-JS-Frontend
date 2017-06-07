@@ -1,5 +1,7 @@
 function OpenDialog(listOfFiles){
 	OpenDialog.currentDialog=this;
+	this.x = 0;
+	this.y = 0;
 	this.files=listOfFiles.split("\n");
 	this.group=GuiElements.create.group(0,0);
 	this.bgRect=GuiElements.create.rect(this.group);
@@ -32,7 +34,8 @@ OpenDialog.setConstants=function(){
 };
 OpenDialog.prototype.makeMenuBnList=function(){
 	var bnM=OpenDialog.bnMargin;
-	var menuBnList=new MenuBnList(this.group,bnM,bnM+OpenDialog.titleBarH,bnM,OpenDialog.width-2*bnM);
+	//var menuBnList=new MenuBnList(this.group,bnM,bnM+OpenDialog.titleBarH,bnM,OpenDialog.width-2*bnM);
+	var menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM+OpenDialog.titleBarH,OpenDialog.width-2*bnM);
 	menuBnList.setMaxHeight(this.calcMaxHeight());
 	for(var i=0;i<this.files.length-1;i++){
 		this.addBnListOption(this.files[i],menuBnList);
@@ -85,17 +88,29 @@ OpenDialog.prototype.createTitleLabel=function(){
 };
 OpenDialog.prototype.updateGroupPosition=function(){
 	var OD=OpenDialog;
-	var x=GuiElements.width/2-OD.width/2;
-	var y=GuiElements.height/2-this.height/2;
-	GuiElements.move.group(this.group,x,y);
+	this.x=GuiElements.width/2-OD.width/2;
+	this.y=GuiElements.height/2-this.height/2;
+	GuiElements.move.group(this.group,this.x,this.y);
+	if(this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
 };
 OpenDialog.prototype.closeDialog=function(){
 	OpenDialog.currentDialog=null;
 	this.group.remove();
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 };
 OpenDialog.prototype.openFile=function(fileName){
 	SaveManager.open(fileName);
 	this.closeDialog();
+};
+OpenDialog.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+OpenDialog.prototype.relToAbsY = function(y){
+	return y + this.y;
 };

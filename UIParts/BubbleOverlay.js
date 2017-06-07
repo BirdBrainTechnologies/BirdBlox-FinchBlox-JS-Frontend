@@ -2,6 +2,8 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
 	if(hMargin==null){
 		hMargin=0;
 	}
+	this.x = 0;
+	this.y = 0;
 	this.bgColor=color;
 	this.margin=margin;
 	this.hMargin=hMargin;
@@ -109,6 +111,8 @@ BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
 	var triX = x - topLeftX;
 	var triY = y - topLeftY;
 	var triH = (BO.triangleH+BO.overlap)*triangleDir;
+	this.x = topLeftX;
+	this.y = topLeftY;
 	GuiElements.move.group(this.group,topLeftX,topLeftY);
 	GuiElements.update.triangleFromPoint(this.triangle,triX,triY,BO.triangleW,triH, vertical);
 	GuiElements.update.rect(this.bgRect,0,0,width,height);
@@ -129,4 +133,10 @@ BubbleOverlay.prototype.fitLocationToRange = function(center, width, range){
 };
 BubbleOverlay.prototype.getVPadding=function() {
 	return this.margin*2+BubbleOverlay.triangleH;
+};
+BubbleOverlay.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+BubbleOverlay.prototype.relToAbsY = function(y){
+	return y + this.y;
 };

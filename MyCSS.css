@@ -1,9 +1,17 @@
 /*
 color:textColor;
 */
+html
+{
+    width: 100%;
+    height: 100%;
+}
 .mainBody
 {
     background-color:#aaa;
+	position: fixed;
+    width: 100%;
+    height: 100%;
 }
 #MainSvg
 {
@@ -32,9 +40,25 @@ path{
     overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
 }
+.noScroll {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
 .subBody
 {
     padding:0px;
     margin:0px;
 }
-.subBody::-webkit-scrollbar { width: 0 !important }
+#divLayer {
+    position:absolute;
+    top:0px;
+    right:0px;
+    left:0px;
+    bottom:0px;
+    height:100%;
+    width:100%;
+    pointer-events: none;
+}
+#divLayer div {
+    pointer-events: auto;
+}

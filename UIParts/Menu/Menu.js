@@ -35,14 +35,17 @@ Menu.prototype.move=function(){
 	this.x=this.button.x;
 	this.y=this.button.y+this.button.height;
 	GuiElements.move.group(this.group,this.x,this.y);
+	if(this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
 };
 Menu.prototype.createMenuBnList=function(){
 	if(this.menuBnList!=null){
 		this.menuBnList.hide();
 	}
 	var bnM=Menu.bnMargin;
-	this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
-	//	this.menuBnList=new SmoothMenuBnList(this.group,bnM,bnM,this.width);
+	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
+	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
 	this.menuBnList.isOverlayPart=true;
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
@@ -68,7 +71,6 @@ Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;
 	mBL.generateBns();
 	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
-	this.menuBnList.show();
 };
 Menu.prototype.previewOpen=function(){
 	return true;
@@ -83,6 +85,7 @@ Menu.prototype.open=function(){
 			this.loadOptions();
 			this.buildMenu();
 			GuiElements.layers.overlay.appendChild(this.group);
+			this.menuBnList.show();
 			this.visible = true;
 			GuiElements.overlay.set(this);
 			this.button.isOverlayPart = true;
@@ -98,6 +101,7 @@ Menu.prototype.close=function(onlyOnDrag){
 	if(onlyOnDrag) return;
 	if(this.visible){
 		this.group.remove();
+		this.menuBnList.hide();
 		this.visible=false;
 		GuiElements.overlay.remove(this);
 		this.button.unToggle();
@@ -110,4 +114,15 @@ Menu.prototype.close=function(onlyOnDrag){
 };
 Menu.prototype.addAlternateFn=function(alternateFn){
 	this.alternateFn=alternateFn;
+};
+Menu.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+Menu.prototype.relToAbsY = function(y){
+	return y + this.y;
+};
+Menu.prototype.updateZoom = function(){
+	if(this.menuBnList != null){
+		this.menuBnList.updateZoom();
+	}
 };

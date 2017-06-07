@@ -73,6 +73,9 @@ DiscoverDialog.prototype.showDialog = function() {
 DiscoverDialog.prototype.closeDialog = function(){
 	HtmlServer.sendRequestWithCallback("flutter/stopDiscover");
 	this.group.remove();
+	if(this.menuBnList != null){
+		this.menuBnList.hide();
+	}
 	this.menuBnList=null;
 	GuiElements.unblockInteraction();
 	DiscoverDialog.instance = null;
@@ -92,17 +95,19 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 
 	let oldScrollY = 0;
 	if(this.menuBnList != null){
-		oldScrollY = this.menuBnList.scrollY;
+		oldScrollY = this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	let bnM = Class.bnMargin;
-	this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
+	//this.menuBnList=new MenuBnList(this.group, bnM, this.menuBnListY, bnM, this.width-bnM*2);
+	this.menuBnList=new SmoothMenuBnList(this, this.group, bnM, this.menuBnListY, this.width-bnM*2);
 	this.menuBnList.setMaxHeight(this.height-this.menuBnListY-Class.cancelBnHeight-Class.bnMargin*2);
 	for(let i=0; i<deviceArr.length; i++){
 		this.addBnListOption(deviceArr[i].name, deviceArr[i].id);
 	}
+
 	this.menuBnList.show();
-	this.menuBnList.scroll(oldScrollY);
+	this.menuBnList.setScroll(oldScrollY);
 };
 
 /* UI Creation */
@@ -158,4 +163,10 @@ DiscoverDialog.prototype.createInstructionText=function(text){
 	GuiElements.move.text(textE,x,y);
 	this.group.appendChild(textE);
 	return textE;
+};
+DiscoverDialog.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+DiscoverDialog.prototype.relToAbsY = function(y){
+	return y + this.y;
 };

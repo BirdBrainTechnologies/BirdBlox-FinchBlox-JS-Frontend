@@ -2,7 +2,7 @@
  * Created by Tom on 6/5/2017.
  */
 
-function SmoothMenuBnList(parentGroup,x,y,width){
+function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.x=x;
 	this.y=y;
 	this.width=width;
@@ -19,6 +19,7 @@ function SmoothMenuBnList(parentGroup,x,y,width){
 
 	this.build();
 	this.parentGroup=parentGroup;
+	this.parent = parent;
 
 	this.visible=false;
 	this.isOverlayPart=false;
@@ -39,10 +40,11 @@ SmoothMenuBnList.setGraphics=function(){
 	SMBL.minWidth=40;
 };
 SmoothMenuBnList.prototype.build = function(){
-	this.foreignObject = GuiElements.create.foreignObject();
-	this.body = GuiElements.create.body(this.foreignObject);
-	this.scrollDiv = GuiElements.create.scrollDiv(this.body);
+	//this.foreignObject = GuiElements.create.foreignObject();
+	this.scrollDiv = GuiElements.create.scrollDiv();
+	TouchReceiver.addListenersSmoothMenuBnListScrollRect(this.scrollDiv, this);
 	this.svg = GuiElements.create.svg(this.scrollDiv);
+	this.zoomG = GuiElements.create.group(0, 0, this.svg);
 };
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
@@ -61,17 +63,25 @@ SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
 	if(!this.visible){
 		this.visible=true;
-		this.parentGroup.appendChild(this.foreignObject);
+		GuiElements.layers.div.appendChild(this.scrollDiv);
+		this.updatePosition();
+		if(GuiElements.isIos && this.scrollable) {
+			this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		}
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
-		this.foreignObject.remove();
+		GuiElements.layers.div.removeChild(this.scrollDiv);
+		if(this.fixScrollTimer != null) {
+			window.clearInterval(this.fixScrollTimer);
+		}
 	}
 };
 SmoothMenuBnList.prototype.generateBns=function(){
 	var columns=1;
+	this.computeWidth();
 	if(!this.bnsGenerated){
 		this.clearBnsArray();
 		var currentY=0;
@@ -107,7 +117,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		}
 		this.scrollable=this.height!=this.internalHeight;
 		this.bnsGenerated=true;
-		GuiElements.update.smoothScrollBnList(this.foreignObject, this.body, this.scrollDiv, this.svg, this.x, this.y, this.width, this.height, this.internalHeight);
+		this.updatePosition();
 	}
 };
 SmoothMenuBnList.prototype.computeWidth=function(){
@@ -139,10 +149,37 @@ SmoothMenuBnList.prototype.clearBnsArray=function(){
 	this.bns=[];
 };
 SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
-	var bn=new Button(x,y,width,this.bnHeight,this.svg);
+	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
 	bn.isOverlayPart=this.isOverlayPart;
-	bn.menuBnList=this;
+	bn.smoothMenuBnList=this;
 	return bn;
+};
+SmoothMenuBnList.prototype.updatePosition = function(){
+	if(this.visible) {
+		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
+		var realX = this.parent.relToAbsX(this.x);
+		var realY = this.parent.relToAbsY(this.y);
+		realX = GuiElements.relToAbsX(realX);
+		realY = GuiElements.relToAbsY(realY);
+		var zoom = GuiElements.zoomFactor;
+
+		GuiElements.update.smoothScrollBnList(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
+			this.height, this.internalHeight, zoom, this.scrollable);
+	}
+};
+SmoothMenuBnList.prototype.updateZoom = function(){
+	this.updatePosition();
+};
+SmoothMenuBnList.prototype.getScroll = function(){
+	if(!this.visible) return 0;
+	return this.scrollDiv.scrollTop;
+};
+SmoothMenuBnList.prototype.setScroll = function(scrollTop){
+	if(!this.visible) return;
+	scrollTop = Math.max(0, scrollTop);
+	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
+	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
+	this.scrollDiv.scrollTop = scrollTop;
 };
