@@ -26,8 +26,8 @@ DiscoverDialog.show = function(deviceManagerClass) {
 };
 
 DiscoverDialog.selectDevice = function(deviceName, deviceId){
-	DiscoverDialog.instance.closeDialog();
 	DiscoverDialog.deviceManagerClass.ConnectDevice(deviceName, deviceId);
+	DiscoverDialog.instance.closeDialog();
 };
 
 DiscoverDialog.setConstants = function(){
