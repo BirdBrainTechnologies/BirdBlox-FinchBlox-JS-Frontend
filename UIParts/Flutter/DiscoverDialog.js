@@ -7,6 +7,7 @@ function DiscoverDialog(){
 	this.x = GuiElements.width/2-this.width/2;
 	this.y = GuiElements.height/4;
 	this.menuBnList = null;
+	this.visible = true;
 }
 /**
  * Creates a discover dialog and shows it. Only allows one dialog to be shown at
@@ -77,6 +78,7 @@ DiscoverDialog.prototype.closeDialog = function(){
 		this.menuBnList.hide();
 	}
 	this.menuBnList=null;
+	this.visible = false;
 	GuiElements.unblockInteraction();
 	DiscoverDialog.instance = null;
 	this.updateTimer = window.clearInterval(this.updateTimer);
@@ -87,7 +89,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 };
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	if(TouchReceiver.touchDown){
+	if(TouchReceiver.touchDown || !this.visible){
 		return;
 	}
 	let Class = DiscoverDialog;

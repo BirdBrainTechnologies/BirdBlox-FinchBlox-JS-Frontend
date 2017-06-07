@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockList.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockList.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -213,13 +213,39 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BlockList.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="BlockList.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="66" column="26" selection-start-line="66" selection-start-column="26" selection-end-line="66" selection-end-column="26" />
+            <state relative-caret-position="418">
+              <caret line="58" column="15" selection-start-line="58" selection-start-column="15" selection-end-line="58" selection-end-column="15" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="752">
+              <caret line="80" column="25" selection-start-line="80" selection-start-column="25" selection-end-line="80" selection-end-column="25" />
+              <folding>
+                <element signature="e#260#361#0" expanded="false" />
+                <element signature="e#413#660#0" expanded="false" />
+                <element signature="e#504#540#0" expanded="false" />
+                <element signature="e#881#1341#0" expanded="false" />
+                <element signature="e#3527#3544#0" expanded="false" />
+                <element signature="e#3609#3728#0" expanded="false" />
+                <element signature="e#3684#3724#0" expanded="false" />
+                <element signature="e#3776#3929#0" expanded="false" />
+                <element signature="e#3979#4389#0" expanded="false" />
+                <element signature="e#4256#4295#0" expanded="false" />
+                <element signature="e#4442#4603#0" expanded="false" />
+                <element signature="e#4657#5049#0" expanded="false" />
+                <element signature="e#5112#5459#0" expanded="false" />
+                <element signature="e#5509#5532#0" expanded="false" />
+                <element signature="e#5582#5605#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -545,13 +571,13 @@
         <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" />
         <option value="$PROJECT_DIR$/UIParts/OpenDialog.js" />
-        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/ConnectOneHBDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockList.js" />
+        <option value="$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js" />
       </list>
     </option>
   </component>
@@ -664,6 +690,24 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="UIParts">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="UIParts">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Flutter">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -868,7 +912,7 @@
       <workItem from="1496413003454" duration="21053000" />
       <workItem from="1496449294947" duration="1610000" />
       <workItem from="1496669442528" duration="20960000" />
-      <workItem from="1496757876623" duration="29545000" />
+      <workItem from="1496757876623" duration="30465000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -965,7 +1009,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="775323000" />
+    <option name="totallyTimeSpent" value="776243000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1971,31 +2015,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#DiscoverDialog#0" expanded="false" />
-            <element signature="e#238#339#0" expanded="false" />
-            <element signature="e#391#638#0" expanded="false" />
-            <element signature="e#482#518#0" expanded="false" />
-            <element signature="e#859#1319#0" expanded="false" />
-            <element signature="e#3465#3482#0" expanded="false" />
-            <element signature="e#3547#3666#0" expanded="false" />
-            <element signature="e#3622#3662#0" expanded="false" />
-            <element signature="e#3714#3867#0" expanded="false" />
-            <element signature="e#3917#4327#0" expanded="false" />
-            <element signature="e#4194#4233#0" expanded="false" />
-            <element signature="e#4380#4541#0" expanded="false" />
-            <element signature="e#4595#4987#0" expanded="false" />
-            <element signature="e#5050#5397#0" expanded="false" />
-            <element signature="e#5447#5470#0" expanded="false" />
-            <element signature="e#5520#5543#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="413">
@@ -2560,10 +2579,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockList.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="66" column="26" selection-start-line="66" selection-start-column="26" selection-end-line="66" selection-end-column="26" />
+        <state relative-caret-position="418">
+          <caret line="58" column="15" selection-start-line="58" selection-start-column="15" selection-end-line="58" selection-end-column="15" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Flutter/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="752">
+          <caret line="80" column="25" selection-start-line="80" selection-start-column="25" selection-end-line="80" selection-end-column="25" />
+          <folding>
+            <element signature="e#260#361#0" expanded="false" />
+            <element signature="e#413#660#0" expanded="false" />
+            <element signature="e#504#540#0" expanded="false" />
+            <element signature="e#881#1341#0" expanded="false" />
+            <element signature="e#3527#3544#0" expanded="false" />
+            <element signature="e#3609#3728#0" expanded="false" />
+            <element signature="e#3684#3724#0" expanded="false" />
+            <element signature="e#3776#3929#0" expanded="false" />
+            <element signature="e#3979#4389#0" expanded="false" />
+            <element signature="e#4256#4295#0" expanded="false" />
+            <element signature="e#4442#4603#0" expanded="false" />
+            <element signature="e#4657#5049#0" expanded="false" />
+            <element signature="e#5112#5459#0" expanded="false" />
+            <element signature="e#5509#5532#0" expanded="false" />
+            <element signature="e#5582#5605#0" expanded="false" />
           </folding>
         </state>
       </provider>
