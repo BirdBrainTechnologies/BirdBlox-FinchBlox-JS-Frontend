@@ -167,7 +167,6 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 
 		GuiElements.update.smoothScrollBnList(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
 			this.height, this.internalHeight, zoom, this.scrollable);
-		GuiElements.alert("x:"+realX+" y:"+realY);
 	}
 };
 SmoothMenuBnList.prototype.updateZoom = function(){
