@@ -142,7 +142,7 @@ SaveManager.loadFile=function(xmlString){
 	}
 };
 SaveManager.cleanFileName=function(fileName){
-	var illegalChars="#%&{}\\<>*?/ $!'\":@+`|=\n.";
+	var illegalChars="#%&{}\\<>*?/$!'\":@+`|=\n.";
 	fileName=fileName.trim();
 	for(var i=0;i<illegalChars.length;i++){
 		fileName=fileName.split(illegalChars.charAt(i)).join("");
