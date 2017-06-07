@@ -455,7 +455,17 @@ Block.prototype.findBestFit=function(){
 	var x=this.getAbsX(); //Get coords to compare.
 	var y=this.getAbsY();
 	var height = this.relToAbsY(this.height) - y;
-	if(move.topOpen&&this.bottomOpen){ //If a connection between the stack and block are possible...
+
+	if(this.returnsValue && move.returnsValue) { //If a connection between the stack and block are possible...
+		var hasMatch = false;
+		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
+			for(var i=0;i<this.slots.length;i++){
+				hasMatch |= this.slots[i].findBestFit();
+			}
+		}
+		return hasMatch; // Tell the calling slot is this block has a match
+	}
+	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
 		var snap=BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
 		var snapBLeft=x-snap.left;
@@ -473,20 +483,15 @@ Block.prototype.findBestFit=function(){
 				fit.dist=dist;
 			}
 		}
-	}
-	if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-		for(var i=0;i<this.slots.length;i++){
-			this.slots[i].findBestFit();
+		if(this.hasBlockSlot1){ //Pass the message on recursively.
+			this.blockSlot1.findBestFit();
 		}
-	}
-	if(this.hasBlockSlot1){ //Pass the message on recursively.
-		this.blockSlot1.findBestFit();
-	}
-	if(this.hasBlockSlot2){
-		this.blockSlot2.findBestFit();
-	}
-	if(this.nextBlock!=null){
-		this.nextBlock.findBestFit();
+		if(this.hasBlockSlot2){
+			this.blockSlot2.findBestFit();
+		}
+		if(this.nextBlock!=null){
+			this.nextBlock.findBestFit();
+		}
 	}
 };
 /**

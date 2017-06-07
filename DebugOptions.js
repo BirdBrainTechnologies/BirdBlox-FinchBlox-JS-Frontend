@@ -4,7 +4,7 @@ function DebugOptions(){
 	var DO = DebugOptions;
 	DO.enabled = true;
 
-	DO.mouse = false;
+	DO.mouse = true;
 	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
