@@ -173,3 +173,14 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 SmoothMenuBnList.prototype.updateZoom = function(){
 	this.updatePosition();
 };
+SmoothMenuBnList.prototype.getScroll = function(){
+	if(!this.visible) return 0;
+	return this.scrollDiv.scrollTop;
+};
+SmoothMenuBnList.prototype.setScroll = function(scrollTop){
+	if(!this.visible) return;
+	scrollTop = Math.max(0, scrollTop);
+	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
+	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
+	this.scrollDiv.scrollTop = scrollTop;
+};

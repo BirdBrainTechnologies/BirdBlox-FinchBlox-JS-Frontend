@@ -20,6 +20,7 @@ function ConnectOneHBDialog(){
 	var thisCOHBD =this;
 	this.updateTimer = self.setInterval(function () { thisCOHBD.discoverHBs() }, COHBD.updateInterval);
 	this.discoverHBs();
+	this.visible = true;
 }
 ConnectOneHBDialog.setConstants=function(){
 	var COHBD=ConnectOneHBDialog;
@@ -88,6 +89,7 @@ ConnectOneHBDialog.prototype.createTitleLabel=function(){
 };
 ConnectOneHBDialog.prototype.closeDialog=function(){
 	this.group.remove();
+	this.visible = false;
 	if(this.menuBnList != null){
 		this.menuBnList.hide();
 	}
@@ -113,14 +115,14 @@ ConnectOneHBDialog.prototype.discoverHBs=function(){
 	});
 };
 ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
-	if(TouchReceiver.touchDown){
+	if(TouchReceiver.touchDown || !this.visible){
 		return;
 	}
 	var hBArray = JSON.parse(newHBs);
 	var COHBD=ConnectOneHBDialog;
 	var oldScroll=0;
 	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.scrollY;
+		oldScroll=this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	var bnM=COHBD.bnMargin;
@@ -130,8 +132,9 @@ ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
 	for(var i=0;i<hBArray.length;i++){
 		this.addBnListOption(hBArray[i].name, hBArray[i].id);
 	}
+
 	this.menuBnList.show();
-	this.menuBnList.scroll(oldScroll);
+	this.menuBnList.setScroll(oldScroll);
 };
 ConnectOneHBDialog.prototype.addBnListOption=function(hBName, hBId){
 	var COHBD=ConnectOneHBDialog;

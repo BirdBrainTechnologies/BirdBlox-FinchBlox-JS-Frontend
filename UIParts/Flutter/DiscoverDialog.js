@@ -95,7 +95,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 
 	let oldScrollY = 0;
 	if(this.menuBnList != null){
-		oldScrollY = this.menuBnList.scrollY;
+		oldScrollY = this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	let bnM = Class.bnMargin;
@@ -105,8 +105,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	for(let i=0; i<deviceArr.length; i++){
 		this.addBnListOption(deviceArr[i].name, deviceArr[i].id);
 	}
+
 	this.menuBnList.show();
-	this.menuBnList.scroll(oldScrollY);
+	this.menuBnList.setScroll(oldScrollY);
 };
 
 /* UI Creation */
