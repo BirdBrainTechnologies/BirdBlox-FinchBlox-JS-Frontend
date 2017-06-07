@@ -64,6 +64,7 @@ BlockList.populateCat_robots = function(category) {
 	} else {
 		category.addLabel("Connect a robot first...");
 	}
+	category.trimBottom();
 }
 BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBServo");
