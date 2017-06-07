@@ -4,7 +4,7 @@
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp=false;
+	HtmlServer.logHttp=false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.encodeHtml=function(message){
 	if(message==""){
@@ -275,4 +275,7 @@ HtmlServer.setSetting=function(key,value){
 	request += "?key=" + HtmlServer.encodeHtml(key);
 	request += "&value=" + HtmlServer.encodeHtml(value);
 	HtmlServer.sendRequestWithCallback(request);
+};
+HtmlServer.sendFinishedLoadingRequest = function(){
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
