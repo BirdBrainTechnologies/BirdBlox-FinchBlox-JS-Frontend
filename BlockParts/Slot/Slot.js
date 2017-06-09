@@ -194,7 +194,7 @@ Slot.prototype.removeChild=function(){
  * Returns nothing. Results stored in CodeManager.fit.
  */
 Slot.prototype.findBestFit=function(){
-	var isLeaf = false;
+	var isLeaf = true;
 	if(this.hasChild){
 		isLeaf = !this.child.findBestFit(); //Pass on the message.
 	}
