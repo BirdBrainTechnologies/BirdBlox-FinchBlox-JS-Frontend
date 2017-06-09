@@ -110,4 +110,5 @@ DebugOptions.throw = function(message){
 function UserException(message) {
 	this.message = message;
 	this.name = 'UserException';
+	this.stack = (new Error()).stack;
 }
