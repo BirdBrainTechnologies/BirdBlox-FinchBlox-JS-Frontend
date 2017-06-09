@@ -46,7 +46,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			if(callbackFn != null) {
 				callbackFn("2");
 			}
-		}, 100);
+		}, 20);
 		return;
 	}
 	if(isPost == null) {
