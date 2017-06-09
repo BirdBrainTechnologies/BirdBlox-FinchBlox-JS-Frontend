@@ -403,9 +403,8 @@ and `2` for the second option.
     http://localhost:22179/settings/get?key=zoom
     Example responses:
     1.5999999999999999
-    Default
     
-`Default` indicates that the key does not have an assigned value
+A 404 response is generated if the key does not have an assigned value.
     
 #### Write setting
 
