@@ -82,7 +82,7 @@ HummingbirdManager.outputUpdateAction=function(block){
 	if(mem.sent){
 		if(block.runMem.requestStatus.finished==true){
 			if(block.runMem.requestStatus.error) {
-				block.displayError("Hummingbird not connected!");
+				block.displayError("Hummingbird not connected");
 				return new ExecutionStatusError();
 			}
 			return new ExecutionStatusDone(); //Done running
