@@ -5,6 +5,7 @@ function Sounds() {
 }
 
 Sounds.loadNames=function(){
+	return;
 	var request = "sound/names";
 	var callback = function(response) {
 		Sounds.names = response.split("\n");
