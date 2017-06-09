@@ -826,6 +826,14 @@ GuiElements.updateZoom=function(){
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };
+GuiElements.updateDimsPreview = function(newWidth, newHeight){
+	GuiElements.width=newWidth/GuiElements.zoomFactor;
+	GuiElements.height=newHeight/GuiElements.zoomFactor;
+	TabManager.updateZoom();
+	DisplayBox.updateZoom();
+	TitleBar.updateZoom();
+	BlockPalette.updateZoom();
+};
 GuiElements.updateDims = function(){
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
