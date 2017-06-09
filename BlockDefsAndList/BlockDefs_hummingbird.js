@@ -208,6 +208,7 @@ B_HBTriLed.prototype.startAction=function(){
 		params += "&red=" + mem.valueR;
 		params += "&green=" + mem.valueG;
 		params += "&blue=" + mem.valueB;
+		mem.params = params;
 		mem.requestStatus={};
 		if(CodeManager.checkHBOutputDelay(this.stack)){
 			HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus); //Send the request.
