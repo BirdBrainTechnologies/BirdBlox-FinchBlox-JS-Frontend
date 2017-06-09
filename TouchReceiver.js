@@ -224,10 +224,11 @@ TouchReceiver.touchStartBN=function(target,e){
  */
 TouchReceiver.touchStartPalette=function(e){
 	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
+	if(TR.touchstart(e, false)){
 		GuiElements.overlay.close(); //Close any visible overlays.
 		TR.targetType="palette";
 		TR.target=null; //The type is all that is important. There is only one palette.
+		e.stopPropagation();
 	}
 };
 /* @fix Write documentation. */
@@ -343,12 +344,7 @@ TouchReceiver.touchmove=function(e){
 			}
 			//If the user drags the palette, it should scroll.
 			if (TR.targetType == "palette") {
-				if (!BlockPalette.scrolling) {
-					BlockPalette.startScroll(TR.getX(e), TR.getY(e));
-				}
-				else {
-					BlockPalette.updateScroll(TR.getX(e), TR.getY(e));
-				}
+				shouldPreventDefault = false;
 			}
 			//If the user drags the tab space, it should scroll.
 			if (TR.targetType == "tabSpace") {
@@ -445,7 +441,7 @@ TouchReceiver.touchend=function(e){
 			TR.target.edit();
 		}
 		else if(TR.targetType=="palette"){
-			BlockPalette.endScroll();
+			shouldPreventDefault = false;
 		}
 		else if(TR.targetType=="tabSpace"){
 			TabManager.endScroll();

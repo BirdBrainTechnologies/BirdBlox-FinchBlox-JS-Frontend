@@ -5,7 +5,9 @@
  * GuiElements is run once the browser has loaded all the js and html files.
  */
 function GuiElements(){
-	GuiElements.svg=document.getElementById("MainSvg");
+	GuiElements.svg1=document.getElementById("frontSvg");
+	GuiElements.svg2=document.getElementById("backSvg");
+
 	GuiElements.defs=document.getElementById("SvgDefs");
 	GuiElements.loadInitialSettings(function(){
 		GuiElements.setConstants();
@@ -155,30 +157,36 @@ GuiElements.buildUI=function(){
  */
 GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
-	GuiElements.zoomGroup=create.group(0,0,GuiElements.svg);
-	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
+	GuiElements.zoomGroup1=create.group(0,0,GuiElements.svg1);
+	GuiElements.zoomGroup2=create.group(0,0,GuiElements.svg2);
+
+	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
+	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
+
 	GuiElements.layers={};
 	var layers=GuiElements.layers;
-	layers.temp=create.layer();
-	layers.aTabBg=create.layer();
-	layers.activeTab=create.layer();
-	layers.TabsBg=create.layer();
-	layers.paletteBG=create.layer();
-	layers.palette=create.layer();
-	layers.catBg=create.layer();
-	layers.categories=create.layer();
-	layers.titleBg=create.layer();
-	layers.titlebar=create.layer();
-	layers.overflowArr = create.layer();
-	layers.stage=create.layer();
-	layers.display=create.layer();
-	layers.drag=create.layer();
-	layers.highlight=create.layer();
-	layers.tabMenu=create.layer();
-	layers.dialogBlock=create.layer();
-	layers.dialog=create.layer();
-	layers.overlay=create.layer();
-	layers.div = document.getElementById("divLayer");
+	layers.temp=create.layer(2);
+	layers.aTabBg=create.layer(2);
+	layers.activeTab=create.layer(2);
+	layers.TabsBg=create.layer(2);
+	layers.paletteBG=create.layer(2);
+	//layers.palette=create.layer(2);
+	layers.paletteScroll = document.getElementById("paletteScrollDiv");
+	layers.trash=create.layer(1);
+	layers.catBg=create.layer(1);
+	layers.categories=create.layer(1);
+	layers.titleBg=create.layer(1);
+	layers.titlebar=create.layer(1);
+	layers.overflowArr = create.layer(1);
+	layers.stage=create.layer(1);
+	layers.display=create.layer(1);
+	layers.drag=create.layer(1);
+	layers.highlight=create.layer(1);
+	layers.tabMenu=create.layer(1);
+	layers.dialogBlock=create.layer(1);
+	layers.dialog=create.layer(1);
+	layers.overlay=create.layer(1);
+	layers.frontScroll = document.getElementById("frontScrollDiv");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -200,8 +208,15 @@ GuiElements.create.group=function(x,y,parent){
 	return group; //Return the group.
 }
 /* Creates a group, adds it to the main SVG, and returns it. */
-GuiElements.create.layer=function(){
-	var layer=GuiElements.create.group(0,0,GuiElements.zoomGroup);
+GuiElements.create.layer=function(depth){
+	DebugOptions.validateNumbers(depth);
+	var group = null;
+	if(depth == 1){
+		group = GuiElements.zoomGroup1;
+	} else if(depth == 2){
+		group = GuiElements.zoomGroup2;
+	}
+	var layer=GuiElements.create.group(0,0,group);
 	return layer;
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
@@ -556,19 +571,21 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollBnList=function(div, svg, zoomG, x, y, width, height, innerHeight, zoom, scrollable) {
+GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerHeight) {
 	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	if(scrollable) {
+	if(innerHeight > height) {
 		div.classList.add("smoothScroll");
 		div.classList.remove("noScroll");
 	} else {
 		div.classList.add("noScroll");
 		div.classList.remove("smoothScroll");
 	}
+
+	var zoom = GuiElements.zoomFactor;
 
 	div.style.top = y + "px";
 	div.style.left = x + "px";
@@ -822,7 +839,8 @@ GuiElements.unblockInteraction=function() {
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
+	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
+	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };

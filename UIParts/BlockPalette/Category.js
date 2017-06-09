@@ -6,7 +6,9 @@ function Category(buttonX,buttonY,index){
 	this.y=TitleBar.height+BlockPalette.catH;
 	this.maxX=this.x;
 	this.maxY=this.y;
-	this.group=this.createGroup();
+	this.scrollDiv=this.createDiv();
+	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
+	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
 	this.id=BlockList.getCatId(index);
 	this.name=BlockList.getCatName(index);
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -26,8 +28,8 @@ function Category(buttonX,buttonY,index){
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
 }
-Category.prototype.createGroup=function(){
-	return GuiElements.create.group(this.x,this.y);
+Category.prototype.createDiv=function(){
+	return GuiElements.create.scrollDiv();
 }
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
@@ -43,7 +45,7 @@ Category.prototype.clearGroup=function(){
 	}
 	this.buttons=new Array();
 	for(var i=0;i<this.labels.length;i++){
-		this.group.removeChild(this.labels[i]);
+		this.contentGroup.removeChild(this.labels[i]);
 	}
 	this.labels=new Array();
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -76,7 +78,7 @@ Category.prototype.addBlock=function(block){
 		this.currentBlockY+=BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX,this.currentBlockY);
 	}
-	var displayStack=new DisplayStack(block,this.group,this);
+	var displayStack=new DisplayStack(block,this.contentGroup,this);
 	this.displayStacks.push(displayStack);
 	var height=displayStack.firstBlock.height;
 	this.currentBlockY+=height;
@@ -96,7 +98,7 @@ Category.prototype.addButton=function(text,callback){
 	if(this.lastHadStud){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
 	}
-	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
+	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.contentGroup);
 	var BP=BlockPalette;
 	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
 	button.setCallbackFunction(callback,true);
@@ -110,7 +112,7 @@ Category.prototype.addLabel=function(text){
 	var x=this.currentBlockX;
 	var y=this.currentBlockY;
 	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
-	this.group.appendChild(labelE);
+	this.contentGroup.appendChild(labelE);
 	this.labels.push(labelE);
 	var height=GuiElements.measure.textHeight(labelE);
 	GuiElements.move.element(labelE,x,y+height);
@@ -124,10 +126,14 @@ Category.prototype.trimBottom=function(){
 	}
 	this.currentBlockY-=BlockPalette.blockMargin;
 	this.currentBlockY+=BlockPalette.mainVMargin;
+};
+Category.prototype.finalize = function(){
 	this.height=this.currentBlockY;
 	this.updateWidth();
 	this.setMinCoords();
-}
+	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, BlockPalette.y, BlockPalette.width, BlockPalette.height, this.height)
+};
+
 Category.prototype.select=function(){
 	if(BlockPalette.selectedCat==this){
 		return;
@@ -135,15 +141,16 @@ Category.prototype.select=function(){
 	if(BlockPalette.selectedCat!=null){
 		BlockPalette.selectedCat.deselect();
 	}
-	GuiElements.layers.palette.appendChild(this.group);
+	GuiElements.layers.paletteScroll.appendChild(this.scrollDiv);
 	BlockPalette.selectedCat=this;
 	this.button.select();
 }
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
-	this.group.remove();
+	GuiElements.layers.paletteScroll.removeChild(this.scrollDiv);
 	this.button.deselect();
 }
+/*
 Category.prototype.startScroll=function(x,y){
 	if(!this.scrolling) {
 		this.scrolling = true;
@@ -174,6 +181,7 @@ Category.prototype.scroll=function(x,y){
 Category.prototype.endScroll=function(){
 	this.scrolling=false;
 };
+*/
 Category.prototype.updateWidth=function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
@@ -191,16 +199,16 @@ Category.prototype.setMinCoords=function(){
 	this.minX=this.maxX-hScrollRange;
 };
 Category.prototype.relToAbsX=function(x){
-	return x + this.x;
+	return x - this.scrollDiv.scrollLeft;
 };
 Category.prototype.relToAbsY=function(y){
-	return y + this.y;
+	return y - this.scrollDiv.scrollTop + BlockPalette.y;
 };
 Category.prototype.absToRelX=function(x){
-	return x - this.x;
+	return x + this.scrollDiv.scrollLeft;
 };
 Category.prototype.absToRelY=function(y){
-	return y - this.y;
+	return y + this.scrollDiv.scrollTop + BlockPalette.y;
 };
 Category.prototype.getAbsX=function(){
 	return this.relToAbsX(0);

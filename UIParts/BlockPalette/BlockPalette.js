@@ -5,6 +5,7 @@ function BlockPalette(){
 	BlockPalette.selectedCat=null;
 	BlockPalette.createCatBg();
 	BlockPalette.createPalBg();
+	BlockPalette.createScrollSvg();
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
@@ -60,7 +61,10 @@ BlockPalette.createPalBg=function(){
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	TouchReceiver.addListenersPalette(BP.palRect);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
-}
+};
+BlockPalette.createScrollSvg = function(){
+	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
+};
 BlockPalette.createCategories=function(){
 	var catCount=BlockList.catCount();
 	var firstColumn=true;
@@ -116,13 +120,13 @@ BlockPalette.ShowTrash=function() {
 		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
-		GuiElements.layers.palette.appendChild(BP.trash);
+		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
 BlockPalette.HideTrash=function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
-		GuiElements.layers.palette.removeChild(BP.trash);
+		GuiElements.layers.trash.removeChild(BP.trash);
 		BP.trash = null;
 	}
 };

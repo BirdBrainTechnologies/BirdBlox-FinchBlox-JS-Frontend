@@ -113,13 +113,18 @@
 
 		<!--<span id="debug2" class="noselect">hi</span>-->
 		<!--<img src="layout.png" style="width:100%;display:none;" id="testImage"/>-->
-        <svg id="MainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+        <svg id="backSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 			<defs id="SvgDefs">
 			</defs>
 			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
 		</svg>
-		<div id="divLayer">
+		<div id="paletteScrollDiv" class="divLayer">
+		</div>
+		<svg id="frontSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 
+			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
+		</svg>
+		<div id="frontScrollDiv" class="divLayer">
 		</div>
 		<span id="debug" class="noselect" style="color:#fff; position:absolute; margin-left:300px;"></span>
     </body>
