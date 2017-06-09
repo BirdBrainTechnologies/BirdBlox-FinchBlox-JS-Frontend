@@ -455,7 +455,18 @@ Block.prototype.findBestFit=function(){
 	var x=this.getAbsX(); //Get coords to compare.
 	var y=this.getAbsY();
 	var height = this.relToAbsY(this.height) - y;
-	if(move.topOpen&&this.bottomOpen){ //If a connection between the stack and block are possible...
+	var hasMatch = false;
+
+	if(move.returnsValue) { //If a connection between the stack and block are possible...
+		var hasMatch = false;
+		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
+			for(var i=0;i<this.slots.length;i++){
+				let slotHasMatch = this.slots[i].findBestFit();
+				hasMatch = slotHasMatch || hasMatch;
+			}
+		}
+	}
+	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
 		var snap=BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
 		var snapBLeft=x-snap.left;
@@ -463,20 +474,15 @@ Block.prototype.findBestFit=function(){
 		var snapBWidth=snap.left+snap.right;
 		var snapBHeight=snap.top+height+snap.bottom;
 		//Check if point falls in a rectangular range.
-		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
-			var xDist=move.topX-x; //If it does, compute the distance with the distance formula.
-			var yDist=move.topY-(y+this.height);
-			var dist=xDist*xDist+yDist*yDist; //Technically this is the distance^2.
-			if(!fit.found||dist<fit.dist){ //See if this fit is closer than the current best fit.
-				fit.found=true; //If so, save it and other helpful infromation.
-				fit.bestFit=this;
-				fit.dist=dist;
+		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)) {
+			var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			var yDist = move.topY - (y + this.height);
+			var dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
+				fit.found = true; //If so, save it and other helpful infromation.
+				fit.bestFit = this;
+				fit.dist = dist;
 			}
-		}
-	}
-	if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-		for(var i=0;i<this.slots.length;i++){
-			this.slots[i].findBestFit();
 		}
 	}
 	if(this.hasBlockSlot1){ //Pass the message on recursively.
@@ -488,6 +494,7 @@ Block.prototype.findBestFit=function(){
 	if(this.nextBlock!=null){
 		this.nextBlock.findBestFit();
 	}
+	return hasMatch;
 };
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.

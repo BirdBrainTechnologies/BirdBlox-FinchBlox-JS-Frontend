@@ -194,6 +194,14 @@ Slot.prototype.removeChild=function(){
  * Returns nothing. Results stored in CodeManager.fit.
  */
 Slot.prototype.findBestFit=function(){
+	var isLeaf = true;
+	if(this.hasChild){
+		isLeaf = !this.child.findBestFit(); //Pass on the message.
+	}
+	if(!isLeaf){
+		return true;
+	}
+
 	var move=CodeManager.move;
 	var fit=CodeManager.fit;
 	var x=this.getAbsX(); //Use coords relative to screen.
@@ -214,10 +222,9 @@ Slot.prototype.findBestFit=function(){
 			fit.bestFit=this;
 			fit.dist=dist;
 		}
+		return true;
 	}
-	if(this.hasChild){
-		this.child.findBestFit(); //Pass on the message.
-	}
+	return false;
 };
 /* Determines if a Block's return type is compatible with this Slot's snap type.
  * @param {number [none,num,string,bool,list]} returnType - The return type of the Block.

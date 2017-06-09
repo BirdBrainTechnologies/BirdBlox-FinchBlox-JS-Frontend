@@ -831,6 +831,9 @@ GuiElements.updateZoom=function(){
 	BlockPalette.updateZoom();
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 };
+GuiElements.updateDims = function(){
+	GuiElements.updateZoom()
+};
 GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;
 	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
