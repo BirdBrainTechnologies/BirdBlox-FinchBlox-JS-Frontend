@@ -59,7 +59,7 @@ BlockPalette.createPalBg=function(){
 	var BP=BlockPalette;
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
-	TouchReceiver.addListenersPalette(BP.palRect);
+	//TouchReceiver.addListenersPalette(BP.palRect);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
 };
 BlockPalette.createScrollSvg = function(){

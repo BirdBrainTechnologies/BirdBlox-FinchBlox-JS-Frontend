@@ -102,8 +102,8 @@ TouchReceiver.touchstart=function(e, preventD){
 	}
 	var TR=TouchReceiver; //shorthand
 	if(preventD) {
-		GuiElements.alert("Prevented 1");
-		//e.preventDefault(); //Stops 300 ms delay events
+		//GuiElements.alert("Prevented 1");
+		e.preventDefault(); //Stops 300 ms delay events
 	}
 	// e.stopPropagation();
 	var startTouch=!TR.touchDown;
@@ -384,9 +384,10 @@ TouchReceiver.touchmove=function(e){
 	}
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
 	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
+	shouldPreventDefault &= TR.targetType != "palette";
 	if(shouldPreventDefault){
-		GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
-		//e.preventDefault();
+		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
+		e.preventDefault();
 	}
 };
 TouchReceiver.hasMovedOutsideThreshold=function(e){
@@ -457,8 +458,8 @@ TouchReceiver.touchend=function(e){
 		TR.touchDown = false;
 	}
 	if(shouldPreventDefault) {
-		GuiElements.alert("Prevented 3");
-		//e.preventDefault();
+		//GuiElements.alert("Prevented 3");
+		e.preventDefault();
 	}
 };
 /* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.

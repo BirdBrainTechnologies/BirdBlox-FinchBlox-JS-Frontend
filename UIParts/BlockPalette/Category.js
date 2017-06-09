@@ -7,6 +7,7 @@ function Category(buttonX,buttonY,index){
 	this.maxX=this.x;
 	this.maxY=this.y;
 	this.scrollDiv=this.createDiv();
+	TouchReceiver.addListenersPalette(this.scrollDiv);
 	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
 	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
 	this.id=BlockList.getCatId(index);
