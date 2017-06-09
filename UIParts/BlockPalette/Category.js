@@ -24,7 +24,6 @@ function Category(buttonX,buttonY,index){
 	this.scrolling=false;
 	this.scrollXOffset=0;
 	this.scrollYOffset=0;
-
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
@@ -132,7 +131,7 @@ Category.prototype.finalize = function(){
 	this.height=this.currentBlockY;
 	this.updateWidth();
 	this.setMinCoords();
-	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, BlockPalette.y, BlockPalette.width, BlockPalette.height, this.height)
+	this.updateSmoothScrollSet();
 };
 
 Category.prototype.select=function(){
@@ -200,10 +199,10 @@ Category.prototype.setMinCoords=function(){
 	this.minX=this.maxX-hScrollRange;
 };
 Category.prototype.relToAbsX=function(x){
-	return x - this.scrollDiv.scrollLeft;
+	return x - this.scrollDiv.scrollLeft / this.currentZoom;
 };
 Category.prototype.relToAbsY=function(y){
-	return y - this.scrollDiv.scrollTop + BlockPalette.y;
+	return y - this.scrollDiv.scrollTop  / this.currentZoom + BlockPalette.y;
 };
 Category.prototype.absToRelX=function(x){
 	return x + this.scrollDiv.scrollLeft;
@@ -226,4 +225,16 @@ Category.prototype.hideDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
 		this.displayStacks[i].hideDeviceDropDowns();
 	}
+};
+Category.prototype.updateZoom = function(){
+	var currentScrollX = this.scrollDiv.scrollLeft / this.currentZoom;
+	var currentScrollY = this.scrollDiv.scrollTop / this.currentZoom;
+	this.updateSmoothScrollSet();
+	this.scrollDiv.scrollLeft = currentScrollX * this.currentZoom;
+	this.scrollDiv.scrollTop = currentScrollY * this.currentZoom;
+};
+Category.prototype.updateSmoothScrollSet = function(){
+	var y = GuiElements.relToAbsY(BlockPalette.y);
+	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, y, BlockPalette.width, BlockPalette.height, this.height);
+	this.currentZoom = GuiElements.zoomFactor;
 };

@@ -48,6 +48,9 @@ BlockPalette.updateZoom=function(){
 	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
 	var clipRect=BP.clippingPath.childNodes[0];
 	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
+	for(let i = 0; i < BlockPalette.categories.length; i++){
+		BlockPalette.categories[i].updateZoom();
+	}
 };
 BlockPalette.createCatBg=function(){
 	var BP=BlockPalette;
