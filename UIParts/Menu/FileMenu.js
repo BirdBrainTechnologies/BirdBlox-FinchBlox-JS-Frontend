@@ -13,6 +13,7 @@ FileMenu.prototype.loadOptions = function(){
 	//this.addOption("Import", this.optionImport);
 	this.addOption("Export", this.optionExport);
 	this.addOption("Debug", this.optionEnableDebug);
+	this.addOption("updateDims", GuiElements.updateDims);
 	if(GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);
 	}

@@ -822,17 +822,25 @@ GuiElements.unblockInteraction=function() {
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 	GuiElements.update.zoom(GuiElements.zoomGroup,GuiElements.zoomFactor);
+	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
+	GuiElements.updateDims();
+};
+GuiElements.updateDimsPreview = function(newWidth, newHeight){
+	GuiElements.width=newWidth/GuiElements.zoomFactor;
+	GuiElements.height=newHeight/GuiElements.zoomFactor;
 	TabManager.updateZoom();
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
-	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 };
 GuiElements.updateDims = function(){
-	GuiElements.updateZoom()
+	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
+	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+	TabManager.updateZoom();
+	DisplayBox.updateZoom();
+	TitleBar.updateZoom();
+	BlockPalette.updateZoom();
 };
 GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;

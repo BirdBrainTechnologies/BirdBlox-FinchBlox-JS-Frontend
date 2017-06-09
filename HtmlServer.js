@@ -40,8 +40,11 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr();
+			}*/
+			if(callbackFn != null) {
+				callbackFn("2");
 			}
 		}, 100);
 		return;
