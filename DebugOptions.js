@@ -67,7 +67,7 @@ DebugOptions.safeFunc = function(func){
 			catch(err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				HtmlServer.showChoiceDialog("ERROR",err.message,"OK","OK",true);
+				HtmlServer.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true);
 			}
 		}
 	}
