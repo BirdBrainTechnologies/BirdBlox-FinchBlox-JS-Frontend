@@ -5,7 +5,7 @@ function DebugOptions(){
 	DO.enabled = true;
 
 	DO.mouse = false;
-	DO.addVirtualHB = false;
+	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
