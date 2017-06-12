@@ -216,7 +216,7 @@ SaveManager.import=function(fileName){
 	SaveManager.userOpen(name);
 };
 SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
-	HtmlServer.getSetting("currentDoc", myCall1, function(){
+	HtmlServer.getSetting("currentDoc", function(){
 		SaveManager.currentDoc = null;
 		SaveManager.fileName = "";
 		callbackFnName();
