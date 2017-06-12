@@ -36,7 +36,7 @@ GuiElements.loadInitialSettings=function(callback){
 		var count = 0;
 		var checkIfDone = function () {
 			count++;
-			GuiElements.alert("count: " + count);
+			GuiElements.alert(""+GuiElements.load.version + GuiElements.load.zoom + GuiElements.load.os + GuiElements.load.lastFileName + GuiElements.load.lastFileNamed);
 			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
 				callback();
 			}
