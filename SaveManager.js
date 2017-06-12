@@ -68,11 +68,14 @@ SaveManager.userRename = function(){
 };
 
 SaveManager.promptRename = function(title, message, nextAction){
+	SaveManager.promptRenameWithDefault(title, message, SaveManager.fileName, nextAction);
+};
+
+SaveManager.promptRenameWithDefault = function(title, message, defaultName, nextAction){
 	if(message == null){
 		message = "Enter a file name";
 	}
-	var currentName=SaveManager.fileName;
-	HtmlServer.showDialog(title,message,currentName,function(cancelled,response){
+	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
 		if(!cancelled){
 			SaveManager.sanitizeRename(title, response, nextAction);
 		}
@@ -81,8 +84,9 @@ SaveManager.promptRename = function(title, message, nextAction){
 
 // Checks if a name is legitimate and renames the current file to that name if it is.
 SaveManager.sanitizeRename = function(title, proposedName, nextAction){
+	GuiElements.alert("sanitizeRename: " + proposedName);
 	if(proposedName == ""){
-		SaveManager.userRenameWithError("Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
+		SaveManager.promptRename(title, "Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
 	} else if(proposedName == SaveManager.fileName) {
 		SaveManager.named = true;
 		if(nextAction != null) nextAction();
@@ -93,10 +97,10 @@ SaveManager.sanitizeRename = function(title, proposedName, nextAction){
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptRename(title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(title, message, availableName, nextAction);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptRename(title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(title, message, availableName, nextAction);
 			}
 		});
 	}
