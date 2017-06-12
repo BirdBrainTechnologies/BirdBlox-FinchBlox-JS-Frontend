@@ -109,6 +109,8 @@ SaveManager.renameSoft = function(title, newName, nextAction){
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.named = true;
+		SaveManager.fileName = newName;
+		TitleBar.setText(SaveManager.fileName);
 		if(nextAction != null) nextAction();
 	}, function(){
 		SaveManager.sanitizeRename(title, newName, nextAction);
