@@ -9,6 +9,7 @@ function SaveManager(){
 
 	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+	SaveManager.newFileName = "program";
 }
 SaveManager.userOpen = function(fileName){
 	SaveManager.saveAndName(function(){
@@ -135,6 +136,7 @@ SaveManager.userNew = function(){
 SaveManager.new = function(){
 	var request = new HttpRequestBuilder("data/save");
 	request.addParam("options", "new");
+	request.addParam("filename", SaveManager.newFileName);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
 		SaveManager.fileName = availableName;
 		TitleBar.setText(SaveManager.fileName);
