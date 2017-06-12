@@ -52,8 +52,11 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.load.os = true;
 			checkIfDone();
 		});
-		SaveManager.getOsVersion(function(){
-			GuiElements.load.os = true;
+		SaveManager.getCurrentDocName(function(){
+			GuiElements.load.lastFileName = true;
+			checkIfDone();
+		}, function(){
+			GuiElements.load.lastFileNamed = true;
 			checkIfDone();
 		});
 	}
