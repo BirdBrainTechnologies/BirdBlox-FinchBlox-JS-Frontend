@@ -47,7 +47,7 @@ SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
 			else {
 				SaveManager.promptRename(title, message, function () {
 					if (nextAction != null) nextAction();
-				})
+				});
 			}
 		});
 	}

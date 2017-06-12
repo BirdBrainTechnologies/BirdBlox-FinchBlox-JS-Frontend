@@ -154,7 +154,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		var request = "tablet/dialog";
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
-		request+="&holder="+HS.encodeHtml(hint);
+		request+="&placeholder="+HS.encodeHtml(hint);
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
