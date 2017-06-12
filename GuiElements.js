@@ -33,7 +33,10 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load.lastFileName = false;
 	GuiElements.load.lastFileNamed = false;
 	if(!DebugOptions.shouldSkipInitSettings()) {
+		var count = 0;
 		var checkIfDone = function () {
+			count++;
+			GuiElements.alert("count: " + count);
 			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
 				callback();
 			}
