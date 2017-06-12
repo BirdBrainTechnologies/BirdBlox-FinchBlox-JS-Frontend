@@ -144,6 +144,7 @@ Category.prototype.select=function(){
 	GuiElements.layers.paletteScroll.appendChild(this.scrollDiv);
 	BlockPalette.selectedCat=this;
 	this.button.select();
+	TouchReceiver.setInitialScrollFix(this.scrollDiv);
 }
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
