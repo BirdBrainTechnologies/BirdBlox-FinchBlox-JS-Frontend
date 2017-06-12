@@ -12,7 +12,7 @@ function SaveManager(){
 	SaveManager.newFileName = "program";
 }
 SaveManager.userOpen = function(fileName){
-	SaveManager.saveAndName(function(){
+	SaveManager.saveAndName("Open", null, function(){
 		SaveManager.open(fileName);
 	}, true);
 };
@@ -120,8 +120,10 @@ SaveManager.userDelete=function(){
 		SaveManager.delete();
 	} else {
 		var question = "Are you sure you want to delete \"" + SaveManager.fileName + "\"?";
-		HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function () {
-			SaveManager.delete(SaveManager.new);
+		HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
+			if(response == "2") {
+				SaveManager.delete(SaveManager.new);
+			}
 		}, null);
 	}
 };
