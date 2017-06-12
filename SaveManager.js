@@ -27,6 +27,7 @@ SaveManager.open=function(fileName, named, nextAction){
 		SaveManager.fileName = fileName;
 		SaveManager.named = named;
 		SaveManager.empty = false;
+		TitleBar.setText(SaveManager.fileName);
 		HtmlServer.setSetting("currentDoc", SaveManager.fileName);
 		let namedString = SaveManager.named? "true" : "false";
 		HtmlServer.setSetting("currentDocNamed", namedString);
@@ -136,6 +137,7 @@ SaveManager.new = function(){
 	request.addParam("options", "new");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
 		SaveManager.fileName = availableName;
+		TitleBar.setText(SaveManager.fileName);
 		SaveManager.named = false;
 		SaveManager.empty = true;
 		SaveManager.loadFile("<project><tabs></tabs></project>");
@@ -191,6 +193,7 @@ SaveManager.duplicate = function(filename){
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.fileName = filename;
+		TitleBar.setText(SaveManager.fileName);
 		SaveManager.named = true;
 		SaveManager.empty = false;
 	}, function(){
