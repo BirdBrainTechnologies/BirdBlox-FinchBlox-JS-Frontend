@@ -12,9 +12,9 @@ function SaveManager(){
 	SaveManager.newFileName = "program";
 }
 SaveManager.userOpen = function(fileName){
-	SaveManager.saveAndName("Open", null, function(){
+	SaveManager.saveAndName("Open", null, true, function(){
 		SaveManager.open(fileName);
-	}, true);
+	});
 };
 
 SaveManager.open=function(fileName, named, nextAction){
@@ -135,7 +135,7 @@ SaveManager.delete = function(nextAction){
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userNew = function(){
-	SaveManager.saveAndName("New", null, SaveManager.new, true);
+	SaveManager.saveAndName("New", null, true, SaveManager.new);
 };
 SaveManager.new = function(){
 	var request = new HttpRequestBuilder("data/save");
@@ -208,9 +208,9 @@ SaveManager.duplicate = function(filename){
 	});
 };
 SaveManager.userExport=function(){
-	SaveManager.saveAndName("Export", null, function(){
+	SaveManager.saveAndName("Export", null, false, function(){
 		SaveManager.export();
-	}, false);
+	});
 };
 SaveManager.export=function(){
 	var request = new HttpRequestBuilder("data/export");
