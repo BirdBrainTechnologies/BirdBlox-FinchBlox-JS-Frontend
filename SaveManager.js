@@ -221,16 +221,15 @@ SaveManager.import=function(fileName){
 	SaveManager.userOpen(name);
 };
 SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
-	HtmlServer.getSetting("currentDoc", function(){
-		SaveManager.currentDoc = null;
-		SaveManager.fileName = "";
+	HtmlServer.getSetting("currentDoc", function(response){
+		SaveManager.currentDoc = response;
+		SaveManager.fileName = response;
 		callbackFnName();
 	}, callbackFnName);
-	var myCall2 = function(){
+	HtmlServer.getSetting("currentDocNamed", function(response){
 		SaveManager.currentDocNamed = response;
 		callbackFnNameSet();
-	};
-	HtmlServer.getSetting("currentDocNamed", myCall2, callbackFnNameSet);
+	}, callbackFnNameSet);
 };
 SaveManager.autoSave = function(){
 	return xmlDocText=XmlWriter.docToText(CodeManager.createXml());
