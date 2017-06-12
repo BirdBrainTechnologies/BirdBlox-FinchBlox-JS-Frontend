@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" afterPath="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -22,7 +22,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="810">
@@ -67,11 +67,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FileMenu.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FileMenu.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Menu/FileMenu.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="10" column="47" selection-start-line="10" selection-start-column="47" selection-end-line="10" selection-end-column="47" />
+            <state relative-caret-position="330">
+              <caret line="15" column="5" selection-start-line="15" selection-start-column="5" selection-end-line="15" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -573,8 +573,8 @@
         <option value="$PROJECT_DIR$/MyCSS.css" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
-        <option value="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
         <option value="$PROJECT_DIR$/SaveManager.js" />
+        <option value="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
       </list>
     </option>
   </component>
@@ -912,7 +912,7 @@
       <workItem from="1496757876623" duration="38933000" />
       <workItem from="1496949900733" duration="599000" />
       <workItem from="1497015344063" duration="21796000" />
-      <workItem from="1497273502963" duration="26681000" />
+      <workItem from="1497273502963" duration="26776000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1009,7 +1009,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="833787000" />
+    <option name="totallyTimeSpent" value="833882000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1872,105 +1872,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="180" column="35" selection-start-line="180" selection-start-column="35" selection-end-line="180" selection-end-column="35" />
-          <folding>
-            <element signature="e#981#1040#0" expanded="false" />
-            <element signature="e#1080#1123#0" expanded="false" />
-            <element signature="e#1163#1208#0" expanded="false" />
-            <element signature="e#1249#1729#0" expanded="false" />
-            <element signature="e#1296#1334#0" expanded="false" />
-            <element signature="e#1433#1465#0" expanded="false" />
-            <element signature="e#1531#1584#0" expanded="false" />
-            <element signature="e#1773#1815#0" expanded="false" />
-            <element signature="e#1870#1969#0" expanded="false" />
-            <element signature="e#2025#2126#0" expanded="false" />
-            <element signature="e#2174#2267#0" expanded="false" />
-            <element signature="e#2312#2922#0" expanded="false" />
-            <element signature="e#2377#2489#0" expanded="false" />
-            <element signature="e#2507#2618#0" expanded="false" />
-            <element signature="e#2891#2920#0" expanded="false" />
-            <element signature="e#2962#3014#0" expanded="false" />
-            <element signature="e#3067#3612#0" expanded="false" />
-            <element signature="e#3165#3224#0" expanded="false" />
-            <element signature="e#3656#4092#0" expanded="false" />
-            <element signature="e#4134#4312#0" expanded="false" />
-            <element signature="e#4157#4216#0" expanded="false" />
-            <element signature="e#4848#4971#0" expanded="false" />
-            <element signature="e#6747#6777#0" expanded="false" />
-            <element signature="e#6816#6846#0" expanded="false" />
-            <element signature="e#6897#6997#0" expanded="false" />
-            <element signature="e#6944#6995#0" expanded="false" />
-            <element signature="e#7048#7148#0" expanded="false" />
-            <element signature="e#7095#7146#0" expanded="false" />
-            <marker date="1497299028168" expanded="false" signature="5042:5186" ph="{...}" />
-            <marker date="1497299028168" expanded="false" signature="5235:5326" ph="{...}" />
-            <marker date="1497299028168" expanded="false" signature="5257:5324" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MyCSS.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="374">
           <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HttpRequestBuilder.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="24" column="28" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="12" column="26" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
-          <folding>
-            <element signature="e#898#928#0" expanded="false" />
-            <element signature="e#1821#1840#0" expanded="false" />
-            <element signature="e#2482#2519#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="40" column="17" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
-            <element signature="e#2894#3038#0" expanded="false" />
-            <element signature="e#3063#3501#0" expanded="false" />
-            <element signature="e#3129#3222#0" expanded="false" />
-            <element signature="e#3294#3384#0" expanded="false" />
-            <element signature="e#3507#3558#0" expanded="false" />
-            <element signature="e#3617#3817#0" expanded="false" />
-            <element signature="e#3864#3924#0" expanded="false" />
-            <element signature="e#6080#6497#0" expanded="false" />
-            <element signature="e#6144#6334#0" expanded="false" />
-            <element signature="e#6181#6275#0" expanded="false" />
-            <element signature="e#6282#6331#0" expanded="false" />
-            <element signature="e#6602#7681#0" expanded="false" />
-            <element signature="e#6693#6904#0" expanded="false" />
-            <element signature="e#6807#6831#0" expanded="false" />
-            <element signature="e#6844#6869#0" expanded="false" />
-            <element signature="e#6876#6901#0" expanded="false" />
-            <element signature="e#6911#7679#0" expanded="false" />
-            <element signature="e#7215#7312#0" expanded="false" />
-            <element signature="e#7439#7561#0" expanded="false" />
-            <element signature="e#7519#7557#0" expanded="false" />
-            <element signature="e#8296#8407#0" expanded="false" />
-            <element signature="e#8450#8634#0" expanded="false" />
-            <element signature="e#8686#8745#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2285,11 +2191,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Menu/FileMenu.js">
+    <entry file="file://$PROJECT_DIR$/HttpRequestBuilder.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="10" column="47" selection-start-line="10" selection-start-column="47" selection-end-line="10" selection-end-column="47" />
+        <state relative-caret-position="484">
+          <caret line="24" column="28" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="180" column="35" selection-start-line="180" selection-start-column="35" selection-end-line="180" selection-end-column="35" />
+          <folding>
+            <element signature="e#981#1040#0" expanded="false" />
+            <element signature="e#1080#1123#0" expanded="false" />
+            <element signature="e#1163#1208#0" expanded="false" />
+            <element signature="e#1249#1729#0" expanded="false" />
+            <element signature="e#1296#1334#0" expanded="false" />
+            <element signature="e#1433#1465#0" expanded="false" />
+            <element signature="e#1531#1584#0" expanded="false" />
+            <element signature="e#1773#1815#0" expanded="false" />
+            <element signature="e#1870#1969#0" expanded="false" />
+            <element signature="e#2025#2126#0" expanded="false" />
+            <element signature="e#2174#2267#0" expanded="false" />
+            <element signature="e#2312#2922#0" expanded="false" />
+            <element signature="e#2377#2489#0" expanded="false" />
+            <element signature="e#2507#2618#0" expanded="false" />
+            <element signature="e#2891#2920#0" expanded="false" />
+            <element signature="e#2962#3014#0" expanded="false" />
+            <element signature="e#3067#3612#0" expanded="false" />
+            <element signature="e#3165#3224#0" expanded="false" />
+            <element signature="e#3656#4092#0" expanded="false" />
+            <element signature="e#4134#4312#0" expanded="false" />
+            <element signature="e#4157#4216#0" expanded="false" />
+            <element signature="e#4848#4971#0" expanded="false" />
+            <element signature="e#6747#6777#0" expanded="false" />
+            <element signature="e#6816#6846#0" expanded="false" />
+            <element signature="e#6897#6997#0" expanded="false" />
+            <element signature="e#6944#6995#0" expanded="false" />
+            <element signature="e#7048#7148#0" expanded="false" />
+            <element signature="e#7095#7146#0" expanded="false" />
+            <marker date="1497299028168" expanded="false" signature="5042:5186" ph="{...}" />
+            <marker date="1497299028168" expanded="false" signature="5235:5326" ph="{...}" />
+            <marker date="1497299028168" expanded="false" signature="5257:5324" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2333,6 +2279,60 @@
             <marker date="1497303203084" expanded="false" signature="14662:14813" ph="{...}" />
             <marker date="1497303203084" expanded="false" signature="14882:14917" ph="{...}" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="12" column="26" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
+          <folding>
+            <element signature="e#898#928#0" expanded="false" />
+            <element signature="e#1821#1840#0" expanded="false" />
+            <element signature="e#2482#2519#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="40" column="17" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+            <element signature="e#2894#3038#0" expanded="false" />
+            <element signature="e#3063#3501#0" expanded="false" />
+            <element signature="e#3129#3222#0" expanded="false" />
+            <element signature="e#3294#3384#0" expanded="false" />
+            <element signature="e#3507#3558#0" expanded="false" />
+            <element signature="e#3617#3817#0" expanded="false" />
+            <element signature="e#3864#3924#0" expanded="false" />
+            <element signature="e#6080#6497#0" expanded="false" />
+            <element signature="e#6144#6334#0" expanded="false" />
+            <element signature="e#6181#6275#0" expanded="false" />
+            <element signature="e#6282#6331#0" expanded="false" />
+            <element signature="e#6602#7681#0" expanded="false" />
+            <element signature="e#6693#6904#0" expanded="false" />
+            <element signature="e#6807#6831#0" expanded="false" />
+            <element signature="e#6844#6869#0" expanded="false" />
+            <element signature="e#6876#6901#0" expanded="false" />
+            <element signature="e#6911#7679#0" expanded="false" />
+            <element signature="e#7215#7312#0" expanded="false" />
+            <element signature="e#7439#7561#0" expanded="false" />
+            <element signature="e#7519#7557#0" expanded="false" />
+            <element signature="e#8296#8407#0" expanded="false" />
+            <element signature="e#8450#8634#0" expanded="false" />
+            <element signature="e#8686#8745#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Menu/FileMenu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="15" column="5" selection-start-line="15" selection-start-column="5" selection-end-line="15" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
