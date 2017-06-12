@@ -131,7 +131,7 @@ SaveManager.delete = function(nextAction){
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userNew = function(){
-	SaveManager.saveAndName(SaveManager.new, true);
+	SaveManager.saveAndName("New", null, SaveManager.new, true);
 };
 SaveManager.new = function(){
 	var request = new HttpRequestBuilder("data/save");
