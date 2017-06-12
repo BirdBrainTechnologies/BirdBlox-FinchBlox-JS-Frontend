@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MyCSS.css" afterPath="$PROJECT_DIR$/MyCSS.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TouchReceiver.js" afterPath="$PROJECT_DIR$/TouchReceiver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" afterPath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -254,7 +252,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Category.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Category.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1044">
@@ -330,11 +328,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TouchReceiver.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TouchReceiver.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="840">
-              <caret line="657" column="6" selection-start-line="657" selection-start-column="6" selection-end-line="657" selection-end-column="6" />
+            <state relative-caret-position="708">
+              <caret line="651" column="0" selection-start-line="651" selection-start-column="0" selection-end-line="651" selection-end-column="0" />
               <folding>
                 <element signature="e#15#184#0" expanded="false" />
                 <element signature="e#1755#1841#0" expanded="false" />
@@ -529,8 +527,8 @@
         <option value="$PROJECT_DIR$/BlockContainers/DisplayStack.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
-        <option value="$PROJECT_DIR$/TouchReceiver.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
+        <option value="$PROJECT_DIR$/TouchReceiver.js" />
       </list>
     </option>
   </component>
@@ -864,7 +862,7 @@
       <workItem from="1496757876623" duration="38933000" />
       <workItem from="1496949900733" duration="599000" />
       <workItem from="1497015344063" duration="21796000" />
-      <workItem from="1497273502963" duration="3109000" />
+      <workItem from="1497273502963" duration="3303000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -961,7 +959,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="810215000" />
+    <option name="totallyTimeSpent" value="810409000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -2199,10 +2197,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1044">
+          <caret line="145" column="25" selection-start-line="145" selection-start-column="25" selection-end-line="145" selection-end-column="25" />
+          <folding>
+            <element signature="e#956#1015#0" expanded="false" />
+            <element signature="e#1055#1098#0" expanded="false" />
+            <element signature="e#1138#1183#0" expanded="false" />
+            <element signature="e#1224#1704#0" expanded="false" />
+            <element signature="e#1271#1309#0" expanded="false" />
+            <element signature="e#1408#1440#0" expanded="false" />
+            <element signature="e#1506#1559#0" expanded="false" />
+            <element signature="e#1748#1790#0" expanded="false" />
+            <element signature="e#1845#1944#0" expanded="false" />
+            <element signature="e#2000#2101#0" expanded="false" />
+            <element signature="e#2149#2242#0" expanded="false" />
+            <element signature="e#2287#2897#0" expanded="false" />
+            <element signature="e#2352#2464#0" expanded="false" />
+            <element signature="e#2482#2593#0" expanded="false" />
+            <element signature="e#2866#2895#0" expanded="false" />
+            <element signature="e#2937#2989#0" expanded="false" />
+            <element signature="e#3042#3587#0" expanded="false" />
+            <element signature="e#3140#3199#0" expanded="false" />
+            <element signature="e#3631#4067#0" expanded="false" />
+            <element signature="e#4109#4287#0" expanded="false" />
+            <element signature="e#4132#4191#0" expanded="false" />
+            <element signature="e#4799#4922#0" expanded="false" />
+            <element signature="e#6669#6699#0" expanded="false" />
+            <element signature="e#6738#6768#0" expanded="false" />
+            <element signature="e#6819#6919#0" expanded="false" />
+            <element signature="e#6866#6917#0" expanded="false" />
+            <element signature="e#6970#7070#0" expanded="false" />
+            <element signature="e#7017#7068#0" expanded="false" />
+            <marker date="1497276625999" expanded="false" signature="4993:5137" ph="{...}" />
+            <marker date="1497276625999" expanded="false" signature="5186:5277" ph="{...}" />
+            <marker date="1497276625999" expanded="false" signature="5208:5275" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="657" column="6" selection-start-line="657" selection-start-column="6" selection-end-line="657" selection-end-column="6" />
+        <state relative-caret-position="708">
+          <caret line="651" column="0" selection-start-line="651" selection-start-column="0" selection-end-line="651" selection-end-column="0" />
           <folding>
             <element signature="e#15#184#0" expanded="false" />
             <element signature="e#1755#1841#0" expanded="false" />
@@ -2307,46 +2345,6 @@
             <element signature="e#20543#20657#0" expanded="false" />
             <element signature="e#20670#20845#0" expanded="false" />
             <element signature="e#21636#21708#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1044">
-          <caret line="145" column="25" selection-start-line="145" selection-start-column="25" selection-end-line="145" selection-end-column="25" />
-          <folding>
-            <element signature="e#956#1015#0" expanded="false" />
-            <element signature="e#1055#1098#0" expanded="false" />
-            <element signature="e#1138#1183#0" expanded="false" />
-            <element signature="e#1224#1704#0" expanded="false" />
-            <element signature="e#1271#1309#0" expanded="false" />
-            <element signature="e#1408#1440#0" expanded="false" />
-            <element signature="e#1506#1559#0" expanded="false" />
-            <element signature="e#1748#1790#0" expanded="false" />
-            <element signature="e#1845#1944#0" expanded="false" />
-            <element signature="e#2000#2101#0" expanded="false" />
-            <element signature="e#2149#2242#0" expanded="false" />
-            <element signature="e#2287#2897#0" expanded="false" />
-            <element signature="e#2352#2464#0" expanded="false" />
-            <element signature="e#2482#2593#0" expanded="false" />
-            <element signature="e#2866#2895#0" expanded="false" />
-            <element signature="e#2937#2989#0" expanded="false" />
-            <element signature="e#3042#3587#0" expanded="false" />
-            <element signature="e#3140#3199#0" expanded="false" />
-            <element signature="e#3631#4067#0" expanded="false" />
-            <element signature="e#4109#4287#0" expanded="false" />
-            <element signature="e#4132#4191#0" expanded="false" />
-            <element signature="e#4799#4922#0" expanded="false" />
-            <element signature="e#6669#6699#0" expanded="false" />
-            <element signature="e#6738#6768#0" expanded="false" />
-            <element signature="e#6819#6919#0" expanded="false" />
-            <element signature="e#6866#6917#0" expanded="false" />
-            <element signature="e#6970#7070#0" expanded="false" />
-            <element signature="e#7017#7068#0" expanded="false" />
-            <marker date="1497276625999" expanded="false" signature="4993:5137" ph="{...}" />
-            <marker date="1497276625999" expanded="false" signature="5186:5277" ph="{...}" />
-            <marker date="1497276625999" expanded="false" signature="5208:5275" ph="{...}" />
           </folding>
         </state>
       </provider>

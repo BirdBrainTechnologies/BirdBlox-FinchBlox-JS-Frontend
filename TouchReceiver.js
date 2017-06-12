@@ -643,10 +643,16 @@ TouchReceiver.createScrollFixTimer = function(div){
 	}
 
 	var mem = {};
-	mem.last = null;
+	mem.lastY = null;
+	mem.lastX = null;
 	var fixScroll = function() {
-		var still = mem.last == null || mem.last == div.scrollTop;
-		mem.last = div.scrollTop;
+		var stillY = mem.lastY == null || mem.lastY == div.scrollTop;
+		var stillX = mem.lastX == null || mem.lastX == div.scrollLeft;
+		var still = stillX && stillY;
+
+		mem.lastY = div.scrollTop;
+		mem.lastX = div.scrollLeft;
+
 		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
 		if(TouchReceiver.touchDown || !still) return;
 		if (div.scrollTop <= 0) {
