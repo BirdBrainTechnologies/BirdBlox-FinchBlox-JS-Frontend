@@ -13318,9 +13318,7 @@ SmoothMenuBnList.prototype.show=function(){
 		this.visible=true;
 		GuiElements.layers.div.appendChild(this.scrollDiv);
 		this.updatePosition();
-		if(GuiElements.isIos && this.scrollable) {
-			this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
-		}
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollable);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){

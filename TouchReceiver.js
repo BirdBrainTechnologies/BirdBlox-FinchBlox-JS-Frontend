@@ -638,6 +638,10 @@ TouchReceiver.addEventListenerSafe=function(element,type, func){
 	element.addEventListener(type, DebugOptions.safeFunc(func), false);
 };
 TouchReceiver.createScrollFixTimer = function(div){
+	if(!GuiElements.isIos) {
+		return;
+	}
+
 	var mem = {};
 	mem.last = null;
 	var fixScroll = function() {

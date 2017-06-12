@@ -571,18 +571,26 @@ GuiElements.update.image=function(imageE,newImageName){
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
-GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerHeight) {
+GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
 	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	if(innerHeight > height) {
-		div.classList.add("smoothScroll");
-		div.classList.remove("noScroll");
+	var scrollY = innerHeight > height;
+	var scrollX = innerWidth > width;
+	div.classList.remove("noScroll");
+	div.classList.remove("smoothScrollXY");
+	div.classList.remove("smoothScrollX");
+	div.classList.remove("smoothScrollY");
+	if(scrollX && scrollY) {
+		div.classList.add("smoothScrollXY");
+	} else if(scrollX) {
+		div.classList.add("smoothScrollX");
+	} else if(scrollY) {
+		div.classList.add("smoothScrollY");
 	} else {
 		div.classList.add("noScroll");
-		div.classList.remove("smoothScroll");
 	}
 
 	var zoom = GuiElements.zoomFactor;
@@ -592,7 +600,7 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	div.style.width = (width * zoom) + "px";
 	div.style.height = (height * zoom) + "px";
 
-	svg.setAttribute('width', width * zoom);
+	svg.setAttribute('width', innerWidth * zoom);
 	svg.setAttribute('height', innerHeight * zoom);
 
 	GuiElements.update.zoom(zoomG, zoom);

@@ -65,9 +65,7 @@ SmoothMenuBnList.prototype.show=function(){
 		this.visible=true;
 		GuiElements.layers.frontScroll.appendChild(this.scrollDiv);
 		this.updatePosition();
-		if(GuiElements.isIos && this.scrollable) {
-			this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
-		}
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
@@ -165,7 +163,7 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 		realY = GuiElements.relToAbsY(realY);
 
 		GuiElements.update.smoothScrollSet(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
-			this.height, this.internalHeight);
+			this.height, this.width, this.internalHeight);
 	}
 };
 SmoothMenuBnList.prototype.updateZoom = function(){

@@ -236,6 +236,6 @@ Category.prototype.updateZoom = function(){
 };
 Category.prototype.updateSmoothScrollSet = function(){
 	var y = GuiElements.relToAbsY(BlockPalette.y);
-	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, y, BlockPalette.width, BlockPalette.height, this.height);
+	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, y, BlockPalette.width, BlockPalette.height, this.width, this.height);
 	this.currentZoom = GuiElements.zoomFactor;
 };

@@ -40,10 +40,20 @@ path{
 	-ms-user-select: none;			 
 	user-select: none;	                                 
 }
-.smoothScroll {
-	overflow-y: scroll; /* has to be scroll, not auto */
-    overflow-x: hidden;
+.smoothScrollX {
+	overflow-y: hidden; /* has to be scroll, not auto */
+    overflow-x: scroll;
 	-webkit-overflow-scrolling: touch;
+}
+.smoothScrollY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+.smoothScrollXY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 .noScroll {
     overflow-y: hidden;
