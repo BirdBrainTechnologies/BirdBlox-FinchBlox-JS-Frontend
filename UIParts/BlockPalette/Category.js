@@ -4,8 +4,8 @@ function Category(buttonX,buttonY,index){
 	this.buttonY=buttonY;
 	this.x=0;
 	this.y=TitleBar.height+BlockPalette.catH;
-	this.maxX=this.x;
-	this.maxY=this.y;
+	/* this.maxX=this.x;
+	this.maxY=this.y; */
 	this.scrollDiv=this.createDiv();
 	TouchReceiver.addListenersPalette(this.scrollDiv);
 	TouchReceiver.createScrollFixTimer(this.scrollDiv);
@@ -131,8 +131,7 @@ Category.prototype.trimBottom=function(){
 Category.prototype.finalize = function(){
 	this.height=this.currentBlockY;
 	this.updateWidth();
-	this.setMinCoords();
-	this.updateSmoothScrollSet();
+	//this.updateSmoothScrollSet();
 };
 
 Category.prototype.select=function(){
@@ -192,13 +191,16 @@ Category.prototype.updateWidth=function(){
 		}
 	}
 	this.width=currentWidth+2*BlockPalette.mainHMargin;
+	this.updateSmoothScrollSet();
 };
+/*
 Category.prototype.setMinCoords=function(){
 	var vScrollRange=this.height-BlockPalette.height;
 	this.minY=this.maxY-vScrollRange;
 	var hScrollRange=this.width-BlockPalette.width;
 	this.minX=this.maxX-hScrollRange;
 };
+*/
 Category.prototype.relToAbsX=function(x){
 	return x - this.scrollDiv.scrollLeft / this.currentZoom;
 };
@@ -206,10 +208,10 @@ Category.prototype.relToAbsY=function(y){
 	return y - this.scrollDiv.scrollTop  / this.currentZoom + BlockPalette.y;
 };
 Category.prototype.absToRelX=function(x){
-	return x + this.scrollDiv.scrollLeft;
+	return x + this.scrollDiv.scrollLeft * this.currentZoom;
 };
 Category.prototype.absToRelY=function(y){
-	return y + this.scrollDiv.scrollTop + BlockPalette.y;
+	return y + this.scrollDiv.scrollTop * this.currentZoom - BlockPalette.y;
 };
 Category.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
