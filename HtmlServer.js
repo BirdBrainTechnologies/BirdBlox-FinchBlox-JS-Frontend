@@ -6,6 +6,9 @@ function HtmlServer(){
 	HtmlServer.dialogVisible=false;
 	HtmlServer.logHttp=false || DebugOptions.shouldLogHttp();
 }
+HtmlServer.decodeHtml = function(message){
+	return decodeURIComponent(message);
+};
 HtmlServer.encodeHtml=function(message){
 	if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
@@ -35,7 +38,7 @@ HtmlServer.encodeHtml=function(message){
 }
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover")<0&&request.indexOf("status")<0) {
+		request.indexOf("discover")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {

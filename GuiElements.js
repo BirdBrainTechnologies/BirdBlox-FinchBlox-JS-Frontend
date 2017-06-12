@@ -30,9 +30,11 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
 	GuiElements.load.os = false;
+	GuiElements.load.lastFileName = false;
+	GuiElements.load.lastFileNamed = false;
 	if(!DebugOptions.shouldSkipInitSettings()) {
 		var checkIfDone = function () {
-			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os) {
+			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
 				callback();
 			}
 		};
@@ -49,7 +51,11 @@ GuiElements.loadInitialSettings=function(callback){
 		GuiElements.getOsVersion(function(){
 			GuiElements.load.os = true;
 			checkIfDone();
-		})
+		});
+		SaveManager.getOsVersion(function(){
+			GuiElements.load.os = true;
+			checkIfDone();
+		});
 	}
 	else{
 		callback();
@@ -572,6 +578,8 @@ GuiElements.update.image=function(imageE,newImageName){
 	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
 };
 GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
+	DebugOptions.validateNonNull(div, svg, zoomG);
+	DebugOptions.validateNumbers(x, y, width, height, innerWidth, innerHeight);
 	/*foreignObj.setAttributeNS(null,"x",x);
 	foreignObj.setAttributeNS(null,"y",y);
 	foreignObj.setAttributeNS(null,"width",width * zoom);

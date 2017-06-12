@@ -1,6 +1,246 @@
 function SaveManager(){
+	if(SaveManager.currentDoc != null){
+		SaveManager.fileName = SaveManager.currentDoc;
+		SaveManager.named = SaveManager.currentDocNamed == "true";
+		SaveManager.open(SaveManager.currentDoc, SaveManager.named);
+	} else {
+		SaveManager.new();
+	}
+
+	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+}
+SaveManager.userOpen = function(fileName){
+	SaveManager.saveAndName(function(){
+		SaveManager.open(fileName);
+	}, true);
+};
+
+SaveManager.open=function(fileName, named, nextAction){
+	if(named == null){
+		named = true;
+	}
+	var request = new HttpRequestBuilder("data/load");
+	request.addParam("filename", fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
+		SaveManager.loadFile(response);
+		SaveManager.fileName = fileName;
+		SaveManager.named = named;
+		SaveManager.empty = false;
+		HtmlServer.setSetting("currentDoc", SaveManager.fileName);
+		let namedString = SaveManager.named? "true" : "false";
+		HtmlServer.setSetting("currentDocNamed", namedString);
+		if(nextAction != null) nextAction();
+	});
+};
+
+SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
+	if(SaveManager.empty && deleteEmpty){
+		SaveManager.delete(nextAction);
+	} else {
+		SaveManager.forceSave(function () {
+			if (SaveManager.named) {
+				if (nextAction != null) nextAction();
+			}
+			else {
+				SaveManager.promptRename(title, message, function () {
+					if (nextAction != null) nextAction();
+				})
+			}
+		});
+	}
+};
+
+// Saves a file and overwrites if the name exists
+SaveManager.forceSave = function(nextAction){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
+};
+
+SaveManager.userRename = function(){
+	SaveManager.forceSave(function(){
+		SaveManager.promptRename("Rename", null);
+	});
+};
+
+SaveManager.promptRename = function(title, message, nextAction){
+	if(message == null){
+		message = "Enter a file name";
+	}
+	var currentName=SaveManager.fileName;
+	HtmlServer.showDialog(title,message,currentName,function(cancelled,response){
+		if(!cancelled){
+			SaveManager.sanitizeRename(title, response, nextAction);
+		}
+	});
+};
+
+// Checks if a name is legitimate and renames the current file to that name if it is.
+SaveManager.sanitizeRename = function(title, proposedName, nextAction){
+	if(proposedName == ""){
+		SaveManager.userRenameWithError("Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
+	} else if(proposedName == SaveManager.fileName) {
+		SaveManager.named = true;
+		if(nextAction != null) nextAction();
+	} else {
+		SaveManager.getAvailableName(function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.renameSoft(title, availableName, nextAction);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptRename(title, message, availableName, nextAction);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptRename(title, message, availableName, nextAction);
+			}
+		});
+	}
+};
+
+SaveManager.renameSoft = function(title, newName, nextAction){
+	var request = new HttpRequestBuilder("data/rename");
+	request.addParam("oldFilename", SaveManager.name);
+	request.addParam("newFilename", newName);
+	request.addParam("options", "soft");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		SaveManager.named = true;
+		if(nextAction != null) nextAction();
+	}, function(){
+		SaveManager.sanitizeRename(title, newName, nextAction);
+	});
+};
+
+SaveManager.userDelete=function(){
+	if(SaveManager.empty && !SaveManager.named){
+		SaveManager.delete();
+	} else {
+		var question = "Are you sure you want to delete \"" + SaveManager.fileName + "\"?";
+		HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function () {
+			SaveManager.delete(SaveManager.new);
+		}, null);
+	}
+};
+SaveManager.delete = function(nextAction){
+	var request = new HttpRequestBuilder("data/delete");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+};
+SaveManager.userNew = function(){
+	SaveManager.saveAndName(SaveManager.new, true);
+};
+SaveManager.new = function(){
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("options", "new");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
+		SaveManager.fileName = availableName;
+		SaveManager.named = false;
+		SaveManager.empty = true;
+		SaveManager.loadFile("<project><tabs></tabs></project>");
+	});
+};
+/**
+ * Issues a getAvailableName request and calls the callback with the results
+ * @param filename {String}
+ * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
+ */
+SaveManager.getAvailableName = function(filename, callbackFn){
+	DebugOptions.validateNonNull(callbackFn);
+	var request = new HttpRequestBuilder("data/getAvailableName");
+	request.addParam("filename", filename);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		var json = JSON.parse(response);
+		if(json.availableName != null){
+			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
+		}
+	});
+};
+SaveManager.loadFile=function(xmlString) {
+	if (xmlString.length > 0) {
+		if (xmlString.charAt(0) == "%") {
+			xmlString = decodeURIComponent(xmlString);
+			//HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
+		}
+		var xmlDoc = XmlWriter.openDoc(xmlString);
+		var project = XmlWriter.findElement(xmlDoc, "project");
+		if (project == null) {
+			SaveManager.loadFile("<project><tabs></tabs></project>");
+		}
+		CodeManager.importXml(project);
+	}
+};
+SaveManager.userDuplicate = function(){
+	SaveManager.forceSave(function(){
+		SaveManager.promptDuplicate("Enter name for duplicate file");
+	});
+};
+SaveManager.promptDuplicate = function(message, nextAction){
+	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
+		HtmlServer.showDialog("Duplicate", message, availableName, function(cancelled, response){
+			if(!cancelled){
+				SaveManager.duplicate(response);
+			}
+		});
+	});
+};
+SaveManager.duplicate = function(filename){
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", filename);
+	request.addParam("options", "soft");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		SaveManager.fileName = filename;
+		SaveManager.named = true;
+		SaveManager.empty = false;
+	}, function(){
+		let message = "\"" + filename + "\" already exists.  Enter a different name.";
+		SaveManager.promptDuplicate(message);
+	});
+};
+SaveManager.userExport=function(){
+	SaveManager.saveAndName("Export", null, function(){
+		SaveManager.export();
+	}, false);
+};
+SaveManager.export=function(){
+	var request = new HttpRequestBuilder("data/export");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+SaveManager.markEdited=function(){
+	SaveManager.empty = false;
+};
+SaveManager.import=function(fileName){
+	let name = HtmlServer.encodeHtml(fileName);
+	SaveManager.userOpen(name);
+};
+SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
+	var myCall1 = function(){
+		SaveManager.currentDoc = response;
+		SaveManager.fileName = response;
+		callbackFnName();
+	};
+	HtmlServer.getSetting("currentDoc", myCall1, function(){
+		SaveManager.currentDoc = null;
+		SaveManager.fileName = "";
+		callbackFnName();
+	});
+	var myCall2 = function(){
+		SaveManager.currentDocNamed = response;
+		callbackFnNameSet();
+	};
+	HtmlServer.getSetting("currentDocNamed", myCall2, callbackFnNameSet);
+};
+SaveManager.autoSave = function(){
+	return xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+};
+
+/*
+
+function SaveManager(){
 	SaveManager.fileName="New project";
-	SaveManager.modified=false;
+	//SaveManager.modified=false;
 	SaveManager.named=false;
 }
 SaveManager.open=function(fileName){
@@ -140,19 +380,7 @@ SaveManager.loadFile=function(xmlString){
 		}
 		CodeManager.importXml(project);
 	}
-};
-SaveManager.cleanFileName=function(fileName){
-	var illegalChars="#%\\<>*?/\":+`|=\n\r.";
-	fileName=fileName.trim();
-	for(var i=0;i<illegalChars.length;i++){
-		fileName=fileName.split(illegalChars.charAt(i)).join("");
-	}
-	if(fileName.length>30){
-		fileName=fileName.substring(0,30);
-	}
-	fileName=fileName.trim();
-	return fileName;
-};
+
 SaveManager.renamePrompt=function(){
 	var currentName=SaveManager.fileName;
 	if(!SaveManager.named){
@@ -230,4 +458,4 @@ SaveManager.listTest=function(){
 		GuiElements.alert(response);
 	};
 	HtmlServer.sendRequestWithCallback("files",callbackFn);
-};
+}; */

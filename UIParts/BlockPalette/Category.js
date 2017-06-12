@@ -25,6 +25,7 @@ function Category(buttonX,buttonY,index){
 	this.scrolling=false;
 	this.scrollXOffset=0;
 	this.scrollYOffset=0;
+	this.finalized = false;
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
@@ -129,6 +130,7 @@ Category.prototype.trimBottom=function(){
 	this.currentBlockY+=BlockPalette.mainVMargin;
 };
 Category.prototype.finalize = function(){
+	this.finalized = true;
 	this.height=this.currentBlockY;
 	this.updateWidth();
 	//this.updateSmoothScrollSet();
@@ -184,6 +186,7 @@ Category.prototype.endScroll=function(){
 };
 */
 Category.prototype.updateWidth=function(){
+	if(!this.finalized) return;
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
 		var blockW=this.blocks[i].width;
