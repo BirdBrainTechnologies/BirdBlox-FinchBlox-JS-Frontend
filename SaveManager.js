@@ -239,10 +239,12 @@ SaveManager.markEdited=function(){
 };
 SaveManager.saveCurrentDoc = function(blank, fileName, named){
 	if(blank){
-		fileName = "";
+		fileName = null;
 		named = false;
+		TitleBar.setText("");
+	} else {
+		TitleBar.setText(fileName);
 	}
-	TitleBar.setText(fileName);
 	SaveManager.fileName = fileName;
 	SaveManager.named = named;
 	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
