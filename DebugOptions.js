@@ -92,6 +92,14 @@ DebugOptions.validateNonNull = function(){
 		}
 	}
 };
+DebugOptions.validateOptionalNums = function(){
+	if(!DebugOptions.shouldLogErrors()) return;
+	for(let i = 0; i < arguments.length; i++){
+		if(arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))){
+			throw new UserException("Invalid optional number");
+		}
+	}
+};
 DebugOptions.assert = function(bool){
 	if(!bool && DebugOptions.shouldLogErrors()){
 		throw new UserException("Assertion Failure");

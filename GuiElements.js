@@ -212,6 +212,7 @@ GuiElements.create=function(){};
  * @return {SVG g} - The group which was created.
  */
 GuiElements.create.group=function(x,y,parent){
+	DebugOptions.validateOptionalNums(x, y);
 	var group=document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
 	group.setAttributeNS(null,"transform","translate("+x+","+y+")"); //Move the group to (x,y).
 	if(parent!=null){ //If provided, add it to the parent.

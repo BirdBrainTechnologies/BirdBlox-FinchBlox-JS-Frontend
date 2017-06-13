@@ -20,9 +20,9 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 	let renameBnX = largeBnWidth + RD.bnMargin;
-	this.createRenameBn(renameBnX, y, contentGroup);
+	this.createRenameBn(file, renameBnX, y, contentGroup);
 	let deleteBnX = renameBnX + OD.smallBnWidth + RD.bnMargin;
-	this.createDeleteBn(deleteBnX, y, contentGroup);
+	this.createDeleteBn(file, deleteBnX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	var RD = RowDialog;
