@@ -109,7 +109,7 @@ SaveManager.sanitizeRename = function(title, proposedName, nextAction){
 
 SaveManager.renameSoft = function(title, newName, nextAction){
 	var request = new HttpRequestBuilder("data/rename");
-	request.addParam("oldFilename", SaveManager.name);
+	request.addParam("oldFilename", SaveManager.fileName);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
