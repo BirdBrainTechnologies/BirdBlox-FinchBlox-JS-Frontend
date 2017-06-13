@@ -7,7 +7,7 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("New", SaveManager.userNew);
 	this.addOption("Open", this.optionOpen);
 	this.addOption("Duplicate", SaveManager.userDuplicate);
-	this.addOption("Rename", SaveManager.userRename);
+	this.addOption("Rename", SaveManager.userRenameFile);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Export", SaveManager.userExport);
 	this.addOption("Debug", this.optionEnableDebug);
@@ -20,7 +20,8 @@ FileMenu.prototype.optionNew=function(){
 };
 FileMenu.prototype.optionOpen=function(){
 	var callbackFn=function(response){
-		new OpenDialog(response);
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
 	};
 	HtmlServer.sendRequestWithCallback("data/files",callbackFn);
 };

@@ -30,8 +30,8 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
 	GuiElements.load.os = false;
-	GuiElements.load.lastFileName = false;
-	GuiElements.load.lastFileNamed = false;
+	GuiElements.load.lastFileName = true;
+	GuiElements.load.lastFileNamed = true;
 	if(!DebugOptions.shouldSkipInitSettings()) {
 		var count = 0;
 		var checkIfDone = function () {
@@ -55,13 +55,13 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.load.os = true;
 			checkIfDone();
 		});
-		SaveManager.getCurrentDocName(function(){
+		/*SaveManager.getCurrentDocName(function(){
 			GuiElements.load.lastFileName = true;
 			checkIfDone();
 		}, function(){
 			GuiElements.load.lastFileNamed = true;
 			checkIfDone();
-		});
+		});*/
 	}
 	else{
 		callback();
@@ -124,6 +124,7 @@ GuiElements.setConstants=function(){
 	DiscoverDialog.setConstants();
 	HBConnectionList.setConstants();
 	OpenDialog.setConstants();
+	RowDialog.setConstants();
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
@@ -161,7 +162,6 @@ GuiElements.buildUI=function(){
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
-	SaveManager.new();
 	DebugOptions.applyActions();
 };
 /* Makes an SVG group element (<g>) for each layer of the interface.

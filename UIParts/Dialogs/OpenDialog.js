@@ -1,4 +1,4 @@
-function OpenDialog(listOfFiles){
+/*function OpenDialog(listOfFiles){
 	OpenDialog.currentDialog=this;
 	this.x = 0;
 	this.y = 0;
@@ -96,13 +96,7 @@ OpenDialog.prototype.updateGroupPosition=function(){
 	}
 };
 OpenDialog.prototype.closeDialog=function(){
-	OpenDialog.currentDialog=null;
-	this.group.remove();
-	if(this.menuBnList != null){
-		this.menuBnList.hide();
-	}
-	this.menuBnList=null;
-	GuiElements.unblockInteraction();
+
 };
 OpenDialog.prototype.openFile=function(fileName){
 	SaveManager.userOpen(fileName);
@@ -113,4 +107,4 @@ OpenDialog.prototype.relToAbsX = function(x){
 };
 OpenDialog.prototype.relToAbsY = function(y){
 	return y + this.y;
-};
+};*/
