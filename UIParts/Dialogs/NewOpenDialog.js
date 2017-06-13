@@ -33,6 +33,7 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 		me.closeDialog();
 		SaveManager.userOpenFile(file);
 	}, true);
+	button.makeScrollable();
 };
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var RD = RowDialog;
@@ -42,6 +43,7 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	button.setCallbackFunction(function(){
 		SaveManager.userDeleteFile(file);
 	}, true);
+	button.makeScrollable();
 };
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 	var RD = RowDialog;
@@ -51,4 +53,5 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 	button.setCallbackFunction(function(){
 		SaveManager.userRenameFile(file);
 	}, true);
+	button.makeScrollable();
 };
