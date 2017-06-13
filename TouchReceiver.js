@@ -222,12 +222,14 @@ TouchReceiver.touchStartBN=function(target,e){
 /* Handles new touch events for the background of the palette.
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchStartPalette=function(e){
+TouchReceiver.touchStartScrollBox=function(target, e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e, false)){
-		GuiElements.overlay.close(); //Close any visible overlays.
-		TR.targetType="palette";
-		TR.target=null; //The type is all that is important. There is only one palette.
+		if(!target.isOverlayPart){
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="scrollBox";
+		TR.target=target; //The type is all that is important. There is only one palette.
 		e.stopPropagation();
 	}
 };
@@ -343,7 +345,7 @@ TouchReceiver.touchmove=function(e){
 				}
 			}
 			//If the user drags the palette, it should scroll.
-			if (TR.targetType == "palette") {
+			if (TR.targetType == "scrollBox") {
 				shouldPreventDefault = false;
 			}
 			//If the user drags the tab space, it should scroll.
@@ -384,7 +386,7 @@ TouchReceiver.touchmove=function(e){
 	}
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
 	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
-	shouldPreventDefault &= TR.targetType != "palette";
+	shouldPreventDefault &= TR.targetType != "scrollBox";
 	if(shouldPreventDefault){
 		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
@@ -441,7 +443,7 @@ TouchReceiver.touchend=function(e){
 			//If a Slot is pressed and released without dragging, it is time to edit its value.
 			TR.target.edit();
 		}
-		else if(TR.targetType=="palette"){
+		else if(TR.targetType=="scrollBox"){
 			shouldPreventDefault = false;
 		}
 		else if(TR.targetType=="tabSpace"){
@@ -480,8 +482,8 @@ TouchReceiver.touchInterrupt=function(){
 		else if(TR.targetType=="button"){
 			TR.target.interrupt(); //Remove the highlight without triggering the action.
 		}
-		else if(TR.targetType=="palette"){
-			BlockPalette.endScroll();
+		else if(TR.targetType=="scrollBox"){
+
 		}
 		else if(TR.targetType=="tabSpace"){
 			TabManager.endScroll();
@@ -585,11 +587,12 @@ TouchReceiver.addListenersBN=function(element,parent){
 };
 /* Adds handlerDown listeners to the background of the Palette. Used for scrolling.
  */
-TouchReceiver.addListenersPalette=function(element){
+TouchReceiver.addListenersScrollBox=function(element, parent){
 	var TR=TouchReceiver;
+	element.parent = parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver.
-		TouchReceiver.touchStartPalette(e);
+		TouchReceiver.touchStartScrollBox(this.parent, e);
 	}, false);
 };
 /* Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.

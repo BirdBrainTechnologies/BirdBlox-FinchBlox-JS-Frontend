@@ -6,8 +6,6 @@ function Category(buttonX,buttonY,index){
 	this.y=TitleBar.height+BlockPalette.catH;
 	/* this.maxX=this.x;
 	this.maxY=this.y; */
-	this.scrollDiv=this.createDiv();
-	TouchReceiver.addListenersPalette(this.scrollDiv);
 	this.group = GuiElements.create.group(0,0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
 		BlockPalette.width, BlockPalette.height, 0, 0);
