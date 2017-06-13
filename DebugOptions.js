@@ -57,6 +57,7 @@ DebugOptions.shouldLogHttp=function(){
 	return DO.enabled && DO.logHttp;
 };
 DebugOptions.safeFunc = function(func){
+	if(func == null) return null;
 	if(DebugOptions.shouldLogErrors()){
 		return function(){
 			try {
