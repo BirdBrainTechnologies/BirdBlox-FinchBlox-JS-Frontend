@@ -32,7 +32,7 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	button.setCallbackFunction(function(){
 		me.closeDialog();
 		SaveManager.userOpenFile(file);
-	}, false);
+	}, true);
 };
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var RD = RowDialog;
