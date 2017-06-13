@@ -16,9 +16,7 @@ function SaveManager(){
 }
 
 SaveManager.openBlank = function(){
-	SaveManager.fileName = null; //TODO: Make sure this is ok
-	SaveManager.named = false;
-	TitleBar.setText("");
+	SaveManager.saveCurrentDoc(true);
 	SaveManager.loadFile("<project><tabs></tabs></project>");
 };
 SaveManager.saveAndName = function(message, nextAction){
@@ -53,10 +51,7 @@ SaveManager.open=function(fileName, named, nextAction){
 	request.addParam("filename", fileName);
 	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
 		SaveManager.loadFile(response);
-		SaveManager.fileName = fileName;
-		SaveManager.named = named;
-		TitleBar.setText(SaveManager.fileName);
-
+		SaveManager.saveCurrentDoc(false, response, true);
 		if(nextAction != null) nextAction();
 	});
 };
@@ -204,10 +199,7 @@ SaveManager.duplicate = function(filename){
 	request.addParam("filename", filename);
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		SaveManager.fileName = filename;
-		TitleBar.setText(SaveManager.fileName);
-		SaveManager.named = true;
-		SaveManager.empty = false;
+		SaveManager.saveCurrentDoc(false, filename, true);
 	}, function(){
 		let message = "\"" + filename + "\" already exists.  Enter a different name.";
 		SaveManager.promptDuplicate(message);
@@ -233,9 +225,7 @@ SaveManager.saveAsNew = function(){
 	request.addParam("filename", SaveManager.newFileName);
 	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
 	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
-		SaveManager.fileName = availableName;
-		TitleBar.setText(SaveManager.fileName);
-		SaveManager.named = false;
+		SaveManager.saveCurrentDoc(false, availableName, false);
 		SaveManager.saving = false;
 	}, function(){
 		SaveManager.saving = false;
@@ -252,6 +242,7 @@ SaveManager.saveCurrentDoc = function(blank, fileName, named){
 		fileName = "";
 		named = false;
 	}
+	TitleBar.setText(fileName);
 	SaveManager.fileName = fileName;
 	SaveManager.named = named;
 	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
