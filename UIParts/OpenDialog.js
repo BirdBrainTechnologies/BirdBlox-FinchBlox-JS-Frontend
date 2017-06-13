@@ -105,7 +105,7 @@ OpenDialog.prototype.closeDialog=function(){
 	GuiElements.unblockInteraction();
 };
 OpenDialog.prototype.openFile=function(fileName){
-	SaveManager.open(fileName);
+	SaveManager.userOpen(fileName);
 	this.closeDialog();
 };
 OpenDialog.prototype.relToAbsX = function(x){

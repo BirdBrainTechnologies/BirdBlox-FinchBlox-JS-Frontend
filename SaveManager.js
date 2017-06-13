@@ -13,7 +13,7 @@ function SaveManager(){
 	SaveManager.makeFunctionsSafe();
 }
 SaveManager.userOpen = function(fileName){
-	SaveManager.saveAndName("Open", null, true, function(){
+	SaveManager.saveAndName(null, "Please name this file before opening a new file", true, function(){
 		SaveManager.open(fileName);
 	});
 };
@@ -38,8 +38,9 @@ SaveManager.open=function(fileName, named, nextAction){
 };
 
 SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
-	title = "Enter name";
-	message = "Please name this file before you leave";
+	if(title == null) {
+		title = "Enter name";
+	}
 	if(SaveManager.empty && deleteEmpty){
 		SaveManager.delete(nextAction);
 	} else {
@@ -147,7 +148,7 @@ SaveManager.delete = function(nextAction){
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userNew = function(){
-	SaveManager.saveAndName("New", null, true, SaveManager.new);
+	SaveManager.saveAndName(null, "Please name this file before creating a new file", true, SaveManager.new);
 };
 SaveManager.new = function(){
 	var request = new HttpRequestBuilder("data/save");
@@ -226,7 +227,7 @@ SaveManager.duplicate = function(filename){
 };
 SaveManager.userExport=function(){
 	SaveManager.printStatus("userExport");
-	SaveManager.saveAndName("Export", null, false, function(){
+	SaveManager.saveAndName(null, "Please name this file so it can be exported", false, function(){
 		SaveManager.export();
 	});
 };
