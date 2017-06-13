@@ -45,7 +45,7 @@ BlockPalette.setGraphics=function(){
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
-	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
+	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height * 2);
 	var clipRect=BP.clippingPath.childNodes[0];
 	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
 	for(let i = 0; i < BlockPalette.categories.length; i++){
@@ -60,7 +60,7 @@ BlockPalette.createCatBg=function(){
 }
 BlockPalette.createPalBg=function(){
 	var BP=BlockPalette;
-	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
+	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height * 2,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	//TouchReceiver.addListenersPalette(BP.palRect);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
