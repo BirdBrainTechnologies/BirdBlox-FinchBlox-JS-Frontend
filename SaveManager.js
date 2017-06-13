@@ -39,7 +39,7 @@ SaveManager.open=function(fileName, named, nextAction){
 
 SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
 	title = "Enter name";
-
+	message = "Please name this file before you leave";
 	if(SaveManager.empty && deleteEmpty){
 		SaveManager.delete(nextAction);
 	} else {

@@ -813,7 +813,8 @@ GuiElements.getAppVersion=function(callback){
 	GuiElements.appVersion=""; //Temp value until ajax completes.
 	HtmlServer.sendRequestWithCallback("version.txt", function(result){
 		GuiElements.appVersion=xhttp.responseText;
-	});
+		callback();
+	}, callback);
 };
 GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){

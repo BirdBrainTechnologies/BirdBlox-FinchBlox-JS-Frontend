@@ -142,7 +142,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
-HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
+HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	//GuiElements.alert("Showing...");
@@ -156,7 +156,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		var request = "tablet/dialog";
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
-		request+="&prefill="+HS.encodeHtml(hint);
+		request+="&prefill="+HS.encodeHtml(prefill);
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
