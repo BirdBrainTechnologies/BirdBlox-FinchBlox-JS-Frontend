@@ -10,6 +10,7 @@ function SaveManager(){
 	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.newFileName = "program";
+	SaveManager.makeFunctionsSafe();
 }
 SaveManager.userOpen = function(fileName){
 	SaveManager.saveAndName("Open", null, true, function(){
@@ -84,7 +85,7 @@ SaveManager.promptRenameWithDefault = function(title, message, defaultName, next
 
 // Checks if a name is legitimate and renames the current file to that name if it is.
 SaveManager.sanitizeRename = function(title, proposedName, nextAction){
-	GuiElements.alert("sanitizeRename: " + proposedName);
+
 	if(proposedName == ""){
 		SaveManager.promptRename(title, "Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
 	} else if(proposedName == SaveManager.fileName) {
@@ -159,6 +160,7 @@ SaveManager.new = function(){
  * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
  */
 SaveManager.getAvailableName = function(filename, callbackFn){
+	SaveManager.printStatus("getAvailableName");
 	DebugOptions.validateNonNull(callbackFn);
 	var request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
@@ -170,6 +172,7 @@ SaveManager.getAvailableName = function(filename, callbackFn){
 	});
 };
 SaveManager.loadFile=function(xmlString) {
+	SaveManager.printStatus("loadFile");
 	if (xmlString.length > 0) {
 		if (xmlString.charAt(0) == "%") {
 			xmlString = decodeURIComponent(xmlString);
@@ -184,11 +187,13 @@ SaveManager.loadFile=function(xmlString) {
 	}
 };
 SaveManager.userDuplicate = function(){
+	SaveManager.printStatus("userDuplicate");
 	SaveManager.forceSave(function(){
 		SaveManager.promptDuplicate("Enter name for duplicate file");
 	});
 };
 SaveManager.promptDuplicate = function(message, nextAction){
+	SaveManager.printStatus("promptDuplicate");
 	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
 		HtmlServer.showDialog("Duplicate", message, availableName, function(cancelled, response){
 			if(!cancelled){
@@ -198,6 +203,7 @@ SaveManager.promptDuplicate = function(message, nextAction){
 	});
 };
 SaveManager.duplicate = function(filename){
+	SaveManager.printStatus("duplicate");
 	var request = new HttpRequestBuilder("data/save");
 	request.addParam("filename", filename);
 	request.addParam("options", "soft");
@@ -212,23 +218,28 @@ SaveManager.duplicate = function(filename){
 	});
 };
 SaveManager.userExport=function(){
+	SaveManager.printStatus("userExport");
 	SaveManager.saveAndName("Export", null, false, function(){
 		SaveManager.export();
 	});
 };
 SaveManager.export=function(){
+	SaveManager.printStatus("export");
 	var request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", SaveManager.fileName);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.markEdited=function(){
+	SaveManager.printStatus("markEdited");
 	SaveManager.empty = false;
 };
 SaveManager.import=function(fileName){
+	SaveManager.printStatus("import");
 	let name = HtmlServer.encodeHtml(fileName);
 	SaveManager.userOpen(name);
 };
 SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
+	SaveManager.printStatus("getCurrentDocName");
 	HtmlServer.getSetting("currentDoc", function(response){
 		SaveManager.currentDoc = response;
 		SaveManager.fileName = response;
@@ -240,7 +251,27 @@ SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
 	}, callbackFnNameSet);
 };
 SaveManager.autoSave = function(){
+	SaveManager.printStatus("autoSave");
 	return xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+};
+SaveManager.printStatus = function(functionName){
+	var data = "fn: " + functionName + "\n";
+	data += "fileName: " + SaveManager.fileName + "\n";
+	data += "empty: " + SaveManager.empty + "\n";
+	data += "named: " + SaveManager.named + "\n";
+
+	data += "currrentDoc: " + SaveManager.currentDoc + "\n";
+	data += "currentDocNamed: " + SaveManager.currentDocNamed + "\n";
+};
+SaveManager.makeFunctionsSafe = function(){
+	var funcs = ["userOpen", "open", "saveAndName", "forceSave", "userRename", "promptRename", "promptRenameWithDefault",
+	"sanitizeRename", "sanitizeRename", "renameSoft", "userDelete", "delete", "userNew", "new", "getAvailableName", "loadFile",
+	"userDuplicate", "promptDuplicate", "duplicate", "userExport", "export", "markEdited", "import", "getCurrentDocName",
+	"autoSave"];
+	for (let i = 0; i < funcs.length; i++){
+		let func = funcs[i];
+		SaveManager[func] = DebugOptions.safeFunc(SaveManager[func]);
+	}
 };
 
 /*
