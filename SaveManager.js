@@ -244,7 +244,7 @@ SaveManager.markEdited=function(){
 };
 SaveManager.import=function(fileName){
 	SaveManager.printStatus("import");
-	let name = HtmlServer.encodeHtml(fileName);
+	let name = HtmlServer.decodeHtml(fileName);
 	SaveManager.userOpen(name);
 };
 SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
