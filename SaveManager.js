@@ -32,7 +32,7 @@ SaveManager.saveAndName = function(message, nextAction){
 			if (nextAction != null) nextAction();
 		}
 		else {
-			SaveManager.promptRename(title, message, function () {
+			SaveManager.promptRename(SaveManager.fileName, title, message, function () {
 				SaveManager.named = true;
 				if (nextAction != null) nextAction();
 			});
