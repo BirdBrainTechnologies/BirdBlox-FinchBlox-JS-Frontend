@@ -7,7 +7,7 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("New", SaveManager.userNew);
 	this.addOption("Open", this.optionOpen);
 	this.addOption("Duplicate", SaveManager.userDuplicate);
-	this.addOption("Rename", SaveManager.userRenameFile);
+	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Export", SaveManager.userExport);
 	this.addOption("Debug", this.optionEnableDebug);

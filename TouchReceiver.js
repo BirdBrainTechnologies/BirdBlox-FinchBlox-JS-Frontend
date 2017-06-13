@@ -359,14 +359,14 @@ TouchReceiver.touchmove=function(e){
 			}
 			//If the user drags a button and it has a menuBnList, it should scroll it.
 			if (TR.targetType == "button") {
-				if (TR.target.menuBnList != null && TR.target.menuBnList.scrollable) {
+				if ((TR.target.menuBnList != null && TR.target.menuBnList.scrollable)) {
 					TR.targetType = "menuBnList";
 					TR.target.interrupt();
 					TR.target = TR.target.menuBnList;
-				} else if (TR.target.smoothMenuBnList != null) {
+				} else if (TR.target.scrollable) {
 					TR.targetType = "smoothMenuBnList";
 					TR.target.interrupt();
-					TR.target = TR.target.smoothMenuBnList;
+					TR.target = null;
 				}
 			}
 			//If the user drags a menuBnList, it should scroll.
@@ -385,7 +385,7 @@ TouchReceiver.touchmove=function(e){
 		}
 	}
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
-	shouldPreventDefault &= TR.targetType != "button" || TR.target.smoothMenuBnList == null;
+	shouldPreventDefault &= TR.targetType != "button" || !TR.target.scrollable;
 	shouldPreventDefault &= TR.targetType != "scrollBox";
 	if(shouldPreventDefault){
 		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
