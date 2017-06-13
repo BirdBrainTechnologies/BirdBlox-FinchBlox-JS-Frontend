@@ -42,7 +42,7 @@ SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
 	if(title == null) {
 		title = "Enter name";
 	}
-	if(SaveManager.empty && deleteEmpty){
+	if(SaveManager.empty && deleteEmpty && !SaveManager.named){
 		SaveManager.delete(nextAction);
 	} else {
 		SaveManager.forceSave(function () {
