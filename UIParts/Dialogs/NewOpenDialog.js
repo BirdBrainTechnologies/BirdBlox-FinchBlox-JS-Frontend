@@ -40,8 +40,11 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var OD = OpenDialog;
 	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
 	button.addIcon(VectorPaths.trash, OD.iconH);
+	var me = this;
 	button.setCallbackFunction(function(){
-		SaveManager.userDeleteFile(file);
+		SaveManager.userDeleteFile(file, function(){
+			me.reloadDialog();
+		});
 	}, true);
 	button.makeScrollable();
 };
@@ -50,8 +53,27 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 	var OD = OpenDialog;
 	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
 	button.addIcon(VectorPaths.edit, OD.iconH);
+	var me = this;
 	button.setCallbackFunction(function(){
-		SaveManager.userRenameFile(file);
+		SaveManager.userRenameFile(file, function(){
+			me.reloadDialog();
+		});
 	}, true);
 	button.makeScrollable();
+};
+OpenDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		me.closeDialog();
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+		openDialog.setScroll(thisScroll);
+	});
+};
+OpenDialog.showDialog = function(){
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+	});
 };

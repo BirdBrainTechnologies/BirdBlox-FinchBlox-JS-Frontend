@@ -18,13 +18,6 @@ FileMenu.prototype.loadOptions = function(){
 FileMenu.prototype.optionNew=function(){
 	SaveManager.new();
 };
-FileMenu.prototype.optionOpen=function(){
-	var callbackFn=function(response){
-		var openDialog = new OpenDialog(response);
-		openDialog.show();
-	};
-	HtmlServer.sendRequestWithCallback("data/files",callbackFn);
-};
 FileMenu.prototype.optionEnableDebug=function(){
 	TitleBar.enableDebug();
 };
@@ -32,4 +25,4 @@ FileMenu.prototype.optionExit=function(){
 	SaveManager.checkPromptSave(function() {
 		HtmlServer.sendRequest("tablet/exit");
 	});
-}
+};

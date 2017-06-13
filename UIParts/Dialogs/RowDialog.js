@@ -137,3 +137,9 @@ RowDialog.prototype.closeDialog = function(){
 	this.scrollBox=null;
 	GuiElements.unblockInteraction();
 };
+RowDialog.prototype.getScroll = function(){
+	return this.scrollBox.getScrollY();
+};
+RowDialog.prototype.setScroll = function(y){
+	this.scrollBox.setScrollY(y);
+};

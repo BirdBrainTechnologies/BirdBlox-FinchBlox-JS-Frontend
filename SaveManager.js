@@ -15,9 +15,10 @@ function SaveManager(){
 	SaveManager.getCurrentDoc();
 }
 
-SaveManager.openBlank = function(){
+SaveManager.openBlank = function(nextAction){
 	SaveManager.saveCurrentDoc(true);
 	SaveManager.loadFile("<project><tabs></tabs></project>");
+	if(nextAction != null) nextAction();
 };
 SaveManager.saveAndName = function(message, nextAction){
 	var title = "Enter name";
@@ -66,9 +67,9 @@ SaveManager.userRename = function(){
 	if(SaveManager.fileName == null) return;
 	SaveManager.userRenameFile(SaveManager.fileName);
 };
-SaveManager.userRenameFile = function(oldFilename){
+SaveManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.forceSave(function(){
-		SaveManager.promptRename(oldFilename, "Rename", null);
+		SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
 	});
 };
 SaveManager.promptRename = function(oldFilename, title, message, nextAction){
@@ -128,11 +129,13 @@ SaveManager.userDelete=function(){
 	if(SaveManager.fileName == null) return;
 	SaveManager.userDeleteFile(SaveManager.fileName);
 };
-SaveManager.userDeleteFile=function(filename){
+SaveManager.userDeleteFile=function(filename, nextAction){
 	var question = "Are you sure you want to delete \"" + filename + "\"?";
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
-			SaveManager.delete(filename, SaveManager.openBlank);
+			SaveManager.delete(filename, function(){
+				SaveManager.openBlank(nextAction);
+			});
 		}
 	}, null);
 };
@@ -183,7 +186,7 @@ SaveManager.userDuplicate = function(){
 		SaveManager.promptDuplicate("Enter name for duplicate file");
 	});
 };
-SaveManager.promptDuplicate = function(message, nextAction){
+SaveManager.promptDuplicate = function(message){
 	SaveManager.printStatus("promptDuplicate");
 	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
 		HtmlServer.showDialog("Duplicate", message, availableName, function(cancelled, response){
