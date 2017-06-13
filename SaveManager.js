@@ -38,6 +38,8 @@ SaveManager.open=function(fileName, named, nextAction){
 };
 
 SaveManager.saveAndName = function(title, message, deleteEmpty, nextAction){
+	title = "Enter name";
+
 	if(SaveManager.empty && deleteEmpty){
 		SaveManager.delete(nextAction);
 	} else {
@@ -112,7 +114,7 @@ SaveManager.renameSoft = function(title, newName, nextAction){
 	request.addParam("oldFilename", SaveManager.fileName);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
-	//TODO: remove this dubug code.
+	//TODO: remove this debug code.
 	SaveManager.named = true;
 	if(nextAction != null) nextAction();
 	/*

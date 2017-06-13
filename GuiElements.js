@@ -811,23 +811,9 @@ GuiElements.overlay.close=function(){
 /* Loads the version number from version.txt */
 GuiElements.getAppVersion=function(callback){
 	GuiElements.appVersion=""; //Temp value until ajax completes.
-	try {
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4&&xhttp.status == 200) {
-				GuiElements.appVersion=xhttp.responseText;
-				callback();
-			}
-			else if(xhttp.readyState == 4){
-				callback();
-			}
-		};
-		xhttp.open("GET", "version.txt", true); //Get the names
-		xhttp.send(); //Make the request
-	}
-	catch(err){
-		callback();
-	}
+	HtmlServer.sendRequestWithCallback("version.txt", function(result){
+		GuiElements.appVersion=xhttp.responseText;
+	});
 };
 GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
