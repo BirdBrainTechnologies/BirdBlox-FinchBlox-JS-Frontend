@@ -51,7 +51,7 @@ SaveManager.open=function(fileName, named, nextAction){
 	request.addParam("filename", fileName);
 	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
 		SaveManager.loadFile(response);
-		SaveManager.saveCurrentDoc(false, response, true);
+		SaveManager.saveCurrentDoc(false, fileName, true);
 		if(nextAction != null) nextAction();
 	});
 };
