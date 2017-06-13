@@ -37,6 +37,8 @@ HtmlServer.encodeHtml=function(message){
 	return eVal; //.replace(/\%20/g, "+");
 }
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	callbackFn = DebugOptions.safeFunc(callbackFn);
+	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
 		request.indexOf("discover")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
