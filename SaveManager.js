@@ -92,7 +92,7 @@ SaveManager.sanitizeRename = function(title, proposedName, nextAction){
 		SaveManager.named = true;
 		if(nextAction != null) nextAction();
 	} else {
-		SaveManager.getAvailableName(function(availableName, alreadySanitized, alreadyAvailable){
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
 				SaveManager.renameSoft(title, availableName, nextAction);
 			} else if(!alreadySanitized){
