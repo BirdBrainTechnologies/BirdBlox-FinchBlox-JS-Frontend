@@ -206,7 +206,7 @@ TouchReceiver.touchStartCatBN=function(target,e){
  */
 TouchReceiver.touchStartBN=function(target,e){
 	var TR=TouchReceiver;
-	var shouldPreventDefault = target.smoothMenuBnList == null;
+	var shouldPreventDefault = target.scrollable;
 	if(!shouldPreventDefault){
 		e.stopPropagation();
 	}

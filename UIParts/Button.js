@@ -17,7 +17,7 @@ function Button(x,y,width,height,parent){
 	this.toggleFunction=null;
 	this.toggled=false;
 	this.isOverlayPart=false;
-	this.menuBnList=null;
+	this.scrollable = false;
 }
 Button.setGraphics=function(){
 	Button.bg=Colors.darkGray;
@@ -215,4 +215,7 @@ Button.prototype.setColor=function(isPressed){
 			GuiElements.update.image(this.imageE,this.imageData.lightName);
 		}
 	}
+};
+Button.prototype.makeScrollable = function(){
+	this.scrollable = true;
 };
