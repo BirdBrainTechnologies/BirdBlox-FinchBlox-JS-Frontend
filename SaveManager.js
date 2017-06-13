@@ -261,7 +261,10 @@ SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
 };
 SaveManager.autoSave = function(){
 	SaveManager.printStatus("autoSave");
-	return xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var result = {};
+	result.data = XmlWriter.docToText(CodeManager.createXml());
+	result.filename = SaveManager.fileName;
+	return result;
 };
 SaveManager.printStatus = function(functionName){
 	var data = "fn: " + functionName + "\n";
