@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DebugOptions.js" afterPath="$PROJECT_DIR$/DebugOptions.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/MenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" afterPath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,8 +29,8 @@
       <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="400">
-              <caret line="252" column="73" selection-start-line="252" selection-start-column="73" selection-end-line="252" selection-end-column="73" />
+            <state relative-caret-position="362">
+              <caret line="251" column="59" selection-start-line="251" selection-start-column="59" selection-end-line="251" selection-end-column="59" />
               <folding>
                 <element signature="e#1917#2177#0" expanded="false" />
                 <element signature="e#2215#2302#0" expanded="false" />
@@ -62,52 +61,41 @@
                 <element signature="e#8285#8313#0" expanded="false" />
                 <element signature="e#8348#8551#0" expanded="false" />
                 <element signature="e#8586#8657#0" expanded="false" />
-                <element signature="e#9587#9905#0" expanded="false" />
-                <element signature="e#10463#17058#0" expanded="false" />
-                <marker date="1497375513511" expanded="false" signature="11311:11807" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11338:11757" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11442:11625" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11464:11515" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11541:11621" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11579:11616" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="11785:11805" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="12799:13034" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="12850:12964" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="12975:13028" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13214:13627" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13250:13453" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13301:13407" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13414:13450" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13701:14165" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13737:13855" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13758:13794" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="13819:13852" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="14532:14652" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="14779:14845" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15379:15717" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15407:15506" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15757:16176" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15805:15819" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15854:16006" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15873:16003" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15930:15962" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="15970:15999" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="16207:16357" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="16235:16260" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="16658:16704" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="16739:16890" ph="{...}" />
-                <marker date="1497375513511" expanded="false" signature="16959:16994" ph="{...}" />
+                <element signature="e#9519#9837#0" expanded="false" />
+                <marker date="1497379754591" expanded="false" signature="11243:11739" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11270:11689" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11374:11557" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11396:11447" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11473:11553" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11511:11548" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="11717:11737" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="12731:12966" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="12782:12896" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="12907:12960" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13146:13559" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13182:13385" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13233:13339" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13346:13382" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13633:14097" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13669:13787" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13690:13726" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="13751:13784" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="14464:14584" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="14711:14777" ph="{...}" />
+                <marker date="1497379754591" expanded="true" signature="15311:15649" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15339:15438" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15689:16108" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15737:15751" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15786:15938" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15805:15935" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15862:15894" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="15902:15931" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="16139:16289" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="16167:16192" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="16590:16636" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="16671:16822" ph="{...}" />
+                <marker date="1497379754591" expanded="false" signature="16891:16926" ph="{...}" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FileMenu.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/Menu/FileMenu.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -115,7 +103,7 @@
       <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
+            <state relative-caret-position="528">
               <caret line="66" column="2" selection-start-line="66" selection-start-column="2" selection-end-line="66" selection-end-column="2" />
               <folding />
             </state>
@@ -125,19 +113,80 @@
       <file leaf-file-name="SmoothScrollBox.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="18" column="25" selection-start-line="18" selection-start-column="25" selection-end-line="18" selection-end-column="25" />
-              <folding />
+            <state relative-caret-position="154">
+              <caret line="44" column="33" selection-start-line="44" selection-start-column="33" selection-end-line="44" selection-end-column="33" />
+              <folding>
+                <element signature="n#!!doc;n#SmoothScrollBox#0" expanded="false" />
+                <element signature="n#!!block;n#SmoothScrollBox#0" expanded="false" />
+                <element signature="e#1041#1325#0" expanded="false" />
+                <element signature="e#1061#1323#0" expanded="false" />
+                <element signature="e#1376#1598#0" expanded="false" />
+                <element signature="e#1956#2016#0" expanded="false" />
+                <element signature="e#2061#2254#0" expanded="false" />
+                <element signature="e#2081#2252#0" expanded="false" />
+                <element signature="e#2299#2476#0" expanded="false" />
+                <element signature="e#2318#2474#0" expanded="false" />
+                <element signature="e#2420#2471#0" expanded="false" />
+                <element signature="e#2525#2595#0" expanded="false" />
+                <element signature="e#2644#2714#0" expanded="false" />
+                <element signature="e#2763#2833#0" expanded="false" />
+                <element signature="e#2882#2951#0" expanded="false" />
+                <element signature="e#3002#3087#0" expanded="false" />
+                <element signature="e#3138#3224#0" expanded="false" />
+                <element signature="e#3276#3330#0" expanded="false" />
+                <element signature="e#3382#3435#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MenuBnList.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js">
+      <file leaf-file-name="Category.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="418">
+              <caret line="19" column="38" selection-start-line="19" selection-start-column="38" selection-end-line="19" selection-end-column="38" />
+              <folding>
+                <element signature="e#1193#1252#0" expanded="false" />
+                <element signature="e#1292#1335#0" expanded="false" />
+                <element signature="e#1375#1420#0" expanded="false" />
+                <element signature="e#1461#1934#0" expanded="false" />
+                <element signature="e#1508#1546#0" expanded="false" />
+                <element signature="e#1645#1677#0" expanded="false" />
+                <element signature="e#1743#1789#0" expanded="false" />
+                <element signature="e#1978#2020#0" expanded="false" />
+                <element signature="e#2075#2174#0" expanded="false" />
+                <element signature="e#2230#2331#0" expanded="false" />
+                <element signature="e#2379#2472#0" expanded="false" />
+                <element signature="e#2517#3120#0" expanded="false" />
+                <element signature="e#2582#2694#0" expanded="false" />
+                <element signature="e#2712#2823#0" expanded="false" />
+                <element signature="e#3089#3118#0" expanded="false" />
+                <element signature="e#3160#3212#0" expanded="false" />
+                <element signature="e#3265#3803#0" expanded="false" />
+                <element signature="e#3363#3422#0" expanded="false" />
+                <element signature="e#3847#4276#0" expanded="false" />
+                <element signature="e#4318#4496#0" expanded="false" />
+                <element signature="e#4341#4400#0" expanded="false" />
+                <element signature="e#7097#7197#0" expanded="false" />
+                <element signature="e#7144#7195#0" expanded="false" />
+                <element signature="e#7248#7348#0" expanded="false" />
+                <element signature="e#7295#7346#0" expanded="false" />
+                <marker date="1497379337029" expanded="false" signature="5108:5252" ph="{...}" />
+                <marker date="1497379337029" expanded="false" signature="5301:5392" ph="{...}" />
+                <marker date="1497379337029" expanded="false" signature="5323:5390" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BlockList.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockList.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="110">
+              <caret line="5" column="26" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="26" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -146,7 +195,7 @@
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="548">
-              <caret line="163" column="48" selection-start-line="163" selection-start-column="48" selection-end-line="163" selection-end-column="48" />
+              <caret line="270" column="20" selection-start-line="270" selection-start-column="20" selection-end-line="270" selection-end-column="20" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
                 <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
@@ -178,10 +227,68 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="BlockPalette.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="226">
+              <caret line="67" column="42" selection-start-line="67" selection-start-column="42" selection-end-line="67" selection-end-column="42" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SmoothMenuBnList.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="374">
+              <caret line="181" column="2" selection-start-line="181" selection-start-column="2" selection-end-line="181" selection-end-column="2" />
+              <folding>
+                <element signature="n#!!doc;n#SmoothMenuBnList#0" expanded="false" />
+                <element signature="n#!!block;n#SmoothMenuBnList#0" expanded="false" />
+                <element signature="e#155#178#0" expanded="false" />
+                <element signature="e#659#791#0" expanded="false" />
+                <element signature="e#838#1136#0" expanded="false" />
+                <element signature="e#1197#1227#0" expanded="false" />
+                <element signature="e#1285#1443#0" expanded="false" />
+                <element signature="e#1357#1396#0" expanded="false" />
+                <element signature="e#1402#1441#0" expanded="false" />
+                <element signature="e#1487#1718#0" expanded="false" />
+                <element signature="e#1528#1716#0" expanded="false" />
+                <element signature="e#1762#1957#0" expanded="false" />
+                <element signature="e#1781#1955#0" expanded="false" />
+                <element signature="e#1901#1952#0" expanded="false" />
+                <element signature="e#2008#3058#0" expanded="false" />
+                <element signature="e#2071#3056#0" expanded="false" />
+                <element signature="e#2228#2717#0" expanded="false" />
+                <element signature="e#2252#2331#0" expanded="false" />
+                <element signature="e#2349#2559#0" expanded="false" />
+                <element signature="e#2479#2554#0" expanded="false" />
+                <element signature="e#2791#2822#0" expanded="false" />
+                <element signature="e#2884#2950#0" expanded="false" />
+                <element signature="e#3110#3627#0" expanded="false" />
+                <element signature="e#3134#3625#0" expanded="false" />
+                <element signature="e#3250#3456#0" expanded="false" />
+                <element signature="e#3421#3452#0" expanded="false" />
+                <element signature="e#3587#3622#0" expanded="false" />
+                <element signature="e#3674#3712#0" expanded="false" />
+                <element signature="e#3765#3873#0" expanded="false" />
+                <element signature="e#3786#3857#0" expanded="false" />
+                <element signature="e#3824#3854#0" expanded="false" />
+                <element signature="e#3942#4133#0" expanded="false" />
+                <element signature="e#4189#4629#0" expanded="false" />
+                <element signature="e#4209#4627#0" expanded="false" />
+                <element signature="e#4681#4708#0" expanded="false" />
+                <element signature="e#4759#4825#0" expanded="false" />
+                <element signature="e#4885#5159#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1452">
+            <state relative-caret-position="924">
               <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
               <folding>
                 <element signature="e#15#254#0" expanded="false" />
@@ -331,46 +438,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BlockPalette.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="44" column="26" selection-start-line="44" selection-start-column="26" selection-end-line="44" selection-end-column="26" />
-              <folding>
-                <element signature="e#335#1389#0" expanded="false" />
-                <element signature="e#2433#2526#0" expanded="false" />
-                <element signature="e#3214#3316#0" expanded="false" />
-                <element signature="e#3267#3278#0" expanded="false" />
-                <element signature="e#3355#3396#0" expanded="false" />
-                <element signature="e#3397#3524#0" expanded="false" />
-                <element signature="e#3570#3687#0" expanded="false" />
-                <element signature="e#3722#4352#0" expanded="false" />
-                <element signature="e#3764#4350#0" expanded="false" />
-                <element signature="e#4388#4504#0" expanded="false" />
-                <element signature="e#4429#4502#0" expanded="false" />
-                <element signature="e#4544#4648#0" expanded="false" />
-                <element signature="e#4586#4646#0" expanded="false" />
-                <element signature="e#4690#4773#0" expanded="false" />
-                <element signature="e#4731#4771#0" expanded="false" />
-                <element signature="e#4808#4907#0" expanded="false" />
-                <element signature="e#4849#4905#0" expanded="false" />
-                <element signature="e#4952#5062#0" expanded="false" />
-                <element signature="e#5004#5060#0" expanded="false" />
-                <element signature="e#5107#5217#0" expanded="false" />
-                <element signature="e#5159#5215#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="526">
-              <caret line="72" column="9" selection-start-line="72" selection-start-column="9" selection-end-line="72" selection-end-column="9" />
+            <state relative-caret-position="330">
+              <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
               <folding>
-                <element signature="e#898#928#0" expanded="false" />
-                <element signature="e#2513#2550#0" expanded="false" />
+                <element signature="e#897#927#0" expanded="false" />
+                <element signature="e#2512#2549#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -402,7 +477,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/ExecutionStatus/ExecutionStatusError.js" />
         <option value="$PROJECT_DIR$/ExecutionStatus/ExecutionStatus.js" />
         <option value="$PROJECT_DIR$/version.txt" />
         <option value="$PROJECT_DIR$/UIParts/DeviceStatusLight.js" />
@@ -442,16 +516,17 @@
         <option value="$PROJECT_DIR$/ColorsAndGraphics/Sounds.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" />
         <option value="$PROJECT_DIR$/HttpRequestBuilder.js" />
-        <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
-        <option value="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
         <option value="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
-        <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js" />
         <option value="$PROJECT_DIR$/UIParts/OpenDialog.js" />
+        <option value="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
+        <option value="$PROJECT_DIR$/DebugOptions.js" />
+        <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
+        <option value="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
         <option value="$PROJECT_DIR$/SaveManager.js" />
       </list>
     </option>
@@ -810,7 +885,7 @@
       <workItem from="1496949900733" duration="599000" />
       <workItem from="1497015344063" duration="21796000" />
       <workItem from="1497273502963" duration="28393000" />
-      <workItem from="1497363382839" duration="9805000" />
+      <workItem from="1497363382839" duration="14038000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -907,7 +982,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="845304000" />
+    <option name="totallyTimeSpent" value="849537000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1245,6 +1320,246 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="262">
           <caret line="473" column="44" selection-start-line="473" selection-start-column="44" selection-end-line="473" selection-end-column="44" />
+          <folding>
+            <element signature="e#14#891#0" expanded="false" />
+            <element signature="e#3295#3349#0" expanded="false" />
+            <element signature="e#3379#3603#0" expanded="false" />
+            <element signature="e#3642#3735#0" expanded="false" />
+            <element signature="e#3666#3713#0" expanded="false" />
+            <element signature="e#3774#3867#0" expanded="false" />
+            <element signature="e#3798#3845#0" expanded="false" />
+            <element signature="e#3906#3999#0" expanded="false" />
+            <element signature="e#3930#3977#0" expanded="false" />
+            <element signature="e#4038#4131#0" expanded="false" />
+            <element signature="e#4062#4109#0" expanded="false" />
+            <element signature="e#4133#4302#0" expanded="false" />
+            <element signature="e#4337#4367#0" expanded="false" />
+            <element signature="e#4369#4503#0" expanded="false" />
+            <element signature="e#4538#4568#0" expanded="false" />
+            <element signature="e#4570#4702#0" expanded="false" />
+            <element signature="e#4742#4889#0" expanded="false" />
+            <element signature="e#4891#5012#0" expanded="false" />
+            <element signature="e#5051#5182#0" expanded="false" />
+            <element signature="e#5093#5180#0" expanded="false" />
+            <element signature="e#5184#5321#0" expanded="false" />
+            <element signature="e#5356#5507#0" expanded="false" />
+            <element signature="e#5509#5586#0" expanded="false" />
+            <element signature="e#5618#6016#0" expanded="false" />
+            <element signature="e#5727#5782#0" expanded="false" />
+            <element signature="e#5809#5862#0" expanded="false" />
+            <element signature="e#5889#5919#0" expanded="false" />
+            <element signature="e#5962#6014#0" expanded="false" />
+            <element signature="e#6018#6209#0" expanded="false" />
+            <element signature="e#7908#8090#0" expanded="false" />
+            <element signature="e#8129#8186#0" expanded="false" />
+            <element signature="e#8188#8410#0" expanded="false" />
+            <element signature="e#8450#8547#0" expanded="false" />
+            <element signature="e#8549#8826#0" expanded="false" />
+            <element signature="e#8867#9206#0" expanded="false" />
+            <element signature="e#8889#9103#0" expanded="false" />
+            <element signature="e#9208#9368#0" expanded="false" />
+            <element signature="e#9412#10125#0" expanded="false" />
+            <element signature="e#9668#9786#0" expanded="false" />
+            <element signature="e#9812#9884#0" expanded="false" />
+            <element signature="e#9911#10009#0" expanded="false" />
+            <element signature="e#10036#10123#0" expanded="false" />
+            <element signature="e#10127#10463#0" expanded="false" />
+            <element signature="e#10505#10989#0" expanded="false" />
+            <element signature="e#10586#10684#0" expanded="false" />
+            <element signature="e#10711#10798#0" expanded="false" />
+            <element signature="e#10915#10987#0" expanded="false" />
+            <element signature="e#11340#11493#0" expanded="false" />
+            <element signature="e#11379#11445#0" expanded="false" />
+            <element signature="e#11495#12134#0" expanded="false" />
+            <element signature="e#12177#13411#0" expanded="false" />
+            <element signature="e#12363#12874#0" expanded="false" />
+            <element signature="e#12652#12748#0" expanded="false" />
+            <element signature="e#12767#12789#0" expanded="false" />
+            <element signature="e#12808#12830#0" expanded="false" />
+            <element signature="e#12849#12871#0" expanded="false" />
+            <element signature="e#13042#13136#0" expanded="false" />
+            <element signature="e#13154#13174#0" expanded="false" />
+            <element signature="e#13192#13212#0" expanded="false" />
+            <element signature="e#13230#13250#0" expanded="false" />
+            <element signature="e#13252#13298#0" expanded="false" />
+            <element signature="e#13413#13622#0" expanded="false" />
+            <element signature="e#13659#16184#0" expanded="false" />
+            <element signature="e#13785#13974#0" expanded="false" />
+            <element signature="e#14093#14538#0" expanded="false" />
+            <element signature="e#14315#14415#0" expanded="false" />
+            <element signature="e#14443#14535#0" expanded="false" />
+            <element signature="e#14687#14764#0" expanded="false" />
+            <element signature="e#14788#15147#0" expanded="false" />
+            <element signature="e#15171#15776#0" expanded="false" />
+            <element signature="e#15508#15586#0" expanded="false" />
+            <element signature="e#15944#16017#0" expanded="false" />
+            <element signature="e#16110#16182#0" expanded="false" />
+            <element signature="e#16186#16694#0" expanded="false" />
+            <element signature="e#16736#17317#0" expanded="false" />
+            <element signature="e#16849#16970#0" expanded="false" />
+            <element signature="e#16994#17208#0" expanded="false" />
+            <element signature="e#17234#17295#0" expanded="false" />
+            <element signature="e#17319#17628#0" expanded="false" />
+            <element signature="e#17672#18285#0" expanded="false" />
+            <element signature="e#17866#17967#0" expanded="false" />
+            <element signature="e#18002#18034#0" expanded="false" />
+            <element signature="e#18093#18283#0" expanded="false" />
+            <element signature="e#18235#18280#0" expanded="false" />
+            <element signature="e#18287#18532#0" expanded="false" />
+            <element signature="e#18578#19148#0" expanded="false" />
+            <element signature="e#18813#18856#0" expanded="false" />
+            <element signature="e#18880#18951#0" expanded="false" />
+            <element signature="e#19150#19489#0" expanded="false" />
+            <element signature="e#21273#21471#0" expanded="false" />
+            <element signature="e#21508#21854#0" expanded="false" />
+            <element signature="e#21530#21649#0" expanded="false" />
+            <element signature="e#21655#21852#0" expanded="false" />
+            <element signature="e#21856#22055#0" expanded="false" />
+            <element signature="e#22092#23947#0" expanded="false" />
+            <element signature="e#22094#22114#0" expanded="false" />
+            <element signature="e#22356#22474#0" expanded="false" />
+            <element signature="e#22521#22891#0" expanded="false" />
+            <element signature="e#22572#22624#0" expanded="false" />
+            <element signature="e#22679#22744#0" expanded="false" />
+            <element signature="e#22792#22888#0" expanded="false" />
+            <element signature="e#23410#23507#0" expanded="false" />
+            <element signature="e#23547#23665#0" expanded="false" />
+            <element signature="e#23688#23763#0" expanded="false" />
+            <element signature="e#23780#23833#0" expanded="false" />
+            <element signature="e#23856#23945#0" expanded="false" />
+            <element signature="e#23949#24164#0" expanded="false" />
+            <element signature="e#24198#25114#0" expanded="false" />
+            <element signature="e#24339#25021#0" expanded="false" />
+            <element signature="e#24390#24601#0" expanded="false" />
+            <element signature="e#24608#24798#0" expanded="false" />
+            <element signature="e#24819#24869#0" expanded="false" />
+            <element signature="e#25116#25247#0" expanded="false" />
+            <element signature="e#25290#25440#0" expanded="false" />
+            <element signature="e#25317#25366#0" expanded="false" />
+            <element signature="e#25372#25438#0" expanded="false" />
+            <element signature="e#25442#25638#0" expanded="false" />
+            <element signature="e#25676#25886#0" expanded="false" />
+            <element signature="e#25703#25807#0" expanded="false" />
+            <element signature="e#25813#25884#0" expanded="false" />
+            <element signature="e#25888#26029#0" expanded="false" />
+            <element signature="e#26030#26271#0" expanded="false" />
+            <element signature="e#26314#26644#0" expanded="false" />
+            <element signature="e#26362#26470#0" expanded="false" />
+            <element signature="e#26498#26552#0" expanded="false" />
+            <element signature="e#26559#26602#0" expanded="false" />
+            <element signature="e#26646#26842#0" expanded="false" />
+            <element signature="e#26885#27402#0" expanded="false" />
+            <element signature="e#26989#27071#0" expanded="false" />
+            <element signature="e#27098#27187#0" expanded="false" />
+            <element signature="e#27214#27264#0" expanded="false" />
+            <element signature="e#27291#27400#0" expanded="false" />
+            <element signature="e#27405#27661#0" expanded="false" />
+            <element signature="e#27713#28090#0" expanded="false" />
+            <element signature="e#27769#28071#0" expanded="false" />
+            <element signature="e#27805#27862#0" expanded="false" />
+            <element signature="e#27869#27979#0" expanded="false" />
+            <element signature="e#28007#28068#0" expanded="false" />
+            <element signature="e#28092#28208#0" expanded="false" />
+            <element signature="e#28252#28257#0" expanded="false" />
+            <element signature="e#28259#28325#0" expanded="false" />
+            <element signature="e#28374#28378#0" expanded="false" />
+            <element signature="e#28380#28446#0" expanded="false" />
+            <element signature="e#28502#28520#0" expanded="false" />
+            <element signature="e#28522#28606#0" expanded="false" />
+            <element signature="e#28671#29169#0" expanded="false" />
+            <element signature="e#28710#28795#0" expanded="false" />
+            <element signature="e#28771#28792#0" expanded="false" />
+            <element signature="e#28822#28909#0" expanded="false" />
+            <element signature="e#28885#28906#0" expanded="false" />
+            <element signature="e#28936#29023#0" expanded="false" />
+            <element signature="e#28999#29020#0" expanded="false" />
+            <element signature="e#29066#29152#0" expanded="false" />
+            <element signature="e#29128#29149#0" expanded="false" />
+            <element signature="e#29171#29231#0" expanded="false" />
+            <element signature="e#29282#29613#0" expanded="false" />
+            <element signature="e#29321#29368#0" expanded="false" />
+            <element signature="e#29395#29444#0" expanded="false" />
+            <element signature="e#29471#29520#0" expanded="false" />
+            <element signature="e#29563#29611#0" expanded="false" />
+            <element signature="e#29615#29712#0" expanded="false" />
+            <element signature="e#29748#29942#0" expanded="false" />
+            <element signature="e#29839#29940#0" expanded="false" />
+            <element signature="e#29944#30072#0" expanded="false" />
+            <element signature="e#30113#30184#0" expanded="false" />
+            <element signature="e#30186#30268#0" expanded="false" />
+            <element signature="e#30300#30616#0" expanded="false" />
+            <element signature="e#30455#30485#0" expanded="false" />
+            <element signature="e#30512#30542#0" expanded="false" />
+            <element signature="e#30585#30614#0" expanded="false" />
+            <element signature="e#30618#30656#0" expanded="false" />
+            <element signature="e#30692#30989#0" expanded="false" />
+            <element signature="e#30816#30850#0" expanded="false" />
+            <element signature="e#30877#30911#0" expanded="false" />
+            <element signature="e#30954#30987#0" expanded="false" />
+            <element signature="e#31045#31190#0" expanded="false" />
+            <element signature="e#31137#31188#0" expanded="false" />
+            <element signature="e#31234#31868#0" expanded="false" />
+            <element signature="e#31483#31541#0" expanded="false" />
+            <element signature="e#31595#31851#0" expanded="false" />
+            <element signature="e#31748#31815#0" expanded="false" />
+            <element signature="e#31905#32267#0" expanded="false" />
+            <element signature="e#31976#32189#0" expanded="false" />
+            <element signature="e#32014#32158#0" expanded="false" />
+            <element signature="e#32051#32103#0" expanded="false" />
+            <element signature="e#32112#32154#0" expanded="false" />
+            <element signature="e#32165#32186#0" expanded="false" />
+            <element signature="e#32200#32219#0" expanded="false" />
+            <element signature="e#32320#32791#0" expanded="false" />
+            <element signature="e#32471#32673#0" expanded="false" />
+            <element signature="e#32511#32670#0" expanded="false" />
+            <element signature="e#32625#32666#0" expanded="false" />
+            <element signature="e#32679#32789#0" expanded="false" />
+            <element signature="e#32739#32786#0" expanded="false" />
+            <element signature="e#32842#33292#0" expanded="false" />
+            <element signature="e#33133#33185#0" expanded="false" />
+            <element signature="e#33238#33290#0" expanded="false" />
+            <element signature="e#33343#33396#0" expanded="false" />
+            <element signature="e#33447#33500#0" expanded="false" />
+            <element signature="e#33543#33588#0" expanded="false" />
+            <element signature="e#33631#33676#0" expanded="false" />
+            <element signature="e#33730#34180#0" expanded="false" />
+            <element signature="e#33769#33842#0" expanded="false" />
+            <element signature="e#33818#33839#0" expanded="false" />
+            <element signature="e#33869#33944#0" expanded="false" />
+            <element signature="e#33920#33941#0" expanded="false" />
+            <element signature="e#33971#34046#0" expanded="false" />
+            <element signature="e#34022#34043#0" expanded="false" />
+            <element signature="e#34089#34163#0" expanded="false" />
+            <element signature="e#34139#34160#0" expanded="false" />
+            <element signature="e#34226#34644#0" expanded="false" />
+            <element signature="e#34265#34330#0" expanded="false" />
+            <element signature="e#34306#34327#0" expanded="false" />
+            <element signature="e#34357#34424#0" expanded="false" />
+            <element signature="e#34400#34421#0" expanded="false" />
+            <element signature="e#34451#34518#0" expanded="false" />
+            <element signature="e#34494#34515#0" expanded="false" />
+            <element signature="e#34561#34627#0" expanded="false" />
+            <element signature="e#34603#34624#0" expanded="false" />
+            <element signature="e#34692#34741#0" expanded="false" />
+            <element signature="e#34789#34838#0" expanded="false" />
+            <element signature="e#34880#35308#0" expanded="false" />
+            <element signature="e#34935#34998#0" expanded="false" />
+            <element signature="e#35025#35090#0" expanded="false" />
+            <element signature="e#35117#35182#0" expanded="false" />
+            <element signature="e#35225#35289#0" expanded="false" />
+            <element signature="e#35364#35839#0" expanded="false" />
+            <element signature="e#35457#35547#0" expanded="false" />
+            <element signature="e#35574#35639#0" expanded="false" />
+            <element signature="e#35666#35731#0" expanded="false" />
+            <element signature="e#35774#35837#0" expanded="false" />
+            <element signature="e#35887#35965#0" expanded="false" />
+            <element signature="e#36022#36219#0" expanded="false" />
+            <element signature="e#36269#36307#0" expanded="false" />
+            <element signature="e#36357#36601#0" expanded="false" />
+            <element signature="e#36406#36598#0" expanded="false" />
+            <element signature="e#36427#36526#0" expanded="false" />
+            <element signature="e#36533#36595#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1275,6 +1590,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="264">
           <caret line="60" column="48" selection-start-line="60" selection-start-column="48" selection-end-line="60" selection-end-column="48" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1292,28 +1610,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="246" column="24" selection-start-line="246" selection-start-column="24" selection-end-line="246" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="686">
-          <caret line="166" column="5" selection-start-line="166" selection-start-column="5" selection-end-line="166" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockContainers/DisplayStack.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="682">
           <caret line="40" column="33" selection-start-line="40" selection-start-column="33" selection-end-line="40" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1434,6 +1735,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="282">
           <caret line="101" column="19" selection-start-line="101" selection-start-column="0" selection-end-line="102" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1606,157 +1910,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1716">
-          <caret line="180" column="35" selection-start-line="180" selection-start-column="35" selection-end-line="180" selection-end-column="35" />
-          <folding>
-            <element signature="e#981#1040#0" expanded="false" />
-            <element signature="e#1080#1123#0" expanded="false" />
-            <element signature="e#1163#1208#0" expanded="false" />
-            <element signature="e#1249#1729#0" expanded="false" />
-            <element signature="e#1296#1334#0" expanded="false" />
-            <element signature="e#1433#1465#0" expanded="false" />
-            <element signature="e#1531#1584#0" expanded="false" />
-            <element signature="e#1773#1815#0" expanded="false" />
-            <element signature="e#1870#1969#0" expanded="false" />
-            <element signature="e#2025#2126#0" expanded="false" />
-            <element signature="e#2174#2267#0" expanded="false" />
-            <element signature="e#2312#2922#0" expanded="false" />
-            <element signature="e#2377#2489#0" expanded="false" />
-            <element signature="e#2507#2618#0" expanded="false" />
-            <element signature="e#2891#2920#0" expanded="false" />
-            <element signature="e#2962#3014#0" expanded="false" />
-            <element signature="e#3067#3612#0" expanded="false" />
-            <element signature="e#3165#3224#0" expanded="false" />
-            <element signature="e#3656#4092#0" expanded="false" />
-            <element signature="e#4134#4312#0" expanded="false" />
-            <element signature="e#4157#4216#0" expanded="false" />
-            <element signature="e#4848#4971#0" expanded="false" />
-            <element signature="e#6747#6777#0" expanded="false" />
-            <element signature="e#6816#6846#0" expanded="false" />
-            <element signature="e#6897#6997#0" expanded="false" />
-            <element signature="e#6944#6995#0" expanded="false" />
-            <element signature="e#7048#7148#0" expanded="false" />
-            <element signature="e#7095#7146#0" expanded="false" />
-            <marker date="1497299028168" expanded="false" signature="5042:5186" ph="{...}" />
-            <marker date="1497299028168" expanded="false" signature="5235:5326" ph="{...}" />
-            <marker date="1497299028168" expanded="false" signature="5257:5324" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="72" column="9" selection-start-line="72" selection-start-column="9" selection-end-line="72" selection-end-column="9" />
-          <folding>
-            <element signature="e#898#928#0" expanded="false" />
-            <element signature="e#2513#2550#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="548">
-          <caret line="163" column="48" selection-start-line="163" selection-start-column="48" selection-end-line="163" selection-end-column="48" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
-            <element signature="e#2994#3138#0" expanded="false" />
-            <element signature="e#3163#3601#0" expanded="false" />
-            <element signature="e#3229#3322#0" expanded="false" />
-            <element signature="e#3394#3484#0" expanded="false" />
-            <element signature="e#3607#3658#0" expanded="false" />
-            <element signature="e#3717#3917#0" expanded="false" />
-            <element signature="e#3964#4024#0" expanded="false" />
-            <element signature="e#6187#6604#0" expanded="false" />
-            <element signature="e#6251#6441#0" expanded="false" />
-            <element signature="e#6288#6382#0" expanded="false" />
-            <element signature="e#6389#6438#0" expanded="false" />
-            <element signature="e#6709#7788#0" expanded="false" />
-            <element signature="e#6800#7011#0" expanded="false" />
-            <element signature="e#6914#6938#0" expanded="false" />
-            <element signature="e#6951#6976#0" expanded="false" />
-            <element signature="e#6983#7008#0" expanded="false" />
-            <element signature="e#7018#7786#0" expanded="false" />
-            <element signature="e#7322#7419#0" expanded="false" />
-            <element signature="e#7546#7668#0" expanded="false" />
-            <element signature="e#7626#7664#0" expanded="false" />
-            <element signature="e#8403#8514#0" expanded="false" />
-            <element signature="e#8557#8741#0" expanded="false" />
-            <element signature="e#8793#8852#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="44" column="26" selection-start-line="44" selection-start-column="26" selection-end-line="44" selection-end-column="26" />
-          <folding>
-            <element signature="e#335#1389#0" expanded="false" />
-            <element signature="e#2433#2526#0" expanded="false" />
-            <element signature="e#3214#3316#0" expanded="false" />
-            <element signature="e#3267#3278#0" expanded="false" />
-            <element signature="e#3355#3396#0" expanded="false" />
-            <element signature="e#3397#3524#0" expanded="false" />
-            <element signature="e#3570#3687#0" expanded="false" />
-            <element signature="e#3722#4352#0" expanded="false" />
-            <element signature="e#3764#4350#0" expanded="false" />
-            <element signature="e#4388#4504#0" expanded="false" />
-            <element signature="e#4429#4502#0" expanded="false" />
-            <element signature="e#4544#4648#0" expanded="false" />
-            <element signature="e#4586#4646#0" expanded="false" />
-            <element signature="e#4690#4773#0" expanded="false" />
-            <element signature="e#4731#4771#0" expanded="false" />
-            <element signature="e#4808#4907#0" expanded="false" />
-            <element signature="e#4849#4905#0" expanded="false" />
-            <element signature="e#4952#5062#0" expanded="false" />
-            <element signature="e#5004#5060#0" expanded="false" />
-            <element signature="e#5107#5217#0" expanded="false" />
-            <element signature="e#5159#5215#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Menu/FileMenu.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="484">
           <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="33" column="59" selection-start-line="33" selection-start-column="59" selection-end-line="33" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="66" column="2" selection-start-line="66" selection-start-column="2" selection-end-line="66" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="18" column="25" selection-start-line="18" selection-start-column="25" selection-end-line="18" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1769,9 +1926,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
+          <folding>
+            <element signature="e#897#927#0" expanded="false" />
+            <element signature="e#2512#2549#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="484">
+          <caret line="40" column="78" selection-start-line="40" selection-start-column="78" selection-end-line="40" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1452">
+        <state relative-caret-position="924">
           <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
           <folding>
             <element signature="e#15#254#0" expanded="false" />
@@ -1920,10 +2104,181 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="181" column="2" selection-start-line="181" selection-start-column="2" selection-end-line="181" selection-end-column="2" />
+          <folding>
+            <element signature="n#!!doc;n#SmoothMenuBnList#0" expanded="false" />
+            <element signature="n#!!block;n#SmoothMenuBnList#0" expanded="false" />
+            <element signature="e#155#178#0" expanded="false" />
+            <element signature="e#659#791#0" expanded="false" />
+            <element signature="e#838#1136#0" expanded="false" />
+            <element signature="e#1197#1227#0" expanded="false" />
+            <element signature="e#1285#1443#0" expanded="false" />
+            <element signature="e#1357#1396#0" expanded="false" />
+            <element signature="e#1402#1441#0" expanded="false" />
+            <element signature="e#1487#1718#0" expanded="false" />
+            <element signature="e#1528#1716#0" expanded="false" />
+            <element signature="e#1762#1957#0" expanded="false" />
+            <element signature="e#1781#1955#0" expanded="false" />
+            <element signature="e#1901#1952#0" expanded="false" />
+            <element signature="e#2008#3058#0" expanded="false" />
+            <element signature="e#2071#3056#0" expanded="false" />
+            <element signature="e#2228#2717#0" expanded="false" />
+            <element signature="e#2252#2331#0" expanded="false" />
+            <element signature="e#2349#2559#0" expanded="false" />
+            <element signature="e#2479#2554#0" expanded="false" />
+            <element signature="e#2791#2822#0" expanded="false" />
+            <element signature="e#2884#2950#0" expanded="false" />
+            <element signature="e#3110#3627#0" expanded="false" />
+            <element signature="e#3134#3625#0" expanded="false" />
+            <element signature="e#3250#3456#0" expanded="false" />
+            <element signature="e#3421#3452#0" expanded="false" />
+            <element signature="e#3587#3622#0" expanded="false" />
+            <element signature="e#3674#3712#0" expanded="false" />
+            <element signature="e#3765#3873#0" expanded="false" />
+            <element signature="e#3786#3857#0" expanded="false" />
+            <element signature="e#3824#3854#0" expanded="false" />
+            <element signature="e#3942#4133#0" expanded="false" />
+            <element signature="e#4189#4629#0" expanded="false" />
+            <element signature="e#4209#4627#0" expanded="false" />
+            <element signature="e#4681#4708#0" expanded="false" />
+            <element signature="e#4759#4825#0" expanded="false" />
+            <element signature="e#4885#5159#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="67" column="42" selection-start-line="67" selection-start-column="42" selection-end-line="67" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BlockPalette/Category.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="19" column="38" selection-start-line="19" selection-start-column="38" selection-end-line="19" selection-end-column="38" />
+          <folding>
+            <element signature="e#1193#1252#0" expanded="false" />
+            <element signature="e#1292#1335#0" expanded="false" />
+            <element signature="e#1375#1420#0" expanded="false" />
+            <element signature="e#1461#1934#0" expanded="false" />
+            <element signature="e#1508#1546#0" expanded="false" />
+            <element signature="e#1645#1677#0" expanded="false" />
+            <element signature="e#1743#1789#0" expanded="false" />
+            <element signature="e#1978#2020#0" expanded="false" />
+            <element signature="e#2075#2174#0" expanded="false" />
+            <element signature="e#2230#2331#0" expanded="false" />
+            <element signature="e#2379#2472#0" expanded="false" />
+            <element signature="e#2517#3120#0" expanded="false" />
+            <element signature="e#2582#2694#0" expanded="false" />
+            <element signature="e#2712#2823#0" expanded="false" />
+            <element signature="e#3089#3118#0" expanded="false" />
+            <element signature="e#3160#3212#0" expanded="false" />
+            <element signature="e#3265#3803#0" expanded="false" />
+            <element signature="e#3363#3422#0" expanded="false" />
+            <element signature="e#3847#4276#0" expanded="false" />
+            <element signature="e#4318#4496#0" expanded="false" />
+            <element signature="e#4341#4400#0" expanded="false" />
+            <element signature="e#7097#7197#0" expanded="false" />
+            <element signature="e#7144#7195#0" expanded="false" />
+            <element signature="e#7248#7348#0" expanded="false" />
+            <element signature="e#7295#7346#0" expanded="false" />
+            <marker date="1497379337029" expanded="false" signature="5108:5252" ph="{...}" />
+            <marker date="1497379337029" expanded="false" signature="5301:5392" ph="{...}" />
+            <marker date="1497379337029" expanded="false" signature="5323:5390" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="548">
+          <caret line="270" column="20" selection-start-line="270" selection-start-column="20" selection-end-line="270" selection-end-column="20" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+            <element signature="e#2994#3138#0" expanded="false" />
+            <element signature="e#3163#3601#0" expanded="false" />
+            <element signature="e#3229#3322#0" expanded="false" />
+            <element signature="e#3394#3484#0" expanded="false" />
+            <element signature="e#3607#3658#0" expanded="false" />
+            <element signature="e#3717#3917#0" expanded="false" />
+            <element signature="e#3964#4024#0" expanded="false" />
+            <element signature="e#6187#6604#0" expanded="false" />
+            <element signature="e#6251#6441#0" expanded="false" />
+            <element signature="e#6288#6382#0" expanded="false" />
+            <element signature="e#6389#6438#0" expanded="false" />
+            <element signature="e#6709#7788#0" expanded="false" />
+            <element signature="e#6800#7011#0" expanded="false" />
+            <element signature="e#6914#6938#0" expanded="false" />
+            <element signature="e#6951#6976#0" expanded="false" />
+            <element signature="e#6983#7008#0" expanded="false" />
+            <element signature="e#7018#7786#0" expanded="false" />
+            <element signature="e#7322#7419#0" expanded="false" />
+            <element signature="e#7546#7668#0" expanded="false" />
+            <element signature="e#7626#7664#0" expanded="false" />
+            <element signature="e#8403#8514#0" expanded="false" />
+            <element signature="e#8557#8741#0" expanded="false" />
+            <element signature="e#8793#8852#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="5" column="26" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="26" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/OpenDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="66" column="2" selection-start-line="66" selection-start-column="2" selection-end-line="66" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="44" column="33" selection-start-line="44" selection-start-column="33" selection-end-line="44" selection-end-column="33" />
+          <folding>
+            <element signature="n#!!doc;n#SmoothScrollBox#0" expanded="false" />
+            <element signature="n#!!block;n#SmoothScrollBox#0" expanded="false" />
+            <element signature="e#1041#1325#0" expanded="false" />
+            <element signature="e#1061#1323#0" expanded="false" />
+            <element signature="e#1376#1598#0" expanded="false" />
+            <element signature="e#1956#2016#0" expanded="false" />
+            <element signature="e#2061#2254#0" expanded="false" />
+            <element signature="e#2081#2252#0" expanded="false" />
+            <element signature="e#2299#2476#0" expanded="false" />
+            <element signature="e#2318#2474#0" expanded="false" />
+            <element signature="e#2420#2471#0" expanded="false" />
+            <element signature="e#2525#2595#0" expanded="false" />
+            <element signature="e#2644#2714#0" expanded="false" />
+            <element signature="e#2763#2833#0" expanded="false" />
+            <element signature="e#2882#2951#0" expanded="false" />
+            <element signature="e#3002#3087#0" expanded="false" />
+            <element signature="e#3138#3224#0" expanded="false" />
+            <element signature="e#3276#3330#0" expanded="false" />
+            <element signature="e#3382#3435#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/SaveManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="252" column="73" selection-start-line="252" selection-start-column="73" selection-end-line="252" selection-end-column="73" />
+        <state relative-caret-position="362">
+          <caret line="251" column="59" selection-start-line="251" selection-start-column="59" selection-end-line="251" selection-end-column="59" />
           <folding>
             <element signature="e#1917#2177#0" expanded="false" />
             <element signature="e#2215#2302#0" expanded="false" />
@@ -1954,41 +2309,40 @@
             <element signature="e#8285#8313#0" expanded="false" />
             <element signature="e#8348#8551#0" expanded="false" />
             <element signature="e#8586#8657#0" expanded="false" />
-            <element signature="e#9587#9905#0" expanded="false" />
-            <element signature="e#10463#17058#0" expanded="false" />
-            <marker date="1497375513511" expanded="false" signature="11311:11807" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11338:11757" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11442:11625" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11464:11515" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11541:11621" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11579:11616" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="11785:11805" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="12799:13034" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="12850:12964" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="12975:13028" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13214:13627" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13250:13453" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13301:13407" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13414:13450" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13701:14165" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13737:13855" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13758:13794" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="13819:13852" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="14532:14652" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="14779:14845" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15379:15717" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15407:15506" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15757:16176" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15805:15819" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15854:16006" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15873:16003" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15930:15962" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="15970:15999" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="16207:16357" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="16235:16260" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="16658:16704" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="16739:16890" ph="{...}" />
-            <marker date="1497375513511" expanded="false" signature="16959:16994" ph="{...}" />
+            <element signature="e#9519#9837#0" expanded="false" />
+            <marker date="1497379754591" expanded="false" signature="11243:11739" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11270:11689" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11374:11557" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11396:11447" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11473:11553" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11511:11548" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="11717:11737" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="12731:12966" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="12782:12896" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="12907:12960" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13146:13559" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13182:13385" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13233:13339" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13346:13382" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13633:14097" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13669:13787" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13690:13726" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="13751:13784" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="14464:14584" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="14711:14777" ph="{...}" />
+            <marker date="1497379754591" expanded="true" signature="15311:15649" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15339:15438" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15689:16108" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15737:15751" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15786:15938" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15805:15935" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15862:15894" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="15902:15931" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="16139:16289" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="16167:16192" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="16590:16636" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="16671:16822" ph="{...}" />
+            <marker date="1497379754591" expanded="false" signature="16891:16926" ph="{...}" />
           </folding>
         </state>
       </provider>

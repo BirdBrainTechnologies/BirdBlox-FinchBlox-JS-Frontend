@@ -8,9 +8,14 @@ function Category(buttonX,buttonY,index){
 	this.maxY=this.y; */
 	this.scrollDiv=this.createDiv();
 	TouchReceiver.addListenersPalette(this.scrollDiv);
+	this.group = GuiElements.create.group(0,0);
+	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+		BlockPalette.width, BlockPalette.height, 0, 0);
+	/*
 	TouchReceiver.createScrollFixTimer(this.scrollDiv);
 	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
 	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
+	*/
 	this.id=BlockList.getCatId(index);
 	this.name=BlockList.getCatName(index);
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -21,11 +26,11 @@ function Category(buttonX,buttonY,index){
 	this.displayStacks=new Array();
 	this.buttons=new Array();
 	this.labels=new Array();
+	this.finalized = false;
 	this.fillGroup();
 	this.scrolling=false;
 	this.scrollXOffset=0;
 	this.scrollYOffset=0;
-	this.finalized = false;
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
@@ -47,7 +52,7 @@ Category.prototype.clearGroup=function(){
 	}
 	this.buttons=new Array();
 	for(var i=0;i<this.labels.length;i++){
-		this.contentGroup.removeChild(this.labels[i]);
+		this.group.removeChild(this.labels[i]);
 	}
 	this.labels=new Array();
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -80,7 +85,7 @@ Category.prototype.addBlock=function(block){
 		this.currentBlockY+=BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX,this.currentBlockY);
 	}
-	var displayStack=new DisplayStack(block,this.contentGroup,this);
+	var displayStack=new DisplayStack(block,this.group,this);
 	this.displayStacks.push(displayStack);
 	var height=displayStack.firstBlock.height;
 	this.currentBlockY+=height;
@@ -100,7 +105,7 @@ Category.prototype.addButton=function(text,callback){
 	if(this.lastHadStud){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
 	}
-	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.contentGroup);
+	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
 	var BP=BlockPalette;
 	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
 	button.setCallbackFunction(callback,true);
@@ -114,7 +119,7 @@ Category.prototype.addLabel=function(text){
 	var x=this.currentBlockX;
 	var y=this.currentBlockY;
 	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
-	this.contentGroup.appendChild(labelE);
+	this.group.appendChild(labelE);
 	this.labels.push(labelE);
 	var height=GuiElements.measure.textHeight(labelE);
 	GuiElements.move.element(labelE,x,y+height);
@@ -143,14 +148,13 @@ Category.prototype.select=function(){
 	if(BlockPalette.selectedCat!=null){
 		BlockPalette.selectedCat.deselect();
 	}
-	GuiElements.layers.paletteScroll.appendChild(this.scrollDiv);
 	BlockPalette.selectedCat=this;
 	this.button.select();
-	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+	this.smoothScrollBox.show();
 }
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
-	GuiElements.layers.paletteScroll.removeChild(this.scrollDiv);
+	this.smoothScrollBox.hide();
 	this.button.deselect();
 }
 /*
@@ -185,8 +189,7 @@ Category.prototype.endScroll=function(){
 	this.scrolling=false;
 };
 */
-Category.prototype.updateWidth=function(){
-	if(!this.finalized) return;
+Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
 		var blockW=this.blocks[i].width;
@@ -195,7 +198,11 @@ Category.prototype.updateWidth=function(){
 		}
 	}
 	this.width=currentWidth+2*BlockPalette.mainHMargin;
-	this.updateSmoothScrollSet();
+};
+Category.prototype.updateWidth=function(){
+	if(!this.finalized) return;
+	this.computeWidth();
+	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
 /*
 Category.prototype.setMinCoords=function(){
@@ -206,16 +213,20 @@ Category.prototype.setMinCoords=function(){
 };
 */
 Category.prototype.relToAbsX=function(x){
-	return x - this.scrollDiv.scrollLeft / this.currentZoom;
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.relToAbsX(x);
 };
 Category.prototype.relToAbsY=function(y){
-	return y - this.scrollDiv.scrollTop  / this.currentZoom + BlockPalette.y;
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.relToAbsY(y);
 };
 Category.prototype.absToRelX=function(x){
-	return x + this.scrollDiv.scrollLeft * this.currentZoom;
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.absToRelX(x);
 };
 Category.prototype.absToRelY=function(y){
-	return y + this.scrollDiv.scrollTop * this.currentZoom - BlockPalette.y;
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.absToRelY(y);
 };
 Category.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
@@ -234,14 +245,7 @@ Category.prototype.hideDeviceDropDowns=function(){
 	}
 };
 Category.prototype.updateZoom = function(){
-	var currentScrollX = this.scrollDiv.scrollLeft / this.currentZoom;
-	var currentScrollY = this.scrollDiv.scrollTop / this.currentZoom;
-	this.updateSmoothScrollSet();
-	this.scrollDiv.scrollLeft = currentScrollX * this.currentZoom;
-	this.scrollDiv.scrollTop = currentScrollY * this.currentZoom;
-};
-Category.prototype.updateSmoothScrollSet = function(){
-	var y = GuiElements.relToAbsY(BlockPalette.y);
-	GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, 0, y, BlockPalette.width, BlockPalette.height, this.width, this.height);
-	this.currentZoom = GuiElements.zoomFactor;
+	if(!this.finalized) return;
+	this.smoothScrollBox.updateZoom();
+	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
