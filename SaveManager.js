@@ -13,6 +13,7 @@ function SaveManager(){
 	SaveManager.makeFunctionsSafe();
 }
 SaveManager.userOpen = function(fileName){
+	if(SaveManager.fileName == fileName) {return;}
 	SaveManager.saveAndName(null, "Please name this file before opening a new file", true, function(){
 		SaveManager.open(fileName);
 	});
