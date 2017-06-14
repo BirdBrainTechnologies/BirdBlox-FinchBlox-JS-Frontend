@@ -242,10 +242,10 @@ SaveManager.saveCurrentDoc = function(blank, fileName, named){
 	}
 	SaveManager.fileName = fileName;
 	SaveManager.named = named;
-	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
 	let namedString = SaveManager.named? "true" : "false";
 	if(blank) namedString = "blank";
 	HtmlServer.setSetting("currentDocNamed", namedString);
+	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
 };
 SaveManager.getCurrentDoc = function(){
 	var load = {};
