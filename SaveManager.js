@@ -88,7 +88,7 @@ SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defa
 // Checks if a name is legitimate and renames the current file to that name if it is.
 SaveManager.sanitizeRename = function(oldFilename, title, proposedName, nextAction){
 	if(proposedName == ""){
-		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
+		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", "", nextAction);
 	} else if(proposedName == oldFilename) {
 		if(nextAction != null) nextAction();
 	} else {
