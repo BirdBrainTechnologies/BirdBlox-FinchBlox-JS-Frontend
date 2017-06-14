@@ -153,7 +153,6 @@ SaveManager.userNew = function(){
  * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
  */
 SaveManager.getAvailableName = function(filename, callbackFn){
-	SaveManager.printStatus("getAvailableName");
 	DebugOptions.validateNonNull(callbackFn);
 	var request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
@@ -165,7 +164,6 @@ SaveManager.getAvailableName = function(filename, callbackFn){
 	});
 };
 SaveManager.loadFile=function(xmlString) {
-	SaveManager.printStatus("loadFile");
 	if (xmlString.length > 0) {
 		if (xmlString.charAt(0) == "%") {
 			xmlString = decodeURIComponent(xmlString);
@@ -181,13 +179,11 @@ SaveManager.loadFile=function(xmlString) {
 };
 SaveManager.userDuplicate = function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.printStatus("userDuplicate");
 	SaveManager.forceSave(function(){
 		SaveManager.promptDuplicate("Enter name for duplicate file");
 	});
 };
 SaveManager.promptDuplicate = function(message){
-	SaveManager.printStatus("promptDuplicate");
 	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
 		HtmlServer.showDialog("Duplicate", message, availableName, function(cancelled, response){
 			if(!cancelled){
@@ -197,7 +193,6 @@ SaveManager.promptDuplicate = function(message){
 	});
 };
 SaveManager.duplicate = function(filename){
-	SaveManager.printStatus("duplicate");
 	var request = new HttpRequestBuilder("data/save");
 	request.addParam("filename", filename);
 	request.addParam("options", "soft");
@@ -210,13 +205,11 @@ SaveManager.duplicate = function(filename){
 };
 SaveManager.userExport=function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.printStatus("userExport");
 	SaveManager.saveAndName("Please name this file so it can be exported", function(){
 		SaveManager.export();
 	});
 };
 SaveManager.export=function(){
-	SaveManager.printStatus("export");
 	var request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", SaveManager.fileName);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -235,7 +228,6 @@ SaveManager.saveAsNew = function(){
 	}, true, xmlDocText);
 };
 SaveManager.markEdited=function(){
-	SaveManager.printStatus("markEdited");
 	if(SaveManager.fileName == null && !SaveManager.saving){
 		SaveManager.saveAsNew();
 	}
@@ -290,7 +282,6 @@ SaveManager.getCurrentDoc = function(){
 
 
 SaveManager.import=function(fileName){
-	SaveManager.printStatus("import");
 	let name = HtmlServer.decodeHtml(fileName);
 	SaveManager.userOpenFile(name);
 };
@@ -308,20 +299,10 @@ SaveManager.import=function(fileName){
 };*/
 SaveManager.autoSave = function(){
 	if(SaveManager.fileName == null) return null;
-	SaveManager.printStatus("autoSave");
 	var result = {};
 	result.data = XmlWriter.docToText(CodeManager.createXml());
 	result.filename = SaveManager.fileName;
 	return result;
-};
-SaveManager.printStatus = function(functionName){
-	var data = "fn: " + functionName + "\n";
-	data += "fileName: " + SaveManager.fileName + "\n";
-	data += "empty: " + SaveManager.empty + "\n";
-	data += "named: " + SaveManager.named + "\n";
-
-	data += "currrentDoc: " + SaveManager.currentDoc + "\n";
-	data += "currentDocNamed: " + SaveManager.currentDocNamed + "\n";
 };
 
 /*
