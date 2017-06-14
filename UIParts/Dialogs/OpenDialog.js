@@ -13,7 +13,7 @@ function OpenDialog(listOfFiles){
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
-	OpenDialog.smallBnWidth = 30;
+	OpenDialog.smallBnWidth = 45;
 	OpenDialog.iconH = 15;
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
