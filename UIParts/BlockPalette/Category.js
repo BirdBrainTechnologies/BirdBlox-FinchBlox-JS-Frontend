@@ -155,38 +155,6 @@ Category.prototype.deselect=function(){
 	this.smoothScrollBox.hide();
 	this.button.deselect();
 }
-/*
-Category.prototype.startScroll=function(x,y){
-	if(!this.scrolling) {
-		this.scrolling = true;
-		this.scrollXOffset = this.x - x;
-		this.scrollYOffset = this.y - y;
-		this.updateWidth();
-		this.setMinCoords();
-	}
-};
-Category.prototype.updateScroll=function(x,y){
-	if(this.scrolling) {
-		this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
-	}
-};
-Category.prototype.scroll=function(x,y){
-	if(this.scrolling) {
-		var minX=Math.min(this.x,this.minX);
-		x = Math.max(minX,x);
-		x = Math.min(this.maxX,x);
-		var minY=Math.min(this.y,this.minY);
-		y = Math.max(minY,y);
-		y = Math.min(this.maxY,y);
-		this.x=x;
-		this.y=y;
-		GuiElements.move.group(this.group, this.x, this.y);
-	}
-};
-Category.prototype.endScroll=function(){
-	this.scrolling=false;
-};
-*/
 Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
@@ -195,21 +163,13 @@ Category.prototype.computeWidth = function(){
 			currentWidth=blockW;
 		}
 	}
-	this.width=currentWidth+2*BlockPalette.mainHMargin;
+	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
 };
 Category.prototype.updateWidth=function(){
 	if(!this.finalized) return;
 	this.computeWidth();
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
-/*
-Category.prototype.setMinCoords=function(){
-	var vScrollRange=this.height-BlockPalette.height;
-	this.minY=this.maxY-vScrollRange;
-	var hScrollRange=this.width-BlockPalette.width;
-	this.minX=this.maxX-hScrollRange;
-};
-*/
 Category.prototype.relToAbsX=function(x){
 	if(!this.finalized) return x;
 	return this.smoothScrollBox.relToAbsX(x);
