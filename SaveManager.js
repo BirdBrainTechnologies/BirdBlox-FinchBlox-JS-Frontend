@@ -131,6 +131,8 @@ SaveManager.userDeleteFile=function(filename, nextAction){
 			SaveManager.delete(filename, function(){
 				if(filename == SaveManager.fileName) {
 					SaveManager.openBlank(nextAction);
+				} else{
+					if(nextAction != null) nextAction();
 				}
 			});
 		}
