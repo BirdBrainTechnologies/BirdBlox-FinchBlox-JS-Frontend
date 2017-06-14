@@ -170,7 +170,7 @@ Button.prototype.release=function(){
 };
 /* Removes the Button's visual highlight without triggering any actions */
 Button.prototype.interrupt=function(){
-	if(this.enabled&&this.pressed&&!this.toggled){
+	if(this.enabled&&this.pressed&&!this.toggles){
 		this.pressed=false;
 		this.setColor(false);
 	}

@@ -4,6 +4,9 @@
 
 function OpenDialog(listOfFiles){
 	this.files=listOfFiles.split("\n");
+	if(listOfFiles == ""){
+		this.files = [];
+	}
 	RowDialog.call(this, "Open", this.files.length, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this))
 }
