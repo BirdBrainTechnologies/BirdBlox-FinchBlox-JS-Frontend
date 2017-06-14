@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" afterPath="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -288,32 +288,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SmoothScrollBox.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="572">
-              <caret line="44" column="54" selection-start-line="44" selection-start-column="54" selection-end-line="44" selection-end-column="54" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-                <element signature="n#!!doc;n#SmoothScrollBox#0" expanded="false" />
-                <element signature="e#1145#1429#0" expanded="false" />
-                <element signature="e#1165#1427#0" expanded="false" />
-                <element signature="e#1480#1702#0" expanded="false" />
-                <element signature="e#2060#2120#0" expanded="false" />
-                <element signature="e#2456#2633#0" expanded="false" />
-                <element signature="e#2475#2631#0" expanded="false" />
-                <element signature="e#2577#2628#0" expanded="false" />
-                <element signature="e#2682#2752#0" expanded="false" />
-                <element signature="e#2801#2871#0" expanded="false" />
-                <element signature="e#2920#2990#0" expanded="false" />
-                <element signature="e#3039#3108#0" expanded="false" />
-                <element signature="e#3159#3244#0" expanded="false" />
-                <element signature="e#3295#3381#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
@@ -322,6 +296,18 @@
               <folding>
                 <element signature="e#898#928#0" expanded="false" />
                 <element signature="e#2795#2832#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BlockDefs_control.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="176">
+              <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -353,7 +339,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/BlockParts/NewSlot/Slot.js" />
         <option value="$PROJECT_DIR$/BlockParts/NewSlot/SlotShape/HexSlotShape.js" />
         <option value="$PROJECT_DIR$/BlockParts/NewSlot/SlotShape/RectSlotShape.js" />
         <option value="$PROJECT_DIR$/BlockParts/NewSlot/SlotShape/InteractiveSlotShape.js" />
@@ -404,6 +389,7 @@
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/Category.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
       </list>
     </option>
   </component>
@@ -799,7 +785,7 @@
       <workItem from="1497015344063" duration="21796000" />
       <workItem from="1497273502963" duration="28393000" />
       <workItem from="1497363382839" duration="36080000" />
-      <workItem from="1497447340186" duration="7020000" />
+      <workItem from="1497447340186" duration="7626000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -896,7 +882,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="878599000" />
+    <option name="totallyTimeSpent" value="879205000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -955,13 +941,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/FlutterManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-66">
@@ -2166,6 +2145,16 @@
             <element signature="e#6108#6159#0" expanded="false" />
             <element signature="e#6212#6312#0" expanded="false" />
             <element signature="e#6259#6310#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
           </folding>
         </state>
       </provider>
