@@ -97,7 +97,9 @@ SmoothScrollBox.prototype.getScrollX = function(){
 };
 SmoothScrollBox.prototype.setScrollX = function(x){
 	this.scrollDiv.scrollLeft = x * this.currentZoom;
+	TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
 SmoothScrollBox.prototype.setScrollY = function(y){
 	this.scrollDiv.scrollTop = y * this.currentZoom;
+	TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
