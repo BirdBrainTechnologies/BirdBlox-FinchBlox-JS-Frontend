@@ -47,8 +47,10 @@ RowDialog.prototype.show = function(){
 
 	this.rowGroup = this.createRows();
 	this.createCenteredBns();
-	this.scrollBox = this.createScrollBox();
-	this.scrollBox.show();
+	this.scrollBox = this.createScrollBox(); // could be null
+	if(this.scrollBox != null) {
+		this.scrollBox.show();
+	}
 
 	GuiElements.layers.overlay.appendChild(this.group);
 
@@ -59,12 +61,13 @@ RowDialog.prototype.calcHeights = function(){
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+	let minHeight = GuiElements.height / 2;
 	let ScrollHeight = this.rowCount * (RowDialog.bnMargin + RowDialog.bnHeight) - RowDialog.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
-	this.height = Math.min(totalHeight, GuiElements.height);
+	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
-	this.scrollBoxHeight = this.height - nonScrollHeight;
+	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
 	this.scrollBoxY = RD.bnMargin + RD.titleBarH;
 };
 RowDialog.prototype.calcWidths=function(){
@@ -123,6 +126,7 @@ RowDialog.prototype.createCenteredBn = function(y, entry){
 	button.setCallbackFunction(entry.callbackFn, true);
 };
 RowDialog.prototype.createScrollBox = function(){
+	if(this.rowCount == 0) return null;
 	let x = this.x + this.scrollBoxX;
 	let y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
@@ -138,8 +142,10 @@ RowDialog.prototype.closeDialog = function(){
 	GuiElements.unblockInteraction();
 };
 RowDialog.prototype.getScroll = function(){
+	if(this.scrollBox == null) return 0;
 	return this.scrollBox.getScrollY();
 };
 RowDialog.prototype.setScroll = function(y){
+	if(this.scrollBox == null) return;
 	this.scrollBox.setScrollY(y);
 };
