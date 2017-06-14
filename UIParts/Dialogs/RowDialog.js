@@ -10,6 +10,7 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom){
 	this.centeredButtons = [];
 	this.extraTopSpace = extraTop;
 	this.extraBottomSpace = extraBottom;
+	this.visible = false;
 }
 RowDialog.setConstants=function(){
 	RowDialog.currentDialog=null;
@@ -37,26 +38,29 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 };
 
 RowDialog.prototype.show = function(){
-	this.calcHeights();
-	this.calcWidths();
-	this.x = GuiElements.width / 2 - this.width / 2;
-	this.y = GuiElements.height / 2 - this.height / 2;
-	this.group = GuiElements.create.group(this.x, this.y);
-	this.bgRect=this.drawBackground();
+	if(!this.visible) {
+		this.visible = true;
+		this.calcHeights();
+		this.calcWidths();
+		this.x = GuiElements.width / 2 - this.width / 2;
+		this.y = GuiElements.height / 2 - this.height / 2;
+		this.group = GuiElements.create.group(this.x, this.y);
+		this.bgRect = this.drawBackground();
 
-	this.titleRect=this.createTitleRect();
-	this.titleText=this.createTitleLabel(this.title);
+		this.titleRect = this.createTitleRect();
+		this.titleText = this.createTitleLabel(this.title);
 
-	this.rowGroup = this.createRows();
-	this.createCenteredBns();
-	this.scrollBox = this.createScrollBox(); // could be null
-	if(this.scrollBox != null) {
-		this.scrollBox.show();
+		this.rowGroup = this.createRows();
+		this.createCenteredBns();
+		this.scrollBox = this.createScrollBox(); // could be null
+		if (this.scrollBox != null) {
+			this.scrollBox.show();
+		}
+
+		GuiElements.layers.overlay.appendChild(this.group);
+
+		GuiElements.blockInteraction();
 	}
-
-	GuiElements.layers.overlay.appendChild(this.group);
-
-	GuiElements.blockInteraction();
 };
 RowDialog.prototype.calcHeights = function(){
 	var RD = RowDialog;
@@ -136,13 +140,16 @@ RowDialog.prototype.createScrollBox = function(){
 		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight, false);
 };
 RowDialog.prototype.closeDialog = function(){
-	RowDialog.currentDialog=null;
-	this.group.remove();
-	if(this.scrollBox != null){
-		this.scrollBox.hide();
+	if(this.visible) {
+		this.visible = false;
+		RowDialog.currentDialog = null;
+		this.group.remove();
+		if (this.scrollBox != null) {
+			this.scrollBox.hide();
+		}
+		this.scrollBox = null;
+		GuiElements.unblockInteraction();
 	}
-	this.scrollBox=null;
-	GuiElements.unblockInteraction();
 };
 RowDialog.prototype.getScroll = function(){
 	if(this.scrollBox == null) return 0;
@@ -153,6 +160,19 @@ RowDialog.prototype.setScroll = function(y){
 	this.scrollBox.setScrollY(y);
 };
 RowDialog.prototype.updateZoom = function(){
-	this.closeDialog();
-	this.show();
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.closeDialog();
+		this.show();
+		this.setScroll(scroll);
+	}
+};
+RowDialog.prototype.reloadRows = function(rowCount){
+	this.rowCount = rowCount;
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.closeDialog();
+		this.show();
+		this.setScroll(scroll);
+	}
 };
