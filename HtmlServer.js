@@ -49,7 +49,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("test\nname");
+				callbackFn("file1\nfile2");
 			}
 		}, 20);
 		return;

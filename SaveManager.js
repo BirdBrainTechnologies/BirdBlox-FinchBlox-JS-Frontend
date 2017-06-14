@@ -65,15 +65,15 @@ SaveManager.forceSave = function(nextAction){
 };
 SaveManager.userRename = function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.userRenameFile(SaveManager.fileName);
-};
-SaveManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.forceSave(function(){
-		SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+		SaveManager.promptRename(SaveManager.fileName, "Rename");
 	});
 };
+SaveManager.userRenameFile = function(oldFilename, nextAction){
+	SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+};
 SaveManager.promptRename = function(oldFilename, title, message, nextAction){
-	SaveManager.promptRenameWithDefault(oldFilename, title, message, SaveManager.fileName, nextAction);
+	SaveManager.promptRenameWithDefault(oldFilename, title, message, oldFilename, nextAction);
 };
 SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defaultName, nextAction){
 	if(message == null){
@@ -88,7 +88,7 @@ SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defa
 // Checks if a name is legitimate and renames the current file to that name if it is.
 SaveManager.sanitizeRename = function(oldFilename, title, proposedName, nextAction){
 	if(proposedName == ""){
-		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", SaveManager.fileName, nextAction);
+		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
 	} else if(proposedName == oldFilename) {
 		if(nextAction != null) nextAction();
 	} else {
@@ -111,19 +111,14 @@ SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
-	//TODO: remove this debug code.
-	SaveManager.named = true;
-	if(nextAction != null) nextAction();
-	/*
-	 HtmlServer.sendRequestWithCallback(request.toString(), function(){
-	 SaveManager.named = true;
-	 SaveManager.fileName = newName;
-	 TitleBar.setText(SaveManager.fileName);
-	 if(nextAction != null) nextAction();
-	 }, function(){
-	 SaveManager.sanitizeRename(title, newName, nextAction);
-	 });
-	 */
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		if(oldFilename == SaveManager.fileName) {
+			SaveManager.saveCurrentDoc(false, newName, true);
+		}
+		if(nextAction != null) nextAction();
+	}, function(){
+		SaveManager.sanitizeRename(title, newName, nextAction);
+	});
 };
 SaveManager.userDelete=function(){
 	if(SaveManager.fileName == null) return;
@@ -134,7 +129,11 @@ SaveManager.userDeleteFile=function(filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(filename, function(){
-				SaveManager.openBlank(nextAction);
+				if(filename == SaveManager.fileName) {
+					SaveManager.openBlank(nextAction);
+				} else{
+					if(nextAction != null) nextAction();
+				}
 			});
 		}
 	}, null);
@@ -256,7 +255,7 @@ SaveManager.getCurrentDoc = function(){
 	load.currentDocNamed = null;
 	var checkProgress = function(){
 		if(load.name && load.named){
-			if(load.currentDoc != null) {
+			if(!load.blank) {
 				SaveManager.open(load.currentDoc, load.currentDocNamed);
 			}
 		}
@@ -272,7 +271,7 @@ SaveManager.getCurrentDoc = function(){
 		} else if (response == "false") {
 			load.currentDocNamed = false;
 		} else if (response == "blank") {
-			load.currentDoc = null;
+			load.blank = true;
 		}
 		load.named = true;
 		checkProgress();
