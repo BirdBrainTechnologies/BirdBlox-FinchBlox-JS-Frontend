@@ -112,7 +112,9 @@ SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		SaveManager.saveCurrentDoc(false, newName, true);
+		if(oldFilename == SaveManager.fileName) {
+			SaveManager.saveCurrentDoc(false, newName, true);
+		}
 		if(nextAction != null) nextAction();
 	}, function(){
 		SaveManager.sanitizeRename(title, newName, nextAction);
@@ -127,7 +129,9 @@ SaveManager.userDeleteFile=function(filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(filename, function(){
-				SaveManager.openBlank(nextAction);
+				if(filename == SaveManager.fileName) {
+					SaveManager.openBlank(nextAction);
+				}
 			});
 		}
 	}, null);
