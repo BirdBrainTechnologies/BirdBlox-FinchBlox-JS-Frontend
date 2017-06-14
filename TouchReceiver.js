@@ -102,7 +102,7 @@ TouchReceiver.touchstart=function(e, preventD){
 	}
 	var TR=TouchReceiver; //shorthand
 	if(preventD) {
-		GuiElements.alert("Prevented 1");
+		//GuiElements.alert("Prevented 1");
 		e.preventDefault(); //Stops 300 ms delay events
 	}
 	// e.stopPropagation();
@@ -388,7 +388,7 @@ TouchReceiver.touchmove=function(e){
 	shouldPreventDefault &= TR.targetType != "button" || !TR.target.scrollable;
 	shouldPreventDefault &= TR.targetType != "scrollBox";
 	if(shouldPreventDefault){
-		GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
+		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
 	}
 };
@@ -460,7 +460,7 @@ TouchReceiver.touchend=function(e){
 		TR.touchDown = false;
 	}
 	if(shouldPreventDefault) {
-		GuiElements.alert("Prevented 3");
+		//GuiElements.alert("Prevented 3");
 		e.preventDefault();
 	}
 };
