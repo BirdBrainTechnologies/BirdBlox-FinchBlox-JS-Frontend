@@ -5,7 +5,7 @@ FileMenu.prototype = Object.create(Menu.prototype);
 FileMenu.prototype.constructor = FileMenu;
 FileMenu.prototype.loadOptions = function(){
 	this.addOption("New", SaveManager.userNew);
-	this.addOption("Open", this.optionOpen);
+	this.addOption("Open", OpenDialog.showDialog);
 	this.addOption("Duplicate", SaveManager.userDuplicate);
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
