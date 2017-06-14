@@ -4,6 +4,7 @@
 
 function RowDialog(title, rowCount, extraTop, extraBottom){
 	RowDialog.currentDialog=this;
+	//this.autoHeight = autoHeight;
 	this.title = title;
 	this.rowCount = rowCount;
 	this.centeredButtons = [];
@@ -21,6 +22,7 @@ RowDialog.setConstants=function(){
 	RowDialog.bnHeight=MenuBnList.bnHeight;
 	RowDialog.bnMargin=5;
 	RowDialog.minWidth = 300;
+	RowDialog.minHeight = 200;
 
 	RowDialog.fontSize=16;
 	RowDialog.font="Arial";
@@ -61,7 +63,7 @@ RowDialog.prototype.calcHeights = function(){
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	let minHeight = GuiElements.height / 2;
+	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RowDialog.bnMargin + RowDialog.bnHeight) - RowDialog.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
@@ -148,4 +150,8 @@ RowDialog.prototype.getScroll = function(){
 RowDialog.prototype.setScroll = function(y){
 	if(this.scrollBox == null) return;
 	this.scrollBox.setScrollY(y);
+};
+RowDialog.prototype.updateZoom = function(){
+	this.closeDialog();
+	this.show();
 };
