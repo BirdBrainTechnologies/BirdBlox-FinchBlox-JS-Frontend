@@ -846,6 +846,11 @@ GuiElements.unblockInteraction=function() {
 		GuiElements.dialogBlock=null;
 	}
 };
+GuiElements.updateDialogBlockZoom = function(){
+	if(GuiElements.dialogBlock!=null) {
+		GuiElements.update.rect(GuiElements.dialogBlock, 0, 0, GuiElements.width, GuiElements.height);
+	}
+};
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
@@ -869,6 +874,7 @@ GuiElements.updateDims = function(){
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
+	GuiElements.updateDialogBlockZoom();
 };
 GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;
