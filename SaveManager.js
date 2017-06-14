@@ -249,7 +249,7 @@ SaveManager.getCurrentDoc = function(){
 	load.currentDocNamed = null;
 	var checkProgress = function(){
 		if(load.name && load.named){
-			if(load.currentDoc != null) {
+			if(!load.blank) {
 				SaveManager.open(load.currentDoc, load.currentDocNamed);
 			}
 		}
@@ -265,7 +265,7 @@ SaveManager.getCurrentDoc = function(){
 		} else if (response == "false") {
 			load.currentDocNamed = false;
 		} else if (response == "blank") {
-			load.currentDoc = null;
+			load.blank = true;
 		}
 		load.named = true;
 		checkProgress();
