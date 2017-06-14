@@ -65,15 +65,15 @@ SaveManager.forceSave = function(nextAction){
 };
 SaveManager.userRename = function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.userRenameFile(SaveManager.fileName);
-};
-SaveManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.forceSave(function(){
-		SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+		SaveManager.promptRename(SaveManager.fileName, "Rename");
 	});
 };
+SaveManager.userRenameFile = function(oldFilename, nextAction){
+	SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+};
 SaveManager.promptRename = function(oldFilename, title, message, nextAction){
-	SaveManager.promptRenameWithDefault(oldFilename, title, message, SaveManager.fileName, nextAction);
+	SaveManager.promptRenameWithDefault(oldFilename, title, message, oldFilename, nextAction);
 };
 SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defaultName, nextAction){
 	if(message == null){
