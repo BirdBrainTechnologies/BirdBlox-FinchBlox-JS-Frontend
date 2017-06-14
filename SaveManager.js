@@ -111,19 +111,12 @@ SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
-	//TODO: remove this debug code.
-	SaveManager.named = true;
-	if(nextAction != null) nextAction();
-	/*
-	 HtmlServer.sendRequestWithCallback(request.toString(), function(){
-	 SaveManager.named = true;
-	 SaveManager.fileName = newName;
-	 TitleBar.setText(SaveManager.fileName);
-	 if(nextAction != null) nextAction();
-	 }, function(){
-	 SaveManager.sanitizeRename(title, newName, nextAction);
-	 });
-	 */
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		SaveManager.saveCurrentDoc(false, newName, true);
+		if(nextAction != null) nextAction();
+	}, function(){
+		SaveManager.sanitizeRename(title, newName, nextAction);
+	});
 };
 SaveManager.userDelete=function(){
 	if(SaveManager.fileName == null) return;
