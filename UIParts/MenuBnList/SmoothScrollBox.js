@@ -63,6 +63,7 @@ SmoothScrollBox.prototype.show = function(){
 		this.layer.appendChild(this.scrollDiv);
 		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
 		this.updateScrollSet();
+		TouchReceiver.setInitialScrollFix(this.scrollDiv);
 	}
 };
 SmoothScrollBox.prototype.hide = function(){
