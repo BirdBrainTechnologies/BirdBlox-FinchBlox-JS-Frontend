@@ -2,9 +2,9 @@
  * Created by Tom on 6/13/2017.
  */
 
-function RowDialog(title, rowCount, extraTop, extraBottom){
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom){
 	RowDialog.currentDialog=this;
-	//this.autoHeight = autoHeight;
+	this.autoHeight = autoHeight;
 	this.title = title;
 	this.rowCount = rowCount;
 	this.centeredButtons = [];
@@ -66,6 +66,7 @@ RowDialog.prototype.calcHeights = function(){
 	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RowDialog.bnMargin + RowDialog.bnHeight) - RowDialog.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
+	if(!this.autoHeight) totalHeight = 0;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
