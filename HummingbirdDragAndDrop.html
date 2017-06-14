@@ -38,8 +38,9 @@
 		<script type="text/javascript" src="UIParts/InputPad/InputPad.js"></script>
 		<script type="text/javascript" src="UIParts/BubbleOverlay.js"></script>
 		<script type="text/javascript" src="UIParts/ResultBubble.js"></script>
-		<script type="text/javascript" src="UIParts/MenuBnList.js"></script>
-		<script type="text/javascript" src="UIParts/SmoothMenuBnList.js"></script>
+		<script type="text/javascript" src="UIParts/MenuBnList/SmoothScrollBox.js"></script>
+		<script type="text/javascript" src="UIParts/MenuBnList/MenuBnList.js"></script>
+		<script type="text/javascript" src="UIParts/MenuBnList/SmoothMenuBnList.js"></script>
 		<script type="text/javascript" src="UIParts/Menu/Menu.js"></script>
 		<script type="text/javascript" src="UIParts/Menu/FileMenu.js"></script>
 		<script type="text/javascript" src="UIParts/Menu/DebugMenu.js"></script>
@@ -53,15 +54,17 @@
 		<script type="text/javascript" src="CodeManager.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/TabManager.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/Tab.js"></script>
-		<script type="text/javascript" src="UIParts/OpenDialog.js"></script>
-		<script type="text/javascript" src="UIParts/ConnectOneHBDialog.js"></script>
-		<script type="text/javascript" src="UIParts/ConnectMultipleHBDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/RowDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/NewOpenDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/ConnectOneHBDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/ConnectMultipleHBDialog.js"></script>
 		<script type="text/javascript" src="UIParts/HBConnectionList.js"></script>
-		<script type="text/javascript" src="UIParts/Flutter/DiscoverDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/DiscoverDialog.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/OverflowArrows.js"></script>
 		<script type="text/javascript" src="BlockContainers/BlockStack.js"></script>
 		<script type="text/javascript" src="HummingbirdManager.js"></script>
 		<script type="text/javascript" src="FlutterManager.js"></script>
+		<script type="text/javascript" src="HttpRequestBuilder.js"></script>
 		<script type="text/javascript" src="HtmlServer.js"></script>
 		<script type="text/javascript" src="XmlWriter.js"></script>
 		<script type="text/javascript" src="SaveManager.js"></script>
@@ -113,13 +116,18 @@
 
 		<!--<span id="debug2" class="noselect">hi</span>-->
 		<!--<img src="layout.png" style="width:100%;display:none;" id="testImage"/>-->
-        <svg id="MainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+        <svg id="backSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 			<defs id="SvgDefs">
 			</defs>
 			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
 		</svg>
-		<div id="divLayer">
+		<div id="paletteScrollDiv" class="divLayer">
+		</div>
+		<svg id="frontSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 
+			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
+		</svg>
+		<div id="frontScrollDiv" class="divLayer">
 		</div>
 		<span id="debug" class="noselect" style="color:#fff; position:absolute; margin-left:300px;"></span>
     </body>

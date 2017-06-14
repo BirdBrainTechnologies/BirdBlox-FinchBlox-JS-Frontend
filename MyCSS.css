@@ -5,15 +5,17 @@ html
 {
     width: 100%;
     height: 100%;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 .mainBody
 {
-    background-color:#aaa;
+    background-color:#00f;
 	position: fixed;
     width: 100%;
     height: 100%;
 }
-#MainSvg
+.mainSvg
 {
     position:absolute;
 	top:0px;
@@ -22,6 +24,11 @@ html
 	bottom:0px;
 	height:100%;
 	width:100%;
+    pointer-events: none;
+}
+.mainSvg g
+{
+    pointer-events: auto;
 }
 path{
 	fill-rule:evenodd;
@@ -35,10 +42,20 @@ path{
 	-ms-user-select: none;			 
 	user-select: none;	                                 
 }
-.smoothScroll {
-	overflow-y: scroll; /* has to be scroll, not auto */
-    overflow-x: hidden;
+.smoothScrollX {
+	overflow-y: hidden; /* has to be scroll, not auto */
+    overflow-x: scroll;
 	-webkit-overflow-scrolling: touch;
+}
+.smoothScrollY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+.smoothScrollXY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 .noScroll {
     overflow-y: hidden;
@@ -49,7 +66,7 @@ path{
     padding:0px;
     margin:0px;
 }
-#divLayer {
+.divLayer {
     position:absolute;
     top:0px;
     right:0px;
@@ -59,6 +76,6 @@ path{
     width:100%;
     pointer-events: none;
 }
-#divLayer div {
+.divLayer div {
     pointer-events: auto;
 }

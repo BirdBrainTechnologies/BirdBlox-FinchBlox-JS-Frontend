@@ -65,6 +65,7 @@ BlockList.populateCat_robots = function(category) {
 		category.addLabel("Connect a robot first...");
 	}
 	category.trimBottom();
+	category.finalize();
 }
 BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBServo");
@@ -82,6 +83,8 @@ BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBKnob");
 	category.addBlockByName("B_HBSound");
 	category.trimBottom();
+	category.finalize();
+
 };
 BlockList.populateCat_flutter=function(category){
 	category.addBlockByName("B_FlutterServo");
@@ -97,6 +100,8 @@ BlockList.populateCat_flutter=function(category){
 	category.addBlockByName("B_FlutterSound");
 	category.addBlockByName("B_FlutterSoil");
 	category.trimBottom();
+	category.finalize();
+
 };
 BlockList.populateCat_motion=function(category){
 	category.addBlockByName("B_Move");
@@ -121,6 +126,8 @@ BlockList.populateCat_motion=function(category){
 	category.addBlockByName("B_YPosition");
 	category.addBlockByName("B_Direction");
 	category.trimBottom();
+	category.finalize();
+
 }
 BlockList.populateCat_looks=function(category){
 	category.addBlockByName("B_alert");
@@ -141,6 +148,8 @@ BlockList.populateCat_looks=function(category){
 	category.addBlockByName("B_GoToFront");
 	category.addBlockByName("B_GoBackLayers");
 	category.trimBottom();
+	category.finalize();
+
 }
 BlockList.populateCat_sound=function(category){
 	category.addBlockByName("B_PlaySound");
@@ -154,6 +163,8 @@ BlockList.populateCat_sound=function(category){
 	category.addBlockByName("B_SetTempoTo");
 	category.addBlockByName("B_Tempo");
 	category.trimBottom();
+	category.finalize();
+
 };
 BlockList.populateCat_pen=function(category){
 	
@@ -177,6 +188,8 @@ BlockList.populateCat_tablet=function(category){
 	category.addSpace();
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
+	category.finalize();
+
 };
 BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_WhenFlagTapped");
@@ -199,6 +212,8 @@ BlockList.populateCat_control=function(category){
 	category.addSpace();
 	category.addBlockByName("B_Stop");
 	category.trimBottom();
+	category.finalize();
+
 }
 BlockList.populateCat_sensing=function(category){
 
@@ -232,7 +247,9 @@ BlockList.populateCat_operators=function(category){
 	category.addSpace();
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
-	
+	category.finalize();
+
+
 }
 // @fix Write Documentation.
 BlockList.populateCat_variables=function(category){
@@ -272,4 +289,6 @@ BlockList.populateCat_variables=function(category){
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
+	category.finalize();
+
 };

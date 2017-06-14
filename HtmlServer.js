@@ -6,6 +6,9 @@ function HtmlServer(){
 	HtmlServer.dialogVisible=false;
 	HtmlServer.logHttp=false || DebugOptions.shouldLogHttp();
 }
+HtmlServer.decodeHtml = function(message){
+	return decodeURIComponent(message);
+};
 HtmlServer.encodeHtml=function(message){
 	if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
@@ -34,8 +37,10 @@ HtmlServer.encodeHtml=function(message){
 	return eVal; //.replace(/\%20/g, "+");
 }
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	callbackFn = DebugOptions.safeFunc(callbackFn);
+	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover")<0&&request.indexOf("status")<0) {
+		request.indexOf("discover")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
@@ -44,9 +49,9 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("2");
+				callbackFn("test\nname");
 			}
-		}, 100);
+		}, 20);
 		return;
 	}
 	if(isPost == null) {
@@ -137,7 +142,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
-HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
+HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	//GuiElements.alert("Showing...");
@@ -151,7 +156,7 @@ HtmlServer.showDialog=function(title,question,hint,callbackFn,callbackErr){
 		var request = "tablet/dialog";
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
-		request+="&holder="+HS.encodeHtml(hint);
+		request+="&prefill="+HS.encodeHtml(prefill);
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);

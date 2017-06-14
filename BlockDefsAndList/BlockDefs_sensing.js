@@ -116,6 +116,7 @@ B_Timer.prototype.startAction=function(){
 	var start=CodeManager.timerForSensingBlock;
 	return new ExecutionStatusResult(new NumData(Math.round((now-start)/100)/10));
 };
+Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");

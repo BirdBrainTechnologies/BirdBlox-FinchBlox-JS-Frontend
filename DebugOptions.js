@@ -57,6 +57,7 @@ DebugOptions.shouldLogHttp=function(){
 	return DO.enabled && DO.logHttp;
 };
 DebugOptions.safeFunc = function(func){
+	if(func == null) return null;
 	if(DebugOptions.shouldLogErrors()){
 		return function(){
 			try {
@@ -67,7 +68,7 @@ DebugOptions.safeFunc = function(func){
 			catch(err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				HtmlServer.showChoiceDialog("ERROR",err.message,"OK","OK",true);
+				HtmlServer.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true);
 			}
 		}
 	}
@@ -91,6 +92,14 @@ DebugOptions.validateNonNull = function(){
 		}
 	}
 };
+DebugOptions.validateOptionalNums = function(){
+	if(!DebugOptions.shouldLogErrors()) return;
+	for(let i = 0; i < arguments.length; i++){
+		if(arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))){
+			throw new UserException("Invalid optional number");
+		}
+	}
+};
 DebugOptions.assert = function(bool){
 	if(!bool && DebugOptions.shouldLogErrors()){
 		throw new UserException("Assertion Failure");
@@ -110,4 +119,5 @@ DebugOptions.throw = function(message){
 function UserException(message) {
 	this.message = message;
 	this.name = 'UserException';
+	this.stack = (new Error()).stack;
 }

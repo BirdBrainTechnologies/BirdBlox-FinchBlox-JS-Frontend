@@ -22,7 +22,7 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
 	this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
 	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
-	this.addOption("Throw error", function(){ImNotAFunction();});
+	this.addOption("Throw error", function(){throw new UserException("test error");});
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
 DebugMenu.prototype.loadFile=function(){

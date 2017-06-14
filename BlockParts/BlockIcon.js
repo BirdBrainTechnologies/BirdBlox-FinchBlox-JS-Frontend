@@ -1,4 +1,4 @@
-BlockIcon=function(parent,pathId,color,altText,height){
+function BlockIcon(parent,pathId,color,altText,height){
 	this.pathId=pathId;
 	this.color=color;
 	this.altText=altText;

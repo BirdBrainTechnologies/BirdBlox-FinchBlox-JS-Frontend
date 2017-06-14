@@ -42,6 +42,8 @@ DisplayStack.prototype.updateDim=function() {
 	this.dim.cy1+=this.getAbsY();
 	this.dim.rx1+=this.getAbsX();
 	this.dim.ry1+=this.getAbsY();
+
+	this.category.updateWidth();
 }
 DisplayStack.prototype.relToAbsX=function(x){
 	return this.category.relToAbsX(x+this.x);

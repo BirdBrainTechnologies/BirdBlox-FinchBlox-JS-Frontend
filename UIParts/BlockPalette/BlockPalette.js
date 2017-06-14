@@ -5,6 +5,7 @@ function BlockPalette(){
 	BlockPalette.selectedCat=null;
 	BlockPalette.createCatBg();
 	BlockPalette.createPalBg();
+	BlockPalette.createScrollSvg();
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
@@ -44,9 +45,12 @@ BlockPalette.setGraphics=function(){
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
-	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
+	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height * 2);
 	var clipRect=BP.clippingPath.childNodes[0];
 	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
+	for(let i = 0; i < BlockPalette.categories.length; i++){
+		BlockPalette.categories[i].updateZoom();
+	}
 };
 BlockPalette.createCatBg=function(){
 	var BP=BlockPalette;
@@ -56,11 +60,14 @@ BlockPalette.createCatBg=function(){
 }
 BlockPalette.createPalBg=function(){
 	var BP=BlockPalette;
-	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
+	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height * 2,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
-	TouchReceiver.addListenersPalette(BP.palRect);
+	//TouchReceiver.addListenersPalette(BP.palRect);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
-}
+};
+BlockPalette.createScrollSvg = function(){
+	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
+};
 BlockPalette.createCategories=function(){
 	var catCount=BlockList.catCount();
 	var firstColumn=true;
@@ -116,13 +123,13 @@ BlockPalette.ShowTrash=function() {
 		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
-		GuiElements.layers.palette.appendChild(BP.trash);
+		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
 BlockPalette.HideTrash=function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
-		GuiElements.layers.palette.removeChild(BP.trash);
+		GuiElements.layers.trash.removeChild(BP.trash);
 		BP.trash = null;
 	}
 };

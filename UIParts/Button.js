@@ -17,7 +17,7 @@ function Button(x,y,width,height,parent){
 	this.toggleFunction=null;
 	this.toggled=false;
 	this.isOverlayPart=false;
-	this.menuBnList=null;
+	this.scrollable = false;
 }
 Button.setGraphics=function(){
 	Button.bg=Colors.darkGray;
@@ -170,7 +170,7 @@ Button.prototype.release=function(){
 };
 /* Removes the Button's visual highlight without triggering any actions */
 Button.prototype.interrupt=function(){
-	if(this.enabled&&this.pressed&&!this.toggled){
+	if(this.enabled&&this.pressed&&!this.toggles){
 		this.pressed=false;
 		this.setColor(false);
 	}
@@ -215,4 +215,7 @@ Button.prototype.setColor=function(isPressed){
 			GuiElements.update.image(this.imageE,this.imageData.lightName);
 		}
 	}
+};
+Button.prototype.makeScrollable = function(){
+	this.scrollable = true;
 };

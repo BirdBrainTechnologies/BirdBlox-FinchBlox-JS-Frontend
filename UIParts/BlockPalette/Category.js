@@ -4,9 +4,16 @@ function Category(buttonX,buttonY,index){
 	this.buttonY=buttonY;
 	this.x=0;
 	this.y=TitleBar.height+BlockPalette.catH;
-	this.maxX=this.x;
-	this.maxY=this.y;
-	this.group=this.createGroup();
+	/* this.maxX=this.x;
+	this.maxY=this.y; */
+	this.group = GuiElements.create.group(0,0);
+	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+		BlockPalette.width, BlockPalette.height, 0, 0);
+	/*
+	TouchReceiver.createScrollFixTimer(this.scrollDiv);
+	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
+	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
+	*/
 	this.id=BlockList.getCatId(index);
 	this.name=BlockList.getCatName(index);
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -17,17 +24,17 @@ function Category(buttonX,buttonY,index){
 	this.displayStacks=new Array();
 	this.buttons=new Array();
 	this.labels=new Array();
+	this.finalized = false;
 	this.fillGroup();
 	this.scrolling=false;
 	this.scrollXOffset=0;
 	this.scrollYOffset=0;
-
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
 }
-Category.prototype.createGroup=function(){
-	return GuiElements.create.group(this.x,this.y);
+Category.prototype.createDiv=function(){
+	return GuiElements.create.scrollDiv();
 }
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
@@ -124,10 +131,14 @@ Category.prototype.trimBottom=function(){
 	}
 	this.currentBlockY-=BlockPalette.blockMargin;
 	this.currentBlockY+=BlockPalette.mainVMargin;
+};
+Category.prototype.finalize = function(){
+	this.finalized = true;
 	this.height=this.currentBlockY;
 	this.updateWidth();
-	this.setMinCoords();
-}
+	//this.updateSmoothScrollSet();
+};
+
 Category.prototype.select=function(){
 	if(BlockPalette.selectedCat==this){
 		return;
@@ -135,15 +146,16 @@ Category.prototype.select=function(){
 	if(BlockPalette.selectedCat!=null){
 		BlockPalette.selectedCat.deselect();
 	}
-	GuiElements.layers.palette.appendChild(this.group);
 	BlockPalette.selectedCat=this;
 	this.button.select();
+	this.smoothScrollBox.show();
 }
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
-	this.group.remove();
+	this.smoothScrollBox.hide();
 	this.button.deselect();
 }
+/*
 Category.prototype.startScroll=function(x,y){
 	if(!this.scrolling) {
 		this.scrolling = true;
@@ -174,7 +186,8 @@ Category.prototype.scroll=function(x,y){
 Category.prototype.endScroll=function(){
 	this.scrolling=false;
 };
-Category.prototype.updateWidth=function(){
+*/
+Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
 		var blockW=this.blocks[i].width;
@@ -184,23 +197,34 @@ Category.prototype.updateWidth=function(){
 	}
 	this.width=currentWidth+2*BlockPalette.mainHMargin;
 };
+Category.prototype.updateWidth=function(){
+	if(!this.finalized) return;
+	this.computeWidth();
+	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+/*
 Category.prototype.setMinCoords=function(){
 	var vScrollRange=this.height-BlockPalette.height;
 	this.minY=this.maxY-vScrollRange;
 	var hScrollRange=this.width-BlockPalette.width;
 	this.minX=this.maxX-hScrollRange;
 };
+*/
 Category.prototype.relToAbsX=function(x){
-	return x + this.x;
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.relToAbsX(x);
 };
 Category.prototype.relToAbsY=function(y){
-	return y + this.y;
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.relToAbsY(y);
 };
 Category.prototype.absToRelX=function(x){
-	return x - this.x;
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.absToRelX(x);
 };
 Category.prototype.absToRelY=function(y){
-	return y - this.y;
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.absToRelY(y);
 };
 Category.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
@@ -217,4 +241,9 @@ Category.prototype.hideDeviceDropDowns=function(){
 	for(var i=0;i<this.displayStacks.length;i++){
 		this.displayStacks[i].hideDeviceDropDowns();
 	}
+};
+Category.prototype.updateZoom = function(){
+	if(!this.finalized) return;
+	this.smoothScrollBox.updateZoom();
+	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
