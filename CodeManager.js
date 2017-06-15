@@ -126,6 +126,9 @@ CodeManager.move.end=function(){
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.IsStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
+			if(move.showTrash) {
+				SaveManager.markEdited();
+			}
 		} else {
 			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
@@ -138,12 +141,10 @@ CodeManager.move.end=function(){
 				move.stack.land();
 				move.stack.updateDim(); //Fix! this line of code might not be needed.
 			}
+			SaveManager.markEdited();
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
-		if(move.showTrash) {
-			SaveManager.markEdited();
-		}
 		BlockPalette.HideTrash();
 	}
 };
