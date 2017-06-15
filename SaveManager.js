@@ -34,7 +34,7 @@ SaveManager.saveAndName = function(message, nextAction){
 };
 SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName == fileName) {return;}
-	SaveManager.saveAndName("Please name this file before opening a new file", function(){
+	SaveManager.saveAndName("Please name this file before opening a different file", function(){
 		SaveManager.open(fileName);
 	});
 };
@@ -46,7 +46,7 @@ SaveManager.open=function(fileName, named, nextAction){
 	request.addParam("filename", fileName);
 	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
 		SaveManager.loadFile(response);
-		SaveManager.saveCurrentDoc(false, fileName, true);
+		SaveManager.saveCurrentDoc(false, fileName, named);
 		if(nextAction != null) nextAction();
 	});
 };
@@ -200,10 +200,10 @@ SaveManager.sanitizeDuplicate = function(proposedName){
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptRenameWithDefault(message, availableName);
+				SaveManager.promptDuplicateWithDefault(message, availableName);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptRenameWithDefault(message, availableName);
+				SaveManager.promptDuplicateWithDefault(message, availableName);
 			}
 		});
 	}
