@@ -34,7 +34,7 @@ SaveManager.saveAndName = function(message, nextAction){
 };
 SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName == fileName) {return;}
-	SaveManager.saveAndName("Please name this file before opening a new file", function(){
+	SaveManager.saveAndName("Please name this file before opening a different file", function(){
 		SaveManager.open(fileName);
 	});
 };
@@ -46,7 +46,7 @@ SaveManager.open=function(fileName, named, nextAction){
 	request.addParam("filename", fileName);
 	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
 		SaveManager.loadFile(response);
-		SaveManager.saveCurrentDoc(false, fileName, true);
+		SaveManager.saveCurrentDoc(false, fileName, named);
 		if(nextAction != null) nextAction();
 	});
 };
@@ -75,7 +75,7 @@ SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defa
 	}
 	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
 		if(!cancelled){
-			SaveManager.sanitizeRename(oldFilename, title, response, nextAction);
+			SaveManager.sanitizeRename(oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
@@ -110,8 +110,10 @@ SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
 			SaveManager.saveCurrentDoc(false, newName, true);
 		}
 		if(nextAction != null) nextAction();
-	}, function(){
-		SaveManager.sanitizeRename(title, newName, nextAction);
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeRename(title, newName, nextAction);
+		}
 	});
 };
 SaveManager.userDelete=function(){
@@ -178,23 +180,47 @@ SaveManager.userDuplicate = function(){
 };
 SaveManager.promptDuplicate = function(message){
 	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
-		HtmlServer.showDialog("Duplicate", message, availableName, function(cancelled, response){
-			if(!cancelled){
-				SaveManager.duplicate(response);
-			}
-		});
+		SaveManager.promptDuplicateWithDefault(message, availableName);
 	});
 };
-SaveManager.duplicate = function(filename){ //TODO: fix this function to POST
+SaveManager.promptDuplicateWithDefault = function(message, defaultName){
+	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
+		if(!cancelled){
+			SaveManager.sanitizeDuplicate(response.trim());
+		}
+	});
+};
+SaveManager.sanitizeDuplicate = function(proposedName){
+	if(proposedName == ""){
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.");
+	} else {
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.duplicate(availableName);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			}
+		});
+	}
+};
+
+SaveManager.duplicate = function(filename){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
 	var request = new HttpRequestBuilder("data/save");
 	request.addParam("filename", filename);
 	request.addParam("options", "soft");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.saveCurrentDoc(false, filename, true);
-	}, function(){
-		let message = "\"" + filename + "\" already exists.  Enter a different name.";
-		SaveManager.promptDuplicate(message);
-	});
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeDuplicate(filename);
+		}
+	}, true, xmlDocText);
 };
 SaveManager.userExport=function(){
 	if(SaveManager.fileName == null) return;
@@ -276,7 +302,13 @@ SaveManager.getCurrentDoc = function(){
 
 SaveManager.import=function(fileName){
 	let name = HtmlServer.decodeHtml(fileName);
-	SaveManager.userOpenFile(name);
+	if(SaveManager.fileName == null){
+		SaveManager.open(name);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.open(name);
+	});
 };
 /*SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
 	SaveManager.printStatus("getCurrentDocName");

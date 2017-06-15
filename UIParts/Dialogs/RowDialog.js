@@ -3,7 +3,6 @@
  */
 
 function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom){
-	RowDialog.currentDialog=this;
 	this.autoHeight = autoHeight;
 	this.title = title;
 	this.rowCount = rowCount;
@@ -40,6 +39,7 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
 		this.visible = true;
+		RowDialog.currentDialog=this;
 		this.calcHeights();
 		this.calcWidths();
 		this.x = GuiElements.width / 2 - this.width / 2;
@@ -165,6 +165,11 @@ RowDialog.prototype.updateZoom = function(){
 		this.closeDialog();
 		this.show();
 		this.setScroll(scroll);
+	}
+};
+RowDialog.updateZoom = function(){
+	if(RowDialog.currentDialog != null){
+		RowDialog.currentDialog.updateZoom();
 	}
 };
 RowDialog.prototype.reloadRows = function(rowCount){

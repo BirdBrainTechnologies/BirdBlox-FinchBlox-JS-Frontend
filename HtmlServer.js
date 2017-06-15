@@ -10,9 +10,9 @@ HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message);
 };
 HtmlServer.encodeHtml=function(message){
-	if(message==""){
+	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
-	}
+	}*/
 	var eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
@@ -35,7 +35,7 @@ HtmlServer.encodeHtml=function(message){
 		eVal = eVal.replace(/&/g, "%26");
 	}
 	return eVal; //.replace(/\%20/g, "+");
-}
+};
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
@@ -72,7 +72,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				}
 				else {
 					if(callbackErr!=null){
-						callbackErr();
+						callbackErr(xhttp.status);
 					}
 					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
@@ -146,6 +146,7 @@ HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
 		request+="&prefill="+HS.encodeHtml(prefill);
+		request+="&selectAll=true";
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
