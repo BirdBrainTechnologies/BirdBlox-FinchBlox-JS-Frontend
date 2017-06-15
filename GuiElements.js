@@ -861,6 +861,8 @@ GuiElements.updateDimsPreview = function(newWidth, newHeight){
 	DisplayBox.updateZoom();
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
+	GuiElements.updateDialogBlockZoom();
+	RowDialog.updateZoom();
 };
 GuiElements.updateDims = function(){
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
