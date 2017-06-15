@@ -75,7 +75,7 @@ SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defa
 	}
 	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
 		if(!cancelled){
-			SaveManager.sanitizeRename(oldFilename, title, response, nextAction);
+			SaveManager.sanitizeRename(oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
@@ -186,7 +186,7 @@ SaveManager.promptDuplicate = function(message){
 SaveManager.promptDuplicateWithDefault = function(message, defaultName){
 	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
 		if(!cancelled){
-			SaveManager.sanitizeDuplicate(response);
+			SaveManager.sanitizeDuplicate(response.trim());
 		}
 	});
 };
