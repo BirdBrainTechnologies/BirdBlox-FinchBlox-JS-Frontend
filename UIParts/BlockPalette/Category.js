@@ -192,14 +192,14 @@ Category.prototype.getAbsX=function(){
 Category.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
-Category.prototype.showDeviceDropDowns=function(){
+Category.prototype.showDeviceDropDowns=function(deviceClass){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showDeviceDropDowns();
+		this.displayStacks[i].showDeviceDropDowns(deviceClass);
 	}
 };
-Category.prototype.hideDeviceDropDowns=function(){
+Category.prototype.hideDeviceDropDowns=function(deviceClass){
 	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideDeviceDropDowns();
+		this.displayStacks[i].hideDeviceDropDowns(deviceClass);
 	}
 };
 Category.prototype.updateZoom = function(){

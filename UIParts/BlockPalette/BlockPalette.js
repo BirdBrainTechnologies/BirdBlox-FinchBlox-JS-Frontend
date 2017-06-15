@@ -153,13 +153,13 @@ BlockPalette.endScroll=function(){
 		BP.selectedCat.endScroll();
 	}
 };
-BlockPalette.showDeviceDropDowns=function(){
+BlockPalette.showDeviceDropDowns=function(deviceClass){
 	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].showDeviceDropDowns();
+		BlockPalette.categories[i].showDeviceDropDowns(deviceClass);
 	}
 };
-BlockPalette.hideDeviceDropDowns=function(){
+BlockPalette.hideDeviceDropDowns=function(deviceClass){
 	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].hideDeviceDropDowns();
+		BlockPalette.categories[i].hideDeviceDropDowns(deviceClass);
 	}
 };

@@ -115,12 +115,12 @@ DisplayStack.prototype.getSprite=function(){
 DisplayStack.prototype.delete=function(){
 	this.group.remove();
 };
-DisplayStack.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+DisplayStack.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
-DisplayStack.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+DisplayStack.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 DisplayStack.prototype.passRecursively=function(functionName){

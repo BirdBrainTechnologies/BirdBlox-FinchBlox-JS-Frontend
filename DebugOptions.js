@@ -4,9 +4,9 @@ function DebugOptions(){
 	var DO = DebugOptions;
 	DO.enabled = true;
 
-	DO.mouse = false;
-	DO.addVirtualHB = true;
-	DO.addVirtualFlutter = false;
+	DO.mouse = true;
+	DO.addVirtualHB = false;
+	DO.addVirtualFlutter = true;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
@@ -28,11 +28,12 @@ DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
 	if(DO.addVirtualHB){
-		let virHB = new Hummingbird("Virtual HB","idOfVirtualHb");
-		virHB.connect();
+		let virHB = new DeviceHummingbird("Virtual HB","idOfVirtualHb");
+		DeviceHummingbird.getManager().setOneDevice(virHB);
 	}
 	if(DO.addVirtualFlutter){
-		FlutterManager.ConnectDevice("Virtual F");
+		let virtual = new DeviceFlutter("Virtual F","idOfVirtualF");
+		DeviceFlutter.getManager().setOneDevice(virtual);
 	}
 	if(DO.showVersion){
 		GuiElements.alert("Version: "+GuiElements.appVersion);

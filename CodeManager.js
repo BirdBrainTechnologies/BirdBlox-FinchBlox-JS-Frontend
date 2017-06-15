@@ -225,7 +225,7 @@ CodeManager.updateRun=function(){
 /* Recursively stops all Block execution.
  */
 CodeManager.stop=function(){
-	HummingbirdManager.stopHummingbirds(); //Stop any motors and LEDs on the Hummingbirds
+	Device.stopAll(); //Stop any motors and LEDs on the devices
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
 	DisplayBox.hide(); //Hide any messages being displayed.
@@ -440,16 +440,16 @@ CodeManager.updateAvailableMessages=function(){
 CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
-CodeManager.hideDeviceDropDowns=function(){
-	TabManager.hideDeviceDropDowns();
-	BlockPalette.hideDeviceDropDowns();
+CodeManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.hideDeviceDropDowns(deviceClass);
+	BlockPalette.hideDeviceDropDowns(deviceClass);
 };
-CodeManager.showDeviceDropDowns=function(){
-	TabManager.showDeviceDropDowns();
-	BlockPalette.showDeviceDropDowns();
+CodeManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.showDeviceDropDowns(deviceClass);
+	BlockPalette.showDeviceDropDowns(deviceClass);
 };
-CodeManager.countHBsInUse=function(){
-	return TabManager.countHBsInUse();
+CodeManager.countDevicesInUse=function(deviceClass){
+	return TabManager.countDevicesInUse(deviceClass);
 };
 /* @fix Write documentation.
  */
@@ -501,7 +501,7 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.getCategory("variables").refreshGroup();
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
-	HummingbirdManager.updateSelectableHBs();
+	DeviceManager.updateSelectableDevices();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;

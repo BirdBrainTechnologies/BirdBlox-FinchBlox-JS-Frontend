@@ -1,8 +1,8 @@
 "use strict";
 
 function DeviceStatusLight(x,centerY,parent){
-	var HBSL=DeviceStatusLight;
-	this.cx=x+HBSL.radius;
+	var DSL=DeviceStatusLight;
+	this.cx=x+DSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
@@ -10,34 +10,29 @@ function DeviceStatusLight(x,centerY,parent){
 	if(true||!TouchReceiver.mouse) {
 		this.updateTimer = self.setInterval(function () {
 			thisStatusLight.updateStatus()
-		}, HBSL.updateInterval);
+		}, DSL.updateInterval);
 	}
 	thisStatusLight.updateStatus();
 }
 DeviceStatusLight.setConstants=function(){
-	var HBSL=DeviceStatusLight;
-	HBSL.greenColor="#0f0";
-	HBSL.redColor="#f00";
-	HBSL.startColor=Colors.black;
-	HBSL.offColor=Colors.darkGray;
-	HBSL.radius=6;
-	HBSL.updateInterval=300;
+	var DSL=DeviceStatusLight;
+	DSL.greenColor="#0f0";
+	DSL.redColor="#f00";
+	DSL.startColor=Colors.black;
+	DSL.offColor=Colors.darkGray;
+	DSL.radius=6;
+	DSL.updateInterval=300;
 };
 DeviceStatusLight.prototype.generateCircle=function(){
-	var HBSL=DeviceStatusLight;
-	return GuiElements.draw.circle(this.cx,this.cy,HBSL.radius,HBSL.startColor,this.parentGroup);
+	var DSL=DeviceStatusLight;
+	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
 };
 DeviceStatusLight.prototype.updateStatus=function(){
-	if (HummingbirdManager.GetDeviceCount() > 0) {
-		HummingbirdManager.UpdateConnectionStatus();
-	}
-	if (FlutterManager.GetDeviceCount() > 0) {
-		FlutterManager.UpdateConnectionStatus();
-	}
-	let hbStatus = HummingbirdManager.GetConnectionStatus();
-	let flutterStatus = FlutterManager.GetConnectionStatus();
-
-	let overallStatus = Math.min(hbStatus, flutterStatus);  // Lower status means more error
+	let overallStatus = 2;
+	Device.getTypeList().forEach(function(deviceClass){
+		deviceClass.getManager().updateTotalStatus();
+		overallStatus = Math.min(deviceClass.getManager().getTotalStatus(), overallStatus); // Lower status means more error
+	});
 	switch(overallStatus) {
 		case 0:
 			GuiElements.update.color(this.circleE,DeviceStatusLight.redColor);

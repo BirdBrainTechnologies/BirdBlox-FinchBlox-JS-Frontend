@@ -18,10 +18,10 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("HB names", this.optionHBs);
 	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
 	this.addOption("Clear log", this.optionClearLog);
-	this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
-	this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
-	this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
-	this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
+	//this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
+	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
+	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
+	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
 	this.addOption("Throw error", function(){throw new UserException("test error");});
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
@@ -65,7 +65,7 @@ DebugMenu.prototype.optionLogHttp=function(){
 	HtmlServer.logHttp=true;
 };
 DebugMenu.prototype.optionVirtualHBs=function(){
-	HummingbirdManager.allowVirtualHBs=true;
+	DiscoverDialog.allowVirtualDevices=true;
 };
 DebugMenu.prototype.optionClearLog=function(){
 	GuiElements.alert("");

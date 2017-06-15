@@ -348,15 +348,15 @@ Slot.prototype.renameList=function(list){
 Slot.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
-Slot.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+Slot.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-Slot.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+Slot.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-Slot.prototype.countHBsInUse=function(){
+Slot.prototype.countDevicesInUse=function(deviceClass){
 	if(this.hasChild){
-		return this.child.countHBsInUse();
+		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
 };

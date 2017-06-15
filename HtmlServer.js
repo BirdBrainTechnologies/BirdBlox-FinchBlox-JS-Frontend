@@ -45,12 +45,12 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr();
-			}*/
-			if(callbackFn != null) {
-				callbackFn("file1\nfile2");
 			}
+			/*if(callbackFn != null) {
+				callbackFn("7");
+			}*/
 		}, 20);
 		return;
 	}
@@ -90,17 +90,6 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	catch(err){
 		if(callbackErr!=null){
 			callbackErr();
-		}
-	}
-};
-HtmlServer.sendHBRequest=function(hBIndex,request,params,requestStatus){
-	if(HummingbirdManager.connectedHBs.length>hBIndex) {
-		HtmlServer.sendRequest(HtmlServer.getHBRequest(hBIndex,request,params), requestStatus);
-	}
-	else{
-		if(requestStatus!=null) {
-			requestStatus.finished = true;
-			requestStatus.error = true;
 		}
 	}
 };

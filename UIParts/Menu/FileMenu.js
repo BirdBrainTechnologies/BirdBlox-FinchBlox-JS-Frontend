@@ -9,7 +9,7 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("Duplicate", SaveManager.userDuplicate);
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
-	this.addOption("Export", SaveManager.userExport);
+	this.addOption("Share", SaveManager.userExport);
 	this.addOption("Debug", this.optionEnableDebug);
 	if(GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);

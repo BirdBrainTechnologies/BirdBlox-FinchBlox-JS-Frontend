@@ -48,25 +48,23 @@ BlockList.catCount=function(){
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 BlockList.populateCat_robots = function(category) {
-	if (HummingbirdManager.GetDeviceCount() > 0 || FlutterManager.GetDeviceCount() > 0) {
-		if (FlutterManager.GetDeviceCount() > 0) {
-			category.addLabel("Flutter");
+	let anyConnected = false;
+	Device.getTypeList().forEach(function(deviceClass){
+		if(deviceClass.getManager().getDeviceCount() > 0) {
+			anyConnected = true;
+			category.addLabel(deviceClass.getDeviceTypeName());
 			category.addSpace();
-			BlockList.populateCat_flutter(category);
-			category.addSpace();
-		}
-		if (HummingbirdManager.GetDeviceCount() > 0) {
-			category.addLabel("Hummingbird");
-			category.addSpace();
-			BlockList.populateCat_hummingbird(category);
+			BlockList["populateCat_" + deviceClass.getDeviceTypeId()](category);
 			category.addSpace();
 		}
-	} else {
+	});
+	if(!anyConnected) {
 		category.addLabel("Connect a robot first...");
+		category.addSpace();
 	}
 	category.trimBottom();
 	category.finalize();
-}
+};
 BlockList.populateCat_hummingbird=function(category){
 	category.addBlockByName("B_HBServo");
 	category.addBlockByName("B_HBMotor");

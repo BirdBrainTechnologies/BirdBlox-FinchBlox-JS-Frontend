@@ -1,13 +1,7 @@
 function SaveManager(){
-	if(SaveManager.currentDoc != null){
-		SaveManager.fileName = SaveManager.currentDoc;
-		SaveManager.named = SaveManager.currentDocNamed == "true";
-		SaveManager.open(SaveManager.currentDoc, SaveManager.named);
-	}
-
 	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.newFileName = "program";
+	SaveManager.newFileName = "new program";
 	SaveManager.saving = false;
 	SaveManager.fileName = null;
 	SaveManager.named = false;
@@ -191,7 +185,7 @@ SaveManager.promptDuplicate = function(message){
 		});
 	});
 };
-SaveManager.duplicate = function(filename){
+SaveManager.duplicate = function(filename){ //TODO: fix this function to POST
 	var request = new HttpRequestBuilder("data/save");
 	request.addParam("filename", filename);
 	request.addParam("options", "soft");
@@ -296,7 +290,7 @@ SaveManager.import=function(fileName){
 		callbackFnNameSet();
 	}, callbackFnNameSet);
 };*/
-SaveManager.currentDoc = function(){
+SaveManager.currentDoc = function(){ //Autosaves
 	if(SaveManager.fileName == null) return null;
 	var result = {};
 	result.data = XmlWriter.docToText(CodeManager.createXml());

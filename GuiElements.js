@@ -114,7 +114,7 @@ GuiElements.setConstants=function(){
 	MenuBnList.setGraphics();
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
-	HummingbirdMenu.setGraphics();
+	DeviceMenu.setGraphics();
 	InputPad.setGraphics();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
@@ -128,8 +128,6 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
-	HummingbirdManager();
-	FlutterManager();
 	SaveManager();
 };
 /* Debugging function which displays information on screen */

@@ -170,8 +170,13 @@ RowDialog.prototype.updateZoom = function(){
 RowDialog.prototype.reloadRows = function(rowCount){
 	this.rowCount = rowCount;
 	if(this.visible) {
+		this.visible = false;
 		let scroll = this.getScroll();
-		this.closeDialog();
+		this.group.remove();
+		if (this.scrollBox != null) {
+			this.scrollBox.hide();
+		}
+		this.scrollBox = null;
 		this.show();
 		this.setScroll(scroll);
 	}
