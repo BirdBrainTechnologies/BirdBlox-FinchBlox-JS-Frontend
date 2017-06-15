@@ -72,7 +72,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				}
 				else {
 					if(callbackErr!=null){
-						callbackErr();
+						callbackErr(xhttp.status);
 					}
 					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
