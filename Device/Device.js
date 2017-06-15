@@ -44,7 +44,6 @@ Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
 };
 Device.fromJsonArray = function(deviceClass, json){
-	GuiElements.alert(json);
 	return [];
 	let res = [];
 	for(let i = 0; i < deviceClass.length; i++){
