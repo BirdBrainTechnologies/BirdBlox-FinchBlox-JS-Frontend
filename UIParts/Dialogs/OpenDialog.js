@@ -9,6 +9,7 @@ function OpenDialog(listOfFiles){
 	}
 	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;

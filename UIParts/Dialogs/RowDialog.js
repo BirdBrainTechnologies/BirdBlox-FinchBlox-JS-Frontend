@@ -10,6 +10,7 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom){
 	this.extraTopSpace = extraTop;
 	this.extraBottomSpace = extraBottom;
 	this.visible = false;
+	this.hintText = "";
 }
 RowDialog.setConstants=function(){
 	RowDialog.currentDialog=null;
@@ -50,7 +51,7 @@ RowDialog.prototype.show = function(){
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
-		this.rowGroup = this.createRows();
+		this.rowGroup = this.createContent();
 		this.createCenteredBns();
 		this.scrollBox = this.createScrollBox(); // could be null
 		if (this.scrollBox != null) {
@@ -105,13 +106,18 @@ RowDialog.prototype.createTitleLabel=function(title){
 	this.group.appendChild(textE);
 	return textE;
 };
-RowDialog.prototype.createRows = function(){
+RowDialog.prototype.createContent = function(){
 	var RD = RowDialog;
 	let y = 0;
 	var rowGroup = GuiElements.create.group(0, 0);
-	for(let i = 0; i < this.rowCount; i++){
-		this.createRow(i, y, this.width - RD.bnMargin * 2, rowGroup);
-		y += RD.bnHeight + RD.bnMargin;
+	if(this.rowCount > 0) {
+		for (let i = 0; i < this.rowCount; i++) {
+			this.createRow(i, y, this.width - RD.bnMargin * 2, rowGroup);
+			y += RD.bnHeight + RD.bnMargin;
+		}
+	}
+	else if(this.hintText != "") {
+		this.createHintText();
 	}
 	return rowGroup;
 };
@@ -138,6 +144,16 @@ RowDialog.prototype.createScrollBox = function(){
 	let y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
 		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight, false);
+};
+RowDialog.prototype.createHintText = function(){
+	var RD = RowDialog;
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
+	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
+	let x = this.width / 2 - textWidth / 2;
+	let y = this.scrollBoxY + RD.charHeight;
+	GuiElements.move.text(this.hintTextE, x, y);
+	this.group.appendChild(this.hintTextE);
 };
 RowDialog.prototype.closeDialog = function(){
 	if(this.visible) {
@@ -191,4 +207,7 @@ RowDialog.prototype.isScrolling = function(){
 		return this.scrollBox.isMoving();
 	}
 	return false;
+};
+RowDialog.prototype.addHintText = function(hintText){
+	this.hintText = hintText;
 };

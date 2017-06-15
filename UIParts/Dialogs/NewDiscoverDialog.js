@@ -9,6 +9,7 @@ function DiscoverDialog(deviceClass){
 	this.deviceClass = deviceClass;
 	this.discoveredDevices = [];
 	this.timerSet = false;
+	this.addHintText(deviceClass.getConnectionInstructions());
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
