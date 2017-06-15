@@ -811,7 +811,7 @@ GuiElements.overlay.close=function(){
 GuiElements.getAppVersion=function(callback){
 	GuiElements.appVersion=""; //Temp value until ajax completes.
 	HtmlServer.sendRequestWithCallback("version.txt", function(result){
-		GuiElements.appVersion=xhttp.responseText;
+		GuiElements.appVersion=result;
 		callback();
 	}, callback);
 };
