@@ -870,6 +870,7 @@ GuiElements.updateDims = function(){
 	TitleBar.updateZoom();
 	BlockPalette.updateZoom();
 	GuiElements.updateDialogBlockZoom();
+	RowDialog.updateZoom();
 };
 GuiElements.configureZoom = function(callback){
 	var GE = GuiElements;

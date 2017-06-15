@@ -167,6 +167,11 @@ RowDialog.prototype.updateZoom = function(){
 		this.setScroll(scroll);
 	}
 };
+RowDialog.updateZoom = function(){
+	if(RowDialog.currentDialog != null){
+		RowDialog.currentDialog.updateZoom();
+	}
+};
 RowDialog.prototype.reloadRows = function(rowCount){
 	this.rowCount = rowCount;
 	if(this.visible) {
