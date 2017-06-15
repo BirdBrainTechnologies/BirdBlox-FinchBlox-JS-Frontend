@@ -44,9 +44,8 @@ Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
 };
 Device.fromJsonArray = function(deviceClass, json){
-	return [];
 	let res = [];
-	for(let i = 0; i < deviceClass.length; i++){
+	for(let i = 0; i < json.length; i++){
 		res.push(Device.fromJson(deviceClass, json[i]));
 	}
 	return res;

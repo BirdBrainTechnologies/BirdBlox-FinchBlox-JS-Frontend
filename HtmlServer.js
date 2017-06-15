@@ -45,12 +45,12 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr();
-			}
-			/*if(callbackFn != null) {
-				callbackFn("7");
 			}*/
+			if(callbackFn != null) {
+				callbackFn("[]");
+			}
 		}, 20);
 		return;
 	}
