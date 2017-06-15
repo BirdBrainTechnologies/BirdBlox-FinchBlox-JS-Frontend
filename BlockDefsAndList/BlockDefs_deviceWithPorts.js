@@ -99,7 +99,7 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			block.displayError(this.deviceClass.getNotConnectedMessage());
+			this.displayError(this.deviceClass.getNotConnectedMessage());
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -153,7 +153,7 @@ B_DeviceWithPortsTriLed.prototype.startAction = function() {
 B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			block.displayError(this.deviceClass.getNotConnectedMessage());
+			this.displayError(this.deviceClass.getNotConnectedMessage());
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();

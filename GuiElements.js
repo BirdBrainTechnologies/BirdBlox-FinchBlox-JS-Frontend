@@ -807,13 +807,10 @@ GuiElements.overlay.close=function(){
 		GE.currentOverlay.close();
 	}
 };
-/* Loads the version number from version.txt */
+/* Loads the version number from version.js */
 GuiElements.getAppVersion=function(callback){
-	GuiElements.appVersion=""; //Temp value until ajax completes.
-	HtmlServer.sendRequestWithCallback("version.txt", function(result){
-		GuiElements.appVersion=result;
-		callback();
-	}, callback);
+	GuiElements.appVersion = FrontendVersion;
+	callback();
 };
 GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
