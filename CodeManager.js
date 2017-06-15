@@ -141,7 +141,9 @@ CodeManager.move.end=function(){
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
-		SaveManager.markEdited();
+		if(move.showTrash) {
+			SaveManager.markEdited();
+		}
 		BlockPalette.HideTrash();
 	}
 };
