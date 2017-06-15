@@ -14,7 +14,7 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.logHttp = true;
 	DO.skipInitSettings = false;
-	DO.blockLogging = false;
+	DO.blockLogging = true;
 	DO.skipHtmlRequests = false;
 	if(DO.enabled){
 		DO.applyConstants();
