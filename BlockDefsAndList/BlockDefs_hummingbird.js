@@ -3,250 +3,107 @@
  * Most relay on the HummingbirdManager to remove redundant code.
  */
 
+function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal);
+}
+B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
+
+
+
 function B_HBServo(x,y){
-	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"Servo"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
-	this.addPart(new NumSlot(this,"NumS_angle",0,true,true)); //Positive integer.
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180);
 }
-B_HBServo.prototype = Object.create(CommandBlock.prototype);
+B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
-/* Generic Hummingbird single output functions. */
-B_HBServo.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"servo","angle",0,180); //0 to 180
-};
-B_HBServo.prototype.updateAction=function(){
-	return HummingbirdManager.outputUpdateAction(this);
-};
-
-
-
-function B_HBLight(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"Light"));
-	this.addPart(new PortSlot(this,"PortS_1", 4)); //Four sensor ports.
-}
-B_HBLight.prototype = Object.create(ReporterBlock.prototype);
-B_HBLight.prototype.constructor = B_HBLight;
-/* Generic Hummingbird input functions. */
-B_HBLight.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"sensor",0);
-};
-B_HBLight.prototype.updateAction=function(){
-	return HummingbirdManager.sensorUpdateAction(this,true,0);
-};
-
 
 
 function B_HBMotor(x,y){
-	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"Motor"));
-	this.addPart(new PortSlot(this,"PortS_1", 2));
-	this.addPart(new NumSlot(this,"NumS_amt",0, false, true)); //Integer
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", 0, 180);
 }
-B_HBMotor.prototype = Object.create(CommandBlock.prototype);
+B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
-/* Generic Hummingbird single output functions. */
-B_HBMotor.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"motor","speed",-100,100); //-100 to 100
-};
-B_HBMotor.prototype.updateAction=function(){
-	return HummingbirdManager.outputUpdateAction(this);
-};
+
+
 
 function B_HBVibration(x,y){
-	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"Vibration"));
-	this.addPart(new PortSlot(this,"PortS_1", 2));
-	this.addPart(new NumSlot(this,"NumS_amt",0,true, true)); //Positive integer.
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 180);
 }
-B_HBVibration.prototype = Object.create(CommandBlock.prototype);
+B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
-/* Generic Hummingbird single output functions. */
-B_HBVibration.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"vibration","intensity",0,100); //0 to 100
-};
-B_HBVibration.prototype.updateAction=function(){
-	return HummingbirdManager.outputUpdateAction(this);
-};
 
 
 
 function B_HBLed(x,y){
-	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"LED"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
-	this.addPart(new NumSlot(this,"NumS_amt",0,true, true)); //Positive integer.
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 180);
 }
-B_HBLed.prototype = Object.create(CommandBlock.prototype);
+B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
-/* Generic Hummingbird single output functions. */
-B_HBLed.prototype.startAction=function(){
-	return HummingbirdManager.outputStartAction(this,"led","intensity",0,100); //0 to 100
-};
-B_HBLed.prototype.updateAction=function(){
-	return HummingbirdManager.outputUpdateAction(this);
-};
 
+
+
+function B_HummingbirdSensorBase(x, y, sensorType, displayName) {
+	B_DeviceWithPortsSensorBase.call(this, x,y, DeviceHummingbird, sensorType, displayName, 4);
+}
+B_HummingbirdSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
+
+
+function B_HBLight(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Light");
+}
+B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBLight.prototype.constructor = B_HBLight;
 
 
 function B_HBTempC(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-	this.addPart(new LabelText(this,"Temperature C"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature C");
 }
-B_HBTempC.prototype = Object.create(ReporterBlock.prototype);
+B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
-/* Generic Hummingbird input functions. */
-B_HBTempC.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"temperature",0)
-};
-B_HBTempC.prototype.updateAction=function(){
-	return HummingbirdManager.sensorUpdateAction(this,true,0);
-};
 Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 
-
-
 function B_HBDistCM(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-	this.addPart(new LabelText(this,"Distance CM"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance CM");
 }
-B_HBDistCM.prototype = Object.create(ReporterBlock.prototype);
+B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
-/* Generic Hummingbird input functions. */
-B_HBDistCM.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"distance",0); //positive int
-};
-B_HBDistCM.prototype.updateAction=function(){
-	return HummingbirdManager.sensorUpdateAction(this,true,0);
-};
 Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 
 
 function B_HBKnob(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager));
-	this.addPart(new LabelText(this,"Knob"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Knob");
 }
-B_HBKnob.prototype = Object.create(ReporterBlock.prototype);
+B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
-/* Generic Hummingbird input functions. */
-B_HBKnob.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"sensor",0);
-};
-B_HBKnob.prototype.updateAction=function(){
-	return HummingbirdManager.sensorUpdateAction(this,true,0);
-};
-
 
 
 function B_HBSound(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-	this.addPart(new LabelText(this,"Sound"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "sound", "Sound");
 }
-B_HBSound.prototype = Object.create(ReporterBlock.prototype);
+B_HBSound.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBSound.prototype.constructor = B_HBSound;
-/* Generic Hummingbird input functions. */
-B_HBSound.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"sound",0); //positive int
-};
-B_HBSound.prototype.updateAction=function(){
-	return HummingbirdManager.sensorUpdateAction(this,true,0);
-};
 
 
 ///// <Special> /////
 
 
 function B_HBTriLed(x,y){
-	CommandBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-	this.addPart(new LabelText(this,"TRI-LED"));
-	this.addPart(new PortSlot(this,"PortS_1", 2));
-	this.addPart(new LabelText(this,"R"));
-	this.addPart(new NumSlot(this,"NumS_r",0,true,true)); //Positive integer.
-	this.addPart(new LabelText(this,"G"));
-	this.addPart(new NumSlot(this,"NumS_g",0,true,true)); //Positive integer.
-	this.addPart(new LabelText(this,"B"));
-	this.addPart(new NumSlot(this,"NumS_b",0,true,true)); //Positive integer.
+	B_DeviceWithPortsTriLed.call(this,x,y, DeviceHummingbird, 2);
 }
-B_HBTriLed.prototype = Object.create(CommandBlock.prototype);
+B_HBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_HBTriLed.prototype.constructor = B_HBTriLed;
-/* Sends a request if the port is an integer from 1 to 4. */
-B_HBTriLed.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.hBIndex=this.slots[0].getData().getValue();
-	mem.portD=this.slots[1].getData();
-	mem.port=mem.portD.getValueWithC(true,true); //Positive integer.
-	mem.dataR=this.slots[2].getData();
-	mem.dataG=this.slots[3].getData();
-	mem.dataB=this.slots[4].getData();
-
-	mem.valueR=mem.dataR.getValueInR(0,100,true,true); //Positive integer.
-	mem.valueG=mem.dataG.getValueInR(0,100,true,true); //Positive integer.
-	mem.valueB=mem.dataB.getValueInR(0,100,true,true); //Positive integer.
-	mem.isValid=mem.dataR.isValid&&mem.dataG.isValid&&mem.dataB.isValid;
-
-	if(mem.port>=1&&mem.port<=4&&mem.isValid&&mem.portD.isValid) { //Only run if port and input are valid.
-		var request = "out/triled";
-		var params = "";
-		params += "&port=" + mem.port;
-		params += "&red=" + mem.valueR;
-		params += "&green=" + mem.valueG;
-		params += "&blue=" + mem.valueB;
-		mem.params = params;
-		mem.request = request;
-		mem.requestStatus={};
-		if(CodeManager.checkHBOutputDelay(this.stack)){
-			HtmlServer.sendHBRequest(mem.hBIndex,request,params,mem.requestStatus); //Send the request.
-			mem.sent=true;
-			CodeManager.updateHBOutputDelay();
-		}
-		else{
-			mem.sent=false;
-		}
-		return new ExecutionStatusRunning(); //Still running
-	}
-	else{
-		return new ExecutionStatusDone(); //Done running
-	}
-};
-/* Waits for the request to finish. */
-B_HBTriLed.prototype.updateAction=function(){
-	return HummingbirdManager.outputUpdateAction(this);
-};
-
 
 
 function B_HBTempF(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-	this.addPart(new LabelText(this,"Temperature F"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature F");
 }
-B_HBTempF.prototype = Object.create(ReporterBlock.prototype);
+B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
-/* Generic Hummingbird input start. */
-B_HBTempF.prototype.startAction=function(){
-	return HummingbirdManager.sensorStartAction(this,"temperature",0);
-};
-/* Waits for the request to finish then converts C to F. */
 B_HBTempF.prototype.updateAction=function(){
-	var status = HummingbirdManager.sensorUpdateAction(this,true,0)
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
 	if(status.hasError() || status.isRunning()){
 		return status;
 	} else {
@@ -262,22 +119,13 @@ B_HBTempF.prototype.updateAction=function(){
 Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 
-
 function B_HBDistInch(x,y){
-	ReporterBlock.call(this,x,y,"hummingbird");
-    this.addPart(new DeviceDropSlot(this,"DDS_1", HummingbirdManager, true));
-    this.addPart(new LabelText(this,"HB Distance Inch"));
-	this.addPart(new PortSlot(this,"PortS_1", 4));
+	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance Inch");
 }
-B_HBDistInch.prototype = Object.create(ReporterBlock.prototype);
-B_HBDistInch.prototype.constructor = B_HBDistInch; //positive float
-/* Generic Hummingbird input start. */
-B_HBDistInch.prototype.startAction=function(){
-    return HummingbirdManager.sensorStartAction(this,"distance",0); //positive int
-};
-/* Waits for the request to finish then converts cm to in. */
+B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBDistInch.prototype.constructor = B_HBDistInch;
 B_HBDistInch.prototype.updateAction=function(){
-	var status = HummingbirdManager.sensorUpdateAction(this,true,0)
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
 	if(status.hasError() || status.isRunning()){
 		return status;
 	} else {

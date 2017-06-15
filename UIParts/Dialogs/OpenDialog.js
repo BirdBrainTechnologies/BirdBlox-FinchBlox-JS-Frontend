@@ -7,8 +7,8 @@ function OpenDialog(listOfFiles){
 	if(listOfFiles == ""){
 		this.files = [];
 	}
-	RowDialog.call(this, "Open", this.files.length, 0, 0);
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this))
+	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;

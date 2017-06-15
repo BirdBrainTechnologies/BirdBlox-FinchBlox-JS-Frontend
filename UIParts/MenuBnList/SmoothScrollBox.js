@@ -20,7 +20,8 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
 	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
 	this.contentGroup = GuiElements.create.group(0, 0, this.contentSvg);
 	this.contentGroup.appendChild(group);
-	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+	this.scrollStatus = {};
+	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
 	this.visible = false;
 	this.currentZoom = GuiElements.zoomFactor;
 	this.isOverlayPart = isOverlay;
@@ -102,4 +103,7 @@ SmoothScrollBox.prototype.setScrollX = function(x){
 SmoothScrollBox.prototype.setScrollY = function(y){
 	this.scrollDiv.scrollTop = y * this.currentZoom;
 	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+};
+SmoothScrollBox.prototype.isMoving = function(){
+	return !this.scrollStatus.still;
 };

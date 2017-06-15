@@ -215,16 +215,16 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
-TabManager.hideDeviceDropDowns=function(){
-	TabManager.passRecursively("hideDeviceDropDowns");
+TabManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-TabManager.showDeviceDropDowns=function(){
-	TabManager.passRecursively("showDeviceDropDowns");
+TabManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
 };
-TabManager.countHBsInUse=function(){
+TabManager.countDevicesInUse=function(deviceClass){
 	var largest=1;
 	for(var i=0;i<TabManager.tabList.length;i++){
-		largest=Math.max(largest,TabManager.tabList[i].countHBsInUse());
+		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
 };

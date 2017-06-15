@@ -532,16 +532,16 @@ BlockStack.prototype.checkVariableUsed=function(variable){
 BlockStack.prototype.checkListUsed=function(list){
 	return this.firstBlock.checkListUsed(list);
 };
-BlockStack.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+BlockStack.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
-BlockStack.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+BlockStack.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
-BlockStack.prototype.countHBsInUse=function(){
-	return this.firstBlock.countHBsInUse();
+BlockStack.prototype.countDevicesInUse=function(deviceClass){
+	return this.firstBlock.countDevicesInUse(deviceClass);
 };
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);

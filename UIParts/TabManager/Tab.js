@@ -296,17 +296,17 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Tab.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+Tab.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-Tab.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+Tab.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-Tab.prototype.countHBsInUse=function(){
+Tab.prototype.countDevicesInUse=function(deviceClass){
 	var largest=1;
 	var stacks=this.stackList;
 	for(var i=0;i<stacks.length;i++){
-		largest=Math.max(largest,stacks[i].countHBsInUse());
+		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
 };

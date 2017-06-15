@@ -114,7 +114,7 @@ GuiElements.setConstants=function(){
 	MenuBnList.setGraphics();
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
-	HummingbirdMenu.setGraphics();
+	DeviceMenu.setGraphics();
 	InputPad.setGraphics();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
@@ -128,8 +128,6 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
-	HummingbirdManager();
-	FlutterManager();
 	SaveManager();
 };
 /* Debugging function which displays information on screen */
@@ -809,13 +807,10 @@ GuiElements.overlay.close=function(){
 		GE.currentOverlay.close();
 	}
 };
-/* Loads the version number from version.txt */
+/* Loads the version number from version.js */
 GuiElements.getAppVersion=function(callback){
-	GuiElements.appVersion=""; //Temp value until ajax completes.
-	HtmlServer.sendRequestWithCallback("version.txt", function(result){
-		GuiElements.appVersion=xhttp.responseText;
-		callback();
-	}, callback);
+	GuiElements.appVersion = FrontendVersion;
+	callback();
 };
 GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){

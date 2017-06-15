@@ -241,15 +241,15 @@ BlockSlot.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-BlockSlot.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+BlockSlot.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-BlockSlot.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+BlockSlot.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-BlockSlot.prototype.countHBsInUse=function(){
+BlockSlot.prototype.countDevicesInUse=function(deviceClass){
 	if(this.hasChild){
-		return this.child.countHBsInUse();
+		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
 };

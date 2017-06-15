@@ -1,16 +1,16 @@
-function DeviceDropSlot(parent, key, DeviceManager, shortText) {
+function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
 	DropSlot.call(this, parent, key, Slot.snapTypes.none);
-	this.prefixText = DeviceManager.GetDeviceName(shortText) + " ";
-	this.DeviceManager = DeviceManager;
+	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
+	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
 	this.setSelectionData(this.prefixText + 1, new SelectionData(0));
 
-	if (DeviceManager.GetDeviceCount() <= 1) {
+	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
 		this.switchToLabel();
 	} else {
 		this.labelText.hide();
@@ -21,14 +21,14 @@ DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
 DeviceDropSlot.prototype.populateList = function() {
 	this.clearOptions();
-	var deviceCount = this.DeviceManager.GetDeviceCount();
+	var deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	for (var i = 0; i < deviceCount; i++) {
 		this.addOption(this.prefixText + (i + 1), new SelectionData(i)); //We'll store a 0-indexed value but display it +1.
 	}
 };
 
 DeviceDropSlot.prototype.duplicate = function(parentCopy) {
-	var myCopy = new DeviceDropSlot(parentCopy, this.DeviceManager, this.shortText);
+	var myCopy = new DeviceDropSlot(parentCopy, this.deviceClass, this.shortText);
 	myCopy.enteredData = this.enteredData;
 	myCopy.changeText(this.text);
 	return myCopy;
@@ -68,16 +68,20 @@ DeviceDropSlot.prototype.updateDim = function() {
 	}
 };
 
-DeviceDropSlot.prototype.hideDeviceDropDowns = function() {
-	this.switchToLabel();
+DeviceDropSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
+	if(this.deviceClass == deviceClass) {
+		this.switchToLabel();
+	}
 };
 
-DeviceDropSlot.prototype.showDeviceDropDowns = function() {
-	this.switchToSlot();
+DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
+	if(this.deviceClass == deviceClass) {
+		this.switchToSlot();
+	}
 };
 
-DeviceDropSlot.prototype.countHBsInUse = function() {
-	if (this.getData() != null) {
+DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
+	if (this.deviceClass == deviceClass && this.getData() != null) {
 		return this.getData().getValue() + 1;
 	} else {
 		return 1;

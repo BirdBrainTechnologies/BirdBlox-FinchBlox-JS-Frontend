@@ -51,7 +51,7 @@ TitleBar.makeButtons=function(){
 	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addImage(ImageLists.hBIcon,TB.bnIconH);
-	TB.hummingbirdMenu=new HummingbirdMenu(TB.hummingbirdBn);
+	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);

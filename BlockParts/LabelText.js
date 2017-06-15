@@ -1,6 +1,7 @@
 //Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
 
 function LabelText(parent,text){
+	DebugOptions.validateNonNull(parent, text);
 	this.text=text;
 	this.width=0;
 	this.height=BlockGraphics.labelText.charHeight;

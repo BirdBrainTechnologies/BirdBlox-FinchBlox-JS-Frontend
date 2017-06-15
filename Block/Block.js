@@ -901,25 +901,25 @@ Block.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Block.prototype.hideDeviceDropDowns=function(){
-	this.passRecursively("hideDeviceDropDowns");
+Block.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-Block.prototype.showDeviceDropDowns=function(){
-	this.passRecursively("showDeviceDropDowns");
+Block.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-Block.prototype.countHBsInUse=function(){
+Block.prototype.countDevicesInUse=function(deviceClass){
 	var largest=1;
 	for(var i=0;i<this.slots.length;i++){
-		largest=Math.max(largest,this.slots[i].countHBsInUse());
+		largest=Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
 	}
 	if(this.blockSlot1!=null){
-		largest=Math.max(largest,this.blockSlot1.countHBsInUse());
+		largest=Math.max(largest,this.blockSlot1.countDevicesInUse(deviceClass));
 	}
 	if(this.blockSlot2!=null){
-		largest=Math.max(largest,this.blockSlot2.countHBsInUse());
+		largest=Math.max(largest,this.blockSlot2.countDevicesInUse(deviceClass));
 	}
 	if(this.bottomOpen&&this.nextBlock!=null){
-		largest=Math.max(largest,this.nextBlock.countHBsInUse());
+		largest=Math.max(largest,this.nextBlock.countDevicesInUse(deviceClass));
 	}
 	return largest;
 };
@@ -954,10 +954,15 @@ Block.prototype.displayError = function(message){
 	this.displayValue(message, true);
 };
 Block.setDisplaySuffix = function(Class, suffix){
+	Block.setDeviceSuffixFn(Class, function(){
+		return suffix;
+	});
+};
+Block.setDeviceSuffixFn = function(Class, suffixFn){
 	Class.prototype.displayResult = function(data){
 		if(data.isValid) {
 			var value = data.asString().getValue();
-			this.displayValue(value + " " + suffix, false);
+			this.displayValue(value + " " + suffixFn(), false);
 		}
 		else{
 			this.displayValue(data.asString().getValue(), false);
