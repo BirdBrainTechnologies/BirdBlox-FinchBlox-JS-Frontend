@@ -59,6 +59,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	button.setCallbackFunction(function(){
 		me.selectDevice(me.discoveredDevices[index]);
 	}, true);
+	button.makeScrollable();
 };
 DiscoverDialog.prototype.selectDevice = function(device){
 	this.deviceClass.getManager().setOneDevice(device);
