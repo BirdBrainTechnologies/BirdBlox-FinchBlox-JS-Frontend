@@ -186,7 +186,7 @@ SaveManager.promptDuplicate = function(message){
 SaveManager.promptDuplicateWithDefault = function(message, defaultName){
 	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
 		if(!cancelled){
-			SaveManager.duplicate(response);
+			SaveManager.sanitizeDuplicate(response);
 		}
 	});
 };

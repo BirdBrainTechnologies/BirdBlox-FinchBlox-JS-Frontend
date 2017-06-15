@@ -10,9 +10,9 @@ HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message);
 };
 HtmlServer.encodeHtml=function(message){
-	if(message==""){
+	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
-	}
+	}*/
 	var eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
@@ -35,7 +35,7 @@ HtmlServer.encodeHtml=function(message){
 		eVal = eVal.replace(/&/g, "%26");
 	}
 	return eVal; //.replace(/\%20/g, "+");
-}
+};
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
