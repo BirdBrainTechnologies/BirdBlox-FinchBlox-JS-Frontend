@@ -302,7 +302,13 @@ SaveManager.getCurrentDoc = function(){
 
 SaveManager.import=function(fileName){
 	let name = HtmlServer.decodeHtml(fileName);
-	SaveManager.userOpenFile(name);
+	if(SaveManager.fileName == null){
+		SaveManager.open(name);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.open(name);
+	});
 };
 /*SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
 	SaveManager.printStatus("getCurrentDocName");
