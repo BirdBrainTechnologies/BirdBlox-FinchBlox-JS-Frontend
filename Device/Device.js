@@ -22,7 +22,10 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	var manager = new DeviceManager(deviceClass);
 	deviceClass.getManager = function(){
 		return manager;
-	}
+	};
+	deviceClass.getConnectionInstructions = function(){
+		return "Scanning for devices...";
+	};
 };
 Device.prototype.getDeviceTypeName = function(shorten, maxChars){
 	return this.constructor.getDeviceTypeName(shorten, maxChars);
