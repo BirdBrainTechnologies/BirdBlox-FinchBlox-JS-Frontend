@@ -42,6 +42,9 @@ DiscoverDialog.prototype.discoverDevices = function() {
 	});
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
+	if(TouchReceiver.touchDown || !this.visible){
+		return;
+	}
 	this.discoveredDevices = Device.fromJsonArray(this.deviceClass, JSON.parse(deviceList));
 	if(DiscoverDialog.allowVirtualDevices){
 		let rand = Math.random() * 20 + 20;

@@ -25,8 +25,8 @@
       <file leaf-file-name="NewDiscoverDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/NewDiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
+            <state relative-caret-position="550">
+              <caret line="46" column="5" selection-start-line="46" selection-start-column="5" selection-end-line="46" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -86,10 +86,37 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="308">
+              <caret line="93" column="5" selection-start-line="91" selection-start-column="4" selection-end-line="93" selection-end-column="5" />
+              <folding>
+                <element signature="e#413#660#0" expanded="false" />
+                <element signature="e#504#540#0" expanded="false" />
+                <element signature="e#723#838#0" expanded="false" />
+                <element signature="e#1393#2190#0" expanded="false" />
+                <element signature="e#1821#1985#0" expanded="false" />
+                <element signature="e#3527#3544#0" expanded="false" />
+                <element signature="e#3609#3728#0" expanded="false" />
+                <element signature="e#3684#3724#0" expanded="false" />
+                <element signature="e#3776#3929#0" expanded="false" />
+                <element signature="e#3979#4389#0" expanded="false" />
+                <element signature="e#4256#4295#0" expanded="false" />
+                <element signature="e#4442#4603#0" expanded="false" />
+                <element signature="e#4657#5049#0" expanded="false" />
+                <element signature="e#5112#5459#0" expanded="false" />
+                <element signature="e#5509#5532#0" expanded="false" />
+                <element signature="e#5582#5605#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="DebugOptions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DebugOptions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-132">
+            <state relative-caret-position="-264">
               <caret line="39" column="5" selection-start-line="39" selection-start-column="5" selection-end-line="39" selection-end-column="5" />
               <folding />
             </state>
@@ -583,7 +610,7 @@
       <workItem from="1497363382839" duration="36080000" />
       <workItem from="1497447340186" duration="24332000" />
       <workItem from="1497490819357" duration="4773000" />
-      <workItem from="1497541302253" duration="11967000" />
+      <workItem from="1497541302253" duration="12086000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -680,7 +707,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="912651000" />
+    <option name="totallyTimeSpent" value="912770000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1349,31 +1376,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="33" column="31" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
-          <folding>
-            <element signature="e#413#660#0" expanded="false" />
-            <element signature="e#504#540#0" expanded="false" />
-            <element signature="e#723#838#0" expanded="false" />
-            <element signature="e#1393#2190#0" expanded="false" />
-            <element signature="e#1821#1985#0" expanded="false" />
-            <element signature="e#3527#3544#0" expanded="false" />
-            <element signature="e#3609#3728#0" expanded="false" />
-            <element signature="e#3684#3724#0" expanded="false" />
-            <element signature="e#3776#3929#0" expanded="false" />
-            <element signature="e#3979#4389#0" expanded="false" />
-            <element signature="e#4256#4295#0" expanded="false" />
-            <element signature="e#4442#4603#0" expanded="false" />
-            <element signature="e#4657#5049#0" expanded="false" />
-            <element signature="e#5112#5459#0" expanded="false" />
-            <element signature="e#5509#5532#0" expanded="false" />
-            <element signature="e#5582#5605#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Device/NewDeviceManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="484">
@@ -1676,16 +1678,41 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DebugOptions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-132">
+        <state relative-caret-position="-264">
           <caret line="39" column="5" selection-start-line="39" selection-start-column="5" selection-end-line="39" selection-end-column="5" />
           <folding />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="93" column="5" selection-start-line="91" selection-start-column="4" selection-end-line="93" selection-end-column="5" />
+          <folding>
+            <element signature="e#413#660#0" expanded="false" />
+            <element signature="e#504#540#0" expanded="false" />
+            <element signature="e#723#838#0" expanded="false" />
+            <element signature="e#1393#2190#0" expanded="false" />
+            <element signature="e#1821#1985#0" expanded="false" />
+            <element signature="e#3527#3544#0" expanded="false" />
+            <element signature="e#3609#3728#0" expanded="false" />
+            <element signature="e#3684#3724#0" expanded="false" />
+            <element signature="e#3776#3929#0" expanded="false" />
+            <element signature="e#3979#4389#0" expanded="false" />
+            <element signature="e#4256#4295#0" expanded="false" />
+            <element signature="e#4442#4603#0" expanded="false" />
+            <element signature="e#4657#5049#0" expanded="false" />
+            <element signature="e#5112#5459#0" expanded="false" />
+            <element signature="e#5509#5532#0" expanded="false" />
+            <element signature="e#5582#5605#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/NewDiscoverDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
+        <state relative-caret-position="550">
+          <caret line="46" column="5" selection-start-line="46" selection-start-column="5" selection-end-line="46" selection-end-column="5" />
           <folding />
         </state>
       </provider>
