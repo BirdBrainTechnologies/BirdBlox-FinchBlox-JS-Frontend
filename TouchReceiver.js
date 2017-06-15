@@ -640,11 +640,8 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
 TouchReceiver.addEventListenerSafe=function(element,type, func){
 	element.addEventListener(type, DebugOptions.safeFunc(func), false);
 };
-TouchReceiver.createScrollFixTimer = function(div){
-	if(!GuiElements.isIos) {
-		return;
-	}
-
+TouchReceiver.createScrollFixTimer = function(div, statusObj){
+	if(!GuiElements.isIos && statusObj == null) return;
 	var mem = {};
 	mem.lastY = null;
 	mem.lastX = null;
@@ -652,6 +649,9 @@ TouchReceiver.createScrollFixTimer = function(div){
 		var stillY = mem.lastY == null || mem.lastY == div.scrollTop;
 		var stillX = mem.lastX == null || mem.lastX == div.scrollLeft;
 		var still = stillX && stillY;
+
+		statusObj.still = still;
+		if(!GuiElements.isIos) return;
 
 		mem.lastY = div.scrollTop;
 		mem.lastX = div.scrollLeft;

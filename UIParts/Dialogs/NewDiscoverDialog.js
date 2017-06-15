@@ -42,7 +42,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 	});
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	if(TouchReceiver.touchDown || !this.visible){
+	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
 	this.discoveredDevices = Device.fromJsonArray(this.deviceClass, JSON.parse(deviceList));

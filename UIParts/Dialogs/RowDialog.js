@@ -181,3 +181,9 @@ RowDialog.prototype.reloadRows = function(rowCount){
 		this.setScroll(scroll);
 	}
 };
+RowDialog.prototype.isScrolling = function(){
+	if(this.scrollBox != null){
+		return this.scrollBox.isMoving();
+	}
+	return false;
+};
