@@ -146,6 +146,7 @@ HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
 		request+="&prefill="+HS.encodeHtml(prefill);
+		request+="&selectAll=true";
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
 			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
