@@ -152,7 +152,12 @@ SaveManager.getAvailableName = function(filename, callbackFn){
 	var request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
-		var json = JSON.parse(response);
+		var json = {};
+		try {
+			json = JSON.parse(response);
+		} catch(e){
+
+		}
 		if(json.availableName != null){
 			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
 		}
