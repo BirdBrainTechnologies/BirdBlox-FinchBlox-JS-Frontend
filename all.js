@@ -16,7 +16,7 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.logHttp = true;
 	DO.skipInitSettings = false;
-	DO.blockLogging = true;
+	DO.blockLogging = false;
 	DO.skipHtmlRequests = false;
 	if(DO.enabled){
 		DO.applyConstants();
@@ -1149,7 +1149,7 @@ GuiElements.alert=function(message){
 		DebugOptions.blockLogging = true;
 	}
 	if(!DebugOptions.blockLogging) {
-		//debug.innerHTML = message; //The iPad app does not support alert dialogs
+		debug.innerHTML = message; //The iPad app does not support alert dialogs
 		//alert(message); //When debugging on a PC this function can be used.
 	}
 };
