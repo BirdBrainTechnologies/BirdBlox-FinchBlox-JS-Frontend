@@ -14,56 +14,39 @@ function OpenDialog(listOfFiles){
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
-	OpenDialog.smallBnWidth = 45;
-	OpenDialog.iconH = 15;
+
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var RD = RowDialog;
-	var OD = OpenDialog;
-	let largeBnWidth = width - OD.smallBnWidth * 2 - RD.bnMargin * 2;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	var file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 	let renameBnX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, renameBnX, y, contentGroup);
-	let deleteBnX = renameBnX + OD.smallBnWidth + RD.bnMargin;
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(file, deleteBnX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
-	var RD = RowDialog;
-	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
-	button.addText(file);
-	var me = this;
-	button.setCallbackFunction(function(){
-		me.closeDialog();
+	RowDialog.createMainBn(file, bnWidth, x, y, contentGroup, function(){
+		this.closeDialog();
 		SaveManager.userOpenFile(file);
-	}, true);
-	button.makeScrollable();
+	}.bind(this));
 };
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
-	var RD = RowDialog;
-	var OD = OpenDialog;
-	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
-	button.addIcon(VectorPaths.trash, OD.iconH);
 	var me = this;
-	button.setCallbackFunction(function(){
-		SaveManager.userDeleteFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		SaveManager.userDeleteFile(false, file, function(){
 			me.reloadDialog();
 		});
-	}, true);
-	button.makeScrollable();
+	});
 };
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
-	var RD = RowDialog;
-	var OD = OpenDialog;
-	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
-	button.addIcon(VectorPaths.edit, OD.iconH);
 	var me = this;
-	button.setCallbackFunction(function(){
-		SaveManager.userRenameFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		SaveManager.userRenameFile(false, file, function(){
 			me.reloadDialog();
 		});
-	}, true);
-	button.makeScrollable();
+	});
 };
 OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();

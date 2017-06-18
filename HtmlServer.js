@@ -49,7 +49,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("");
+				callbackFn("Started");
 			}
 		}, 20);
 		return;
@@ -263,8 +263,30 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	};
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HS.dialogVisible = false;
+		if (callbackErr != null) {
+			callbackErr();
+		}
+	});
 };
+HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=alert(message);
+		HtmlServer.dialogVisible=false;
+	}
+	else {
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/dialog/alert");
+		request.addParam("title", HS.encodeHtml(title));
+		request.addParam("message", HS.encodeHtml(message));
+		request.addParam("button", HS.encodeHtml(button));
+		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	}
+};
+
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
 	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };

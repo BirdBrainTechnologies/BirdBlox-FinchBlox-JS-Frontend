@@ -5,8 +5,10 @@
  * GuiElements is run once the browser has loaded all the js and html files.
  */
 function GuiElements(){
-	GuiElements.svg1=document.getElementById("frontSvg");
-	GuiElements.svg2=document.getElementById("backSvg");
+	let svg2=document.getElementById("frontSvg");
+	let svg1=document.getElementById("middleSvg");
+	let svg0=document.getElementById("backSvg");
+	GuiElements.svgs = [svg0, svg1, svg2];
 
 	GuiElements.defs=document.getElementById("SvgDefs");
 	GuiElements.loadInitialSettings(function(){
@@ -123,8 +125,10 @@ GuiElements.setConstants=function(){
 	ConnectMultipleHBDialog.setConstants();
 	DiscoverDialog.setConstants();
 	HBConnectionList.setConstants();
+	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	RecordingDialog.setConstants();
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
@@ -167,36 +171,40 @@ GuiElements.buildUI=function(){
  */
 GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
-	GuiElements.zoomGroup1=create.group(0,0,GuiElements.svg1);
-	GuiElements.zoomGroup2=create.group(0,0,GuiElements.svg2);
-
-	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
-	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
+	GuiElements.zoomGroups = [];
+	GuiElements.svgs.forEach(function(svg){
+		let zoomGroup = create.group(0,0,svg);
+		GuiElements.zoomGroups.push(zoomGroup);
+		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	});
 
 	GuiElements.layers={};
+	let i = 0;
 	var layers=GuiElements.layers;
-	layers.temp=create.layer(2);
-	layers.aTabBg=create.layer(2);
-	layers.activeTab=create.layer(2);
-	layers.TabsBg=create.layer(2);
-	layers.paletteBG=create.layer(2);
-	//layers.palette=create.layer(2);
+	layers.temp=create.layer(i);
+	layers.aTabBg=create.layer(i);
+	layers.activeTab=create.layer(i);
+	layers.TabsBg=create.layer(i);
+	layers.paletteBG=create.layer(i);
 	layers.paletteScroll = document.getElementById("paletteScrollDiv");
-	layers.trash=create.layer(1);
-	layers.catBg=create.layer(1);
-	layers.categories=create.layer(1);
-	layers.titleBg=create.layer(1);
-	layers.titlebar=create.layer(1);
-	layers.overflowArr = create.layer(1);
-	layers.stage=create.layer(1);
-	layers.display=create.layer(1);
-	layers.drag=create.layer(1);
-	layers.highlight=create.layer(1);
-	layers.tabMenu=create.layer(1);
-	layers.dialogBlock=create.layer(1);
-	layers.dialog=create.layer(1);
-	layers.overlay=create.layer(1);
+	i++;
+	layers.trash=create.layer(i);
+	layers.catBg=create.layer(i);
+	layers.categories=create.layer(i);
+	layers.titleBg=create.layer(i);
+	layers.titlebar=create.layer(i);
+	layers.overflowArr = create.layer(i);
+	layers.stage=create.layer(i);
+	layers.display=create.layer(i);
+	layers.drag=create.layer(i);
+	layers.highlight=create.layer(i);
+	layers.tabMenu=create.layer(i);
+	layers.dialogBlock=create.layer(i);
+	layers.dialog=create.layer(i);
+	layers.overlay=create.layer(i);
 	layers.frontScroll = document.getElementById("frontScrollDiv");
+	i++;
+	layers.overlayOverlay=create.layer(i);
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -221,14 +229,7 @@ GuiElements.create.group=function(x,y,parent){
 /* Creates a group, adds it to the main SVG, and returns it. */
 GuiElements.create.layer=function(depth){
 	DebugOptions.validateNumbers(depth);
-	var group = null;
-	if(depth == 1){
-		group = GuiElements.zoomGroup1;
-	} else if(depth == 2){
-		group = GuiElements.zoomGroup2;
-	}
-	var layer=GuiElements.create.group(0,0,group);
-	return layer;
+	return GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
  * @param {text} id - The id of the gradient (needed to reference it later).
@@ -849,8 +850,9 @@ GuiElements.updateDialogBlockZoom = function(){
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
-	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
+	GuiElements.zoomGroups.forEach(function(zoomGroup){
+		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	});
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };

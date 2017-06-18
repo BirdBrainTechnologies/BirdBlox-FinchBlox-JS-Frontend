@@ -1014,8 +1014,10 @@ DeviceFlutter.getConnectionInstructions = function(){
  * GuiElements is run once the browser has loaded all the js and html files.
  */
 function GuiElements(){
-	GuiElements.svg1=document.getElementById("frontSvg");
-	GuiElements.svg2=document.getElementById("backSvg");
+	let svg2=document.getElementById("frontSvg");
+	let svg1=document.getElementById("middleSvg");
+	let svg0=document.getElementById("backSvg");
+	GuiElements.svgs = [svg0, svg1, svg2];
 
 	GuiElements.defs=document.getElementById("SvgDefs");
 	GuiElements.loadInitialSettings(function(){
@@ -1132,8 +1134,10 @@ GuiElements.setConstants=function(){
 	ConnectMultipleHBDialog.setConstants();
 	DiscoverDialog.setConstants();
 	HBConnectionList.setConstants();
+	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	RecordingDialog.setConstants();
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
@@ -1176,36 +1180,40 @@ GuiElements.buildUI=function(){
  */
 GuiElements.createLayers=function(){
 	var create=GuiElements.create;//shorthand
-	GuiElements.zoomGroup1=create.group(0,0,GuiElements.svg1);
-	GuiElements.zoomGroup2=create.group(0,0,GuiElements.svg2);
-
-	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
-	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
+	GuiElements.zoomGroups = [];
+	GuiElements.svgs.forEach(function(svg){
+		let zoomGroup = create.group(0,0,svg);
+		GuiElements.zoomGroups.push(zoomGroup);
+		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	});
 
 	GuiElements.layers={};
+	let i = 0;
 	var layers=GuiElements.layers;
-	layers.temp=create.layer(2);
-	layers.aTabBg=create.layer(2);
-	layers.activeTab=create.layer(2);
-	layers.TabsBg=create.layer(2);
-	layers.paletteBG=create.layer(2);
-	//layers.palette=create.layer(2);
+	layers.temp=create.layer(i);
+	layers.aTabBg=create.layer(i);
+	layers.activeTab=create.layer(i);
+	layers.TabsBg=create.layer(i);
+	layers.paletteBG=create.layer(i);
 	layers.paletteScroll = document.getElementById("paletteScrollDiv");
-	layers.trash=create.layer(1);
-	layers.catBg=create.layer(1);
-	layers.categories=create.layer(1);
-	layers.titleBg=create.layer(1);
-	layers.titlebar=create.layer(1);
-	layers.overflowArr = create.layer(1);
-	layers.stage=create.layer(1);
-	layers.display=create.layer(1);
-	layers.drag=create.layer(1);
-	layers.highlight=create.layer(1);
-	layers.tabMenu=create.layer(1);
-	layers.dialogBlock=create.layer(1);
-	layers.dialog=create.layer(1);
-	layers.overlay=create.layer(1);
+	i++;
+	layers.trash=create.layer(i);
+	layers.catBg=create.layer(i);
+	layers.categories=create.layer(i);
+	layers.titleBg=create.layer(i);
+	layers.titlebar=create.layer(i);
+	layers.overflowArr = create.layer(i);
+	layers.stage=create.layer(i);
+	layers.display=create.layer(i);
+	layers.drag=create.layer(i);
+	layers.highlight=create.layer(i);
+	layers.tabMenu=create.layer(i);
+	layers.dialogBlock=create.layer(i);
+	layers.dialog=create.layer(i);
+	layers.overlay=create.layer(i);
 	layers.frontScroll = document.getElementById("frontScrollDiv");
+	i++;
+	layers.overlayOverlay=create.layer(i);
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -1230,14 +1238,7 @@ GuiElements.create.group=function(x,y,parent){
 /* Creates a group, adds it to the main SVG, and returns it. */
 GuiElements.create.layer=function(depth){
 	DebugOptions.validateNumbers(depth);
-	var group = null;
-	if(depth == 1){
-		group = GuiElements.zoomGroup1;
-	} else if(depth == 2){
-		group = GuiElements.zoomGroup2;
-	}
-	var layer=GuiElements.create.group(0,0,group);
-	return layer;
+	return GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
  * @param {text} id - The id of the gradient (needed to reference it later).
@@ -1858,8 +1859,9 @@ GuiElements.updateDialogBlockZoom = function(){
 /* Tells UI parts that zoom has changed. */
 GuiElements.updateZoom=function(){
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.update.zoom(GuiElements.zoomGroup1,GuiElements.zoomFactor);
-	GuiElements.update.zoom(GuiElements.zoomGroup2,GuiElements.zoomFactor);
+	GuiElements.zoomGroups.forEach(function(zoomGroup){
+		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	});
 	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };
@@ -2099,6 +2101,8 @@ BlockList.populateCat_looks=function(category){
 
 }
 BlockList.populateCat_sound=function(category){
+	category.addButton("Record sounds",RecordingDialog.showDialog);
+	category.addSpace();
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlaySoundUntilDone");
 	category.addBlockByName("B_StopAllSounds");
@@ -2354,6 +2358,22 @@ function VectorPaths(){
 	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z"
 	VP.trash.width = 311.111;
 	VP.trash.height = 364.012;
+	VP.square = {};
+	VP.square.path="m 1,1 10,0 0,10 -10,0 z";
+	VP.square.width=12;
+	VP.square.height=12;
+	VP.play = {};
+	VP.play.path="m 0,0 8.66025,5 -8.66025,5 z";
+	VP.play.width=8.66025;
+	VP.play.height=10;
+	VP.circle = {};
+	VP.circle.path = "m 0,50 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0";
+	VP.circle.width = 100;
+	VP.circle.height = 100;
+	VP.pause = {};
+	VP.pause.path = "m 3,3 10,0 0,30 -10,0 z m 20,0 10,0 0,30 -10,0 z";
+	VP.pause.width = 36;
+	VP.pause.height = 36;
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -3777,7 +3797,7 @@ BlockPalette.setGraphics=function(){
 BlockPalette.updateZoom=function(){
 	var BP=BlockPalette;
 	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
-	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height * 2);
+	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
 	var clipRect=BP.clippingPath.childNodes[0];
 	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
 	for(let i = 0; i < BlockPalette.categories.length; i++){
@@ -3792,7 +3812,7 @@ BlockPalette.createCatBg=function(){
 }
 BlockPalette.createPalBg=function(){
 	var BP=BlockPalette;
-	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height * 2,BP.bg);
+	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	//TouchReceiver.addListenersPalette(BP.palRect);
 	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
@@ -4304,6 +4324,7 @@ function Button(x,y,width,height,parent){
 	this.y=y;
 	this.width=width;
 	this.height=height;
+	this.parentGroup = parent;
 	this.group=GuiElements.create.group(x,y,parent);
 	this.buildBg();
 	this.pressed=false;
@@ -4311,7 +4332,7 @@ function Button(x,y,width,height,parent){
 	this.hasText=false;
 	this.hasIcon=false;
 	this.hasImage=false;
-	this.iconInverts=false;
+	this.foregroundInverts=false;
 	this.callback=null;
 	this.delayedCallback=null;
 	this.toggles=false;
@@ -4334,7 +4355,7 @@ Button.setGraphics=function(){
 	Button.defaultFont="Arial";
 	Button.defaultFontWeight="normal";
 	Button.defaultCharHeight=12;
-}
+};
 Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
 	this.group.appendChild(this.bgRect);
@@ -4353,12 +4374,11 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	if(height==null){
 		height=Button.defaultCharHeight;
 	}
-	
+	this.foregroundInverts = true;
 	
 	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width);
 	this.group.appendChild(this.textE);
-	var bbox=this.textE.getBBox();
 	var textW=GuiElements.measure.textWidth(this.textE);
 	var textX=(this.width-textW)/2;
 	var textY=(this.height+height)/2;
@@ -4374,13 +4394,85 @@ Button.prototype.addIcon=function(pathId,height){
 		this.imageE.remove();
 	}
 	this.hasIcon=true;
-	this.iconInverts=true;
+	this.foregroundInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
 	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
-}
+};
+Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+	if(color == null){
+		color = Button.foreground;
+		this.foregroundInverts = true;
+	}
+	if(font==null){
+		font=Button.defaultFont;
+	}
+	if(size==null){
+		size=Button.defaultFontSize;
+	}
+	if(weight==null){
+		weight=Button.defaultFontWeight;
+	}
+	if(charH==null){
+		charH=Button.defaultCharHeight;
+	}
+	this.hasIcon = true;
+	this.hasText = true;
+	
+	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	GuiElements.update.textLimitWidth(this.textE,text,this.width - iconW - sideMargin);
+	this.group.appendChild(this.textE);
+	var textW=GuiElements.measure.textWidth(this.textE);
+	var totalW = textW + iconW + sideMargin;
+	var iconX = (this.width - totalW) / 2;
+	var iconY = (this.height-iconHeight)/2;
+	var textX = iconX + iconW + sideMargin;
+	var textY = (this.height+charH)/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	TouchReceiver.addListenersBN(this.textE,this);
+	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+};
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+	if(color == null){
+		color = Button.foreground;
+		this.foregroundInverts = true;
+	}
+	if(font==null){
+		font=Button.defaultFont;
+	}
+	if(size==null){
+		size=Button.defaultFontSize;
+	}
+	if(weight==null){
+		weight=Button.defaultFontWeight;
+	}
+	if(charH==null){
+		charH=Button.defaultCharHeight;
+	}
+	this.hasIcon = true;
+	this.hasText = true;
+
+	var sideMargin = (this.height - iconHeight) / 2;
+	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	var textMaxW = this.width - iconW - sideMargin * 2;
+	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
+	this.group.appendChild(this.textE);
+	var textW=GuiElements.measure.textWidth(this.textE);
+	var iconX = sideMargin;
+	var iconY = (this.height-iconHeight)/2;
+	var textX = (this.width - textW) / 2;
+	textX = Math.max(iconW + sideMargin * 2, textX);
+	var textY = (this.height+charH)/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	TouchReceiver.addListenersBN(this.textE,this);
+	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+};
 Button.prototype.addImage=function(imageData,height){
 	if(this.hasIcon){
 		this.icon.remove();
@@ -4401,7 +4493,7 @@ Button.prototype.addColorIcon=function(pathId,height,color){
 		this.icon.remove();
 	}
 	this.hasIcon=true;
-	this.iconInverts=false;
+	this.foregroundInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
@@ -4425,10 +4517,10 @@ Button.prototype.disable=function(){
 		this.enabled=false;
 		this.pressed=false;
 		this.bgRect.setAttributeNS(null,"fill",Button.disabledBg);
-		if(this.hasText){
+		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.disabledFore);
 		}
-		if(this.hasIcon&&this.iconInverts){
+		if(this.hasIcon&&this.foregroundInverts){
 			this.icon.setColor(Button.disabledFore);
 		}
 	}
@@ -4486,6 +4578,12 @@ Button.prototype.unToggle=function(){
 Button.prototype.remove=function(){
 	this.group.remove();
 };
+Button.prototype.hide = function(){
+	this.group.remove();
+};
+Button.prototype.show = function(){
+	this.parentGroup.appendChild(this.group);
+};
 Button.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
@@ -4494,10 +4592,10 @@ Button.prototype.move=function(x,y){
 Button.prototype.setColor=function(isPressed){
 	if(isPressed) {
 		this.bgRect.setAttributeNS(null,"fill",Button.highlightBg);
-		if(this.hasText){
+		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
 		}
-		if(this.hasIcon&&this.iconInverts){
+		if(this.hasIcon&&this.foregroundInverts){
 			this.icon.setColor(Button.highlightFore);
 		}
 		if(this.hasImage){
@@ -4506,10 +4604,10 @@ Button.prototype.setColor=function(isPressed){
 	}
 	else{
 		this.bgRect.setAttributeNS(null, "fill", Button.bg);
-		if (this.hasText) {
+		if (this.hasText && this.foregroundInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
-		if (this.hasIcon && this.iconInverts) {
+		if (this.hasIcon && this.foregroundInverts) {
 			this.icon.setColor(Button.foreground);
 		}
 		if(this.hasImage){
@@ -7481,6 +7579,133 @@ Tab.prototype.updateArrowsShift=function(){
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 /**
+ * Created by Tom on 6/17/2017.
+ */
+function RecordingManager(){
+	var RM = RecordingManager;
+	RM.recordingStates = {};
+	RM.recordingStates.stopped = 0;
+	RM.recordingStates.recording = 1;
+	RM.recordingStates.paused = 2;
+	RM.state = RM.recordingStates.stopped;
+	RM.updateTimer = null;
+	RM.updateInterval = 200;
+	RM.startTime = null;
+	RM.pausedTime = 0;
+}
+RecordingManager.userRenameFile = function(oldFilename, nextAction){
+	SaveManager.userRenameFile(true, oldFilename, nextAction);
+};
+RecordingManager.userDeleteFile=function(filename, nextAction){
+	SaveManager.userDeleteFile(true, filename, nextAction);
+};
+RecordingManager.startRecording=function(){
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/start");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		if(result == "Started"){
+			RM.setState(RM.recordingStates.recording);
+			RecordingDialog.startedRecording();
+		} else if(result == "Permission denied"){
+			let message = "Please grant recording permissions to the BirdBlox app in settings";
+			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
+		} else if(result == "Requesting permission") {
+
+		}
+	});
+};
+RecordingManager.stopRecording=function(){
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/stop");
+	var stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+};
+RecordingManager.pauseRecording=function(){
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/pause");
+	var stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	var pauseRec = function(){
+		RM.setState(RM.recordingStates.paused);
+		RecordingDialog.pausedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
+};
+RecordingManager.discardRecording = function(){
+	var RM = RecordingManager;
+	var stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	var message = "Are you sure you would like to delete the current recording?";
+	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
+		if(result == "2") {
+			var request = new HttpRequestBuilder("sound/recording/discard");
+			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+		}
+	}, stopRec);
+};
+RecordingManager.resumeRecording = function(){
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/unpause");
+	var stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	var resumeRec = function(){
+		RM.setState(RM.recordingStates.recording);
+		RecordingDialog.startedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
+};
+RecordingManager.listRecordings = function(callbackFn){
+	var request = new HttpRequestBuilder("sound/names");
+	request.addParam("recording", "true");
+	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn);
+};
+RecordingManager.setState = function(state){
+	var RM = RecordingManager;
+	var prevState = RM.state;
+	RM.state = state;
+	var states = RM.recordingStates;
+
+
+
+	if(state == states.recording){
+		if(RM.updateTimer == null){
+			if(prevState == states.stopped) RM.pausedTime = 0;
+			RM.startTime = new Date().getTime();
+			RM.updateTimer = self.setInterval(RM.updateCounter, RM.updateInterval);
+		}
+	}
+	else if(state == states.paused) {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+			RM.pausedTime = RM.getElapsedTime();
+		}
+	}
+	else {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+		}
+	}
+};
+RecordingManager.updateCounter = function(){
+	var RM = RecordingManager;
+	RecordingDialog.updateCounter(RM.getElapsedTime());
+};
+RecordingManager.getElapsedTime = function(){
+	var RM = RecordingManager;
+	return new Date().getTime() - RM.startTime + RM.pausedTime;
+};
+/**
  * Created by Tom on 6/13/2017.
  */
 
@@ -7504,13 +7729,16 @@ RowDialog.setConstants=function(){
 	RowDialog.centeredBnWidth=100;
 	RowDialog.bnHeight=MenuBnList.bnHeight;
 	RowDialog.bnMargin=5;
-	RowDialog.minWidth = 300;
+	RowDialog.minWidth = 400;
 	RowDialog.minHeight = 200;
 
 	RowDialog.fontSize=16;
 	RowDialog.font="Arial";
-	RowDialog.fontWeight="normal";
+	RowDialog.titleFontWeight="bold";
+	RowDialog.centeredfontWeight="bold";
 	RowDialog.charHeight=12;
+	RowDialog.smallBnWidth = 45;
+	RowDialog.iconH = 15;
 };
 RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 	let entry = {};
@@ -7551,7 +7779,7 @@ RowDialog.prototype.calcHeights = function(){
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
 	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
-	let ScrollHeight = this.rowCount * (RowDialog.bnMargin + RowDialog.bnHeight) - RowDialog.bnMargin;
+	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
 	if(!this.autoHeight) totalHeight = 0;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
@@ -7559,6 +7787,8 @@ RowDialog.prototype.calcHeights = function(){
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
 	this.scrollBoxY = RD.bnMargin + RD.titleBarH;
+	this.extraTopY = RD.titleBarH;
+	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 RowDialog.prototype.calcWidths=function(){
 	var RD = RowDialog;
@@ -7567,6 +7797,7 @@ RowDialog.prototype.calcWidths=function(){
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;
 	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
+	this.contentWidth = this.width - RD.bnMargin * 2;
 };
 RowDialog.prototype.drawBackground = function(){
 	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
@@ -7581,7 +7812,7 @@ RowDialog.prototype.createTitleRect=function(){
 };
 RowDialog.prototype.createTitleLabel=function(title){
 	var RD=RowDialog;
-	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.fontWeight);
+	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
 	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
 	var y=RD.titleBarH/2+RD.charHeight/2;
 	GuiElements.move.text(textE,x,y);
@@ -7594,7 +7825,7 @@ RowDialog.prototype.createContent = function(){
 	var rowGroup = GuiElements.create.group(0, 0);
 	if(this.rowCount > 0) {
 		for (let i = 0; i < this.rowCount; i++) {
-			this.createRow(i, y, this.width - RD.bnMargin * 2, rowGroup);
+			this.createRow(i, y, this.contentWidth, rowGroup);
 			y += RD.bnHeight + RD.bnMargin;
 		}
 	}
@@ -7609,16 +7840,19 @@ RowDialog.prototype.createRow = function(index, y, width, contentGroup){
 RowDialog.prototype.createCenteredBns = function(){
 	var RD = RowDialog;
 	let y = this.centeredButtonY;
+	this.centeredButtonEs = [];
 	for(let i = 0; i < this.centeredButtons.length; i++){
-		this.createCenteredBn(y, this.centeredButtons[i]);
+		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+		this.centeredButtonEs.push(bn);
 		y += RD.bnHeight + RD.bnMargin;
 	}
 };
 RowDialog.prototype.createCenteredBn = function(y, entry){
 	var RD = RowDialog;
 	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
-	button.addText(entry.text);
+	button.addText(entry.text, null, null, RD.centeredfontWeight);
 	button.setCallbackFunction(entry.callbackFn, true);
+	return button;
 };
 RowDialog.prototype.createScrollBox = function(){
 	if(this.rowCount == 0) return null;
@@ -7693,6 +7927,42 @@ RowDialog.prototype.isScrolling = function(){
 RowDialog.prototype.addHintText = function(hintText){
 	this.hintText = hintText;
 };
+RowDialog.prototype.getExtraTopY = function(){
+	return this.extraTopY;
+};
+RowDialog.prototype.getExtraBottomY = function(){
+	return this.extraBottomY;
+};
+RowDialog.prototype.getContentWidth = function(){
+	return this.contentWidth;
+};
+RowDialog.prototype.getCenteredButton = function(i){
+	return this.centeredButtonEs[i];
+};
+RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn){
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	button.addText(text);
+	return button;
+};
+RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	button.addIcon(iconId, RD.iconH);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
 /**
  * Created by Tom on 6/13/2017.
  */
@@ -7709,56 +7979,39 @@ function OpenDialog(listOfFiles){
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
-	OpenDialog.smallBnWidth = 45;
-	OpenDialog.iconH = 15;
+
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var RD = RowDialog;
-	var OD = OpenDialog;
-	let largeBnWidth = width - OD.smallBnWidth * 2 - RD.bnMargin * 2;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	var file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 	let renameBnX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, renameBnX, y, contentGroup);
-	let deleteBnX = renameBnX + OD.smallBnWidth + RD.bnMargin;
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(file, deleteBnX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
-	var RD = RowDialog;
-	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
-	button.addText(file);
-	var me = this;
-	button.setCallbackFunction(function(){
-		me.closeDialog();
+	RowDialog.createMainBn(file, bnWidth, x, y, contentGroup, function(){
+		this.closeDialog();
 		SaveManager.userOpenFile(file);
-	}, true);
-	button.makeScrollable();
+	}.bind(this));
 };
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
-	var RD = RowDialog;
-	var OD = OpenDialog;
-	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
-	button.addIcon(VectorPaths.trash, OD.iconH);
 	var me = this;
-	button.setCallbackFunction(function(){
-		SaveManager.userDeleteFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		SaveManager.userDeleteFile(false, file, function(){
 			me.reloadDialog();
 		});
-	}, true);
-	button.makeScrollable();
+	});
 };
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
-	var RD = RowDialog;
-	var OD = OpenDialog;
-	var button = new Button(x, y, OD.smallBnWidth, RD.bnHeight, contentGroup);
-	button.addIcon(VectorPaths.edit, OD.iconH);
 	var me = this;
-	button.setCallbackFunction(function(){
-		SaveManager.userRenameFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		SaveManager.userRenameFile(false, file, function(){
 			me.reloadDialog();
 		});
-	}, true);
-	button.makeScrollable();
+	});
 };
 OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();
@@ -8117,6 +8370,289 @@ ConnectMultipleHBDialog.reloadDialog=function(){
 	new ConnectMultipleHBDialog();
 };
 
+/**
+ * Created by Tom on 6/16/2017.
+ */
+function RecordingDialog(listOfRecordings){
+	var RecD = RecordingDialog;
+	this.recordings=listOfRecordings.split("\n");
+	if(listOfRecordings == ""){
+		this.recordings = [];
+	}
+	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap record to start");
+	this.state = RecordingManager.recordingStates.stopped;
+}
+RecordingDialog.prototype = Object.create(RowDialog.prototype);
+RecordingDialog.prototype.constructor = RecordingDialog;
+RecordingDialog.setConstants = function(){
+	var RecD = RecordingDialog;
+	RecD.currentDialog = null;
+	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	RecD.coverRectOpacity = 0.8;
+	RecD.coverRectColor = Colors.black;
+	RecD.counterFont = "Arial";
+	RecD.counterColor = Colors.white;
+	RecD.counterFontSize = 60;
+	RecD.counterFontWeight = "normal";
+	RecD.counterBottomMargin = 50;
+	RecD.recordColor = "#f00";
+	RecD.recordTextSize = 25;
+	RecD.recordTextCharH = 18;
+	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.iconSidemargin = 10;
+
+};
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+	var RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * 3 - RD.bnMargin * 3;
+	var recording = this.recordings[index];
+	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
+	let playBnX = largeBnWidth + RD.bnMargin;
+	this.createPlayBn(recording, playBnX, y, contentGroup);
+	let renameBnX = playBnX  + RD.smallBnWidth + RD.bnMargin;
+	this.createRenameBn(recording, renameBnX, y, contentGroup);
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
+};
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
+	button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
+};
+RecordingDialog.prototype.createPlayBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.play, x, y, contentGroup, null);
+};
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		RecordingManager.userDeleteFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		RecordingManager.userRenameFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	RecordingDialog.currentDialog = this;
+	this.recordButton = this.createRecordButton();
+	this.discardButton = this.createDiscardButton();
+	this.saveButton = this.createSaveButton();
+	this.pauseButton = this.createPauseButton();
+	this.resumeRecordingBn = this.createResumeRecordingBn();
+	this.goToState(this.state);
+};
+RecordingDialog.prototype.closeDialog = function(){
+	RowDialog.prototype.closeDialog.call(this);
+	RecordingDialog.currentDialog = null;
+};
+RecordingDialog.prototype.createRecordButton = function(){
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	let x = RD.bnMargin;
+	let y = this.getExtraBottomY();
+	var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
+		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
+	button.setCallbackFunction(function(){
+		RecordingManager.startRecording();
+	}, true);
+	return button;
+};
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+	var RD = RowDialog;
+	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
+	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
+	let y = this.getExtraBottomY();
+	var button = new Button(x, y, width, RD.bnHeight, this.group);
+	button.setCallbackFunction(callbackFn, true);
+	return button;
+};
+RecordingDialog.prototype.createDiscardButton = function(){
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	let button = this.createOneThirdBn(0, function(){
+		RecordingManager.discardRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	return button;
+};
+RecordingDialog.prototype.createSaveButton = function(){
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	let button = this.createOneThirdBn(1, function(){
+		this.goToState(RecordingManager.recordingStates.stopped);
+		RecordingManager.stopRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
+	return button;
+};
+RecordingDialog.prototype.createPauseButton = function(){
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.paused);
+		RecordingManager.pauseRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	return button;
+};
+RecordingDialog.prototype.createResumeRecordingBn = function(){
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.recording);
+		RecordingManager.resumeRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	return button;
+};
+RecordingDialog.prototype.drawCoverRect = function(){
+	let halfStep = RowDialog.bnMargin / 2;
+	let x = this.x + halfStep;
+	let y = this.y + this.getExtraTopY() + halfStep;
+	let height = this.getExtraBottomY() - this.getExtraTopY() - RowDialog.bnMargin;
+	let width = this.width - RowDialog.bnMargin;
+	let rect = GuiElements.draw.rect(x, y, width, height, RecordingDialog.coverRectColor);
+	GuiElements.update.opacity(rect, RecordingDialog.coverRectOpacity);
+	GuiElements.layers.overlayOverlay.appendChild(rect);
+	return rect;
+};
+RecordingDialog.prototype.drawTimeCounter = function(){
+	var RD = RecordingDialog;
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+	GuiElements.layers.overlayOverlay.appendChild(textE);
+	let width = GuiElements.measure.textWidth(textE);
+	let height = GuiElements.measure.textHeight(textE);
+	let x = this.x + this.width / 2 - width / 2;
+	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
+	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
+	if(span < 2 * RecordingDialog.counterBottomMargin){
+		y = this.getExtraBottomY() - span / 2;
+	}
+	y += this.y;
+	this.counterY = y;
+	GuiElements.move.text(textE, x, y);
+	return textE;
+};
+RecordingDialog.showDialog = function(){
+	var recordDialog = new RecordingDialog("Hello\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld");
+	recordDialog.show();
+};
+RecordingDialog.prototype.goToState = function(state){
+	var RecD = RecordingDialog;
+	this.state = state;
+	var states = RecordingManager.recordingStates;
+	if(state == states.stopped){
+		this.recordButton.show();
+		this.discardButton.hide();
+		this.saveButton.hide();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(false);
+		this.getCenteredButton(0).enable();
+	}
+	else if(state == states.recording){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.show();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+	else if(state == states.paused){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.show();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+};
+RecordingDialog.startedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
+	}
+};
+RecordingDialog.stoppedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+};
+RecordingDialog.pausedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
+	}
+};
+RecordingDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	RecordingManager.listRecordings(function(response){
+		me.closeDialog();
+		var dialog = new RecordingDialog(response);
+		dialog.show();
+		dialog.setScroll(thisScroll);
+	});
+};
+RecordingDialog.prototype.setCounterVisibility = function(visible){
+	if(visible){
+		if (this.coverRect == null) {
+			this.coverRect = this.drawCoverRect();
+		}
+		if (this.counter == null) {
+			this.counter = this.drawTimeCounter();
+		}
+	} else {
+		if (this.coverRect != null) {
+			this.coverRect.remove();
+			this.coverRect = null;
+		}
+		if (this.counter != null) {
+			this.counter.remove();
+			this.counter = null;
+		}
+	}
+};
+RecordingDialog.prototype.updateCounter = function(time){
+	if(this.counter == null) return;
+	var totalSeconds = Math.floor(time / 1000);
+	var seconds = totalSeconds % 60;
+	var totalMinutes = Math.floor(totalSeconds / 60);
+	var minutes = totalMinutes % 60;
+	var hours = Math.floor(totalMinutes / 60);
+	var secondsString = seconds + "";
+	if(secondsString.length < 2){
+		secondsString = "0" + secondsString;
+	}
+	var minutesString = minutes + "";
+	var totalString = minutesString + ":" + secondsString;
+	if(hours > 0) {
+		if(minutesString.length < 2) {
+			minutesString = "0" + minutesString;
+		}
+		totalString = hours + ":" + minutesString + ":" + secondsString;
+	}
+	GuiElements.update.text(this.counter, totalString);
+	var width = GuiElements.measure.textWidth(this.counter);
+	let counterX = this.x + this.width / 2 - width / 2;
+	GuiElements.move.text(this.counter, counterX, this.counterY);
+};
+RecordingDialog.updateCounter = function(time){
+	if(this.currentDialog != null){
+		this.currentDialog.updateCounter(time);
+	}
+};
 function HBConnectionList(x,upperY,lowerY,hBToReplace){
 	var HBCL=HBConnectionList;
 	this.group=GuiElements.create.group(0,0);
@@ -8997,7 +9533,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("");
+				callbackFn("Started");
 			}
 		}, 20);
 		return;
@@ -9211,8 +9747,30 @@ HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
 	};
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,callbackErr);
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HS.dialogVisible = false;
+		if (callbackErr != null) {
+			callbackErr();
+		}
+	});
 };
+HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=alert(message);
+		HtmlServer.dialogVisible=false;
+	}
+	else {
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/dialog/alert");
+		request.addParam("title", HS.encodeHtml(title));
+		request.addParam("message", HS.encodeHtml(message));
+		request.addParam("button", HS.encodeHtml(button));
+		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	}
+};
+
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
 	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
 };
@@ -9400,7 +9958,7 @@ SaveManager.saveAndName = function(message, nextAction){
 			if (nextAction != null) nextAction();
 		}
 		else {
-			SaveManager.promptRename(SaveManager.fileName, title, message, function () {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
 				SaveManager.named = true;
 				if (nextAction != null) nextAction();
 			});
@@ -9435,71 +9993,72 @@ SaveManager.forceSave = function(nextAction){
 SaveManager.userRename = function(){
 	if(SaveManager.fileName == null) return;
 	SaveManager.forceSave(function(){
-		SaveManager.promptRename(SaveManager.fileName, "Rename");
+		SaveManager.promptRename(false, SaveManager.fileName, "Rename");
 	});
 };
-SaveManager.userRenameFile = function(oldFilename, nextAction){
-	SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+	SaveManager.promptRename(isRecording, oldFilename, "Rename", null, nextAction);
 };
-SaveManager.promptRename = function(oldFilename, title, message, nextAction){
-	SaveManager.promptRenameWithDefault(oldFilename, title, message, oldFilename, nextAction);
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
 };
-SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defaultName, nextAction){
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
 	if(message == null){
 		message = "Enter a file name";
 	}
 	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
 		if(!cancelled){
-			SaveManager.sanitizeRename(oldFilename, title, response.trim(), nextAction);
+			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
 // Checks if a name is legitimate and renames the current file to that name if it is.
-SaveManager.sanitizeRename = function(oldFilename, title, proposedName, nextAction){
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
 	if(proposedName == ""){
-		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
+		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
 	} else if(proposedName == oldFilename) {
 		if(nextAction != null) nextAction();
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
-				SaveManager.renameSoft(oldFilename, title, availableName, nextAction);
+				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptRenameWithDefault(oldFilename, title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptRenameWithDefault(oldFilename, title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
 	var request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
+	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		if(oldFilename == SaveManager.fileName) {
+		if(oldFilename == SaveManager.fileName && !isRecording) {
 			SaveManager.saveCurrentDoc(false, newName, true);
 		}
 		if(nextAction != null) nextAction();
 	}, function(error){
 		if(400 <= error && error < 500) {
-			SaveManager.sanitizeRename(title, newName, nextAction);
+			SaveManager.sanitizeRename(isRecording, title, newName, nextAction);
 		}
 	});
 };
 SaveManager.userDelete=function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.userDeleteFile(SaveManager.fileName);
+	SaveManager.userDeleteFile(false, SaveManager.fileName);
 };
-SaveManager.userDeleteFile=function(filename, nextAction){
+SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	var question = "Are you sure you want to delete \"" + filename + "\"?";
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
-			SaveManager.delete(filename, function(){
+			SaveManager.delete(isRecording, filename, function(){
 				if(filename == SaveManager.fileName) {
 					SaveManager.openBlank(nextAction);
 				} else{
@@ -9509,9 +10068,10 @@ SaveManager.userDeleteFile=function(filename, nextAction){
 		}
 	}, null);
 };
-SaveManager.delete = function(filename, nextAction){
+SaveManager.delete = function(isRecording, filename, nextAction){
 	var request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userNew = function(){

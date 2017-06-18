@@ -25,7 +25,7 @@ SaveManager.saveAndName = function(message, nextAction){
 			if (nextAction != null) nextAction();
 		}
 		else {
-			SaveManager.promptRename(SaveManager.fileName, title, message, function () {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
 				SaveManager.named = true;
 				if (nextAction != null) nextAction();
 			});
@@ -60,71 +60,72 @@ SaveManager.forceSave = function(nextAction){
 SaveManager.userRename = function(){
 	if(SaveManager.fileName == null) return;
 	SaveManager.forceSave(function(){
-		SaveManager.promptRename(SaveManager.fileName, "Rename");
+		SaveManager.promptRename(false, SaveManager.fileName, "Rename");
 	});
 };
-SaveManager.userRenameFile = function(oldFilename, nextAction){
-	SaveManager.promptRename(oldFilename, "Rename", null, nextAction);
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+	SaveManager.promptRename(isRecording, oldFilename, "Rename", null, nextAction);
 };
-SaveManager.promptRename = function(oldFilename, title, message, nextAction){
-	SaveManager.promptRenameWithDefault(oldFilename, title, message, oldFilename, nextAction);
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
 };
-SaveManager.promptRenameWithDefault = function(oldFilename, title, message, defaultName, nextAction){
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
 	if(message == null){
 		message = "Enter a file name";
 	}
 	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
 		if(!cancelled){
-			SaveManager.sanitizeRename(oldFilename, title, response.trim(), nextAction);
+			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
 // Checks if a name is legitimate and renames the current file to that name if it is.
-SaveManager.sanitizeRename = function(oldFilename, title, proposedName, nextAction){
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
 	if(proposedName == ""){
-		SaveManager.promptRename(oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
+		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
 	} else if(proposedName == oldFilename) {
 		if(nextAction != null) nextAction();
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
-				SaveManager.renameSoft(oldFilename, title, availableName, nextAction);
+				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptRenameWithDefault(oldFilename, title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptRenameWithDefault(oldFilename, title, message, availableName, nextAction);
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.renameSoft = function(oldFilename, title, newName, nextAction){
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
 	var request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	request.addParam("options", "soft");
+	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		if(oldFilename == SaveManager.fileName) {
+		if(oldFilename == SaveManager.fileName && !isRecording) {
 			SaveManager.saveCurrentDoc(false, newName, true);
 		}
 		if(nextAction != null) nextAction();
 	}, function(error){
 		if(400 <= error && error < 500) {
-			SaveManager.sanitizeRename(title, newName, nextAction);
+			SaveManager.sanitizeRename(isRecording, title, newName, nextAction);
 		}
 	});
 };
 SaveManager.userDelete=function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.userDeleteFile(SaveManager.fileName);
+	SaveManager.userDeleteFile(false, SaveManager.fileName);
 };
-SaveManager.userDeleteFile=function(filename, nextAction){
+SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	var question = "Are you sure you want to delete \"" + filename + "\"?";
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
-			SaveManager.delete(filename, function(){
+			SaveManager.delete(isRecording, filename, function(){
 				if(filename == SaveManager.fileName) {
 					SaveManager.openBlank(nextAction);
 				} else{
@@ -134,9 +135,10 @@ SaveManager.userDeleteFile=function(filename, nextAction){
 		}
 	}, null);
 };
-SaveManager.delete = function(filename, nextAction){
+SaveManager.delete = function(isRecording, filename, nextAction){
 	var request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userNew = function(){
