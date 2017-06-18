@@ -1,33 +1,28 @@
 //@fix Write documentation.
 
-function SoundDropSlot(parent,key){
+function SoundDropSlot(parent,key, isRecording){
 	DropSlot.call(this,parent,key);
+	this.isRecording = isRecording;
 }
 SoundDropSlot.prototype = Object.create(DropSlot.prototype);
 SoundDropSlot.prototype.constructor = SoundDropSlot;
 
-SoundDropSlot.prototype.populateList=function(){
+SoundDropSlot.prototype.populateList = function(){
 	this.clearOptions();
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		var currentSound=Sounds.getSoundName(i);
-		this.addOption(currentSound,new SelectionData(currentSound));
-	}
+	const me = this;
+	let list = Sound.getSoundList(this.isRecording);
+	list.forEach(function(sound){
+		me.addOption(sound.name, new SelectionData(sound.id));
+	});
 };
 SoundDropSlot.prototype.edit=function(){
 	var me = this;
 	DropSlot.prototype.edit.call(this, function(){
 		if(me.enteredData != null) {
-			var soundName = me.enteredData.getValue();
-			HtmlServer.sendRequestWithCallback("sound/stop", function(){
-				if(Sounds.checkNameIsValid(soundName)){
-					var request = "sound/play?filename="+soundName;
-					HtmlServer.sendRequestWithCallback(request);
-					GuiElements.alert("sent: " + request);
-				}
-				else{
-					GuiElements.alert("Bad sound: " + soundName);
-				}
-			});
+			if(!this.isRecording) {
+				let soundId = me.enteredData.getValue();
+				Sound.playAndStopPrev(soundId, false);
+			}
 		}
 		else{
 			GuiElements.alert("No data");
@@ -36,5 +31,5 @@ SoundDropSlot.prototype.edit=function(){
 };
 SoundDropSlot.prototype.deselect=function(){
 	DropSlot.prototype.deselect.call(this);
-	HtmlServer.sendRequestWithCallback("sound/stop");
+	Sound.stopAllSounds();
 };

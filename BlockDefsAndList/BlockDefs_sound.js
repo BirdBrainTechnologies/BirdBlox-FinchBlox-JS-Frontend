@@ -1,35 +1,32 @@
-//@fix Write documentation.
-function B_PlaySound(x,y){
+function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"play sound"));
-	var dS=new SoundDropSlot(this,"SDS_1");
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
-	}
+	this.isRecording = isRecording;
+	this.waitUntilDone = waitUntilDone;
+	this.addPart(new LabelText(this, label));
+	let dS=new SoundDropSlot(this,"SDS_1", isRecording);
 	this.addPart(dS);
 }
-B_PlaySound.prototype = Object.create(CommandBlock.prototype);
-B_PlaySound.prototype.constructor = B_PlaySound;
-B_PlaySound.prototype.startAction=function(){
-	var soundData=this.slots[0].getData();
-	if(soundData==null){
+B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
+B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
+B_PlaySoundOrRecording.prototype.startAction=function(){
+	let soundData=this.slots[0].getData();
+	if(soundData == null){
 		return new ExecutionStatusDone();
 	}
-	var soundName=soundData.getValue();
-	if(Sounds.checkNameIsValid(soundName)){
-		var mem=this.runMem;
-		mem.request = "sound/play?filename="+soundName;
-		mem.requestStatus=function(){};
-		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return new ExecutionStatusRunning(); //Still running
-	}
-	return new ExecutionStatusDone();
+	let soundId=soundData.getValue();
+	let status = {};
+	this.runMem.playStatus = status;
+	status.donePlaying = false;
+	status.requestSent = false;
+	Sound.play(soundId, this.isRecording, status);
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
-B_PlaySound.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
+B_PlaySoundOrRecording.prototype.updateAction=function(){
+	let mem=this.runMem;
+	let status=mem.playStatus;
+	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
+	if(done){
 		return new ExecutionStatusDone(); //Done running
 	}
 	else{
@@ -37,64 +34,31 @@ B_PlaySound.prototype.updateAction=function(){
 	}
 };
 
-function B_PlaySoundUntilDone(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"play sound until done"));
-	var dS=new SoundDropSlot(this,"SDS_1");
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
-	}
-	this.addPart(dS);
+
+function B_PlaySound(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound", false, false);
 }
-B_PlaySoundUntilDone.prototype = Object.create(CommandBlock.prototype);
+B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlaySound.prototype.constructor = B_PlaySound;
+
+function B_PlaySoundUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound until done", false, true);
+}
+B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
-B_PlaySoundUntilDone.prototype.startAction=function(){
-	var soundData=this.slots[0].getData();
-	if(soundData==null){
-		return new ExecutionStatusDone();
-	}
-	var soundName=soundData.getValue();
-	var soundIndex=Sounds.indexFromName(soundName);
-	if(soundIndex>=0){
-		var mem=this.runMem;
-		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
-        mem.timerStarted=false;
-		mem.request = "sound/play?filename="+soundName;
-		mem.cancel=false;
-		mem.requestStatus=function(){};
-		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return new ExecutionStatusRunning(); //Still running
-	}
-	return new ExecutionStatusDone();
-};
-/* Wait for the request to finish. */
-B_PlaySoundUntilDone.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(mem.cancel){
-		return new ExecutionStatusDone();
-	}
-	if(!mem.timerStarted){
-		var status=mem.requestStatus;
-		if(status.finished==true){
-			mem.startTime=new Date().getTime();
-			mem.timerStarted=true;
-		}
-		else{
-			return new ExecutionStatusRunning(); //Still running
-		}
-	}
-	if(new Date().getTime() >= (mem.startTime+mem.soundDuration)){
-        return new ExecutionStatusDone(); //Done running
-	}
-	else{
-        return new ExecutionStatusRunning(); //Still running
-	}
-};
-B_PlaySoundUntilDone.prototype.stopAllSounds=function(){
-	if(this.runMem!=null) {
-		this.runMem.cancel = true;
-	}
-};
+
+function B_PlayRecording(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording", true, false);
+}
+B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecording.prototype.constructor = B_PlayRecording;
+
+function B_PlayRecordingUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording until done", true, true);
+}
+B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
+
 
 
 function B_StopAllSounds(x,y){
@@ -105,14 +69,19 @@ B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
 B_StopAllSounds.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "sound/stop";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	mem.requestStatus = {};
+	Sound.stopAllSounds(mem.requestStatus);
 	return new ExecutionStatusRunning(); //Still running
 };
 B_StopAllSounds.prototype.updateAction=function(){
-	return !this.runMem.requestStatus.finished;
+	if(this.runMem.requestStatus.finished){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
 };
+
 
 
 function B_RestForBeats(x,y){

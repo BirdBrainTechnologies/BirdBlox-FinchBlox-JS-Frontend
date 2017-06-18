@@ -100,7 +100,7 @@ GuiElements.setConstants=function(){
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
-	Sounds();
+	Sound.setConstants();
 	BlockList();
 	Colors();
 	Button.setGraphics();

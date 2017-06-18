@@ -137,7 +137,7 @@ function B_FlutterDistInch(x, y) {
 B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
-B_HBDistInch.prototype.updateAction=function(){
+B_FlutterDistInch.prototype.updateAction=function(){
 	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if(status.hasError() || status.isRunning()){
 		return status;

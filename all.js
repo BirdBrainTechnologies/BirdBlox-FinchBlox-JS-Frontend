@@ -1109,7 +1109,7 @@ GuiElements.setConstants=function(){
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
-	Sounds();
+	Sound.setConstants();
 	BlockList();
 	Colors();
 	Button.setGraphics();
@@ -2103,6 +2103,8 @@ BlockList.populateCat_looks=function(category){
 BlockList.populateCat_sound=function(category){
 	category.addButton("Record sounds",RecordingDialog.showDialog);
 	category.addSpace();
+	category.addBlockByName("B_PlayRecording");
+	category.addBlockByName("B_PlayRecordingUntilDone");
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlaySoundUntilDone");
 	category.addBlockByName("B_StopAllSounds");
@@ -2906,59 +2908,135 @@ BlockGraphics.create.predicate=function(x,y,width,height,category,isSlot){
 
 
 
-function Sounds() {
-	Sounds.names = [];
-	Sounds.durations = [];
-	Sounds.loadNames();
-}
-
-Sounds.loadNames=function(){
-	var request = "sound/names";
-	var callback = function(response) {
-		Sounds.names = response.split("\n");
-		Sounds.names = Sounds.names.filter(function(n){ return n != "" });
-		Sounds.durations = Array.apply(null, new Array(Sounds.names.length)).map(Number.prototype.valueOf,0);
-
-		for (var i = 0; i < Sounds.names.length; i++) {
-			const index = i;
-			var request = "sound/duration?filename=" + Sounds.getSoundName(i);
-			var durationCallback = function(duration) {
-				//HtmlServer.sendRequest("server/log/LOG:Got_duration:" + index + ":"+ duration);
-				Sounds.durations[index] = Number(duration);
-			};
-			HtmlServer.sendRequestWithCallback(request,durationCallback);
-		}
-
-	};
-	HtmlServer.sendRequestWithCallback(request, callback);
-};
-
-Sounds.getSoundDuration=function(index){
-	return Sounds.durations[index];
-};
-
-Sounds.getSoundName=function(index){
-	return Sounds.names[index];
-};
-Sounds.getSoundCount=function(){
-	return Sounds.names.length;
-};
-Sounds.indexFromName=function(soundName){
-	return Sounds.names.indexOf(soundName);
-};
-Sounds.checkNameIsValid=function(soundName){
-	return Sounds.indexFromName(soundName)>=0;
-};
-
-// Stops all sounds and tones
-Sounds.stopAllSounds=function(){
-	var request = "sound/stopAll"
-	var errCallback = function() {
-		// TODO(ttsun): Handle error
-		//GuiElements.alert("Error stopping all sounds.")
+/**
+ * Created by Tom on 6/18/2017.
+ */
+function Sound(id, isRecording, name){
+	this.id = id;
+	if(name == null){
+		name = Sound.nameFromId(id, isRecording);
 	}
-	HtmlServer.sendRequestWithCallback(request, null, errCallback);
+	this.name = name;
+	this.isRecording = isRecording;
 }
+Sound.setConstants = function(){
+	Sound.soundList = [];
+	Sound.recordingList = [];
+	Sound.playingSoundStatuses = [];
+	Sound.loadSounds(true);
+	Sound.loadSounds(false);
+};
+Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
+	Sound.stopAllSounds(null, function(){
+		Sound.playWithCallback(id, isRecording, sentCallback, errorCallback, donePlayingCallback);
+	});
+};
+Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
+	let status = {};
+	status.donePlayingCallback = donePlayingCallback;
+	Sound.playingSoundStatuses.push(status);
+	const removeEntry = function(){
+		let index = Sound.playingSoundStatuses.indexOf(status);
+		if(index > -1) {
+			Sound.playingSoundStatuses.splice(index, 1);
+			return true;
+		}
+		return false;
+	};
+	const errorFn = function(){
+		removeEntry();
+		if(errorCallback != null) errorCallback();
+	};
+	const donePlayingFn = function(){
+		if(removeEntry()) {
+			if (donePlayingCallback != null) donePlayingCallback();
+		}
+	};
+	Sound.getDuration(id, isRecording, function(duration){
+		let request = new HttpRequestBuilder("sound/play");
+		request.addParam("filename", id);
+		request.addParam("recording", isRecording + "");
+		HtmlServer.sendRequestWithCallback(request.toString(), function(){
+			setTimeout(donePlayingFn, duration);
+			if(sentCallback != null) sentCallback();
+		}, errorFn);
+	}, errorFn);
+};
+Sound.play = function(id, isRecording, status){
+	if(status == null){
+		Sound.playWithCallback(id, isRecording);
+	}
+	else{
+		status.donePlaying = false;
+		status.requestSent = false;
+		const endPlaying = function(){
+			status.donePlaying = true;
+			status.requestSent = true;
+		};
+		Sound.playWithCallback(id, isRecording, function(){
+			status.requestSent = true;
+		}, endPlaying, endPlaying);
+	}
+};
+Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
+	let request = new HttpRequestBuilder("sound/duration");
+	request.addParam("filename", id);
+	request.addParam("recording", isRecording + "");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		let res = Number(result);
+		if(!isNaN(res)){
+			if(callbackFn != null) callbackFn(res);
+		} else{
+			if(callbackError != null) callbackError();
+		}
+	}, callbackError);
+};
+Sound.loadSounds = function(isRecording, callbackFn){
+	let request = new HttpRequestBuilder("sound/names");
+	request.addParam("recording", isRecording + "");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		let list = result.split("\n");
+		if(result === "") list = [];
+		let resultList = list.map(function(id){
+			return new Sound(id, isRecording);
+		});
+		if(isRecording){
+			Sound.recordingList = resultList;
+		} else {
+			Sound.soundList = resultList;
+		}
+		if(callbackFn != null) callbackFn(resultList);
+	});
+};
+Sound.nameFromId = function(id, isRecording){
+	if(isRecording) return id;
+	let name = id;
+	if(name.substring(name.length - 4) === ".wav") {
+		name = name.substring(0, name.length - 4);
+	}
+	name = name.replace("_", " ");
+	name = name.replace(/\b\w/g, l => l.toUpperCase());
+	return name;
+};
+Sound.stopAllSounds=function(status, callbackFn){
+	if(status == null) status = {};
+	let request = new HttpRequestBuilder("sound/stopAll");
+	let callback = function() {
+		status.finished = true;
+		Sound.playingSoundStatuses.forEach(function (playStatus) {
+			if(playStatus.donePlayingCallback != null) playStatus.donePlayingCallback();
+		});
+		Sound.playingSoundStatuses = [];
+		if(callbackFn != null) callbackFn();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), callback, callback);
+};
+Sound.getSoundList = function(isRecording){
+	if(isRecording) {
+		return Sound.recordingList;
+	}
+	return Sound.soundList;
+};
 
 
 /* TouchReceiver is a static class that handles all touch events.
@@ -4362,6 +4440,7 @@ Button.prototype.buildBg=function(){
 	TouchReceiver.addListenersBN(this.bgRect,this);
 }
 Button.prototype.addText=function(text,font,size,weight,height){
+	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
 	}
@@ -4387,12 +4466,7 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	TouchReceiver.addListenersBN(this.textE,this);
 }
 Button.prototype.addIcon=function(pathId,height){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
-	if(this.hasImage){
-		this.imageE.remove();
-	}
+	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -4402,6 +4476,7 @@ Button.prototype.addIcon=function(pathId,height){
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+	this.removeContent();
 	if(color == null){
 		color = Button.foreground;
 		this.foregroundInverts = true;
@@ -4437,8 +4512,9 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+	this.removeContent();
 	if(color == null){
-		color = Button.foreground;
+		color = this.currentForeground();
 		this.foregroundInverts = true;
 	}
 	if(font==null){
@@ -4474,12 +4550,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addImage=function(imageData,height){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
-	if(this.hasImage){
-		this.imageE.remove();
-	}
+	this.removeContent();
 	var imageW=imageData.width/imageData.height*height;
 	var imageX=(this.width-imageW)/2;
 	var imageY=(this.height-height)/2;
@@ -4489,9 +4560,7 @@ Button.prototype.addImage=function(imageData,height){
 	TouchReceiver.addListenersBN(this.imageE,this);
 };
 Button.prototype.addColorIcon=function(pathId,height,color){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
+	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -4500,6 +4569,17 @@ Button.prototype.addColorIcon=function(pathId,height,color){
 	this.icon=new VectorIcon(iconX,iconY,pathId,color,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 }
+Button.prototype.removeContent = function(){
+	if(this.hasIcon){
+		this.icon.remove();
+	}
+	if(this.hasImage){
+		this.imageE.remove();
+	}
+	if(this.hasText){
+		this.textE.remove();
+	}
+};
 Button.prototype.setCallbackFunction=function(callback,delay){
 	if(delay){
 		this.delayedCallback=callback;
@@ -4617,6 +4697,15 @@ Button.prototype.setColor=function(isPressed){
 };
 Button.prototype.makeScrollable = function(){
 	this.scrollable = true;
+};
+Button.prototype.currentForeground = function(){
+	if(!this.enabled){
+		return Button.disabledFore;
+	} else if(this.pressed) {
+		return Button.highlightFore;
+	} else {
+		return Button.foreground;
+	}
 };
 
 
@@ -6646,7 +6735,7 @@ CodeManager.stop=function(){
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
 	DisplayBox.hide(); //Hide any messages being displayed.
-	Sounds.stopAllSounds() // Stops all sounds and tones
+	Sound.stopAllSounds() // Stops all sounds and tones
 	                       // Note: Tones are not allowed to be async, so they 
 	                       // must be stopped manually
 }
@@ -7582,7 +7671,7 @@ Tab.prototype.updateArrowsShift=function(){
  * Created by Tom on 6/17/2017.
  */
 function RecordingManager(){
-	var RM = RecordingManager;
+	let RM = RecordingManager;
 	RM.recordingStates = {};
 	RM.recordingStates.stopped = 0;
 	RM.recordingStates.recording = 1;
@@ -7592,6 +7681,7 @@ function RecordingManager(){
 	RM.updateInterval = 200;
 	RM.startTime = null;
 	RM.pausedTime = 0;
+	RM.awaitingPermission = false;
 }
 RecordingManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.userRenameFile(true, oldFilename, nextAction);
@@ -7600,8 +7690,8 @@ RecordingManager.userDeleteFile=function(filename, nextAction){
 	SaveManager.userDeleteFile(true, filename, nextAction);
 };
 RecordingManager.startRecording=function(){
-	var RM = RecordingManager;
-	var request = new HttpRequestBuilder("sound/recording/start");
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/start");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
 		if(result == "Started"){
 			RM.setState(RM.recordingStates.recording);
@@ -7610,80 +7700,78 @@ RecordingManager.startRecording=function(){
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
 			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
 		} else if(result == "Requesting permission") {
-
+			RM.awaitingPermission = true;
 		}
 	});
 };
 RecordingManager.stopRecording=function(){
-	var RM = RecordingManager;
-	var request = new HttpRequestBuilder("sound/recording/stop");
-	var stopRec = function() {
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/stop");
+	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
 RecordingManager.pauseRecording=function(){
-	var RM = RecordingManager;
-	var request = new HttpRequestBuilder("sound/recording/pause");
-	var stopRec = function() {
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/pause");
+	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	var pauseRec = function(){
+	let pauseRec = function(){
 		RM.setState(RM.recordingStates.paused);
 		RecordingDialog.pausedRecording();
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
 };
 RecordingManager.discardRecording = function(){
-	var RM = RecordingManager;
-	var stopRec = function() {
+	let RM = RecordingManager;
+	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	var message = "Are you sure you would like to delete the current recording?";
+	let message = "Are you sure you would like to delete the current recording?";
 	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
 		if(result == "2") {
-			var request = new HttpRequestBuilder("sound/recording/discard");
+			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 		}
 	}, stopRec);
 };
 RecordingManager.resumeRecording = function(){
-	var RM = RecordingManager;
-	var request = new HttpRequestBuilder("sound/recording/unpause");
-	var stopRec = function() {
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/unpause");
+	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	var resumeRec = function(){
+	let resumeRec = function(){
 		RM.setState(RM.recordingStates.recording);
 		RecordingDialog.startedRecording();
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
 };
 RecordingManager.listRecordings = function(callbackFn){
-	var request = new HttpRequestBuilder("sound/names");
-	request.addParam("recording", "true");
-	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn);
+	Sound.loadSounds(true, callbackFn);
 };
 RecordingManager.setState = function(state){
-	var RM = RecordingManager;
-	var prevState = RM.state;
+	let RM = RecordingManager;
+	let prevState = RM.state;
 	RM.state = state;
-	var states = RM.recordingStates;
+	let states = RM.recordingStates;
 
 
 
-	if(state == states.recording){
+	if(state === states.recording){
 		if(RM.updateTimer == null){
-			if(prevState == states.stopped) RM.pausedTime = 0;
+			if(prevState === states.stopped) RM.pausedTime = 0;
 			RM.startTime = new Date().getTime();
 			RM.updateTimer = self.setInterval(RM.updateCounter, RM.updateInterval);
 		}
 	}
-	else if(state == states.paused) {
+	else if(state === states.paused) {
 		if (RM.updateTimer != null) {
 			RM.updateTimer = window.clearInterval(RM.updateTimer);
 			RM.updateTimer = null;
@@ -7698,12 +7786,21 @@ RecordingManager.setState = function(state){
 	}
 };
 RecordingManager.updateCounter = function(){
-	var RM = RecordingManager;
+	let RM = RecordingManager;
 	RecordingDialog.updateCounter(RM.getElapsedTime());
 };
 RecordingManager.getElapsedTime = function(){
-	var RM = RecordingManager;
+	let RM = RecordingManager;
 	return new Date().getTime() - RM.startTime + RM.pausedTime;
+};
+RecordingManager.permissionGranted = function(){
+	let RM = RecordingManager;
+	if(RM.awaitingPermission){
+		RM.awaitingPermission = false;
+		if(RecordingDialog.currentDialog != null){
+			RM.startRecording();
+		}
+	}
 };
 /**
  * Created by Tom on 6/13/2017.
@@ -8374,11 +8471,8 @@ ConnectMultipleHBDialog.reloadDialog=function(){
  * Created by Tom on 6/16/2017.
  */
 function RecordingDialog(listOfRecordings){
-	var RecD = RecordingDialog;
-	this.recordings=listOfRecordings.split("\n");
-	if(listOfRecordings == ""){
-		this.recordings = [];
-	}
+	let RecD = RecordingDialog;
+	this.recordings=listOfRecordings.map(x => x.id);
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
@@ -8387,7 +8481,7 @@ function RecordingDialog(listOfRecordings){
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
 RecordingDialog.setConstants = function(){
-	var RecD = RecordingDialog;
+	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	RecD.coverRectOpacity = 0.8;
@@ -8405,9 +8499,9 @@ RecordingDialog.setConstants = function(){
 
 };
 RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var RD = RowDialog;
+	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
-	var recording = this.recordings[index];
+	let recording = this.recordings[index];
 	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
 	let renameBnX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(recording, renameBnX, y, contentGroup);
@@ -8415,11 +8509,35 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
 RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
-	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
-	button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
+	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
+	let state = {};
+	state.playing = false;
+	let me = this;
+	let showPlay = function(){
+		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
+	};
+	let showStop = function(){
+		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
+	};
+	button.setCallbackFunction(function(){
+		if(state.playing){
+			Sound.stopAllSounds();
+		} else {
+			Sound.playAndStopPrev(recording, true, function(){
+				state.playing = true;
+				showStop();
+			}, null, function(){
+				if(me.visible) {
+					state.playing = false;
+					showPlay();
+				}
+			});
+		}
+	}, true);
+	showPlay();
 };
 RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
-	var me = this;
+	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
 		RecordingManager.userDeleteFile(file, function(){
 			me.reloadDialog();
@@ -8427,7 +8545,7 @@ RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	});
 };
 RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
-	var me = this;
+	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
 		RecordingManager.userRenameFile(file, function(){
 			me.reloadDialog();
@@ -8449,11 +8567,11 @@ RecordingDialog.prototype.closeDialog = function(){
 	RecordingDialog.currentDialog = null;
 };
 RecordingDialog.prototype.createRecordButton = function(){
-	var RD = RowDialog;
-	var RecD = RecordingDialog;
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
 	let y = this.getExtraBottomY();
-	var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
 	button.setCallbackFunction(function(){
@@ -8462,17 +8580,17 @@ RecordingDialog.prototype.createRecordButton = function(){
 	return button;
 };
 RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
-	var RD = RowDialog;
+	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
 	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
 	let y = this.getExtraBottomY();
-	var button = new Button(x, y, width, RD.bnHeight, this.group);
+	let button = new Button(x, y, width, RD.bnHeight, this.group);
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
 RecordingDialog.prototype.createDiscardButton = function(){
-	var RD = RowDialog;
-	var RecD = RecordingDialog;
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
 	let button = this.createOneThirdBn(0, function(){
 		RecordingManager.discardRecording();
 	}.bind(this));
@@ -8480,8 +8598,8 @@ RecordingDialog.prototype.createDiscardButton = function(){
 	return button;
 };
 RecordingDialog.prototype.createSaveButton = function(){
-	var RD = RowDialog;
-	var RecD = RecordingDialog;
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
 	let button = this.createOneThirdBn(1, function(){
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
@@ -8490,8 +8608,8 @@ RecordingDialog.prototype.createSaveButton = function(){
 	return button;
 };
 RecordingDialog.prototype.createPauseButton = function(){
-	var RD = RowDialog;
-	var RecD = RecordingDialog;
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
 	let button = this.createOneThirdBn(2, function(){
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
@@ -8500,8 +8618,8 @@ RecordingDialog.prototype.createPauseButton = function(){
 	return button;
 };
 RecordingDialog.prototype.createResumeRecordingBn = function(){
-	var RD = RowDialog;
-	var RecD = RecordingDialog;
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
 	let button = this.createOneThirdBn(2, function(){
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
@@ -8521,7 +8639,7 @@ RecordingDialog.prototype.drawCoverRect = function(){
 	return rect;
 };
 RecordingDialog.prototype.drawTimeCounter = function(){
-	var RD = RecordingDialog;
+	let RD = RecordingDialog;
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
@@ -8539,15 +8657,15 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 };
 RecordingDialog.showDialog = function(){
 	RecordingManager.listRecordings(function(result){
-		var recordDialog = new RecordingDialog(result);
+		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
 RecordingDialog.prototype.goToState = function(state){
-	var RecD = RecordingDialog;
+	let RecD = RecordingDialog;
 	this.state = state;
-	var states = RecordingManager.recordingStates;
-	if(state == states.stopped){
+	let states = RecordingManager.recordingStates;
+	if(state === states.stopped){
 		this.recordButton.show();
 		this.discardButton.hide();
 		this.saveButton.hide();
@@ -8556,7 +8674,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.setCounterVisibility(false);
 		this.getCenteredButton(0).enable();
 	}
-	else if(state == states.recording){
+	else if(state === states.recording){
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -8565,7 +8683,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.setCounterVisibility(true);
 		this.getCenteredButton(0).disable();
 	}
-	else if(state == states.paused){
+	else if(state === states.paused){
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -8596,7 +8714,7 @@ RecordingDialog.prototype.reloadDialog = function(){
 	let me = this;
 	RecordingManager.listRecordings(function(response){
 		me.closeDialog();
-		var dialog = new RecordingDialog(response);
+		let dialog = new RecordingDialog(response);
 		dialog.show();
 		dialog.setScroll(thisScroll);
 	});
@@ -8622,17 +8740,17 @@ RecordingDialog.prototype.setCounterVisibility = function(visible){
 };
 RecordingDialog.prototype.updateCounter = function(time){
 	if(this.counter == null) return;
-	var totalSeconds = Math.floor(time / 1000);
-	var seconds = totalSeconds % 60;
-	var totalMinutes = Math.floor(totalSeconds / 60);
-	var minutes = totalMinutes % 60;
-	var hours = Math.floor(totalMinutes / 60);
-	var secondsString = seconds + "";
+	let totalSeconds = Math.floor(time / 1000);
+	let seconds = totalSeconds % 60;
+	let totalMinutes = Math.floor(totalSeconds / 60);
+	let minutes = totalMinutes % 60;
+	let hours = Math.floor(totalMinutes / 60);
+	let secondsString = seconds + "";
 	if(secondsString.length < 2){
 		secondsString = "0" + secondsString;
 	}
-	var minutesString = minutes + "";
-	var totalString = minutesString + ":" + secondsString;
+	let minutesString = minutes + "";
+	let totalString = minutesString + ":" + secondsString;
 	if(hours > 0) {
 		if(minutesString.length < 2) {
 			minutesString = "0" + minutesString;
@@ -8640,7 +8758,7 @@ RecordingDialog.prototype.updateCounter = function(time){
 		totalString = hours + ":" + minutesString + ":" + secondsString;
 	}
 	GuiElements.update.text(this.counter, totalString);
-	var width = GuiElements.measure.textWidth(this.counter);
+	let width = GuiElements.measure.textWidth(this.counter);
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 };
@@ -8724,6 +8842,8 @@ HBConnectionList.prototype.close=function(){
 /**
  * Created by Tom on 6/14/2017.
  */
+
+
 
 function DiscoverDialog(deviceClass){
 	let title = "Connect " + deviceClass.getDeviceTypeName(false);
@@ -9529,7 +9649,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("Started");
+				callbackFn("3000");
 			}
 		}, 20);
 		return;
@@ -12685,34 +12805,29 @@ DropSlot.prototype.updateEdit=function(visibleText,data){
 };
 //@fix Write documentation.
 
-function SoundDropSlot(parent,key){
+function SoundDropSlot(parent,key, isRecording){
 	DropSlot.call(this,parent,key);
+	this.isRecording = isRecording;
 }
 SoundDropSlot.prototype = Object.create(DropSlot.prototype);
 SoundDropSlot.prototype.constructor = SoundDropSlot;
 
-SoundDropSlot.prototype.populateList=function(){
+SoundDropSlot.prototype.populateList = function(){
 	this.clearOptions();
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		var currentSound=Sounds.getSoundName(i);
-		this.addOption(currentSound,new SelectionData(currentSound));
-	}
+	const me = this;
+	let list = Sound.getSoundList(this.isRecording);
+	list.forEach(function(sound){
+		me.addOption(sound.name, new SelectionData(sound.id));
+	});
 };
 SoundDropSlot.prototype.edit=function(){
 	var me = this;
 	DropSlot.prototype.edit.call(this, function(){
 		if(me.enteredData != null) {
-			var soundName = me.enteredData.getValue();
-			HtmlServer.sendRequestWithCallback("sound/stop", function(){
-				if(Sounds.checkNameIsValid(soundName)){
-					var request = "sound/play?filename="+soundName;
-					HtmlServer.sendRequestWithCallback(request);
-					GuiElements.alert("sent: " + request);
-				}
-				else{
-					GuiElements.alert("Bad sound: " + soundName);
-				}
-			});
+			if(!this.isRecording) {
+				let soundId = me.enteredData.getValue();
+				Sound.playAndStopPrev(soundId, false);
+			}
 		}
 		else{
 			GuiElements.alert("No data");
@@ -12721,7 +12836,7 @@ SoundDropSlot.prototype.edit=function(){
 };
 SoundDropSlot.prototype.deselect=function(){
 	DropSlot.prototype.deselect.call(this);
-	HtmlServer.sendRequestWithCallback("sound/stop");
+	Sound.stopAllSounds();
 };
 /* NumSlot is a subclass of RoundSlot.
  * It creates a RoundSlot optimized for use with numbers.
@@ -13842,7 +13957,7 @@ function B_FlutterDistInch(x, y) {
 B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
-B_HBDistInch.prototype.updateAction=function(){
+B_FlutterDistInch.prototype.updateAction=function(){
 	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if(status.hasError() || status.isRunning()){
 		return status;
@@ -15225,38 +15340,35 @@ B_Display.prototype.startAction=function(){
 
 
 
-//@fix Write documentation.
-function B_PlaySound(x,y){
+function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"play sound"));
-	var dS=new SoundDropSlot(this,"SDS_1");
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
-	}
+	this.isRecording = isRecording;
+	this.waitUntilDone = waitUntilDone;
+	this.addPart(new LabelText(this, label));
+	let dS=new SoundDropSlot(this,"SDS_1", isRecording);
 	this.addPart(dS);
 }
-B_PlaySound.prototype = Object.create(CommandBlock.prototype);
-B_PlaySound.prototype.constructor = B_PlaySound;
-B_PlaySound.prototype.startAction=function(){
-	var soundData=this.slots[0].getData();
-	if(soundData==null){
+B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
+B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
+B_PlaySoundOrRecording.prototype.startAction=function(){
+	let soundData=this.slots[0].getData();
+	if(soundData == null){
 		return new ExecutionStatusDone();
 	}
-	var soundName=soundData.getValue();
-	if(Sounds.checkNameIsValid(soundName)){
-		var mem=this.runMem;
-		mem.request = "sound/play?filename="+soundName;
-		mem.requestStatus=function(){};
-		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return new ExecutionStatusRunning(); //Still running
-	}
-	return new ExecutionStatusDone();
+	let soundId=soundData.getValue();
+	let status = {};
+	this.runMem.playStatus = status;
+	status.donePlaying = false;
+	status.requestSent = false;
+	Sound.play(soundId, this.isRecording, status);
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Wait for the request to finish. */
-B_PlaySound.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
+B_PlaySoundOrRecording.prototype.updateAction=function(){
+	let mem=this.runMem;
+	let status=mem.playStatus;
+	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
+	if(done){
 		return new ExecutionStatusDone(); //Done running
 	}
 	else{
@@ -15264,64 +15376,31 @@ B_PlaySound.prototype.updateAction=function(){
 	}
 };
 
-function B_PlaySoundUntilDone(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"play sound until done"));
-	var dS=new SoundDropSlot(this,"SDS_1");
-	for(var i=0;i<Sounds.getSoundCount();i++){
-		dS.addOption(Sounds.getSoundName(i),new SelectionData(Sounds.getSoundName(i)));
-	}
-	this.addPart(dS);
+
+function B_PlaySound(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound", false, false);
 }
-B_PlaySoundUntilDone.prototype = Object.create(CommandBlock.prototype);
+B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlaySound.prototype.constructor = B_PlaySound;
+
+function B_PlaySoundUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound until done", false, true);
+}
+B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
-B_PlaySoundUntilDone.prototype.startAction=function(){
-	var soundData=this.slots[0].getData();
-	if(soundData==null){
-		return new ExecutionStatusDone();
-	}
-	var soundName=soundData.getValue();
-	var soundIndex=Sounds.indexFromName(soundName);
-	if(soundIndex>=0){
-		var mem=this.runMem;
-		mem.soundDuration=Sounds.getSoundDuration(soundIndex);
-        mem.timerStarted=false;
-		mem.request = "sound/play?filename="+soundName;
-		mem.cancel=false;
-		mem.requestStatus=function(){};
-		HtmlServer.sendRequest(mem.request,mem.requestStatus);
-		return new ExecutionStatusRunning(); //Still running
-	}
-	return new ExecutionStatusDone();
-};
-/* Wait for the request to finish. */
-B_PlaySoundUntilDone.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(mem.cancel){
-		return new ExecutionStatusDone();
-	}
-	if(!mem.timerStarted){
-		var status=mem.requestStatus;
-		if(status.finished==true){
-			mem.startTime=new Date().getTime();
-			mem.timerStarted=true;
-		}
-		else{
-			return new ExecutionStatusRunning(); //Still running
-		}
-	}
-	if(new Date().getTime() >= (mem.startTime+mem.soundDuration)){
-        return new ExecutionStatusDone(); //Done running
-	}
-	else{
-        return new ExecutionStatusRunning(); //Still running
-	}
-};
-B_PlaySoundUntilDone.prototype.stopAllSounds=function(){
-	if(this.runMem!=null) {
-		this.runMem.cancel = true;
-	}
-};
+
+function B_PlayRecording(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording", true, false);
+}
+B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecording.prototype.constructor = B_PlayRecording;
+
+function B_PlayRecordingUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording until done", true, true);
+}
+B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
+
 
 
 function B_StopAllSounds(x,y){
@@ -15332,14 +15411,19 @@ B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
 B_StopAllSounds.prototype.startAction=function(){
 	var mem=this.runMem;
-	mem.request = "sound/stop";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	mem.requestStatus = {};
+	Sound.stopAllSounds(mem.requestStatus);
 	return new ExecutionStatusRunning(); //Still running
 };
 B_StopAllSounds.prototype.updateAction=function(){
-	return !this.runMem.requestStatus.finished;
+	if(this.runMem.requestStatus.finished){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
 };
+
 
 
 function B_RestForBeats(x,y){

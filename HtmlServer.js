@@ -49,7 +49,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("Started");
+				callbackFn("3000");
 			}
 		}, 20);
 		return;
