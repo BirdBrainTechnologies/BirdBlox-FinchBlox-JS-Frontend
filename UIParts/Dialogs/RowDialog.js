@@ -22,13 +22,16 @@ RowDialog.setConstants=function(){
 	RowDialog.centeredBnWidth=100;
 	RowDialog.bnHeight=MenuBnList.bnHeight;
 	RowDialog.bnMargin=5;
-	RowDialog.minWidth = 300;
+	RowDialog.minWidth = 400;
 	RowDialog.minHeight = 200;
 
 	RowDialog.fontSize=16;
 	RowDialog.font="Arial";
-	RowDialog.fontWeight="normal";
+	RowDialog.titleFontWeight="bold";
+	RowDialog.centeredfontWeight="bold";
 	RowDialog.charHeight=12;
+	RowDialog.smallBnWidth = 45;
+	RowDialog.iconH = 15;
 };
 RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 	let entry = {};
@@ -69,7 +72,7 @@ RowDialog.prototype.calcHeights = function(){
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
 	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
-	let ScrollHeight = this.rowCount * (RowDialog.bnMargin + RowDialog.bnHeight) - RowDialog.bnMargin;
+	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
 	if(!this.autoHeight) totalHeight = 0;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
@@ -77,6 +80,8 @@ RowDialog.prototype.calcHeights = function(){
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
 	this.scrollBoxY = RD.bnMargin + RD.titleBarH;
+	this.extraTopY = RD.titleBarH;
+	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 RowDialog.prototype.calcWidths=function(){
 	var RD = RowDialog;
@@ -85,6 +90,7 @@ RowDialog.prototype.calcWidths=function(){
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;
 	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
+	this.contentWidth = this.width - RD.bnMargin * 2;
 };
 RowDialog.prototype.drawBackground = function(){
 	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
@@ -99,7 +105,7 @@ RowDialog.prototype.createTitleRect=function(){
 };
 RowDialog.prototype.createTitleLabel=function(title){
 	var RD=RowDialog;
-	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.fontWeight);
+	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
 	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
 	var y=RD.titleBarH/2+RD.charHeight/2;
 	GuiElements.move.text(textE,x,y);
@@ -112,7 +118,7 @@ RowDialog.prototype.createContent = function(){
 	var rowGroup = GuiElements.create.group(0, 0);
 	if(this.rowCount > 0) {
 		for (let i = 0; i < this.rowCount; i++) {
-			this.createRow(i, y, this.width - RD.bnMargin * 2, rowGroup);
+			this.createRow(i, y, this.contentWidth, rowGroup);
 			y += RD.bnHeight + RD.bnMargin;
 		}
 	}
@@ -127,16 +133,19 @@ RowDialog.prototype.createRow = function(index, y, width, contentGroup){
 RowDialog.prototype.createCenteredBns = function(){
 	var RD = RowDialog;
 	let y = this.centeredButtonY;
+	this.centeredButtonEs = [];
 	for(let i = 0; i < this.centeredButtons.length; i++){
-		this.createCenteredBn(y, this.centeredButtons[i]);
+		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+		this.centeredButtonEs.push(bn);
 		y += RD.bnHeight + RD.bnMargin;
 	}
 };
 RowDialog.prototype.createCenteredBn = function(y, entry){
 	var RD = RowDialog;
 	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
-	button.addText(entry.text);
+	button.addText(entry.text, null, null, RD.centeredfontWeight);
 	button.setCallbackFunction(entry.callbackFn, true);
+	return button;
 };
 RowDialog.prototype.createScrollBox = function(){
 	if(this.rowCount == 0) return null;
@@ -210,4 +219,40 @@ RowDialog.prototype.isScrolling = function(){
 };
 RowDialog.prototype.addHintText = function(hintText){
 	this.hintText = hintText;
+};
+RowDialog.prototype.getExtraTopY = function(){
+	return this.extraTopY;
+};
+RowDialog.prototype.getExtraBottomY = function(){
+	return this.extraBottomY;
+};
+RowDialog.prototype.getContentWidth = function(){
+	return this.contentWidth;
+};
+RowDialog.prototype.getCenteredButton = function(i){
+	return this.centeredButtonEs[i];
+};
+RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn){
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	button.addText(text);
+	return button;
+};
+RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	button.addIcon(iconId, RD.iconH);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
 };

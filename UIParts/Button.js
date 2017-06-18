@@ -3,6 +3,7 @@ function Button(x,y,width,height,parent){
 	this.y=y;
 	this.width=width;
 	this.height=height;
+	this.parentGroup = parent;
 	this.group=GuiElements.create.group(x,y,parent);
 	this.buildBg();
 	this.pressed=false;
@@ -10,7 +11,7 @@ function Button(x,y,width,height,parent){
 	this.hasText=false;
 	this.hasIcon=false;
 	this.hasImage=false;
-	this.iconInverts=false;
+	this.foregroundInverts=false;
 	this.callback=null;
 	this.delayedCallback=null;
 	this.toggles=false;
@@ -33,7 +34,7 @@ Button.setGraphics=function(){
 	Button.defaultFont="Arial";
 	Button.defaultFontWeight="normal";
 	Button.defaultCharHeight=12;
-}
+};
 Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
 	this.group.appendChild(this.bgRect);
@@ -52,12 +53,11 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	if(height==null){
 		height=Button.defaultCharHeight;
 	}
-	
+	this.foregroundInverts = true;
 	
 	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width);
 	this.group.appendChild(this.textE);
-	var bbox=this.textE.getBBox();
 	var textW=GuiElements.measure.textWidth(this.textE);
 	var textX=(this.width-textW)/2;
 	var textY=(this.height+height)/2;
@@ -73,13 +73,85 @@ Button.prototype.addIcon=function(pathId,height){
 		this.imageE.remove();
 	}
 	this.hasIcon=true;
-	this.iconInverts=true;
+	this.foregroundInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
 	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
-}
+};
+Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+	if(color == null){
+		color = Button.foreground;
+		this.foregroundInverts = true;
+	}
+	if(font==null){
+		font=Button.defaultFont;
+	}
+	if(size==null){
+		size=Button.defaultFontSize;
+	}
+	if(weight==null){
+		weight=Button.defaultFontWeight;
+	}
+	if(charH==null){
+		charH=Button.defaultCharHeight;
+	}
+	this.hasIcon = true;
+	this.hasText = true;
+	
+	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	GuiElements.update.textLimitWidth(this.textE,text,this.width - iconW - sideMargin);
+	this.group.appendChild(this.textE);
+	var textW=GuiElements.measure.textWidth(this.textE);
+	var totalW = textW + iconW + sideMargin;
+	var iconX = (this.width - totalW) / 2;
+	var iconY = (this.height-iconHeight)/2;
+	var textX = iconX + iconW + sideMargin;
+	var textY = (this.height+charH)/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	TouchReceiver.addListenersBN(this.textE,this);
+	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+};
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+	if(color == null){
+		color = Button.foreground;
+		this.foregroundInverts = true;
+	}
+	if(font==null){
+		font=Button.defaultFont;
+	}
+	if(size==null){
+		size=Button.defaultFontSize;
+	}
+	if(weight==null){
+		weight=Button.defaultFontWeight;
+	}
+	if(charH==null){
+		charH=Button.defaultCharHeight;
+	}
+	this.hasIcon = true;
+	this.hasText = true;
+
+	var sideMargin = (this.height - iconHeight) / 2;
+	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	var textMaxW = this.width - iconW - sideMargin * 2;
+	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
+	this.group.appendChild(this.textE);
+	var textW=GuiElements.measure.textWidth(this.textE);
+	var iconX = sideMargin;
+	var iconY = (this.height-iconHeight)/2;
+	var textX = (this.width - textW) / 2;
+	textX = Math.max(iconW + sideMargin * 2, textX);
+	var textY = (this.height+charH)/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	TouchReceiver.addListenersBN(this.textE,this);
+	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+};
 Button.prototype.addImage=function(imageData,height){
 	if(this.hasIcon){
 		this.icon.remove();
@@ -100,7 +172,7 @@ Button.prototype.addColorIcon=function(pathId,height,color){
 		this.icon.remove();
 	}
 	this.hasIcon=true;
-	this.iconInverts=false;
+	this.foregroundInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
@@ -124,10 +196,10 @@ Button.prototype.disable=function(){
 		this.enabled=false;
 		this.pressed=false;
 		this.bgRect.setAttributeNS(null,"fill",Button.disabledBg);
-		if(this.hasText){
+		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.disabledFore);
 		}
-		if(this.hasIcon&&this.iconInverts){
+		if(this.hasIcon&&this.foregroundInverts){
 			this.icon.setColor(Button.disabledFore);
 		}
 	}
@@ -185,6 +257,12 @@ Button.prototype.unToggle=function(){
 Button.prototype.remove=function(){
 	this.group.remove();
 };
+Button.prototype.hide = function(){
+	this.group.remove();
+};
+Button.prototype.show = function(){
+	this.parentGroup.appendChild(this.group);
+};
 Button.prototype.move=function(x,y){
 	this.x=x;
 	this.y=y;
@@ -193,10 +271,10 @@ Button.prototype.move=function(x,y){
 Button.prototype.setColor=function(isPressed){
 	if(isPressed) {
 		this.bgRect.setAttributeNS(null,"fill",Button.highlightBg);
-		if(this.hasText){
+		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
 		}
-		if(this.hasIcon&&this.iconInverts){
+		if(this.hasIcon&&this.foregroundInverts){
 			this.icon.setColor(Button.highlightFore);
 		}
 		if(this.hasImage){
@@ -205,10 +283,10 @@ Button.prototype.setColor=function(isPressed){
 	}
 	else{
 		this.bgRect.setAttributeNS(null, "fill", Button.bg);
-		if (this.hasText) {
+		if (this.hasText && this.foregroundInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
-		if (this.hasIcon && this.iconInverts) {
+		if (this.hasIcon && this.foregroundInverts) {
 			this.icon.setColor(Button.foreground);
 		}
 		if(this.hasImage){

@@ -150,6 +150,8 @@ BlockList.populateCat_looks=function(category){
 
 }
 BlockList.populateCat_sound=function(category){
+	category.addButton("Record sounds",RecordingDialog.showDialog);
+	category.addSpace();
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlaySoundUntilDone");
 	category.addBlockByName("B_StopAllSounds");

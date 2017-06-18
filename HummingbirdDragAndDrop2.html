@@ -3,8 +3,7 @@
     <head>
         <title>Hummingbird Drag And Drop</title>
         <link href="MyCSS.css" rel="stylesheet" type="text/css" />
-		<script type="text/javascript" src="all.js"></script>
-		<!--<script type="text/javascript" src="version.js"></script>
+		<script type="text/javascript" src="version.js"></script>
 		<script type="text/javascript" src="DebugOptions.js"></script>
 		<script type="text/javascript" src="Data/Data.js"></script>
 		<script type="text/javascript" src="Data/NumData.js"></script>
@@ -60,10 +59,12 @@
 		<script type="text/javascript" src="CodeManager.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/TabManager.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/Tab.js"></script>
+		<script type="text/javascript" src="RecordingManager.js"></script>
 		<script type="text/javascript" src="UIParts/Dialogs/RowDialog.js"></script>
 		<script type="text/javascript" src="UIParts/Dialogs/OpenDialog.js"></script>
 		<script type="text/javascript" src="UIParts/Dialogs/ConnectOneHBDialog.js"></script>
 		<script type="text/javascript" src="UIParts/Dialogs/ConnectMultipleHBDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/RecordingDialog.js"></script>
 		<script type="text/javascript" src="UIParts/HBConnectionList.js"></script>
 		<script type="text/javascript" src="UIParts/Dialogs/NewDiscoverDialog.js"></script>
 		<script type="text/javascript" src="UIParts/TabManager/OverflowArrows.js"></script>
@@ -108,7 +109,7 @@
 		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_operators.js"></script>
 		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_tablet.js"></script>
 		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_sound.js"></script>
-		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_variables.js"></script>-->
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_variables.js"></script>
 
 
 		<script type="text/javascript" src="Test.js"></script>
@@ -119,11 +120,11 @@
 		<meta name="format-detection" content="telephone=no">
 		<link rel="apple-touch-icon" href="AppIcon.png"/>
     </head>
-	<body style="padding:0px;margin:0px;" class = "mainBody">
+    <body style="padding:0px;margin:0px;" class = "mainBody">
 
 		<!--<span id="debug2" class="noselect">hi</span>-->
 		<!--<img src="layout.png" style="width:100%;display:none;" id="testImage"/>-->
-		<svg id="backSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+        <svg id="backSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 			<defs id="SvgDefs">
 			</defs>
 			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
@@ -138,5 +139,5 @@
 		<svg id="frontSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
 		</svg>
 		<span id="debug" class="noselect" style="color:#fff; position:absolute; margin-left:300px;"></span>
-	</body>
+    </body>
 </html>
