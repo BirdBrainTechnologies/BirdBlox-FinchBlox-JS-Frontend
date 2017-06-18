@@ -3014,7 +3014,7 @@ Sound.nameFromId = function(id, isRecording){
 	if(name.substring(name.length - 4) === ".wav") {
 		name = name.substring(0, name.length - 4);
 	}
-	name = name.replace("_", " ");
+	name = name.split("_").join(" ");
 	name = name.replace(/\b\w/g, l => l.toUpperCase());
 	return name;
 };
@@ -3217,6 +3217,9 @@ TouchReceiver.touchStartBlock=function(target,e){
  */
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
+	if(!target.parent.stack.isDisplayStack) {
+		TR.checkStartZoom(e);
+	}
 	if(TR.touchstart(e)){
 		if(slot.selected!=true){
 			GuiElements.overlay.close(); //Close any visible overlays.
