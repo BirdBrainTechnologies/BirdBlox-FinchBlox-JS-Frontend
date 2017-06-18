@@ -8544,8 +8544,10 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	return textE;
 };
 RecordingDialog.showDialog = function(){
-	var recordDialog = new RecordingDialog("Hello\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld");
-	recordDialog.show();
+	RecordingManager.listRecordings(function(result){
+		var recordDialog = new RecordingDialog(result);
+		recordDialog.show();
+	});
 };
 RecordingDialog.prototype.goToState = function(state){
 	var RecD = RecordingDialog;
@@ -10030,7 +10032,7 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
-		});
+		}, isRecording);
 	}
 };
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
@@ -10081,11 +10083,16 @@ SaveManager.userNew = function(){
  * Issues a getAvailableName request and calls the callback with the results
  * @param filename {String}
  * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
+ * @param isRecording {boolean}
  */
-SaveManager.getAvailableName = function(filename, callbackFn){
+SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
+	if(isRecording == null){
+		isRecording = false;
+	}
 	DebugOptions.validateNonNull(callbackFn);
 	var request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		var json = {};
 		try {

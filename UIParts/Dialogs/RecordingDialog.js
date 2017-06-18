@@ -172,8 +172,10 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	return textE;
 };
 RecordingDialog.showDialog = function(){
-	var recordDialog = new RecordingDialog("Hello\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld\nWorld");
-	recordDialog.show();
+	RecordingManager.listRecordings(function(result){
+		var recordDialog = new RecordingDialog(result);
+		recordDialog.show();
+	});
 };
 RecordingDialog.prototype.goToState = function(state){
 	var RecD = RecordingDialog;
