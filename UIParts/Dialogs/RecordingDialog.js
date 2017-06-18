@@ -34,12 +34,10 @@ RecordingDialog.setConstants = function(){
 };
 RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 3 - RD.bnMargin * 3;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	var recording = this.recordings[index];
 	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
-	let playBnX = largeBnWidth + RD.bnMargin;
-	this.createPlayBn(recording, playBnX, y, contentGroup);
-	let renameBnX = playBnX  + RD.smallBnWidth + RD.bnMargin;
+	let renameBnX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(recording, renameBnX, y, contentGroup);
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
@@ -47,10 +45,6 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
 	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
 	button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
-};
-RecordingDialog.prototype.createPlayBn = function(file, x, y, contentGroup){
-	var me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.play, x, y, contentGroup, null);
 };
 RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var me = this;
