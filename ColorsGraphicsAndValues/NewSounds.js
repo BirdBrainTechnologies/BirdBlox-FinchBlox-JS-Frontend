@@ -104,7 +104,7 @@ Sound.nameFromId = function(id, isRecording){
 	if(name.substring(name.length - 4) === ".wav") {
 		name = name.substring(0, name.length - 4);
 	}
-	name = name.replace("_", " ");
+	name = name.split("_").join(" ");
 	name = name.replace(/\b\w/g, l => l.toUpperCase());
 	return name;
 };

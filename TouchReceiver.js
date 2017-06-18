@@ -178,6 +178,9 @@ TouchReceiver.touchStartBlock=function(target,e){
  */
 TouchReceiver.touchStartSlot=function(slot,e){
 	var TR=TouchReceiver;
+	if(!target.parent.stack.isDisplayStack) {
+		TR.checkStartZoom(e);
+	}
 	if(TR.touchstart(e)){
 		if(slot.selected!=true){
 			GuiElements.overlay.close(); //Close any visible overlays.
