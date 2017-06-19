@@ -8363,7 +8363,7 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
 	button.addText("X");
 	button.setCallbackFunction(function(){
 		this.deviceClass.getManager().removeDevice(index);
-	}.bind(this));
+	}.bind(this), true);
 	return button;
 };
 ConnectMultipleDialog.prototype.show = function(){
@@ -8781,7 +8781,7 @@ RobotConnectionList.prototype.updateRobotList=function(newRobots){
 		return;
 	}
 	let robotArray = Device.fromJsonArrayString(this.deviceClass, newRobots);
-	let oldScroll=0;
+	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();
 		this.menuBnList.hide();
@@ -8794,7 +8794,9 @@ RobotConnectionList.prototype.updateRobotList=function(newRobots){
 		this.addBnListOption(robotArray[i]);
 	}
 	this.menuBnList.show();
-	this.menuBnList.setScroll(oldScroll);
+	if(oldScroll != null) {
+		this.menuBnList.setScroll(oldScroll);
+	}
 };
 RobotConnectionList.prototype.addBnListOption=function(robot){
 	let me = this;
