@@ -71,6 +71,7 @@ SmoothMenuBnList.prototype.show=function(){
 		this.layer.appendChild(this.scrollDiv);
 		this.updatePosition();
 		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
+		TouchReceiver.setInitialScrollFix(this.scrollDiv);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){

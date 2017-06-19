@@ -15,7 +15,7 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 RobotConnectionList.setConstants = function(){
 	let RCL=RobotConnectionList;
 	RCL.bnMargin = 5;
-	RCL.bgColor="#171717";
+	RCL.bgColor=Colors.lightGray; //"#171717";
 	RCL.updateInterval=DiscoverDialog.updateInterval;
 	RCL.height=150;
 	RCL.width=200;
