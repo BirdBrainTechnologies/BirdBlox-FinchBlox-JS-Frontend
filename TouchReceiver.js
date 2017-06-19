@@ -631,6 +631,8 @@ TouchReceiver.addListenersTabRow=function(element,tabRow,index){
 	var TR=TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartTabRow(tabRow, index, e);
+		TR.touchDown = false;
+		e.stopPropagation();
 	}, false);
 };
 
