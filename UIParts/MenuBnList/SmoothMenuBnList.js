@@ -2,7 +2,10 @@
  * Created by Tom on 6/5/2017.
  */
 
-function SmoothMenuBnList(parent, parentGroup,x,y,width){
+function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
+	if(layer == null){
+		layer = GuiElements.layers.frontScroll;
+	}
 	this.x=x;
 	this.y=y;
 	this.width=width;
@@ -20,6 +23,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.build();
 	this.parentGroup=parentGroup;
 	this.parent = parent;
+	this.layer = layer;
 
 	this.visible=false;
 	this.isOverlayPart=false;
@@ -32,6 +36,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.scrollY=0;
 	this.scrollable=false;
 
+	this.scrollStatus = {};
 }
 SmoothMenuBnList.setGraphics=function(){
 	var SMBL=SmoothMenuBnList;
@@ -63,15 +68,16 @@ SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
 	if(!this.visible){
 		this.visible=true;
-		GuiElements.layers.frontScroll.appendChild(this.scrollDiv);
+		this.layer.appendChild(this.scrollDiv);
 		this.updatePosition();
-		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
+		TouchReceiver.setInitialScrollFix(this.scrollDiv);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
-		GuiElements.layers.frontScroll.removeChild(this.scrollDiv);
+		this.layer.removeChild(this.scrollDiv);
 		if(this.fixScrollTimer != null) {
 			window.clearInterval(this.fixScrollTimer);
 		}
@@ -179,4 +185,11 @@ SmoothMenuBnList.prototype.setScroll = function(scrollTop){
 	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
+};
+SmoothMenuBnList.prototype.markAsOverlayPart = function(){
+	this.isOverlayPart = true;
+};
+SmoothMenuBnList.prototype.isScrolling = function(){
+	if(!this.visible) return false;
+	return !this.scrollStatus.still;
 };

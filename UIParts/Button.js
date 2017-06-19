@@ -41,6 +41,7 @@ Button.prototype.buildBg=function(){
 	TouchReceiver.addListenersBN(this.bgRect,this);
 }
 Button.prototype.addText=function(text,font,size,weight,height){
+	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
 	}
@@ -66,12 +67,7 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	TouchReceiver.addListenersBN(this.textE,this);
 }
 Button.prototype.addIcon=function(pathId,height){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
-	if(this.hasImage){
-		this.imageE.remove();
-	}
+	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -81,6 +77,7 @@ Button.prototype.addIcon=function(pathId,height){
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+	this.removeContent();
 	if(color == null){
 		color = Button.foreground;
 		this.foregroundInverts = true;
@@ -116,8 +113,9 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+	this.removeContent();
 	if(color == null){
-		color = Button.foreground;
+		color = this.currentForeground();
 		this.foregroundInverts = true;
 	}
 	if(font==null){
@@ -153,12 +151,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addImage=function(imageData,height){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
-	if(this.hasImage){
-		this.imageE.remove();
-	}
+	this.removeContent();
 	var imageW=imageData.width/imageData.height*height;
 	var imageX=(this.width-imageW)/2;
 	var imageY=(this.height-height)/2;
@@ -168,9 +161,7 @@ Button.prototype.addImage=function(imageData,height){
 	TouchReceiver.addListenersBN(this.imageE,this);
 };
 Button.prototype.addColorIcon=function(pathId,height,color){
-	if(this.hasIcon){
-		this.icon.remove();
-	}
+	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
@@ -179,6 +170,17 @@ Button.prototype.addColorIcon=function(pathId,height,color){
 	this.icon=new VectorIcon(iconX,iconY,pathId,color,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 }
+Button.prototype.removeContent = function(){
+	if(this.hasIcon){
+		this.icon.remove();
+	}
+	if(this.hasImage){
+		this.imageE.remove();
+	}
+	if(this.hasText){
+		this.textE.remove();
+	}
+};
 Button.prototype.setCallbackFunction=function(callback,delay){
 	if(delay){
 		this.delayedCallback=callback;
@@ -296,4 +298,13 @@ Button.prototype.setColor=function(isPressed){
 };
 Button.prototype.makeScrollable = function(){
 	this.scrollable = true;
+};
+Button.prototype.currentForeground = function(){
+	if(!this.enabled){
+		return Button.disabledFore;
+	} else if(this.pressed) {
+		return Button.highlightFore;
+	} else {
+		return Button.foreground;
+	}
 };

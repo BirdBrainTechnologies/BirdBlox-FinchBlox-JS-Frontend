@@ -53,6 +53,23 @@ Device.fromJsonArray = function(deviceClass, json){
 	}
 	return res;
 };
+Device.fromJsonArrayString = function(deviceClass, deviceList){
+	let json = "[]";
+	try{
+		json = JSON.parse(deviceList);
+	} catch(e) {
+
+	}
+	let list = Device.fromJsonArray(deviceClass, json);
+	if(DiscoverDialog.allowVirtualDevices){
+		let rand = Math.random() * 20 + 20;
+		for(let i = 0; i < rand; i++) {
+			let name = "Virtual " + deviceClass.getDeviceTypeName(true);
+			list.push(new deviceClass(name + i, "virtualDevice" + i));
+		}
+	}
+	return list;
+};
 Device.getTypeList = function(){
 	return [DeviceHummingbird, DeviceFlutter];
 };

@@ -16,9 +16,11 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Send request", this.optionSendRequest);
 	this.addOption("Log HTTP", this.optionLogHttp);
 	this.addOption("HB names", this.optionHBs);
-	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
+	this.addOption("Allow virtual Robots", this.optionVirtualHBs);
 	this.addOption("Clear log", this.optionClearLog);
-	//this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
+	this.addOption("Connect Multiple", function(){
+		ConnectMultipleDialog.showDialog();
+	});
 	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
 	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
 	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);

@@ -40,7 +40,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
@@ -49,7 +49,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn("Started");
+				callbackFn('[{"name":"hi","id":"there"}]');
 			}
 		}, 20);
 		return;

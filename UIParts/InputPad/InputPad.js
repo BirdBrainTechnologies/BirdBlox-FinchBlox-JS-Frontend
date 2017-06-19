@@ -437,9 +437,9 @@ InputPad.makeOkBn=function(x,y){
 };
 InputPad.relToAbsX = function(x){
 	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsX(IP.buttonMargin + x)
+	return IP.bubbleOverlay.relToAbsX(x)
 };
 InputPad.relToAbsY = function(y){
 	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsY(IP.buttonMargin + y)
+	return IP.bubbleOverlay.relToAbsY(y)
 };

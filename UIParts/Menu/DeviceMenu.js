@@ -3,7 +3,7 @@
 function DeviceMenu(button){
 	Menu.call(this,button,DeviceMenu.width);
 	this.addAlternateFn(function(){
-		DebugOptions.throw("Not implemented"); //TODO: implement
+		ConnectMultipleDialog.showDialog();
 	});
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
@@ -32,6 +32,7 @@ DeviceMenu.prototype.loadOptions=function(){
 			});
 		}, this);
 	}
+	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
 DeviceMenu.prototype.previewOpen=function(){
 	let connectionCount = 0;
