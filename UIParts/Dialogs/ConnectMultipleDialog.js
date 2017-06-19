@@ -111,6 +111,9 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	if(deviceClass == null){
 		deviceClass = this.deviceClass;
 	}
+	if(deviceClass !== this.deviceClass){
+		this.deviceClass.getManager().stopDiscover();
+	}
 	let thisScroll = this.getScroll();
 	let me = this;
 	me.hide();
