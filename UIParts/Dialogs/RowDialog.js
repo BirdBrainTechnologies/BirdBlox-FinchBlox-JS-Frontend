@@ -171,13 +171,8 @@ RowDialog.prototype.createHintText = function(){
 };
 RowDialog.prototype.closeDialog = function(){
 	if(this.visible) {
-		this.visible = false;
 		RowDialog.currentDialog = null;
-		this.group.remove();
-		if (this.scrollBox != null) {
-			this.scrollBox.hide();
-		}
-		this.scrollBox = null;
+		this.hide();
 		GuiElements.unblockInteraction();
 	}
 };
@@ -202,16 +197,21 @@ RowDialog.updateZoom = function(){
 		RowDialog.currentDialog.updateZoom();
 	}
 };
-RowDialog.prototype.reloadRows = function(rowCount){
-	this.rowCount = rowCount;
+RowDialog.prototype.hide = function(){
 	if(this.visible) {
 		this.visible = false;
-		let scroll = this.getScroll();
 		this.group.remove();
 		if (this.scrollBox != null) {
 			this.scrollBox.hide();
 		}
 		this.scrollBox = null;
+	}
+};
+RowDialog.prototype.reloadRows = function(rowCount){
+	this.rowCount = rowCount;
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.hide();
 		this.show();
 		this.setScroll(scroll);
 	}

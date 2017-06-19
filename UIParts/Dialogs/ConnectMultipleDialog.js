@@ -78,6 +78,7 @@ ConnectMultipleDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
 	this.createConnectBn();
 	this.createTabRow();
+	this.deviceClass.getManager().discover();
 };
 ConnectMultipleDialog.prototype.createConnectBn = function(){
 	let CMD = ConnectMultipleDialog;
@@ -112,17 +113,18 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	}
 	let thisScroll = this.getScroll();
 	let me = this;
-	me.closeDialog();
+	me.hide();
 	let dialog = new ConnectMultipleDialog(deviceClass);
 	dialog.show();
 	if(deviceClass === this.deviceClass) {
 		dialog.setScroll(thisScroll);
 	}
 };
-ConnectMultipleDialog.closeDialog = function(){
+ConnectMultipleDialog.prototype.closeDialog = function(){
 	let CMD = ConnectMultipleDialog;
 	RowDialog.prototype.closeDialog.call(this);
 	CMD.currentDialog = null;
+	this.deviceClass.getManager().stopDiscover();
 };
 ConnectMultipleDialog.reloadDialog = function(){
 	let CMD = ConnectMultipleDialog;

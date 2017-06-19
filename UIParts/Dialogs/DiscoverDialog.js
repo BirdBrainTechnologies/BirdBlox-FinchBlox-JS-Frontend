@@ -28,9 +28,8 @@ DiscoverDialog.prototype.show = function(){
 	}
 };
 DiscoverDialog.prototype.discoverDevices = function() {
-	var request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	var me = this;
-	HtmlServer.sendRequestWithCallback(request.toString(), this.updateDeviceList.bind(this), function(){
+	let me = this;
+	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
 		if(DiscoverDialog.allowVirtualDevices) {
 			let prefix = "Virtual " + me.deviceClass.getDeviceTypeName(true) + " ";
 			let obj1 = {};
@@ -70,4 +69,5 @@ DiscoverDialog.prototype.closeDialog = function(){
 		this.timerSet = false;
 		this.updateTimer = window.clearInterval(this.updateTimer);
 	}
+	this.deviceClass.getManager().stopDiscover();
 };

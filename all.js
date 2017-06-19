@@ -994,6 +994,14 @@ DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 };
+DeviceManager.prototype.discover = function(callbackFn, callbackErr){
+	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
+	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+};
+DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
+	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
+	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+};
 DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
 		deviceType.getManager().updateSelectableDevices();
@@ -8122,13 +8130,8 @@ RowDialog.prototype.createHintText = function(){
 };
 RowDialog.prototype.closeDialog = function(){
 	if(this.visible) {
-		this.visible = false;
 		RowDialog.currentDialog = null;
-		this.group.remove();
-		if (this.scrollBox != null) {
-			this.scrollBox.hide();
-		}
-		this.scrollBox = null;
+		this.hide();
 		GuiElements.unblockInteraction();
 	}
 };
@@ -8153,16 +8156,21 @@ RowDialog.updateZoom = function(){
 		RowDialog.currentDialog.updateZoom();
 	}
 };
-RowDialog.prototype.reloadRows = function(rowCount){
-	this.rowCount = rowCount;
+RowDialog.prototype.hide = function(){
 	if(this.visible) {
 		this.visible = false;
-		let scroll = this.getScroll();
 		this.group.remove();
 		if (this.scrollBox != null) {
 			this.scrollBox.hide();
 		}
 		this.scrollBox = null;
+	}
+};
+RowDialog.prototype.reloadRows = function(rowCount){
+	this.rowCount = rowCount;
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.hide();
 		this.show();
 		this.setScroll(scroll);
 	}
@@ -8372,6 +8380,7 @@ ConnectMultipleDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
 	this.createConnectBn();
 	this.createTabRow();
+	this.deviceClass.getManager().discover();
 };
 ConnectMultipleDialog.prototype.createConnectBn = function(){
 	let CMD = ConnectMultipleDialog;
@@ -8406,17 +8415,18 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	}
 	let thisScroll = this.getScroll();
 	let me = this;
-	me.closeDialog();
+	me.hide();
 	let dialog = new ConnectMultipleDialog(deviceClass);
 	dialog.show();
 	if(deviceClass === this.deviceClass) {
 		dialog.setScroll(thisScroll);
 	}
 };
-ConnectMultipleDialog.closeDialog = function(){
+ConnectMultipleDialog.prototype.closeDialog = function(){
 	let CMD = ConnectMultipleDialog;
 	RowDialog.prototype.closeDialog.call(this);
 	CMD.currentDialog = null;
+	this.deviceClass.getManager().stopDiscover();
 };
 ConnectMultipleDialog.reloadDialog = function(){
 	let CMD = ConnectMultipleDialog;
@@ -8754,6 +8764,11 @@ RobotConnectionList.setConstants = function(){
 	RCL.width=200;
 };
 RobotConnectionList.prototype.show = function(){
+	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
+		this.showWithList("");
+	}.bind(this));
+};
+RobotConnectionList.prototype.showWithList = function(list){
 	let RCL = RobotConnectionList;
 	this.visible = true;
 	this.group=GuiElements.create.group(0,0);
@@ -8762,11 +8777,11 @@ RobotConnectionList.prototype.show = function(){
 	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
-	this.discoverRobots();
+	this.updateRobotList(list);
 };
 RobotConnectionList.prototype.discoverRobots=function(){
 	let me = this;
-	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
+	this.deviceClass.getManager().discover(function(response){
 		me.updateRobotList(response);
 	},function(){
 		if(DiscoverDialog.allowVirtualDevices){
@@ -8853,9 +8868,8 @@ DiscoverDialog.prototype.show = function(){
 	}
 };
 DiscoverDialog.prototype.discoverDevices = function() {
-	var request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	var me = this;
-	HtmlServer.sendRequestWithCallback(request.toString(), this.updateDeviceList.bind(this), function(){
+	let me = this;
+	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
 		if(DiscoverDialog.allowVirtualDevices) {
 			let prefix = "Virtual " + me.deviceClass.getDeviceTypeName(true) + " ";
 			let obj1 = {};
@@ -8895,6 +8909,7 @@ DiscoverDialog.prototype.closeDialog = function(){
 		this.timerSet = false;
 		this.updateTimer = window.clearInterval(this.updateTimer);
 	}
+	this.deviceClass.getManager().stopDiscover();
 };
 function OverflowArrows(){
 	var OA = OverflowArrows;

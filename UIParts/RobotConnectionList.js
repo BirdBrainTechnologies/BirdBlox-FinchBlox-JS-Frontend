@@ -21,6 +21,11 @@ RobotConnectionList.setConstants = function(){
 	RCL.width=200;
 };
 RobotConnectionList.prototype.show = function(){
+	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
+		this.showWithList("");
+	}.bind(this));
+};
+RobotConnectionList.prototype.showWithList = function(list){
 	let RCL = RobotConnectionList;
 	this.visible = true;
 	this.group=GuiElements.create.group(0,0);
@@ -29,11 +34,11 @@ RobotConnectionList.prototype.show = function(){
 	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
-	this.discoverRobots();
+	this.updateRobotList(list);
 };
 RobotConnectionList.prototype.discoverRobots=function(){
 	let me = this;
-	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
+	this.deviceClass.getManager().discover(function(response){
 		me.updateRobotList(response);
 	},function(){
 		if(DiscoverDialog.allowVirtualDevices){

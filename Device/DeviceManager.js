@@ -86,6 +86,14 @@ DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 };
+DeviceManager.prototype.discover = function(callbackFn, callbackErr){
+	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
+	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+};
+DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
+	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
+	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+};
 DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
 		deviceType.getManager().updateSelectableDevices();
