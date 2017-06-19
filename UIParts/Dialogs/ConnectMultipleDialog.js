@@ -69,7 +69,7 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
 	button.addText("X");
 	button.setCallbackFunction(function(){
 		this.deviceClass.getManager().removeDevice(index);
-	}.bind(this));
+	}.bind(this), true);
 	return button;
 };
 ConnectMultipleDialog.prototype.show = function(){
