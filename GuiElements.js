@@ -121,13 +121,13 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
-	ConnectOneHBDialog.setConstants();
-	ConnectMultipleHBDialog.setConstants();
 	DiscoverDialog.setConstants();
-	HBConnectionList.setConstants();
 	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	ConnectMultipleDialog.setConstants();
+	RobotConnectionList.setConstants();
+	TabRow.setConstants();
 	RecordingDialog.setConstants();
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
@@ -205,6 +205,7 @@ GuiElements.createLayers=function(){
 	layers.frontScroll = document.getElementById("frontScrollDiv");
 	i++;
 	layers.overlayOverlay=create.layer(i);
+	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.

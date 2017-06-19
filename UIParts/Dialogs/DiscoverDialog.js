@@ -48,20 +48,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	var json = "[]";
-	try{
-		json = JSON.parse(deviceList);
-	} catch(e) {
-
-	}
-	this.discoveredDevices = Device.fromJsonArray(this.deviceClass, json);
-	if(DiscoverDialog.allowVirtualDevices){
-		let rand = Math.random() * 20 + 20;
-		for(let i = 0; i < rand; i++) {
-			let name = "Virtual " + this.deviceClass.getDeviceTypeName(true);
-			this.discoveredDevices.push(new this.deviceClass(name + i, "virtualDevice"));
-		}
-	}
+	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){

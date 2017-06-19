@@ -7,8 +7,8 @@ function DebugOptions(){
 	DO.enabled = true;
 
 	DO.mouse = false;
-	DO.addVirtualHB = false;
-	DO.addVirtualFlutter = true;
+	DO.addVirtualHB = true;
+	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
@@ -852,6 +852,23 @@ Device.fromJsonArray = function(deviceClass, json){
 	}
 	return res;
 };
+Device.fromJsonArrayString = function(deviceClass, deviceList){
+	let json = "[]";
+	try{
+		json = JSON.parse(deviceList);
+	} catch(e) {
+
+	}
+	let list = Device.fromJsonArray(deviceClass, json);
+	if(DiscoverDialog.allowVirtualDevices){
+		let rand = Math.random() * 20 + 20;
+		for(let i = 0; i < rand; i++) {
+			let name = "Virtual " + deviceClass.getDeviceTypeName(true);
+			list.push(new deviceClass(name + i, "virtualDevice" + i));
+		}
+	}
+	return list;
+};
 Device.getTypeList = function(){
 	return [DeviceHummingbird, DeviceFlutter];
 };
@@ -913,17 +930,17 @@ DeviceManager.prototype.setDevice = function(index, newDevice){
 	this.connectedDevices[index].disconnect();
 	newDevice.connect();
 	this.connectedDevices[index] = newDevice;
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.removeDevice = function(index){
 	this.connectedDevices[index].disconnect();
 	this.connectedDevices.splice(index, 1);
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.appendDevice = function(newDevice){
 	newDevice.connect();
 	this.connectedDevices.push(newDevice);
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.setOneDevice = function(newDevice){
 	for(let i = 0; i<this.connectedDevices.length; i++){
@@ -931,14 +948,14 @@ DeviceManager.prototype.setOneDevice = function(newDevice){
 	}
 	newDevice.connect();
 	this.connectedDevices = [newDevice];
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.removeAllDevices = function(){
 	this.connectedDevices.forEach(function(device){
 		device.disconnect();
 	});
 	this.connectedDevices = [];
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.updateTotalStatus = function(){
 	if(this.getDeviceCount() == 0){
@@ -972,6 +989,10 @@ DeviceManager.prototype.updateSelectableDevices = function(){
 };
 DeviceManager.prototype.getSelectableDeviceCount=function(){
 	return this.selectableDevices;
+};
+DeviceManager.prototype.devicesChanged = function(){
+	ConnectMultipleDialog.reloadDialog();
+	this.updateSelectableDevices();
 };
 DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
@@ -1130,13 +1151,13 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
-	ConnectOneHBDialog.setConstants();
-	ConnectMultipleHBDialog.setConstants();
 	DiscoverDialog.setConstants();
-	HBConnectionList.setConstants();
 	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	ConnectMultipleDialog.setConstants();
+	RobotConnectionList.setConstants();
+	TabRow.setConstants();
 	RecordingDialog.setConstants();
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
@@ -1214,6 +1235,7 @@ GuiElements.createLayers=function(){
 	layers.frontScroll = document.getElementById("frontScrollDiv");
 	i++;
 	layers.overlayOverlay=create.layer(i);
+	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
@@ -3257,8 +3279,8 @@ TouchReceiver.touchStartBN=function(target,e){
 			GuiElements.overlay.close(); //Close any visible overlays.
 		}
 		TR.targetType="button";
-		target.press(); //Changes the button's appearance and may trigger an action.
 		TR.target=target;
+		target.press(); //Changes the button's appearance and may trigger an action.
 	}
 };
 /* Handles new touch events for the background of the palette.
@@ -3323,6 +3345,16 @@ TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 		TR.targetType="smoothMenuBnList";
 		TouchReceiver.target=target; //Store target.
 		e.stopPropagation();
+	}
+};
+TouchReceiver.touchStartTabRow=function(tabRow, index, e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)){
+		if(!tabRow.isOverlayPart) {
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="tabrow";
+		tabRow.selectTab(index);
 	}
 };
 
@@ -3656,6 +3688,13 @@ TouchReceiver.addListenersDisplayBox=function(element){
 		TouchReceiver.touchStartDisplayBox(e);
 	}, false);
 };
+TouchReceiver.addListenersTabRow=function(element,tabRow,index){
+	var TR=TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartTabRow(tabRow, index, e);
+	}, false);
+};
+
 /* Adds handlerDown listeners to the parts of any overlay that do not already have handlers.
  * @param {SVG element} element - The part the listeners are being applied to.
  */
@@ -4761,6 +4800,90 @@ DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();
 	this.updateTimer=window.clearInterval(this.updateTimer);
 };
+/**
+ * Created by Tom on 6/18/2017.
+ */
+function TabRow(x, y, width, height, parent, initialTab){
+	if(initialTab == null){
+		initialTab = null;
+	}
+	this.tabList = [];
+	this.x = x;
+	this.y = y;
+	this.parent = parent;
+	this.width = width;
+	this.height = height;
+	this.callbackFn = null;
+	this.initalTab = initialTab;
+	this.selectedTab = initialTab;
+	this.isOverlayPart = false;
+}
+TabRow.setConstants = function(){
+	const TR = TabRow;
+	TR.slantW = 5;
+	TR.deselectedColor = Colors.darkGray;
+	TR.selectedColor = Colors.black;
+	TR.foregroundColor = Colors.white;
+
+	TR.fontSize=16;
+	TR.font="Arial";
+	TR.fontWeight="bold";
+	TR.charHeight=12;
+};
+TabRow.prototype.show = function(){
+	this.group = GuiElements.create.group(this.x, this.y, this.parent);
+	this.createTabs();
+	if(this.selectedTab != null) {
+		this.visuallySelectTab(this.selectedTab);
+	}
+};
+TabRow.prototype.addTab = function(text, id){
+	let entry = {};
+	entry.text = text;
+	entry.id = id;
+	this.tabList.push(entry);
+};
+TabRow.prototype.createTabs = function(){
+	let tabCount = this.tabList.length;
+	let tabWidth = this.width / tabCount;
+	this.tabEList = [];
+	this.tabList.forEach(function(entry, index){
+		this.tabEList.push(this.createTab(index, entry.text, tabWidth, index * tabWidth));
+	}.bind(this));
+};
+TabRow.prototype.createTab = function(index, text, width, x){
+	let TR = TabRow;
+	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
+	this.group.appendChild(tabE);
+	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
+	GuiElements.update.textLimitWidth(textE, text, width);
+	let textW = GuiElements.measure.textWidth(textE);
+	let textX = x + (width - textW) / 2;
+	let textY = (this.height + TR.charHeight) / 2;
+	GuiElements.move.text(textE, textX, textY);
+	TouchReceiver.addListenersTabRow(textE, this, index);
+	TouchReceiver.addListenersTabRow(tabE, this, index);
+	this.group.appendChild(textE);
+	return tabE;
+};
+TabRow.prototype.selectTab = function(index){
+	if(index !== this.selectTab) {
+		this.selectTab = index;
+		this.visuallySelectTab(index);
+		if (this.callbackFn != null) this.callbackFn(this.tabList[index].id);
+	}
+};
+TabRow.prototype.visuallySelectTab = function(index){
+	let TR = TabRow;
+	let tabE = this.tabEList[index];
+	GuiElements.update.color(tabE, TR.selectedColor);
+};
+TabRow.prototype.setCallbackFunction = function(callback){
+	this.callbackFn = callback;
+};
+TabRow.prototype.markAsOverlayPart = function(){
+	this.isOverlayPart = true;
+};
 function InputPad(){
 	InputPad.buildPad();
 }
@@ -5200,16 +5323,19 @@ InputPad.makeOkBn=function(x,y){
 };
 InputPad.relToAbsX = function(x){
 	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsX(IP.buttonMargin + x)
+	return IP.bubbleOverlay.relToAbsX(x)
 };
 InputPad.relToAbsY = function(y){
 	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsY(IP.buttonMargin + y)
+	return IP.bubbleOverlay.relToAbsY(y)
 };
 
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
+function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
+	}
+	if(layer == null){
+		layer = GuiElements.layers.overlay;
 	}
 	this.x = 0;
 	this.y = 0;
@@ -5218,7 +5344,7 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
 	this.hMargin=hMargin;
 	this.innerGroup=innerGroup;
 	this.parent=parent;
-	this.layerG=GuiElements.layers.overlay;
+	this.layerG = layer;
 	this.visible=false;
 	this.buildBubble();
 }
@@ -5344,10 +5470,10 @@ BubbleOverlay.prototype.getVPadding=function() {
 	return this.margin*2+BubbleOverlay.triangleH;
 };
 BubbleOverlay.prototype.relToAbsX = function(x){
-	return x + this.x;
+	return x + this.x + this.margin;
 };
 BubbleOverlay.prototype.relToAbsY = function(y){
-	return y + this.y;
+	return y + this.y + this.margin;
 };
 function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	var RB = ResultBubble;
@@ -5690,7 +5816,10 @@ MenuBnList.prototype.scroll=function(scrollY){
  * Created by Tom on 6/5/2017.
  */
 
-function SmoothMenuBnList(parent, parentGroup,x,y,width){
+function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
+	if(layer == null){
+		layer = GuiElements.layers.frontScroll;
+	}
 	this.x=x;
 	this.y=y;
 	this.width=width;
@@ -5708,6 +5837,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.build();
 	this.parentGroup=parentGroup;
 	this.parent = parent;
+	this.layer = layer;
 
 	this.visible=false;
 	this.isOverlayPart=false;
@@ -5720,6 +5850,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width){
 	this.scrollY=0;
 	this.scrollable=false;
 
+	this.scrollStatus = {};
 }
 SmoothMenuBnList.setGraphics=function(){
 	var SMBL=SmoothMenuBnList;
@@ -5751,15 +5882,15 @@ SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
 	if(!this.visible){
 		this.visible=true;
-		GuiElements.layers.frontScroll.appendChild(this.scrollDiv);
+		this.layer.appendChild(this.scrollDiv);
 		this.updatePosition();
-		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
 	}
 };
 SmoothMenuBnList.prototype.hide=function(){
 	if(this.visible){
 		this.visible=false;
-		GuiElements.layers.frontScroll.removeChild(this.scrollDiv);
+		this.layer.removeChild(this.scrollDiv);
 		if(this.fixScrollTimer != null) {
 			window.clearInterval(this.fixScrollTimer);
 		}
@@ -5867,6 +5998,13 @@ SmoothMenuBnList.prototype.setScroll = function(scrollTop){
 	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
+};
+SmoothMenuBnList.prototype.markAsOverlayPart = function(){
+	this.isOverlayPart = true;
+};
+SmoothMenuBnList.prototype.isScrolling = function(){
+	if(!this.visible) return false;
+	return !this.scrollStatus.still;
 };
 function Menu(button,width){
 	if(width==null){
@@ -6042,9 +6180,11 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Send request", this.optionSendRequest);
 	this.addOption("Log HTTP", this.optionLogHttp);
 	this.addOption("HB names", this.optionHBs);
-	this.addOption("Allow virtual HBs", this.optionVirtualHBs);
+	this.addOption("Allow virtual Robots", this.optionVirtualHBs);
 	this.addOption("Clear log", this.optionClearLog);
-	//this.addOption("Connect Multiple", HummingbirdManager.showConnectMultipleDialog);
+	this.addOption("Connect Multiple", function(){
+		ConnectMultipleDialog.showDialog();
+	});
 	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
 	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
 	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
@@ -6164,7 +6304,7 @@ ViewMenu.prototype.optionResetZoom=function(){
 function DeviceMenu(button){
 	Menu.call(this,button,DeviceMenu.width);
 	this.addAlternateFn(function(){
-		DebugOptions.throw("Not implemented"); //TODO: implement
+		ConnectMultipleDialog.showDialog();
 	});
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
@@ -6193,6 +6333,7 @@ DeviceMenu.prototype.loadOptions=function(){
 			});
 		}, this);
 	}
+	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
 DeviceMenu.prototype.previewOpen=function(){
 	let connectionCount = 0;
@@ -7809,13 +7950,17 @@ RecordingManager.permissionGranted = function(){
  * Created by Tom on 6/13/2017.
  */
 
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom){
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar){
+	if(extendTitleBar == null){
+		extendTitleBar = 0;
+	}
 	this.autoHeight = autoHeight;
 	this.title = title;
 	this.rowCount = rowCount;
 	this.centeredButtons = [];
 	this.extraTopSpace = extraTop;
 	this.extraBottomSpace = extraBottom;
+	this.extendTitleBar = extendTitleBar;
 	this.visible = false;
 	this.hintText = "";
 }
@@ -7831,6 +7976,7 @@ RowDialog.setConstants=function(){
 	RowDialog.bnMargin=5;
 	RowDialog.minWidth = 400;
 	RowDialog.minHeight = 200;
+	RowDialog.hintMargin = 5;
 
 	RowDialog.fontSize=16;
 	RowDialog.font="Arial";
@@ -7886,7 +8032,7 @@ RowDialog.prototype.calcHeights = function(){
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	this.scrollBoxY = RD.bnMargin + RD.titleBarH;
+	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
 	this.extraTopY = RD.titleBarH;
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
@@ -7906,7 +8052,7 @@ RowDialog.prototype.drawBackground = function(){
 };
 RowDialog.prototype.createTitleRect=function(){
 	var RD=RowDialog;
-	var rect=GuiElements.draw.rect(0,0,this.width,RD.titleBarH,RD.titleBarColor);
+	var rect=GuiElements.draw.rect(0,0,this.width,RD.titleBarH + this.extendTitleBar,RD.titleBarColor);
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -7955,7 +8101,7 @@ RowDialog.prototype.createCenteredBn = function(y, entry){
 	return button;
 };
 RowDialog.prototype.createScrollBox = function(){
-	if(this.rowCount == 0) return null;
+	if(this.rowCount === 0) return null;
 	let x = this.x + this.scrollBoxX;
 	let y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
@@ -7967,7 +8113,7 @@ RowDialog.prototype.createHintText = function(){
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
 	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
 	let x = this.width / 2 - textWidth / 2;
-	let y = this.scrollBoxY + RD.charHeight;
+	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };
@@ -8039,6 +8185,14 @@ RowDialog.prototype.getContentWidth = function(){
 RowDialog.prototype.getCenteredButton = function(i){
 	return this.centeredButtonEs[i];
 };
+RowDialog.prototype.contentRelToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.scrollBox.relToAbsX(x);
+};
+RowDialog.prototype.contentRelToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.scrollBox.relToAbsY(y);
+};
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
 	var RD = RowDialog;
 	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
@@ -8053,16 +8207,22 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
 	button.addText(text);
 	return button;
 };
-RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn){
 	var RD = RowDialog;
 	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
-	button.addIcon(iconId, RD.iconH);
 	if(callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
 	return button;
 };
+RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+	let RD = RowDialog;
+	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+	button.addIcon(iconId, RD.iconH);
+	return button;
+};
+
 /**
  * Created by Tom on 6/13/2017.
  */
@@ -8129,347 +8289,145 @@ OpenDialog.showDialog = function(){
 		openDialog.show();
 	});
 };
-function ConnectOneHBDialog(){
-	var COHBD=ConnectOneHBDialog;
-	if(COHBD.currentCOHBD!=null){
-		COHBD.currentCOHBD.closeDialog();
-	}
-	COHBD.currentCOHBD=this;
-	this.width=COHBD.width;
-	this.height=GuiElements.height/2;
-	this.x=GuiElements.width/2-this.width/2;
-	this.y=GuiElements.height/4;
-	this.menuBnList=null;
-	this.group=GuiElements.create.group(this.x,this.y);
-	this.bgRect=this.makeBgRect();
-	//this.menuBnList=this.makeMenuBnList();
-	this.cancelBn=this.makeCancelBn();
-	this.titleRect=this.createTitleRect();
-	this.titleText=this.createTitleLabel();
-	GuiElements.layers.dialog.appendChild(this.group);
-	GuiElements.blockInteraction();
-	var thisCOHBD =this;
-	this.updateTimer = self.setInterval(function () { thisCOHBD.discoverHBs() }, COHBD.updateInterval);
-	this.discoverHBs();
-	this.visible = true;
+/**
+ * Created by Tom on 6/18/2017.
+ */
+function ConnectMultipleDialog(deviceClass){
+	let CMD = ConnectMultipleDialog;
+	CMD.lastClass = deviceClass;
+	let title = "Connect Multiple";
+	this.deviceClass = deviceClass;
+	let count = deviceClass.getManager().getDeviceCount();
+	RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap \"+\" to connect");
 }
-ConnectOneHBDialog.setConstants=function(){
-	var COHBD=ConnectOneHBDialog;
-	COHBD.currentCOHBD=null;
-	COHBD.updateInterval=500;
+ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
+ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
+ConnectMultipleDialog.setConstants = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = null;
 
-	COHBD.titleBarColor=Colors.lightGray;
-	COHBD.titleBarFontC=Colors.white;
-	COHBD.bgColor=Colors.black;
-	COHBD.titleBarH=30;
-	COHBD.width=300;
-	COHBD.cancelBnWidth=100;
-	COHBD.cancelBnHeight=MenuBnList.bnHeight;
-	COHBD.bnMargin=5;
+	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	CMD.tabRowHeight = RowDialog.titleBarH;
+	CMD.numberWidth = 35;
+	CMD.plusFontSize=26;
+	CMD.plusCharHeight=18;
 
-	COHBD.fontSize=16;
-	COHBD.font="Arial";
-	COHBD.fontWeight="normal";
-	COHBD.charHeight=12;
+	CMD.numberFontSize=16;
+	CMD.numberFont="Arial";
+	CMD.numberFontWeight="normal";
+	CMD.numberCharHeight=12;
+	CMD.numberColor = Colors.white;
 };
-ConnectOneHBDialog.prototype.makeBgRect=function(){
-	var COHBD=ConnectOneHBDialog;
-	var rectE=GuiElements.draw.rect(0,0,this.width,this.height,COHBD.bgColor);
-	this.group.appendChild(rectE);
-	return rectE;
+ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let statusX = 0;
+	let numberX = statusX + DeviceStatusLight.radius * 2;
+	let mainBnX = numberX + CMD.numberWidth;
+	let removeBnX = width - RowDialog.smallBnWidth;
+	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+
+	let robot = this.deviceClass.getManager().getDevice(index);
+	this.createStatusLight(robot, statusX, y, contentGroup);
+	this.createNumberText(index, numberX, y, contentGroup);
+	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
-ConnectOneHBDialog.prototype.makeMenuBnList=function(){
-	var bnM=OpenDialog.bnMargin;
-	var menuBnList=new MenuBnList(this.group,bnM,bnM+OpenDialog.titleBarH,bnM,OpenDialog.width-2*bnM);
-	menuBnList.setMaxHeight(this.calcMaxHeight());
-	for(var i=0;i<this.files.length-1;i++){
-		this.addBnListOption(this.files[i],menuBnList);
-	}
-	menuBnList.show();
-	return menuBnList;
+ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup);
 };
-ConnectOneHBDialog.prototype.makeCancelBn=function(){
-	var COHBD=ConnectOneHBDialog;
-	var width=COHBD.cancelBnWidth;
-	var height=COHBD.cancelBnHeight;
-	var x=COHBD.width/2-width/2;
-	var y=this.height-height-COHBD.bnMargin;
-	var cancelBn=new Button(x,y,width,height,this.group);
-	cancelBn.addText("Cancel");
-	var callbackFn=function(){
-		callbackFn.dialog.closeDialog();
-	};
-	callbackFn.dialog=this;
-	cancelBn.setCallbackFunction(callbackFn,true);
-	return cancelBn;
-};
-ConnectOneHBDialog.prototype.createTitleRect=function(){
-	var COHBD=ConnectOneHBDialog;
-	var rect=GuiElements.draw.rect(0,0,COHBD.width,COHBD.titleBarH,COHBD.titleBarColor);
-	this.group.appendChild(rect);
-	return rect;
-};
-ConnectOneHBDialog.prototype.createTitleLabel=function(){
-	var COHBD=ConnectOneHBDialog;
-	var textE=GuiElements.draw.text(0,0,"Connect",COHBD.fontSize,COHBD.titleBarFontC,COHBD.font,COHBD.fontWeight);
-	var x=COHBD.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=COHBD.titleBarH/2+COHBD.charHeight/2;
-	GuiElements.move.text(textE,x,y);
-	this.group.appendChild(textE);
+ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textW = GuiElements.measure.textWidth(textE);
+	let textX = x + (CMD.numberWidth - textW) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	GuiElements.move.text(textE, textX, textY);
+	contentGroup.appendChild(textE);
 	return textE;
 };
-ConnectOneHBDialog.prototype.closeDialog=function(){
-	this.group.remove();
-	this.visible = false;
-	if(this.menuBnList != null){
-		this.menuBnList.hide();
-	}
-	this.menuBnList=null;
-	GuiElements.unblockInteraction();
-	ConnectOneHBDialog.currentCOHBD=null;
-	this.updateTimer = window.clearInterval(this.updateTimer);
-	HtmlServer.sendRequestWithCallback("hummingbird/stopDiscover");
+ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup){
+	let connectionX = this.x + this.width / 2;
+	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function(){
+		let upperY = this.contentRelToAbsY(y);
+		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
+	}.bind(this));
 };
-ConnectOneHBDialog.prototype.discoverHBs=function(){
-	var thisCOHBD=this;
-	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
-		var hBString=response;
-		if(HummingbirdManager.allowVirtualHBs){
-			//response+="\nVirtual HB";
-			response=response.trim();
-		}
-		thisCOHBD.updateHBList(response);
-	},function(){
-		if(HummingbirdManager.allowVirtualHBs){
-			thisCOHBD.updateHBList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
-		}
-	});
-};
-ConnectOneHBDialog.prototype.updateHBList=function(newHBs){
-	if(TouchReceiver.touchDown || !this.visible){
-		return;
-	}
-	var hBArray = JSON.parse(newHBs);
-	var COHBD=ConnectOneHBDialog;
-	var oldScroll=0;
-	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.getScroll();
-		this.menuBnList.hide();
-	}
-	var bnM=COHBD.bnMargin;
-	//this.menuBnList=new MenuBnList(this.group,bnM,bnM+COHBD.titleBarH,bnM,this.width-bnM*2);
-	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM+COHBD.titleBarH,this.width-bnM*2);
-	this.menuBnList.setMaxHeight(this.height-COHBD.titleBarH-COHBD.cancelBnHeight-COHBD.bnMargin*3);
-	for(var i=0;i<hBArray.length;i++){
-		this.addBnListOption(hBArray[i].name, hBArray[i].id);
-	}
-
-	this.menuBnList.show();
-	this.menuBnList.setScroll(oldScroll);
-};
-ConnectOneHBDialog.prototype.addBnListOption=function(hBName, hBId){
-	var COHBD=ConnectOneHBDialog;
-	this.menuBnList.addOption(hBName,function(){
-		COHBD.selectHB(hBName, hBId);
-	});
-};
-ConnectOneHBDialog.selectHB=function(hBName, hBId){
-	ConnectOneHBDialog.currentCOHBD.closeDialog();
-	HummingbirdManager.connectOneHB(hBName, hBId);
-};
-ConnectOneHBDialog.prototype.relToAbsX = function(x){
-	return x + this.x;
-};
-ConnectOneHBDialog.prototype.relToAbsY = function(y){
-	return y + this.y;
-};
-/*
-
-OpenDialog.prototype.addBnListOption=function(file,menuBnList){
-	var dialog=this;
-	menuBnList.addOption(file,function(){dialog.openFile(file)});
-};
-
-
-OpenDialog.prototype.updateGroupPosition=function(){
-	var OD=OpenDialog;
-	var x=GuiElements.width/2-OD.width/2;
-	var y=GuiElements.height/2-this.height/2;
-	GuiElements.move.group(this.group,x,y);
-};
-
-OpenDialog.prototype.openFile=function(fileName){
-	SaveManager.open(fileName);
-	this.closeDialog();
-};
-*/
-function ConnectMultipleHBDialog(){
-	var CMHBD=ConnectMultipleHBDialog;
-	if(CMHBD.currentCOHBD!=null){
-		CMHBD.currentCOHBD.closeDialog();
-	}
-	CMHBD.currentCOHBD=this;
-	this.hBList=HummingbirdManager.getConnectedHBs();
-	CMHBD.currentDialog=this;
-	this.width=CMHBD.width;
-	this.height=this.computeHeight();
-	this.x=GuiElements.width/2-this.width/2;
-	this.y=GuiElements.height/2-this.height/2;
-	this.statusLights=[];
-	this.group=GuiElements.create.group(this.x,this.y);
-	this.bgRect=this.makeBgRect();
-	this.titleRect=this.createTitleRect();
-	this.titleText=this.createTitleLabel();
-	if(this.hBList.length<10) {
-		this.plusBn = this.createPlusBn();
-	}
-	this.doneBn=this.makeDoneBn();
-	this.createRows();
-	GuiElements.layers.dialog.appendChild(this.group);
-	GuiElements.blockInteraction();
-	HtmlServer.sendRequestWithCallback("hummingbird/discover");
-}
-ConnectMultipleHBDialog.setConstants=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	CMHBD.currentDialog=null;
-
-	CMHBD.titleBarColor=Colors.lightGray;
-	CMHBD.fontColor=Colors.white;
-	CMHBD.bgColor=Colors.black;
-	CMHBD.titleBarH=30;
-	CMHBD.width=300;
-	CMHBD.doneBnWidth=100;
-	CMHBD.buttonH=30;
-	CMHBD.bnM=7;
-	CMHBD.smallBnWidth=30;
-	CMHBD.statusToBnM=CMHBD.smallBnWidth+CMHBD.bnM-DeviceStatusLight.radius*2;
-	CMHBD.editIconH=15;
-
-	CMHBD.fontSize=16;
-	CMHBD.font="Arial";
-	CMHBD.fontWeight="normal";
-	CMHBD.charHeight=12;
-	CMHBD.plusFontSize=26;
-	CMHBD.plusCharHeight=18;
-};
-ConnectMultipleHBDialog.prototype.computeHeight=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var count=this.hBList.length;
-	if(count==10){
-		count--;
-	}
-	return CMHBD.titleBarH+(count+2)*CMHBD.buttonH+(count+3)*CMHBD.bnM;
-};
-ConnectMultipleHBDialog.prototype.makeBgRect=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var rectE=GuiElements.draw.rect(0,0,this.width,this.height,CMHBD.bgColor);
-	this.group.appendChild(rectE);
-	return rectE;
-};
-ConnectMultipleHBDialog.prototype.makeDoneBn=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var width=CMHBD.doneBnWidth;
-	var height=CMHBD.buttonH;
-	var x=CMHBD.width/2-width/2;
-	var y=this.height-height-CMHBD.bnM;
-	var doneBn=new Button(x,y,width,height,this.group);
-	doneBn.addText("Done");
-	var callbackFn=function(){
-		callbackFn.dialog.closeDialog();
-	};
-	callbackFn.dialog=this;
-	doneBn.setCallbackFunction(callbackFn,true);
-	return doneBn;
-};
-ConnectMultipleHBDialog.prototype.createTitleRect=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var rect=GuiElements.draw.rect(0,0,CMHBD.width,CMHBD.titleBarH,CMHBD.titleBarColor);
-	this.group.appendChild(rect);
-	return rect;
-};
-ConnectMultipleHBDialog.prototype.createTitleLabel=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var textE=GuiElements.draw.text(0,0,"Connect Multiple",CMHBD.fontSize,CMHBD.fontColor,CMHBD.font,CMHBD.fontWeight);
-	var x=CMHBD.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=CMHBD.titleBarH/2+CMHBD.charHeight/2;
-	GuiElements.move.text(textE,x,y);
-	this.group.appendChild(textE);
-	return textE;
-};
-ConnectMultipleHBDialog.prototype.closeDialog=function(){
-	this.group.remove();
-	GuiElements.unblockInteraction();
-	for(var i=0;i<this.statusLights.length;i++){
-		this.statusLights[i].remove();
-	}
-	ConnectMultipleHBDialog.currentCOHBD=null;
-	HtmlServer.sendRequestWithCallback("/hummingbird/stopDiscover");
-};
-ConnectMultipleHBDialog.prototype.createRows=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	for(var i=0;i<this.hBList.length;i++){
-		this.createRow(i+1,CMHBD.titleBarH+CMHBD.buttonH*i+CMHBD.bnM*(i+1),this.hBList[i]);
-	}
-};
-ConnectMultipleHBDialog.prototype.createRow=function(index,y,hummingbird){
-	var CMHBD=ConnectMultipleHBDialog;
-	var x=CMHBD.bnM;
-	var request="hummingbird/"+HtmlServer.encodeHtml(hummingbird.name)+"/status";
-	// TODO: Fix status light to work with multiple devices
-	var statusLight=new DeviceStatusLight(x,y+CMHBD.buttonH/2,this.group);
-	this.statusLights.push(statusLight);
-	x+=DeviceStatusLight.radius*2;
-	var textE=GuiElements.draw.text(0,0,index,CMHBD.fontSize,CMHBD.fontColor,CMHBD.font,CMHBD.fontWeight);
-	var textW=GuiElements.measure.textWidth(textE);
-	var textX=x+CMHBD.statusToBnM/2-textW/2;
-	var textY=y+CMHBD.buttonH/2+CMHBD.charHeight/2;
-	GuiElements.move.text(textE,textX,textY);
-	this.group.appendChild(textE);
-	x+=CMHBD.statusToBnM;
-	var endX=this.width-CMHBD.bnM-CMHBD.smallBnWidth;
-	var xButton=new Button(endX,y,CMHBD.smallBnWidth,CMHBD.buttonH,this.group);
-	xButton.addText("X",CMHBD.font,CMHBD.fontSize,CMHBD.fontWeight,CMHBD.fontCharHeight);
-	endX-=CMHBD.smallBnWidth+CMHBD.bnM;
-	var renButton=new Button(endX,y,CMHBD.smallBnWidth,CMHBD.buttonH,this.group);
-	renButton.addIcon(VectorPaths.edit,CMHBD.editIconH);
-	endX-=CMHBD.bnM;
-	var hBButton=new Button(x,y,endX-x,CMHBD.buttonH,this.group);
-	hBButton.addText(hummingbird.name,CMHBD.font,CMHBD.fontSize,CMHBD.fontWeight,CMHBD.fontCharHeight);
-
-	renButton.setCallbackFunction(function(){
-		hummingbird.promptRename();
-		ConnectMultipleHBDialog.reloadDialog();
-	},true);
-	xButton.setCallbackFunction(function(){
-		hummingbird.disconnect();
-		ConnectMultipleHBDialog.reloadDialog();
-	},true);
-	var overlayX=GuiElements.width/2;
-	var overlayUpY=y+this.y;
-	var overlayLowY=overlayUpY+CMHBD.buttonH;
-	hBButton.setCallbackFunction(function(){
-		new HBConnectionList(overlayX,overlayUpY,overlayLowY,hummingbird);
-	},true);
-};
-ConnectMultipleHBDialog.prototype.createPlusBn=function(){
-	var CMHBD=ConnectMultipleHBDialog;
-	var x=CMHBD.bnM*2+CMHBD.smallBnWidth;
-	var y=this.height-CMHBD.buttonH*2-CMHBD.bnM*2;
-	var width=this.width-4*CMHBD.bnM-2*CMHBD.smallBnWidth;
-	var button=new Button(x,y,width,CMHBD.buttonH,this.group);
-	button.addText("+",CMHBD.font,CMHBD.plusFontSize,CMHBD.fontWeight,CMHBD.plusCharHeight);
-	var overlayX=GuiElements.width/2;
-	var overlayUpY=y+this.y;
-	var overlayLowY=overlayUpY+CMHBD.buttonH;
+ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup){
+	let button = RowDialog.createSmallBn(x, y, contentGroup);
+	button.addText("X");
 	button.setCallbackFunction(function(){
-		new HBConnectionList(overlayX,overlayUpY,overlayLowY,null);
-	},true);
+		this.deviceClass.getManager().removeDevice(index);
+	}.bind(this));
 	return button;
 };
-ConnectMultipleHBDialog.reloadDialog=function(){
-	new ConnectMultipleHBDialog();
+ConnectMultipleDialog.prototype.show = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = this;
+	RowDialog.prototype.show.call(this);
+	this.createConnectBn();
+	this.createTabRow();
 };
-
+ConnectMultipleDialog.prototype.createConnectBn = function(){
+	let CMD = ConnectMultipleDialog;
+	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
+	let x = (this.width - bnWidth) / 2;
+	let y = this.getExtraBottomY();
+	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
+	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	let upperY = y + this.y;
+	let lowerY = upperY + RowDialog.bnHeight;
+	let connectionX = this.x + this.width / 2;
+	button.setCallbackFunction(function(){
+		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
+	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.createTabRow = function(){
+	let CMD = ConnectMultipleDialog;
+	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
+	Device.getTypeList().forEach(function(deviceClass){
+		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	});
+	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
+	if(deviceClass == null){
+		deviceClass = this.deviceClass;
+	}
+	let thisScroll = this.getScroll();
+	let me = this;
+	me.closeDialog();
+	let dialog = new ConnectMultipleDialog(deviceClass);
+	dialog.show();
+	if(deviceClass === this.deviceClass) {
+		dialog.setScroll(thisScroll);
+	}
+};
+ConnectMultipleDialog.closeDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	RowDialog.prototype.closeDialog.call(this);
+	CMD.currentDialog = null;
+};
+ConnectMultipleDialog.reloadDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.currentDialog != null){
+		CMD.currentDialog.reloadDialog();
+	}
+};
+ConnectMultipleDialog.showDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.lastClass == null) {
+		CMD.lastClass = Device.getTypeList()[0];
+	}
+	(new ConnectMultipleDialog(CMD.lastClass)).show();
+};
 /**
  * Created by Tom on 6/16/2017.
  */
@@ -8770,78 +8728,96 @@ RecordingDialog.updateCounter = function(time){
 		this.currentDialog.updateCounter(time);
 	}
 };
-function HBConnectionList(x,upperY,lowerY,hBToReplace){
-	var HBCL=HBConnectionList;
-	this.group=GuiElements.create.group(0,0);
-	this.menuBnList=null;
-	this.bubbleOverlay=new BubbleOverlay(HBCL.bgColor,HBCL.bnMargin,this.group,this);
-	this.bubbleOverlay.display(x,x,upperY,lowerY,HBCL.width,HBCL.height);
-	var thisHBCL=this;
-	this.updateTimer = self.setInterval(function () { thisHBCL.discoverHBs() }, HBCL.updateInterval);
-	this.hBToReplace=hBToReplace;
-	this.discoverHBs();
+/**
+ * Created by Tom on 6/19/2017.
+ */
+function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
+	if(index == null){
+		index = null;
+	}
+	this.x = x;
+	this.upperY = upperY;
+	this.lowerY = lowerY;
+	this.index = index;
+	this.deviceClass = deviceClass;
+	this.visible = false;
 }
-HBConnectionList.setConstants=function(){
-	var HBCL=HBConnectionList;
-	HBCL.bnMargin=7;
-	HBCL.bgColor="#171717";
-	HBCL.updateInterval=ConnectOneHBDialog.updateInterval;
-	HBCL.height=150;
-	HBCL.width=200;
+RobotConnectionList.setConstants = function(){
+	let RCL=RobotConnectionList;
+	RCL.bnMargin = 5;
+	RCL.bgColor="#171717";
+	RCL.updateInterval=DiscoverDialog.updateInterval;
+	RCL.height=150;
+	RCL.width=200;
 };
-HBConnectionList.prototype.discoverHBs=function(){
-	var thisHBCL=this;
+RobotConnectionList.prototype.show = function(){
+	let RCL = RobotConnectionList;
+	this.visible = true;
+	this.group=GuiElements.create.group(0,0);
+	this.menuBnList = null;
+	let layer = GuiElements.layers.overlayOverlay;
+	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
+	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
+	this.discoverRobots();
+};
+RobotConnectionList.prototype.discoverRobots=function(){
+	let me = this;
 	HtmlServer.sendRequestWithCallback("hummingbird/discover",function(response){
-		var hBString=response;
-		if(HummingbirdManager.allowVirtualHBs){
-			response+="\nVirtual HB";
-			response=response.trim();
-		}
-		thisHBCL.updateHBList(response);
+		me.updateRobotList(response);
 	},function(){
-		if(HummingbirdManager.allowVirtualHBs){
-			thisHBCL.updateHBList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
+		if(DiscoverDialog.allowVirtualDevices){
+			me.updateRobotList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
 		}
 	});
 };
-HBConnectionList.prototype.updateHBList=function(newHBs){
-	if(TouchReceiver.touchDown){
+RobotConnectionList.prototype.updateRobotList=function(newRobots){
+	const RCL = RobotConnectionList;
+	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
+	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
-	var HBCL=HBConnectionList;
-	var oldScroll=0;
+	let robotArray = Device.fromJsonArrayString(this.deviceClass, newRobots);
+	let oldScroll=0;
 	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.scrollY;
+		oldScroll=this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
-	this.menuBnList=new MenuBnList(this.group,0,0,HBCL.bnMargin,HBCL.width);
-	//this.menuBnList=new SmoothMenuBnList(this, this.group,0,0,HBCL.width);
-	this.menuBnList.isOverlayPart=true;
-	this.menuBnList.setMaxHeight(HBCL.height);
-	var hBArray=newHBs.split("\n");
-	if(newHBs==""){
-		hBArray=[];
-	}
-	for(var i=0;i<hBArray.length;i++) {
-		this.addBnListOption(hBArray[i]);
+	let layer = GuiElements.layers.overlayOverlayScroll;
+	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
+	this.menuBnList.markAsOverlayPart();
+	this.menuBnList.setMaxHeight(RCL.height);
+	for(let i=0; i < robotArray.length;i++) {
+		this.addBnListOption(robotArray[i]);
 	}
 	this.menuBnList.show();
-	this.menuBnList.scroll(oldScroll);
+	this.menuBnList.setScroll(oldScroll);
 };
-HBConnectionList.prototype.addBnListOption=function(hBName){
-	var HBCL=HBConnectionList;
-	var hBToReplace=this.hBToReplace;
-	var thisHBCL=this;
-	this.menuBnList.addOption(hBName,function(){
-		thisHBCL.close();
-		HummingbirdManager.replaceHBConnection(hBToReplace,hBName,ConnectMultipleHBDialog.reloadDialog);
+RobotConnectionList.prototype.addBnListOption=function(robot){
+	let me = this;
+	this.menuBnList.addOption(robot.name,function(){
+		me.close();
+		if(me.index == null){
+			me.deviceClass.getManager().appendDevice(robot);
+		} else {
+			me.deviceClass.getManager().setDevice(me.index, robot);
+		}
 	});
 };
-HBConnectionList.prototype.close=function(){
+RobotConnectionList.prototype.close=function(){
 	this.updateTimer=window.clearInterval(this.updateTimer);
 	this.bubbleOverlay.hide();
+	this.visible = false;
+	if(this.menuBnList != null) this.menuBnList.hide();
 };
-
+RobotConnectionList.prototype.relToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.bubbleOverlay.relToAbsX(x);
+};
+RobotConnectionList.prototype.relToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.bubbleOverlay.relToAbsY(y);
+};
 /**
  * Created by Tom on 6/14/2017.
  */
@@ -8892,20 +8868,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	var json = "[]";
-	try{
-		json = JSON.parse(deviceList);
-	} catch(e) {
-
-	}
-	this.discoveredDevices = Device.fromJsonArray(this.deviceClass, json);
-	if(DiscoverDialog.allowVirtualDevices){
-		let rand = Math.random() * 20 + 20;
-		for(let i = 0; i < rand; i++) {
-			let name = "Virtual " + this.deviceClass.getDeviceTypeName(true);
-			this.discoveredDevices.push(new this.deviceClass(name + i, "virtualDevice"));
-		}
-	}
+	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){

@@ -218,8 +218,8 @@ TouchReceiver.touchStartBN=function(target,e){
 			GuiElements.overlay.close(); //Close any visible overlays.
 		}
 		TR.targetType="button";
-		target.press(); //Changes the button's appearance and may trigger an action.
 		TR.target=target;
+		target.press(); //Changes the button's appearance and may trigger an action.
 	}
 };
 /* Handles new touch events for the background of the palette.
@@ -284,6 +284,16 @@ TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 		TR.targetType="smoothMenuBnList";
 		TouchReceiver.target=target; //Store target.
 		e.stopPropagation();
+	}
+};
+TouchReceiver.touchStartTabRow=function(tabRow, index, e){
+	var TR=TouchReceiver;
+	if(TR.touchstart(e)){
+		if(!tabRow.isOverlayPart) {
+			GuiElements.overlay.close(); //Close any visible overlays.
+		}
+		TR.targetType="tabrow";
+		tabRow.selectTab(index);
 	}
 };
 
@@ -617,6 +627,13 @@ TouchReceiver.addListenersDisplayBox=function(element){
 		TouchReceiver.touchStartDisplayBox(e);
 	}, false);
 };
+TouchReceiver.addListenersTabRow=function(element,tabRow,index){
+	var TR=TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartTabRow(tabRow, index, e);
+	}, false);
+};
+
 /* Adds handlerDown listeners to the parts of any overlay that do not already have handlers.
  * @param {SVG element} element - The part the listeners are being applied to.
  */

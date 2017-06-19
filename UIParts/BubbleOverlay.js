@@ -1,6 +1,9 @@
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
+function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
+	}
+	if(layer == null){
+		layer = GuiElements.layers.overlay;
 	}
 	this.x = 0;
 	this.y = 0;
@@ -9,7 +12,7 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin){
 	this.hMargin=hMargin;
 	this.innerGroup=innerGroup;
 	this.parent=parent;
-	this.layerG=GuiElements.layers.overlay;
+	this.layerG = layer;
 	this.visible=false;
 	this.buildBubble();
 }
@@ -135,8 +138,8 @@ BubbleOverlay.prototype.getVPadding=function() {
 	return this.margin*2+BubbleOverlay.triangleH;
 };
 BubbleOverlay.prototype.relToAbsX = function(x){
-	return x + this.x;
+	return x + this.x + this.margin;
 };
 BubbleOverlay.prototype.relToAbsY = function(y){
-	return y + this.y;
+	return y + this.y + this.margin;
 };

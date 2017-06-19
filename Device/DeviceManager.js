@@ -22,17 +22,17 @@ DeviceManager.prototype.setDevice = function(index, newDevice){
 	this.connectedDevices[index].disconnect();
 	newDevice.connect();
 	this.connectedDevices[index] = newDevice;
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.removeDevice = function(index){
 	this.connectedDevices[index].disconnect();
 	this.connectedDevices.splice(index, 1);
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.appendDevice = function(newDevice){
 	newDevice.connect();
 	this.connectedDevices.push(newDevice);
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.setOneDevice = function(newDevice){
 	for(let i = 0; i<this.connectedDevices.length; i++){
@@ -40,14 +40,14 @@ DeviceManager.prototype.setOneDevice = function(newDevice){
 	}
 	newDevice.connect();
 	this.connectedDevices = [newDevice];
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.removeAllDevices = function(){
 	this.connectedDevices.forEach(function(device){
 		device.disconnect();
 	});
 	this.connectedDevices = [];
-	this.updateSelectableDevices();
+	this.devicesChanged();
 };
 DeviceManager.prototype.updateTotalStatus = function(){
 	if(this.getDeviceCount() == 0){
@@ -81,6 +81,10 @@ DeviceManager.prototype.updateSelectableDevices = function(){
 };
 DeviceManager.prototype.getSelectableDeviceCount=function(){
 	return this.selectableDevices;
+};
+DeviceManager.prototype.devicesChanged = function(){
+	ConnectMultipleDialog.reloadDialog();
+	this.updateSelectableDevices();
 };
 DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
