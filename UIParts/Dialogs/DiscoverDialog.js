@@ -16,7 +16,7 @@ function DiscoverDialog(deviceClass){
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
 DiscoverDialog.setConstants = function(){
-	DiscoverDialog.updateInterval = 500;
+	DiscoverDialog.updateInterval = 2; //500
 	DiscoverDialog.allowVirtualDevices = false;
 };
 DiscoverDialog.prototype.show = function(){
