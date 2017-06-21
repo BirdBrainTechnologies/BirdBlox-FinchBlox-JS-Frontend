@@ -8914,6 +8914,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 			me.updateDeviceList(JSON.stringify(arr));
 		}
 	});
+	GuiElements.alert(Math.random() + "X");
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
@@ -8921,7 +8922,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	}
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
-	GuiElements.alert(Math.random());
+
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);

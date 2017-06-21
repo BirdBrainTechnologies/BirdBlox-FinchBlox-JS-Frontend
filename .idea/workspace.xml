@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -54,16 +54,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="10" column="35" lean-forward="true" selection-start-line="10" selection-start-column="35" selection-end-line="10" selection-end-column="35" />
+            <state relative-caret-position="543">
+              <caret line="45" column="41" lean-forward="false" selection-start-line="45" selection-start-column="41" selection-end-line="45" selection-end-column="41" />
               <folding>
                 <element signature="e#575#661#0" expanded="false" />
-                <element signature="e#1850#2120#0" expanded="false" />
-                <element signature="e#2032#2084#0" expanded="false" />
-                <element signature="e#2178#2255#0" expanded="false" />
+                <element signature="e#1857#2127#0" expanded="false" />
+                <element signature="e#2039#2091#0" expanded="false" />
+                <element signature="e#2185#2262#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -147,11 +147,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NewSounds.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="NewSounds.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="16" column="33" lean-forward="true" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+            <state relative-caret-position="126">
+              <caret line="13" column="29" lean-forward="true" selection-start-line="13" selection-start-column="29" selection-end-line="13" selection-end-column="29" />
               <folding>
                 <element signature="n#!!block;n#Sound#0" expanded="false" />
                 <element signature="e#111#159#0" expanded="false" />
@@ -187,7 +187,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>overlay.</find>
       <find>overlay.r</find>
       <find>overlay.re</find>
       <find>overlay.rel</find>
@@ -213,10 +212,11 @@
       <find>h</find>
       <find>hi</find>
       <find>dialog</find>
-      <find>updateDeviceList</find>
-      <find>discoverDevices</find>
       <find>&quot;recor</find>
       <find>rand</find>
+      <find>updateDeviceList</find>
+      <find>getManager().discover</find>
+      <find>discoverDevices</find>
     </findStrings>
     <replaceStrings>
       <replace>Sound</replace>
@@ -277,9 +277,9 @@
         <option value="$PROJECT_DIR$/RecordingManager.js" />
         <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/DialogManager.js" />
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" />
+        <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
       </list>
     </option>
   </component>
@@ -831,7 +831,7 @@
       <workItem from="1497798631603" duration="22124000" />
       <workItem from="1497878242640" duration="15969000" />
       <workItem from="1497977565585" duration="651000" />
-      <workItem from="1498051937872" duration="7697000" />
+      <workItem from="1498051937872" duration="9321000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -928,7 +928,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="992130000" />
+    <option name="totallyTimeSpent" value="993754000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1036,9 +1036,9 @@
           <folding>
             <element signature="n#!!block;n#DiscoverDialog#0" expanded="false" />
             <element signature="e#575#661#0" expanded="false" />
-            <element signature="e#1850#2120#0" expanded="false" />
-            <element signature="e#2032#2084#0" expanded="false" />
-            <element signature="e#2178#2255#0" expanded="false" />
+            <element signature="e#1857#2127#0" expanded="false" />
+            <element signature="e#2039#2091#0" expanded="false" />
+            <element signature="e#2185#2262#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1507,19 +1507,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="10" column="35" lean-forward="true" selection-start-line="10" selection-start-column="35" selection-end-line="10" selection-end-column="35" />
-          <folding>
-            <element signature="e#575#661#0" expanded="false" />
-            <element signature="e#1850#2120#0" expanded="false" />
-            <element signature="e#2032#2084#0" expanded="false" />
-            <element signature="e#2178#2255#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Sounds.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
@@ -1530,8 +1517,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="16" column="33" lean-forward="true" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+        <state relative-caret-position="126">
+          <caret line="13" column="29" lean-forward="true" selection-start-line="13" selection-start-column="29" selection-end-line="13" selection-end-column="29" />
           <folding>
             <element signature="n#!!block;n#Sound#0" expanded="false" />
             <element signature="e#111#159#0" expanded="false" />
@@ -1551,6 +1538,19 @@
             <element signature="e#3747#3832#0" expanded="false" />
             <element signature="e#4035#4115#0" expanded="false" />
             <element signature="e#4054#4088#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="543">
+          <caret line="45" column="41" lean-forward="false" selection-start-line="45" selection-start-column="41" selection-end-line="45" selection-end-column="41" />
+          <folding>
+            <element signature="e#575#661#0" expanded="false" />
+            <element signature="e#1857#2127#0" expanded="false" />
+            <element signature="e#2039#2091#0" expanded="false" />
+            <element signature="e#2185#2262#0" expanded="false" />
           </folding>
         </state>
       </provider>
