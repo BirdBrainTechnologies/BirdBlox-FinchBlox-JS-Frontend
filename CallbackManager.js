@@ -6,7 +6,8 @@ function CallbackManager(){
 }
 CallbackManager.sounds = {};
 CallbackManager.sounds.recordingEnded = function(){
-	return true;
+	RecordingManager.interruptRecording();
+	return false;
 };
 CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
@@ -17,16 +18,19 @@ CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
-CallbackManager.dialog.promptClosed = function(cancelled, response){
+CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
 };
-CallbackManager.dialog.choiceClosed = function(cancelled, firstSelected){
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
 	return false;
 };
-CallbackManager.dialog.alertClosed = function(){
+CallbackManager.dialog.alertResponded = function(){
 	return false;
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	return false;
+};
+CallbackManager.robot.discovered = function(robotList){
+	return true;
 };

@@ -50,6 +50,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	}
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
+	GuiElements.alert(Math.random());
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
