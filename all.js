@@ -889,6 +889,7 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port){
 	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in/" + sensorType);
 	request.addParam("id", this.id);
 	request.addParam("port", port);
+	request.addParam("sensor", sensorType);
 	HtmlServer.sendRequest(request.toString(), status);
 };
 DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey){
