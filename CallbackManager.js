@@ -17,15 +17,16 @@ CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
-CallbackManager.dialog.prompt = function(cancelled, response){
+CallbackManager.dialog.promptClosed = function(cancelled, response){
 	return false;
 };
-CallbackManager.dialog.choice = function(cancelled, firstSelected){
+CallbackManager.dialog.choiceClosed = function(cancelled, firstSelected){
 	return false;
 };
-CallbackManager.dialog.alert = function(){
+CallbackManager.dialog.alertClosed = function(){
 	return false;
 };
-CallbackManager.dialog.updateStatus = function(robotId, isConnected){
+CallbackManager.robot = {};
+CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	return false;
 };
