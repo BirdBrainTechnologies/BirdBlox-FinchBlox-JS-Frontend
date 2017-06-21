@@ -8896,8 +8896,8 @@ DiscoverDialog.prototype.show = function(){
 	if(!this.timerSet) {
 		this.timerSet = true;
 		this.updateTimer = self.setInterval(this.discoverDevices.bind(this), DD.updateInterval);
+		this.discoverDevices();
 	}
-	this.discoverDevices();
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
