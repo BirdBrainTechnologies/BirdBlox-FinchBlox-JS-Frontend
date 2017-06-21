@@ -19,6 +19,7 @@ Sound.setConstants = function(){
 	Sound.type.effect = "effect";
 	Sound.type.ui = "ui";
 	Sound.type.recording = "recording";
+	Sound.click = "click";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){

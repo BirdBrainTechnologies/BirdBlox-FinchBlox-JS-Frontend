@@ -11,6 +11,12 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Download file", this.downloadFile);
 	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
+	this.addOption("click.wav", function(){
+		Sound.click = "click";
+	});
+	this.addOption("click2.wav", function(){
+		Sound.click = "click2";
+	});
 	this.addOption("Set JS Url", this.optionSetJsUrl);
 	this.addOption("Reset JS Url", this.optionResetJsUrl);
 	this.addOption("Send request", this.optionSendRequest);
