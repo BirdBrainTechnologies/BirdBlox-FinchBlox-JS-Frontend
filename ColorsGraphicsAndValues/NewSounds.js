@@ -50,7 +50,7 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 	Sound.getDuration(id, isRecording, function(duration){
 		let request = new HttpRequestBuilder("sound/play");
 		request.addParam("filename", id);
-		request.addParam("recording", isRecording + "");
+		request.addParam("type", Sound.boolToType(isRecording));
 		HtmlServer.sendRequestWithCallback(request.toString(), function(){
 			setTimeout(donePlayingFn, duration);
 			if(sentCallback != null) sentCallback();
@@ -76,7 +76,7 @@ Sound.play = function(id, isRecording, status){
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 	let request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
-	request.addParam("recording", isRecording + "");
+	request.addParam("type", Sound.boolToType(isRecording));
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
 		let res = Number(result);
 		if(!isNaN(res)){
@@ -88,7 +88,7 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 };
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
-	request.addParam("recording", isRecording + "");
+	request.addParam("type", Sound.boolToType(isRecording));
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
 		let list = result.split("\n");
 		if(result === "") list = [];
@@ -131,4 +131,11 @@ Sound.getSoundList = function(isRecording){
 		return Sound.recordingList;
 	}
 	return Sound.soundList;
+};
+Sound.boolToType = function(isRecording){
+	if(isRecording){
+		return Sound.type.recording;
+	} else {
+		return Sound.type.effect;
+	}
 };
