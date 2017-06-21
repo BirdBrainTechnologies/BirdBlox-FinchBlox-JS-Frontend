@@ -26,6 +26,7 @@ DebugOptions.applyConstants = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
 };
+
 DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
@@ -2955,6 +2956,11 @@ Sound.setConstants = function(){
 	Sound.playingSoundStatuses = [];
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
+	Sound.type = {};
+	Sound.type.effect = "effect";
+	Sound.type.ui = "ui";
+	Sound.type.recording = "recording";
+	Sound.click = "click";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
@@ -6186,6 +6192,12 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Download file", this.downloadFile);
 	this.addOption("Hide Debug", TitleBar.hideDebug);
 	this.addOption("Version", this.optionVersion);
+	this.addOption("click.wav", function(){
+		Sound.click = "click";
+	});
+	this.addOption("click2.wav", function(){
+		Sound.click = "click2";
+	});
 	this.addOption("Set JS Url", this.optionSetJsUrl);
 	this.addOption("Reset JS Url", this.optionResetJsUrl);
 	this.addOption("Send request", this.optionSendRequest);
@@ -6793,6 +6805,10 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
+				let snapSoundRequest = new HttpRequestBuilder("sound/play");
+				snapSoundRequest.addParam("type", Sound.type.ui);
+				snapSoundRequest.addParam("filename", Sound.click);
+				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
 			}
 			else{
 				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
@@ -9639,7 +9655,8 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn('[{"name":"hi","id":"there"}]');
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Started');
 			}
 		}, 20);
 		return;
