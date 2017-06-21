@@ -16,7 +16,7 @@ function DiscoverDialog(deviceClass){
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
 DiscoverDialog.setConstants = function(){
-	DiscoverDialog.updateInterval = 2; //500
+	DiscoverDialog.updateInterval = 500;
 	DiscoverDialog.allowVirtualDevices = false;
 };
 DiscoverDialog.prototype.show = function(){
@@ -48,7 +48,6 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	GuiElements.alert(Math.random() + "Y");
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 
