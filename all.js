@@ -6170,7 +6170,7 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Share", SaveManager.userExport);
-	this.addOption("Debug", this.optionEnableDebug);
+	//this.addOption("Debug", this.optionEnableDebug);
 	if(GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);
 	}
