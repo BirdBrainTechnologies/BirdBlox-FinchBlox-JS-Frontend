@@ -24,6 +24,7 @@ DebugOptions.applyConstants = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
 };
+
 DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;

@@ -135,6 +135,10 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
+				let snapSoundRequest = new HttpRequestBuilder("sound/play");
+				snapSoundRequest.addParam("type", Sound.type.ui);
+				snapSoundRequest.addParam("filename", "click.wav");
+				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
 			}
 			else{
 				//If it is not going to be snapped or deleted, simply drop it onto the current tab.

@@ -49,7 +49,8 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				callbackErr();
 			}*/
 			if(callbackFn != null) {
-				callbackFn('[{"name":"hi","id":"there"}]');
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Started');
 			}
 		}, 20);
 		return;

@@ -15,6 +15,10 @@ Sound.setConstants = function(){
 	Sound.playingSoundStatuses = [];
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
+	Sound.type = {};
+	Sound.type.effect = "effect";
+	Sound.type.ui = "ui";
+	Sound.type.recording = "recording";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
