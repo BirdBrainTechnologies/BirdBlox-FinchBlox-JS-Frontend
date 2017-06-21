@@ -44,6 +44,11 @@ RecordingManager.stopRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
+RecordingManager.interruptRecording = function(){
+	let RM = RecordingManager;
+	RM.setState(RM.recordingStates.stopped);
+	RecordingDialog.stoppedRecording();
+};
 RecordingManager.pauseRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/pause");

@@ -7884,6 +7884,11 @@ RecordingManager.stopRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
+RecordingManager.interruptRecording = function(){
+	let RM = RecordingManager;
+	RM.setState(RM.recordingStates.stopped);
+	RecordingDialog.stoppedRecording();
+};
 RecordingManager.pauseRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/pause");
@@ -8909,6 +8914,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	}
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
+	GuiElements.alert(Math.random());
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
