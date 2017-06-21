@@ -4,7 +4,7 @@ var FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -1179,7 +1179,7 @@ GuiElements.alert=function(message){
 		DebugOptions.blockLogging = true;
 	}
 	if(!DebugOptions.blockLogging) {
-		debug.innerHTML = message; //The iPad app does not support alert dialogs
+		//debug.innerHTML = message; //The iPad app does not support alert dialogs
 		//alert(message); //When debugging on a PC this function can be used.
 	}
 };
@@ -6170,7 +6170,7 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Share", SaveManager.userExport);
-	this.addOption("Debug", this.optionEnableDebug);
+	//this.addOption("Debug", this.optionEnableDebug);
 	if(GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);
 	}
@@ -8896,8 +8896,8 @@ DiscoverDialog.prototype.show = function(){
 	if(!this.timerSet) {
 		this.timerSet = true;
 		this.updateTimer = self.setInterval(this.discoverDevices.bind(this), DD.updateInterval);
+		this.discoverDevices();
 	}
-	this.discoverDevices();
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
@@ -8921,7 +8921,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	}
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
-	GuiElements.alert(Math.random());
+
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);

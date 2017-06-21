@@ -25,8 +25,8 @@ DiscoverDialog.prototype.show = function(){
 	if(!this.timerSet) {
 		this.timerSet = true;
 		this.updateTimer = self.setInterval(this.discoverDevices.bind(this), DD.updateInterval);
+		this.discoverDevices();
 	}
-	this.discoverDevices();
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
@@ -50,7 +50,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	}
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
-	GuiElements.alert(Math.random());
+
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
