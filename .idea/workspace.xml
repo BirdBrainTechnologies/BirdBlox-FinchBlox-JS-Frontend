@@ -57,13 +57,11 @@
       <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="543">
-              <caret line="45" column="41" lean-forward="false" selection-start-line="45" selection-start-column="41" selection-end-line="45" selection-end-column="41" />
+            <state relative-caret-position="651">
+              <caret line="31" column="12" lean-forward="true" selection-start-line="31" selection-start-column="12" selection-end-line="31" selection-end-column="12" />
               <folding>
-                <element signature="e#575#661#0" expanded="false" />
-                <element signature="e#1857#2127#0" expanded="false" />
-                <element signature="e#2039#2091#0" expanded="false" />
-                <element signature="e#2185#2262#0" expanded="false" />
+                <element signature="e#2040#2092#0" expanded="false" />
+                <element signature="e#2186#2263#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -95,7 +93,7 @@
         <entry file="file://$PROJECT_DIR$/all.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="358">
-              <caret line="15433" column="17" lean-forward="false" selection-start-line="15433" selection-start-column="17" selection-end-line="15433" selection-end-column="17" />
+              <caret line="15434" column="17" lean-forward="false" selection-start-line="15434" selection-start-column="17" selection-end-line="15434" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -187,7 +185,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>overlay.r</find>
       <find>overlay.re</find>
       <find>overlay.rel</find>
       <find>new bub</find>
@@ -217,6 +214,7 @@
       <find>updateDeviceList</find>
       <find>getManager().discover</find>
       <find>discoverDevices</find>
+      <find>new D</find>
     </findStrings>
     <replaceStrings>
       <replace>Sound</replace>
@@ -831,7 +829,7 @@
       <workItem from="1497798631603" duration="22124000" />
       <workItem from="1497878242640" duration="15969000" />
       <workItem from="1497977565585" duration="651000" />
-      <workItem from="1498051937872" duration="9321000" />
+      <workItem from="1498051937872" duration="9647000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -928,7 +926,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="993754000" />
+    <option name="totallyTimeSpent" value="994080000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1036,9 +1034,9 @@
           <folding>
             <element signature="n#!!block;n#DiscoverDialog#0" expanded="false" />
             <element signature="e#575#661#0" expanded="false" />
-            <element signature="e#1857#2127#0" expanded="false" />
-            <element signature="e#2039#2091#0" expanded="false" />
-            <element signature="e#2185#2262#0" expanded="false" />
+            <element signature="e#1858#2128#0" expanded="false" />
+            <element signature="e#2040#2092#0" expanded="false" />
+            <element signature="e#2186#2263#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1440,7 +1438,7 @@
     <entry file="file://$PROJECT_DIR$/all.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="358">
-          <caret line="15433" column="17" lean-forward="false" selection-start-line="15433" selection-start-column="17" selection-end-line="15433" selection-end-column="17" />
+          <caret line="15434" column="17" lean-forward="false" selection-start-line="15434" selection-start-column="17" selection-end-line="15434" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -1544,13 +1542,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="543">
-          <caret line="45" column="41" lean-forward="false" selection-start-line="45" selection-start-column="41" selection-end-line="45" selection-end-column="41" />
+        <state relative-caret-position="651">
+          <caret line="31" column="12" lean-forward="true" selection-start-line="31" selection-start-column="12" selection-end-line="31" selection-end-column="12" />
           <folding>
-            <element signature="e#575#661#0" expanded="false" />
-            <element signature="e#1857#2127#0" expanded="false" />
-            <element signature="e#2039#2091#0" expanded="false" />
-            <element signature="e#2185#2262#0" expanded="false" />
+            <element signature="e#2040#2092#0" expanded="false" />
+            <element signature="e#2186#2263#0" expanded="false" />
           </folding>
         </state>
       </provider>
