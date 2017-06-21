@@ -126,7 +126,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(isRecording, filename, function(){
-				if(filename == SaveManager.fileName) {
+				if(filename == SaveManager.fileName && isRecording) {
 					SaveManager.openBlank(nextAction);
 				} else{
 					if(nextAction != null) nextAction();

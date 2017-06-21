@@ -47,7 +47,6 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
-		GuiElements.alert(Math.random());
 		this.visible = true;
 		RowDialog.currentDialog=this;
 		this.calcHeights();
