@@ -13,12 +13,12 @@ Sound.setConstants = function(){
 	Sound.soundList = [];
 	Sound.recordingList = [];
 	Sound.playingSoundStatuses = [];
-	Sound.loadSounds(true);
-	Sound.loadSounds(false);
 	Sound.type = {};
 	Sound.type.effect = "effect";
 	Sound.type.ui = "ui";
 	Sound.type.recording = "recording";
+	Sound.loadSounds(true);
+	Sound.loadSounds(false);
 	Sound.click = "click";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
