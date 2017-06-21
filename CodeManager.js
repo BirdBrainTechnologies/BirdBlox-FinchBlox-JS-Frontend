@@ -137,7 +137,7 @@ CodeManager.move.end=function(){
 				fit.bestFit.snap(move.stack.firstBlock);
 				let snapSoundRequest = new HttpRequestBuilder("sound/play");
 				snapSoundRequest.addParam("type", Sound.type.ui);
-				snapSoundRequest.addParam("filename", "click.wav");
+				snapSoundRequest.addParam("filename", Sound.click);
 				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
 			}
 			else{
