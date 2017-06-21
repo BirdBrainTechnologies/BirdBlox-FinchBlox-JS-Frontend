@@ -1179,7 +1179,7 @@ GuiElements.alert=function(message){
 		DebugOptions.blockLogging = true;
 	}
 	if(!DebugOptions.blockLogging) {
-		//debug.innerHTML = message; //The iPad app does not support alert dialogs
+		debug.innerHTML = message; //The iPad app does not support alert dialogs
 		//alert(message); //When debugging on a PC this function can be used.
 	}
 };
@@ -2960,7 +2960,7 @@ Sound.setConstants = function(){
 	Sound.type.recording = "recording";
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
-	Sound.click = "click";
+	Sound.click = "click2";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
@@ -8034,6 +8034,7 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
+		GuiElements.alert(Math.random());
 		this.visible = true;
 		RowDialog.currentDialog=this;
 		this.calcHeights();

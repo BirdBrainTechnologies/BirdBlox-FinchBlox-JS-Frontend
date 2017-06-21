@@ -19,7 +19,7 @@ Sound.setConstants = function(){
 	Sound.type.recording = "recording";
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
-	Sound.click = "click";
+	Sound.click = "click2";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
