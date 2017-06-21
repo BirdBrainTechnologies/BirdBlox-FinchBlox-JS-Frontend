@@ -4,9 +4,9 @@ var FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
-	DO.mouse = false;
+	DO.mouse = true;
 	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
@@ -2960,7 +2960,7 @@ Sound.setConstants = function(){
 	Sound.type.recording = "recording";
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
-	Sound.click = "click";
+	Sound.click = "click2";
 };
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
@@ -10198,7 +10198,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(isRecording, filename, function(){
-				if(filename == SaveManager.fileName) {
+				if(filename == SaveManager.fileName && isRecording) {
 					SaveManager.openBlank(nextAction);
 				} else{
 					if(nextAction != null) nextAction();
@@ -13721,7 +13721,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 
 function B_HBMotor(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", 0, 180);
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100);
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -13729,7 +13729,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 
 function B_HBVibration(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 180);
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100);
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -13737,7 +13737,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 function B_HBLed(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 180);
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100);
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
