@@ -8914,12 +8914,12 @@ DiscoverDialog.prototype.discoverDevices = function() {
 			me.updateDeviceList(JSON.stringify(arr));
 		}
 	});
-	GuiElements.alert(Math.random() + "X");
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
+	GuiElements.alert(Math.random() + "Y");
 	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 

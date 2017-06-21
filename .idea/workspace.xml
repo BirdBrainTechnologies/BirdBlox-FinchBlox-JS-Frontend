@@ -57,8 +57,8 @@
       <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="18" column="44" lean-forward="false" selection-start-line="18" selection-start-column="44" selection-end-line="18" selection-end-column="44" />
+            <state relative-caret-position="735">
+              <caret line="50" column="40" lean-forward="false" selection-start-line="50" selection-start-column="40" selection-end-line="50" selection-end-column="40" />
               <folding>
                 <element signature="e#2044#2096#0" expanded="false" />
                 <element signature="e#2190#2267#0" expanded="false" />
@@ -829,7 +829,7 @@
       <workItem from="1497798631603" duration="22124000" />
       <workItem from="1497878242640" duration="15969000" />
       <workItem from="1497977565585" duration="651000" />
-      <workItem from="1498051937872" duration="9886000" />
+      <workItem from="1498051937872" duration="10032000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -926,7 +926,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="994319000" />
+    <option name="totallyTimeSpent" value="994465000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1542,8 +1542,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="18" column="44" lean-forward="false" selection-start-line="18" selection-start-column="44" selection-end-line="18" selection-end-column="44" />
+        <state relative-caret-position="735">
+          <caret line="50" column="40" lean-forward="false" selection-start-line="50" selection-start-column="40" selection-end-line="50" selection-end-column="40" />
           <folding>
             <element signature="e#2044#2096#0" expanded="false" />
             <element signature="e#2190#2267#0" expanded="false" />
