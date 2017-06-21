@@ -4,9 +4,9 @@ var FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
-	DO.mouse = true;
+	DO.mouse = false;
 	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
 	DO.showVersion = false;
