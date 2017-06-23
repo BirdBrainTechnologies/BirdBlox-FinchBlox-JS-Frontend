@@ -4025,7 +4025,7 @@ TitleBar.setText=function(text){
 };
 TitleBar.updateText = function(){
 	let TB=TitleBar;
-	if(GuiElements.smallMode) {
+	if(GuiElements.width < BlockPalette.width * 2) {
 		if(TB.titleTextVisble) {
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
@@ -4070,7 +4070,7 @@ TitleBar.updateZoomPart2=function(){
 		TB.viewBn.press();
 		TB.viewBn.release();
 	}
-	TitleBar.setText(TitleBar.titleText);
+	TB.updateText();
 };
 
 
