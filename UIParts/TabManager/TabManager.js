@@ -16,11 +16,14 @@ TabManager.setGraphics=function(){
 	TM.maxZoom = 3;
 
 	TM.tabAreaX=BlockPalette.width;
+	if(GuiElements.smallMode){
+		TM.tabAreaX=0;
+	}
 	TM.tabAreaY=TitleBar.height;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
+	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
 
 	/* No longer different from tabArea since tab bar was removed */
-	TM.tabSpaceX=BlockPalette.width;
+	TM.tabSpaceX=TM.tabAreaX;
 	TM.tabSpaceY=TitleBar.height;
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
@@ -237,9 +240,7 @@ TabManager.passRecursively=function(functionName){
 };
 TabManager.updateZoom=function(){
 	var TM=TabManager;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
+	TM.setGraphics();
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
 	TabManager.passRecursively("updateZoom");
 };

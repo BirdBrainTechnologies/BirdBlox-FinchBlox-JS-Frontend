@@ -66,6 +66,9 @@ OverflowArrows.prototype.updateZoom=function(){
 OverflowArrows.prototype.setArrowPos=function(){
 	var OA = OverflowArrows;
 	this.left = BlockPalette.width;
+	if(!GuiElements.paletteLayersVisible) {
+		this.left = 0;
+	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;

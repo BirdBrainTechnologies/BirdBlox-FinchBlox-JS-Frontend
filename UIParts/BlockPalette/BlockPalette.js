@@ -9,6 +9,7 @@ function BlockPalette(){
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
+	BlockPalette.visible = true;
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.mainVMargin=10;
@@ -43,27 +44,26 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.trashColor = Colors.white;
 };
 BlockPalette.updateZoom=function(){
-	var BP=BlockPalette;
-	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
+	let BP=BlockPalette;
+	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
-	var clipRect=BP.clippingPath.childNodes[0];
-	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
+	GuiElements.update.rect(BP.catRect,0,BP.catY,BP.width,BP.catH);
+	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
 	for(let i = 0; i < BlockPalette.categories.length; i++){
 		BlockPalette.categories[i].updateZoom();
 	}
 };
 BlockPalette.createCatBg=function(){
-	var BP=BlockPalette;
+	let BP=BlockPalette;
 	BP.catRect=GuiElements.draw.rect(0,BP.catY,BP.width,BP.catH,BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
 	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
-}
+};
 BlockPalette.createPalBg=function(){
-	var BP=BlockPalette;
+	let BP=BlockPalette;
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	//TouchReceiver.addListenersPalette(BP.palRect);
-	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
 };
 BlockPalette.createScrollSvg = function(){
 	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
@@ -129,7 +129,7 @@ BlockPalette.ShowTrash=function() {
 BlockPalette.HideTrash=function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
-		GuiElements.layers.trash.removeChild(BP.trash);
+		BP.trash.remove();
 		BP.trash = null;
 	}
 };

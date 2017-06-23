@@ -1181,6 +1181,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
 	GuiElements.defaultZoomMultiple = 1;
+	GuiElements.smallModeThreshold = 620;
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
@@ -1193,8 +1194,12 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
+
+	GuiElements.paletteLayersVisible = true;
+	GuiElements.smallMode = false;
+	GuiElements.checkSmallMode();
 };
-/* Many classes have static functions which set constants such as font size, etc. 
+/* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
@@ -1209,11 +1214,12 @@ GuiElements.setConstants=function(){
 	Button.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
-	TitleBar.setGraphics();
+	TitleBar.setGraphicsPart1();
 	BlockGraphics();
 	Slot.setConstants();
 	Block.setConstants();
 	BlockPalette.setGraphics();
+	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
@@ -1334,7 +1340,16 @@ GuiElements.create.group=function(x,y,parent){
 /* Creates a group, adds it to the main SVG, and returns it. */
 GuiElements.create.layer=function(depth){
 	DebugOptions.validateNumbers(depth);
-	return GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let layerG = GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let showHideLayer = GuiElements.create.group(0, 0, layerG);
+	let layer = {};
+	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
+	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
+	layer.hide = showHideLayer.remove.bind(showHideLayer);
+	layer.show = function(){
+		layerG.appendChild(showHideLayer);
+	};
+	return layer;
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
  * @param {text} id - The id of the gradient (needed to reference it later).
@@ -1964,20 +1979,20 @@ GuiElements.updateZoom=function(){
 GuiElements.updateDimsPreview = function(newWidth, newHeight){
 	GuiElements.width=newWidth/GuiElements.zoomFactor;
 	GuiElements.height=newHeight/GuiElements.zoomFactor;
-	TabManager.updateZoom();
-	DisplayBox.updateZoom();
-	TitleBar.updateZoom();
-	BlockPalette.updateZoom();
-	GuiElements.updateDialogBlockZoom();
-	RowDialog.updateZoom();
+	GuiElements.passUpdateZoom();
 };
 GuiElements.updateDims = function(){
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
-	TabManager.updateZoom();
+	GuiElements.passUpdateZoom();
+};
+GuiElements.passUpdateZoom = function(){
+	GuiElements.checkSmallMode();
 	DisplayBox.updateZoom();
-	TitleBar.updateZoom();
+	TitleBar.updateZoomPart1();
 	BlockPalette.updateZoom();
+	TitleBar.updateZoomPart2();
+	TabManager.updateZoom();
 	GuiElements.updateDialogBlockZoom();
 	RowDialog.updateZoom();
 };
@@ -2042,9 +2057,47 @@ GuiElements.relToAbsX = function(x){
 GuiElements.relToAbsY = function(y){
 	return y * GuiElements.zoomFactor;
 };
-
-
-
+GuiElements.hidePaletteLayers = function(skipUpdate){
+	if(skipUpdate == null){
+		skipUpdate = false;
+	}
+	let GE = GuiElements;
+	if(GuiElements.paletteLayersVisible){
+		GuiElements.paletteLayersVisible = false;
+		GE.layers.paletteBG.hide();
+		GE.layers.paletteScroll.style.visibility = "hidden";
+		GE.layers.trash.hide();
+		GE.layers.catBg.hide();
+		GE.layers.categories.hide();
+		if(!skipUpdate) {
+			TabManager.updateZoom();
+		}
+	}
+};
+GuiElements.showPaletteLayers = function(skipUpdate){
+	let GE = GuiElements;
+	if(skipUpdate == null){
+		skipUpdate = false;
+	}
+	if(!GuiElements.paletteLayersVisible){
+		GuiElements.paletteLayersVisible = true;
+		GE.layers.paletteBG.show();
+		GE.layers.paletteScroll.style.visibility = "visible";
+		GE.layers.trash.show();
+		GE.layers.catBg.show();
+		GE.layers.categories.show();
+		if(!skipUpdate) {
+			TabManager.updateZoom();
+		}
+	}
+};
+GuiElements.checkSmallMode = function(){
+	let GE = GuiElements;
+	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
+	if(!GE.smallMode && !GE.paletteLayersVisible) {
+		GE.showPaletteLayers(true);
+	}
+};
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
@@ -3849,15 +3902,21 @@ TouchReceiver.setInitialScrollFix = function(div) {
 function TitleBar(){
 	let TB=TitleBar;
 	TB.titleTextVisble = true;
+	TB.titleText = "";
 	TitleBar.createBar();
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
 }
-TitleBar.setGraphics=function(){
+TitleBar.setGraphicsPart1=function(){
 	var TB=TitleBar;
-	TB.height=54;
-	TB.buttonMargin=Button.defaultMargin;
-	TB.buttonW=64;
+	if(GuiElements.smallMode) {
+		TB.height = 44;
+		TB.buttonMargin=Button.defaultMargin / 2;
+	} else {
+		TB.height = 54;
+		TB.buttonMargin=Button.defaultMargin;
+	}
+	TB.buttonW = TB.height * 64 / 54;
 	TB.longButtonW=85;
 	TB.bnIconMargin=3;
 	TB.bg=Colors.black;
@@ -3871,20 +3930,28 @@ TitleBar.setGraphics=function(){
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
+	TB.shortButtonW = TB.buttonH;
+	TB.shortButtonW = TB.buttonW;
+
+	TB.width=GuiElements.width;
 };
-TitleBar.createBar=function(){
+TitleBar.setGraphicsPart2 = function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-
-	TB.fileBnX=TB.buttonMargin;
-	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
-
-	TB.hummingbirdBnX=BlockPalette.width-TB.buttonMargin-TB.buttonW;
-	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 
-	TB.width=GuiElements.width;
+	TB.fileBnX=TB.buttonMargin;
+	if(GuiElements.smallMode) {
+		TB.showBnX = TB.buttonMargin;
+		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
+	}
+	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
+	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
+	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+};
+TitleBar.createBar=function(){
+	var TB=TitleBar;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
 };
@@ -3903,6 +3970,33 @@ TitleBar.makeButtons=function(){
 	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
 
+	if(GuiElements.smallMode) {
+		TB.showBn = new Button(TB.showBnX, TB.buttonMargin, TB.shortButtonW, TB.buttonH, TBLayer);
+		TB.showBn.addText("Show");
+		TB.showBn.setCallbackFunction(function () {
+			GuiElements.showPaletteLayers();
+		}, false);
+		TB.showBn.setCallbackFunction(function () {
+			TB.showBn.hide();
+			TB.hideBn.show();
+		}, true);
+		TB.hideBn = new Button(TB.showBnX, TB.buttonMargin, TB.shortButtonW, TB.buttonH, TBLayer);
+		TB.hideBn.addText("Hide");
+		TB.hideBn.setCallbackFunction(function () {
+			GuiElements.hidePaletteLayers();
+		}, false);
+		TB.hideBn.setCallbackFunction(function () {
+			TB.hideBn.hide();
+			TB.showBn.show();
+		}, true);
+		if(GuiElements.paletteLayersVisible){
+			TB.showBn.hide();
+		} else {
+			TB.hideBn.hide();
+		}
+	}
+
+
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
 	TB.fileMenu=new FileMenu(TB.fileBn);
@@ -3919,6 +4013,16 @@ TitleBar.makeButtons=function(){
 	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
 	*/
 };
+TitleBar.removeButtons = function(){
+	let TB=TitleBar;
+	TB.flagBn.remove();
+	TB.stopBn.remove();
+	TB.fileBn.remove();
+	TB.viewBn.remove();
+	TB.hummingbirdBn.remove();
+	if(TB.debugBn != null) TB.debugBn.remove();
+	TB.deviceStatusLight.remove();
+};
 TitleBar.makeTitleText=function(){
 	var TB=TitleBar;
 	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
@@ -3930,6 +4034,7 @@ TitleBar.setText=function(text){
 	var width=GuiElements.measure.textWidth(TB.titleLabel);
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;
+	TB.titleText = text;
 	GuiElements.move.text(TB.titleLabel,x,y);
 	TitleBar.hideTextIfTooLarge(x, width);
 };
@@ -3940,6 +4045,8 @@ TitleBar.hideTextIfTooLarge = function(textX, textWidth){
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
 		}
+		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 	} else {
 		if(!TB.titleTextVisble) {
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
@@ -3960,25 +4067,21 @@ TitleBar.hideDebug = function(){
 	TitleBar.debugBn.remove();
 	TitleBar.debugBn = null;
 };
-TitleBar.updateZoom=function(){
-	var TB=TitleBar;
-	TB.width=GuiElements.width;
+TitleBar.updateZoomPart1 = function(){
+	TitleBar.setGraphicsPart1();
+};
+TitleBar.updateZoomPart2=function(){
+	let TB=TitleBar;
+	let viewShowing = TB.viewBn.toggled;
+	TB.setGraphicsPart2();
 	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
-	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
-	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
-	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
-	TB.viewMenu.updateZoom();
-	if(TB.debugBn!=null) {
-		TB.debugBn.move(TB.debugX, TB.buttonMargin);
-		TB.debugMenu.move();
+	TitleBar.removeButtons();
+	TitleBar.makeButtons();
+	if(viewShowing){
+		TB.viewBn.press();
+		TB.viewBn.release();
 	}
-	var width=GuiElements.measure.textWidth(TB.titleLabel);
-	var x=GuiElements.width/2-width/2;
-	var y=TB.height/2+TB.fontCharHeight/2;
-	GuiElements.move.text(TB.titleLabel,x,y);
-	TitleBar.hideTextIfTooLarge(x, width);
+	TitleBar.setText(TitleBar.titleText);
 };
 
 
@@ -3991,6 +4094,7 @@ function BlockPalette(){
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
+	BlockPalette.visible = true;
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.mainVMargin=10;
@@ -4025,27 +4129,26 @@ BlockPalette.setGraphics=function(){
 	BlockPalette.trashColor = Colors.white;
 };
 BlockPalette.updateZoom=function(){
-	var BP=BlockPalette;
-	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
+	let BP=BlockPalette;
+	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
-	var clipRect=BP.clippingPath.childNodes[0];
-	GuiElements.update.rect(clipRect,0,BP.y,BP.width,BP.height);
+	GuiElements.update.rect(BP.catRect,0,BP.catY,BP.width,BP.catH);
+	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
 	for(let i = 0; i < BlockPalette.categories.length; i++){
 		BlockPalette.categories[i].updateZoom();
 	}
 };
 BlockPalette.createCatBg=function(){
-	var BP=BlockPalette;
+	let BP=BlockPalette;
 	BP.catRect=GuiElements.draw.rect(0,BP.catY,BP.width,BP.catH,BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
 	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
-}
+};
 BlockPalette.createPalBg=function(){
-	var BP=BlockPalette;
+	let BP=BlockPalette;
 	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	//TouchReceiver.addListenersPalette(BP.palRect);
-	BP.clippingPath=GuiElements.clip(0,BP.y,BP.width,BP.height,GuiElements.layers.palette);
 };
 BlockPalette.createScrollSvg = function(){
 	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
@@ -4111,7 +4214,7 @@ BlockPalette.ShowTrash=function() {
 BlockPalette.HideTrash=function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
-		GuiElements.layers.trash.removeChild(BP.trash);
+		BP.trash.remove();
 		BP.trash = null;
 	}
 };
@@ -4375,9 +4478,6 @@ function Category(buttonX,buttonY,index){
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
 }
-Category.prototype.createDiv=function(){
-	return GuiElements.create.scrollDiv();
-}
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
 }
@@ -4546,6 +4646,7 @@ Category.prototype.hideDeviceDropDowns=function(deviceClass){
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;
+	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
@@ -6730,8 +6831,7 @@ DisplayBox.buildElements=function(){
 };
 DisplayBox.updateZoom=function(){
 	var DB=DisplayBox;
-	DB.rectY=GuiElements.height-DB.rectH-DB.screenMargin;
-	DB.rectW=GuiElements.width-2*DB.screenMargin;
+	DB.setGraphics();
 	var textW=GuiElements.measure.textWidth(DB.textE);
 	var textX=DB.rectX+DB.rectW/2-textW/2;
 	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
@@ -7355,11 +7455,14 @@ TabManager.setGraphics=function(){
 	TM.maxZoom = 3;
 
 	TM.tabAreaX=BlockPalette.width;
+	if(GuiElements.smallMode){
+		TM.tabAreaX=0;
+	}
 	TM.tabAreaY=TitleBar.height;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
+	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
 
 	/* No longer different from tabArea since tab bar was removed */
-	TM.tabSpaceX=BlockPalette.width;
+	TM.tabSpaceX=TM.tabAreaX;
 	TM.tabSpaceY=TitleBar.height;
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
@@ -7576,9 +7679,7 @@ TabManager.passRecursively=function(functionName){
 };
 TabManager.updateZoom=function(){
 	var TM=TabManager;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
+	TM.setGraphics();
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
 	TabManager.passRecursively("updateZoom");
 };
@@ -9096,6 +9197,9 @@ OverflowArrows.prototype.updateZoom=function(){
 OverflowArrows.prototype.setArrowPos=function(){
 	var OA = OverflowArrows;
 	this.left = BlockPalette.width;
+	if(!GuiElements.paletteLayersVisible) {
+		this.left = 0;
+	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
