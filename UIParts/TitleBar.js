@@ -73,6 +73,8 @@ TitleBar.makeButtons=function(){
 		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer,TB.bnIconH);
 		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
 		TB.showHideBn.build(GuiElements.paletteLayersVisible);
+	} else {
+		TB.showHideBn = null;
 	}
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
@@ -99,6 +101,7 @@ TitleBar.removeButtons = function(){
 	TB.viewBn.remove();
 	TB.hummingbirdBn.remove();
 	if(TB.debugBn != null) TB.debugBn.remove();
+	if(TB.showHideBn != null) TB.showHideBn.remove();
 	TB.deviceStatusLight.remove();
 };
 TitleBar.makeTitleText=function(){
@@ -118,7 +121,7 @@ TitleBar.setText=function(text){
 };
 TitleBar.hideTextIfTooLarge = function(textX, textWidth){
 	let TB=TitleBar;
-	if(textX < BlockPalette.width) {
+	if(!GuiElements.smallMode) {
 		if(TB.titleTextVisble) {
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
