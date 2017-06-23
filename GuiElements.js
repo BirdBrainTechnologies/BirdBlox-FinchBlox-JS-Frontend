@@ -78,6 +78,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
 	GuiElements.defaultZoomMultiple = 1;
+	GuiElements.smallModeThreshold = 620;
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
@@ -90,8 +91,12 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
+
+	GuiElements.paletteLayersVisible = true;
+	GuiElements.smallMode = false;
+	GuiElements.checkSmallMode();
 };
-/* Many classes have static functions which set constants such as font size, etc. 
+/* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
@@ -106,11 +111,12 @@ GuiElements.setConstants=function(){
 	Button.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
-	TitleBar.setGraphics();
+	TitleBar.setGraphicsPart1();
 	BlockGraphics();
 	Slot.setConstants();
 	Block.setConstants();
 	BlockPalette.setGraphics();
+	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
 	MenuBnList.setGraphics();
@@ -132,7 +138,7 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
-	SaveManager();
+	SaveManager.setConstants();
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
@@ -140,7 +146,7 @@ GuiElements.alert=function(message){
 		DebugOptions.blockLogging = true;
 	}
 	if(!DebugOptions.blockLogging) {
-		//debug.innerHTML = message; //The iPad app does not support alert dialogs
+		debug.innerHTML = message; //The iPad app does not support alert dialogs
 		//alert(message); //When debugging on a PC this function can be used.
 	}
 };
@@ -164,6 +170,7 @@ GuiElements.buildUI=function(){
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
+	SaveManager();
 	DebugOptions.applyActions();
 };
 /* Makes an SVG group element (<g>) for each layer of the interface.
@@ -230,7 +237,16 @@ GuiElements.create.group=function(x,y,parent){
 /* Creates a group, adds it to the main SVG, and returns it. */
 GuiElements.create.layer=function(depth){
 	DebugOptions.validateNumbers(depth);
-	return GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let layerG = GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let showHideLayer = GuiElements.create.group(0, 0, layerG);
+	let layer = {};
+	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
+	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
+	layer.hide = showHideLayer.remove.bind(showHideLayer);
+	layer.show = function(){
+		layerG.appendChild(showHideLayer);
+	};
+	return layer;
 };
 /* Creates a linear SVG gradient and adds it to the SVG defs.
  * @param {text} id - The id of the gradient (needed to reference it later).
@@ -860,20 +876,20 @@ GuiElements.updateZoom=function(){
 GuiElements.updateDimsPreview = function(newWidth, newHeight){
 	GuiElements.width=newWidth/GuiElements.zoomFactor;
 	GuiElements.height=newHeight/GuiElements.zoomFactor;
-	TabManager.updateZoom();
-	DisplayBox.updateZoom();
-	TitleBar.updateZoom();
-	BlockPalette.updateZoom();
-	GuiElements.updateDialogBlockZoom();
-	RowDialog.updateZoom();
+	GuiElements.passUpdateZoom();
 };
 GuiElements.updateDims = function(){
 	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
-	TabManager.updateZoom();
+	GuiElements.passUpdateZoom();
+};
+GuiElements.passUpdateZoom = function(){
+	GuiElements.checkSmallMode();
 	DisplayBox.updateZoom();
-	TitleBar.updateZoom();
+	TitleBar.updateZoomPart1();
 	BlockPalette.updateZoom();
+	TitleBar.updateZoomPart2();
+	TabManager.updateZoom();
 	GuiElements.updateDialogBlockZoom();
 	RowDialog.updateZoom();
 };
@@ -938,5 +954,44 @@ GuiElements.relToAbsX = function(x){
 GuiElements.relToAbsY = function(y){
 	return y * GuiElements.zoomFactor;
 };
-
-
+GuiElements.hidePaletteLayers = function(skipUpdate){
+	if(skipUpdate == null){
+		skipUpdate = false;
+	}
+	let GE = GuiElements;
+	if(GuiElements.paletteLayersVisible){
+		GuiElements.paletteLayersVisible = false;
+		GE.layers.paletteBG.hide();
+		GE.layers.paletteScroll.style.visibility = "hidden";
+		GE.layers.trash.hide();
+		GE.layers.catBg.hide();
+		GE.layers.categories.hide();
+		if(!skipUpdate) {
+			TabManager.updateZoom();
+		}
+	}
+};
+GuiElements.showPaletteLayers = function(skipUpdate){
+	let GE = GuiElements;
+	if(skipUpdate == null){
+		skipUpdate = false;
+	}
+	if(!GuiElements.paletteLayersVisible){
+		GuiElements.paletteLayersVisible = true;
+		GE.layers.paletteBG.show();
+		GE.layers.paletteScroll.style.visibility = "visible";
+		GE.layers.trash.show();
+		GE.layers.catBg.show();
+		GE.layers.categories.show();
+		if(!skipUpdate) {
+			TabManager.updateZoom();
+		}
+	}
+};
+GuiElements.checkSmallMode = function(){
+	let GE = GuiElements;
+	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
+	if(!GE.smallMode && !GE.paletteLayersVisible) {
+		GE.showPaletteLayers(true);
+	}
+};

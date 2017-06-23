@@ -63,7 +63,7 @@ CodeManager.move.start=function(block,x,y){
 		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
 		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
-		move.showTrash = !BlockPalette.IsStackOverPalette(x, y);
+		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
 		move.bottomOpen=stack.getLastBlock().bottomOpen;
@@ -95,7 +95,7 @@ CodeManager.move.update=function(x,y){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
+		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
 			if(move.showTrash) {
 				BlockPalette.ShowTrash();
@@ -124,7 +124,7 @@ CodeManager.move.end=function(){
 		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
-		if(BlockPalette.IsStackOverPalette(move.touchX, move.touchY)){
+		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
 			if(move.showTrash) {
 				SaveManager.markEdited();
@@ -135,6 +135,7 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
+
 				let snapSoundRequest = new HttpRequestBuilder("sound/play");
 				snapSoundRequest.addParam("type", Sound.type.ui);
 				snapSoundRequest.addParam("filename", Sound.click);

@@ -41,6 +41,7 @@ Button.prototype.buildBg=function(){
 	TouchReceiver.addListenersBN(this.bgRect,this);
 }
 Button.prototype.addText=function(text,font,size,weight,height){
+	DebugOptions.validateNonNull(text);
 	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
@@ -54,6 +55,7 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	if(height==null){
 		height=Button.defaultCharHeight;
 	}
+	DebugOptions.validateNumbers(size, height);
 	this.foregroundInverts = true;
 	
 	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);

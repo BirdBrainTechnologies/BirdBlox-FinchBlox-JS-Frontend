@@ -1,13 +1,21 @@
 function TitleBar(){
+	let TB=TitleBar;
+	TB.titleTextVisble = true;
+	TB.titleText = "";
 	TitleBar.createBar();
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
 }
-TitleBar.setGraphics=function(){
+TitleBar.setGraphicsPart1=function(){
 	var TB=TitleBar;
-	TB.height=54;
-	TB.buttonMargin=Button.defaultMargin;
-	TB.buttonW=64;
+	if(GuiElements.smallMode) {
+		TB.height = 44;
+		TB.buttonMargin=Button.defaultMargin / 2;
+	} else {
+		TB.height = 54;
+		TB.buttonMargin=Button.defaultMargin;
+	}
+	TB.buttonW = TB.height * 64 / 54;
 	TB.longButtonW=85;
 	TB.bnIconMargin=3;
 	TB.bg=Colors.black;
@@ -21,20 +29,28 @@ TitleBar.setGraphics=function(){
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
+	TB.shortButtonW = TB.buttonH;
+	TB.shortButtonW = TB.buttonW;
+
+	TB.width=GuiElements.width;
 };
-TitleBar.createBar=function(){
+TitleBar.setGraphicsPart2 = function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
 	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-
-	TB.fileBnX=TB.buttonMargin;
-	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
-
-	TB.hummingbirdBnX=BlockPalette.width-TB.buttonMargin-TB.buttonW;
-	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 
-	TB.width=GuiElements.width;
+	TB.fileBnX=TB.buttonMargin;
+	if(GuiElements.smallMode) {
+		TB.showBnX = TB.buttonMargin;
+		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
+	}
+	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
+	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
+	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+};
+TitleBar.createBar=function(){
+	var TB=TitleBar;
 	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
 };
@@ -50,8 +66,16 @@ TitleBar.makeButtons=function(){
 
 	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.hummingbirdBn.addImage(ImageLists.hBIcon,TB.bnIconH);
+	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
+
+	if(GuiElements.smallMode) {
+		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer,TB.bnIconH);
+		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
+		TB.showHideBn.build(GuiElements.paletteLayersVisible);
+	} else {
+		TB.showHideBn = null;
+	}
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
@@ -69,6 +93,17 @@ TitleBar.makeButtons=function(){
 	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
 	*/
 };
+TitleBar.removeButtons = function(){
+	let TB=TitleBar;
+	TB.flagBn.remove();
+	TB.stopBn.remove();
+	TB.fileBn.remove();
+	TB.viewBn.remove();
+	TB.hummingbirdBn.remove();
+	if(TB.debugBn != null) TB.debugBn.remove();
+	if(TB.showHideBn != null) TB.showHideBn.remove();
+	TB.deviceStatusLight.remove();
+};
 TitleBar.makeTitleText=function(){
 	var TB=TitleBar;
 	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
@@ -76,11 +111,28 @@ TitleBar.makeTitleText=function(){
 };
 TitleBar.setText=function(text){
 	var TB=TitleBar;
-	GuiElements.update.text(TB.titleLabel,text);
-	var width=GuiElements.measure.textWidth(TB.titleLabel);
-	var x=GuiElements.width/2-width/2;
-	var y=TB.height/2+TB.fontCharHeight/2;
-	GuiElements.move.text(TB.titleLabel,x,y);
+	TB.titleText = text;
+	TitleBar.updateText();
+};
+TitleBar.updateText = function(){
+	let TB=TitleBar;
+	if(GuiElements.width < BlockPalette.width * 2) {
+		if(TB.titleTextVisble) {
+			TB.titleLabel.remove();
+			TB.titleTextVisble = false;
+		}
+	} else {
+		if(!TB.titleTextVisble) {
+			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
+			TB.titleTextVisble = true;
+		}
+		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
+		let width=GuiElements.measure.textWidth(TB.titleLabel);
+		let x=GuiElements.width/2-width/2;
+		let y=TB.height/2+TB.fontCharHeight/2;
+		GuiElements.move.text(TB.titleLabel,x,y);
+	}
 };
 TitleBar.enableDebug=function(){
 	var TB=TitleBar;
@@ -95,22 +147,19 @@ TitleBar.hideDebug = function(){
 	TitleBar.debugBn.remove();
 	TitleBar.debugBn = null;
 };
-TitleBar.updateZoom=function(){
-	var TB=TitleBar;
-	TB.width=GuiElements.width;
+TitleBar.updateZoomPart1 = function(){
+	TitleBar.setGraphicsPart1();
+};
+TitleBar.updateZoomPart2=function(){
+	let TB=TitleBar;
+	let viewShowing = TB.viewBn.toggled;
+	TB.setGraphicsPart2();
 	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
-	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
-	TB.stopBn.move(TB.stopBnX,TB.buttonMargin);
-	TB.flagBn.move(TB.flagBnX,TB.buttonMargin);
-	TB.viewMenu.updateZoom();
-	if(TB.debugBn!=null) {
-		TB.debugBn.move(TB.debugX, TB.buttonMargin);
-		TB.debugMenu.move();
+	TitleBar.removeButtons();
+	TitleBar.makeButtons();
+	if(viewShowing){
+		TB.viewBn.press();
+		TB.viewBn.release();
 	}
-	var width=GuiElements.measure.textWidth(TB.titleLabel);
-	var x=GuiElements.width/2-width/2;
-	var y=TB.height/2+TB.fontCharHeight/2;
-	GuiElements.move.text(TB.titleLabel,x,y);
+	TB.updateText();
 };

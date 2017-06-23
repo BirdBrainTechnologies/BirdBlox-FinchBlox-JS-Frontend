@@ -11,6 +11,10 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.index = index;
 	this.deviceClass = deviceClass;
 	this.visible = false;
+	this.robotId = null;
+	if(index != null){
+		this.robotId = this.deviceClass.getManager().getDevice(index);
+	}
 }
 RobotConnectionList.setConstants = function(){
 	let RCL=RobotConnectionList;
@@ -42,17 +46,16 @@ RobotConnectionList.prototype.discoverRobots=function(){
 		me.updateRobotList(response);
 	},function(){
 		if(DiscoverDialog.allowVirtualDevices){
-			me.updateRobotList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
+			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
 		}
 	});
 };
-RobotConnectionList.prototype.updateRobotList=function(newRobots){
+RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	const RCL = RobotConnectionList;
 	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
-	let robotArray = Device.fromJsonArrayString(this.deviceClass, newRobots);
 	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();

@@ -33,9 +33,6 @@ function Category(buttonX,buttonY,index){
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
 }
-Category.prototype.createDiv=function(){
-	return GuiElements.create.scrollDiv();
-}
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
 }
@@ -204,6 +201,7 @@ Category.prototype.hideDeviceDropDowns=function(deviceClass){
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;
+	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };

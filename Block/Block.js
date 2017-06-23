@@ -556,6 +556,7 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	}
 	if(this.stack!=null) {
 		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		this.stack.tab.updateArrows();
 	}
 };
 /**

@@ -86,9 +86,37 @@ DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 };
-DeviceManager.prototype.discover = function(callbackFn, callbackErr){
+DeviceManager.prototype.lookupRobotIndexById = function(id){
+	for(let i = 0; i < this.connectedDevices.length; i++){
+		if(this.connectedDevices[i].id === id){
+			return i;
+		}
+	}
+	return -1;
+};
+DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeId){
+	if(includeConnected == null){
+		includeConnected = false;
+	}
+	if(excludeId == null){
+		excludeId = null;
+	}
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		if(callbackFn == null) return;
+		let robotList = Device.fromJsonArrayString(this.deviceClass, response);
+		let disconnectedRobotsList = [];
+		robotList.forEach(function(robot){
+			let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+			if(connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id))
+				disconnectedRobotsList.push(robot);
+		}.bind(this));
+		let newList = disconnectedRobotsList;
+		if(includeConnected){
+			newList = this.connectedDevices.concat(robotList);
+		}
+		callbackFn(newList);
+	}.bind(this), callbackErr);
 };
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
@@ -98,4 +126,14 @@ DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
 		deviceType.getManager().updateSelectableDevices();
 	});
+};
+DeviceManager.prototype.getVirtualRobotList = function(){
+	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
+	let obj1 = {};
+	let obj2 = {};
+	obj1.name = prefix + "1";
+	obj2.name = prefix + "2";
+	obj1.id = "virtualDevice1";
+	obj2.id = "virtualDevice2";
+	return [obj1, obj2];
 };
