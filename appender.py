@@ -37,6 +37,13 @@ def concat_js():
     target.write(use_strict)
     target.write("\n")
     for path in paths:
-        target.write(open(path, "r").read().replace(use_strict, ""))
+        target.write(clean_file(open(path, "r").read()))
         target.write("\n")
+        
+def clean_file(file):
+    use_strict = "\"use strict\";"
+    file = file.replace(use_strict, "")
+    file = file.replace("DO.mouse = true;", "DO.mouse = false;")
+    return file
+
 concat_js()

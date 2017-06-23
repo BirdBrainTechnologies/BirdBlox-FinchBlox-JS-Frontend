@@ -70,31 +70,10 @@ TitleBar.makeButtons=function(){
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
 
 	if(GuiElements.smallMode) {
-		TB.showBn = new Button(TB.showBnX, TB.buttonMargin, TB.shortButtonW, TB.buttonH, TBLayer);
-		TB.showBn.addText("Show");
-		TB.showBn.setCallbackFunction(function () {
-			GuiElements.showPaletteLayers();
-		}, false);
-		TB.showBn.setCallbackFunction(function () {
-			TB.showBn.hide();
-			TB.hideBn.show();
-		}, true);
-		TB.hideBn = new Button(TB.showBnX, TB.buttonMargin, TB.shortButtonW, TB.buttonH, TBLayer);
-		TB.hideBn.addText("Hide");
-		TB.hideBn.setCallbackFunction(function () {
-			GuiElements.hidePaletteLayers();
-		}, false);
-		TB.hideBn.setCallbackFunction(function () {
-			TB.hideBn.hide();
-			TB.showBn.show();
-		}, true);
-		if(GuiElements.paletteLayersVisible){
-			TB.showBn.hide();
-		} else {
-			TB.hideBn.hide();
-		}
+		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer,TB.bnIconH);
+		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
+		TB.showHideBn.build(GuiElements.paletteLayersVisible);
 	}
-
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
