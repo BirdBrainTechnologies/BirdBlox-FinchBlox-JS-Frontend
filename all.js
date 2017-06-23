@@ -4030,17 +4030,17 @@ TitleBar.setText=function(text){
 };
 TitleBar.hideTextIfTooLarge = function(textX, textWidth){
 	let TB=TitleBar;
-	if(!GuiElements.smallMode) {
+	if(GuiElements.smallMode) {
 		if(TB.titleTextVisble) {
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
 		}
-		let maxWidth = GuiElements.width - BlockPalette.width * 2;
-		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 	} else {
 		if(!TB.titleTextVisble) {
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
+			let maxWidth = GuiElements.width - BlockPalette.width * 2;
+			GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		}
 	}
 };

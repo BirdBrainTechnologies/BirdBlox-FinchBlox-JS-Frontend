@@ -45,8 +45,8 @@
       <file leaf-file-name="TitleBar.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="604">
-              <caret line="125" column="35" lean-forward="true" selection-start-line="125" selection-start-column="35" selection-end-line="125" selection-end-column="35" />
+            <state relative-caret-position="562">
+              <caret line="123" column="7" lean-forward="false" selection-start-line="123" selection-start-column="7" selection-end-line="123" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -993,7 +993,7 @@
       <workItem from="1497878242640" duration="15969000" />
       <workItem from="1497977565585" duration="651000" />
       <workItem from="1498051937872" duration="16885000" />
-      <workItem from="1498223662619" duration="25157000" />
+      <workItem from="1498223662619" duration="25239000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1090,7 +1090,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1026475000" />
+    <option name="totallyTimeSpent" value="1026557000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -2310,8 +2310,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="604">
-          <caret line="125" column="35" lean-forward="true" selection-start-line="125" selection-start-column="35" selection-end-line="125" selection-end-column="35" />
+        <state relative-caret-position="562">
+          <caret line="123" column="7" lean-forward="false" selection-start-line="123" selection-start-column="7" selection-end-line="123" selection-end-column="7" />
           <folding />
         </state>
       </provider>
