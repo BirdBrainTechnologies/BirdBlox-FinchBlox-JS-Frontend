@@ -5,12 +5,13 @@
 "use strict";
 
 function DiscoverDialog(deviceClass){
+	let DD = DiscoverDialog;
 	let title = "Connect " + deviceClass.getDeviceTypeName(false);
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
 	this.discoveredDevices = [];
-	this.timerSet = false;
+	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
 	this.addHintText(deviceClass.getConnectionInstructions());
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
@@ -22,9 +23,8 @@ DiscoverDialog.setConstants = function(){
 DiscoverDialog.prototype.show = function(){
 	var DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
-	if(!this.timerSet) {
-		this.timerSet = true;
-		this.updateTimer = self.setInterval(this.discoverDevices.bind(this), DD.updateInterval);
+	if(!this.updateTimer.isRunning()) {
+		this.updateTimer.start();
 		this.discoverDevices();
 	}
 };
@@ -32,15 +32,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
 	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
 		if(DiscoverDialog.allowVirtualDevices) {
-			let prefix = "Virtual " + me.deviceClass.getDeviceTypeName(true) + " ";
-			let obj1 = {};
-			let obj2 = {};
-			obj1.name = prefix + "1";
-			obj2.name = prefix + "2";
-			obj1.id = "virtualDevice1";
-			obj2.id = "virtualDevice2";
-			let arr = [obj1, obj2];
-			me.updateDeviceList(JSON.stringify(arr));
+			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
 		}
 	});
 };
@@ -48,7 +40,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
+	this.discoveredDevices = deviceList;
 	this.reloadRows(this.discoveredDevices.length);
 
 };
@@ -69,7 +61,7 @@ DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	if(this.timerSet) {
 		this.timerSet = false;
-		this.updateTimer = window.clearInterval(this.updateTimer);
+		this.updateTimer.stop();
 	}
 	this.deviceClass.getManager().stopDiscover();
 };

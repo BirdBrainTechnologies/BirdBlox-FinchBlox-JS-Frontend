@@ -1,13 +1,17 @@
 function SaveManager(){
-	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
-	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.newFileName = "new program";
 	SaveManager.saving = false;
 	SaveManager.fileName = null;
 	SaveManager.named = false;
-
+	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
+	SaveManager.autoSaveTimer.start();
 	SaveManager.getCurrentDoc();
 }
+SaveManager.setConstants = function(){
+	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+	SaveManager.newFileName = "new program";
+	SaveManager.autoSaveInterval = 100;
+};
 
 SaveManager.openBlank = function(nextAction){
 	SaveManager.saveCurrentDoc(true);
@@ -309,7 +313,11 @@ SaveManager.getCurrentDoc = function(){
 		checkProgress();
 	});
 };
-
+SaveManager.autoSave = function(){
+	if(SaveManager.fileName != null) {
+		SaveManager.forceSave();
+	}
+};
 
 
 SaveManager.import=function(fileName){

@@ -132,7 +132,7 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
-	SaveManager();
+	SaveManager.setConstants();
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
@@ -164,6 +164,7 @@ GuiElements.buildUI=function(){
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
+	SaveManager();
 	DebugOptions.applyActions();
 };
 /* Makes an SVG group element (<g>) for each layer of the interface.

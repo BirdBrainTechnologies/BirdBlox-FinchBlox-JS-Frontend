@@ -4,7 +4,7 @@ var FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -619,6 +619,31 @@ ExecutionStatusRunning.constructor = ExecutionStatus;
 ExecutionStatusRunning.prototype.isRunning = function(){
 	return true;
 };
+/**
+ * Created by Tom on 6/23/2017.
+ */
+function Timer(interval, callbackFn){
+	this.interval = interval;
+	this.callbackFn = callbackFn;
+	this.updateTimer = null;
+}
+Timer.prototype.start = function(){
+	if(this.updateTimer == null) {
+		this.updateTimer = self.setInterval(this.tick.bind(this), this.interval);
+	}
+};
+Timer.prototype.stop = function(){
+	if(this.updateTimer != null){
+		this.updateTimer = window.clearInterval(this.updateTimer);
+		this.updateTimer = null;
+	}
+};
+Timer.prototype.tick = function(){
+	if(this.callbackFn != null) this.callbackFn();
+};
+Timer.prototype.isRunning = function(){
+	return this.updateTimer != null;
+};
 function Variable(name, data){
 	this.name=name;
 	this.data=data;
@@ -996,9 +1021,37 @@ DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 };
-DeviceManager.prototype.discover = function(callbackFn, callbackErr){
+DeviceManager.prototype.lookupRobotIndexById = function(id){
+	for(let i = 0; i < this.connectedDevices.length; i++){
+		if(this.connectedDevices[i].id === id){
+			return i;
+		}
+	}
+	return -1;
+};
+DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeId){
+	if(includeConnected == null){
+		includeConnected = false;
+	}
+	if(excludeId == null){
+		excludeId = null;
+	}
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		if(callbackFn == null) return;
+		let robotList = Device.fromJsonArrayString(this.deviceClass, response);
+		let disconnectedRobotsList = [];
+		robotList.forEach(function(robot){
+			let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+			if(connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id))
+				disconnectedRobotsList.push(robot);
+		}.bind(this));
+		let newList = disconnectedRobotsList;
+		if(includeConnected){
+			newList = this.connectedDevices.concat(robotList);
+		}
+		callbackFn(newList);
+	}.bind(this), callbackErr);
 };
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
@@ -1008,6 +1061,16 @@ DeviceManager.updateSelectableDevices = function(){
 	Device.getTypeList().forEach(function(deviceType){
 		deviceType.getManager().updateSelectableDevices();
 	});
+};
+DeviceManager.prototype.getVirtualRobotList = function(){
+	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
+	let obj1 = {};
+	let obj2 = {};
+	obj1.name = prefix + "1";
+	obj2.name = prefix + "2";
+	obj1.id = "virtualDevice1";
+	obj2.id = "virtualDevice2";
+	return [obj1, obj2];
 };
 /**
  * Created by Tom on 6/14/2017.
@@ -1172,7 +1235,7 @@ GuiElements.setConstants=function(){
 	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
-	SaveManager();
+	SaveManager.setConstants();
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
@@ -1204,6 +1267,7 @@ GuiElements.buildUI=function(){
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
+	SaveManager();
 	DebugOptions.applyActions();
 };
 /* Makes an SVG group element (<g>) for each layer of the interface.
@@ -4506,6 +4570,7 @@ Button.prototype.buildBg=function(){
 	TouchReceiver.addListenersBN(this.bgRect,this);
 }
 Button.prototype.addText=function(text,font,size,weight,height){
+	DebugOptions.validateNonNull(text);
 	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
@@ -4519,6 +4584,7 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	if(height==null){
 		height=Button.defaultCharHeight;
 	}
+	DebugOptions.validateNumbers(size, height);
 	this.foregroundInverts = true;
 	
 	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
@@ -8786,6 +8852,10 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.index = index;
 	this.deviceClass = deviceClass;
 	this.visible = false;
+	this.robotId = null;
+	if(index != null){
+		this.robotId = this.deviceClass.getManager().getDevice(index);
+	}
 }
 RobotConnectionList.setConstants = function(){
 	let RCL=RobotConnectionList;
@@ -8817,17 +8887,16 @@ RobotConnectionList.prototype.discoverRobots=function(){
 		me.updateRobotList(response);
 	},function(){
 		if(DiscoverDialog.allowVirtualDevices){
-			me.updateRobotList('[{"id":"Virtual HB1"},{"id":"Virtual HB2"}]');
+			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
 		}
 	});
 };
-RobotConnectionList.prototype.updateRobotList=function(newRobots){
+RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	const RCL = RobotConnectionList;
 	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
-	let robotArray = Device.fromJsonArrayString(this.deviceClass, newRobots);
 	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();
@@ -8877,12 +8946,13 @@ RobotConnectionList.prototype.relToAbsY = function(y){
 
 
 function DiscoverDialog(deviceClass){
+	let DD = DiscoverDialog;
 	let title = "Connect " + deviceClass.getDeviceTypeName(false);
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
 	this.discoveredDevices = [];
-	this.timerSet = false;
+	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
 	this.addHintText(deviceClass.getConnectionInstructions());
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
@@ -8894,9 +8964,8 @@ DiscoverDialog.setConstants = function(){
 DiscoverDialog.prototype.show = function(){
 	var DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
-	if(!this.timerSet) {
-		this.timerSet = true;
-		this.updateTimer = self.setInterval(this.discoverDevices.bind(this), DD.updateInterval);
+	if(!this.updateTimer.isRunning()) {
+		this.updateTimer.start();
 		this.discoverDevices();
 	}
 };
@@ -8904,15 +8973,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
 	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
 		if(DiscoverDialog.allowVirtualDevices) {
-			let prefix = "Virtual " + me.deviceClass.getDeviceTypeName(true) + " ";
-			let obj1 = {};
-			let obj2 = {};
-			obj1.name = prefix + "1";
-			obj2.name = prefix + "2";
-			obj1.id = "virtualDevice1";
-			obj2.id = "virtualDevice2";
-			let arr = [obj1, obj2];
-			me.updateDeviceList(JSON.stringify(arr));
+			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
 		}
 	});
 };
@@ -8920,7 +8981,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	this.discoveredDevices = Device.fromJsonArrayString(this.deviceClass, deviceList);
+	this.discoveredDevices = deviceList;
 	this.reloadRows(this.discoveredDevices.length);
 
 };
@@ -8941,7 +9002,7 @@ DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	if(this.timerSet) {
 		this.timerSet = false;
-		this.updateTimer = window.clearInterval(this.updateTimer);
+		this.updateTimer.stop();
 	}
 	this.deviceClass.getManager().stopDiscover();
 };
@@ -9670,7 +9731,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Started');
+				callbackFn('[]');
 			}
 		}, 20);
 		return;
@@ -10072,15 +10133,19 @@ XmlWriter.findNodeByKey = function(nodes, key){
 	return null;
 };
 function SaveManager(){
-	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
-	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.newFileName = "new program";
 	SaveManager.saving = false;
 	SaveManager.fileName = null;
 	SaveManager.named = false;
-
+	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
+	SaveManager.autoSaveTimer.start();
 	SaveManager.getCurrentDoc();
 }
+SaveManager.setConstants = function(){
+	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+	SaveManager.newFileName = "new program";
+	SaveManager.autoSaveInterval = 100;
+};
 
 SaveManager.openBlank = function(nextAction){
 	SaveManager.saveCurrentDoc(true);
@@ -10382,7 +10447,11 @@ SaveManager.getCurrentDoc = function(){
 		checkProgress();
 	});
 };
-
+SaveManager.autoSave = function(){
+	if(SaveManager.fileName != null) {
+		SaveManager.forceSave();
+	}
+};
 
 
 SaveManager.import=function(fileName){
