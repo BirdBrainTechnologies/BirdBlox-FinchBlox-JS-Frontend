@@ -4191,9 +4191,10 @@ BlockPalette.selectFirstCat=function(){
 BlockPalette.getAbsY=function(){
 	return TitleBar.height+BlockPalette.catH;
 }*/
-BlockPalette.IsStackOverPalette=function(x,y){
+BlockPalette.isStackOverPalette=function(x,y){
+	if(!GuiElements.paletteLayersVisible) return false;
 	return CodeManager.move.pInRange(x,y,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
-}
+};
 BlockPalette.ShowTrash=function() {
 	let BP = BlockPalette;
 	if (!BP.trash) {
@@ -6929,7 +6930,7 @@ CodeManager.move.start=function(block,x,y){
 		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
 		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
-		move.showTrash = !BlockPalette.IsStackOverPalette(x, y);
+		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
 		move.bottomOpen=stack.getLastBlock().bottomOpen;
@@ -6961,7 +6962,7 @@ CodeManager.move.update=function(x,y){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if (BlockPalette.IsStackOverPalette(move.touchX, move.touchY)) {
+		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
 			if(move.showTrash) {
 				BlockPalette.ShowTrash();
@@ -6990,7 +6991,7 @@ CodeManager.move.end=function(){
 		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
-		if(BlockPalette.IsStackOverPalette(move.touchX, move.touchY)){
+		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
 			if(move.showTrash) {
 				SaveManager.markEdited();
@@ -7001,6 +7002,7 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
+
 				let snapSoundRequest = new HttpRequestBuilder("sound/play");
 				snapSoundRequest.addParam("type", Sound.type.ui);
 				snapSoundRequest.addParam("filename", Sound.click);
@@ -9415,8 +9417,8 @@ BlockStack.prototype.stop=function(){
 BlockStack.prototype.updateRun=function(){
 	if(this.isRunning){
 		//Different procedures are used if the Block returns a value.
-		if(this.returnType==Block.returnTypes.none){
-			if(this.currentBlock.stack!=this){ //If the current Block has been removed, don't run it.
+		if(this.returnType===Block.returnTypes.none){
+			if(this.currentBlock.stack!==this){ //If the current Block has been removed, don't run it.
 				this.endRun(); //Stop execution.
 				return new ExecutionStatusDone();
 			}
@@ -11167,6 +11169,7 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	}
 	if(this.stack!=null) {
 		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		this.stack.tab.updateArrows();
 	}
 };
 /**

@@ -106,9 +106,10 @@ BlockPalette.selectFirstCat=function(){
 BlockPalette.getAbsY=function(){
 	return TitleBar.height+BlockPalette.catH;
 }*/
-BlockPalette.IsStackOverPalette=function(x,y){
+BlockPalette.isStackOverPalette=function(x,y){
+	if(!GuiElements.paletteLayersVisible) return false;
 	return CodeManager.move.pInRange(x,y,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
-}
+};
 BlockPalette.ShowTrash=function() {
 	let BP = BlockPalette;
 	if (!BP.trash) {

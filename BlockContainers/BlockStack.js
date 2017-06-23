@@ -202,8 +202,8 @@ BlockStack.prototype.stop=function(){
 BlockStack.prototype.updateRun=function(){
 	if(this.isRunning){
 		//Different procedures are used if the Block returns a value.
-		if(this.returnType==Block.returnTypes.none){
-			if(this.currentBlock.stack!=this){ //If the current Block has been removed, don't run it.
+		if(this.returnType===Block.returnTypes.none){
+			if(this.currentBlock.stack!==this){ //If the current Block has been removed, don't run it.
 				this.endRun(); //Stop execution.
 				return new ExecutionStatusDone();
 			}
