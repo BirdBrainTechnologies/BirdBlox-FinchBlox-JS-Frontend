@@ -87,7 +87,7 @@ TitleBar.setText=function(text){
 };
 TitleBar.hideTextIfTooLarge = function(textX, textWidth){
 	let TB=TitleBar;
-	if(x < BlockPalette.width) {
+	if(textX < BlockPalette.width) {
 		if(TB.titleTextVisble) {
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
