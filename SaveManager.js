@@ -190,7 +190,7 @@ SaveManager.loadFile=function(xmlString) {
 };
 SaveManager.userDuplicate = function(){
 	if(SaveManager.fileName == null) return;
-	SaveManager.forceSave(function(){
+	SaveManager.saveAndName("Please name this file before duplicating it", function(){
 		SaveManager.promptDuplicate("Enter name for duplicate file");
 	});
 };
