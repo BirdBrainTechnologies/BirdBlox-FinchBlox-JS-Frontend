@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SVGIcons/VectorPaths.js" afterPath="$PROJECT_DIR$/SVGIcons/VectorPaths.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TitleBar.js" afterPath="$PROJECT_DIR$/UIParts/TitleBar.js" />
     </list>
     <ignored path="Git.iws" />
@@ -386,8 +385,8 @@
       <file leaf-file-name="TitleBar.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="457">
-              <caret line="52" column="48" lean-forward="false" selection-start-line="52" selection-start-column="48" selection-end-line="52" selection-end-column="48" />
+            <state relative-caret-position="585">
+              <caret line="107" column="49" lean-forward="true" selection-start-line="107" selection-start-column="49" selection-end-line="107" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -414,7 +413,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.hide</find>
       <find>stop</find>
       <find>hide</find>
       <find>reloadRows</find>
@@ -444,6 +442,7 @@
       <find>.alert=f</find>
       <find>function(){};</find>
       <find>before</find>
+      <find>titleLabel</find>
     </findStrings>
     <replaceStrings>
       <replace>Sound</replace>
@@ -1060,7 +1059,7 @@
       <workItem from="1497878242640" duration="15969000" />
       <workItem from="1497977565585" duration="651000" />
       <workItem from="1498051937872" duration="16885000" />
-      <workItem from="1498223662619" duration="6529000" />
+      <workItem from="1498223662619" duration="7602000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1157,7 +1156,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1007847000" />
+    <option name="totallyTimeSpent" value="1008920000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1883,14 +1882,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="6" column="20" lean-forward="false" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/SVGIcons/VectorPaths.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="882">
@@ -1899,10 +1890,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="6" column="20" lean-forward="false" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="457">
-          <caret line="52" column="48" lean-forward="false" selection-start-line="52" selection-start-column="48" selection-end-line="52" selection-end-column="48" />
+        <state relative-caret-position="585">
+          <caret line="107" column="49" lean-forward="true" selection-start-line="107" selection-start-column="49" selection-end-line="107" selection-end-column="49" />
           <folding />
         </state>
       </provider>

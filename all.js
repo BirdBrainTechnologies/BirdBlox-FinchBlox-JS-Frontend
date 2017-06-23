@@ -3847,6 +3847,8 @@ TouchReceiver.setInitialScrollFix = function(div) {
 	}
 };
 function TitleBar(){
+	let TB=TitleBar;
+	TB.titleTextVisble = true;
 	TitleBar.createBar();
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
@@ -3929,6 +3931,21 @@ TitleBar.setText=function(text){
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;
 	GuiElements.move.text(TB.titleLabel,x,y);
+	TitleBar.hideTextIfTooLarge(x, width);
+};
+TitleBar.hideTextIfTooLarge = function(textX, textWidth){
+	let TB=TitleBar;
+	if(x < BlockPalette.width) {
+		if(TB.titleTextVisble) {
+			TB.titleLabel.remove();
+			TB.titleTextVisble = false;
+		}
+	} else {
+		if(!TB.titleTextVisble) {
+			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
+			TB.titleTextVisble = true;
+		}
+	}
 };
 TitleBar.enableDebug=function(){
 	var TB=TitleBar;
@@ -3961,6 +3978,7 @@ TitleBar.updateZoom=function(){
 	var x=GuiElements.width/2-width/2;
 	var y=TB.height/2+TB.fontCharHeight/2;
 	GuiElements.move.text(TB.titleLabel,x,y);
+	TitleBar.hideTextIfTooLarge(x, width);
 };
 
 
