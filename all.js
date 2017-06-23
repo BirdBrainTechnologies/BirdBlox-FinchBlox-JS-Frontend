@@ -4020,15 +4020,10 @@ TitleBar.makeTitleText=function(){
 };
 TitleBar.setText=function(text){
 	var TB=TitleBar;
-	GuiElements.update.text(TB.titleLabel,text);
-	var width=GuiElements.measure.textWidth(TB.titleLabel);
-	var x=GuiElements.width/2-width/2;
-	var y=TB.height/2+TB.fontCharHeight/2;
 	TB.titleText = text;
-	GuiElements.move.text(TB.titleLabel,x,y);
-	TitleBar.hideTextIfTooLarge(x, width);
+	TitleBar.updateText();
 };
-TitleBar.hideTextIfTooLarge = function(textX, textWidth){
+TitleBar.updateText = function(){
 	let TB=TitleBar;
 	if(GuiElements.smallMode) {
 		if(TB.titleTextVisble) {
@@ -4039,9 +4034,13 @@ TitleBar.hideTextIfTooLarge = function(textX, textWidth){
 		if(!TB.titleTextVisble) {
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
-			let maxWidth = GuiElements.width - BlockPalette.width * 2;
-			GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		}
+		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
+		let width=GuiElements.measure.textWidth(TB.titleLabel);
+		let x=GuiElements.width/2-width/2;
+		let y=TB.height/2+TB.fontCharHeight/2;
+		GuiElements.move.text(TB.titleLabel,x,y);
 	}
 };
 TitleBar.enableDebug=function(){
@@ -9910,7 +9909,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('[]');
+				callbackFn('Test');
 			}
 		}, 20);
 		return;
