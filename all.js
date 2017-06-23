@@ -10144,7 +10144,7 @@ SaveManager.setConstants = function(){
 	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.newFileName = "new program";
-	SaveManager.autoSaveInterval = 100;
+	SaveManager.autoSaveInterval = 1000 * 15;
 };
 
 SaveManager.openBlank = function(nextAction){
