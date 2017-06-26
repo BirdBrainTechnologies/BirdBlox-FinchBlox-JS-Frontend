@@ -17,7 +17,7 @@ DeviceManager.setStatics = function(){
 	statuses.connected = 1;
 	statuses.noDevices = 2;
 	DM.totalStatus = statuses.noDevices;
-	DM.statusListeners = new Set();
+	DM.statusListener = null;
 };
 DeviceManager.setStatics();
 DeviceManager.prototype.getDeviceCount = function() {
@@ -183,9 +183,7 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;
 	let totalStatus = DM.getStatus();
-	DM.statusListeners.forEach(function(object){
-		object.updateStatus(totalStatus);
-	});
+	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
 	return totalStatus;
 };
 DeviceManager.getStatus = function(){
@@ -205,9 +203,6 @@ DeviceManager.forEach = function(callbackFn){
 		callbackFn(deviceType.getManager());
 	});
 };
-DeviceManager.addStatusListener = function(object){
-	DeviceManager.statusListeners.add(object);
-};
-DeviceManager.removeStatusListener = function(object){
-	DeviceManager.statusListeners.delete(object);
+DeviceManager.setStatusListener = function(object){
+	DeviceManager.statusListener = object;
 };

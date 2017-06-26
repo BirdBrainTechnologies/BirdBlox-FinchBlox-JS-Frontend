@@ -833,7 +833,7 @@ function Device(name, id){
 	this.name = name;
 	this.id = id;
 	this.status = DeviceManager.statuses.disconnected;
-	this.statusListeners = new Set();
+	this.statusListener = null;
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -875,19 +875,14 @@ Device.prototype.connect = function(){
 };
 Device.prototype.setStatus = function(status){
 	this.status = status;
-	this.statusListeners.forEach(function(object){
-		object.updateStatus(this.status);
-	}.bind(this));
+	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
 	DeviceManager.updateStatus();
 };
 Device.prototype.getStatus = function(){
 	return this.status;
 };
-Device.prototype.addStatusListener = function(object){
-	this.statusListeners.add(object);
-};
-Device.prototype.removeStatusListener = function(object){
-	this.statusListeners.delete(object);
+Device.prototype.setStatusListener = function(object){
+	this.statusListener = object;
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
@@ -973,7 +968,7 @@ DeviceManager.setStatics = function(){
 	statuses.connected = 1;
 	statuses.noDevices = 2;
 	DM.totalStatus = statuses.noDevices;
-	DM.statusListeners = new Set();
+	DM.statusListener = null;
 };
 DeviceManager.setStatics();
 DeviceManager.prototype.getDeviceCount = function() {
@@ -1139,9 +1134,7 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;
 	let totalStatus = DM.getStatus();
-	DM.statusListeners.forEach(function(object){
-		object.updateStatus(totalStatus);
-	});
+	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
 	return totalStatus;
 };
 DeviceManager.getStatus = function(){
@@ -1161,11 +1154,8 @@ DeviceManager.forEach = function(callbackFn){
 		callbackFn(deviceType.getManager());
 	});
 };
-DeviceManager.addStatusListener = function(object){
-	DeviceManager.statusListeners.add(object);
-};
-DeviceManager.removeStatusListener = function(object){
-	DeviceManager.statusListeners.delete(object);
+DeviceManager.setStatusListener = function(object){
+	DeviceManager.statusListener = object;
 };
 /**
  * Created by Tom on 6/14/2017.
@@ -5094,7 +5084,7 @@ function DeviceStatusLight(x,centerY,parent,statusProvider){
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	this.statusProvider = statusProvider;
-	this.statusProvider.addStatusListener(this);
+	this.statusProvider.setStatusListener(this);
 	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
@@ -9312,10 +9302,7 @@ DiscoverDialog.prototype.selectDevice = function(device){
 };
 DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
-	if(this.timerSet) {
-		this.timerSet = false;
-		this.updateTimer.stop();
-	}
+	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
 function OverflowArrows(){

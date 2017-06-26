@@ -7,7 +7,7 @@ function DeviceStatusLight(x,centerY,parent,statusProvider){
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	this.statusProvider = statusProvider;
-	this.statusProvider.addStatusListener(this);
+	this.statusProvider.setStatusListener(this);
 	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){

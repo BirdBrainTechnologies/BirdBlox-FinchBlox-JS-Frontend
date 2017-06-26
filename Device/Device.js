@@ -5,7 +5,7 @@ function Device(name, id){
 	this.name = name;
 	this.id = id;
 	this.status = DeviceManager.statuses.disconnected;
-	this.statusListeners = new Set();
+	this.statusListener = null;
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -47,19 +47,14 @@ Device.prototype.connect = function(){
 };
 Device.prototype.setStatus = function(status){
 	this.status = status;
-	this.statusListeners.forEach(function(object){
-		object.updateStatus(this.status);
-	}.bind(this));
+	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
 	DeviceManager.updateStatus();
 };
 Device.prototype.getStatus = function(){
 	return this.status;
 };
-Device.prototype.addStatusListener = function(object){
-	this.statusListeners.add(object);
-};
-Device.prototype.removeStatusListener = function(object){
-	this.statusListeners.delete(object);
+Device.prototype.setStatusListener = function(object){
+	this.statusListener = object;
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
