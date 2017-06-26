@@ -54,11 +54,11 @@ Device.fromJsonArray = function(deviceClass, json){
 	return res;
 };
 Device.fromJsonArrayString = function(deviceClass, deviceList){
-	let json = "[]";
+	let json = [];
 	try{
 		json = JSON.parse(deviceList);
 	} catch(e) {
-
+		json = [];
 	}
 	let list = Device.fromJsonArray(deviceClass, json);
 	if(DiscoverDialog.allowVirtualDevices){

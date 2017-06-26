@@ -14,7 +14,6 @@ function GuiElements(){
 	GuiElements.loadInitialSettings(function(){
 		GuiElements.setConstants();
 		GuiElements.createLayers();
-		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 		GuiElements.dialogBlock=null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
@@ -160,6 +159,7 @@ GuiElements.throwError=function(errMessage){
 GuiElements.buildUI=function(){
 	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
+	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 
@@ -205,6 +205,8 @@ GuiElements.createLayers=function(){
 	layers.display=create.layer(i);
 	layers.drag=create.layer(i);
 	layers.highlight=create.layer(i);
+	layers.resultBubble=create.layer(i);
+	layers.inputPad=create.layer(i);
 	layers.tabMenu=create.layer(i);
 	layers.dialogBlock=create.layer(i);
 	layers.dialog=create.layer(i);
@@ -794,36 +796,6 @@ GuiElements.displayValue=function(value,x,y,width,height, error){
 	var upperY=y;
 	var lowerY=y+height;
 	new ResultBubble(leftX, rightX,upperY,lowerY,value, error);
-};
-/* GuiElements.overlay contains functions that keep track of overlays present on the screen.
- */
-GuiElements.overlay=function(){};
-/* Sets the currently visible overlay and closes any existing overlays.
- * @param the overlay which will be visible.
- */
-GuiElements.overlay.set=function(overlay){
-	var GE=GuiElements;
-	if(GE.currentOverlay!=null){
-		GE.currentOverlay.close();
-	}
-	GE.currentOverlay=overlay;
-};
-/* Called by a closing overlay to indicate that it is no longer visible.
- * @param the overlay which is no longer visible.
- */
-GuiElements.overlay.remove=function(overlay){
-	var GE=GuiElements;
-	if(GE.currentOverlay==overlay){
-		GE.currentOverlay=null;
-	}
-};
-/* Called to force any currently visible overlays to close.
- */
-GuiElements.overlay.close=function(){
-	var GE=GuiElements;
-	if(GE.currentOverlay!=null){
-		GE.currentOverlay.close();
-	}
 };
 /* Loads the version number from version.js */
 GuiElements.getAppVersion=function(callback){

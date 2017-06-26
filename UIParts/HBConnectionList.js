@@ -2,7 +2,8 @@ function HBConnectionList(x,upperY,lowerY,hBToReplace){
 	var HBCL=HBConnectionList;
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=null;
-	this.bubbleOverlay=new BubbleOverlay(HBCL.bgColor,HBCL.bnMargin,this.group,this);
+	let layer = GuiElements.layers.overlay;
+	this.bubbleOverlay=new BubbleOverlay(HBCL.bgColor,HBCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(x,x,upperY,lowerY,HBCL.width,HBCL.height);
 	var thisHBCL=this;
 	this.updateTimer = self.setInterval(function () { thisHBCL.discoverHBs() }, HBCL.updateInterval);
@@ -44,7 +45,7 @@ HBConnectionList.prototype.updateHBList=function(newHBs){
 	}
 	this.menuBnList=new MenuBnList(this.group,0,0,HBCL.bnMargin,HBCL.width);
 	//this.menuBnList=new SmoothMenuBnList(this, this.group,0,0,HBCL.width);
-	this.menuBnList.isOverlayPart=true;
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(HBCL.height);
 	var hBArray=newHBs.split("\n");
 	if(newHBs==""){

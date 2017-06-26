@@ -14,7 +14,7 @@ function TabRow(x, y, width, height, parent, initialTab){
 	this.callbackFn = null;
 	this.initalTab = initialTab;
 	this.selectedTab = initialTab;
-	this.isOverlayPart = false;
+	this.partOfOverlay = null;
 }
 TabRow.setConstants = function(){
 	const TR = TabRow;
@@ -79,6 +79,6 @@ TabRow.prototype.visuallySelectTab = function(index){
 TabRow.prototype.setCallbackFunction = function(callback){
 	this.callbackFn = callback;
 };
-TabRow.prototype.markAsOverlayPart = function(){
-	this.isOverlayPart = true;
+TabRow.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
 };

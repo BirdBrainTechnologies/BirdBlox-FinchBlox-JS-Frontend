@@ -63,7 +63,7 @@ RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	}
 	let layer = GuiElements.layers.overlayOverlayScroll;
 	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
-	this.menuBnList.markAsOverlayPart();
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(RCL.height);
 	for(let i=0; i < robotArray.length;i++) {
 		this.addBnListOption(robotArray[i]);

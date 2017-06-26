@@ -26,6 +26,8 @@ function Menu(button,width){
 	this.alternateFn=null;
 	this.scheduleAlternate=false;
 }
+Menu.prototype = Object.create(Overlay.prototype);
+Menu.prototype.constructor = Menu;
 Menu.setGraphics=function(){
 	Menu.defaultWidth=100;
 	Menu.bnMargin=Button.defaultMargin;
@@ -46,7 +48,7 @@ Menu.prototype.createMenuBnList=function(){
 	var bnM=Menu.bnMargin;
 	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
 	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
-	this.menuBnList.isOverlayPart=true;
+	this.menuBnList.markAsOverlayPart(this);
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
@@ -87,8 +89,8 @@ Menu.prototype.open=function(){
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			GuiElements.overlay.set(this);
-			this.button.isOverlayPart = true;
+			Overlay.addOverlay(this);
+			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate=false;
 		}
 		else{
@@ -103,9 +105,9 @@ Menu.prototype.close=function(onlyOnDrag){
 		this.group.remove();
 		this.menuBnList.hide();
 		this.visible=false;
-		GuiElements.overlay.remove(this);
+		Overlay.removeOverlay(this);
 		this.button.unToggle();
-		this.button.isOverlayPart=false;
+		this.button.unmarkAsOverlayPart();
 	}
 	else if(this.scheduleAlternate){
 		this.scheduleAlternate=false;

@@ -54,7 +54,7 @@ CodeManager.move=function(){};
 CodeManager.move.start=function(block,x,y){
 	var move=CodeManager.move; //shorthand
 	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		move.moving=true; //Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */

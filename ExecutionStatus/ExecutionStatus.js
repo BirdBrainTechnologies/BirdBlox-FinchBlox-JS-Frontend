@@ -8,7 +8,7 @@
  * @abstract
  */
 function ExecutionStatus(){
-	DebugOptions.throw("Abstract class may not be constructed");
+	DebugOptions.markAbstract();
 }
 /**
  * Is the block/stack/slot currently running?

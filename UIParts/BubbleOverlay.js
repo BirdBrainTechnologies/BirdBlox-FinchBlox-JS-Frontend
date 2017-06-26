@@ -16,6 +16,8 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
 	this.visible=false;
 	this.buildBubble();
 }
+BubbleOverlay.prototype = Object.create(Overlay.prototype);
+BubbleOverlay.prototype.constructor = BubbleOverlay;
 BubbleOverlay.setGraphics=function(){
 	BubbleOverlay.triangleW=15;
 	BubbleOverlay.triangleH=7;
@@ -43,14 +45,14 @@ BubbleOverlay.prototype.show=function(){
 	if(!this.visible) {
 		this.layerG.appendChild(this.group);
 		this.visible=true;
-		GuiElements.overlay.set(this);
+		Overlay.addOverlay(this);
 	}
 };
 BubbleOverlay.prototype.hide=function(){
 	if(this.visible) {
 		this.group.remove();
 		this.visible=false;
-		GuiElements.overlay.remove(this);
+		Overlay.removeOverlay(this);
 	}
 };
 BubbleOverlay.prototype.close=function(){

@@ -5,7 +5,10 @@
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
  */
-function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, isOverlay){
+function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay){
+	if(partOfOverlay == null){
+		partOfOverlay = null;
+	}
 	DebugOptions.validateNonNull(group, layer);
 	DebugOptions.validateNumbers(width, height, innerWidth, innerHeight);
 	this.x = absX;
@@ -24,7 +27,7 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
 	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
 	this.visible = false;
 	this.currentZoom = GuiElements.zoomFactor;
-	this.isOverlayPart = isOverlay;
+	this.partOfOverlay = partOfOverlay;
 }
 SmoothScrollBox.prototype.updateScrollSet = function(){
 	if(this.visible) {
