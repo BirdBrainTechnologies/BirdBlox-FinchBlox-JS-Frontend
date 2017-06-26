@@ -14,10 +14,12 @@ BlockContextMenu.prototype.showMenu=function(){
 	var BCM=BlockContextMenu;
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
-	this.menuBnList.isOverlayPart=true;
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	this.menuBnList.show();
-	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
 	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
 };
 BlockContextMenu.prototype.addOptions=function(){

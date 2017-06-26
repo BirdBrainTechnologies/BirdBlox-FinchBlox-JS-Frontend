@@ -63,7 +63,7 @@ TouchReceiver.handleUp=function(event){
 };
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 	}
 };
 /* Returns the touch x coord from the event arguments
@@ -160,7 +160,7 @@ TouchReceiver.touchStartBlock=function(target,e){
 		TR.checkStartZoom(e);
 	}
 	if(TR.touchstart(e)){ //prevent multitouch issues.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
 			TR.targetType="displayStack";
 			TR.setLongTouchTimer();
@@ -183,7 +183,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
 	}
 	if(TR.touchstart(e)){
 		if(slot.selected!=true){
-			GuiElements.overlay.close(); //Close any visible overlays.
+			Overlay.closeOverlays(); //Close any visible overlays.
 		}
 		TR.targetType="slot";
 		TouchReceiver.target=slot; //Store target Slot.
@@ -197,10 +197,10 @@ TouchReceiver.touchStartSlot=function(slot,e){
 TouchReceiver.touchStartCatBN=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 	}
 };
 /* Handles new touch events for Buttons.  Stores the target Button.
@@ -214,9 +214,7 @@ TouchReceiver.touchStartBN=function(target,e){
 		e.stopPropagation();
 	}
 	if(TR.touchstart(e, shouldPreventDefault)){
-		if(!target.isOverlayPart){
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="button";
 		TR.target=target;
 		target.press(); //Changes the button's appearance and may trigger an action.
@@ -228,9 +226,7 @@ TouchReceiver.touchStartBN=function(target,e){
 TouchReceiver.touchStartScrollBox=function(target, e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e, false)){
-		if(!target.isOverlayPart){
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="scrollBox";
 		TR.target=target; //The type is all that is important. There is only one palette.
 		e.stopPropagation();
@@ -241,7 +237,7 @@ TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
 	TR.checkStartZoom(e);
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="tabSpace";
 		TR.target=null;
 	}
@@ -250,7 +246,7 @@ TouchReceiver.touchStartTabSpace=function(e){
 TouchReceiver.touchStartDisplayBox=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="displayBox";
 		TR.target=null;
 		DisplayBox.hide();
@@ -268,9 +264,7 @@ TouchReceiver.touchStartOverlayPart=function(e){
 TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)) {
-		if(!target.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="menuBnList";
 		TouchReceiver.target=target; //Store target Slot.
 	}
@@ -278,9 +272,7 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e, false)) {
-		if(!target.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="smoothMenuBnList";
 		TouchReceiver.target=target; //Store target.
 		e.stopPropagation();
@@ -289,9 +281,7 @@ TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 TouchReceiver.touchStartTabRow=function(tabRow, index, e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		if(!tabRow.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(tabRow.partOfOverlay);
 		TR.targetType="tabrow";
 		tabRow.selectTab(index);
 	}
@@ -306,7 +296,7 @@ TouchReceiver.touchmove=function(e){
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
 		if(TR.longTouch) {
-			GuiElements.overlay.close();
+			Overlay.closeOverlays();
 			TR.longTouch = false;
 		}
 		if(TR.zooming){

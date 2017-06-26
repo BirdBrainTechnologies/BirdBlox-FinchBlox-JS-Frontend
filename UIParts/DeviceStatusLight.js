@@ -1,18 +1,14 @@
 "use strict";
 
-function DeviceStatusLight(x,centerY,parent){
-	var DSL=DeviceStatusLight;
+function DeviceStatusLight(x,centerY,parent,statusProvider){
+	const DSL=DeviceStatusLight;
 	this.cx=x+DSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
-	var thisStatusLight=this;
-	if(true||!TouchReceiver.mouse) {
-		this.updateTimer = self.setInterval(function () {
-			thisStatusLight.updateStatus()
-		}, DSL.updateInterval);
-	}
-	thisStatusLight.updateStatus();
+	this.statusProvider = statusProvider;
+	this.statusProvider.setStatusListener(this);
+	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
 	var DSL=DeviceStatusLight;
@@ -24,26 +20,21 @@ DeviceStatusLight.setConstants=function(){
 	DSL.updateInterval=300;
 };
 DeviceStatusLight.prototype.generateCircle=function(){
-	var DSL=DeviceStatusLight;
+	let DSL=DeviceStatusLight;
 	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
 };
-DeviceStatusLight.prototype.updateStatus=function(){
-	let overallStatus = 2;
-	Device.getTypeList().forEach(function(deviceClass){
-		deviceClass.getManager().updateTotalStatus();
-		overallStatus = Math.min(deviceClass.getManager().getTotalStatus(), overallStatus); // Lower status means more error
-	});
-	switch(overallStatus) {
-		case 0:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.redColor);
-			break;
-		case 1:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.greenColor);
-			break;
-		case 2:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.offColor);
-			break;
+DeviceStatusLight.prototype.updateStatus=function(status){
+	const DSL = DeviceStatusLight;
+	let color = null;
+	const statuses = DeviceManager.statuses;
+	if (status === statuses.connected) {
+		color = DSL.greenColor;
+	} else if (status === statuses.disconnected) {
+		color = DSL.redColor;
+	} else {
+		color = DSL.offColor;
 	}
+	GuiElements.update.color(this.circleE,color);
 };
 DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();

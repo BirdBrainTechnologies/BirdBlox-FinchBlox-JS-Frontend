@@ -26,7 +26,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
 	this.layer = layer;
 
 	this.visible=false;
-	this.isOverlayPart=false;
+	this.partOfOverlay=null;
 	this.internalHeight=0;
 
 	this.maxHeight=null;
@@ -156,7 +156,7 @@ SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
-	bn.isOverlayPart=this.isOverlayPart;
+	bn.partOfOverlay=this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
@@ -186,8 +186,8 @@ SmoothMenuBnList.prototype.setScroll = function(scrollTop){
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
 };
-SmoothMenuBnList.prototype.markAsOverlayPart = function(){
-	this.isOverlayPart = true;
+SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
 };
 SmoothMenuBnList.prototype.isScrolling = function(){
 	if(!this.visible) return false;

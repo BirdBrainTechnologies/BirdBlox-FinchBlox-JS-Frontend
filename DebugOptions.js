@@ -117,6 +117,9 @@ DebugOptions.throw = function(message){
 	if(!DebugOptions.shouldLogErrors()) return;
 	throw new UserException(message);
 };
+DebugOptions.markAbstract = function(){
+	DebugOptions.throw("Abstract class may not be constructed");
+};
 
 function UserException(message) {
 	this.message = message;

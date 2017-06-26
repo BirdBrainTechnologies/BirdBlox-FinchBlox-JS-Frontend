@@ -19,7 +19,7 @@ function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 		columns=1;
 	}
 	this.columns=columns;
-	this.isOverlayPart=false;
+	this.partOfOverlay=false;
 	this.internalHeight=0;
 	this.scrolling=false;
 	this.scrollYOffset=0;
@@ -119,7 +119,7 @@ MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var bn=new Button(x,y,width,this.bnHeight,this.group);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
-	bn.isOverlayPart=this.isOverlayPart;
+	bn.markAsOverlayPart(this.partOfOverlay);
 	bn.menuBnList=this;
 	return bn;
 }
@@ -185,4 +185,7 @@ MenuBnList.prototype.scroll=function(scrollY){
 	this.scrollY=Math.min(0,this.scrollY);
 	this.scrollY=Math.max(this.height-this.internalHeight,this.scrollY);
 	this.move(this.x,this.y);
+};
+MenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
 };

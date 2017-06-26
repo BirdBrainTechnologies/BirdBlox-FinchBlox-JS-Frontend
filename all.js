@@ -119,6 +119,9 @@ DebugOptions.throw = function(message){
 	if(!DebugOptions.shouldLogErrors()) return;
 	throw new UserException(message);
 };
+DebugOptions.markAbstract = function(){
+	DebugOptions.throw("Abstract class may not be constructed");
+};
 
 function UserException(message) {
 	this.message = message;
@@ -520,7 +523,7 @@ SelectionData.importXml=function(dataNode){
  * @abstract
  */
 function ExecutionStatus(){
-	DebugOptions.throw("Abstract class may not be constructed");
+	DebugOptions.markAbstract();
 }
 /**
  * Is the block/stack/slot currently running?
@@ -829,6 +832,8 @@ List.prototype.getIndex=function(indexData){
 function Device(name, id){
 	this.name = name;
 	this.id = id;
+	this.status = DeviceManager.statuses.disconnected;
+	this.statusListener = null;
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -868,6 +873,17 @@ Device.prototype.connect = function(){
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+Device.prototype.setStatus = function(status){
+	this.status = status;
+	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
+	DeviceManager.updateStatus();
+};
+Device.prototype.getStatus = function(){
+	return this.status;
+};
+Device.prototype.setStatusListener = function(object){
+	this.statusListener = object;
+};
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
 };
@@ -879,11 +895,11 @@ Device.fromJsonArray = function(deviceClass, json){
 	return res;
 };
 Device.fromJsonArrayString = function(deviceClass, deviceList){
-	let json = "[]";
+	let json = [];
 	try{
 		json = JSON.parse(deviceList);
 	} catch(e) {
-
+		json = [];
 	}
 	let list = Device.fromJsonArray(deviceClass, json);
 	if(DiscoverDialog.allowVirtualDevices){
@@ -939,12 +955,22 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue){
 function DeviceManager(deviceClass){
 	this.deviceClass = deviceClass;
 	this.connectedDevices = [];
-	this.connectionStatus = 2;
+	this.connectionStatus = DeviceManager.statuses.noDevices;
 	// 0 - At least 1 disconnected
 	// 1 - Every device is OK
 	// 2 - Nothing connected
 	this.selectableDevices = 0;
 }
+DeviceManager.setStatics = function(){
+	const DM = DeviceManager;
+	const statuses = DeviceManager.statuses = {};
+	statuses.disconnected = 0;
+	statuses.connected = 1;
+	statuses.noDevices = 2;
+	DM.totalStatus = statuses.noDevices;
+	DM.statusListener = null;
+};
+DeviceManager.setStatics();
 DeviceManager.prototype.getDeviceCount = function() {
 	return this.connectedDevices.length;
 };
@@ -1020,6 +1046,7 @@ DeviceManager.prototype.getSelectableDeviceCount=function(){
 DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
+	DeviceManager.updateStatus();
 };
 DeviceManager.prototype.lookupRobotIndexById = function(id){
 	for(let i = 0; i < this.connectedDevices.length; i++){
@@ -1057,11 +1084,6 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 };
-DeviceManager.updateSelectableDevices = function(){
-	Device.getTypeList().forEach(function(deviceType){
-		deviceType.getManager().updateSelectableDevices();
-	});
-};
 DeviceManager.prototype.getVirtualRobotList = function(){
 	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
 	let obj1 = {};
@@ -1071,6 +1093,69 @@ DeviceManager.prototype.getVirtualRobotList = function(){
 	obj1.id = "virtualDevice1";
 	obj2.id = "virtualDevice2";
 	return [obj1, obj2];
+};
+DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if(index >= 0) {
+		robot = this.connectedDevices[index];
+	}
+	if(robot != null){
+		const statuses = DeviceManager.statuses;
+		robot.setStatus(status? statuses.connected : statuses.disconnected);
+	}
+};
+DeviceManager.prototype.getStatus = function(){
+	const statuses = DeviceManager.statuses;
+	let disconnected = false;
+	let hasDevice = this.connectedDevices.length > 0;
+	this.connectedDevices.forEach(function(device){
+		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
+	});
+	if(!hasDevice){
+		this.connectionStatus = statuses.noDevices;
+	} else if(disconnected) {
+		this.connectionStatus = statuses.disconnected;
+	} else {
+		this.connectionStatus = statuses.connected;
+	}
+	return this.connectionStatus;
+};
+DeviceManager.updateSelectableDevices = function(){
+	DeviceManager.forEach(function(manager){
+		manager.updateSelectableDevices();
+	});
+};
+DeviceManager.updateConnectionStatus = function(deviceId, status){
+	DeviceManager.forEach(function(manager){
+		manager.updateConnectionStatus(deviceId, status);
+	});
+};
+DeviceManager.updateStatus = function(){
+	const DM = DeviceManager;
+	let totalStatus = DM.getStatus();
+	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
+	return totalStatus;
+};
+DeviceManager.getStatus = function(){
+	let DM = DeviceManager;
+	let minStatus = DM.statuses.noDevices;
+	DM.forEach(function(manager){
+		minStatus = DM.minStatus(manager.getStatus(), minStatus);
+	});
+	DM.totalStatus = minStatus;
+	return minStatus;
+};
+DeviceManager.minStatus = function(status1, status2) {
+	return Math.min(status1, status2);
+};
+DeviceManager.forEach = function(callbackFn){
+	Device.getTypeList().forEach(function(deviceType){
+		callbackFn(deviceType.getManager());
+	});
+};
+DeviceManager.setStatusListener = function(object){
+	DeviceManager.statusListener = object;
 };
 /**
  * Created by Tom on 6/14/2017.
@@ -1117,7 +1202,6 @@ function GuiElements(){
 	GuiElements.loadInitialSettings(function(){
 		GuiElements.setConstants();
 		GuiElements.createLayers();
-		GuiElements.currentOverlay=null; //Keeps track of is a BubbleOverlay is visible so that is can be closed.
 		GuiElements.dialogBlock=null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
@@ -1263,6 +1347,7 @@ GuiElements.throwError=function(errMessage){
 GuiElements.buildUI=function(){
 	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
+	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 
@@ -1308,6 +1393,8 @@ GuiElements.createLayers=function(){
 	layers.display=create.layer(i);
 	layers.drag=create.layer(i);
 	layers.highlight=create.layer(i);
+	layers.resultBubble=create.layer(i);
+	layers.inputPad=create.layer(i);
 	layers.tabMenu=create.layer(i);
 	layers.dialogBlock=create.layer(i);
 	layers.dialog=create.layer(i);
@@ -1897,36 +1984,6 @@ GuiElements.displayValue=function(value,x,y,width,height, error){
 	var upperY=y;
 	var lowerY=y+height;
 	new ResultBubble(leftX, rightX,upperY,lowerY,value, error);
-};
-/* GuiElements.overlay contains functions that keep track of overlays present on the screen.
- */
-GuiElements.overlay=function(){};
-/* Sets the currently visible overlay and closes any existing overlays.
- * @param the overlay which will be visible.
- */
-GuiElements.overlay.set=function(overlay){
-	var GE=GuiElements;
-	if(GE.currentOverlay!=null){
-		GE.currentOverlay.close();
-	}
-	GE.currentOverlay=overlay;
-};
-/* Called by a closing overlay to indicate that it is no longer visible.
- * @param the overlay which is no longer visible.
- */
-GuiElements.overlay.remove=function(overlay){
-	var GE=GuiElements;
-	if(GE.currentOverlay==overlay){
-		GE.currentOverlay=null;
-	}
-};
-/* Called to force any currently visible overlays to close.
- */
-GuiElements.overlay.close=function(){
-	var GE=GuiElements;
-	if(GE.currentOverlay!=null){
-		GE.currentOverlay.close();
-	}
 };
 /* Loads the version number from version.js */
 GuiElements.getAppVersion=function(callback){
@@ -3275,7 +3332,7 @@ TouchReceiver.handleUp=function(event){
 };
 TouchReceiver.handleDocumentDown=function(event){
 	if(TouchReceiver.touchstart(event)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 	}
 };
 /* Returns the touch x coord from the event arguments
@@ -3372,7 +3429,7 @@ TouchReceiver.touchStartBlock=function(target,e){
 		TR.checkStartZoom(e);
 	}
 	if(TR.touchstart(e)){ //prevent multitouch issues.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
 			TR.targetType="displayStack";
 			TR.setLongTouchTimer();
@@ -3395,7 +3452,7 @@ TouchReceiver.touchStartSlot=function(slot,e){
 	}
 	if(TR.touchstart(e)){
 		if(slot.selected!=true){
-			GuiElements.overlay.close(); //Close any visible overlays.
+			Overlay.closeOverlays(); //Close any visible overlays.
 		}
 		TR.targetType="slot";
 		TouchReceiver.target=slot; //Store target Slot.
@@ -3409,10 +3466,10 @@ TouchReceiver.touchStartSlot=function(slot,e){
 TouchReceiver.touchStartCatBN=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="category";
 		target.select(); //Makes the button light up and the category become visible.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 	}
 };
 /* Handles new touch events for Buttons.  Stores the target Button.
@@ -3426,9 +3483,7 @@ TouchReceiver.touchStartBN=function(target,e){
 		e.stopPropagation();
 	}
 	if(TR.touchstart(e, shouldPreventDefault)){
-		if(!target.isOverlayPart){
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="button";
 		TR.target=target;
 		target.press(); //Changes the button's appearance and may trigger an action.
@@ -3440,9 +3495,7 @@ TouchReceiver.touchStartBN=function(target,e){
 TouchReceiver.touchStartScrollBox=function(target, e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e, false)){
-		if(!target.isOverlayPart){
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="scrollBox";
 		TR.target=target; //The type is all that is important. There is only one palette.
 		e.stopPropagation();
@@ -3453,7 +3506,7 @@ TouchReceiver.touchStartTabSpace=function(e){
 	var TR=TouchReceiver;
 	TR.checkStartZoom(e);
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="tabSpace";
 		TR.target=null;
 	}
@@ -3462,7 +3515,7 @@ TouchReceiver.touchStartTabSpace=function(e){
 TouchReceiver.touchStartDisplayBox=function(e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="displayBox";
 		TR.target=null;
 		DisplayBox.hide();
@@ -3480,9 +3533,7 @@ TouchReceiver.touchStartOverlayPart=function(e){
 TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)) {
-		if(!target.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="menuBnList";
 		TouchReceiver.target=target; //Store target Slot.
 	}
@@ -3490,9 +3541,7 @@ TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
 TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e, false)) {
-		if(!target.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType="smoothMenuBnList";
 		TouchReceiver.target=target; //Store target.
 		e.stopPropagation();
@@ -3501,9 +3550,7 @@ TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
 TouchReceiver.touchStartTabRow=function(tabRow, index, e){
 	var TR=TouchReceiver;
 	if(TR.touchstart(e)){
-		if(!tabRow.isOverlayPart) {
-			GuiElements.overlay.close(); //Close any visible overlays.
-		}
+		Overlay.closeOverlaysExcept(tabRow.partOfOverlay);
 		TR.targetType="tabrow";
 		tabRow.selectTab(index);
 	}
@@ -3518,7 +3565,7 @@ TouchReceiver.touchmove=function(e){
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
 		if(TR.longTouch) {
-			GuiElements.overlay.close();
+			Overlay.closeOverlays();
 			TR.longTouch = false;
 		}
 		if(TR.zooming){
@@ -3957,6 +4004,10 @@ TitleBar.setGraphicsPart2 = function(){
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+
+	TB.titleLeftX = BlockPalette.width;
+	TB.titleRightX = TB.flagBnX - TB.buttonMargin;
+	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 };
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -3973,7 +4024,7 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
+	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
@@ -4035,11 +4086,16 @@ TitleBar.updateText = function(){
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
 		}
-		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		let maxWidth = TB.titleWidth;
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		let width=GuiElements.measure.textWidth(TB.titleLabel);
 		let x=GuiElements.width/2-width/2;
 		let y=TB.height/2+TB.fontCharHeight/2;
+		if(x < TB.titleLeftX) {
+			x = TB.titleLeftX;
+		} else if(x + width > TB.titleRightX) {
+			x = TB.titleRightX - width;
+		}
 		GuiElements.move.text(TB.titleLabel,x,y);
 	}
 };
@@ -4659,7 +4715,7 @@ function Button(x,y,width,height,parent){
 	this.toggles=false;
 	this.toggleFunction=null;
 	this.toggled=false;
-	this.isOverlayPart=false;
+	this.partOfOverlay=null;
 	this.scrollable = false;
 }
 Button.setGraphics=function(){
@@ -4952,6 +5008,12 @@ Button.prototype.currentForeground = function(){
 		return Button.foreground;
 	}
 };
+Button.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+Button.prototype.unmarkAsOverlayPart = function(){
+	this.partOfOverlay = null;
+};
 /**
  * Created by Tom on 6/23/2017.
  */
@@ -5015,19 +5077,15 @@ ShowHideButton.prototype.remove = function(){
 };
 
 
-function DeviceStatusLight(x,centerY,parent){
-	var DSL=DeviceStatusLight;
+function DeviceStatusLight(x,centerY,parent,statusProvider){
+	const DSL=DeviceStatusLight;
 	this.cx=x+DSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
-	var thisStatusLight=this;
-	if(true||!TouchReceiver.mouse) {
-		this.updateTimer = self.setInterval(function () {
-			thisStatusLight.updateStatus()
-		}, DSL.updateInterval);
-	}
-	thisStatusLight.updateStatus();
+	this.statusProvider = statusProvider;
+	this.statusProvider.setStatusListener(this);
+	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
 	var DSL=DeviceStatusLight;
@@ -5039,30 +5097,80 @@ DeviceStatusLight.setConstants=function(){
 	DSL.updateInterval=300;
 };
 DeviceStatusLight.prototype.generateCircle=function(){
-	var DSL=DeviceStatusLight;
+	let DSL=DeviceStatusLight;
 	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
 };
-DeviceStatusLight.prototype.updateStatus=function(){
-	let overallStatus = 2;
-	Device.getTypeList().forEach(function(deviceClass){
-		deviceClass.getManager().updateTotalStatus();
-		overallStatus = Math.min(deviceClass.getManager().getTotalStatus(), overallStatus); // Lower status means more error
-	});
-	switch(overallStatus) {
-		case 0:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.redColor);
-			break;
-		case 1:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.greenColor);
-			break;
-		case 2:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.offColor);
-			break;
+DeviceStatusLight.prototype.updateStatus=function(status){
+	const DSL = DeviceStatusLight;
+	let color = null;
+	const statuses = DeviceManager.statuses;
+	if (status === statuses.connected) {
+		color = DSL.greenColor;
+	} else if (status === statuses.disconnected) {
+		color = DSL.redColor;
+	} else {
+		color = DSL.offColor;
 	}
+	GuiElements.update.color(this.circleE,color);
 };
 DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();
 	this.updateTimer=window.clearInterval(this.updateTimer);
+};
+/**
+ * Created by Tom on 6/26/2017.
+ */
+/* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
+ * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
+function Overlay(type){
+	this.type = type;
+}
+/* All overlays have a close function */
+Overlay.prototype.close = function() {
+	DebugOptions.markAbstract();
+};
+Overlay.prototype.addOverlayAndCloseOthers = function(){
+	Overlay.closeOverlaysOfType(this.type);
+	Overlay.addOverlay(this);
+};
+/* Initializes the static elements of the class */
+Overlay.setStatics = function(){
+	/* Keeps track of open overlays */
+	Overlay.openOverlays = new Set();
+	Overlay.types = {};
+	Overlay.types.inputPad = 1;
+	Overlay.types.resultBubble = 2;
+	Overlay.types.menu = 3;
+	Overlay.types.connectionList = 4;
+};
+Overlay.addOverlay = function(overlay){
+	if(!Overlay.openOverlays.has(overlay)) {
+		Overlay.openOverlays.add(overlay);
+	}
+};
+Overlay.removeOverlay = function(overlay){
+	if(Overlay.openOverlays.has(overlay)) {
+		Overlay.openOverlays.delete(overlay);
+	}
+};
+Overlay.closeOverlays = function(){
+	Overlay.openOverlays.forEach(function(overlay){
+		overlay.close();
+	});
+};
+Overlay.closeOverlaysExcept = function(overlay){
+	Overlay.openOverlays.forEach(function(currentOverlay){
+		if(currentOverlay !== overlay) {
+			currentOverlay.close();
+		}
+	});
+};
+Overlay.closeOverlaysOfType = function(type){
+	Overlay.openOverlays.forEach(function(currentOverlay){
+		if(currentOverlay.type === type) {
+			currentOverlay.close();
+		}
+	});
 };
 /**
  * Created by Tom on 6/18/2017.
@@ -5080,7 +5188,7 @@ function TabRow(x, y, width, height, parent, initialTab){
 	this.callbackFn = null;
 	this.initalTab = initialTab;
 	this.selectedTab = initialTab;
-	this.isOverlayPart = false;
+	this.partOfOverlay = null;
 }
 TabRow.setConstants = function(){
 	const TR = TabRow;
@@ -5145,8 +5253,8 @@ TabRow.prototype.visuallySelectTab = function(index){
 TabRow.prototype.setCallbackFunction = function(callback){
 	this.callbackFn = callback;
 };
-TabRow.prototype.markAsOverlayPart = function(){
-	this.isOverlayPart = true;
+TabRow.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
 };
 function InputPad(){
 	InputPad.buildPad();
@@ -5194,12 +5302,14 @@ InputPad.buildPad=function(){
 	IP.group=GuiElements.create.group(0,0);
 	IP.visible=false;
 	/*IP.makeBg();*/
-	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP);
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	IP.bubbleOverlay=new BubbleOverlay(overlayType, IP.bg,IP.buttonMargin,IP.group,IP,null,layer);
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
 	//IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
 	IP.menuBnList=new SmoothMenuBnList(IP, IP.group,0,0);
-	IP.menuBnList.isOverlayPart=true;
+	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
 	IP.previewFn = null;
 };
 /*InputPad.makeBg=function(){
@@ -5218,7 +5328,7 @@ InputPad.resetPad=function(columns){//removes any options which may have been ad
 	} else {
 		IP.menuBnList = new MenuBnList(IP.group, 0, 0, IP.buttonMargin, null, columns);
 	}
-	IP.menuBnList.isOverlayPart=true;
+	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
 	IP.previewFn = null;
 };
 InputPad.addOption=function(text,data){
@@ -5554,21 +5664,21 @@ InputPad.makeNumBn=function(x,y,num){
 	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
-	button.isOverlayPart=true;
+	button.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makePlusMinusBn=function(x,y){
 	var IP=InputPad;
 	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
 	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
-	IP.plusMinusBn.isOverlayPart=true;
+	IP.plusMinusBn.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeDecimalBn=function(x,y){
 	var IP=InputPad;
 	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
-	IP.decimalBn.isOverlayPart=true;
+	IP.decimalBn.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeBsBn=function(x,y){
 	var IP=InputPad;
@@ -5576,14 +5686,14 @@ InputPad.makeBsBn=function(x,y){
 	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
 	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
 	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
-	IP.bsButton.isOverlayPart=true;
+	IP.bsButton.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeOkBn=function(x,y){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
 	button.addIcon(VectorPaths.checkmark,IP.okBnH);
 	button.setCallbackFunction(InputPad.okPressed,true);
-	button.isOverlayPart=true;
+	button.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.relToAbsX = function(x){
 	var IP = InputPad;
@@ -5594,13 +5704,14 @@ InputPad.relToAbsY = function(y){
 	return IP.bubbleOverlay.relToAbsY(y)
 };
 
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
 	}
 	if(layer == null){
 		layer = GuiElements.layers.overlay;
 	}
+	Overlay.call(this, overlayType);
 	this.x = 0;
 	this.y = 0;
 	this.bgColor=color;
@@ -5612,6 +5723,8 @@ function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
 	this.visible=false;
 	this.buildBubble();
 }
+BubbleOverlay.prototype = Object.create(Overlay.prototype);
+BubbleOverlay.prototype.constructor = BubbleOverlay;
 BubbleOverlay.setGraphics=function(){
 	BubbleOverlay.triangleW=15;
 	BubbleOverlay.triangleH=7;
@@ -5639,14 +5752,14 @@ BubbleOverlay.prototype.show=function(){
 	if(!this.visible) {
 		this.layerG.appendChild(this.group);
 		this.visible=true;
-		GuiElements.overlay.set(this);
+		this.addOverlayAndCloseOthers();
 	}
 };
 BubbleOverlay.prototype.hide=function(){
 	if(this.visible) {
 		this.group.remove();
 		this.visible=false;
-		GuiElements.overlay.remove(this);
+		Overlay.removeOverlay(this);
 	}
 };
 BubbleOverlay.prototype.close=function(){
@@ -5756,9 +5869,11 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	var width=GuiElements.measure.textWidth(textE);
 	var group=GuiElements.create.group(0,0);
 	group.appendChild(textE);
-	this.bubbleOverlay=new BubbleOverlay(bgColor,RB.margin,group,this,RB.hMargin);
+	let layer = GuiElements.layers.resultBubble;
+	let overlayType = Overlay.types.resultBubble;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
 	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
-	/*this.vanishTimer = self.setInterval(function () { GuiElements.overlay.close() }, RB.lifetime);*/
+	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
 }
 ResultBubble.setConstants=function(){
 	var RB=ResultBubble;
@@ -5785,7 +5900,10 @@ ResultBubble.prototype.close=function(){
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
  */
-function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, isOverlay){
+function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay){
+	if(partOfOverlay == null){
+		partOfOverlay = null;
+	}
 	DebugOptions.validateNonNull(group, layer);
 	DebugOptions.validateNumbers(width, height, innerWidth, innerHeight);
 	this.x = absX;
@@ -5804,7 +5922,7 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
 	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
 	this.visible = false;
 	this.currentZoom = GuiElements.zoomFactor;
-	this.isOverlayPart = isOverlay;
+	this.partOfOverlay = partOfOverlay;
 }
 SmoothScrollBox.prototype.updateScrollSet = function(){
 	if(this.visible) {
@@ -5908,7 +6026,7 @@ function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
 		columns=1;
 	}
 	this.columns=columns;
-	this.isOverlayPart=false;
+	this.partOfOverlay=false;
 	this.internalHeight=0;
 	this.scrolling=false;
 	this.scrollYOffset=0;
@@ -6008,7 +6126,7 @@ MenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var bn=new Button(x,y,width,this.bnHeight,this.group);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
-	bn.isOverlayPart=this.isOverlayPart;
+	bn.markAsOverlayPart(this.partOfOverlay);
 	bn.menuBnList=this;
 	return bn;
 }
@@ -6075,6 +6193,9 @@ MenuBnList.prototype.scroll=function(scrollY){
 	this.scrollY=Math.max(this.height-this.internalHeight,this.scrollY);
 	this.move(this.x,this.y);
 };
+MenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
 
 /**
  * Created by Tom on 6/5/2017.
@@ -6104,7 +6225,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
 	this.layer = layer;
 
 	this.visible=false;
-	this.isOverlayPart=false;
+	this.partOfOverlay=null;
 	this.internalHeight=0;
 
 	this.maxHeight=null;
@@ -6234,7 +6355,7 @@ SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
 	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
 	bn.addText(text);
 	bn.setCallbackFunction(func,true);
-	bn.isOverlayPart=this.isOverlayPart;
+	bn.partOfOverlay=this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
@@ -6264,8 +6385,8 @@ SmoothMenuBnList.prototype.setScroll = function(scrollTop){
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
 };
-SmoothMenuBnList.prototype.markAsOverlayPart = function(){
-	this.isOverlayPart = true;
+SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
 };
 SmoothMenuBnList.prototype.isScrolling = function(){
 	if(!this.visible) return false;
@@ -6275,6 +6396,7 @@ function Menu(button,width){
 	if(width==null){
 		width=Menu.defaultWidth;
 	}
+	Overlay.call(this, Overlay.types.menu);
 	DebugOptions.validateNumbers(width);
 	this.width=width;
 	this.x=button.x;
@@ -6299,6 +6421,8 @@ function Menu(button,width){
 	this.alternateFn=null;
 	this.scheduleAlternate=false;
 }
+Menu.prototype = Object.create(Overlay.prototype);
+Menu.prototype.constructor = Menu;
 Menu.setGraphics=function(){
 	Menu.defaultWidth=100;
 	Menu.bnMargin=Button.defaultMargin;
@@ -6319,7 +6443,7 @@ Menu.prototype.createMenuBnList=function(){
 	var bnM=Menu.bnMargin;
 	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
 	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
-	this.menuBnList.isOverlayPart=true;
+	this.menuBnList.markAsOverlayPart(this);
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
@@ -6360,8 +6484,8 @@ Menu.prototype.open=function(){
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			GuiElements.overlay.set(this);
-			this.button.isOverlayPart = true;
+			this.addOverlayAndCloseOthers();
+			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate=false;
 		}
 		else{
@@ -6376,9 +6500,9 @@ Menu.prototype.close=function(onlyOnDrag){
 		this.group.remove();
 		this.menuBnList.hide();
 		this.visible=false;
-		GuiElements.overlay.remove(this);
+		Overlay.removeOverlay(this);
 		this.button.unToggle();
-		this.button.isOverlayPart=false;
+		this.button.unmarkAsOverlayPart();
 	}
 	else if(this.scheduleAlternate){
 		this.scheduleAlternate=false;
@@ -6629,10 +6753,12 @@ BlockContextMenu.prototype.showMenu=function(){
 	var BCM=BlockContextMenu;
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
-	this.menuBnList.isOverlayPart=true;
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	this.menuBnList.show();
-	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
 	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
 };
 BlockContextMenu.prototype.addOptions=function(){
@@ -6971,7 +7097,7 @@ CodeManager.move=function(){};
 CodeManager.move.start=function(block,x,y){
 	var move=CodeManager.move; //shorthand
 	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		move.moving=true; //Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
@@ -8386,7 +8512,7 @@ RowDialog.prototype.createScrollBox = function(){
 	let x = this.x + this.scrollBoxX;
 	let y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
-		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight, false);
+		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
 };
 RowDialog.prototype.createHintText = function(){
 	var RD = RowDialog;
@@ -8616,7 +8742,7 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
-	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup);
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
 };
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
 	let CMD = ConnectMultipleDialog;
@@ -9051,7 +9177,8 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
-	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	let overlayType = Overlay.types.connectionList;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
 	this.updateRobotList(list);
@@ -9079,7 +9206,7 @@ RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	}
 	let layer = GuiElements.layers.overlayOverlayScroll;
 	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
-	this.menuBnList.markAsOverlayPart();
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(RCL.height);
 	for(let i=0; i < robotArray.length;i++) {
 		this.addBnListOption(robotArray[i]);
@@ -9175,10 +9302,7 @@ DiscoverDialog.prototype.selectDevice = function(device){
 };
 DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
-	if(this.timerSet) {
-		this.timerSet = false;
-		this.updateTimer.stop();
-	}
+	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
 function OverflowArrows(){
@@ -9909,7 +10033,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Test');
+				callbackFn('[]');
 			}
 		}, 20);
 		return;
@@ -10161,6 +10285,44 @@ HtmlServer.setSetting=function(key,value){
 };
 HtmlServer.sendFinishedLoadingRequest = function(){
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function CallbackManager(){
+
+}
+CallbackManager.sounds = {};
+CallbackManager.sounds.recordingEnded = function(){
+	RecordingManager.interruptRecording();
+	return false;
+};
+CallbackManager.sounds.permissionGranted = function(){
+	RecordingManager.permissionGranted();
+	return true;
+};
+CallbackManager.data = {};
+CallbackManager.data.import = function(fileName){
+	SaveManager.import(fileName);
+	return true;
+};
+CallbackManager.dialog = {};
+CallbackManager.dialog.promptResponded = function(cancelled, response){
+	return false;
+};
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
+	return false;
+};
+CallbackManager.dialog.alertResponded = function(){
+	return false;
+};
+CallbackManager.robot = {};
+CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
+};
+CallbackManager.robot.discovered = function(robotList){
+	return true;
 };
 function XmlWriter(){
 
@@ -10442,7 +10604,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(isRecording, filename, function(){
-				if(filename == SaveManager.fileName && isRecording) {
+				if(filename === SaveManager.fileName && !isRecording) {
 					SaveManager.openBlank(nextAction);
 				} else{
 					if(nextAction != null) nextAction();

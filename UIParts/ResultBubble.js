@@ -15,9 +15,11 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	var width=GuiElements.measure.textWidth(textE);
 	var group=GuiElements.create.group(0,0);
 	group.appendChild(textE);
-	this.bubbleOverlay=new BubbleOverlay(bgColor,RB.margin,group,this,RB.hMargin);
+	let layer = GuiElements.layers.resultBubble;
+	let overlayType = Overlay.types.resultBubble;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
 	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
-	/*this.vanishTimer = self.setInterval(function () { GuiElements.overlay.close() }, RB.lifetime);*/
+	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
 }
 ResultBubble.setConstants=function(){
 	var RB=ResultBubble;

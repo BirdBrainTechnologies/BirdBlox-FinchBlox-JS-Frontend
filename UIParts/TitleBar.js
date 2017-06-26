@@ -48,6 +48,10 @@ TitleBar.setGraphicsPart2 = function(){
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+
+	TB.titleLeftX = BlockPalette.width;
+	TB.titleRightX = TB.flagBnX - TB.buttonMargin;
+	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 };
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -64,7 +68,7 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
+	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
@@ -126,11 +130,16 @@ TitleBar.updateText = function(){
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
 		}
-		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		let maxWidth = TB.titleWidth;
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		let width=GuiElements.measure.textWidth(TB.titleLabel);
 		let x=GuiElements.width/2-width/2;
 		let y=TB.height/2+TB.fontCharHeight/2;
+		if(x < TB.titleLeftX) {
+			x = TB.titleLeftX;
+		} else if(x + width > TB.titleRightX) {
+			x = TB.titleRightX - width;
+		}
 		GuiElements.move.text(TB.titleLabel,x,y);
 	}
 };

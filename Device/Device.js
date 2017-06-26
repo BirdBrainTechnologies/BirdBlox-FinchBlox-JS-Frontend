@@ -4,6 +4,8 @@
 function Device(name, id){
 	this.name = name;
 	this.id = id;
+	this.status = DeviceManager.statuses.disconnected;
+	this.statusListener = null;
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -43,6 +45,17 @@ Device.prototype.connect = function(){
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+Device.prototype.setStatus = function(status){
+	this.status = status;
+	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
+	DeviceManager.updateStatus();
+};
+Device.prototype.getStatus = function(){
+	return this.status;
+};
+Device.prototype.setStatusListener = function(object){
+	this.statusListener = object;
+};
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
 };
@@ -54,11 +67,11 @@ Device.fromJsonArray = function(deviceClass, json){
 	return res;
 };
 Device.fromJsonArrayString = function(deviceClass, deviceList){
-	let json = "[]";
+	let json = [];
 	try{
 		json = JSON.parse(deviceList);
 	} catch(e) {
-
+		json = [];
 	}
 	let list = Device.fromJsonArray(deviceClass, json);
 	if(DiscoverDialog.allowVirtualDevices){

@@ -17,7 +17,7 @@ function Button(x,y,width,height,parent){
 	this.toggles=false;
 	this.toggleFunction=null;
 	this.toggled=false;
-	this.isOverlayPart=false;
+	this.partOfOverlay=null;
 	this.scrollable = false;
 }
 Button.setGraphics=function(){
@@ -309,4 +309,10 @@ Button.prototype.currentForeground = function(){
 	} else {
 		return Button.foreground;
 	}
+};
+Button.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+Button.prototype.unmarkAsOverlayPart = function(){
+	this.partOfOverlay = null;
 };

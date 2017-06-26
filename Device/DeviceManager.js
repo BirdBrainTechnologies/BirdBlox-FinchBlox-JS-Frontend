@@ -4,12 +4,22 @@
 function DeviceManager(deviceClass){
 	this.deviceClass = deviceClass;
 	this.connectedDevices = [];
-	this.connectionStatus = 2;
+	this.connectionStatus = DeviceManager.statuses.noDevices;
 	// 0 - At least 1 disconnected
 	// 1 - Every device is OK
 	// 2 - Nothing connected
 	this.selectableDevices = 0;
 }
+DeviceManager.setStatics = function(){
+	const DM = DeviceManager;
+	const statuses = DeviceManager.statuses = {};
+	statuses.disconnected = 0;
+	statuses.connected = 1;
+	statuses.noDevices = 2;
+	DM.totalStatus = statuses.noDevices;
+	DM.statusListener = null;
+};
+DeviceManager.setStatics();
 DeviceManager.prototype.getDeviceCount = function() {
 	return this.connectedDevices.length;
 };
@@ -85,6 +95,7 @@ DeviceManager.prototype.getSelectableDeviceCount=function(){
 DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
+	DeviceManager.updateStatus();
 };
 DeviceManager.prototype.lookupRobotIndexById = function(id){
 	for(let i = 0; i < this.connectedDevices.length; i++){
@@ -122,11 +133,6 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 };
-DeviceManager.updateSelectableDevices = function(){
-	Device.getTypeList().forEach(function(deviceType){
-		deviceType.getManager().updateSelectableDevices();
-	});
-};
 DeviceManager.prototype.getVirtualRobotList = function(){
 	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
 	let obj1 = {};
@@ -136,4 +142,67 @@ DeviceManager.prototype.getVirtualRobotList = function(){
 	obj1.id = "virtualDevice1";
 	obj2.id = "virtualDevice2";
 	return [obj1, obj2];
+};
+DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if(index >= 0) {
+		robot = this.connectedDevices[index];
+	}
+	if(robot != null){
+		const statuses = DeviceManager.statuses;
+		robot.setStatus(status? statuses.connected : statuses.disconnected);
+	}
+};
+DeviceManager.prototype.getStatus = function(){
+	const statuses = DeviceManager.statuses;
+	let disconnected = false;
+	let hasDevice = this.connectedDevices.length > 0;
+	this.connectedDevices.forEach(function(device){
+		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
+	});
+	if(!hasDevice){
+		this.connectionStatus = statuses.noDevices;
+	} else if(disconnected) {
+		this.connectionStatus = statuses.disconnected;
+	} else {
+		this.connectionStatus = statuses.connected;
+	}
+	return this.connectionStatus;
+};
+DeviceManager.updateSelectableDevices = function(){
+	DeviceManager.forEach(function(manager){
+		manager.updateSelectableDevices();
+	});
+};
+DeviceManager.updateConnectionStatus = function(deviceId, status){
+	DeviceManager.forEach(function(manager){
+		manager.updateConnectionStatus(deviceId, status);
+	});
+};
+DeviceManager.updateStatus = function(){
+	const DM = DeviceManager;
+	let totalStatus = DM.getStatus();
+	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
+	return totalStatus;
+};
+DeviceManager.getStatus = function(){
+	let DM = DeviceManager;
+	let minStatus = DM.statuses.noDevices;
+	DM.forEach(function(manager){
+		minStatus = DM.minStatus(manager.getStatus(), minStatus);
+	});
+	DM.totalStatus = minStatus;
+	return minStatus;
+};
+DeviceManager.minStatus = function(status1, status2) {
+	return Math.min(status1, status2);
+};
+DeviceManager.forEach = function(callbackFn){
+	Device.getTypeList().forEach(function(deviceType){
+		callbackFn(deviceType.getManager());
+	});
+};
+DeviceManager.setStatusListener = function(object){
+	DeviceManager.statusListener = object;
 };
