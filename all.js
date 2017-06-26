@@ -9949,13 +9949,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr();
-			}
-			/* if(callbackFn != null) {
+			}*/
+			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('[]');
-			} */
+			}
 		}, 20);
 		return;
 	}
@@ -10487,7 +10487,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response == "2") {
 			SaveManager.delete(isRecording, filename, function(){
-				if(filename == SaveManager.fileName && isRecording) {
+				if(filename === SaveManager.fileName && !isRecording) {
 					SaveManager.openBlank(nextAction);
 				} else{
 					if(nextAction != null) nextAction();
