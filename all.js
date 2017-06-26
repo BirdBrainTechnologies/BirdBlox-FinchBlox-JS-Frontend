@@ -832,6 +832,8 @@ List.prototype.getIndex=function(indexData){
 function Device(name, id){
 	this.name = name;
 	this.id = id;
+	this.status = DeviceManager.statuses.disconnected;
+	this.statusListeners = new Set();
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -870,6 +872,22 @@ Device.prototype.connect = function(){
 	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
+};
+Device.prototype.setStatus = function(status){
+	this.status = status;
+	this.statusListeners.forEach(function(object){
+		object.updateStatus(this.status);
+	}.bind(this));
+	DeviceManager.updateStatus();
+};
+Device.prototype.getStatus = function(){
+	return this.status;
+};
+Device.prototype.addStatusListener = function(object){
+	this.statusListeners.add(object);
+};
+Device.prototype.removeStatusListener = function(object){
+	this.statusListeners.delete(object);
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
@@ -942,12 +960,22 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue){
 function DeviceManager(deviceClass){
 	this.deviceClass = deviceClass;
 	this.connectedDevices = [];
-	this.connectionStatus = 2;
+	this.connectionStatus = DeviceManager.statuses.noDevices;
 	// 0 - At least 1 disconnected
 	// 1 - Every device is OK
 	// 2 - Nothing connected
 	this.selectableDevices = 0;
 }
+DeviceManager.setStatics = function(){
+	const DM = DeviceManager;
+	const statuses = DeviceManager.statuses = {};
+	statuses.disconnected = 0;
+	statuses.connected = 1;
+	statuses.noDevices = 2;
+	DM.totalStatus = statuses.noDevices;
+	DM.statusListeners = new Set();
+};
+DeviceManager.setStatics();
 DeviceManager.prototype.getDeviceCount = function() {
 	return this.connectedDevices.length;
 };
@@ -1023,6 +1051,7 @@ DeviceManager.prototype.getSelectableDeviceCount=function(){
 DeviceManager.prototype.devicesChanged = function(){
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
+	DeviceManager.updateStatus();
 };
 DeviceManager.prototype.lookupRobotIndexById = function(id){
 	for(let i = 0; i < this.connectedDevices.length; i++){
@@ -1060,11 +1089,6 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 };
-DeviceManager.updateSelectableDevices = function(){
-	Device.getTypeList().forEach(function(deviceType){
-		deviceType.getManager().updateSelectableDevices();
-	});
-};
 DeviceManager.prototype.getVirtualRobotList = function(){
 	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
 	let obj1 = {};
@@ -1074,6 +1098,74 @@ DeviceManager.prototype.getVirtualRobotList = function(){
 	obj1.id = "virtualDevice1";
 	obj2.id = "virtualDevice2";
 	return [obj1, obj2];
+};
+DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if(index >= 0) {
+		robot = this.connectedDevices[index];
+	}
+	if(robot != null){
+		const statuses = DeviceManager.statuses;
+		robot.setStatus(status? statuses.connected : statuses.disconnected);
+	}
+};
+DeviceManager.prototype.getStatus = function(){
+	const statuses = DeviceManager.statuses;
+	let disconnected = false;
+	let hasDevice = this.connectedDevices.length > 0;
+	this.connectedDevices.forEach(function(device){
+		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
+	});
+	if(!hasDevice){
+		this.connectionStatus = statuses.noDevices;
+	} else if(disconnected) {
+		this.connectionStatus = statuses.disconnected;
+	} else {
+		this.connectionStatus = statuses.connected;
+	}
+	return this.connectionStatus;
+};
+DeviceManager.updateSelectableDevices = function(){
+	DeviceManager.forEach(function(manager){
+		manager.updateSelectableDevices();
+	});
+};
+DeviceManager.updateConnectionStatus = function(deviceId, status){
+	DeviceManager.forEach(function(manager){
+		manager.updateConnectionStatus(deviceId, status);
+	});
+};
+DeviceManager.updateStatus = function(){
+	const DM = DeviceManager;
+	let totalStatus = DM.getStatus();
+	DM.statusListeners.forEach(function(object){
+		object.updateStatus(totalStatus);
+	});
+	return totalStatus;
+};
+DeviceManager.getStatus = function(){
+	let DM = DeviceManager;
+	let minStatus = DM.statuses.noDevices;
+	DM.forEach(function(manager){
+		minStatus = DM.minStatus(manager.getStatus(), minStatus);
+	});
+	DM.totalStatus = minStatus;
+	return minStatus;
+};
+DeviceManager.minStatus = function(status1, status2) {
+	return Math.min(status1, status2);
+};
+DeviceManager.forEach = function(callbackFn){
+	Device.getTypeList().forEach(function(deviceType){
+		callbackFn(deviceType.getManager());
+	});
+};
+DeviceManager.addStatusListener = function(object){
+	DeviceManager.statusListeners.add(object);
+};
+DeviceManager.removeStatusListener = function(object){
+	DeviceManager.statusListeners.delete(object);
 };
 /**
  * Created by Tom on 6/14/2017.
@@ -3942,7 +4034,7 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
+	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
@@ -4995,19 +5087,15 @@ ShowHideButton.prototype.remove = function(){
 };
 
 
-function DeviceStatusLight(x,centerY,parent){
-	var DSL=DeviceStatusLight;
+function DeviceStatusLight(x,centerY,parent,statusProvider){
+	const DSL=DeviceStatusLight;
 	this.cx=x+DSL.radius;
 	this.cy=centerY;
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
-	var thisStatusLight=this;
-	if(true||!TouchReceiver.mouse) {
-		this.updateTimer = self.setInterval(function () {
-			thisStatusLight.updateStatus()
-		}, DSL.updateInterval);
-	}
-	thisStatusLight.updateStatus();
+	this.statusProvider = statusProvider;
+	this.statusProvider.addStatusListener(this);
+	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
 	var DSL=DeviceStatusLight;
@@ -5019,26 +5107,21 @@ DeviceStatusLight.setConstants=function(){
 	DSL.updateInterval=300;
 };
 DeviceStatusLight.prototype.generateCircle=function(){
-	var DSL=DeviceStatusLight;
+	let DSL=DeviceStatusLight;
 	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
 };
-DeviceStatusLight.prototype.updateStatus=function(){
-	let overallStatus = 2;
-	Device.getTypeList().forEach(function(deviceClass){
-		deviceClass.getManager().updateTotalStatus();
-		overallStatus = Math.min(deviceClass.getManager().getTotalStatus(), overallStatus); // Lower status means more error
-	});
-	switch(overallStatus) {
-		case 0:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.redColor);
-			break;
-		case 1:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.greenColor);
-			break;
-		case 2:
-			GuiElements.update.color(this.circleE,DeviceStatusLight.offColor);
-			break;
+DeviceStatusLight.prototype.updateStatus=function(status){
+	const DSL = DeviceStatusLight;
+	let color = null;
+	const statuses = DeviceManager.statuses;
+	if (status === statuses.connected) {
+		color = DSL.greenColor;
+	} else if (status === statuses.disconnected) {
+		color = DSL.redColor;
+	} else {
+		color = DSL.offColor;
 	}
+	GuiElements.update.color(this.circleE,color);
 };
 DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();
@@ -8669,7 +8752,7 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
-	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup);
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
 };
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
 	let CMD = ConnectMultipleDialog;
@@ -10215,6 +10298,44 @@ HtmlServer.setSetting=function(key,value){
 };
 HtmlServer.sendFinishedLoadingRequest = function(){
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function CallbackManager(){
+
+}
+CallbackManager.sounds = {};
+CallbackManager.sounds.recordingEnded = function(){
+	RecordingManager.interruptRecording();
+	return false;
+};
+CallbackManager.sounds.permissionGranted = function(){
+	RecordingManager.permissionGranted();
+	return true;
+};
+CallbackManager.data = {};
+CallbackManager.data.import = function(fileName){
+	SaveManager.import(fileName);
+	return true;
+};
+CallbackManager.dialog = {};
+CallbackManager.dialog.promptResponded = function(cancelled, response){
+	return false;
+};
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
+	return false;
+};
+CallbackManager.dialog.alertResponded = function(){
+	return false;
+};
+CallbackManager.robot = {};
+CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
+};
+CallbackManager.robot.discovered = function(robotList){
+	return true;
 };
 function XmlWriter(){
 

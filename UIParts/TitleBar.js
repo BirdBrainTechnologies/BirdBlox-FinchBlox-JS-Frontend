@@ -68,7 +68,7 @@ TitleBar.makeButtons=function(){
 	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer);
+	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);

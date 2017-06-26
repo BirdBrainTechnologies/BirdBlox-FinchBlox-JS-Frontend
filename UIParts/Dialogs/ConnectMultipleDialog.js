@@ -44,7 +44,7 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
-	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup);
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
 };
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
 	let CMD = ConnectMultipleDialog;

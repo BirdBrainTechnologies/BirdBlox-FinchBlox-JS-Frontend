@@ -18,6 +18,7 @@ CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
+CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
 };
@@ -29,7 +30,8 @@ CallbackManager.dialog.alertResponded = function(){
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
-	return false;
+	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
 };
 CallbackManager.robot.discovered = function(robotList){
 	return true;

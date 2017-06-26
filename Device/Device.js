@@ -4,6 +4,8 @@
 function Device(name, id){
 	this.name = name;
 	this.id = id;
+	this.status = DeviceManager.statuses.disconnected;
+	this.statusListeners = new Set();
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
@@ -42,6 +44,22 @@ Device.prototype.connect = function(){
 	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
+};
+Device.prototype.setStatus = function(status){
+	this.status = status;
+	this.statusListeners.forEach(function(object){
+		object.updateStatus(this.status);
+	}.bind(this));
+	DeviceManager.updateStatus();
+};
+Device.prototype.getStatus = function(){
+	return this.status;
+};
+Device.prototype.addStatusListener = function(object){
+	this.statusListeners.add(object);
+};
+Device.prototype.removeStatusListener = function(object){
+	this.statusListeners.delete(object);
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
