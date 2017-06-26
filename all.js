@@ -3922,6 +3922,10 @@ TitleBar.setGraphicsPart2 = function(){
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+
+	TB.titleLeftX = BlockPalette.width;
+	TB.titleRightX = TB.flagBnX - TB.buttonW;
+	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 };
 TitleBar.createBar=function(){
 	var TB=TitleBar;
@@ -4000,11 +4004,16 @@ TitleBar.updateText = function(){
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
 		}
-		let maxWidth = GuiElements.width - BlockPalette.width * 2;
+		let maxWidth = TB.titleWidth;
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		let width=GuiElements.measure.textWidth(TB.titleLabel);
 		let x=GuiElements.width/2-width/2;
 		let y=TB.height/2+TB.fontCharHeight/2;
+		if(x < TB.titleLeftX) {
+			x = TB.titleLeftX;
+		} else if(x + width > TB.titleRightX) {
+			x = TB.titleRightX - width;
+		}
 		GuiElements.move.text(TB.titleLabel,x,y);
 	}
 };
