@@ -15,7 +15,8 @@ BlockContextMenu.prototype.showMenu=function(){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
 	let layer = GuiElements.layers.inputPad;
-	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	this.menuBnList.show();

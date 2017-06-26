@@ -2,6 +2,7 @@ function Menu(button,width){
 	if(width==null){
 		width=Menu.defaultWidth;
 	}
+	Overlay.call(this, Overlay.types.menu);
 	DebugOptions.validateNumbers(width);
 	this.width=width;
 	this.x=button.x;
@@ -89,7 +90,7 @@ Menu.prototype.open=function(){
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			Overlay.addOverlay(this);
+			this.addOverlayAndCloseOthers();
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate=false;
 		}

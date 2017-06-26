@@ -1,10 +1,11 @@
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
 	}
 	if(layer == null){
 		layer = GuiElements.layers.overlay;
 	}
+	Overlay.call(this, overlayType);
 	this.x = 0;
 	this.y = 0;
 	this.bgColor=color;
@@ -45,7 +46,7 @@ BubbleOverlay.prototype.show=function(){
 	if(!this.visible) {
 		this.layerG.appendChild(this.group);
 		this.visible=true;
-		Overlay.addOverlay(this);
+		this.addOverlayAndCloseOthers();
 	}
 };
 BubbleOverlay.prototype.hide=function(){

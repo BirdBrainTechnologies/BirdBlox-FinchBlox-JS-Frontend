@@ -2,30 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/Overlay.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DebugOptions.js" afterPath="$PROJECT_DIR$/DebugOptions.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/Device.js" afterPath="$PROJECT_DIR$/Device/Device.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExecutionStatus/ExecutionStatus.js" afterPath="$PROJECT_DIR$/ExecutionStatus/ExecutionStatus.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TouchReceiver.js" afterPath="$PROJECT_DIR$/TouchReceiver.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BlockContextMenu.js" afterPath="$PROJECT_DIR$/UIParts/BlockContextMenu.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" afterPath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Button.js" afterPath="$PROJECT_DIR$/UIParts/Button.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/HBConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/HBConnectionList.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Menu/Menu.js" afterPath="$PROJECT_DIR$/UIParts/Menu/Menu.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Overlay.js" afterPath="$PROJECT_DIR$/UIParts/Overlay.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/ResultBubble.js" afterPath="$PROJECT_DIR$/UIParts/ResultBubble.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TabRow.js" afterPath="$PROJECT_DIR$/UIParts/TabRow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all.js" afterPath="$PROJECT_DIR$/all.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -48,8 +32,8 @@
       <file leaf-file-name="Menu.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/Menu/Menu.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="92" column="48" lean-forward="true" selection-start-line="92" selection-start-column="48" selection-end-line="92" selection-end-column="48" />
+            <state relative-caret-position="475">
+              <caret line="101" column="2" lean-forward="true" selection-start-line="101" selection-start-column="2" selection-end-line="101" selection-end-column="2" />
               <folding />
             </state>
           </provider>
@@ -67,37 +51,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BubbleOverlay.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BubbleOverlay.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/BubbleOverlay.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="9" lean-forward="false" selection-start-line="0" selection-start-column="9" selection-end-line="0" selection-end-column="9" />
+            <state relative-caret-position="672">
+              <caret line="48" column="40" lean-forward="false" selection-start-line="48" selection-start-column="40" selection-end-line="48" selection-end-column="40" />
               <folding>
-                <element signature="e#93#110#0" expanded="false" />
-                <element signature="e#129#171#0" expanded="false" />
-                <element signature="e#528#638#0" expanded="false" />
-                <element signature="e#686#726#0" expanded="false" />
-                <element signature="e#774#1036#0" expanded="false" />
-                <element signature="e#1079#1296#0" expanded="false" />
-                <element signature="e#1637#1676#0" expanded="false" />
-                <element signature="e#1754#3511#0" expanded="false" />
-                <element signature="e#1847#1885#0" expanded="false" />
-                <element signature="e#1941#1962#0" expanded="false" />
-                <element signature="e#2003#2041#0" expanded="false" />
-                <element signature="e#2130#2178#0" expanded="false" />
-                <element signature="e#2675#2908#0" expanded="false" />
-                <element signature="e#2786#2835#0" expanded="false" />
-                <element signature="e#2842#2905#0" expanded="false" />
-                <element signature="e#2914#3149#0" expanded="false" />
-                <element signature="e#3027#3090#0" expanded="false" />
-                <element signature="e#3097#3146#0" expanded="false" />
-                <element signature="e#3588#3777#0" expanded="false" />
-                <element signature="e#3639#3672#0" expanded="false" />
-                <element signature="e#3690#3705#0" expanded="false" />
-                <element signature="e#3735#3762#0" expanded="false" />
-                <element signature="e#3826#3876#0" expanded="false" />
-                <element signature="e#3925#3962#0" expanded="false" />
-                <element signature="e#4011#4048#0" expanded="false" />
+                <element signature="e#575#685#0" expanded="false" />
+                <element signature="e#821#1083#0" expanded="false" />
+                <element signature="e#1126#1343#0" expanded="false" />
+                <element signature="e#1691#1730#0" expanded="false" />
+                <element signature="e#1808#3565#0" expanded="false" />
+                <element signature="e#1901#1939#0" expanded="false" />
+                <element signature="e#1995#2016#0" expanded="false" />
+                <element signature="e#2057#2095#0" expanded="false" />
+                <element signature="e#2184#2232#0" expanded="false" />
+                <element signature="e#2729#2962#0" expanded="false" />
+                <element signature="e#2840#2889#0" expanded="false" />
+                <element signature="e#2896#2959#0" expanded="false" />
+                <element signature="e#2968#3203#0" expanded="false" />
+                <element signature="e#3081#3144#0" expanded="false" />
+                <element signature="e#3151#3200#0" expanded="false" />
+                <element signature="e#3642#3831#0" expanded="false" />
+                <element signature="e#3693#3726#0" expanded="false" />
+                <element signature="e#3744#3759#0" expanded="false" />
+                <element signature="e#3789#3816#0" expanded="false" />
+                <element signature="e#3880#3930#0" expanded="false" />
+                <element signature="e#3979#4016#0" expanded="false" />
+                <element signature="e#4065#4102#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -108,16 +89,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="583">
               <caret line="60" column="18" lean-forward="false" selection-start-line="60" selection-start-column="18" selection-end-line="60" selection-end-column="18" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RobotConnectionList.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="924">
-              <caret line="65" column="58" lean-forward="true" selection-start-line="65" selection-start-column="58" selection-end-line="65" selection-end-column="58" />
               <folding />
             </state>
           </provider>
@@ -323,12 +294,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ResultBubble.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ResultBubble.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/ResultBubble.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="28" column="19" lean-forward="true" selection-start-line="28" selection-start-column="19" selection-end-line="28" selection-end-column="19" />
+            <state relative-caret-position="483">
+              <caret line="24" column="24" lean-forward="true" selection-start-line="24" selection-start-column="24" selection-end-line="24" selection-end-column="24" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Overlay.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/Overlay.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="273">
+              <caret line="13" column="43" lean-forward="true" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -364,7 +347,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>markAsO</find>
       <find>markAsOv</find>
       <find>markAsOverla</find>
       <find>markAsOverlay</find>
@@ -386,13 +368,14 @@
       <find>overlay=</find>
       <find>bubbl</find>
       <find>buildui</find>
-      <find>overlay</find>
       <find>buildui\</find>
       <find>GuiElements.overlay.close()</find>
       <find>ne</find>
       <find>new B</find>
       <find>new Bub</find>
       <find>new Bubb</find>
+      <find>overlay</find>
+      <find>addover</find>
       <find>new Bubble</find>
     </findStrings>
     <replaceStrings>
@@ -444,7 +427,6 @@
         <option value="$PROJECT_DIR$/UIParts/TitleBar.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/ExecutionStatus/ExecutionStatus.js" />
-        <option value="$PROJECT_DIR$/UIParts/Overlay.js" />
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
         <option value="$PROJECT_DIR$/UIParts/Button.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/InputPad.js" />
@@ -452,17 +434,18 @@
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/MenuBnList.js" />
         <option value="$PROJECT_DIR$/UIParts/HBConnectionList.js" />
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
-        <option value="$PROJECT_DIR$/UIParts/Menu/Menu.js" />
         <option value="$PROJECT_DIR$/UIParts/TabRow.js" />
         <option value="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
         <option value="$PROJECT_DIR$/TouchReceiver.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
         <option value="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
         <option value="$PROJECT_DIR$/Device/Device.js" />
-        <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/ResultBubble.js" />
+        <option value="$PROJECT_DIR$/UIParts/Menu/Menu.js" />
+        <option value="$PROJECT_DIR$/UIParts/Overlay.js" />
+        <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
       </list>
     </option>
   </component>
@@ -1044,7 +1027,7 @@
       <workItem from="1497977565585" duration="651000" />
       <workItem from="1498051937872" duration="16885000" />
       <workItem from="1498223662619" duration="26390000" />
-      <workItem from="1498483085902" duration="6357000" />
+      <workItem from="1498483085902" duration="7588000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1141,7 +1124,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1034065000" />
+    <option name="totallyTimeSpent" value="1035296000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -2275,14 +2258,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Menu/Menu.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="92" column="48" lean-forward="true" selection-start-line="92" selection-start-column="48" selection-end-line="92" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop2.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="296">
@@ -2303,16 +2278,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="38" column="21" lean-forward="true" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Overlay.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="30" column="7" lean-forward="true" selection-start-line="30" selection-start-column="7" selection-end-line="30" selection-end-column="7" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
@@ -2507,45 +2472,60 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BubbleOverlay.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/Menu/Menu.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="9" lean-forward="false" selection-start-line="0" selection-start-column="9" selection-end-line="0" selection-end-column="9" />
-          <folding>
-            <element signature="e#93#110#0" expanded="false" />
-            <element signature="e#129#171#0" expanded="false" />
-            <element signature="e#528#638#0" expanded="false" />
-            <element signature="e#686#726#0" expanded="false" />
-            <element signature="e#774#1036#0" expanded="false" />
-            <element signature="e#1079#1296#0" expanded="false" />
-            <element signature="e#1637#1676#0" expanded="false" />
-            <element signature="e#1754#3511#0" expanded="false" />
-            <element signature="e#1847#1885#0" expanded="false" />
-            <element signature="e#1941#1962#0" expanded="false" />
-            <element signature="e#2003#2041#0" expanded="false" />
-            <element signature="e#2130#2178#0" expanded="false" />
-            <element signature="e#2675#2908#0" expanded="false" />
-            <element signature="e#2786#2835#0" expanded="false" />
-            <element signature="e#2842#2905#0" expanded="false" />
-            <element signature="e#2914#3149#0" expanded="false" />
-            <element signature="e#3027#3090#0" expanded="false" />
-            <element signature="e#3097#3146#0" expanded="false" />
-            <element signature="e#3588#3777#0" expanded="false" />
-            <element signature="e#3639#3672#0" expanded="false" />
-            <element signature="e#3690#3705#0" expanded="false" />
-            <element signature="e#3735#3762#0" expanded="false" />
-            <element signature="e#3826#3876#0" expanded="false" />
-            <element signature="e#3925#3962#0" expanded="false" />
-            <element signature="e#4011#4048#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="475">
+          <caret line="101" column="2" lean-forward="true" selection-start-line="101" selection-start-column="2" selection-end-line="101" selection-end-column="2" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/ResultBubble.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="28" column="19" lean-forward="true" selection-start-line="28" selection-start-column="19" selection-end-line="28" selection-end-column="19" />
+        <state relative-caret-position="483">
+          <caret line="24" column="24" lean-forward="true" selection-start-line="24" selection-start-column="24" selection-end-line="24" selection-end-column="24" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Overlay.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="43" lean-forward="true" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BubbleOverlay.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="48" column="40" lean-forward="false" selection-start-line="48" selection-start-column="40" selection-end-line="48" selection-end-column="40" />
+          <folding>
+            <element signature="e#575#685#0" expanded="false" />
+            <element signature="e#821#1083#0" expanded="false" />
+            <element signature="e#1126#1343#0" expanded="false" />
+            <element signature="e#1691#1730#0" expanded="false" />
+            <element signature="e#1808#3565#0" expanded="false" />
+            <element signature="e#1901#1939#0" expanded="false" />
+            <element signature="e#1995#2016#0" expanded="false" />
+            <element signature="e#2057#2095#0" expanded="false" />
+            <element signature="e#2184#2232#0" expanded="false" />
+            <element signature="e#2729#2962#0" expanded="false" />
+            <element signature="e#2840#2889#0" expanded="false" />
+            <element signature="e#2896#2959#0" expanded="false" />
+            <element signature="e#2968#3203#0" expanded="false" />
+            <element signature="e#3081#3144#0" expanded="false" />
+            <element signature="e#3151#3200#0" expanded="false" />
+            <element signature="e#3642#3831#0" expanded="false" />
+            <element signature="e#3693#3726#0" expanded="false" />
+            <element signature="e#3744#3759#0" expanded="false" />
+            <element signature="e#3789#3816#0" expanded="false" />
+            <element signature="e#3880#3930#0" expanded="false" />
+            <element signature="e#3979#4016#0" expanded="false" />
+            <element signature="e#4065#4102#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

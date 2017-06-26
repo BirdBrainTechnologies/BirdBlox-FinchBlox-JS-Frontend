@@ -35,7 +35,8 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
-	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	let overlayType = Overlay.types.connectionList;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
 	this.updateRobotList(list);

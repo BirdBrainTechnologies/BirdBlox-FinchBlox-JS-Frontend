@@ -5039,18 +5039,27 @@ DeviceStatusLight.prototype.remove=function(){
  * Created by Tom on 6/26/2017.
  */
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
- * elements are tapped.  They don't necessarily have a lot in common, so their constructor is empty. */
-function Overlay(){
-	
+ * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
+function Overlay(type){
+	this.type = type;
 }
 /* All overlays have a close function */
 Overlay.prototype.close = function() {
 	DebugOptions.markAbstract();
 };
+Overlay.prototype.addOverlayAndCloseOthers = function(){
+	Overlay.closeOverlaysOfType(this.type);
+	Overlay.addOverlay(this);
+};
 /* Initializes the static elements of the class */
 Overlay.setStatics = function(){
 	/* Keeps track of open overlays */
 	Overlay.openOverlays = new Set();
+	Overlay.types = {};
+	Overlay.types.inputPad = 1;
+	Overlay.types.resultBubble = 2;
+	Overlay.types.menu = 3;
+	Overlay.types.connectionList = 4;
 };
 Overlay.addOverlay = function(overlay){
 	if(!Overlay.openOverlays.has(overlay)) {
@@ -5070,6 +5079,13 @@ Overlay.closeOverlays = function(){
 Overlay.closeOverlaysExcept = function(overlay){
 	Overlay.openOverlays.forEach(function(currentOverlay){
 		if(currentOverlay !== overlay) {
+			currentOverlay.close();
+		}
+	});
+};
+Overlay.closeOverlaysOfType = function(type){
+	Overlay.openOverlays.forEach(function(currentOverlay){
+		if(currentOverlay.type === type) {
 			currentOverlay.close();
 		}
 	});
@@ -5205,7 +5221,8 @@ InputPad.buildPad=function(){
 	IP.visible=false;
 	/*IP.makeBg();*/
 	let layer = GuiElements.layers.inputPad;
-	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP,null,layer);
+	let overlayType = Overlay.types.inputPad;
+	IP.bubbleOverlay=new BubbleOverlay(overlayType, IP.bg,IP.buttonMargin,IP.group,IP,null,layer);
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
 	//IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
@@ -5605,13 +5622,14 @@ InputPad.relToAbsY = function(y){
 	return IP.bubbleOverlay.relToAbsY(y)
 };
 
-function BubbleOverlay(color, margin, innerGroup, parent, hMargin, layer){
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
 	}
 	if(layer == null){
 		layer = GuiElements.layers.overlay;
 	}
+	Overlay.call(this, overlayType);
 	this.x = 0;
 	this.y = 0;
 	this.bgColor=color;
@@ -5652,7 +5670,7 @@ BubbleOverlay.prototype.show=function(){
 	if(!this.visible) {
 		this.layerG.appendChild(this.group);
 		this.visible=true;
-		Overlay.addOverlay(this);
+		this.addOverlayAndCloseOthers();
 	}
 };
 BubbleOverlay.prototype.hide=function(){
@@ -5770,7 +5788,8 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	var group=GuiElements.create.group(0,0);
 	group.appendChild(textE);
 	let layer = GuiElements.layers.resultBubble;
-	this.bubbleOverlay=new BubbleOverlay(bgColor,RB.margin,group,this,RB.hMargin,layer);
+	let overlayType = Overlay.types.resultBubble;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
 	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
 	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
 }
@@ -6295,6 +6314,7 @@ function Menu(button,width){
 	if(width==null){
 		width=Menu.defaultWidth;
 	}
+	Overlay.call(this, Overlay.types.menu);
 	DebugOptions.validateNumbers(width);
 	this.width=width;
 	this.x=button.x;
@@ -6382,7 +6402,7 @@ Menu.prototype.open=function(){
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			Overlay.addOverlay(this);
+			this.addOverlayAndCloseOthers();
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate=false;
 		}
@@ -6652,7 +6672,8 @@ BlockContextMenu.prototype.showMenu=function(){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
 	let layer = GuiElements.layers.inputPad;
-	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	this.menuBnList.show();
@@ -9074,7 +9095,8 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
-	this.bubbleOverlay=new BubbleOverlay(RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	let overlayType = Overlay.types.connectionList;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
 	this.updateRobotList(list);
