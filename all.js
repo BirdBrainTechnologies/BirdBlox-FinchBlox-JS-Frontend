@@ -8935,6 +8935,10 @@ RecordingDialog.prototype.show = function(){
 	this.resumeRecordingBn = this.createResumeRecordingBn();
 	this.goToState(this.state);
 };
+RecordingDialog.prototype.hide = function(){
+	RowDialog.prototype.hide.call(this);
+	this.setCounterVisibility(false);
+};
 RecordingDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
@@ -10033,7 +10037,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('[]');
+				callbackFn('Started');
 			}
 		}, 20);
 		return;
