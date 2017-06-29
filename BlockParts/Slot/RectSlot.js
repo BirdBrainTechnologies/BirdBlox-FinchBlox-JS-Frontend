@@ -10,12 +10,14 @@
 function RectSlot(parent,key,snapType,outputType,value){
 	Slot.call(this,parent,key,Slot.inputTypes.string,snapType,outputType); //Call constructor.
 	this.enteredData=new StringData(value); //Set entered data to initial value.
-	this.buildSlot(); //Create the SVG elements that make up the Slot.
+	this.slotShape = new RectSlotShape(this, value);
+	this.slotShape.show();
 }
 RectSlot.prototype = Object.create(Slot.prototype);
 RectSlot.prototype.constructor = RectSlot;
 /* Builds the Slot's SVG elements such as its rectangle, text, and invisible hit box.
  */
+/*
 RectSlot.prototype.buildSlot=function(){
 	this.textH=BlockGraphics.valueText.charHeight; //Used for centering.
 	this.textW=0; //Will be calculated later.
@@ -23,73 +25,67 @@ RectSlot.prototype.buildSlot=function(){
 	this.textE=this.generateText(this.enteredData.getValue());
 	this.hitBoxE=this.generateHitBox(); //Creates an invisible box for receiving touches.
 };
+*/
 /* Moves the Slot's SVG elements to the specified location.
  * @param {number} x - The x coord of the Slot.
  * @param {number} y - The y coord of the Slot.
  * @fix moving hitbox is redundant with RoundSlot.
  */
 RectSlot.prototype.moveSlot=function(x,y){
-	BlockGraphics.update.path(this.slotE,x,y,this.width,this.height,3,true);//Fix! BG
-	var textX=x+this.width/2-this.textW/2; //Centers the text horizontally.
-	var textY=y+this.textH/2+this.height/2; //Centers the text vertically
-	BlockGraphics.update.text(this.textE,textX,textY); //Move the text.
-	var bGHB=BlockGraphics.hitBox; //Get data about the size of the hit box.
-	var hitX=x-bGHB.hMargin; //Compute its x and y coords.
-	var hitY=y-bGHB.vMargin;
-	var hitW=this.width+bGHB.hMargin*2; //Compute its width and height.
-	var hitH=this.height+bGHB.vMargin*2;
-	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH); //Move/resize its rectangle.
+	this.slotShape.move(x, y);
 };
 /* Makes the Slot's SVG elements invisible. Used when child is added.
  * @fix redundant with RoundSlot.
  */
 RectSlot.prototype.hideSlot=function(){
-	this.slotE.remove();
-	this.textE.remove();
-	this.hitBoxE.remove();
+	this.slotShape.hide();
 };
 /* Makes the Slot's SVG elements visible. Used when child is removed.
  * @fix redundant with RoundSlot.
  */
 RectSlot.prototype.showSlot=function(){
-	this.parent.group.appendChild(this.slotE);
-	this.parent.group.appendChild(this.textE);
-	this.parent.group.appendChild(this.hitBoxE);
+	this.slotShape.show();
 };
 /* Generates and returns an SVG text element to display the Slot's value.
  * @param {string} text - The text to add to the element.
  * @return {SVG text} - The finished SVG text element.
  * @fix redundant with RoundSlot.
  */
+/*
 RectSlot.prototype.generateText=function(text){ //Fix BG
 	var obj=BlockGraphics.create.valueText(text,this.parent.group);
 	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
 	return obj;
 };
+*/
 /* Generates and returns an SVG path element to be the rectangle part of the Slot.
  * @return {SVG path} - The finished SVG path element.
  * @fix BlockGraphics number reference.
  */
+/*
 RectSlot.prototype.generateSlot=function(){//Fix BG
 	var obj=BlockGraphics.create.slot(this.parent.group,3,this.parent.category);
 	TouchReceiver.addListenersSlot(obj,this);
 	return obj;
 };
+*/
 /* Generates and returns a transparent rectangle which enlarges the touch area of the Slot.
  * @return {SVG rect} - The finished SVG rect element.
  * @fix redundant with RoundSlot.
  */
+/*
 RectSlot.prototype.generateHitBox=function(){
 	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
 	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
 	return obj;
 };
+*/
 /* Changes the value text of the Slot. Updates parent's stack dims.
  * @param {string} text - The text to change the visible value to.
  * @fix redundant with RoundSlot.
  */
 RectSlot.prototype.changeText=function(text){
-	GuiElements.update.text(this.textE,text); //Update text.
+	this.slotShape.changeText(text);
 	if(this.parent.stack!=null) {
 		this.parent.stack.updateDim(); //Update dimensions.
 	}
@@ -99,15 +95,8 @@ RectSlot.prototype.changeText=function(text){
  * @fix redundant with RoundSlot.
  */
 RectSlot.prototype.updateDimNR=function(){
-	var bG=BlockGraphics.string; //Get dimension data.
-	this.textW=GuiElements.measure.textWidth(this.textE); //Measure text element.
-	var width=this.textW+2*bG.slotHMargin; //Add space for margins.
-	var height=bG.slotHeight; //Has no child, so is just the default height.
-	if(width<bG.slotWidth){ //Check if width is less than the minimum.
-		width=bG.slotWidth;
-	}
-	this.width=width; //Save computations.
-	this.height=height;
+	this.width = this.slotShape.width;
+	this.height = this.slotShape.height;
 };
 /* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
  * @fix BlockGraphics

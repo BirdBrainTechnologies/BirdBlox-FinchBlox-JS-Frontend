@@ -7,48 +7,53 @@
  */
 function HexSlot(parent,key,snapType){
 	Slot.call(this,parent,key,Slot.inputTypes.bool,snapType,Slot.outputTypes.bool); //Call constructor.
-	this.buildSlot(); //Create the SVG elements that make up the Slot.
+	this.slotShape = new HexSlotShape(this);
+	this.slotShape.show();
 }
 HexSlot.prototype = Object.create(Slot.prototype);
 HexSlot.prototype.constructor = HexSlot;
 /* Builds the Slot's SVG path.
  */
+/*
 HexSlot.prototype.buildSlot=function(){
 	this.slotE=this.generateSlot();
-};
+};*/
 /* Moves the Slot's SVG elements to the specified location.
  * @param {number} x - The x coord of the Slot.
  * @param {number} y - The y coord of the Slot.
  */
+
 HexSlot.prototype.moveSlot=function(x,y){
-	BlockGraphics.update.path(this.slotE,x,y,this.width,this.height,2,true);//Fix! BG
+	this.slotShape.move(x, y);
 };
 /* Makes the Slot's SVG elements invisible. Used when child is added.
  */
 HexSlot.prototype.hideSlot=function(){
-	this.slotE.remove();
+	this.slotShape.hide();
 };
 /* Makes the Slot's SVG elements visible. Used when child is removed.
  */
 HexSlot.prototype.showSlot=function(){
-	this.parent.group.appendChild(this.slotE);
+	this.slotShape.show();
 };
+
 /* Generates and returns an SVG path element to be the hexagon part of the Slot.
  * @return {SVG path} - The finished SVG path element.
  * @fix BlockGraphics number reference.
  */
+/*
 HexSlot.prototype.generateSlot=function(){
 	var obj=BlockGraphics.create.slot(this.parent.group,2,this.parent.category);
 	TouchReceiver.addListenersChild(obj,this.parent); //Adds event listeners.
 	return obj;
 };
+*/
 /* Computes the dimensions of the SVG elements making up the Slot.
  * Only called if has no child.
  */
 HexSlot.prototype.updateDimNR=function(){
-	var bG=BlockGraphics.predicate;
-	this.width=bG.slotWidth; //Has no child or value, so just use defaults.
-	this.height=bG.slotHeight
+	this.width = this.slotShape.width;
+	this.height = this.slotShape.height;
 };
 /* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
  * @fix BlockGraphics
