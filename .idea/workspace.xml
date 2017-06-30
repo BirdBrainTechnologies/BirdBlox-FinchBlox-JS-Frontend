@@ -171,8 +171,8 @@
       <file leaf-file-name="all.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/all.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="19" column="22" lean-forward="true" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+            <state relative-caret-position="441">
+              <caret line="21" column="28" lean-forward="true" selection-start-line="21" selection-start-column="28" selection-end-line="21" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -1070,7 +1070,7 @@
       <workItem from="1498223662619" duration="26390000" />
       <workItem from="1498483085902" duration="23485000" />
       <workItem from="1498749111498" duration="29338000" />
-      <workItem from="1498830368049" duration="8099000" />
+      <workItem from="1498830368049" duration="8185000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1167,7 +1167,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1088630000" />
+    <option name="totallyTimeSpent" value="1088716000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -2137,8 +2137,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/all.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="19" column="22" lean-forward="true" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+        <state relative-caret-position="441">
+          <caret line="21" column="28" lean-forward="true" selection-start-line="21" selection-start-column="28" selection-end-line="21" selection-end-column="28" />
           <folding />
         </state>
       </provider>
