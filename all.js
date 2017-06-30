@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading13";
+	debug.innerHTML = "Loading14";
 }, false);
 
 function DebugOptions(){
@@ -10824,4 +10824,18 @@ SaveManager.currentDoc = function(){ //Autosaves
 	result.data = XmlWriter.docToText(CodeManager.createXml());
 	result.filename = SaveManager.fileName;
 	return result;
+};
+
+SaveManager.openData = function(fileName, data){
+	let fileName = HtmlServer.decodeHtml(fileName);
+	let data = HtmlServer.decodeHtml(data);
+	if(SaveManager.fileName == null){
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+	});
 };
