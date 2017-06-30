@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading3";
+	debug.innerHTML = "Loading4";
 }, false);
 
 function DebugOptions(){
@@ -7589,8 +7589,7 @@ CodeManager.beatsToMs=function(beats){
 };
 CodeManager.setSoundTempo=function(newTempo){
 	if(isFinite(newTempo)&&!isNaN(newTempo)){
-		}
-		else if(newTempo<=20){
+		if(newTempo<=20){
 			CodeManager.sound.tempo=20;
 		}
 		else{
