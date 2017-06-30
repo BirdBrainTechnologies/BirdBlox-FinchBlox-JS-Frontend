@@ -1,9 +1,6 @@
 "use strict";
 var FrontendVersion = 393;
 
-document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading14";
-}, false);
 
 function DebugOptions(){
 	var DO = DebugOptions;
@@ -1211,6 +1208,10 @@ function GuiElements(){
 	});
 }
 /* Runs GuiElements once all resources are loaded. */
+document.addEventListener('DOMContentLoaded', function() {
+	GuiElements.alert("Loading");
+	(DebugOptions.safeFunc(GuiElements))();
+}, false);
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	HtmlServer();
@@ -5549,7 +5550,7 @@ InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
 	var IP=InputPad;
 	IP.triOffset=(InputPad.width-InputPad.triangleW)/2;
 	IP.halfOffset=InputPad.width/2;
-
+	
 	var arrowDown=(lowerY+IP.tallH>GuiElements.height);
 	var yCoord=lowerY+IP.triangleH;
 	var xCoord=x-IP.halfOffset;
@@ -6991,7 +6992,7 @@ DisplayBox.setGraphics=function(){
 	DB.charHeight=25;
 	DB.screenMargin=60;
 	DB.rectH=50;
-
+	
 	DB.rectX=DB.screenMargin;
 	DB.rectY=GuiElements.height-DB.rectH-DB.screenMargin;
 	DB.rectW=GuiElements.width-2*DB.screenMargin;
@@ -7096,7 +7097,7 @@ CodeManager.move.start=function(block,x,y){
 	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
 		Overlay.closeOverlays(); //Close any visible overlays.
 		move.moving=true; //Record that a Block is now moving.
-		/* Disconnect the Block from its current BlockStack to form a new BlockStack
+		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
 		var stack=block.unsnap();
 		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
@@ -7104,7 +7105,7 @@ CodeManager.move.start=function(block,x,y){
 		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
 		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
-
+		
 		//Store other information about how the BlockStack can connect to other Blocks.
 		move.bottomOpen=stack.getLastBlock().bottomOpen;
 		move.topOpen=stack.firstBlock.topOpen;
@@ -7119,7 +7120,7 @@ CodeManager.move.start=function(block,x,y){
 		move.stack=stack; //Store stack.
 	}
 }
-/* Updates the position of the currently moving BlockStack.
+/* Updates the position of the currently moving BlockStack.  
  * Also highlights the slot that fits it best (if any).
  * @param {number} x - The x coord of the user's finger.
  * @param {number} y - The y coord of the user's finger.
@@ -7206,7 +7207,7 @@ CodeManager.move.interrupt=function(){
 		move.moving = false; //There are now no moving BlockStacks.
 	}
 }
-/* Returns a boolean indicating if a point falls within a rectangular region.
+/* Returns a boolean indicating if a point falls within a rectangular region. 
  * Useful for determining which Blocks a moving BlockStack can connect to.
  * @param {number} x1 - The x coord of the point.
  * @param {number} y1 - The y coord of the point.
@@ -7278,7 +7279,7 @@ CodeManager.stop=function(){
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
 	DisplayBox.hide(); //Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
-	                       // Note: Tones are not allowed to be async, so they
+	                       // Note: Tones are not allowed to be async, so they 
 	                       // must be stopped manually
 }
 /* Stops the update timer.
@@ -7589,7 +7590,10 @@ CodeManager.beatsToMs=function(beats){
 };
 CodeManager.setSoundTempo=function(newTempo){
 	if(isFinite(newTempo)&&!isNaN(newTempo)){
-		if(newTempo<=20){
+		if(newTempo>=500){
+			CodeManager.sound.tempo=500;
+		}
+		else if(newTempo<=20){
 			CodeManager.sound.tempo=20;
 		}
 		else{
@@ -7699,7 +7703,7 @@ TabManager.updateAvailableMessages=function(){
 /**
  * @returns {ExecutionStatus}
  */
-TabManager.updateRun=function(){
+TabManager.updateRun=function(){	
 	if(!this.isRunning){
 		return false;
 	}
@@ -8482,7 +8486,7 @@ RowDialog.prototype.createContent = function(){
 	return rowGroup;
 };
 RowDialog.prototype.createRow = function(index, y, width, contentGroup){
-
+	
 };
 RowDialog.prototype.createCenteredBns = function(){
 	var RD = RowDialog;
@@ -9723,7 +9727,7 @@ BlockStack.prototype.snap=function(block){ //Fix! remove redundant code.
 	block.stack.remove();
 	block.changeStack(this);
 	oldG.remove();
-
+	
 	this.updateDim();
 };
 /* Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
@@ -10827,8 +10831,8 @@ SaveManager.currentDoc = function(){ //Autosaves
 };
 
 SaveManager.openData = function(fileName, data){
-	let fileName = HtmlServer.decodeHtml(fileName);
-	let data = HtmlServer.decodeHtml(data);
+	fileName = HtmlServer.decodeHtml(fileName);
+	data = HtmlServer.decodeHtml(data);
 	if(SaveManager.fileName == null){
 		SaveManager.loadFile(data);
 		SaveManager.saveCurrentDoc(false, fileName, true);
@@ -10839,3 +10843,6020 @@ SaveManager.openData = function(fileName, data){
 		SaveManager.saveCurrentDoc(false, fileName, true);
 	});
 };
+
+//Refactoring...
+/**
+ * Block is an abstract class that represents an executable block.
+ * Blocks are nearly always contained within BlockStacks or DisplayStacks.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  
+ * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
+ * @constructor
+ * TODO: remove the type parameter and use blockShape and instead.
+ * @param {number} type - The shape of the Block.  0=Command, 1=Reporter, 2=Predicate, 4=Hat, 5=Loop, 6=DoubleLoop.
+ * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
+ * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
+ * @param {number} y - The y coord of the Block.
+ * @param {string} category - The Block's category in string form.
+ */
+function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=Predicate Fix! BG
+	this.blockTypeName=this.constructor.name; //Keeps track of what type of Block this is.
+
+	this.x=x; //Store coords
+	this.y=y;
+	this.type=type; //Fix! remove this property
+	this.bottomOpen=(type===0||type===4||type===5||type===6); //Can Blocks be attached to the bottom of this Block?
+	this.topOpen=(type===0||type===5||type===6); //Can Blocks be attached to the top of this Block?
+	this.returnsValue=(returnType!==Block.returnTypes.none); //Does this Block attack to Slots and return a value?
+	this.returnType=returnType; //What type of value does this Block return?
+	this.hasBlockSlot1=(type===5||type===6); //Is this Block like an if block that has a special BlockSlot?
+	this.hasBlockSlot2=(type===6); //Does it have two BlockSlots?
+	this.hasHat=(type===4); //Is it a HatBlock?
+	
+	this.group=GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
+	this.parent=null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
+	this.parts=[]; //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	this.slots=[]; //The slots array just holds the Slots.
+	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
+	this.category=category;
+	this.isGlowing=false;
+	
+	this.stack=null; //It has no Stack yet.
+	this.path=this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
+	this.height=0; //Will be set later when the Block's dimensions are updated.
+	this.width=0;
+	this.runMem=function(){}; //serves as a place for the block to store info while running
+	if(this.bottomOpen){
+		this.nextBlock=null; //Reference to the Block below this one.
+	}
+	if(this.returnsValue){
+		this.resultData=null; //Stores the Data to be passed on to the Slot containing this Block.
+	}
+	if(this.hasBlockSlot1){
+		this.topHeight=0; //The height of just the top of the Block (where the LabelText and Slots are)
+		this.blockSlot1=new BlockSlot(this);
+	}
+	if(this.hasBlockSlot2){
+		//The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
+		this.midHeight=0;
+		this.midLabel=new LabelText(this,this.midLabelText); //The text to appear in the middle section (i.e. "else");
+		this.blockSlot2=new BlockSlot(this);
+	}
+}
+/**
+ * Sets the possible values for Block.returnTypes.
+ */
+Block.setConstants=function(){
+	Block.returnTypes=function(){};
+	Block.returnTypes.none=0; //A command Block always is Block.returnTypes.none.
+	Block.returnTypes.num=1;
+	Block.returnTypes.string=2;
+	Block.returnTypes.bool=3;
+	Block.returnTypes.list=4;
+};
+/**
+ * Converts an x coord relative to the Block to an x coord relative to the screen
+ * @param {number} x
+ * @returns {number}
+ */
+Block.prototype.relToAbsX=function(x){
+	if(this.stack!=null) {
+		return this.stack.relToAbsX(x + this.x);
+	}
+	return x + this.x;
+};
+/**
+ * Converts a y coord relative to the Block to a y coord relative to the screen
+ * @param {number} y
+ * @returns {number}
+ */
+Block.prototype.relToAbsY=function(y){
+	if(this.stack!=null) {
+		return this.stack.relToAbsY(y + this.y);
+	}
+	return y + this.y;
+};
+/**
+ * Converts an x coord relative to the screen to an x coord relative to the Block
+ * @param x
+ * @returns {number}
+ */
+Block.prototype.absToRelX=function(x){
+	if(this.stack!=null) {
+		return this.stack.absToRelX(x) - this.x;
+	}
+	return x - this.x;
+};
+/**
+ * Converts a y coord relative to the screen to a y coord relative to the Block
+ * @param y
+ * @returns {number}
+ */
+Block.prototype.absToRelY=function(y){
+	if(this.stack!=null) {
+		return this.stack.absToRelY(y) - this.y;
+	}
+	return y - this.y;
+};
+/**
+ * Returns the x coord of the Block relative to the screen (not the group it is contained in).
+ * @return {number} - The x coord of the Block relative to the screen.
+ */
+Block.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the Block relative to the screen.
+ * @return {number} - The y coord of the Block relative to the screen.
+ */
+Block.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+/**
+ * Creates and returns the main SVG path element for the Block.
+ * @return {object} - The main SVG path element for the Block.
+ */
+Block.prototype.generatePath=function(){
+	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	TouchReceiver.addListenersChild(pathE,this);
+	return pathE;
+};
+/**
+ * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
+ * @param {LabelText|BlockIcon|Slot} part - part to add.
+ */
+Block.prototype.addPart=function(part){
+	this.parts.push(part);
+	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
+		this.slots.push(part);
+	}
+};
+/**
+ * Moves the Block and sets its this.x and this.y values.
+ * @param {number} x - New x coord.
+ * @param {number} y - New y coord.
+ */
+Block.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	//All parts of the Block are contained within its group to allow for easy movement.
+	GuiElements.move.group(this.group,x,y);
+};
+/**
+ * Recursively stops the Block, its Slots, and any subsequent Blocks.
+ */
+Block.prototype.stop=function(){
+	this.running=0; //Stop this Block.
+	this.runMem = {}; //Clear memory
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].stop(); //Stop this Block's Slots.
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.stop(); //Stop the BlockSlots.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.stop();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.stop(); //Stop the next Block.
+	}
+};
+/**
+ * Updates this currently executing Block and returns if the Block is still running
+ * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
+ */
+Block.prototype.updateRun=function(){
+	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
+	if(this.running===0||this.running===3){
+		for(let i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution
+			this.slots[i].stop();
+		}
+		this.running=1; //Now the Block is ready to run its Slots.
+	}
+	let myExecStatus; //The value to return.
+	if(this.running===1){ //If the Block is currently waiting on its Slots...
+		for(let i=0;i<this.slots.length;i++){
+			//Check to see if each Slot is done and update the first Slot that isn't done.
+			let slotExecStatus = this.slots[i].updateRun();
+			//If the slot is still running...
+			if(slotExecStatus.isRunning()){
+				//The Block is still running and will execute again next time
+				return new ExecutionStatusRunning();
+			} else if(slotExecStatus.hasError()) {
+				//If the slot through an error, the Block is done running, and will pass the error up the call stack.
+				this.running = 3;
+				return slotExecStatus;
+			}
+		}
+		this.running=2; //If all Slots are done running, the Block itself may now run.
+		//This function is overridden by the class of the particular Block.
+		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
+		myExecStatus = this.startAction();
+	}
+	else if(this.running === 2){ //If the Block is currently running, update it.
+		//This function is also overridden and is called repeatedly until the Block is done running.
+		myExecStatus = this.updateAction();
+	}
+	if(!myExecStatus.isRunning()){ //If the block is done running...
+		if(this.running !== 0) {
+			this.running = 3; //Record that the Block is done, provided that it was started
+		}
+		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
+	}
+	return myExecStatus; //Return a boolean indicating if this Block is done.
+};
+/**
+ * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
+ * @return {ExecutionStatus} - indicating if it has finished.
+ */
+Block.prototype.startAction=function(){
+	return new ExecutionStatusRunning(); //Still running
+};
+/**
+ * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
+ * @return {ExecutionStatus} - The next Block to run or a boolean indicating if it has finished.
+ */
+Block.prototype.updateAction=function(){
+	return new ExecutionStatusRunning(); //Still running //Fix! by default this should be false.
+};
+/**
+ * Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
+ * Only used if Block returns a value.
+ * Once the Block returns its value, it is done and can reset its state.
+ * @return {Data} - The result of the Block's execution.
+ */
+Block.prototype.getResultData=function(){
+	DebugOptions.assert(this.returnsValue);
+	if(this.running === 3){ //Only return data if the Block is done running.
+		this.running = 0; //Reset the Block's state. Prevents same data from ever being re-returned
+		return this.resultData; //Access stored result data and return it.
+	}
+	return null; //If called when the block is not done running, return null. This should never happen.
+};
+/**
+ * Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
+ * @param {BlockStack} stack - The stack the Blocks will be moved to.
+ */
+Block.prototype.changeStack=function(stack){
+	this.stack=stack; //Move this Block to the stack
+	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
+	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.changeStack(stack); //Tell the next block to move.
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.changeStack(stack); //If this block is a loop/if tell its contents to move.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
+	}
+};
+/**
+ * Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
+ * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
+ * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
+ */
+Block.prototype.updateStackDim=function(){
+	//Slots are updated separately by updateStackDimRI.
+	if(this.blockSlot1!=null){
+		this.blockSlot1.updateStackDim(); //If this block is a loop/if tell its contents to update.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.updateStackDim(); //If it has a second BlockSlot, update it too.
+	}
+	this.updateStackDimRI(); //Update the stack dimensions using information from this Block.
+	if(this.nextBlock!=null){
+		this.nextBlock.updateStackDim(); //Tell the next block to update.
+	}
+};
+/**
+ * Handles more of the recursion for updateStackDim.
+ * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
+ * This allows other functions to avoid unnecessary updates when full recursion is not needed.
+ * updateStackDimO handled the actual updates.
+ */
+Block.prototype.updateStackDimRI=function(){
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].updateStackDim(); //Pass message on to Slots.
+	}
+	this.updateStackDimO(); //Update this Block.
+};
+/**
+ * Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
+ * It is called recursively by updateStackDim and updateStackDimRI.
+ * The stack has two bounding boxes. Both are used when looking for potential Blocks to snap to.
+ * Reporters/predicates can snap to the large r bounding box.
+ * Commands can snap to the smaller c bounding box.
+ * (the r box is larger because they can be snapped to the middle of other blocks while command blocks can't)
+ * The point of stack bounding boxes is that when looking for potential Blocks to snap only those inside a matching
+ * stack have to be investigated.
+ */
+Block.prototype.updateStackDimO=function(){
+	let sDim=this.stack.dim; //Loads the stack's dimension data.
+	let snap=BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
+	if(this.bottomOpen||this.topOpen){ //Only update the c box if this is a command block //Fix! use !this.returnsValue
+		let cx1=this.x-snap.left; //Create bounding rectangle for this particular command Block
+		let cy1=this.y-snap.top;
+		let cx2=this.x+snap.right;
+		let cy2=this.y+this.height+snap.bottom;
+		if(cx1<sDim.cx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+			sDim.cx1=cx1;
+		}
+		if(cy1<sDim.cy1){
+			sDim.cy1=cy1;
+		}
+		if(cx2>sDim.cx2){
+			sDim.cx2=cx2;
+		}
+		if(cy2>sDim.cy2){
+			sDim.cy2=cy2;
+		}
+	}
+	let rx1=this.x; //The r bounding box is just the size of the Block itself.
+	let ry1=this.y;
+	let rx2=this.x+this.width;
+	let ry2=this.y+this.height;
+	if(rx1<sDim.rx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+		sDim.rx1=rx1;
+	}
+	if(ry1<sDim.ry1){
+		sDim.ry1=ry1;
+	}
+	if(rx2>sDim.rx2){
+		sDim.rx2=rx2;
+	}
+	if(ry2>sDim.ry2){
+		sDim.ry2=ry2;
+	}
+	//The Stacks dimensions now include the Block.
+	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
+};
+/**
+ * Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
+ * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
+ */
+Block.prototype.updateDim=function(){
+	let bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
+	if(this.topOpen||this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
+		bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
+	}
+	let width=0;
+	width+=bG.hMargin; //The left margin of the Block.
+	let height=0;
+	for(let i=0;i<this.parts.length;i++){
+		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
+		width+=this.parts[i].width; //Fill the width of the middle of the Block
+		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
+			height=this.parts[i].height;
+		}
+		if(i<this.parts.length-1){
+			width+=BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		}
+	}
+	width+=bG.hMargin; //Add the right margin of the Block.
+	height+=2*bG.vMargin; //Add the bottom and top margins of the Block.
+	if(height<bG.height){ //If the height is less than the min height, fix it.
+		height=bG.height;
+	}
+	if(this.hasBlockSlot1){ //If it has a BlockSlot update that.
+		this.topHeight=height; //The topHeight is the height of everything avove the BlockSlot.
+		this.blockSlot1.updateDim(); //Update the BlockSlot.
+		height+=this.blockSlot1.height; //The total height, however, includes the BlockSlot.
+		height+=BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
+	}
+	if(this.hasBlockSlot2){ //If the Block has a second BlockSlot...
+		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
+		this.midHeight=this.midLabel.height; //Add the Label's height to the total.
+		this.midHeight+=2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
+		if(this.midHeight<bG.height){ //If it's less than the minimum, adjust it.
+			this.midHeight=bG.height;
+		}
+		height+=this.midHeight; //Add the midHeight to the total.
+		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
+		height+=this.blockSlot2.height; //Add its height to the total.
+	}
+	//If the Block was a loop or DoubleLoop now we are dealing with its actual properties (not those of command)
+	bG=BlockGraphics.getType(this.type);
+	if(width<bG.width){ //If it is less than the minimum width, adjust it.
+		width=bG.width;
+	}
+	this.resize(width,height); //Resize this Block to the new widths.
+	if(this.nextBlock!=null){
+		this.nextBlock.updateDim(); //Pass the message to the next Block.
+	}
+};
+/**
+ * Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
+ * The BlockStack calls this function after the updateDim function, so all sizes are correct.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * @return {number} - The width of the current block, indicating how much the x should shift over.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
+Block.prototype.updateAlign=function(x,y){
+	let bG=BlockGraphics;
+	this.updateAlignRI(x,y); //Update recursively within the block.
+	if(this.hasBlockSlot1){ //Then tell all susequent blocks to align.
+		this.blockSlot1.updateAlign(this.x+bG.loop.side,this.y+this.topHeight);
+	}
+	if(this.hasBlockSlot2){
+		this.blockSlot2.updateAlign(this.x+bG.loop.side,this.y+this.topHeight+this.blockSlot1.height+this.midHeight);
+		this.midLabel.updateAlign(bG.loop.side,this.topHeight+this.blockSlot1.height+this.midHeight/2);
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.updateAlign(this.x,this.y+this.height);
+	}
+	return this.width;
+};
+/**
+ * Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
+Block.prototype.updateAlignRI=function(x,y){
+	this.move(x,y); //Move to the desired location
+	let bG=BlockGraphics.getType(this.type);
+	let yCoord=this.height/2; //Compute coords for internal parts.
+	let xCoord=0;
+	if(this.hasBlockSlot1){
+		yCoord=this.topHeight/2; //Internal parts measure their y coords from the center of the block.
+	}
+	if(this.bottomOpen||this.topOpen){
+		bG=BlockGraphics.command;
+	}
+	xCoord+=bG.hMargin;
+	for(let i=0;i<this.parts.length;i++){
+		xCoord+=this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
+		if(i<this.parts.length-1){
+			xCoord+=BlockGraphics.block.pMargin;
+		}
+	}
+};
+/**
+ * Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
+ * @param {number} width - The desired width of the Block.
+ * @param {number} height - The desired height of the Block.
+ */
+Block.prototype.resize=function(width,height){
+	let BG=BlockGraphics;
+	//First set width and height properties.
+	this.width=width;
+	this.height=height;
+	//Then collect other necessary information.
+	let innerHeight1=0;
+	let innerHeight2=0;
+	let midHeight=0;
+	if(this.hasBlockSlot1){
+		innerHeight1=this.blockSlot1.height;
+	}
+	if(this.hasBlockSlot2){
+		innerHeight2=this.blockSlot2.height;
+		midHeight=this.midHeight;
+	}
+	//Tell BlockGraphics to change the path description to match the new properties.
+	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
+};
+/**
+ * Recursively searches for the Block with best fits the currently moving BlockStack.
+ * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
+ * A command block attempts to find a connection between its bottom and the moving stack's top.
+ * Connections to the top of the stack's findBestFit.
+ */
+Block.prototype.findBestFit=function(){
+	let move=CodeManager.move;
+	let fit=CodeManager.fit;
+	let x=this.getAbsX(); //Get coords to compare.
+	let y=this.getAbsY();
+	let height = this.relToAbsY(this.height) - y;
+	let hasMatch = false;
+
+	if(move.returnsValue) { //If a connection between the stack and block are possible...
+		let hasMatch = false;
+		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
+			for(let i=0;i<this.slots.length;i++){
+				let slotHasMatch = this.slots[i].findBestFit();
+				hasMatch = slotHasMatch || hasMatch;
+			}
+		}
+	}
+	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
+		let snap=BlockGraphics.command.snap; //Load snap bounding box
+		//see if corner of moving block falls within the snap bounding box.
+		let snapBLeft=x-snap.left;
+		let snapBTop=y-snap.top;
+		let snapBWidth=snap.left+snap.right;
+		let snapBHeight=snap.top+height+snap.bottom;
+		//Check if point falls in a rectangular range.
+		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)) {
+			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			let yDist = move.topY - (y + this.height);
+			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
+				fit.found = true; //If so, save it and other helpful infromation.
+				fit.bestFit = this;
+				fit.dist = dist;
+			}
+		}
+	}
+	if(this.hasBlockSlot1){ //Pass the message on recursively.
+		this.blockSlot1.findBestFit();
+	}
+	if(this.hasBlockSlot2){
+		this.blockSlot2.findBestFit();
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.findBestFit();
+	}
+	return hasMatch;
+};
+/**
+ * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
+ * The indicator is a different color/shape depending on the Block's type and if it is running.
+ */
+Block.prototype.highlight=function(){
+	if(this.bottomOpen){
+		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
+	}
+	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
+		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen=false");
+	}
+};
+/**
+ * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
+ * @param {Block} block - The first Block in the stack to attach to this Block.
+ */
+Block.prototype.snap=function(block){ //Fix! documentation
+	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
+	let bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
+	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
+		let bG=BlockGraphics.command;
+		//Disconnect the blocks after this Block and shift them over to make room.
+		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.stack.getHeight()+bG.shiftY);
+	}
+	let stack=this.stack;
+	//If the Block we are inserting is part of a stack...
+	if(block.stack!=null) {
+		//Make it glow if this stack is running
+		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code. x3 in Stack, BlockStack, and Slot ---Refactor Marker---
+			block.glow(); //Recursively applied glow effect
+		}
+		//Stop the stack being added if this stack is stopped
+		else if (!stack.isRunning && block.stack.isRunning) {
+			block.stack.stop();
+		}
+		//The added block is stopped, but still glows as part of a running stack.
+		else if (stack.isRunning && block.isRunning) {
+			block.stop();
+		}
+	}
+	let upperBlock=this; //The Block which will go above the inserted stack.
+	let lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
+	let topStackBlock=block; //The top Block in the stack to be inserted.
+
+	//The top of where the stack is inserted note which Blocks are above/below them.
+	upperBlock.nextBlock=topStackBlock;
+	topStackBlock.parent=upperBlock;
+	//The bottom of where the stack is inserted does the same.
+	bottomStackBlock.nextBlock=lowerBlock;
+	if(lowerBlock!=null){ //There might not be a Block below the inserted stack.
+		lowerBlock.parent=bottomStackBlock;
+	}
+	let oldG=null;
+	if(block.stack!=null) {
+		oldG=block.stack.group; //Get a handle to the old stack's group
+		block.stack.remove(); //Remove the old stack.
+	}
+	if(this.stack!=null) {
+		block.changeStack(this.stack); //Move the block over into this stack
+	}
+	if(oldG!=null) {
+		oldG.remove(); //Remove the old stack's group.
+	}
+	if(this.stack!=null) {
+		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		this.stack.tab.updateArrows();
+	}
+};
+/**
+ * Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+ * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
+ */
+Block.prototype.unsnap=function(){
+	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
+	if(this.parent!=null){
+		if(this.parent.isSlot||this.parent.isBlockSlot){ //Sees if it is attached to a Slot not another Block.
+			this.parent.removeChild(); //Leave the Slot.
+			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
+		}
+		else{ //This Block is connected to another Block.
+			this.parent.nextBlock=null; //Disconnect from parent Block.
+			this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
+		}
+		this.parent=null; //Delete reference to parent Block/Slot/BlockSlot.
+		//Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
+		return new BlockStack(this,this.stack.getTab());
+	}
+	//If the Block already had no parent, just return this Block's stack.
+	return this.stack;
+};
+/**
+ * Recursively finds and returns the last Block in this BlockStack.
+ * @return {Block} - The last Block in this BlockStack.
+ */
+Block.prototype.getLastBlock=function(obj){
+	if(this.nextBlock==null){
+		return this; //This Block is the last one.
+	}
+	else{
+		return this.nextBlock.getLastBlock(); //Try the next Block.
+	}
+};
+/**
+ * Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
+ * @return {number} - The height of this Block and all subsequent Blocks.
+ */
+Block.prototype.addHeights=function(){
+	if(this.nextBlock!=null){
+		return this.height+this.nextBlock.addHeights(); //Return this Block's height plus those below it.
+	}
+	else{
+		return this.height; //This is the last Block. Return its height.
+	}
+};
+/* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @return {Block} - This Block's copy.
+ */
+/**
+ * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @param {number} x - The new Block's x coord.
+ * @param {number} y - The new Block's y coord.
+ * @return {Block} - This Block's copy.
+ */
+Block.prototype.duplicate = function(x, y){
+	let myCopy = null;
+	if(this.variable != null){ //Copy variable data if this is a variable Block.
+		myCopy = new this.constructor(x, y, this.variable);
+	}
+	else if(this.list != null){
+		myCopy = new this.constructor(x, y, this.list);
+	}
+	else {
+		myCopy = new this.constructor(x, y);
+	}
+	myCopy.copyFrom(this);
+	return myCopy;
+};
+/**
+ * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ */
+Block.prototype.copyFrom = function(block){
+	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
+		this.slots[i].copyFrom(block.slots[i]);
+	}
+	if(this.blockSlot1!=null){ //Copy the contents of its BlockSlots.
+		this.blockSlot1.copyFrom(block.blockSlot1);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.copyFrom(block.blockSlot2);
+	}
+	if(block.nextBlock!=null){ //Copy subsequent Blocks.
+		this.nextBlock=block.nextBlock.duplicate(0,0);
+		this.nextBlock.parent=this;
+	}
+};
+
+/* Returns an entirely text-based version of the Block for display in dialogs.
+ * May exclude a slot and replace if with "___".
+ * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
+ * @return {string} - The finished text summary.
+ */
+Block.prototype.textSummary=function(slotToExclude){
+	let summary="";
+	for(let i=0;i<this.parts.length;i++){
+		if(this.parts[i]==slotToExclude){
+			summary+="___"; //Replace slot with underscores.
+		}
+		else{
+			summary+=this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
+		}
+		if(i<this.parts.length-1){ //Add space between part descriptions.
+			summary+=" ";
+		}
+	}
+	return summary;
+};
+/* Overridden by subclasses. Alerts Block that the flag was clicked. Most Blocks won't respond to this directly.
+ */
+Block.prototype.eventFlagClicked=function(){
+	
+};
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.eventBroadcast=function(message){
+
+};
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.checkBroadcastRunning=function(message){
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots. */
+Block.prototype.checkBroadcastMessageAvailable=function(message){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+/* Recursively updates the available broadcast messages.
+ */
+Block.prototype.updateAvailableMessages=function(){
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].updateAvailableMessages();
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.updateAvailableMessages();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.updateAvailableMessages();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.updateAvailableMessages();
+	}
+};
+/* Deletes the Block's running memory (memory reserved for computations related to execution)
+ */
+Block.prototype.clearMem=function(){
+	this.runMem=new function(){}; //Delete all runMem.
+	for(let i=0;i<this.slots.length;i++){ //NOT recursive.
+		this.slots[i].clearMem(); //Removes resultData and resets running state to 0.
+	}
+};
+/* Returns the result of the Block's execution.
+ * The data is then removed to prevent the result from being returned again.
+ */
+Block.prototype.getResultData=function(){
+	let result=this.resultData;
+	this.resultData=null;
+	return result;
+};
+/* Recursively adds a white outline to indicate that the BlockStack is running. */
+Block.prototype.glow=function(){
+	BlockGraphics.update.glow(this.path);
+	this.isGlowing=true; //Used by other classes to determine things like highlight color.
+	if(this.blockSlot1!=null){
+		this.blockSlot1.glow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.glow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.glow();
+	}
+};
+/* Recursively removes the outline. */
+Block.prototype.stopGlow=function(){
+	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	this.isGlowing=false;
+	if(this.blockSlot1!=null){
+		this.blockSlot1.stopGlow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.stopGlow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.stopGlow();
+	}
+};
+
+Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
+	xmlBlocks.appendChild(this.createXml(xmlDoc));
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.writeToXml(xmlDoc,xmlBlocks);
+	}
+};
+Block.prototype.createXml=function(xmlDoc){
+	let block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	let slots=XmlWriter.createElement(xmlDoc,"slots");
+	XmlWriter.setAttribute(slots,"keyVal","true");
+	for(let i=0;i<this.slots.length;i++){
+		slots.appendChild(this.slots[i].createXml(xmlDoc));
+	}
+	block.appendChild(slots);
+	if(this.blockSlot1!=null){
+		let blockSlots=XmlWriter.createElement(xmlDoc,"blockSlots");
+		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
+		if(this.blockSlot2!=null){
+			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
+		}
+		block.appendChild(blockSlots);
+	}
+	return block;
+};
+Block.importXml=function(blockNode){
+	let type=XmlWriter.getAttribute(blockNode,"type");
+	let block;
+	try {
+		if (type.substring(0, 2) == "B_") {
+			if(window[type].importXml!=null){
+				return window[type].importXml(blockNode);
+			}
+			else {
+				block = new window[type](0, 0);
+			}
+		}
+		else{
+			return null;
+		}
+	}
+	catch(e) {
+		return null;
+	}
+	block.copyFromXml(blockNode);
+	return block;
+};
+Block.prototype.importSlotXml = function(slotsNode){
+	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
+	let slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
+	if(keyVal){
+		for(let i=0;i<this.slots.length;i++){
+			let key = this.slots[i].getKey();
+			let slot = XmlWriter.findNodeByKey(slotNodes, key);
+			if(slot != null) {
+				this.slots[i].importXml(slot);
+			}
+		}
+	}
+	else{
+		for(let i=0;i<slotNodes.length&&i<this.slots.length;i++){
+			this.slots[i].importXml(slotNodes[i]);
+		}
+	}
+};
+Block.prototype.copyFromXml = function(blockNode){
+	let slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	this.importSlotXml(slotsNode);
+	let blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
+	let blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	if(this.blockSlot1!=null&&blockSlotNodes.length>=1){
+		this.blockSlot1.importXml(blockSlotNodes[0]);
+	}
+	if(this.blockSlot2!=null&&blockSlotNodes.length>=2){
+		this.blockSlot2.importXml(blockSlotNodes[1]);
+	}
+};
+Block.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Block.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Block.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Block.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Block.prototype.checkVariableUsed=function(variable){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Block.prototype.checkListUsed=function(list){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+Block.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Block.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+Block.prototype.countDevicesInUse=function(deviceClass){
+	let largest=1;
+	for(let i=0;i<this.slots.length;i++){
+		largest=Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
+	}
+	if(this.blockSlot1!=null){
+		largest=Math.max(largest,this.blockSlot1.countDevicesInUse(deviceClass));
+	}
+	if(this.blockSlot2!=null){
+		largest=Math.max(largest,this.blockSlot2.countDevicesInUse(deviceClass));
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		largest=Math.max(largest,this.nextBlock.countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+Block.prototype.passRecursively=function(functionName){
+	let args = Array.prototype.slice.call(arguments, 1);
+	for(let i=0;i<this.slots.length;i++){
+		let currentSlot=this.slots[i];
+		currentSlot[functionName].apply(currentSlot,args);
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1[functionName].apply(this.blockSlot1,args);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2[functionName].apply(this.blockSlot2,args);
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock[functionName].apply(this.nextBlock,args);
+	}
+};
+Block.prototype.displayResult = function(data){
+	let value = data.asString().getValue();
+	this.displayValue(value, false);
+};
+Block.prototype.displayValue = function(message, error){
+	let x=this.getAbsX();
+	let y=this.getAbsY();
+	let width=this.relToAbsX(this.width) - x;
+	let height=this.relToAbsY(this.height) - y;
+	GuiElements.displayValue(message,x,y,width,height, error);
+};
+Block.prototype.displayError = function(message){
+	this.displayValue(message, true);
+};
+Block.setDisplaySuffix = function(Class, suffix){
+	Block.setDeviceSuffixFn(Class, function(){
+		return suffix;
+	});
+};
+Block.setDeviceSuffixFn = function(Class, suffixFn){
+	Class.prototype.displayResult = function(data){
+		if(data.isValid) {
+			let value = data.asString().getValue();
+			this.displayValue(value + " " + suffixFn(), false);
+		}
+		else{
+			this.displayValue(data.asString().getValue(), false);
+		}
+	};
+};
+/* Child of Block. The CommandBlock is for Blocks that return no value but have no BlockSlots.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} bottomOpen - Can Blocks be attached to the bottom of this Block?
+ */
+function CommandBlock(x,y,category,bottomOpen){
+	Block.call(this,0,Block.returnTypes.none,x,y,category); //Call constructor.
+	if(bottomOpen!=null&&bottomOpen==false){ //if bottomOpen is false, change it from the default.
+		this.bottomOpen=false;
+	}
+}
+CommandBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+CommandBlock.prototype.constructor = CommandBlock;
+/* Child of Block. The CommandBlock is for Blocks that return values other than booleans.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {number} returnType - (optional) The type of data the Block returns (from Block.returnTypes). Default: num.
+ */
+function ReporterBlock(x,y,category,returnType){
+	if(returnType==null){
+		returnType=Block.returnTypes.num; //Return nums by default.
+	}
+	Block.call(this,1,returnType,x,y,category); //Call constructor.
+}
+ReporterBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+ReporterBlock.prototype.constructor = ReporterBlock;
+/* Child of Block. The CommandBlock is for Blocks that return booleans.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ */
+function PredicateBlock(x,y,category){
+	Block.call(this,2,Block.returnTypes.bool,x,y,category); //Call constructor.
+}
+PredicateBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+PredicateBlock.prototype.constructor = PredicateBlock;
+
+/* Child of Block. The HatBlock is for Blocks like CommandBlock but which have rounded tops which accept no Blocks.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ */
+function HatBlock(x,y,category){
+	Block.call(this,4,Block.returnTypes.none,x,y,category); //Call constructor.
+}
+HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+HatBlock.prototype.constructor = HatBlock;
+/* Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with a space for additional Blocks
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} bottomOpen - Can Blocks be attached to the bottom of this Block?
+ */
+function LoopBlock(x,y,category,bottomOpen){
+	Block.call(this,5,Block.returnTypes.none,x,y,category); //Call constructor.
+	if(bottomOpen!=null&&bottomOpen==false){ //if bottomOpen is false, change it from the default.
+		this.bottomOpen=false;
+	}
+}
+LoopBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+LoopBlock.prototype.constructor = LoopBlock;
+/* Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with two spaces for additional Blocks
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} midLabelText - i.e. "Else".  The text to label the second BlockSlot.
+ */
+function DoubleLoopBlock(x,y,category,midLabelText){
+	this.midLabelText=midLabelText; //Is set before constructor so Block is ready to render when constructor runs.
+	Block.call(this,6,Block.returnTypes.none,x,y,category);
+}
+DoubleLoopBlock.prototype = Object.create(Block.prototype);
+DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function SlotShape(slot){
+	this.slot = slot;
+	this.visible = false;
+	this.built = false;
+}
+SlotShape.setConstants = function(){
+
+};
+SlotShape.prototype.show = function(){
+	if(this.visible) return;
+	this.visible = true;
+	if(!this.built) this.buildSlot();
+	this.slot.parent.group.appendChild(this.group);
+	this.updateDim();
+	this.updateAlign();
+};
+SlotShape.prototype.hide = function(){
+	if(!this.visible) return;
+	this.visible = false;
+	this.group.remove();
+};
+SlotShape.prototype.buildSlot = function(){
+	if(this.built) return;
+	this.built = true;
+	this.group = GuiElements.create.group(0, 0);
+};
+SlotShape.prototype.move = function(x, y){
+	GuiElements.move.group(this.group, x, y);
+};
+SlotShape.prototype.updateDim = function(){
+	DebugOptions.markAbstract();
+};
+SlotShape.prototype.updateAlign = function(){
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function EditableSlotShape(slot, initialText, dimConstants){
+	SlotShape.call(this, slot);
+	this.text = initialText;
+	this.dimConstants = dimConstants;
+}
+EditableSlotShape.prototype = Object.create(SlotShape.prototype);
+EditableSlotShape.prototype.constructor = EditableSlotShape;
+EditableSlotShape.setConstants = function(){
+	const ESS = EditableSlotShape;
+	ESS.charHeight = BlockGraphics.valueText.charHeight;
+	ESS.hitBox = {};
+	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
+	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;
+};
+EditableSlotShape.prototype.buildSlot = function(){
+	SlotShape.prototype.buildSlot.call(this);
+	this.buildBackground();
+
+	this.textE=BlockGraphics.create.valueText(this.text,this.group);
+	GuiElements.update.color(this.textE, this.dimConstants.valueText.fill);
+	this.hitBoxE = BlockGraphics.create.slotHitBox(this.group);
+
+	TouchReceiver.addListenersSlot(this.textE, this.slot);
+	TouchReceiver.addListenersSlot(this.hitBoxE,this.slot);
+};
+EditableSlotShape.prototype.buildBackground = function(){
+	GuiElements.markAbstract();
+};
+
+EditableSlotShape.prototype.changeText=function(text){
+	this.text=text; //Store value
+	GuiElements.update.text(this.textE,text); //Update text.
+	this.updateDim();
+	this.updateAlign();
+};
+EditableSlotShape.prototype.select=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+};
+EditableSlotShape.prototype.deselect=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.fill);
+};
+EditableSlotShape.prototype.grayOutValue=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+};
+EditableSlotShape.prototype.unGrayOutValue=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+};
+EditableSlotShape.prototype.updateDim = function(){
+	const dC = this.dimConstants;
+	this.textW = GuiElements.measure.textWidth(this.textE); //Measure text element.
+	let width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
+	let height = dC.slotHeight; //Has no child, so is just the default height.
+	if(width < dC.slotWidth){ //Check if width is less than the minimum.
+		width = dC.slotWidth;
+	}
+	this.width = width; //Save computations.
+	this.height = height;
+};
+EditableSlotShape.prototype.updateAlign = function(){
+	const dC = this.dimConstants;
+	const textX=(this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW/2; //Centers the text horizontally.
+	const textY=EditableSlotShape.charHeight/2+this.height/2; //Centers the text vertically
+	BlockGraphics.update.text(this.textE,textX,textY); //Move the text.
+	const bGHB=BlockGraphics.hitBox; //Get data about the size of the hit box.
+	const hitX=bGHB.hMargin; //Compute its x and y coords.
+	const hitY=bGHB.vMargin;
+	const hitW=this.width+bGHB.hMargin*2; //Compute its width and height.
+	const hitH=this.height+bGHB.vMargin*2;
+	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH); //Move/resize its rectangle.
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function RectSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, RectSlotShape);
+}
+RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+RectSlotShape.prototype.constructor = RectSlotShape;
+RectSlotShape.setConstants = function(){
+	const RSS = RectSlotShape;
+	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
+	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
+	RSS.slotHeight = BlockGraphics.string.slotHeight;
+	RSS.slotWidth = BlockGraphics.string.slotWidth;
+	RSS.valueText = {};
+	RSS.valueText.fill = BlockGraphics.valueText.fill;
+	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+};
+RectSlotShape.prototype.buildSlot=function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+RectSlotShape.prototype.buildBackground = function(){
+	this.slotE = BlockGraphics.create.slot(this.group,3);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+};
+RectSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+RectSlotShape.prototype.updateAlign = function(){
+	EditableSlotShape.prototype.updateAlign.call(this);
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function HexSlotShape(slot){
+	SlotShape.call(this, slot);
+}
+HexSlotShape.prototype = Object.create(SlotShape.prototype);
+HexSlotShape.prototype.constructor = HexSlotShape;
+HexSlotShape.setConstants = function(){
+	const HSS = HexSlotShape;
+	const bG=BlockGraphics.predicate;
+	HSS.slotWidth = bG.slotWidth;
+	HSS.slotHeight = bG.slotHeight;
+};
+HexSlotShape.prototype.buildSlot = function(){
+	const HSS = HexSlotShape;
+	SlotShape.prototype.buildSlot.call(this);
+	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
+};
+HexSlotShape.prototype.updateDim = function(){
+	const HSS = HexSlotShape;
+	this.width=HSS.slotWidth;
+	this.height=HSS.slotHeight;
+};
+HexSlotShape.prototype.updateAlign = function(){
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function RoundSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, RoundSlotShape);
+}
+RoundSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+RoundSlotShape.prototype.constructor = RoundSlotShape;
+RoundSlotShape.setConstants = function(){
+	const RSS = RoundSlotShape;
+	const bG = BlockGraphics.reporter;
+	RSS.slotLMargin = bG.slotHMargin;
+	RSS.slotRMargin = bG.slotHMargin;
+	RSS.slotHeight = bG.slotHeight;
+	RSS.slotWidth = bG.slotWidth;
+
+	RSS.valueText = {};
+	RSS.valueText.fill = BlockGraphics.valueText.fill;
+	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+
+	RSS.slotSelectedFill = bG.slotSelectedFill;
+	RSS.slotFill = bG.slotFill;
+};
+RoundSlotShape.prototype.buildSlot=function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+RoundSlotShape.prototype.buildBackground = function(){
+	this.slotE = BlockGraphics.create.slot(this.group,1);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+};
+RoundSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+RoundSlotShape.prototype.updateAlign = function(){
+	EditableSlotShape.prototype.updateAlign.call(this);
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,1,true);//Fix! BG
+};
+RoundSlotShape.prototype.select = function(){
+	const RSS = RoundSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+};
+RoundSlotShape.prototype.deselect = function(){
+	const RSS = RoundSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotFill);
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function DropSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, DropSlotShape);
+}
+DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+DropSlotShape.prototype.constructor = DropSlotShape;
+DropSlotShape.setConstants = function(){
+	const DSS = DropSlotShape;
+	const bG = BlockGraphics.dropSlot;
+	DSS.bgColor = bG.bg;
+	DSS.bgOpacity = bG.bgOpacity;
+	DSS.selectedBgOpacity = bG.selectedBgOpacity;
+	DSS.triColor = bG.triColor;
+	DSS.selectedTriColor = bG.selectedTriColor;
+	DSS.triW = bG.triW;
+	DSS.triH = bG.triH;
+
+	DSS.slotLMargin = bG.slotHMargin;
+	DSS.textMargin = DSS.slotLMargin;
+	DSS.slotRMargin = DSS.slotLMargin + DSS.textMargin + DSS.triW;
+	DSS.slotHeight = bG.slotHeight;
+	DSS.slotWidth = bG.slotWidth;
+
+	DSS.valueText = {};
+	DSS.valueText.fill = bG.textFill;
+	DSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	DSS.valueText.selectedFill = bG.textFill;
+};
+DropSlotShape.prototype.buildSlot = function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+DropSlotShape.prototype.buildBackground = function(){
+	this.bgE=this.generateBg();
+	this.triE=this.generateTri();
+};
+DropSlotShape.prototype.generateBg=function(){
+	const DSS = DropSlotShape;
+	const bgE=GuiElements.create.rect(this.group);
+	GuiElements.update.color(bgE,DSS.bgColor);
+	GuiElements.update.opacity(bgE,DSS.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE,this.slot);
+	return bgE;
+};
+DropSlotShape.prototype.generateTri=function(){
+	const DSS = DropSlotShape;
+	const triE=GuiElements.create.path(this.group);
+	GuiElements.update.color(triE,DSS.triColor);
+	TouchReceiver.addListenersSlot(triE,this.slot);
+	return triE;
+};
+DropSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+DropSlotShape.prototype.updateAlign = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.updateAlign.call(this);
+
+	const triX=this.width - DSS.slotRMargin + DSS.textMargin;
+	const triY=this.height/2 - DSS.triH/2;
+	GuiElements.update.triangle(this.triE,triX,triY,DSS.triW,0-DSS.triH);
+
+	GuiElements.update.rect(this.bgE,0,0,this.width,this.height);
+};
+DropSlotShape.prototype.select = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.opacity(this.bgE,DSS.selectedBgOpacity);
+	GuiElements.update.color(this.triE,DSS.selectedTriColor);
+};
+DropSlotShape.prototype.deselect = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.opacity(this.bgE,DSS.bgOpacity);
+	GuiElements.update.color(this.triE,DSS.triColor);
+};
+/**
+ * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
+ * attached.
+ * Every Slot has a parent Block which it relies on heavily.
+ * Slots can be edited in different ways, as indicated by their shape.
+ * Slots can accept different types of Blocks and can automatically convert Data into a certain type.
+ * Block implementations first update their Slots (compute their values) before accessing them during execution.
+ * Slots must implement highlight(); textSummary(); getDataNotFromChild(); createXml(); importXml(); TODO: Update this list
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
+ * @param {string} key - The name of the Slot. Used for reading and writing save files.
+ * @param {number} inputType - [none, num, string, drop] The type of Data which can be directly entered into the Slot. TODO: perhaps change drop data
+ * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
+ * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
+ */
+function Slot(parent, key, inputType, snapType, outputType){
+	DebugOptions.validateNonNull(parent, key, inputType, snapType, outputType);
+	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
+	DebugOptions.assert(key.includes("_"));
+	//Store data passed by constructor.
+	this.inputType = inputType; //TODO: Remove this unused field
+	this.snapType = snapType;
+	this.outputType = outputType;
+	this.parent = parent; //Parent Block.
+	this.key = key;
+	this.hasChild = false; //Nothing is attached yet.
+	this.child = null; //Stores attached Block.
+	this.width = 0; //Will be computed later using updateDim
+	this.height = 0;
+	this.x = 0;
+	this.y = 0;
+	this.isSlot = true; //All Block parts have this property. //TODO: Remove unused field
+	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
+	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
+	this.resultData = null; //passed to Block for use in implementation.
+}
+Slot.setConstants = function(){
+	/* The type of Data which can be directly entered into the Slot.  This was used for determining
+	 * input method but is no longer used for anything. */
+	Slot.inputTypes = function(){};
+	Slot.inputTypes.none = 0; //Predicate Slots cannot be directly entered into.
+	Slot.inputTypes.num = 1; //Edited with InputPad
+	Slot.inputTypes.string = 2; //Edited with dialog.
+	Slot.inputTypes.drop = 3; //Edited with dropdown.
+	//The type of Blocks which can be attached to the Slot.
+	Slot.snapTypes = function(){};
+	Slot.snapTypes.none = 0; //Nothing can attach (dropdowns often)
+	Slot.snapTypes.numStrBool = 1; //Blocks with return type num, string, or bool can attach (will be auto cast).
+	Slot.snapTypes.bool = 2; //Only Blocks that return bool can attach.
+	Slot.snapTypes.list = 3; //Only Blocks that return lists can attach.
+	Slot.snapTypes.any = 4; //Any type of Block can attach (used for the = Block).
+	//The type of Data the Slot should convert to before outputting. Guarantees the Block gets the type it wants.
+	Slot.outputTypes = function(){};
+	Slot.outputTypes.any = 0; //No conversion will occur.
+	Slot.outputTypes.num = 1; //Convert to num.
+	Slot.outputTypes.string = 2; //Convert to string.
+	Slot.outputTypes.bool = 3; //Convert to bool.
+	Slot.outputTypes.list = 4; //Convert to list.
+};
+
+/** Recursively updates dimensions and those of children. */
+Slot.prototype.updateDim = function(){
+	if(this.hasChild){
+		//Width is determined by child if it has one.
+		this.child.updateDim(); //Pass on message.
+		this.width = this.child.width;
+		this.height = this.child.height;
+	}
+	else{
+		//Otherwise, the size of the slot graphic is used.
+		this.width = this.slotShape.width;
+		this.height = this.slotShape.height;
+	}
+};
+
+/**
+ * Recursively updates Slot's alignment and alignment of children.
+ * @param {number} x - The x coord the Slot should have when completed relative to the Block it is in.
+ * @param {number} y - The y coord ths Slot should have measured from the center of the Slot.
+ * @return {number} - The width of the Slot, indicating how much the next item should be shifted over.
+ * TODO: Measure y from top of Slot to make it consistent with Block.
+ */
+Slot.prototype.updateAlign = function(x, y){
+	DebugOptions.validateNumbers(x, y);
+	if(this.hasChild){
+		//The x and y coords the child should have.
+		//TODO: Use relToAbs for this
+		const xCoord = x + this.parent.x; //converts coord from inside this Block's g to outside g
+		const yCoord = y + this.parent.y - this.height / 2; //Converts y to make it relative to top of Block.
+		this.x = x; //Sets this Slot's x.
+		this.y = y - this.height / 2; //Converts y to make it relative to top of Block.
+		return this.child.updateAlign(xCoord, yCoord); //Update child.
+		//This Slot itself does not need to change visibly because it is covered by a Block.
+	}
+	else{
+		this.x = x; //Sets this Slot's x.
+		this.y = y - this.height / 2; //Converts y to make it relative to top of Block.
+		this.slotShape.move(this.x, this.y); //Moves the graphic to the correct position
+		return this.width;
+	}
+};
+
+/**
+ * Attaches a Block to the Slot.  Changes the Block's stack to that of the Slot
+ * @param {Block} block - The Block to attach.
+ * TODO: Stop code that is currently running.
+ */
+Slot.prototype.snap = function(block){
+	DebugOptions.validateNonNull(block);
+	block.parent = this; //Set the Block's parent.
+	if(this.hasChild){ //If the Slot already has a child, detach it and move it out of the way.
+		const prevChild = this.child;
+		prevChild.unsnap(); //Detach the old Block.
+		prevChild.stack.shiftOver(block.stack.dim.rw, block.stack.dim.rh); //Move it over. //Fix! stack.dim
+	}
+	this.hasChild = true;
+	this.child = block; //Set child.
+	this.hideSlot(); //Slot graphics are covered and should be hidden.
+	if(block.stack != null) {
+		const oldG = block.stack.group; //Old group can be deleted.
+		block.stack.remove(); //TODO: use delete() instead.
+		block.changeStack(this.parent.stack); //Move Block into this stack.
+		oldG.remove();
+	}
+	if(this.parent.stack != null) {
+		this.parent.stack.updateDim(); //Update parent's dimensions.
+	}
+};
+
+/**
+ * Recursively changes the stack of the Slot's children.
+ * @param {BlockStack} stack - The stack to change to.
+ */
+Slot.prototype.changeStack = function(stack){
+	DebugOptions.validateNonNull(stack);
+	if(this.hasChild){
+		this.child.changeStack(stack); //Pass the message.
+	}
+};
+
+/**
+ * Recursively stops the Slot and its children.
+ */
+Slot.prototype.stop = function(){
+	this.clearMem(); //Stop Slot.
+	if(this.hasChild){
+		this.child.stop(); //Stop children.
+	}
+};
+
+/**
+ * Update's the Slot's execution. Returns if it is still running.
+ * @return {ExecutionStatus} - Is the Slot still running or has crashed?
+ */
+Slot.prototype.updateRun = function(){
+	if(this.running === 3){ //If the Slot has finished running, no need to update.
+		return new ExecutionStatusDone(); //Done running
+	}
+	if(this.hasChild){
+		let childExecStatus = this.child.updateRun();
+		if(!childExecStatus.isRunning()){ //Update the child first until it is done.
+			if(childExecStatus.hasError()){
+				this.running = 3;
+				return childExecStatus;
+			} else{
+				this.running = 3; //Copy data from child and finish execution.
+				this.resultData = this.convertData(childExecStatus.getResult()); //Convert it to the proper type.
+				this.resultIsFromChild = true;
+				return new ExecutionStatusDone();
+			}
+		}
+		else{
+			this.running = 2; //Waiting for child to finish.
+			return new ExecutionStatusRunning(); //Still running
+		}
+	}
+	else{
+		//The result is not from the child, so the getData function will figure out what to do.
+		this.running = 3;
+		this.resultIsFromChild = false;
+		return new ExecutionStatusDone(); //Done running
+	}
+};
+
+/**
+ * Overridden by subclasses. Returns the result of the Slot's execution.
+ * @return {Data} - The result of the Slot's execution.
+ */
+Slot.prototype.getData = function(){
+	if(this.running === 3){ //It should be done running.
+		if(this.resultIsFromChild){
+			return this.resultData; //Return the result from the child.
+		}
+	}
+	else{
+		return this.getDataNotFromChild(); //Return the default value / entered value.
+	}
+};
+
+/**
+ * Returns the result if the slot has no child
+ * @abstract
+ */
+Slot.prototype.getDataNotFromChild = function(){
+	DebugOptions.assert(!this.resultIsFromChild);
+	GuiElements.markAbstract();
+};
+
+/** Recursively updates the dimensions of the BlockStack. */
+Slot.prototype.updateStackDim = function(){
+	if(this.hasChild){
+		this.child.updateStackDim(); //Pass on message.
+	}
+};
+
+/** Removes the child and makes the Slot's graphics visible again. */
+Slot.prototype.removeChild = function(){
+	this.hasChild = false;
+	this.child = null;
+	this.showSlot();
+};
+
+/**
+ * Checks if the moving BlockStack fits within this Slot. Then recursively passes message on to children.
+ * Returns nothing. Results stored in CodeManager.fit.
+ * @return {boolean} - true iff this Slot or one of its descendants can accept the moving blocks
+ */
+Slot.prototype.findBestFit = function(){
+	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
+	let childIsLeaf = false;
+	// The slot is a leaf unless one of its decedents is a leaf.
+	if(this.hasChild){
+		childIsLeaf = this.child.findBestFit(); // Pass on the message.
+	}
+	if(childIsLeaf){
+		// Don't bother checking this slot if it already has a matching decedents.
+		return true;
+	}
+
+	// shorthand
+	const move = CodeManager.move;
+	const fit = CodeManager.fit;
+
+	// Use coords relative to screen.
+	const x = this.getAbsX();
+	const y = this.getAbsY();
+	const myHeight = this.getAbsHeight();
+	const myWidth = this.getAbsWidth();
+
+	// Is the BlockStack's type compatible with the Slot?
+	const typeMatches = this.checkFit(move.returnType);
+
+	// Does the bounding box of the BlockStack overlap with the bounding box of the Slot?
+	const width = move.bottomX - move.topX;
+	const height = move.bottomY - move.topY;
+	const locationMatches = move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
+
+	// If so, use distance to find the best fit
+	if(typeMatches && locationMatches){
+		const xDist = move.touchX - (x + this.width / 2); //Compute the distance.
+		const yDist = move.touchY - (y + this.height / 2);
+		const dist = xDist * xDist + yDist * yDist;
+		if(!fit.found || dist < fit.dist){
+			fit.found = true; //Store the match.
+			fit.bestFit = this;
+			fit.dist = dist;
+		}
+		// Found match
+		return true;
+	}
+	// No compatible descendants
+	return false;
+};
+
+/**
+ * Determines if a Block's return type is compatible with this Slot's snap type.
+ * @param {number} outputType - [none, num, string, bool, list] The return type of the Block.
+ * @return {boolean} - Is the return type compatible with the snap type?
+ */
+Slot.prototype.checkFit = function(outputType){
+	DebugOptions.validateNonNull(outputType);
+	const sT = Slot.snapTypes;
+	const rT = Block.returnTypes;
+	const snapType = this.snapType;
+	if(snapType === sT.none){
+		//If the Slot accepts nothing, it isn't compatible.
+		return false;
+	}
+	else if(snapType === sT.any){
+		//If the Slot accepts anything, it is compatible.
+		return true;
+	}
+	else if(snapType === sT.numStrBool){
+		//Num, string, or bool is compatible.
+		return outputType === rT.num || outputType === rT.string || outputType === rT.bool;
+	}
+	else if(snapType === sT.bool){
+		//Only bool is compatible.
+		return outputType === rT.bool;
+	}
+	else if(snapType === sT.list){
+		//Only list is compatible.
+		return outputType === rT.list;
+	}
+	else{
+		//Should never be called.
+		DebugOptions.assert(false);
+		return false;
+	}
+};
+
+// These functions convert between screen (absolute) coordinates and local (relative) coordinates.
+// TODO: Build these with higher-order functions.
+/**
+ * @param {number} x
+ * @returns {number}
+ */
+Slot.prototype.relToAbsX = function(x){
+	return this.parent.relToAbsX(x + this.x);
+};
+/**
+ * @param {number} y
+ * @returns {number}
+ */
+Slot.prototype.relToAbsY = function(y){
+	return this.parent.relToAbsY(y + this.y);
+};
+/**
+ * @param {number} x
+ * @returns {number}
+ */
+Slot.prototype.absToRelX = function(x){
+	return this.parent.absToRelX(x) - this.x;
+};
+/**
+ * @param {number} y
+ * @returns {number}
+ */
+Slot.prototype.absToRelY = function(y){
+	return this.parent.absToRelY(y) - this.y;
+};
+/**
+ * Returns the x coord of the Slot relative to the screen (not the group it is contained in).
+ * @return {number} - The x coord of the Slot relative to the screen.
+ */
+Slot.prototype.getAbsX = function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the Slot relative to the screen (not the group it is contained in).
+ * @return {number} - The y coord of the Slot relative to the screen.
+ */
+Slot.prototype.getAbsY = function(){//Fix for tabs
+	return this.relToAbsY(0);
+};
+/**
+ * @returns {number}
+ */
+Slot.prototype.getAbsWidth = function(){
+	return this.relToAbsX(this.width) - this.getAbsX();
+};
+/**
+ * @returns {number}
+ */
+Slot.prototype.getAbsHeight = function(){
+	return this.relToAbsY(this.height) - this.getAbsY();
+};
+
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {Slot} slot - The slot to copy from
+ */
+Slot.prototype.copyFrom = function(slot){
+	DebugOptions.validateNonNull(slot);
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
+};
+
+/** Clears the result data of the Slot and resets its running state. Is called by Block's clearMem function. */
+Slot.prototype.clearMem = function(){
+	this.resultData = null;
+	this.running = 0;
+};
+
+/**
+ * Converts the provided data to match the Slot's output type and returns it.
+ * @param {Data} data - The Data to convert.
+ * @return {Data} - The converted Data.
+ */
+Slot.prototype.convertData = function(data){
+	DebugOptions.validateNonNull(data);
+	const outType = this.outputType;
+	const oT = Slot.outputTypes;
+	if(outType === oT.any){
+		//If any type will do, just return it.
+		return data;
+	}
+	else if(outType === oT.num){
+		//Convert to a num.
+		return data.asNum();
+	}
+	else if(outType === oT.string){
+		//Convert to a string.
+		return data.asString();
+	}
+	else if(outType === oT.bool){
+		//Convert to a bool.
+		return data.asBool();
+	}
+	else if(outType === oT.list){
+		//Convert to a list.
+		return data.asList();
+	}
+	//Should not be called.
+	DebugOptions.assert(false);
+	return null;
+};
+
+/**
+ * Overridden by subclasses. Checks if a given message is still in use by any of the DropSlots.
+ * @param {string} message - the message to check
+ */
+Slot.prototype.checkBroadcastMessageAvailable = function(message){
+	return false;
+};
+
+/** Overridden by subclasses. Updates the available broadcast messages. */
+Slot.prototype.updateAvailableMessages = function(){
+
+};
+
+/**
+ * Recursively renames a variable
+ * @param {Variable} variable
+ */
+Slot.prototype.renameVariable = function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+
+/**
+ * Recursively deletes a variable
+ * @param {Variable} variable
+ */
+Slot.prototype.deleteVariable = function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+
+/**
+ * Recursively renames a list
+ * @param {List} list
+ */
+Slot.prototype.renameList = function(list){
+	this.passRecursively("renameList",list);
+};
+
+/**
+ * Deletes a list
+ * @param {List} list
+ */
+Slot.prototype.deleteList = function(list){
+	this.passRecursively("deleteList",list);
+};
+
+/**
+ * Recursively hides device dropdowns
+ * @param deviceClass - A subclass of the Device class
+ */
+Slot.prototype.hideDeviceDropDowns = function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+
+/**
+ * Recursively shows device dropdowns
+ * @param deviceClass - A subclass of the Device class
+ */
+Slot.prototype.showDeviceDropDowns = function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+
+/**
+ * Recursively counts devices in use of a certain device type
+ * @param deviceClass - A subclass of the Device class
+ * @returns {number}
+ */
+Slot.prototype.countDevicesInUse = function(deviceClass){
+	if(this.hasChild){
+		return this.child.countDevicesInUse(deviceClass);
+	}
+	return 0;
+};
+
+/**
+ * Calls the given function on its children
+ * @param {string} functionName - The name of the function being called
+ */
+Slot.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	if(this.hasChild){
+		this.child[functionName].apply(this.child, args);
+	}
+};
+
+/**
+ * Checks if the given variable is ever referenced
+ * @param {Variable} variable - The variable to check
+ * @returns {boolean} - Returns if the variable is used by the Slot's descendants
+ */
+Slot.prototype.checkVariableUsed = function(variable){
+	if(this.hasChild){
+		return this.child.checkVariableUsed(variable);
+	}
+	return false;
+};
+
+/**
+ * Checks if the given list is ever referenced
+ * @param {List} list - The list to check
+ * @returns {boolean} - Returns if the list is used by the Slot's descendants
+ */
+Slot.prototype.checkListUsed = function(list){
+	if(this.hasChild){
+		return this.child.checkListUsed(list);
+	}
+	return false;
+};
+
+/**
+ * Appends information about this Slot to the document
+ * @param {Document} xmlDoc - The document to append to
+ * @return {Document} - The document with the Slot appended
+ */
+Slot.prototype.createXml = function(xmlDoc){
+	DebugOptions.validateNonNull(xmlDoc);
+	const slot = XmlWriter.createElement(xmlDoc,"slot");
+	XmlWriter.setAttribute(slot,"type","Slot");
+	XmlWriter.setAttribute(slot,"key",this.key);
+	if(this.hasChild){
+		const child = XmlWriter.createElement(xmlDoc,"child");
+		child.appendChild(this.child.createXml(xmlDoc));
+		slot.appendChild(child);
+	}
+	return slot;
+};
+
+/**
+ * Imports the data from the node to this Slot
+ * @param {Document} slotNode
+ * @return {Slot} - A reference to this Slot
+ * @abstract
+ */
+Slot.prototype.importXml = function(slotNode) {
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Returns this Slot's key
+ * @returns {string}
+ */
+Slot.prototype.getKey = function(){
+	return this.key;
+};
+
+/**
+ * Shows the Slot's graphic.
+ * TODO: Remove this function
+ */
+Slot.prototype.showSlot = function(){
+	this.slotShape.show();
+};
+
+/**
+ * Hide's the Slot's graphic.
+ * TODO: Remove this function
+ */
+Slot.prototype.hideSlot = function(){
+	this.slotShape.hide();
+};
+
+/**
+ * Draws a white border around the slot to indicate that the blocks being dragged will snap to it if released.
+ * @abstract
+ */
+Slot.prototype.highlight = function(){
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Creates a string representing the slot and its content
+ * @return {string}
+ * @abstract
+ */
+Slot.prototype.textSummary = function(){
+	DebugOptions.markAbstract();
+};
+/**
+ * RoundSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
+ * It creates a Slot that can be edited with the InputPad's NumPad.
+ * It is generally designed for nums, but can snap or output other types.
+ * Its input type, however, is always num.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {string} key - The name of the Slot. Used for reading and writing save files.
+ * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
+ * @param {number} outputType - [any,num,string,bool,list] The type of Data the RoundSlot should convert to.
+ * @param {number} data - The initial data stored in the Slot. Could be string, num, or selection data.
+ * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
+ */
+function RoundSlot(parent,key,snapType,outputType,data,positive,integer){
+	Slot.call(this,parent,key,Slot.inputTypes.num,snapType,outputType); //Call constructor.
+	//Entered data stores the data that has been entered using the InputPad.
+	this.enteredData=data; //Set entered data to initial value.
+	this.text=this.enteredData.asString().getValue();
+	this.positive=positive; //Store other properties.
+	this.integer=integer;
+	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
+	this.slotShape.show();
+	this.selected=false; //Indicates if the Slot is visually selected for editing.
+	//Declare arrays for special options to list above the NumPad (i.e. "last" for "Item _ of Array" blocks)
+	this.optionsText = []; //The text of the special option.
+	this.optionsData = []; //The Data representing that option (never visible to the user).
+	this.dropColumns = 1; //The number of columns to show in the drop down.
+}
+RoundSlot.prototype = Object.create(Slot.prototype);
+RoundSlot.prototype.constructor = RoundSlot;
+RoundSlot.prototype.changeText=function(text){
+	this.text=text; //Store value
+	this.slotShape.changeText(text);
+	if(this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update dimensions.
+	}
+};
+/* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
+ * @fix BlockGraphics
+ */
+RoundSlot.prototype.highlight=function(){
+	var isSlot=!this.hasChild; //Fix! unclear.
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,1,isSlot);
+};
+/* Prepares the Slot for editing using the InputPad. Selects the Slot and shows the NumPad.
+ * @fix allow InputPad to be next to Slot.
+ */
+RoundSlot.prototype.edit=function(){
+	if(!this.selected){
+		var x1 = this.getAbsX();
+		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
+		var y1 = this.getAbsY();
+		var y2 = this.relToAbsY(this.height);
+		this.select(); //Change appearance to reflect editing.
+		InputPad.resetPad(this.dropColumns); //Prepare the InputPad for editing with the correct number of columns.
+		for(var i=0;i<this.optionsText.length;i++){ //Add special options to the inputPad (if any).
+			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
+		}
+		//Show the NumPad at the proper location.
+		InputPad.showNumPad(this,x1, x2, y1, y2,this.positive,this.integer);
+	}
+};
+/* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
+ * Only used for special RoundSlots.
+ */
+RoundSlot.prototype.editText=function(){
+	//Builds a text-based representation of the Block with "___" in place of this Slot.
+	var question=this.parent.textSummary(this);
+	//Get the current value for the hint text.
+	var currentVal=this.enteredData.getValue();
+	//The callback function changes the text.
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			callbackFn.slot.enteredData=new StringData(response);
+			callbackFn.slot.changeText(response);
+		}
+		//callbackFn.slot.deselect();
+	};
+	callbackFn.slot=this;
+	//The error function cancels any change.
+	var callbackErr=function(){
+
+	};
+	callbackErr.slot=this;
+	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn,callbackErr);
+	//Visually deselect the Slot.
+	callbackFn.slot.deselect();
+};
+/* Updates the enteredData value and value text of the Slot to match what has been entered on the InputPad.
+ * @param {string} visibleText - What the value text should become.
+ * @param {Data} data - What the enteredData should be set to.
+ */
+RoundSlot.prototype.updateEdit=function(visibleText,data){
+	if(this.selected){ //Only can edit if the Slot is selected.
+		this.enteredData=data;
+		this.changeText(visibleText);
+	}
+	else{
+		GuiElements.throwError("Attempt to call updateEdit on Slot that is not selected.");
+	}
+};
+/* Saves the Data from the InputPad to the Slot, updates the text, and deselects the Slot.
+ * @param {Data} data - The Data to save to the Slot.
+ */
+RoundSlot.prototype.saveNumData=function(data){
+	if(this.selected){ //Only can edit if the Slot is selected.
+		this.enteredData=data; //Save data.
+		this.changeText(data.asString().getValue()); //Display data.
+		this.deselect();
+	}
+	else{
+		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
+	}
+};
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {RoundSlot} slot - The slot to copy from
+ */
+RoundSlot.prototype.copyFrom=function(slot){
+	var data = slot.enteredData;
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
+};
+/* Selects the Slot for editing and changes its appearance.
+ */
+RoundSlot.prototype.select=function(){
+	this.selected=true;
+	this.slotShape.select();
+};
+/* Deselects the Slot after editing and changes its appearance.
+ */
+RoundSlot.prototype.deselect=function(){
+	this.selected=false;
+	this.slotShape.deselect();
+};
+/* Returns a text-based version of the Slot for display in dialogs.
+ * @return {string} - The text-based summary of the Slot.
+ */
+RoundSlot.prototype.textSummary=function(){
+	//Curved parentheses are used because it is a RoundSlot.
+	if(this.hasChild){ //If it has a child, just use an ellipsis.
+		return "(...)";
+	}
+	else{ //Otherwise, print the value.
+		return "("+this.enteredData.asString().getValue()+")";
+	}
+};
+/* Returns the result of the RoundSlot's execution for use by its parent Block.
+ * @return {Data} - The result of the RoundSlot's execution.
+ */
+RoundSlot.prototype.getData=function(){
+	if(this.running==3){
+		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
+		if(this.resultIsFromChild){
+			return this.resultData;
+		}
+		else{
+			return this.enteredData;
+		}
+	}
+	if(this.hasChild){
+		//If it isn't done executing and has a child, throw an error.
+		GuiElements.throwError("RoundSlot.getData() run with child when running="+this.running);
+		return null;
+	}
+	else{
+		//If it has no child, data can be read at any time.
+		return this.enteredData;
+	}
+};
+/* Adds a special option to the Slot which will be provided on the NumPad.
+ * @param {string} displayText - The text the option will be displayed as.
+ * @param {Data} data - The Data which will be stored in the Slot if the option is selected.
+ */
+RoundSlot.prototype.addOption=function(displayText,data){
+	this.optionsText.push(displayText);
+	this.optionsData.push(data);
+};
+/* Saves non-numeric SelectionData into the RoundSlot. Changes the value text and deselects the Slot as well.
+ * Only used if a special option has non-numeric Data in it.
+ * @param {string} text - The value text to display.
+ * @param {SelectionData} data - The Data to store.
+ */
+RoundSlot.prototype.setSelectionData=function(text,data){
+	this.enteredData=data;
+	this.changeText(text);
+	if(this.selected){
+		this.deselect();
+	}
+};
+/* Makes the value text gray to indicate that any key will delete it. */
+RoundSlot.prototype.grayOutValue=function(){
+	this.slotShape.grayOutValue();
+};
+/* Makes the value text the default edit color again. */
+RoundSlot.prototype.ungrayValue=function(){
+	this.slotShape.unGrayOutValue();
+};
+
+RoundSlot.prototype.createXml=function(xmlDoc){
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
+	XmlWriter.setAttribute(slot,"type","RoundSlot");
+	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
+	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+	slot.appendChild(enteredData);
+	XmlWriter.setAttribute(slot,"text",this.text);
+	return slot;
+};
+RoundSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="RoundSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};
+/* RectSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
+ * It creates a Slot that can be edited with a dialog.
+ * It is generally designed to hold a string and its input type is always string.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the RoundSlot.
+ * @param {number [any,num,string,bool,list] outputType - The type of Data the RoundSlot should convert to.
+ * @param {string} value - The initial string stored in the Slot.
+ */
+function RectSlot(parent,key,snapType,outputType,value){
+	Slot.call(this,parent,key,Slot.inputTypes.string,snapType,outputType); //Call constructor.
+	this.enteredData=new StringData(value); //Set entered data to initial value.
+	this.slotShape = new RectSlotShape(this, value);
+	this.slotShape.show();
+}
+RectSlot.prototype = Object.create(Slot.prototype);
+RectSlot.prototype.constructor = RectSlot;
+/* Builds the Slot's SVG elements such as its rectangle, text, and invisible hit box.
+ */
+/*
+RectSlot.prototype.buildSlot=function(){
+	this.textH=BlockGraphics.valueText.charHeight; //Used for centering.
+	this.textW=0; //Will be calculated later.
+	this.slotE=this.generateSlot();
+	this.textE=this.generateText(this.enteredData.getValue());
+	this.hitBoxE=this.generateHitBox(); //Creates an invisible box for receiving touches.
+};
+*/
+/* Moves the Slot's SVG elements to the specified location.
+ * @param {number} x - The x coord of the Slot.
+ * @param {number} y - The y coord of the Slot.
+ * @fix moving hitbox is redundant with RoundSlot.
+ */
+RectSlot.prototype.moveSlot=function(x,y){
+	this.slotShape.move(x, y);
+};
+/* Makes the Slot's SVG elements invisible. Used when child is added.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.hideSlot=function(){
+	this.slotShape.hide();
+};
+/* Makes the Slot's SVG elements visible. Used when child is removed.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.showSlot=function(){
+	this.slotShape.show();
+};
+/* Generates and returns an SVG text element to display the Slot's value.
+ * @param {string} text - The text to add to the element.
+ * @return {SVG text} - The finished SVG text element.
+ * @fix redundant with RoundSlot.
+ */
+/*
+RectSlot.prototype.generateText=function(text){ //Fix BG
+	var obj=BlockGraphics.create.valueText(text,this.parent.group);
+	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
+	return obj;
+};
+*/
+/* Generates and returns an SVG path element to be the rectangle part of the Slot.
+ * @return {SVG path} - The finished SVG path element.
+ * @fix BlockGraphics number reference.
+ */
+/*
+RectSlot.prototype.generateSlot=function(){//Fix BG
+	var obj=BlockGraphics.create.slot(this.parent.group,3,this.parent.category);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+};
+*/
+/* Generates and returns a transparent rectangle which enlarges the touch area of the Slot.
+ * @return {SVG rect} - The finished SVG rect element.
+ * @fix redundant with RoundSlot.
+ */
+/*
+RectSlot.prototype.generateHitBox=function(){
+	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
+	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
+	return obj;
+};
+*/
+/* Changes the value text of the Slot. Updates parent's stack dims.
+ * @param {string} text - The text to change the visible value to.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.changeText=function(text){
+	this.slotShape.changeText(text);
+	if(this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update dimensions.
+	}
+};
+/* Computes the dimensions of the SVG elements making up the Slot.
+ * Only called if has no child.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.updateDimNR=function(){
+	this.width = this.slotShape.width;
+	this.height = this.slotShape.height;
+};
+/* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
+ * @fix BlockGraphics
+ */
+RectSlot.prototype.highlight=function(){//Fix BG
+	var isSlot=!this.hasChild; //Fix! unclear.
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+};
+/* Opens a dialog to edit this Slot.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.edit=function(){
+	//Builds a text-based representation of the Block with "___" in place of this Slot.
+	var question=this.parent.textSummary(this);
+	//Get the current value for the hint text.
+	var currentVal=this.enteredData.getValue();
+	//The callback function changes the text.
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			callbackFn.slot.enteredData=new StringData(response);
+			callbackFn.slot.changeText(response);
+			SaveManager.markEdited();
+		}
+	};
+	callbackFn.slot=this;
+	//Show the dialog.
+	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn);
+};
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {RectSlot} slot - The slot to copy from
+ */
+RectSlot.prototype.copyFrom=function(slot){
+	var data = slot.enteredData;
+	this.enteredData = data;
+	this.changeText(data.asString().getValue());
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
+};
+/* Returns a text-based version of the Slot for display in dialogs.
+ * @return {string} - The text-based summary of the Slot.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.textSummary=function(){
+	//Square brackets are used because it is a RectSlot.
+	if(this.hasChild){ //If it has a child, just use an ellipsis.
+		return "[...]";
+	}
+	else{ //Otherwise, print the value.
+		return "["+this.enteredData.getValue()+"]";
+	}
+};
+/* Returns the result of the RoundSlot's execution for use by its parent Block.
+ * @return {Data} - The result of the RectSlot's execution.
+ * @fix redundant with RoundSlot.
+ */
+RectSlot.prototype.getData=function(){
+	if(this.running==3){
+		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
+		if(this.resultIsFromChild){
+			return this.resultData;
+		}
+		else{
+			return this.enteredData;
+		}
+	}
+	if(this.hasChild){
+		//If it isn't done executing and has a child, throw an error.
+		GuiElements.throwError("RectSlot.getData() run with child when running="+this.running);
+		return null;
+	}
+	else{
+		//If it has no child, data can be read at any time.
+		return this.enteredData;
+	}
+};
+
+RectSlot.prototype.createXml=function(xmlDoc){
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
+	XmlWriter.setAttribute(slot,"type","RectSlot");
+	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
+	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+	slot.appendChild(enteredData);
+	if(this.hasChild){
+		var child=XmlWriter.createElement(xmlDoc,"child");
+		child.appendChild(this.child.createXml(xmlDoc));
+		slot.appendChild(child);
+	}
+	return slot;
+};
+RectSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="RectSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=data.asString().getValue();
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};
+/**
+ * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
+ * It creates a hexagonal Slot that can hold Blocks but not be edited via InputPad or dialog.
+ * Its input type and output type is always bool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {string} key - The name of the Slot. Used for reading and writing save files.
+ * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
+ */
+function HexSlot(parent,key,snapType){
+	Slot.call(this,parent,key,Slot.inputTypes.none,snapType,Slot.outputTypes.bool); //Call constructor.
+	this.slotShape = new HexSlotShape(this);
+	this.slotShape.show();
+}
+HexSlot.prototype = Object.create(Slot.prototype);
+HexSlot.prototype.constructor = HexSlot;
+
+/**
+ * @inheritDoc
+ * TODO: fix BlockGraphics
+ */
+HexSlot.prototype.highlight=function(){
+	const slotGraphicShowing = !this.hasChild;
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,2,slotGraphicShowing);
+};
+
+/**
+ * @inheritDoc
+ * @return {string}
+ */
+HexSlot.prototype.textSummary=function(){
+	//Angle brackets are used because it is a HexSlot.
+	if(this.hasChild){ //If it has a child, just use an ellipsis.
+		return "<...>";
+	}
+	else{ //Otherwise, it is empty.
+		return "<>";
+	}
+};
+
+/**
+ * @inheritDoc
+ * @return {Data}
+ */
+HexSlot.prototype.getDataNotFromChild=function(){
+	return new BoolData(false,false); //The Slot is empty. Return default value of false.
+};
+
+/**
+ * @inheritDoc
+ * @param {Document} xmlDoc
+ * @returns {Document}
+ */
+HexSlot.prototype.createXml=function(xmlDoc){
+	const slot = Slot.prototype.createXml.call(this, xmlDoc);
+	XmlWriter.setAttribute(slot,"type","HexSlot");
+	return slot;
+};
+
+/**
+ * @inheritDoc
+ * @param {Document} slotNode
+ * @return {HexSlot}
+ */
+HexSlot.prototype.importXml=function(slotNode){
+	const type = XmlWriter.getAttribute(slotNode, "type");
+	// The save file appears to have the wrong type of Slot. The data is left at default value.
+	// TODO: Remove this check and just validate the data.
+	if(type !== "HexSlot"){
+		return this;
+	}
+	// Get the nodes for this Slot's child.
+	const childNode = XmlWriter.findSubElement(slotNode, "child");
+	const blockNode = XmlWriter.findSubElement(childNode, "block");
+	if(blockNode != null) {
+		// Import the Block from the save file
+		const childBlock = Block.importXml(blockNode);
+		// If import succeeds, connect the Block
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	// Return a reference to this Slot.
+	return this;
+};
+function DropSlot(parent,key,snapType){
+	if(snapType==null){
+		snapType=Slot.snapTypes.none;
+	}
+	Slot.call(this,parent,key,Slot.inputTypes.drop,snapType,Slot.outputTypes.any);
+	this.enteredData=null;
+	this.text="";
+	this.slotShape = new DropSlotShape(this, "");
+	this.slotShape.show();
+	this.selected=false;
+	this.optionsText=new Array();
+	this.optionsData=new Array();
+	this.dropColumns=1; //The number of columns to show in the drop down.
+	this.slotVisible=true;
+}
+DropSlot.prototype = Object.create(Slot.prototype);
+DropSlot.prototype.constructor = DropSlot;
+DropSlot.prototype.addOption=function(displayText,data){
+	this.optionsText.push(displayText);
+	this.optionsData.push(data);
+};
+DropSlot.prototype.populateList=function(){//overrided by subclasses
+	
+};
+/*
+DropSlot.prototype.buildSlot=function(){
+	this.textH=BlockGraphics.valueText.charHeight;
+	this.textW=0;
+	this.bgE=this.generateBg();
+	this.triE=this.generateTri();
+	this.textE=this.generateText();
+	this.hitBoxE=this.generateHitBox();
+}
+*/
+/*
+DropSlot.prototype.generateBg=function(){
+	var bG=BlockGraphics.dropSlot;
+	var bgE=GuiElements.create.rect(this.parent.group);
+	GuiElements.update.color(bgE,bG.bg);
+	GuiElements.update.opacity(bgE,bG.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE,this);
+	return bgE;
+}
+DropSlot.prototype.generateTri=function(){
+	var bG=BlockGraphics.dropSlot;
+	var triE=GuiElements.create.path(this.parent.group);
+	GuiElements.update.color(triE,bG.triColor);
+	TouchReceiver.addListenersSlot(triE,this);
+	return triE;
+}
+DropSlot.prototype.generateText=function(){ //Fix BG
+	var bG=BlockGraphics.dropSlot;
+	var obj=BlockGraphics.create.valueText("",this.parent.group);
+	GuiElements.update.color(obj,bG.textFill);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+}
+DropSlot.prototype.generateHitBox=function(){
+	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
+	TouchReceiver.addListenersSlot(obj,this);
+	return obj;
+};
+*/
+DropSlot.prototype.moveSlot=function(x,y){
+	this.slotShape.move(x, y);
+};
+DropSlot.prototype.hideSlot=function(){
+	this.slotShape.hide();
+};
+DropSlot.prototype.showSlot=function(){
+	this.slotShape.show();
+};
+DropSlot.prototype.changeText=function(text){
+	this.text=text;
+	this.slotShape.changeText(text);
+	if(this.parent.stack!=null){
+		this.parent.stack.updateDim();
+	}
+};
+DropSlot.prototype.updateDimNR=function(){
+	this.width = this.slotShape.width;
+	this.height = this.slotShape.height;
+};
+DropSlot.prototype.duplicate=function(parentCopy){
+	var myCopy=new DropSlot(parentCopy,this.snapType);
+	for(var i=0;i<this.optionsText.length;i++){
+		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
+	}
+	if(this.hasChild){
+		myCopy.snap(this.child.duplicate(0,0));
+	}
+	myCopy.enteredData=this.enteredData;
+	myCopy.changeText(this.text);
+	myCopy.dropColumns=this.dropColumns;
+	return myCopy;
+}
+/**
+ * Copies data and blocks from a Slot into this Slot
+ * @param {DropSlot} slot - The slot to copy from
+ */
+DropSlot.prototype.copyFrom=function(slot){
+	this.enteredData = slot.enteredData;
+	this.changeText(slot.text);
+	if(slot.hasChild){
+		this.snap(slot.child.duplicate(0,0));
+	}
+};
+DropSlot.prototype.highlight=function(){//Fix BG
+	var isSlot=!this.hasChild;
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+};
+DropSlot.prototype.edit=function(previewFn){
+	if(previewFn == null){
+		previewFn = null;
+	}
+	if(!this.selected){
+		var x1 = this.getAbsX();
+		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
+		var y1 = this.getAbsY();
+		var y2 = this.relToAbsY(this.height);
+		this.select();
+		InputPad.resetPad(this.dropColumns);
+		this.populateList(); //Loads any dynamic options.
+		for(var i=0;i<this.optionsText.length;i++){
+			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
+		}
+		InputPad.showDropdown(this,x1, x2, y1, y2, null, previewFn);
+	}
+};
+/* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
+ * Only used for special DropSlots.
+ */
+DropSlot.prototype.editText=function(){
+	//Builds a text-based representation of the Block with "___" in place of this Slot.
+	var question=this.parent.textSummary(this);
+	//Get the current value for the hint text.
+	var currentVal=this.enteredData.getValue();
+	//The callback function changes the text.
+	var callbackFn=function(cancelled,response){
+		if(!cancelled){
+			callbackFn.slot.enteredData=new StringData(response);
+			callbackFn.slot.changeText(response);
+		}
+		//callbackFn.slot.deselect();
+	};
+	callbackFn.slot=this;
+	//The error function cancels any change.
+	var callbackErr=function(){
+
+	};
+	callbackErr.slot=this;
+	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn,callbackErr);
+	//Visually deselect the Slot.
+	callbackFn.slot.deselect();
+};
+DropSlot.prototype.select=function(){
+	this.selected = true;
+	this.slotShape.select();
+};
+DropSlot.prototype.deselect=function(){
+	this.selected = false;
+	this.slotShape.deselect();
+};
+DropSlot.prototype.textSummary=function(){
+	if(this.hasChild){
+		return "[...]";
+	}
+	else{
+		if(this.enteredData==null){
+			return "[ ]";
+		}
+		return "["+this.enteredData.asString().getValue()+"]";
+	}
+};
+DropSlot.prototype.setSelectionData=function(text,data){
+	this.enteredData=data;
+	this.changeText(text);
+	if(this.selected){
+		this.deselect();
+	}
+};
+/* Saves the Data from the InputPad to the Slot, updates the text, and deselects the Slot.
+ * @param {Data} data - The Data to save to the Slot.
+ */
+DropSlot.prototype.saveNumData=function(data){
+	this.setSelectionData(data.asString().getValue(), data);
+};
+DropSlot.prototype.getData=function(){
+	if(this.running==3){
+		if(this.resultIsFromChild){
+			return this.resultData;
+		}
+		else{
+			return this.enteredData;
+		}
+	}
+	if(this.hasChild){
+		return null;
+	}
+	else{
+		return this.enteredData;
+	}
+}
+DropSlot.prototype.clearOptions=function(){
+	this.optionsText=new Array();
+	this.optionsData=new Array();
+}
+
+DropSlot.prototype.createXml=function(xmlDoc){
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
+	XmlWriter.setAttribute(slot,"type","DropSlot");
+	XmlWriter.setAttribute(slot,"text",this.text);
+	if(this.enteredData!=null){
+		var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
+		enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+		slot.appendChild(enteredData);
+	}
+	return slot;
+};
+DropSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			this.enteredData=data;
+			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
+			this.changeText(text);
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};
+DropSlot.prototype.updateEdit=function(visibleText,data){
+	if(this.selected){ //Only can edit if the Slot is selected.
+		this.enteredData=data;
+		this.changeText(visibleText);
+	}
+	else{
+		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
+	}
+};
+//@fix Write documentation.
+
+function SoundDropSlot(parent,key, isRecording){
+	DropSlot.call(this,parent,key);
+	this.isRecording = isRecording;
+}
+SoundDropSlot.prototype = Object.create(DropSlot.prototype);
+SoundDropSlot.prototype.constructor = SoundDropSlot;
+
+SoundDropSlot.prototype.populateList = function(){
+	this.clearOptions();
+	const me = this;
+	let list = Sound.getSoundList(this.isRecording);
+	list.forEach(function(sound){
+		me.addOption(sound.name, new SelectionData(sound.id));
+	});
+};
+SoundDropSlot.prototype.edit=function(){
+	var me = this;
+	DropSlot.prototype.edit.call(this, function(){
+		if(me.enteredData != null) {
+			if(!this.isRecording) {
+				let soundId = me.enteredData.getValue();
+				Sound.playAndStopPrev(soundId, false);
+			}
+		}
+		else{
+			GuiElements.alert("No data");
+		}
+	});
+};
+SoundDropSlot.prototype.deselect=function(){
+	DropSlot.prototype.deselect.call(this);
+	Sound.stopAllSounds();
+};
+/* NumSlot is a subclass of RoundSlot.
+ * It creates a RoundSlot optimized for use with numbers.
+ * It automatically converts any results into NumData and has a snapType of numStrBool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {number} value - The initial number stored in the Slot.
+ * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
+ */
+function NumSlot(parent,key,value,positive,integer){
+	if(positive==null){ //Optional parameters are false by default.
+		positive=false;
+	}
+	if(integer==null){
+		integer=false;
+	}
+	//Make RoundSlot.
+	RoundSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.num,new NumData(value),positive,integer);
+}
+NumSlot.prototype = Object.create(RoundSlot.prototype);
+NumSlot.prototype.constructor = NumSlot;
+/* StringSlot is a subclass of RectSlot.
+ * It creates a RectSlot optimized for use with strings.
+ * It automatically converts any results into StringData and has a snapType of numStrBool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {string} value - The initial string stored in the Slot.
+ */
+function StringSlot(parent,key,value){
+	//Make RectSlot.
+	RectSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.string,value);
+}
+StringSlot.prototype = Object.create(RectSlot.prototype);
+StringSlot.prototype.constructor = StringSlot;
+/* BoolSlot is a subclass of HexSlot.
+ * It creates a RectSlot optimized for use with booleans.
+ * It has a snapType of bool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ */
+function BoolSlot(parent,key){
+	//Make HexSlot.
+	HexSlot.call(this,parent,key,Slot.snapTypes.bool);
+}
+BoolSlot.prototype = Object.create(HexSlot.prototype);
+BoolSlot.prototype.constructor = BoolSlot;
+//@fix Write documentation.
+
+function VarDropSlot(key, parent){
+	DropSlot.call(this,key, parent,Slot.snapTypes.none);
+	var variables=CodeManager.variableList;
+	if(variables.length>0){
+		var lastVar=variables[variables.length-1];
+		this.setSelectionData(lastVar.getName(),new SelectionData(lastVar));
+	}
+}
+VarDropSlot.prototype = Object.create(DropSlot.prototype);
+VarDropSlot.prototype.constructor = VarDropSlot;
+VarDropSlot.prototype.populateList=function(){
+	this.clearOptions();
+	var variables=CodeManager.variableList;
+	for(var i=0;i<variables.length;i++){
+		var currentVar=variables[i];
+		this.addOption(currentVar.getName(),new SelectionData(currentVar));
+	}
+};
+VarDropSlot.prototype.importXml=function(slotNode){
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			var variable=CodeManager.findVar(data.getValue());
+			if(variable!=null) {
+				this.setSelectionData(variable.getName(), new SelectionData(variable));
+			}
+		}
+	}
+	return this;
+};
+VarDropSlot.prototype.renameVariable=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		this.changeText(variable.getName());
+	}
+};
+VarDropSlot.prototype.deleteVariable=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		this.setSelectionData("",null);
+	}
+};
+VarDropSlot.prototype.checkVariableUsed=function(variable){
+	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+		return true;
+	}
+	return false;
+};
+//@fix Write documentation.
+
+function ListDropSlot(parent,key,snapType){
+	if(snapType==null){
+		snapType=Slot.snapTypes.none
+	}
+	DropSlot.call(this,parent,key,snapType);
+	var lists=CodeManager.listList;
+	if(lists.length>0){
+		var lastList=lists[lists.length-1];
+		this.setSelectionData(lastList.getName(),new SelectionData(lastList));
+	}
+}
+ListDropSlot.prototype = Object.create(DropSlot.prototype);
+ListDropSlot.prototype.constructor = ListDropSlot;
+ListDropSlot.prototype.populateList=function(){
+	this.clearOptions();
+	var lists=CodeManager.listList;
+	for(var i=0;i<lists.length;i++){
+		var currentList=lists[i];
+		this.addOption(currentList.getName(),new SelectionData(currentList));
+	}
+};
+ListDropSlot.prototype.importXml=function(slotNode){
+	this.setSelectionData("",null);
+	var type=XmlWriter.getAttribute(slotNode,"type");
+	if(type!="DropSlot"){
+		return this;
+	}
+	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
+	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
+	if(dataNode!=null){
+		var data=Data.importXml(dataNode);
+		if(data!=null){
+			var list=CodeManager.findList(data.getValue());
+			if(list!=null) {
+				this.setSelectionData(list.getName(), new SelectionData(list));
+			}
+		}
+	}
+	var childNode=XmlWriter.findSubElement(slotNode,"child");
+	var blockNode=XmlWriter.findSubElement(childNode,"block");
+	if(blockNode!=null) {
+		var childBlock = Block.importXml(blockNode);
+		if (childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
+};
+ListDropSlot.prototype.renameList=function(list){
+	if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		this.changeText(list.getName());
+	}
+	this.passRecursively("renameList",list);
+};
+ListDropSlot.prototype.deleteList=function(list){
+	if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		this.setSelectionData("",null);
+	}
+	this.passRecursively("deleteList",list);
+};
+ListDropSlot.prototype.checkListUsed=function(list){
+	if(this.hasChild){
+		return DropSlot.prototype.checkListUsed.call(this,list);
+	}
+	else if(this.enteredData!=null&&this.enteredData.getValue()==list){
+		return true;
+	}
+	return false;
+};
+
+
+function PortSlot(parent, key, maxPorts) {
+	DropSlot.call(this, parent, key, Slot.snapTypes.none);
+	this.maxPorts = maxPorts;
+	this.setSelectionData();
+    for(let portNum = 1; portNum <= this.maxPorts; portNum++) {
+        this.addOption("port " + portNum.toString(), new NumData(portNum));
+    }
+    this.setSelectionData("1",new NumData(1));
+}
+PortSlot.prototype = Object.create(DropSlot.prototype);
+PortSlot.prototype.constructor = PortSlot;
+//@fix Write documentation.
+
+function BroadcastDropSlot(parent,key,isHatBlock){
+	if(isHatBlock==null){
+		isHatBlock=false;
+	}
+	var snapType=Slot.snapTypes.numStrBool;
+	if(isHatBlock){
+		snapType=Slot.snapTypes.none;
+	}
+	this.isHatBlock=isHatBlock;
+	DropSlot.call(this,parent,key,snapType);
+}
+BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
+BroadcastDropSlot.prototype.constructor = BroadcastDropSlot;
+BroadcastDropSlot.prototype.populateList=function(){
+	this.clearOptions();
+	CodeManager.updateAvailableMessages();
+	if(this.isHatBlock){
+		this.addOption("any message",new SelectionData("any_message"));
+	}
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		var currentMessage=messages[i];
+		this.addOption('"'+currentMessage+'"',new StringData(currentMessage));
+	}
+	this.addOption("new",new SelectionData("new_message"));
+};
+BroadcastDropSlot.prototype.duplicate=function(parentCopy){
+	var myCopy=new BroadcastDropSlot(parentCopy,this.isHatBlock);
+	myCopy.enteredData=this.enteredData;
+	myCopy.changeText(this.text);
+	return myCopy;
+};
+BroadcastDropSlot.prototype.checkBroadcastMessageAvailable=function(message){
+	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
+		return message==this.enteredData.getValue();
+	}
+	return false;
+};
+BroadcastDropSlot.prototype.updateAvailableMessages=function(){
+	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
+		CodeManager.addBroadcastMessage(this.enteredData.getValue());
+	}
+};
+function DeviceDropSlot(parent, key, deviceClass, shortText) {
+	if (shortText == null) {
+		shortText = false;
+	}
+	this.shortText = shortText;
+	DropSlot.call(this, parent, key, Slot.snapTypes.none);
+	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
+	this.deviceClass = deviceClass;
+	this.labelText = new LabelText(this.parent, this.prefixText.trim());
+	this.labelMode = false;
+	this.setSelectionData(this.prefixText + 1, new SelectionData(0));
+
+	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
+		this.switchToLabel();
+	} else {
+		this.labelText.hide();
+	}
+}
+
+DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
+DeviceDropSlot.prototype.constructor = DeviceDropSlot;
+DeviceDropSlot.prototype.populateList = function() {
+	this.clearOptions();
+	var deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	for (var i = 0; i < deviceCount; i++) {
+		this.addOption(this.prefixText + (i + 1), new SelectionData(i)); //We'll store a 0-indexed value but display it +1.
+	}
+};
+
+DeviceDropSlot.prototype.duplicate = function(parentCopy) {
+	var myCopy = new DeviceDropSlot(parentCopy, this.deviceClass, this.shortText);
+	myCopy.enteredData = this.enteredData;
+	myCopy.changeText(this.text);
+	return myCopy;
+};
+
+DeviceDropSlot.prototype.switchToLabel = function() {
+	if (!this.labelMode) {
+		this.labelMode = true;
+		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
+		this.labelText.show();
+		this.hideSlot();
+	}
+};
+
+DeviceDropSlot.prototype.switchToSlot = function() {
+	if (this.labelMode) {
+		this.labelMode = false;
+		this.labelText.hide();
+		this.showSlot();
+	}
+};
+
+DeviceDropSlot.prototype.updateAlign = function(x, y) {
+	if (this.labelMode) {
+		return LabelText.prototype.updateAlign.call(this.labelText, x, y);
+	} else {
+		return DropSlot.prototype.updateAlign.call(this, x, y);
+	}
+};
+
+DeviceDropSlot.prototype.updateDim = function() {
+	if (this.labelMode) {
+		LabelText.prototype.updateDim.call(this.labelText);
+		this.width = this.labelText.width;
+	} else {
+		DropSlot.prototype.updateDim.call(this);
+	}
+};
+
+DeviceDropSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
+	if(this.deviceClass == deviceClass) {
+		this.switchToLabel();
+	}
+};
+
+DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
+	if(this.deviceClass == deviceClass) {
+		this.switchToSlot();
+	}
+};
+
+DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
+	if (this.deviceClass == deviceClass && this.getData() != null) {
+		return this.getData().getValue() + 1;
+	} else {
+		return 1;
+	}
+};
+
+DeviceDropSlot.prototype.importXml = function(slotNode) {
+	DropSlot.prototype.importXml.call(this, slotNode);
+	this.enteredData = new SelectionData(parseInt(this.enteredData.getValue()));
+	if (this.enteredData.getValue() < 0) {
+		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
+	}
+};
+function BlockSlot(parent){
+	this.child=null;
+	//this.width=0;
+	this.height=0;
+	this.x=0;
+	this.y=0;
+	this.parent=parent;
+	this.isBlockSlot=true;
+	this.hasChild=false;
+	this.isRunning=false;
+	this.currentBlock=null;
+}
+BlockSlot.prototype.getAbsX=function(){
+	return this.parent.stack.relToAbsX(this.x);
+};
+BlockSlot.prototype.getAbsY=function(){
+	return this.parent.stack.relToAbsY(this.y);
+};
+BlockSlot.prototype.updateDim=function(){
+	var bG=BlockGraphics.getType(this.type);
+	if(this.hasChild){
+		this.child.updateDim();
+		this.height=this.child.addHeights();
+	}
+	else{
+		//this.width=0;
+		this.height=BlockGraphics.loop.bottomH;
+	}
+}
+BlockSlot.prototype.updateAlign=function(x,y){
+	this.x=x;
+	this.y=y;
+	if(this.hasChild){
+		this.child.updateAlign(x,y);
+	}
+}
+BlockSlot.prototype.snap=function(block){
+	if(!block.getLastBlock().bottomOpen&&this.child!=null){
+		var BG=BlockGraphics.command;
+		this.child.unsnap().shiftOver(BG.shiftX,block.stack.getHeight()+BG.shiftY);
+	}
+	var stack=this.parent.stack;
+	if(stack!=null&&block.stack!=null) {
+		if (stack.isRunning && !block.stack.isRunning) {
+			block.glow();
+		}
+		else if (!stack.isRunning && block.stack.isRunning) { //Blocks that are added are stopped.
+			block.stack.stop();
+		}
+		else if (stack.isRunning && block.isRunning) { //The added block is stopped, but still glows as part of a running stack.
+			block.stop();
+		}
+	}
+	block.parent=this;
+	if(this.hasChild){
+		var lastBlock=block.getLastBlock();
+		var prevChild=this.child;
+		lastBlock.nextBlock=prevChild;
+		prevChild.parent=lastBlock;
+	}
+	this.hasChild=true;
+	this.child=block;
+	if(block.stack!=null) {
+		var oldG = block.stack.group;
+		block.stack.remove();
+		block.changeStack(this.parent.stack);
+		oldG.remove();
+	}
+	if(stack!=null) {
+		this.parent.stack.updateDim();
+	}
+}
+BlockSlot.prototype.changeStack=function(stack){
+	if(this.hasChild){
+		this.child.changeStack(stack);
+	}
+}
+BlockSlot.prototype.updateStackDim=function(stack){
+	if(this.hasChild){
+		this.child.updateStackDim(stack);
+	}
+}
+BlockSlot.prototype.removeChild=function(){
+	this.hasChild=false;
+	this.child=null;
+}
+BlockSlot.prototype.findBestFit=function(){
+	var move=CodeManager.move;
+	var fit=CodeManager.fit;
+	var x=this.getAbsX();
+	var y=this.getAbsY();
+	if(move.topOpen){
+		var snap=BlockGraphics.command.snap;
+		if(move.pInRange(move.topX,move.topY,x-snap.left,y-snap.top,snap.left+snap.right,snap.top+snap.bottom)){
+			var xDist=move.topX-x;
+			var yDist=move.topY-y;
+			var dist=xDist*xDist+yDist*yDist;
+			if(!fit.found||dist<fit.dist){
+				fit.found=true;
+				fit.bestFit=this;
+				fit.dist=dist;
+			}
+		}
+	}
+	if(this.hasChild){
+		this.child.findBestFit();
+	}
+}
+BlockSlot.prototype.highlight=function(){
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.parent.isGlowing);
+};
+BlockSlot.prototype.duplicate=function(parentCopy){
+	var myCopy=new BlockSlot(parentCopy);
+	if(this.hasChild){
+		myCopy.snap(this.child.duplicate(0,0));
+	}
+	return myCopy;
+};
+BlockSlot.prototype.copyFrom=function(blockSlot){
+	if(blockSlot.hasChild){
+		this.snap(blockSlot.child.duplicate(0,0));
+	}
+};
+BlockSlot.prototype.startRun=function(){
+	if(!this.isRunning&&this.hasChild){
+		this.isRunning=true;
+		this.currentBlock=this.child;
+	}
+}
+BlockSlot.prototype.stop=function(){
+	if(this.isRunning&&this.hasChild){
+		this.child.stop();
+	}
+	this.isRunning=false;
+};
+BlockSlot.prototype.updateRun=function(){
+	if(this.isRunning){
+		if(this.currentBlock.stack!=this.parent.stack){ //If the current Block has been removed, don't run it.
+			this.isRunning=false;
+			return new ExecutionStatusDone();
+		}
+		let execStatus = this.currentBlock.updateRun();
+		if(!execStatus.isRunning()){
+			if(execStatus.hasError()){
+				this.isRunning=false;
+				return execStatus;
+			} else {
+				this.currentBlock = this.currentBlock.nextBlock;
+			}
+		}
+		if(this.currentBlock!=null){
+			return new ExecutionStatusRunning();
+		} else{
+			this.isRunning = false;
+			return new ExecutionStatusDone();
+		}
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+BlockSlot.prototype.glow=function(){
+	if(this.hasChild){
+		this.child.glow();
+	}
+};
+BlockSlot.prototype.stopGlow=function(){
+	if(this.hasChild){
+		this.child.stopGlow();
+	}
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots. */
+BlockSlot.prototype.checkBroadcastMessageAvailable=function(message){
+	if(this.hasChild){
+		return this.child.checkBroadcastMessageAvailable(message);
+	}
+	return false;
+};
+/* Recursively updates the available broadcast messages.
+ */
+BlockSlot.prototype.updateAvailableMessages=function(){
+	if(this.hasChild){
+		this.child.updateAvailableMessages();
+	}
+};
+
+BlockSlot.prototype.createXml=function(xmlDoc){
+	var blockSlot=XmlWriter.createElement(xmlDoc,"blockSlot");
+	if(this.hasChild){
+		var blocks=XmlWriter.createElement(xmlDoc,"blocks");
+		this.child.writeToXml(xmlDoc,blocks);
+		blockSlot.appendChild(blocks);
+	}
+	return blockSlot;
+};
+BlockSlot.prototype.importXml=function(blockSlotNode){
+	var blocksNode=XmlWriter.findSubElement(blockSlotNode,"blocks");
+	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
+	if(blockNodes.length>0){
+		var firstBlock=null;
+		var i=0;
+		while(firstBlock==null&&i<blockNodes.length){
+			firstBlock=Block.importXml(blockNodes[i]);
+			i++;
+		}
+		if(firstBlock==null){
+			return;
+		}
+		this.snap(firstBlock);
+		var previousBlock=firstBlock;
+		while(i<blockNodes.length) {
+			var newBlock = Block.importXml(blockNodes[i]);
+			if (newBlock != null) {
+				previousBlock.snap(newBlock);
+				previousBlock = newBlock;
+			}
+			i++;
+		}
+	}
+};
+BlockSlot.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+BlockSlot.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+BlockSlot.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+BlockSlot.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+BlockSlot.prototype.checkVariableUsed=function(variable){
+	if(this.hasChild){
+		return this.child.checkVariableUsed(variable);
+	}
+	return false;
+};
+BlockSlot.prototype.checkListUsed=function(list){
+	if(this.hasChild){
+		return this.child.checkListUsed(list);
+	}
+	return false;
+};
+BlockSlot.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+BlockSlot.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+BlockSlot.prototype.countDevicesInUse=function(deviceClass){
+	if(this.hasChild){
+		return this.child.countDevicesInUse(deviceClass);
+	}
+	return 0;
+};
+BlockSlot.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	if(this.hasChild){
+		this.child[functionName].apply(this.child,args);
+	}
+};
+//Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
+
+function LabelText(parent,text){
+	DebugOptions.validateNonNull(parent, text);
+	this.text=text;
+	this.width=0;
+	this.height=BlockGraphics.labelText.charHeight;
+	this.x=0;
+	this.y=0;
+	this.parent=parent;
+	this.textE=this.generateText(text);
+	this.isSlot=false;
+	this.visible=true;
+}
+LabelText.prototype.updateAlign=function(x,y){
+	this.move(x,y+this.height/2);
+	return this.width;
+};
+LabelText.prototype.updateDim=function(){
+	if(this.width==0){
+		GuiElements.layers.temp.appendChild(this.textE);
+		this.width=GuiElements.measure.textWidth(this.textE);
+		this.textE.remove();
+		this.parent.group.appendChild(this.textE);
+	}
+};
+LabelText.prototype.generateText=function(text){
+	var obj=BlockGraphics.create.labelText(text,this.parent.group);
+	TouchReceiver.addListenersChild(obj,this.parent);
+	return obj;
+};
+LabelText.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	BlockGraphics.update.text(this.textE,x,y);
+};
+LabelText.prototype.duplicate=function(parentCopy){
+	return new LabelText(parentCopy,this.text);
+};
+LabelText.prototype.textSummary=function(){
+	return this.text;
+};
+LabelText.prototype.show=function(){
+	if(!this.visible){
+		this.parent.group.appendChild(this.textE);
+		this.visible=true;
+	}
+};
+LabelText.prototype.hide=function(){
+	if(this.visible){
+		this.textE.remove();
+		this.visible=false;
+	}
+};
+LabelText.prototype.remove=function(){
+	this.textE.remove();
+};
+function BlockIcon(parent,pathId,color,altText,height){
+	this.pathId=pathId;
+	this.color=color;
+	this.altText=altText;
+	this.width=VectorIcon.computeWidth(pathId,height);
+	this.height=height;
+	this.x=0;
+	this.y=0;
+	this.parent=parent;
+	this.icon=new VectorIcon(0,0,pathId,color,height,this.parent.group);
+	TouchReceiver.addListenersChild(this.icon.pathE,this.parent);
+	this.isSlot=false;
+}
+BlockIcon.prototype.updateAlign=function(x,y){
+	this.move(x,y-this.height/2);
+	return this.width;
+}
+BlockIcon.prototype.updateDim=function(){
+	
+}
+BlockIcon.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	this.icon.move(x,y);
+}
+BlockIcon.prototype.duplicate=function(parentCopy){
+	return new BlockIcon(parentCopy,this.pathId,this.color,this.altText,this.height);
+}
+BlockIcon.prototype.textSummary=function(){
+	return this.altText;
+}
+/**
+ * Created by Tom on 6/14/2017.
+ */
+function B_DeviceWithPortsSensorBase(x, y, deviceClass, sensorType, displayName, numberOfPorts){
+	ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+	this.sensorType = sensorType;
+	this.displayName = displayName;
+	this.numberOfPorts = numberOfPorts;
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
+	this.addPart(new LabelText(this,displayName));
+	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
+}
+B_DeviceWithPortsSensorBase.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceWithPortsSensorBase.prototype.constructor = B_DeviceWithPortsSensorBase;
+/* Generic Hummingbird input functions. */
+B_DeviceWithPortsSensorBase.prototype.startAction=function(){
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = this.slots[1].getData().getValue();
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, this.sensorType, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
+	var status = this.runMem.requestStatus;
+	if (status.finished) {
+		if(status.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage());
+			return new ExecutionStatusError();
+		} else {
+			var result = new StringData(status.result);
+			if(result.isNumber()){
+				return new ExecutionStatusResult(result.asNum());
+			}
+			else{
+				return new ExecutionStatusResult(new NumData(0, false));
+			}
+		}
+	}
+	return new ExecutionStatusRunning(); // Still running
+};
+
+
+
+
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal){
+	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+	this.outputType = outputType;
+	this.displayName = displayName;
+	this.numberOfPorts = numberOfPorts;
+	this.minVal = minVal;
+	this.maxVal = maxVal;
+	this.positive = minVal >= 0;
+	this.valueKey = valueKey;
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
+	this.addPart(new LabelText(this,displayName));
+	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
+	this.addPart(new NumSlot(this,"NumS_out", 0, this.positive, true)); //integer
+}
+B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
+B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
+B_DeviceWithPortsOutputBase.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = this.slots[1].getData().getValue();
+	let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true); // [0,180]
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.setOutput(mem.requestStatus, this.outputType, port, value, this.valueKey);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
+	if(this.runMem.requestStatus.finished){
+		if(this.runMem.requestStatus.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage());
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	}
+	else{
+		return new ExecutionStatusRunning();
+	}
+};
+
+
+
+
+function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
+	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+	this.numberOfPorts = numberOfPorts;
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
+	this.addPart(new LabelText(this, "TRI-LED"));
+	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
+	this.addPart(new LabelText(this, "R"));
+	this.addPart(new NumSlot(this,"NumS_r", 0, true, true)); //Positive integer.
+	this.addPart(new LabelText(this, "G"));
+	this.addPart(new NumSlot(this,"NumS_g", 0, true, true)); //Positive integer.
+	this.addPart(new LabelText(this, "B"));
+	this.addPart(new NumSlot(this,"NumS_b", 0, true, true)); //Positive integer.
+}
+B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
+B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
+B_DeviceWithPortsTriLed.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	mem.requestStatus = {};
+	let port = this.slots[1].getData().getValue(); // Positive integer.
+	let valueR = this.slots[2].getData().getValueInR(0, 100, true, true); //Positive integer.
+	let valueG = this.slots[3].getData().getValueInR(0, 100, true, true); //Positive integer.
+	let valueB = this.slots[4].getData().getValueInR(0, 100, true, true); //Positive integer.
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		device.setTriLed(mem.requestStatus, port, valueR, valueG, valueB);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+/* Waits for the request to finish. */
+B_DeviceWithPortsTriLed.prototype.updateAction = function() {
+	if(this.runMem.requestStatus.finished){
+		if(this.runMem.requestStatus.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage());
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	}
+	else{
+		return new ExecutionStatusRunning();
+	}
+};
+/* This file contains the implementations for Blocks in the hummingbird category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ * Most relay on the HummingbirdManager to remove redundant code.
+ */
+
+function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal);
+}
+B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
+
+
+
+function B_HBServo(x,y){
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180);
+}
+B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
+B_HBServo.prototype.constructor = B_HBServo;
+
+
+function B_HBMotor(x,y){
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100);
+}
+B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
+B_HBMotor.prototype.constructor = B_HBMotor;
+
+
+
+function B_HBVibration(x,y){
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100);
+}
+B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
+B_HBVibration.prototype.constructor = B_HBVibration;
+
+
+
+function B_HBLed(x,y){
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100);
+}
+B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
+B_HBLed.prototype.constructor = B_HBLed;
+
+
+
+function B_HummingbirdSensorBase(x, y, sensorType, displayName) {
+	B_DeviceWithPortsSensorBase.call(this, x,y, DeviceHummingbird, sensorType, displayName, 4);
+}
+B_HummingbirdSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
+
+
+function B_HBLight(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Light");
+}
+B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBLight.prototype.constructor = B_HBLight;
+
+
+function B_HBTempC(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature C");
+}
+B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBTempC.prototype.constructor = B_HBTempC;
+Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
+
+
+function B_HBDistCM(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance CM");
+}
+B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBDistCM.prototype.constructor = B_HBDistCM;
+Block.setDisplaySuffix(B_HBDistCM, "cm");
+
+
+
+function B_HBKnob(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Knob");
+}
+B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBKnob.prototype.constructor = B_HBKnob;
+
+
+function B_HBSound(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "sound", "Sound");
+}
+B_HBSound.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBSound.prototype.constructor = B_HBSound;
+
+
+///// <Special> /////
+
+
+function B_HBTriLed(x,y){
+	B_DeviceWithPortsTriLed.call(this,x,y, DeviceHummingbird, 2);
+}
+B_HBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
+B_HBTriLed.prototype.constructor = B_HBTriLed;
+
+
+function B_HBTempF(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature F");
+}
+B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBTempF.prototype.constructor = B_HBTempF;
+B_HBTempF.prototype.updateAction=function(){
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultC = status.getResult();
+		if(resultC != null && resultC.isValid) {
+			let result=new NumData(Math.round(resultC.getValue()*1.8+32));
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
+		}
+	}
+};
+Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
+
+
+function B_HBDistInch(x,y){
+	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance Inch");
+}
+B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
+B_HBDistInch.prototype.constructor = B_HBDistInch;
+B_HBDistInch.prototype.updateAction=function(){
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultMm = status.getResult();
+		if(resultMm != null && resultMm.isValid) {
+			let result=new NumData((resultMm.getValue()/2.54).toFixed(1)*1);
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
+		}
+	}
+};
+Block.setDisplaySuffix(B_HBDistInch, "inches");
+
+/* Output Blocks */
+function B_FlutterServo(x, y) {
+	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180);
+}
+B_FlutterServo.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_FlutterServo.prototype.constructor = B_FlutterServo;
+
+
+function B_FlutterTriLed(x,y){
+	B_DeviceWithPortsTriLed.call(this,x,y, DeviceFlutter, 3);
+}
+B_FlutterTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
+B_FlutterTriLed.prototype.constructor = B_FlutterTriLed;
+
+
+function B_FlutterBuzzer(x, y) {
+	CommandBlock.call(this, x, y, "flutter");
+	this.addPart(new DeviceDropSlot(this,"DDS_1", DeviceFlutter, true));
+	this.addPart(new LabelText(this, "Buzzer"));
+	this.addPart(new LabelText(this, "Volume"));
+	this.addPart(new NumSlot(this,"NumS_vol", 20, true, true)); //Positive integer.
+	this.addPart(new LabelText(this, "Frequency"));
+	this.addPart(new NumSlot(this,"NumS_freq", 10000, true, true)); //Positive integer.
+}
+B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
+/* Generic flutter single output functions. */
+B_FlutterBuzzer.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = DeviceFlutter.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(DeviceFlutter.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let volume = this.slots[1].getData().getValueInR(0, 100, true, true);
+	let frequency = this.slots[2].getData().getValueInR(0, 20000, true, true);
+	this.runMem.requestStatus = {};
+	device.setBuzzer(this.runMem.requestStatus, volume, frequency);
+	return new ExecutionStatusRunning();
+};
+B_FlutterBuzzer.prototype.updateAction = function() {
+	if(this.runMem.requestStatus.finished){
+		if(this.runMem.requestStatus.error){
+			this.displayError(DeviceFlutter.getNotConnectedMessage());
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	}
+	else{
+		return new ExecutionStatusRunning();
+	}
+};
+
+
+
+
+/* Input Blocks */
+function B_FlutterSensorBase(x, y, sensorType, displayName) {
+	B_DeviceWithPortsSensorBase.call(this, x,y, DeviceFlutter, sensorType, displayName, 3);
+}
+B_FlutterSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_FlutterSensorBase.constructor = B_FlutterSensorBase;
+
+function B_FlutterLight(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "light", "Light");
+}
+B_FlutterLight.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterLight.prototype.constructor = B_FlutterLight;
+
+function B_FlutterTempC(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "temperature", "Temperature C");
+}
+B_FlutterTempC.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterTempC.prototype.constructor = B_FlutterTempC;
+Block.setDisplaySuffix(B_FlutterTempC, String.fromCharCode(176) + "C");
+
+
+
+function B_FlutterDistCM(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "distance", "Distance CM");
+}
+B_FlutterDistCM.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterDistCM.prototype.constructor = B_FlutterDistCM;
+Block.setDisplaySuffix(B_FlutterDistCM, "cm");
+
+
+function B_FlutterKnob(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "sensor", "Knob");
+}
+B_FlutterKnob.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterKnob.prototype.constructor = B_FlutterKnob;
+
+
+function B_FlutterSoil(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "soil", "Soil Moisture");
+}
+B_FlutterSoil.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterSoil.prototype.constructor = B_FlutterSoil;
+
+
+function B_FlutterSound(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "sound", "Sound");
+}
+B_FlutterSound.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterSound.prototype.constructor = B_FlutterSound;
+
+
+function B_FlutterTempF(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "temperature", "Temperature F");
+}
+B_FlutterTempF.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterTempF.prototype.constructor = B_FlutterTempF;
+/* Waits for the request to finish then converts C to F. */
+B_FlutterTempF.prototype.updateAction=function(){
+	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultC = status.getResult();
+		if(resultC != null && resultC.isValid) {
+			let result=new NumData(Math.round(resultC.getValue()*1.8+32));
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
+		}
+	}
+};
+Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
+
+Block.setDisplaySuffix(B_FlutterTempF, String.fromCharCode(176) + "F");
+
+
+function B_FlutterDistInch(x, y) {
+	B_FlutterSensorBase.call(this, x, y, "distance", "Distance Inch");
+}
+B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
+B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
+/* Waits for the request to finish then converts cm to in. */
+B_FlutterDistInch.prototype.updateAction=function(){
+	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	if(status.hasError() || status.isRunning()){
+		return status;
+	} else {
+		let resultMm = status.getResult();
+		if(resultMm != null && resultMm.isValid) {
+			let result=new NumData((resultMm.getValue()/2.54).toFixed(1)*1);
+			return new ExecutionStatusResult(result);
+		} else {
+			return status;
+		}
+	}
+};
+
+Block.setDisplaySuffix(B_FlutterDistInch, "inches");
+
+/* This file contains the implementations for Blocks in the control category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ */
+
+
+
+function B_WhenFlagTapped(x,y){
+	HatBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"when"));
+	this.addPart(new BlockIcon(this,VectorPaths.flag,TitleBar.flagFill,"flag",15));
+	this.addPart(new LabelText(this,"tapped"));
+}
+B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
+B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
+/* Triggers stack to start running. */
+B_WhenFlagTapped.prototype.eventFlagClicked=function(){
+	this.stack.startRun();
+};
+/* Does nothing. */
+B_WhenFlagTapped.prototype.startAction=function(){
+	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
+};
+
+
+
+function B_WhenIReceive(x,y){
+	HatBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"when I receive"));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",true));
+}
+B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
+B_WhenIReceive.prototype.constructor = B_WhenIReceive;
+B_WhenIReceive.prototype.eventBroadcast=function(message){
+	var myMessage=this.slots[0].getData();
+	if(myMessage!=null){
+		var myMessageStr=myMessage.getValue();
+		if(myMessageStr=="any_message"||myMessageStr==message){
+			this.stack.stop();
+			this.stack.startRun(null,message);
+		}
+	}
+};
+/* Does nothing. */
+B_WhenIReceive.prototype.startAction=function(){
+	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
+};
+
+
+
+function B_Wait(x,y){
+	CommandBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"wait"));
+	this.addPart(new NumSlot(this,"NumS_dur",1,true)); //Must be positive.
+	this.addPart(new LabelText(this,"secs"));
+}
+B_Wait.prototype = Object.create(CommandBlock.prototype);
+B_Wait.prototype.constructor = B_Wait;
+/* Records current time. */
+B_Wait.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.startTime=new Date().getTime();
+	mem.delayTime=this.slots[0].getData().getValueWithC(true)*1000;
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Waits until current time exceeds stored time plus delay. */
+B_Wait.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(new Date().getTime()>=mem.startTime+mem.delayTime){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_WaitUntil(x,y){
+	CommandBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"wait until"));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
+}
+B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
+B_WaitUntil.prototype.constructor = B_WaitUntil;
+/* Checks condition. If true, stops running; if false, resets Block to check again. */
+B_WaitUntil.prototype.startAction=function(){
+	var stopWaiting=this.slots[0].getData().getValue();
+	if(stopWaiting){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		this.running=0; //startAction will be run next time, giving Slots ability to recalculate.
+		this.clearMem(); //runMem and previous values of Slots will be removed.
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_Forever(x,y){
+	LoopBlock.call(this,x,y,"control",false); //Bottom is not open.
+	this.addPart(new LabelText(this,"repeat forever"));
+}
+B_Forever.prototype = Object.create(LoopBlock.prototype);
+B_Forever.prototype.constructor = B_Forever;
+/* Begins executing contents. */
+B_Forever.prototype.startAction=function(){
+	this.blockSlot1.startRun();
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Continues executing contents. If contents are done, runs them again. */
+B_Forever.prototype.updateAction=function(){
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()) {
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else{
+			this.blockSlot1.startRun();
+		}
+	}
+	return new ExecutionStatusRunning(); //Still running. Never stops.
+};
+
+
+
+function B_Repeat(x,y){
+	LoopBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"repeat"));
+	this.addPart(new NumSlot(this,"NumS_count",10,true,true)); //Positive integer.
+}
+B_Repeat.prototype = Object.create(LoopBlock.prototype);
+B_Repeat.prototype.constructor = B_Repeat;
+/* Prepares counter and begins executing contents. */
+B_Repeat.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.timesD=this.slots[0].getData();
+	mem.times=mem.timesD.getValueWithC(true,true);
+	mem.count=0;
+	if(mem.times>0&&mem.timesD.isValid) {
+		this.blockSlot1.startRun();
+		return new ExecutionStatusRunning(); //Still running
+	}
+	else{
+		return new ExecutionStatusDone();
+	}
+};
+/* Update contents. When they finish, increment counter and possibly run them again. */
+B_Repeat.prototype.updateAction=function(){
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()){
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else {
+			var mem = this.runMem;
+			mem.count++;
+			if (mem.count >= mem.times) {
+				return new ExecutionStatusDone(); //Done running
+			}
+			else {
+				this.blockSlot1.startRun();
+			}
+		}
+	}
+	return new ExecutionStatusRunning(); //Still running
+};
+
+
+
+function B_RepeatUntil(x,y){
+	LoopBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"repeat until"));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
+}
+B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
+B_RepeatUntil.prototype.constructor = B_RepeatUntil;
+/* Checks condition and either stops running or executes contents. */
+B_RepeatUntil.prototype.startAction=function(){
+	var stopRepeating=this.slots[0].getData().getValue();
+	if(stopRepeating){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		this.blockSlot1.startRun();
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+/* Updates contents until completed. Then resets Block to condition can be checked again. */
+B_RepeatUntil.prototype.updateAction=function(){
+	let blockSlotStatus = this.blockSlot1.updateRun();
+	if(!blockSlotStatus.isRunning()){
+		if(blockSlotStatus.hasError()){
+			return blockSlotStatus;
+		} else {
+			this.running=0; //startAction will be run next time, giving Slots ability to recalculate.
+			this.clearMem(); //runMem and previous values of Slots will be removed.
+		}
+	}
+	return new ExecutionStatusRunning(); //Still running
+};
+
+
+
+function B_If(x,y){
+	LoopBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"if"));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
+}
+B_If.prototype = Object.create(LoopBlock.prototype);
+B_If.prototype.constructor = B_If;
+/* Either stops running or executes contents. */
+B_If.prototype.startAction=function(){
+	var check=this.slots[0].getData().getValue();
+	if(check){
+		this.blockSlot1.startRun();
+		return new ExecutionStatusRunning(); //Still running
+	}
+	else{
+		return new ExecutionStatusDone(); //Done running
+	}
+};
+/* Continues executing contents until completed. */
+B_If.prototype.updateAction=function(){
+	return this.blockSlot1.updateRun();
+};
+
+
+
+function B_IfElse(x,y){
+	DoubleLoopBlock.call(this,x,y,"control","else");
+	this.addPart(new LabelText(this,"if"));
+	this.addPart(new BoolSlot(this,"BoolS_cond"));
+}
+B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
+B_IfElse.prototype.constructor = B_IfElse;
+/* Starts executing one of two BlockSlots. */
+B_IfElse.prototype.startAction=function(){
+	this.runMem.check=this.slots[0].getData().getValue();
+	if(this.runMem.check){
+		this.blockSlot1.startRun();
+		return new ExecutionStatusRunning(); //Still running
+	}
+	else{
+		this.blockSlot2.startRun();
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+/* Continues executing one of two BlockSlots until completion. */
+B_IfElse.prototype.updateAction=function(){
+	if(this.runMem.check){
+		return this.blockSlot1.updateRun();
+	}
+	else{
+		return this.blockSlot2.updateRun();
+	}
+};
+
+
+
+
+function B_Broadcast(x,y){
+	CommandBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"broadcast"));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",false));
+}
+B_Broadcast.prototype = Object.create(CommandBlock.prototype);
+B_Broadcast.prototype.constructor = B_Broadcast;
+/* Broadcast the message if one has been selected. */
+B_Broadcast.prototype.startAction=function(){
+	var message=this.slots[0].getData();
+	if(message!=null){
+		CodeManager.message=new StringData(message.getValue());
+		CodeManager.eventBroadcast(message.getValue());
+	}
+	return new ExecutionStatusRunning();
+};
+B_Broadcast.prototype.updateAction=function(){
+	return new ExecutionStatusDone();
+};
+
+function B_BroadcastAndWait(x,y){
+	CommandBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"broadcast"));
+	this.addPart(new BroadcastDropSlot(this,"BDS_msg",false));
+	this.addPart(new LabelText(this,"and wait"));
+}
+B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
+B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
+B_BroadcastAndWait.prototype.startAction=function(){
+	var message=this.slots[0].getData();
+	if(message!=null){
+		this.runMem.message=message.getValue();
+		CodeManager.message=new StringData(this.runMem.message);
+		CodeManager.eventBroadcast(this.runMem.message);
+	}
+	return new ExecutionStatusRunning();
+};
+B_BroadcastAndWait.prototype.updateAction=function(){
+	if(CodeManager.checkBroadcastRunning(this.runMem.message)){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+
+function B_Message(x,y){
+	ReporterBlock.call(this,x,y,"control",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"message"));
+}
+B_Message.prototype = Object.create(ReporterBlock.prototype);
+B_Message.prototype.constructor = B_Message;
+B_Message.prototype.startAction=function(){
+	return new ExecutionStatusResult(CodeManager.message);
+};
+
+
+
+function B_Stop(x,y){//No bottom slot
+	CommandBlock.call(this,x,y,"control",true);
+	this.addPart(new LabelText(this,"stop"));
+	var dS=new DropSlot(this,"DS_act",Slot.snapTypes.none);
+	dS.addOption("all",new SelectionData("all"));
+	dS.addOption("this script",new SelectionData("this_script"));
+	//dS.addOption("this block",new SelectionData("this_block"));
+	dS.addOption("all but this script",new SelectionData("all_but_this_script"));
+	//dS.addOption("other scripts in sprite",new SelectionData("other_scripts_in_sprite"));
+	dS.setSelectionData("all",new SelectionData("all"));
+	this.addPart(dS);
+}
+B_Stop.prototype = Object.create(CommandBlock.prototype);
+B_Stop.prototype.constructor = B_Stop;
+B_Stop.prototype.startAction=function(){
+	var selection=this.slots[0].getData().getValue();
+	if(selection=="all"){
+		CodeManager.stop();
+	}
+	else if(selection=="this_script"){
+		this.stack.stop();
+	}
+	else if(selection=="all_but_this_script"){
+		TabManager.stopAllButStack(this.stack);
+	}
+	return new ExecutionStatusDone();
+};
+
+
+
+
+///// <Not implemented> /////
+function B_WhenIAmTapped(x,y){
+	HatBlock.call(this,x,y,"control");
+	this.addPart(new LabelText(this,"when I am"));
+	var dS=new DropSlot(this,"DS_act",null,Slot.snapTypes.bool);
+	dS.addOption("tapped",new SelectionData("tapped"));
+	dS.addOption("pressed",new SelectionData("pressed"));
+	dS.addOption("released",new SelectionData("released"));
+	this.addPart(dS);
+}
+B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
+B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
+
+
+
+
+/* This file contains the implementations for Blocks in the sensing category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ * Many of these will use the this.stack.getSprite() method, which is not done yet.
+ */
+
+function B_Ask(x,y){
+	CommandBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"ask"));
+	this.addPart(new StringSlot(this,"StrS_msg","what's your name?"));
+	this.addPart(new LabelText(this,"and wait"));
+}
+B_Ask.prototype = Object.create(CommandBlock.prototype);
+B_Ask.prototype.constructor = B_Ask;
+/* Show a dialog with the question unless another dialog is already visible or has been displayed recently. */
+B_Ask.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.question=this.slots[0].getData().getValue(); //Form the question
+	mem.questionDisplayed=false; //Has the dialog request been issued yet?
+	if(HtmlServer.dialogVisible){ //If there is already a dialog, we will wait until it is closed.
+		mem.waitingForDialog=true; //We are waiting.
+	}
+	else{
+		mem.waitingForDialog=false; //We are not waiting for a dialog to disappear.
+		//There is a delay between repeated dialogs to give the user time to stop the program.
+		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
+			this.showQuestion(); //Show the dialog.
+		}
+	}
+	return new ExecutionStatusRunning();
+};
+/* Waits until the dialog has been displayed and completed. */
+B_Ask.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(mem.waitingForDialog){ //If we are waiting for a dialog to close...
+		if(!HtmlServer.dialogVisible){ //...And the dialog is closed...
+			mem.waitingForDialog=false; //...Then we can stop waiting.
+		}
+		return new ExecutionStatusRunning(); //Still running.
+	}
+	else if(!mem.questionDisplayed){ //If the question has not yet been displayed...
+		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
+			if(HtmlServer.dialogVisible){ //Make sure there still isn't a dialog visible.
+				mem.waitingForDialog=true;
+			}
+			else{
+				this.showQuestion(); //Display the question.
+			}
+		}
+		return new ExecutionStatusRunning(); //Still running.
+	}
+	else{
+		if(mem.finished==true){ //Question has been answered.
+			CodeManager.updateDialogDelay(); //Tell CodeManager to reset the dialog delay clock.
+			return new ExecutionStatusDone(); //Done running
+		}
+		else{ //Waiting on answer from user.
+			return new ExecutionStatusRunning(); //Still running
+		}
+	}
+};
+B_Ask.prototype.showQuestion=function(){
+	var mem=this.runMem;
+	mem.finished=false; //Will be changed once answered.
+	var callbackFn=function(cancelled,response){
+		if(cancelled){
+			CodeManager.answer = new StringData("", true); //"" is the default answer.
+		}
+		else{
+			CodeManager.answer = new StringData(response, true); //Store the user's anser in the CodeManager.
+		}
+		callbackFn.mem.finished=true; //Done waiting.
+	};
+	callbackFn.mem=mem;
+	var callbackErr=function(){ //If an error occurs...
+		CodeManager.answer = new StringData("", true); //"" is the default answer.
+		callbackErr.mem.finished=true; //Done waiting.
+	};
+	callbackErr.mem=mem;
+	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr); //Make the request.
+	mem.questionDisplayed=true; //Prevents displaying twice.
+};
+
+
+
+
+function B_Answer(x,y){
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"answer"));
+}
+B_Answer.prototype = Object.create(ReporterBlock.prototype);
+/* Result is whatever is stored in CodeManager. */
+B_Answer.prototype.constructor = B_Answer;
+B_Answer.prototype.startAction=function(){
+	return new ExecutionStatusResult(CodeManager.answer);
+};
+
+function B_ResetTimer(x,y){
+	CommandBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"reset timer"));
+}
+B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
+B_ResetTimer.prototype.constructor = B_ResetTimer;
+B_ResetTimer.prototype.startAction=function(){
+	CodeManager.timerForSensingBlock=new Date().getTime();
+	return new ExecutionStatusDone();
+};
+
+function B_Timer(x,y){
+	ReporterBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"timer"));
+}
+B_Timer.prototype = Object.create(ReporterBlock.prototype);
+B_Timer.prototype.constructor = B_Timer;
+B_Timer.prototype.startAction=function(){
+	var now=new Date().getTime();
+	var start=CodeManager.timerForSensingBlock;
+	return new ExecutionStatusResult(new NumData(Math.round((now-start)/100)/10));
+};
+Block.setDisplaySuffix(B_Timer, "s");
+
+function B_CurrentTime(x,y){
+	ReporterBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"current"));
+	var dS=new DropSlot(this,"DS_interval",null,Slot.snapTypes.bool);
+	dS.addOption("year",new SelectionData("year"));
+	dS.addOption("month",new SelectionData("month"));
+	dS.addOption("date",new SelectionData("date"));
+	dS.addOption("day of the week",new SelectionData("day of the week"));
+	dS.addOption("hour",new SelectionData("hour"));
+	dS.addOption("minute",new SelectionData("minute"));
+	dS.addOption("second",new SelectionData("second"));
+	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
+	dS.setSelectionData("date",new SelectionData("date"));
+	this.addPart(dS);
+}
+B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
+B_CurrentTime.prototype.constructor = B_CurrentTime;
+B_CurrentTime.prototype.startAction=function(){
+	var unitD=this.slots[0].getData();
+	if(unitD==null){
+		return new ExecutionStatusResult(new NumData(0,false));
+	}
+	var unit=unitD.getValue();
+	if(unit=="year"){
+		return new ExecutionStatusResult(new NumData(new Date().getFullYear()));
+	}
+	else if(unit=="month"){
+		return new ExecutionStatusResult(new NumData(new Date().getMonth()+1));
+	}
+	else if(unit=="date"){
+		return new ExecutionStatusResult(new NumData(new Date().getDate()));
+	}
+	else if(unit=="day of the week"){
+		return new ExecutionStatusResult(new NumData(new Date().getDay()+1));
+	}
+	else if(unit=="hour"){
+		return new ExecutionStatusResult(new NumData(new Date().getHours()));
+	}
+	else if(unit=="minute"){
+		return new ExecutionStatusResult(new NumData(new Date().getMinutes()));
+	}
+	else if(unit=="second"){
+		return new ExecutionStatusResult(new NumData(new Date().getSeconds()));
+	}
+	else if(unit=="time in milliseconds"){
+		return new ExecutionStatusResult(new NumData(new Date().getTime()));
+	}
+	return new ExecutionStatusResult(new NumData(0, false));
+};
+/* This file contains the implementations for Blocks in the operators category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ */
+
+function B_Add(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,"+"));
+	this.addPart(new NumSlot(this,"NumS_2",0));
+}
+B_Add.prototype = Object.create(ReporterBlock.prototype);
+B_Add.prototype.constructor = B_Add;
+/* Sets the result to the sum of the Slots. Result is valid only if both inputs are. */
+B_Add.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val=data1.getValue()+data2.getValue();
+	return new ExecutionStatusResult(new NumData(val,isValid));
+};
+
+
+
+function B_Subtract(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,String.fromCharCode(8211)));
+	this.addPart(new NumSlot(this,"NumS_2",0));
+}
+B_Subtract.prototype = Object.create(ReporterBlock.prototype);
+B_Subtract.prototype.constructor = B_Subtract;
+/* Sets the result to the difference between the Slots. Result is valid only if both inputs are. */
+B_Subtract.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val=data1.getValue()-data2.getValue();
+	return new ExecutionStatusResult(new NumData(val,isValid));
+};
+
+
+
+function B_Multiply(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,"*"));
+	this.addPart(new NumSlot(this,"NumS_2",0));
+}
+B_Multiply.prototype = Object.create(ReporterBlock.prototype);
+B_Multiply.prototype.constructor = B_Multiply;
+/* Sets the result to the product of the Slots. Result is valid only if both inputs are. */
+B_Multiply.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val=data1.getValue()*data2.getValue();
+	return new ExecutionStatusResult(new NumData(val,isValid));
+};
+
+
+
+function B_Divide(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,"/"));
+	this.addPart(new NumSlot(this,"NumS_2",1));
+}
+B_Divide.prototype = Object.create(ReporterBlock.prototype);
+B_Divide.prototype.constructor = B_Divide;
+/* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2!=0. */
+B_Divide.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val1=data1.getValue();
+	var val2=data2.getValue();
+	var val=val1/val2;
+	if(val2==0){
+		val=0; //Return invalid 0 if told to divide by 0.
+		isValid=false;
+	}
+	return new ExecutionStatusResult(new NumData(val,isValid));
+};
+
+
+
+function B_Mod(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",17));
+	this.addPart(new LabelText(this,"mod"));
+	this.addPart(new NumSlot(this,"NumS_2",10));
+}
+B_Mod.prototype = Object.create(ReporterBlock.prototype);
+B_Mod.prototype.constructor = B_Mod;
+/* Sets the result to the first Slot mod the second Slot. Valid if Slots are valid and second isn't 0. */
+B_Mod.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val1=data1.getValue();
+	var val2=data2.getValue();
+	var result=((val1%val2)+val2)%val2;
+	if(val2==0){
+		result=0;
+		isValid=false;
+	}
+	return new ExecutionStatusResult(new NumData(result,isValid));
+};
+
+
+
+function B_Round(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"round"));
+	this.addPart(new NumSlot(this,"NumS_1",0.5));
+}
+B_Round.prototype = Object.create(ReporterBlock.prototype);
+B_Round.prototype.constructor = B_Round;
+/* Sets the result to the rounded value of the Slot. Is valid only if Slot is. */
+B_Round.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var isValid=data1.isValid;
+	var val=data1.getValueWithC(false,true); //Integer
+	return new ExecutionStatusResult(new NumData(val,isValid));
+};
+
+
+
+function B_PickRandom(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"pick random"));
+	this.addPart(new NumSlot(this,"NumS_min",1));
+	this.addPart(new LabelText(this,"to"));
+	this.addPart(new NumSlot(this,"NumS_max",10));
+}
+/* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
+B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
+B_PickRandom.prototype.constructor = B_PickRandom;
+B_PickRandom.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	var isValid=data1.isValid&&data2.isValid;
+	var val1=data1.getValue();
+	var val2=data2.getValue();
+	var integer = (val1===(val1|0)&&val2===(val2|0));
+	var rVal;
+	var min=val1;
+	var max=val2;
+	if(min>max){
+		min=val2;
+		max=val1;
+	}
+	if(integer){
+		rVal = Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	else{
+		rVal = Math.random() * (max - min) + min;
+	}
+	return new ExecutionStatusResult(new NumData(rVal,isValid));
+};
+
+
+
+function B_LessThan(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,"<"));
+	this.addPart(new NumSlot(this,"NumS_2",0));
+}
+B_LessThan.prototype = Object.create(PredicateBlock.prototype);
+B_LessThan.prototype.constructor = B_LessThan;
+/* Result is a valid boolean indicating is Slot1<Slot2. */
+B_LessThan.prototype.startAction=function(){
+	var val1=this.slots[0].getData().getValue();
+	var val2=this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1<val2));
+};
+
+
+
+function B_EqualTo(x,y){//needs to work with strings
+	PredicateBlock.call(this,x,y,"operators");
+	var rS=new RoundSlot(this,"RndS_item1",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
+	rS.addOption("Enter text",new SelectionData("enter_text"));
+	var rS2=new RoundSlot(this,"RndS_item2",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
+	rS2.addOption("Enter text",new SelectionData("enter_text"));
+
+	this.addPart(rS);
+	this.addPart(new LabelText(this,"="));
+	this.addPart(rS2);
+}
+B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
+B_EqualTo.prototype.constructor = B_EqualTo;
+/* Compares data of any type to determine equality. Result is always valid. */
+B_EqualTo.prototype.startAction=function(){
+	var data1=this.slots[0].getData();
+	var data2=this.slots[1].getData();
+	return new ExecutionStatusResult(new BoolData(Data.checkEquality(data1,data2)));
+};
+
+
+
+function B_GreaterThan(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new NumSlot(this,"NumS_1",0));
+	this.addPart(new LabelText(this,">"));
+	this.addPart(new NumSlot(this,"NumS_2",0));
+}
+B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
+B_GreaterThan.prototype.constructor = B_GreaterThan;
+/* Result is a valid boolean indicating is Slot1>Slot2. */
+B_GreaterThan.prototype.startAction=function(){
+	var val1=this.slots[0].getData().getValue();
+	var val2=this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1>val2));
+};
+
+
+
+function B_And(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new BoolSlot(this,"BoolS_1"));
+	this.addPart(new LabelText(this,"and"));
+	this.addPart(new BoolSlot(this,"BoolS_2"));
+}
+B_And.prototype = Object.create(PredicateBlock.prototype);
+B_And.prototype.constructor = B_And;
+/* Result is true if both are true. Always valid. */
+B_And.prototype.startAction=function(){
+	var val1=this.slots[0].getData().getValue();
+	var val2=this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1&&val2));
+};
+
+
+
+function B_Or(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new BoolSlot(this,"BoolS_1"));
+	this.addPart(new LabelText(this,"or"));
+	this.addPart(new BoolSlot(this,"BoolS_2"));
+}
+B_Or.prototype = Object.create(PredicateBlock.prototype);
+B_Or.prototype.constructor = B_Or;
+/* Result is true if either is true. Always valid. */
+B_Or.prototype.startAction=function(){
+	var val1=this.slots[0].getData().getValue();
+	var val2=this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1||val2));
+};
+
+
+
+function B_Not(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"not"));
+	this.addPart(new BoolSlot(this,"BoolS_1"));
+}
+B_Not.prototype = Object.create(PredicateBlock.prototype);
+B_Not.prototype.constructor = B_Not;
+/* Result is true if Slot is false. Always valid. */
+B_Not.prototype.startAction=function(){
+	var val1=this.slots[0].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(!val1));
+};
+
+
+
+function B_True(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"true"));
+}
+B_True.prototype = Object.create(PredicateBlock.prototype);
+B_True.prototype.constructor = B_True;
+/* Result is true. */
+B_True.prototype.startAction=function(){
+	return new ExecutionStatusResult(new BoolData(true));
+};
+
+
+
+function B_False(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"false"));
+}
+B_False.prototype = Object.create(PredicateBlock.prototype);
+B_False.prototype.constructor = B_False;
+/* Result is false. */
+B_False.prototype.startAction=function(){
+	return new ExecutionStatusResult(new BoolData(false));
+};
+
+
+
+function B_LetterOf(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"letter"));
+	this.addPart(new NumSlot(this,"NumS_idx",1,true,true));
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new StringSlot(this,"StrS_text","world"));
+}
+B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
+B_LetterOf.prototype.constructor = B_LetterOf;
+/* Result is nth letter of word. Makes n and integer in range. Always valid. */
+B_LetterOf.prototype.startAction=function(){
+	var word=this.slots[1].getData().getValue();
+	var index=this.slots[0].getData().getValueInR(1,word.length,true,true);
+	if(word.length>0) {
+		return new ExecutionStatusResult(StringData(word.substring(index - 1, index)));
+	}
+	else{
+		return new ExecutionStatusResult(StringData("")); //Letter of empty string is empty string.
+	}
+};
+
+
+
+function B_LengthOf(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"length of"));
+	this.addPart(new StringSlot(this,"StrS_text","world"));
+}
+B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
+B_LengthOf.prototype.constructor = B_LengthOf;
+/* Result is length of word. Always valid. */
+B_LengthOf.prototype.startAction=function(){
+	var word=this.slots[0].getData().getValue();
+	return new ExecutionStatusResult(new NumData(word.length));
+};
+
+
+
+function B_join(x,y){
+	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"join"));
+	this.addPart(new StringSlot(this,"StrS_1","hello "));
+	this.addPart(new LabelText(this,"and"));
+	this.addPart(new StringSlot(this,"StrS_2","world"));
+}
+B_join.prototype = Object.create(ReporterBlock.prototype);
+B_join.prototype.constructor = B_join;
+/* Result is Slots concatenated. Always valid. */
+B_join.prototype.startAction=function(){
+	var word1=this.slots[0].getData().getValue();
+	var word2=this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new StringData(word1+word2));
+};
+
+
+
+function B_Split(x,y){
+	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
+	this.addPart(new LabelText(this,"split"));
+	this.addPart(new StringSlot(this,"StrS_1","hello world"));
+	this.addPart(new LabelText(this,"by"));
+	var dS=new DropSlot(this,"DS_separator",Slot.snapTypes.numStrBool);
+	dS.addOption("Enter text",new SelectionData("enter_text"));
+	dS.addOption("letter",new SelectionData("letter"));
+	dS.addOption("whitespace",new SelectionData("whitespace"));
+	dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+	this.addPart(dS);
+}
+B_Split.prototype = Object.create(ReporterBlock.prototype);
+B_Split.prototype.constructor = B_Split;
+/* Returns a list made from splitting the string by the provided character. */
+B_Split.prototype.startAction=function(){
+	var string1=this.slots[0].getData().getValue();
+	var splitD=this.slots[1].getData();
+	var resultArray;
+	if(splitD.type==Data.types.string){
+		var splitStr=splitD.getValue();
+		resultArray=string1.split(splitStr);
+	}
+	else if(splitD.type==Data.types.selection){
+		var selection=splitD.getValue();
+		if(selection=="letter"){
+			resultArray=string1.split("");
+		}
+		else if(selection=="whitespace"){
+			resultArray=string1.split(/\s+/);
+		}
+	}
+	else{
+		resultArray=[];
+	}
+	var dataArray=new Array(resultArray.length);
+	for(var i=0;i<resultArray.length;i++){
+		dataArray[i]=new StringData(resultArray[i]);
+	}
+	return new ExecutionStatusResult(new ListData(dataArray));
+};
+
+
+
+function B_IsAType(x,y){
+	PredicateBlock.call(this,x,y,"operators");
+	this.addPart(new LabelText(this,"is"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
+	this.addPart(new LabelText(this,"a"));
+	var dS=new DropSlot(this,"DS_type",Slot.snapTypes.none);
+	dS.addOption("number",new SelectionData("number"));
+	dS.addOption("text",new SelectionData("text"));
+	dS.addOption("boolean",new SelectionData("boolean"));
+	dS.addOption("list",new SelectionData("list"));
+	dS.addOption("invalid number",new SelectionData("invalid_num"));
+	dS.setSelectionData("number",new SelectionData("number"));
+	this.addPart(dS);
+	this.addPart(new LabelText(this,"?"));
+}
+B_IsAType.prototype = Object.create(PredicateBlock.prototype);
+B_IsAType.prototype.constructor = B_IsAType;
+/* Result is Slots concatenated. Always valid. */
+B_IsAType.prototype.startAction=function(){
+	var data=this.slots[0].getData();
+	var selectionD=this.slots[1].getData();
+	var selection=selectionD.getValue();
+	if(selectionD.type==Data.types.string){
+		if(selection=="invalid number"){
+			selection="invalid_num";
+		}
+	}
+	var types=Data.types;
+	if(selection=="number"){
+		if(data.type==types.num&&data.isValid){
+			return new ExecutionStatusResult(new BoolData(true));
+		}
+		else if(data.type==types.string&&data.isNumber()){
+			return new ExecutionStatusResult(new BoolData(true));
+		}
+		else{
+			return new ExecutionStatusResult(new BoolData(false));
+		}
+	}
+	else if(selection=="text"){
+		return new ExecutionStatusResult(new BoolData(data.type==types.string&&!data.isNumber()));
+	}
+	else if(selection=="boolean"){
+		return new ExecutionStatusResult(new BoolData(data.type==types.bool));
+	}
+	else if(selection=="list"){
+		return new ExecutionStatusResult(new BoolData(data.type==types.list));
+	}
+	else if(selection=="invalid_num"){
+		if(data.type==types.num&&!data.isValid){
+			return new ExecutionStatusResult(new BoolData(true));
+		}
+		else if(data.type==types.string&&data.getValue()==(new NumData(0/0).asString().getValue())){
+			return new ExecutionStatusResult(new BoolData(true));
+		}
+		else{
+			return new ExecutionStatusResult(new BoolData(false));
+		}
+	}
+	else{
+		return new ExecutionStatusResult(new BoolData(false));
+	}
+};
+
+
+
+function B_mathOfNumber(x,y){
+	ReporterBlock.call(this,x,y,"operators");
+	var dS=new DropSlot(this,"DS_operation",null,Slot.snapTypes.bool);
+	dS.addOption("sin",new SelectionData("sin"));
+	dS.addOption("cos",new SelectionData("cos"));
+	dS.addOption("tan",new SelectionData("tan"));
+
+	dS.addOption("asin",new SelectionData("asin"));
+	dS.addOption("acos",new SelectionData("acos"));
+	dS.addOption("atan",new SelectionData("atan"));
+
+	dS.addOption("ln",new SelectionData("ln"));
+	dS.addOption("e^",new SelectionData("e^"));
+	dS.addOption("ceiling",new SelectionData("ceiling"));
+
+	dS.addOption("log",new SelectionData("log"));
+	dS.addOption("10^",new SelectionData("10^"));
+	dS.addOption("floor",new SelectionData("floor"));
+
+	dS.addOption("abs",new SelectionData("abs"));
+	dS.addOption("sqrt",new SelectionData("sqrt"));
+
+	dS.dropColumns=3;
+	dS.setSelectionData("sqrt",new SelectionData("sqrt"));
+	this.addPart(dS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new NumSlot(this,"NumS_val",10));
+}
+B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
+B_mathOfNumber.prototype.constructor = B_mathOfNumber;
+B_mathOfNumber.prototype.startAction=function(){
+	var operator=this.slots[0].getData().getValue();
+	var data=this.slots[1].getData();
+	var value=data.getValue();
+	var isValid=data.isValid;
+	if(operator=="sin"){
+		value=Math.sin(value/180*Math.PI);
+	}
+	else if(operator=="cos"){
+		value=Math.cos(value/180*Math.PI);
+	}
+	else if(operator=="tan"){
+		value=Math.tan(value/180*Math.PI);
+		if(Math.abs(value)>1000000000){
+			value=1/0;
+		}
+	}
+	else if(operator=="asin"){
+		value=Math.asin(value)/Math.PI*180;
+	}
+	else if(operator=="acos"){
+		value=Math.acos(value)/Math.PI*180;
+	}
+	else if(operator=="atan"){
+		value=Math.atan(value)/Math.PI*180;
+	}
+	else if(operator=="ln"){
+		value=Math.log(value);
+	}
+	else if(operator=="log") {
+		try {
+			value = Math.log10(value);
+		}
+		catch(e){
+			value=Math.log(10) / Math.log(value);
+		}
+	}
+	else if(operator=="e^"){
+		value=Math.exp(value);
+	}
+	else if(operator=="10^"){
+		value=Math.pow(10,value);
+	}
+	else if(operator=="ceiling"){
+		value=Math.ceil(value);
+	}
+	else if(operator=="floor"){
+		value=Math.floor(value);
+	}
+	else if(operator=="abs"){
+		value=Math.abs(value);
+	}
+	else if(operator=="sqrt"){
+		value=Math.sqrt(value);
+	}
+	if(!isFinite(value)||isNaN(value)){
+		value=0;
+		isValid=false;
+	}
+	return new ExecutionStatusResult(new NumData(value,isValid));
+};
+/* This file contains the implementations for Blocks in the tablet category.
+ * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
+ */
+
+function B_DeviceShaken(x,y){
+	PredicateBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"Device Shaken"));
+}
+B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
+B_DeviceShaken.prototype.constructor = B_DeviceShaken;
+/* Make the request. */
+B_DeviceShaken.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/shake";
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_DeviceShaken.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			return new ExecutionStatusResult(new BoolData(status.result=="1",true));
+		}
+		else{
+			return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_DeviceSSID(x,y){
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"Device SSID"));
+}
+B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceSSID.prototype.constructor = B_DeviceSSID;
+/* Make the request. */
+B_DeviceSSID.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/ssid";
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_DeviceSSID.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			return new ExecutionStatusResult(new StringData(status.result,true));
+		}
+		else{
+			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_DevicePressure(x,y){
+	ReporterBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"Device Pressure"));
+}
+B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
+B_DevicePressure.prototype.constructor = B_DevicePressure;
+/* Make the request. */
+B_DevicePressure.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/pressure";
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_DevicePressure.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			var result=parseFloat(status.result);
+			return new ExecutionStatusResult(new NumData(result,true));
+		}
+		else{
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+Block.setDisplaySuffix(B_DevicePressure, "kPa");
+
+
+function B_DeviceRelativeAltitude(x,y){
+	ReporterBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"Device Relative Altitude"));
+}
+B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
+/* Make the request. */
+B_DeviceRelativeAltitude.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/altitude";
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_DeviceRelativeAltitude.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			var result=parseFloat(status.result);
+			return new ExecutionStatusResult(new NumData(result,true));
+		}
+		else{
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
+
+
+
+function B_DeviceOrientation(x,y){
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"Device Orientation"));
+}
+B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
+/* Make the request. */
+B_DeviceOrientation.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/orientation";
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_DeviceOrientation.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			return new ExecutionStatusResult(new StringData(status.result,true));
+		}
+		else{
+			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_DeviceAcceleration(x,y){
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
+	this.addPart(new LabelText(this,"Device"));
+	var dS=new DropSlot(this,"DS_axis");
+	dS.addOption("X",new SelectionData(0));
+	dS.addOption("Y",new SelectionData(1));
+	dS.addOption("Z",new SelectionData(2));
+	dS.addOption("Total",new SelectionData("total"));
+	dS.setSelectionData("X",new SelectionData(0));
+	this.addPart(dS);
+	this.addPart(new LabelText(this,"Acceleration"));
+}
+B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
+/* Make the request. */
+B_DeviceAcceleration.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/acceleration";
+	mem.requestStatus=function(){};
+	mem.axis=this.slots[0].getData().getValue();
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. Then get the correct axis. */
+B_DeviceAcceleration.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			var parts = status.result.split(" ");
+			var result;
+			if(mem.axis == "total") {
+				let x = parseFloat(parts[0]);
+				let y = parseFloat(parts[1]);
+				let z = parseFloat(parts[2]);
+				result = Math.sqrt(x*x + y*y + z*z);
+			} else {
+				result = parseFloat(parts[mem.axis]);
+			}
+			return new ExecutionStatusResult(new NumData(result,true));
+		}
+		else{
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
+
+
+function B_DeviceLocation(x,y){
+	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
+	this.addPart(new LabelText(this,"Device"));
+	var dS=new DropSlot(this,"DS_dir");
+	dS.addOption("Latitude",new SelectionData(0));
+	dS.addOption("Longitude",new SelectionData(1));
+	dS.setSelectionData("Latitude",new SelectionData(0));
+	this.addPart(dS);
+}
+B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
+B_DeviceLocation.prototype.constructor = B_DeviceLocation;
+/* Make the request. */
+B_DeviceLocation.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.request = "tablet/location";
+	mem.requestStatus=function(){};
+	mem.axis=this.slots[0].getData().getValue();
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. Then get the correct axis. */
+B_DeviceLocation.prototype.updateAction=function(){
+	var mem=this.runMem;
+	var status=mem.requestStatus;
+	if(status.finished==true){
+		if(status.error==false){
+			var result = status.result.split(" ")[mem.axis];
+			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
+		}
+		else{
+			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+		}
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+/////////////////
+
+
+function B_Display(x,y){
+	CommandBlock.call(this,x,y,"tablet");
+	this.addPart(new LabelText(this,"Display"));
+	this.addPart(new StringSlot(this,"StrS_msg","hello"));
+}
+B_Display.prototype = Object.create(CommandBlock.prototype);
+B_Display.prototype.constructor = B_Display;
+B_Display.prototype.startAction=function(){
+	var message=this.slots[0].getData().getValue();
+	DisplayBox.displayText(message);
+	return new ExecutionStatusDone(); //Done running
+};
+
+
+
+
+
+
+
+function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
+	CommandBlock.call(this,x,y,"sound");
+	this.isRecording = isRecording;
+	this.waitUntilDone = waitUntilDone;
+	this.addPart(new LabelText(this, label));
+	let dS=new SoundDropSlot(this,"SDS_1", isRecording);
+	this.addPart(dS);
+}
+B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
+B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
+B_PlaySoundOrRecording.prototype.startAction=function(){
+	let soundData=this.slots[0].getData();
+	if(soundData == null){
+		return new ExecutionStatusDone();
+	}
+	let soundId=soundData.getValue();
+	let status = {};
+	this.runMem.playStatus = status;
+	status.donePlaying = false;
+	status.requestSent = false;
+	Sound.play(soundId, this.isRecording, status);
+	return new ExecutionStatusRunning(); //Still running
+};
+/* Wait for the request to finish. */
+B_PlaySoundOrRecording.prototype.updateAction=function(){
+	let mem=this.runMem;
+	let status=mem.playStatus;
+	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
+	if(done){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+function B_PlaySound(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound", false, false);
+}
+B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlaySound.prototype.constructor = B_PlaySound;
+
+function B_PlaySoundUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play sound until done", false, true);
+}
+B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
+
+function B_PlayRecording(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording", true, false);
+}
+B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecording.prototype.constructor = B_PlayRecording;
+
+function B_PlayRecordingUntilDone(x,y){
+	B_PlaySoundOrRecording.call(this,x,y,"play recording until done", true, true);
+}
+B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
+B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
+
+
+
+function B_StopAllSounds(x,y){
+	CommandBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"stop all sounds"));
+}
+B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
+B_StopAllSounds.prototype.constructor = B_StopAllSounds;
+B_StopAllSounds.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.requestStatus = {};
+	Sound.stopAllSounds(mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+B_StopAllSounds.prototype.updateAction=function(){
+	if(this.runMem.requestStatus.finished){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+
+function B_RestForBeats(x,y){
+	CommandBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"rest for"));
+	this.addPart(new NumSlot(this,"NumS_dur",0.2,true)); //Positive
+	this.addPart(new LabelText(this,"beats"));
+}
+B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
+B_RestForBeats.prototype.constructor = B_RestForBeats;
+B_RestForBeats.prototype.startAction=function(){
+	var mem=this.runMem;
+	mem.startTime=new Date().getTime();
+	var beats=this.slots[0].getData().getValueWithC(true); //Positive
+	mem.delayTime=CodeManager.beatsToMs(beats);
+	return new ExecutionStatusRunning(); //Still running
+};
+B_RestForBeats.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(new Date().getTime()>=mem.startTime+mem.delayTime){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+
+function B_PlayNoteForBeats(x,y){
+	CommandBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"play note"));
+	this.addPart(new NumSlot(this,"NumS_note",60,true,true)); //Positive integer
+	this.addPart(new LabelText(this,"for"));
+	this.addPart(new NumSlot(this,"NumS_dur",1,true)); //Positive
+	this.addPart(new LabelText(this,"beats"));
+}
+B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
+B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
+B_PlayNoteForBeats.prototype.startAction=function(){
+	var mem=this.runMem;
+	var note=this.slots[0].getData().getValueWithC(true,true);
+	var beats=this.slots[1].getData().getValueWithC(true); //Positive
+	mem.soundDuration=CodeManager.beatsToMs(beats);
+	mem.request = "sound/note?note="+note+"&duration="+mem.soundDuration;
+	mem.timerStarted=false;
+	mem.requestStatus=function(){};
+	HtmlServer.sendRequest(mem.request,mem.requestStatus);
+	return new ExecutionStatusRunning(); //Still running
+};
+B_PlayNoteForBeats.prototype.updateAction=function(){
+	var mem=this.runMem;
+	if(!mem.timerStarted){
+		var status=mem.requestStatus;
+		if(status.finished==true){
+			mem.startTime=new Date().getTime();
+			mem.timerStarted=true;
+		}
+		else{
+			return new ExecutionStatusRunning(); //Still running
+		}
+	}
+	if(new Date().getTime()>=mem.startTime+mem.soundDuration){
+		return new ExecutionStatusDone(); //Done running
+	}
+	else{
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
+function B_ChangeTempoBy(x,y){
+	CommandBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"change tempo by"));
+	this.addPart(new NumSlot(this,"NumS_amt",20));
+}
+B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
+B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
+B_ChangeTempoBy.prototype.startAction=function(){
+	var slotData=this.slots[0].getData();
+	if(slotData.isValid) {
+		var newTempo = CodeManager.sound.tempo +slotData.getValue();
+		CodeManager.setSoundTempo(newTempo);
+	}
+	return new ExecutionStatusDone();
+};
+
+function B_SetTempoTo(x,y){
+	CommandBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"set tempo to"));
+	this.addPart(new NumSlot(this,"NumS_tempo",60,true)); //Positive
+	this.addPart(new LabelText(this,"bpm"));
+}
+B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
+B_SetTempoTo.prototype.constructor = B_SetTempoTo;
+B_SetTempoTo.prototype.startAction=function(){
+	var slotData=this.slots[0].getData();
+	if(slotData.isValid) {
+		var newTempo = slotData.getValue();
+		CodeManager.setSoundTempo(newTempo);
+	}
+	return new ExecutionStatusDone();
+};
+
+function B_Tempo(x,y){
+	ReporterBlock.call(this,x,y,"sound");
+	this.addPart(new LabelText(this,"tempo"));
+}
+B_Tempo.prototype = Object.create(ReporterBlock.prototype);
+B_Tempo.prototype.constructor = B_Tempo;
+B_Tempo.prototype.startAction=function(){
+	return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
+};
+
+//@fix Write documentation.
+
+function B_Variable(x,y,variable){
+	ReporterBlock.call(this,x,y,"variables",Block.returnTypes.string);
+	if (variable != null) {
+		this.variable=variable;
+		this.addPart(new LabelText(this,this.variable.getName()));
+	}
+}
+B_Variable.prototype = Object.create(ReporterBlock.prototype);
+B_Variable.prototype.constructor = B_Variable;
+B_Variable.prototype.startAction=function(){
+	return new ExecutionStatusResult(this.variable.getData());
+};
+B_Variable.prototype.createXml=function(xmlDoc){
+	var block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	XmlWriter.setAttribute(block,"variable",this.variable.getName());
+	return block;
+};
+B_Variable.prototype.setVar=function(variable){
+	if (variable != null) {
+		this.variable=variable;
+		this.addPart(new LabelText(this,this.variable.getName()));
+	}
+}
+B_Variable.prototype.renameVar=function(){
+	this.variable.rename();	
+};
+B_Variable.prototype.deleteVar=function(){
+	this.variable.delete();
+};
+B_Variable.prototype.renameVariable=function(variable){
+	if(variable==this.variable){
+		this.parts[0].remove();
+		this.parts[0]=new LabelText(this,this.variable.getName());
+		if(this.stack!=null){
+			this.stack.updateDim();
+		}
+	}
+};
+B_Variable.prototype.deleteVariable=function(variable){
+	if(variable==this.variable){
+		this.unsnap().delete();
+	}
+};
+B_Variable.prototype.checkVariableUsed=function(variable){
+	if(variable==this.variable){
+		return new ExecutionStatusRunning();
+	}
+	return new ExecutionStatusDone();
+};
+B_Variable.importXml=function(blockNode){
+	var variableName=XmlWriter.getAttribute(blockNode,"variable");
+	var variable=CodeManager.findVar(variableName);
+	if(variable!=null){
+		return new B_Variable(0,0,variable);
+	}
+	return null;
+};
+
+
+
+
+function B_SetTo(x,y){
+	CommandBlock.call(this,x,y,"variables");
+	this.addPart(new LabelText(this,"set"));
+	this.addPart(new VarDropSlot(this,"VDS_1"));
+	this.addPart(new LabelText(this,"to"));
+	var rS=new RoundSlot(this,"RndS_val",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new NumData(0));
+	rS.addOption("Enter text",new SelectionData("enter_text"));
+	this.addPart(rS);
+}
+B_SetTo.prototype = Object.create(CommandBlock.prototype);
+B_SetTo.prototype.constructor = B_SetTo;
+B_SetTo.prototype.startAction=function(){
+	var variableD=this.slots[0].getData();
+	var data=this.slots[1].getData();
+	var type=data.type;
+	var types=Data.types;
+	if(type==types.bool||type==types.num||type==types.string) {
+		if (variableD != null && variableD.type == Data.types.selection) {
+			var variable = variableD.getValue();
+			variable.setData(data);
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+
+function B_ChangeBy(x,y){
+	CommandBlock.call(this,x,y,"variables");
+	this.addPart(new LabelText(this,"change"));
+	this.addPart(new VarDropSlot(this,"VDS_1"));
+	this.addPart(new LabelText(this,"by"));
+	this.addPart(new NumSlot(this,"NumS_val",1));
+}
+B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
+B_ChangeBy.prototype.constructor = B_ChangeBy;
+B_ChangeBy.prototype.startAction=function(){
+	var variableD=this.slots[0].getData();
+	var incrementD=this.slots[1].getData();
+	if(variableD != null && variableD.type == Data.types.selection){
+		var variable=variableD.getValue();
+		var currentD=variable.getData().asNum();
+		var newV=incrementD.getValue()+currentD.getValue();
+		var isValid=currentD.isValid&&incrementD.isValid;
+		var newD=new NumData(newV,isValid);
+		variable.setData(newD);
+	}
+	return new ExecutionStatusDone();
+};
+
+
+//Done
+function B_List(x,y,list){
+	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
+	if (list != null) {
+		this.list=list;
+		this.addPart(new LabelText(this,this.list.getName()));
+	}
+}
+B_List.prototype = Object.create(ReporterBlock.prototype);
+B_List.prototype.constructor = B_List;
+B_List.prototype.startAction=function(){
+	return new ExecutionStatusResult(this.list.getData().asString());
+};
+B_List.prototype.createXml=function(xmlDoc){
+	var block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	XmlWriter.setAttribute(block,"list",this.list.getName());
+	return block;
+};
+B_List.prototype.setList=function(list){
+	if (list != null) {
+		this.list=list;
+		this.addPart(new LabelText(this,this.list.getName()));
+	}
+}
+B_List.importXml=function(blockNode){
+	var listName=XmlWriter.getAttribute(blockNode,"list");
+	var list=CodeManager.findList(listName);
+	if(list!=null){
+		return new B_List(0,0,list);
+	}
+	return null;
+};
+B_List.prototype.renameLi=function(){
+	this.list.rename();
+};
+B_List.prototype.deleteLi=function(){
+	this.list.delete();
+};
+B_List.prototype.renameList=function(list){
+	if(list==this.list){
+		this.parts[0].remove();
+		this.parts[0]=new LabelText(this,this.list.getName());
+		if(this.stack!=null){
+			this.stack.updateDim();
+		}
+	}
+};
+B_List.prototype.deleteList=function(list){
+	if(list==this.list){
+		this.unsnap().delete();
+	}
+};
+B_List.prototype.checkListUsed=function(list){
+	if(list==this.list){
+		return new ExecutionStatusRunning();
+	}
+	return new ExecutionStatusDone();
+};
+
+
+//Done
+function B_AddToList(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"add"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new LabelText(this,"to"));
+	this.addPart(new ListDropSlot(this,"LDS_1"));
+}
+B_AddToList.prototype = Object.create(CommandBlock.prototype);
+B_AddToList.prototype.constructor = B_AddToList;
+B_AddToList.prototype.startAction=function(){
+	var listD=this.slots[1].getData();
+	if(listD!=null&&listD.type == Data.types.selection){
+		var list=listD.getValue();
+		var array=list.getData().getValue();
+		var itemD=this.slots[0].getData();
+		if(itemD.isValid){
+			array.push(itemD);
+		}
+		else{
+			array.push(itemD.asString());
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+//Done
+function B_DeleteItemOfList(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"delete"));
+	var nS=new NumSlot(this,"NumS_idx",1,true,true);
+	nS.addOption("last",new SelectionData("last"));
+	nS.addOption("random",new SelectionData("random"));
+	nS.addOption("all",new SelectionData("all"));
+	this.addPart(nS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new ListDropSlot(this,"LDS_1"));
+}
+B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
+B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
+B_DeleteItemOfList.prototype.startAction=function(){
+	var listD=this.slots[1].getData();
+	if(listD!=null&&listD.type == Data.types.selection){
+		var indexD=this.slots[0].getData();
+		var list=listD.getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
+		if(indexD.type==Data.types.selection&&indexD.getValue()=="all"){
+			list.setData(new ListData());
+		}
+		else {
+			var index = listData.getIndex(indexD);
+			if (index != null) {
+				array.splice(index, 1);
+			}
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+//Done
+function B_InsertItemAtOfList(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"insert"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new LabelText(this,"at"));
+	var nS=new NumSlot(this,"NumS_idx",1,true,true);
+	nS.addOption("last",new SelectionData("last"));
+	nS.addOption("random",new SelectionData("random"));
+	this.addPart(nS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new ListDropSlot(this,"LDS_1"));
+}
+B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
+B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
+B_InsertItemAtOfList.prototype.startAction=function(){
+	var listD=this.slots[2].getData();
+	if(listD!=null&&listD.type == Data.types.selection){
+		var indexD=this.slots[1].getData();
+		var list=listD.getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
+		var itemD=this.slots[0].getData();
+		var index=listData.getIndex(indexD);
+		if(index==null||indexD.getValue()>array.length){
+			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
+				if(itemD.isValid){
+					array.push(itemD);
+				}
+				else{
+					array.push(itemD.asString());
+				}
+			}
+			return new ExecutionStatusDone();
+		}
+		if(itemD.isValid){
+			array.splice(index, 0, itemD);
+		}
+		else{
+			array.splice(index, 0, itemD.asString());
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+//Done
+function B_ReplaceItemOfListWith(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"replace item"));
+	var nS=new NumSlot(this,"NumS_idx",1,true,true);
+	nS.addOption("last",new SelectionData("last"));
+	nS.addOption("random",new SelectionData("random"));
+	this.addPart(nS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new ListDropSlot(this,"LDS_1"));
+	this.addPart(new LabelText(this,"with"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+}
+B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
+B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
+B_ReplaceItemOfListWith.prototype.startAction=function(){
+	var listD=this.slots[1].getData();
+	if(listD!=null&&listD.type == Data.types.selection){
+		var indexD=this.slots[0].getData();
+		var list=listD.getValue();
+		var listData=list.getData();
+		var array=listData.getValue();
+		var itemD=this.slots[2].getData();
+		var index=listData.getIndex(indexD);
+		if(index==null){
+			return new ExecutionStatusDone();
+		}
+		if(itemD.isValid){
+			array[index]=itemD;
+		}
+		else{
+			array[index]=itemD.asString();
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+
+function B_CopyListToList(x,y){
+	CommandBlock.call(this,x,y,"lists");
+	this.addPart(new LabelText(this,"copy"));
+	this.addPart(new ListDropSlot(this,"LDS_from",Slot.snapTypes.list));
+	this.addPart(new LabelText(this,"to"));
+	this.addPart(new ListDropSlot(this,"LDS_to"));
+}
+B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
+B_CopyListToList.prototype.constructor = B_CopyListToList;
+B_CopyListToList.prototype.startAction=function(){
+	var listD1=this.slots[0].getData();
+	var listD2=this.slots[1].getData();
+	if(listD1!=null&&listD2!=null){
+		var listDataToCopy;
+		if(listD1.type==Data.types.selection){
+			listDataToCopy=listD1.getValue().getData();
+		}
+		else if(listD1.type==Data.types.list){
+			listDataToCopy=listD1;
+		}
+		else{
+			return new ExecutionStatusDone();
+		}
+		if(listD2.type==Data.types.selection){
+			var listToCopyTo=listD2.getValue();
+			listToCopyTo.setData(listDataToCopy.duplicate());
+		}
+	}
+	return new ExecutionStatusDone();
+};
+
+
+
+//Done
+function B_ItemOfList(x,y){
+	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
+	this.addPart(new LabelText(this,"item"));
+	var nS=new NumSlot(this,"NumS_idx",1,true,true);
+	nS.addOption("last",new SelectionData("last"));
+	nS.addOption("random",new SelectionData("random"));
+	this.addPart(nS);
+	this.addPart(new LabelText(this,"of"));
+	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+}
+B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
+B_ItemOfList.prototype.constructor = B_ItemOfList;
+B_ItemOfList.prototype.startAction=function(){
+	var listD=this.slots[1].getData();
+	var indexD;
+	if(listD!=null&&listD.type == Data.types.selection) {
+		indexD = this.slots[0].getData();
+		var list = listD.getValue();
+		var listData=list.getData();
+		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		indexD = this.slots[0].getData();
+		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
+	}
+	else {
+		return new ExecutionStatusResult(new StringData("", false));
+	}
+};
+B_ItemOfList.prototype.getItemOfList=function(listData,indexD){
+	var array = listData.getValue();
+	var index=listData.getIndex(indexD);
+	if(index==null){
+		return new StringData("", false);
+	}
+	else {
+		return array[index];
+	}
+};
+
+
+//Done
+function B_LengthOfList(x,y){
+	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.num);
+	this.addPart(new LabelText(this,"length of"));
+	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+}
+B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
+B_LengthOfList.prototype.constructor = B_LengthOfList;
+B_LengthOfList.prototype.startAction=function(){
+	var listD=this.slots[0].getData();
+	if(listD!=null&&listD.type == Data.types.selection) {
+		var list = listD.getValue();
+		var array = list.getData().getValue();
+		return new ExecutionStatusResult(new NumData(array.length));
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		return new ExecutionStatusResult(new NumData(listD.getValue().length));
+	}
+	else {
+		return new ExecutionStatusResult(new NumData(0,false));
+	}
+};
+
+
+//Done
+function B_ListContainsItem(x,y){
+	PredicateBlock.call(this,x,y,"lists");
+	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+	this.addPart(new LabelText(this,"contains"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+}
+B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
+B_ListContainsItem.prototype.constructor = B_ListContainsItem;
+B_ListContainsItem.prototype.startAction=function(){
+	var listD=this.slots[0].getData();
+	var itemD;
+	if(listD!=null&&listD.type == Data.types.selection) {
+		var list = listD.getValue();
+		var listData=list.getData();
+		itemD=this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
+	}
+	else if(listD!=null&&listD.type == Data.types.list){
+		itemD=this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
+	}
+	else {
+		return new ExecutionStatusResult(new BoolData(false,true));
+	}
+};
+B_ListContainsItem.prototype.checkListContainsItem=function(listData,itemD){
+	var array = listData.getValue();
+	for(var i=0;i<array.length;i++){
+		if(Data.checkEquality(itemD,array[i])){
+			return new BoolData(true,true);
+		}
+	}
+	return new BoolData(false,true);
+};
+function Test(){
+	var stack1;
+	stack1=new BlockStack(new b_whenFlagTapped(20,45));
+	stack1=new BlockStack(new b_Repeat(20,105));
+	stack1=new BlockStack(new b_IfElse(20,165));
+	stack1=new BlockStack(new b_HummingbirdLed(20,225));
+	stack1=new BlockStack(new b_HummingbirdTriLed(20,285));
+	stack1=new BlockStack(new b_SayThis(20,345));
+	stack1=new BlockStack(new b_Wait(20,405));
+	stack1=new BlockStack(new b_WaitUntil(20,465));
+	stack1=new BlockStack(new b_HummingbirdLight(20,525));
+	stack1=new BlockStack(new b_HBTempC(20,585));
+	
+	stack1=new BlockStack(new b_SayForSecs(320,45));
+	stack1=new BlockStack(new b_Say(320,75));
+	stack1=new BlockStack(new b_ThinkForSecs(320,105));
+	stack1=new BlockStack(new b_Think(320,135));
+	stack1=new BlockStack(new b_ChangeSizeBy(320,165));
+	stack1=new BlockStack(new b_SetSizeTo(320,195));
+	stack1=new BlockStack(new b_Size(320,230));
+	stack1=new BlockStack(new b_Show(320,255));
+	stack1=new BlockStack(new b_Hide(320,285));
+	stack1=new BlockStack(new b_GoToFront(320,315));
+	stack1=new BlockStack(new b_GoBackLayers(320,345));
+	stack1=new BlockStack(new b_HummingbirdLed(320,385));
+	stack1=new BlockStack(new b_HummingbirdMotor(320,500));
+	
+	
+	stack1=new BlockStack(new b_DeviceOrientation(620,45));
+	stack1=new BlockStack(new b_Add(620,105));
+	stack1=new BlockStack(new b_Subtract(620,165));
+	stack1=new BlockStack(new b_Multiply(620,225));
+	stack1=new BlockStack(new b_Divide(620,285));
+	stack1=new BlockStack(new b_Round(620,345));
+	stack1=new BlockStack(new b_PickRandom(620,405));
+	stack1=new BlockStack(new b_LessThan(620,465));
+	stack1=new BlockStack(new b_EqualTo(620,525));
+	stack1=new BlockStack(new b_GreaterThan(620,585));
+	
+	stack1=new BlockStack(new b_And(920,45));
+	stack1=new BlockStack(new b_Or(920,105));
+	stack1=new BlockStack(new b_Not(920,165));
+	stack1=new BlockStack(new b_True(920,225));
+	stack1=new BlockStack(new b_False(920,285));
+	stack1=new BlockStack(new b_LetterOf(920,345));
+	stack1=new BlockStack(new b_LengthOf(920,405));
+	stack1=new BlockStack(new b_LessThan(920,465));
+	stack1=new BlockStack(new b_EqualTo(920,525));
+	stack1=new BlockStack(new b_GreaterThan(920,585));
+}
