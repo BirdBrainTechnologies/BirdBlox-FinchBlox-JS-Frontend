@@ -351,8 +351,8 @@ SaveManager.currentDoc = function(){ //Autosaves
 };
 
 SaveManager.openData = function(fileName, data){
-	let fileName = HtmlServer.decodeHtml(fileName);
-	let data = HtmlServer.decodeHtml(data);
+	fileName = HtmlServer.decodeHtml(fileName);
+	data = HtmlServer.decodeHtml(data);
 	if(SaveManager.fileName == null){
 		SaveManager.loadFile(data);
 		SaveManager.saveCurrentDoc(false, fileName, true);

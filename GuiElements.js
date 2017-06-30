@@ -21,6 +21,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
+	GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){
@@ -146,13 +147,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	if(DebugOptions.blockLogging == null){
-		DebugOptions.blockLogging = true;
-	}
-	if(!DebugOptions.blockLogging) {
-		debug.innerHTML = message; //The iPad app does not support alert dialogs
-		//alert(message); //When debugging on a PC this function can be used.
-	}
+	debug.innerHTML = message; //The iPad app does not support alert dialogs
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
