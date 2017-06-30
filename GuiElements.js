@@ -34,7 +34,7 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load.os = false;
 	GuiElements.load.lastFileName = true;
 	GuiElements.load.lastFileNamed = true;
-	if(!DebugOptions.shouldSkipInitSettings() && false) {
+	if(!DebugOptions.shouldSkipInitSettings()) {
 		var count = 0;
 		var checkIfDone = function () {
 			count++;
