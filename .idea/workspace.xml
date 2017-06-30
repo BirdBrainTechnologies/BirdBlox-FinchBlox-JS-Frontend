@@ -171,8 +171,8 @@
       <file leaf-file-name="all.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/all.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="84">
-              <caret line="4" column="32" lean-forward="false" selection-start-line="4" selection-start-column="32" selection-end-line="4" selection-end-column="32" />
+            <state relative-caret-position="672">
+              <caret line="32" column="39" lean-forward="true" selection-start-line="32" selection-start-column="39" selection-end-line="32" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -201,8 +201,8 @@
       <file leaf-file-name="HummingbirdDragAndDrop.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="137" column="14" lean-forward="true" selection-start-line="137" selection-start-column="14" selection-end-line="137" selection-end-column="14" />
+            <state relative-caret-position="546">
+              <caret line="140" column="106" lean-forward="false" selection-start-line="140" selection-start-column="106" selection-end-line="140" selection-end-column="106" />
               <folding />
             </state>
           </provider>
@@ -1070,7 +1070,7 @@
       <workItem from="1498223662619" duration="26390000" />
       <workItem from="1498483085902" duration="23485000" />
       <workItem from="1498749111498" duration="29338000" />
-      <workItem from="1498830368049" duration="8593000" />
+      <workItem from="1498830368049" duration="8686000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1167,7 +1167,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1089124000" />
+    <option name="totallyTimeSpent" value="1089217000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1968,14 +1968,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/SlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="23" column="2" lean-forward="true" selection-start-line="23" selection-start-column="2" selection-end-line="23" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -2127,18 +2119,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/SlotShape.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
-          <caret line="137" column="14" lean-forward="true" selection-start-line="137" selection-start-column="14" selection-end-line="137" selection-end-column="14" />
+          <caret line="23" column="2" lean-forward="true" selection-start-line="23" selection-start-column="2" selection-end-line="23" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="140" column="106" lean-forward="false" selection-start-line="140" selection-start-column="106" selection-end-line="140" selection-end-column="106" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/all.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="4" column="32" lean-forward="false" selection-start-line="4" selection-start-column="32" selection-end-line="4" selection-end-column="32" />
+        <state relative-caret-position="672">
+          <caret line="32" column="39" lean-forward="true" selection-start-line="32" selection-start-column="39" selection-end-line="32" selection-end-column="39" />
           <folding />
         </state>
       </provider>
