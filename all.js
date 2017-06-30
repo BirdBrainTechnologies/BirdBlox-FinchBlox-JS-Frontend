@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading5";
+	debug.innerHTML = "Loading6";
 }, false);
 
 function DebugOptions(){
@@ -5418,5 +5418,3110 @@ InputPad.updateBsIcon=function(){
 			IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
 			IP.undoVisible=false;
 		}
+	}
+};
+InputPad.undo=function(){
+	var IP=InputPad;
+	if(IP.undoAvailable) {
+		IP.dataIsNumeric=IP.undoData.dataIsNumeric;
+		if(IP.dataIsNumeric){
+			IP.displayNum=new DisplayNum(IP.undoData.data);
+		}
+		else{
+			IP.nonNumericData=IP.undoData.data;
+			IP.nonNumericText=IP.undoData.text;
+		}
+		IP.removeUndoDelayed();
+		IP.updateSlot();
+		IP.grayOutValue();
+	}
+};
+InputPad.bsReleased=function(){
+	InputPad.updateBsIcon();
+};
+InputPad.bsPressed=function(){
+	var IP=InputPad;
+	if(IP.undoAvailable){
+		IP.undo();
+	}
+	else {
+		IP.removeUndoDelayed();
+		IP.ungray();
+		if(IP.dataIsNumeric) {
+			IP.displayNum.backspace();
+		}
+		else{
+			IP.dataIsNumeric=true;
+			IP.displayNum=new DisplayNum(new NumData(0));
+		}
+		IP.updateSlot();
+	}
+	SaveManager.markEdited();
+};
+InputPad.okPressed=function(){
+	InputPad.close();
+};
+InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth, previewFn){
+	var IP=InputPad;
+	IP.previewFn = previewFn;
+	IP.visible=true;
+	IP.usingNumberPad=false;
+	IP.specialCommand="";
+	IP.slot=slot;
+	IP.dataIsNumeric=false;
+	IP.nonNumericData=IP.slot.enteredData;
+	IP.nonNumericText=IP.slot.text;
+	var Vmargins=IP.bubbleOverlay.getVPadding();
+	IP.menuBnList.setMaxHeight(Math.max(upperY-Vmargins,GuiElements.height-lowerY-Vmargins));
+	IP.menuBnList.generateBns();
+	IP.width=IP.menuBnList.width;//+2*IP.buttonMargin;
+	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;
+	//IP.menuBnList.move(0,0);
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
+	IP.menuBnList.show();
+	/*IP.tallH=IP.height+IP.triangleH;
+	IP.move(x,upperY,lowerY);
+	GuiElements.layers.inputPad.appendChild(IP.group);*/
+};
+InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
+	var IP=InputPad;
+	IP.previewFn = null;
+	IP.usingNumberPad=true;
+	IP.specialCommand="";
+	IP.width=InputPad.BnAreaW;
+	IP.height=InputPad.BnAreaH;
+	/*IP.tallH=IP.height+IP.triangleH;*/
+	IP.undoAvailable=false;
+	IP.valueGrayed=false;
+	if(!IP.menuBnList.isEmpty()){
+		IP.menuBnList.width=IP.buttonW*3+IP.buttonMargin*2;
+		IP.menuBnList.generateBns();
+		IP.height+=IP.menuBnList.height+IP.buttonMargin;
+		/*IP.tallH+=IP.menuBnList.height+IP.buttonMargin;*/
+		GuiElements.move.group(IP.bnGroup,0,IP.menuBnList.height+IP.buttonMargin);
+		//IP.menuBnList.move(0,0);
+		IP.menuBnList.show();
+	}
+	else{
+		GuiElements.move.group(IP.bnGroup,0,0);
+	}
+	var IP=InputPad;
+	/*GuiElements.layers.inputPad.appendChild(IP.group);*/
+	IP.group.appendChild(IP.bnGroup);
+	IP.visible=true;
+	IP.slot=slot;
+	if(slot.getData().type==Data.types.num){
+		var numData=slot.getData();
+		if(numData.getValue()==0){
+			IP.displayNum=new DisplayNum(new NumData(0));
+		}
+		else{
+			IP.displayNum=new DisplayNum(numData);
+			IP.grayOutValue();
+		}
+		IP.dataIsNumeric=true;
+	}
+	else{
+		IP.dataIsNumeric=false;
+		IP.nonNumericData=slot.getData();
+		IP.nonNumericText=IP.slot.text;
+		IP.grayOutValue();
+	}
+	if(positive){
+		IP.plusMinusBn.disable();
+	}
+	else{
+		IP.plusMinusBn.enable();
+	}
+	if(integer){
+		IP.decimalBn.disable();
+	}
+	else{
+		IP.decimalBn.enable();
+	}
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
+	if(IP.menuBnList.updatePosition != null){
+		IP.menuBnList.updatePosition();
+	}
+	/*InputPad.move(x,upperY,lowerY);*/
+};
+/*InputPad.move=function(x,upperY,lowerY){
+	var IP=InputPad;
+	IP.triOffset=(InputPad.width-InputPad.triangleW)/2;
+	IP.halfOffset=InputPad.width/2;
+
+	var arrowDown=(lowerY+IP.tallH>GuiElements.height);
+	var yCoord=lowerY+IP.triangleH;
+	var xCoord=x-IP.halfOffset;
+	var arrowDir=1;
+	var arrowX=IP.triOffset;
+	var arrowY=0;
+	if(arrowDown){
+		arrowDir=-1;
+		yCoord=upperY-IP.tallH;
+		arrowY=IP.height;
+	}
+	if(xCoord<0){
+		arrowX+=xCoord;
+		xCoord=0;
+	}
+	if(xCoord+IP.width>GuiElements.width){
+		arrowX=IP.width+x-GuiElements.width-IP.triangleW/2;
+		xCoord=GuiElements.width-IP.width;
+	}
+	GuiElements.move.group(IP.group,xCoord,yCoord);
+	GuiElements.update.triangle(IP.triangle,arrowX,arrowY,IP.triangleW,IP.triangleH*arrowDir);
+	GuiElements.update.rect(IP.bgRect,0,0,IP.width,IP.height);
+ 	IP.menuBnList.move(IP.buttonMargin,IP.buttonMargin);
+ 	IP.menuBnList.show();
+};*/
+InputPad.updateSlot=function(){
+	var IP=InputPad;
+	if(IP.dataIsNumeric){
+		IP.slot.updateEdit(IP.displayNum.getString(),IP.displayNum.getData());
+	}
+	else{
+		IP.slot.updateEdit(IP.nonNumericText,IP.nonNumericData);
+	}
+};
+InputPad.close=function(){
+	var IP = InputPad;
+	if(IP.visible) {
+		if (IP.specialCommand=="enter_text") {
+			IP.slot.editText();
+		}
+		else if (IP.specialCommand=="new_message") {
+			CodeManager.newBroadcastMessage(IP.slot);
+		}
+		else if (InputPad.dataIsNumeric) {
+			IP.slot.saveNumData(IP.displayNum.getData());
+		}
+		else {
+			IP.slot.setSelectionData(IP.nonNumericText, IP.nonNumericData);
+		}
+		/*IP.group.remove();*/
+		IP.bubbleOverlay.hide();
+		IP.visible = false;
+		IP.menuBnList.hide();
+		IP.bnGroup.remove();
+		IP.removeUndo();
+	}
+};
+InputPad.menuBnSelected=function(text,data){
+	var IP=InputPad;
+	if(data.type==Data.types.num){
+		IP.displayNum=new DisplayNum(data);
+		IP.dataIsNumeric=true;
+	}
+	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
+		IP.specialCommand="enter_text";
+	}
+	else if(data.type==Data.types.selection&&data.getValue()=="new_message"){
+		IP.specialCommand="new_message";
+	}
+	else{
+		IP.dataIsNumeric=false;
+		IP.nonNumericText=text;
+		IP.nonNumericData=data;
+	}
+	SaveManager.markEdited();
+	if(IP.previewFn != null){
+		IP.updateSlot();
+		IP.previewFn();
+	}
+	else {
+		IP.close();
+	}
+};
+
+InputPad.makeBns=function(){
+	var IP=InputPad;
+	var currentNum;
+	var xPos=0;
+	var yPos=0;
+	for(var i=0;i<3;i++){
+		xPos=0;
+		for(var j=0;j<3;j++){
+			currentNum=7-i*3+j;
+			InputPad.makeNumBn(xPos,yPos,currentNum);
+			xPos+=IP.buttonMargin;
+			xPos+=IP.buttonW;
+		}
+		yPos+=IP.buttonMargin;
+		yPos+=IP.buttonH;
+	}
+	InputPad.makeNumBn(IP.buttonMargin+IP.buttonW,IP.buttonMargin*3+IP.buttonH*3,0);
+	InputPad.makePlusMinusBn(0,IP.buttonMargin*3+IP.buttonH*3);
+	InputPad.makeDecimalBn(IP.buttonMargin*2+IP.buttonW*2,IP.buttonMargin*3+IP.buttonH*3);
+	InputPad.makeBsBn(0,IP.buttonMargin*4+IP.buttonH*4);
+	InputPad.makeOkBn(IP.buttonMargin+IP.longBnW,IP.buttonMargin*4+IP.buttonH*4);
+};
+InputPad.makeNumBn=function(x,y,num){
+	var IP=InputPad;
+	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
+	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
+	button.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.makePlusMinusBn=function(x,y){
+	var IP=InputPad;
+	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
+	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
+	IP.plusMinusBn.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.makeDecimalBn=function(x,y){
+	var IP=InputPad;
+	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
+	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
+	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
+	IP.decimalBn.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.makeBsBn=function(x,y){
+	var IP=InputPad;
+	IP.bsButton=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
+	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
+	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
+	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
+	IP.bsButton.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.makeOkBn=function(x,y){
+	var IP=InputPad;
+	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
+	button.addIcon(VectorPaths.checkmark,IP.okBnH);
+	button.setCallbackFunction(InputPad.okPressed,true);
+	button.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.relToAbsX = function(x){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsX(x)
+};
+InputPad.relToAbsY = function(y){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsY(y)
+};
+
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
+	if(hMargin==null){
+		hMargin=0;
+	}
+	if(layer == null){
+		layer = GuiElements.layers.overlay;
+	}
+	Overlay.call(this, overlayType);
+	this.x = 0;
+	this.y = 0;
+	this.bgColor=color;
+	this.margin=margin;
+	this.hMargin=hMargin;
+	this.innerGroup=innerGroup;
+	this.parent=parent;
+	this.layerG = layer;
+	this.visible=false;
+	this.buildBubble();
+}
+BubbleOverlay.prototype = Object.create(Overlay.prototype);
+BubbleOverlay.prototype.constructor = BubbleOverlay;
+BubbleOverlay.setGraphics=function(){
+	BubbleOverlay.triangleW=15;
+	BubbleOverlay.triangleH=7;
+	BubbleOverlay.minW=25;
+	BubbleOverlay.overlap=1;
+};
+BubbleOverlay.prototype.buildBubble=function(){
+	this.buildGroups();
+	this.makeBg();
+};
+BubbleOverlay.prototype.buildGroups=function(){
+	this.group=GuiElements.create.group(0,0);
+	TouchReceiver.addListenersOverlayPart(this.group);
+	this.bgGroup=GuiElements.create.group(0,0,this.group);
+	this.group.appendChild(this.innerGroup);
+	GuiElements.move.group(this.innerGroup,this.margin,this.margin);
+};
+BubbleOverlay.prototype.makeBg=function(){
+	this.bgRect=GuiElements.create.rect(this.bgGroup);
+	GuiElements.update.color(this.bgRect,this.bgColor);
+	this.triangle=GuiElements.create.path(this.bgGroup);
+	GuiElements.update.color(this.triangle,this.bgColor);
+};
+BubbleOverlay.prototype.show=function(){
+	if(!this.visible) {
+		this.layerG.appendChild(this.group);
+		this.visible=true;
+		this.addOverlayAndCloseOthers();
+	}
+};
+BubbleOverlay.prototype.hide=function(){
+	if(this.visible) {
+		this.group.remove();
+		this.visible=false;
+		Overlay.removeOverlay(this);
+	}
+};
+BubbleOverlay.prototype.close=function(){
+	this.hide();
+	this.parent.close();
+};
+BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
+	DebugOptions.validateNumbers(x1,x2,y1,y2,innerWidth,innerHeight);
+	var BO=BubbleOverlay;
+	/* Compute dimensions of the bubble */
+	var width=innerWidth+2*this.margin;
+	if(width<BO.minW){
+		width=BO.minW;
+	}
+	var height=innerHeight+2*this.margin;
+	/* Center the content in the bubble */
+	GuiElements.move.group(this.innerGroup,(width-innerWidth)/2,(height-innerHeight)/2);
+
+	/* Compute dimension depending on orientation */
+	var longW = width + BO.triangleH;
+	var longH = height + BO.triangleH;
+
+	var attemptB = Math.max(0, y2 + longH - GuiElements.height);
+	var attemptT = Math.max(0, longH - y1);
+	var attemptR = Math.max(0, x2 + longW - GuiElements.width);
+	var attemptL = Math.max(0, longW - x1);
+	var min = Math.min(attemptT, attemptB, attemptL, attemptR);
+	var vertical = attemptT <= min || attemptB <= min;
+
+	var topLeftX = NaN;
+	var topLeftY = NaN;
+	var x = NaN;
+	var y = NaN;
+	var triangleDir = 1;
+	if(vertical){
+		x = (x1 + x2) / 2;
+		topLeftX = this.fitLocationToRange(x, width, GuiElements.width);
+		if(attemptB <= min){
+			topLeftY = y2 + BO.triangleH;
+			y = y2;
+		}
+		else{
+			topLeftY = y1 - longH;
+			y = y1;
+			triangleDir = -1;
+		}
+	}
+	else{
+		y = (y1 + y2) / 2;
+		topLeftY = this.fitLocationToRange(y, height, GuiElements.height);
+		if(attemptL <= min){
+			topLeftX = x1 - longW;
+			x = x1;
+			triangleDir = -1;
+		}
+		else{
+			topLeftX = x2 + BO.triangleH;
+			x = x2;
+		}
+	}
+	var triX = x - topLeftX;
+	var triY = y - topLeftY;
+	var triH = (BO.triangleH+BO.overlap)*triangleDir;
+	this.x = topLeftX;
+	this.y = topLeftY;
+	GuiElements.move.group(this.group,topLeftX,topLeftY);
+	GuiElements.update.triangleFromPoint(this.triangle,triX,triY,BO.triangleW,triH, vertical);
+	GuiElements.update.rect(this.bgRect,0,0,width,height);
+	this.show();
+};
+BubbleOverlay.prototype.fitLocationToRange = function(center, width, range){
+	var res = center - width / 2;
+	if(width > range){
+		res = (range - width) / 2;
+	}
+	else if(res < 0){
+		res = 0;
+	}
+	else if(res + width > range){
+		res = range - width;
+	}
+	return res;
+};
+BubbleOverlay.prototype.getVPadding=function() {
+	return this.margin*2+BubbleOverlay.triangleH;
+};
+BubbleOverlay.prototype.relToAbsX = function(x){
+	return x + this.x + this.margin;
+};
+BubbleOverlay.prototype.relToAbsY = function(y){
+	return y + this.y + this.margin;
+};
+function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
+	var RB = ResultBubble;
+	if(error == null){
+		error = false;
+	}
+	var fontColor = RB.fontColor;
+	var bgColor = RB.bgColor;
+	if(error){
+		fontColor = RB.errorFontColor;
+		bgColor = RB.errorBgColor;
+	}
+	var height=RB.charHeight;
+	var textE=GuiElements.draw.text(0,height,text,RB.fontSize,fontColor,RB.font,RB.fontWeight);
+	GuiElements.update.textLimitWidth(textE,text,GuiElements.width-RB.hMargin*2);
+	var width=GuiElements.measure.textWidth(textE);
+	var group=GuiElements.create.group(0,0);
+	group.appendChild(textE);
+	let layer = GuiElements.layers.resultBubble;
+	let overlayType = Overlay.types.resultBubble;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
+	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
+	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
+}
+ResultBubble.setConstants=function(){
+	var RB=ResultBubble;
+	RB.fontColor=Colors.black;
+	RB.errorFontColor = Colors.white;
+	RB.bgColor=Colors.white;
+	RB.errorBgColor = "#c00000";
+	RB.fontSize=16;
+	RB.font="Arial";
+	RB.fontWeight="normal";
+	RB.charHeight=12;
+	RB.margin=4;
+	/*RB.lifetime=3000;*/
+	RB.hMargin=20;
+};
+ResultBubble.prototype.close=function(){
+	this.bubbleOverlay.hide();
+	/*this.vanishTimer = window.clearInterval(this.vanishTimer);*/
+};
+/**
+ * Created by Tom on 6/13/2017.
+ */
+/**
+ * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
+ * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
+ */
+function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay){
+	if(partOfOverlay == null){
+		partOfOverlay = null;
+	}
+	DebugOptions.validateNonNull(group, layer);
+	DebugOptions.validateNumbers(width, height, innerWidth, innerHeight);
+	this.x = absX;
+	this.y = absY;
+	this.width = width;
+	this.height = height;
+	this.innerWidth = innerWidth;
+	this.innerHeight = innerHeight;
+	this.layer = layer;
+	this.scrollDiv = GuiElements.create.scrollDiv();
+	TouchReceiver.addListenersScrollBox(this.scrollDiv, this);
+	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
+	this.contentGroup = GuiElements.create.group(0, 0, this.contentSvg);
+	this.contentGroup.appendChild(group);
+	this.scrollStatus = {};
+	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
+	this.visible = false;
+	this.currentZoom = GuiElements.zoomFactor;
+	this.partOfOverlay = partOfOverlay;
+}
+SmoothScrollBox.prototype.updateScrollSet = function(){
+	if(this.visible) {
+		let realX = GuiElements.relToAbsX(this.x);
+		let realY = GuiElements.relToAbsY(this.y);
+
+		GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
+			this.height, this.innerWidth, this.innerHeight);
+	}
+};
+SmoothScrollBox.prototype.updateZoom = function(){
+	var currentScrollX = this.getScrollX();
+	var currentScrollY = this.getScrollY();
+	this.currentZoom = GuiElements.zoomFactor;
+	this.updateScrollSet();
+	this.setScrollX(currentScrollX);
+	this.setScrollY(currentScrollY);
+};
+SmoothScrollBox.prototype.setContentDims = function(innerWidth, innerHeight){
+	this.innerHeight = innerHeight;
+	this.innerWidth = innerWidth;
+	this.updateScrollSet();
+};
+SmoothScrollBox.prototype.setDims = function(width, height){
+	this.width = width;
+	this.height = height;
+	this.updateScrollSet();
+};
+SmoothScrollBox.prototype.move = function(absX, absY){
+	this.x = absX;
+	this.y = absY;
+	this.updateScrollSet();
+};
+SmoothScrollBox.prototype.show = function(){
+	if(!this.visible){
+		this.visible = true;
+		this.layer.appendChild(this.scrollDiv);
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+		this.updateScrollSet();
+		TouchReceiver.setInitialScrollFix(this.scrollDiv);
+	}
+};
+SmoothScrollBox.prototype.hide = function(){
+	if(this.visible){
+		this.visible = false;
+		this.layer.removeChild(this.scrollDiv);
+		if(this.fixScrollTimer != null) {
+			window.clearInterval(this.fixScrollTimer);
+		}
+	}
+};
+SmoothScrollBox.prototype.relToAbsX=function(x){
+	return x - this.scrollDiv.scrollLeft / this.currentZoom + this.x;
+};
+SmoothScrollBox.prototype.relToAbsY=function(y){
+	return y - this.scrollDiv.scrollTop  / this.currentZoom + this.y;
+};
+SmoothScrollBox.prototype.absToRelX=function(x){
+	return x + this.scrollDiv.scrollLeft * this.currentZoom - this.x;
+};
+SmoothScrollBox.prototype.absToRelY=function(y){
+	return y + this.scrollDiv.scrollTop * this.currentZoom - this.y;
+};
+SmoothScrollBox.prototype.getScrollY = function(){
+	if(!this.visible) return 0;
+	return this.scrollDiv.scrollTop / this.currentZoom;
+};
+SmoothScrollBox.prototype.getScrollX = function(){
+	if(!this.visible) return 0;
+	return this.scrollDiv.scrollLeft / this.currentZoom;
+};
+SmoothScrollBox.prototype.setScrollX = function(x){
+	this.scrollDiv.scrollLeft = x * this.currentZoom;
+	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+};
+SmoothScrollBox.prototype.setScrollY = function(y){
+	this.scrollDiv.scrollTop = y * this.currentZoom;
+	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+};
+SmoothScrollBox.prototype.isMoving = function(){
+	return !this.scrollStatus.still;
+};
+function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
+	this.x=x;
+	this.y=y;
+	this.width=width;
+	if(width==null){
+		this.width=null;
+	}
+	this.height=0;
+	this.bnHeight=MenuBnList.bnHeight;
+	this.bnMargin=bnMargin;
+	this.bnsGenerated=false;
+	this.bnTextList=new Array();
+	this.bnFunctionsList=new Array();
+	this.bns=null;
+	this.group=GuiElements.create.group(x,y);
+	this.parentGroup=parentGroup;
+	this.visible=false;
+	if(columns==null){
+		columns=1;
+	}
+	this.columns=columns;
+	this.partOfOverlay=false;
+	this.internalHeight=0;
+	this.scrolling=false;
+	this.scrollYOffset=0;
+	this.scrollY=0;
+	this.scrollable=false;
+	this.maxHeight=null;
+}
+MenuBnList.setGraphics=function(){
+	var MBL=MenuBnList;
+	MBL.bnHeight=34; //25
+	MBL.bnHMargin=10; //only used when width not specified.
+	MBL.minWidth=40;
+}
+MenuBnList.prototype.setMaxHeight=function(maxHeight){
+	this.maxHeight=maxHeight;
+	this.clippingPath=GuiElements.clip(0,0,GuiElements.width,maxHeight,this.group);
+	this.clipRect=this.clippingPath.childNodes[0];
+	this.scrollRect=this.makeScrollRect();
+};
+MenuBnList.prototype.addOption=function(text,func){
+	this.bnsGenerated=false;
+	this.bnTextList.push(text);
+	if(func==null){
+		this.bnFunctionsList.push(null);
+	}
+	else{
+		this.bnFunctionsList.push(func);
+	}
+}
+MenuBnList.prototype.show=function(){
+	this.generateBns();
+	if(!this.visible){
+		this.visible=true;
+		this.parentGroup.appendChild(this.group);
+	}
+}
+MenuBnList.prototype.hide=function(){
+	if(this.visible){
+		this.visible=false;
+		this.group.remove();
+		if(this.maxHeight!=null) {
+			this.clippingPath.remove();
+		}
+	}
+}
+MenuBnList.prototype.generateBns=function(){
+	var columns=this.columns;
+	this.computeWidth(columns);
+	if(!this.bnsGenerated){
+		this.clearBnsArray();
+		var currentY=0;
+		var currentX=0;
+		var column=0;
+		var count=this.bnTextList.length;
+		var bnWidth=0;
+		for(var i=0;i<count;i++){
+			if(column==columns){
+				column=0;
+				currentX=0;
+				currentY+=this.bnHeight+this.bnMargin;
+			}
+			if(column==0) {
+				bnWidth = (this.width + this.bnMargin) / columns - this.bnMargin;
+				var remainingBns=count-i;
+				if(remainingBns<columns){
+					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
+				}
+			}
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			currentX+=bnWidth+this.bnMargin;
+			column++;
+		}
+		currentY+=this.bnHeight;
+		this.internalHeight=currentY;
+		if(count==0){
+			this.internalHeight=0;
+		}
+		this.height=this.internalHeight;
+		if(this.maxHeight!=null){
+			this.height=Math.min(this.internalHeight,this.maxHeight);
+		}
+		this.scrollable=this.height!=this.internalHeight;
+		this.updateScrollRect();
+		this.bnsGenerated=true;
+	}
+};
+MenuBnList.prototype.clearBnsArray=function(){
+	if(this.bns!=null){
+		for(var i=0;i<this.bns.length;i++){
+			this.bns[i].remove();
+		}
+	}
+	this.bns=new Array();
+}
+MenuBnList.prototype.generateBn=function(x,y,width,text,func){
+	var MBL=MenuBnList;
+	var bn=new Button(x,y,width,this.bnHeight,this.group);
+	bn.addText(text);
+	bn.setCallbackFunction(func,true);
+	bn.markAsOverlayPart(this.partOfOverlay);
+	bn.menuBnList=this;
+	return bn;
+}
+MenuBnList.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	GuiElements.move.group(this.group,x,y+this.scrollY);
+	if(this.maxHeight!=null){
+		GuiElements.move.element(this.clipRect,0,(0-this.scrollY));
+	}
+};
+MenuBnList.prototype.computeWidth=function(){
+	if(this.width==null) {
+		var columns = this.columns;
+		var MBL = MenuBnList;
+		var longestW = 0;
+		for (var i = 0; i < this.bnTextList.length; i++) {
+			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+			if (currentW > longestW) {
+				longestW = currentW;
+			}
+		}
+		this.width = columns * longestW + columns * 2 * MBL.bnHMargin + (columns - 1) * this.bnMargin;
+		if (this.width < MBL.minWidth) {
+			this.width = MBL.minWidth;
+		}
+	}
+}
+MenuBnList.prototype.makeScrollRect=function(){
+	var rectE=GuiElements.create.rect(this.group);
+	rectE.setAttributeNS(null,"fill","#000");
+	GuiElements.update.opacity(rectE,0);
+	TouchReceiver.addListenersMenuBnListScrollRect(rectE,this);
+	return rectE;
+};
+MenuBnList.prototype.updateScrollRect=function(){
+	if(this.maxHeight!=null) {
+		GuiElements.update.rect(this.scrollRect, 0, 0, this.width, this.internalHeight);
+	}
+};
+MenuBnList.prototype.isEmpty=function(){
+	return this.bnTextList.length==0;
+};
+MenuBnList.prototype.startScroll=function(y){
+	if(!this.scrolling){
+		this.scrollYOffset = this.scrollY - y;
+		this.scrolling=true;
+	}
+};
+MenuBnList.prototype.updateScroll=function(y){
+	if(this.scrolling){
+		this.scroll(this.scrollYOffset + y);
+		this.scrolling=true;
+	}
+};
+MenuBnList.prototype.endScroll=function(){
+	if(this.scrolling){
+		this.scrolling=false;
+	}
+};
+MenuBnList.prototype.scroll=function(scrollY){
+	this.scrollY=scrollY;
+	this.scrollY=Math.min(0,this.scrollY);
+	this.scrollY=Math.max(this.height-this.internalHeight,this.scrollY);
+	this.move(this.x,this.y);
+};
+MenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+
+/**
+ * Created by Tom on 6/5/2017.
+ */
+
+function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
+	if(layer == null){
+		layer = GuiElements.layers.frontScroll;
+	}
+	this.x=x;
+	this.y=y;
+	this.width=width;
+	if(width==null){
+		this.width=null;
+	}
+	this.height=0;
+	this.bnHeight=SmoothMenuBnList.bnHeight;
+	this.bnMargin=Button.defaultMargin;
+	this.bnsGenerated=false;
+	this.bnTextList=[];
+	this.bnFunctionsList=[];
+	this.bns=null;
+
+	this.build();
+	this.parentGroup=parentGroup;
+	this.parent = parent;
+	this.layer = layer;
+
+	this.visible=false;
+	this.partOfOverlay=null;
+	this.internalHeight=0;
+
+	this.maxHeight=null;
+
+	this.scrolling=false;
+	this.scrollYOffset=0;
+	this.scrollY=0;
+	this.scrollable=false;
+
+	this.scrollStatus = {};
+}
+SmoothMenuBnList.setGraphics=function(){
+	var SMBL=SmoothMenuBnList;
+	SMBL.bnHeight=34; //25
+	SMBL.bnHMargin=10; //only used when width not specified.
+	SMBL.minWidth=40;
+};
+SmoothMenuBnList.prototype.build = function(){
+	//this.foreignObject = GuiElements.create.foreignObject();
+	this.scrollDiv = GuiElements.create.scrollDiv();
+	TouchReceiver.addListenersSmoothMenuBnListScrollRect(this.scrollDiv, this);
+	this.svg = GuiElements.create.svg(this.scrollDiv);
+	this.zoomG = GuiElements.create.group(0, 0, this.svg);
+};
+SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
+	this.maxHeight=maxHeight;
+};
+SmoothMenuBnList.prototype.addOption=function(text,func){
+	this.bnsGenerated=false;
+	this.bnTextList.push(text);
+	if(func==null){
+		this.bnFunctionsList.push(null);
+	}
+	else{
+		this.bnFunctionsList.push(func);
+	}
+};
+SmoothMenuBnList.prototype.show=function(){
+	this.generateBns();
+	if(!this.visible){
+		this.visible=true;
+		this.layer.appendChild(this.scrollDiv);
+		this.updatePosition();
+		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
+		TouchReceiver.setInitialScrollFix(this.scrollDiv);
+	}
+};
+SmoothMenuBnList.prototype.hide=function(){
+	if(this.visible){
+		this.visible=false;
+		this.layer.removeChild(this.scrollDiv);
+		if(this.fixScrollTimer != null) {
+			window.clearInterval(this.fixScrollTimer);
+		}
+	}
+};
+SmoothMenuBnList.prototype.generateBns=function(){
+	var columns=1;
+	this.computeWidth();
+	if(!this.bnsGenerated){
+		this.clearBnsArray();
+		var currentY=0;
+		var currentX=0;
+		var column=0;
+		var count=this.bnTextList.length;
+		var bnWidth=0;
+		for(var i=0;i<count;i++){
+			if(column==columns){
+				column=0;
+				currentX=0;
+				currentY+=this.bnHeight+this.bnMargin;
+			}
+			if(column==0) {
+				bnWidth = (this.width + this.bnMargin) / columns - this.bnMargin;
+				var remainingBns=count-i;
+				if(remainingBns<columns){
+					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
+				}
+			}
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			currentX+=bnWidth+this.bnMargin;
+			column++;
+		}
+		currentY+=this.bnHeight;
+		this.internalHeight=currentY;
+		if(count==0){
+			this.internalHeight=0;
+		}
+		this.height=this.internalHeight;
+		if(this.maxHeight!=null){
+			this.height=Math.min(this.internalHeight,this.maxHeight);
+		}
+		this.scrollable=this.height!=this.internalHeight;
+		this.bnsGenerated=true;
+		this.updatePosition();
+	}
+};
+SmoothMenuBnList.prototype.computeWidth=function(){
+	if(this.width==null) {
+		var columns = 1;
+		var MBL = MenuBnList;
+		var longestW = 0;
+		for (var i = 0; i < this.bnTextList.length; i++) {
+			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+			if (currentW > longestW) {
+				longestW = currentW;
+			}
+		}
+		this.width = columns * longestW + columns * 2 * MBL.bnHMargin + (columns - 1) * this.bnMargin;
+		if (this.width < MBL.minWidth) {
+			this.width = MBL.minWidth;
+		}
+	}
+};
+SmoothMenuBnList.prototype.isEmpty=function(){
+	return this.bnTextList.length==0;
+};
+SmoothMenuBnList.prototype.clearBnsArray=function(){
+	if(this.bns!=null){
+		for(var i=0;i<this.bns.length;i++){
+			this.bns[i].remove();
+		}
+	}
+	this.bns=[];
+};
+SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
+	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
+	bn.addText(text);
+	bn.setCallbackFunction(func,true);
+	bn.partOfOverlay=this.partOfOverlay;
+	bn.makeScrollable();
+	return bn;
+};
+SmoothMenuBnList.prototype.updatePosition = function(){
+	if(this.visible) {
+		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
+		var realX = this.parent.relToAbsX(this.x);
+		var realY = this.parent.relToAbsY(this.y);
+		realX = GuiElements.relToAbsX(realX);
+		realY = GuiElements.relToAbsY(realY);
+
+		GuiElements.update.smoothScrollSet(this.scrollDiv, this.svg, this.zoomG, realX, realY, this.width,
+			this.height, this.width, this.internalHeight);
+	}
+};
+SmoothMenuBnList.prototype.updateZoom = function(){
+	this.updatePosition();
+};
+SmoothMenuBnList.prototype.getScroll = function(){
+	if(!this.visible) return 0;
+	return this.scrollDiv.scrollTop;
+};
+SmoothMenuBnList.prototype.setScroll = function(scrollTop){
+	if(!this.visible) return;
+	scrollTop = Math.max(0, scrollTop);
+	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
+	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
+	this.scrollDiv.scrollTop = scrollTop;
+};
+SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+SmoothMenuBnList.prototype.isScrolling = function(){
+	if(!this.visible) return false;
+	return !this.scrollStatus.still;
+};
+function Menu(button,width){
+	if(width==null){
+		width=Menu.defaultWidth;
+	}
+	Overlay.call(this, Overlay.types.menu);
+	DebugOptions.validateNumbers(width);
+	this.width=width;
+	this.x=button.x;
+	this.y=button.y+button.height;
+	this.group=GuiElements.create.group(this.x,this.y);
+	TouchReceiver.addListenersOverlayPart(this.group);
+	this.bgRect=GuiElements.create.rect(this.group);
+	GuiElements.update.color(this.bgRect,Menu.bgColor);
+	this.menuBnList=null;
+	this.visible=false;
+	var callbackFn=function(){
+		callbackFn.menu.open();
+	};
+	callbackFn.menu=this;
+	button.setCallbackFunction(callbackFn,false);
+	callbackFn=function(){
+		callbackFn.menu.close();
+	};
+	callbackFn.menu=this;
+	button.setToggleFunction(callbackFn);
+	this.button=button;
+	this.alternateFn=null;
+	this.scheduleAlternate=false;
+}
+Menu.prototype = Object.create(Overlay.prototype);
+Menu.prototype.constructor = Menu;
+Menu.setGraphics=function(){
+	Menu.defaultWidth=100;
+	Menu.bnMargin=Button.defaultMargin;
+	Menu.bgColor=Colors.black;
+};
+Menu.prototype.move=function(){
+	this.x=this.button.x;
+	this.y=this.button.y+this.button.height;
+	GuiElements.move.group(this.group,this.x,this.y);
+	if(this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
+};
+Menu.prototype.createMenuBnList=function(){
+	if(this.menuBnList!=null){
+		this.menuBnList.hide();
+	}
+	var bnM=Menu.bnMargin;
+	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
+	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
+	this.menuBnList.markAsOverlayPart(this);
+	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+	this.menuBnList.setMaxHeight(maxH);
+};
+Menu.prototype.addOption=function(text,func,close){
+	if(close==null){
+		close=true;
+	}
+	var callbackFn=function(){
+		if(callbackFn.close) {
+			callbackFn.menu.close();
+		}
+		if(callbackFn.func != null) {
+			callbackFn.func.call(callbackFn.menu);
+		}
+	};
+	callbackFn.menu=this;
+	callbackFn.func=func;
+	callbackFn.close=close;
+	this.menuBnList.addOption(text,callbackFn);
+};
+Menu.prototype.buildMenu=function(){
+	var mBL=this.menuBnList;
+	mBL.generateBns();
+	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
+};
+Menu.prototype.previewOpen=function(){
+	return true;
+};
+Menu.prototype.loadOptions=function(){
+
+};
+Menu.prototype.open=function(){
+	if(!this.visible) {
+		if(this.previewOpen()) {
+			this.createMenuBnList();
+			this.loadOptions();
+			this.buildMenu();
+			GuiElements.layers.overlay.appendChild(this.group);
+			this.menuBnList.show();
+			this.visible = true;
+			this.addOverlayAndCloseOthers();
+			this.button.markAsOverlayPart(this);
+			this.scheduleAlternate=false;
+		}
+		else{
+			this.button.toggled=true;
+			this.scheduleAlternate=true;
+		}
+	}
+};
+Menu.prototype.close=function(onlyOnDrag){
+	if(onlyOnDrag) return;
+	if(this.visible){
+		this.group.remove();
+		this.menuBnList.hide();
+		this.visible=false;
+		Overlay.removeOverlay(this);
+		this.button.unToggle();
+		this.button.unmarkAsOverlayPart();
+	}
+	else if(this.scheduleAlternate){
+		this.scheduleAlternate=false;
+		this.alternateFn();
+	}
+};
+Menu.prototype.addAlternateFn=function(alternateFn){
+	this.alternateFn=alternateFn;
+};
+Menu.prototype.relToAbsX = function(x){
+	return x + this.x;
+};
+Menu.prototype.relToAbsY = function(y){
+	return y + this.y;
+};
+Menu.prototype.updateZoom = function(){
+	if(this.menuBnList != null){
+		this.menuBnList.updateZoom();
+	}
+};
+function FileMenu(button){
+	Menu.call(this,button);
+}
+FileMenu.prototype = Object.create(Menu.prototype);
+FileMenu.prototype.constructor = FileMenu;
+FileMenu.prototype.loadOptions = function(){
+	this.addOption("New", SaveManager.userNew);
+	this.addOption("Open", OpenDialog.showDialog);
+	this.addOption("Duplicate", SaveManager.userDuplicate);
+	this.addOption("Rename", SaveManager.userRename);
+	this.addOption("Delete", SaveManager.userDelete);
+	this.addOption("Share", SaveManager.userExport);
+	//this.addOption("Debug", this.optionEnableDebug);
+	if(GuiElements.isKindle) {
+		this.addOption("Exit", this.optionExit);
+	}
+};
+FileMenu.prototype.optionNew=function(){
+	SaveManager.new();
+};
+FileMenu.prototype.optionEnableDebug=function(){
+	TitleBar.enableDebug();
+};
+FileMenu.prototype.optionExit=function(){
+	SaveManager.checkPromptSave(function() {
+		HtmlServer.sendRequest("tablet/exit");
+	});
+};
+function DebugMenu(button){
+	Menu.call(this,button,130);
+	this.lastRequest = "";
+	this.lastResponse = "";
+}
+DebugMenu.prototype = Object.create(Menu.prototype);
+DebugMenu.prototype.constructor = DebugMenu;
+DebugMenu.prototype.loadOptions = function() {
+	this.addOption("Enable logging", DebugOptions.enableLogging);
+	this.addOption("Load file", this.loadFile);
+	this.addOption("Download file", this.downloadFile);
+	this.addOption("Hide Debug", TitleBar.hideDebug);
+	this.addOption("Version", this.optionVersion);
+	this.addOption("click.wav", function(){
+		Sound.click = "click";
+	});
+	this.addOption("click2.wav", function(){
+		Sound.click = "click2";
+	});
+	this.addOption("Set JS Url", this.optionSetJsUrl);
+	this.addOption("Reset JS Url", this.optionResetJsUrl);
+	this.addOption("Send request", this.optionSendRequest);
+	this.addOption("Log HTTP", this.optionLogHttp);
+	this.addOption("HB names", this.optionHBs);
+	this.addOption("Allow virtual Robots", this.optionVirtualHBs);
+	this.addOption("Clear log", this.optionClearLog);
+	this.addOption("Connect Multiple", function(){
+		ConnectMultipleDialog.showDialog();
+	});
+	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
+	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
+	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
+	this.addOption("Throw error", function(){throw new UserException("test error");});
+	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
+};
+DebugMenu.prototype.loadFile=function(){
+	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
+		if(!cancelled){
+			SaveManager.loadFile(resp);
+		}
+	});
+};
+DebugMenu.prototype.downloadFile = function(){
+	var xml = XmlWriter.docToText(CodeManager.createXml());
+	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+	window.open(url, '_blank');
+};
+DebugMenu.prototype.optionNew=function(){
+	SaveManager.new();
+};
+DebugMenu.prototype.optionVersion=function(){
+	GuiElements.alert("Version: "+GuiElements.appVersion);
+};
+DebugMenu.prototype.optionScreenSize=function(){
+	HtmlServer.sendRequestWithCallback("tablet/screenSize",function(response){
+		GuiElements.alert("Size: "+response);
+	});
+};
+DebugMenu.prototype.optionPixelSize=function(){
+	GuiElements.alert(GuiElements.height+" "+GuiElements.width);
+};
+DebugMenu.prototype.optionZoom=function(){
+	HtmlServer.getSetting("zoom",function(response){
+		GuiElements.alert("Zoom: "+(response));
+	});
+};
+DebugMenu.prototype.optionHBs=function(){
+	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
+		GuiElements.alert("Names: "+response.split("\n").join(","));
+	});
+};
+DebugMenu.prototype.optionLogHttp=function(){
+	HtmlServer.logHttp=true;
+};
+DebugMenu.prototype.optionVirtualHBs=function(){
+	DiscoverDialog.allowVirtualDevices=true;
+};
+DebugMenu.prototype.optionClearLog=function(){
+	GuiElements.alert("");
+};
+DebugMenu.prototype.optionSetJsUrl=function(){
+	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, function(cancel, url) {
+		if(!cancel && url != ""){
+			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
+			HtmlServer.sendRequestWithCallback(request);
+		}
+	}, function(){});
+};
+DebugMenu.prototype.optionResetJsUrl=function(){
+	var request = "resetjsurl";
+	HtmlServer.sendRequestWithCallback(request);
+};
+DebugMenu.prototype.optionSendRequest=function(){
+	var message = this.lastResponse;
+	if(this.lastResponse == ""){
+		message = "Request: http://localhost:22179/[...]"
+	}
+	var me = this;
+	HtmlServer.showDialog("Send request", message, this.lastRequest, function(cancel, request) {
+		if(!cancel && (request != "" || me.lastRequest != "")){
+			if(request == ""){
+				request = me.lastRequest;
+			}
+			me.lastRequest = request;
+			HtmlServer.sendRequestWithCallback(request, function(resp){
+				me.lastResponse = "Response: \"" + resp + "\"";
+				me.optionSendRequest();
+			}, function(){
+				me.lastResponse = "Error sending request";
+				me.optionSendRequest();
+			});
+		}
+		else{
+			me.lastResponse = "";
+		}
+	}, function(){
+		me.lastResponse = "";
+	});
+};
+function ViewMenu(button){
+	Menu.call(this,button);
+}
+ViewMenu.prototype = Object.create(Menu.prototype);
+ViewMenu.prototype.constructor = ViewMenu;
+ViewMenu.prototype.loadOptions = function() {
+	this.addOption("Zoom in", this.optionZoomIn,false);
+	this.addOption("Zoom out", this.optionZoomOut,false);
+	this.addOption("Reset zoom", this.optionResetZoom,true);
+};
+ViewMenu.prototype.optionZoomIn=function(){
+	GuiElements.zoomMultiple+=GuiElements.zoomAmount;
+	GuiElements.zoomMultiple=Math.min(GuiElements.zoomMultiple,GuiElements.maxZoomMult);
+	GuiElements.updateZoom();
+};
+ViewMenu.prototype.optionZoomOut=function(){
+	GuiElements.zoomMultiple-=GuiElements.zoomAmount;
+	GuiElements.zoomMultiple=Math.max(GuiElements.zoomMultiple,GuiElements.minZoomMult);
+	GuiElements.updateZoom();
+};
+ViewMenu.prototype.optionResetZoom=function(){
+	GuiElements.zoomMultiple=1;
+	GuiElements.updateZoom();
+};
+
+
+function DeviceMenu(button){
+	Menu.call(this,button,DeviceMenu.width);
+	this.addAlternateFn(function(){
+		ConnectMultipleDialog.showDialog();
+	});
+}
+DeviceMenu.prototype = Object.create(Menu.prototype);
+DeviceMenu.prototype.constructor = ViewMenu;
+DeviceMenu.setGraphics=function(){
+	DeviceMenu.width=150;
+	DeviceMenu.maxDeviceNameChars = 8;
+};
+DeviceMenu.prototype.loadOptions=function(){
+	let connectedClass = null;
+	Device.getTypeList().forEach(function(deviceClass){
+		if(deviceClass.getManager().getDeviceCount() > 0){
+			connectedClass = deviceClass;
+		}
+	});
+	if(connectedClass != null){
+		var currentDevice = connectedClass.getManager().getDevice(0);
+		this.addOption(currentDevice.name,function(){},false);
+		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+			connectedClass.getManager().removeAllDevices();
+		});
+	} else {
+		Device.getTypeList().forEach(function(deviceClass){
+			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+				(new DiscoverDialog(deviceClass)).show();
+			});
+		}, this);
+	}
+	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
+};
+DeviceMenu.prototype.previewOpen=function(){
+	let connectionCount = 0;
+	Device.getTypeList().forEach(function(deviceClass){
+		connectionCount += deviceClass.getManager().getDeviceCount();
+	});
+	return (connectionCount<=1);
+};
+function BlockContextMenu(block,x,y){
+	this.block=block;
+	this.x=x;
+	this.y=y;
+	this.showMenu();
+}
+BlockContextMenu.setGraphics=function(){
+	var BCM=BlockContextMenu;
+	BCM.bnMargin=Button.defaultMargin;
+	BCM.bgColor=Colors.black;
+	BCM.blockShift=20;
+};
+BlockContextMenu.prototype.showMenu=function(){
+	var BCM=BlockContextMenu;
+	this.group=GuiElements.create.group(0,0);
+	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.addOptions();
+	this.menuBnList.show();
+	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
+};
+BlockContextMenu.prototype.addOptions=function(){
+	if(this.block.stack.isDisplayStack){
+		if(this.block.blockTypeName=="B_Variable"){
+			var funcRen=function(){
+				funcRen.block.renameVar();
+				funcRen.BCM.close();
+			};
+			funcRen.block=this.block;
+			funcRen.BCM=this;
+			this.menuBnList.addOption("Rename", funcRen);
+			var funcDel=function(){
+				funcDel.block.deleteVar();
+				funcDel.BCM.close();
+			};
+			funcDel.block=this.block;
+			funcDel.BCM=this;
+			this.menuBnList.addOption("Delete", funcDel);
+		}
+		if(this.block.blockTypeName=="B_List"){
+			var funcRen=function(){
+				funcRen.block.renameLi();
+				funcRen.BCM.close();
+			};
+			funcRen.block=this.block;
+			funcRen.BCM=this;
+			this.menuBnList.addOption("Rename", funcRen);
+			var funcDel=function(){
+				funcDel.block.deleteLi();
+				funcDel.BCM.close();
+			};
+			funcDel.block=this.block;
+			funcDel.BCM=this;
+			this.menuBnList.addOption("Delete", funcDel);
+		}
+	}
+	else {
+		var BCM = this;
+		var funcDup = function () {
+			funcDup.BCM.duplicate();
+		};
+		funcDup.BCM = this;
+		this.menuBnList.addOption("Duplicate", funcDup);
+		this.menuBnList.addOption("Delete",function(){
+			BCM.block.unsnap().delete();
+			BCM.close();
+		})
+	}
+};
+BlockContextMenu.prototype.duplicate=function(){
+	var BCM=BlockContextMenu;
+	var newX=this.block.getAbsX()+BCM.blockShift;
+	var newY=this.block.getAbsY()+BCM.blockShift;
+	var blockCopy=this.block.duplicate(newX,newY);
+	var tab=this.block.stack.tab;
+	var copyStack=new BlockStack(blockCopy,tab);
+	//copyStack.updateDim();
+	this.close();
+};
+BlockContextMenu.prototype.close=function(){
+	this.block=null;
+	this.bubbleOverlay.hide();
+};
+// handles displaying numbers entered using the inputpad
+function DisplayNum(initialData){
+	this.isNegative=(initialData.getValue()<0);
+	var asStringData=initialData.asPositiveString();
+	var parts=asStringData.getValue().split(".");
+	this.integerPart=parts[0];
+	if(this.integerPart==""){
+		this.integerPart="0";
+	}
+	this.decimalPart="";
+	this.hasDecimalPoint=(parts.length>1);
+	if(this.hasDecimalPoint){
+		this.decimalPart=parts[1];
+	}
+}
+DisplayNum.prototype.backspace=function(){
+	if(this.hasDecimalPoint&&this.decimalPart!=""){
+		var newL=this.decimalPart.length-1;
+		this.decimalPart=this.decimalPart.substring(0,newL);
+	}
+	else if(this.hasDecimalPoint){
+		this.hasDecimalPoint=false;
+	}
+	else if(this.integerPart.length>1){
+		var newL=this.integerPart.length-1;
+		this.integerPart=this.integerPart.substring(0,newL);
+	}
+	else if(this.integerPart!="0"){
+		this.integerPart="0";
+	}
+	else if(this.isNegative){
+		this.isNegative=false;
+	}
+}
+DisplayNum.prototype.switchSign=function(){
+	this.isNegative=!this.isNegative;
+}
+DisplayNum.prototype.addDecimalPoint=function(){
+	if(!this.hasDecimalPoint){
+		this.hasDecimalPoint=true;
+		this.decimalPart="";
+	}
+}
+DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
+	if(this.hasDecimalPoint){
+		if(this.decimalPart.length<5){
+			this.decimalPart+=digit;
+		}
+	}
+	else if(this.integerPart!="0"){
+		if(this.integerPart.length<10){
+			this.integerPart+=digit;
+		}
+	}
+	else if(digit!="0"){
+		this.integerPart=digit;
+	}
+}
+DisplayNum.prototype.getString=function(){
+	var rVal="";
+	if(this.isNegative){
+		rVal+="-";
+	}
+	rVal+=this.integerPart;
+	if(this.hasDecimalPoint){
+		rVal+=".";
+		rVal+=this.decimalPart;
+	}
+	return rVal;
+}
+DisplayNum.prototype.getData=function(){
+	var rVal=parseInt(this.integerPart, 10);
+	if(this.hasDecimalPoint&&this.decimalPart.length>0){
+		var decPart=parseInt(this.decimalPart, 10);
+		decPart/=Math.pow(10,this.decimalPart.length);
+		rVal+=decPart;
+	}
+	if(this.isNegative){
+		rVal=0-rVal;
+	}
+	return new NumData(rVal);
+}
+function VectorIcon(x,y,pathId,color,height,parent){
+	this.x=x;
+	this.y=y;
+	this.color=color;
+	this.height=height;
+	this.pathId=pathId;
+	this.parent=parent;
+	this.pathE=null;
+	this.draw();
+}
+VectorIcon.computeWidth=function(pathId,height){
+	var scale=height/pathId.height;
+	return scale*pathId.width;
+}
+VectorIcon.prototype.draw=function(){
+	this.scale=this.height/this.pathId.height;
+	this.width=this.scale*this.pathId.width;
+	this.group=GuiElements.create.group(this.x,this.y,this.parent);
+	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
+	this.pathE=GuiElements.create.path(this.group);
+	this.pathE.setAttributeNS(null,"d",this.pathId.path);
+	this.pathE.setAttributeNS(null,"fill",this.color);
+	this.group.appendChild(this.pathE);
+}
+VectorIcon.prototype.setColor=function(color){
+	this.color=color;
+	this.pathE.setAttributeNS(null,"fill",this.color);
+}
+VectorIcon.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
+};
+/* Deletes the icon and removes the path from its parent group. */
+VectorIcon.prototype.remove=function(){
+	this.pathE.remove();
+};
+//Highlights where the current block will go
+function Highlighter(){
+	Highlighter.path=Highlighter.createPath();
+	Highlighter.visible=false;
+}
+Highlighter.createPath=function(){
+	var bG=BlockGraphics.highlight;
+	var path=document.createElementNS("http://www.w3.org/2000/svg", 'path');
+	path.setAttributeNS(null,"stroke",bG.strokeC);
+	path.setAttributeNS(null,"stroke-width",bG.strokeW);
+	path.setAttributeNS(null,"fill","none");
+	return path;
+}
+Highlighter.highlight=function(x,y,width,height,type,isSlot,isGlowing){
+	var myX = CodeManager.dragAbsToRelX(x);
+	var myY = CodeManager.dragAbsToRelX(y);
+	var pathD=BlockGraphics.buildPath.highlight(myX, myY, width,height,type,isSlot);
+	Highlighter.path.setAttributeNS(null,"d",pathD);
+	if(!Highlighter.visible){
+		GuiElements.layers.highlight.appendChild(Highlighter.path);
+		Highlighter.visible=true;
+	}
+	var bG=BlockGraphics.highlight;
+	if(isGlowing!=null&&isGlowing){
+		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeDarkC);
+	}
+	else{
+		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeC);
+	}
+};
+Highlighter.hide=function(){
+	if(Highlighter.visible){
+		Highlighter.path.remove();
+		Highlighter.visible=false;
+	}
+};
+function DisplayBox(){
+	var DB=DisplayBox;
+	DB.layer=GuiElements.layers.display;
+	DB.buildElements();
+	DB.visible=false;
+}
+DisplayBox.setGraphics=function(){
+	var DB=DisplayBox;
+	DB.bgColor=Colors.white;
+	DB.fontColor=Colors.black;
+	DB.fontSize=35;
+	DB.font="Arial";
+	DB.fontWeight="normal";
+	DB.charHeight=25;
+	DB.screenMargin=60;
+	DB.rectH=50;
+
+	DB.rectX=DB.screenMargin;
+	DB.rectY=GuiElements.height-DB.rectH-DB.screenMargin;
+	DB.rectW=GuiElements.width-2*DB.screenMargin;
+};
+DisplayBox.buildElements=function(){
+	var DB=DisplayBox;
+	DB.rectE=GuiElements.draw.rect(DB.rectX,DB.rectY,DB.rectW,DB.rectH,DB.bgColor);
+	DB.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
+	TouchReceiver.addListenersDisplayBox(DB.rectE);
+	TouchReceiver.addListenersDisplayBox(DB.textE);
+};
+DisplayBox.updateZoom=function(){
+	var DB=DisplayBox;
+	DB.setGraphics();
+	var textW=GuiElements.measure.textWidth(DB.textE);
+	var textX=DB.rectX+DB.rectW/2-textW/2;
+	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
+	GuiElements.move.text(DB.textE,textX,textY);
+	GuiElements.update.rect(DB.rectE,DB.rectX,DB.rectY,DB.rectW,DB.rectH);
+};
+DisplayBox.displayText=function(text){
+	var DB=DisplayBox;
+	GuiElements.update.textLimitWidth(DB.textE,text,DB.rectW);
+	var textW=GuiElements.measure.textWidth(DB.textE);
+	var textX=DB.rectX+DB.rectW/2-textW/2;
+	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
+	GuiElements.move.text(DB.textE,textX,textY);
+	DB.show();
+};
+DisplayBox.show=function(){
+	var DB=DisplayBox;
+	if(!DB.visible){
+		DB.layer.appendChild(DB.rectE);
+		DB.layer.appendChild(DB.textE);
+		DB.visible=true;
+	}
+};
+DisplayBox.hide=function(){
+	var DB=DisplayBox;
+	if(DB.visible){
+		DB.textE.remove();
+		DB.rectE.remove();
+		DB.visible=false;
+	}
+};
+
+
+
+/* CodeManager is a static class that controls block execution.
+ * It also moves the BlockStack that the user is dragging.
+ */
+function CodeManager(){
+	var move=CodeManager.move; //shorthand
+	move.moving=false; //Is there a BlockStack that is currently moving?
+	move.stack=null; //Reference to BlockStack that is currently moving.
+	move.offsetX=0; //The difference between the BlockStack's x and the touch x.
+	move.offsetY=0; //The difference between the BlockStack's y and the touch y.
+	move.touchX=0; //The x coord of the user's finger.
+	move.touchY=0; //The y coord of the user's finger.
+	move.topX=0; //The top-left corner's x coord of the BlockStack being moved.
+	move.topY=0; //The top-left corner's y-coord of the BlockStack being moved.
+	move.bottomX=0; //The bottom-right corner
+	move.bottomY=0;
+	move.showTrash = false; //The trash can only shows if the blocks originated from the tabSpace
+	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
+	move.returnType;
+
+	CodeManager.variableList=new Array();
+	CodeManager.listList=new Array();
+	CodeManager.broadcastList=new Array(); //A list of broadcast messages in use.
+	CodeManager.isRunning=false; //Are at least some Blocks currently executing?
+	//Stores information used when determine which slot is closest to the moving stack.
+	CodeManager.fit=function(){};
+	CodeManager.updateTimer=null; //A timer which tells executing Blocks to update.
+	CodeManager.updateInterval=10; //How quickly does the update timer fire (in ms)?
+	//Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
+	CodeManager.answer=new StringData("");
+	CodeManager.message=new StringData(""); //Stores the broadcast message.
+	CodeManager.sound=function(){};
+	CodeManager.sound.tempo=60; //Default tempo is 60 bpm for sound blocks.
+	CodeManager.sound.volume=50; //Default volume if 50%.
+	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
+	CodeManager.repeatDialogDelay=500;
+	CodeManager.lastDialogDisplayTime=null;
+	CodeManager.repeatHBOutDelay=67;
+	CodeManager.reservedStackHBoutput=null;
+	CodeManager.lastHBOutputSendTime=null;
+	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+}
+/* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
+ * These functions are called by the TouchReciever class when the user drags a BlockStack.
+ */
+CodeManager.move=function(){};
+/* Picks up a Block so that it can be moved.  Stores necessary information in CodeManager.move.
+ * Transfers the BlockStack into the drag layer above other blocks.
+ * @param {Block} block - The block the user dragged.
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+CodeManager.move.start=function(block,x,y){
+	var move=CodeManager.move; //shorthand
+	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
+		Overlay.closeOverlays(); //Close any visible overlays.
+		move.moving=true; //Record that a Block is now moving.
+		/* Disconnect the Block from its current BlockStack to form a new BlockStack
+		containing only the Block and the Blocks below it. */
+		var stack=block.unsnap();
+		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
+		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
+		move.bottomY=stack.relToAbsY(stack.dim.rh);
+		move.returnType=stack.returnType; //Store the BlockStack's return type.
+		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
+
+		//Store other information about how the BlockStack can connect to other Blocks.
+		move.bottomOpen=stack.getLastBlock().bottomOpen;
+		move.topOpen=stack.firstBlock.topOpen;
+		move.returnsValue=stack.firstBlock.returnsValue;
+		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
+		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
+
+		move.touchX=x; //Store coords
+		move.touchY=y;
+		move.offsetX=stack.getAbsX()-x; //Store offset.
+		move.offsetY=stack.getAbsY()-y;
+		move.stack=stack; //Store stack.
+	}
+}
+/* Updates the position of the currently moving BlockStack.
+ * Also highlights the slot that fits it best (if any).
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+CodeManager.move.update=function(x,y){
+	var move=CodeManager.move; //shorthand
+	if(move.moving){ //Only update if a BlockStack is currently moving.
+		move.touchX = x;
+		move.touchY = y;
+		move.topX = move.offsetX+x;
+		move.topY = move.offsetY+y;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
+		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
+		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
+		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+			Highlighter.hide(); //Hide any existing highlight.
+			if(move.showTrash) {
+				BlockPalette.ShowTrash();
+			}
+		} else {
+			BlockPalette.HideTrash();
+			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+			CodeManager.findBestFit();
+			if(CodeManager.fit.found){
+				CodeManager.fit.bestFit.highlight(); //If such a slot exists, highlight it.
+			}
+			else{
+				Highlighter.hide(); //If not, hide any existing highlight.
+			}
+		}
+	}
+};
+/* Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
+ */
+CodeManager.move.end=function(){
+	var move=CodeManager.move; //shorthand
+	var fit=CodeManager.fit; //shorthand
+	if(move.moving){ //Only run if a BlockStack is currently moving.
+		move.topX = move.offsetX+move.touchX;
+		move.topY = move.offsetY+move.touchY;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
+		//If the BlockStack overlaps with the BlockPalette, delete it.
+		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
+			move.stack.delete();
+			if(move.showTrash) {
+				SaveManager.markEdited();
+			}
+		} else {
+			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+			CodeManager.findBestFit();
+			if(fit.found){
+				//Snap is onto the Block/Slot that fits it best.
+				fit.bestFit.snap(move.stack.firstBlock);
+
+				let snapSoundRequest = new HttpRequestBuilder("sound/play");
+				snapSoundRequest.addParam("type", Sound.type.ui);
+				snapSoundRequest.addParam("filename", Sound.click);
+				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+			}
+			else{
+				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
+				move.stack.land();
+				move.stack.updateDim(); //Fix! this line of code might not be needed.
+			}
+			SaveManager.markEdited();
+		}
+		Highlighter.hide(); //Hide any existing highlight.
+		move.moving=false; //There are now no moving BlockStacks.
+		BlockPalette.HideTrash();
+	}
+};
+/* Drops the BlockStack where it is without attaching it to anything or deleting it.
+ */
+CodeManager.move.interrupt=function(){
+	var move=CodeManager.move; //shorthand
+	if(move.moving) { //Only run if a BlockStack is currently moving.
+		move.topX = move.offsetX + move.touchX;
+		move.topY = move.offsetY + move.touchY;
+		move.stack.land();
+		move.stack.updateDim(); //Fix! this line of code might not be needed.
+		Highlighter.hide(); //Hide any existing highlight.
+		move.moving = false; //There are now no moving BlockStacks.
+	}
+}
+/* Returns a boolean indicating if a point falls within a rectangular region.
+ * Useful for determining which Blocks a moving BlockStack can connect to.
+ * @param {number} x1 - The x coord of the point.
+ * @param {number} y1 - The y coord of the point.
+ * @param {number} yR - The x coord of the top-left corner of the region.
+ * @param {number} yY - The y coord of the top-left corner of the region.
+ * @param {number} width - The width of the region.
+ * @param {number} height - The height of the region.
+ * @return {boolean} - Is the point within the region?
+ */
+CodeManager.move.pInRange=function(x1,y1,xR,yR,width,height){
+	//Checks to see if the point is on the correct side of all four sides of the rectangular region.
+	return (x1>=xR && x1<=xR+width && y1>=yR && y1<=yR+height);
+}
+/* Returns a boolean indicating if two rectangular regions overlap.
+ * Useful for determining which Slots a moving BlockStack can connect to.
+ * @param {number} x1 - The x coord of the top-left corner of the first region.
+ * @param {number} y1 - The y coord of the top-left corner of the first region.
+ * @param {number} width1 - The width of the first region.
+ * @param {number} height1 - The height of the first region.
+ * @param {number} x2 - The x coord of the top-left corner of the second region.
+ * @param {number} y2 - The y coord of the top-left corner of the second region.
+ * @param {number} width2 - The width of the second region.
+ * @param {number} height2 - The height of the second region.
+ * @return {boolean} - Do the rectangular regions overlap?
+ */
+CodeManager.move.rInRange=function(x1,y1,width1,height1,x2,y2,width2,height2){
+	//These conditions check that there are no vertical or horizontal gaps between the regions.
+	//Is the right side of region 1 to the right of the left side of region 2?
+	var xBigEnough = x1+width1>=x2;
+	//Is the bottom side of region 1 below the top side of region 2?
+	var yBigEnough = y1+height1>=y2;
+	//Is the left side of region 1 to the left of the right side of region 2?
+	var xSmallEnough = x1<=x2+width2;
+	//Is the top side of region 1 above the bottom side of region 2?
+	var ySmallEnough = y1<=y2+height2;
+	//If it passes all 4 checks, the regions overlap.
+	return xBigEnough&&yBigEnough&&xSmallEnough&&ySmallEnough;
+}
+/* Recursively searches for the Block/Slot that best fits the moving BlockStack.
+ * All results are stored in CodeManager.fit.  Nothing is returned.
+ */
+CodeManager.findBestFit=function(){
+	var fit=CodeManager.fit; //shorthand
+	fit.found=false; //Have any matching slot/block been found?
+	fit.bestFit=null; //Slot/Block that is closest to the item?
+	fit.dist=0; //How far is the best candidate from the ideal location?
+	TabManager.activeTab.findBestFit(); //Begins the recursive calls.
+}
+/* Recursively updates any Blocks that are currently executing.
+ * Stops the update timer if all Blocks are finished.
+ */
+CodeManager.updateRun=function(){
+	var CM=CodeManager;
+	var startingReservation=CM.reservedStackHBoutput;
+	if(!TabManager.updateRun().isRunning()){ //A recursive call.  Returns true if any Blocks are running.
+		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
+	}
+	var now=new Date().getTime();
+	var timeExpired=now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime;
+	if(CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput==startingReservation&&timeExpired) {
+		CM.reservedStackHBoutput = null;
+	}
+};
+/* Recursively stops all Block execution.
+ */
+CodeManager.stop=function(){
+	Device.stopAll(); //Stop any motors and LEDs on the devices
+	TabManager.stop(); //Recursive call.
+	CodeManager.stopUpdateTimer(); //Stop the update timer.
+	DisplayBox.hide(); //Hide any messages being displayed.
+	Sound.stopAllSounds() // Stops all sounds and tones
+	                       // Note: Tones are not allowed to be async, so they
+	                       // must be stopped manually
+}
+/* Stops the update timer.
+ */
+CodeManager.stopUpdateTimer=function(){
+	if(CodeManager.isRunning){ //If the timer is currently running...
+		//...Stop the timer.
+		CodeManager.updateTimer = window.clearInterval(CodeManager.updateTimer);
+		CodeManager.isRunning=false;
+	}
+}
+/* Starts the update timer.  When it fires, the timer will call the CodeManager.updateRun function.
+ */
+CodeManager.startUpdateTimer=function(){
+	if(!CodeManager.isRunning){ //If the timer is not running...
+		//...Start the timer.
+		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
+		CodeManager.isRunning=true;
+	}
+}
+/* Recursively passes on the message that the flag button was tapped.
+ * @fix method name.
+ */
+CodeManager.eventFlagClicked=function(){
+	TabManager.eventFlagClicked();
+}
+/**/
+CodeManager.checkDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+CodeManager.updateDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	CM.lastDialogDisplayTime=now;
+};
+CodeManager.checkHBOutputDelay=function(stack){
+	return true;
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
+	if(CM.lastHBOutputSendTime==null||(now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime&&!stackReserved)){
+		if(CM.reservedStackHBoutput==stack){
+			CM.reservedStackHBoutput=null;
+		}
+		return true;
+	}
+	else{
+		if(CM.reservedStackHBoutput==null){
+			CM.reservedStackHBoutput=stack;
+		}
+		return false;
+	}
+};
+CodeManager.updateHBOutputDelay=function(){
+	CodeManager.lastHBOutputSendTime=new Date().getTime();
+};
+/* @fix Write documentation.
+ */
+CodeManager.addVariable=function(variable){
+	CodeManager.variableList.push(variable);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeVariable=function(variable){
+	var index=CodeManager.variableList.indexOf(variable);
+	CodeManager.variableList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newVariable=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&CodeManager.checkVarName(result)) {
+			result=result.trim();
+			new Variable(result);
+			SaveManager.markEdited();
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+};
+CodeManager.checkVarName=function(name){
+	name=name.trim();
+	if(name.length>0){
+		var variables=CodeManager.variableList;
+		for(var i=0;i<variables.length;i++){
+			if(variables[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+};
+CodeManager.findVar=function(name){
+	var variables=CodeManager.variableList;
+	for(var i=0;i<variables.length;i++){
+		if(variables[i].getName()==name){
+			return variables[i];
+		}
+	}
+	return null;
+};
+/* @fix Write documentation.
+ */
+CodeManager.addList=function(list){
+	CodeManager.listList.push(list);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeList=function(list){
+	var index=CodeManager.listList.indexOf(list);
+	CodeManager.listList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newList=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&CodeManager.checkListName(result)) {
+			result=result.trim();
+			new List(result);
+			SaveManager.markEdited();
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkListName=function(name){
+	name=name.trim();
+	if(name.length>0){
+		var lists=CodeManager.listList;
+		for(var i=0;i<lists.length;i++){
+			if(lists[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+};
+CodeManager.findList=function(name){
+	var lists=CodeManager.listList;
+	for(var i=0;i<lists.length;i++){
+		if(lists[i].getName()==name){
+			return lists[i];
+		}
+	}
+	return null;
+};
+/* @fix Write documentation.
+ */
+CodeManager.newBroadcastMessage=function(slot){
+	slot.deselect();
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&result.length>0){
+			result=result.trim();
+			CodeManager.addBroadcastMessage(result);
+			slot.setSelectionData('"'+result+'"',new StringData(result));
+		}
+	};
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastMessage=function(message){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(messages[i]==message){
+			return false;
+		}
+	}
+	return true;
+};
+/* @fix Write documentation.
+ */
+CodeManager.addBroadcastMessage=function(message){
+	if(CodeManager.checkBroadcastMessage(message)){
+		CodeManager.broadcastList.push(message);
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeUnusedMessages=function(){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
+			messages.splice(i,1);
+		}
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.updateAvailableMessages=function(){
+	CodeManager.broadcastList=new Array();
+	TabManager.updateAvailableMessages();
+};
+/* @fix Write documentation.
+ */
+CodeManager.eventBroadcast=function(message){
+	TabManager.eventBroadcast(message);
+};
+CodeManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.hideDeviceDropDowns(deviceClass);
+	BlockPalette.hideDeviceDropDowns(deviceClass);
+};
+CodeManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.showDeviceDropDowns(deviceClass);
+	BlockPalette.showDeviceDropDowns(deviceClass);
+};
+CodeManager.countDevicesInUse=function(deviceClass){
+	return TabManager.countDevicesInUse(deviceClass);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastRunning=function(message){
+	return TabManager.checkBroadcastRunning(message);
+};
+
+CodeManager.createXml=function(){
+	var CM=CodeManager;
+	var xmlDoc = XmlWriter.newDoc("project");
+	var project=xmlDoc.getElementsByTagName("project")[0];
+	var fileName="project";
+	if(SaveManager.named){
+		fileName=SaveManager.fileName;
+	}
+	XmlWriter.setAttribute(project,"name",fileName);
+	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
+	XmlWriter.setAttribute(project,"created",new Date().getTime());
+	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	var variables=XmlWriter.createElement(xmlDoc,"variables");
+	for(var i=0;i<CM.variableList.length;i++){
+		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
+	}
+	project.appendChild(variables);
+	var lists=XmlWriter.createElement(xmlDoc,"lists");
+	for(i=0;i<CM.listList.length;i++){
+		lists.appendChild(CM.listList[i].createXml(xmlDoc));
+	}
+	project.appendChild(lists);
+	project.appendChild(TabManager.createXml(xmlDoc));
+	return xmlDoc;
+};
+CodeManager.importXml=function(projectNode){
+	CodeManager.deleteAll();
+	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
+	if(variablesNode!=null) {
+		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
+		for (var i = 0; i < variableNodes.length; i++) {
+			Variable.importXml(variableNodes[i]);
+		}
+	}
+	var listsNode=XmlWriter.findSubElement(projectNode,"lists");
+	if(listsNode!=null) {
+		var listNodes = XmlWriter.findSubElements(listsNode, "list");
+		for (i = 0; i < listNodes.length; i++) {
+			List.importXml(listNodes[i]);
+		}
+	}
+	BlockPalette.getCategory("variables").refreshGroup();
+	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
+	TabManager.importXml(tabsNode);
+	DeviceManager.updateSelectableDevices();
+};
+CodeManager.deleteAll=function(){
+	var CM=CodeManager;
+	CM.stop();
+	TabManager.deleteAll();
+	CodeManager();
+};
+CodeManager.renameVariable=function(variable){
+	TabManager.renameVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteVariable=function(variable){
+	TabManager.deleteVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.renameList=function(list){
+	TabManager.renameList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteList=function(list){
+	TabManager.deleteList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.checkVariableUsed=function(variable){
+	return TabManager.checkVariableUsed(variable);
+};
+CodeManager.checkListUsed=function(list){
+	return TabManager.checkListUsed(list);
+};
+CodeManager.beatsToMs=function(beats){
+	var tempo=CodeManager.sound.tempo;
+	var res=beats/tempo*60*1000;
+	if(isNaN(res)||!isFinite(res)){
+		return 0;
+	}
+	return res;
+};
+CodeManager.setSoundTempo=function(newTempo){
+	if(isFinite(newTempo)&&!isNaN(newTempo)){
+		if(newTempo<=20){
+			CodeManager.sound.tempo=20;
+		}
+		else{
+			CodeManager.sound.tempo=newTempo;
+		}
+	}
+};
+CodeManager.dragAbsToRelX=function(x){
+	return x / TabManager.getActiveZoom();
+};
+CodeManager.dragAbsToRelY=function(y){
+	return y / TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsX=function(x){
+	return x * TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsY=function(y){
+	return y * TabManager.getActiveZoom();
+};
+function TabManager(){
+	var TM=TabManager;
+	TM.tabList=new Array();
+	TM.activeTab=null;
+	TM.createInitialTab();
+	TabManager.createTabSpaceBg();
+	TM.isRunning=false;
+	TM.scrolling=false;
+	TM.zooming = false;
+}
+TabManager.setGraphics=function(){
+	var TM=TabManager;
+	TM.bg=Colors.black;
+
+	TM.minZoom = 0.35;
+	TM.maxZoom = 3;
+
+	TM.tabAreaX=BlockPalette.width;
+	if(GuiElements.smallMode){
+		TM.tabAreaX=0;
+	}
+	TM.tabAreaY=TitleBar.height;
+	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
+
+	/* No longer different from tabArea since tab bar was removed */
+	TM.tabSpaceX=TM.tabAreaX;
+	TM.tabSpaceY=TitleBar.height;
+	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
+	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
+	TM.spaceScrollMargin=50;
+};
+TabManager.createTabSpaceBg=function(){
+	var TM=TabManager;
+	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
+	TouchReceiver.addListenersTabSpace(TM.bgRect);
+	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
+};
+TabManager.updatePositions=function(){
+	/* This might not be needed now that tabs aren't visible */
+};
+TabManager.addTab=function(tab){
+	TabManager.tabList.push(tab);
+};
+TabManager.removeTab=function(tab){
+	var index=TabManager.tabList.indexOf(tab);
+	TabManager.stackList.splice(index,1);
+};
+TabManager.createInitialTab=function(){
+	var TM=TabManager;
+	var t=new Tab();
+	TM.activateTab(TM.tabList[0]);
+	TM.updatePositions();
+};
+TabManager.activateTab=function(tab){
+	if(TabManager.activeTab!=null){
+		TabManager.activeTab.deactivate();
+	}
+	tab.activate();
+	TabManager.activeTab=tab;
+};
+TabManager.eventFlagClicked=function(){
+	TabManager.passRecursively("eventFlagClicked");
+};
+TabManager.eventBroadcast=function(message){
+	TabManager.passRecursively("eventBroadcast",message);
+};
+TabManager.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		for(var i=0;i<TabManager.tabList.length;i++){
+			if(TabManager.tabList[i].checkBroadcastRunning(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+TabManager.checkBroadcastMessageAvailable=function(message){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.updateAvailableMessages=function(){
+	TabManager.passRecursively("updateAvailableMessages");
+};
+/**
+ * @returns {ExecutionStatus}
+ */
+TabManager.updateRun=function(){
+	if(!this.isRunning){
+		return false;
+	}
+	var rVal=false;
+	for(var i=0;i<TabManager.tabList.length;i++){
+		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
+	}
+	this.isRunning=rVal;
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusDone();
+	}
+};
+TabManager.stop=function(){
+	TabManager.passRecursively("stop");
+	this.isRunning=false;
+}
+TabManager.stopAllButStack=function(stack){
+	TabManager.passRecursively("stopAllButStack",stack);
+};
+TabManager.startRun=function(){
+	TabManager.isRunning=true;
+	CodeManager.startUpdateTimer();
+}
+TabManager.startScroll=function(x,y){
+	var TM=TabManager;
+	if(!TM.scrolling){
+		TM.scrolling=true;
+		TM.activeTab.startScroll(x,y);
+	}
+};
+TabManager.updateScroll=function (x,y){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.activeTab.updateScroll(x,y);
+	}
+};
+TabManager.endScroll=function(){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.scrolling=false;
+		TM.activeTab.endScroll();
+	}
+};
+TabManager.startZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(!TM.zooming){
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.updateZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.endZooming = function(){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.zooming = false;
+		TM.activeTab.endZooming();
+	}
+};
+TabManager.createXml=function(xmlDoc){
+	var TM=TabManager;
+	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
+	//XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
+	for(var i=0;i<TM.tabList.length;i++){
+		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
+	}
+	return tabs;
+};
+TabManager.importXml=function(tabsNode){
+	var TM=TabManager;
+	if(tabsNode!=null) {
+		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		//var active = XmlWriter.getAttribute(tabsNode, "active");
+		for (var i = 0; i < tabNodes.length; i++) {
+			Tab.importXml(tabNodes[i]);
+		}
+	}
+	TM.updatePositions();
+	if(TM.tabList.length==0){
+		TM.createInitialTab();
+	}
+	else{
+		TM.activateTab(TM.tabList[0]);
+	}
+};
+TabManager.deleteAll=function(){
+	var TM=TabManager;
+	for(var i=0;i<TM.tabList.length;i++){
+		TM.tabList[i].delete();
+	}
+	TM.tabList=new Array();
+	TM.activeTab=null;
+	TM.isRunning=false;
+	TM.scrolling=false;
+};
+TabManager.renameVariable=function(variable){
+	TabManager.passRecursively("renameVariable",variable);
+};
+TabManager.deleteVariable=function(variable){
+	TabManager.passRecursively("deleteVariable",variable);
+};
+TabManager.renameList=function(list){
+	TabManager.passRecursively("renameList",list);
+};
+TabManager.deleteList=function(list){
+	TabManager.passRecursively("deleteList",list);
+};
+TabManager.checkVariableUsed=function(variable){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.checkListUsed=function(list){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+TabManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
+};
+TabManager.countDevicesInUse=function(deviceClass){
+	var largest=1;
+	for(var i=0;i<TabManager.tabList.length;i++){
+		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+TabManager.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	for(var i=0;i<TabManager.tabList.length;i++){
+		var currentList=TabManager.tabList[i];
+		currentList[functionName].apply(currentList,args);
+	}
+};
+TabManager.updateZoom=function(){
+	var TM=TabManager;
+	TM.setGraphics();
+	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
+};
+TabManager.getActiveZoom = function(){
+	if(TabManager.activateTab == null){
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
+};
+function Tab(){
+	this.mainG=GuiElements.create.group(0,0);
+	this.scrollX=0;
+	this.scrollY=0;
+	this.zoomFactor = 1;
+	this.visible=false;
+	TabManager.addTab(this);
+	this.stackList=new Array();
+	this.isRunning=false;
+	this.scrolling=false;
+	this.zooming = false;
+	this.scrollXOffset=50;
+	this.scrollYOffset=100;
+	this.zoomStartDist=null;
+	this.startZoom = null;
+	this.updateTransform();
+	this.overFlowArr = new OverflowArrows();
+	this.dim={};
+	this.dim.x1=0;
+	this.dim.y1=0;
+	this.dim.x2=0;
+	this.dim.y2=0;
+}
+Tab.prototype.activate=function(){
+	GuiElements.layers.activeTab.appendChild(this.mainG);
+	this.overFlowArr.show();
+};
+Tab.prototype.addStack=function(stack){
+	this.stackList.push(stack);
+};
+Tab.prototype.removeStack=function(stack){
+	var index=this.stackList.indexOf(stack);
+	this.stackList.splice(index,1);
+};
+Tab.prototype.getSprite=function(){
+	return this.sprite;
+}
+Tab.prototype.relToAbsX=function(x){
+	return x * this.zoomFactor + this.scrollX;
+};
+Tab.prototype.relToAbsY=function(y){
+	return y * this.zoomFactor + this.scrollY;
+};
+Tab.prototype.absToRelX=function(x){
+	return (x - this.scrollX) / this.zoomFactor;
+};
+Tab.prototype.absToRelY=function(y){
+	return (y - this.scrollY) / this.zoomFactor;
+};
+Tab.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+Tab.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+Tab.prototype.findBestFit=function(){
+	this.passRecursively("findBestFit");
+};
+Tab.prototype.eventFlagClicked=function(){
+	this.passRecursively("eventFlagClicked");
+};
+Tab.prototype.eventBroadcast=function(message){
+	this.passRecursively("eventBroadcast",message);
+};
+Tab.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		var stacks=this.stackList;
+		for(var i=0;i<stacks.length;i++){
+			if(stacks[i].checkBroadcastRunning(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+Tab.prototype.checkBroadcastMessageAvailable=function(message){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.updateAvailableMessages=function(){
+	this.passRecursively("updateAvailableMessages");
+};
+/**
+ * @returns {ExecutionStatus}
+ */
+Tab.prototype.updateRun=function(){
+	if(!this.isRunning){
+		return false;
+	}
+	var stacks=this.stackList;
+	var rVal=false;
+	for(var i=0;i<stacks.length;i++){
+		rVal = stacks[i].updateRun().isRunning() || rVal;
+	}
+	this.isRunning=rVal;
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+Tab.prototype.stop=function(){
+	this.passRecursively("stop");
+	this.isRunning=false;
+}
+Tab.prototype.stopAllButStack=function(stack){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i]!=stack) {
+			stacks[i].stop();
+		}
+	}
+};
+Tab.prototype.startRun=function(){
+	this.isRunning=true;
+	TabManager.startRun();
+}
+Tab.prototype.startScroll=function(x,y){
+	if(!this.scrolling) {
+		this.scrolling = true;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		this.updateTabDim();
+	}
+};
+Tab.prototype.updateScroll=function(x,y){
+	if(this.scrolling) {
+		this.scrollX=this.scrollXOffset + x;
+		this.scrollY=this.scrollYOffset + y;
+		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+		this.updateArrowsShift();
+		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
+	}
+};
+Tab.prototype.scroll=function(x,y) {
+	/*
+	this.scrollX=x;
+	this.scrollY=y;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	var dim=this.dim;
+	var x1=x+dim.xDiff;
+	var y1=y+dim.yDiff;
+
+	var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
+	var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
+	this.scrollX=newObjX-dim.xDiff;
+	this.scrollY=newObjY-dim.yDiff;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	*/
+};
+Tab.prototype.endScroll=function(){
+	this.scrolling = false;
+};
+Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
+	// var minX;
+	// var maxX;
+	// if(objectW<containerW){
+	// 	if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
+	// 		return objectX;
+	// 	}
+	// 	minX=Math.min(containerX,objectX);
+	// 	maxX=Math.max(containerX+containerW-objectW,objectX);
+	// }
+	// else{
+	// 	minX=Math.min(containerX+containerW-objectW,objectX);
+	// 	maxX=Math.max(containerX,objectX);
+	// }
+	// var rVal=targetX;
+	// rVal=Math.min(rVal,maxX);
+	// rVal=Math.max(rVal,minX);
+	// return rVal;
+};
+Tab.prototype.startZooming = function(x1, y1, x2, y2){
+	if(!this.zooming) {
+		this.zooming = true;
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.startZoom = this.zoomFactor;
+		this.updateTabDim();
+	}
+};
+Tab.prototype.updateZooming = function(x1, y1, x2, y2){
+	if(this.zooming){
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
+		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+		var zoomRatio = this.zoomFactor / this.startZoom;
+		this.scrollX=this.scrollXOffset * zoomRatio + x;
+		this.scrollY=this.scrollYOffset * zoomRatio + y;
+		this.updateTransform();
+		this.updateArrowsShift();
+	}
+};
+Tab.prototype.updateTransform=function(){
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
+};
+Tab.prototype.endZooming = function(){
+	this.zooming = false;
+};
+Tab.prototype.updateTabDim=function(){
+	var dim=this.dim;
+	dim.width=0;
+	dim.height=0;
+	dim.x1=null;
+	dim.y1=null;
+	dim.x2=null;
+	dim.y2=null;
+	this.passRecursively("updateTabDim");
+	if(dim.x1==null){
+		dim.x1=0;
+		dim.y1=0;
+		dim.x2=0;
+		dim.y2=0;
+	}
+};
+Tab.prototype.createXml=function(xmlDoc){
+	var tab=XmlWriter.createElement(xmlDoc,"tab");
+	//XmlWriter.setAttribute(tab,"name",this.name);
+	XmlWriter.setAttribute(tab,"x",this.scrollX);
+	XmlWriter.setAttribute(tab,"y",this.scrollY);
+	XmlWriter.setAttribute(tab,"zoom",this.zoomFactor);
+	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
+	for(var i=0;i<this.stackList.length;i++){
+		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
+	}
+	tab.appendChild(stacks);
+	return tab;
+};
+Tab.importXml=function(tabNode){
+	//var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
+	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
+	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
+	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	var tab=new Tab();
+	tab.scrollX=x;
+	tab.scrollY=y;
+	tab.zoomFactor = zoom;
+	tab.updateTransform();
+	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
+	if(stacksNode!=null){
+		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
+		for(var i=0;i<stackNodes.length;i++){
+			BlockStack.importXml(stackNodes[i],tab);
+		}
+	}
+	tab.updateArrows();
+	return tab;
+};
+Tab.prototype.delete=function(){
+	this.passRecursively("delete");
+	this.mainG.remove();
+};
+Tab.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Tab.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Tab.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Tab.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Tab.prototype.checkVariableUsed=function(variable){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.checkListUsed=function(list){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Tab.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+Tab.prototype.countDevicesInUse=function(deviceClass){
+	var largest=1;
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+Tab.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		var currentStack=stacks[i];
+		var currentL=stacks.length;
+		currentStack[functionName].apply(currentStack,args);
+		if(currentL!=stacks.length){
+			i--;
+		}
+	}
+};
+Tab.prototype.getZoom=function(){
+	return this.zoomFactor;
+};
+Tab.prototype.updateZoom=function(){
+	this.overFlowArr.updateZoom();
+	this.updateArrows();
+};
+Tab.prototype.updateArrows=function(){
+	this.updateTabDim();
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+Tab.prototype.updateArrowsShift=function(){
+	var x1 = this.relToAbsX(this.dim.x1)
+	var y1 = this.relToAbsY(this.dim.y1)
+	var x2 = this.relToAbsX(this.dim.x2)
+	var y2 = this.relToAbsY(this.dim.y2)
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function RecordingManager(){
+	let RM = RecordingManager;
+	RM.recordingStates = {};
+	RM.recordingStates.stopped = 0;
+	RM.recordingStates.recording = 1;
+	RM.recordingStates.paused = 2;
+	RM.state = RM.recordingStates.stopped;
+	RM.updateTimer = null;
+	RM.updateInterval = 200;
+	RM.startTime = null;
+	RM.pausedTime = 0;
+	RM.awaitingPermission = false;
+}
+RecordingManager.userRenameFile = function(oldFilename, nextAction){
+	SaveManager.userRenameFile(true, oldFilename, nextAction);
+};
+RecordingManager.userDeleteFile=function(filename, nextAction){
+	SaveManager.userDeleteFile(true, filename, nextAction);
+};
+RecordingManager.startRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/start");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		if(result == "Started"){
+			RM.setState(RM.recordingStates.recording);
+			RecordingDialog.startedRecording();
+		} else if(result == "Permission denied"){
+			let message = "Please grant recording permissions to the BirdBlox app in settings";
+			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
+		} else if(result == "Requesting permission") {
+			RM.awaitingPermission = true;
+		}
+	});
+};
+RecordingManager.stopRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/stop");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+};
+RecordingManager.interruptRecording = function(){
+	let RM = RecordingManager;
+	RM.setState(RM.recordingStates.stopped);
+	RecordingDialog.stoppedRecording();
+};
+RecordingManager.pauseRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/pause");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let pauseRec = function(){
+		RM.setState(RM.recordingStates.paused);
+		RecordingDialog.pausedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
+};
+RecordingManager.discardRecording = function(){
+	let RM = RecordingManager;
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let message = "Are you sure you would like to delete the current recording?";
+	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
+		if(result == "2") {
+			let request = new HttpRequestBuilder("sound/recording/discard");
+			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+		}
+	}, stopRec);
+};
+RecordingManager.resumeRecording = function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/unpause");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let resumeRec = function(){
+		RM.setState(RM.recordingStates.recording);
+		RecordingDialog.startedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
+};
+RecordingManager.listRecordings = function(callbackFn){
+	Sound.loadSounds(true, callbackFn);
+};
+RecordingManager.setState = function(state){
+	let RM = RecordingManager;
+	let prevState = RM.state;
+	RM.state = state;
+	let states = RM.recordingStates;
+
+
+
+	if(state === states.recording){
+		if(RM.updateTimer == null){
+			if(prevState === states.stopped) RM.pausedTime = 0;
+			RM.startTime = new Date().getTime();
+			RM.updateTimer = self.setInterval(RM.updateCounter, RM.updateInterval);
+		}
+	}
+	else if(state === states.paused) {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+			RM.pausedTime = RM.getElapsedTime();
+		}
+	}
+	else {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+		}
+	}
+};
+RecordingManager.updateCounter = function(){
+	let RM = RecordingManager;
+	RecordingDialog.updateCounter(RM.getElapsedTime());
+};
+RecordingManager.getElapsedTime = function(){
+	let RM = RecordingManager;
+	return new Date().getTime() - RM.startTime + RM.pausedTime;
+};
+RecordingManager.permissionGranted = function(){
+	let RM = RecordingManager;
+	if(RM.awaitingPermission){
+		RM.awaitingPermission = false;
+		if(RecordingDialog.currentDialog != null){
+			RM.startRecording();
+		}
+	}
+};
+/**
+ * Created by Tom on 6/13/2017.
+ */
+
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar){
+	if(extendTitleBar == null){
+		extendTitleBar = 0;
+	}
+	this.autoHeight = autoHeight;
+	this.title = title;
+	this.rowCount = rowCount;
+	this.centeredButtons = [];
+	this.extraTopSpace = extraTop;
+	this.extraBottomSpace = extraBottom;
+	this.extendTitleBar = extendTitleBar;
+	this.visible = false;
+	this.hintText = "";
+}
+RowDialog.setConstants=function(){
+	RowDialog.currentDialog=null;
+
+	RowDialog.titleBarColor=Colors.lightGray;
+	RowDialog.titleBarFontC=Colors.white;
+	RowDialog.bgColor=Colors.black;
+	RowDialog.titleBarH=30;
+	RowDialog.centeredBnWidth=100;
+	RowDialog.bnHeight=MenuBnList.bnHeight;
+	RowDialog.bnMargin=5;
+	RowDialog.minWidth = 400;
+	RowDialog.minHeight = 200;
+	RowDialog.hintMargin = 5;
+
+	RowDialog.fontSize=16;
+	RowDialog.font="Arial";
+	RowDialog.titleFontWeight="bold";
+	RowDialog.centeredfontWeight="bold";
+	RowDialog.charHeight=12;
+	RowDialog.smallBnWidth = 45;
+	RowDialog.iconH = 15;
+};
+RowDialog.prototype.addCenteredButton = function(text, callbackFn){
+	let entry = {};
+	entry.text = text;
+	entry.callbackFn = callbackFn;
+	this.centeredButtons.push(entry);
+};
+
+RowDialog.prototype.show = function(){
+	if(!this.visible) {
+		this.visible = true;
+		RowDialog.currentDialog=this;
+		this.calcHeights();
+		this.calcWidths();
+		this.x = GuiElements.width / 2 - this.width / 2;
+		this.y = GuiElements.height / 2 - this.height / 2;
+		this.group = GuiElements.create.group(this.x, this.y);
+		this.bgRect = this.drawBackground();
+
+		this.titleRect = this.createTitleRect();
+		this.titleText = this.createTitleLabel(this.title);
+
+		this.rowGroup = this.createContent();
+		this.createCenteredBns();
+		this.scrollBox = this.createScrollBox(); // could be null
+		if (this.scrollBox != null) {
+			this.scrollBox.show();
+		}
+
+		GuiElements.layers.overlay.appendChild(this.group);
+
+		GuiElements.blockInteraction();
+	}
+};
+RowDialog.prototype.calcHeights = function(){
+	var RD = RowDialog;
+	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
+	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
+	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
+	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
+	let totalHeight = nonScrollHeight + ScrollHeight;
+	if(!this.autoHeight) totalHeight = 0;
+	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
+	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
+	this.innerHeight = ScrollHeight;
+	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
+	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+	this.extraTopY = RD.titleBarH;
+	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
+};
+RowDialog.prototype.calcWidths=function(){
+	var RD = RowDialog;
+	let thirdWidth = GuiElements.width / 3;
+	this.width = Math.min(GuiElements.width, Math.max(thirdWidth, RD.minWidth));
+	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
+	this.scrollBoxX = RD.bnMargin;
+	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
+	this.contentWidth = this.width - RD.bnMargin * 2;
+};
+RowDialog.prototype.drawBackground = function(){
+	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
+	this.group.appendChild(rect);
+	return rect;
+};
+RowDialog.prototype.createTitleRect=function(){
+	var RD=RowDialog;
+	var rect=GuiElements.draw.rect(0,0,this.width,RD.titleBarH + this.extendTitleBar,RD.titleBarColor);
+	this.group.appendChild(rect);
+	return rect;
+};
+RowDialog.prototype.createTitleLabel=function(title){
+	var RD=RowDialog;
+	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
+	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
+	var y=RD.titleBarH/2+RD.charHeight/2;
+	GuiElements.move.text(textE,x,y);
+	this.group.appendChild(textE);
+	return textE;
+};
+RowDialog.prototype.createContent = function(){
+	var RD = RowDialog;
+	let y = 0;
+	var rowGroup = GuiElements.create.group(0, 0);
+	if(this.rowCount > 0) {
+		for (let i = 0; i < this.rowCount; i++) {
+			this.createRow(i, y, this.contentWidth, rowGroup);
+			y += RD.bnHeight + RD.bnMargin;
+		}
+	}
+	else if(this.hintText != "") {
+		this.createHintText();
+	}
+	return rowGroup;
+};
+RowDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+};
+RowDialog.prototype.createCenteredBns = function(){
+	var RD = RowDialog;
+	let y = this.centeredButtonY;
+	this.centeredButtonEs = [];
+	for(let i = 0; i < this.centeredButtons.length; i++){
+		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+		this.centeredButtonEs.push(bn);
+		y += RD.bnHeight + RD.bnMargin;
+	}
+};
+RowDialog.prototype.createCenteredBn = function(y, entry){
+	var RD = RowDialog;
+	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
+	button.addText(entry.text, null, null, RD.centeredfontWeight);
+	button.setCallbackFunction(entry.callbackFn, true);
+	return button;
+};
+RowDialog.prototype.createScrollBox = function(){
+	if(this.rowCount === 0) return null;
+	let x = this.x + this.scrollBoxX;
+	let y = this.y + this.scrollBoxY;
+	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
+		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
+};
+RowDialog.prototype.createHintText = function(){
+	var RD = RowDialog;
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
+	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
+	let x = this.width / 2 - textWidth / 2;
+	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
+	GuiElements.move.text(this.hintTextE, x, y);
+	this.group.appendChild(this.hintTextE);
+};
+RowDialog.prototype.closeDialog = function(){
+	if(this.visible) {
+		RowDialog.currentDialog = null;
+		this.hide();
+		GuiElements.unblockInteraction();
 	}
 };
