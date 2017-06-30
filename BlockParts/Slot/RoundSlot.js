@@ -1,11 +1,13 @@
-/* RoundSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
+/**
+ * RoundSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
  * It creates a Slot that can be edited with the InputPad's NumPad.
  * It is generally designed for nums, but can snap or output other types.
  * Its input type, however, is always num.
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of.
- * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the RoundSlot.
- * @param {number [any,num,string,bool,list] outputType - The type of Data the RoundSlot should convert to.
+ * @param {string} key - The name of the Slot. Used for reading and writing save files.
+ * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
+ * @param {number} outputType - [any,num,string,bool,list] The type of Data the RoundSlot should convert to.
  * @param {number} data - The initial data stored in the Slot. Could be string, num, or selection data.
  * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
  * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
@@ -21,88 +23,18 @@ function RoundSlot(parent,key,snapType,outputType,data,positive,integer){
 	this.slotShape.show();
 	this.selected=false; //Indicates if the Slot is visually selected for editing.
 	//Declare arrays for special options to list above the NumPad (i.e. "last" for "Item _ of Array" blocks)
-	this.optionsText=new Array(); //The text of the special option.
-	this.optionsData=new Array(); //The Data representing that option (never visible to the user).
-	this.dropColumns=1; //The number of columns to show in the drop down.
+	this.optionsText = []; //The text of the special option.
+	this.optionsData = []; //The Data representing that option (never visible to the user).
+	this.dropColumns = 1; //The number of columns to show in the drop down.
 }
 RoundSlot.prototype = Object.create(Slot.prototype);
 RoundSlot.prototype.constructor = RoundSlot;
-/* Builds the Slot's SVG elements such as its oval, text, and invisible hit box.
- */
-/*
-RoundSlot.prototype.buildSlot=function(){
-	this.textH=BlockGraphics.valueText.charHeight; //Used for center alignment.
-	this.textW=0; //Will be calculated later.
-	this.slotE=this.generateSlot();//Fix! BG
-	this.textE=this.generateText(this.text);
-	this.hitBoxE=this.generateHitBox(); //Creates an invisible box for receiving touches.
-};
-*/
-/* Moves the Slot's SVG elements to the specified location.
- * @param {number} x - The x coord of the Slot.
- * @param {number} y - The y coord of the Slot.
- */
-RoundSlot.prototype.moveSlot=function(x,y){
-	this.slotShape.move(x, y);
-};
-/* Makes the Slot's SVG elements invisible. Used when child is added.
- */
-RoundSlot.prototype.hideSlot=function(){
-	this.slotShape.hide();
-};
-/* Makes the Slot's SVG elements visible. Used when child is removed.
- */
-RoundSlot.prototype.showSlot=function(){
-	this.slotShape.show();
-};
-/* Generates and returns an SVG text element to display the Slot's value.
- * @param {string} text - The text to add to the element.
- * @return {SVG text} - The finished SVG text element.
- */
-/*
-RoundSlot.prototype.generateText=function(text){ //Fix BG
-	var obj=BlockGraphics.create.valueText(text,this.parent.group);
-	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
-	return obj;
-};
-*/
-/* Generates and returns an SVG path element to be the oval part of the Slot.
- * @return {SVG path} - The finished SVG path element.
- * @fix BlockGraphics number reference.
- */
-/*
-RoundSlot.prototype.generateSlot=function(){
-	var obj=BlockGraphics.create.slot(this.parent.group,1,this.parent.category);
-	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
-	return obj;
-};
-*/
-/* Generates and returns a transparent rectangle which enlarges the touch area of the Slot.
- * @return {SVG rect} - The finished SVG rect element.
- */
-/*
-RoundSlot.prototype.generateHitBox=function(){
-	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
-	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
-	return obj;
-};
-*/
-/* Changes the value text of the Slot. Stores value in this.text. Updates parent's stack dims.
- * @param {string} text - The text to change the visible value to.
- */
 RoundSlot.prototype.changeText=function(text){
 	this.text=text; //Store value
 	this.slotShape.changeText(text);
 	if(this.parent.stack!=null) {
 		this.parent.stack.updateDim(); //Update dimensions.
 	}
-};
-/* Computes the dimensions of the SVG elements making up the Slot.
- * Only called if has no child.
- */
-RoundSlot.prototype.updateDimNR=function(){
-	this.width = this.slotShape.width;
-	this.height = this.slotShape.height;
 };
 /* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
  * @fix BlockGraphics

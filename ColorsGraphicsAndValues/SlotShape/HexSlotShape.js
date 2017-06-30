@@ -16,7 +16,7 @@ HexSlotShape.prototype.buildSlot = function(){
 	const HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
 	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category);
-	TouchReceiver.addListenersChild(this.slotE,this.slot); //Adds event listeners.
+	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
 };
 HexSlotShape.prototype.updateDim = function(){
 	const HSS = HexSlotShape;

@@ -18,6 +18,10 @@ CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
+CallbackManager.data.openData = function(fileName, data){
+	SaveManager.openData(fileName, data);
+	return true;
+};
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;

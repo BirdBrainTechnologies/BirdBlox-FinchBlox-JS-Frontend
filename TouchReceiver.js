@@ -557,10 +557,9 @@ TouchReceiver.addListenersCat=function(element,category){
  */
 TouchReceiver.addListenersChild=function(element,parent){
 	var TR=TouchReceiver;
-	element.parent=parent; //Teaches the SVG element to know what Block it belongs to.
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Block.
-		TouchReceiver.touchStartBlock(this.parent,e);
+		TouchReceiver.touchStartBlock(parent,e);
 	}, false);
 };
 /* Adds handlerDown listeners to the parts of a Slot.
@@ -569,10 +568,9 @@ TouchReceiver.addListenersChild=function(element,parent){
  */
 TouchReceiver.addListenersSlot=function(element,slot){
 	var TR=TouchReceiver;
-	element.slotRef=slot; //Teaches the SVG element to know what Slot it belongs to.
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
-		TouchReceiver.touchStartSlot(this.slotRef,e);
+		TouchReceiver.touchStartSlot(slot,e);
 	}, false);
 };
 /* Adds handlerDown listeners to the parts of a Button.
