@@ -112,6 +112,11 @@ GuiElements.setConstants=function(){
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphicsPart1();
 	BlockGraphics();
+	HexSlotShape.setConstants();
+	EditableSlotShape.setConstants();
+	RectSlotShape.setConstants();
+	RoundSlotShape.setConstants();
+	DropSlotShape.setConstants();
 	Slot.setConstants();
 	Block.setConstants();
 	BlockPalette.setGraphics();

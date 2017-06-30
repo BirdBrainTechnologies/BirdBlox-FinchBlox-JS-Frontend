@@ -1,10 +1,12 @@
 "use strict";
-/* Block is an abstract class that represents an executable block.
+//Refactoring...
+/**
+ * Block is an abstract class that represents an executable block.
  * Blocks are nearly always contained within BlockStacks or DisplayStacks.
  * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
- * @fix remove the type parameter and use blockShape and instead.
+ * TODO: remove the type parameter and use blockShape and instead.
  * @param {number} type - The shape of the Block.  0=Command, 1=Reporter, 2=Predicate, 4=Hat, 5=Loop, 6=DoubleLoop.
  * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
@@ -17,18 +19,18 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 	this.x=x; //Store coords
 	this.y=y;
 	this.type=type; //Fix! remove this property
-	this.bottomOpen=(type==0||type==4||type==5||type==6); //Can Blocks be attached to the bottom of this Block?
-	this.topOpen=(type==0||type==5||type==6); //Can Blocks be attached to the top of this Block?
-	this.returnsValue=(returnType!=Block.returnTypes.none); //Does this Block attack to Slots and return a value?
+	this.bottomOpen=(type===0||type===4||type===5||type===6); //Can Blocks be attached to the bottom of this Block?
+	this.topOpen=(type===0||type===5||type===6); //Can Blocks be attached to the top of this Block?
+	this.returnsValue=(returnType!==Block.returnTypes.none); //Does this Block attack to Slots and return a value?
 	this.returnType=returnType; //What type of value does this Block return?
-	this.hasBlockSlot1=(type==5||type==6); //Is this Block like an if block that has a special BlockSlot?
-	this.hasBlockSlot2=(type==6); //Does it have two BlockSlots?
-	this.hasHat=(type==4); //Is it a HatBlock?
+	this.hasBlockSlot1=(type===5||type===6); //Is this Block like an if block that has a special BlockSlot?
+	this.hasBlockSlot2=(type===6); //Does it have two BlockSlots?
+	this.hasHat=(type===4); //Is it a HatBlock?
 	
 	this.group=GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
 	this.parent=null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
-	this.parts=new Array(); //The parts of a Block include its LabelText, BlockIcons, and Slots.
-	this.slots=new Array(); //The slots array just holds the Slots.
+	this.parts=[]; //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	this.slots=[]; //The slots array just holds the Slots.
 	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
 	this.category=category;
 	this.isGlowing=false;
@@ -55,7 +57,8 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 		this.blockSlot2=new BlockSlot(this);
 	}
 }
-/* Sets the possible values for Block.returnTypes.
+/**
+ * Sets the possible values for Block.returnTypes.
  */
 Block.setConstants=function(){
 	Block.returnTypes=function(){};
@@ -65,52 +68,76 @@ Block.setConstants=function(){
 	Block.returnTypes.bool=3;
 	Block.returnTypes.list=4;
 };
+/**
+ * Converts an x coord relative to the Block to an x coord relative to the screen
+ * @param {number} x
+ * @returns {number}
+ */
 Block.prototype.relToAbsX=function(x){
 	if(this.stack!=null) {
 		return this.stack.relToAbsX(x + this.x);
 	}
 	return x + this.x;
 };
+/**
+ * Converts a y coord relative to the Block to a y coord relative to the screen
+ * @param {number} y
+ * @returns {number}
+ */
 Block.prototype.relToAbsY=function(y){
 	if(this.stack!=null) {
 		return this.stack.relToAbsY(y + this.y);
 	}
 	return y + this.y;
 };
+/**
+ * Converts an x coord relative to the screen to an x coord relative to the Block
+ * @param x
+ * @returns {number}
+ */
 Block.prototype.absToRelX=function(x){
 	if(this.stack!=null) {
 		return this.stack.absToRelX(x) - this.x;
 	}
 	return x - this.x;
 };
+/**
+ * Converts a y coord relative to the screen to a y coord relative to the Block
+ * @param y
+ * @returns {number}
+ */
 Block.prototype.absToRelY=function(y){
 	if(this.stack!=null) {
 		return this.stack.absToRelY(y) - this.y;
 	}
 	return y - this.y;
 };
-/* Returns the x coord of the Block relative to the screen (not the group it is contained in).
+/**
+ * Returns the x coord of the Block relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Block relative to the screen.
  */
 Block.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
 };
-/* Returns the y coord of the Block relative to the screen.
+/**
+ * Returns the y coord of the Block relative to the screen.
  * @return {number} - The y coord of the Block relative to the screen.
  */
 Block.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
-/* Creates and returns the main SVG path element for the Block.
- * @return {SVG path} - The main SVG path element for the Block.
+/**
+ * Creates and returns the main SVG path element for the Block.
+ * @return {object} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath=function(){
-	var pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
 	TouchReceiver.addListenersChild(pathE,this);
 	return pathE;
 };
-/* Adds a part (LabelText, BlockIcon, or Slot) to the Block.
- * @param {LabelText/BlockIcon/Slot} part - part to add.
+/**
+ * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
+ * @param {LabelText|BlockIcon|Slot} part - part to add.
  */
 Block.prototype.addPart=function(part){
 	this.parts.push(part);
@@ -135,7 +162,7 @@ Block.prototype.move=function(x,y){
 Block.prototype.stop=function(){
 	this.running=0; //Stop this Block.
 	this.runMem = {}; //Clear memory
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		this.slots[i].stop(); //Stop this Block's Slots.
 	}
 	if(this.blockSlot1!=null){
@@ -154,20 +181,23 @@ Block.prototype.stop=function(){
  */
 Block.prototype.updateRun=function(){
 	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
-	if(this.running==0||this.running==3){
+	if(this.running===0||this.running===3){
 		for(let i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution
 			this.slots[i].stop();
 		}
 		this.running=1; //Now the Block is ready to run its Slots.
 	}
-	var myExecStatus; //The value to return.
-	if(this.running==1){ //If the Block is currently waiting on its Slots...
+	let myExecStatus; //The value to return.
+	if(this.running===1){ //If the Block is currently waiting on its Slots...
 		for(let i=0;i<this.slots.length;i++){
 			//Check to see if each Slot is done and update the first Slot that isn't done.
 			let slotExecStatus = this.slots[i].updateRun();
+			//If the slot is still running...
 			if(slotExecStatus.isRunning()){
+				//The Block is still running and will execute again next time
 				return new ExecutionStatusRunning();
 			} else if(slotExecStatus.hasError()) {
+				//If the slot through an error, the Block is done running, and will pass the error up the call stack.
 				this.running = 3;
 				return slotExecStatus;
 			}
@@ -177,12 +207,12 @@ Block.prototype.updateRun=function(){
 		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
 		myExecStatus = this.startAction();
 	}
-	else if(this.running==2){ //If the Block is currently running, update it.
+	else if(this.running === 2){ //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
 		myExecStatus = this.updateAction();
 	}
 	if(!myExecStatus.isRunning()){ //If the block is done running...
-		if(this.running != 0) {
+		if(this.running !== 0) {
 			this.running = 3; //Record that the Block is done, provided that it was started
 		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
@@ -210,8 +240,9 @@ Block.prototype.updateAction=function(){
  * @return {Data} - The result of the Block's execution.
  */
 Block.prototype.getResultData=function(){
-	if(this.running==3){ //Only return data if the Block is done running.
-		this.running=0; //Reset the Block's state. Prevents same data from ever being re-returned
+	DebugOptions.assert(this.returnsValue);
+	if(this.running === 3){ //Only return data if the Block is done running.
+		this.running = 0; //Reset the Block's state. Prevents same data from ever being re-returned
 		return this.resultData; //Access stored result data and return it.
 	}
 	return null; //If called when the block is not done running, return null. This should never happen.
@@ -224,7 +255,7 @@ Block.prototype.changeStack=function(stack){
 	this.stack=stack; //Move this Block to the stack
 	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
 	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
 	}
 	if(this.nextBlock!=null){
@@ -262,7 +293,7 @@ Block.prototype.updateStackDim=function(){
  * updateStackDimO handled the actual updates.
  */
 Block.prototype.updateStackDimRI=function(){
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		this.slots[i].updateStackDim(); //Pass message on to Slots.
 	}
 	this.updateStackDimO(); //Update this Block.
@@ -278,13 +309,13 @@ Block.prototype.updateStackDimRI=function(){
  * stack have to be investigated.
  */
 Block.prototype.updateStackDimO=function(){
-	var sDim=this.stack.dim; //Loads the stack's dimension data.
-	var snap=BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
+	let sDim=this.stack.dim; //Loads the stack's dimension data.
+	let snap=BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
 	if(this.bottomOpen||this.topOpen){ //Only update the c box if this is a command block //Fix! use !this.returnsValue
-		var cx1=this.x-snap.left; //Create bounding rectangle for this particular command Block
-		var cy1=this.y-snap.top;
-		var cx2=this.x+snap.right;
-		var cy2=this.y+this.height+snap.bottom;
+		let cx1=this.x-snap.left; //Create bounding rectangle for this particular command Block
+		let cy1=this.y-snap.top;
+		let cx2=this.x+snap.right;
+		let cy2=this.y+this.height+snap.bottom;
 		if(cx1<sDim.cx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1=cx1;
 		}
@@ -298,10 +329,10 @@ Block.prototype.updateStackDimO=function(){
 			sDim.cy2=cy2;
 		}
 	}
-	var rx1=this.x; //The r bounding box is just the size of the Block itself.
-	var ry1=this.y;
-	var rx2=this.x+this.width;
-	var ry2=this.y+this.height;
+	let rx1=this.x; //The r bounding box is just the size of the Block itself.
+	let ry1=this.y;
+	let rx2=this.x+this.width;
+	let ry2=this.y+this.height;
 	if(rx1<sDim.rx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
 		sDim.rx1=rx1;
 	}
@@ -322,14 +353,14 @@ Block.prototype.updateStackDimO=function(){
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
  */
 Block.prototype.updateDim=function(){
-	var bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
+	let bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
 	if(this.topOpen||this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
 		bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
-	var width=0;
+	let width=0;
 	width+=bG.hMargin; //The left margin of the Block.
-	var height=0;
-	for(var i=0;i<this.parts.length;i++){
+	let height=0;
+	for(let i=0;i<this.parts.length;i++){
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
 		width+=this.parts[i].width; //Fill the width of the middle of the Block
 		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
@@ -380,7 +411,7 @@ Block.prototype.updateDim=function(){
  * y is measured from the top for all Blocks, x is measured from the left.
  */
 Block.prototype.updateAlign=function(x,y){
-	var bG=BlockGraphics;
+	let bG=BlockGraphics;
 	this.updateAlignRI(x,y); //Update recursively within the block.
 	if(this.hasBlockSlot1){ //Then tell all susequent blocks to align.
 		this.blockSlot1.updateAlign(this.x+bG.loop.side,this.y+this.topHeight);
@@ -402,9 +433,9 @@ Block.prototype.updateAlign=function(x,y){
  */
 Block.prototype.updateAlignRI=function(x,y){
 	this.move(x,y); //Move to the desired location
-	var bG=BlockGraphics.getType(this.type);
-	var yCoord=this.height/2; //Compute coords for internal parts.
-	var xCoord=0;
+	let bG=BlockGraphics.getType(this.type);
+	let yCoord=this.height/2; //Compute coords for internal parts.
+	let xCoord=0;
 	if(this.hasBlockSlot1){
 		yCoord=this.topHeight/2; //Internal parts measure their y coords from the center of the block.
 	}
@@ -412,7 +443,7 @@ Block.prototype.updateAlignRI=function(x,y){
 		bG=BlockGraphics.command;
 	}
 	xCoord+=bG.hMargin;
-	for(var i=0;i<this.parts.length;i++){
+	for(let i=0;i<this.parts.length;i++){
 		xCoord+=this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
 		if(i<this.parts.length-1){
 			xCoord+=BlockGraphics.block.pMargin;
@@ -425,14 +456,14 @@ Block.prototype.updateAlignRI=function(x,y){
  * @param {number} height - The desired height of the Block.
  */
 Block.prototype.resize=function(width,height){
-	var BG=BlockGraphics;
+	let BG=BlockGraphics;
 	//First set width and height properties.
 	this.width=width;
 	this.height=height;
 	//Then collect other necessary information.
-	var innerHeight1=0;
-	var innerHeight2=0;
-	var midHeight=0;
+	let innerHeight1=0;
+	let innerHeight2=0;
+	let midHeight=0;
 	if(this.hasBlockSlot1){
 		innerHeight1=this.blockSlot1.height;
 	}
@@ -450,34 +481,34 @@ Block.prototype.resize=function(width,height){
  * Connections to the top of the stack's findBestFit.
  */
 Block.prototype.findBestFit=function(){
-	var move=CodeManager.move;
-	var fit=CodeManager.fit;
-	var x=this.getAbsX(); //Get coords to compare.
-	var y=this.getAbsY();
-	var height = this.relToAbsY(this.height) - y;
-	var hasMatch = false;
+	let move=CodeManager.move;
+	let fit=CodeManager.fit;
+	let x=this.getAbsX(); //Get coords to compare.
+	let y=this.getAbsY();
+	let height = this.relToAbsY(this.height) - y;
+	let hasMatch = false;
 
 	if(move.returnsValue) { //If a connection between the stack and block are possible...
-		var hasMatch = false;
+		let hasMatch = false;
 		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-			for(var i=0;i<this.slots.length;i++){
+			for(let i=0;i<this.slots.length;i++){
 				let slotHasMatch = this.slots[i].findBestFit();
 				hasMatch = slotHasMatch || hasMatch;
 			}
 		}
 	}
 	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
-		var snap=BlockGraphics.command.snap; //Load snap bounding box
+		let snap=BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
-		var snapBLeft=x-snap.left;
-		var snapBTop=y-snap.top;
-		var snapBWidth=snap.left+snap.right;
-		var snapBHeight=snap.top+height+snap.bottom;
+		let snapBLeft=x-snap.left;
+		let snapBTop=y-snap.top;
+		let snapBWidth=snap.left+snap.right;
+		let snapBHeight=snap.top+height+snap.bottom;
 		//Check if point falls in a rectangular range.
 		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)) {
-			var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
-			var yDist = move.topY - (y + this.height);
-			var dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			let yDist = move.topY - (y + this.height);
+			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
 				fit.bestFit = this;
@@ -514,26 +545,32 @@ Block.prototype.highlight=function(){
  */
 Block.prototype.snap=function(block){ //Fix! documentation
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
-	var bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	let bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
 	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
-		var bG=BlockGraphics.command;
+		let bG=BlockGraphics.command;
+		//Disconnect the blocks after this Block and shift them over to make room.
 		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.stack.getHeight()+bG.shiftY);
 	}
-	var stack=this.stack;
+	let stack=this.stack;
+	//If the Block we are inserting is part of a stack...
 	if(block.stack!=null) {
-		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code.
-			block.glow();
+		//Make it glow if this stack is running
+		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code. x3 in Stack, BlockStack, and Slot ---Refactor Marker---
+			block.glow(); //Recursively applied glow effect
 		}
-		else if (!stack.isRunning && block.stack.isRunning) { //Blocks that are added are stopped.
+		//Stop the stack being added if this stack is stopped
+		else if (!stack.isRunning && block.stack.isRunning) {
 			block.stack.stop();
 		}
-		else if (stack.isRunning && block.isRunning) { //The added block is stopped, but still glows as part of a running stack.
+		//The added block is stopped, but still glows as part of a running stack.
+		else if (stack.isRunning && block.isRunning) {
 			block.stop();
 		}
 	}
-	var upperBlock=this; //The Block which will go above the inserted stack.
-	var lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
-	var topStackBlock=block; //The top Block in the stack to be inserted.
+	let upperBlock=this; //The Block which will go above the inserted stack.
+	let lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
+	let topStackBlock=block; //The top Block in the stack to be inserted.
 
 	//The top of where the stack is inserted note which Blocks are above/below them.
 	upperBlock.nextBlock=topStackBlock;
@@ -543,7 +580,7 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	if(lowerBlock!=null){ //There might not be a Block below the inserted stack.
 		lowerBlock.parent=bottomStackBlock;
 	}
-	var oldG=null;
+	let oldG=null;
 	if(block.stack!=null) {
 		oldG=block.stack.group; //Get a handle to the old stack's group
 		block.stack.remove(); //Remove the old stack.
@@ -615,7 +652,7 @@ Block.prototype.addHeights=function(){
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y){
-	var myCopy = null;
+	let myCopy = null;
 	if(this.variable != null){ //Copy variable data if this is a variable Block.
 		myCopy = new this.constructor(x, y, this.variable);
 	}
@@ -634,7 +671,7 @@ Block.prototype.duplicate = function(x, y){
  */
 Block.prototype.copyFrom = function(block){
 	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
-	for(var i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
+	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);
 	}
 	if(this.blockSlot1!=null){ //Copy the contents of its BlockSlots.
@@ -655,8 +692,8 @@ Block.prototype.copyFrom = function(block){
  * @return {string} - The finished text summary.
  */
 Block.prototype.textSummary=function(slotToExclude){
-	var summary="";
-	for(var i=0;i<this.parts.length;i++){
+	let summary="";
+	for(let i=0;i<this.parts.length;i++){
 		if(this.parts[i]==slotToExclude){
 			summary+="___"; //Replace slot with underscores.
 		}
@@ -684,7 +721,7 @@ Block.prototype.checkBroadcastRunning=function(message){
 };
 /* Recursively checks if a given message is still in use by any of the DropSlots. */
 Block.prototype.checkBroadcastMessageAvailable=function(message){
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		if(this.slots[i].checkBroadcastMessageAvailable(message)){
 			return true;
 		}
@@ -709,7 +746,7 @@ Block.prototype.checkBroadcastMessageAvailable=function(message){
 /* Recursively updates the available broadcast messages.
  */
 Block.prototype.updateAvailableMessages=function(){
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		this.slots[i].updateAvailableMessages();
 	}
 	if(this.blockSlot1!=null){
@@ -726,7 +763,7 @@ Block.prototype.updateAvailableMessages=function(){
  */
 Block.prototype.clearMem=function(){
 	this.runMem=new function(){}; //Delete all runMem.
-	for(var i=0;i<this.slots.length;i++){ //NOT recursive.
+	for(let i=0;i<this.slots.length;i++){ //NOT recursive.
 		this.slots[i].clearMem(); //Removes resultData and resets running state to 0.
 	}
 };
@@ -734,7 +771,7 @@ Block.prototype.clearMem=function(){
  * The data is then removed to prevent the result from being returned again.
  */
 Block.prototype.getResultData=function(){
-	var result=this.resultData;
+	let result=this.resultData;
 	this.resultData=null;
 	return result;
 };
@@ -774,16 +811,16 @@ Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
 	}
 };
 Block.prototype.createXml=function(xmlDoc){
-	var block=XmlWriter.createElement(xmlDoc,"block");
+	let block=XmlWriter.createElement(xmlDoc,"block");
 	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	var slots=XmlWriter.createElement(xmlDoc,"slots");
+	let slots=XmlWriter.createElement(xmlDoc,"slots");
 	XmlWriter.setAttribute(slots,"keyVal","true");
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
 	}
 	block.appendChild(slots);
 	if(this.blockSlot1!=null){
-		var blockSlots=XmlWriter.createElement(xmlDoc,"blockSlots");
+		let blockSlots=XmlWriter.createElement(xmlDoc,"blockSlots");
 		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
 		if(this.blockSlot2!=null){
 			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
@@ -793,8 +830,8 @@ Block.prototype.createXml=function(xmlDoc){
 	return block;
 };
 Block.importXml=function(blockNode){
-	var type=XmlWriter.getAttribute(blockNode,"type");
-	var block;
+	let type=XmlWriter.getAttribute(blockNode,"type");
+	let block;
 	try {
 		if (type.substring(0, 2) == "B_") {
 			if(window[type].importXml!=null){
@@ -815,8 +852,8 @@ Block.importXml=function(blockNode){
 	return block;
 };
 Block.prototype.importSlotXml = function(slotsNode){
-	var keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
-	var slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
+	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
+	let slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
 	if(keyVal){
 		for(let i=0;i<this.slots.length;i++){
 			let key = this.slots[i].getKey();
@@ -833,10 +870,10 @@ Block.prototype.importSlotXml = function(slotsNode){
 	}
 };
 Block.prototype.copyFromXml = function(blockNode){
-	var slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	let slotsNode=XmlWriter.findSubElement(blockNode,"slots");
 	this.importSlotXml(slotsNode);
-	var blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
-	var blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	let blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
+	let blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
 	if(this.blockSlot1!=null&&blockSlotNodes.length>=1){
 		this.blockSlot1.importXml(blockSlotNodes[0]);
 	}
@@ -857,7 +894,7 @@ Block.prototype.deleteList=function(list){
 	this.passRecursively("deleteList",list);
 };
 Block.prototype.checkVariableUsed=function(variable){
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		if(this.slots[i].checkVariableUsed(variable)){
 			return true;
 		}
@@ -880,7 +917,7 @@ Block.prototype.checkVariableUsed=function(variable){
 	return false;
 };
 Block.prototype.checkListUsed=function(list){
-	for(var i=0;i<this.slots.length;i++){
+	for(let i=0;i<this.slots.length;i++){
 		if(this.slots[i].checkListUsed(list)){
 			return true;
 		}
@@ -909,8 +946,8 @@ Block.prototype.showDeviceDropDowns=function(deviceClass){
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
 Block.prototype.countDevicesInUse=function(deviceClass){
-	var largest=1;
-	for(var i=0;i<this.slots.length;i++){
+	let largest=1;
+	for(let i=0;i<this.slots.length;i++){
 		largest=Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
 	}
 	if(this.blockSlot1!=null){
@@ -925,9 +962,9 @@ Block.prototype.countDevicesInUse=function(deviceClass){
 	return largest;
 };
 Block.prototype.passRecursively=function(functionName){
-	var args = Array.prototype.slice.call(arguments, 1);
-	for(var i=0;i<this.slots.length;i++){
-		var currentSlot=this.slots[i];
+	let args = Array.prototype.slice.call(arguments, 1);
+	for(let i=0;i<this.slots.length;i++){
+		let currentSlot=this.slots[i];
 		currentSlot[functionName].apply(currentSlot,args);
 	}
 	if(this.blockSlot1!=null){
@@ -941,14 +978,14 @@ Block.prototype.passRecursively=function(functionName){
 	}
 };
 Block.prototype.displayResult = function(data){
-	var value = data.asString().getValue();
+	let value = data.asString().getValue();
 	this.displayValue(value, false);
 };
 Block.prototype.displayValue = function(message, error){
-	var x=this.getAbsX();
-	var y=this.getAbsY();
-	var width=this.relToAbsX(this.width) - x;
-	var height=this.relToAbsY(this.height) - y;
+	let x=this.getAbsX();
+	let y=this.getAbsY();
+	let width=this.relToAbsX(this.width) - x;
+	let height=this.relToAbsY(this.height) - y;
 	GuiElements.displayValue(message,x,y,width,height, error);
 };
 Block.prototype.displayError = function(message){
@@ -962,7 +999,7 @@ Block.setDisplaySuffix = function(Class, suffix){
 Block.setDeviceSuffixFn = function(Class, suffixFn){
 	Class.prototype.displayResult = function(data){
 		if(data.isValid) {
-			var value = data.asString().getValue();
+			let value = data.asString().getValue();
 			this.displayValue(value + " " + suffixFn(), false);
 		}
 		else{

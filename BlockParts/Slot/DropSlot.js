@@ -5,7 +5,8 @@ function DropSlot(parent,key,snapType){
 	Slot.call(this,parent,key,Slot.inputTypes.drop,snapType,Slot.outputTypes.any);
 	this.enteredData=null;
 	this.text="";
-	this.buildSlot();
+	this.slotShape = new DropSlotShape(this, "");
+	this.slotShape.show();
 	this.selected=false;
 	this.optionsText=new Array();
 	this.optionsData=new Array();
@@ -21,6 +22,7 @@ DropSlot.prototype.addOption=function(displayText,data){
 DropSlot.prototype.populateList=function(){//overrided by subclasses
 	
 }
+/*
 DropSlot.prototype.buildSlot=function(){
 	this.textH=BlockGraphics.valueText.charHeight;
 	this.textW=0;
@@ -29,6 +31,8 @@ DropSlot.prototype.buildSlot=function(){
 	this.textE=this.generateText();
 	this.hitBoxE=this.generateHitBox();
 }
+*/
+/*
 DropSlot.prototype.generateBg=function(){
 	var bG=BlockGraphics.dropSlot;
 	var bgE=GuiElements.create.rect(this.parent.group);
@@ -40,7 +44,7 @@ DropSlot.prototype.generateBg=function(){
 DropSlot.prototype.generateTri=function(){
 	var bG=BlockGraphics.dropSlot;
 	var triE=GuiElements.create.path(this.parent.group);
-	GuiElements.update.color(triE,bG.triFill);
+	GuiElements.update.color(triE,bG.triColor);
 	TouchReceiver.addListenersSlot(triE,this);
 	return triE;
 }
@@ -56,58 +60,27 @@ DropSlot.prototype.generateHitBox=function(){
 	TouchReceiver.addListenersSlot(obj,this);
 	return obj;
 };
+*/
 DropSlot.prototype.moveSlot=function(x,y){
-	var bG=BlockGraphics.dropSlot;
-	GuiElements.update.rect(this.bgE,x,y,this.width,this.height);
-	var textX=x+bG.slotHMargin;
-	var textY=y+this.textH/2+this.height/2;
-	BlockGraphics.update.text(this.textE,textX,textY);
-	var triX=x+this.width-bG.slotHMargin-bG.triW;
-	var triY=y+this.height/2-bG.triH/2;
-	GuiElements.update.triangle(this.triE,triX,triY,bG.triW,0-bG.triH);
-	var bGHB=BlockGraphics.hitBox;
-	var hitX=x-bGHB.hMargin;
-	var hitY=y-bGHB.vMargin;
-	var hitW=this.width+bGHB.hMargin*2;
-	var hitH=this.height+bGHB.vMargin*2;
-	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH);
-}
+	this.slotShape.move(x, y);
+};
 DropSlot.prototype.hideSlot=function(){
-	if(this.slotVisible) {
-		this.slotVisible=false;
-		this.bgE.remove();
-		this.textE.remove();
-		this.triE.remove();
-		this.hitBoxE.remove();
-	}
-}
+	this.slotShape.hide();
+};
 DropSlot.prototype.showSlot=function(){
-	if(!this.slotVisible) {
-		this.slotVisible=true;
-		this.parent.group.appendChild(this.bgE);
-		this.parent.group.appendChild(this.triE);
-		this.parent.group.appendChild(this.textE);
-		this.parent.group.appendChild(this.hitBoxE);
-	}
-}
+	this.slotShape.show();
+};
 DropSlot.prototype.changeText=function(text){
 	this.text=text;
-	GuiElements.update.text(this.textE,text);
+	this.slotShape.changeText(text);
 	if(this.parent.stack!=null){
 		this.parent.stack.updateDim();
 	}
-}
+};
 DropSlot.prototype.updateDimNR=function(){
-	var bG=BlockGraphics.dropSlot;
-	this.textW=GuiElements.measure.textWidth(this.textE);
-	var width=this.textW+3*bG.slotHMargin+bG.triW;
-	var height=bG.slotHeight;
-	if(width<bG.slotWidth){
-		width=bG.slotWidth;
-	}
-	this.width=width;
-	this.height=height;
-}
+	this.width = this.slotShape.width;
+	this.height = this.slotShape.height;
+};
 DropSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new DropSlot(parentCopy,this.snapType);
 	for(var i=0;i<this.optionsText.length;i++){
@@ -181,18 +154,12 @@ DropSlot.prototype.editText=function(){
 	callbackFn.slot.deselect();
 };
 DropSlot.prototype.select=function(){
-	var bG=BlockGraphics.dropSlot;
-	this.selected=true;
-	GuiElements.update.color(this.bgE,bG.selectedBg);
-	GuiElements.update.opacity(this.bgE,bG.selectedBgOpacity);
-	GuiElements.update.color(this.triE,bG.selectedTriFill);
+	this.selected = true;
+	this.slotShape.select();
 };
 DropSlot.prototype.deselect=function(){
-	var bG=BlockGraphics.dropSlot;
-	this.selected=false;
-	GuiElements.update.color(this.bgE,bG.bg);
-	GuiElements.update.opacity(this.bgE,bG.bgOpacity);
-	GuiElements.update.color(this.triE,bG.triFill);
+	this.selected = false;
+	this.slotShape.deselect();
 };
 DropSlot.prototype.textSummary=function(){
 	if(this.hasChild){

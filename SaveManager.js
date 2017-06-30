@@ -349,3 +349,17 @@ SaveManager.currentDoc = function(){ //Autosaves
 	result.filename = SaveManager.fileName;
 	return result;
 };
+
+SaveManager.openData = function(fileName, data){
+	let fileName = HtmlServer.decodeHtml(fileName);
+	let data = HtmlServer.decodeHtml(data);
+	if(SaveManager.fileName == null){
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+	});
+};

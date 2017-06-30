@@ -93,6 +93,10 @@ RecordingDialog.prototype.show = function(){
 	this.resumeRecordingBn = this.createResumeRecordingBn();
 	this.goToState(this.state);
 };
+RecordingDialog.prototype.hide = function(){
+	RowDialog.prototype.hide.call(this);
+	this.setCounterVisibility(false);
+};
 RecordingDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
