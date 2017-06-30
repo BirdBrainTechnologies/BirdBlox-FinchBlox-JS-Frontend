@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading1";
+	debug.innerHTML = "Loading2";
 }, false);
 
 function DebugOptions(){
@@ -7255,3 +7255,5132 @@ CodeManager.findBestFit=function(){
 	fit.dist=0; //How far is the best candidate from the ideal location?
 	TabManager.activeTab.findBestFit(); //Begins the recursive calls.
 }
+		if(newTempo>=500){
+			CodeManager.sound.tempo=500;
+/* Recursively updates any Blocks that are currently executing.
+ * Stops the update timer if all Blocks are finished.
+ */
+CodeManager.updateRun=function(){
+	var CM=CodeManager;
+	var startingReservation=CM.reservedStackHBoutput;
+	if(!TabManager.updateRun().isRunning()){ //A recursive call.  Returns true if any Blocks are running.
+		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
+	}
+	var now=new Date().getTime();
+	var timeExpired=now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime;
+	if(CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput==startingReservation&&timeExpired) {
+		CM.reservedStackHBoutput = null;
+	}
+};
+/* Recursively stops all Block execution.
+ */
+CodeManager.stop=function(){
+	Device.stopAll(); //Stop any motors and LEDs on the devices
+	TabManager.stop(); //Recursive call.
+	CodeManager.stopUpdateTimer(); //Stop the update timer.
+	DisplayBox.hide(); //Hide any messages being displayed.
+	Sound.stopAllSounds() // Stops all sounds and tones
+	                       // Note: Tones are not allowed to be async, so they
+	                       // must be stopped manually
+}
+/* Stops the update timer.
+ */
+CodeManager.stopUpdateTimer=function(){
+	if(CodeManager.isRunning){ //If the timer is currently running...
+		//...Stop the timer.
+		CodeManager.updateTimer = window.clearInterval(CodeManager.updateTimer);
+		CodeManager.isRunning=false;
+	}
+}
+/* Starts the update timer.  When it fires, the timer will call the CodeManager.updateRun function.
+ */
+CodeManager.startUpdateTimer=function(){
+	if(!CodeManager.isRunning){ //If the timer is not running...
+		//...Start the timer.
+		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
+		CodeManager.isRunning=true;
+	}
+}
+/* Recursively passes on the message that the flag button was tapped.
+ * @fix method name.
+ */
+CodeManager.eventFlagClicked=function(){
+	TabManager.eventFlagClicked();
+}
+/**/
+CodeManager.checkDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+CodeManager.updateDialogDelay=function(){
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	CM.lastDialogDisplayTime=now;
+};
+CodeManager.checkHBOutputDelay=function(stack){
+	return true;
+	var CM=CodeManager;
+	var now=new Date().getTime();
+	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
+	if(CM.lastHBOutputSendTime==null||(now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime&&!stackReserved)){
+		if(CM.reservedStackHBoutput==stack){
+			CM.reservedStackHBoutput=null;
+		}
+		return true;
+	}
+	else{
+		if(CM.reservedStackHBoutput==null){
+			CM.reservedStackHBoutput=stack;
+		}
+		return false;
+	}
+};
+CodeManager.updateHBOutputDelay=function(){
+	CodeManager.lastHBOutputSendTime=new Date().getTime();
+};
+/* @fix Write documentation.
+ */
+CodeManager.addVariable=function(variable){
+	CodeManager.variableList.push(variable);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeVariable=function(variable){
+	var index=CodeManager.variableList.indexOf(variable);
+	CodeManager.variableList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newVariable=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&CodeManager.checkVarName(result)) {
+			result=result.trim();
+			new Variable(result);
+			SaveManager.markEdited();
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+};
+CodeManager.checkVarName=function(name){
+	name=name.trim();
+	if(name.length>0){
+		var variables=CodeManager.variableList;
+		for(var i=0;i<variables.length;i++){
+			if(variables[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+};
+CodeManager.findVar=function(name){
+	var variables=CodeManager.variableList;
+	for(var i=0;i<variables.length;i++){
+		if(variables[i].getName()==name){
+			return variables[i];
+		}
+	}
+	return null;
+};
+/* @fix Write documentation.
+ */
+CodeManager.addList=function(list){
+	CodeManager.listList.push(list);
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeList=function(list){
+	var index=CodeManager.listList.indexOf(list);
+	CodeManager.listList.splice(index,1);
+};
+/* @fix Write documentation.
+ */
+CodeManager.newList=function(){
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&CodeManager.checkListName(result)) {
+			result=result.trim();
+			new List(result);
+			SaveManager.markEdited();
+			BlockPalette.getCategory("variables").refreshGroup();
+		}
+	};
+	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkListName=function(name){
+	name=name.trim();
+	if(name.length>0){
+		var lists=CodeManager.listList;
+		for(var i=0;i<lists.length;i++){
+			if(lists[i].getName()==name){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+};
+CodeManager.findList=function(name){
+	var lists=CodeManager.listList;
+	for(var i=0;i<lists.length;i++){
+		if(lists[i].getName()==name){
+			return lists[i];
+		}
+	}
+	return null;
+};
+/* @fix Write documentation.
+ */
+CodeManager.newBroadcastMessage=function(slot){
+	slot.deselect();
+	var callbackFn=function(cancelled,result) {
+		if(!cancelled&&result.length>0){
+			result=result.trim();
+			CodeManager.addBroadcastMessage(result);
+			slot.setSelectionData('"'+result+'"',new StringData(result));
+		}
+	};
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastMessage=function(message){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(messages[i]==message){
+			return false;
+		}
+	}
+	return true;
+};
+/* @fix Write documentation.
+ */
+CodeManager.addBroadcastMessage=function(message){
+	if(CodeManager.checkBroadcastMessage(message)){
+		CodeManager.broadcastList.push(message);
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.removeUnusedMessages=function(){
+	var messages=CodeManager.broadcastList;
+	for(var i=0;i<messages.length;i++){
+		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
+			messages.splice(i,1);
+		}
+	}
+};
+/* @fix Write documentation.
+ */
+CodeManager.updateAvailableMessages=function(){
+	CodeManager.broadcastList=new Array();
+	TabManager.updateAvailableMessages();
+};
+/* @fix Write documentation.
+ */
+CodeManager.eventBroadcast=function(message){
+	TabManager.eventBroadcast(message);
+};
+CodeManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.hideDeviceDropDowns(deviceClass);
+	BlockPalette.hideDeviceDropDowns(deviceClass);
+};
+CodeManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.showDeviceDropDowns(deviceClass);
+	BlockPalette.showDeviceDropDowns(deviceClass);
+};
+CodeManager.countDevicesInUse=function(deviceClass){
+	return TabManager.countDevicesInUse(deviceClass);
+};
+/* @fix Write documentation.
+ */
+CodeManager.checkBroadcastRunning=function(message){
+	return TabManager.checkBroadcastRunning(message);
+};
+
+CodeManager.createXml=function(){
+	var CM=CodeManager;
+	var xmlDoc = XmlWriter.newDoc("project");
+	var project=xmlDoc.getElementsByTagName("project")[0];
+	var fileName="project";
+	if(SaveManager.named){
+		fileName=SaveManager.fileName;
+	}
+	XmlWriter.setAttribute(project,"name",fileName);
+	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
+	XmlWriter.setAttribute(project,"created",new Date().getTime());
+	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	var variables=XmlWriter.createElement(xmlDoc,"variables");
+	for(var i=0;i<CM.variableList.length;i++){
+		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
+	}
+	project.appendChild(variables);
+	var lists=XmlWriter.createElement(xmlDoc,"lists");
+	for(i=0;i<CM.listList.length;i++){
+		lists.appendChild(CM.listList[i].createXml(xmlDoc));
+	}
+	project.appendChild(lists);
+	project.appendChild(TabManager.createXml(xmlDoc));
+	return xmlDoc;
+};
+CodeManager.importXml=function(projectNode){
+	CodeManager.deleteAll();
+	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
+	if(variablesNode!=null) {
+		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
+		for (var i = 0; i < variableNodes.length; i++) {
+			Variable.importXml(variableNodes[i]);
+		}
+	}
+	var listsNode=XmlWriter.findSubElement(projectNode,"lists");
+	if(listsNode!=null) {
+		var listNodes = XmlWriter.findSubElements(listsNode, "list");
+		for (i = 0; i < listNodes.length; i++) {
+			List.importXml(listNodes[i]);
+		}
+	}
+	BlockPalette.getCategory("variables").refreshGroup();
+	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
+	TabManager.importXml(tabsNode);
+	DeviceManager.updateSelectableDevices();
+};
+CodeManager.deleteAll=function(){
+	var CM=CodeManager;
+	CM.stop();
+	TabManager.deleteAll();
+	CodeManager();
+};
+CodeManager.renameVariable=function(variable){
+	TabManager.renameVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteVariable=function(variable){
+	TabManager.deleteVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.renameList=function(list){
+	TabManager.renameList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.deleteList=function(list){
+	TabManager.deleteList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+CodeManager.checkVariableUsed=function(variable){
+	return TabManager.checkVariableUsed(variable);
+};
+CodeManager.checkListUsed=function(list){
+	return TabManager.checkListUsed(list);
+};
+CodeManager.beatsToMs=function(beats){
+	var tempo=CodeManager.sound.tempo;
+	var res=beats/tempo*60*1000;
+	if(isNaN(res)||!isFinite(res)){
+		return 0;
+	}
+	return res;
+};
+CodeManager.setSoundTempo=function(newTempo){
+	if(isFinite(newTempo)&&!isNaN(newTempo)){
+		}
+		else if(newTempo<=20){
+			CodeManager.sound.tempo=20;
+		}
+		else{
+			CodeManager.sound.tempo=newTempo;
+		}
+	}
+};
+CodeManager.dragAbsToRelX=function(x){
+	return x / TabManager.getActiveZoom();
+};
+CodeManager.dragAbsToRelY=function(y){
+	return y / TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsX=function(x){
+	return x * TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsY=function(y){
+	return y * TabManager.getActiveZoom();
+};
+function TabManager(){
+	var TM=TabManager;
+	TM.tabList=new Array();
+	TM.activeTab=null;
+	TM.createInitialTab();
+	TabManager.createTabSpaceBg();
+	TM.isRunning=false;
+	TM.scrolling=false;
+	TM.zooming = false;
+}
+TabManager.setGraphics=function(){
+	var TM=TabManager;
+	TM.bg=Colors.black;
+
+	TM.minZoom = 0.35;
+	TM.maxZoom = 3;
+
+	TM.tabAreaX=BlockPalette.width;
+	if(GuiElements.smallMode){
+		TM.tabAreaX=0;
+	}
+	TM.tabAreaY=TitleBar.height;
+	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
+
+	/* No longer different from tabArea since tab bar was removed */
+	TM.tabSpaceX=TM.tabAreaX;
+	TM.tabSpaceY=TitleBar.height;
+	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
+	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
+	TM.spaceScrollMargin=50;
+};
+TabManager.createTabSpaceBg=function(){
+	var TM=TabManager;
+	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
+	TouchReceiver.addListenersTabSpace(TM.bgRect);
+	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
+};
+TabManager.updatePositions=function(){
+	/* This might not be needed now that tabs aren't visible */
+};
+TabManager.addTab=function(tab){
+	TabManager.tabList.push(tab);
+};
+TabManager.removeTab=function(tab){
+	var index=TabManager.tabList.indexOf(tab);
+	TabManager.stackList.splice(index,1);
+};
+TabManager.createInitialTab=function(){
+	var TM=TabManager;
+	var t=new Tab();
+	TM.activateTab(TM.tabList[0]);
+	TM.updatePositions();
+};
+TabManager.activateTab=function(tab){
+	if(TabManager.activeTab!=null){
+		TabManager.activeTab.deactivate();
+	}
+	tab.activate();
+	TabManager.activeTab=tab;
+};
+TabManager.eventFlagClicked=function(){
+	TabManager.passRecursively("eventFlagClicked");
+};
+TabManager.eventBroadcast=function(message){
+	TabManager.passRecursively("eventBroadcast",message);
+};
+TabManager.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		for(var i=0;i<TabManager.tabList.length;i++){
+			if(TabManager.tabList[i].checkBroadcastRunning(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+TabManager.checkBroadcastMessageAvailable=function(message){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.updateAvailableMessages=function(){
+	TabManager.passRecursively("updateAvailableMessages");
+};
+/**
+ * @returns {ExecutionStatus}
+ */
+TabManager.updateRun=function(){
+	if(!this.isRunning){
+		return false;
+	}
+	var rVal=false;
+	for(var i=0;i<TabManager.tabList.length;i++){
+		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
+	}
+	this.isRunning=rVal;
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusDone();
+	}
+};
+TabManager.stop=function(){
+	TabManager.passRecursively("stop");
+	this.isRunning=false;
+}
+TabManager.stopAllButStack=function(stack){
+	TabManager.passRecursively("stopAllButStack",stack);
+};
+TabManager.startRun=function(){
+	TabManager.isRunning=true;
+	CodeManager.startUpdateTimer();
+}
+TabManager.startScroll=function(x,y){
+	var TM=TabManager;
+	if(!TM.scrolling){
+		TM.scrolling=true;
+		TM.activeTab.startScroll(x,y);
+	}
+};
+TabManager.updateScroll=function (x,y){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.activeTab.updateScroll(x,y);
+	}
+};
+TabManager.endScroll=function(){
+	var TM=TabManager;
+	if(TM.scrolling){
+		TM.scrolling=false;
+		TM.activeTab.endScroll();
+	}
+};
+TabManager.startZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(!TM.zooming){
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.updateZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.endZooming = function(){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.zooming = false;
+		TM.activeTab.endZooming();
+	}
+};
+TabManager.createXml=function(xmlDoc){
+	var TM=TabManager;
+	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
+	//XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
+	for(var i=0;i<TM.tabList.length;i++){
+		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
+	}
+	return tabs;
+};
+TabManager.importXml=function(tabsNode){
+	var TM=TabManager;
+	if(tabsNode!=null) {
+		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		//var active = XmlWriter.getAttribute(tabsNode, "active");
+		for (var i = 0; i < tabNodes.length; i++) {
+			Tab.importXml(tabNodes[i]);
+		}
+	}
+	TM.updatePositions();
+	if(TM.tabList.length==0){
+		TM.createInitialTab();
+	}
+	else{
+		TM.activateTab(TM.tabList[0]);
+	}
+};
+TabManager.deleteAll=function(){
+	var TM=TabManager;
+	for(var i=0;i<TM.tabList.length;i++){
+		TM.tabList[i].delete();
+	}
+	TM.tabList=new Array();
+	TM.activeTab=null;
+	TM.isRunning=false;
+	TM.scrolling=false;
+};
+TabManager.renameVariable=function(variable){
+	TabManager.passRecursively("renameVariable",variable);
+};
+TabManager.deleteVariable=function(variable){
+	TabManager.passRecursively("deleteVariable",variable);
+};
+TabManager.renameList=function(list){
+	TabManager.passRecursively("renameList",list);
+};
+TabManager.deleteList=function(list){
+	TabManager.passRecursively("deleteList",list);
+};
+TabManager.checkVariableUsed=function(variable){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.checkListUsed=function(list){
+	for(var i=0;i<TabManager.tabList.length;i++){
+		if(TabManager.tabList[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+TabManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+TabManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
+};
+TabManager.countDevicesInUse=function(deviceClass){
+	var largest=1;
+	for(var i=0;i<TabManager.tabList.length;i++){
+		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+TabManager.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	for(var i=0;i<TabManager.tabList.length;i++){
+		var currentList=TabManager.tabList[i];
+		currentList[functionName].apply(currentList,args);
+	}
+};
+TabManager.updateZoom=function(){
+	var TM=TabManager;
+	TM.setGraphics();
+	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
+};
+TabManager.getActiveZoom = function(){
+	if(TabManager.activateTab == null){
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
+};
+function Tab(){
+	this.mainG=GuiElements.create.group(0,0);
+	this.scrollX=0;
+	this.scrollY=0;
+	this.zoomFactor = 1;
+	this.visible=false;
+	TabManager.addTab(this);
+	this.stackList=new Array();
+	this.isRunning=false;
+	this.scrolling=false;
+	this.zooming = false;
+	this.scrollXOffset=50;
+	this.scrollYOffset=100;
+	this.zoomStartDist=null;
+	this.startZoom = null;
+	this.updateTransform();
+	this.overFlowArr = new OverflowArrows();
+	this.dim={};
+	this.dim.x1=0;
+	this.dim.y1=0;
+	this.dim.x2=0;
+	this.dim.y2=0;
+}
+Tab.prototype.activate=function(){
+	GuiElements.layers.activeTab.appendChild(this.mainG);
+	this.overFlowArr.show();
+};
+Tab.prototype.addStack=function(stack){
+	this.stackList.push(stack);
+};
+Tab.prototype.removeStack=function(stack){
+	var index=this.stackList.indexOf(stack);
+	this.stackList.splice(index,1);
+};
+Tab.prototype.getSprite=function(){
+	return this.sprite;
+}
+Tab.prototype.relToAbsX=function(x){
+	return x * this.zoomFactor + this.scrollX;
+};
+Tab.prototype.relToAbsY=function(y){
+	return y * this.zoomFactor + this.scrollY;
+};
+Tab.prototype.absToRelX=function(x){
+	return (x - this.scrollX) / this.zoomFactor;
+};
+Tab.prototype.absToRelY=function(y){
+	return (y - this.scrollY) / this.zoomFactor;
+};
+Tab.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+Tab.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+Tab.prototype.findBestFit=function(){
+	this.passRecursively("findBestFit");
+};
+Tab.prototype.eventFlagClicked=function(){
+	this.passRecursively("eventFlagClicked");
+};
+Tab.prototype.eventBroadcast=function(message){
+	this.passRecursively("eventBroadcast",message);
+};
+Tab.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		var stacks=this.stackList;
+		for(var i=0;i<stacks.length;i++){
+			if(stacks[i].checkBroadcastRunning(message)){
+				return true;
+			}
+		}
+	}
+	return false;
+};
+Tab.prototype.checkBroadcastMessageAvailable=function(message){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.updateAvailableMessages=function(){
+	this.passRecursively("updateAvailableMessages");
+};
+/**
+ * @returns {ExecutionStatus}
+ */
+Tab.prototype.updateRun=function(){
+	if(!this.isRunning){
+		return false;
+	}
+	var stacks=this.stackList;
+	var rVal=false;
+	for(var i=0;i<stacks.length;i++){
+		rVal = stacks[i].updateRun().isRunning() || rVal;
+	}
+	this.isRunning=rVal;
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+Tab.prototype.stop=function(){
+	this.passRecursively("stop");
+	this.isRunning=false;
+}
+Tab.prototype.stopAllButStack=function(stack){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i]!=stack) {
+			stacks[i].stop();
+		}
+	}
+};
+Tab.prototype.startRun=function(){
+	this.isRunning=true;
+	TabManager.startRun();
+}
+Tab.prototype.startScroll=function(x,y){
+	if(!this.scrolling) {
+		this.scrolling = true;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		this.updateTabDim();
+	}
+};
+Tab.prototype.updateScroll=function(x,y){
+	if(this.scrolling) {
+		this.scrollX=this.scrollXOffset + x;
+		this.scrollY=this.scrollYOffset + y;
+		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+		this.updateArrowsShift();
+		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
+	}
+};
+Tab.prototype.scroll=function(x,y) {
+	/*
+	this.scrollX=x;
+	this.scrollY=y;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	var dim=this.dim;
+	var x1=x+dim.xDiff;
+	var y1=y+dim.yDiff;
+
+	var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
+	var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
+	this.scrollX=newObjX-dim.xDiff;
+	this.scrollY=newObjY-dim.yDiff;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	*/
+};
+Tab.prototype.endScroll=function(){
+	this.scrolling = false;
+};
+Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
+	// var minX;
+	// var maxX;
+	// if(objectW<containerW){
+	// 	if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
+	// 		return objectX;
+	// 	}
+	// 	minX=Math.min(containerX,objectX);
+	// 	maxX=Math.max(containerX+containerW-objectW,objectX);
+	// }
+	// else{
+	// 	minX=Math.min(containerX+containerW-objectW,objectX);
+	// 	maxX=Math.max(containerX,objectX);
+	// }
+	// var rVal=targetX;
+	// rVal=Math.min(rVal,maxX);
+	// rVal=Math.max(rVal,minX);
+	// return rVal;
+};
+Tab.prototype.startZooming = function(x1, y1, x2, y2){
+	if(!this.zooming) {
+		this.zooming = true;
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.startZoom = this.zoomFactor;
+		this.updateTabDim();
+	}
+};
+Tab.prototype.updateZooming = function(x1, y1, x2, y2){
+	if(this.zooming){
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
+		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+		var zoomRatio = this.zoomFactor / this.startZoom;
+		this.scrollX=this.scrollXOffset * zoomRatio + x;
+		this.scrollY=this.scrollYOffset * zoomRatio + y;
+		this.updateTransform();
+		this.updateArrowsShift();
+	}
+};
+Tab.prototype.updateTransform=function(){
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
+};
+Tab.prototype.endZooming = function(){
+	this.zooming = false;
+};
+Tab.prototype.updateTabDim=function(){
+	var dim=this.dim;
+	dim.width=0;
+	dim.height=0;
+	dim.x1=null;
+	dim.y1=null;
+	dim.x2=null;
+	dim.y2=null;
+	this.passRecursively("updateTabDim");
+	if(dim.x1==null){
+		dim.x1=0;
+		dim.y1=0;
+		dim.x2=0;
+		dim.y2=0;
+	}
+};
+Tab.prototype.createXml=function(xmlDoc){
+	var tab=XmlWriter.createElement(xmlDoc,"tab");
+	//XmlWriter.setAttribute(tab,"name",this.name);
+	XmlWriter.setAttribute(tab,"x",this.scrollX);
+	XmlWriter.setAttribute(tab,"y",this.scrollY);
+	XmlWriter.setAttribute(tab,"zoom",this.zoomFactor);
+	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
+	for(var i=0;i<this.stackList.length;i++){
+		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
+	}
+	tab.appendChild(stacks);
+	return tab;
+};
+Tab.importXml=function(tabNode){
+	//var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
+	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
+	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
+	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	var tab=new Tab();
+	tab.scrollX=x;
+	tab.scrollY=y;
+	tab.zoomFactor = zoom;
+	tab.updateTransform();
+	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
+	if(stacksNode!=null){
+		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
+		for(var i=0;i<stackNodes.length;i++){
+			BlockStack.importXml(stackNodes[i],tab);
+		}
+	}
+	tab.updateArrows();
+	return tab;
+};
+Tab.prototype.delete=function(){
+	this.passRecursively("delete");
+	this.mainG.remove();
+};
+Tab.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Tab.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Tab.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Tab.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Tab.prototype.checkVariableUsed=function(variable){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.checkListUsed=function(list){
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		if(stacks[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+Tab.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Tab.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+Tab.prototype.countDevicesInUse=function(deviceClass){
+	var largest=1;
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+Tab.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	var stacks=this.stackList;
+	for(var i=0;i<stacks.length;i++){
+		var currentStack=stacks[i];
+		var currentL=stacks.length;
+		currentStack[functionName].apply(currentStack,args);
+		if(currentL!=stacks.length){
+			i--;
+		}
+	}
+};
+Tab.prototype.getZoom=function(){
+	return this.zoomFactor;
+};
+Tab.prototype.updateZoom=function(){
+	this.overFlowArr.updateZoom();
+	this.updateArrows();
+};
+Tab.prototype.updateArrows=function(){
+	this.updateTabDim();
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+Tab.prototype.updateArrowsShift=function(){
+	var x1 = this.relToAbsX(this.dim.x1)
+	var y1 = this.relToAbsY(this.dim.y1)
+	var x2 = this.relToAbsX(this.dim.x2)
+	var y2 = this.relToAbsY(this.dim.y2)
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function RecordingManager(){
+	let RM = RecordingManager;
+	RM.recordingStates = {};
+	RM.recordingStates.stopped = 0;
+	RM.recordingStates.recording = 1;
+	RM.recordingStates.paused = 2;
+	RM.state = RM.recordingStates.stopped;
+	RM.updateTimer = null;
+	RM.updateInterval = 200;
+	RM.startTime = null;
+	RM.pausedTime = 0;
+	RM.awaitingPermission = false;
+}
+RecordingManager.userRenameFile = function(oldFilename, nextAction){
+	SaveManager.userRenameFile(true, oldFilename, nextAction);
+};
+RecordingManager.userDeleteFile=function(filename, nextAction){
+	SaveManager.userDeleteFile(true, filename, nextAction);
+};
+RecordingManager.startRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/start");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		if(result == "Started"){
+			RM.setState(RM.recordingStates.recording);
+			RecordingDialog.startedRecording();
+		} else if(result == "Permission denied"){
+			let message = "Please grant recording permissions to the BirdBlox app in settings";
+			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
+		} else if(result == "Requesting permission") {
+			RM.awaitingPermission = true;
+		}
+	});
+};
+RecordingManager.stopRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/stop");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+};
+RecordingManager.interruptRecording = function(){
+	let RM = RecordingManager;
+	RM.setState(RM.recordingStates.stopped);
+	RecordingDialog.stoppedRecording();
+};
+RecordingManager.pauseRecording=function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/pause");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let pauseRec = function(){
+		RM.setState(RM.recordingStates.paused);
+		RecordingDialog.pausedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
+};
+RecordingManager.discardRecording = function(){
+	let RM = RecordingManager;
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let message = "Are you sure you would like to delete the current recording?";
+	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
+		if(result == "2") {
+			let request = new HttpRequestBuilder("sound/recording/discard");
+			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
+		}
+	}, stopRec);
+};
+RecordingManager.resumeRecording = function(){
+	let RM = RecordingManager;
+	let request = new HttpRequestBuilder("sound/recording/unpause");
+	let stopRec = function() {
+		RM.setState(RM.recordingStates.stopped);
+		RecordingDialog.stoppedRecording();
+	};
+	let resumeRec = function(){
+		RM.setState(RM.recordingStates.recording);
+		RecordingDialog.startedRecording();
+	};
+	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
+};
+RecordingManager.listRecordings = function(callbackFn){
+	Sound.loadSounds(true, callbackFn);
+};
+RecordingManager.setState = function(state){
+	let RM = RecordingManager;
+	let prevState = RM.state;
+	RM.state = state;
+	let states = RM.recordingStates;
+
+
+
+	if(state === states.recording){
+		if(RM.updateTimer == null){
+			if(prevState === states.stopped) RM.pausedTime = 0;
+			RM.startTime = new Date().getTime();
+			RM.updateTimer = self.setInterval(RM.updateCounter, RM.updateInterval);
+		}
+	}
+	else if(state === states.paused) {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+			RM.pausedTime = RM.getElapsedTime();
+		}
+	}
+	else {
+		if (RM.updateTimer != null) {
+			RM.updateTimer = window.clearInterval(RM.updateTimer);
+			RM.updateTimer = null;
+		}
+	}
+};
+RecordingManager.updateCounter = function(){
+	let RM = RecordingManager;
+	RecordingDialog.updateCounter(RM.getElapsedTime());
+};
+RecordingManager.getElapsedTime = function(){
+	let RM = RecordingManager;
+	return new Date().getTime() - RM.startTime + RM.pausedTime;
+};
+RecordingManager.permissionGranted = function(){
+	let RM = RecordingManager;
+	if(RM.awaitingPermission){
+		RM.awaitingPermission = false;
+		if(RecordingDialog.currentDialog != null){
+			RM.startRecording();
+		}
+	}
+};
+/**
+ * Created by Tom on 6/13/2017.
+ */
+
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar){
+	if(extendTitleBar == null){
+		extendTitleBar = 0;
+	}
+	this.autoHeight = autoHeight;
+	this.title = title;
+	this.rowCount = rowCount;
+	this.centeredButtons = [];
+	this.extraTopSpace = extraTop;
+	this.extraBottomSpace = extraBottom;
+	this.extendTitleBar = extendTitleBar;
+	this.visible = false;
+	this.hintText = "";
+}
+RowDialog.setConstants=function(){
+	RowDialog.currentDialog=null;
+
+	RowDialog.titleBarColor=Colors.lightGray;
+	RowDialog.titleBarFontC=Colors.white;
+	RowDialog.bgColor=Colors.black;
+	RowDialog.titleBarH=30;
+	RowDialog.centeredBnWidth=100;
+	RowDialog.bnHeight=MenuBnList.bnHeight;
+	RowDialog.bnMargin=5;
+	RowDialog.minWidth = 400;
+	RowDialog.minHeight = 200;
+	RowDialog.hintMargin = 5;
+
+	RowDialog.fontSize=16;
+	RowDialog.font="Arial";
+	RowDialog.titleFontWeight="bold";
+	RowDialog.centeredfontWeight="bold";
+	RowDialog.charHeight=12;
+	RowDialog.smallBnWidth = 45;
+	RowDialog.iconH = 15;
+};
+RowDialog.prototype.addCenteredButton = function(text, callbackFn){
+	let entry = {};
+	entry.text = text;
+	entry.callbackFn = callbackFn;
+	this.centeredButtons.push(entry);
+};
+
+RowDialog.prototype.show = function(){
+	if(!this.visible) {
+		this.visible = true;
+		RowDialog.currentDialog=this;
+		this.calcHeights();
+		this.calcWidths();
+		this.x = GuiElements.width / 2 - this.width / 2;
+		this.y = GuiElements.height / 2 - this.height / 2;
+		this.group = GuiElements.create.group(this.x, this.y);
+		this.bgRect = this.drawBackground();
+
+		this.titleRect = this.createTitleRect();
+		this.titleText = this.createTitleLabel(this.title);
+
+		this.rowGroup = this.createContent();
+		this.createCenteredBns();
+		this.scrollBox = this.createScrollBox(); // could be null
+		if (this.scrollBox != null) {
+			this.scrollBox.show();
+		}
+
+		GuiElements.layers.overlay.appendChild(this.group);
+
+		GuiElements.blockInteraction();
+	}
+};
+RowDialog.prototype.calcHeights = function(){
+	var RD = RowDialog;
+	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
+	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
+	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
+	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
+	let totalHeight = nonScrollHeight + ScrollHeight;
+	if(!this.autoHeight) totalHeight = 0;
+	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
+	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
+	this.innerHeight = ScrollHeight;
+	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
+	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+	this.extraTopY = RD.titleBarH;
+	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
+};
+RowDialog.prototype.calcWidths=function(){
+	var RD = RowDialog;
+	let thirdWidth = GuiElements.width / 3;
+	this.width = Math.min(GuiElements.width, Math.max(thirdWidth, RD.minWidth));
+	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
+	this.scrollBoxX = RD.bnMargin;
+	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
+	this.contentWidth = this.width - RD.bnMargin * 2;
+};
+RowDialog.prototype.drawBackground = function(){
+	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
+	this.group.appendChild(rect);
+	return rect;
+};
+RowDialog.prototype.createTitleRect=function(){
+	var RD=RowDialog;
+	var rect=GuiElements.draw.rect(0,0,this.width,RD.titleBarH + this.extendTitleBar,RD.titleBarColor);
+	this.group.appendChild(rect);
+	return rect;
+};
+RowDialog.prototype.createTitleLabel=function(title){
+	var RD=RowDialog;
+	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
+	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
+	var y=RD.titleBarH/2+RD.charHeight/2;
+	GuiElements.move.text(textE,x,y);
+	this.group.appendChild(textE);
+	return textE;
+};
+RowDialog.prototype.createContent = function(){
+	var RD = RowDialog;
+	let y = 0;
+	var rowGroup = GuiElements.create.group(0, 0);
+	if(this.rowCount > 0) {
+		for (let i = 0; i < this.rowCount; i++) {
+			this.createRow(i, y, this.contentWidth, rowGroup);
+			y += RD.bnHeight + RD.bnMargin;
+		}
+	}
+	else if(this.hintText != "") {
+		this.createHintText();
+	}
+	return rowGroup;
+};
+RowDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+};
+RowDialog.prototype.createCenteredBns = function(){
+	var RD = RowDialog;
+	let y = this.centeredButtonY;
+	this.centeredButtonEs = [];
+	for(let i = 0; i < this.centeredButtons.length; i++){
+		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+		this.centeredButtonEs.push(bn);
+		y += RD.bnHeight + RD.bnMargin;
+	}
+};
+RowDialog.prototype.createCenteredBn = function(y, entry){
+	var RD = RowDialog;
+	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
+	button.addText(entry.text, null, null, RD.centeredfontWeight);
+	button.setCallbackFunction(entry.callbackFn, true);
+	return button;
+};
+RowDialog.prototype.createScrollBox = function(){
+	if(this.rowCount === 0) return null;
+	let x = this.x + this.scrollBoxX;
+	let y = this.y + this.scrollBoxY;
+	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
+		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
+};
+RowDialog.prototype.createHintText = function(){
+	var RD = RowDialog;
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
+	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
+	let x = this.width / 2 - textWidth / 2;
+	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
+	GuiElements.move.text(this.hintTextE, x, y);
+	this.group.appendChild(this.hintTextE);
+};
+RowDialog.prototype.closeDialog = function(){
+	if(this.visible) {
+		RowDialog.currentDialog = null;
+		this.hide();
+		GuiElements.unblockInteraction();
+	}
+};
+RowDialog.prototype.getScroll = function(){
+	if(this.scrollBox == null) return 0;
+	return this.scrollBox.getScrollY();
+};
+RowDialog.prototype.setScroll = function(y){
+	if(this.scrollBox == null) return;
+	this.scrollBox.setScrollY(y);
+};
+RowDialog.prototype.updateZoom = function(){
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.closeDialog();
+		this.show();
+		this.setScroll(scroll);
+	}
+};
+RowDialog.updateZoom = function(){
+	if(RowDialog.currentDialog != null){
+		RowDialog.currentDialog.updateZoom();
+	}
+};
+RowDialog.prototype.hide = function(){
+	if(this.visible) {
+		this.visible = false;
+		this.group.remove();
+		if (this.scrollBox != null) {
+			this.scrollBox.hide();
+		}
+		this.scrollBox = null;
+	}
+};
+RowDialog.prototype.reloadRows = function(rowCount){
+	this.rowCount = rowCount;
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.hide();
+		this.show();
+		this.setScroll(scroll);
+	}
+};
+RowDialog.prototype.isScrolling = function(){
+	if(this.scrollBox != null){
+		return this.scrollBox.isMoving();
+	}
+	return false;
+};
+RowDialog.prototype.addHintText = function(hintText){
+	this.hintText = hintText;
+};
+RowDialog.prototype.getExtraTopY = function(){
+	return this.extraTopY;
+};
+RowDialog.prototype.getExtraBottomY = function(){
+	return this.extraBottomY;
+};
+RowDialog.prototype.getContentWidth = function(){
+	return this.contentWidth;
+};
+RowDialog.prototype.getCenteredButton = function(i){
+	return this.centeredButtonEs[i];
+};
+RowDialog.prototype.contentRelToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.scrollBox.relToAbsX(x);
+};
+RowDialog.prototype.contentRelToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.scrollBox.relToAbsY(y);
+};
+RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn){
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	button.addText(text);
+	return button;
+};
+RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+	let RD = RowDialog;
+	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+	button.addIcon(iconId, RD.iconH);
+	return button;
+};
+
+/**
+ * Created by Tom on 6/13/2017.
+ */
+
+function OpenDialog(listOfFiles){
+	this.files=listOfFiles.split("\n");
+	if(listOfFiles == ""){
+		this.files = [];
+	}
+	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addHintText("No saved programs");
+}
+OpenDialog.prototype = Object.create(RowDialog.prototype);
+OpenDialog.constructor = OpenDialog;
+OpenDialog.setConstants = function(){
+
+};
+OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
+	var RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	var file = this.files[index];
+	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+	let renameBnX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(file, renameBnX, y, contentGroup);
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	this.createDeleteBn(file, deleteBnX, y, contentGroup);
+};
+OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
+	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
+		this.closeDialog();
+		SaveManager.userOpenFile(file);
+	}.bind(this));
+};
+OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		SaveManager.userDeleteFile(false, file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		SaveManager.userRenameFile(false, file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		me.closeDialog();
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+		openDialog.setScroll(thisScroll);
+	});
+};
+OpenDialog.showDialog = function(){
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+	});
+};
+/**
+ * Created by Tom on 6/18/2017.
+ */
+function ConnectMultipleDialog(deviceClass){
+	let CMD = ConnectMultipleDialog;
+	CMD.lastClass = deviceClass;
+	let title = "Connect Multiple";
+	this.deviceClass = deviceClass;
+	let count = deviceClass.getManager().getDeviceCount();
+	RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap \"+\" to connect");
+}
+ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
+ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
+ConnectMultipleDialog.setConstants = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = null;
+
+	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	CMD.tabRowHeight = RowDialog.titleBarH;
+	CMD.numberWidth = 35;
+	CMD.plusFontSize=26;
+	CMD.plusCharHeight=18;
+
+	CMD.numberFontSize=16;
+	CMD.numberFont="Arial";
+	CMD.numberFontWeight="normal";
+	CMD.numberCharHeight=12;
+	CMD.numberColor = Colors.white;
+};
+ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let statusX = 0;
+	let numberX = statusX + DeviceStatusLight.radius * 2;
+	let mainBnX = numberX + CMD.numberWidth;
+	let removeBnX = width - RowDialog.smallBnWidth;
+	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+
+	let robot = this.deviceClass.getManager().getDevice(index);
+	this.createStatusLight(robot, statusX, y, contentGroup);
+	this.createNumberText(index, numberX, y, contentGroup);
+	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
+};
+ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
+};
+ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textW = GuiElements.measure.textWidth(textE);
+	let textX = x + (CMD.numberWidth - textW) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	GuiElements.move.text(textE, textX, textY);
+	contentGroup.appendChild(textE);
+	return textE;
+};
+ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup){
+	let connectionX = this.x + this.width / 2;
+	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function(){
+		let upperY = this.contentRelToAbsY(y);
+		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
+	}.bind(this));
+};
+ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup){
+	let button = RowDialog.createSmallBn(x, y, contentGroup);
+	button.addText("X");
+	button.setCallbackFunction(function(){
+		this.deviceClass.getManager().removeDevice(index);
+	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.show = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = this;
+	RowDialog.prototype.show.call(this);
+	this.createConnectBn();
+	this.createTabRow();
+	this.deviceClass.getManager().discover();
+};
+ConnectMultipleDialog.prototype.createConnectBn = function(){
+	let CMD = ConnectMultipleDialog;
+	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
+	let x = (this.width - bnWidth) / 2;
+	let y = this.getExtraBottomY();
+	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
+	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	let upperY = y + this.y;
+	let lowerY = upperY + RowDialog.bnHeight;
+	let connectionX = this.x + this.width / 2;
+	button.setCallbackFunction(function(){
+		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
+	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.createTabRow = function(){
+	let CMD = ConnectMultipleDialog;
+	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
+	Device.getTypeList().forEach(function(deviceClass){
+		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	});
+	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
+	if(deviceClass == null){
+		deviceClass = this.deviceClass;
+	}
+	if(deviceClass !== this.deviceClass){
+		this.deviceClass.getManager().stopDiscover();
+	}
+	let thisScroll = this.getScroll();
+	let me = this;
+	me.hide();
+	let dialog = new ConnectMultipleDialog(deviceClass);
+	dialog.show();
+	if(deviceClass === this.deviceClass) {
+		dialog.setScroll(thisScroll);
+	}
+};
+ConnectMultipleDialog.prototype.closeDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	RowDialog.prototype.closeDialog.call(this);
+	CMD.currentDialog = null;
+	this.deviceClass.getManager().stopDiscover();
+};
+ConnectMultipleDialog.reloadDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.currentDialog != null){
+		CMD.currentDialog.reloadDialog();
+	}
+};
+ConnectMultipleDialog.showDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.lastClass == null) {
+		CMD.lastClass = Device.getTypeList()[0];
+	}
+	(new ConnectMultipleDialog(CMD.lastClass)).show();
+};
+/**
+ * Created by Tom on 6/16/2017.
+ */
+function RecordingDialog(listOfRecordings){
+	let RecD = RecordingDialog;
+	this.recordings=listOfRecordings.map(x => x.id);
+	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap record to start");
+	this.state = RecordingManager.recordingStates.stopped;
+}
+RecordingDialog.prototype = Object.create(RowDialog.prototype);
+RecordingDialog.prototype.constructor = RecordingDialog;
+RecordingDialog.setConstants = function(){
+	let RecD = RecordingDialog;
+	RecD.currentDialog = null;
+	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	RecD.coverRectOpacity = 0.8;
+	RecD.coverRectColor = Colors.black;
+	RecD.counterFont = "Arial";
+	RecD.counterColor = Colors.white;
+	RecD.counterFontSize = 60;
+	RecD.counterFontWeight = "normal";
+	RecD.counterBottomMargin = 50;
+	RecD.recordColor = "#f00";
+	RecD.recordTextSize = 25;
+	RecD.recordTextCharH = 18;
+	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.iconSidemargin = 10;
+
+};
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+	let RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	let recording = this.recordings[index];
+	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
+	let renameBnX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(recording, renameBnX, y, contentGroup);
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
+};
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
+	let state = {};
+	state.playing = false;
+	let me = this;
+	let showPlay = function(){
+		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
+	};
+	let showStop = function(){
+		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
+	};
+	button.setCallbackFunction(function(){
+		if(state.playing){
+			Sound.stopAllSounds();
+		} else {
+			Sound.playAndStopPrev(recording, true, function(){
+				state.playing = true;
+				showStop();
+			}, null, function(){
+				if(me.visible) {
+					state.playing = false;
+					showPlay();
+				}
+			});
+		}
+	}, true);
+	showPlay();
+};
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+	let me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		RecordingManager.userDeleteFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	let me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		RecordingManager.userRenameFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	RecordingDialog.currentDialog = this;
+	this.recordButton = this.createRecordButton();
+	this.discardButton = this.createDiscardButton();
+	this.saveButton = this.createSaveButton();
+	this.pauseButton = this.createPauseButton();
+	this.resumeRecordingBn = this.createResumeRecordingBn();
+	this.goToState(this.state);
+};
+RecordingDialog.prototype.hide = function(){
+	RowDialog.prototype.hide.call(this);
+	this.setCounterVisibility(false);
+};
+RecordingDialog.prototype.closeDialog = function(){
+	RowDialog.prototype.closeDialog.call(this);
+	RecordingDialog.currentDialog = null;
+};
+RecordingDialog.prototype.createRecordButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let x = RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
+		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
+	button.setCallbackFunction(function(){
+		RecordingManager.startRecording();
+	}, true);
+	return button;
+};
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+	let RD = RowDialog;
+	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
+	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, width, RD.bnHeight, this.group);
+	button.setCallbackFunction(callbackFn, true);
+	return button;
+};
+RecordingDialog.prototype.createDiscardButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(0, function(){
+		RecordingManager.discardRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	return button;
+};
+RecordingDialog.prototype.createSaveButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(1, function(){
+		this.goToState(RecordingManager.recordingStates.stopped);
+		RecordingManager.stopRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
+	return button;
+};
+RecordingDialog.prototype.createPauseButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.paused);
+		RecordingManager.pauseRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	return button;
+};
+RecordingDialog.prototype.createResumeRecordingBn = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.recording);
+		RecordingManager.resumeRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	return button;
+};
+RecordingDialog.prototype.drawCoverRect = function(){
+	let halfStep = RowDialog.bnMargin / 2;
+	let x = this.x + halfStep;
+	let y = this.y + this.getExtraTopY() + halfStep;
+	let height = this.getExtraBottomY() - this.getExtraTopY() - RowDialog.bnMargin;
+	let width = this.width - RowDialog.bnMargin;
+	let rect = GuiElements.draw.rect(x, y, width, height, RecordingDialog.coverRectColor);
+	GuiElements.update.opacity(rect, RecordingDialog.coverRectOpacity);
+	GuiElements.layers.overlayOverlay.appendChild(rect);
+	return rect;
+};
+RecordingDialog.prototype.drawTimeCounter = function(){
+	let RD = RecordingDialog;
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+	GuiElements.layers.overlayOverlay.appendChild(textE);
+	let width = GuiElements.measure.textWidth(textE);
+	let height = GuiElements.measure.textHeight(textE);
+	let x = this.x + this.width / 2 - width / 2;
+	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
+	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
+	if(span < 2 * RecordingDialog.counterBottomMargin){
+		y = this.getExtraBottomY() - span / 2;
+	}
+	y += this.y;
+	this.counterY = y;
+	GuiElements.move.text(textE, x, y);
+	return textE;
+};
+RecordingDialog.showDialog = function(){
+	RecordingManager.listRecordings(function(result){
+		let recordDialog = new RecordingDialog(result);
+		recordDialog.show();
+	});
+};
+RecordingDialog.prototype.goToState = function(state){
+	let RecD = RecordingDialog;
+	this.state = state;
+	let states = RecordingManager.recordingStates;
+	if(state === states.stopped){
+		this.recordButton.show();
+		this.discardButton.hide();
+		this.saveButton.hide();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(false);
+		this.getCenteredButton(0).enable();
+	}
+	else if(state === states.recording){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.show();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+	else if(state === states.paused){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.show();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+};
+RecordingDialog.startedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
+	}
+};
+RecordingDialog.stoppedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+};
+RecordingDialog.pausedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
+	}
+};
+RecordingDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	RecordingManager.listRecordings(function(response){
+		me.closeDialog();
+		let dialog = new RecordingDialog(response);
+		dialog.show();
+		dialog.setScroll(thisScroll);
+	});
+};
+RecordingDialog.prototype.setCounterVisibility = function(visible){
+	if(visible){
+		if (this.coverRect == null) {
+			this.coverRect = this.drawCoverRect();
+		}
+		if (this.counter == null) {
+			this.counter = this.drawTimeCounter();
+		}
+	} else {
+		if (this.coverRect != null) {
+			this.coverRect.remove();
+			this.coverRect = null;
+		}
+		if (this.counter != null) {
+			this.counter.remove();
+			this.counter = null;
+		}
+	}
+};
+RecordingDialog.prototype.updateCounter = function(time){
+	if(this.counter == null) return;
+	let totalSeconds = Math.floor(time / 1000);
+	let seconds = totalSeconds % 60;
+	let totalMinutes = Math.floor(totalSeconds / 60);
+	let minutes = totalMinutes % 60;
+	let hours = Math.floor(totalMinutes / 60);
+	let secondsString = seconds + "";
+	if(secondsString.length < 2){
+		secondsString = "0" + secondsString;
+	}
+	let minutesString = minutes + "";
+	let totalString = minutesString + ":" + secondsString;
+	if(hours > 0) {
+		if(minutesString.length < 2) {
+			minutesString = "0" + minutesString;
+		}
+		totalString = hours + ":" + minutesString + ":" + secondsString;
+	}
+	GuiElements.update.text(this.counter, totalString);
+	let width = GuiElements.measure.textWidth(this.counter);
+	let counterX = this.x + this.width / 2 - width / 2;
+	GuiElements.move.text(this.counter, counterX, this.counterY);
+};
+RecordingDialog.updateCounter = function(time){
+	if(this.currentDialog != null){
+		this.currentDialog.updateCounter(time);
+	}
+};
+/**
+ * Created by Tom on 6/19/2017.
+ */
+function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
+	if(index == null){
+		index = null;
+	}
+	this.x = x;
+	this.upperY = upperY;
+	this.lowerY = lowerY;
+	this.index = index;
+	this.deviceClass = deviceClass;
+	this.visible = false;
+	this.robotId = null;
+	if(index != null){
+		this.robotId = this.deviceClass.getManager().getDevice(index);
+	}
+}
+RobotConnectionList.setConstants = function(){
+	let RCL=RobotConnectionList;
+	RCL.bnMargin = 5;
+	RCL.bgColor=Colors.lightGray; //"#171717";
+	RCL.updateInterval=DiscoverDialog.updateInterval;
+	RCL.height=150;
+	RCL.width=200;
+};
+RobotConnectionList.prototype.show = function(){
+	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
+		this.showWithList("");
+	}.bind(this));
+};
+RobotConnectionList.prototype.showWithList = function(list){
+	let RCL = RobotConnectionList;
+	this.visible = true;
+	this.group=GuiElements.create.group(0,0);
+	this.menuBnList = null;
+	let layer = GuiElements.layers.overlayOverlay;
+	let overlayType = Overlay.types.connectionList;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
+	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
+	this.updateRobotList(list);
+};
+RobotConnectionList.prototype.discoverRobots=function(){
+	let me = this;
+	this.deviceClass.getManager().discover(function(response){
+		me.updateRobotList(response);
+	},function(){
+		if(DiscoverDialog.allowVirtualDevices){
+			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
+		}
+	});
+};
+RobotConnectionList.prototype.updateRobotList=function(robotArray){
+	const RCL = RobotConnectionList;
+	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
+	if(TouchReceiver.touchDown || !this.visible || isScrolling){
+		return;
+	}
+	let oldScroll=null;
+	if(this.menuBnList!=null){
+		oldScroll=this.menuBnList.getScroll();
+		this.menuBnList.hide();
+	}
+	let layer = GuiElements.layers.overlayOverlayScroll;
+	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.menuBnList.setMaxHeight(RCL.height);
+	for(let i=0; i < robotArray.length;i++) {
+		this.addBnListOption(robotArray[i]);
+	}
+	this.menuBnList.show();
+	if(oldScroll != null) {
+		this.menuBnList.setScroll(oldScroll);
+	}
+};
+RobotConnectionList.prototype.addBnListOption=function(robot){
+	let me = this;
+	this.menuBnList.addOption(robot.name,function(){
+		me.close();
+		if(me.index == null){
+			me.deviceClass.getManager().appendDevice(robot);
+		} else {
+			me.deviceClass.getManager().setDevice(me.index, robot);
+		}
+	});
+};
+RobotConnectionList.prototype.close=function(){
+	this.updateTimer=window.clearInterval(this.updateTimer);
+	this.bubbleOverlay.hide();
+	this.visible = false;
+	if(this.menuBnList != null) this.menuBnList.hide();
+};
+RobotConnectionList.prototype.relToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.bubbleOverlay.relToAbsX(x);
+};
+RobotConnectionList.prototype.relToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.bubbleOverlay.relToAbsY(y);
+};
+/**
+ * Created by Tom on 6/14/2017.
+ */
+
+
+
+function DiscoverDialog(deviceClass){
+	let DD = DiscoverDialog;
+	let title = "Connect " + deviceClass.getDeviceTypeName(false);
+	RowDialog.call(this, false, title, 0, 0, 0);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.deviceClass = deviceClass;
+	this.discoveredDevices = [];
+	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
+	this.addHintText(deviceClass.getConnectionInstructions());
+}
+DiscoverDialog.prototype = Object.create(RowDialog.prototype);
+DiscoverDialog.prototype.constructor = DiscoverDialog;
+DiscoverDialog.setConstants = function(){
+	DiscoverDialog.updateInterval = 500;
+	DiscoverDialog.allowVirtualDevices = false;
+};
+DiscoverDialog.prototype.show = function(){
+	var DD = DiscoverDialog;
+	RowDialog.prototype.show.call(this);
+	if(!this.updateTimer.isRunning()) {
+		this.updateTimer.start();
+		this.discoverDevices();
+	}
+};
+DiscoverDialog.prototype.discoverDevices = function() {
+	let me = this;
+	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
+		if(DiscoverDialog.allowVirtualDevices) {
+			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
+		}
+	});
+};
+DiscoverDialog.prototype.updateDeviceList = function(deviceList){
+	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
+		return;
+	}
+	this.discoveredDevices = deviceList;
+	this.reloadRows(this.discoveredDevices.length);
+
+};
+DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
+	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
+	button.addText(this.discoveredDevices[index].name);
+	var me = this;
+	button.setCallbackFunction(function(){
+		me.selectDevice(me.discoveredDevices[index]);
+	}, true);
+	button.makeScrollable();
+};
+DiscoverDialog.prototype.selectDevice = function(device){
+	this.deviceClass.getManager().setOneDevice(device);
+	this.closeDialog();
+};
+DiscoverDialog.prototype.closeDialog = function(){
+	RowDialog.prototype.closeDialog.call(this);
+	this.updateTimer.stop();
+	this.deviceClass.getManager().stopDiscover();
+};
+function OverflowArrows(){
+	var OA = OverflowArrows;
+	this.group = GuiElements.create.group(0, 0);
+	this.triTop = this.makeTriangle();
+	this.triLeft = this.makeTriangle();
+	this.triRight = this.makeTriangle();
+	this.triBottom = this.makeTriangle();
+	this.setArrowPos();
+	this.visible = false;
+}
+OverflowArrows.prototype.makeTriangle=function(){
+	var OA = OverflowArrows;
+	var tri = GuiElements.create.path();
+	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.opacity(tri, OA.opacity);
+	GuiElements.makeClickThrough(tri);
+	return tri;
+};
+OverflowArrows.setConstants=function(){
+	var OA = OverflowArrows;
+	OA.triangleW = 25;
+	OA.triangleH = 15;
+	OA.margin = 15;
+	OA.opacity = 0.5;
+};
+OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
+	if(left == right) {
+		this.showIfTrue(this.triLeft, false);
+		this.showIfTrue(this.triRight, false);
+	}
+	else{
+		this.showIfTrue(this.triLeft, left < this.left);
+		this.showIfTrue(this.triRight, right > this.right);
+	}
+	if(top == bottom){
+		this.showIfTrue(this.triTop, false);
+		this.showIfTrue(this.triBottom, false);
+	}
+	else {
+		this.showIfTrue(this.triTop, top < this.top);
+		this.showIfTrue(this.triBottom, bottom > this.bottom);
+	}
+};
+OverflowArrows.prototype.showIfTrue=function(tri,shouldShow){
+	if(shouldShow){
+		this.group.appendChild(tri);
+	} else{
+		tri.remove();
+	}
+};
+OverflowArrows.prototype.show=function(){
+	if(!this.visible) {
+		this.visible = true;
+		GuiElements.layers.overflowArr.appendChild(this.group);
+	}
+};
+OverflowArrows.prototype.hide=function(){
+	if(this.visible){
+		this.visible = false;
+		this.group.remove();
+	}
+};
+OverflowArrows.prototype.updateZoom=function(){
+	this.setArrowPos();
+};
+OverflowArrows.prototype.setArrowPos=function(){
+	var OA = OverflowArrows;
+	this.left = BlockPalette.width;
+	if(!GuiElements.paletteLayersVisible) {
+		this.left = 0;
+	}
+	this.top = TitleBar.height;
+	this.right = GuiElements.width;
+	this.bottom = GuiElements.height;
+	this.midX = (this.left + this.right) / 2;
+	this.midY = (this.top + this.bottom) / 2;
+
+	GuiElements.update.triangleFromPoint(this.triTop, this.midX, this.top + OA.margin, OA.triangleW, OA.triangleH, true);
+	GuiElements.update.triangleFromPoint(this.triLeft, this.left + OA.margin, this.midY, OA.triangleW, OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triRight, this.right - OA.margin, this.midY, OA.triangleW, -OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triBottom, this.midX, this.bottom - OA.margin, OA.triangleW, -OA.triangleH, true);
+};
+/**
+ * BlockStack is a class that holds a stack of Blocks.
+ * BlockStacks move, execute, and snap the Blocks within them.
+ * They pass messages onto their Blocks, which are passed on recursively.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.
+ * Empty BlockStacks are not allowed because each BlockStack must have a non-null firstBlock property.
+ * @constructor
+ * @param {Block} firstBlock - The first Block in the BlockStack.
+ * The firstBlock is automatically moved along with subsequent Blocks into the BlockStack.
+ * @param {Tab} tab - The tab the BlockStack lives within.
+ */
+function BlockStack(firstBlock,tab){
+	tab.addStack(this); //The Tab maintains a list of all its BlockStacks.
+	this.firstBlock=firstBlock;
+	this.firstBlock.stop(); //Prevents execution.
+	this.firstBlock.stopGlow(); //Removes visual indicator of execution.
+	this.returnType=firstBlock.returnType; //The BlockStack returns the same type of value as its first Block.
+	this.tab=tab;
+	this.x = 0;
+	this.y = 0;
+	var blockX = firstBlock.getAbsX();
+	var blockY = firstBlock.getAbsY();
+	this.x=this.setAbsX(firstBlock.getAbsX());
+	this.y=this.setAbsY(firstBlock.getAbsY());
+	this.tabGroup=tab.mainG; //Stores the SVG group element of the Tab it is within.
+	this.group=GuiElements.create.group(this.x,this.y,this.tabGroup); //Creates a group for the BlockStack.
+	this.firstBlock.changeStack(this); //Moves all Blocks into the BlockStack.
+	this.dim=function(){}; //Stores information about the snap bounding box of the BlockStack.
+	//this.dim values will be assigned later.
+	this.dim.cw=0; //Dimensions of regions command blocks can be attached to.
+	this.dim.ch=0;
+	this.dim.rw=0; //Dimensions of regions reporter/predicate blocks can be attached to.
+	this.dim.rh=0;
+	this.dim.cx1=0; //These will be measured relative to the Tab, not the BlockStack.
+	this.dim.cy1=0;
+	this.dim.rx1=0;
+	this.dim.ry1=0;
+	this.updateDim(); //Updates the this.dim values, the dimensions of the Blocks, and aligns them.
+	this.isRunning=false;
+	this.currentBlock=null; //Keeps track of which Block in the BlockStack is currently executing.
+	this.isDisplayStack=false;
+	this.runningBroadcastMessage=""; //Keeps track of if this stack's execution was started by a broadcast.
+	this.move(this.x,this.y);
+	this.flying=false; //BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
+	this.tab.updateArrows();
+}
+/* Recursively updates the this.dim values, the dimensions of the Blocks, and and the Blocks' alignment.
+ */
+BlockStack.prototype.updateDim=function() {
+	this.firstBlock.updateDim(); //Recursively updates the dimensions of the Blocks.
+	//The first Block is aligned to the top-left corner of the BlockStack.
+	this.firstBlock.updateAlign(0,0); //Blocks recursively aligned.
+	this.dim.cx1=0; //Clear existing values from bounding boxes.
+	this.dim.cy1=0; //During updateStackDim, these values are measured relative to the BlockStack.
+	this.dim.cx2=0;
+	this.dim.cy2=0;
+	this.dim.rx1=0;
+	this.dim.ry1=0;
+	this.dim.rx2=0;
+	this.dim.ry2=0;
+	//Recursively each box updates the this.dim boxes to include their own bounding boxes.
+	this.firstBlock.updateStackDim();
+	//Dimensions of both types of boxes are calculated.
+	this.dim.cw=this.dim.cx2-this.dim.cx1;
+	this.dim.ch=this.dim.cy2-this.dim.cy1;
+	this.dim.rw=this.dim.rx2-this.dim.rx1;
+	this.dim.rh=this.dim.ry2-this.dim.ry1;
+};
+/**
+ * Converts a coordinate relative to the inside of the stack to one relative to the screen.
+ * @param {number} x - The coord relative to the inside fo the stack.
+ * @return {number} - The coord relative to the screen.
+ */
+BlockStack.prototype.relToAbsX=function(x){
+	if(this.flying){
+		return CodeManager.dragRelToAbsX(x+this.x);
+	}
+	else{
+		return this.tab.relToAbsX(x+this.x); //In a Tab; return x plus Tab's offset.
+	}
+};
+BlockStack.prototype.relToAbsY=function(y){
+	if(this.flying){
+		return CodeManager.dragRelToAbsY(y+this.y); //Not in a Tab; scale by dragLayer's scale
+	}
+	else{
+		return this.tab.relToAbsY(y+this.y); //In a Tab; return y plus Tab's offset.
+	}
+};
+/**
+ * Converts a coordinate relative to the screen to one relative to the inside of the stack.
+ * @param {number} x - The coord relative to the screen.
+ * @return {number} - The coord relative to the inside fo the stack.
+ */
+BlockStack.prototype.absToRelX=function(x){
+	if(this.flying){
+		return CodeManager.dragAbsToRelX(x)-this.x;
+	}
+	else{
+		return this.tab.absToRelX(x)-this.x; //In a Tab; return x minus Tab's offset.
+	}
+};
+BlockStack.prototype.absToRelY=function(y){
+	if(this.flying){
+		return CodeManager.dragAbsToRelY(y)-this.y;
+	}
+	else{
+		return this.tab.absToRelY(y)-this.y; //In a Tab; return y minus Tab's offset.
+	}
+};
+/**
+ * Returns the x coord of the BlockStack relative to the screen.
+ * @return The x coord of the BlockStack relative to the screen.
+ */
+BlockStack.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the BlockStack relative to the screen.
+ * @return The y coord of the BlockStack relative to the screen.
+ */
+BlockStack.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+BlockStack.prototype.setAbsX=function(x){
+	return this.x + this.absToRelX(x);
+};
+BlockStack.prototype.setAbsY=function(y){
+	return this.y + this.absToRelY(y);
+};
+/* Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
+ * Returns no values but stores results on CodeManager.fit.
+ */
+BlockStack.prototype.findBestFit=function(){
+	//Not implemented, check top of block
+	var move=CodeManager.move;
+	var fit=CodeManager.fit;
+	if(move.stack===this){ //If this BlockStack is the one being moved, it can't attach to itself.
+		return;
+	}
+	//Check if the moving BlockStack can attah to the top of this BlockStack.
+	if(move.bottomOpen&&this.firstBlock.topOpen){
+		this.findBestFitTop();
+	}
+	//Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
+	if(move.topOpen){
+		//Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
+		let absCx=this.relToAbsX(this.dim.cx1);
+		let absCy=this.relToAbsY(this.dim.cy1);
+		let absW = this.relToAbsX(this.dim.cw) - absCx;
+		let absH = this.relToAbsY(this.dim.ch) - absCy;
+		if(move.pInRange(move.topX,move.topY,absCx,absCy,absW,absH)){
+			this.firstBlock.findBestFit();
+		}
+	}
+	//Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
+	if(move.returnsValue){
+		//Only check if the BlockStack's bounding box overlaps with this BlockStack's bounding box.
+		let absRx=this.relToAbsX(this.dim.rx1);
+		let absRy=this.relToAbsY(this.dim.ry1);
+		let absW = this.relToAbsX(this.dim.rw) - absRx;
+		let absH = this.relToAbsY(this.dim.rh) - absRy;
+		var width = move.bottomX - move.topX;
+		var height = move.bottomY - move.topY;
+		if(move.rInRange(move.topX,move.topY,width,height,absRx,absRy,absW,absH)){
+			this.firstBlock.findBestFit();
+		}
+	}
+};
+/**
+ * Moves this BlockStack to a new location relative to the Tab. Updates this.x and this.y accordingly.
+ * @param {number} x - the x coord to move to.
+ * @param {number} y - the y coord to move to.
+ */
+BlockStack.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	GuiElements.move.group(this.group,x,y);
+};
+/**
+ * Moves the BlockStack to a certain location on the screen.
+ * @param {number} x - The x coord relative to the screen where the BlockStack should move.
+ * @param {number} y - The y coord relative to the screen where the BlockStack should move.
+ */
+BlockStack.prototype.moveAbs=function(x,y){
+	var relX=this.absToRelX(x);
+	var relY=this.absToRelY(y);
+	this.move(relX,relY);
+};
+/* Recursively stops the execution of the BlockStack and its contents. Removes the glow as well.
+ */
+BlockStack.prototype.stop=function(){
+	if(this.isRunning){
+		this.firstBlock.stop();
+		this.endRun(); //Removes glow and sets isRunning.
+	}
+};
+/**
+ * Updates the execution of the BlockStack and its contents. Returns boolean to indicate if still running.
+ * @return {ExecutionStatus}
+ */
+BlockStack.prototype.updateRun=function(){
+	if(this.isRunning){
+		//Different procedures are used if the Block returns a value.
+		if(this.returnType===Block.returnTypes.none){
+			if(this.currentBlock.stack!==this){ //If the current Block has been removed, don't run it.
+				this.endRun(); //Stop execution.
+				return new ExecutionStatusDone();
+			}
+			//Update the current Block.
+			let execStatus = this.currentBlock.updateRun();
+			if(!execStatus.isRunning()){
+				//If the block threw a error, display it
+				if(execStatus.hasError()){
+					this.endRun();
+					return new ExecutionStatusDone();
+				} else{
+					//Otherwise, the next block will run next.
+					this.currentBlock=this.currentBlock.nextBlock;
+				}
+			}
+			//If the end of the BlockStack has been reached, end execution.
+			if(this.currentBlock!=null){
+				return new ExecutionStatusRunning();
+			} else{
+				this.endRun();
+				return new ExecutionStatusDone();
+			}
+		}
+		else{ //Procedure for Blocks that return a value.
+			let execStatus = this.currentBlock.updateRun();
+			if(execStatus.isRunning()){
+				return new ExecutionStatusRunning();
+			}
+			else if(execStatus.hasError()){
+				this.endRun();
+				return new ExecutionStatusDone();
+			}
+			else{
+				//When it is done running, display the result.
+				this.currentBlock.displayResult(execStatus.getResult());
+				this.endRun(); //Execution is done.
+				return new ExecutionStatusDone();
+			}
+		}
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+/**
+ * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
+ * @param {Block} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
+ */
+BlockStack.prototype.startRun=function(startBlock,broadcastMessage){
+	if(startBlock==null){
+		startBlock=this.firstBlock; //Set parameter to default.
+	}
+	if(broadcastMessage==null){
+		broadcastMessage="";
+	}
+	this.runningBroadcastMessage=broadcastMessage;
+	if(!this.isRunning){ //Only start if not already running.
+		this.isRunning=true;
+		this.currentBlock=startBlock;
+		this.firstBlock.glow();
+		this.tab.startRun(); //Starts Tab if it is not already running.
+	}
+};
+/* Ends execution and removes glow. Does not call stop() function on Blocks; assumes they have stopped already.
+ */
+BlockStack.prototype.endRun=function(){
+	this.isRunning=false;
+	this.firstBlock.stopGlow();
+};
+/* Checks if the moving BlockStack can snap on to the top of this BlockStack. Returns nothing.
+ * Results are stored in CodeManager.fit.
+ * Only called if moving BlockStack returns no value.
+ */
+BlockStack.prototype.findBestFitTop=function(){
+	var snap=BlockGraphics.command.snap; //Get snap bounding box for command Blocks.
+	var move=CodeManager.move;
+	var fit=CodeManager.fit;
+	var x=this.firstBlock.getAbsX(); //Uses screen coordinates.
+	var y=this.firstBlock.getAbsY();
+	var height = this.relToAbsY(this.firstBlock.height) - y;
+	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
+	 * the snap bounding box of the first Block in the BlockStack. */
+	//Gets the bottom-left corner of the moving BlockStack.
+	var moveBottomLeftX=move.topX;
+	var moveBottomLeftY=move.bottomY;
+	//Gets the snap bounding box of the first Block.
+	var snapBLeft=x-snap.left;
+	var snapBTop=y-snap.top;
+	var snapBWidth=snap.left+snap.right;
+	var snapBHeight=snap.top+height+snap.bottom;
+	//Checks if the point falls in the box.
+	if(move.pInRange(moveBottomLeftX,moveBottomLeftY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
+		var xDist=move.topX-x;
+		var yDist=move.bottomY-y;
+		var dist=xDist*xDist+yDist*yDist; //Computes the distance.
+		if(!fit.found||dist<fit.dist){ //Compares it to existing fit.
+			fit.found=true;
+			fit.bestFit=this; //Note that in this case the bestFit is set to a BlockStack, not a Block.
+			fit.dist=dist; //Saves the fit.
+		}
+	}
+};
+/**
+ * Recursively attaches the provided Block and its subsequent Blocks to the top of this BlockStack.
+ * @param {Block} block - The Block to attach to this BlockStack.
+ * @fix - Remove redundant code.
+ */
+BlockStack.prototype.snap=function(block){ //Fix! remove redundant code.
+	if(this.isRunning&&!block.stack.isRunning){ //Fix! documentation
+		block.glow();
+	}
+	else if(!this.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
+		block.stack.stop();
+	}
+	else if(this.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
+		block.stop();
+	}
+	/* Move this BlockStack up by the height of the of the stack the Block belongs to.
+	 * This compensates for the amount existing Blocks will be shifted down by the newly-added Blocks. */
+	this.move(this.x,this.y-block.stack.dim.rh); //Fix! this.dim clarification
+	var topStackBlock=block; //There is a new top Block.
+	var bottomStackBlock=block.getLastBlock(); //The last Block in the stack being added.
+	var upperBlock=this.firstBlock; //The topmost of the existing Blocks.
+	//Fix references between Blocks to glue them together.
+	this.firstBlock=topStackBlock;
+	topStackBlock.parent=null;
+	bottomStackBlock.nextBlock=upperBlock;
+	upperBlock.parent=bottomStackBlock;
+	//The old BlockStack can now be destroyed.
+	var oldG=block.stack.group;
+	block.stack.remove();
+	block.changeStack(this);
+	oldG.remove();
+
+	this.updateDim();
+};
+/* Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
+ */
+BlockStack.prototype.highlight=function(){
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.isRunning);
+};
+/**
+ * Shifts this BlockStack by the specified amount.
+ * @param {number} x - The amount to shift in the x direction.
+ * @param {number} y - The amount to shift in the y direction.
+ */
+BlockStack.prototype.shiftOver=function(x,y){
+	this.move(this.x+x,this.y+y);
+};
+/**
+ * Recursively copies this BlockStack and all its contents to a new BlockStack. Returns the new BlcokStack.
+ * @return {BlockStack} - The newly-copied BlockStack.
+ */
+BlockStack.prototype.duplicate=function(x,y,group){
+	//First duplicate the Blocks.
+	var firstCopyBlock=this.firstBlock.duplicate(x,y);
+	//Then put them in a new BlockStack.
+	return new BlockStack(firstCopyBlock,this.tab);
+};
+/* Returns the Tab this BlockStack belongs to. Used by the Blocks it contains when they need to kow their tab.
+ * @return {Tab} - The Tab this BlockStack belongs to.
+ */
+BlockStack.prototype.getTab=function(){
+	return this.tab;
+};
+/**
+ * Returns the Sprite this BlockStack and its Blocks are associated with. Called by this BlockStack's Blocks.
+ * Used in Block implementations.
+ * @return {Sprite} - The Sprite this BlockStack and its Blocks are associated with.
+ */
+BlockStack.prototype.getSprite=function(){
+	return this.tab.getSprite();
+};
+/* Moves this BlockStack out of the Tab's group and into the drag layer about other Blocks.
+ */
+BlockStack.prototype.fly=function(){
+	this.group.remove(); //Remove group from Tab (visually only).
+	GuiElements.layers.drag.appendChild(this.group); //Add group to drag layer.
+	var absX=this.getAbsX(); //Get current location on screen.
+	var absY=this.getAbsY();
+	this.flying=true; //Record that this BlockStack is flying.
+	//Move to ensure that position on screen does not change.
+	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
+	this.tab.updateArrows();
+};
+/* Moves this BlockStack back into its Tab's group.
+ */
+BlockStack.prototype.land=function(){
+	this.group.remove(); //Remove from drag layer.
+	this.tabGroup.appendChild(this.group); //Go back into tab group.
+	var absX=this.getAbsX(); //Get current location on screen.
+	var absY=this.getAbsY();
+	this.flying=false;
+	//Move to ensure that position on screen does not change.
+	this.move(this.tab.absToRelX(absX),this.tab.absToRelY(absY));
+	this.tab.updateArrows();
+};
+/* Removes the stack from the Tab's list.
+ */
+BlockStack.prototype.remove=function(){
+	this.tab.removeStack(this);
+};
+/* Stops execution and removes the BlockStack digitally and visually.
+ */
+BlockStack.prototype.delete=function(){
+	this.stop();
+	this.group.remove();
+	this.remove(); //Remove from Tab's list.
+	this.tab.updateArrows();
+};
+/* Passes message to first Block in BlockStack that the flag was tapped.
+ */
+BlockStack.prototype.eventFlagClicked=function(){
+	if(!this.isRunning){ //Only pass message if not already running.
+		this.firstBlock.eventFlagClicked();
+	}
+};
+/* Passes broadcast message to first Block in BlockStack.
+ */
+BlockStack.prototype.eventBroadcast=function(message){
+	this.firstBlock.eventBroadcast(message);
+};
+/* Checks if a broadcast is still running for the broadcast and wait Block.
+ */
+BlockStack.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		return this.runningBroadcastMessage==message;
+	}
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots.
+ */
+BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
+	return this.firstBlock.checkBroadcastMessageAvailable(message);
+};
+/* Recursively updates the available broadcast messages.
+ */
+BlockStack.prototype.updateAvailableMessages=function(){
+	this.firstBlock.updateAvailableMessages();
+};
+/**
+ * Recursively returns the last Block in the BlockStack.
+ * @return {Block} - The last Block in the BlockStack.
+ */
+BlockStack.prototype.getLastBlock=function(){
+	return this.firstBlock.getLastBlock();
+};
+/*
+
+ */
+BlockStack.prototype.updateTabDim=function(){
+	if(this.flying) return;
+	var dim=this.tab.dim;
+	if(dim.x1==null||this.x<dim.x1){
+		dim.x1=this.x;
+	}
+	if(dim.y1==null||this.y<dim.y1){
+		dim.y1=this.y;
+	}
+	var x2=this.x+this.dim.rw;
+	if(dim.x2==null||x2>dim.x2){
+		dim.x2=x2;
+	}
+	var y2=this.y+this.dim.rh;
+	if(dim.y2==null||y2>dim.y2){
+		dim.y2=y2;
+	}
+};
+/* TODO: Write documentation. */
+BlockStack.prototype.createXml=function(xmlDoc){
+	var stack=XmlWriter.createElement(xmlDoc,"stack");
+	XmlWriter.setAttribute(stack,"x",this.x);
+	XmlWriter.setAttribute(stack,"y",this.y);
+	var blocks=XmlWriter.createElement(xmlDoc,"blocks");
+	this.firstBlock.writeToXml(xmlDoc,blocks);
+	stack.appendChild(blocks);
+	return stack;
+};
+/* TODO: Write documentation. */
+BlockStack.importXml=function(stackNode,tab){
+	var x=XmlWriter.getAttribute(stackNode,"x",0,true);
+	var y=XmlWriter.getAttribute(stackNode,"y",0,true);
+	var blocksNode=XmlWriter.findSubElement(stackNode,"blocks");
+	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
+	if(blockNodes.length>0){
+		var firstBlock=null;
+		var i=0;
+		while(firstBlock==null&&i<blockNodes.length){
+			firstBlock=Block.importXml(blockNodes[i]);
+			i++;
+		}
+		if(firstBlock==null){
+			return null;
+		}
+		var stack=new BlockStack(firstBlock,tab);
+		stack.move(x,y);
+		var previousBlock=firstBlock;
+		while(i<blockNodes.length) {
+			var newBlock = Block.importXml(blockNodes[i]);
+			if (newBlock != null) {
+				previousBlock.snap(newBlock);
+				previousBlock = newBlock;
+			}
+			i++;
+		}
+		stack.updateDim();
+	}
+	else{
+		return null;
+	}
+};
+BlockStack.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+BlockStack.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+BlockStack.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+BlockStack.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+BlockStack.prototype.checkVariableUsed=function(variable){
+	return this.firstBlock.checkVariableUsed(variable);
+};
+BlockStack.prototype.checkListUsed=function(list){
+	return this.firstBlock.checkListUsed(list);
+};
+BlockStack.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+	this.updateDim();
+};
+BlockStack.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+	this.updateDim();
+};
+BlockStack.prototype.countDevicesInUse=function(deviceClass){
+	return this.firstBlock.countDevicesInUse(deviceClass);
+};
+BlockStack.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	this.firstBlock[functionName].apply(this.firstBlock,args);
+};
+BlockStack.prototype.getWidth=function(){
+	return this.dim.rw;
+};
+BlockStack.prototype.getHeight=function(){
+	return this.dim.rh;
+};
+/**
+ * Created by Tom on 6/12/2017.
+ */
+
+/**
+ * Represents a request to be used with HtmlServer
+ * @param url {String} - The beginning of the request
+ * @constructor
+ */
+function HttpRequestBuilder(url){
+	DebugOptions.validateNonNull(url);
+	this.request = url;
+	this.hasFirstParam = false;
+}
+/**
+ * Adds a get parameter with the given key and value
+ * @param key {String}
+ * @param value {String} - The value will be escaped with
+ */
+HttpRequestBuilder.prototype.addParam = function(key, value){
+	if(!this.hasFirstParam){
+		this.hasFirstParam = true;
+		this.request += "?";
+	} else{
+		this.request += "&";
+	}
+	this.request += key;
+	this.request += "=";
+	this.request += HtmlServer.encodeHtml(value);
+};
+/**
+ * Returns the request to give to HtmlServer
+ * @returns {String}
+ */
+HttpRequestBuilder.prototype.toString = function(){
+	return this.request;
+};
+
+
+/* HtmlServer is a static class that will manage HTTP requests.
+ * This class is not nearly finished.
+ */
+function HtmlServer(){
+	HtmlServer.port=22179;
+	HtmlServer.dialogVisible=false;
+	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
+}
+HtmlServer.decodeHtml = function(message){
+	return decodeURIComponent(message);
+};
+HtmlServer.encodeHtml=function(message){
+	/*if(message==""){
+		return "%20"; //Empty strings can't be used in the URL.
+	}*/
+	var eVal;
+	if (!encodeURIComponent) {
+		eVal = escape(message);
+		eVal = eVal.replace(/@/g, "%40");
+		eVal = eVal.replace(/\//g, "%2F");
+		eVal = eVal.replace(/\+/g, "%2B");
+		eVal = eVal.replace(/'/g, "%60");
+		eVal = eVal.replace(/"/g, "%22");
+		eVal = eVal.replace(/`/g, "%27");
+		eVal = eVal.replace(/&/g, "%26");
+	} else {
+		eVal = encodeURIComponent(message);
+		eVal = eVal.replace(/~/g, "%7E");
+		eVal = eVal.replace(/!/g, "%21");
+		eVal = eVal.replace(/\(/g, "%28");
+		eVal = eVal.replace(/\)/g, "%29");
+		eVal = eVal.replace(/'/g, "%27");
+		eVal = eVal.replace(/"/g, "%22");
+		eVal = eVal.replace(/`/g, "%27");
+		eVal = eVal.replace(/&/g, "%26");
+	}
+	return eVal; //.replace(/\%20/g, "+");
+};
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	callbackFn = DebugOptions.safeFunc(callbackFn);
+	callbackErr = DebugOptions.safeFunc(callbackErr);
+	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+	}
+	if(DebugOptions.shouldSkipHtmlRequests()) {
+		setTimeout(function () {
+			if(callbackErr != null) {
+				callbackErr();
+			}
+			/*if(callbackFn != null) {
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Started');
+			}*/
+		}, 20);
+		return;
+	}
+	if(isPost == null) {
+		isPost=false;
+	}
+	var requestType="GET";
+	if(isPost){
+		requestType="POST";
+	}
+	try {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if (200 <= xhttp.status && xhttp.status <= 299) {
+					if(callbackFn!=null){
+						callbackFn(xhttp.responseText);
+					}
+				}
+				else {
+					if(callbackErr!=null){
+						if(HtmlServer.logHttp){
+							GuiElements.alert("HTTP ERROR: " + xhttp.status);
+						}
+						callbackErr(xhttp.status);
+					}
+					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
+				}
+			}
+		};
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
+		if(isPost){
+			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
+			xhttp.send(postData);
+		}
+		else{
+			xhttp.send(); //Make the request
+		}
+	}
+	catch(err){
+		if(callbackErr!=null){
+			callbackErr();
+		}
+	}
+};
+HtmlServer.sendRequest=function(request,requestStatus){
+	/*
+	 setTimeout(function(){
+		requestStatus.error = false;
+		requestStatus.finished = true;
+		requestStatus.result = "7";
+	}, 300);
+	return;
+	*/
+	if(requestStatus!=null){
+		requestStatus.error=false;
+		var callbackFn=function(response){
+			callbackFn.requestStatus.finished=true;
+			callbackFn.requestStatus.result=response;
+		};
+		callbackFn.requestStatus=requestStatus;
+		var callbackErr=function(){
+			callbackErr.requestStatus.finished=true;
+			callbackErr.requestStatus.error=true;
+		};
+		callbackErr.requestStatus=requestStatus;
+		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
+	}
+	else{
+		HtmlServer.sendRequestWithCallback(request);
+	}
+}
+HtmlServer.getHBRequest=function(hBIndex,request,params){
+	DebugOptions.validateNonNull(params);
+	var res = "hummingbird/";
+	res += request;
+	res += "?id=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
+	res += params;
+	return res;
+};
+HtmlServer.getUrlForRequest=function(request){
+	return "http://localhost:"+HtmlServer.port+"/"+request;
+}
+HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	//GuiElements.alert("Showing...");
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var newText=prompt(question);
+		HtmlServer.dialogVisible=false;
+		callbackFn(newText==null,newText);
+	}
+	else{
+		var HS=HtmlServer;
+		var request = "tablet/dialog";
+		request+="?title=" + HS.encodeHtml(title);
+		request+="&question="+HS.encodeHtml(question);
+		request+="&prefill="+HS.encodeHtml(prefill);
+		request+="&selectAll=true";
+		var onDialogPresented=function(result){
+			//GuiElements.alert("dialog presented...");
+			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
+		}
+		onDialogPresented.callbackFn=callbackFn;
+		onDialogPresented.callbackErr=callbackErr;
+		var onDialogFail=function(){
+			//GuiElements.alert("dialog failed...");
+			HtmlServer.dialogVisible=false;
+			if(onDialogFail.callbackErr!=null) {
+				onDialogFail.callbackErr();
+			}
+		}
+		onDialogFail.callbackErr=callbackErr;
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
+	}
+}
+HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "tablet/dialog_response";
+	var onResponseReceived=function(response){
+		if(response=="No Response"){
+			HS.sendRequestWithCallback(request,onResponseReceived,function(){
+				//GuiElements.alert("Error2");
+				HtmlServer.dialogVisible=false;
+				callbackErr();
+			});
+			//GuiElements.alert("No resp");
+		}
+		else if(response=="Cancelled"){
+			HtmlServer.dialogVisible=false;
+			onResponseReceived.callbackFn(true);
+			//GuiElements.alert("Cancelled");
+		}
+		else{
+			HtmlServer.dialogVisible=false;
+			var trimmed=response.substring(1,response.length-1);
+			onResponseReceived.callbackFn(false,trimmed);
+			//GuiElements.alert("Done");
+		}
+	}
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HtmlServer.dialogVisible=false;
+		if(callbackErr != null) {
+			callbackErr();
+		}
+	});
+}
+HtmlServer.getFileName=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var onResponseReceived=function(response){
+		if(response=="File has no name."){
+			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
+};
+HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=confirm(question);
+		HtmlServer.dialogVisible=false;
+		if(swapIfMouse){
+			result=!result;
+		}
+		if(result){
+			callbackFn("1");
+		}
+		else{
+			callbackFn("2");
+		}
+	}
+	else {
+		var HS = HtmlServer;
+		var request = "tablet/choice";
+		request += "?title=" + HS.encodeHtml(title);
+		request += "&question=" + HS.encodeHtml(question);
+		request += "&button1=" + HS.encodeHtml(option1);
+		request += "&button2=" + HS.encodeHtml(option2);
+		var onDialogPresented = function (result) {
+			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
+		};
+		onDialogPresented.callbackFn = callbackFn;
+		onDialogPresented.callbackErr = callbackErr;
+		var onDialogFail = function () {
+			HtmlServer.dialogVisible = false;
+			if (onDialogFail.callbackErr != null) {
+				onDialogFail.callbackErr();
+			}
+		};
+		onDialogFail.callbackErr = callbackErr;
+		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
+	}
+};
+HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "tablet/choice_response";
+	var onResponseReceived=function(response){
+		if(response=="0"){
+			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			HtmlServer.dialogVisible=false;
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HS.dialogVisible = false;
+		if (callbackErr != null) {
+			callbackErr();
+		}
+	});
+};
+HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=alert(message);
+		HtmlServer.dialogVisible=false;
+	}
+	else {
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/dialog/alert");
+		request.addParam("title", HS.encodeHtml(title));
+		request.addParam("message", HS.encodeHtml(message));
+		request.addParam("button", HS.encodeHtml(button));
+		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	}
+};
+
+HtmlServer.getSetting=function(key,callbackFn,callbackErr){
+	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+};
+HtmlServer.setSetting=function(key,value){
+	var request = "settings/set";
+	request += "?key=" + HtmlServer.encodeHtml(key);
+	request += "&value=" + HtmlServer.encodeHtml(value);
+	HtmlServer.sendRequestWithCallback(request);
+};
+HtmlServer.sendFinishedLoadingRequest = function(){
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function CallbackManager(){
+
+}
+CallbackManager.sounds = {};
+CallbackManager.sounds.recordingEnded = function(){
+	RecordingManager.interruptRecording();
+	return false;
+};
+CallbackManager.sounds.permissionGranted = function(){
+	RecordingManager.permissionGranted();
+	return true;
+};
+CallbackManager.data = {};
+CallbackManager.data.import = function(fileName){
+	SaveManager.import(fileName);
+	return true;
+};
+CallbackManager.data.openData = function(fileName, data){
+	SaveManager.openData(fileName, data);
+	return true;
+};
+CallbackManager.dialog = {};
+CallbackManager.dialog.promptResponded = function(cancelled, response){
+	return false;
+};
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
+	return false;
+};
+CallbackManager.dialog.alertResponded = function(){
+	return false;
+};
+CallbackManager.robot = {};
+CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
+};
+CallbackManager.robot.discovered = function(robotList){
+	return true;
+};
+function XmlWriter(){
+
+}
+XmlWriter.setAttribute=function(element,name,value){
+	name=XmlWriter.escape(name);
+	value=XmlWriter.escape(value);
+	element.setAttribute(name,value);
+};
+XmlWriter.createElement=function(xmlDoc,tagName){
+	tagName=XmlWriter.escape(tagName);
+	return xmlDoc.createElement(tagName);
+};
+XmlWriter.createTextNode=function(xmlDoc,data){
+	data=XmlWriter.escape(data);
+	return xmlDoc.createTextNode(data);
+};
+XmlWriter.newDoc=function(tagName){
+	tagName=XmlWriter.escape(tagName);
+	var xmlString = "<"+tagName+"></"+tagName+">";
+	var parser = new DOMParser();
+	return parser.parseFromString(xmlString, "text/xml");
+};
+XmlWriter.escape=function(string){
+	string=string+"";
+	string=string.replace(/&/g, '&amp;');
+	string=string.replace(/</g, '&lt;');
+	string=string.replace(/>/g, '&gt;');
+	string=string.replace(/"/g, '&quot;');
+	string=string.replace(/'/g, '&apos;');
+	return string;
+};
+XmlWriter.unEscape=function(string) {
+	string = string + "";
+	string = string.replace(/&apos;/g, "'");
+	string = string.replace(/&quot;/g, '"');
+	string = string.replace(/&gt;/g, '>');
+	string = string.replace(/&lt;/g, '<');
+	string = string.replace(/&amp;/g, '&');
+	return string;
+};
+XmlWriter.downloadDoc=function(xmlDoc,name){
+  window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
+	//var blob = new Blob([XmlWriter.docToText(xmlDoc)], {type: "text/plain;charset=utf-8"});
+	//saveAs(blob, name+".xml");
+};
+XmlWriter.openDocInTab=function(xmlDoc){
+	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
+};
+XmlWriter.openDoc=function(xmlString){
+	var parser = new DOMParser();
+	return parser.parseFromString(xmlString, "text/xml");
+};
+XmlWriter.findElement=function(xmlDoc,tagName){
+	tagName=XmlWriter.escape(tagName);
+	var results=xmlDoc.getElementsByTagName(tagName);
+	if(results.length==0){
+		return null;
+	}
+	return results[0];
+};
+XmlWriter.findSubElements=function(node,tagName){
+	if(node==null){
+		return [];
+	}
+	var children=node.childNodes;
+	var results=[];
+	for(var i=0;i<children.length;i++){
+		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+			results.push(children[i]);
+		}
+	}
+	return results;
+};
+XmlWriter.findSubElement=function(node,tagName){
+	if(node==null){
+		return null;
+	}
+	var children=node.childNodes;
+	for(var i=0;i<children.length;i++){
+		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+			return children[i];
+		}
+	}
+	return null;
+};
+XmlWriter.getAttribute=function(element,name,defaultVal,isNum){
+	if(isNum==null){
+		isNum=false;
+	}
+	if(defaultVal==null){
+		defaultVal=null;
+	}
+	var val=element.getAttribute(XmlWriter.escape(name));
+	if(val==null){
+		return defaultVal;
+	}
+	val=XmlWriter.unEscape(val);
+	if(isNum){
+		var numData=(new StringData(val)).asNum();
+		if(numData.isValid){
+			return numData.getValue();
+		}
+		return defaultVal;
+	}
+	return val;
+};
+XmlWriter.getTextNode=function(element,name,defaultVal,isNum){
+	if(isNum==null){
+		isNum=false;
+	}
+	if(defaultVal==null){
+		defaultVal=null;
+	}
+	var innerNode=XmlWriter.findSubElement(element,name);
+	if(innerNode==null){
+		return defaultVal;
+	}
+	var childNodes=innerNode.childNodes;
+	if(childNodes.length>=1&&childNodes[0].nodeType==3){
+		var val = childNodes[0].nodeValue;
+		if(val==null){
+			return defaultVal;
+		}
+		val=XmlWriter.unEscape(val);
+		if(isNum){
+			var numData=(new StringData(val)).asNum();
+			if(numData.isValid){
+				return numData.getValue();
+			}
+			return defaultVal;
+		}
+		return val;
+	}
+	return defaultVal;
+};
+XmlWriter.docToText=function(xmlDoc){
+	var serializer = new XMLSerializer();
+	return serializer.serializeToString(xmlDoc);
+};
+XmlWriter.findNodeByKey = function(nodes, key){
+	for(var i = 0; i < nodes.length; i++){
+		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+		if(nodeKey == key){
+			return nodes[i];
+		}
+	}
+	return null;
+};
+function SaveManager(){
+	SaveManager.saving = false;
+	SaveManager.fileName = null;
+	SaveManager.named = false;
+	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
+	SaveManager.autoSaveTimer.start();
+	SaveManager.getCurrentDoc();
+}
+SaveManager.setConstants = function(){
+	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+	SaveManager.newFileName = "new program";
+	SaveManager.autoSaveInterval = 1000 * 15;
+};
+
+SaveManager.openBlank = function(nextAction){
+	SaveManager.saveCurrentDoc(true);
+	SaveManager.loadFile("<project><tabs></tabs></project>");
+	if(nextAction != null) nextAction();
+};
+SaveManager.saveAndName = function(message, nextAction){
+	var title = "Enter name";
+	if(SaveManager.fileName == null){
+		if (nextAction != null) nextAction();
+		return;
+	}
+	SaveManager.forceSave(function () {
+		if (SaveManager.named) {
+			if (nextAction != null) nextAction();
+		}
+		else {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
+				SaveManager.named = true;
+				if (nextAction != null) nextAction();
+			});
+		}
+	});
+};
+SaveManager.userOpenFile = function(fileName){
+	if(SaveManager.fileName == fileName) {return;}
+	SaveManager.saveAndName("Please name this file before opening a different file", function(){
+		SaveManager.open(fileName);
+	});
+};
+SaveManager.open=function(fileName, named, nextAction){
+	if(named == null){
+		named = true;
+	}
+	var request = new HttpRequestBuilder("data/load");
+	request.addParam("filename", fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
+		SaveManager.loadFile(response);
+		SaveManager.saveCurrentDoc(false, fileName, named);
+		if(nextAction != null) nextAction();
+	});
+};
+// Saves a the current file and overwrites if the name exists
+SaveManager.forceSave = function(nextAction){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
+};
+SaveManager.userRename = function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.forceSave(function(){
+		SaveManager.promptRename(false, SaveManager.fileName, "Rename");
+	});
+};
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+	SaveManager.promptRename(isRecording, oldFilename, "Rename", null, nextAction);
+};
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
+};
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
+	if(message == null){
+		message = "Enter a file name";
+	}
+	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
+		if(!cancelled){
+			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
+		}
+	});
+};
+// Checks if a name is legitimate and renames the current file to that name if it is.
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
+	if(proposedName == ""){
+		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
+	} else if(proposedName == oldFilename) {
+		if(nextAction != null) nextAction();
+	} else {
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+			}
+		}, isRecording);
+	}
+};
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
+	var request = new HttpRequestBuilder("data/rename");
+	request.addParam("oldFilename", oldFilename);
+	request.addParam("newFilename", newName);
+	request.addParam("options", "soft");
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		if(oldFilename == SaveManager.fileName && !isRecording) {
+			SaveManager.saveCurrentDoc(false, newName, true);
+		}
+		if(nextAction != null) nextAction();
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeRename(isRecording, title, newName, nextAction);
+		}
+	});
+};
+SaveManager.userDelete=function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.userDeleteFile(false, SaveManager.fileName);
+};
+SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
+	var question = "Are you sure you want to delete \"" + filename + "\"?";
+	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
+		if(response == "2") {
+			SaveManager.delete(isRecording, filename, function(){
+				if(filename === SaveManager.fileName && !isRecording) {
+					SaveManager.openBlank(nextAction);
+				} else{
+					if(nextAction != null) nextAction();
+				}
+			});
+		}
+	}, null);
+};
+SaveManager.delete = function(isRecording, filename, nextAction){
+	var request = new HttpRequestBuilder("data/delete");
+	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+};
+SaveManager.userNew = function(){
+	SaveManager.saveAndName("Please name this file before creating a new file", SaveManager.openBlank);
+};
+/**
+ * Issues a getAvailableName request and calls the callback with the results
+ * @param filename {String}
+ * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
+ * @param isRecording {boolean}
+ */
+SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
+	if(isRecording == null){
+		isRecording = false;
+	}
+	DebugOptions.validateNonNull(callbackFn);
+	var request = new HttpRequestBuilder("data/getAvailableName");
+	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		var json = {};
+		try {
+			json = JSON.parse(response);
+		} catch(e){
+
+		}
+		if(json.availableName != null){
+			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
+		}
+	});
+};
+SaveManager.loadFile=function(xmlString) {
+	if (xmlString.length > 0) {
+		if (xmlString.charAt(0) == "%") {
+			xmlString = decodeURIComponent(xmlString);
+			//HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
+		}
+		var xmlDoc = XmlWriter.openDoc(xmlString);
+		var project = XmlWriter.findElement(xmlDoc, "project");
+		if (project == null) {
+			SaveManager.loadFile("<project><tabs></tabs></project>");
+		}
+		CodeManager.importXml(project);
+	}
+};
+SaveManager.userDuplicate = function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.saveAndName("Please name this file before duplicating it", function(){
+		SaveManager.promptDuplicate("Enter name for duplicate file");
+	});
+};
+SaveManager.promptDuplicate = function(message){
+	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
+		SaveManager.promptDuplicateWithDefault(message, availableName);
+	});
+};
+SaveManager.promptDuplicateWithDefault = function(message, defaultName){
+	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
+		if(!cancelled){
+			SaveManager.sanitizeDuplicate(response.trim());
+		}
+	});
+};
+SaveManager.sanitizeDuplicate = function(proposedName){
+	if(proposedName == ""){
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.");
+	} else {
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.duplicate(availableName);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			}
+		});
+	}
+};
+
+SaveManager.duplicate = function(filename){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", filename);
+	request.addParam("options", "soft");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		SaveManager.saveCurrentDoc(false, filename, true);
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeDuplicate(filename);
+		}
+	}, true, xmlDocText);
+};
+SaveManager.userExport=function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.saveAndName("Please name this file so it can be exported", function(){
+		SaveManager.export();
+	});
+};
+SaveManager.export=function(){
+	var request = new HttpRequestBuilder("data/export");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+SaveManager.saveAsNew = function(){
+	SaveManager.saving = true;
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("options", "new");
+	request.addParam("filename", SaveManager.newFileName);
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
+		SaveManager.saveCurrentDoc(false, availableName, false);
+		SaveManager.saving = false;
+	}, function(){
+		SaveManager.saving = false;
+	}, true, xmlDocText);
+};
+SaveManager.markEdited=function(){
+	if(SaveManager.fileName == null && !SaveManager.saving){
+		SaveManager.saveAsNew();
+	}
+};
+SaveManager.saveCurrentDoc = function(blank, fileName, named){
+	if(blank){
+		fileName = null;
+		named = false;
+		TitleBar.setText("");
+	} else {
+		TitleBar.setText(fileName);
+	}
+	SaveManager.fileName = fileName;
+	SaveManager.named = named;
+	let namedString = SaveManager.named? "true" : "false";
+	if(blank) namedString = "blank";
+	HtmlServer.setSetting("currentDocNamed", namedString);
+	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
+};
+SaveManager.getCurrentDoc = function(){
+	var load = {};
+	load.name = false;
+	load.named = false;
+	load.blank = false;
+	load.currentDoc = null;
+	load.currentDocNamed = null;
+	var checkProgress = function(){
+		if(load.name && load.named){
+			if(!load.blank) {
+				SaveManager.open(load.currentDoc, load.currentDocNamed);
+			}
+		}
+	};
+	HtmlServer.getSetting("currentDoc", function(response){
+		load.currentDoc = response;
+		load.name = true;
+		checkProgress();
+	});
+	HtmlServer.getSetting("currentDocNamed", function(response){
+		if(response == "true"){
+			load.currentDocNamed = true;
+		} else if (response == "false") {
+			load.currentDocNamed = false;
+		} else if (response == "blank") {
+			load.blank = true;
+		}
+		load.named = true;
+		checkProgress();
+	});
+};
+SaveManager.autoSave = function(){
+	if(SaveManager.fileName != null) {
+		SaveManager.forceSave();
+	}
+};
+
+
+SaveManager.import=function(fileName){
+	let name = HtmlServer.decodeHtml(fileName);
+	if(SaveManager.fileName == null){
+		SaveManager.open(name);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.open(name);
+	});
+};
+/*SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
+	SaveManager.printStatus("getCurrentDocName");
+	HtmlServer.getSetting("currentDoc", function(response){
+		SaveManager.currentDoc = response;
+		SaveManager.fileName = response;
+		callbackFnName();
+	}, callbackFnName);
+	HtmlServer.getSetting("currentDocNamed", function(response){
+		SaveManager.currentDocNamed = response;
+		callbackFnNameSet();
+	}, callbackFnNameSet);
+};*/
+SaveManager.currentDoc = function(){ //Autosaves
+	if(SaveManager.fileName == null) return null;
+	var result = {};
+	result.data = XmlWriter.docToText(CodeManager.createXml());
+	result.filename = SaveManager.fileName;
+	return result;
+};
+
+SaveManager.openData = function(fileName, data){
+	let fileName = HtmlServer.decodeHtml(fileName);
+	let data = HtmlServer.decodeHtml(data);
+	if(SaveManager.fileName == null){
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+	});
+};
+
+//Refactoring...
+/**
+ * Block is an abstract class that represents an executable block.
+ * Blocks are nearly always contained within BlockStacks or DisplayStacks.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.
+ * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
+ * @constructor
+ * TODO: remove the type parameter and use blockShape and instead.
+ * @param {number} type - The shape of the Block.  0=Command, 1=Reporter, 2=Predicate, 4=Hat, 5=Loop, 6=DoubleLoop.
+ * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
+ * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
+ * @param {number} y - The y coord of the Block.
+ * @param {string} category - The Block's category in string form.
+ */
+function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=Predicate Fix! BG
+	this.blockTypeName=this.constructor.name; //Keeps track of what type of Block this is.
+
+	this.x=x; //Store coords
+	this.y=y;
+	this.type=type; //Fix! remove this property
+	this.bottomOpen=(type===0||type===4||type===5||type===6); //Can Blocks be attached to the bottom of this Block?
+	this.topOpen=(type===0||type===5||type===6); //Can Blocks be attached to the top of this Block?
+	this.returnsValue=(returnType!==Block.returnTypes.none); //Does this Block attack to Slots and return a value?
+	this.returnType=returnType; //What type of value does this Block return?
+	this.hasBlockSlot1=(type===5||type===6); //Is this Block like an if block that has a special BlockSlot?
+	this.hasBlockSlot2=(type===6); //Does it have two BlockSlots?
+	this.hasHat=(type===4); //Is it a HatBlock?
+
+	this.group=GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
+	this.parent=null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
+	this.parts=[]; //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	this.slots=[]; //The slots array just holds the Slots.
+	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
+	this.category=category;
+	this.isGlowing=false;
+
+	this.stack=null; //It has no Stack yet.
+	this.path=this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
+	this.height=0; //Will be set later when the Block's dimensions are updated.
+	this.width=0;
+	this.runMem=function(){}; //serves as a place for the block to store info while running
+	if(this.bottomOpen){
+		this.nextBlock=null; //Reference to the Block below this one.
+	}
+	if(this.returnsValue){
+		this.resultData=null; //Stores the Data to be passed on to the Slot containing this Block.
+	}
+	if(this.hasBlockSlot1){
+		this.topHeight=0; //The height of just the top of the Block (where the LabelText and Slots are)
+		this.blockSlot1=new BlockSlot(this);
+	}
+	if(this.hasBlockSlot2){
+		//The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
+		this.midHeight=0;
+		this.midLabel=new LabelText(this,this.midLabelText); //The text to appear in the middle section (i.e. "else");
+		this.blockSlot2=new BlockSlot(this);
+	}
+}
+/**
+ * Sets the possible values for Block.returnTypes.
+ */
+Block.setConstants=function(){
+	Block.returnTypes=function(){};
+	Block.returnTypes.none=0; //A command Block always is Block.returnTypes.none.
+	Block.returnTypes.num=1;
+	Block.returnTypes.string=2;
+	Block.returnTypes.bool=3;
+	Block.returnTypes.list=4;
+};
+/**
+ * Converts an x coord relative to the Block to an x coord relative to the screen
+ * @param {number} x
+ * @returns {number}
+ */
+Block.prototype.relToAbsX=function(x){
+	if(this.stack!=null) {
+		return this.stack.relToAbsX(x + this.x);
+	}
+	return x + this.x;
+};
+/**
+ * Converts a y coord relative to the Block to a y coord relative to the screen
+ * @param {number} y
+ * @returns {number}
+ */
+Block.prototype.relToAbsY=function(y){
+	if(this.stack!=null) {
+		return this.stack.relToAbsY(y + this.y);
+	}
+	return y + this.y;
+};
+/**
+ * Converts an x coord relative to the screen to an x coord relative to the Block
+ * @param x
+ * @returns {number}
+ */
+Block.prototype.absToRelX=function(x){
+	if(this.stack!=null) {
+		return this.stack.absToRelX(x) - this.x;
+	}
+	return x - this.x;
+};
+/**
+ * Converts a y coord relative to the screen to a y coord relative to the Block
+ * @param y
+ * @returns {number}
+ */
+Block.prototype.absToRelY=function(y){
+	if(this.stack!=null) {
+		return this.stack.absToRelY(y) - this.y;
+	}
+	return y - this.y;
+};
+/**
+ * Returns the x coord of the Block relative to the screen (not the group it is contained in).
+ * @return {number} - The x coord of the Block relative to the screen.
+ */
+Block.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the Block relative to the screen.
+ * @return {number} - The y coord of the Block relative to the screen.
+ */
+Block.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+/**
+ * Creates and returns the main SVG path element for the Block.
+ * @return {object} - The main SVG path element for the Block.
+ */
+Block.prototype.generatePath=function(){
+	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	TouchReceiver.addListenersChild(pathE,this);
+	return pathE;
+};
+/**
+ * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
+ * @param {LabelText|BlockIcon|Slot} part - part to add.
+ */
+Block.prototype.addPart=function(part){
+	this.parts.push(part);
+	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
+		this.slots.push(part);
+	}
+};
+/**
+ * Moves the Block and sets its this.x and this.y values.
+ * @param {number} x - New x coord.
+ * @param {number} y - New y coord.
+ */
+Block.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	//All parts of the Block are contained within its group to allow for easy movement.
+	GuiElements.move.group(this.group,x,y);
+};
+/**
+ * Recursively stops the Block, its Slots, and any subsequent Blocks.
+ */
+Block.prototype.stop=function(){
+	this.running=0; //Stop this Block.
+	this.runMem = {}; //Clear memory
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].stop(); //Stop this Block's Slots.
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.stop(); //Stop the BlockSlots.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.stop();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.stop(); //Stop the next Block.
+	}
+};
+/**
+ * Updates this currently executing Block and returns if the Block is still running
+ * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
+ */
+Block.prototype.updateRun=function(){
+	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
+	if(this.running===0||this.running===3){
+		for(let i=0;i<this.slots.length;i++){ //...Reset all Slots to prepare for execution
+			this.slots[i].stop();
+		}
+		this.running=1; //Now the Block is ready to run its Slots.
+	}
+	let myExecStatus; //The value to return.
+	if(this.running===1){ //If the Block is currently waiting on its Slots...
+		for(let i=0;i<this.slots.length;i++){
+			//Check to see if each Slot is done and update the first Slot that isn't done.
+			let slotExecStatus = this.slots[i].updateRun();
+			//If the slot is still running...
+			if(slotExecStatus.isRunning()){
+				//The Block is still running and will execute again next time
+				return new ExecutionStatusRunning();
+			} else if(slotExecStatus.hasError()) {
+				//If the slot through an error, the Block is done running, and will pass the error up the call stack.
+				this.running = 3;
+				return slotExecStatus;
+			}
+		}
+		this.running=2; //If all Slots are done running, the Block itself may now run.
+		//This function is overridden by the class of the particular Block.
+		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
+		myExecStatus = this.startAction();
+	}
+	else if(this.running === 2){ //If the Block is currently running, update it.
+		//This function is also overridden and is called repeatedly until the Block is done running.
+		myExecStatus = this.updateAction();
+	}
+	if(!myExecStatus.isRunning()){ //If the block is done running...
+		if(this.running !== 0) {
+			this.running = 3; //Record that the Block is done, provided that it was started
+		}
+		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
+	}
+	return myExecStatus; //Return a boolean indicating if this Block is done.
+};
+/**
+ * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
+ * @return {ExecutionStatus} - indicating if it has finished.
+ */
+Block.prototype.startAction=function(){
+	return new ExecutionStatusRunning(); //Still running
+};
+/**
+ * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
+ * @return {ExecutionStatus} - The next Block to run or a boolean indicating if it has finished.
+ */
+Block.prototype.updateAction=function(){
+	return new ExecutionStatusRunning(); //Still running //Fix! by default this should be false.
+};
+/**
+ * Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
+ * Only used if Block returns a value.
+ * Once the Block returns its value, it is done and can reset its state.
+ * @return {Data} - The result of the Block's execution.
+ */
+Block.prototype.getResultData=function(){
+	DebugOptions.assert(this.returnsValue);
+	if(this.running === 3){ //Only return data if the Block is done running.
+		this.running = 0; //Reset the Block's state. Prevents same data from ever being re-returned
+		return this.resultData; //Access stored result data and return it.
+	}
+	return null; //If called when the block is not done running, return null. This should never happen.
+};
+/**
+ * Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
+ * @param {BlockStack} stack - The stack the Blocks will be moved to.
+ */
+Block.prototype.changeStack=function(stack){
+	this.stack=stack; //Move this Block to the stack
+	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
+	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.changeStack(stack); //Tell the next block to move.
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.changeStack(stack); //If this block is a loop/if tell its contents to move.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
+	}
+};
+/**
+ * Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
+ * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
+ * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
+ */
+Block.prototype.updateStackDim=function(){
+	//Slots are updated separately by updateStackDimRI.
+	if(this.blockSlot1!=null){
+		this.blockSlot1.updateStackDim(); //If this block is a loop/if tell its contents to update.
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.updateStackDim(); //If it has a second BlockSlot, update it too.
+	}
+	this.updateStackDimRI(); //Update the stack dimensions using information from this Block.
+	if(this.nextBlock!=null){
+		this.nextBlock.updateStackDim(); //Tell the next block to update.
+	}
+};
+/**
+ * Handles more of the recursion for updateStackDim.
+ * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
+ * This allows other functions to avoid unnecessary updates when full recursion is not needed.
+ * updateStackDimO handled the actual updates.
+ */
+Block.prototype.updateStackDimRI=function(){
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].updateStackDim(); //Pass message on to Slots.
+	}
+	this.updateStackDimO(); //Update this Block.
+};
+/**
+ * Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
+ * It is called recursively by updateStackDim and updateStackDimRI.
+ * The stack has two bounding boxes. Both are used when looking for potential Blocks to snap to.
+ * Reporters/predicates can snap to the large r bounding box.
+ * Commands can snap to the smaller c bounding box.
+ * (the r box is larger because they can be snapped to the middle of other blocks while command blocks can't)
+ * The point of stack bounding boxes is that when looking for potential Blocks to snap only those inside a matching
+ * stack have to be investigated.
+ */
+Block.prototype.updateStackDimO=function(){
+	let sDim=this.stack.dim; //Loads the stack's dimension data.
+	let snap=BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
+	if(this.bottomOpen||this.topOpen){ //Only update the c box if this is a command block //Fix! use !this.returnsValue
+		let cx1=this.x-snap.left; //Create bounding rectangle for this particular command Block
+		let cy1=this.y-snap.top;
+		let cx2=this.x+snap.right;
+		let cy2=this.y+this.height+snap.bottom;
+		if(cx1<sDim.cx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+			sDim.cx1=cx1;
+		}
+		if(cy1<sDim.cy1){
+			sDim.cy1=cy1;
+		}
+		if(cx2>sDim.cx2){
+			sDim.cx2=cx2;
+		}
+		if(cy2>sDim.cy2){
+			sDim.cy2=cy2;
+		}
+	}
+	let rx1=this.x; //The r bounding box is just the size of the Block itself.
+	let ry1=this.y;
+	let rx2=this.x+this.width;
+	let ry2=this.y+this.height;
+	if(rx1<sDim.rx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+		sDim.rx1=rx1;
+	}
+	if(ry1<sDim.ry1){
+		sDim.ry1=ry1;
+	}
+	if(rx2>sDim.rx2){
+		sDim.rx2=rx2;
+	}
+	if(ry2>sDim.ry2){
+		sDim.ry2=ry2;
+	}
+	//The Stacks dimensions now include the Block.
+	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
+};
+/**
+ * Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
+ * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
+ */
+Block.prototype.updateDim=function(){
+	let bG=BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
+	if(this.topOpen||this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
+		bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
+	}
+	let width=0;
+	width+=bG.hMargin; //The left margin of the Block.
+	let height=0;
+	for(let i=0;i<this.parts.length;i++){
+		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
+		width+=this.parts[i].width; //Fill the width of the middle of the Block
+		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
+			height=this.parts[i].height;
+		}
+		if(i<this.parts.length-1){
+			width+=BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		}
+	}
+	width+=bG.hMargin; //Add the right margin of the Block.
+	height+=2*bG.vMargin; //Add the bottom and top margins of the Block.
+	if(height<bG.height){ //If the height is less than the min height, fix it.
+		height=bG.height;
+	}
+	if(this.hasBlockSlot1){ //If it has a BlockSlot update that.
+		this.topHeight=height; //The topHeight is the height of everything avove the BlockSlot.
+		this.blockSlot1.updateDim(); //Update the BlockSlot.
+		height+=this.blockSlot1.height; //The total height, however, includes the BlockSlot.
+		height+=BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
+	}
+	if(this.hasBlockSlot2){ //If the Block has a second BlockSlot...
+		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
+		this.midHeight=this.midLabel.height; //Add the Label's height to the total.
+		this.midHeight+=2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
+		if(this.midHeight<bG.height){ //If it's less than the minimum, adjust it.
+			this.midHeight=bG.height;
+		}
+		height+=this.midHeight; //Add the midHeight to the total.
+		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
+		height+=this.blockSlot2.height; //Add its height to the total.
+	}
+	//If the Block was a loop or DoubleLoop now we are dealing with its actual properties (not those of command)
+	bG=BlockGraphics.getType(this.type);
+	if(width<bG.width){ //If it is less than the minimum width, adjust it.
+		width=bG.width;
+	}
+	this.resize(width,height); //Resize this Block to the new widths.
+	if(this.nextBlock!=null){
+		this.nextBlock.updateDim(); //Pass the message to the next Block.
+	}
+};
+/**
+ * Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
+ * The BlockStack calls this function after the updateDim function, so all sizes are correct.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * @return {number} - The width of the current block, indicating how much the x should shift over.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
+Block.prototype.updateAlign=function(x,y){
+	let bG=BlockGraphics;
+	this.updateAlignRI(x,y); //Update recursively within the block.
+	if(this.hasBlockSlot1){ //Then tell all susequent blocks to align.
+		this.blockSlot1.updateAlign(this.x+bG.loop.side,this.y+this.topHeight);
+	}
+	if(this.hasBlockSlot2){
+		this.blockSlot2.updateAlign(this.x+bG.loop.side,this.y+this.topHeight+this.blockSlot1.height+this.midHeight);
+		this.midLabel.updateAlign(bG.loop.side,this.topHeight+this.blockSlot1.height+this.midHeight/2);
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.updateAlign(this.x,this.y+this.height);
+	}
+	return this.width;
+};
+/**
+ * Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
+ * @param {number} x - The x coord this block should have when completed.
+ * @param {number} y - The y coord the block should have.
+ * y is measured from the top for all Blocks, x is measured from the left.
+ */
+Block.prototype.updateAlignRI=function(x,y){
+	this.move(x,y); //Move to the desired location
+	let bG=BlockGraphics.getType(this.type);
+	let yCoord=this.height/2; //Compute coords for internal parts.
+	let xCoord=0;
+	if(this.hasBlockSlot1){
+		yCoord=this.topHeight/2; //Internal parts measure their y coords from the center of the block.
+	}
+	if(this.bottomOpen||this.topOpen){
+		bG=BlockGraphics.command;
+	}
+	xCoord+=bG.hMargin;
+	for(let i=0;i<this.parts.length;i++){
+		xCoord+=this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
+		if(i<this.parts.length-1){
+			xCoord+=BlockGraphics.block.pMargin;
+		}
+	}
+};
+/**
+ * Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
+ * @param {number} width - The desired width of the Block.
+ * @param {number} height - The desired height of the Block.
+ */
+Block.prototype.resize=function(width,height){
+	let BG=BlockGraphics;
+	//First set width and height properties.
+	this.width=width;
+	this.height=height;
+	//Then collect other necessary information.
+	let innerHeight1=0;
+	let innerHeight2=0;
+	let midHeight=0;
+	if(this.hasBlockSlot1){
+		innerHeight1=this.blockSlot1.height;
+	}
+	if(this.hasBlockSlot2){
+		innerHeight2=this.blockSlot2.height;
+		midHeight=this.midHeight;
+	}
+	//Tell BlockGraphics to change the path description to match the new properties.
+	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
+};
+/**
+ * Recursively searches for the Block with best fits the currently moving BlockStack.
+ * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
+ * A command block attempts to find a connection between its bottom and the moving stack's top.
+ * Connections to the top of the stack's findBestFit.
+ */
+Block.prototype.findBestFit=function(){
+	let move=CodeManager.move;
+	let fit=CodeManager.fit;
+	let x=this.getAbsX(); //Get coords to compare.
+	let y=this.getAbsY();
+	let height = this.relToAbsY(this.height) - y;
+	let hasMatch = false;
+
+	if(move.returnsValue) { //If a connection between the stack and block are possible...
+		let hasMatch = false;
+		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
+			for(let i=0;i<this.slots.length;i++){
+				let slotHasMatch = this.slots[i].findBestFit();
+				hasMatch = slotHasMatch || hasMatch;
+			}
+		}
+	}
+	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
+		let snap=BlockGraphics.command.snap; //Load snap bounding box
+		//see if corner of moving block falls within the snap bounding box.
+		let snapBLeft=x-snap.left;
+		let snapBTop=y-snap.top;
+		let snapBWidth=snap.left+snap.right;
+		let snapBHeight=snap.top+height+snap.bottom;
+		//Check if point falls in a rectangular range.
+		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)) {
+			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			let yDist = move.topY - (y + this.height);
+			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
+				fit.found = true; //If so, save it and other helpful infromation.
+				fit.bestFit = this;
+				fit.dist = dist;
+			}
+		}
+	}
+	if(this.hasBlockSlot1){ //Pass the message on recursively.
+		this.blockSlot1.findBestFit();
+	}
+	if(this.hasBlockSlot2){
+		this.blockSlot2.findBestFit();
+	}
+	if(this.nextBlock!=null){
+		this.nextBlock.findBestFit();
+	}
+	return hasMatch;
+};
+/**
+ * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
+ * The indicator is a different color/shape depending on the Block's type and if it is running.
+ */
+Block.prototype.highlight=function(){
+	if(this.bottomOpen){
+		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
+	}
+	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
+		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen=false");
+	}
+};
+/**
+ * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
+ * @param {Block} block - The first Block in the stack to attach to this Block.
+ */
+Block.prototype.snap=function(block){ //Fix! documentation
+	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
+	let bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
+	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
+		let bG=BlockGraphics.command;
+		//Disconnect the blocks after this Block and shift them over to make room.
+		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.stack.getHeight()+bG.shiftY);
+	}
+	let stack=this.stack;
+	//If the Block we are inserting is part of a stack...
+	if(block.stack!=null) {
+		//Make it glow if this stack is running
+		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code. x3 in Stack, BlockStack, and Slot ---Refactor Marker---
+			block.glow(); //Recursively applied glow effect
+		}
+		//Stop the stack being added if this stack is stopped
+		else if (!stack.isRunning && block.stack.isRunning) {
+			block.stack.stop();
+		}
+		//The added block is stopped, but still glows as part of a running stack.
+		else if (stack.isRunning && block.isRunning) {
+			block.stop();
+		}
+	}
+	let upperBlock=this; //The Block which will go above the inserted stack.
+	let lowerBlock=this.nextBlock;//The Block which will go below the inserted stack. Might be null.
+	let topStackBlock=block; //The top Block in the stack to be inserted.
+
+	//The top of where the stack is inserted note which Blocks are above/below them.
+	upperBlock.nextBlock=topStackBlock;
+	topStackBlock.parent=upperBlock;
+	//The bottom of where the stack is inserted does the same.
+	bottomStackBlock.nextBlock=lowerBlock;
+	if(lowerBlock!=null){ //There might not be a Block below the inserted stack.
+		lowerBlock.parent=bottomStackBlock;
+	}
+	let oldG=null;
+	if(block.stack!=null) {
+		oldG=block.stack.group; //Get a handle to the old stack's group
+		block.stack.remove(); //Remove the old stack.
+	}
+	if(this.stack!=null) {
+		block.changeStack(this.stack); //Move the block over into this stack
+	}
+	if(oldG!=null) {
+		oldG.remove(); //Remove the old stack's group.
+	}
+	if(this.stack!=null) {
+		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		this.stack.tab.updateArrows();
+	}
+};
+/**
+ * Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+ * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
+ */
+Block.prototype.unsnap=function(){
+	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
+	if(this.parent!=null){
+		if(this.parent.isSlot||this.parent.isBlockSlot){ //Sees if it is attached to a Slot not another Block.
+			this.parent.removeChild(); //Leave the Slot.
+			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
+		}
+		else{ //This Block is connected to another Block.
+			this.parent.nextBlock=null; //Disconnect from parent Block.
+			this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
+		}
+		this.parent=null; //Delete reference to parent Block/Slot/BlockSlot.
+		//Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
+		return new BlockStack(this,this.stack.getTab());
+	}
+	//If the Block already had no parent, just return this Block's stack.
+	return this.stack;
+};
+/**
+ * Recursively finds and returns the last Block in this BlockStack.
+ * @return {Block} - The last Block in this BlockStack.
+ */
+Block.prototype.getLastBlock=function(obj){
+	if(this.nextBlock==null){
+		return this; //This Block is the last one.
+	}
+	else{
+		return this.nextBlock.getLastBlock(); //Try the next Block.
+	}
+};
+/**
+ * Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
+ * @return {number} - The height of this Block and all subsequent Blocks.
+ */
+Block.prototype.addHeights=function(){
+	if(this.nextBlock!=null){
+		return this.height+this.nextBlock.addHeights(); //Return this Block's height plus those below it.
+	}
+	else{
+		return this.height; //This is the last Block. Return its height.
+	}
+};
+/* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @return {Block} - This Block's copy.
+ */
+/**
+ * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * @param {number} x - The new Block's x coord.
+ * @param {number} y - The new Block's y coord.
+ * @return {Block} - This Block's copy.
+ */
+Block.prototype.duplicate = function(x, y){
+	let myCopy = null;
+	if(this.variable != null){ //Copy variable data if this is a variable Block.
+		myCopy = new this.constructor(x, y, this.variable);
+	}
+	else if(this.list != null){
+		myCopy = new this.constructor(x, y, this.list);
+	}
+	else {
+		myCopy = new this.constructor(x, y);
+	}
+	myCopy.copyFrom(this);
+	return myCopy;
+};
+/**
+ * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ */
+Block.prototype.copyFrom = function(block){
+	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
+		this.slots[i].copyFrom(block.slots[i]);
+	}
+	if(this.blockSlot1!=null){ //Copy the contents of its BlockSlots.
+		this.blockSlot1.copyFrom(block.blockSlot1);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.copyFrom(block.blockSlot2);
+	}
+	if(block.nextBlock!=null){ //Copy subsequent Blocks.
+		this.nextBlock=block.nextBlock.duplicate(0,0);
+		this.nextBlock.parent=this;
+	}
+};
+
+/* Returns an entirely text-based version of the Block for display in dialogs.
+ * May exclude a slot and replace if with "___".
+ * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
+ * @return {string} - The finished text summary.
+ */
+Block.prototype.textSummary=function(slotToExclude){
+	let summary="";
+	for(let i=0;i<this.parts.length;i++){
+		if(this.parts[i]==slotToExclude){
+			summary+="___"; //Replace slot with underscores.
+		}
+		else{
+			summary+=this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
+		}
+		if(i<this.parts.length-1){ //Add space between part descriptions.
+			summary+=" ";
+		}
+	}
+	return summary;
+};
+/* Overridden by subclasses. Alerts Block that the flag was clicked. Most Blocks won't respond to this directly.
+ */
+Block.prototype.eventFlagClicked=function(){
+
+};
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.eventBroadcast=function(message){
+
+};
+/* Overridden by subclasses. Passes broadcast message to Block. */
+Block.prototype.checkBroadcastRunning=function(message){
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots. */
+Block.prototype.checkBroadcastMessageAvailable=function(message){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkBroadcastMessageAvailable(message)){
+			return true;
+		}
+	}
+	return false;
+};
+/* Recursively updates the available broadcast messages.
+ */
+Block.prototype.updateAvailableMessages=function(){
+	for(let i=0;i<this.slots.length;i++){
+		this.slots[i].updateAvailableMessages();
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1.updateAvailableMessages();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.updateAvailableMessages();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.updateAvailableMessages();
+	}
+};
+/* Deletes the Block's running memory (memory reserved for computations related to execution)
+ */
+Block.prototype.clearMem=function(){
+	this.runMem=new function(){}; //Delete all runMem.
+	for(let i=0;i<this.slots.length;i++){ //NOT recursive.
+		this.slots[i].clearMem(); //Removes resultData and resets running state to 0.
+	}
+};
+/* Returns the result of the Block's execution.
+ * The data is then removed to prevent the result from being returned again.
+ */
+Block.prototype.getResultData=function(){
+	let result=this.resultData;
+	this.resultData=null;
+	return result;
+};
+/* Recursively adds a white outline to indicate that the BlockStack is running. */
+Block.prototype.glow=function(){
+	BlockGraphics.update.glow(this.path);
+	this.isGlowing=true; //Used by other classes to determine things like highlight color.
+	if(this.blockSlot1!=null){
+		this.blockSlot1.glow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.glow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.glow();
+	}
+};
+/* Recursively removes the outline. */
+Block.prototype.stopGlow=function(){
+	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	this.isGlowing=false;
+	if(this.blockSlot1!=null){
+		this.blockSlot1.stopGlow();
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2.stopGlow();
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.stopGlow();
+	}
+};
+
+Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
+	xmlBlocks.appendChild(this.createXml(xmlDoc));
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock.writeToXml(xmlDoc,xmlBlocks);
+	}
+};
+Block.prototype.createXml=function(xmlDoc){
+	let block=XmlWriter.createElement(xmlDoc,"block");
+	XmlWriter.setAttribute(block,"type",this.blockTypeName);
+	let slots=XmlWriter.createElement(xmlDoc,"slots");
+	XmlWriter.setAttribute(slots,"keyVal","true");
+	for(let i=0;i<this.slots.length;i++){
+		slots.appendChild(this.slots[i].createXml(xmlDoc));
+	}
+	block.appendChild(slots);
+	if(this.blockSlot1!=null){
+		let blockSlots=XmlWriter.createElement(xmlDoc,"blockSlots");
+		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
+		if(this.blockSlot2!=null){
+			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
+		}
+		block.appendChild(blockSlots);
+	}
+	return block;
+};
+Block.importXml=function(blockNode){
+	let type=XmlWriter.getAttribute(blockNode,"type");
+	let block;
+	try {
+		if (type.substring(0, 2) == "B_") {
+			if(window[type].importXml!=null){
+				return window[type].importXml(blockNode);
+			}
+			else {
+				block = new window[type](0, 0);
+			}
+		}
+		else{
+			return null;
+		}
+	}
+	catch(e) {
+		return null;
+	}
+	block.copyFromXml(blockNode);
+	return block;
+};
+Block.prototype.importSlotXml = function(slotsNode){
+	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
+	let slotNodes=XmlWriter.findSubElements(slotsNode,"slot");
+	if(keyVal){
+		for(let i=0;i<this.slots.length;i++){
+			let key = this.slots[i].getKey();
+			let slot = XmlWriter.findNodeByKey(slotNodes, key);
+			if(slot != null) {
+				this.slots[i].importXml(slot);
+			}
+		}
+	}
+	else{
+		for(let i=0;i<slotNodes.length&&i<this.slots.length;i++){
+			this.slots[i].importXml(slotNodes[i]);
+		}
+	}
+};
+Block.prototype.copyFromXml = function(blockNode){
+	let slotsNode=XmlWriter.findSubElement(blockNode,"slots");
+	this.importSlotXml(slotsNode);
+	let blockSlotsNode=XmlWriter.findSubElement(blockNode,"blockSlots");
+	let blockSlotNodes=XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	if(this.blockSlot1!=null&&blockSlotNodes.length>=1){
+		this.blockSlot1.importXml(blockSlotNodes[0]);
+	}
+	if(this.blockSlot2!=null&&blockSlotNodes.length>=2){
+		this.blockSlot2.importXml(blockSlotNodes[1]);
+	}
+};
+Block.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+Block.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+Block.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+Block.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+Block.prototype.checkVariableUsed=function(variable){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkVariableUsed(variable)){
+			return true;
+		}
+	}
+	return false;
+};
+Block.prototype.checkListUsed=function(list){
+	for(let i=0;i<this.slots.length;i++){
+		if(this.slots[i].checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot1!=null){
+		if(this.blockSlot1.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.blockSlot2!=null){
+		if(this.blockSlot2.checkListUsed(list)){
+			return true;
+		}
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		if(this.nextBlock.checkListUsed(list)){
+			return true;
+		}
+	}
+	return false;
+};
+Block.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Block.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+Block.prototype.countDevicesInUse=function(deviceClass){
+	let largest=1;
+	for(let i=0;i<this.slots.length;i++){
+		largest=Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
+	}
+	if(this.blockSlot1!=null){
+		largest=Math.max(largest,this.blockSlot1.countDevicesInUse(deviceClass));
+	}
+	if(this.blockSlot2!=null){
+		largest=Math.max(largest,this.blockSlot2.countDevicesInUse(deviceClass));
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		largest=Math.max(largest,this.nextBlock.countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+Block.prototype.passRecursively=function(functionName){
+	let args = Array.prototype.slice.call(arguments, 1);
+	for(let i=0;i<this.slots.length;i++){
+		let currentSlot=this.slots[i];
+		currentSlot[functionName].apply(currentSlot,args);
+	}
+	if(this.blockSlot1!=null){
+		this.blockSlot1[functionName].apply(this.blockSlot1,args);
+	}
+	if(this.blockSlot2!=null){
+		this.blockSlot2[functionName].apply(this.blockSlot2,args);
+	}
+	if(this.bottomOpen&&this.nextBlock!=null){
+		this.nextBlock[functionName].apply(this.nextBlock,args);
+	}
+};
+Block.prototype.displayResult = function(data){
+	let value = data.asString().getValue();
+	this.displayValue(value, false);
+};
+Block.prototype.displayValue = function(message, error){
+	let x=this.getAbsX();
+	let y=this.getAbsY();
+	let width=this.relToAbsX(this.width) - x;
+	let height=this.relToAbsY(this.height) - y;
+	GuiElements.displayValue(message,x,y,width,height, error);
+};
+Block.prototype.displayError = function(message){
+	this.displayValue(message, true);
+};
+Block.setDisplaySuffix = function(Class, suffix){
+	Block.setDeviceSuffixFn(Class, function(){
+		return suffix;
+	});
+};
+Block.setDeviceSuffixFn = function(Class, suffixFn){
+	Class.prototype.displayResult = function(data){
+		if(data.isValid) {
+			let value = data.asString().getValue();
+			this.displayValue(value + " " + suffixFn(), false);
+		}
+		else{
+			this.displayValue(data.asString().getValue(), false);
+		}
+	};
+};
+/* Child of Block. The CommandBlock is for Blocks that return no value but have no BlockSlots.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} bottomOpen - Can Blocks be attached to the bottom of this Block?
+ */
+function CommandBlock(x,y,category,bottomOpen){
+	Block.call(this,0,Block.returnTypes.none,x,y,category); //Call constructor.
+	if(bottomOpen!=null&&bottomOpen==false){ //if bottomOpen is false, change it from the default.
+		this.bottomOpen=false;
+	}
+}
+CommandBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+CommandBlock.prototype.constructor = CommandBlock;
+/* Child of Block. The CommandBlock is for Blocks that return values other than booleans.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {number} returnType - (optional) The type of data the Block returns (from Block.returnTypes). Default: num.
+ */
+function ReporterBlock(x,y,category,returnType){
+	if(returnType==null){
+		returnType=Block.returnTypes.num; //Return nums by default.
+	}
+	Block.call(this,1,returnType,x,y,category); //Call constructor.
+}
+ReporterBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+ReporterBlock.prototype.constructor = ReporterBlock;
+/* Child of Block. The CommandBlock is for Blocks that return booleans.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ */
+function PredicateBlock(x,y,category){
+	Block.call(this,2,Block.returnTypes.bool,x,y,category); //Call constructor.
+}
+PredicateBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+PredicateBlock.prototype.constructor = PredicateBlock;
+
+/* Child of Block. The HatBlock is for Blocks like CommandBlock but which have rounded tops which accept no Blocks.
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ */
+function HatBlock(x,y,category){
+	Block.call(this,4,Block.returnTypes.none,x,y,category); //Call constructor.
+}
+HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+HatBlock.prototype.constructor = HatBlock;
+/* Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with a space for additional Blocks
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} bottomOpen - Can Blocks be attached to the bottom of this Block?
+ */
+function LoopBlock(x,y,category,bottomOpen){
+	Block.call(this,5,Block.returnTypes.none,x,y,category); //Call constructor.
+	if(bottomOpen!=null&&bottomOpen==false){ //if bottomOpen is false, change it from the default.
+		this.bottomOpen=false;
+	}
+}
+LoopBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
+LoopBlock.prototype.constructor = LoopBlock;
+/* Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with two spaces for additional Blocks
+ * @constructor
+ * @param {number} x - The x coord for the Block.
+ * @param {number} y - The y coord for the Block.
+ * @param {string} category - The Block's category in string form. Used mainly to color it.
+ * @param {boolean} midLabelText - i.e. "Else".  The text to label the second BlockSlot.
+ */
+function DoubleLoopBlock(x,y,category,midLabelText){
+	this.midLabelText=midLabelText; //Is set before constructor so Block is ready to render when constructor runs.
+	Block.call(this,6,Block.returnTypes.none,x,y,category);
+}
+DoubleLoopBlock.prototype = Object.create(Block.prototype);
+DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function SlotShape(slot){
+	this.slot = slot;
+	this.visible = false;
+	this.built = false;
+}
+SlotShape.setConstants = function(){
+
+};
+SlotShape.prototype.abcdef = function(){};
+SlotShape.prototype.show = function(){
+	if(this.visible) return;
+	this.visible = true;
+	if(!this.built) this.buildSlot();
+	this.slot.parent.group.appendChild(this.group);
+	this.updateDim();
+	this.updateAlign();
+};
+SlotShape.prototype.hide = function(){
+	if(!this.visible) return;
+	this.visible = false;
+	this.group.remove();
+};
+SlotShape.prototype.buildSlot = function(){
+	if(this.built) return;
+	this.built = true;
+	this.group = GuiElements.create.group(0, 0);
+};
+SlotShape.prototype.move = function(x, y){
+	GuiElements.move.group(this.group, x, y);
+};
+SlotShape.prototype.updateDim = function(){
+	DebugOptions.markAbstract();
+};
+SlotShape.prototype.updateAlign = function(){
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function EditableSlotShape(slot, initialText, dimConstants){
+	SlotShape.call(this, slot);
+	this.text = initialText;
+	this.dimConstants = dimConstants;
+}
+EditableSlotShape.prototype = Object.create(SlotShape.prototype);
+EditableSlotShape.prototype.constructor = EditableSlotShape;
+EditableSlotShape.setConstants = function(){
+	const ESS = EditableSlotShape;
+	ESS.charHeight = BlockGraphics.valueText.charHeight;
+	ESS.hitBox = {};
+	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
+	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;
+};
+EditableSlotShape.prototype.buildSlot = function(){
+	SlotShape.prototype.buildSlot.call(this);
+	this.buildBackground();
+
+	this.textE=BlockGraphics.create.valueText(this.text,this.group);
+	GuiElements.update.color(this.textE, this.dimConstants.valueText.fill);
+	this.hitBoxE = BlockGraphics.create.slotHitBox(this.group);
+
+	TouchReceiver.addListenersSlot(this.textE, this.slot);
+	TouchReceiver.addListenersSlot(this.hitBoxE,this.slot);
+};
+EditableSlotShape.prototype.buildBackground = function(){
+	GuiElements.markAbstract();
+};
+
+EditableSlotShape.prototype.changeText=function(text){
+	this.text=text; //Store value
+	GuiElements.update.text(this.textE,text); //Update text.
+	this.updateDim();
+	this.updateAlign();
+};
+EditableSlotShape.prototype.select=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+};
+EditableSlotShape.prototype.deselect=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.fill);
+};
+EditableSlotShape.prototype.grayOutValue=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+};
+EditableSlotShape.prototype.unGrayOutValue=function(){
+	const dC = this.dimConstants;
+	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+};
+EditableSlotShape.prototype.updateDim = function(){
+	const dC = this.dimConstants;
+	this.textW = GuiElements.measure.textWidth(this.textE); //Measure text element.
+	let width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
+	let height = dC.slotHeight; //Has no child, so is just the default height.
+	if(width < dC.slotWidth){ //Check if width is less than the minimum.
+		width = dC.slotWidth;
+	}
+	this.width = width; //Save computations.
+	this.height = height;
+};
+EditableSlotShape.prototype.updateAlign = function(){
+	const dC = this.dimConstants;
+	const textX=(this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW/2; //Centers the text horizontally.
+	const textY=EditableSlotShape.charHeight/2+this.height/2; //Centers the text vertically
+	BlockGraphics.update.text(this.textE,textX,textY); //Move the text.
+	const bGHB=BlockGraphics.hitBox; //Get data about the size of the hit box.
+	const hitX=bGHB.hMargin; //Compute its x and y coords.
+	const hitY=bGHB.vMargin;
+	const hitW=this.width+bGHB.hMargin*2; //Compute its width and height.
+	const hitH=this.height+bGHB.vMargin*2;
+	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH); //Move/resize its rectangle.
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function RectSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, RectSlotShape);
+}
+RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+RectSlotShape.prototype.constructor = RectSlotShape;
+RectSlotShape.setConstants = function(){
+	const RSS = RectSlotShape;
+	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
+	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
+	RSS.slotHeight = BlockGraphics.string.slotHeight;
+	RSS.slotWidth = BlockGraphics.string.slotWidth;
+	RSS.valueText = {};
+	RSS.valueText.fill = BlockGraphics.valueText.fill;
+	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+};
+RectSlotShape.prototype.buildSlot=function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+RectSlotShape.prototype.buildBackground = function(){
+	this.slotE = BlockGraphics.create.slot(this.group,3);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+};
+RectSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+RectSlotShape.prototype.updateAlign = function(){
+	EditableSlotShape.prototype.updateAlign.call(this);
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function HexSlotShape(slot){
+	SlotShape.call(this, slot);
+}
+HexSlotShape.prototype = Object.create(SlotShape.prototype);
+HexSlotShape.prototype.constructor = HexSlotShape;
+HexSlotShape.setConstants = function(){
+	const HSS = HexSlotShape;
+	const bG=BlockGraphics.predicate;
+	HSS.slotWidth = bG.slotWidth;
+	HSS.slotHeight = bG.slotHeight;
+};
+HexSlotShape.prototype.buildSlot = function(){
+	const HSS = HexSlotShape;
+	SlotShape.prototype.buildSlot.call(this);
+	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
+};
+HexSlotShape.prototype.updateDim = function(){
+	const HSS = HexSlotShape;
+	this.width=HSS.slotWidth;
+	this.height=HSS.slotHeight;
+};
+HexSlotShape.prototype.updateAlign = function(){
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function RoundSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, RoundSlotShape);
+}
+RoundSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+RoundSlotShape.prototype.constructor = RoundSlotShape;
+RoundSlotShape.setConstants = function(){
+	const RSS = RoundSlotShape;
+	const bG = BlockGraphics.reporter;
+	RSS.slotLMargin = bG.slotHMargin;
+	RSS.slotRMargin = bG.slotHMargin;
+	RSS.slotHeight = bG.slotHeight;
+	RSS.slotWidth = bG.slotWidth;
+
+	RSS.valueText = {};
+	RSS.valueText.fill = BlockGraphics.valueText.fill;
+	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+
+	RSS.slotSelectedFill = bG.slotSelectedFill;
+	RSS.slotFill = bG.slotFill;
+};
+RoundSlotShape.prototype.buildSlot=function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+RoundSlotShape.prototype.buildBackground = function(){
+	this.slotE = BlockGraphics.create.slot(this.group,1);
+	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+};
+RoundSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+RoundSlotShape.prototype.updateAlign = function(){
+	EditableSlotShape.prototype.updateAlign.call(this);
+	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,1,true);//Fix! BG
+};
+RoundSlotShape.prototype.select = function(){
+	const RSS = RoundSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+};
+RoundSlotShape.prototype.deselect = function(){
+	const RSS = RoundSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotFill);
+};
+/**
+ * Created by Tom on 6/29/2017.
+ */
+function DropSlotShape(slot, initialText){
+	EditableSlotShape.call(this, slot, initialText, DropSlotShape);
+}
+DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
+DropSlotShape.prototype.constructor = DropSlotShape;
+DropSlotShape.setConstants = function(){
+	const DSS = DropSlotShape;
+	const bG = BlockGraphics.dropSlot;
+	DSS.bgColor = bG.bg;
+	DSS.bgOpacity = bG.bgOpacity;
+	DSS.selectedBgOpacity = bG.selectedBgOpacity;
+	DSS.triColor = bG.triColor;
+	DSS.selectedTriColor = bG.selectedTriColor;
+	DSS.triW = bG.triW;
+	DSS.triH = bG.triH;
+
+	DSS.slotLMargin = bG.slotHMargin;
+	DSS.textMargin = DSS.slotLMargin;
+	DSS.slotRMargin = DSS.slotLMargin + DSS.textMargin + DSS.triW;
+	DSS.slotHeight = bG.slotHeight;
+	DSS.slotWidth = bG.slotWidth;
+
+	DSS.valueText = {};
+	DSS.valueText.fill = bG.textFill;
+	DSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
+	DSS.valueText.selectedFill = bG.textFill;
+};
+DropSlotShape.prototype.buildSlot = function(){
+	EditableSlotShape.prototype.buildSlot.call(this);
+};
+DropSlotShape.prototype.buildBackground = function(){
+	this.bgE=this.generateBg();
+	this.triE=this.generateTri();
+};
+DropSlotShape.prototype.generateBg=function(){
+	const DSS = DropSlotShape;
+	const bgE=GuiElements.create.rect(this.group);
+	GuiElements.update.color(bgE,DSS.bgColor);
+	GuiElements.update.opacity(bgE,DSS.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE,this.slot);
+	return bgE;
+};
+DropSlotShape.prototype.generateTri=function(){
+	const DSS = DropSlotShape;
+	const triE=GuiElements.create.path(this.group);
+	GuiElements.update.color(triE,DSS.triColor);
+	TouchReceiver.addListenersSlot(triE,this.slot);
+	return triE;
+};
+DropSlotShape.prototype.updateDim = function(){
+	EditableSlotShape.prototype.updateDim.call(this);
+};
+DropSlotShape.prototype.updateAlign = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.updateAlign.call(this);
+
+	const triX=this.width - DSS.slotRMargin + DSS.textMargin;
+	const triY=this.height/2 - DSS.triH/2;
+	GuiElements.update.triangle(this.triE,triX,triY,DSS.triW,0-DSS.triH);
+
+	GuiElements.update.rect(this.bgE,0,0,this.width,this.height);
+};
+DropSlotShape.prototype.select = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.opacity(this.bgE,DSS.selectedBgOpacity);
+	GuiElements.update.color(this.triE,DSS.selectedTriColor);
+};
+DropSlotShape.prototype.deselect = function(){
+	const DSS = DropSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.opacity(this.bgE,DSS.bgOpacity);
+	GuiElements.update.color(this.triE,DSS.triColor);
+};
+/**
+ * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
+ * attached.
+ * Every Slot has a parent Block which it relies on heavily.
+ * Slots can be edited in different ways, as indicated by their shape.
+ * Slots can accept different types of Blocks and can automatically convert Data into a certain type.
+ * Block implementations first update their Slots (compute their values) before accessing them during execution.
+ * Slots must implement highlight(); textSummary(); getDataNotFromChild(); createXml(); importXml(); TODO: Update this list
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
+ * @param {string} key - The name of the Slot. Used for reading and writing save files.
+ * @param {number} inputType - [none, num, string, drop] The type of Data which can be directly entered into the Slot. TODO: perhaps change drop data
+ * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
+ * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
+ */
+function Slot(parent, key, inputType, snapType, outputType){
+	DebugOptions.validateNonNull(parent, key, inputType, snapType, outputType);
+	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
+	DebugOptions.assert(key.includes("_"));
+	//Store data passed by constructor.
+	this.inputType = inputType; //TODO: Remove this unused field
+	this.snapType = snapType;
+	this.outputType = outputType;
+	this.parent = parent; //Parent Block.
+	this.key = key;
+	this.hasChild = false; //Nothing is attached yet.
+	this.child = null; //Stores attached Block.
+	this.width = 0; //Will be computed later using updateDim
+	this.height = 0;
+	this.x = 0;
+	this.y = 0;
+	this.isSlot = true; //All Block parts have this property. //TODO: Remove unused field
+	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
+	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
+	this.resultData = null; //passed to Block for use in implementation.
+}
+Slot.setConstants = function(){
+	/* The type of Data which can be directly entered into the Slot.  This was used for determining
+	 * input method but is no longer used for anything. */
+	Slot.inputTypes = function(){};
+	Slot.inputTypes.none = 0; //Predicate Slots cannot be directly entered into.
+	Slot.inputTypes.num = 1; //Edited with InputPad
+	Slot.inputTypes.string = 2; //Edited with dialog.
+	Slot.inputTypes.drop = 3; //Edited with dropdown.
+	//The type of Blocks which can be attached to the Slot.
+	Slot.snapTypes = function(){};
+	Slot.snapTypes.none = 0; //Nothing can attach (dropdowns often)
+	Slot.snapTypes.numStrBool = 1; //Blocks with return type num, string, or bool can attach (will be auto cast).
+	Slot.snapTypes.bool = 2; //Only Blocks that return bool can attach.
+	Slot.snapTypes.list = 3; //Only Blocks that return lists can attach.
+	Slot.snapTypes.any = 4; //Any type of Block can attach (used for the = Block).
+	//The type of Data the Slot should convert to before outputting. Guarantees the Block gets the type it wants.
+	Slot.outputTypes = function(){};
+	Slot.outputTypes.any = 0; //No conversion will occur.
+	Slot.outputTypes.num = 1; //Convert to num.
+	Slot.outputTypes.string = 2; //Convert to string.
+	Slot.outputTypes.bool = 3; //Convert to bool.
+	Slot.outputTypes.list = 4; //Convert to list.
+};
+
+/** Recursively updates dimensions and those of children. */
+Slot.prototype.updateDim = function(){
+	if(this.hasChild){
+		//Width is determined by child if it has one.
+		this.child.updateDim(); //Pass on message.
+		this.width = this.child.width;
+		this.height = this.child.height;
+	}
+	else{
+		//Otherwise, the size of the slot graphic is used.
+		this.width = this.slotShape.width;
+		this.height = this.slotShape.height;
+	}
+};
+
+/**
+ * Recursively updates Slot's alignment and alignment of children.
+ * @param {number} x - The x coord the Slot should have when completed relative to the Block it is in.
+ * @param {number} y - The y coord ths Slot should have measured from the center of the Slot.
+ * @return {number} - The width of the Slot, indicating how much the next item should be shifted over.
+ * TODO: Measure y from top of Slot to make it consistent with Block.
+ */
+Slot.prototype.updateAlign = function(x, y){
+	DebugOptions.validateNumbers(x, y);
+	if(this.hasChild){
+		//The x and y coords the child should have.
+		//TODO: Use relToAbs for this
+		const xCoord = x + this.parent.x; //converts coord from inside this Block's g to outside g
+		const yCoord = y + this.parent.y - this.height / 2; //Converts y to make it relative to top of Block.
+		this.x = x; //Sets this Slot's x.
+		this.y = y - this.height / 2; //Converts y to make it relative to top of Block.
+		return this.child.updateAlign(xCoord, yCoord); //Update child.
+		//This Slot itself does not need to change visibly because it is covered by a Block.
+	}
+	else{
+		this.x = x; //Sets this Slot's x.
+		this.y = y - this.height / 2; //Converts y to make it relative to top of Block.
+		this.slotShape.move(this.x, this.y); //Moves the graphic to the correct position
+		return this.width;
+	}
+};
+
+/**
+ * Attaches a Block to the Slot.  Changes the Block's stack to that of the Slot
+ * @param {Block} block - The Block to attach.
+ * TODO: Stop code that is currently running.
+ */
+Slot.prototype.snap = function(block){
+	DebugOptions.validateNonNull(block);
+	block.parent = this; //Set the Block's parent.
+	if(this.hasChild){ //If the Slot already has a child, detach it and move it out of the way.
+		const prevChild = this.child;
+		prevChild.unsnap(); //Detach the old Block.
+		prevChild.stack.shiftOver(block.stack.dim.rw, block.stack.dim.rh); //Move it over. //Fix! stack.dim
+	}
+	this.hasChild = true;
+	this.child = block; //Set child.
+	this.hideSlot(); //Slot graphics are covered and should be hidden.
+	if(block.stack != null) {
+		const oldG = block.stack.group; //Old group can be deleted.
+		block.stack.remove(); //TODO: use delete() instead.
+		block.changeStack(this.parent.stack); //Move Block into this stack.
+		oldG.remove();
+	}
+	if(this.parent.stack != null) {
+		this.parent.stack.updateDim(); //Update parent's dimensions.
+	}
+};
+
+/**
+ * Recursively changes the stack of the Slot's children.
+ * @param {BlockStack} stack - The stack to change to.
+ */
+Slot.prototype.changeStack = function(stack){
+	DebugOptions.validateNonNull(stack);
+	if(this.hasChild){
+		this.child.changeStack(stack); //Pass the message.
+	}
+};
+
+/**
+ * Recursively stops the Slot and its children.
+ */
+Slot.prototype.stop = function(){
+	this.clearMem(); //Stop Slot.
+	if(this.hasChild){
+		this.child.stop(); //Stop children.
+	}
+};
