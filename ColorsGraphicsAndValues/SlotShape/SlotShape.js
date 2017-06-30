@@ -9,7 +9,6 @@ function SlotShape(slot){
 SlotShape.setConstants = function(){
 
 };
-SlotShape.prototype.abcdef = function(){};
 SlotShape.prototype.show = function(){
 	if(this.visible) return;
 	this.visible = true;
