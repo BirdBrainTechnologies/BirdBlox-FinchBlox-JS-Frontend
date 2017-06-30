@@ -9994,7 +9994,7 @@ HttpRequestBuilder.prototype.toString = function(){
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp=false || DebugOptions.shouldLogHttp();
+	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message);
@@ -10035,13 +10035,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr();
-			}*/
-			if(callbackFn != null) {
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Started');
-			}
+			}*/
 		}, 20);
 		return;
 	}
@@ -12324,6 +12324,7 @@ Slot.prototype.updateDim = function(){
  * TODO: Measure y from top of Slot to make it consistent with Block.
  */
 Slot.prototype.updateAlign = function(x, y){
+	DebugOptions.validateNumbers(x, y);
 	if(this.hasChild){
 		//The x and y coords the child should have.
 		//TODO: Use relToAbs for this
@@ -12348,6 +12349,7 @@ Slot.prototype.updateAlign = function(x, y){
  * TODO: Stop code that is currently running.
  */
 Slot.prototype.snap = function(block){
+	DebugOptions.validateNonNull(block);
 	block.parent = this; //Set the Block's parent.
 	if(this.hasChild){ //If the Slot already has a child, detach it and move it out of the way.
 		const prevChild = this.child;
@@ -12373,6 +12375,7 @@ Slot.prototype.snap = function(block){
  * @param {BlockStack} stack - The stack to change to.
  */
 Slot.prototype.changeStack = function(stack){
+	DebugOptions.validateNonNull(stack);
 	if(this.hasChild){
 		this.child.changeStack(stack); //Pass the message.
 	}
@@ -12518,6 +12521,7 @@ Slot.prototype.findBestFit = function(){
  * @return {boolean} - Is the return type compatible with the snap type?
  */
 Slot.prototype.checkFit = function(outputType){
+	DebugOptions.validateNonNull(outputType);
 	const sT = Slot.snapTypes;
 	const rT = Block.returnTypes;
 	const snapType = this.snapType;
@@ -12610,6 +12614,7 @@ Slot.prototype.getAbsHeight = function(){
  * @param {Slot} slot - The slot to copy from
  */
 Slot.prototype.copyFrom = function(slot){
+	DebugOptions.validateNonNull(slot);
 	if(slot.hasChild){
 		this.snap(slot.child.duplicate(0,0));
 	}
@@ -12627,6 +12632,7 @@ Slot.prototype.clearMem = function(){
  * @return {Data} - The converted Data.
  */
 Slot.prototype.convertData = function(data){
+	DebugOptions.validateNonNull(data);
 	const outType = this.outputType;
 	const oT = Slot.outputTypes;
 	if(outType === oT.any){
@@ -12768,6 +12774,7 @@ Slot.prototype.checkListUsed = function(list){
  * @return {Document} - The document with the Slot appended
  */
 Slot.prototype.createXml = function(xmlDoc){
+	DebugOptions.validateNonNull(xmlDoc);
 	const slot = XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"type","Slot");
 	XmlWriter.setAttribute(slot,"key",this.key);
@@ -13386,10 +13393,10 @@ DropSlot.prototype.constructor = DropSlot;
 DropSlot.prototype.addOption=function(displayText,data){
 	this.optionsText.push(displayText);
 	this.optionsData.push(data);
-}
+};
 DropSlot.prototype.populateList=function(){//overrided by subclasses
 	
-}
+};
 /*
 DropSlot.prototype.buildSlot=function(){
 	this.textH=BlockGraphics.valueText.charHeight;

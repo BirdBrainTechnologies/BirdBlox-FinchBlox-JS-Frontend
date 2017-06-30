@@ -18,10 +18,10 @@ DropSlot.prototype.constructor = DropSlot;
 DropSlot.prototype.addOption=function(displayText,data){
 	this.optionsText.push(displayText);
 	this.optionsData.push(data);
-}
+};
 DropSlot.prototype.populateList=function(){//overrided by subclasses
 	
-}
+};
 /*
 DropSlot.prototype.buildSlot=function(){
 	this.textH=BlockGraphics.valueText.charHeight;

@@ -4,7 +4,7 @@
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp=false || DebugOptions.shouldLogHttp();
+	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message);
@@ -45,13 +45,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr();
-			}*/
-			if(callbackFn != null) {
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Started');
-			}
+			}*/
 		}, 20);
 		return;
 	}
