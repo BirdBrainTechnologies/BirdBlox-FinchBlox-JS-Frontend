@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading6";
+	debug.innerHTML = "Loading7";
 }, false);
 
 function DebugOptions(){
@@ -8524,4 +8524,2318 @@ RowDialog.prototype.closeDialog = function(){
 		this.hide();
 		GuiElements.unblockInteraction();
 	}
+};
+RowDialog.prototype.getScroll = function(){
+	if(this.scrollBox == null) return 0;
+	return this.scrollBox.getScrollY();
+};
+RowDialog.prototype.setScroll = function(y){
+	if(this.scrollBox == null) return;
+	this.scrollBox.setScrollY(y);
+};
+RowDialog.prototype.updateZoom = function(){
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.closeDialog();
+		this.show();
+		this.setScroll(scroll);
+	}
+};
+RowDialog.updateZoom = function(){
+	if(RowDialog.currentDialog != null){
+		RowDialog.currentDialog.updateZoom();
+	}
+};
+RowDialog.prototype.hide = function(){
+	if(this.visible) {
+		this.visible = false;
+		this.group.remove();
+		if (this.scrollBox != null) {
+			this.scrollBox.hide();
+		}
+		this.scrollBox = null;
+	}
+};
+RowDialog.prototype.reloadRows = function(rowCount){
+	this.rowCount = rowCount;
+	if(this.visible) {
+		let scroll = this.getScroll();
+		this.hide();
+		this.show();
+		this.setScroll(scroll);
+	}
+};
+RowDialog.prototype.isScrolling = function(){
+	if(this.scrollBox != null){
+		return this.scrollBox.isMoving();
+	}
+	return false;
+};
+RowDialog.prototype.addHintText = function(hintText){
+	this.hintText = hintText;
+};
+RowDialog.prototype.getExtraTopY = function(){
+	return this.extraTopY;
+};
+RowDialog.prototype.getExtraBottomY = function(){
+	return this.extraBottomY;
+};
+RowDialog.prototype.getContentWidth = function(){
+	return this.contentWidth;
+};
+RowDialog.prototype.getCenteredButton = function(i){
+	return this.centeredButtonEs[i];
+};
+RowDialog.prototype.contentRelToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.scrollBox.relToAbsX(x);
+};
+RowDialog.prototype.contentRelToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.scrollBox.relToAbsY(y);
+};
+RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn){
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	button.addText(text);
+	return button;
+};
+RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn){
+	var RD = RowDialog;
+	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	if(callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
+	}
+	button.makeScrollable();
+	return button;
+};
+RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
+	let RD = RowDialog;
+	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+	button.addIcon(iconId, RD.iconH);
+	return button;
+};
+
+/**
+ * Created by Tom on 6/13/2017.
+ */
+
+function OpenDialog(listOfFiles){
+	this.files=listOfFiles.split("\n");
+	if(listOfFiles == ""){
+		this.files = [];
+	}
+	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addHintText("No saved programs");
+}
+OpenDialog.prototype = Object.create(RowDialog.prototype);
+OpenDialog.constructor = OpenDialog;
+OpenDialog.setConstants = function(){
+
+};
+OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
+	var RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	var file = this.files[index];
+	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+	let renameBnX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(file, renameBnX, y, contentGroup);
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	this.createDeleteBn(file, deleteBnX, y, contentGroup);
+};
+OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
+	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
+		this.closeDialog();
+		SaveManager.userOpenFile(file);
+	}.bind(this));
+};
+OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		SaveManager.userDeleteFile(false, file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	var me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		SaveManager.userRenameFile(false, file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		me.closeDialog();
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+		openDialog.setScroll(thisScroll);
+	});
+};
+OpenDialog.showDialog = function(){
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		var openDialog = new OpenDialog(response);
+		openDialog.show();
+	});
+};
+/**
+ * Created by Tom on 6/18/2017.
+ */
+function ConnectMultipleDialog(deviceClass){
+	let CMD = ConnectMultipleDialog;
+	CMD.lastClass = deviceClass;
+	let title = "Connect Multiple";
+	this.deviceClass = deviceClass;
+	let count = deviceClass.getManager().getDeviceCount();
+	RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap \"+\" to connect");
+}
+ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
+ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
+ConnectMultipleDialog.setConstants = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = null;
+
+	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	CMD.tabRowHeight = RowDialog.titleBarH;
+	CMD.numberWidth = 35;
+	CMD.plusFontSize=26;
+	CMD.plusCharHeight=18;
+
+	CMD.numberFontSize=16;
+	CMD.numberFont="Arial";
+	CMD.numberFontWeight="normal";
+	CMD.numberCharHeight=12;
+	CMD.numberColor = Colors.white;
+};
+ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let statusX = 0;
+	let numberX = statusX + DeviceStatusLight.radius * 2;
+	let mainBnX = numberX + CMD.numberWidth;
+	let removeBnX = width - RowDialog.smallBnWidth;
+	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+
+	let robot = this.deviceClass.getManager().getDevice(index);
+	this.createStatusLight(robot, statusX, y, contentGroup);
+	this.createNumberText(index, numberX, y, contentGroup);
+	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
+};
+ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
+	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
+};
+ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
+	let CMD = ConnectMultipleDialog;
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textW = GuiElements.measure.textWidth(textE);
+	let textX = x + (CMD.numberWidth - textW) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	GuiElements.move.text(textE, textX, textY);
+	contentGroup.appendChild(textE);
+	return textE;
+};
+ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup){
+	let connectionX = this.x + this.width / 2;
+	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function(){
+		let upperY = this.contentRelToAbsY(y);
+		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
+	}.bind(this));
+};
+ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup){
+	let button = RowDialog.createSmallBn(x, y, contentGroup);
+	button.addText("X");
+	button.setCallbackFunction(function(){
+		this.deviceClass.getManager().removeDevice(index);
+	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.show = function(){
+	let CMD = ConnectMultipleDialog;
+	CMD.currentDialog = this;
+	RowDialog.prototype.show.call(this);
+	this.createConnectBn();
+	this.createTabRow();
+	this.deviceClass.getManager().discover();
+};
+ConnectMultipleDialog.prototype.createConnectBn = function(){
+	let CMD = ConnectMultipleDialog;
+	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
+	let x = (this.width - bnWidth) / 2;
+	let y = this.getExtraBottomY();
+	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
+	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	let upperY = y + this.y;
+	let lowerY = upperY + RowDialog.bnHeight;
+	let connectionX = this.x + this.width / 2;
+	button.setCallbackFunction(function(){
+		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
+	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.createTabRow = function(){
+	let CMD = ConnectMultipleDialog;
+	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
+	Device.getTypeList().forEach(function(deviceClass){
+		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	});
+	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
+	if(deviceClass == null){
+		deviceClass = this.deviceClass;
+	}
+	if(deviceClass !== this.deviceClass){
+		this.deviceClass.getManager().stopDiscover();
+	}
+	let thisScroll = this.getScroll();
+	let me = this;
+	me.hide();
+	let dialog = new ConnectMultipleDialog(deviceClass);
+	dialog.show();
+	if(deviceClass === this.deviceClass) {
+		dialog.setScroll(thisScroll);
+	}
+};
+ConnectMultipleDialog.prototype.closeDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	RowDialog.prototype.closeDialog.call(this);
+	CMD.currentDialog = null;
+	this.deviceClass.getManager().stopDiscover();
+};
+ConnectMultipleDialog.reloadDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.currentDialog != null){
+		CMD.currentDialog.reloadDialog();
+	}
+};
+ConnectMultipleDialog.showDialog = function(){
+	let CMD = ConnectMultipleDialog;
+	if(CMD.lastClass == null) {
+		CMD.lastClass = Device.getTypeList()[0];
+	}
+	(new ConnectMultipleDialog(CMD.lastClass)).show();
+};
+/**
+ * Created by Tom on 6/16/2017.
+ */
+function RecordingDialog(listOfRecordings){
+	let RecD = RecordingDialog;
+	this.recordings=listOfRecordings.map(x => x.id);
+	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	this.addCenteredButton("Done", this.closeDialog.bind(this));
+	this.addHintText("Tap record to start");
+	this.state = RecordingManager.recordingStates.stopped;
+}
+RecordingDialog.prototype = Object.create(RowDialog.prototype);
+RecordingDialog.prototype.constructor = RecordingDialog;
+RecordingDialog.setConstants = function(){
+	let RecD = RecordingDialog;
+	RecD.currentDialog = null;
+	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	RecD.coverRectOpacity = 0.8;
+	RecD.coverRectColor = Colors.black;
+	RecD.counterFont = "Arial";
+	RecD.counterColor = Colors.white;
+	RecD.counterFontSize = 60;
+	RecD.counterFontWeight = "normal";
+	RecD.counterBottomMargin = 50;
+	RecD.recordColor = "#f00";
+	RecD.recordTextSize = 25;
+	RecD.recordTextCharH = 18;
+	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.iconSidemargin = 10;
+
+};
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+	let RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	let recording = this.recordings[index];
+	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
+	let renameBnX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(recording, renameBnX, y, contentGroup);
+	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
+};
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
+	let state = {};
+	state.playing = false;
+	let me = this;
+	let showPlay = function(){
+		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
+	};
+	let showStop = function(){
+		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
+	};
+	button.setCallbackFunction(function(){
+		if(state.playing){
+			Sound.stopAllSounds();
+		} else {
+			Sound.playAndStopPrev(recording, true, function(){
+				state.playing = true;
+				showStop();
+			}, null, function(){
+				if(me.visible) {
+					state.playing = false;
+					showPlay();
+				}
+			});
+		}
+	}, true);
+	showPlay();
+};
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+	let me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
+		RecordingManager.userDeleteFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	let me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		RecordingManager.userRenameFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+RecordingDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	RecordingDialog.currentDialog = this;
+	this.recordButton = this.createRecordButton();
+	this.discardButton = this.createDiscardButton();
+	this.saveButton = this.createSaveButton();
+	this.pauseButton = this.createPauseButton();
+	this.resumeRecordingBn = this.createResumeRecordingBn();
+	this.goToState(this.state);
+};
+RecordingDialog.prototype.hide = function(){
+	RowDialog.prototype.hide.call(this);
+	this.setCounterVisibility(false);
+};
+RecordingDialog.prototype.closeDialog = function(){
+	RowDialog.prototype.closeDialog.call(this);
+	RecordingDialog.currentDialog = null;
+};
+RecordingDialog.prototype.createRecordButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let x = RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
+		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
+	button.setCallbackFunction(function(){
+		RecordingManager.startRecording();
+	}, true);
+	return button;
+};
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+	let RD = RowDialog;
+	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
+	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, width, RD.bnHeight, this.group);
+	button.setCallbackFunction(callbackFn, true);
+	return button;
+};
+RecordingDialog.prototype.createDiscardButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(0, function(){
+		RecordingManager.discardRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	return button;
+};
+RecordingDialog.prototype.createSaveButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(1, function(){
+		this.goToState(RecordingManager.recordingStates.stopped);
+		RecordingManager.stopRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
+	return button;
+};
+RecordingDialog.prototype.createPauseButton = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.paused);
+		RecordingManager.pauseRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	return button;
+};
+RecordingDialog.prototype.createResumeRecordingBn = function(){
+	let RD = RowDialog;
+	let RecD = RecordingDialog;
+	let button = this.createOneThirdBn(2, function(){
+		this.goToState(RecordingManager.recordingStates.recording);
+		RecordingManager.resumeRecording();
+	}.bind(this));
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	return button;
+};
+RecordingDialog.prototype.drawCoverRect = function(){
+	let halfStep = RowDialog.bnMargin / 2;
+	let x = this.x + halfStep;
+	let y = this.y + this.getExtraTopY() + halfStep;
+	let height = this.getExtraBottomY() - this.getExtraTopY() - RowDialog.bnMargin;
+	let width = this.width - RowDialog.bnMargin;
+	let rect = GuiElements.draw.rect(x, y, width, height, RecordingDialog.coverRectColor);
+	GuiElements.update.opacity(rect, RecordingDialog.coverRectOpacity);
+	GuiElements.layers.overlayOverlay.appendChild(rect);
+	return rect;
+};
+RecordingDialog.prototype.drawTimeCounter = function(){
+	let RD = RecordingDialog;
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+	GuiElements.layers.overlayOverlay.appendChild(textE);
+	let width = GuiElements.measure.textWidth(textE);
+	let height = GuiElements.measure.textHeight(textE);
+	let x = this.x + this.width / 2 - width / 2;
+	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
+	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
+	if(span < 2 * RecordingDialog.counterBottomMargin){
+		y = this.getExtraBottomY() - span / 2;
+	}
+	y += this.y;
+	this.counterY = y;
+	GuiElements.move.text(textE, x, y);
+	return textE;
+};
+RecordingDialog.showDialog = function(){
+	RecordingManager.listRecordings(function(result){
+		let recordDialog = new RecordingDialog(result);
+		recordDialog.show();
+	});
+};
+RecordingDialog.prototype.goToState = function(state){
+	let RecD = RecordingDialog;
+	this.state = state;
+	let states = RecordingManager.recordingStates;
+	if(state === states.stopped){
+		this.recordButton.show();
+		this.discardButton.hide();
+		this.saveButton.hide();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(false);
+		this.getCenteredButton(0).enable();
+	}
+	else if(state === states.recording){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.show();
+		this.resumeRecordingBn.hide();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+	else if(state === states.paused){
+		this.recordButton.hide();
+		this.discardButton.show();
+		this.saveButton.show();
+		this.pauseButton.hide();
+		this.resumeRecordingBn.show();
+		this.setCounterVisibility(true);
+		this.getCenteredButton(0).disable();
+	}
+};
+RecordingDialog.startedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
+	}
+};
+RecordingDialog.stoppedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+};
+RecordingDialog.pausedRecording = function(){
+	if(RecordingDialog.currentDialog != null){
+		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
+	}
+};
+RecordingDialog.prototype.reloadDialog = function(){
+	let thisScroll = this.getScroll();
+	let me = this;
+	RecordingManager.listRecordings(function(response){
+		me.closeDialog();
+		let dialog = new RecordingDialog(response);
+		dialog.show();
+		dialog.setScroll(thisScroll);
+	});
+};
+RecordingDialog.prototype.setCounterVisibility = function(visible){
+	if(visible){
+		if (this.coverRect == null) {
+			this.coverRect = this.drawCoverRect();
+		}
+		if (this.counter == null) {
+			this.counter = this.drawTimeCounter();
+		}
+	} else {
+		if (this.coverRect != null) {
+			this.coverRect.remove();
+			this.coverRect = null;
+		}
+		if (this.counter != null) {
+			this.counter.remove();
+			this.counter = null;
+		}
+	}
+};
+RecordingDialog.prototype.updateCounter = function(time){
+	if(this.counter == null) return;
+	let totalSeconds = Math.floor(time / 1000);
+	let seconds = totalSeconds % 60;
+	let totalMinutes = Math.floor(totalSeconds / 60);
+	let minutes = totalMinutes % 60;
+	let hours = Math.floor(totalMinutes / 60);
+	let secondsString = seconds + "";
+	if(secondsString.length < 2){
+		secondsString = "0" + secondsString;
+	}
+	let minutesString = minutes + "";
+	let totalString = minutesString + ":" + secondsString;
+	if(hours > 0) {
+		if(minutesString.length < 2) {
+			minutesString = "0" + minutesString;
+		}
+		totalString = hours + ":" + minutesString + ":" + secondsString;
+	}
+	GuiElements.update.text(this.counter, totalString);
+	let width = GuiElements.measure.textWidth(this.counter);
+	let counterX = this.x + this.width / 2 - width / 2;
+	GuiElements.move.text(this.counter, counterX, this.counterY);
+};
+RecordingDialog.updateCounter = function(time){
+	if(this.currentDialog != null){
+		this.currentDialog.updateCounter(time);
+	}
+};
+/**
+ * Created by Tom on 6/19/2017.
+ */
+function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
+	if(index == null){
+		index = null;
+	}
+	this.x = x;
+	this.upperY = upperY;
+	this.lowerY = lowerY;
+	this.index = index;
+	this.deviceClass = deviceClass;
+	this.visible = false;
+	this.robotId = null;
+	if(index != null){
+		this.robotId = this.deviceClass.getManager().getDevice(index);
+	}
+}
+RobotConnectionList.setConstants = function(){
+	let RCL=RobotConnectionList;
+	RCL.bnMargin = 5;
+	RCL.bgColor=Colors.lightGray; //"#171717";
+	RCL.updateInterval=DiscoverDialog.updateInterval;
+	RCL.height=150;
+	RCL.width=200;
+};
+RobotConnectionList.prototype.show = function(){
+	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
+		this.showWithList("");
+	}.bind(this));
+};
+RobotConnectionList.prototype.showWithList = function(list){
+	let RCL = RobotConnectionList;
+	this.visible = true;
+	this.group=GuiElements.create.group(0,0);
+	this.menuBnList = null;
+	let layer = GuiElements.layers.overlayOverlay;
+	let overlayType = Overlay.types.connectionList;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
+	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
+	this.updateRobotList(list);
+};
+RobotConnectionList.prototype.discoverRobots=function(){
+	let me = this;
+	this.deviceClass.getManager().discover(function(response){
+		me.updateRobotList(response);
+	},function(){
+		if(DiscoverDialog.allowVirtualDevices){
+			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
+		}
+	});
+};
+RobotConnectionList.prototype.updateRobotList=function(robotArray){
+	const RCL = RobotConnectionList;
+	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
+	if(TouchReceiver.touchDown || !this.visible || isScrolling){
+		return;
+	}
+	let oldScroll=null;
+	if(this.menuBnList!=null){
+		oldScroll=this.menuBnList.getScroll();
+		this.menuBnList.hide();
+	}
+	let layer = GuiElements.layers.overlayOverlayScroll;
+	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.menuBnList.setMaxHeight(RCL.height);
+	for(let i=0; i < robotArray.length;i++) {
+		this.addBnListOption(robotArray[i]);
+	}
+	this.menuBnList.show();
+	if(oldScroll != null) {
+		this.menuBnList.setScroll(oldScroll);
+	}
+};
+RobotConnectionList.prototype.addBnListOption=function(robot){
+	let me = this;
+	this.menuBnList.addOption(robot.name,function(){
+		me.close();
+		if(me.index == null){
+			me.deviceClass.getManager().appendDevice(robot);
+		} else {
+			me.deviceClass.getManager().setDevice(me.index, robot);
+		}
+	});
+};
+RobotConnectionList.prototype.close=function(){
+	this.updateTimer=window.clearInterval(this.updateTimer);
+	this.bubbleOverlay.hide();
+	this.visible = false;
+	if(this.menuBnList != null) this.menuBnList.hide();
+};
+RobotConnectionList.prototype.relToAbsX = function(x){
+	if(!this.visible) return x;
+	return this.bubbleOverlay.relToAbsX(x);
+};
+RobotConnectionList.prototype.relToAbsY = function(y){
+	if(!this.visible) return y;
+	return this.bubbleOverlay.relToAbsY(y);
+};
+/**
+ * Created by Tom on 6/14/2017.
+ */
+
+
+
+function DiscoverDialog(deviceClass){
+	let DD = DiscoverDialog;
+	let title = "Connect " + deviceClass.getDeviceTypeName(false);
+	RowDialog.call(this, false, title, 0, 0, 0);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.deviceClass = deviceClass;
+	this.discoveredDevices = [];
+	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
+	this.addHintText(deviceClass.getConnectionInstructions());
+}
+DiscoverDialog.prototype = Object.create(RowDialog.prototype);
+DiscoverDialog.prototype.constructor = DiscoverDialog;
+DiscoverDialog.setConstants = function(){
+	DiscoverDialog.updateInterval = 500;
+	DiscoverDialog.allowVirtualDevices = false;
+};
+DiscoverDialog.prototype.show = function(){
+	var DD = DiscoverDialog;
+	RowDialog.prototype.show.call(this);
+	if(!this.updateTimer.isRunning()) {
+		this.updateTimer.start();
+		this.discoverDevices();
+	}
+};
+DiscoverDialog.prototype.discoverDevices = function() {
+	let me = this;
+	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
+		if(DiscoverDialog.allowVirtualDevices) {
+			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
+		}
+	});
+};
+DiscoverDialog.prototype.updateDeviceList = function(deviceList){
+	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
+		return;
+	}
+	this.discoveredDevices = deviceList;
+	this.reloadRows(this.discoveredDevices.length);
+
+};
+DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
+	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
+	button.addText(this.discoveredDevices[index].name);
+	var me = this;
+	button.setCallbackFunction(function(){
+		me.selectDevice(me.discoveredDevices[index]);
+	}, true);
+	button.makeScrollable();
+};
+DiscoverDialog.prototype.selectDevice = function(device){
+	this.deviceClass.getManager().setOneDevice(device);
+	this.closeDialog();
+};
+DiscoverDialog.prototype.closeDialog = function(){
+	RowDialog.prototype.closeDialog.call(this);
+	this.updateTimer.stop();
+	this.deviceClass.getManager().stopDiscover();
+};
+function OverflowArrows(){
+	var OA = OverflowArrows;
+	this.group = GuiElements.create.group(0, 0);
+	this.triTop = this.makeTriangle();
+	this.triLeft = this.makeTriangle();
+	this.triRight = this.makeTriangle();
+	this.triBottom = this.makeTriangle();
+	this.setArrowPos();
+	this.visible = false;
+}
+OverflowArrows.prototype.makeTriangle=function(){
+	var OA = OverflowArrows;
+	var tri = GuiElements.create.path();
+	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.opacity(tri, OA.opacity);
+	GuiElements.makeClickThrough(tri);
+	return tri;
+};
+OverflowArrows.setConstants=function(){
+	var OA = OverflowArrows;
+	OA.triangleW = 25;
+	OA.triangleH = 15;
+	OA.margin = 15;
+	OA.opacity = 0.5;
+};
+OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
+	if(left == right) {
+		this.showIfTrue(this.triLeft, false);
+		this.showIfTrue(this.triRight, false);
+	}
+	else{
+		this.showIfTrue(this.triLeft, left < this.left);
+		this.showIfTrue(this.triRight, right > this.right);
+	}
+	if(top == bottom){
+		this.showIfTrue(this.triTop, false);
+		this.showIfTrue(this.triBottom, false);
+	}
+	else {
+		this.showIfTrue(this.triTop, top < this.top);
+		this.showIfTrue(this.triBottom, bottom > this.bottom);
+	}
+};
+OverflowArrows.prototype.showIfTrue=function(tri,shouldShow){
+	if(shouldShow){
+		this.group.appendChild(tri);
+	} else{
+		tri.remove();
+	}
+};
+OverflowArrows.prototype.show=function(){
+	if(!this.visible) {
+		this.visible = true;
+		GuiElements.layers.overflowArr.appendChild(this.group);
+	}
+};
+OverflowArrows.prototype.hide=function(){
+	if(this.visible){
+		this.visible = false;
+		this.group.remove();
+	}
+};
+OverflowArrows.prototype.updateZoom=function(){
+	this.setArrowPos();
+};
+OverflowArrows.prototype.setArrowPos=function(){
+	var OA = OverflowArrows;
+	this.left = BlockPalette.width;
+	if(!GuiElements.paletteLayersVisible) {
+		this.left = 0;
+	}
+	this.top = TitleBar.height;
+	this.right = GuiElements.width;
+	this.bottom = GuiElements.height;
+	this.midX = (this.left + this.right) / 2;
+	this.midY = (this.top + this.bottom) / 2;
+
+	GuiElements.update.triangleFromPoint(this.triTop, this.midX, this.top + OA.margin, OA.triangleW, OA.triangleH, true);
+	GuiElements.update.triangleFromPoint(this.triLeft, this.left + OA.margin, this.midY, OA.triangleW, OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triRight, this.right - OA.margin, this.midY, OA.triangleW, -OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triBottom, this.midX, this.bottom - OA.margin, OA.triangleW, -OA.triangleH, true);
+};
+/**
+ * BlockStack is a class that holds a stack of Blocks.
+ * BlockStacks move, execute, and snap the Blocks within them.
+ * They pass messages onto their Blocks, which are passed on recursively.
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.
+ * Empty BlockStacks are not allowed because each BlockStack must have a non-null firstBlock property.
+ * @constructor
+ * @param {Block} firstBlock - The first Block in the BlockStack.
+ * The firstBlock is automatically moved along with subsequent Blocks into the BlockStack.
+ * @param {Tab} tab - The tab the BlockStack lives within.
+ */
+function BlockStack(firstBlock,tab){
+	tab.addStack(this); //The Tab maintains a list of all its BlockStacks.
+	this.firstBlock=firstBlock;
+	this.firstBlock.stop(); //Prevents execution.
+	this.firstBlock.stopGlow(); //Removes visual indicator of execution.
+	this.returnType=firstBlock.returnType; //The BlockStack returns the same type of value as its first Block.
+	this.tab=tab;
+	this.x = 0;
+	this.y = 0;
+	var blockX = firstBlock.getAbsX();
+	var blockY = firstBlock.getAbsY();
+	this.x=this.setAbsX(firstBlock.getAbsX());
+	this.y=this.setAbsY(firstBlock.getAbsY());
+	this.tabGroup=tab.mainG; //Stores the SVG group element of the Tab it is within.
+	this.group=GuiElements.create.group(this.x,this.y,this.tabGroup); //Creates a group for the BlockStack.
+	this.firstBlock.changeStack(this); //Moves all Blocks into the BlockStack.
+	this.dim=function(){}; //Stores information about the snap bounding box of the BlockStack.
+	//this.dim values will be assigned later.
+	this.dim.cw=0; //Dimensions of regions command blocks can be attached to.
+	this.dim.ch=0;
+	this.dim.rw=0; //Dimensions of regions reporter/predicate blocks can be attached to.
+	this.dim.rh=0;
+	this.dim.cx1=0; //These will be measured relative to the Tab, not the BlockStack.
+	this.dim.cy1=0;
+	this.dim.rx1=0;
+	this.dim.ry1=0;
+	this.updateDim(); //Updates the this.dim values, the dimensions of the Blocks, and aligns them.
+	this.isRunning=false;
+	this.currentBlock=null; //Keeps track of which Block in the BlockStack is currently executing.
+	this.isDisplayStack=false;
+	this.runningBroadcastMessage=""; //Keeps track of if this stack's execution was started by a broadcast.
+	this.move(this.x,this.y);
+	this.flying=false; //BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
+	this.tab.updateArrows();
+}
+/* Recursively updates the this.dim values, the dimensions of the Blocks, and and the Blocks' alignment.
+ */
+BlockStack.prototype.updateDim=function() {
+	this.firstBlock.updateDim(); //Recursively updates the dimensions of the Blocks.
+	//The first Block is aligned to the top-left corner of the BlockStack.
+	this.firstBlock.updateAlign(0,0); //Blocks recursively aligned.
+	this.dim.cx1=0; //Clear existing values from bounding boxes.
+	this.dim.cy1=0; //During updateStackDim, these values are measured relative to the BlockStack.
+	this.dim.cx2=0;
+	this.dim.cy2=0;
+	this.dim.rx1=0;
+	this.dim.ry1=0;
+	this.dim.rx2=0;
+	this.dim.ry2=0;
+	//Recursively each box updates the this.dim boxes to include their own bounding boxes.
+	this.firstBlock.updateStackDim();
+	//Dimensions of both types of boxes are calculated.
+	this.dim.cw=this.dim.cx2-this.dim.cx1;
+	this.dim.ch=this.dim.cy2-this.dim.cy1;
+	this.dim.rw=this.dim.rx2-this.dim.rx1;
+	this.dim.rh=this.dim.ry2-this.dim.ry1;
+};
+/**
+ * Converts a coordinate relative to the inside of the stack to one relative to the screen.
+ * @param {number} x - The coord relative to the inside fo the stack.
+ * @return {number} - The coord relative to the screen.
+ */
+BlockStack.prototype.relToAbsX=function(x){
+	if(this.flying){
+		return CodeManager.dragRelToAbsX(x+this.x);
+	}
+	else{
+		return this.tab.relToAbsX(x+this.x); //In a Tab; return x plus Tab's offset.
+	}
+};
+BlockStack.prototype.relToAbsY=function(y){
+	if(this.flying){
+		return CodeManager.dragRelToAbsY(y+this.y); //Not in a Tab; scale by dragLayer's scale
+	}
+	else{
+		return this.tab.relToAbsY(y+this.y); //In a Tab; return y plus Tab's offset.
+	}
+};
+/**
+ * Converts a coordinate relative to the screen to one relative to the inside of the stack.
+ * @param {number} x - The coord relative to the screen.
+ * @return {number} - The coord relative to the inside fo the stack.
+ */
+BlockStack.prototype.absToRelX=function(x){
+	if(this.flying){
+		return CodeManager.dragAbsToRelX(x)-this.x;
+	}
+	else{
+		return this.tab.absToRelX(x)-this.x; //In a Tab; return x minus Tab's offset.
+	}
+};
+BlockStack.prototype.absToRelY=function(y){
+	if(this.flying){
+		return CodeManager.dragAbsToRelY(y)-this.y;
+	}
+	else{
+		return this.tab.absToRelY(y)-this.y; //In a Tab; return y minus Tab's offset.
+	}
+};
+/**
+ * Returns the x coord of the BlockStack relative to the screen.
+ * @return The x coord of the BlockStack relative to the screen.
+ */
+BlockStack.prototype.getAbsX=function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the BlockStack relative to the screen.
+ * @return The y coord of the BlockStack relative to the screen.
+ */
+BlockStack.prototype.getAbsY=function(){
+	return this.relToAbsY(0);
+};
+BlockStack.prototype.setAbsX=function(x){
+	return this.x + this.absToRelX(x);
+};
+BlockStack.prototype.setAbsY=function(y){
+	return this.y + this.absToRelY(y);
+};
+/* Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
+ * Returns no values but stores results on CodeManager.fit.
+ */
+BlockStack.prototype.findBestFit=function(){
+	//Not implemented, check top of block
+	var move=CodeManager.move;
+	var fit=CodeManager.fit;
+	if(move.stack===this){ //If this BlockStack is the one being moved, it can't attach to itself.
+		return;
+	}
+	//Check if the moving BlockStack can attah to the top of this BlockStack.
+	if(move.bottomOpen&&this.firstBlock.topOpen){
+		this.findBestFitTop();
+	}
+	//Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
+	if(move.topOpen){
+		//Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
+		let absCx=this.relToAbsX(this.dim.cx1);
+		let absCy=this.relToAbsY(this.dim.cy1);
+		let absW = this.relToAbsX(this.dim.cw) - absCx;
+		let absH = this.relToAbsY(this.dim.ch) - absCy;
+		if(move.pInRange(move.topX,move.topY,absCx,absCy,absW,absH)){
+			this.firstBlock.findBestFit();
+		}
+	}
+	//Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
+	if(move.returnsValue){
+		//Only check if the BlockStack's bounding box overlaps with this BlockStack's bounding box.
+		let absRx=this.relToAbsX(this.dim.rx1);
+		let absRy=this.relToAbsY(this.dim.ry1);
+		let absW = this.relToAbsX(this.dim.rw) - absRx;
+		let absH = this.relToAbsY(this.dim.rh) - absRy;
+		var width = move.bottomX - move.topX;
+		var height = move.bottomY - move.topY;
+		if(move.rInRange(move.topX,move.topY,width,height,absRx,absRy,absW,absH)){
+			this.firstBlock.findBestFit();
+		}
+	}
+};
+/**
+ * Moves this BlockStack to a new location relative to the Tab. Updates this.x and this.y accordingly.
+ * @param {number} x - the x coord to move to.
+ * @param {number} y - the y coord to move to.
+ */
+BlockStack.prototype.move=function(x,y){
+	this.x=x;
+	this.y=y;
+	GuiElements.move.group(this.group,x,y);
+};
+/**
+ * Moves the BlockStack to a certain location on the screen.
+ * @param {number} x - The x coord relative to the screen where the BlockStack should move.
+ * @param {number} y - The y coord relative to the screen where the BlockStack should move.
+ */
+BlockStack.prototype.moveAbs=function(x,y){
+	var relX=this.absToRelX(x);
+	var relY=this.absToRelY(y);
+	this.move(relX,relY);
+};
+/* Recursively stops the execution of the BlockStack and its contents. Removes the glow as well.
+ */
+BlockStack.prototype.stop=function(){
+	if(this.isRunning){
+		this.firstBlock.stop();
+		this.endRun(); //Removes glow and sets isRunning.
+	}
+};
+/**
+ * Updates the execution of the BlockStack and its contents. Returns boolean to indicate if still running.
+ * @return {ExecutionStatus}
+ */
+BlockStack.prototype.updateRun=function(){
+	if(this.isRunning){
+		//Different procedures are used if the Block returns a value.
+		if(this.returnType===Block.returnTypes.none){
+			if(this.currentBlock.stack!==this){ //If the current Block has been removed, don't run it.
+				this.endRun(); //Stop execution.
+				return new ExecutionStatusDone();
+			}
+			//Update the current Block.
+			let execStatus = this.currentBlock.updateRun();
+			if(!execStatus.isRunning()){
+				//If the block threw a error, display it
+				if(execStatus.hasError()){
+					this.endRun();
+					return new ExecutionStatusDone();
+				} else{
+					//Otherwise, the next block will run next.
+					this.currentBlock=this.currentBlock.nextBlock;
+				}
+			}
+			//If the end of the BlockStack has been reached, end execution.
+			if(this.currentBlock!=null){
+				return new ExecutionStatusRunning();
+			} else{
+				this.endRun();
+				return new ExecutionStatusDone();
+			}
+		}
+		else{ //Procedure for Blocks that return a value.
+			let execStatus = this.currentBlock.updateRun();
+			if(execStatus.isRunning()){
+				return new ExecutionStatusRunning();
+			}
+			else if(execStatus.hasError()){
+				this.endRun();
+				return new ExecutionStatusDone();
+			}
+			else{
+				//When it is done running, display the result.
+				this.currentBlock.displayResult(execStatus.getResult());
+				this.endRun(); //Execution is done.
+				return new ExecutionStatusDone();
+			}
+		}
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
+/**
+ * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
+ * @param {Block} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
+ */
+BlockStack.prototype.startRun=function(startBlock,broadcastMessage){
+	if(startBlock==null){
+		startBlock=this.firstBlock; //Set parameter to default.
+	}
+	if(broadcastMessage==null){
+		broadcastMessage="";
+	}
+	this.runningBroadcastMessage=broadcastMessage;
+	if(!this.isRunning){ //Only start if not already running.
+		this.isRunning=true;
+		this.currentBlock=startBlock;
+		this.firstBlock.glow();
+		this.tab.startRun(); //Starts Tab if it is not already running.
+	}
+};
+/* Ends execution and removes glow. Does not call stop() function on Blocks; assumes they have stopped already.
+ */
+BlockStack.prototype.endRun=function(){
+	this.isRunning=false;
+	this.firstBlock.stopGlow();
+};
+/* Checks if the moving BlockStack can snap on to the top of this BlockStack. Returns nothing.
+ * Results are stored in CodeManager.fit.
+ * Only called if moving BlockStack returns no value.
+ */
+BlockStack.prototype.findBestFitTop=function(){
+	var snap=BlockGraphics.command.snap; //Get snap bounding box for command Blocks.
+	var move=CodeManager.move;
+	var fit=CodeManager.fit;
+	var x=this.firstBlock.getAbsX(); //Uses screen coordinates.
+	var y=this.firstBlock.getAbsY();
+	var height = this.relToAbsY(this.firstBlock.height) - y;
+	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
+	 * the snap bounding box of the first Block in the BlockStack. */
+	//Gets the bottom-left corner of the moving BlockStack.
+	var moveBottomLeftX=move.topX;
+	var moveBottomLeftY=move.bottomY;
+	//Gets the snap bounding box of the first Block.
+	var snapBLeft=x-snap.left;
+	var snapBTop=y-snap.top;
+	var snapBWidth=snap.left+snap.right;
+	var snapBHeight=snap.top+height+snap.bottom;
+	//Checks if the point falls in the box.
+	if(move.pInRange(moveBottomLeftX,moveBottomLeftY,snapBLeft,snapBTop,snapBWidth,snapBHeight)){
+		var xDist=move.topX-x;
+		var yDist=move.bottomY-y;
+		var dist=xDist*xDist+yDist*yDist; //Computes the distance.
+		if(!fit.found||dist<fit.dist){ //Compares it to existing fit.
+			fit.found=true;
+			fit.bestFit=this; //Note that in this case the bestFit is set to a BlockStack, not a Block.
+			fit.dist=dist; //Saves the fit.
+		}
+	}
+};
+/**
+ * Recursively attaches the provided Block and its subsequent Blocks to the top of this BlockStack.
+ * @param {Block} block - The Block to attach to this BlockStack.
+ * @fix - Remove redundant code.
+ */
+BlockStack.prototype.snap=function(block){ //Fix! remove redundant code.
+	if(this.isRunning&&!block.stack.isRunning){ //Fix! documentation
+		block.glow();
+	}
+	else if(!this.isRunning&&block.stack.isRunning){ //Blocks that are added are stopped.
+		block.stack.stop();
+	}
+	else if(this.isRunning&&block.isRunning){ //The added block is stopped, but still glows as part of a running stack.
+		block.stop();
+	}
+	/* Move this BlockStack up by the height of the of the stack the Block belongs to.
+	 * This compensates for the amount existing Blocks will be shifted down by the newly-added Blocks. */
+	this.move(this.x,this.y-block.stack.dim.rh); //Fix! this.dim clarification
+	var topStackBlock=block; //There is a new top Block.
+	var bottomStackBlock=block.getLastBlock(); //The last Block in the stack being added.
+	var upperBlock=this.firstBlock; //The topmost of the existing Blocks.
+	//Fix references between Blocks to glue them together.
+	this.firstBlock=topStackBlock;
+	topStackBlock.parent=null;
+	bottomStackBlock.nextBlock=upperBlock;
+	upperBlock.parent=bottomStackBlock;
+	//The old BlockStack can now be destroyed.
+	var oldG=block.stack.group;
+	block.stack.remove();
+	block.changeStack(this);
+	oldG.remove();
+
+	this.updateDim();
+};
+/* Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
+ */
+BlockStack.prototype.highlight=function(){
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.isRunning);
+};
+/**
+ * Shifts this BlockStack by the specified amount.
+ * @param {number} x - The amount to shift in the x direction.
+ * @param {number} y - The amount to shift in the y direction.
+ */
+BlockStack.prototype.shiftOver=function(x,y){
+	this.move(this.x+x,this.y+y);
+};
+/**
+ * Recursively copies this BlockStack and all its contents to a new BlockStack. Returns the new BlcokStack.
+ * @return {BlockStack} - The newly-copied BlockStack.
+ */
+BlockStack.prototype.duplicate=function(x,y,group){
+	//First duplicate the Blocks.
+	var firstCopyBlock=this.firstBlock.duplicate(x,y);
+	//Then put them in a new BlockStack.
+	return new BlockStack(firstCopyBlock,this.tab);
+};
+/* Returns the Tab this BlockStack belongs to. Used by the Blocks it contains when they need to kow their tab.
+ * @return {Tab} - The Tab this BlockStack belongs to.
+ */
+BlockStack.prototype.getTab=function(){
+	return this.tab;
+};
+/**
+ * Returns the Sprite this BlockStack and its Blocks are associated with. Called by this BlockStack's Blocks.
+ * Used in Block implementations.
+ * @return {Sprite} - The Sprite this BlockStack and its Blocks are associated with.
+ */
+BlockStack.prototype.getSprite=function(){
+	return this.tab.getSprite();
+};
+/* Moves this BlockStack out of the Tab's group and into the drag layer about other Blocks.
+ */
+BlockStack.prototype.fly=function(){
+	this.group.remove(); //Remove group from Tab (visually only).
+	GuiElements.layers.drag.appendChild(this.group); //Add group to drag layer.
+	var absX=this.getAbsX(); //Get current location on screen.
+	var absY=this.getAbsY();
+	this.flying=true; //Record that this BlockStack is flying.
+	//Move to ensure that position on screen does not change.
+	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
+	this.tab.updateArrows();
+};
+/* Moves this BlockStack back into its Tab's group.
+ */
+BlockStack.prototype.land=function(){
+	this.group.remove(); //Remove from drag layer.
+	this.tabGroup.appendChild(this.group); //Go back into tab group.
+	var absX=this.getAbsX(); //Get current location on screen.
+	var absY=this.getAbsY();
+	this.flying=false;
+	//Move to ensure that position on screen does not change.
+	this.move(this.tab.absToRelX(absX),this.tab.absToRelY(absY));
+	this.tab.updateArrows();
+};
+/* Removes the stack from the Tab's list.
+ */
+BlockStack.prototype.remove=function(){
+	this.tab.removeStack(this);
+};
+/* Stops execution and removes the BlockStack digitally and visually.
+ */
+BlockStack.prototype.delete=function(){
+	this.stop();
+	this.group.remove();
+	this.remove(); //Remove from Tab's list.
+	this.tab.updateArrows();
+};
+/* Passes message to first Block in BlockStack that the flag was tapped.
+ */
+BlockStack.prototype.eventFlagClicked=function(){
+	if(!this.isRunning){ //Only pass message if not already running.
+		this.firstBlock.eventFlagClicked();
+	}
+};
+/* Passes broadcast message to first Block in BlockStack.
+ */
+BlockStack.prototype.eventBroadcast=function(message){
+	this.firstBlock.eventBroadcast(message);
+};
+/* Checks if a broadcast is still running for the broadcast and wait Block.
+ */
+BlockStack.prototype.checkBroadcastRunning=function(message){
+	if(this.isRunning){
+		return this.runningBroadcastMessage==message;
+	}
+	return false;
+};
+/* Recursively checks if a given message is still in use by any of the DropSlots.
+ */
+BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
+	return this.firstBlock.checkBroadcastMessageAvailable(message);
+};
+/* Recursively updates the available broadcast messages.
+ */
+BlockStack.prototype.updateAvailableMessages=function(){
+	this.firstBlock.updateAvailableMessages();
+};
+/**
+ * Recursively returns the last Block in the BlockStack.
+ * @return {Block} - The last Block in the BlockStack.
+ */
+BlockStack.prototype.getLastBlock=function(){
+	return this.firstBlock.getLastBlock();
+};
+/*
+
+ */
+BlockStack.prototype.updateTabDim=function(){
+	if(this.flying) return;
+	var dim=this.tab.dim;
+	if(dim.x1==null||this.x<dim.x1){
+		dim.x1=this.x;
+	}
+	if(dim.y1==null||this.y<dim.y1){
+		dim.y1=this.y;
+	}
+	var x2=this.x+this.dim.rw;
+	if(dim.x2==null||x2>dim.x2){
+		dim.x2=x2;
+	}
+	var y2=this.y+this.dim.rh;
+	if(dim.y2==null||y2>dim.y2){
+		dim.y2=y2;
+	}
+};
+/* TODO: Write documentation. */
+BlockStack.prototype.createXml=function(xmlDoc){
+	var stack=XmlWriter.createElement(xmlDoc,"stack");
+	XmlWriter.setAttribute(stack,"x",this.x);
+	XmlWriter.setAttribute(stack,"y",this.y);
+	var blocks=XmlWriter.createElement(xmlDoc,"blocks");
+	this.firstBlock.writeToXml(xmlDoc,blocks);
+	stack.appendChild(blocks);
+	return stack;
+};
+/* TODO: Write documentation. */
+BlockStack.importXml=function(stackNode,tab){
+	var x=XmlWriter.getAttribute(stackNode,"x",0,true);
+	var y=XmlWriter.getAttribute(stackNode,"y",0,true);
+	var blocksNode=XmlWriter.findSubElement(stackNode,"blocks");
+	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
+	if(blockNodes.length>0){
+		var firstBlock=null;
+		var i=0;
+		while(firstBlock==null&&i<blockNodes.length){
+			firstBlock=Block.importXml(blockNodes[i]);
+			i++;
+		}
+		if(firstBlock==null){
+			return null;
+		}
+		var stack=new BlockStack(firstBlock,tab);
+		stack.move(x,y);
+		var previousBlock=firstBlock;
+		while(i<blockNodes.length) {
+			var newBlock = Block.importXml(blockNodes[i]);
+			if (newBlock != null) {
+				previousBlock.snap(newBlock);
+				previousBlock = newBlock;
+			}
+			i++;
+		}
+		stack.updateDim();
+	}
+	else{
+		return null;
+	}
+};
+BlockStack.prototype.renameVariable=function(variable){
+	this.passRecursively("renameVariable",variable);
+};
+BlockStack.prototype.deleteVariable=function(variable){
+	this.passRecursively("deleteVariable",variable);
+};
+BlockStack.prototype.renameList=function(list){
+	this.passRecursively("renameList",list);
+};
+BlockStack.prototype.deleteList=function(list){
+	this.passRecursively("deleteList",list);
+};
+BlockStack.prototype.checkVariableUsed=function(variable){
+	return this.firstBlock.checkVariableUsed(variable);
+};
+BlockStack.prototype.checkListUsed=function(list){
+	return this.firstBlock.checkListUsed(list);
+};
+BlockStack.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+	this.updateDim();
+};
+BlockStack.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+	this.updateDim();
+};
+BlockStack.prototype.countDevicesInUse=function(deviceClass){
+	return this.firstBlock.countDevicesInUse(deviceClass);
+};
+BlockStack.prototype.passRecursively=function(functionName){
+	var args = Array.prototype.slice.call(arguments, 1);
+	this.firstBlock[functionName].apply(this.firstBlock,args);
+};
+BlockStack.prototype.getWidth=function(){
+	return this.dim.rw;
+};
+BlockStack.prototype.getHeight=function(){
+	return this.dim.rh;
+};
+/**
+ * Created by Tom on 6/12/2017.
+ */
+
+/**
+ * Represents a request to be used with HtmlServer
+ * @param url {String} - The beginning of the request
+ * @constructor
+ */
+function HttpRequestBuilder(url){
+	DebugOptions.validateNonNull(url);
+	this.request = url;
+	this.hasFirstParam = false;
+}
+/**
+ * Adds a get parameter with the given key and value
+ * @param key {String}
+ * @param value {String} - The value will be escaped with
+ */
+HttpRequestBuilder.prototype.addParam = function(key, value){
+	if(!this.hasFirstParam){
+		this.hasFirstParam = true;
+		this.request += "?";
+	} else{
+		this.request += "&";
+	}
+	this.request += key;
+	this.request += "=";
+	this.request += HtmlServer.encodeHtml(value);
+};
+/**
+ * Returns the request to give to HtmlServer
+ * @returns {String}
+ */
+HttpRequestBuilder.prototype.toString = function(){
+	return this.request;
+};
+
+
+/* HtmlServer is a static class that will manage HTTP requests.
+ * This class is not nearly finished.
+ */
+function HtmlServer(){
+	HtmlServer.port=22179;
+	HtmlServer.dialogVisible=false;
+	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
+}
+HtmlServer.decodeHtml = function(message){
+	return decodeURIComponent(message);
+};
+HtmlServer.encodeHtml=function(message){
+	/*if(message==""){
+		return "%20"; //Empty strings can't be used in the URL.
+	}*/
+	var eVal;
+	if (!encodeURIComponent) {
+		eVal = escape(message);
+		eVal = eVal.replace(/@/g, "%40");
+		eVal = eVal.replace(/\//g, "%2F");
+		eVal = eVal.replace(/\+/g, "%2B");
+		eVal = eVal.replace(/'/g, "%60");
+		eVal = eVal.replace(/"/g, "%22");
+		eVal = eVal.replace(/`/g, "%27");
+		eVal = eVal.replace(/&/g, "%26");
+	} else {
+		eVal = encodeURIComponent(message);
+		eVal = eVal.replace(/~/g, "%7E");
+		eVal = eVal.replace(/!/g, "%21");
+		eVal = eVal.replace(/\(/g, "%28");
+		eVal = eVal.replace(/\)/g, "%29");
+		eVal = eVal.replace(/'/g, "%27");
+		eVal = eVal.replace(/"/g, "%22");
+		eVal = eVal.replace(/`/g, "%27");
+		eVal = eVal.replace(/&/g, "%26");
+	}
+	return eVal; //.replace(/\%20/g, "+");
+};
+HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+	callbackFn = DebugOptions.safeFunc(callbackFn);
+	callbackErr = DebugOptions.safeFunc(callbackErr);
+	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+		GuiElements.alert(HtmlServer.getUrlForRequest(request));
+	}
+	if(DebugOptions.shouldSkipHtmlRequests()) {
+		setTimeout(function () {
+			if(callbackErr != null) {
+				callbackErr();
+			}
+			/*if(callbackFn != null) {
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Started');
+			}*/
+		}, 20);
+		return;
+	}
+	if(isPost == null) {
+		isPost=false;
+	}
+	var requestType="GET";
+	if(isPost){
+		requestType="POST";
+	}
+	try {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if (200 <= xhttp.status && xhttp.status <= 299) {
+					if(callbackFn!=null){
+						callbackFn(xhttp.responseText);
+					}
+				}
+				else {
+					if(callbackErr!=null){
+						if(HtmlServer.logHttp){
+							GuiElements.alert("HTTP ERROR: " + xhttp.status);
+						}
+						callbackErr(xhttp.status);
+					}
+					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
+				}
+			}
+		};
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
+		if(isPost){
+			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
+			xhttp.send(postData);
+		}
+		else{
+			xhttp.send(); //Make the request
+		}
+	}
+	catch(err){
+		if(callbackErr!=null){
+			callbackErr();
+		}
+	}
+};
+HtmlServer.sendRequest=function(request,requestStatus){
+	/*
+	 setTimeout(function(){
+		requestStatus.error = false;
+		requestStatus.finished = true;
+		requestStatus.result = "7";
+	}, 300);
+	return;
+	*/
+	if(requestStatus!=null){
+		requestStatus.error=false;
+		var callbackFn=function(response){
+			callbackFn.requestStatus.finished=true;
+			callbackFn.requestStatus.result=response;
+		};
+		callbackFn.requestStatus=requestStatus;
+		var callbackErr=function(){
+			callbackErr.requestStatus.finished=true;
+			callbackErr.requestStatus.error=true;
+		};
+		callbackErr.requestStatus=requestStatus;
+		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
+	}
+	else{
+		HtmlServer.sendRequestWithCallback(request);
+	}
+}
+HtmlServer.getHBRequest=function(hBIndex,request,params){
+	DebugOptions.validateNonNull(params);
+	var res = "hummingbird/";
+	res += request;
+	res += "?id=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
+	res += params;
+	return res;
+};
+HtmlServer.getUrlForRequest=function(request){
+	return "http://localhost:"+HtmlServer.port+"/"+request;
+}
+HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	//GuiElements.alert("Showing...");
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var newText=prompt(question);
+		HtmlServer.dialogVisible=false;
+		callbackFn(newText==null,newText);
+	}
+	else{
+		var HS=HtmlServer;
+		var request = "tablet/dialog";
+		request+="?title=" + HS.encodeHtml(title);
+		request+="&question="+HS.encodeHtml(question);
+		request+="&prefill="+HS.encodeHtml(prefill);
+		request+="&selectAll=true";
+		var onDialogPresented=function(result){
+			//GuiElements.alert("dialog presented...");
+			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
+		}
+		onDialogPresented.callbackFn=callbackFn;
+		onDialogPresented.callbackErr=callbackErr;
+		var onDialogFail=function(){
+			//GuiElements.alert("dialog failed...");
+			HtmlServer.dialogVisible=false;
+			if(onDialogFail.callbackErr!=null) {
+				onDialogFail.callbackErr();
+			}
+		}
+		onDialogFail.callbackErr=callbackErr;
+		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
+	}
+}
+HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "tablet/dialog_response";
+	var onResponseReceived=function(response){
+		if(response=="No Response"){
+			HS.sendRequestWithCallback(request,onResponseReceived,function(){
+				//GuiElements.alert("Error2");
+				HtmlServer.dialogVisible=false;
+				callbackErr();
+			});
+			//GuiElements.alert("No resp");
+		}
+		else if(response=="Cancelled"){
+			HtmlServer.dialogVisible=false;
+			onResponseReceived.callbackFn(true);
+			//GuiElements.alert("Cancelled");
+		}
+		else{
+			HtmlServer.dialogVisible=false;
+			var trimmed=response.substring(1,response.length-1);
+			onResponseReceived.callbackFn(false,trimmed);
+			//GuiElements.alert("Done");
+		}
+	}
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HtmlServer.dialogVisible=false;
+		if(callbackErr != null) {
+			callbackErr();
+		}
+	});
+}
+HtmlServer.getFileName=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var onResponseReceived=function(response){
+		if(response=="File has no name."){
+			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
+};
+HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=confirm(question);
+		HtmlServer.dialogVisible=false;
+		if(swapIfMouse){
+			result=!result;
+		}
+		if(result){
+			callbackFn("1");
+		}
+		else{
+			callbackFn("2");
+		}
+	}
+	else {
+		var HS = HtmlServer;
+		var request = "tablet/choice";
+		request += "?title=" + HS.encodeHtml(title);
+		request += "&question=" + HS.encodeHtml(question);
+		request += "&button1=" + HS.encodeHtml(option1);
+		request += "&button2=" + HS.encodeHtml(option2);
+		var onDialogPresented = function (result) {
+			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
+		};
+		onDialogPresented.callbackFn = callbackFn;
+		onDialogPresented.callbackErr = callbackErr;
+		var onDialogFail = function () {
+			HtmlServer.dialogVisible = false;
+			if (onDialogFail.callbackErr != null) {
+				onDialogFail.callbackErr();
+			}
+		};
+		onDialogFail.callbackErr = callbackErr;
+		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
+	}
+};
+HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
+	var HS=HtmlServer;
+	var request = "tablet/choice_response";
+	var onResponseReceived=function(response){
+		if(response=="0"){
+			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
+		}
+		else{
+			HtmlServer.dialogVisible=false;
+			onResponseReceived.callbackFn(response);
+		}
+	};
+	onResponseReceived.callbackFn=callbackFn;
+	onResponseReceived.callbackErr=callbackErr;
+	HS.sendRequestWithCallback(request,onResponseReceived,function(){
+		HS.dialogVisible = false;
+		if (callbackErr != null) {
+			callbackErr();
+		}
+	});
+};
+HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
+	TouchReceiver.touchInterrupt();
+	HtmlServer.dialogVisible=true;
+	if(TouchReceiver.mouse){ //Kept for debugging on a PC
+		var result=alert(message);
+		HtmlServer.dialogVisible=false;
+	}
+	else {
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/dialog/alert");
+		request.addParam("title", HS.encodeHtml(title));
+		request.addParam("message", HS.encodeHtml(message));
+		request.addParam("button", HS.encodeHtml(button));
+		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	}
+};
+
+HtmlServer.getSetting=function(key,callbackFn,callbackErr){
+	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+};
+HtmlServer.setSetting=function(key,value){
+	var request = "settings/set";
+	request += "?key=" + HtmlServer.encodeHtml(key);
+	request += "&value=" + HtmlServer.encodeHtml(value);
+	HtmlServer.sendRequestWithCallback(request);
+};
+HtmlServer.sendFinishedLoadingRequest = function(){
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+/**
+ * Created by Tom on 6/17/2017.
+ */
+function CallbackManager(){
+
+}
+CallbackManager.sounds = {};
+CallbackManager.sounds.recordingEnded = function(){
+	RecordingManager.interruptRecording();
+	return false;
+};
+CallbackManager.sounds.permissionGranted = function(){
+	RecordingManager.permissionGranted();
+	return true;
+};
+CallbackManager.data = {};
+CallbackManager.data.import = function(fileName){
+	SaveManager.import(fileName);
+	return true;
+};
+CallbackManager.data.openData = function(fileName, data){
+	SaveManager.openData(fileName, data);
+	return true;
+};
+CallbackManager.dialog = {};
+CallbackManager.dialog.promptResponded = function(cancelled, response){
+	return false;
+};
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
+	return false;
+};
+CallbackManager.dialog.alertResponded = function(){
+	return false;
+};
+CallbackManager.robot = {};
+CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
+};
+CallbackManager.robot.discovered = function(robotList){
+	return true;
+};
+function XmlWriter(){
+
+}
+XmlWriter.setAttribute=function(element,name,value){
+	name=XmlWriter.escape(name);
+	value=XmlWriter.escape(value);
+	element.setAttribute(name,value);
+};
+XmlWriter.createElement=function(xmlDoc,tagName){
+	tagName=XmlWriter.escape(tagName);
+	return xmlDoc.createElement(tagName);
+};
+XmlWriter.createTextNode=function(xmlDoc,data){
+	data=XmlWriter.escape(data);
+	return xmlDoc.createTextNode(data);
+};
+XmlWriter.newDoc=function(tagName){
+	tagName=XmlWriter.escape(tagName);
+	var xmlString = "<"+tagName+"></"+tagName+">";
+	var parser = new DOMParser();
+	return parser.parseFromString(xmlString, "text/xml");
+};
+XmlWriter.escape=function(string){
+	string=string+"";
+	string=string.replace(/&/g, '&amp;');
+	string=string.replace(/</g, '&lt;');
+	string=string.replace(/>/g, '&gt;');
+	string=string.replace(/"/g, '&quot;');
+	string=string.replace(/'/g, '&apos;');
+	return string;
+};
+XmlWriter.unEscape=function(string) {
+	string = string + "";
+	string = string.replace(/&apos;/g, "'");
+	string = string.replace(/&quot;/g, '"');
+	string = string.replace(/&gt;/g, '>');
+	string = string.replace(/&lt;/g, '<');
+	string = string.replace(/&amp;/g, '&');
+	return string;
+};
+XmlWriter.downloadDoc=function(xmlDoc,name){
+  window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
+	//var blob = new Blob([XmlWriter.docToText(xmlDoc)], {type: "text/plain;charset=utf-8"});
+	//saveAs(blob, name+".xml");
+};
+XmlWriter.openDocInTab=function(xmlDoc){
+	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
+};
+XmlWriter.openDoc=function(xmlString){
+	var parser = new DOMParser();
+	return parser.parseFromString(xmlString, "text/xml");
+};
+XmlWriter.findElement=function(xmlDoc,tagName){
+	tagName=XmlWriter.escape(tagName);
+	var results=xmlDoc.getElementsByTagName(tagName);
+	if(results.length==0){
+		return null;
+	}
+	return results[0];
+};
+XmlWriter.findSubElements=function(node,tagName){
+	if(node==null){
+		return [];
+	}
+	var children=node.childNodes;
+	var results=[];
+	for(var i=0;i<children.length;i++){
+		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+			results.push(children[i]);
+		}
+	}
+	return results;
+};
+XmlWriter.findSubElement=function(node,tagName){
+	if(node==null){
+		return null;
+	}
+	var children=node.childNodes;
+	for(var i=0;i<children.length;i++){
+		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+			return children[i];
+		}
+	}
+	return null;
+};
+XmlWriter.getAttribute=function(element,name,defaultVal,isNum){
+	if(isNum==null){
+		isNum=false;
+	}
+	if(defaultVal==null){
+		defaultVal=null;
+	}
+	var val=element.getAttribute(XmlWriter.escape(name));
+	if(val==null){
+		return defaultVal;
+	}
+	val=XmlWriter.unEscape(val);
+	if(isNum){
+		var numData=(new StringData(val)).asNum();
+		if(numData.isValid){
+			return numData.getValue();
+		}
+		return defaultVal;
+	}
+	return val;
+};
+XmlWriter.getTextNode=function(element,name,defaultVal,isNum){
+	if(isNum==null){
+		isNum=false;
+	}
+	if(defaultVal==null){
+		defaultVal=null;
+	}
+	var innerNode=XmlWriter.findSubElement(element,name);
+	if(innerNode==null){
+		return defaultVal;
+	}
+	var childNodes=innerNode.childNodes;
+	if(childNodes.length>=1&&childNodes[0].nodeType==3){
+		var val = childNodes[0].nodeValue;
+		if(val==null){
+			return defaultVal;
+		}
+		val=XmlWriter.unEscape(val);
+		if(isNum){
+			var numData=(new StringData(val)).asNum();
+			if(numData.isValid){
+				return numData.getValue();
+			}
+			return defaultVal;
+		}
+		return val;
+	}
+	return defaultVal;
+};
+XmlWriter.docToText=function(xmlDoc){
+	var serializer = new XMLSerializer();
+	return serializer.serializeToString(xmlDoc);
+};
+XmlWriter.findNodeByKey = function(nodes, key){
+	for(var i = 0; i < nodes.length; i++){
+		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+		if(nodeKey == key){
+			return nodes[i];
+		}
+	}
+	return null;
+};
+function SaveManager(){
+	SaveManager.saving = false;
+	SaveManager.fileName = null;
+	SaveManager.named = false;
+	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
+	SaveManager.autoSaveTimer.start();
+	SaveManager.getCurrentDoc();
+}
+SaveManager.setConstants = function(){
+	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+	SaveManager.newFileName = "new program";
+	SaveManager.autoSaveInterval = 1000 * 15;
+};
+
+SaveManager.openBlank = function(nextAction){
+	SaveManager.saveCurrentDoc(true);
+	SaveManager.loadFile("<project><tabs></tabs></project>");
+	if(nextAction != null) nextAction();
+};
+SaveManager.saveAndName = function(message, nextAction){
+	var title = "Enter name";
+	if(SaveManager.fileName == null){
+		if (nextAction != null) nextAction();
+		return;
+	}
+	SaveManager.forceSave(function () {
+		if (SaveManager.named) {
+			if (nextAction != null) nextAction();
+		}
+		else {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
+				SaveManager.named = true;
+				if (nextAction != null) nextAction();
+			});
+		}
+	});
+};
+SaveManager.userOpenFile = function(fileName){
+	if(SaveManager.fileName == fileName) {return;}
+	SaveManager.saveAndName("Please name this file before opening a different file", function(){
+		SaveManager.open(fileName);
+	});
+};
+SaveManager.open=function(fileName, named, nextAction){
+	if(named == null){
+		named = true;
+	}
+	var request = new HttpRequestBuilder("data/load");
+	request.addParam("filename", fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
+		SaveManager.loadFile(response);
+		SaveManager.saveCurrentDoc(false, fileName, named);
+		if(nextAction != null) nextAction();
+	});
+};
+// Saves a the current file and overwrites if the name exists
+SaveManager.forceSave = function(nextAction){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
+};
+SaveManager.userRename = function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.forceSave(function(){
+		SaveManager.promptRename(false, SaveManager.fileName, "Rename");
+	});
+};
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+	SaveManager.promptRename(isRecording, oldFilename, "Rename", null, nextAction);
+};
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
+};
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
+	if(message == null){
+		message = "Enter a file name";
+	}
+	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
+		if(!cancelled){
+			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
+		}
+	});
+};
+// Checks if a name is legitimate and renames the current file to that name if it is.
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
+	if(proposedName == ""){
+		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
+	} else if(proposedName == oldFilename) {
+		if(nextAction != null) nextAction();
+	} else {
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+			}
+		}, isRecording);
+	}
+};
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
+	var request = new HttpRequestBuilder("data/rename");
+	request.addParam("oldFilename", oldFilename);
+	request.addParam("newFilename", newName);
+	request.addParam("options", "soft");
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		if(oldFilename == SaveManager.fileName && !isRecording) {
+			SaveManager.saveCurrentDoc(false, newName, true);
+		}
+		if(nextAction != null) nextAction();
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeRename(isRecording, title, newName, nextAction);
+		}
+	});
+};
+SaveManager.userDelete=function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.userDeleteFile(false, SaveManager.fileName);
+};
+SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
+	var question = "Are you sure you want to delete \"" + filename + "\"?";
+	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
+		if(response == "2") {
+			SaveManager.delete(isRecording, filename, function(){
+				if(filename === SaveManager.fileName && !isRecording) {
+					SaveManager.openBlank(nextAction);
+				} else{
+					if(nextAction != null) nextAction();
+				}
+			});
+		}
+	}, null);
+};
+SaveManager.delete = function(isRecording, filename, nextAction){
+	var request = new HttpRequestBuilder("data/delete");
+	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+};
+SaveManager.userNew = function(){
+	SaveManager.saveAndName("Please name this file before creating a new file", SaveManager.openBlank);
+};
+/**
+ * Issues a getAvailableName request and calls the callback with the results
+ * @param filename {String}
+ * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
+ * @param isRecording {boolean}
+ */
+SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
+	if(isRecording == null){
+		isRecording = false;
+	}
+	DebugOptions.validateNonNull(callbackFn);
+	var request = new HttpRequestBuilder("data/getAvailableName");
+	request.addParam("filename", filename);
+	request.addParam("recording", "" + isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		var json = {};
+		try {
+			json = JSON.parse(response);
+		} catch(e){
+
+		}
+		if(json.availableName != null){
+			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
+		}
+	});
+};
+SaveManager.loadFile=function(xmlString) {
+	if (xmlString.length > 0) {
+		if (xmlString.charAt(0) == "%") {
+			xmlString = decodeURIComponent(xmlString);
+			//HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
+		}
+		var xmlDoc = XmlWriter.openDoc(xmlString);
+		var project = XmlWriter.findElement(xmlDoc, "project");
+		if (project == null) {
+			SaveManager.loadFile("<project><tabs></tabs></project>");
+		}
+		CodeManager.importXml(project);
+	}
+};
+SaveManager.userDuplicate = function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.saveAndName("Please name this file before duplicating it", function(){
+		SaveManager.promptDuplicate("Enter name for duplicate file");
+	});
+};
+SaveManager.promptDuplicate = function(message){
+	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
+		SaveManager.promptDuplicateWithDefault(message, availableName);
+	});
+};
+SaveManager.promptDuplicateWithDefault = function(message, defaultName){
+	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
+		if(!cancelled){
+			SaveManager.sanitizeDuplicate(response.trim());
+		}
+	});
+};
+SaveManager.sanitizeDuplicate = function(proposedName){
+	if(proposedName == ""){
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.");
+	} else {
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
+			if(alreadySanitized && alreadyAvailable){
+				SaveManager.duplicate(availableName);
+			} else if(!alreadySanitized){
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			} else if(!alreadyAvailable){
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptDuplicateWithDefault(message, availableName);
+			}
+		});
+	}
+};
+
+SaveManager.duplicate = function(filename){
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("filename", filename);
+	request.addParam("options", "soft");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+		SaveManager.saveCurrentDoc(false, filename, true);
+	}, function(error){
+		if(400 <= error && error < 500) {
+			SaveManager.sanitizeDuplicate(filename);
+		}
+	}, true, xmlDocText);
+};
+SaveManager.userExport=function(){
+	if(SaveManager.fileName == null) return;
+	SaveManager.saveAndName("Please name this file so it can be exported", function(){
+		SaveManager.export();
+	});
+};
+SaveManager.export=function(){
+	var request = new HttpRequestBuilder("data/export");
+	request.addParam("filename", SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+SaveManager.saveAsNew = function(){
+	SaveManager.saving = true;
+	var request = new HttpRequestBuilder("data/save");
+	request.addParam("options", "new");
+	request.addParam("filename", SaveManager.newFileName);
+	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
+	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
+		SaveManager.saveCurrentDoc(false, availableName, false);
+		SaveManager.saving = false;
+	}, function(){
+		SaveManager.saving = false;
+	}, true, xmlDocText);
+};
+SaveManager.markEdited=function(){
+	if(SaveManager.fileName == null && !SaveManager.saving){
+		SaveManager.saveAsNew();
+	}
+};
+SaveManager.saveCurrentDoc = function(blank, fileName, named){
+	if(blank){
+		fileName = null;
+		named = false;
+		TitleBar.setText("");
+	} else {
+		TitleBar.setText(fileName);
+	}
+	SaveManager.fileName = fileName;
+	SaveManager.named = named;
+	let namedString = SaveManager.named? "true" : "false";
+	if(blank) namedString = "blank";
+	HtmlServer.setSetting("currentDocNamed", namedString);
+	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
+};
+SaveManager.getCurrentDoc = function(){
+	var load = {};
+	load.name = false;
+	load.named = false;
+	load.blank = false;
+	load.currentDoc = null;
+	load.currentDocNamed = null;
+	var checkProgress = function(){
+		if(load.name && load.named){
+			if(!load.blank) {
+				SaveManager.open(load.currentDoc, load.currentDocNamed);
+			}
+		}
+	};
+	HtmlServer.getSetting("currentDoc", function(response){
+		load.currentDoc = response;
+		load.name = true;
+		checkProgress();
+	});
+	HtmlServer.getSetting("currentDocNamed", function(response){
+		if(response == "true"){
+			load.currentDocNamed = true;
+		} else if (response == "false") {
+			load.currentDocNamed = false;
+		} else if (response == "blank") {
+			load.blank = true;
+		}
+		load.named = true;
+		checkProgress();
+	});
+};
+SaveManager.autoSave = function(){
+	if(SaveManager.fileName != null) {
+		SaveManager.forceSave();
+	}
+};
+
+
+SaveManager.import=function(fileName){
+	let name = HtmlServer.decodeHtml(fileName);
+	if(SaveManager.fileName == null){
+		SaveManager.open(name);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.open(name);
+	});
+};
+/*SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
+	SaveManager.printStatus("getCurrentDocName");
+	HtmlServer.getSetting("currentDoc", function(response){
+		SaveManager.currentDoc = response;
+		SaveManager.fileName = response;
+		callbackFnName();
+	}, callbackFnName);
+	HtmlServer.getSetting("currentDocNamed", function(response){
+		SaveManager.currentDocNamed = response;
+		callbackFnNameSet();
+	}, callbackFnNameSet);
+};*/
+SaveManager.currentDoc = function(){ //Autosaves
+	if(SaveManager.fileName == null) return null;
+	var result = {};
+	result.data = XmlWriter.docToText(CodeManager.createXml());
+	result.filename = SaveManager.fileName;
+	return result;
+};
+
+SaveManager.openData = function(fileName, data){
+	let fileName = HtmlServer.decodeHtml(fileName);
+	let data = HtmlServer.decodeHtml(data);
+	if(SaveManager.fileName == null){
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+		return;
+	}
+	SaveManager.forceSave(function () {
+		SaveManager.loadFile(data);
+		SaveManager.saveCurrentDoc(false, fileName, true);
+	});
 };
