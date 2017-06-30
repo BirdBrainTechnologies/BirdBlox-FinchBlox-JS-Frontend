@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading2";
+	debug.innerHTML = "Loading3";
 }, false);
 
 function DebugOptions(){
@@ -7255,8 +7255,6 @@ CodeManager.findBestFit=function(){
 	fit.dist=0; //How far is the best candidate from the ideal location?
 	TabManager.activeTab.findBestFit(); //Begins the recursive calls.
 }
-		if(newTempo>=500){
-			CodeManager.sound.tempo=500;
 /* Recursively updates any Blocks that are currently executing.
  * Stops the update timer if all Blocks are finished.
  */
