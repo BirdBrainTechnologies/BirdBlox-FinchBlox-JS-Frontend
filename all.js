@@ -2,7 +2,7 @@
 var FrontendVersion = 393;
 
 document.addEventListener('DOMContentLoaded', function() {
-	debug.innerHTML = "Loading";
+	debug.innerHTML = "Loading1";
 }, false);
 
 function DebugOptions(){
