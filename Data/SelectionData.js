@@ -1,22 +1,22 @@
-function SelectionData(value,isValid){
-	Data.call(this,Data.types.selection,value,true); //Selection Data comes from a drop down and is always valid.
+function SelectionData(displayText, value, isValid){
+	DebugOptions.validateNonNull(displayText, value);
+	Data.call(this,Data.types.selection, value, isValid);
+	this.displayText = displayText;
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
-SelectionData.prototype.asString=function(){
-	var valueString="";
-	if(this.getValue().constructor.name=="Variable"){
-		valueString=this.getValue().name;
-	}
-	else if(this.getValue().constructor.name=="List"){
-		valueString=this.getValue().name;
-	}
-	else{
-		valueString=this.getValue()+"";
-	}
-	return new StringData(valueString,true);
+SelectionData.prototype.asString = function(){
+	return new StringData(this.displayText, true);
 };
 SelectionData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value");
+	const value = XmlWriter.getTextNode(dataNode, "value");
+	const displayText = XmlWriter.getTextNode(dataNode, "displayText");
+	if(value == null || displayText == null) return null;
 	return new SelectionData(value);
+};
+SelectionData.empty = function(isValid){
+	return new SelectionData("", "", isValid);
+};
+SelectionData.asSelection = function(){
+	return this;
 };

@@ -8,7 +8,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
-	this.setSelectionData(this.prefixText + 1, new SelectionData(0));
+	this.setSelectionData(new SelectionData(this.prefixText + 1, 0));
 
 	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
 		this.switchToLabel();
@@ -37,7 +37,7 @@ DeviceDropSlot.prototype.duplicate = function(parentCopy) {
 DeviceDropSlot.prototype.switchToLabel = function() {
 	if (!this.labelMode) {
 		this.labelMode = true;
-		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
+		this.setSelectionData(new SelectionData(0, this.prefixText + 1));
 		this.labelText.show();
 		this.hideSlot();
 	}

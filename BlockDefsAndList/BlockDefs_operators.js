@@ -181,9 +181,9 @@ B_LessThan.prototype.startAction=function(){
 function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
 	var rS=new RoundSlot(this,"RndS_item1",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS.addOption("Enter text",new SelectionData("enter_text"));
+	rS.addOption(new SelectionData("Enter text", "enter_text"));
 	var rS2=new RoundSlot(this,"RndS_item2",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS2.addOption("Enter text",new SelectionData("enter_text"));
+	rS2.addOption(new SelectionData("Enter text", "enter_text"));
 
 	this.addPart(rS);
 	this.addPart(new LabelText(this,"="));
@@ -354,10 +354,10 @@ function B_Split(x,y){
 	this.addPart(new StringSlot(this,"StrS_1","hello world"));
 	this.addPart(new LabelText(this,"by"));
 	var dS=new DropSlot(this,"DS_separator",Slot.snapTypes.numStrBool);
-	dS.addOption("Enter text",new SelectionData("enter_text"));
-	dS.addOption("letter",new SelectionData("letter"));
-	dS.addOption("whitespace",new SelectionData("whitespace"));
-	dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+	dS.addOption(new SelectionData("Enter text", "enter_text"));
+	dS.addOption(new SelectionData("letter", "letter"));
+	dS.addOption(new SelectionData("whitespace", "whitespace"));
+	dS.setSelectionData(new SelectionData("whitespace", "whitespace"));
 	this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
@@ -398,12 +398,12 @@ function B_IsAType(x,y){
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
 	this.addPart(new LabelText(this,"a"));
 	var dS=new DropSlot(this,"DS_type",Slot.snapTypes.none);
-	dS.addOption("number",new SelectionData("number"));
-	dS.addOption("text",new SelectionData("text"));
-	dS.addOption("boolean",new SelectionData("boolean"));
-	dS.addOption("list",new SelectionData("list"));
-	dS.addOption("invalid number",new SelectionData("invalid_num"));
-	dS.setSelectionData("number",new SelectionData("number"));
+	dS.addOption(new SelectionData("number", "number"));
+	dS.addOption(new SelectionData("text", "text"));
+	dS.addOption(new SelectionData("boolean", "boolean"));
+	dS.addOption(new SelectionData("list", "list"));
+	dS.addOption(new SelectionData("invalid number", "invalid_num"));
+	dS.setSelectionData(new SelectionData("number", "number"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"?"));
 }
@@ -461,27 +461,27 @@ B_IsAType.prototype.startAction=function(){
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
 	var dS=new DropSlot(this,"DS_operation",null,Slot.snapTypes.bool);
-	dS.addOption("sin",new SelectionData("sin"));
-	dS.addOption("cos",new SelectionData("cos"));
-	dS.addOption("tan",new SelectionData("tan"));
+	dS.addOption(new SelectionData("sin", "sin"));
+	dS.addOption(new SelectionData("cos", "cos"));
+	dS.addOption(new SelectionData("tan", "tan"));
 
-	dS.addOption("asin",new SelectionData("asin"));
-	dS.addOption("acos",new SelectionData("acos"));
-	dS.addOption("atan",new SelectionData("atan"));
+	dS.addOption(new SelectionData("asin", "asin"));
+	dS.addOption(new SelectionData("acos", "acos"));
+	dS.addOption(new SelectionData("atan", "atan"));
 
-	dS.addOption("ln",new SelectionData("ln"));
-	dS.addOption("e^",new SelectionData("e^"));
-	dS.addOption("ceiling",new SelectionData("ceiling"));
+	dS.addOption(new SelectionData("ln", "ln"));
+	dS.addOption(new SelectionData("e^", "e^"));
+	dS.addOption(new SelectionData("ceiling", "ceiling"));
 
-	dS.addOption("log",new SelectionData("log"));
-	dS.addOption("10^",new SelectionData("10^"));
-	dS.addOption("floor",new SelectionData("floor"));
+	dS.addOption(new SelectionData("log", "log"));
+	dS.addOption(new SelectionData("10^", "10^"));
+	dS.addOption(new SelectionData("floor", "floor"));
 
-	dS.addOption("abs",new SelectionData("abs"));
-	dS.addOption("sqrt",new SelectionData("sqrt"));
+	dS.addOption(new SelectionData("abs", "abs"));
+	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
 	dS.dropColumns=3;
-	dS.setSelectionData("sqrt",new SelectionData("sqrt"));
+	dS.setSelectionData(new SelectionData("sqrt", "sqrt"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new NumSlot(this,"NumS_val",10));

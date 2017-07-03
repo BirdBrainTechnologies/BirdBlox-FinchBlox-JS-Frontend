@@ -5,6 +5,7 @@ function EditableSlotShape(slot, initialText, dimConstants){
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
+	this.isGray = false;
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);
 EditableSlotShape.prototype.constructor = EditableSlotShape;
@@ -47,10 +48,12 @@ EditableSlotShape.prototype.deselect=function(){
 EditableSlotShape.prototype.grayOutValue=function(){
 	const dC = this.dimConstants;
 	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+	this.isGray = true;
 };
 EditableSlotShape.prototype.unGrayOutValue=function(){
 	const dC = this.dimConstants;
 	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	this.isGray = false;
 };
 EditableSlotShape.prototype.updateDim = function(){
 	const dC = this.dimConstants;

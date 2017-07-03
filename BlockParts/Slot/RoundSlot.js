@@ -8,7 +8,7 @@
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
  * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
  * @param {number} outputType - [any,num,string,bool,list] The type of Data the RoundSlot should convert to.
- * @param {number} data - The initial data stored in the Slot. Could be string, num, or selection data.
+ * @param {Data} data - The initial data stored in the Slot. Could be string, num, or selection data.
  * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
  * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
  */

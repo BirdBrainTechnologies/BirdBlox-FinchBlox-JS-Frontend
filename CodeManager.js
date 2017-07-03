@@ -40,6 +40,8 @@ function CodeManager(){
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+	CodeManager.modifiedTime = new Date().getTime();
+	CodeManager.createdTime = new Date().getTime();
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
@@ -475,8 +477,8 @@ CodeManager.createXml=function(){
 	}
 	XmlWriter.setAttribute(project,"name",fileName);
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
-	XmlWriter.setAttribute(project,"created",new Date().getTime());
-	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	XmlWriter.setAttribute(project,"created",CodeManager.createdTime);
+	XmlWriter.setAttribute(project,"modified",CodeManager.modifiedTime);
 	var variables=XmlWriter.createElement(xmlDoc,"variables");
 	for(var i=0;i<CM.variableList.length;i++){
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
@@ -492,6 +494,8 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
+	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
+	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
 	if(variablesNode!=null) {
 		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
@@ -510,6 +514,9 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+};
+CodeManager.updateModified = function(){
+	CodeManager.modifiedTime = new Date().getTime();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;

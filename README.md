@@ -651,10 +651,10 @@ function B_Split(x,y){
     var dS=new DropSlot(this,"TEMPKEY",Slot.snapTypes.numStrBool);
       //Add options to select from
       //"enter_text" is a special option; tells InputPad to show prompt dialog
-    dS.addOption("Enter text",new SelectionData("enter_text"));
-    dS.addOption("letter",new SelectionData("letter"));
-    dS.addOption("whitespace",new SelectionData("whitespace"));
-    dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+    dS.addOption(new SelectionData("Enter text", "enter_text"));
+    dS.addOption(new SelectionData("letter", "letter"));
+    dS.addOption(new SelectionData("whitespace", "whitespace"));
+    dS.setSelectionData(new SelectionData("whitespace", "whitespace"));
     this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);

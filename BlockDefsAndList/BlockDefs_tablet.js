@@ -174,11 +174,11 @@ function B_DeviceAcceleration(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
 	var dS=new DropSlot(this,"DS_axis");
-	dS.addOption("X",new SelectionData(0));
-	dS.addOption("Y",new SelectionData(1));
-	dS.addOption("Z",new SelectionData(2));
-	dS.addOption("Total",new SelectionData("total"));
-	dS.setSelectionData("X",new SelectionData(0));
+	dS.addOption(new SelectionData("X", 0));
+	dS.addOption(new SelectionData("Y", 1));
+	dS.addOption(new SelectionData("Z", 2));
+	dS.addOption(new SelectionData("Total", "total"));
+	dS.setSelectionData(new SelectionData("X", 0));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"Acceleration"));
 }
@@ -226,9 +226,9 @@ function B_DeviceLocation(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
 	var dS=new DropSlot(this,"DS_dir");
-	dS.addOption("Latitude",new SelectionData(0));
-	dS.addOption("Longitude",new SelectionData(1));
-	dS.setSelectionData("Latitude",new SelectionData(0));
+	dS.addOption(new SelectionData("Latitude", 0));
+	dS.addOption(new SelectionData("Longitude", 1));
+	dS.setSelectionData(new SelectionData("Latitude", 0));
 	this.addPart(dS);
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);

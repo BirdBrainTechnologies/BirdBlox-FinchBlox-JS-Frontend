@@ -308,7 +308,7 @@ function B_Message(x,y){
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
-B_Message.prototype.startAction=function(){
+B_Message.prototype.startAction=function(){blockd
 	return new ExecutionStatusResult(CodeManager.message);
 };
 
@@ -318,12 +318,12 @@ function B_Stop(x,y){//No bottom slot
 	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
 	var dS=new DropSlot(this,"DS_act",Slot.snapTypes.none);
-	dS.addOption("all",new SelectionData("all"));
-	dS.addOption("this script",new SelectionData("this_script"));
-	//dS.addOption("this block",new SelectionData("this_block"));
-	dS.addOption("all but this script",new SelectionData("all_but_this_script"));
-	//dS.addOption("other scripts in sprite",new SelectionData("other_scripts_in_sprite"));
-	dS.setSelectionData("all",new SelectionData("all"));
+	dS.addOption(new SelectionData("all", "all"));
+	dS.addOption(new SelectionData("this script", "this_script"));
+	//dS.addOption(new SelectionData("this block", "this_block"));
+	dS.addOption(new SelectionData("all but this script", "all_but_this_script"));
+	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
+	dS.setSelectionData(new SelectionData("all", "all"));
 	this.addPart(dS);
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
@@ -350,9 +350,9 @@ function B_WhenIAmTapped(x,y){
 	HatBlock.call(this,x,y,"control");
 	this.addPart(new LabelText(this,"when I am"));
 	var dS=new DropSlot(this,"DS_act",null,Slot.snapTypes.bool);
-	dS.addOption("tapped",new SelectionData("tapped"));
-	dS.addOption("pressed",new SelectionData("pressed"));
-	dS.addOption("released",new SelectionData("released"));
+	dS.addOption(new SelectionData("tapped", "tapped"));
+	dS.addOption(new SelectionData("pressed", "pressed"));
+	dS.addOption(new SelectionData("released", "released"));
 	this.addPart(dS);
 }
 B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);

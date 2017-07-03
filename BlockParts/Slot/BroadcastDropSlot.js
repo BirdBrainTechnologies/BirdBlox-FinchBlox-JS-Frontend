@@ -17,14 +17,14 @@ BroadcastDropSlot.prototype.populateList=function(){
 	this.clearOptions();
 	CodeManager.updateAvailableMessages();
 	if(this.isHatBlock){
-		this.addOption("any message",new SelectionData("any_message"));
+		this.addOption(new SelectionData("any message", "any_message"));
 	}
 	var messages=CodeManager.broadcastList;
 	for(var i=0;i<messages.length;i++){
 		var currentMessage=messages[i];
 		this.addOption('"'+currentMessage+'"',new StringData(currentMessage));
 	}
-	this.addOption("new",new SelectionData("new_message"));
+	this.addOption(new SelectionData("new", "new_message"));
 };
 BroadcastDropSlot.prototype.duplicate=function(parentCopy){
 	var myCopy=new BroadcastDropSlot(parentCopy,this.isHatBlock);

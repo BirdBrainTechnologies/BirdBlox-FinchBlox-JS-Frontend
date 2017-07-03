@@ -122,15 +122,15 @@ function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"current"));
 	var dS=new DropSlot(this,"DS_interval",null,Slot.snapTypes.bool);
-	dS.addOption("year",new SelectionData("year"));
-	dS.addOption("month",new SelectionData("month"));
-	dS.addOption("date",new SelectionData("date"));
-	dS.addOption("day of the week",new SelectionData("day of the week"));
-	dS.addOption("hour",new SelectionData("hour"));
-	dS.addOption("minute",new SelectionData("minute"));
-	dS.addOption("second",new SelectionData("second"));
-	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
-	dS.setSelectionData("date",new SelectionData("date"));
+	dS.addOption(new SelectionData("year", "year"));
+	dS.addOption(new SelectionData("month", "month"));
+	dS.addOption(new SelectionData("date", "date"));
+	dS.addOption(new SelectionData("day of the week", "day of the week"));
+	dS.addOption(new SelectionData("hour", "hour"));
+	dS.addOption(new SelectionData("minute", "minute"));
+	dS.addOption(new SelectionData("second", "second"));
+	dS.addOption(new SelectionData("time in milliseconds", "time in milliseconds"));
+	dS.setSelectionData(new SelectionData("date", "date"));
 	this.addPart(dS);
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);

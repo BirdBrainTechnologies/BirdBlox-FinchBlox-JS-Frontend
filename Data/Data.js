@@ -26,6 +26,9 @@ Data.prototype.asString=function(){
 Data.prototype.asList=function(){
 	return new ListData(null,false);
 };
+Data.prototype.asSelection = function(){
+	return SelectionData.empty(false);
+};
 Data.prototype.getValue=function(){ //might remove
 	return this.value;
 };
