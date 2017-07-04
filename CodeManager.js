@@ -431,7 +431,7 @@ CodeManager.addBroadcastMessage=function(message){
 };
 /* @fix Write documentation.
  */
-CodeManager.removeUnusedMessages=function(){
+CodeManager.removeUnusedMessages=function(){ //TODO: remove this
 	var messages=CodeManager.broadcastList;
 	for(var i=0;i<messages.length;i++){
 		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
@@ -442,7 +442,7 @@ CodeManager.removeUnusedMessages=function(){
 /* @fix Write documentation.
  */
 CodeManager.updateAvailableMessages=function(){
-	CodeManager.broadcastList=new Array();
+	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();
 };
 /* @fix Write documentation.

@@ -4,6 +4,7 @@
 function InputSystem(){
 	this.visible = false;
 	this.closed = false;
+	this.cancelled = false; //TODO: remove this?
 }
 InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	DebugOptions.assert(!this.visible);
@@ -17,5 +18,5 @@ InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 InputSystem.prototype.close = function(){
 	this.closed = true;
 	this.visible = false;
-	this.slotFinishFn(this.currentData);
+	this.slotFinishFn(this.currentData, this.cancelled);
 };

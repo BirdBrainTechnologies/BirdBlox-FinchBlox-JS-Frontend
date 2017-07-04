@@ -14,5 +14,5 @@ NewRectSlot.prototype.formatTextSummary = function(textSummary) {
 	return "[" + textSummary + "]";
 };
 NewRectSlot.prototype.createInputSystem = function(){
-	return new InputDialog(this.parent.textSummary(this));
+	return new InputDialog(this.parent.textSummary(this), true);
 };

@@ -317,7 +317,7 @@ B_Message.prototype.startAction=function(){blockd
 function B_Stop(x,y){//No bottom slot
 	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
-	var dS=new DropSlot(this,"DS_act",Slot.snapTypes.none);
+	const dS = new NewDropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
 	dS.addOption(new SelectionData("all", "all"));
 	dS.addOption(new SelectionData("this script", "this_script"));
 	//dS.addOption(new SelectionData("this block", "this_block"));
@@ -341,22 +341,5 @@ B_Stop.prototype.startAction=function(){
 	}
 	return new ExecutionStatusDone();
 };
-
-
-
-
-///// <Not implemented> /////
-function B_WhenIAmTapped(x,y){
-	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when I am"));
-	var dS=new DropSlot(this,"DS_act",null,Slot.snapTypes.bool);
-	dS.addOption(new SelectionData("tapped", "tapped"));
-	dS.addOption(new SelectionData("pressed", "pressed"));
-	dS.addOption(new SelectionData("released", "released"));
-	this.addPart(dS);
-}
-B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
-B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
-
 
 

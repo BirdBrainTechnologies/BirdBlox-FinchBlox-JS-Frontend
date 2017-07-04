@@ -173,12 +173,11 @@ B_DeviceOrientation.prototype.updateAction=function(){
 function B_DeviceAcceleration(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
-	var dS=new DropSlot(this,"DS_axis");
+	const dS = new NewDropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
 	dS.addOption(new SelectionData("Total", "total"));
-	dS.setSelectionData(new SelectionData("X", 0));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"Acceleration"));
 }

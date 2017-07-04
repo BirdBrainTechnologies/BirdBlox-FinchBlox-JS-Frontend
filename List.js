@@ -11,6 +11,9 @@ function List(name,data){
 List.prototype.getName=function(){
 	return this.name;
 };
+List.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
+};
 List.prototype.changeName=function(newName){
 	if(this.name!=this.newName){
 		this.name=newName;

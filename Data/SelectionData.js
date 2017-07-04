@@ -8,6 +8,12 @@ SelectionData.prototype.constructor = SelectionData;
 SelectionData.prototype.asString = function(){
 	return new StringData(this.displayText, true);
 };
+SelectionData.prototype.asSelection = function(){
+	return this;
+};
+SelectionData.prototype.isSelection = function(){
+	return true;
+};
 SelectionData.importXml=function(dataNode){
 	const value = XmlWriter.getTextNode(dataNode, "value");
 	const displayText = XmlWriter.getTextNode(dataNode, "displayText");
@@ -17,6 +23,4 @@ SelectionData.importXml=function(dataNode){
 SelectionData.empty = function(isValid){
 	return new SelectionData("", "", isValid);
 };
-SelectionData.asSelection = function(){
-	return this;
-};
+

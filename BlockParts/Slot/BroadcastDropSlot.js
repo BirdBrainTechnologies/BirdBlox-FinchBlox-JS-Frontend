@@ -1,45 +1,42 @@
 //@fix Write documentation.
 
 function BroadcastDropSlot(parent,key,isHatBlock){
-	if(isHatBlock==null){
-		isHatBlock=false;
+	if(isHatBlock == null){
+		isHatBlock = false;
 	}
-	var snapType=Slot.snapTypes.numStrBool;
+	let snapType = Slot.snapTypes.numStrBool;
 	if(isHatBlock){
-		snapType=Slot.snapTypes.none;
+		snapType = Slot.snapTypes.none;
 	}
-	this.isHatBlock=isHatBlock;
-	DropSlot.call(this,parent,key,snapType);
+	if(isHatBlock) {
+		this.addOption("any message", "any_message");
+	}
+	NewDropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
 }
-BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
+BroadcastDropSlot.prototype = Object.create(NewDropSlot.prototype);
 BroadcastDropSlot.prototype.constructor = BroadcastDropSlot;
-BroadcastDropSlot.prototype.populateList=function(){
-	this.clearOptions();
+BroadcastDropSlot.prototype.populatePad = function(selectPad){
+	NewDropSlot.prototype.populatePad.call(this, selectPad);
 	CodeManager.updateAvailableMessages();
-	if(this.isHatBlock){
-		this.addOption(new SelectionData("any message", "any_message"));
-	}
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		var currentMessage=messages[i];
-		this.addOption('"'+currentMessage+'"',new StringData(currentMessage));
-	}
+	const messages = CodeManager.broadcastList;
+	messages.forEach(function(message){
+		selectPad.addOption(new StringData(message), '"'+message+'"');
+	});
+	selectPad.addAction("new", function(callbackFn){
+		const inputDialog = new InputDialog(this.textSummary(), false);
+		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+			callbackFn(data, !cancelled);
+		}, this.enteredData);
+	}.bind(this));
 	this.addOption(new SelectionData("new", "new_message"));
 };
-BroadcastDropSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new BroadcastDropSlot(parentCopy,this.isHatBlock);
-	myCopy.enteredData=this.enteredData;
-	myCopy.changeText(this.text);
-	return myCopy;
-};
-BroadcastDropSlot.prototype.checkBroadcastMessageAvailable=function(message){
-	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
-		return message==this.enteredData.getValue();
-	}
-	return false;
-};
 BroadcastDropSlot.prototype.updateAvailableMessages=function(){
-	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
+	if(this.enteredData !== null && this.enteredData.type === Data.types.string){
 		CodeManager.addBroadcastMessage(this.enteredData.getValue());
 	}
+};
+BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	data = data.asString();
+	if(!data.isValid) return null;
+	return data;
 };

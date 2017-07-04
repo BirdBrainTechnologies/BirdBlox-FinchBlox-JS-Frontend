@@ -18,3 +18,6 @@ InputWidget.prototype.close = function(){
 InputWidget.prototype.fixedHeight = function(){
 	return true;
 };
+InputWidget.prototype.setMaxHeight = function(height){
+
+};

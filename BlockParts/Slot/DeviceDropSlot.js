@@ -3,12 +3,13 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 		shortText = false;
 	}
 	this.shortText = shortText;
-	DropSlot.call(this, parent, key, Slot.snapTypes.none);
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
-	this.setSelectionData(new SelectionData(this.prefixText + 1, 0));
+	const data = new SelectionData(this.prefixText + 1, 0);
+
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
 
 	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
 		this.switchToLabel();
@@ -19,19 +20,12 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
-DeviceDropSlot.prototype.populateList = function() {
-	this.clearOptions();
-	var deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
-	for (var i = 0; i < deviceCount; i++) {
-		this.addOption(this.prefixText + (i + 1), new SelectionData(i)); //We'll store a 0-indexed value but display it +1.
+DeviceDropSlot.prototype.populatePad = function(selectPad) {
+	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	for (let i = 0; i < deviceCount; i++) {
+		//We'll store a 0-indexed value but display it +1.
+		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), new SelectionData(i)));
 	}
-};
-
-DeviceDropSlot.prototype.duplicate = function(parentCopy) {
-	var myCopy = new DeviceDropSlot(parentCopy, this.deviceClass, this.shortText);
-	myCopy.enteredData = this.enteredData;
-	myCopy.changeText(this.text);
-	return myCopy;
 };
 
 DeviceDropSlot.prototype.switchToLabel = function() {
@@ -39,7 +33,7 @@ DeviceDropSlot.prototype.switchToLabel = function() {
 		this.labelMode = true;
 		this.setSelectionData(new SelectionData(0, this.prefixText + 1));
 		this.labelText.show();
-		this.hideSlot();
+		this.slotShape.hide();
 	}
 };
 
@@ -47,7 +41,7 @@ DeviceDropSlot.prototype.switchToSlot = function() {
 	if (this.labelMode) {
 		this.labelMode = false;
 		this.labelText.hide();
-		this.showSlot();
+		this.slotShape.show();
 	}
 };
 
@@ -69,19 +63,19 @@ DeviceDropSlot.prototype.updateDim = function() {
 };
 
 DeviceDropSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	if(this.deviceClass == deviceClass) {
+	if(this.deviceClass === deviceClass) {
 		this.switchToLabel();
 	}
 };
 
 DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	if(this.deviceClass == deviceClass) {
+	if(this.deviceClass === deviceClass) {
 		this.switchToSlot();
 	}
 };
 
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
-	if (this.deviceClass == deviceClass && this.getData() != null) {
+	if (this.deviceClass === deviceClass && this.getData() != null) {
 		return this.getData().getValue() + 1;
 	} else {
 		return 1;
@@ -94,4 +88,13 @@ DeviceDropSlot.prototype.importXml = function(slotNode) {
 	if (this.enteredData.getValue() < 0) {
 		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
 	}
+};
+
+DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	const value = data.asNum().getValue();
+	if(value < 0) return null;
+	if(value % 1 !== 0) return null;
+	if(!Number.isInteger(value)) return null;
+	if(value >= 30) return null; // TODO: implement connection limit
+	return data;
 };

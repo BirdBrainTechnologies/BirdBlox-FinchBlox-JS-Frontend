@@ -171,7 +171,8 @@ InputWidget.NumPad.prototype.bsPressed=function(){
 	}
 };
 InputWidget.NumPad.prototype.okPressed=function(){
-	this.finishFn(this.displayNum.getData());
+	this.updateFn(ths.displayNum.getData());
+	this.finishFn();
 };
 InputWidget.NumPad.prototype.sendUpdate = function(){
 	this.updateFn(ths.displayNum.getData());

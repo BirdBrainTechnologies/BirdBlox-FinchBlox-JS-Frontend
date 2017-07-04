@@ -7,7 +7,7 @@
  */
 function StringSlot(parent,key,value){
 	//Make RectSlot.
-	RectSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.string,value);
+	NewRectSlot.call(this, parent, key, Slot.snapTypes.numStrBool, Slot.outputTypes.string, new StringData(value));
 }
 StringSlot.prototype = Object.create(RectSlot.prototype);
 StringSlot.prototype.constructor = StringSlot;

@@ -353,7 +353,11 @@ function B_Split(x,y){
 	this.addPart(new LabelText(this,"split"));
 	this.addPart(new StringSlot(this,"StrS_1","hello world"));
 	this.addPart(new LabelText(this,"by"));
-	var dS=new DropSlot(this,"DS_separator",Slot.snapTypes.numStrBool);
+
+	const inputType = EditableSlot.inputTypes.any;
+	const snapType = Slot.snapTypes.numStrBool;
+	const data = new SelectionData("whitespace", "whitespace");
+	const dS=new NewDropSlot(this,"DS_separator", inputType, snapType, data);
 	dS.addOption(new SelectionData("Enter text", "enter_text"));
 	dS.addOption(new SelectionData("letter", "letter"));
 	dS.addOption(new SelectionData("whitespace", "whitespace"));
@@ -397,13 +401,12 @@ function B_IsAType(x,y){
 	this.addPart(new LabelText(this,"is"));
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
 	this.addPart(new LabelText(this,"a"));
-	var dS=new DropSlot(this,"DS_type",Slot.snapTypes.none);
+	const dS = new NewDropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("text", "text"));
 	dS.addOption(new SelectionData("boolean", "boolean"));
 	dS.addOption(new SelectionData("list", "list"));
 	dS.addOption(new SelectionData("invalid number", "invalid_num"));
-	dS.setSelectionData(new SelectionData("number", "number"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"?"));
 }
@@ -460,7 +463,7 @@ B_IsAType.prototype.startAction=function(){
 
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	var dS=new DropSlot(this,"DS_operation",null,Slot.snapTypes.bool);
+	const dS = new NewDropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));
@@ -480,8 +483,6 @@ function B_mathOfNumber(x,y){
 	dS.addOption(new SelectionData("abs", "abs"));
 	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
-	dS.dropColumns=3;
-	dS.setSelectionData(new SelectionData("sqrt", "sqrt"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new NumSlot(this,"NumS_val",10));

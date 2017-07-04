@@ -9,6 +9,9 @@ function Variable(name, data){
 Variable.prototype.getName=function(){
 	return this.name;
 };
+Variable.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
+};
 Variable.prototype.getData=function(){
 	return this.data;
 };

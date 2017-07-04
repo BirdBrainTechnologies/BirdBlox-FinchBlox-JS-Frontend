@@ -121,7 +121,7 @@ Block.setDisplaySuffix(B_Timer, "s");
 function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"current"));
-	var dS=new DropSlot(this,"DS_interval",null,Slot.snapTypes.bool);
+	const dS = new NewDropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
 	dS.addOption(new SelectionData("year", "year"));
 	dS.addOption(new SelectionData("month", "month"));
 	dS.addOption(new SelectionData("date", "date"));
@@ -130,7 +130,6 @@ function B_CurrentTime(x,y){
 	dS.addOption(new SelectionData("minute", "minute"));
 	dS.addOption(new SelectionData("second", "second"));
 	dS.addOption(new SelectionData("time in milliseconds", "time in milliseconds"));
-	dS.setSelectionData(new SelectionData("date", "date"));
 	this.addPart(dS);
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);

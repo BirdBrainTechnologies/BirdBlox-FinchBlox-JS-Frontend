@@ -32,6 +32,9 @@ Data.prototype.asSelection = function(){
 Data.prototype.getValue=function(){ //might remove
 	return this.value;
 };
+Data.prototype.isSelection = function(){
+	return false;
+};
 Data.checkEquality=function(data1,data2){
 	var val1=data1.getValue();
 	var val2=data2.getValue();
@@ -64,7 +67,6 @@ Data.checkEquality=function(data1,data2){
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
-
 Data.prototype.createXml=function(xmlDoc){
 	var data=XmlWriter.createElement(xmlDoc,"data");
 	XmlWriter.setAttribute(data,"type",this.getDataTypeName());

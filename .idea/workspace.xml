@@ -2,37 +2,38 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/NumPad.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BlockParts/Slot/NewDropSlot.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/LabelWidget.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/InputPad/SelectPadWidget.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/Unused/BlockDefs_motion.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/Unused/BlockDefs_motion.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/BroadcastDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/BroadcastDropSlot.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/ListDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/ListDropSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/NumSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/NumSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/PortSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/PortSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/StringSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/StringSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/VarDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/VarDropSlot.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/EditableSlotShape.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/EditableSlotShape.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/BoolData.js" afterPath="$PROJECT_DIR$/Data/BoolData.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/Data.js" afterPath="$PROJECT_DIR$/Data/Data.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/NumData.js" afterPath="$PROJECT_DIR$/Data/NumData.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/SelectionData.js" afterPath="$PROJECT_DIR$/Data/SelectionData.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Data/StringData.js" afterPath="$PROJECT_DIR$/Data/StringData.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" afterPath="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" afterPath="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all.js" afterPath="$PROJECT_DIR$/all.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/List.js" afterPath="$PROJECT_DIR$/List.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Variable.js" afterPath="$PROJECT_DIR$/Variable.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/OldDropSlot.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/NumPad.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/NumPadWidget.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -51,102 +52,7 @@
     <favorites_list name="Git" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="NewRoundSlot.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="3" lean-forward="true" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NewInputPad.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1339">
-              <caret line="80" column="2" lean-forward="true" selection-start-line="80" selection-start-column="2" selection-end-line="80" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InputWidget.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputWidget.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc;n#InputWidget#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NumPad.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NumPad.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="154" column="38" lean-forward="true" selection-start-line="154" selection-start-column="38" selection-end-line="154" selection-end-column="38" />
-              <folding>
-                <element signature="e#0#38#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BubbleOverlay.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/BubbleOverlay.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1872">
-              <caret line="14" column="23" lean-forward="true" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InputPad.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputPad.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InputDialog.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputDialog.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="16" column="2" lean-forward="true" selection-start-line="16" selection-start-column="2" selection-end-line="16" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NewRectSlot.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="17" column="2" lean-forward="true" selection-start-line="17" selection-start-column="2" selection-end-line="17" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InputSystem.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputSystem.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
-              <caret line="7" column="73" lean-forward="true" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="73" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -157,36 +63,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Data.import</find>
-      <find>Data.importx</find>
-      <find>Data.importxm</find>
-      <find>Data.importxml</find>
-      <find>Data.importxml(</find>
-      <find>changeText</find>
-      <find>new</find>
-      <find>new Rec</find>
-      <find>copyfrom</find>
-      <find>updateDimNR</find>
-      <find>new Rect</find>
-      <find>new Sele</find>
-      <find>new Selection</find>
-      <find>new SelectionData</find>
+      <find>construct</find>
+      <find>constructo</find>
+      <find>constructor</find>
+      <find>constructor ==</find>
+      <find>constructor =</find>
+      <find>b</find>
+      <find>br</find>
+      <find>broar</find>
+      <find>broa</find>
+      <find>broadca</find>
+      <find>broadcast</find>
+      <find>new b</find>
+      <find>new br</find>
+      <find>new broard</find>
+      <find>new broar</find>
+      <find>new broa</find>
+      <find>new bro</find>
+      <find>pop</find>
+      <find>this.output</find>
+      <find>san</find>
       <find>ne</find>
-      <find>a</find>
-      <find>asS</find>
-      <find>asSele</find>
-      <find>inputType</find>
-      <find>showN</find>
-      <find>sanitizeData</find>
-      <find>x</find>
-      <find>x1,</find>
-      <find>this.parent</find>
-      <find>var</find>
-      <find>InputPad.</find>
-      <find>bnGroup</find>
-      <find>margin</find>
-      <find>this.hMargin</find>
-      <find>buttonMargin</find>
+      <find>new Dr</find>
+      <find>new</find>
+      <find>new D</find>
+      <find>new Drop</find>
+      <find>new DropS</find>
+      <find>new DropSl</find>
+      <find>new DropSlot</find>
+      <find>new DropSlot(</find>
+      <find>DS_</find>
     </findStrings>
     <replaceStrings>
       <replace>Sound</replace>
@@ -220,26 +126,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
-        <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
-        <option value="$PROJECT_DIR$/UIParts/DeviceStatusLight.js" />
-        <option value="$PROJECT_DIR$/Device/Device.js" />
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" />
-        <option value="$PROJECT_DIR$/Block/Block.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/InteractiveSlotShape.js" />
-        <option value="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/RectSlot.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/BlockGraphics.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/RectSlotShape.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/RoundSlotShape.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/DropSlotShape.js" />
-        <option value="$PROJECT_DIR$/XmlWriter.js" />
         <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/HexSlot.js" />
         <option value="$PROJECT_DIR$/TouchReceiver.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/HexSlotShape.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/SlotShape.js" />
@@ -248,29 +138,45 @@
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/Unused/BlockDefs_motion.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js" />
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
-        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/RoundSlot.js" />
         <option value="$PROJECT_DIR$/Data/BoolData.js" />
         <option value="$PROJECT_DIR$/Data/NumData.js" />
         <option value="$PROJECT_DIR$/Data/StringData.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
-        <option value="$PROJECT_DIR$/Data/Data.js" />
-        <option value="$PROJECT_DIR$/Data/SelectionData.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" />
         <option value="$PROJECT_DIR$/SaveManager.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" />
         <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/EditableSlotShape.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/NumPad.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/NumPadWidget.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/LabelWidget.js" />
+        <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/NumSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/StringSlot.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/SelectPadWidget.js" />
+        <option value="$PROJECT_DIR$/Data/Data.js" />
+        <option value="$PROJECT_DIR$/Data/SelectionData.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/BroadcastDropSlot.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/PortSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js" />
+        <option value="$PROJECT_DIR$/Variable.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/VarDropSlot.js" />
+        <option value="$PROJECT_DIR$/List.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/ListDropSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/NewDropSlot.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" />
       </list>
     </option>
   </component>
@@ -281,10 +187,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="2391" />
+    <option name="x" value="-9" />
     <option name="y" value="-9" />
-    <option name="width" value="2418" />
-    <option name="height" value="1318" />
+    <option name="width" value="1938" />
+    <option name="height" value="1048" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -386,24 +292,6 @@
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="Menu">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="UIParts">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="InputPad">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
@@ -418,39 +306,7 @@
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="UIParts">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="Dialogs">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="Images">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="Device">
+            <PATH_ELEMENT USER_OBJECT="SoundsForUI">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -465,38 +321,6 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="Data">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="ColorsGraphicsAndValues">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="ColorsGraphicsAndValues">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="SlotShape">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -529,62 +353,6 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="Slot">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="BlockDefsAndList">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="BlockContainers">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="Block">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT USER_OBJECT=".idea">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -820,7 +588,9 @@
       <workItem from="1498749111498" duration="29338000" />
       <workItem from="1498830368049" duration="18286000" />
       <workItem from="1499087719375" duration="3018000" />
-      <workItem from="1499090914425" duration="15509000" />
+      <workItem from="1499090914425" duration="22635000" />
+      <workItem from="1499174467567" duration="8630000" />
+      <workItem from="1499192813731" duration="1692000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -917,16 +687,16 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1117344000" />
+    <option name="totallyTimeSpent" value="1134792000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12695065" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12691697" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3282353" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31339285" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31294116" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294643" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.49615806" order="1" side_tool="false" content_ui="tabs" />
@@ -1002,176 +772,10 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/HexSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="26" lean-forward="true" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Test.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1029">
-          <caret line="49" column="1" lean-forward="true" selection-start-line="49" selection-start-column="1" selection-end-line="49" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="17" column="32" lean-forward="true" selection-start-line="17" selection-start-column="32" selection-end-line="17" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="59" column="5" lean-forward="true" selection-start-line="59" selection-start-column="5" selection-end-line="59" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCSS.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" column="1" lean-forward="true" selection-start-line="9" selection-start-column="1" selection-end-line="9" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/DropSlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/HexSlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/RectSlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-80">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/RoundSlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/all.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="10832" column="12" lean-forward="true" selection-start-line="10832" selection-start-column="12" selection-end-line="10832" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="120" column="61" lean-forward="true" selection-start-line="120" selection-start-column="61" selection-end-line="120" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/SlotShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="23" column="2" lean-forward="true" selection-start-line="23" selection-start-column="2" selection-end-line="23" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GuiElements.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/Unused/BlockDefs_motion.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="32" column="44" lean-forward="true" selection-start-line="32" selection-start-column="44" selection-end-line="32" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="351">
-            <caret line="653" column="7" lean-forward="false" selection-start-line="653" selection-start-column="7" selection-end-line="653" selection-end-column="7" />
-            <folding />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="209" column="0" lean-forward="false" selection-start-line="209" selection-start-column="0" selection-end-line="209" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="359" column="71" lean-forward="false" selection-start-line="359" selection-start-column="6" selection-end-line="359" selection-end-column="71" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="334" column="5" lean-forward="true" selection-start-line="334" selection-start-column="5" selection-end-line="334" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="42">
-          <caret line="209" column="53" lean-forward="true" selection-start-line="209" selection-start-column="53" selection-end-line="209" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_deviceWithPorts.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
           <caret line="3" column="44" lean-forward="true" selection-start-line="3" selection-start-column="44" selection-end-line="3" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="58">
-          <caret line="20" column="47" lean-forward="true" selection-start-line="20" selection-start-column="47" selection-end-line="20" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="16" column="5" lean-forward="true" selection-start-line="16" selection-start-column="5" selection-end-line="16" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DropSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4389">
-          <caret line="209" column="59" lean-forward="false" selection-start-line="209" selection-start-column="59" selection-end-line="209" selection-end-column="59" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1196,67 +800,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Data/StringData.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="6" column="24" lean-forward="false" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data/Data.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="18" column="2" lean-forward="true" selection-start-line="18" selection-start-column="2" selection-end-line="18" selection-end-column="2" />
-          <folding>
-            <element signature="e#112#137#0" expanded="false" />
-            <element signature="e#168#377#0" expanded="false" />
-            <element signature="e#410#443#0" expanded="false" />
-            <element signature="e#477#515#0" expanded="false" />
-            <element signature="e#551#588#0" expanded="false" />
-            <element signature="e#775#813#0" expanded="false" />
-            <element signature="e#855#1943#0" expanded="false" />
-            <element signature="e#1142#1252#0" expanded="false" />
-            <element signature="e#1313#1845#0" expanded="false" />
-            <element signature="e#1362#1424#0" expanded="false" />
-            <element signature="e#1480#1764#0" expanded="false" />
-            <element signature="e#1563#1675#0" expanded="false" />
-            <element signature="e#1683#1760#0" expanded="false" />
-            <element signature="e#1771#1842#0" expanded="false" />
-            <element signature="e#1851#1941#0" expanded="false" />
-            <element signature="e#1987#2557#0" expanded="false" />
-            <element signature="e#2292#2332#0" expanded="false" />
-            <element signature="e#2383#2423#0" expanded="false" />
-            <element signature="e#2808#3133#0" expanded="false" />
-            <element signature="e#2840#2860#0" expanded="false" />
-            <element signature="e#2897#2918#0" expanded="false" />
-            <element signature="e#2957#2980#0" expanded="false" />
-            <element signature="e#3017#3038#0" expanded="false" />
-            <element signature="e#3080#3106#0" expanded="false" />
-            <element signature="e#3112#3131#0" expanded="false" />
-            <element signature="e#3178#3463#0" expanded="false" />
-            <element signature="e#3200#3222#0" expanded="false" />
-            <element signature="e#3249#3272#0" expanded="false" />
-            <element signature="e#3301#3326#0" expanded="false" />
-            <element signature="e#3353#3376#0" expanded="false" />
-            <element signature="e#3408#3436#0" expanded="false" />
-            <element signature="e#3442#3461#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data/SelectionData.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="20" column="16" lean-forward="false" selection-start-line="20" selection-start-column="16" selection-end-line="20" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Data/NumData.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
           <caret line="15" column="5" lean-forward="true" selection-start-line="15" selection-start-column="5" selection-end-line="15" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1264,17 +811,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
           <caret line="71" column="21" lean-forward="true" selection-start-line="71" selection-start-column="21" selection-end-line="71" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/StringSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="10" column="1" lean-forward="false" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1282,36 +818,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#XmlWriter#0" expanded="false" />
-            <element signature="e#76#176#0" expanded="false" />
-            <element signature="e#226#304#0" expanded="false" />
-            <element signature="e#352#422#0" expanded="false" />
-            <element signature="e#666#899#0" expanded="false" />
-            <element signature="e#937#1184#0" expanded="false" />
-            <element signature="e#1318#1407#0" expanded="false" />
-            <element signature="e#1480#1568#0" expanded="false" />
-            <element signature="e#1744#1896#0" expanded="false" />
-            <element signature="e#1855#1874#0" expanded="false" />
-            <element signature="e#1946#2183#0" expanded="false" />
-            <element signature="e#1963#1980#0" expanded="false" />
-            <element signature="e#2064#2164#0" expanded="false" />
-            <element signature="e#2126#2161#0" expanded="false" />
-            <element signature="e#2232#2444#0" expanded="false" />
-            <element signature="e#2249#2268#0" expanded="false" />
-            <element signature="e#2335#2428#0" expanded="false" />
-            <element signature="e#2397#2425#0" expanded="false" />
-            <element signature="e#2508#2868#0" expanded="false" />
-            <element signature="e#2526#2545#0" expanded="false" />
-            <element signature="e#2567#2590#0" expanded="false" />
-            <element signature="e#2660#2685#0" expanded="false" />
-            <element signature="e#2726#2853#0" expanded="false" />
-            <element signature="e#2794#2829#0" expanded="false" />
-            <element signature="e#3539#3627#0" expanded="false" />
-            <element signature="e#3675#3842#0" expanded="false" />
-            <element signature="e#3715#3826#0" expanded="false" />
-            <element signature="e#3798#3823#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1319,7 +825,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="572">
           <caret line="175" column="29" lean-forward="true" selection-start-line="175" selection-start-column="29" selection-end-line="175" selection-end-column="29" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1327,148 +832,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="530">
           <caret line="187" column="25" lean-forward="true" selection-start-line="187" selection-start-column="25" selection-end-line="187" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/Slot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2121">
-          <caret line="33" column="41" lean-forward="false" selection-start-line="33" selection-start-column="41" selection-end-line="33" selection-end-column="41" />
-          <folding>
-            <element signature="n#!!doc;n#Slot#0" expanded="false" />
-            <element signature="e#2609#2663#0" expanded="false" />
-            <element signature="e#3048#3108#0" expanded="false" />
-            <element signature="e#3475#3919#0" expanded="false" />
-            <element signature="e#3963#4803#0" expanded="false" />
-            <element signature="e#4020#4569#0" expanded="false" />
-            <element signature="e#4024#4067#0" expanded="false" />
-            <element signature="e#4464#4479#0" expanded="false" />
-            <element signature="e#4575#4801#0" expanded="false" />
-            <element signature="e#4806#4986#0" expanded="false" />
-            <element signature="e#5024#5846#0" expanded="false" />
-            <element signature="e#5130#5387#0" expanded="false" />
-            <element signature="e#5538#5745#0" expanded="false" />
-            <element signature="e#5777#5844#0" expanded="false" />
-            <element signature="e#5849#5968#0" expanded="false" />
-            <element signature="e#6013#6130#0" expanded="false" />
-            <element signature="e#6071#6128#0" expanded="false" />
-            <element signature="e#6133#6188#0" expanded="false" />
-            <element signature="e#6221#6316#0" expanded="false" />
-            <element signature="e#6272#6314#0" expanded="false" />
-            <element signature="e#6319#6465#0" expanded="false" />
-            <element signature="e#6503#7462#0" expanded="false" />
-            <element signature="e#6528#6638#0" expanded="false" />
-            <element signature="e#6657#7255#0" expanded="false" />
-            <element signature="e#6741#7132#0" expanded="false" />
-            <element signature="e#6819#6875#0" expanded="false" />
-            <element signature="e#6880#7128#0" expanded="false" />
-            <element signature="e#7139#7252#0" expanded="false" />
-            <element signature="e#7261#7460#0" expanded="false" />
-            <element signature="e#7465#7601#0" expanded="false" />
-            <element signature="e#7637#8058#0" expanded="false" />
-            <element signature="e#7662#7873#0" expanded="false" />
-            <element signature="e#7788#7820#0" expanded="false" />
-            <element signature="e#7827#7870#0" expanded="false" />
-            <element signature="e#8061#8128#0" expanded="false" />
-            <element signature="e#8176#8255#0" expanded="false" />
-            <element signature="e#8258#8318#0" expanded="false" />
-            <element signature="e#8361#8437#0" expanded="false" />
-            <element signature="e#8381#8435#0" expanded="false" />
-            <element signature="e#8440#8509#0" expanded="false" />
-            <element signature="e#8549#8614#0" expanded="false" />
-            <element signature="e#8617#8882#0" expanded="false" />
-            <element signature="e#8922#10392#0" expanded="false" />
-            <element signature="e#9121#9191#0" expanded="false" />
-            <element signature="e#9208#9304#0" expanded="false" />
-            <element signature="e#10010#10345#0" expanded="false" />
-            <element signature="e#10222#10310#0" expanded="false" />
-            <element signature="e#10395#10650#0" expanded="false" />
-            <element signature="e#10697#11481#0" expanded="false" />
-            <element signature="e#10859#10933#0" expanded="false" />
-            <element signature="e#10963#11034#0" expanded="false" />
-            <element signature="e#11071#11201#0" expanded="false" />
-            <element signature="e#11232#11298#0" expanded="false" />
-            <element signature="e#11329#11395#0" expanded="false" />
-            <element signature="e#11401#11479#0" expanded="false" />
-            <element signature="e#11484#11582#0" expanded="false" />
-            <element signature="e#11633#11682#0" expanded="false" />
-            <element signature="e#11721#11767#0" expanded="false" />
-            <element signature="e#11769#11818#0" expanded="false" />
-            <element signature="e#11857#11903#0" expanded="false" />
-            <element signature="e#11905#11954#0" expanded="false" />
-            <element signature="e#11993#12039#0" expanded="false" />
-            <element signature="e#12041#12090#0" expanded="false" />
-            <element signature="e#12129#12175#0" expanded="false" />
-            <element signature="e#12177#12348#0" expanded="false" />
-            <element signature="e#12384#12414#0" expanded="false" />
-            <element signature="e#12416#12587#0" expanded="false" />
-            <element signature="e#12623#12667#0" expanded="false" />
-            <element signature="e#12669#12697#0" expanded="false" />
-            <element signature="e#12737#12793#0" expanded="false" />
-            <element signature="e#12795#12823#0" expanded="false" />
-            <element signature="e#12864#12921#0" expanded="false" />
-            <element signature="e#12924#13030#0" expanded="false" />
-            <element signature="e#13071#13174#0" expanded="false" />
-            <element signature="e#13128#13172#0" expanded="false" />
-            <element signature="e#13177#13288#0" expanded="false" />
-            <element signature="e#13325#13372#0" expanded="false" />
-            <element signature="e#13375#13545#0" expanded="false" />
-            <element signature="e#13589#14172#0" expanded="false" />
-            <element signature="e#13715#13775#0" expanded="false" />
-            <element signature="e#13804#13853#0" expanded="false" />
-            <element signature="e#13885#13940#0" expanded="false" />
-            <element signature="e#13970#14021#0" expanded="false" />
-            <element signature="e#14051#14102#0" expanded="false" />
-            <element signature="e#14175#14328#0" expanded="false" />
-            <element signature="e#14394#14412#0" expanded="false" />
-            <element signature="e#14415#14489#0" expanded="false" />
-            <element signature="e#14541#14545#0" expanded="false" />
-            <element signature="e#14548#14619#0" expanded="false" />
-            <element signature="e#14670#14723#0" expanded="false" />
-            <element signature="e#14726#14797#0" expanded="false" />
-            <element signature="e#14848#14901#0" expanded="false" />
-            <element signature="e#14904#14963#0" expanded="false" />
-            <element signature="e#15006#15051#0" expanded="false" />
-            <element signature="e#15054#15101#0" expanded="false" />
-            <element signature="e#15144#15189#0" expanded="false" />
-            <element signature="e#15192#15292#0" expanded="false" />
-            <element signature="e#15351#15413#0" expanded="false" />
-            <element signature="e#15416#15516#0" expanded="false" />
-            <element signature="e#15575#15637#0" expanded="false" />
-            <element signature="e#15640#15785#0" expanded="false" />
-            <element signature="e#15842#15931#0" expanded="false" />
-            <element signature="e#15862#15918#0" expanded="false" />
-            <element signature="e#15934#16057#0" expanded="false" />
-            <element signature="e#16113#16247#0" expanded="false" />
-            <element signature="e#16189#16245#0" expanded="false" />
-            <element signature="e#16250#16444#0" expanded="false" />
-            <element signature="e#16498#16588#0" expanded="false" />
-            <element signature="e#16518#16571#0" expanded="false" />
-            <element signature="e#16591#16765#0" expanded="false" />
-            <element signature="e#16811#16893#0" expanded="false" />
-            <element signature="e#16831#16876#0" expanded="false" />
-            <element signature="e#16896#17074#0" expanded="false" />
-            <element signature="e#17512#17641#0" expanded="false" />
-            <element signature="e#18012#18067#0" expanded="false" />
-            <element signature="e#18102#18123#0" expanded="false" />
-            <element signature="e#18126#18192#0" expanded="false" />
-            <element signature="e#18229#18256#0" expanded="false" />
-            <element signature="e#18259#18326#0" expanded="false" />
-            <element signature="e#18363#18390#0" expanded="false" />
-            <element signature="e#18393#18524#0" expanded="false" />
-            <element signature="e#18562#18595#0" expanded="false" />
-            <element signature="e#18598#18696#0" expanded="false" />
-            <element signature="e#18736#18769#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="44" column="38" lean-forward="true" selection-start-line="44" selection-start-column="38" selection-end-line="44" selection-end-column="38" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1476,7 +839,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
           <caret line="21" column="48" lean-forward="true" selection-start-line="21" selection-start-column="48" selection-end-line="21" selection-end-column="48" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1484,43 +846,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
           <caret line="115" column="45" lean-forward="true" selection-start-line="115" selection-start-column="45" selection-end-line="115" selection-end-column="45" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="n#!!block;n#RectSlot#0" expanded="false" />
-            <element signature="e#991#1080#0" expanded="false" />
-            <element signature="e#1081#1423#0" expanded="false" />
-            <element signature="e#1424#1634#0" expanded="false" />
-            <element signature="e#1676#1707#0" expanded="false" />
-            <element signature="e#1709#1816#0" expanded="false" />
-            <element signature="e#1855#1882#0" expanded="false" />
-            <element signature="e#1884#1991#0" expanded="false" />
-            <element signature="e#2030#2057#0" expanded="false" />
-            <element signature="e#2059#2283#0" expanded="false" />
-            <element signature="e#2284#2494#0" expanded="false" />
-            <element signature="e#2495#2676#0" expanded="false" />
-            <element signature="e#2677#2871#0" expanded="false" />
-            <element signature="e#2872#3056#0" expanded="false" />
-            <element signature="e#3057#3252#0" expanded="false" />
-            <element signature="e#3253#3425#0" expanded="false" />
-            <element signature="e#3470#3595#0" expanded="false" />
-            <element signature="e#3535#3593#0" expanded="false" />
-            <element signature="e#3597#3733#0" expanded="false" />
-            <element signature="e#3775#3852#0" expanded="false" />
-            <element signature="e#3854#3973#0" expanded="false" />
-            <element signature="e#4013#4155#0" expanded="false" />
-            <element signature="e#4157#4231#0" expanded="false" />
-            <element signature="e#4843#4953#0" expanded="false" />
-            <element signature="e#4996#5164#0" expanded="false" />
-            <element signature="e#5118#5162#0" expanded="false" />
-            <element signature="e#5166#5329#0" expanded="false" />
-            <element signature="e#5600#5777#0" expanded="false" />
-            <element signature="e#5815#6323#0" expanded="false" />
-            <element signature="e#5837#6038#0" expanded="false" />
-            <element signature="e#5963#5995#0" expanded="false" />
-            <element signature="e#6002#6035#0" expanded="false" />
-            <element signature="e#6057#6230#0" expanded="false" />
-            <element signature="e#6236#6321#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1528,7 +853,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="299">
           <caret line="491" column="54" lean-forward="true" selection-start-line="491" selection-start-column="54" selection-end-line="491" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1536,89 +860,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#RoundSlot#0" expanded="false" />
-            <element signature="e#1113#1132#0" expanded="false" />
-            <element signature="e#1511#1568#0" expanded="false" />
-            <element signature="e#2040#2196#0" expanded="false" />
-            <element signature="e#2136#2194#0" expanded="false" />
-            <element signature="e#2198#2317#0" expanded="false" />
-            <element signature="e#2358#2492#0" expanded="false" />
-            <element signature="e#2494#2632#0" expanded="false" />
-            <element signature="e#2668#3309#0" expanded="false" />
-            <element signature="e#2689#3307#0" expanded="false" />
-            <element signature="e#3072#3189#0" expanded="false" />
-            <element signature="e#3311#3470#0" expanded="false" />
-            <element signature="e#3510#4240#0" expanded="false" />
-            <element signature="e#3818#3974#0" expanded="false" />
-            <element signature="e#3836#3939#0" expanded="false" />
-            <element signature="e#4068#4073#0" expanded="false" />
-            <element signature="e#4242#4484#0" expanded="false" />
-            <element signature="e#4542#4762#0" expanded="false" />
-            <element signature="e#4562#4664#0" expanded="false" />
-            <element signature="e#4670#4760#0" expanded="false" />
-            <element signature="e#4764#4912#0" expanded="false" />
-            <element signature="e#4959#5243#0" expanded="false" />
-            <element signature="e#4979#5144#0" expanded="false" />
-            <element signature="e#5150#5241#0" expanded="false" />
-            <element signature="e#5245#5356#0" expanded="false" />
-            <element signature="e#5400#5568#0" expanded="false" />
-            <element signature="e#5522#5566#0" expanded="false" />
-            <element signature="e#5570#5633#0" expanded="false" />
-            <element signature="e#5671#5721#0" expanded="false" />
-            <element signature="e#5723#5790#0" expanded="false" />
-            <element signature="e#5830#5883#0" expanded="false" />
-            <element signature="e#5885#6014#0" expanded="false" />
-            <element signature="e#6057#6299#0" expanded="false" />
-            <element signature="e#6135#6200#0" expanded="false" />
-            <element signature="e#6206#6297#0" expanded="false" />
-            <element signature="e#6301#6445#0" expanded="false" />
-            <element signature="e#6484#6993#0" expanded="false" />
-            <element signature="e#6506#6707#0" expanded="false" />
-            <element signature="e#6632#6664#0" expanded="false" />
-            <element signature="e#6671#6704#0" expanded="false" />
-            <element signature="e#6726#6900#0" expanded="false" />
-            <element signature="e#6906#6991#0" expanded="false" />
-            <element signature="e#6995#7241#0" expanded="false" />
-            <element signature="e#7370#7649#0" expanded="false" />
-            <element signature="e#7706#7799#0" expanded="false" />
-            <element signature="e#7774#7797#0" expanded="false" />
-            <element signature="e#7801#7873#0" expanded="false" />
-            <element signature="e#7917#7952#0" expanded="false" />
-            <element signature="e#7954#8010#0" expanded="false" />
-            <element signature="e#8053#8090#0" expanded="false" />
-            <element signature="e#8139#8469#0" expanded="false" />
-            <element signature="e#8519#9229#0" expanded="false" />
-            <element signature="e#8594#8613#0" expanded="false" />
-            <element signature="e#8768#8963#0" expanded="false" />
-            <element signature="e#8823#8960#0" expanded="false" />
-            <element signature="e#9104#9213#0" expanded="false" />
-            <element signature="e#9179#9210#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="17" column="2" lean-forward="true" selection-start-line="17" selection-start-column="2" selection-end-line="17" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="16" column="2" lean-forward="true" selection-start-line="16" selection-start-column="2" selection-end-line="16" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputSystem.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="73" lean-forward="true" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="73" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1626,31 +867,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="840">
           <caret line="55" column="24" lean-forward="false" selection-start-line="55" selection-start-column="24" selection-end-line="55" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1339">
-          <caret line="80" column="2" lean-forward="true" selection-start-line="80" selection-start-column="2" selection-end-line="80" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="3" lean-forward="true" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputPad.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1658,27 +874,271 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1872">
           <caret line="14" column="23" lean-forward="true" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-110">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="30" column="29" lean-forward="true" selection-start-line="30" selection-start-column="29" selection-end-line="30" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GuiElements.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="677">
+          <caret line="208" column="17" lean-forward="false" selection-start-line="208" selection-start-column="17" selection-end-line="208" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputPad.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="8" column="27" lean-forward="true" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/LabelWidget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="567">
+          <caret line="29" column="2" lean-forward="true" selection-start-line="29" selection-start-column="2" selection-end-line="29" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2478">
+          <caret line="202" column="18" lean-forward="false" selection-start-line="202" selection-start-column="18" selection-end-line="202" selection-end-column="18" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputWidget.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc;n#InputWidget#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="231">
+          <caret line="13" column="2" lean-forward="true" selection-start-line="13" selection-start-column="2" selection-end-line="13" selection-end-column="2" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NumPad.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NumPadWidget.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="154" column="38" lean-forward="true" selection-start-line="154" selection-start-column="38" selection-end-line="154" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#38#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="189">
+          <caret line="65" column="65" lean-forward="true" selection-start-line="65" selection-start-column="65" selection-end-line="65" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="460">
+          <caret line="22" column="51" lean-forward="true" selection-start-line="22" selection-start-column="51" selection-end-line="22" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NumSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/StringSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="10" column="1" lean-forward="true" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/Slot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="217">
+          <caret line="387" column="19" lean-forward="true" selection-start-line="387" selection-start-column="19" selection-end-line="387" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/StringData.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="819">
+          <caret line="48" column="31" lean-forward="true" selection-start-line="48" selection-start-column="31" selection-end-line="48" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="14" column="2" lean-forward="true" selection-start-line="14" selection-start-column="2" selection-end-line="14" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/SelectPadWidget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-590">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="435" column="0" lean-forward="false" selection-start-line="435" selection-start-column="0" selection-end-line="435" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="6" column="49" lean-forward="false" selection-start-line="6" selection-start-column="49" selection-end-line="6" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/InputSystem.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="20" column="54" lean-forward="false" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/PortSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="6" column="39" lean-forward="false" selection-start-line="6" selection-start-column="39" selection-end-line="6" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="14" column="2" lean-forward="true" selection-start-line="14" selection-start-column="2" selection-end-line="14" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/SelectionData.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/Data.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="79" column="41" lean-forward="true" selection-start-line="79" selection-start-column="41" selection-end-line="79" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/List.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="14" column="46" lean-forward="false" selection-start-line="14" selection-start-column="46" selection-end-line="14" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/ListDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="9" column="23" lean-forward="true" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/VarDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="25" column="63" lean-forward="true" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Variable.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="8" column="34" lean-forward="false" selection-start-line="8" selection-start-column="34" selection-end-line="8" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/OldDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3276">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="880">
+          <caret line="102" column="44" lean-forward="true" selection-start-line="102" selection-start-column="12" selection-end-line="102" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/DeviceDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/NewDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="840">
+          <caret line="58" column="9" lean-forward="true" selection-start-line="58" selection-start-column="9" selection-end-line="58" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/BroadcastDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="29" column="16" lean-forward="false" selection-start-line="24" selection-start-column="31" selection-end-line="29" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-37">
+          <caret line="320" column="24" lean-forward="false" selection-start-line="320" selection-start-column="24" selection-end-line="320" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_operators.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="467" column="41" lean-forward="false" selection-start-line="467" selection-start-column="41" selection-end-line="467" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="132" column="0" lean-forward="false" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="246">
+          <caret line="181" column="53" lean-forward="true" selection-start-line="181" selection-start-column="53" selection-end-line="181" selection-end-column="53" />
+          <folding />
         </state>
       </provider>
     </entry>
