@@ -1,5 +1,10 @@
 // handles displaying numbers entered using the inputpad
 function DisplayNum(initialData){
+	this.isNum = initialData.type === Data.types.num;
+	if(!this.isNum){
+		this.data = initialData;
+		return;
+	}
 	this.isNegative=(initialData.getValue()<0);
 	var asStringData=initialData.asPositiveString();
 	var parts=asStringData.getValue().split(".");
@@ -14,6 +19,7 @@ function DisplayNum(initialData){
 	}
 }
 DisplayNum.prototype.backspace=function(){
+	if(!this.isNum) return;
 	if(this.hasDecimalPoint&&this.decimalPart!=""){
 		var newL=this.decimalPart.length-1;
 		this.decimalPart=this.decimalPart.substring(0,newL);
@@ -33,15 +39,18 @@ DisplayNum.prototype.backspace=function(){
 	}
 }
 DisplayNum.prototype.switchSign=function(){
+	if(!this.isNum) return;
 	this.isNegative=!this.isNegative;
 }
 DisplayNum.prototype.addDecimalPoint=function(){
+	if(!this.isNum) return;
 	if(!this.hasDecimalPoint){
 		this.hasDecimalPoint=true;
 		this.decimalPart="";
 	}
 }
 DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
+	if(!this.isNum) return;
 	if(this.hasDecimalPoint){
 		if(this.decimalPart.length<5){
 			this.decimalPart+=digit;
@@ -57,6 +66,9 @@ DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
 	}
 }
 DisplayNum.prototype.getString=function(){
+	if(!this.isNum){
+		return this.data.asString().getValue();
+	}
 	var rVal="";
 	if(this.isNegative){
 		rVal+="-";
@@ -69,6 +81,9 @@ DisplayNum.prototype.getString=function(){
 	return rVal;
 }
 DisplayNum.prototype.getData=function(){
+	if(!this.isNum){
+		return this.data;
+	}
 	var rVal=parseInt(this.integerPart, 10);
 	if(this.hasDecimalPoint&&this.decimalPart.length>0){
 		var decPart=parseInt(this.decimalPart, 10);

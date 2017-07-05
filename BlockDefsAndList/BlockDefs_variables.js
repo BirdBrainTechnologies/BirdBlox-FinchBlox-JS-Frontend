@@ -67,9 +67,7 @@ function B_SetTo(x,y){
 	this.addPart(new LabelText(this,"set"));
 	this.addPart(new VarDropSlot(this,"VDS_1"));
 	this.addPart(new LabelText(this,"to"));
-	var rS=new RoundSlot(this,"RndS_val",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new NumData(0));
-	rS.addOption(new SelectionData("Enter text", "enter_text"));
-	this.addPart(rS);
+	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
@@ -79,7 +77,7 @@ B_SetTo.prototype.startAction=function(){
 	var type=data.type;
 	var types=Data.types;
 	if(type==types.bool||type==types.num||type==types.string) {
-		if (variableD != null && variableD.type == Data.types.selection) {
+		if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
 			var variable = variableD.getValue();
 			variable.setData(data);
 		}
@@ -101,7 +99,7 @@ B_ChangeBy.prototype.constructor = B_ChangeBy;
 B_ChangeBy.prototype.startAction=function(){
 	var variableD=this.slots[0].getData();
 	var incrementD=this.slots[1].getData();
-	if(variableD != null && variableD.type == Data.types.selection){
+	if(variableD.type === Data.types.selection && !variableD.isEmpty()){
 		var variable=variableD.getValue();
 		var currentD=variable.getData().asNum();
 		var newV=incrementD.getValue()+currentD.getValue();
@@ -178,7 +176,7 @@ B_List.prototype.checkListUsed=function(list){
 function B_AddToList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"add"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"to"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -186,7 +184,7 @@ B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
 B_AddToList.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var list=listD.getValue();
 		var array=list.getData().getValue();
 		var itemD=this.slots[0].getData();
@@ -217,12 +215,12 @@ B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
 B_DeleteItemOfList.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
 		var array=listData.getValue();
-		if(indexD.type==Data.types.selection&&indexD.getValue()=="all"){
+		if(indexD.type === Data.types.selection && indexD.getValue() === "all"){
 			list.setData(new ListData());
 		}
 		else {
@@ -240,7 +238,7 @@ B_DeleteItemOfList.prototype.startAction=function(){
 function B_InsertItemAtOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"insert"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
 	var nS=new NumSlot(this,"NumS_idx",1,true,true);
 	nS.addOption(new SelectionData("last", "last"));
@@ -253,7 +251,7 @@ B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
 B_InsertItemAtOfList.prototype.startAction=function(){
 	var listD=this.slots[2].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[1].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
@@ -293,13 +291,13 @@ function B_ReplaceItemOfListWith(x,y){
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
 B_ReplaceItemOfListWith.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
@@ -333,21 +331,18 @@ B_CopyListToList.prototype.constructor = B_CopyListToList;
 B_CopyListToList.prototype.startAction=function(){
 	var listD1=this.slots[0].getData();
 	var listD2=this.slots[1].getData();
-	if(listD1!=null&&listD2!=null){
-		var listDataToCopy;
-		if(listD1.type==Data.types.selection){
-			listDataToCopy=listD1.getValue().getData();
+	if(listD2.type === Data.types.selection && !listD2.isEmpty()){
+		if(listD1.type === Data.types.selection && !listD1.isEmpty()) {
+			listDataToCopy = listD1.getValue().getData();
 		}
-		else if(listD1.type==Data.types.list){
-			listDataToCopy=listD1;
+		else if(listD1.type === Data.types.list){
+			listDataToCopy = listD1;
 		}
 		else{
 			return new ExecutionStatusDone();
 		}
-		if(listD2.type==Data.types.selection){
-			var listToCopyTo=listD2.getValue();
-			listToCopyTo.setData(listDataToCopy.duplicate());
-		}
+		const listToCopyTo = listD2.getValue();
+		listToCopyTo.setData(listDataToCopy.duplicate());
 	}
 	return new ExecutionStatusDone();
 };
@@ -367,16 +362,16 @@ function B_ItemOfList(x,y){
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
-B_ItemOfList.prototype.startAction=function(){
+B_ItemOfList.prototype.startAction = function(){
 	var listD=this.slots[1].getData();
 	var indexD;
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		indexD = this.slots[0].getData();
 		var list = listD.getValue();
 		var listData=list.getData();
 		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		indexD = this.slots[0].getData();
 		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
 	}
@@ -406,12 +401,12 @@ B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
 B_LengthOfList.prototype.startAction=function(){
 	var listD=this.slots[0].getData();
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		var list = listD.getValue();
 		var array = list.getData().getValue();
 		return new ExecutionStatusResult(new NumData(array.length));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		return new ExecutionStatusResult(new NumData(listD.getValue().length));
 	}
 	else {
@@ -425,20 +420,20 @@ function B_ListContainsItem(x,y){
 	PredicateBlock.call(this,x,y,"lists");
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 	this.addPart(new LabelText(this,"contains"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
 B_ListContainsItem.prototype.startAction=function(){
 	var listD=this.slots[0].getData();
 	var itemD;
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		var list = listD.getValue();
 		var listData=list.getData();
 		itemD=this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		itemD=this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
 	}

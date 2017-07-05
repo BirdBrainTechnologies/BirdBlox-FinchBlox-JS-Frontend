@@ -31,7 +31,7 @@ function B_WhenIReceive(x,y){
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
 B_WhenIReceive.prototype.eventBroadcast=function(message){
-	var myMessage=this.slots[0].getData();
+	var myMessage=this.slots[0].getDataNotFromChild(); //Returns instantly and desn't require execution.
 	if(myMessage!=null){
 		var myMessageStr=myMessage.getValue();
 		if(myMessageStr=="any_message"||myMessageStr==message){
@@ -267,7 +267,7 @@ B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction=function(){
 	var message=this.slots[0].getData();
-	if(message!=null){
+	if(message.getValue() !== ""){
 		CodeManager.message=new StringData(message.getValue());
 		CodeManager.eventBroadcast(message.getValue());
 	}
@@ -308,7 +308,7 @@ function B_Message(x,y){
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
-B_Message.prototype.startAction=function(){blockd
+B_Message.prototype.startAction=function(){
 	return new ExecutionStatusResult(CodeManager.message);
 };
 
@@ -317,13 +317,12 @@ B_Message.prototype.startAction=function(){blockd
 function B_Stop(x,y){//No bottom slot
 	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
-	const dS = new NewDropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
+	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
 	dS.addOption(new SelectionData("all", "all"));
 	dS.addOption(new SelectionData("this script", "this_script"));
 	//dS.addOption(new SelectionData("this block", "this_block"));
 	dS.addOption(new SelectionData("all but this script", "all_but_this_script"));
 	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
-	dS.setSelectionData(new SelectionData("all", "all"));
 	this.addPart(dS);
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);

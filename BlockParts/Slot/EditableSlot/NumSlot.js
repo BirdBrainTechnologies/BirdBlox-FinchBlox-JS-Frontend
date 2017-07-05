@@ -18,7 +18,7 @@ function NumSlot(parent,key,value,positive,integer){
 	const inputType = EditableSlot.inputTypes.num;
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.num;
-	NewRoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;

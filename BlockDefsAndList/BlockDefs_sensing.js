@@ -121,7 +121,7 @@ Block.setDisplaySuffix(B_Timer, "s");
 function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"current"));
-	const dS = new NewDropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
+	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
 	dS.addOption(new SelectionData("year", "year"));
 	dS.addOption(new SelectionData("month", "month"));
 	dS.addOption(new SelectionData("date", "date"));

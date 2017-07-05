@@ -4,10 +4,13 @@
 function InputWidget(){
 	DebugOptions.markAbstract();
 }
-InputWidget.prototype.show = function(x, y, slotShape, updateFn, finishFn, data){
+InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+	this.x = x;
+	this.y = y;
 	this.slotShape = slotShape;
 	this.updateFn = updateFn;
 	this.finishFn = finishFn;
+	this.overlay = overlay;
 };
 InputWidget.prototype.updateDim = function(){
 	DebugOptions.markAbstract();

@@ -202,3 +202,11 @@ SmoothMenuBnList.prototype.previewHeight = function(){
 	}
 	return height;
 };
+SmoothMenuBnList.previewHeight = function(count, maxHeight){
+	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+	height = Math.max(height, 0);
+	if(this.maxHeight != null){
+		height = Math.min(height, maxHeight);
+	}
+	return height;
+};

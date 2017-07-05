@@ -8,7 +8,7 @@
  * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
  */
 function HexSlot(parent,key,snapType){
-	Slot.call(this,parent,key,Slot.inputTypes.none,snapType,Slot.outputTypes.bool); //Call constructor.
+	Slot.call(this, parent, key, snapType, Slot.outputTypes.bool); //Call constructor.
 	this.slotShape = new HexSlotShape(this);
 	this.slotShape.show();
 }

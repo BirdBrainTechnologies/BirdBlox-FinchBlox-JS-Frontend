@@ -4,7 +4,7 @@
 InputWidget.Label = function(text){
 	this.text = text;
 };
-InputWidget.Label.prototype = Object.create(InputWidget);
+InputWidget.Label.prototype = Object.create(InputWidget.prototype);
 InputWidget.Label.prototype.constructor = InputWidget.Label;
 InputWidget.Label.setConstants = function(){
 	const L = InputWidget.Label;
@@ -13,15 +13,15 @@ InputWidget.Label.setConstants = function(){
 	L.fontWeight="bold";
 	L.charHeight=12;
 	L.color = Colors.white;
-	L.maxWidth = NewInputPad.innerWidth;
 };
-InputWidget.Label.prototype.show = function(x, y){
+InputWidget.Label.prototype.show = function(x, y, parentGroup){
 	const L = InputWidget.Label;
 	this.textE = GuiElements.draw.text(x, y, "", L.fontSize, L.color, L.font, L.fontWeight);
-	GuiElements.update.textLimitWidth(this.textE, this.text, L.maxWidth);
+	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = L.maxWidth / 2 - textW / 2;
-	GuiElements.move.text(this.textE, textX, y);
+	const textX = NewInputPad.width / 2 - textW / 2;
+	GuiElements.move.text(this.textE, textX, y + L.charHeight);
+	parentGroup.appendChild(this.textE);
 };
 InputWidget.Label.prototype.updateDim = function(){
 	const L = InputWidget.Label;

@@ -30,14 +30,17 @@ EditableSlot.prototype.edit = function(){
 		this.editing = true;
 		this.slotShape.select();
 		const inputSys = this.createInputSystem();
-		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this));
+		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
 	}
 };
 EditableSlot.prototype.createInputSystem = function(){
 	DebugOptions.markAbstract();
 };
-EditableSlot.prototype.updateEdit = function(visibleText, data){
+EditableSlot.prototype.updateEdit = function(data, visibleText){
 	DebugOptions.assert(this.editing);
+	if(visibleText == null){
+		visibleText = data.asString().getValue();
+	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
 };

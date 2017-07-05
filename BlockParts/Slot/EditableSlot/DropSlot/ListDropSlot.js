@@ -19,8 +19,15 @@ ListDropSlot.prototype.populatePad = function(selectPad){
 	CodeManager.listList.forEach(function(list){
 		selectPad.addOption(list.getSelectionData());
 	});
+	selectPad.addAction("Create list", function(callback){
+		CodeManager.newList(function(list){
+			callback(list.getSelectionData(), true);
+		}, function(){
+			callback(null, false);
+		})
+	});
 };
-VarDropSlot.prototype.selectionDataFromValue = function(value){
+ListDropSlot.prototype.selectionDataFromValue = function(value){
 	const list = CodeManager.findList(value);
 	if(list == null) return null;
 	return list.getSelectionData();
@@ -32,8 +39,8 @@ ListDropSlot.prototype.renameList=function(list){
 	this.passRecursively("renameList", list);
 };
 ListDropSlot.prototype.deleteList=function(list){
-	if(this.enteredData != null && this.enteredData.getValue() === list){
-		this.setData(list.getSelectionData(), false, true);
+	if(!this.enteredData.isEmpty() && this.enteredData.getValue() === list){
+		this.setData(SelectionData.empty(), false, true);
 	}
 	this.passRecursively("deleteList",list);
 };

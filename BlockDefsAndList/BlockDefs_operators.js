@@ -180,14 +180,9 @@ B_LessThan.prototype.startAction=function(){
 
 function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
-	var rS=new RoundSlot(this,"RndS_item1",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS.addOption(new SelectionData("Enter text", "enter_text"));
-	var rS2=new RoundSlot(this,"RndS_item2",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS2.addOption(new SelectionData("Enter text", "enter_text"));
-
-	this.addPart(rS);
+	this.addPart(new NumOrStringSlot(this, "RndS_item1", new NumData(0)));
 	this.addPart(new LabelText(this,"="));
-	this.addPart(rS2);
+	this.addPart(new NumOrStringSlot(this, "RndS_item2", new NumData(0)));
 }
 B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
@@ -357,11 +352,10 @@ function B_Split(x,y){
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const data = new SelectionData("whitespace", "whitespace");
-	const dS=new NewDropSlot(this,"DS_separator", inputType, snapType, data);
-	dS.addOption(new SelectionData("Enter text", "enter_text"));
+	const dS=new DropSlot(this,"DS_separator", inputType, snapType, data);
+	dS.addEnterText("Edit text");
 	dS.addOption(new SelectionData("letter", "letter"));
 	dS.addOption(new SelectionData("whitespace", "whitespace"));
-	dS.setSelectionData(new SelectionData("whitespace", "whitespace"));
 	this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
@@ -399,9 +393,9 @@ B_Split.prototype.startAction=function(){
 function B_IsAType(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"is"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(5)));
 	this.addPart(new LabelText(this,"a"));
-	const dS = new NewDropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
+	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("text", "text"));
 	dS.addOption(new SelectionData("boolean", "boolean"));
@@ -463,7 +457,7 @@ B_IsAType.prototype.startAction=function(){
 
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	const dS = new NewDropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));

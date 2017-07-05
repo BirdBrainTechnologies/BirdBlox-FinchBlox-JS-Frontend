@@ -118,7 +118,13 @@ GuiElements.setConstants=function(){
 	RectSlotShape.setConstants();
 	RoundSlotShape.setConstants();
 	DropSlotShape.setConstants();
+
 	Slot.setConstants();
+	EditableSlot.setConstants();
+	NewInputPad.setConstants();
+	InputWidget.NumPad.setConstants();
+	InputWidget.Label.setConstants();
+
 	Block.setConstants();
 	BlockPalette.setGraphics();
 	TitleBar.setGraphicsPart2();
@@ -128,7 +134,7 @@ GuiElements.setConstants=function(){
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
-	InputPad.setGraphics();
+	NewInputPad.setConstants();
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
@@ -165,7 +171,6 @@ GuiElements.buildUI=function(){
 
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
-	InputPad(); //Builds the inputpad, which is used for number entry and dropdown selection
 	DisplayBox(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */

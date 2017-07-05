@@ -18,7 +18,6 @@ NewInputPad.setConstants = function(){
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
 	IP.maxHeight = GuiElements.height - 2 * IP.margin;
-	IP.innerWidth = NewInputPad.width - NewInputPad.margin * 2;
 };
 NewInputPad.prototype.addWidget = function(widget){
 	this.widgets.push(widget);
@@ -32,8 +31,8 @@ NewInputPad.prototype.show = function(slotShape, updateFn, finishFn, data){
 	const layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
 	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, IP.margin, layer);
-	this.showWidgets();
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
+	this.showWidgets(this.bubbleOverlay);
 };
 NewInputPad.prototype.updateDim = function(){
 	const IP = NewInputPad;
@@ -58,25 +57,28 @@ NewInputPad.prototype.updateDim = function(){
 	this.height = height;
 	this.width = IP.width;
 };
-NewInputPad.prototype.showWidgets = function(){
+NewInputPad.prototype.showWidgets = function(overlay){
 	const IP = NewInputPad;
 	let y = 0;
 	for(let i = 0; i < this.widgets.length; i++) {
-		this.widgets[i].show(0, y, this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this));
+		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.currentData);
 		y += this.widgets[i].height + IP.margin;
 	}
 };
 NewInputPad.prototype.close = function(){
+	if(this.closed) return;
 	InputSystem.prototype.close.call(this);
 	this.widgets.forEach(function(widget){
 		widget.close();
 	});
+	this.bubbleOverlay.close();
 };
-NewInputPad.prototype.updateEdit = function(newData){
-	this.updateFn(newData);
+NewInputPad.prototype.updateEdit = function(newData, text){
+	this.updateFn(newData, text);
 	this.currentData = newData;
 	SaveManager.markEdited();
 };
-NewInputPad.prototype.finishEdit = function(){
+NewInputPad.prototype.finishEdit = function(newData){
+	this.currentData = newData;
 	this.close();
 };

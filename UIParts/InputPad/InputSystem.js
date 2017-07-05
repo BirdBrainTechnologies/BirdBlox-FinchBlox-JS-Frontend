@@ -11,12 +11,13 @@ InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	DebugOptions.assert(!this.closed);
 	this.visible = true;
 	this.slotShape = slotShape;
-	this.slotUpdateFn = updateFn;
-	this.slotFinishFn = finishFn;
+	this.updateFn = updateFn;
+	this.finishFn = finishFn;
 	this.currentData = data;
 };
 InputSystem.prototype.close = function(){
+	if(this.closed) return;
 	this.closed = true;
 	this.visible = false;
-	this.slotFinishFn(this.currentData, this.cancelled);
+	this.finishFn(this.currentData, this.cancelled);
 };

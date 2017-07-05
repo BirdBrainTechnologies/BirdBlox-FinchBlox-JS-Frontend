@@ -9,7 +9,6 @@
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} inputType - [none, num, string, drop] The type of Data which can be directly entered into the Slot. TODO: perhaps change drop data
  * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
  * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
  */
@@ -199,7 +198,6 @@ Slot.prototype.getData = function(){
  * @abstract
  */
 Slot.prototype.getDataNotFromChild = function(){
-	DebugOptions.assert(!this.resultIsFromChild);
 	GuiElements.markAbstract();
 };
 

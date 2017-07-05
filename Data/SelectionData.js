@@ -11,14 +11,13 @@ SelectionData.prototype.asString = function(){
 SelectionData.prototype.asSelection = function(){
 	return this;
 };
-SelectionData.prototype.isSelection = function(){
-	return true;
+SelectionData.prototype.isEmpty = function(){
+	return this.value === "";
 };
 SelectionData.importXml=function(dataNode){
 	const value = XmlWriter.getTextNode(dataNode, "value");
-	const displayText = XmlWriter.getTextNode(dataNode, "displayText");
-	if(value == null || displayText == null) return null;
-	return new SelectionData(value);
+	if(value == null) return null;
+	return new SelectionData("", value);
 };
 SelectionData.empty = function(isValid){
 	return new SelectionData("", "", isValid);

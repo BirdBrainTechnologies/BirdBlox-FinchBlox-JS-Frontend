@@ -15,6 +15,13 @@ VarDropSlot.prototype.populatePad=function(selectPad){
 	CodeManager.variableList.forEach(function(variable){
 		selectPad.addOption(new SelectionData(variable.getName(), variable));
 	});
+	selectPad.addAction("Create variable", function(callback){
+		CodeManager.newVariable(function(variable){
+			callback(variable.getSelectionData(), true);
+		}, function(){
+			callback(null, false);
+		})
+	});
 };
 VarDropSlot.prototype.selectionDataFromValue = function(value){
 	const variable = CodeManager.findVar(value);

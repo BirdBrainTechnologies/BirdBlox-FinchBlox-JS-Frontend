@@ -33,6 +33,9 @@ Data.prototype.getValue=function(){ //might remove
 	return this.value;
 };
 Data.prototype.isSelection = function(){
+	return this.type === Data.types.selection;
+};
+Data.prototype.isNumber = function(){
 	return false;
 };
 Data.checkEquality=function(data1,data2){

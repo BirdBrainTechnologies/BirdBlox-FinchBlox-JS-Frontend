@@ -4,13 +4,12 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
+	const data = new SelectionData(this.prefixText + 1, 0);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
+
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
-	const data = new SelectionData(this.prefixText + 1, 0);
-
-	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
-
 	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
 		this.switchToLabel();
 	} else {
@@ -31,9 +30,9 @@ DeviceDropSlot.prototype.populatePad = function(selectPad) {
 DeviceDropSlot.prototype.switchToLabel = function() {
 	if (!this.labelMode) {
 		this.labelMode = true;
-		this.setSelectionData(new SelectionData(0, this.prefixText + 1));
 		this.labelText.show();
 		this.slotShape.hide();
+		this.setData(new SelectionData(0, this.prefixText + 1), false, true);
 	}
 };
 
@@ -79,14 +78,6 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		return this.getData().getValue() + 1;
 	} else {
 		return 1;
-	}
-};
-
-DeviceDropSlot.prototype.importXml = function(slotNode) {
-	DropSlot.prototype.importXml.call(this, slotNode);
-	this.enteredData = new SelectionData(parseInt(this.enteredData.getValue()));
-	if (this.enteredData.getValue() < 0) {
-		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
 	}
 };
 

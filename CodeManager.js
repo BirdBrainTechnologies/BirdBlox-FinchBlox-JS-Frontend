@@ -317,16 +317,18 @@ CodeManager.removeVariable=function(variable){
 };
 /* @fix Write documentation.
  */
-CodeManager.newVariable=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newVariable=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create variable","Enter variable name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
-			new Variable(result);
+			const variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(variable);
+		} else {
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+	});
 };
 CodeManager.checkVarName=function(name){
 	name=name.trim();
@@ -363,16 +365,18 @@ CodeManager.removeList=function(list){
 };
 /* @fix Write documentation.
  */
-CodeManager.newList=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newList=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create list","Enter list name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
-			new List(result);
+			const list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(list);
+		} else{
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+	});
 };
 /* @fix Write documentation.
  */
