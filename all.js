@@ -12519,7 +12519,6 @@ Slot.prototype.getData = function(){
 	//If it isn't done executing and has a child, throw an error.
 	DebugOptions.assert(!this.hasChild);
 	DebugOptions.assert(false); //TODO: see if this is ok.
-	return this.enteredData;
 };
 
 /**
@@ -13650,7 +13649,7 @@ DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
 
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.deviceClass === deviceClass && this.getData() != null) {
-		return this.getData().getValue() + 1;
+		return this.getDataNotFromChild().getValue() + 1;
 	} else {
 		return 1;
 	}
