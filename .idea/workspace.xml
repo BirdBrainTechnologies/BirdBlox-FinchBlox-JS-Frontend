@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="" />
+    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceManager.js" afterPath="$PROJECT_DIR$/Device/DeviceManager.js" />
+    </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,21 +23,61 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Slot.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Slot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockParts/Slot/Slot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
-              <caret line="181" column="11" lean-forward="true" selection-start-line="181" selection-start-column="11" selection-end-line="181" selection-end-column="11" />
+            <state relative-caret-position="301">
+              <caret line="362" column="0" lean-forward="false" selection-start-line="362" selection-start-column="0" selection-end-line="371" selection-end-column="2" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DeviceDropSlot.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DeviceDropSlot.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="373">
-              <caret line="80" column="5" lean-forward="true" selection-start-line="80" selection-start-column="5" selection-end-line="80" selection-end-column="5" />
+            <state relative-caret-position="691">
+              <caret line="94" column="2" lean-forward="true" selection-start-line="94" selection-start-column="2" selection-end-line="94" selection-end-column="2" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="EditableSlot.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="397">
+              <caret line="103" column="25" lean-forward="true" selection-start-line="103" selection-start-column="25" selection-end-line="103" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Data.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Data/Data.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1197">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DeviceManager.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="607">
+              <caret line="143" column="21" lean-forward="true" selection-start-line="143" selection-start-column="21" selection-end-line="143" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Device.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Device/Device.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="461">
+              <caret line="80" column="67" lean-forward="true" selection-start-line="80" selection-start-column="38" selection-end-line="80" selection-end-column="67" />
               <folding />
             </state>
           </provider>
@@ -43,7 +86,7 @@
       <file leaf-file-name="Block.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Block/Block.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="196">
+            <state relative-caret-position="-1946">
               <caret line="480" column="22" lean-forward="true" selection-start-line="480" selection-start-column="22" selection-end-line="480" selection-end-column="22" />
               <folding />
             </state>
@@ -98,8 +141,8 @@
       <find>selectiondatafromvalue =</find>
       <find>selectiondatafromvalue =</find>
       <find>selectiondatafromvalue = f</find>
-      <find>findbest</find>
       <find>loadFi</find>
+      <find>findbest</find>
       <find>this.enter</find>
     </findStrings>
     <replaceStrings>
@@ -141,7 +184,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/BlockParts/Slot/NewRoundSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/DropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/NewRectSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/BroadcastDropSlot.js" />
@@ -191,6 +233,7 @@
         <option value="$PROJECT_DIR$/SaveManager.js" />
         <option value="$PROJECT_DIR$/Block/Block.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
+        <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" />
       </list>
     </option>
@@ -354,6 +397,20 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="SoundsForUI">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Device">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -702,7 +759,7 @@
       <workItem from="1499192813731" duration="1890000" />
       <workItem from="1499210141493" duration="7145000" />
       <workItem from="1499260573758" duration="18870000" />
-      <workItem from="1499350667616" duration="2630000" />
+      <workItem from="1499350667616" duration="6052000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -799,7 +856,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1163635000" />
+    <option name="totallyTimeSpent" value="1167057000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -808,7 +865,7 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12638815" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3282353" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31176472" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31176472" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294643" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.49615806" order="1" side_tool="false" content_ui="tabs" />
@@ -884,20 +941,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="14" column="2" lean-forward="true" selection-start-line="14" selection-start-column="2" selection-end-line="14" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/List.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="14" column="46" lean-forward="false" selection-start-line="14" selection-start-column="46" selection-end-line="14" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Variable.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
@@ -1099,13 +1142,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
           <caret line="21" column="40" lean-forward="true" selection-start-line="21" selection-start-column="40" selection-end-line="21" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data/SelectionData.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1136,6 +1172,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
           <caret line="25" column="29" lean-forward="false" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="29" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1143,14 +1180,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
           <caret line="1" column="33" lean-forward="false" selection-start-line="1" selection-start-column="33" selection-end-line="1" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data/Data.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1071">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1234,22 +1263,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="21" column="36" lean-forward="true" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Block/Block.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="480" column="22" lean-forward="true" selection-start-line="480" selection-start-column="22" selection-end-line="480" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/all.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="461">
@@ -1266,18 +1279,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js">
+    <entry file="file://$PROJECT_DIR$/Block/Block.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="373">
-          <caret line="80" column="5" lean-forward="true" selection-start-line="80" selection-start-column="5" selection-end-line="80" selection-end-column="5" />
+        <state relative-caret-position="-1946">
+          <caret line="480" column="22" lean-forward="true" selection-start-line="480" selection-start-column="22" selection-end-line="480" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/Data.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1197">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data/SelectionData.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="9" lean-forward="false" selection-start-line="0" selection-start-column="9" selection-end-line="0" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockParts/Slot/Slot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="181" column="11" lean-forward="true" selection-start-line="181" selection-start-column="11" selection-end-line="181" selection-end-column="11" />
+        <state relative-caret-position="301">
+          <caret line="362" column="0" lean-forward="false" selection-start-line="362" selection-start-column="0" selection-end-line="371" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="103" column="25" lean-forward="true" selection-start-line="103" selection-start-column="25" selection-end-line="103" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Device/Device.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="461">
+          <caret line="80" column="67" lean-forward="true" selection-start-line="80" selection-start-column="38" selection-end-line="80" selection-end-column="67" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="607">
+          <caret line="143" column="21" lean-forward="true" selection-start-line="143" selection-start-column="21" selection-end-line="143" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="691">
+          <caret line="94" column="2" lean-forward="true" selection-start-line="94" selection-start-column="2" selection-end-line="94" selection-end-column="2" />
           <folding />
         </state>
       </provider>

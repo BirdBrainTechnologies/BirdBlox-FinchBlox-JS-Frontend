@@ -10,7 +10,8 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
-	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
+	const deviceCount = deviceClass.getManager().getSelectableDeviceCount();
+	if (deviceCount <= 1) {
 		this.switchToLabel();
 	} else {
 		this.labelText.hide();
@@ -23,7 +24,7 @@ DeviceDropSlot.prototype.populatePad = function(selectPad) {
 	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	for (let i = 0; i < deviceCount; i++) {
 		//We'll store a 0-indexed value but display it +1.
-		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), new SelectionData(i)));
+		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
 	}
 };
 
@@ -32,7 +33,7 @@ DeviceDropSlot.prototype.switchToLabel = function() {
 		this.labelMode = true;
 		this.labelText.show();
 		this.slotShape.hide();
-		this.setData(new SelectionData(0, this.prefixText + 1), false, true);
+		this.setData(new SelectionData(this.prefixText + 1, 0), false, true);
 	}
 };
 
@@ -74,15 +75,18 @@ DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
 };
 
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
-	if (this.deviceClass === deviceClass && this.getData() != null) {
-		return this.getDataNotFromChild().getValue() + 1;
+	if (this.deviceClass === deviceClass) {
+		const myVal = this.getDataNotFromChild().getValue();
+		return myVal + 1;
 	} else {
 		return 1;
 	}
 };
 
 DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
-	const value = data.asNum().getValue();
+	const numData = data.asNum();
+	if(!numData.isValid) return null;
+	const value = numData.getValue();
 	if(value < 0) return null;
 	if(value % 1 !== 0) return null;
 	if(!Number.isInteger(value)) return null;

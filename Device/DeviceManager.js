@@ -135,13 +135,9 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 };
 DeviceManager.prototype.getVirtualRobotList = function(){
 	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
-	let obj1 = {};
-	let obj2 = {};
-	obj1.name = prefix + "1";
-	obj2.name = prefix + "2";
-	obj1.id = "virtualDevice1";
-	obj2.id = "virtualDevice2";
-	return [obj1, obj2];
+	const robot1 = new this.deviceClass(prefix + "1", "virtualDevice1");
+	const robot2 = new this.deviceClass(prefix + "2", "virtualDevice2");
+	return [robot1, robot2];
 };
 DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
 	const index = this.lookupRobotIndexById(deviceId);
