@@ -156,8 +156,17 @@ Data.prototype.asString=function(){
 Data.prototype.asList=function(){
 	return new ListData(null,false);
 };
+Data.prototype.asSelection = function(){
+	return SelectionData.empty(false);
+};
 Data.prototype.getValue=function(){ //might remove
 	return this.value;
+};
+Data.prototype.isSelection = function(){
+	return this.type === Data.types.selection;
+};
+Data.prototype.isNumber = function(){
+	return false;
 };
 Data.checkEquality=function(data1,data2){
 	var val1=data1.getValue();
@@ -191,7 +200,6 @@ Data.checkEquality=function(data1,data2){
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
-
 Data.prototype.createXml=function(xmlDoc){
 	var data=XmlWriter.createElement(xmlDoc,"data");
 	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
@@ -322,12 +330,14 @@ NumData.prototype.getValueWithC=function(positive,integer){
 	return val;
 };
 NumData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value",0,true);
-	if((value+"").indexOf(".")==-1){
-		return new NumData(parseInt(value));
-	}
-	else{
-		return new NumData(parseFloat(value));
+	const value=XmlWriter.getTextNode(dataNode,"value",null,true);
+	if(value == null) return null;
+	const stringData = new StringData(value);
+	const numData = stringData.asNum();
+	if(numData.isValid){
+		return numData;
+	} else {
+		return null;
 	}
 };
 function BoolData(value,isValid){
@@ -355,8 +365,9 @@ BoolData.prototype.asString=function(){
 	}
 }
 BoolData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value","false");
-	return new BoolData(value=="true");
+	let value = XmlWriter.getTextNode(dataNode, "value");
+	if(value == null) return null;
+	return new BoolData(value == "true");
 };
 function StringData(value,isValid){
 	Data.call(this,Data.types.string,value,isValid);
@@ -388,7 +399,8 @@ StringData.prototype.isNumber=function(){ //Checks to see if the number can be c
 	return numberRE.test(this.getValue());
 }
 StringData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value","");
+	var value=XmlWriter.getTextNode(dataNode,"value");
+	if(value == null) return null;
 	return new StringData(value);
 };
 //Not implemented
@@ -491,28 +503,32 @@ ListData.importXml=function(dataNode){
 	}
 	return new ListData(valueArray);
 };
-function SelectionData(value,isValid){
-	Data.call(this,Data.types.selection,value,true); //Selection Data comes from a drop down and is always valid.
+function SelectionData(displayText, value, isValid){
+	DebugOptions.validateNonNull(displayText, value);
+	Data.call(this,Data.types.selection, value, isValid);
+	this.displayText = displayText;
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
-SelectionData.prototype.asString=function(){
-	var valueString="";
-	if(this.getValue().constructor.name=="Variable"){
-		valueString=this.getValue().name;
-	}
-	else if(this.getValue().constructor.name=="List"){
-		valueString=this.getValue().name;
-	}
-	else{
-		valueString=this.getValue()+"";
-	}
-	return new StringData(valueString,true);
+SelectionData.prototype.asString = function(){
+	return new StringData(this.displayText, true);
+};
+SelectionData.prototype.asSelection = function(){
+	return this;
+};
+SelectionData.prototype.isEmpty = function(){
+	return this.value === "";
 };
 SelectionData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value");
-	return new SelectionData(value);
+	const value = XmlWriter.getTextNode(dataNode, "value");
+	if(value == null) return null;
+	return new SelectionData("", value);
 };
+SelectionData.empty = function(isValid){
+	return new SelectionData("", "", isValid);
+};
+
+
 /**
  * Created by Tom on 6/2/2017.
  */
@@ -658,6 +674,9 @@ function Variable(name, data){
 Variable.prototype.getName=function(){
 	return this.name;
 };
+Variable.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
+};
 Variable.prototype.getData=function(){
 	return this.data;
 };
@@ -728,6 +747,9 @@ function List(name,data){
 }
 List.prototype.getName=function(){
 	return this.name;
+};
+List.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
 };
 List.prototype.changeName=function(newName){
 	if(this.name!=this.newName){
@@ -1086,13 +1108,9 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
 };
 DeviceManager.prototype.getVirtualRobotList = function(){
 	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
-	let obj1 = {};
-	let obj2 = {};
-	obj1.name = prefix + "1";
-	obj2.name = prefix + "2";
-	obj1.id = "virtualDevice1";
-	obj2.id = "virtualDevice2";
-	return [obj1, obj2];
+	const robot1 = new this.deviceClass(prefix + "1", "virtualDevice1");
+	const robot2 = new this.deviceClass(prefix + "2", "virtualDevice2");
+	return [robot1, robot2];
 };
 DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
 	const index = this.lookupRobotIndexById(deviceId);
@@ -1306,7 +1324,11 @@ GuiElements.setConstants=function(){
 	RectSlotShape.setConstants();
 	RoundSlotShape.setConstants();
 	DropSlotShape.setConstants();
+
 	Slot.setConstants();
+	EditableSlot.setConstants();
+
+
 	Block.setConstants();
 	BlockPalette.setGraphics();
 	TitleBar.setGraphicsPart2();
@@ -1316,7 +1338,7 @@ GuiElements.setConstants=function(){
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
-	InputPad.setGraphics();
+
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
@@ -1324,6 +1346,12 @@ GuiElements.setConstants=function(){
 	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+
+	NewInputPad.setConstants();
+	SoundInputPad.setConstants();
+	InputWidget.NumPad.setConstants();
+	InputWidget.Label.setConstants();
+
 	ConnectMultipleDialog.setConstants();
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
@@ -1353,7 +1381,6 @@ GuiElements.buildUI=function(){
 
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
-	InputPad(); //Builds the inputpad, which is used for number entry and dropdown selection
 	DisplayBox(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
@@ -3176,6 +3203,7 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 		}
 	};
 	Sound.getDuration(id, isRecording, function(duration){
+		id = id.split(".wav").join(""); //TODO: remove .wav replacement
 		let request = new HttpRequestBuilder("sound/play");
 		request.addParam("filename", id);
 		request.addParam("type", Sound.boolToType(isRecording));
@@ -3234,7 +3262,7 @@ Sound.loadSounds = function(isRecording, callbackFn){
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
 	let name = id;
-	if(name.substring(name.length - 4) === ".wav") {
+	if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
 		name = name.substring(0, name.length - 4);
 	}
 	name = name.split("_").join(" ");
@@ -4695,6 +4723,7 @@ Category.prototype.updateZoom = function(){
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
 function Button(x,y,width,height,parent){
+	DebugOptions.validateNumbers(x, y, width, height);
 	this.x=x;
 	this.y=y;
 	this.width=width;
@@ -5254,454 +5283,666 @@ TabRow.prototype.setCallbackFunction = function(callback){
 TabRow.prototype.markAsOverlayPart = function(overlay){
 	this.partOfOverlay = overlay;
 };
-function InputPad(){
-	InputPad.buildPad();
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function InputSystem(){
+	this.visible = false;
+	this.closed = false;
+	this.cancelled = false; //TODO: remove this?
 }
-InputPad.setGraphics=function(){
-	InputPad.buttonW=50;
-	InputPad.buttonH=40;
-	InputPad.buttonMargin=Button.defaultMargin;
-	/*InputPad.triangleW=15;
-	InputPad.triangleH=7;*/
-	InputPad.fontSize=34;
-	InputPad.font="Arial";
-	InputPad.fontWeight="bold";
-	InputPad.bg=Colors.black;
-	InputPad.charHeight=25;
-	InputPad.plusMinusH=22;
-	InputPad.bsBnH=25;
-	InputPad.okBnH=InputPad.bsBnH;
-	
-	InputPad.BnAreaW=InputPad.buttonW*3+InputPad.buttonMargin*2;
-	InputPad.BnAreaH=InputPad.buttonH*5+InputPad.buttonMargin*4;
-	InputPad.width=InputPad.BnAreaW;
-	InputPad.height=InputPad.BnAreaH;
-	
-	InputPad.longBnW=(InputPad.width-InputPad.buttonMargin)/2;
-	InputPad.triOffset=(InputPad.width-InputPad.triangleW)/2;
-	InputPad.halfOffset=InputPad.width/2;
-	/*InputPad.tallH=InputPad.height+InputPad.triangleH;*/
-	
-	InputPad.usingNumberPad=false;
-	InputPad.dataIsNumeric=false;
-	InputPad.nonNumericData=null;
-	InputPad.nonNumericText=null;
-	InputPad.displayNum=null;
-	InputPad.undoAvailable=false;
-	InputPad.undoVisible=false;
-	InputPad.undoData=function(){};
-	InputPad.undoData.dataIsNumeric=false;
-	InputPad.undoData.data=null;
-	InputPad.undoData.text=null;
-	InputPad.valueGrayed=true;
+InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
+	DebugOptions.assert(!this.visible);
+	DebugOptions.assert(!this.closed);
+	this.visible = true;
+	this.slotShape = slotShape;
+	this.updateFn = updateFn;
+	this.finishFn = finishFn;
+	this.currentData = data;
 };
-InputPad.buildPad=function(){
-	var IP=InputPad;
-	IP.group=GuiElements.create.group(0,0);
-	IP.visible=false;
-	/*IP.makeBg();*/
-	let layer = GuiElements.layers.inputPad;
-	let overlayType = Overlay.types.inputPad;
-	IP.bubbleOverlay=new BubbleOverlay(overlayType, IP.bg,IP.buttonMargin,IP.group,IP,null,layer);
-	IP.bnGroup=GuiElements.create.group(0,0);
-	IP.makeBns();
-	//IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
-	IP.menuBnList=new SmoothMenuBnList(IP, IP.group,0,0);
-	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
-	IP.previewFn = null;
+InputSystem.prototype.close = function(){
+	if(this.closed) return;
+	this.closed = true;
+	this.visible = false;
+	this.finishFn(this.currentData, this.cancelled);
 };
-/*InputPad.makeBg=function(){
-	var IP=InputPad;
-	IP.bgGroup=GuiElements.create.group(0,0,IP.group);
-	IP.bgRect=GuiElements.draw.rect(0,0,IP.width,IP.height,IP.bg);
-	IP.triangle=GuiElements.draw.triangle(IP.triOffset,0,IP.triangleW,IP.triangleH,IP.bg);
-	IP.bgGroup.appendChild(IP.bgRect);
-	IP.bgGroup.appendChild(IP.triangle);
-};*/
-InputPad.resetPad=function(columns){//removes any options which may have been added to the pad
-	var IP=InputPad;
-	IP.close();
-	if(columns == 1){
-		IP.menuBnList = new SmoothMenuBnList(IP, IP.group, 0, 0);
-	} else {
-		IP.menuBnList = new MenuBnList(IP.group, 0, 0, IP.buttonMargin, null, columns);
-	}
-	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
-	IP.previewFn = null;
-};
-InputPad.addOption=function(text,data){
-	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
-	InputPad.menuBnList.addOption(text,dataFunction);
-};
-InputPad.numPressed=function(num){
-	var IP=InputPad;
-	IP.removeUndo();
-	IP.deleteIfGray();
-	IP.displayNum.addDigit(num+"");
-	SaveManager.markEdited();
-	IP.updateSlot();
-	IP.dataIsNumeric=true;
-};
-InputPad.plusMinusPressed=function(){
-	var IP=InputPad;
-	IP.removeUndo();
-	IP.deleteIfGray();
-	IP.displayNum.switchSign();
-	SaveManager.markEdited();
-	IP.updateSlot();
-};
-InputPad.decimalPressed=function(){
-	var IP=InputPad;
-	IP.removeUndo();
-	IP.deleteIfGray();
-	IP.displayNum.addDecimalPoint();
-	SaveManager.markEdited();
-	IP.updateSlot();
-};
-InputPad.deleteIfGray=function(){
-	var IP=InputPad;
-	if(IP.valueGrayed){
-		IP.showUndo();
-		IP.dataIsNumeric=true;
-		IP.displayNum=new DisplayNum(new NumData(0));
-		IP.updateSlot();
-		IP.ungray();
-	}
-};
-InputPad.ungray=function(){
-	var IP=InputPad;
-	if(IP.valueGrayed) {
-		IP.slot.ungrayValue();
-		IP.valueGrayed=false;
-	}
-};
-InputPad.grayOutValue=function(){
-	var IP=InputPad;
-	IP.slot.grayOutValue();
-	IP.valueGrayed=true;
-};
-InputPad.showUndo=function(){
-	var IP=InputPad;
-	if(!IP.undoAvailable) {
-		IP.undoAvailable = true;
-		IP.undoData.dataIsNumeric = IP.dataIsNumeric;
-		if (IP.dataIsNumeric) {
-			IP.undoData.data = IP.displayNum.getData();
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function InputDialog(textSummary, acceptsEmptyString){
+	InputSystem.call(this);
+	this.textSummary = textSummary;
+	this.acceptsEmptyString = acceptsEmptyString;
+}
+InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
+	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
+	const oldVal = data.asString().getValue();
+	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,function(cancelled,response){
+		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
+			this.currentData = new StringData(response);
+			this.cancelled = false;
+		} else {
+			this.cancelled = true;
 		}
-		else {
-			IP.undoData.data = IP.nonNumericData;
-			IP.undoData.text = IP.nonNumericText;
+		InputSystem.prototype.close.call(this);
+	}.bind(this));
+};
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function NewInputPad(x1, x2, y1, y2){
+	InputSystem.call(this);
+	this.widgets = [];
+	const coords = this.coords = {};
+	coords.x1 = x1;
+	coords.x2 = x2;
+	coords.y1 = y1;
+	coords.y2 = y2;
+}
+NewInputPad.prototype = Object.create(InputSystem.prototype);
+NewInputPad.prototype.constructor = NewInputPad;
+NewInputPad.setConstants = function(){
+	const IP = NewInputPad;
+	IP.background = Colors.black;
+	IP.margin = Button.defaultMargin;
+	IP.width = 160;
+};
+NewInputPad.prototype.addWidget = function(widget){
+	this.widgets.push(widget);
+};
+NewInputPad.prototype.show = function(slotShape, updateFn, finishFn, data){
+	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
+	const IP = NewInputPad;
+	this.group = GuiElements.create.group(0, 0);
+	this.updateDim();
+	const type = Overlay.types.inputPad;
+	const layer = GuiElements.layers.inputPad;
+	const coords = this.coords;
+	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, IP.margin, layer);
+	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
+	this.showWidgets(this.bubbleOverlay);
+};
+NewInputPad.prototype.updateDim = function(){
+	const IP = NewInputPad;
+	let height = 0;
+	this.widgets.forEach(function(widget){
+		if(widget.fixedHeight()){
+			widget.updateDim();
+			height += widget.height;
 		}
-		IP.updateBsIcon();
+		height += IP.margin;
+	});
+	height -= IP.margin;
+	height = Math.max(height, 0);
+	const maxHeight = GuiElements.height - 2 * IP.margin;
+	let allocH = (maxHeight - height);
+	this.widgets.forEach(function(widget){
+		if(!widget.fixedHeight()){
+			widget.setMaxHeight(allocH);
+			widget.updateDim();
+			height += widget.height;
+		}
+	});
+	this.height = height;
+	this.width = IP.width;
+};
+NewInputPad.prototype.showWidgets = function(overlay){
+	const IP = NewInputPad;
+	let y = 0;
+	for(let i = 0; i < this.widgets.length; i++) {
+		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.currentData);
+		y += this.widgets[i].height + IP.margin;
 	}
 };
-InputPad.removeUndo=function(){
-	var IP=InputPad;
-	IP.removeUndoDelayed();
-	IP.updateBsIcon();
+NewInputPad.prototype.close = function(){
+	if(this.closed) return;
+	InputSystem.prototype.close.call(this);
+	this.widgets.forEach(function(widget){
+		widget.close();
+	});
+	this.bubbleOverlay.close();
 };
-InputPad.removeUndoDelayed=function(){
-	var IP=InputPad;
-	if(IP.undoAvailable) {
-		IP.undoAvailable = false;
-		IP.undoData.data = null;
-		IP.undoData.text = null;
-	}
-};
-InputPad.updateBsIcon=function(){
-	var IP=InputPad;
-	if(IP.undoAvailable!=IP.undoVisible) {
-		if(IP.undoAvailable){
-			IP.bsButton.addIcon(VectorPaths.undo,IP.bsBnH);
-			IP.undoVisible=true;
-		}
-		else{
-			IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
-			IP.undoVisible=false;
-		}
-	}
-};
-InputPad.undo=function(){
-	var IP=InputPad;
-	if(IP.undoAvailable) {
-		IP.dataIsNumeric=IP.undoData.dataIsNumeric;
-		if(IP.dataIsNumeric){
-			IP.displayNum=new DisplayNum(IP.undoData.data);
-		}
-		else{
-			IP.nonNumericData=IP.undoData.data;
-			IP.nonNumericText=IP.undoData.text;
-		}
-		IP.removeUndoDelayed();
-		IP.updateSlot();
-		IP.grayOutValue();
-	}
-};
-InputPad.bsReleased=function(){
-	InputPad.updateBsIcon();
-};
-InputPad.bsPressed=function(){
-	var IP=InputPad;
-	if(IP.undoAvailable){
-		IP.undo();
-	}
-	else {
-		IP.removeUndoDelayed();
-		IP.ungray();
-		if(IP.dataIsNumeric) {
-			IP.displayNum.backspace();
-		}
-		else{
-			IP.dataIsNumeric=true;
-			IP.displayNum=new DisplayNum(new NumData(0));
-		}
-		IP.updateSlot();
-	}
+NewInputPad.prototype.updateEdit = function(newData, text){
+	this.updateFn(newData, text);
+	this.currentData = newData;
 	SaveManager.markEdited();
 };
-InputPad.okPressed=function(){
-	InputPad.close();
+NewInputPad.prototype.finishEdit = function(newData){
+	this.currentData = newData;
+	this.close();
 };
-InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth, previewFn){
-	var IP=InputPad;
-	IP.previewFn = previewFn;
-	IP.visible=true;
-	IP.usingNumberPad=false;
-	IP.specialCommand="";
-	IP.slot=slot;
-	IP.dataIsNumeric=false;
-	IP.nonNumericData=IP.slot.enteredData;
-	IP.nonNumericText=IP.slot.text;
-	var Vmargins=IP.bubbleOverlay.getVPadding();
-	IP.menuBnList.setMaxHeight(Math.max(upperY-Vmargins,GuiElements.height-lowerY-Vmargins));
-	IP.menuBnList.generateBns();
-	IP.width=IP.menuBnList.width;//+2*IP.buttonMargin;
-	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;
-	//IP.menuBnList.move(0,0);
-	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
-	IP.menuBnList.show();
-	/*IP.tallH=IP.height+IP.triangleH;
-	IP.move(x,upperY,lowerY);
-	GuiElements.layers.inputPad.appendChild(IP.group);*/
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function InputWidget(){
+	DebugOptions.markAbstract();
+}
+InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+	this.x = x;
+	this.y = y;
+	this.slotShape = slotShape;
+	this.updateFn = updateFn;
+	this.finishFn = finishFn;
+	this.overlay = overlay;
 };
-InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
-	var IP=InputPad;
-	IP.previewFn = null;
-	IP.usingNumberPad=true;
-	IP.specialCommand="";
-	IP.width=InputPad.BnAreaW;
-	IP.height=InputPad.BnAreaH;
-	/*IP.tallH=IP.height+IP.triangleH;*/
-	IP.undoAvailable=false;
-	IP.valueGrayed=false;
-	if(!IP.menuBnList.isEmpty()){
-		IP.menuBnList.width=IP.buttonW*3+IP.buttonMargin*2;
-		IP.menuBnList.generateBns();
-		IP.height+=IP.menuBnList.height+IP.buttonMargin;
-		/*IP.tallH+=IP.menuBnList.height+IP.buttonMargin;*/
-		GuiElements.move.group(IP.bnGroup,0,IP.menuBnList.height+IP.buttonMargin);
-		//IP.menuBnList.move(0,0);
-		IP.menuBnList.show();
-	}
-	else{
-		GuiElements.move.group(IP.bnGroup,0,0);
-	}
-	var IP=InputPad;
-	/*GuiElements.layers.inputPad.appendChild(IP.group);*/
-	IP.group.appendChild(IP.bnGroup);
-	IP.visible=true;
-	IP.slot=slot;
-	if(slot.getData().type==Data.types.num){
-		var numData=slot.getData();
-		if(numData.getValue()==0){
-			IP.displayNum=new DisplayNum(new NumData(0));
-		}
-		else{
-			IP.displayNum=new DisplayNum(numData);
-			IP.grayOutValue();
-		}
-		IP.dataIsNumeric=true;
-	}
-	else{
-		IP.dataIsNumeric=false;
-		IP.nonNumericData=slot.getData();
-		IP.nonNumericText=IP.slot.text;
-		IP.grayOutValue();
-	}
-	if(positive){
-		IP.plusMinusBn.disable();
-	}
-	else{
-		IP.plusMinusBn.enable();
-	}
-	if(integer){
-		IP.decimalBn.disable();
-	}
-	else{
-		IP.decimalBn.enable();
-	}
-	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
-	if(IP.menuBnList.updatePosition != null){
-		IP.menuBnList.updatePosition();
-	}
-	/*InputPad.move(x,upperY,lowerY);*/
+InputWidget.prototype.updateDim = function(){
+	DebugOptions.markAbstract();
 };
-/*InputPad.move=function(x,upperY,lowerY){
-	var IP=InputPad;
-	IP.triOffset=(InputPad.width-InputPad.triangleW)/2;
-	IP.halfOffset=InputPad.width/2;
-	
-	var arrowDown=(lowerY+IP.tallH>GuiElements.height);
-	var yCoord=lowerY+IP.triangleH;
-	var xCoord=x-IP.halfOffset;
-	var arrowDir=1;
-	var arrowX=IP.triOffset;
-	var arrowY=0;
-	if(arrowDown){
-		arrowDir=-1;
-		yCoord=upperY-IP.tallH;
-		arrowY=IP.height;
-	}
-	if(xCoord<0){
-		arrowX+=xCoord;
-		xCoord=0;
-	}
-	if(xCoord+IP.width>GuiElements.width){
-		arrowX=IP.width+x-GuiElements.width-IP.triangleW/2;
-		xCoord=GuiElements.width-IP.width;
-	}
-	GuiElements.move.group(IP.group,xCoord,yCoord);
-	GuiElements.update.triangle(IP.triangle,arrowX,arrowY,IP.triangleW,IP.triangleH*arrowDir);
-	GuiElements.update.rect(IP.bgRect,0,0,IP.width,IP.height);
- 	IP.menuBnList.move(IP.buttonMargin,IP.buttonMargin);
- 	IP.menuBnList.show();
-};*/
-InputPad.updateSlot=function(){
-	var IP=InputPad;
-	if(IP.dataIsNumeric){
-		IP.slot.updateEdit(IP.displayNum.getString(),IP.displayNum.getData());
-	}
-	else{
-		IP.slot.updateEdit(IP.nonNumericText,IP.nonNumericData);
-	}
+InputWidget.prototype.close = function(){
+
 };
-InputPad.close=function(){
-	var IP = InputPad;
-	if(IP.visible) {
-		if (IP.specialCommand=="enter_text") {
-			IP.slot.editText();
-		}
-		else if (IP.specialCommand=="new_message") {
-			CodeManager.newBroadcastMessage(IP.slot);
-		}
-		else if (InputPad.dataIsNumeric) {
-			IP.slot.saveNumData(IP.displayNum.getData());
-		}
-		else {
-			IP.slot.setSelectionData(IP.nonNumericText, IP.nonNumericData);
-		}
-		/*IP.group.remove();*/
-		IP.bubbleOverlay.hide();
-		IP.visible = false;
-		IP.menuBnList.hide();
-		IP.bnGroup.remove();
-		IP.removeUndo();
-	}
+InputWidget.prototype.fixedHeight = function(){
+	return true;
 };
-InputPad.menuBnSelected=function(text,data){
-	var IP=InputPad;
-	if(data.type==Data.types.num){
-		IP.displayNum=new DisplayNum(data);
-		IP.dataIsNumeric=true;
-	}
-	else if(data.type==Data.types.selection&&data.getValue()=="enter_text"){
-		IP.specialCommand="enter_text";
-	}
-	else if(data.type==Data.types.selection&&data.getValue()=="new_message"){
-		IP.specialCommand="new_message";
-	}
-	else{
-		IP.dataIsNumeric=false;
-		IP.nonNumericText=text;
-		IP.nonNumericData=data;
-	}
-	SaveManager.markEdited();
-	if(IP.previewFn != null){
-		IP.updateSlot();
-		IP.previewFn();
-	}
-	else {
-		IP.close();
-	}
+InputWidget.prototype.setMaxHeight = function(height){
+
+};
+/**
+ * Created by Tom on 7/3/2017.
+ */
+InputWidget.Label = function(text){
+	this.text = text;
+};
+InputWidget.Label.prototype = Object.create(InputWidget.prototype);
+InputWidget.Label.prototype.constructor = InputWidget.Label;
+InputWidget.Label.setConstants = function(){
+	const L = InputWidget.Label;
+	L.fontSize=16; //TODO: Get rid of font redundancy
+	L.font="Arial";
+	L.fontWeight="bold";
+	L.charHeight=12;
+	L.color = Colors.white;
+};
+InputWidget.Label.prototype.show = function(x, y, parentGroup){
+	const L = InputWidget.Label;
+	this.textE = GuiElements.draw.text(x, y, "", L.fontSize, L.color, L.font, L.fontWeight);
+	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = NewInputPad.width / 2 - textW / 2;
+	GuiElements.move.text(this.textE, textX, y + L.charHeight);
+	parentGroup.appendChild(this.textE);
+};
+InputWidget.Label.prototype.updateDim = function(){
+	const L = InputWidget.Label;
+	this.height = L.charHeight;
+	this.width = L.maxWidth;
+};
+/**
+ * Created by Tom on 7/3/2017.
+ */
+InputWidget.NumPad = function(positive, integer){
+	this.positive = positive;
+	this.integer = integer;
+};
+InputWidget.NumPad.prototype = Object.create(InputWidget.prototype);
+InputWidget.NumPad.prototype.constructor = InputWidget.NumPad;
+InputWidget.NumPad.setConstants = function(){
+	const NP = InputWidget.NumPad;
+	NP.bnMargin = NewInputPad.margin;
+	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
+	NP.bnHeight = 40;
+	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
+	NP.fontSize=34;
+	NP.font="Arial";
+	NP.fontWeight="bold";
+	NP.charHeight=25;
+	NP.plusMinusH=22;
+	NP.bsIconH=25;
+	NP.okIconH=NP.bsIconH;
+};
+InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+	this.group = GuiElements.create.group(x, y, parentGroup);
+	this.displayNum = new DisplayNum(data);
+	this.makeBns();
+	this.grayOutUnlessZero();
+};
+InputWidget.NumPad.prototype.updateDim = function(x, y){
+	const NP = InputWidget.NumPad;
+	this.height = NP.bnHeight*5 + NP.bnMargin*4;
+	this.width = NewInputPad.width;
 };
 
-InputPad.makeBns=function(){
-	var IP=InputPad;
-	var currentNum;
-	var xPos=0;
-	var yPos=0;
-	for(var i=0;i<3;i++){
+InputWidget.NumPad.prototype.grayOutUnlessZero = function(){
+	const data = this.displayNum.getData();
+	if(this.displayNum.isNum || data.getValue() !== 0) {
+		this.slotShape.grayOutValue();
+	}
+};
+InputWidget.NumPad.prototype.makeBns = function(){
+	const NP = InputWidget.NumPad;
+	let currentNum;
+	let xPos=0;
+	let yPos=0;
+	for(let i=0;i<3;i++){
 		xPos=0;
-		for(var j=0;j<3;j++){
+		for(let j=0;j<3;j++){
 			currentNum=7-i*3+j;
-			InputPad.makeNumBn(xPos,yPos,currentNum);
-			xPos+=IP.buttonMargin;
-			xPos+=IP.buttonW;
+			this.makeNumBn(xPos,yPos,currentNum);
+			xPos+=NP.bnMargin;
+			xPos+=NP.bnWidth;
 		}
-		yPos+=IP.buttonMargin;
-		yPos+=IP.buttonH;
+		yPos+=NP.bnMargin;
+		yPos+=NP.bnHeight;
 	}
-	InputPad.makeNumBn(IP.buttonMargin+IP.buttonW,IP.buttonMargin*3+IP.buttonH*3,0);
-	InputPad.makePlusMinusBn(0,IP.buttonMargin*3+IP.buttonH*3);
-	InputPad.makeDecimalBn(IP.buttonMargin*2+IP.buttonW*2,IP.buttonMargin*3+IP.buttonH*3);
-	InputPad.makeBsBn(0,IP.buttonMargin*4+IP.buttonH*4);
-	InputPad.makeOkBn(IP.buttonMargin+IP.longBnW,IP.buttonMargin*4+IP.buttonH*4);
+	this.makeNumBn(NP.bnMargin+NP.bnWidth,NP.bnMargin*3+NP.bnHeight*3,0);
+	this.makePlusMinusBn(0,NP.bnMargin*3+NP.bnHeight*3);
+	this.makeDecimalBn(NP.bnMargin*2+NP.bnWidth*2,NP.bnMargin*3+NP.bnHeight*3);
+	this.bsButton = this.makeBsBn(0,NP.bnMargin*4+NP.bnHeight*4);
+	this.okButton = this.makeOkBn(NP.bnMargin+NP.longBnW,NP.bnMargin*4+NP.bnHeight*4);
 };
-InputPad.makeNumBn=function(x,y,num){
-	var IP=InputPad;
-	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
-	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
-	button.markAsOverlayPart(IP.bubbleOverlay);
+InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn){
+	const NP = InputWidget.NumPad;
+	let button=new Button(x,y,NP.bnWidth,NP.bnHeight,this.group);
+	button.addText(text,NP.font,NP.fontSize,NP.fontWeight,NP.charHeight);
+	button.setCallbackFunction(callbackFn,false);
+	button.markAsOverlayPart(this.overlay);
+	return button;
 };
-InputPad.makePlusMinusBn=function(x,y){
-	var IP=InputPad;
-	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
-	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
-	IP.plusMinusBn.markAsOverlayPart(IP.bubbleOverlay);
+InputWidget.NumPad.prototype.makeNumBn=function(x,y,num){
+	return this.makeTextButton(x, y, num + "", function(){this.numPressed(num)}.bind(this));
 };
-InputPad.makeDecimalBn=function(x,y){
-	var IP=InputPad;
-	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
-	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
-	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
-	IP.decimalBn.markAsOverlayPart(IP.bubbleOverlay);
+InputWidget.NumPad.prototype.makePlusMinusBn=function(x,y){
+	let button = this.makeTextButton(x, y, String.fromCharCode(177), this.plusMinusPressed.bind(this));
+	if(this.positive) button.disable();
+	return button;
 };
-InputPad.makeBsBn=function(x,y){
-	var IP=InputPad;
-	IP.bsButton=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
-	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
-	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
-	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
-	IP.bsButton.markAsOverlayPart(IP.bubbleOverlay);
+InputWidget.NumPad.prototype.makeDecimalBn=function(x,y){
+	let button = this.makeTextButton(x, y, ".", this.decimalPressed.bind(this));
+	if(this.integer) button.disable();
+	return button;
 };
-InputPad.makeOkBn=function(x,y){
-	var IP=InputPad;
-	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
-	button.addIcon(VectorPaths.checkmark,IP.okBnH);
-	button.setCallbackFunction(InputPad.okPressed,true);
-	button.markAsOverlayPart(IP.bubbleOverlay);
+InputWidget.NumPad.prototype.makeBsBn=function(x,y){
+	const NP = InputWidget.NumPad;
+	let button=new Button(x,y,NP.longBnW,NP.bnHeight,this.group);
+	button.addIcon(VectorPaths.backspace,NP.bsIconH);
+	button.setCallbackFunction(this.bsPressed.bind(this),false);
+	button.setCallbackFunction(this.bsReleased.bind(this),true);
+	button.markAsOverlayPart(this.overlay);
+	return button;
 };
-InputPad.relToAbsX = function(x){
-	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsX(x)
-};
-InputPad.relToAbsY = function(y){
-	var IP = InputPad;
-	return IP.bubbleOverlay.relToAbsY(y)
+InputWidget.NumPad.prototype.makeOkBn=function(x,y){
+	const NP = InputWidget.NumPad;
+	let button=new Button(x,y,NP.longBnW,NP.bnHeight,this.group);
+	button.addIcon(VectorPaths.checkmark,NP.okIconH);
+	button.setCallbackFunction(this.okPressed.bind(this),true);
+	button.markAsOverlayPart(this.overlay);
+	return button;
 };
 
+
+
+InputWidget.NumPad.prototype.numPressed=function(num){
+	this.removeUndo();
+	this.deleteIfGray();
+	this.displayNum.addDigit(num+"");
+	this.sendUpdate();
+};
+InputWidget.NumPad.prototype.plusMinusPressed=function(){
+	this.removeUndo();
+	this.deleteIfGray();
+	this.displayNum.switchSign();
+	this.sendUpdate();
+};
+InputWidget.NumPad.prototype.decimalPressed=function(){
+	this.removeUndo();
+	this.deleteIfGray();
+	this.displayNum.addDecimalPoint();
+	this.sendUpdate();
+};
+InputWidget.NumPad.prototype.deleteIfGray=function(){
+	if(this.slotShape.isGray){
+		this.showUndo();
+		this.displayNum=new DisplayNum(new NumData(0));
+		this.slotShape.unGrayOutValue();
+		this.sendUpdate();
+	}
+};
+InputWidget.NumPad.prototype.showUndo=function(){
+	if(!this.undoAvailable) {
+		this.undoAvailable = true;
+		this.undoData = this.displayNum.getData();
+		this.updateBsIcon();
+	}
+};
+InputWidget.NumPad.prototype.removeUndo=function(){
+	this.removeUndoDelayed();
+	this.updateBsIcon();
+};
+InputWidget.NumPad.prototype.removeUndoDelayed=function(){
+	if(this.undoAvailable) {
+		this.undoAvailable = false;
+		this.undoData = null;
+	}
+};
+InputWidget.NumPad.prototype.updateBsIcon=function(){
+	const NP = InputWidget.NumPad;
+	if(this.undoAvailable !== this.undoVisible) {
+		if(this.undoAvailable){
+			this.bsButton.addIcon(VectorPaths.undo, NP.bsIconH);
+			this.undoVisible = true;
+		}
+		else{
+			this.bsButton.addIcon(VectorPaths.backspace, NP.bsIconH);
+			this.undoVisible = false;
+		}
+	}
+};
+InputWidget.NumPad.prototype.undo=function(){
+	const NP = InputWidget.NumPad;
+	if(this.undoAvailable) {
+		this.displayNum = new DisplayNum(this.undoData);
+		this.removeUndoDelayed();
+		this.slotShape.grayOutValue();
+		this.sendUpdate();
+	}
+};
+InputWidget.NumPad.prototype.bsReleased=function(){
+	this.updateBsIcon();
+};
+InputWidget.NumPad.prototype.bsPressed=function(){
+	if(this.undoAvailable){
+		this.undo();
+	}
+	else {
+		this.removeUndoDelayed();
+		this.slotShape.unGrayOutValue();
+		if(!this.displayNum.isNum) {
+			this.displayNum = new DisplayNum(new NumData(0));
+		}
+		this.displayNum.backspace();
+		this.sendUpdate();
+	}
+};
+InputWidget.NumPad.prototype.okPressed=function(){
+	this.finishFn(this.displayNum.getData());
+};
+InputWidget.NumPad.prototype.sendUpdate = function(){
+	this.updateFn(this.displayNum.getData(), this.displayNum.getString());
+};
+// handles displaying numbers entered using the inputpad
+function DisplayNum(initialData){
+	this.isNum = initialData.type === Data.types.num;
+	if(!this.isNum){
+		this.data = initialData;
+		return;
+	}
+	this.isNegative=(initialData.getValue()<0);
+	var asStringData=initialData.asPositiveString();
+	var parts=asStringData.getValue().split(".");
+	this.integerPart=parts[0];
+	if(this.integerPart==""){
+		this.integerPart="0";
+	}
+	this.decimalPart="";
+	this.hasDecimalPoint=(parts.length>1);
+	if(this.hasDecimalPoint){
+		this.decimalPart=parts[1];
+	}
+}
+DisplayNum.prototype.backspace=function(){
+	if(!this.isNum) return;
+	if(this.hasDecimalPoint&&this.decimalPart!=""){
+		var newL=this.decimalPart.length-1;
+		this.decimalPart=this.decimalPart.substring(0,newL);
+	}
+	else if(this.hasDecimalPoint){
+		this.hasDecimalPoint=false;
+	}
+	else if(this.integerPart.length>1){
+		var newL=this.integerPart.length-1;
+		this.integerPart=this.integerPart.substring(0,newL);
+	}
+	else if(this.integerPart!="0"){
+		this.integerPart="0";
+	}
+	else if(this.isNegative){
+		this.isNegative=false;
+	}
+}
+DisplayNum.prototype.switchSign=function(){
+	if(!this.isNum) return;
+	this.isNegative=!this.isNegative;
+}
+DisplayNum.prototype.addDecimalPoint=function(){
+	if(!this.isNum) return;
+	if(!this.hasDecimalPoint){
+		this.hasDecimalPoint=true;
+		this.decimalPart="";
+	}
+}
+DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
+	if(!this.isNum) return;
+	if(this.hasDecimalPoint){
+		if(this.decimalPart.length<5){
+			this.decimalPart+=digit;
+		}
+	}
+	else if(this.integerPart!="0"){
+		if(this.integerPart.length<10){
+			this.integerPart+=digit;
+		}
+	}
+	else if(digit!="0"){
+		this.integerPart=digit;
+	}
+}
+DisplayNum.prototype.getString=function(){
+	if(!this.isNum){
+		return this.data.asString().getValue();
+	}
+	var rVal="";
+	if(this.isNegative){
+		rVal+="-";
+	}
+	rVal+=this.integerPart;
+	if(this.hasDecimalPoint){
+		rVal+=".";
+		rVal+=this.decimalPart;
+	}
+	return rVal;
+}
+DisplayNum.prototype.getData=function(){
+	if(!this.isNum){
+		return this.data;
+	}
+	var rVal=parseInt(this.integerPart, 10);
+	if(this.hasDecimalPoint&&this.decimalPart.length>0){
+		var decPart=parseInt(this.decimalPart, 10);
+		decPart/=Math.pow(10,this.decimalPart.length);
+		rVal+=decPart;
+	}
+	if(this.isNegative){
+		rVal=0-rVal;
+	}
+	return new NumData(rVal);
+}
+/**
+ * Created by Tom on 7/3/2017.
+ */
+InputWidget.SelectPad = function(){
+	this.optionsList = [];
+	this.maxHeight = null;
+};
+InputWidget.SelectPad.prototype = Object.create(InputWidget);
+InputWidget.SelectPad.constructor = InputWidget.SelectPad;
+InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+	const layer = GuiElements.layers.frontScroll;
+	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, NewInputPad.width, layer);
+	this.optionsList.forEach(function(option){
+		this.menuBnList.addOption(option.text, option.callbackFn);
+	}.bind(this));
+	DebugOptions.assert(this.maxHeight != null);
+	this.menuBnList.markAsOverlayPart(overlay);
+	this.menuBnList.setMaxHeight(this.maxHeight);
+	this.menuBnList.show();
+};
+InputWidget.SelectPad.prototype.updateDim = function(){
+	DebugOptions.assert(this.maxHeight !== null);
+	this.height = SmoothMenuBnList.previewHeight(this.optionsList.length, this.maxHeight);
+	this.width = NewInputPad.innerWidth;
+};
+InputWidget.SelectPad.prototype.fixedHeight = function(){
+	return false;
+};
+InputWidget.SelectPad.prototype.setMaxHeight = function(height){
+	this.maxHeight = height;
+};
+InputWidget.SelectPad.prototype.addOption = function(data, text) {
+	if(text == null){
+		text = data.asString().getValue();
+	}
+	const option = {};
+	option.text = text;
+	const me = this;
+	option.callbackFn = function(){
+		me.finishFn(data);
+	};
+	this.optionsList.push(option);
+};
+InputWidget.SelectPad.prototype.addAction = function(text, callbackFn){
+	const option = {};
+	option.text = text;
+	const me = this;
+	option.callbackFn = function(){
+		callbackFn(me.actionCallback.bind(me));
+	};
+	this.optionsList.push(option);
+};
+InputWidget.SelectPad.prototype.actionCallback = function(data, shouldClose){
+	if(data != null){
+		this.updateFn(data);
+	}
+	if(shouldClose){
+		this.finishFn();
+	}
+};
+InputWidget.SelectPad.prototype.isEmpty = function(){
+	return this.optionsList.length === 0;
+};
+InputWidget.SelectPad.prototype.close = function(){
+	this.menuBnList.hide();
+};
+InputWidget.SelectPad.prototype.relToAbsX = function(x){
+	return this.overlay.relToAbsX(this.x);
+};
+InputWidget.SelectPad.prototype.relToAbsY = function(y){
+	return this.overlay.relToAbsY(this.y);
+};
+InputWidget.SelectPad.prototype.getAbsX = function(){
+	return this.relToAbsX(0);
+};
+InputWidget.SelectPad.prototype.getAbsY = function(){
+	return this.relToAbsY(0);
+};
+/**
+ * Created by Tom on 7/6/2017.
+ */
+function SoundInputPad(x1, x2, y1, y2, isRecording){
+	InputSystem.call(this);
+	this.widgets = [];
+	const coords = this.coords = {};
+	coords.x1 = x1;
+	coords.x2 = x2;
+	coords.y1 = y1;
+	coords.y2 = y2;
+	this.isRecording = isRecording;
+}
+SoundInputPad.prototype = Object.create(InputSystem.prototype);
+SoundInputPad.prototype.constructor = InputSystem;
+SoundInputPad.setConstants = function(){
+	const SIP = SoundInputPad;
+	SIP.margin = NewInputPad.margin;
+	SIP.rowHeight = SmoothMenuBnList.bnHeight;
+	SIP.width = 300;
+	SIP.playBnWidth = RowDialog.smallBnWidth;
+	SIP.mainBnWidth = SIP.width - SIP.playBnWidth - SIP.margin;
+	SIP.iconH = RowDialog.iconH;
+	SIP.background = Colors.black;
+};
+SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
+	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
+	const SIP = SoundInputPad;
+	this.group = GuiElements.create.group(0, 0);
+	this.updateDim();
+	const bubbleGroup = GuiElements.create.group(0, 0);
+	const type = Overlay.types.inputPad;
+	const layer = GuiElements.layers.inputPad;
+	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, SIP.margin, layer);
+	const coords = this.coords;
+	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
+	const absX = this.bubbleOverlay.relToAbsX(0);
+	const absY = this.bubbleOverlay.relToAbsY(0);
+	this.createRows();
+	const scrollLayer = GuiElements.layers.frontScroll;
+	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width, this.innerHeight, this.bubbleOverlay);
+	this.smoothScrollBox.show();
+};
+SoundInputPad.prototype.updateDim = function(){
+	const SIP = SoundInputPad;
+	const maxHeight = GuiElements.height - SIP.margin * 2;
+	const soundCount = Sound.getSoundList(this.isRecording).length;
+	let desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
+	desiredHeight = Math.max(0, desiredHeight);
+	this.height = Math.min(desiredHeight, maxHeight);
+	this.innerHeight = desiredHeight;
+	this.width = SIP.width;
+};
+SoundInputPad.prototype.createRows = function(){
+	const SIP = SoundInputPad;
+	let y = 0;
+	Sound.getSoundList(this.isRecording).forEach(function(sound){
+		this.createRow(sound, y);
+		y += SIP.margin + SIP.rowHeight;
+	}.bind(this));
+};
+SoundInputPad.prototype.createRow = function(sound, y){
+	const SIP = SoundInputPad;
+	this.createMainBn(sound, 0, y, SIP.mainBnWidth);
+	this.createPlayBn(sound, SIP.margin + SIP.mainBnWidth, y, SIP.playBnWidth);
+};
+SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
+	const SIP = SoundInputPad;
+	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	button.addText(sound.name);
+	button.markAsOverlayPart(this.bubbleOverlay);
+	button.setCallbackFunction(function(){
+		this.currentData = new SelectionData(sound.name, sound.id);
+		this.close();
+	}.bind(this), true);
+	button.makeScrollable();
+};
+SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
+	const SIP = SoundInputPad;
+	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	const mem = {};
+	mem.playing = false;
+	button.addIcon(VectorPaths.play, SIP.iconH);
+	button.markAsOverlayPart(this.bubbleOverlay);
+	const stoppedPlaying = function(){
+		mem.playing = false;
+		button.addIcon(VectorPaths.play, SIP.iconH);
+	};
+	button.setCallbackFunction(function(){
+		if(mem.playing) {
+			stoppedPlaying();
+			Sound.stopAllSounds();
+		} else {
+			mem.playing = true;
+			button.addIcon(VectorPaths.square, SIP.iconH);
+			Sound.playAndStopPrev(sound.id, this.isRecording, null, stoppedPlaying, stoppedPlaying);
+		}
+	}.bind(this), true);
+	button.makeScrollable();
+};
+SoundInputPad.prototype.close = function(){
+	if(this.closed) return;
+	InputSystem.prototype.close.call(this);
+	this.smoothScrollBox.hide();
+	this.bubbleOverlay.close();
+	Sound.stopAllSounds();
+};
 function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
 	if(hMargin==null){
 		hMargin=0;
@@ -5714,7 +5955,7 @@ function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, 
 	this.y = 0;
 	this.bgColor=color;
 	this.margin=margin;
-	this.hMargin=hMargin;
+	this.hMargin=hMargin; //TODO: remove this
 	this.innerGroup=innerGroup;
 	this.parent=parent;
 	this.layerG = layer;
@@ -6390,6 +6631,23 @@ SmoothMenuBnList.prototype.isScrolling = function(){
 	if(!this.visible) return false;
 	return !this.scrollStatus.still;
 };
+SmoothMenuBnList.prototype.previewHeight = function(){
+	let height = 0;
+	let internalHeight = (this.bnHeight + this.bnMargin) * this.bnTextList.length - this.bnMargin;
+	internalHeight = Math.max(internalHeight, 0);
+	if(this.maxHeight!=null){
+		height = Math.min(internalHeight, this.maxHeight);
+	}
+	return height;
+};
+SmoothMenuBnList.previewHeight = function(count, maxHeight){
+	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+	height = Math.max(height, 0);
+	if(maxHeight != null){
+		height = Math.min(height, maxHeight);
+	}
+	return height;
+};
 function Menu(button,width){
 	if(width==null){
 		width=Menu.defaultWidth;
@@ -6829,88 +7087,6 @@ BlockContextMenu.prototype.close=function(){
 	this.block=null;
 	this.bubbleOverlay.hide();
 };
-// handles displaying numbers entered using the inputpad
-function DisplayNum(initialData){
-	this.isNegative=(initialData.getValue()<0);
-	var asStringData=initialData.asPositiveString();
-	var parts=asStringData.getValue().split(".");
-	this.integerPart=parts[0];
-	if(this.integerPart==""){
-		this.integerPart="0";
-	}
-	this.decimalPart="";
-	this.hasDecimalPoint=(parts.length>1);
-	if(this.hasDecimalPoint){
-		this.decimalPart=parts[1];
-	}
-}
-DisplayNum.prototype.backspace=function(){
-	if(this.hasDecimalPoint&&this.decimalPart!=""){
-		var newL=this.decimalPart.length-1;
-		this.decimalPart=this.decimalPart.substring(0,newL);
-	}
-	else if(this.hasDecimalPoint){
-		this.hasDecimalPoint=false;
-	}
-	else if(this.integerPart.length>1){
-		var newL=this.integerPart.length-1;
-		this.integerPart=this.integerPart.substring(0,newL);
-	}
-	else if(this.integerPart!="0"){
-		this.integerPart="0";
-	}
-	else if(this.isNegative){
-		this.isNegative=false;
-	}
-}
-DisplayNum.prototype.switchSign=function(){
-	this.isNegative=!this.isNegative;
-}
-DisplayNum.prototype.addDecimalPoint=function(){
-	if(!this.hasDecimalPoint){
-		this.hasDecimalPoint=true;
-		this.decimalPart="";
-	}
-}
-DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
-	if(this.hasDecimalPoint){
-		if(this.decimalPart.length<5){
-			this.decimalPart+=digit;
-		}
-	}
-	else if(this.integerPart!="0"){
-		if(this.integerPart.length<10){
-			this.integerPart+=digit;
-		}
-	}
-	else if(digit!="0"){
-		this.integerPart=digit;
-	}
-}
-DisplayNum.prototype.getString=function(){
-	var rVal="";
-	if(this.isNegative){
-		rVal+="-";
-	}
-	rVal+=this.integerPart;
-	if(this.hasDecimalPoint){
-		rVal+=".";
-		rVal+=this.decimalPart;
-	}
-	return rVal;
-}
-DisplayNum.prototype.getData=function(){
-	var rVal=parseInt(this.integerPart, 10);
-	if(this.hasDecimalPoint&&this.decimalPart.length>0){
-		var decPart=parseInt(this.decimalPart, 10);
-		decPart/=Math.pow(10,this.decimalPart.length);
-		rVal+=decPart;
-	}
-	if(this.isNegative){
-		rVal=0-rVal;
-	}
-	return new NumData(rVal);
-}
 function VectorIcon(x,y,pathId,color,height,parent){
 	this.x=x;
 	this.y=y;
@@ -7089,6 +7265,8 @@ function CodeManager(){
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+	CodeManager.modifiedTime = new Date().getTime();
+	CodeManager.createdTime = new Date().getTime();
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
@@ -7364,16 +7542,18 @@ CodeManager.removeVariable=function(variable){
 };
 /* @fix Write documentation.
  */
-CodeManager.newVariable=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newVariable=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create variable","Enter variable name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
-			new Variable(result);
+			const variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(variable);
+		} else {
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+	});
 };
 CodeManager.checkVarName=function(name){
 	name=name.trim();
@@ -7410,16 +7590,18 @@ CodeManager.removeList=function(list){
 };
 /* @fix Write documentation.
  */
-CodeManager.newList=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newList=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create list","Enter list name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
-			new List(result);
+			const list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(list);
+		} else{
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+	});
 };
 /* @fix Write documentation.
  */
@@ -7478,7 +7660,7 @@ CodeManager.addBroadcastMessage=function(message){
 };
 /* @fix Write documentation.
  */
-CodeManager.removeUnusedMessages=function(){
+CodeManager.removeUnusedMessages=function(){ //TODO: remove this
 	var messages=CodeManager.broadcastList;
 	for(var i=0;i<messages.length;i++){
 		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
@@ -7489,7 +7671,7 @@ CodeManager.removeUnusedMessages=function(){
 /* @fix Write documentation.
  */
 CodeManager.updateAvailableMessages=function(){
-	CodeManager.broadcastList=new Array();
+	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();
 };
 /* @fix Write documentation.
@@ -7524,8 +7706,8 @@ CodeManager.createXml=function(){
 	}
 	XmlWriter.setAttribute(project,"name",fileName);
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
-	XmlWriter.setAttribute(project,"created",new Date().getTime());
-	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	XmlWriter.setAttribute(project,"created",CodeManager.createdTime);
+	XmlWriter.setAttribute(project,"modified",CodeManager.modifiedTime);
 	var variables=XmlWriter.createElement(xmlDoc,"variables");
 	for(var i=0;i<CM.variableList.length;i++){
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
@@ -7541,6 +7723,8 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
+	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
+	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
 	if(variablesNode!=null) {
 		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
@@ -7559,6 +7743,9 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+};
+CodeManager.updateModified = function(){
+	CodeManager.modifiedTime = new Date().getTime();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;
@@ -10038,13 +10225,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr();
-			}
-			/*if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Started');
 			}*/
+			if(callbackFn != null) {
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('3000');
+			}
 		}, 20);
 		return;
 	}
@@ -10367,10 +10554,12 @@ XmlWriter.escape=function(string){
 	string=string.replace(/>/g, '&gt;');
 	string=string.replace(/"/g, '&quot;');
 	string=string.replace(/'/g, '&apos;');
+	string=string.replace(/ /g, '&#32;');
 	return string;
 };
 XmlWriter.unEscape=function(string) {
 	string = string + "";
+	string=string.replace(/&#32;/g, ' ');
 	string = string.replace(/&apos;/g, "'");
 	string = string.replace(/&quot;/g, '"');
 	string = string.replace(/&gt;/g, '>');
@@ -10471,6 +10660,9 @@ XmlWriter.getTextNode=function(element,name,defaultVal,isNum){
 		}
 		return val;
 	}
+	else if(childNodes.length === 0){
+		return "";
+	}
 	return defaultVal;
 };
 XmlWriter.docToText=function(xmlDoc){
@@ -10503,7 +10695,7 @@ SaveManager.setConstants = function(){
 
 SaveManager.openBlank = function(nextAction){
 	SaveManager.saveCurrentDoc(true);
-	SaveManager.loadFile("<project><tabs></tabs></project>");
+	SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: use an empty string here
 	if(nextAction != null) nextAction();
 };
 SaveManager.saveAndName = function(message, nextAction){
@@ -10671,9 +10863,10 @@ SaveManager.loadFile=function(xmlString) {
 		var xmlDoc = XmlWriter.openDoc(xmlString);
 		var project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
-			SaveManager.loadFile("<project><tabs></tabs></project>");
+			SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: change this line
+		} else {
+			CodeManager.importXml(project);
 		}
-		CodeManager.importXml(project);
 	}
 };
 SaveManager.userDuplicate = function(){
@@ -10754,6 +10947,7 @@ SaveManager.markEdited=function(){
 	if(SaveManager.fileName == null && !SaveManager.saving){
 		SaveManager.saveAsNew();
 	}
+	CodeManager.updateModified();
 };
 SaveManager.saveCurrentDoc = function(blank, fileName, named){
 	if(blank){
@@ -11342,12 +11536,9 @@ Block.prototype.findBestFit=function(){
 	let hasMatch = false;
 
 	if(move.returnsValue) { //If a connection between the stack and block are possible...
-		let hasMatch = false;
-		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-			for(let i=0;i<this.slots.length;i++){
-				let slotHasMatch = this.slots[i].findBestFit();
-				hasMatch = slotHasMatch || hasMatch;
-			}
+		for(let i=0;i<this.slots.length;i++){
+			let slotHasMatch = this.slots[i].findBestFit();
+			hasMatch = slotHasMatch || hasMatch;
 		}
 	}
 	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
@@ -11987,6 +12178,7 @@ function EditableSlotShape(slot, initialText, dimConstants){
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
+	this.isGray = false;
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);
 EditableSlotShape.prototype.constructor = EditableSlotShape;
@@ -12029,10 +12221,12 @@ EditableSlotShape.prototype.deselect=function(){
 EditableSlotShape.prototype.grayOutValue=function(){
 	const dC = this.dimConstants;
 	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+	this.isGray = true;
 };
 EditableSlotShape.prototype.unGrayOutValue=function(){
 	const dC = this.dimConstants;
 	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	this.isGray = false;
 };
 EditableSlotShape.prototype.updateDim = function(){
 	const dC = this.dimConstants;
@@ -12254,16 +12448,14 @@ DropSlotShape.prototype.deselect = function(){
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} inputType - [none, num, string, drop] The type of Data which can be directly entered into the Slot. TODO: perhaps change drop data
  * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
  * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
  */
-function Slot(parent, key, inputType, snapType, outputType){
-	DebugOptions.validateNonNull(parent, key, inputType, snapType, outputType);
+function Slot(parent, key, snapType, outputType){
+	DebugOptions.validateNonNull(parent, key, snapType, outputType);
 	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
 	DebugOptions.assert(key.includes("_"));
 	//Store data passed by constructor.
-	this.inputType = inputType; //TODO: Remove this unused field
 	this.snapType = snapType;
 	this.outputType = outputType;
 	this.parent = parent; //Parent Block.
@@ -12280,22 +12472,15 @@ function Slot(parent, key, inputType, snapType, outputType){
 	this.resultData = null; //passed to Block for use in implementation.
 }
 Slot.setConstants = function(){
-	/* The type of Data which can be directly entered into the Slot.  This was used for determining
-	 * input method but is no longer used for anything. */
-	Slot.inputTypes = function(){};
-	Slot.inputTypes.none = 0; //Predicate Slots cannot be directly entered into.
-	Slot.inputTypes.num = 1; //Edited with InputPad
-	Slot.inputTypes.string = 2; //Edited with dialog.
-	Slot.inputTypes.drop = 3; //Edited with dropdown.
 	//The type of Blocks which can be attached to the Slot.
-	Slot.snapTypes = function(){};
+	Slot.snapTypes = {};
 	Slot.snapTypes.none = 0; //Nothing can attach (dropdowns often)
 	Slot.snapTypes.numStrBool = 1; //Blocks with return type num, string, or bool can attach (will be auto cast).
 	Slot.snapTypes.bool = 2; //Only Blocks that return bool can attach.
 	Slot.snapTypes.list = 3; //Only Blocks that return lists can attach.
 	Slot.snapTypes.any = 4; //Any type of Block can attach (used for the = Block).
 	//The type of Data the Slot should convert to before outputting. Guarantees the Block gets the type it wants.
-	Slot.outputTypes = function(){};
+	Slot.outputTypes = {};
 	Slot.outputTypes.any = 0; //No conversion will occur.
 	Slot.outputTypes.num = 1; //Convert to num.
 	Slot.outputTypes.string = 2; //Convert to string.
@@ -12432,14 +12617,18 @@ Slot.prototype.updateRun = function(){
  * @return {Data} - The result of the Slot's execution.
  */
 Slot.prototype.getData = function(){
-	if(this.running === 3){ //It should be done running.
+	if(this.running === 3){
+		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
 		if(this.resultIsFromChild){
-			return this.resultData; //Return the result from the child.
+			return this.resultData;
+		}
+		else{
+			return this.getDataNotFromChild();
 		}
 	}
-	else{
-		return this.getDataNotFromChild(); //Return the default value / entered value.
-	}
+	//If it isn't done executing and has a child, throw an error.
+	DebugOptions.assert(!this.hasChild);
+	DebugOptions.assert(false); //TODO: see if this is ok.
 };
 
 /**
@@ -12447,7 +12636,6 @@ Slot.prototype.getData = function(){
  * @abstract
  */
 Slot.prototype.getDataNotFromChild = function(){
-	DebugOptions.assert(!this.resultIsFromChild);
 	GuiElements.markAbstract();
 };
 
@@ -12472,12 +12660,12 @@ Slot.prototype.removeChild = function(){
  */
 Slot.prototype.findBestFit = function(){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
-	let childIsLeaf = false;
+	let childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childIsLeaf = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(); // Pass on the message.
 	}
-	if(childIsLeaf){
+	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
 		return true;
 	}
@@ -12778,7 +12966,7 @@ Slot.prototype.checkListUsed = function(list){
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
 	const slot = XmlWriter.createElement(xmlDoc,"slot");
-	XmlWriter.setAttribute(slot,"type","Slot");
+	//XmlWriter.setAttribute(slot,"type","Slot"); //TODO: See why this was here
 	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
 		const child = XmlWriter.createElement(xmlDoc,"child");
@@ -12792,10 +12980,18 @@ Slot.prototype.createXml = function(xmlDoc){
  * Imports the data from the node to this Slot
  * @param {Document} slotNode
  * @return {Slot} - A reference to this Slot
- * @abstract
  */
 Slot.prototype.importXml = function(slotNode) {
-	DebugOptions.markAbstract();
+	DebugOptions.validateNonNull(slotNode);
+	const childNode = XmlWriter.findSubElement(slotNode, "child");
+	const blockNode = XmlWriter.findSubElement(childNode, "block");
+	if(blockNode != null) {
+		const childBlock = Block.importXml(blockNode);
+		if(childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
 };
 
 /**
@@ -12839,458 +13035,6 @@ Slot.prototype.textSummary = function(){
 	DebugOptions.markAbstract();
 };
 /**
- * RoundSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
- * It creates a Slot that can be edited with the InputPad's NumPad.
- * It is generally designed for nums, but can snap or output other types.
- * Its input type, however, is always num.
- * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
- * @param {number} outputType - [any,num,string,bool,list] The type of Data the RoundSlot should convert to.
- * @param {number} data - The initial data stored in the Slot. Could be string, num, or selection data.
- * @param {boolean} positive - Determines if the NumPad will have the plus/minus Button disabled.
- * @param {boolean} integer - Determines if the NumPad will have the decimal point Button disabled.
- */
-function RoundSlot(parent,key,snapType,outputType,data,positive,integer){
-	Slot.call(this,parent,key,Slot.inputTypes.num,snapType,outputType); //Call constructor.
-	//Entered data stores the data that has been entered using the InputPad.
-	this.enteredData=data; //Set entered data to initial value.
-	this.text=this.enteredData.asString().getValue();
-	this.positive=positive; //Store other properties.
-	this.integer=integer;
-	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
-	this.slotShape.show();
-	this.selected=false; //Indicates if the Slot is visually selected for editing.
-	//Declare arrays for special options to list above the NumPad (i.e. "last" for "Item _ of Array" blocks)
-	this.optionsText = []; //The text of the special option.
-	this.optionsData = []; //The Data representing that option (never visible to the user).
-	this.dropColumns = 1; //The number of columns to show in the drop down.
-}
-RoundSlot.prototype = Object.create(Slot.prototype);
-RoundSlot.prototype.constructor = RoundSlot;
-RoundSlot.prototype.changeText=function(text){
-	this.text=text; //Store value
-	this.slotShape.changeText(text);
-	if(this.parent.stack!=null) {
-		this.parent.stack.updateDim(); //Update dimensions.
-	}
-};
-/* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
- * @fix BlockGraphics
- */
-RoundSlot.prototype.highlight=function(){
-	var isSlot=!this.hasChild; //Fix! unclear.
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,1,isSlot);
-};
-/* Prepares the Slot for editing using the InputPad. Selects the Slot and shows the NumPad.
- * @fix allow InputPad to be next to Slot.
- */
-RoundSlot.prototype.edit=function(){
-	if(!this.selected){
-		var x1 = this.getAbsX();
-		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
-		var y1 = this.getAbsY();
-		var y2 = this.relToAbsY(this.height);
-		this.select(); //Change appearance to reflect editing.
-		InputPad.resetPad(this.dropColumns); //Prepare the InputPad for editing with the correct number of columns.
-		for(var i=0;i<this.optionsText.length;i++){ //Add special options to the inputPad (if any).
-			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
-		}
-		//Show the NumPad at the proper location.
-		InputPad.showNumPad(this,x1, x2, y1, y2,this.positive,this.integer);
-	}
-};
-/* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
- * Only used for special RoundSlots.
- */
-RoundSlot.prototype.editText=function(){
-	//Builds a text-based representation of the Block with "___" in place of this Slot.
-	var question=this.parent.textSummary(this);
-	//Get the current value for the hint text.
-	var currentVal=this.enteredData.getValue();
-	//The callback function changes the text.
-	var callbackFn=function(cancelled,response){
-		if(!cancelled){
-			callbackFn.slot.enteredData=new StringData(response);
-			callbackFn.slot.changeText(response);
-		}
-		//callbackFn.slot.deselect();
-	};
-	callbackFn.slot=this;
-	//The error function cancels any change.
-	var callbackErr=function(){
-
-	};
-	callbackErr.slot=this;
-	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn,callbackErr);
-	//Visually deselect the Slot.
-	callbackFn.slot.deselect();
-};
-/* Updates the enteredData value and value text of the Slot to match what has been entered on the InputPad.
- * @param {string} visibleText - What the value text should become.
- * @param {Data} data - What the enteredData should be set to.
- */
-RoundSlot.prototype.updateEdit=function(visibleText,data){
-	if(this.selected){ //Only can edit if the Slot is selected.
-		this.enteredData=data;
-		this.changeText(visibleText);
-	}
-	else{
-		GuiElements.throwError("Attempt to call updateEdit on Slot that is not selected.");
-	}
-};
-/* Saves the Data from the InputPad to the Slot, updates the text, and deselects the Slot.
- * @param {Data} data - The Data to save to the Slot.
- */
-RoundSlot.prototype.saveNumData=function(data){
-	if(this.selected){ //Only can edit if the Slot is selected.
-		this.enteredData=data; //Save data.
-		this.changeText(data.asString().getValue()); //Display data.
-		this.deselect();
-	}
-	else{
-		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
-	}
-};
-/**
- * Copies data and blocks from a Slot into this Slot
- * @param {RoundSlot} slot - The slot to copy from
- */
-RoundSlot.prototype.copyFrom=function(slot){
-	var data = slot.enteredData;
-	this.enteredData = data;
-	this.changeText(data.asString().getValue());
-	if(slot.hasChild){
-		this.snap(slot.child.duplicate(0,0));
-	}
-};
-/* Selects the Slot for editing and changes its appearance.
- */
-RoundSlot.prototype.select=function(){
-	this.selected=true;
-	this.slotShape.select();
-};
-/* Deselects the Slot after editing and changes its appearance.
- */
-RoundSlot.prototype.deselect=function(){
-	this.selected=false;
-	this.slotShape.deselect();
-};
-/* Returns a text-based version of the Slot for display in dialogs.
- * @return {string} - The text-based summary of the Slot.
- */
-RoundSlot.prototype.textSummary=function(){
-	//Curved parentheses are used because it is a RoundSlot.
-	if(this.hasChild){ //If it has a child, just use an ellipsis.
-		return "(...)";
-	}
-	else{ //Otherwise, print the value.
-		return "("+this.enteredData.asString().getValue()+")";
-	}
-};
-/* Returns the result of the RoundSlot's execution for use by its parent Block.
- * @return {Data} - The result of the RoundSlot's execution.
- */
-RoundSlot.prototype.getData=function(){
-	if(this.running==3){
-		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
-		if(this.resultIsFromChild){
-			return this.resultData;
-		}
-		else{
-			return this.enteredData;
-		}
-	}
-	if(this.hasChild){
-		//If it isn't done executing and has a child, throw an error.
-		GuiElements.throwError("RoundSlot.getData() run with child when running="+this.running);
-		return null;
-	}
-	else{
-		//If it has no child, data can be read at any time.
-		return this.enteredData;
-	}
-};
-/* Adds a special option to the Slot which will be provided on the NumPad.
- * @param {string} displayText - The text the option will be displayed as.
- * @param {Data} data - The Data which will be stored in the Slot if the option is selected.
- */
-RoundSlot.prototype.addOption=function(displayText,data){
-	this.optionsText.push(displayText);
-	this.optionsData.push(data);
-};
-/* Saves non-numeric SelectionData into the RoundSlot. Changes the value text and deselects the Slot as well.
- * Only used if a special option has non-numeric Data in it.
- * @param {string} text - The value text to display.
- * @param {SelectionData} data - The Data to store.
- */
-RoundSlot.prototype.setSelectionData=function(text,data){
-	this.enteredData=data;
-	this.changeText(text);
-	if(this.selected){
-		this.deselect();
-	}
-};
-/* Makes the value text gray to indicate that any key will delete it. */
-RoundSlot.prototype.grayOutValue=function(){
-	this.slotShape.grayOutValue();
-};
-/* Makes the value text the default edit color again. */
-RoundSlot.prototype.ungrayValue=function(){
-	this.slotShape.unGrayOutValue();
-};
-
-RoundSlot.prototype.createXml=function(xmlDoc){
-	var slot = Slot.prototype.createXml.call(this, xmlDoc);
-	XmlWriter.setAttribute(slot,"type","RoundSlot");
-	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
-	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
-	slot.appendChild(enteredData);
-	XmlWriter.setAttribute(slot,"text",this.text);
-	return slot;
-};
-RoundSlot.prototype.importXml=function(slotNode){
-	var type=XmlWriter.getAttribute(slotNode,"type");
-	if(type!="RoundSlot"){
-		return this;
-	}
-	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
-	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
-	if(dataNode!=null){
-		var data=Data.importXml(dataNode);
-		if(data!=null){
-			this.enteredData=data;
-			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
-			this.changeText(text);
-		}
-	}
-	var childNode=XmlWriter.findSubElement(slotNode,"child");
-	var blockNode=XmlWriter.findSubElement(childNode,"block");
-	if(blockNode!=null) {
-		var childBlock = Block.importXml(blockNode);
-		if (childBlock != null) {
-			this.snap(childBlock);
-		}
-	}
-	return this;
-};
-/* RectSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
- * It creates a Slot that can be edited with a dialog.
- * It is generally designed to hold a string and its input type is always string.
- * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {number [none,numStrBool,bool,list,any} snapType - The type of Blocks which can be attached to the RoundSlot.
- * @param {number [any,num,string,bool,list] outputType - The type of Data the RoundSlot should convert to.
- * @param {string} value - The initial string stored in the Slot.
- */
-function RectSlot(parent,key,snapType,outputType,value){
-	Slot.call(this,parent,key,Slot.inputTypes.string,snapType,outputType); //Call constructor.
-	this.enteredData=new StringData(value); //Set entered data to initial value.
-	this.slotShape = new RectSlotShape(this, value);
-	this.slotShape.show();
-}
-RectSlot.prototype = Object.create(Slot.prototype);
-RectSlot.prototype.constructor = RectSlot;
-/* Builds the Slot's SVG elements such as its rectangle, text, and invisible hit box.
- */
-/*
-RectSlot.prototype.buildSlot=function(){
-	this.textH=BlockGraphics.valueText.charHeight; //Used for centering.
-	this.textW=0; //Will be calculated later.
-	this.slotE=this.generateSlot();
-	this.textE=this.generateText(this.enteredData.getValue());
-	this.hitBoxE=this.generateHitBox(); //Creates an invisible box for receiving touches.
-};
-*/
-/* Moves the Slot's SVG elements to the specified location.
- * @param {number} x - The x coord of the Slot.
- * @param {number} y - The y coord of the Slot.
- * @fix moving hitbox is redundant with RoundSlot.
- */
-RectSlot.prototype.moveSlot=function(x,y){
-	this.slotShape.move(x, y);
-};
-/* Makes the Slot's SVG elements invisible. Used when child is added.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.hideSlot=function(){
-	this.slotShape.hide();
-};
-/* Makes the Slot's SVG elements visible. Used when child is removed.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.showSlot=function(){
-	this.slotShape.show();
-};
-/* Generates and returns an SVG text element to display the Slot's value.
- * @param {string} text - The text to add to the element.
- * @return {SVG text} - The finished SVG text element.
- * @fix redundant with RoundSlot.
- */
-/*
-RectSlot.prototype.generateText=function(text){ //Fix BG
-	var obj=BlockGraphics.create.valueText(text,this.parent.group);
-	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
-	return obj;
-};
-*/
-/* Generates and returns an SVG path element to be the rectangle part of the Slot.
- * @return {SVG path} - The finished SVG path element.
- * @fix BlockGraphics number reference.
- */
-/*
-RectSlot.prototype.generateSlot=function(){//Fix BG
-	var obj=BlockGraphics.create.slot(this.parent.group,3,this.parent.category);
-	TouchReceiver.addListenersSlot(obj,this);
-	return obj;
-};
-*/
-/* Generates and returns a transparent rectangle which enlarges the touch area of the Slot.
- * @return {SVG rect} - The finished SVG rect element.
- * @fix redundant with RoundSlot.
- */
-/*
-RectSlot.prototype.generateHitBox=function(){
-	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
-	TouchReceiver.addListenersSlot(obj,this); //Adds event listeners.
-	return obj;
-};
-*/
-/* Changes the value text of the Slot. Updates parent's stack dims.
- * @param {string} text - The text to change the visible value to.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.changeText=function(text){
-	this.slotShape.changeText(text);
-	if(this.parent.stack!=null) {
-		this.parent.stack.updateDim(); //Update dimensions.
-	}
-};
-/* Computes the dimensions of the SVG elements making up the Slot.
- * Only called if has no child.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.updateDimNR=function(){
-	this.width = this.slotShape.width;
-	this.height = this.slotShape.height;
-};
-/* Adds an indicator showing that the moving BlockStack will snap onto this Slot if released.
- * @fix BlockGraphics
- */
-RectSlot.prototype.highlight=function(){//Fix BG
-	var isSlot=!this.hasChild; //Fix! unclear.
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
-};
-/* Opens a dialog to edit this Slot.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.edit=function(){
-	//Builds a text-based representation of the Block with "___" in place of this Slot.
-	var question=this.parent.textSummary(this);
-	//Get the current value for the hint text.
-	var currentVal=this.enteredData.getValue();
-	//The callback function changes the text.
-	var callbackFn=function(cancelled,response){
-		if(!cancelled){
-			callbackFn.slot.enteredData=new StringData(response);
-			callbackFn.slot.changeText(response);
-			SaveManager.markEdited();
-		}
-	};
-	callbackFn.slot=this;
-	//Show the dialog.
-	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn);
-};
-/**
- * Copies data and blocks from a Slot into this Slot
- * @param {RectSlot} slot - The slot to copy from
- */
-RectSlot.prototype.copyFrom=function(slot){
-	var data = slot.enteredData;
-	this.enteredData = data;
-	this.changeText(data.asString().getValue());
-	if(slot.hasChild){
-		this.snap(slot.child.duplicate(0,0));
-	}
-};
-/* Returns a text-based version of the Slot for display in dialogs.
- * @return {string} - The text-based summary of the Slot.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.textSummary=function(){
-	//Square brackets are used because it is a RectSlot.
-	if(this.hasChild){ //If it has a child, just use an ellipsis.
-		return "[...]";
-	}
-	else{ //Otherwise, print the value.
-		return "["+this.enteredData.getValue()+"]";
-	}
-};
-/* Returns the result of the RoundSlot's execution for use by its parent Block.
- * @return {Data} - The result of the RectSlot's execution.
- * @fix redundant with RoundSlot.
- */
-RectSlot.prototype.getData=function(){
-	if(this.running==3){
-		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
-		if(this.resultIsFromChild){
-			return this.resultData;
-		}
-		else{
-			return this.enteredData;
-		}
-	}
-	if(this.hasChild){
-		//If it isn't done executing and has a child, throw an error.
-		GuiElements.throwError("RectSlot.getData() run with child when running="+this.running);
-		return null;
-	}
-	else{
-		//If it has no child, data can be read at any time.
-		return this.enteredData;
-	}
-};
-
-RectSlot.prototype.createXml=function(xmlDoc){
-	var slot = Slot.prototype.createXml.call(this, xmlDoc);
-	XmlWriter.setAttribute(slot,"type","RectSlot");
-	var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
-	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
-	slot.appendChild(enteredData);
-	if(this.hasChild){
-		var child=XmlWriter.createElement(xmlDoc,"child");
-		child.appendChild(this.child.createXml(xmlDoc));
-		slot.appendChild(child);
-	}
-	return slot;
-};
-RectSlot.prototype.importXml=function(slotNode){
-	var type=XmlWriter.getAttribute(slotNode,"type");
-	if(type!="RectSlot"){
-		return this;
-	}
-	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
-	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
-	if(dataNode!=null){
-		var data=Data.importXml(dataNode);
-		if(data!=null){
-			this.enteredData=data;
-			var text=data.asString().getValue();
-			this.changeText(text);
-		}
-	}
-	var childNode=XmlWriter.findSubElement(slotNode,"child");
-	var blockNode=XmlWriter.findSubElement(childNode,"block");
-	if(blockNode!=null) {
-		var childBlock = Block.importXml(blockNode);
-		if (childBlock != null) {
-			this.snap(childBlock);
-		}
-	}
-	return this;
-};
-/**
  * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
  * It creates a hexagonal Slot that can hold Blocks but not be edited via InputPad or dialog.
  * Its input type and output type is always bool.
@@ -13300,7 +13044,7 @@ RectSlot.prototype.importXml=function(slotNode){
  * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
  */
 function HexSlot(parent,key,snapType){
-	Slot.call(this,parent,key,Slot.inputTypes.none,snapType,Slot.outputTypes.bool); //Call constructor.
+	Slot.call(this, parent, key, snapType, Slot.outputTypes.bool); //Call constructor.
 	this.slotShape = new HexSlotShape(this);
 	this.slotShape.show();
 }
@@ -13375,390 +13119,458 @@ HexSlot.prototype.importXml=function(slotNode){
 	// Return a reference to this Slot.
 	return this;
 };
-function DropSlot(parent,key,snapType){
-	if(snapType==null){
-		snapType=Slot.snapTypes.none;
-	}
-	Slot.call(this,parent,key,Slot.inputTypes.drop,snapType,Slot.outputTypes.any);
-	this.enteredData=null;
-	this.text="";
-	this.slotShape = new DropSlotShape(this, "");
-	this.slotShape.show();
-	this.selected=false;
-	this.optionsText=new Array();
-	this.optionsData=new Array();
-	this.dropColumns=1; //The number of columns to show in the drop down.
-	this.slotVisible=true;
-}
-DropSlot.prototype = Object.create(Slot.prototype);
-DropSlot.prototype.constructor = DropSlot;
-DropSlot.prototype.addOption=function(displayText,data){
-	this.optionsText.push(displayText);
-	this.optionsData.push(data);
-};
-DropSlot.prototype.populateList=function(){//overrided by subclasses
-	
-};
-/*
-DropSlot.prototype.buildSlot=function(){
-	this.textH=BlockGraphics.valueText.charHeight;
-	this.textW=0;
-	this.bgE=this.generateBg();
-	this.triE=this.generateTri();
-	this.textE=this.generateText();
-	this.hitBoxE=this.generateHitBox();
-}
-*/
-/*
-DropSlot.prototype.generateBg=function(){
-	var bG=BlockGraphics.dropSlot;
-	var bgE=GuiElements.create.rect(this.parent.group);
-	GuiElements.update.color(bgE,bG.bg);
-	GuiElements.update.opacity(bgE,bG.bgOpacity);
-	TouchReceiver.addListenersSlot(bgE,this);
-	return bgE;
-}
-DropSlot.prototype.generateTri=function(){
-	var bG=BlockGraphics.dropSlot;
-	var triE=GuiElements.create.path(this.parent.group);
-	GuiElements.update.color(triE,bG.triColor);
-	TouchReceiver.addListenersSlot(triE,this);
-	return triE;
-}
-DropSlot.prototype.generateText=function(){ //Fix BG
-	var bG=BlockGraphics.dropSlot;
-	var obj=BlockGraphics.create.valueText("",this.parent.group);
-	GuiElements.update.color(obj,bG.textFill);
-	TouchReceiver.addListenersSlot(obj,this);
-	return obj;
-}
-DropSlot.prototype.generateHitBox=function(){
-	var obj=BlockGraphics.create.slotHitBox(this.parent.group);
-	TouchReceiver.addListenersSlot(obj,this);
-	return obj;
-};
-*/
-DropSlot.prototype.moveSlot=function(x,y){
-	this.slotShape.move(x, y);
-};
-DropSlot.prototype.hideSlot=function(){
-	this.slotShape.hide();
-};
-DropSlot.prototype.showSlot=function(){
-	this.slotShape.show();
-};
-DropSlot.prototype.changeText=function(text){
-	this.text=text;
-	this.slotShape.changeText(text);
-	if(this.parent.stack!=null){
-		this.parent.stack.updateDim();
-	}
-};
-DropSlot.prototype.updateDimNR=function(){
-	this.width = this.slotShape.width;
-	this.height = this.slotShape.height;
-};
-DropSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new DropSlot(parentCopy,this.snapType);
-	for(var i=0;i<this.optionsText.length;i++){
-		myCopy.addOption(this.optionsText[i],this.optionsData[i]);
-	}
-	if(this.hasChild){
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	myCopy.enteredData=this.enteredData;
-	myCopy.changeText(this.text);
-	myCopy.dropColumns=this.dropColumns;
-	return myCopy;
-}
 /**
- * Copies data and blocks from a Slot into this Slot
- * @param {DropSlot} slot - The slot to copy from
+ * Created by Tom on 6/30/2017.
  */
-DropSlot.prototype.copyFrom=function(slot){
-	this.enteredData = slot.enteredData;
-	this.changeText(slot.text);
-	if(slot.hasChild){
-		this.snap(slot.child.duplicate(0,0));
-	}
-};
-DropSlot.prototype.highlight=function(){//Fix BG
-	var isSlot=!this.hasChild;
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
-};
-DropSlot.prototype.edit=function(previewFn){
-	if(previewFn == null){
-		previewFn = null;
-	}
-	if(!this.selected){
-		var x1 = this.getAbsX();
-		var x2 = this.relToAbsX(this.width); //Get coords relative to the screen.
-		var y1 = this.getAbsY();
-		var y2 = this.relToAbsY(this.height);
-		this.select();
-		InputPad.resetPad(this.dropColumns);
-		this.populateList(); //Loads any dynamic options.
-		for(var i=0;i<this.optionsText.length;i++){
-			InputPad.addOption(this.optionsText[i],this.optionsData[i]);
-		}
-		InputPad.showDropdown(this,x1, x2, y1, y2, null, previewFn);
-	}
-};
-/* Shows a dialog to allow text to be entered into the Slot. Uses a callback function with enteredData and changeText.
- * Only used for special DropSlots.
- */
-DropSlot.prototype.editText=function(){
-	//Builds a text-based representation of the Block with "___" in place of this Slot.
-	var question=this.parent.textSummary(this);
-	//Get the current value for the hint text.
-	var currentVal=this.enteredData.getValue();
-	//The callback function changes the text.
-	var callbackFn=function(cancelled,response){
-		if(!cancelled){
-			callbackFn.slot.enteredData=new StringData(response);
-			callbackFn.slot.changeText(response);
-		}
-		//callbackFn.slot.deselect();
-	};
-	callbackFn.slot=this;
-	//The error function cancels any change.
-	var callbackErr=function(){
-
-	};
-	callbackErr.slot=this;
-	HtmlServer.showDialog("Edit text",question,currentVal,callbackFn,callbackErr);
-	//Visually deselect the Slot.
-	callbackFn.slot.deselect();
-};
-DropSlot.prototype.select=function(){
-	this.selected = true;
-	this.slotShape.select();
-};
-DropSlot.prototype.deselect=function(){
-	this.selected = false;
-	this.slotShape.deselect();
-};
-DropSlot.prototype.textSummary=function(){
-	if(this.hasChild){
-		return "[...]";
-	}
-	else{
-		if(this.enteredData==null){
-			return "[ ]";
-		}
-		return "["+this.enteredData.asString().getValue()+"]";
-	}
-};
-DropSlot.prototype.setSelectionData=function(text,data){
-	this.enteredData=data;
-	this.changeText(text);
-	if(this.selected){
-		this.deselect();
-	}
-};
-/* Saves the Data from the InputPad to the Slot, updates the text, and deselects the Slot.
- * @param {Data} data - The Data to save to the Slot.
- */
-DropSlot.prototype.saveNumData=function(data){
-	this.setSelectionData(data.asString().getValue(), data);
-};
-DropSlot.prototype.getData=function(){
-	if(this.running==3){
-		if(this.resultIsFromChild){
-			return this.resultData;
-		}
-		else{
-			return this.enteredData;
-		}
-	}
-	if(this.hasChild){
-		return null;
-	}
-	else{
-		return this.enteredData;
-	}
+function EditableSlot(parent, key, inputType, snapType, outputType, data){
+	Slot.call(this, parent, key, snapType, outputType);
+	this.inputType = inputType;
+	this.enteredData = data;
+	this.editing = false;
+	//TODO: perhaps build the slot here?
 }
-DropSlot.prototype.clearOptions=function(){
-	this.optionsText=new Array();
-	this.optionsData=new Array();
-}
-
-DropSlot.prototype.createXml=function(xmlDoc){
-	var slot = Slot.prototype.createXml.call(this, xmlDoc);
-	XmlWriter.setAttribute(slot,"type","DropSlot");
-	XmlWriter.setAttribute(slot,"text",this.text);
-	if(this.enteredData!=null){
-		var enteredData=XmlWriter.createElement(xmlDoc,"enteredData");
-		enteredData.appendChild(this.enteredData.createXml(xmlDoc));
-		slot.appendChild(enteredData);
+EditableSlot.prototype = Object.create(Slot.prototype);
+EditableSlot.prototype.constructor = EditableSlot;
+EditableSlot.setConstants = function(){
+	/* The type of Data which can be directly entered into the Slot. */
+	EditableSlot.inputTypes = {};
+	EditableSlot.inputTypes.any = 0;
+	EditableSlot.inputTypes.num = 1;
+	EditableSlot.inputTypes.string = 2;
+	EditableSlot.inputTypes.select = 3;
+};
+EditableSlot.prototype.changeText = function(text, updateDim){
+	this.slotShape.changeText(text);
+	if(updateDim && this.parent.stack!=null) {
+		this.parent.stack.updateDim(); //Update dimensions.
 	}
+};
+EditableSlot.prototype.edit = function(){
+	DebugOptions.assert(!this.hasChild);
+	if(!this.editing){
+		this.editing = true;
+		this.slotShape.select();
+		const inputSys = this.createInputSystem();
+		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
+	}
+};
+EditableSlot.prototype.createInputSystem = function(){
+	DebugOptions.markAbstract();
+};
+EditableSlot.prototype.updateEdit = function(data, visibleText){
+	DebugOptions.assert(this.editing);
+	if(visibleText == null){
+		visibleText = data.asString().getValue();
+	}
+	this.enteredData = data;
+	this.changeText(visibleText, true);
+};
+EditableSlot.prototype.finishEdit = function(data){
+	DebugOptions.assert(this.editing);
+	if(this.editing) {
+		this.setData(data, false, true);
+		this.slotShape.deselect();
+		this.editing = false;
+	}
+};
+EditableSlot.prototype.setData = function(data, sanitize, updateDim){
+	if(sanitize){
+		data = this.sanitizeData(data);
+	}
+	if(data == null) return;
+	this.enteredData = data;
+	this.changeText(this.enteredData.asString().getValue(), updateDim);
+};
+EditableSlot.prototype.sanitizeData = function(data) {
+	if(data == null) return null;
+	const inputTypes = EditableSlot.inputTypes;
+	if(this.inputType === inputTypes.string) {
+		data = data.asString();
+	}
+	else if(this.inputType === inputTypes.num) {
+		data = data.asNum();
+	}
+	else if(this.inputType === inputTypes.select) {
+		data = data.asSelection();
+	}
+	if(data.isValid) {
+		return data;
+	}
+	return null;
+};
+EditableSlot.prototype.textSummary = function(){
+	let result = "...";
+	if(!this.hasChild){ //If it has a child, just use an ellipsis.
+		result = this.enteredData.asString().getValue();
+	}
+	return this.formatTextSummary(result);
+};
+EditableSlot.prototype.formatTextSummary = function(textSummary){
+	DebugOptions.markAbstract();
+};
+EditableSlot.prototype.getDataNotFromChild = function(){
+	return this.enteredData;
+};
+EditableSlot.prototype.createXml = function(xmlDoc){
+	let slot = Slot.prototype.createXml.call(this, xmlDoc);
+	let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
+	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+	slot.appendChild(enteredData);
 	return slot;
 };
-DropSlot.prototype.importXml=function(slotNode){
-	var type=XmlWriter.getAttribute(slotNode,"type");
-	if(type!="DropSlot"){
-		return this;
-	}
-	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
-	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
-	if(dataNode!=null){
-		var data=Data.importXml(dataNode);
-		if(data!=null){
-			this.enteredData=data;
-			var text=XmlWriter.getAttribute(slotNode,"text",data.asString().getValue());
-			this.changeText(text);
-		}
-	}
-	var childNode=XmlWriter.findSubElement(slotNode,"child");
-	var blockNode=XmlWriter.findSubElement(childNode,"block");
-	if(blockNode!=null) {
-		var childBlock = Block.importXml(blockNode);
-		if (childBlock != null) {
-			this.snap(childBlock);
+EditableSlot.prototype.importXml=function(slotNode){
+	Slot.prototype.importXml.call(this, slotNode);
+	const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
+	const dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
+	if(dataNode != null){
+		const data = Data.importXml(dataNode);
+		if(data != null){
+			this.setData(data, true, false);
 		}
 	}
 	return this;
 };
-DropSlot.prototype.updateEdit=function(visibleText,data){
-	if(this.selected){ //Only can edit if the Slot is selected.
-		this.enteredData=data;
-		this.changeText(visibleText);
-	}
-	else{
-		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
-	}
+/**
+ * @param {EditableSlot} slot
+ */
+EditableSlot.prototype.copyFrom = function(slot){
+	Slot.prototype.copyFrom.call(this, slot);
+	this.setData(slot.enteredData, false, false);
 };
-//@fix Write documentation.
-
-function SoundDropSlot(parent,key, isRecording){
-	DropSlot.call(this,parent,key);
-	this.isRecording = isRecording;
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function RectSlot(parent, key, snapType, outputType, data){
+	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
+	this.slotShape = new RectSlotShape(this, data.asString().getValue());
+	this.slotShape.show();
 }
-SoundDropSlot.prototype = Object.create(DropSlot.prototype);
-SoundDropSlot.prototype.constructor = SoundDropSlot;
-
-SoundDropSlot.prototype.populateList = function(){
-	this.clearOptions();
-	const me = this;
-	let list = Sound.getSoundList(this.isRecording);
-	list.forEach(function(sound){
-		me.addOption(sound.name, new SelectionData(sound.id));
+RectSlot.prototype = Object.create(EditableSlot.prototype);
+RectSlot.prototype.constructor = RectSlot;
+RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
+	let isSlot = !this.hasChild;
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+};
+RectSlot.prototype.formatTextSummary = function(textSummary) {
+	return "[" + textSummary + "]";
+};
+RectSlot.prototype.createInputSystem = function(){
+	return new InputDialog(this.parent.textSummary(this), true);
+};
+/**
+ * Created by Tom on 7/3/2017.
+ */
+function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer){
+	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
+	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
+	this.slotShape.show();
+	this.additionalOptions = [];
+	this.positive = positive;
+	this.integer = integer;
+	this.labelText = "";
+}
+RoundSlot.prototype = Object.create(EditableSlot.prototype);
+RoundSlot.prototype.constructor = RoundSlot;
+RoundSlot.prototype.highlight=function(){
+	const isSlot = !this.hasChild; //TODO: Fix! unclear.
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,1,isSlot);
+};
+RoundSlot.prototype.formatTextSummary = function(textSummary) {
+	return "(" + textSummary + ")";
+};
+RoundSlot.prototype.addOption = function(data, displayText) {
+	if(displayText == null){
+		displayText = null;
+	}
+	const option = {};
+	option.displayText = displayText;
+	option.data = data;
+	this.additionalOptions.push(option);
+};
+RoundSlot.prototype.populatePad = function(selectPad){
+	this.additionalOptions.forEach(function(option){
+		selectPad.addOption(option.data, option.displayText);
 	});
 };
-SoundDropSlot.prototype.edit=function(){
-	var me = this;
-	DropSlot.prototype.edit.call(this, function(){
-		if(me.enteredData != null) {
-			if(!this.isRecording) {
-				let soundId = me.enteredData.getValue();
-				Sound.playAndStopPrev(soundId, false);
-			}
-		}
-		else{
-			GuiElements.alert("No data");
-		}
-	});
-};
-SoundDropSlot.prototype.deselect=function(){
-	DropSlot.prototype.deselect.call(this);
-	Sound.stopAllSounds();
-};
-/* NumSlot is a subclass of RoundSlot.
- * It creates a RoundSlot optimized for use with numbers.
- * It automatically converts any results into NumData and has a snapType of numStrBool.
- * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {number} value - The initial number stored in the Slot.
- * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
- * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
- */
-function NumSlot(parent,key,value,positive,integer){
-	if(positive==null){ //Optional parameters are false by default.
-		positive=false;
+RoundSlot.prototype.createInputSystem = function(){
+	const x1 = this.getAbsX();
+	const y1 = this.getAbsY();
+	const x2 = this.relToAbsX(this.width);
+	const y2 = this.relToAbsY(this.height);
+	const inputPad = new NewInputPad(x1, x2, y1, y2);
+
+	if(this.labelText !== "") {
+		inputPad.addWidget(new InputWidget.Label(this.labelText));
 	}
-	if(integer==null){
-		integer=false;
+
+	const selectPad = new InputWidget.SelectPad();
+	this.populatePad(selectPad);
+	if(!selectPad.isEmpty()) {
+		inputPad.addWidget(selectPad);
 	}
-	//Make RoundSlot.
-	RoundSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.num,new NumData(value),positive,integer);
-}
-NumSlot.prototype = Object.create(RoundSlot.prototype);
-NumSlot.prototype.constructor = NumSlot;
-/* StringSlot is a subclass of RectSlot.
- * It creates a RectSlot optimized for use with strings.
- * It automatically converts any results into StringData and has a snapType of numStrBool.
- * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {string} value - The initial string stored in the Slot.
+
+	inputPad.addWidget(new InputWidget.NumPad(this.positive, this.integer));
+	return inputPad;
+};
+RoundSlot.prototype.selectionDataFromValue = function(value){
+	for(let i = 0; i < this.optionsList.length; i++) {
+		const option = this.optionsList[i];
+		if(option.data.getValue() === value) {
+			return option.data;
+		}
+	}
+	return null;
+};
+RoundSlot.prototype.sanitizeData = function(data){
+	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
+	if(data.isSelection()) {
+		const value = data.getValue();
+		return this.selectionDataFromValue(value);
+	}
+	return data;
+};
+RoundSlot.prototype.addLabelText = function(text){
+	this.labelText = text;
+};
+/**
+ * Created by Tom on 7/4/2017.
  */
-function StringSlot(parent,key,value){
-	//Make RectSlot.
-	RectSlot.call(this,parent,key,Slot.snapTypes.numStrBool,Slot.outputTypes.string,value);
+function DropSlot(parent, key, inputType, snapType, data, nullable){
+	if(inputType == null){
+		inputType = EditableSlot.inputTypes.select;
+	}
+	if(snapType == null){
+		snapType = Slot.snapTypes.none;
+	}
+	if(data == null) {
+		DebugOptions.assert(nullable !== true);
+		nullable = false;
+		data = SelectionData.empty();
+	} else if(nullable == null){
+		nullable = false;
+	}
+	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
+	this.slotShape = new DropSlotShape(this, data.asString().getValue());
+	this.slotShape.show();
+	this.optionsList = [];
+	this.nullable = nullable;
 }
-StringSlot.prototype = Object.create(RectSlot.prototype);
-StringSlot.prototype.constructor = StringSlot;
-/* BoolSlot is a subclass of HexSlot.
- * It creates a RectSlot optimized for use with booleans.
- * It has a snapType of bool.
- * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
+DropSlot.prototype = Object.create(EditableSlot.prototype);
+DropSlot.prototype.constructor = DropSlot;
+DropSlot.prototype.highlight = function(){ //TODO: fix BlockGraphics
+	const isSlot = !this.hasChild;
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+};
+DropSlot.prototype.formatTextSummary = function(textSummary) {
+	return "[" + textSummary + "]";
+};
+DropSlot.prototype.addEnterText = function(displayText){
+	const option = {};
+	option.displayText = displayText;
+	option.isAction = true;
+	this.optionsList.push(option);
+};
+DropSlot.prototype.addOption = function(data, displayText) {
+	if(displayText == null){
+		displayText = null;
+	}
+	const option = {};
+	option.displayText = displayText;
+	option.data = data;
+	option.isAction = false;
+	this.optionsList.push(option);
+};
+DropSlot.prototype.populatePad = function(selectPad){
+	this.optionsList.forEach(function(option){
+		if(option.isAction) {
+			selectPad.addAction(option.displayText, function(callbackFn){
+				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+				inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+					callbackFn(data, !cancelled);
+				}, this.enteredData);
+			}.bind(this)); //TODO: clean up edit text options
+		} else {
+			selectPad.addOption(option.data, option.displayText);
+		}
+	}.bind(this));
+};
+DropSlot.prototype.createInputSystem = function(){
+	const x1 = this.getAbsX();
+	const y1 = this.getAbsY();
+	const x2 = this.relToAbsX(this.width);
+	const y2 = this.relToAbsY(this.height);
+	const inputPad = new NewInputPad(x1, x2, y1, y2);
+
+	const selectPad = new InputWidget.SelectPad();
+	this.populatePad(selectPad);
+	inputPad.addWidget(selectPad);
+
+	return inputPad;
+};
+DropSlot.prototype.selectionDataFromValue = function(value){
+	for(let i = 0; i < this.optionsList.length; i++) {
+		const option = this.optionsList[i];
+		if(!option.isAction && option.data.getValue() === value) {
+			return option.data;
+		}
+	}
+};
+DropSlot.prototype.sanitizeNonSelectionData = function(data){
+	return data;
+};
+DropSlot.prototype.sanitizeData = function(data){
+	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
+	if(data.isSelection()) {
+		const value = data.getValue();
+		if(value === "" && this.nullable) {
+			return SelectionData.empty();
+		}
+		return this.selectionDataFromValue(value);
+	}
+	return this.sanitizeNonSelectionData(data);
+};
+/**
+ * Created by Tom on 7/4/2017.
  */
-function BoolSlot(parent,key){
-	//Make HexSlot.
-	HexSlot.call(this,parent,key,Slot.snapTypes.bool);
+function DropSlot(parent, key, inputType, snapType, data, nullable){
+	if(inputType == null){
+		inputType = EditableSlot.inputTypes.select;
+	}
+	if(snapType == null){
+		snapType = Slot.snapTypes.none;
+	}
+	if(data == null) {
+		DebugOptions.assert(nullable !== true);
+		nullable = false;
+		data = SelectionData.empty();
+	} else if(nullable == null){
+		nullable = false;
+	}
+	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
+	this.slotShape = new DropSlotShape(this, data.asString().getValue());
+	this.slotShape.show();
+	this.optionsList = [];
+	this.nullable = nullable;
 }
-BoolSlot.prototype = Object.create(HexSlot.prototype);
-BoolSlot.prototype.constructor = BoolSlot;
+DropSlot.prototype = Object.create(EditableSlot.prototype);
+DropSlot.prototype.constructor = DropSlot;
+DropSlot.prototype.highlight = function(){ //TODO: fix BlockGraphics
+	const isSlot = !this.hasChild;
+	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+};
+DropSlot.prototype.formatTextSummary = function(textSummary) {
+	return "[" + textSummary + "]";
+};
+DropSlot.prototype.addEnterText = function(displayText){
+	const option = {};
+	option.displayText = displayText;
+	option.isAction = true;
+	this.optionsList.push(option);
+};
+DropSlot.prototype.addOption = function(data, displayText) {
+	if(displayText == null){
+		displayText = null;
+	}
+	const option = {};
+	option.displayText = displayText;
+	option.data = data;
+	option.isAction = false;
+	this.optionsList.push(option);
+};
+DropSlot.prototype.populatePad = function(selectPad){
+	this.optionsList.forEach(function(option){
+		if(option.isAction) {
+			selectPad.addAction(option.displayText, function(callbackFn){
+				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+				inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+					callbackFn(data, !cancelled);
+				}, this.enteredData);
+			}.bind(this)); //TODO: clean up edit text options
+		} else {
+			selectPad.addOption(option.data, option.displayText);
+		}
+	}.bind(this));
+};
+DropSlot.prototype.createInputSystem = function(){
+	const x1 = this.getAbsX();
+	const y1 = this.getAbsY();
+	const x2 = this.relToAbsX(this.width);
+	const y2 = this.relToAbsY(this.height);
+	const inputPad = new NewInputPad(x1, x2, y1, y2);
+
+	const selectPad = new InputWidget.SelectPad();
+	this.populatePad(selectPad);
+	inputPad.addWidget(selectPad);
+
+	return inputPad;
+};
+DropSlot.prototype.selectionDataFromValue = function(value){
+	for(let i = 0; i < this.optionsList.length; i++) {
+		const option = this.optionsList[i];
+		if(!option.isAction && option.data.getValue() === value) {
+			return option.data;
+		}
+	}
+};
+DropSlot.prototype.sanitizeNonSelectionData = function(data){
+	return data;
+};
+DropSlot.prototype.sanitizeData = function(data){
+	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
+	if(data.isSelection()) {
+		const value = data.getValue();
+		if(value === "" && this.nullable) {
+			return SelectionData.empty();
+		}
+		return this.selectionDataFromValue(value);
+	}
+	return this.sanitizeNonSelectionData(data);
+};
 //@fix Write documentation.
 
 function VarDropSlot(key, parent){
-	DropSlot.call(this,key, parent,Slot.snapTypes.none);
-	var variables=CodeManager.variableList;
-	if(variables.length>0){
-		var lastVar=variables[variables.length-1];
-		this.setSelectionData(lastVar.getName(),new SelectionData(lastVar));
+	const variables = CodeManager.variableList;
+	let data = SelectionData.empty();
+	if(variables.length > 0){
+		const lastVar = variables[variables.length-1];
+		data = lastVar.getSelectionData();
 	}
+	DropSlot.call(this, key, parent, null, null, data, true);
 }
 VarDropSlot.prototype = Object.create(DropSlot.prototype);
 VarDropSlot.prototype.constructor = VarDropSlot;
-VarDropSlot.prototype.populateList=function(){
-	this.clearOptions();
-	var variables=CodeManager.variableList;
-	for(var i=0;i<variables.length;i++){
-		var currentVar=variables[i];
-		this.addOption(currentVar.getName(),new SelectionData(currentVar));
-	}
+VarDropSlot.prototype.populatePad=function(selectPad){
+	CodeManager.variableList.forEach(function(variable){
+		selectPad.addOption(new SelectionData(variable.getName(), variable));
+	});
+	selectPad.addAction("Create variable", function(callback){
+		CodeManager.newVariable(function(variable){
+			callback(variable.getSelectionData(), true);
+		}, function(){
+			callback(null, false);
+		})
+	});
 };
-VarDropSlot.prototype.importXml=function(slotNode){
-	var type=XmlWriter.getAttribute(slotNode,"type");
-	if(type!="DropSlot"){
-		return this;
-	}
-	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
-	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
-	if(dataNode!=null){
-		var data=Data.importXml(dataNode);
-		if(data!=null){
-			var variable=CodeManager.findVar(data.getValue());
-			if(variable!=null) {
-				this.setSelectionData(variable.getName(), new SelectionData(variable));
-			}
-		}
-	}
-	return this;
+VarDropSlot.prototype.selectionDataFromValue = function(value){
+	const variable = CodeManager.findVar(value);
+	if(variable == null) return null;
+	return variable.getSelectionData();
 };
 VarDropSlot.prototype.renameVariable=function(variable){
-	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
-		this.changeText(variable.getName());
+	if(this.enteredData != null && this.enteredData.getValue() === variable){
+		this.setData(variable.getSelectionData(), false, true);
 	}
 };
 VarDropSlot.prototype.deleteVariable=function(variable){
-	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
-		this.setSelectionData("",null);
+	if(this.enteredData != null && this.enteredData.getValue() === variable){
+		this.setData(SelectionData.empty(), false, true);
 	}
 };
 VarDropSlot.prototype.checkVariableUsed=function(variable){
-	if(this.enteredData!=null&&this.enteredData.getValue()==variable){
+	if(this.enteredData != null&&this.enteredData.getValue() === variable){
 		return true;
 	}
 	return false;
@@ -13766,62 +13578,46 @@ VarDropSlot.prototype.checkVariableUsed=function(variable){
 //@fix Write documentation.
 
 function ListDropSlot(parent,key,snapType){
-	if(snapType==null){
-		snapType=Slot.snapTypes.none
+	if(snapType == null){
+		snapType = Slot.snapTypes.none
 	}
-	DropSlot.call(this,parent,key,snapType);
-	var lists=CodeManager.listList;
+
+	const lists = CodeManager.listList;
+	let data = SelectionData.empty();
 	if(lists.length>0){
-		var lastList=lists[lists.length-1];
-		this.setSelectionData(lastList.getName(),new SelectionData(lastList));
+		const lastList = lists[lists.length-1];
+		data = lastList.getSelectionData();
 	}
+	DropSlot.call(this, parent, key, null, snapType, data, true);
 }
 ListDropSlot.prototype = Object.create(DropSlot.prototype);
 ListDropSlot.prototype.constructor = ListDropSlot;
-ListDropSlot.prototype.populateList=function(){
-	this.clearOptions();
-	var lists=CodeManager.listList;
-	for(var i=0;i<lists.length;i++){
-		var currentList=lists[i];
-		this.addOption(currentList.getName(),new SelectionData(currentList));
-	}
+ListDropSlot.prototype.populatePad = function(selectPad){
+	CodeManager.listList.forEach(function(list){
+		selectPad.addOption(list.getSelectionData());
+	});
+	selectPad.addAction("Create list", function(callback){
+		CodeManager.newList(function(list){
+			callback(list.getSelectionData(), true);
+		}, function(){
+			callback(null, false);
+		})
+	});
 };
-ListDropSlot.prototype.importXml=function(slotNode){
-	this.setSelectionData("",null);
-	var type=XmlWriter.getAttribute(slotNode,"type");
-	if(type!="DropSlot"){
-		return this;
-	}
-	var enteredDataNode=XmlWriter.findSubElement(slotNode,"enteredData");
-	var dataNode=XmlWriter.findSubElement(enteredDataNode,"data");
-	if(dataNode!=null){
-		var data=Data.importXml(dataNode);
-		if(data!=null){
-			var list=CodeManager.findList(data.getValue());
-			if(list!=null) {
-				this.setSelectionData(list.getName(), new SelectionData(list));
-			}
-		}
-	}
-	var childNode=XmlWriter.findSubElement(slotNode,"child");
-	var blockNode=XmlWriter.findSubElement(childNode,"block");
-	if(blockNode!=null) {
-		var childBlock = Block.importXml(blockNode);
-		if (childBlock != null) {
-			this.snap(childBlock);
-		}
-	}
-	return this;
+ListDropSlot.prototype.selectionDataFromValue = function(value){
+	const list = CodeManager.findList(value);
+	if(list == null) return null;
+	return list.getSelectionData();
 };
 ListDropSlot.prototype.renameList=function(list){
-	if(this.enteredData!=null&&this.enteredData.getValue()==list){
-		this.changeText(list.getName());
+	if(this.enteredData != null && this.enteredData.getValue() === list){
+		this.setData(list.getSelectionData(), false, true);
 	}
-	this.passRecursively("renameList",list);
+	this.passRecursively("renameList", list);
 };
 ListDropSlot.prototype.deleteList=function(list){
-	if(this.enteredData!=null&&this.enteredData.getValue()==list){
-		this.setSelectionData("",null);
+	if(!this.enteredData.isEmpty() && this.enteredData.getValue() === list){
+		this.setData(SelectionData.empty(), false, true);
 	}
 	this.passRecursively("deleteList",list);
 };
@@ -13829,7 +13625,7 @@ ListDropSlot.prototype.checkListUsed=function(list){
 	if(this.hasChild){
 		return DropSlot.prototype.checkListUsed.call(this,list);
 	}
-	else if(this.enteredData!=null&&this.enteredData.getValue()==list){
+	else if(this.enteredData != null && this.enteredData.getValue() === list){
 		return true;
 	}
 	return false;
@@ -13837,74 +13633,69 @@ ListDropSlot.prototype.checkListUsed=function(list){
 
 
 function PortSlot(parent, key, maxPorts) {
-	DropSlot.call(this, parent, key, Slot.snapTypes.none);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
-	this.setSelectionData();
     for(let portNum = 1; portNum <= this.maxPorts; portNum++) {
-        this.addOption("port " + portNum.toString(), new NumData(portNum));
+        this.addOption(new NumData(portNum), "port " + portNum.toString());
     }
-    this.setSelectionData("1",new NumData(1));
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
 PortSlot.prototype.constructor = PortSlot;
 //@fix Write documentation.
 
 function BroadcastDropSlot(parent,key,isHatBlock){
-	if(isHatBlock==null){
-		isHatBlock=false;
+	if(isHatBlock == null){
+		isHatBlock = false;
 	}
-	var snapType=Slot.snapTypes.numStrBool;
+	let snapType = Slot.snapTypes.numStrBool;
 	if(isHatBlock){
-		snapType=Slot.snapTypes.none;
+		snapType = Slot.snapTypes.none;
 	}
-	this.isHatBlock=isHatBlock;
-	DropSlot.call(this,parent,key,snapType);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
+	if(isHatBlock) {
+		this.addOption(new SelectionData("any message", "any_message"));
+	}
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
 BroadcastDropSlot.prototype.constructor = BroadcastDropSlot;
-BroadcastDropSlot.prototype.populateList=function(){
-	this.clearOptions();
+BroadcastDropSlot.prototype.populatePad = function(selectPad){
+	DropSlot.prototype.populatePad.call(this, selectPad);
 	CodeManager.updateAvailableMessages();
-	if(this.isHatBlock){
-		this.addOption("any message",new SelectionData("any_message"));
-	}
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		var currentMessage=messages[i];
-		this.addOption('"'+currentMessage+'"',new StringData(currentMessage));
-	}
-	this.addOption("new",new SelectionData("new_message"));
-};
-BroadcastDropSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new BroadcastDropSlot(parentCopy,this.isHatBlock);
-	myCopy.enteredData=this.enteredData;
-	myCopy.changeText(this.text);
-	return myCopy;
-};
-BroadcastDropSlot.prototype.checkBroadcastMessageAvailable=function(message){
-	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
-		return message==this.enteredData.getValue();
-	}
-	return false;
+	const messages = CodeManager.broadcastList;
+	messages.forEach(function(message){
+		selectPad.addOption(new StringData(message), '"'+message+'"');
+	});
+	selectPad.addAction("new", function(callbackFn){
+		const inputDialog = new InputDialog(this.parent.textSummary(this), false);
+		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+			callbackFn(data, !cancelled);
+		}, this.enteredData);
+	}.bind(this));
 };
 BroadcastDropSlot.prototype.updateAvailableMessages=function(){
-	if(this.enteredData!=null&&this.enteredData.type==Data.types.string){
+	if(this.enteredData !== null && this.enteredData.type === Data.types.string){
 		CodeManager.addBroadcastMessage(this.enteredData.getValue());
 	}
+};
+BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	data = data.asString();
+	if(!data.isValid) return null;
+	return data;
 };
 function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
-	DropSlot.call(this, parent, key, Slot.snapTypes.none);
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
+	const data = new SelectionData(this.prefixText + 1, 0);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
+
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
-	this.setSelectionData(this.prefixText + 1, new SelectionData(0));
-
-	if (deviceClass.getManager().getSelectableDeviceCount() <= 1) {
+	const deviceCount = deviceClass.getManager().getSelectableDeviceCount();
+	if (deviceCount <= 1) {
 		this.switchToLabel();
 	} else {
 		this.labelText.hide();
@@ -13913,27 +13704,20 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
-DeviceDropSlot.prototype.populateList = function() {
-	this.clearOptions();
-	var deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
-	for (var i = 0; i < deviceCount; i++) {
-		this.addOption(this.prefixText + (i + 1), new SelectionData(i)); //We'll store a 0-indexed value but display it +1.
+DeviceDropSlot.prototype.populatePad = function(selectPad) {
+	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	for (let i = 0; i < deviceCount; i++) {
+		//We'll store a 0-indexed value but display it +1.
+		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
 	}
-};
-
-DeviceDropSlot.prototype.duplicate = function(parentCopy) {
-	var myCopy = new DeviceDropSlot(parentCopy, this.deviceClass, this.shortText);
-	myCopy.enteredData = this.enteredData;
-	myCopy.changeText(this.text);
-	return myCopy;
 };
 
 DeviceDropSlot.prototype.switchToLabel = function() {
 	if (!this.labelMode) {
 		this.labelMode = true;
-		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
 		this.labelText.show();
-		this.hideSlot();
+		this.slotShape.hide();
+		this.setData(new SelectionData(this.prefixText + 1, 0), false, true);
 	}
 };
 
@@ -13941,7 +13725,7 @@ DeviceDropSlot.prototype.switchToSlot = function() {
 	if (this.labelMode) {
 		this.labelMode = false;
 		this.labelText.hide();
-		this.showSlot();
+		this.slotShape.show();
 	}
 };
 
@@ -13963,32 +13747,146 @@ DeviceDropSlot.prototype.updateDim = function() {
 };
 
 DeviceDropSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	if(this.deviceClass == deviceClass) {
+	if(this.deviceClass === deviceClass) {
 		this.switchToLabel();
 	}
 };
 
 DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	if(this.deviceClass == deviceClass) {
+	if(this.deviceClass === deviceClass) {
 		this.switchToSlot();
 	}
 };
 
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
-	if (this.deviceClass == deviceClass && this.getData() != null) {
-		return this.getData().getValue() + 1;
+	if (this.deviceClass === deviceClass) {
+		const myVal = this.getDataNotFromChild().getValue();
+		return myVal + 1;
 	} else {
 		return 1;
 	}
 };
 
-DeviceDropSlot.prototype.importXml = function(slotNode) {
-	DropSlot.prototype.importXml.call(this, slotNode);
-	this.enteredData = new SelectionData(parseInt(this.enteredData.getValue()));
-	if (this.enteredData.getValue() < 0) {
-		this.setSelectionData(this.prefixText + 1, new SelectionData(0));
-	}
+DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	const numData = data.asNum();
+	if(!numData.isValid) return null;
+	const value = numData.getValue();
+	if(value < 0) return null;
+	if(value % 1 !== 0) return null;
+	if(!Number.isInteger(value)) return null;
+	if(value >= 30) return null; // TODO: implement connection limit
+	return data;
 };
+//@fix Write documentation.
+
+function SoundDropSlot(parent,key, isRecording){
+	DropSlot.call(this,parent,key);
+	this.isRecording = isRecording;
+}
+SoundDropSlot.prototype = Object.create(DropSlot.prototype);
+SoundDropSlot.prototype.constructor = SoundDropSlot;
+SoundDropSlot.prototype.createInputSystem = function(){
+	const x1 = this.getAbsX();
+	const y1 = this.getAbsY();
+	const x2 = this.relToAbsX(this.width);
+	const y2 = this.relToAbsY(this.height);
+	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
+};
+SoundDropSlot.prototype.populatePad = function(selectPad){
+	/*const me = this;
+	let list = Sound.getSoundList(this.isRecording);
+	list.forEach(function(sound){
+		selectPad.addOption(new SelectionData(sound.name, sound.id));
+	});*/
+};
+/* TODO: Sound previewing
+SoundDropSlot.prototype.edit=function(){
+	const me = this;
+	DropSlot.prototype.edit.call(this, function(){
+		if(me.enteredData != null) {
+			if(!this.isRecording) {
+				let soundId = me.enteredData.getValue();
+				Sound.playAndStopPrev(soundId, false);
+			}
+		}
+		else{
+			GuiElements.alert("No data");
+		}
+	});
+};
+SoundDropSlot.prototype.deselect=function(){
+	DropSlot.prototype.deselect.call(this);
+	Sound.stopAllSounds();
+};*/
+/* BoolSlot is a subclass of HexSlot.
+ * It creates a RectSlot optimized for use with booleans.
+ * It has a snapType of bool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ */
+function BoolSlot(parent,key){
+	//Make HexSlot.
+	HexSlot.call(this,parent,key,Slot.snapTypes.bool);
+}
+BoolSlot.prototype = Object.create(HexSlot.prototype);
+BoolSlot.prototype.constructor = BoolSlot;
+/* NumSlot is a subclass of RoundSlot.
+ * It creates a RoundSlot optimized for use with numbers.
+ * It automatically converts any results into NumData and has a snapType of numStrBool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {number} value - The initial number stored in the Slot.
+ * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
+ */
+function NumSlot(parent,key,value,positive,integer){
+	if(positive==null){ //Optional parameters are false by default.
+		positive=false;
+	}
+	if(integer==null){
+		integer=false;
+	}
+	//Make RoundSlot.
+	const inputType = EditableSlot.inputTypes.num;
+	const snapType = Slot.snapTypes.numStrBool;
+	const outputType = Slot.outputTypes.num;
+	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+}
+NumSlot.prototype = Object.create(RoundSlot.prototype);
+NumSlot.prototype.constructor = NumSlot;
+/* StringSlot is a subclass of RectSlot.
+ * It creates a RectSlot optimized for use with strings.
+ * It automatically converts any results into StringData and has a snapType of numStrBool.
+ * @constructor
+ * @param {Block} parent - The Block this Slot is a part of.
+ * @param {string} value - The initial string stored in the Slot.
+ */
+function StringSlot(parent,key,value){
+	//Make RectSlot.
+	RectSlot.call(this, parent, key, Slot.snapTypes.numStrBool, Slot.outputTypes.string, new StringData(value));
+}
+StringSlot.prototype = Object.create(RectSlot.prototype);
+StringSlot.prototype.constructor = StringSlot;
+/**
+ * Created by Tom on 7/4/2017.
+ */
+function NumOrStringSlot(parent, key, data){
+	const inputType = EditableSlot.inputTypes.any;
+	const snapType = Slot.snapTypes.numStrBool;
+	const outputType = Slot.outputTypes.any;
+	RoundSlot.call(this, parent, key, inputType, snapType, outputType, data, false, false);
+}
+NumOrStringSlot.prototype = Object.create(RoundSlot.prototype);
+NumOrStringSlot.prototype.constructor = NumOrStringSlot;
+NumOrStringSlot.prototype.populatePad = function(selectPad){
+	selectPad.addAction("Enter text", function(callbackFn){
+		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+			callbackFn(data, !cancelled);
+		}, this.enteredData);
+	}.bind(this)); //TODO: clean up edit text options
+};
+
 function BlockSlot(parent){
 	this.child=null;
 	//this.width=0;
@@ -14832,7 +14730,7 @@ function B_WhenIReceive(x,y){
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
 B_WhenIReceive.prototype.eventBroadcast=function(message){
-	var myMessage=this.slots[0].getData();
+	var myMessage=this.slots[0].getDataNotFromChild(); //Returns instantly and desn't require execution.
 	if(myMessage!=null){
 		var myMessageStr=myMessage.getValue();
 		if(myMessageStr=="any_message"||myMessageStr==message){
@@ -15068,7 +14966,7 @@ B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction=function(){
 	var message=this.slots[0].getData();
-	if(message!=null){
+	if(message.getValue() !== ""){
 		CodeManager.message=new StringData(message.getValue());
 		CodeManager.eventBroadcast(message.getValue());
 	}
@@ -15118,13 +15016,12 @@ B_Message.prototype.startAction=function(){
 function B_Stop(x,y){//No bottom slot
 	CommandBlock.call(this,x,y,"control",true);
 	this.addPart(new LabelText(this,"stop"));
-	var dS=new DropSlot(this,"DS_act",Slot.snapTypes.none);
-	dS.addOption("all",new SelectionData("all"));
-	dS.addOption("this script",new SelectionData("this_script"));
-	//dS.addOption("this block",new SelectionData("this_block"));
-	dS.addOption("all but this script",new SelectionData("all_but_this_script"));
-	//dS.addOption("other scripts in sprite",new SelectionData("other_scripts_in_sprite"));
-	dS.setSelectionData("all",new SelectionData("all"));
+	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
+	dS.addOption(new SelectionData("all", "all"));
+	dS.addOption(new SelectionData("this script", "this_script"));
+	//dS.addOption(new SelectionData("this block", "this_block"));
+	dS.addOption(new SelectionData("all but this script", "all_but_this_script"));
+	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
 	this.addPart(dS);
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
@@ -15142,23 +15039,6 @@ B_Stop.prototype.startAction=function(){
 	}
 	return new ExecutionStatusDone();
 };
-
-
-
-
-///// <Not implemented> /////
-function B_WhenIAmTapped(x,y){
-	HatBlock.call(this,x,y,"control");
-	this.addPart(new LabelText(this,"when I am"));
-	var dS=new DropSlot(this,"DS_act",null,Slot.snapTypes.bool);
-	dS.addOption("tapped",new SelectionData("tapped"));
-	dS.addOption("pressed",new SelectionData("pressed"));
-	dS.addOption("released",new SelectionData("released"));
-	this.addPart(dS);
-}
-B_WhenIAmTapped.prototype = Object.create(HatBlock.prototype);
-B_WhenIAmTapped.prototype.constructor = B_WhenIAmTapped;
-
 
 
 
@@ -15285,16 +15165,15 @@ Block.setDisplaySuffix(B_Timer, "s");
 function B_CurrentTime(x,y){
 	ReporterBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"current"));
-	var dS=new DropSlot(this,"DS_interval",null,Slot.snapTypes.bool);
-	dS.addOption("year",new SelectionData("year"));
-	dS.addOption("month",new SelectionData("month"));
-	dS.addOption("date",new SelectionData("date"));
-	dS.addOption("day of the week",new SelectionData("day of the week"));
-	dS.addOption("hour",new SelectionData("hour"));
-	dS.addOption("minute",new SelectionData("minute"));
-	dS.addOption("second",new SelectionData("second"));
-	dS.addOption("time in milliseconds",new SelectionData("time in milliseconds"));
-	dS.setSelectionData("date",new SelectionData("date"));
+	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
+	dS.addOption(new SelectionData("year", "year"));
+	dS.addOption(new SelectionData("month", "month"));
+	dS.addOption(new SelectionData("date", "date"));
+	dS.addOption(new SelectionData("day of the week", "day of the week"));
+	dS.addOption(new SelectionData("hour", "hour"));
+	dS.addOption(new SelectionData("minute", "minute"));
+	dS.addOption(new SelectionData("second", "second"));
+	dS.addOption(new SelectionData("time in milliseconds", "time in milliseconds"));
 	this.addPart(dS);
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
@@ -15513,14 +15392,9 @@ B_LessThan.prototype.startAction=function(){
 
 function B_EqualTo(x,y){//needs to work with strings
 	PredicateBlock.call(this,x,y,"operators");
-	var rS=new RoundSlot(this,"RndS_item1",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS.addOption("Enter text",new SelectionData("enter_text"));
-	var rS2=new RoundSlot(this,"RndS_item2",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(0));
-	rS2.addOption("Enter text",new SelectionData("enter_text"));
-
-	this.addPart(rS);
+	this.addPart(new NumOrStringSlot(this, "RndS_item1", new NumData(0)));
 	this.addPart(new LabelText(this,"="));
-	this.addPart(rS2);
+	this.addPart(new NumOrStringSlot(this, "RndS_item2", new NumData(0)));
 }
 B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
@@ -15686,11 +15560,14 @@ function B_Split(x,y){
 	this.addPart(new LabelText(this,"split"));
 	this.addPart(new StringSlot(this,"StrS_1","hello world"));
 	this.addPart(new LabelText(this,"by"));
-	var dS=new DropSlot(this,"DS_separator",Slot.snapTypes.numStrBool);
-	dS.addOption("Enter text",new SelectionData("enter_text"));
-	dS.addOption("letter",new SelectionData("letter"));
-	dS.addOption("whitespace",new SelectionData("whitespace"));
-	dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+
+	const inputType = EditableSlot.inputTypes.any;
+	const snapType = Slot.snapTypes.numStrBool;
+	const data = new SelectionData("whitespace", "whitespace");
+	const dS=new DropSlot(this,"DS_separator", inputType, snapType, data);
+	dS.addEnterText("Edit text");
+	dS.addOption(new SelectionData("letter", "letter"));
+	dS.addOption(new SelectionData("whitespace", "whitespace"));
 	this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
@@ -15728,15 +15605,14 @@ B_Split.prototype.startAction=function(){
 function B_IsAType(x,y){
 	PredicateBlock.call(this,x,y,"operators");
 	this.addPart(new LabelText(this,"is"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,"5"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(5)));
 	this.addPart(new LabelText(this,"a"));
-	var dS=new DropSlot(this,"DS_type",Slot.snapTypes.none);
-	dS.addOption("number",new SelectionData("number"));
-	dS.addOption("text",new SelectionData("text"));
-	dS.addOption("boolean",new SelectionData("boolean"));
-	dS.addOption("list",new SelectionData("list"));
-	dS.addOption("invalid number",new SelectionData("invalid_num"));
-	dS.setSelectionData("number",new SelectionData("number"));
+	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
+	dS.addOption(new SelectionData("number", "number"));
+	dS.addOption(new SelectionData("text", "text"));
+	dS.addOption(new SelectionData("boolean", "boolean"));
+	dS.addOption(new SelectionData("list", "list"));
+	dS.addOption(new SelectionData("invalid number", "invalid_num"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"?"));
 }
@@ -15793,28 +15669,26 @@ B_IsAType.prototype.startAction=function(){
 
 function B_mathOfNumber(x,y){
 	ReporterBlock.call(this,x,y,"operators");
-	var dS=new DropSlot(this,"DS_operation",null,Slot.snapTypes.bool);
-	dS.addOption("sin",new SelectionData("sin"));
-	dS.addOption("cos",new SelectionData("cos"));
-	dS.addOption("tan",new SelectionData("tan"));
+	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	dS.addOption(new SelectionData("sin", "sin"));
+	dS.addOption(new SelectionData("cos", "cos"));
+	dS.addOption(new SelectionData("tan", "tan"));
 
-	dS.addOption("asin",new SelectionData("asin"));
-	dS.addOption("acos",new SelectionData("acos"));
-	dS.addOption("atan",new SelectionData("atan"));
+	dS.addOption(new SelectionData("asin", "asin"));
+	dS.addOption(new SelectionData("acos", "acos"));
+	dS.addOption(new SelectionData("atan", "atan"));
 
-	dS.addOption("ln",new SelectionData("ln"));
-	dS.addOption("e^",new SelectionData("e^"));
-	dS.addOption("ceiling",new SelectionData("ceiling"));
+	dS.addOption(new SelectionData("ln", "ln"));
+	dS.addOption(new SelectionData("e^", "e^"));
+	dS.addOption(new SelectionData("ceiling", "ceiling"));
 
-	dS.addOption("log",new SelectionData("log"));
-	dS.addOption("10^",new SelectionData("10^"));
-	dS.addOption("floor",new SelectionData("floor"));
+	dS.addOption(new SelectionData("log", "log"));
+	dS.addOption(new SelectionData("10^", "10^"));
+	dS.addOption(new SelectionData("floor", "floor"));
 
-	dS.addOption("abs",new SelectionData("abs"));
-	dS.addOption("sqrt",new SelectionData("sqrt"));
+	dS.addOption(new SelectionData("abs", "abs"));
+	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
-	dS.dropColumns=3;
-	dS.setSelectionData("sqrt",new SelectionData("sqrt"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new NumSlot(this,"NumS_val",10));
@@ -16057,12 +15931,11 @@ B_DeviceOrientation.prototype.updateAction=function(){
 function B_DeviceAcceleration(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
-	var dS=new DropSlot(this,"DS_axis");
-	dS.addOption("X",new SelectionData(0));
-	dS.addOption("Y",new SelectionData(1));
-	dS.addOption("Z",new SelectionData(2));
-	dS.addOption("Total",new SelectionData("total"));
-	dS.setSelectionData("X",new SelectionData(0));
+	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
+	dS.addOption(new SelectionData("X", 0));
+	dS.addOption(new SelectionData("Y", 1));
+	dS.addOption(new SelectionData("Z", 2));
+	dS.addOption(new SelectionData("Total", "total"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this,"Acceleration"));
 }
@@ -16109,10 +15982,9 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 function B_DeviceLocation(x,y){
 	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
 	this.addPart(new LabelText(this,"Device"));
-	var dS=new DropSlot(this,"DS_dir");
-	dS.addOption("Latitude",new SelectionData(0));
-	dS.addOption("Longitude",new SelectionData(1));
-	dS.setSelectionData("Latitude",new SelectionData(0));
+	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData("Latitude", 0));
+	dS.addOption(new SelectionData("Latitude", 0));
+	dS.addOption(new SelectionData("Longitude", 1));
 	this.addPart(dS);
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
@@ -16430,9 +16302,7 @@ function B_SetTo(x,y){
 	this.addPart(new LabelText(this,"set"));
 	this.addPart(new VarDropSlot(this,"VDS_1"));
 	this.addPart(new LabelText(this,"to"));
-	var rS=new RoundSlot(this,"RndS_val",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new NumData(0));
-	rS.addOption("Enter text",new SelectionData("enter_text"));
-	this.addPart(rS);
+	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
@@ -16442,7 +16312,7 @@ B_SetTo.prototype.startAction=function(){
 	var type=data.type;
 	var types=Data.types;
 	if(type==types.bool||type==types.num||type==types.string) {
-		if (variableD != null && variableD.type == Data.types.selection) {
+		if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
 			var variable = variableD.getValue();
 			variable.setData(data);
 		}
@@ -16464,7 +16334,7 @@ B_ChangeBy.prototype.constructor = B_ChangeBy;
 B_ChangeBy.prototype.startAction=function(){
 	var variableD=this.slots[0].getData();
 	var incrementD=this.slots[1].getData();
-	if(variableD != null && variableD.type == Data.types.selection){
+	if(variableD.type === Data.types.selection && !variableD.isEmpty()){
 		var variable=variableD.getValue();
 		var currentD=variable.getData().asNum();
 		var newV=incrementD.getValue()+currentD.getValue();
@@ -16541,7 +16411,7 @@ B_List.prototype.checkListUsed=function(list){
 function B_AddToList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"add"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"to"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -16549,7 +16419,7 @@ B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
 B_AddToList.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var list=listD.getValue();
 		var array=list.getData().getValue();
 		var itemD=this.slots[0].getData();
@@ -16569,9 +16439,9 @@ function B_DeleteItemOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"delete"));
 	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption("last",new SelectionData("last"));
-	nS.addOption("random",new SelectionData("random"));
-	nS.addOption("all",new SelectionData("all"));
+	nS.addOption(new SelectionData("last", "last"));
+	nS.addOption(new SelectionData("random", "random"));
+	nS.addOption(new SelectionData("all", "all"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
@@ -16580,12 +16450,12 @@ B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
 B_DeleteItemOfList.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
 		var array=listData.getValue();
-		if(indexD.type==Data.types.selection&&indexD.getValue()=="all"){
+		if(indexD.type === Data.types.selection && indexD.getValue() === "all"){
 			list.setData(new ListData());
 		}
 		else {
@@ -16603,11 +16473,11 @@ B_DeleteItemOfList.prototype.startAction=function(){
 function B_InsertItemAtOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"insert"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
 	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption("last",new SelectionData("last"));
-	nS.addOption("random",new SelectionData("random"));
+	nS.addOption(new SelectionData("last", "last"));
+	nS.addOption(new SelectionData("random", "random"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
@@ -16616,7 +16486,7 @@ B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
 B_InsertItemAtOfList.prototype.startAction=function(){
 	var listD=this.slots[2].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[1].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
@@ -16650,19 +16520,19 @@ function B_ReplaceItemOfListWith(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"replace item"));
 	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption("last",new SelectionData("last"));
-	nS.addOption("random",new SelectionData("random"));
+	nS.addOption(new SelectionData("last", "last"));
+	nS.addOption(new SelectionData("random", "random"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
 B_ReplaceItemOfListWith.prototype.startAction=function(){
 	var listD=this.slots[1].getData();
-	if(listD!=null&&listD.type == Data.types.selection){
+	if(listD.type === Data.types.selection && !listD.isEmpty()){
 		var indexD=this.slots[0].getData();
 		var list=listD.getValue();
 		var listData=list.getData();
@@ -16696,21 +16566,18 @@ B_CopyListToList.prototype.constructor = B_CopyListToList;
 B_CopyListToList.prototype.startAction=function(){
 	var listD1=this.slots[0].getData();
 	var listD2=this.slots[1].getData();
-	if(listD1!=null&&listD2!=null){
-		var listDataToCopy;
-		if(listD1.type==Data.types.selection){
-			listDataToCopy=listD1.getValue().getData();
+	if(listD2.type === Data.types.selection && !listD2.isEmpty()){
+		if(listD1.type === Data.types.selection && !listD1.isEmpty()) {
+			listDataToCopy = listD1.getValue().getData();
 		}
-		else if(listD1.type==Data.types.list){
-			listDataToCopy=listD1;
+		else if(listD1.type === Data.types.list){
+			listDataToCopy = listD1;
 		}
 		else{
 			return new ExecutionStatusDone();
 		}
-		if(listD2.type==Data.types.selection){
-			var listToCopyTo=listD2.getValue();
-			listToCopyTo.setData(listDataToCopy.duplicate());
-		}
+		const listToCopyTo = listD2.getValue();
+		listToCopyTo.setData(listDataToCopy.duplicate());
 	}
 	return new ExecutionStatusDone();
 };
@@ -16722,24 +16589,24 @@ function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"item"));
 	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption("last",new SelectionData("last"));
-	nS.addOption("random",new SelectionData("random"));
+	nS.addOption(new SelectionData("last", "last"));
+	nS.addOption(new SelectionData("random", "random"));
 	this.addPart(nS);
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
-B_ItemOfList.prototype.startAction=function(){
+B_ItemOfList.prototype.startAction = function(){
 	var listD=this.slots[1].getData();
 	var indexD;
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		indexD = this.slots[0].getData();
 		var list = listD.getValue();
 		var listData=list.getData();
 		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		indexD = this.slots[0].getData();
 		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
 	}
@@ -16769,12 +16636,12 @@ B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
 B_LengthOfList.prototype.startAction=function(){
 	var listD=this.slots[0].getData();
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		var list = listD.getValue();
 		var array = list.getData().getValue();
 		return new ExecutionStatusResult(new NumData(array.length));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		return new ExecutionStatusResult(new NumData(listD.getValue().length));
 	}
 	else {
@@ -16788,20 +16655,20 @@ function B_ListContainsItem(x,y){
 	PredicateBlock.call(this,x,y,"lists");
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 	this.addPart(new LabelText(this,"contains"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,"thing"));
+	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
 B_ListContainsItem.prototype.startAction=function(){
 	var listD=this.slots[0].getData();
 	var itemD;
-	if(listD!=null&&listD.type == Data.types.selection) {
+	if(listD.type === Data.types.selection && !listD.isEmpty()) {
 		var list = listD.getValue();
 		var listData=list.getData();
 		itemD=this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
 	}
-	else if(listD!=null&&listD.type == Data.types.list){
+	else if(listD.type === Data.types.list){
 		itemD=this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
 	}

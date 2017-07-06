@@ -40,6 +40,8 @@ function CodeManager(){
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+	CodeManager.modifiedTime = new Date().getTime();
+	CodeManager.createdTime = new Date().getTime();
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
@@ -315,16 +317,18 @@ CodeManager.removeVariable=function(variable){
 };
 /* @fix Write documentation.
  */
-CodeManager.newVariable=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newVariable=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create variable","Enter variable name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
-			new Variable(result);
+			const variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(variable);
+		} else {
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+	});
 };
 CodeManager.checkVarName=function(name){
 	name=name.trim();
@@ -361,16 +365,18 @@ CodeManager.removeList=function(list){
 };
 /* @fix Write documentation.
  */
-CodeManager.newList=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newList=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create list","Enter list name","",function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
-			new List(result);
+			const list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(list);
+		} else{
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+	});
 };
 /* @fix Write documentation.
  */
@@ -429,7 +435,7 @@ CodeManager.addBroadcastMessage=function(message){
 };
 /* @fix Write documentation.
  */
-CodeManager.removeUnusedMessages=function(){
+CodeManager.removeUnusedMessages=function(){ //TODO: remove this
 	var messages=CodeManager.broadcastList;
 	for(var i=0;i<messages.length;i++){
 		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
@@ -440,7 +446,7 @@ CodeManager.removeUnusedMessages=function(){
 /* @fix Write documentation.
  */
 CodeManager.updateAvailableMessages=function(){
-	CodeManager.broadcastList=new Array();
+	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();
 };
 /* @fix Write documentation.
@@ -475,8 +481,8 @@ CodeManager.createXml=function(){
 	}
 	XmlWriter.setAttribute(project,"name",fileName);
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
-	XmlWriter.setAttribute(project,"created",new Date().getTime());
-	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	XmlWriter.setAttribute(project,"created",CodeManager.createdTime);
+	XmlWriter.setAttribute(project,"modified",CodeManager.modifiedTime);
 	var variables=XmlWriter.createElement(xmlDoc,"variables");
 	for(var i=0;i<CM.variableList.length;i++){
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
@@ -492,6 +498,8 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
+	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
+	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
 	if(variablesNode!=null) {
 		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
@@ -510,6 +518,9 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+};
+CodeManager.updateModified = function(){
+	CodeManager.modifiedTime = new Date().getTime();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;

@@ -251,3 +251,6 @@ DropSlot.prototype.updateEdit=function(visibleText,data){
 		throw new UserException("Attempt to call updateEdit on Slot that is not selected.");
 	}
 };
+DropSlot.prototype.editText = function(callbackCancel, callbackResp){
+	HtmlServer.showDialog("Edit text", )
+};

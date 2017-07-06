@@ -9,16 +9,14 @@
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} inputType - [none, num, string, drop] The type of Data which can be directly entered into the Slot. TODO: perhaps change drop data
  * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
  * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
  */
-function Slot(parent, key, inputType, snapType, outputType){
-	DebugOptions.validateNonNull(parent, key, inputType, snapType, outputType);
+function Slot(parent, key, snapType, outputType){
+	DebugOptions.validateNonNull(parent, key, snapType, outputType);
 	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
 	DebugOptions.assert(key.includes("_"));
 	//Store data passed by constructor.
-	this.inputType = inputType; //TODO: Remove this unused field
 	this.snapType = snapType;
 	this.outputType = outputType;
 	this.parent = parent; //Parent Block.
@@ -35,22 +33,15 @@ function Slot(parent, key, inputType, snapType, outputType){
 	this.resultData = null; //passed to Block for use in implementation.
 }
 Slot.setConstants = function(){
-	/* The type of Data which can be directly entered into the Slot.  This was used for determining
-	 * input method but is no longer used for anything. */
-	Slot.inputTypes = function(){};
-	Slot.inputTypes.none = 0; //Predicate Slots cannot be directly entered into.
-	Slot.inputTypes.num = 1; //Edited with InputPad
-	Slot.inputTypes.string = 2; //Edited with dialog.
-	Slot.inputTypes.drop = 3; //Edited with dropdown.
 	//The type of Blocks which can be attached to the Slot.
-	Slot.snapTypes = function(){};
+	Slot.snapTypes = {};
 	Slot.snapTypes.none = 0; //Nothing can attach (dropdowns often)
 	Slot.snapTypes.numStrBool = 1; //Blocks with return type num, string, or bool can attach (will be auto cast).
 	Slot.snapTypes.bool = 2; //Only Blocks that return bool can attach.
 	Slot.snapTypes.list = 3; //Only Blocks that return lists can attach.
 	Slot.snapTypes.any = 4; //Any type of Block can attach (used for the = Block).
 	//The type of Data the Slot should convert to before outputting. Guarantees the Block gets the type it wants.
-	Slot.outputTypes = function(){};
+	Slot.outputTypes = {};
 	Slot.outputTypes.any = 0; //No conversion will occur.
 	Slot.outputTypes.num = 1; //Convert to num.
 	Slot.outputTypes.string = 2; //Convert to string.
@@ -187,14 +178,18 @@ Slot.prototype.updateRun = function(){
  * @return {Data} - The result of the Slot's execution.
  */
 Slot.prototype.getData = function(){
-	if(this.running === 3){ //It should be done running.
+	if(this.running === 3){
+		//If the Slot finished executing, resultIsFromChild determines where to read the result from.
 		if(this.resultIsFromChild){
-			return this.resultData; //Return the result from the child.
+			return this.resultData;
+		}
+		else{
+			return this.getDataNotFromChild();
 		}
 	}
-	else{
-		return this.getDataNotFromChild(); //Return the default value / entered value.
-	}
+	//If it isn't done executing and has a child, throw an error.
+	DebugOptions.assert(!this.hasChild);
+	DebugOptions.assert(false); //TODO: see if this is ok.
 };
 
 /**
@@ -202,7 +197,6 @@ Slot.prototype.getData = function(){
  * @abstract
  */
 Slot.prototype.getDataNotFromChild = function(){
-	DebugOptions.assert(!this.resultIsFromChild);
 	GuiElements.markAbstract();
 };
 
@@ -227,12 +221,12 @@ Slot.prototype.removeChild = function(){
  */
 Slot.prototype.findBestFit = function(){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
-	let childIsLeaf = false;
+	let childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childIsLeaf = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(); // Pass on the message.
 	}
-	if(childIsLeaf){
+	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
 		return true;
 	}
@@ -533,7 +527,7 @@ Slot.prototype.checkListUsed = function(list){
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
 	const slot = XmlWriter.createElement(xmlDoc,"slot");
-	XmlWriter.setAttribute(slot,"type","Slot");
+	//XmlWriter.setAttribute(slot,"type","Slot"); //TODO: See why this was here
 	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
 		const child = XmlWriter.createElement(xmlDoc,"child");
@@ -547,10 +541,18 @@ Slot.prototype.createXml = function(xmlDoc){
  * Imports the data from the node to this Slot
  * @param {Document} slotNode
  * @return {Slot} - A reference to this Slot
- * @abstract
  */
 Slot.prototype.importXml = function(slotNode) {
-	DebugOptions.markAbstract();
+	DebugOptions.validateNonNull(slotNode);
+	const childNode = XmlWriter.findSubElement(slotNode, "child");
+	const blockNode = XmlWriter.findSubElement(childNode, "block");
+	if(blockNode != null) {
+		const childBlock = Block.importXml(blockNode);
+		if(childBlock != null) {
+			this.snap(childBlock);
+		}
+	}
+	return this;
 };
 
 /**

@@ -28,6 +28,7 @@ StringData.prototype.isNumber=function(){ //Checks to see if the number can be c
 	return numberRE.test(this.getValue());
 }
 StringData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value","");
+	var value=XmlWriter.getTextNode(dataNode,"value");
+	if(value == null) return null;
 	return new StringData(value);
 };

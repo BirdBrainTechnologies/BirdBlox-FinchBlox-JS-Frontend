@@ -36,10 +36,10 @@ function B_PointInDirection(x,y){
 	CommandBlock.call(this,x,y,"motion");
 	this.addPart(new LabelText(this,"point in direction"));
 	var nS=new NumSlot(this,"TEMPKEY",90);
-	nS.addOption("(90) right",new NumData(90));
-	nS.addOption("(-90) left",new SelectionData(-90));
-	nS.addOption("(0) up",new NumData(0));
-	nS.addOption("(180) down",new NumData(180));
+	nS.addOption(new NumData(90), "(90) right");
+	nS.addOption(new NumData(-90), "(-90) left");
+	nS.addOption(new NumData(0), "(0) up");
+	nS.addOption(new NumData(180), "(180) down");
 	this.addPart(nS);
 }
 B_PointInDirection.prototype = Object.create(CommandBlock.prototype);

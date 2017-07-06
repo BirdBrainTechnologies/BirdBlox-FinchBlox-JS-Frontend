@@ -193,3 +193,20 @@ SmoothMenuBnList.prototype.isScrolling = function(){
 	if(!this.visible) return false;
 	return !this.scrollStatus.still;
 };
+SmoothMenuBnList.prototype.previewHeight = function(){
+	let height = 0;
+	let internalHeight = (this.bnHeight + this.bnMargin) * this.bnTextList.length - this.bnMargin;
+	internalHeight = Math.max(internalHeight, 0);
+	if(this.maxHeight!=null){
+		height = Math.min(internalHeight, this.maxHeight);
+	}
+	return height;
+};
+SmoothMenuBnList.previewHeight = function(count, maxHeight){
+	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+	height = Math.max(height, 0);
+	if(maxHeight != null){
+		height = Math.min(height, maxHeight);
+	}
+	return height;
+};

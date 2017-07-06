@@ -1,13 +1,11 @@
 "use strict";
 
 function PortSlot(parent, key, maxPorts) {
-	DropSlot.call(this, parent, key, Slot.snapTypes.none);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
-	this.setSelectionData();
     for(let portNum = 1; portNum <= this.maxPorts; portNum++) {
-        this.addOption("port " + portNum.toString(), new NumData(portNum));
+        this.addOption(new NumData(portNum), "port " + portNum.toString());
     }
-    this.setSelectionData("1",new NumData(1));
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
 PortSlot.prototype.constructor = PortSlot;

@@ -15,7 +15,7 @@ SaveManager.setConstants = function(){
 
 SaveManager.openBlank = function(nextAction){
 	SaveManager.saveCurrentDoc(true);
-	SaveManager.loadFile("<project><tabs></tabs></project>");
+	SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: use an empty string here
 	if(nextAction != null) nextAction();
 };
 SaveManager.saveAndName = function(message, nextAction){
@@ -183,9 +183,10 @@ SaveManager.loadFile=function(xmlString) {
 		var xmlDoc = XmlWriter.openDoc(xmlString);
 		var project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
-			SaveManager.loadFile("<project><tabs></tabs></project>");
+			SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: change this line
+		} else {
+			CodeManager.importXml(project);
 		}
-		CodeManager.importXml(project);
 	}
 };
 SaveManager.userDuplicate = function(){
@@ -266,6 +267,7 @@ SaveManager.markEdited=function(){
 	if(SaveManager.fileName == null && !SaveManager.saving){
 		SaveManager.saveAsNew();
 	}
+	CodeManager.updateModified();
 };
 SaveManager.saveCurrentDoc = function(blank, fileName, named){
 	if(blank){

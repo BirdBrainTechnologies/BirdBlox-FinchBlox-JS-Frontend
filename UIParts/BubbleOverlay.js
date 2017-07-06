@@ -10,7 +10,7 @@ function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, 
 	this.y = 0;
 	this.bgColor=color;
 	this.margin=margin;
-	this.hMargin=hMargin;
+	this.hMargin=hMargin; //TODO: remove this
 	this.innerGroup=innerGroup;
 	this.parent=parent;
 	this.layerG = layer;
