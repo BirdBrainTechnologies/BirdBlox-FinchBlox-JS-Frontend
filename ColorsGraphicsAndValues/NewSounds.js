@@ -78,6 +78,7 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 	let request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
 	request.addParam("type", Sound.boolToType(isRecording));
+	HtmlServer.showDialog("test", request.toString(), "", function(){}, function(){});
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
 		let res = Number(result);
 		if(!isNaN(res)){
@@ -91,7 +92,7 @@ Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let list = result.split("\n"); //TODO: remove .wav removal
+		let list = result.split("\n");
 		if(result === "") list = [];
 		let resultList = list.map(function(id){
 			return new Sound(id, isRecording);
@@ -107,7 +108,7 @@ Sound.loadSounds = function(isRecording, callbackFn){
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
 	let name = id;
-	if(name.substring(name.length - 4) === ".wav") {
+	if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
 		name = name.substring(0, name.length - 4);
 	}
 	name = name.split("_").join(" ");
