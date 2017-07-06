@@ -65,7 +65,7 @@ DropSlot.prototype.createInputSystem = function(){
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2); //TODO: Perhapse check if this.optionsList.length > 0
+	const inputPad = new NewInputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);

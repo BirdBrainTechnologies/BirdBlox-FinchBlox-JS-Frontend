@@ -1,4 +1,5 @@
 function Button(x,y,width,height,parent){
+	DebugOptions.validateNumbers(x, y, width, height);
 	this.x=x;
 	this.y=y;
 	this.width=width;

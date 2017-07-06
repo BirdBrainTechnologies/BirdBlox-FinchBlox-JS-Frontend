@@ -17,7 +17,6 @@ NewInputPad.setConstants = function(){
 	IP.background = Colors.black;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
-	IP.maxHeight = GuiElements.height - 2 * IP.margin;
 };
 NewInputPad.prototype.addWidget = function(widget){
 	this.widgets.push(widget);
@@ -46,7 +45,8 @@ NewInputPad.prototype.updateDim = function(){
 	});
 	height -= IP.margin;
 	height = Math.max(height, 0);
-	let allocH = (IP.maxHeight - height);
+	const maxHeight = GuiElements.height - 2 * IP.margin;
+	let allocH = (maxHeight - height);
 	this.widgets.forEach(function(widget){
 		if(!widget.fixedHeight()){
 			widget.setMaxHeight(allocH);

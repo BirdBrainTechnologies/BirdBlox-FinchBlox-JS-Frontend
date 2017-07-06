@@ -121,9 +121,7 @@ GuiElements.setConstants=function(){
 
 	Slot.setConstants();
 	EditableSlot.setConstants();
-	NewInputPad.setConstants();
-	InputWidget.NumPad.setConstants();
-	InputWidget.Label.setConstants();
+
 
 	Block.setConstants();
 	BlockPalette.setGraphics();
@@ -134,7 +132,7 @@ GuiElements.setConstants=function(){
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
-	NewInputPad.setConstants();
+
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
@@ -142,6 +140,12 @@ GuiElements.setConstants=function(){
 	RecordingManager();
 	OpenDialog.setConstants();
 	RowDialog.setConstants();
+
+	NewInputPad.setConstants();
+	SoundInputPad.setConstants();
+	InputWidget.NumPad.setConstants();
+	InputWidget.Label.setConstants();
+
 	ConnectMultipleDialog.setConstants();
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();

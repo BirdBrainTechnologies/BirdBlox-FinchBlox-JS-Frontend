@@ -6,12 +6,19 @@ function SoundDropSlot(parent,key, isRecording){
 }
 SoundDropSlot.prototype = Object.create(DropSlot.prototype);
 SoundDropSlot.prototype.constructor = SoundDropSlot;
+SoundDropSlot.prototype.createInputSystem = function(){
+	const x1 = this.getAbsX();
+	const y1 = this.getAbsY();
+	const x2 = this.relToAbsX(this.width);
+	const y2 = this.relToAbsY(this.height);
+	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
+};
 SoundDropSlot.prototype.populatePad = function(selectPad){
-	const me = this;
+	/*const me = this;
 	let list = Sound.getSoundList(this.isRecording);
 	list.forEach(function(sound){
 		selectPad.addOption(new SelectionData(sound.name, sound.id));
-	});
+	});*/
 };
 /* TODO: Sound previewing
 SoundDropSlot.prototype.edit=function(){

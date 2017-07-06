@@ -45,13 +45,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr();
-			}
-			/*if(callbackFn != null) {
+			}*/
+			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Started');
-			}*/
+			}
 		}, 20);
 		return;
 	}
