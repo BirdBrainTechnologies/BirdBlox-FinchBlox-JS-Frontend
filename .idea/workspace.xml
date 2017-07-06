@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -22,11 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SoundInputPad.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SoundInputPad.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="399">
-              <caret line="19" column="18" lean-forward="false" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
+              <caret line="19" column="4" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -42,49 +42,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NewSounds.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="NewSounds.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <element signature="e#111#159#0" expanded="false" />
-                <element signature="e#245#517#0" expanded="false" />
-                <element signature="e#618#758#0" expanded="false" />
-                <element signature="e#657#754#0" expanded="false" />
-                <element signature="e#860#1778#0" expanded="false" />
-                <element signature="e#1004#1169#0" expanded="false" />
-                <element signature="e#1081#1150#0" expanded="false" />
-                <element signature="e#1198#1264#0" expanded="false" />
-                <element signature="e#1299#1388#0" expanded="false" />
-                <element signature="e#1321#1385#0" expanded="false" />
-                <element signature="e#1444#1765#0" expanded="false" />
-                <element signature="e#1662#1751#0" expanded="false" />
-                <element signature="e#1826#2178#0" expanded="false" />
-                <element signature="e#1847#1894#0" expanded="false" />
-                <element signature="e#1900#2176#0" expanded="false" />
-                <element signature="e#1993#2058#0" expanded="false" />
-                <element signature="e#2112#2147#0" expanded="false" />
-                <element signature="e#2252#2649#0" expanded="false" />
-                <element signature="e#2476#2630#0" expanded="false" />
-                <element signature="e#2523#2571#0" expanded="false" />
-                <element signature="e#2576#2627#0" expanded="false" />
-                <element signature="e#2703#3200#0" expanded="false" />
-                <element signature="e#2889#3196#0" expanded="false" />
-                <element signature="e#2995#3038#0" expanded="false" />
-                <element signature="e#3058#3100#0" expanded="false" />
-                <element signature="e#3106#3144#0" expanded="false" />
-                <element signature="e#3246#3493#0" expanded="false" />
-                <element signature="e#3340#3389#0" expanded="false" />
-                <element signature="e#3543#3992#0" expanded="false" />
-                <element signature="e#3661#3912#0" expanded="false" />
-                <element signature="e#3748#3833#0" expanded="false" />
-                <element signature="e#4036#4116#0" expanded="false" />
-                <element signature="e#4055#4089#0" expanded="false" />
-                <element signature="e#4158#4251#0" expanded="false" />
-                <element signature="e#4176#4211#0" expanded="false" />
-                <element signature="e#4217#4249#0" expanded="false" />
-              </folding>
+            <state relative-caret-position="504">
+              <caret line="98" column="45" lean-forward="true" selection-start-line="98" selection-start-column="45" selection-end-line="98" selection-end-column="45" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -102,7 +65,7 @@
       <file leaf-file-name="SmoothScrollBox.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
+            <state relative-caret-position="-1407">
               <caret line="7" column="9" lean-forward="false" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
               <folding />
             </state>
@@ -130,7 +93,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sanit</find>
       <find>sanitize</find>
       <find>sanitizeData</find>
       <find>sanitizeData =</find>
@@ -141,7 +103,6 @@
       <find>drop</find>
       <find>dropsl</find>
       <find>dropslot</find>
-      <find>s</find>
       <find>sele</find>
       <find>selecti</find>
       <find>selection</find>
@@ -158,8 +119,10 @@
       <find>loadFi</find>
       <find>this.enter</find>
       <find>findbest</find>
-      <find>IP.maxHeight</find>
       <find>input</find>
+      <find>IP.maxHeight</find>
+      <find>s</find>
+      <find>sound</find>
     </findStrings>
     <replaceStrings>
       <replace>Sound</replace>
@@ -200,7 +163,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/BlockParts/Slot/PortSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/SoundDropSlot.js" />
         <option value="$PROJECT_DIR$/Variable.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/VarDropSlot.js" />
@@ -251,6 +213,7 @@
         <option value="$PROJECT_DIR$/UIParts/Button.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js" />
+        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js" />
       </list>
     </option>
   </component>
@@ -789,7 +752,7 @@
       <workItem from="1499192813731" duration="1890000" />
       <workItem from="1499210141493" duration="7145000" />
       <workItem from="1499260573758" duration="18870000" />
-      <workItem from="1499350667616" duration="13073000" />
+      <workItem from="1499350667616" duration="14021000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -886,7 +849,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1174078000" />
+    <option name="totallyTimeSpent" value="1175026000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -1324,10 +1287,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="9" lean-forward="false" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
+        <state relative-caret-position="-107">
+          <caret line="35" column="27" lean-forward="true" selection-start-line="35" selection-start-column="27" selection-end-line="35" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="19" column="4" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-168">
+          <caret line="22" column="32" lean-forward="false" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
           <folding />
         </state>
       </provider>
@@ -1348,71 +1327,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1407">
+          <caret line="7" column="9" lean-forward="false" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/NewSounds.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#111#159#0" expanded="false" />
-            <element signature="e#245#517#0" expanded="false" />
-            <element signature="e#618#758#0" expanded="false" />
-            <element signature="e#657#754#0" expanded="false" />
-            <element signature="e#860#1778#0" expanded="false" />
-            <element signature="e#1004#1169#0" expanded="false" />
-            <element signature="e#1081#1150#0" expanded="false" />
-            <element signature="e#1198#1264#0" expanded="false" />
-            <element signature="e#1299#1388#0" expanded="false" />
-            <element signature="e#1321#1385#0" expanded="false" />
-            <element signature="e#1444#1765#0" expanded="false" />
-            <element signature="e#1662#1751#0" expanded="false" />
-            <element signature="e#1826#2178#0" expanded="false" />
-            <element signature="e#1847#1894#0" expanded="false" />
-            <element signature="e#1900#2176#0" expanded="false" />
-            <element signature="e#1993#2058#0" expanded="false" />
-            <element signature="e#2112#2147#0" expanded="false" />
-            <element signature="e#2252#2649#0" expanded="false" />
-            <element signature="e#2476#2630#0" expanded="false" />
-            <element signature="e#2523#2571#0" expanded="false" />
-            <element signature="e#2576#2627#0" expanded="false" />
-            <element signature="e#2703#3200#0" expanded="false" />
-            <element signature="e#2889#3196#0" expanded="false" />
-            <element signature="e#2995#3038#0" expanded="false" />
-            <element signature="e#3058#3100#0" expanded="false" />
-            <element signature="e#3106#3144#0" expanded="false" />
-            <element signature="e#3246#3493#0" expanded="false" />
-            <element signature="e#3340#3389#0" expanded="false" />
-            <element signature="e#3543#3992#0" expanded="false" />
-            <element signature="e#3661#3912#0" expanded="false" />
-            <element signature="e#3748#3833#0" expanded="false" />
-            <element signature="e#4036#4116#0" expanded="false" />
-            <element signature="e#4055#4089#0" expanded="false" />
-            <element signature="e#4158#4251#0" expanded="false" />
-            <element signature="e#4176#4211#0" expanded="false" />
-            <element signature="e#4217#4249#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-107">
-          <caret line="35" column="27" lean-forward="true" selection-start-line="35" selection-start-column="27" selection-end-line="35" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-168">
-          <caret line="22" column="32" lean-forward="false" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="19" column="18" lean-forward="false" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
+        <state relative-caret-position="504">
+          <caret line="98" column="45" lean-forward="true" selection-start-line="98" selection-start-column="45" selection-end-line="98" selection-end-column="45" />
           <folding />
         </state>
       </provider>
