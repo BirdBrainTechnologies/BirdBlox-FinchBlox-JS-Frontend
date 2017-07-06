@@ -75,7 +75,7 @@ DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
 
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.deviceClass === deviceClass && this.getData() != null) {
-		return this.getData().getValue() + 1;
+		return this.getDataNotFromChild().getValue() + 1;
 	} else {
 		return 1;
 	}

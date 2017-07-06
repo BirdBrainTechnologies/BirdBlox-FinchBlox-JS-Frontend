@@ -190,7 +190,6 @@ Slot.prototype.getData = function(){
 	//If it isn't done executing and has a child, throw an error.
 	DebugOptions.assert(!this.hasChild);
 	DebugOptions.assert(false); //TODO: see if this is ok.
-	return this.enteredData;
 };
 
 /**
