@@ -489,12 +489,9 @@ Block.prototype.findBestFit=function(){
 	let hasMatch = false;
 
 	if(move.returnsValue) { //If a connection between the stack and block are possible...
-		let hasMatch = false;
-		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-			for(let i=0;i<this.slots.length;i++){
-				let slotHasMatch = this.slots[i].findBestFit();
-				hasMatch = slotHasMatch || hasMatch;
-			}
+		for(let i=0;i<this.slots.length;i++){
+			let slotHasMatch = this.slots[i].findBestFit();
+			hasMatch = slotHasMatch || hasMatch;
 		}
 	}
 	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...

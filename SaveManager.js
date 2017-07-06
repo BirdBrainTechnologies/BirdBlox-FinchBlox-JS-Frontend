@@ -184,8 +184,9 @@ SaveManager.loadFile=function(xmlString) {
 		var project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
 			SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: change this line
+		} else {
+			CodeManager.importXml(project);
 		}
-		CodeManager.importXml(project);
 	}
 };
 SaveManager.userDuplicate = function(){

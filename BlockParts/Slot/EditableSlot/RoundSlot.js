@@ -64,6 +64,7 @@ RoundSlot.prototype.selectionDataFromValue = function(value){
 };
 RoundSlot.prototype.sanitizeData = function(data){
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
 	if(data.isSelection()) {
 		const value = data.getValue();
 		return this.selectionDataFromValue(value);

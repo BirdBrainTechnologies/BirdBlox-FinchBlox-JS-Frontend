@@ -61,6 +61,7 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim){
 	this.changeText(this.enteredData.asString().getValue(), updateDim);
 };
 EditableSlot.prototype.sanitizeData = function(data) {
+	if(data == null) return null;
 	const inputTypes = EditableSlot.inputTypes;
 	if(this.inputType === inputTypes.string) {
 		data = data.asString();

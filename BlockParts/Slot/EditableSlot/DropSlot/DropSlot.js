@@ -58,7 +58,7 @@ DropSlot.prototype.populatePad = function(selectPad){
 		} else {
 			selectPad.addOption(option.data, option.displayText);
 		}
-	});
+	}.bind(this));
 };
 DropSlot.prototype.createInputSystem = function(){
 	const x1 = this.getAbsX();
@@ -76,7 +76,7 @@ DropSlot.prototype.createInputSystem = function(){
 DropSlot.prototype.selectionDataFromValue = function(value){
 	for(let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(option.data.getValue() === value) {
+		if(!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
 	}
@@ -86,6 +86,7 @@ DropSlot.prototype.sanitizeNonSelectionData = function(data){
 };
 DropSlot.prototype.sanitizeData = function(data){
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
 	if(data.isSelection()) {
 		const value = data.getValue();
 		if(value === "" && this.nullable) {

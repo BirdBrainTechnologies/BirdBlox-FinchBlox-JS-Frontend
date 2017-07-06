@@ -222,12 +222,12 @@ Slot.prototype.removeChild = function(){
  */
 Slot.prototype.findBestFit = function(){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
-	let childIsLeaf = false;
+	let childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childIsLeaf = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(); // Pass on the message.
 	}
-	if(childIsLeaf){
+	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
 		return true;
 	}

@@ -10754,8 +10754,9 @@ SaveManager.loadFile=function(xmlString) {
 		var project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
 			SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: change this line
+		} else {
+			CodeManager.importXml(project);
 		}
-		CodeManager.importXml(project);
 	}
 };
 SaveManager.userDuplicate = function(){
@@ -11425,12 +11426,9 @@ Block.prototype.findBestFit=function(){
 	let hasMatch = false;
 
 	if(move.returnsValue) { //If a connection between the stack and block are possible...
-		let hasMatch = false;
-		if(move.returnsValue){ //If the moving stack returns a value, see if it fits in any slots.
-			for(let i=0;i<this.slots.length;i++){
-				let slotHasMatch = this.slots[i].findBestFit();
-				hasMatch = slotHasMatch || hasMatch;
-			}
+		for(let i=0;i<this.slots.length;i++){
+			let slotHasMatch = this.slots[i].findBestFit();
+			hasMatch = slotHasMatch || hasMatch;
 		}
 	}
 	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
@@ -12553,12 +12551,12 @@ Slot.prototype.removeChild = function(){
  */
 Slot.prototype.findBestFit = function(){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
-	let childIsLeaf = false;
+	let childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childIsLeaf = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(); // Pass on the message.
 	}
-	if(childIsLeaf){
+	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
 		return true;
 	}
@@ -13075,6 +13073,7 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim){
 	this.changeText(this.enteredData.asString().getValue(), updateDim);
 };
 EditableSlot.prototype.sanitizeData = function(data) {
+	if(data == null) return null;
 	const inputTypes = EditableSlot.inputTypes;
 	if(this.inputType === inputTypes.string) {
 		data = data.asString();
@@ -13215,6 +13214,7 @@ RoundSlot.prototype.selectionDataFromValue = function(value){
 };
 RoundSlot.prototype.sanitizeData = function(data){
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
 	if(data.isSelection()) {
 		const value = data.getValue();
 		return this.selectionDataFromValue(value);
@@ -13284,7 +13284,7 @@ DropSlot.prototype.populatePad = function(selectPad){
 		} else {
 			selectPad.addOption(option.data, option.displayText);
 		}
-	});
+	}.bind(this));
 };
 DropSlot.prototype.createInputSystem = function(){
 	const x1 = this.getAbsX();
@@ -13302,7 +13302,7 @@ DropSlot.prototype.createInputSystem = function(){
 DropSlot.prototype.selectionDataFromValue = function(value){
 	for(let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(option.data.getValue() === value) {
+		if(!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
 	}
@@ -13312,6 +13312,7 @@ DropSlot.prototype.sanitizeNonSelectionData = function(data){
 };
 DropSlot.prototype.sanitizeData = function(data){
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
 	if(data.isSelection()) {
 		const value = data.getValue();
 		if(value === "" && this.nullable) {
@@ -13381,7 +13382,7 @@ DropSlot.prototype.populatePad = function(selectPad){
 		} else {
 			selectPad.addOption(option.data, option.displayText);
 		}
-	});
+	}.bind(this));
 };
 DropSlot.prototype.createInputSystem = function(){
 	const x1 = this.getAbsX();
@@ -13399,7 +13400,7 @@ DropSlot.prototype.createInputSystem = function(){
 DropSlot.prototype.selectionDataFromValue = function(value){
 	for(let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(option.data.getValue() === value) {
+		if(!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
 	}
@@ -13409,6 +13410,7 @@ DropSlot.prototype.sanitizeNonSelectionData = function(data){
 };
 DropSlot.prototype.sanitizeData = function(data){
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
 	if(data.isSelection()) {
 		const value = data.getValue();
 		if(value === "" && this.nullable) {
