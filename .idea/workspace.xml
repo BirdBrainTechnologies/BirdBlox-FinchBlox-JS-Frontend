@@ -789,7 +789,7 @@
       <workItem from="1499192813731" duration="1890000" />
       <workItem from="1499210141493" duration="7145000" />
       <workItem from="1499260573758" duration="18870000" />
-      <workItem from="1499350667616" duration="12925000" />
+      <workItem from="1499350667616" duration="12976000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -886,7 +886,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1173930000" />
+    <option name="totallyTimeSpent" value="1173981000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
