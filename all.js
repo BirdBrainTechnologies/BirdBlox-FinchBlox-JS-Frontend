@@ -5909,7 +5909,8 @@ SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
 	button.setCallbackFunction(function(){
 		this.currentData = new SelectionData(sound.name, sound.id);
 		this.close();
-	}.bind(this), true)
+	}.bind(this), true);
+	button.makeScrollable();
 };
 SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
@@ -5932,6 +5933,7 @@ SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 			Sound.playAndStopPrev(sound.id, this.isRecording, null, stoppedPlaying, stoppedPlaying);
 		}
 	}.bind(this), true);
+	button.makeScrollable();
 };
 SoundInputPad.prototype.close = function(){
 	if(this.closed) return;
