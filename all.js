@@ -3182,7 +3182,6 @@ Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, d
 	});
 };
 Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
-	id = id.split(".wav").join(""); //TODO: remove .wav replacement
 	let status = {};
 	status.donePlayingCallback = donePlayingCallback;
 	Sound.playingSoundStatuses.push(status);
@@ -3204,6 +3203,7 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 		}
 	};
 	Sound.getDuration(id, isRecording, function(duration){
+		id = id.split(".wav").join(""); //TODO: remove .wav replacement
 		let request = new HttpRequestBuilder("sound/play");
 		request.addParam("filename", id);
 		request.addParam("type", Sound.boolToType(isRecording));
