@@ -3233,7 +3233,6 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 	let request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
 	request.addParam("type", Sound.boolToType(isRecording));
-	HtmlServer.showDialog("test", request.toString(), "", function(){}, function(){});
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
 		let res = Number(result);
 		if(!isNaN(res)){
