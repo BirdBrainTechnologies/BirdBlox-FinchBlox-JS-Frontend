@@ -90,3 +90,19 @@ Device.stopAll = function(){
 	var request = new HttpRequestBuilder("devices/stop");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+Device.configureBlock = function(blockClass){
+	return;
+	blockClass.prototype.updateConnectionStatus = function(){
+		this.updateActive();
+	};
+	blockClass.prototype.checkActive = function(){
+		if(this.slots[0] == null) return;
+		const index = this.slots[0].getDataNotFromChild().getValue();
+		return this.deviceClass.getManager().deviceIsConnected(index);
+	};
+	const oldUpdateFn = blockClass.prototype.updateAlignRI;
+	blockClass.prototype.updateAlignRI = function(x, y){
+		this.updateActive();
+		return oldUpdateFn.call(this, x, y);
+	};
+};

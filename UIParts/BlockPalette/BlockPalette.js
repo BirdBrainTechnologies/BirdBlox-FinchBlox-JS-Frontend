@@ -1,7 +1,7 @@
 "use strict";
 
 function BlockPalette(){
-	BlockPalette.categories=new Array();
+	BlockPalette.categories = [];
 	BlockPalette.selectedCat=null;
 	BlockPalette.createCatBg();
 	BlockPalette.createPalBg();
@@ -162,6 +162,10 @@ BlockPalette.hideDeviceDropDowns=function(deviceClass){
 };
 BlockPalette.updateAvailableSensors = function(){
 	BlockPalette.passRecursively("updateAvailableSensors");
+};
+BlockPalette.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	BlockPalette.passRecursively.apply(BlockPalette, arguments);
 };
 BlockPalette.passRecursively = function(functionName){
 	const args = Array.prototype.slice.call(arguments, 1);

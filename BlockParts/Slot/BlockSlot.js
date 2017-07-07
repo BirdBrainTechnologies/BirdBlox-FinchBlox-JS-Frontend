@@ -256,6 +256,10 @@ BlockSlot.prototype.countDevicesInUse=function(deviceClass){
 BlockSlot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+BlockSlot.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 BlockSlot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){

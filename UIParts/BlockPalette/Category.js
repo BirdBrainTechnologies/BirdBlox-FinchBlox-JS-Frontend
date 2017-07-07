@@ -198,6 +198,10 @@ Category.prototype.hideDeviceDropDowns=function(deviceClass){
 Category.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+Category.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 Category.prototype.passRecursively = function(functionName){
 	const args = Array.prototype.slice.call(arguments, 1);
 	this.displayStacks.forEach(function(stack){

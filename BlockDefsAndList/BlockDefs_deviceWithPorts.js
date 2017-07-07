@@ -53,9 +53,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	}
 	return new ExecutionStatusRunning(); // Still running
 };
-
-
-
+Device.configureBlock(B_DeviceWithPortsSensorBase);
 
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -111,7 +109,7 @@ B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-
+Device.configureBlock(B_DeviceWithPortsOutputBase);
 
 
 
@@ -165,3 +163,4 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
+Device.configureBlock(B_DeviceWithPortsTriLed);

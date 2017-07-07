@@ -474,7 +474,16 @@ CodeManager.updateAvailableSensors = function(){
 	TabManager.updateAvailableSensors();
 	BlockPalette.updateAvailableSensors();
 };
-
+CodeManager.updateConnectionStatus = function(){
+	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
+};
+CodeManager.passRecursivelyDown = function(message, includePalette) {
+	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
+	TabManager.passRecursivelyDown.apply(TabManager, args);
+	if(includePalette) {
+		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
+	}
+};
 CodeManager.createXml=function(){
 	var CM=CodeManager;
 	var xmlDoc = XmlWriter.newDoc("project");
