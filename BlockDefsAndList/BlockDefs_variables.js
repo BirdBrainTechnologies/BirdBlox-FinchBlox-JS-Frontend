@@ -203,11 +203,7 @@ B_AddToList.prototype.startAction=function(){
 function B_DeleteItemOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"delete"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	nS.addOption(new SelectionData("all", "all"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -240,10 +236,7 @@ function B_InsertItemAtOfList(x,y){
 	this.addPart(new LabelText(this,"insert"));
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -284,10 +277,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 function B_ReplaceItemOfListWith(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"replace item"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
@@ -353,10 +343,7 @@ B_CopyListToList.prototype.startAction=function(){
 function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"item"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 }

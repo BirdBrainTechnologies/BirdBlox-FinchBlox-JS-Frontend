@@ -5,7 +5,7 @@ function RoundSlot(parent, key, inputType, snapType, outputType, data, positive,
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
 	this.slotShape.show();
-	this.additionalOptions = [];
+	this.optionsList = [];
 	this.positive = positive;
 	this.integer = integer;
 	this.labelText = "";
@@ -26,10 +26,10 @@ RoundSlot.prototype.addOption = function(data, displayText) {
 	const option = {};
 	option.displayText = displayText;
 	option.data = data;
-	this.additionalOptions.push(option);
+	this.optionsList.push(option);
 };
 RoundSlot.prototype.populatePad = function(selectPad){
-	this.additionalOptions.forEach(function(option){
+	this.optionsList.forEach(function(option){
 		selectPad.addOption(option.data, option.displayText);
 	});
 };

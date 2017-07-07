@@ -83,7 +83,8 @@ TitleBar.makeButtons=function(){
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.fileMenu=new FileMenu(TB.fileBn);
+	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
+	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
 	TB.viewMenu=new ViewMenu(TB.viewBn);
@@ -114,7 +115,8 @@ TitleBar.makeTitleText=function(){
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 TitleBar.setText=function(text){
-	var TB=TitleBar;
+	const TB = TitleBar;
+	if(text == null) text = "";
 	TB.titleText = text;
 	TitleBar.updateText();
 };

@@ -501,6 +501,7 @@ CodeManager.createXml=function(){
 	return xmlDoc;
 };
 CodeManager.importXml=function(projectNode){
+	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
@@ -522,6 +523,7 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	TitleBar.setText(SaveManager.fileName);
 };
 CodeManager.updateModified = function(){
 	CodeManager.modifiedTime = new Date().getTime();

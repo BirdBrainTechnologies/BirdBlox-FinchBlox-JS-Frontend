@@ -1,5 +1,5 @@
 "use strict";
-var FrontendVersion = 393;
+const FrontendVersion = 393;
 
 
 function DebugOptions(){
@@ -4115,7 +4115,8 @@ TitleBar.makeButtons=function(){
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.fileMenu=new FileMenu(TB.fileBn);
+	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
+	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
 	TB.viewMenu=new ViewMenu(TB.viewBn);
@@ -4146,7 +4147,8 @@ TitleBar.makeTitleText=function(){
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 TitleBar.setText=function(text){
-	var TB=TitleBar;
+	const TB = TitleBar;
+	if(text == null) text = "";
 	TB.titleText = text;
 	TitleBar.updateText();
 };
@@ -6915,7 +6917,7 @@ DebugMenu.prototype.loadOptions = function() {
 DebugMenu.prototype.loadFile=function(){
 	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
 		if(!cancelled){
-			SaveManager.loadFile(resp);
+			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };
@@ -7788,6 +7790,7 @@ CodeManager.createXml=function(){
 	return xmlDoc;
 };
 CodeManager.importXml=function(projectNode){
+	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
@@ -7809,6 +7812,7 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	TitleBar.setText(SaveManager.fileName);
 };
 CodeManager.updateModified = function(){
 	CodeManager.modifiedTime = new Date().getTime();
@@ -10300,13 +10304,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}
-			/*if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('3000');
 			}*/
+			if(callbackFn != null) {
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Hello');
+			}
 		}, 20);
 		return;
 	}
@@ -10576,14 +10580,30 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.import = function(fileName){
+CallbackManager.data.open = function(fileName, data, named) {
+	fileName = HtmlServer.decodeHtml(fileName);
+	data = HtmlServer.decodeHtml(data);
+	named = named === "true";
+	SaveManager.backendOpen(fileName, data, named);
+	return true;
+};
+CallbackManager.data.setName = function(fileName){
+	fileName = HtmlServer.decodeHtml(fileName);
+	SaveManager.backendSetName(fileName);
+	return true;
+};
+CallbackManager.data.close = function(){
+	SaveManager.backendClose();
+	return true;
+};
+/* CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
 CallbackManager.data.openData = function(fileName, data){
 	SaveManager.openData(fileName, data);
 	return true;
-};
+}; */
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
@@ -10760,76 +10780,76 @@ XmlWriter.findNodeByKey = function(nodes, key){
 	return null;
 };
 function SaveManager(){
-	SaveManager.saving = false;
 	SaveManager.fileName = null;
 	SaveManager.named = false;
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
 	SaveManager.autoSaveTimer.start();
-	SaveManager.getCurrentDoc();
+	SaveManager.saving = false;
 }
 SaveManager.setConstants = function(){
-	SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.newFileName = "new program";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
+SaveManager.backendOpen = function(fileName, data, named) {
+	SaveManager.named = named;
+	SaveManager.fileName = fileName;
+	SaveManager.loadData(data);
+};
+SaveManager.loadData = function(data) {
+	if (data.length > 0) {
+		if (data.charAt(0) === "%") {
+			data = decodeURIComponent(data);
+		}
+		const xmlDoc = XmlWriter.openDoc(data);
+		const project = XmlWriter.findElement(xmlDoc, "project");
+		if (project == null) {
+			SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
+		} else {
+			CodeManager.importXml(project);
+		}
+	} else{
+		SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
+		//TODO: fail file open
+	}
+};
+SaveManager.backendSetName = function(fileName){
+	SaveManager.named = true;
+	SaveManager.fileName = fileName;
+	TitleBar.setText(fileName);
+};
+SaveManager.backendClose = function(){
+	SaveManager.loadBlank();
+};
 
-SaveManager.openBlank = function(nextAction){
-	SaveManager.saveCurrentDoc(true);
-	SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: use an empty string here
-	if(nextAction != null) nextAction();
+SaveManager.loadBlank = function(){
+	SaveManager.fileName = null;
+	SaveManager.named = false;
+	SaveManager.loadData("<project><tabs></tabs></project>");
 };
-SaveManager.saveAndName = function(message, nextAction){
-	var title = "Enter name";
-	if(SaveManager.fileName == null){
-		if (nextAction != null) nextAction();
-		return;
-	}
-	SaveManager.forceSave(function () {
-		if (SaveManager.named) {
-			if (nextAction != null) nextAction();
-		}
-		else {
-			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
-				SaveManager.named = true;
-				if (nextAction != null) nextAction();
-			});
-		}
+SaveManager.userNew = function(){
+	SaveManager.autoSave(function(){
+		const request = new HttpRequestBuilder("data/close");
+		HtmlServer.sendRequestWithCallback(request.toString(), function(){
+			SaveManager.loadBlank();
+		});
 	});
 };
-SaveManager.userOpenFile = function(fileName){
-	if(SaveManager.fileName == fileName) {return;}
-	SaveManager.saveAndName("Please name this file before opening a different file", function(){
-		SaveManager.open(fileName);
-	});
-};
-SaveManager.open=function(fileName, named, nextAction){
-	if(named == null){
-		named = true;
-	}
-	var request = new HttpRequestBuilder("data/load");
-	request.addParam("filename", fileName);
-	HtmlServer.sendRequestWithCallback(request.toString(), function (response) {
-		SaveManager.loadFile(response);
-		SaveManager.saveCurrentDoc(false, fileName, named);
-		if(nextAction != null) nextAction();
-	});
-};
-// Saves a the current file and overwrites if the name exists
-SaveManager.forceSave = function(nextAction){
-	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-	var request = new HttpRequestBuilder("data/save");
-	request.addParam("filename", SaveManager.fileName);
+SaveManager.autoSave = function(nextAction){
+	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	const request = new HttpRequestBuilder("data/autoSave");
 	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
 };
-SaveManager.userRename = function(){
-	if(SaveManager.fileName == null) return;
-	SaveManager.forceSave(function(){
-		SaveManager.promptRename(false, SaveManager.fileName, "Rename");
+SaveManager.userOpenFile = function(fileName){
+	if(SaveManager.fileName === fileName) {return;}
+	SaveManager.autoSave(function(){
+		const request = new HttpRequestBuilder("data/open");
+		request.addParam("filename", fileName);
+		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
-	SaveManager.promptRename(isRecording, oldFilename, "Rename", null, nextAction);
+	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
 };
 SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
 	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
@@ -10846,9 +10866,9 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
 };
 // Checks if a name is legitimate and renames the current file to that name if it is.
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
-	if(proposedName == ""){
+	if(proposedName === ""){
 		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
-	} else if(proposedName == oldFilename) {
+	} else if(proposedName === oldFilename) {
 		if(nextAction != null) nextAction();
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
@@ -10866,65 +10886,36 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 	}
 };
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
-	var request = new HttpRequestBuilder("data/rename");
+	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
-	request.addParam("options", "soft");
 	request.addParam("recording", "" + isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		if(oldFilename == SaveManager.fileName && !isRecording) {
-			SaveManager.saveCurrentDoc(false, newName, true);
-		}
-		if(nextAction != null) nextAction();
-	}, function(error){
-		if(400 <= error && error < 500) {
-			SaveManager.sanitizeRename(isRecording, title, newName, nextAction);
-		}
-	});
-};
-SaveManager.userDelete=function(){
-	if(SaveManager.fileName == null) return;
-	SaveManager.userDeleteFile(false, SaveManager.fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
-	var question = "Are you sure you want to delete \"" + filename + "\"?";
+	const question = "Are you sure you want to delete \"" + filename + "\"?";
 	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
-		if(response == "2") {
-			SaveManager.delete(isRecording, filename, function(){
-				if(filename === SaveManager.fileName && !isRecording) {
-					SaveManager.openBlank(nextAction);
-				} else{
-					if(nextAction != null) nextAction();
-				}
-			});
+		if(response === "2") {
+			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);
 };
 SaveManager.delete = function(isRecording, filename, nextAction){
-	var request = new HttpRequestBuilder("data/delete");
+	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
 	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
-SaveManager.userNew = function(){
-	SaveManager.saveAndName("Please name this file before creating a new file", SaveManager.openBlank);
-};
-/**
- * Issues a getAvailableName request and calls the callback with the results
- * @param filename {String}
- * @param callbackFn {function|undefined} - callbackFn(availableName, alreadySanitized, alreadyAvailable)
- * @param isRecording {boolean}
- */
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 	if(isRecording == null){
 		isRecording = false;
 	}
 	DebugOptions.validateNonNull(callbackFn);
-	var request = new HttpRequestBuilder("data/getAvailableName");
+	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
 	request.addParam("recording", "" + isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
-		var json = {};
+		let json = {};
 		try {
 			json = JSON.parse(response);
 		} catch(e){
@@ -10935,197 +10926,77 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 		}
 	});
 };
-SaveManager.loadFile=function(xmlString) {
-	if (xmlString.length > 0) {
-		if (xmlString.charAt(0) == "%") {
-			xmlString = decodeURIComponent(xmlString);
-			//HtmlServer.showChoiceDialog("file",xmlString,"Done","Done",true);
-		}
-		var xmlDoc = XmlWriter.openDoc(xmlString);
-		var project = XmlWriter.findElement(xmlDoc, "project");
-		if (project == null) {
-			SaveManager.loadFile("<project><tabs></tabs></project>"); //TODO: change this line
-		} else {
-			CodeManager.importXml(project);
-		}
-	}
+SaveManager.userDuplicateFile = function(filename){
+	SaveManager.promptDuplicate(filename, "Enter name for duplicate file");
 };
-SaveManager.userDuplicate = function(){
-	if(SaveManager.fileName == null) return;
-	SaveManager.saveAndName("Please name this file before duplicating it", function(){
-		SaveManager.promptDuplicate("Enter name for duplicate file");
+SaveManager.promptDuplicate = function(message, filename){
+	SaveManager.getAvailableName(filename, function(availableName){
+		SaveManager.promptDuplicateWithDefault(message, filename, availableName);
 	});
 };
-SaveManager.promptDuplicate = function(message){
-	SaveManager.getAvailableName(SaveManager.fileName, function(availableName){
-		SaveManager.promptDuplicateWithDefault(message, availableName);
-	});
-};
-SaveManager.promptDuplicateWithDefault = function(message, defaultName){
+SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName){
 	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
 		if(!cancelled){
-			SaveManager.sanitizeDuplicate(response.trim());
+			SaveManager.sanitizeDuplicate(response.trim(), filename);
 		}
 	});
 };
-SaveManager.sanitizeDuplicate = function(proposedName){
-	if(proposedName == ""){
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.");
+SaveManager.sanitizeDuplicate = function(proposedName, filename){
+	if(proposedName === ""){
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
-				SaveManager.duplicate(availableName);
+				SaveManager.duplicate(filename, availableName);
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptDuplicateWithDefault(message, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptDuplicateWithDefault(message, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
 			}
 		});
 	}
 };
-
-SaveManager.duplicate = function(filename){
-	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-	var request = new HttpRequestBuilder("data/save");
+SaveManager.duplicate = function(filename, newName){
+	const request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
-	request.addParam("options", "soft");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		SaveManager.saveCurrentDoc(false, filename, true);
-	}, function(error){
-		if(400 <= error && error < 500) {
-			SaveManager.sanitizeDuplicate(filename);
-		}
-	}, true, xmlDocText);
+	request.addParam("newFilename", newName);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
-SaveManager.userExport=function(){
+SaveManager.userExportFile = function(filename){
 	if(SaveManager.fileName == null) return;
-	SaveManager.saveAndName("Please name this file so it can be exported", function(){
-		SaveManager.export();
-	});
+	SaveManager.export();
 };
-SaveManager.export=function(){
-	var request = new HttpRequestBuilder("data/export");
-	request.addParam("filename", SaveManager.fileName);
+SaveManager.export=function(filename){
+	const request = new HttpRequestBuilder("data/export");
+	request.addParam("filename", filename);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.saveAsNew = function(){
 	SaveManager.saving = true;
-	var request = new HttpRequestBuilder("data/save");
-	request.addParam("options", "new");
-	request.addParam("filename", SaveManager.newFileName);
-	var xmlDocText=XmlWriter.docToText(CodeManager.createXml());
-	HtmlServer.sendRequestWithCallback(request.toString(), function(availableName){
-		SaveManager.saveCurrentDoc(false, availableName, false);
+	const request = new HttpRequestBuilder("data/new");
+	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.saving = false;
 	}, function(){
 		SaveManager.saving = false;
 	}, true, xmlDocText);
 };
 SaveManager.markEdited=function(){
+	CodeManager.updateModified();
 	if(SaveManager.fileName == null && !SaveManager.saving){
 		SaveManager.saveAsNew();
 	}
-	CodeManager.updateModified();
-};
-SaveManager.saveCurrentDoc = function(blank, fileName, named){
-	if(blank){
-		fileName = null;
-		named = false;
-		TitleBar.setText("");
-	} else {
-		TitleBar.setText(fileName);
-	}
-	SaveManager.fileName = fileName;
-	SaveManager.named = named;
-	let namedString = SaveManager.named? "true" : "false";
-	if(blank) namedString = "blank";
-	HtmlServer.setSetting("currentDocNamed", namedString);
-	HtmlServer.setSetting("currentDoc", SaveManager.fileName);
-};
-SaveManager.getCurrentDoc = function(){
-	var load = {};
-	load.name = false;
-	load.named = false;
-	load.blank = false;
-	load.currentDoc = null;
-	load.currentDocNamed = null;
-	var checkProgress = function(){
-		if(load.name && load.named){
-			if(!load.blank) {
-				SaveManager.open(load.currentDoc, load.currentDocNamed);
-			}
-		}
-	};
-	HtmlServer.getSetting("currentDoc", function(response){
-		load.currentDoc = response;
-		load.name = true;
-		checkProgress();
-	});
-	HtmlServer.getSetting("currentDocNamed", function(response){
-		if(response == "true"){
-			load.currentDocNamed = true;
-		} else if (response == "false") {
-			load.currentDocNamed = false;
-		} else if (response == "blank") {
-			load.blank = true;
-		}
-		load.named = true;
-		checkProgress();
-	});
-};
-SaveManager.autoSave = function(){
-	if(SaveManager.fileName != null) {
-		SaveManager.forceSave();
+	if(SaveManager.fileName != null){
+		SaveManager.autoSave();
 	}
 };
 
 
-SaveManager.import=function(fileName){
-	let name = HtmlServer.decodeHtml(fileName);
-	if(SaveManager.fileName == null){
-		SaveManager.open(name);
-		return;
-	}
-	SaveManager.forceSave(function () {
-		SaveManager.open(name);
-	});
-};
-/*SaveManager.getCurrentDocName = function(callbackFnName, callbackFnNameSet){
-	SaveManager.printStatus("getCurrentDocName");
-	HtmlServer.getSetting("currentDoc", function(response){
-		SaveManager.currentDoc = response;
-		SaveManager.fileName = response;
-		callbackFnName();
-	}, callbackFnName);
-	HtmlServer.getSetting("currentDocNamed", function(response){
-		SaveManager.currentDocNamed = response;
-		callbackFnNameSet();
-	}, callbackFnNameSet);
-};*/
-SaveManager.currentDoc = function(){ //Autosaves
-	if(SaveManager.fileName == null) return null;
-	var result = {};
-	result.data = XmlWriter.docToText(CodeManager.createXml());
-	result.filename = SaveManager.fileName;
-	return result;
-};
 
-SaveManager.openData = function(fileName, data){
-	fileName = HtmlServer.decodeHtml(fileName);
-	data = HtmlServer.decodeHtml(data);
-	if(SaveManager.fileName == null){
-		SaveManager.loadFile(data);
-		SaveManager.saveCurrentDoc(false, fileName, true);
-		return;
-	}
-	SaveManager.forceSave(function () {
-		SaveManager.loadFile(data);
-		SaveManager.saveCurrentDoc(false, fileName, true);
-	});
-};
+
 
 //Refactoring...
 /**
@@ -13423,7 +13294,7 @@ function RoundSlot(parent, key, inputType, snapType, outputType, data, positive,
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
 	this.slotShape.show();
-	this.additionalOptions = [];
+	this.optionsList = [];
 	this.positive = positive;
 	this.integer = integer;
 	this.labelText = "";
@@ -13444,10 +13315,10 @@ RoundSlot.prototype.addOption = function(data, displayText) {
 	const option = {};
 	option.displayText = displayText;
 	option.data = data;
-	this.additionalOptions.push(option);
+	this.optionsList.push(option);
 };
 RoundSlot.prototype.populatePad = function(selectPad){
-	this.additionalOptions.forEach(function(option){
+	this.optionsList.forEach(function(option){
 		selectPad.addOption(option.data, option.displayText);
 	});
 };
@@ -14012,6 +13883,7 @@ function NumSlot(parent,key,value,positive,integer){
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
 	this.minVal = null;
 	this.maxVal = null;
+	this.limitsSet = false;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
@@ -14019,12 +13891,18 @@ NumSlot.prototype.addLimits = function(min, max, displayUnits){
 	this.labelText = displayUnits + " (" + min + "-" + max + ")";
 	this.minVal = min;
 	this.maxVal = max;
+	this.limitsSet =true;
 };
 NumSlot.prototype.sanitizeData = function(data){
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
 	if(data == null) return null;
-	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
-	return new NumData(value, data.isValid);
+	if(this.limitsSet) {
+		const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+		return new NumData(value, data.isValid);
+	}
+	else {
+		return data.asNum();
+	}
 };
 /* StringSlot is a subclass of RectSlot.
  * It creates a RectSlot optimized for use with strings.
@@ -14059,6 +13937,32 @@ NumOrStringSlot.prototype.populatePad = function(selectPad){
 	}.bind(this)); //TODO: clean up edit text options
 };
 
+/**
+ * Created by Tom on 7/7/2017.
+ */
+function IndexSlot(parent,key) {
+	const inputType = EditableSlot.inputTypes.any;
+	const snapType = Slot.snapTypes.numStrBool;
+	const outputType = Slot.outputTypes.any;
+	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
+	this.addOption(new SelectionData("last", "last"));
+	this.addOption(new SelectionData("random", "random"));
+	this.addOption(new SelectionData("all", "all"));
+}
+IndexSlot.prototype = Object.create(RoundSlot.prototype);
+IndexSlot.prototype.constructor = IndexSlot;
+IndexSlot.prototype.sanitizeData = function(data){
+	data = RoundSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
+	if(!data.isSelection()) {
+		const numData = data.asNum();
+		if(!numData.isValid) return null;
+		let value = numData.getValueWithC(true, true);
+		value = Math.max(1, value);
+		return new NumData(value);
+	}
+	return data;
+};
 function BlockSlot(parent){
 	this.child=null;
 	//this.width=0;
@@ -16667,11 +16571,7 @@ B_AddToList.prototype.startAction=function(){
 function B_DeleteItemOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"delete"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	nS.addOption(new SelectionData("all", "all"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -16704,10 +16604,7 @@ function B_InsertItemAtOfList(x,y){
 	this.addPart(new LabelText(this,"insert"));
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -16748,10 +16645,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 function B_ReplaceItemOfListWith(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"replace item"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
@@ -16817,10 +16711,7 @@ B_CopyListToList.prototype.startAction=function(){
 function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"item"));
-	var nS=new NumSlot(this,"NumS_idx",1,true,true);
-	nS.addOption(new SelectionData("last", "last"));
-	nS.addOption(new SelectionData("random", "random"));
-	this.addPart(nS);
+	this.addPart(new IndexSlot(this,"NumS_idx"));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 }

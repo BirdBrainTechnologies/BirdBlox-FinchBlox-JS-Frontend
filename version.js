@@ -1,1 +1,1 @@
-var FrontendVersion = 393;
+const FrontendVersion = 393;
