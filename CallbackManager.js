@@ -14,14 +14,30 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.import = function(fileName){
+CallbackManager.data.open = function(fileName, data, named) {
+	fileName = HtmlServer.decodeHtml(fileName);
+	data = HtmlServer.decodeHtml(data);
+	named = named === "true";
+	SaveManager.backendOpen(fileName, data, named);
+	return true;
+};
+CallbackManager.data.setName = function(fileName){
+	fileName = HtmlServer.decodeHtml(fileName);
+	SaveManager.backendSetName(fileName);
+	return true;
+};
+CallbackManager.data.close = function(){
+	SaveManager.backendClose();
+	return true;
+};
+/* CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;
 };
 CallbackManager.data.openData = function(fileName, data){
 	SaveManager.openData(fileName, data);
 	return true;
-};
+}; */
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
@@ -39,4 +55,8 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 };
 CallbackManager.robot.discovered = function(robotList){
 	return true;
+};
+CallbackManager.device = {};
+CallbackManager.device.availableSensors = function(sensorList){
+	TabletSensors.updateAvailable(sensorList);
 };

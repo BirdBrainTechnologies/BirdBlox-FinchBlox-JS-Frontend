@@ -543,6 +543,9 @@ BlockStack.prototype.showDeviceDropDowns=function(deviceClass){
 BlockStack.prototype.countDevicesInUse=function(deviceClass){
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
+BlockStack.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);

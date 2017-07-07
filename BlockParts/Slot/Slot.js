@@ -484,6 +484,10 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
 	return 0;
 };
 
+Slot.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+
 /**
  * Calls the given function on its children
  * @param {string} functionName - The name of the function being called
@@ -594,4 +598,19 @@ Slot.prototype.highlight = function(){
  */
 Slot.prototype.textSummary = function(){
 	DebugOptions.markAbstract();
+};
+
+Slot.prototype.makeActive = function(){
+	this.slotShape.makeActive();
+};
+
+Slot.prototype.makeInactive = function(){
+	this.slotShape.makeInactive();
+};
+Slot.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
 };

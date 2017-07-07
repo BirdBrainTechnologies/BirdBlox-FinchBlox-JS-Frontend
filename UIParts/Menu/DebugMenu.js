@@ -36,7 +36,7 @@ DebugMenu.prototype.loadOptions = function() {
 DebugMenu.prototype.loadFile=function(){
 	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
 		if(!cancelled){
-			SaveManager.loadFile(resp);
+			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };

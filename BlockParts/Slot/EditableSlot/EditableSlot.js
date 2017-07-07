@@ -47,7 +47,7 @@ EditableSlot.prototype.updateEdit = function(data, visibleText){
 EditableSlot.prototype.finishEdit = function(data){
 	DebugOptions.assert(this.editing);
 	if(this.editing) {
-		this.setData(data, false, true);
+		this.setData(data, true, true); //Sanitize data
 		this.slotShape.deselect();
 		this.editing = false;
 	}

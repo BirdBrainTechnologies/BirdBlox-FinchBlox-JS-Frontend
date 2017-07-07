@@ -310,6 +310,9 @@ Tab.prototype.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
+Tab.prototype.updateAvailableSensors = function() {
+	this.passRecursively("updateAvailableSensors");
+};
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	var stacks=this.stackList;

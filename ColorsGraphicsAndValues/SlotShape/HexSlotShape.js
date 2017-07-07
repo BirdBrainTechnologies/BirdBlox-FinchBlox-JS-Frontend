@@ -15,7 +15,7 @@ HexSlotShape.setConstants = function(){
 HexSlotShape.prototype.buildSlot = function(){
 	const HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
-	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category);
+	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category,this.active);
 	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
 };
 HexSlotShape.prototype.updateDim = function(){
@@ -25,4 +25,16 @@ HexSlotShape.prototype.updateDim = function(){
 };
 HexSlotShape.prototype.updateAlign = function(){
 	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+};
+HexSlotShape.prototype.makeActive = function(){
+	if(!this.active) {
+		this.active = true;
+		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
+	}
+};
+HexSlotShape.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
+	}
 };

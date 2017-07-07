@@ -57,7 +57,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 
 
 
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal){
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
@@ -67,10 +67,13 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 	this.maxVal = maxVal;
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
+	this.displayUnits = displayUnits;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	this.addPart(new NumSlot(this,"NumS_out", 0, this.positive, true)); //integer
+	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
+	this.addPart(numSlot);
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
