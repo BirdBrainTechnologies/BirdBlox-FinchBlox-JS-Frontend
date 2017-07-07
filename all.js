@@ -1204,6 +1204,41 @@ DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency){
 DeviceFlutter.getConnectionInstructions = function(){
 	return "Press the \"find me\" button on your Flutter";
 };
+/**
+ * Created by Tom on 7/6/2017.
+ */
+function TabletSensors(){
+	const TS = TabletSensors;
+	TabletSensors.clear();
+	TabletSensors.requestAvailable();
+}
+TabletSensors.requestAvailable = function(){
+	const request = new HttpRequestBuilder("device/availableSensors");
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+		TabletSensors.updateAvailable(response);
+	});
+};
+TabletSensors.updateAvailable = function(sensorList){
+	TabletSensors.clear();
+	const sensors = TabletSensors.sensors;
+	let list = sensorList.split("\n");
+	if(sensorList === "") {
+		list = [];
+	}
+	list.forEach(function(sensor){
+		if(sensors[sensor] === false) {
+			sensors[sensor] = true;
+		}
+	});
+	CodeManager.updateAvailableSensors();
+};
+TabletSensors.clear = function(){
+	const sensors = TabletSensors.sensors = {};
+	sensors.accelerometer = false;
+	sensors.barometer = false;
+	sensors.microphone = false;
+	sensors.gps = false;
+};
 
 
 /* GuiElements is a static class that builds the UI and initializes the other classes.
@@ -1338,6 +1373,7 @@ GuiElements.setConstants=function(){
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
+	TabletSensors();
 
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
@@ -2507,6 +2543,7 @@ Colors.setCategory=function(){
 		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
+		"inactive": "#a3a3a3"
 	};
 };
 Colors.setMultipliers=function(){
@@ -2999,14 +3036,16 @@ BlockGraphics.buildPath.doubleLoop=function(x,y,width,height,innerHeight1,innerH
 	return path;
 }
 BlockGraphics.create=function(){}
-BlockGraphics.create.block=function(category,group,returnsValue){
+BlockGraphics.create.block=function(category,group,returnsValue,active){
+	if(!active) category = "inactive";
 	var path=GuiElements.create.path(group);
 	var fill=Colors.getGradient(category);
 	path.setAttributeNS(null,"fill",fill);
-	BlockGraphics.update.stroke(path,category,returnsValue);
+	BlockGraphics.update.stroke(path,category,returnsValue,active);
 	return path;
 }
-BlockGraphics.create.slot=function(group,type,category){
+BlockGraphics.create.slot=function(group,type,category,active){
+	if(!active) category = "inactive";
 	var bG=BlockGraphics.reporter;
 	var path=GuiElements.create.path(group);
 	if(type==2){
@@ -3018,7 +3057,7 @@ BlockGraphics.create.slot=function(group,type,category){
 		path.setAttributeNS(null,"fill",bG.slotFill);
 	}
 	return path;
-}
+};
 BlockGraphics.create.slotHitBox=function(group){
 	var rectE=GuiElements.create.rect(group);
 	rectE.setAttributeNS(null,"fill","#000");
@@ -3089,7 +3128,8 @@ BlockGraphics.update.glow=function(path){
 	path.setAttributeNS(null,"stroke",glow.color);
 	path.setAttributeNS(null,"stroke-width",glow.strokeW);
 };
-BlockGraphics.update.stroke=function(path,category,returnsValue){
+BlockGraphics.update.stroke=function(path,category,returnsValue,active){
+	if(!active) category = "inactive";
 	if(returnsValue){
 		var outline=Colors.getColor(category);
 		path.setAttributeNS(null,"stroke",outline);
@@ -3098,6 +3138,16 @@ BlockGraphics.update.stroke=function(path,category,returnsValue){
 	else{
 		path.setAttributeNS(null,"stroke-width",0);
 	}
+};
+BlockGraphics.update.hexSlotGradient = function(path, category, active){
+	if(!active) category = "inactive";
+	path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
+};
+BlockGraphics.update.blockActive = function(path,category,returnsValue,active){
+	if(!active) category = "inactive";
+	const fill=Colors.getGradient(category);
+	path.setAttributeNS(null,"fill",fill);
+	BlockGraphics.update.stroke(path,category,returnsValue,active);
 };
 BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
 	var bG=BlockGraphics.highlight;
@@ -4311,14 +4361,19 @@ BlockPalette.endScroll=function(){
 	}
 };
 BlockPalette.showDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].showDeviceDropDowns(deviceClass);
-	}
+	BlockPalette.passRecursively("showDeviceDropDowns", deviceClass);
 };
 BlockPalette.hideDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].hideDeviceDropDowns(deviceClass);
-	}
+	BlockPalette.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+BlockPalette.updateAvailableSensors = function(){
+	BlockPalette.passRecursively("updateAvailableSensors");
+};
+BlockPalette.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	BlockPalette.categories.forEach(function(category){
+		category[functionName].apply(category,args);
+	});
 };
 function DisplayStack(firstBlock,group,category){
 	//this.index=CodeManager.addStack(this); //Universal codeManager needed
@@ -4444,6 +4499,9 @@ DisplayStack.prototype.hideDeviceDropDowns=function(deviceClass){
 DisplayStack.prototype.showDeviceDropDowns=function(deviceClass){
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
+};
+DisplayStack.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
 };
 DisplayStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -4707,14 +4765,19 @@ Category.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
 Category.prototype.showDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showDeviceDropDowns(deviceClass);
-	}
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
 Category.prototype.hideDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideDeviceDropDowns(deviceClass);
-	}
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Category.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+Category.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.displayStacks.forEach(function(stack){
+		stack[functionName].apply(stack,args);
+	});
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;
@@ -7694,6 +7757,10 @@ CodeManager.countDevicesInUse=function(deviceClass){
 CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
+CodeManager.updateAvailableSensors = function(){
+	TabManager.updateAvailableSensors();
+	BlockPalette.updateAvailableSensors();
+};
 
 CodeManager.createXml=function(){
 	var CM=CodeManager;
@@ -8059,6 +8126,9 @@ TabManager.getActiveZoom = function(){
 	}
 	return TabManager.activeTab.getZoom();
 };
+TabManager.updateAvailableSensors = function(){
+	TabManager.passRecursively("updateAvailableSensors");
+};
 function Tab(){
 	this.mainG=GuiElements.create.group(0,0);
 	this.scrollX=0;
@@ -8370,6 +8440,9 @@ Tab.prototype.countDevicesInUse=function(deviceClass){
 		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
+};
+Tab.prototype.updateAvailableSensors = function() {
+	this.passRecursively("updateAvailableSensors");
 };
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -10128,6 +10201,9 @@ BlockStack.prototype.showDeviceDropDowns=function(deviceClass){
 BlockStack.prototype.countDevicesInUse=function(deviceClass){
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
+BlockStack.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);
@@ -10224,13 +10300,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr();
-			}*/
-			if(callbackFn != null) {
+			if(callbackErr != null) {
+				callbackErr(418, "I'm a teapot");
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('3000');
-			}
+			}*/
 		}, 20);
 		return;
 	}
@@ -10255,7 +10331,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 						if(HtmlServer.logHttp){
 							GuiElements.alert("HTTP ERROR: " + xhttp.status);
 						}
-						callbackErr(xhttp.status);
+						callbackErr(xhttp.status, xhttp.responseText);
 					}
 					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
@@ -10292,9 +10368,11 @@ HtmlServer.sendRequest=function(request,requestStatus){
 			callbackFn.requestStatus.result=response;
 		};
 		callbackFn.requestStatus=requestStatus;
-		var callbackErr=function(){
+		var callbackErr=function(code, result){
 			callbackErr.requestStatus.finished=true;
 			callbackErr.requestStatus.error=true;
+			callbackErr.requestStatus.code = code;
+			callbackErr.requestStatus.result = result;
 		};
 		callbackErr.requestStatus=requestStatus;
 		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
@@ -10523,6 +10601,10 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 };
 CallbackManager.robot.discovered = function(robotList){
 	return true;
+};
+CallbackManager.device = {};
+CallbackManager.device.availableSensors = function(sensorList){
+	TabletSensors.updateAvailable(sensorList);
 };
 function XmlWriter(){
 
@@ -11080,6 +11162,7 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
 	this.category=category;
 	this.isGlowing=false;
+	this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
 	
 	this.stack=null; //It has no Stack yet.
 	this.path=this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -11177,7 +11260,7 @@ Block.prototype.getAbsY=function(){
  * @return {object} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath=function(){
-	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue,this.active);
 	TouchReceiver.addListenersChild(pathE,this);
 	return pathE;
 };
@@ -11834,7 +11917,7 @@ Block.prototype.glow=function(){
 };
 /* Recursively removes the outline. */
 Block.prototype.stopGlow=function(){
-	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue,this.active);
 	this.isGlowing=false;
 	if(this.blockSlot1!=null){
 		this.blockSlot1.stopGlow();
@@ -11844,6 +11927,28 @@ Block.prototype.stopGlow=function(){
 	}
 	if(this.bottomOpen&&this.nextBlock!=null){
 		this.nextBlock.stopGlow();
+	}
+};
+
+Block.prototype.makeActive = function(){
+	if(!this.active){
+		this.active = true;
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		this.passRecursively("makeActive");
+	}
+};
+Block.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		this.passRecursively("makeInactive");
+	}
+};
+Block.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
 	}
 };
 
@@ -12004,6 +12109,13 @@ Block.prototype.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
+Block.prototype.checkActive = function(){
+	return true;
+};
+Block.prototype.updateAvailableSensors = function(){
+	this.setActive(this.checkActive());
+	this.passRecursively("updateAvailableSensors");
+};
 Block.prototype.passRecursively=function(functionName){
 	let args = Array.prototype.slice.call(arguments, 1);
 	for(let i=0;i<this.slots.length;i++){
@@ -12138,6 +12250,7 @@ function SlotShape(slot){
 	this.slot = slot;
 	this.visible = false;
 	this.built = false;
+	this.active = true;
 }
 SlotShape.setConstants = function(){
 
@@ -12169,7 +12282,23 @@ SlotShape.prototype.updateDim = function(){
 SlotShape.prototype.updateAlign = function(){
 	DebugOptions.markAbstract();
 };
-
+SlotShape.prototype.makeActive = function(){
+	if(!this.active) {
+		this.active = true;
+	}
+};
+SlotShape.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+	}
+};
+SlotShape.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
+};
 /**
  * Created by Tom on 6/29/2017.
  */
@@ -12300,7 +12429,7 @@ HexSlotShape.setConstants = function(){
 HexSlotShape.prototype.buildSlot = function(){
 	const HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
-	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category);
+	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category,this.active);
 	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
 };
 HexSlotShape.prototype.updateDim = function(){
@@ -12310,6 +12439,18 @@ HexSlotShape.prototype.updateDim = function(){
 };
 HexSlotShape.prototype.updateAlign = function(){
 	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+};
+HexSlotShape.prototype.makeActive = function(){
+	if(!this.active) {
+		this.active = true;
+		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
+	}
+};
+HexSlotShape.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
+	}
 };
 /**
  * Created by Tom on 6/29/2017.
@@ -12922,6 +13063,10 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
 	return 0;
 };
 
+Slot.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+
 /**
  * Calls the given function on its children
  * @param {string} functionName - The name of the function being called
@@ -13032,6 +13177,21 @@ Slot.prototype.highlight = function(){
  */
 Slot.prototype.textSummary = function(){
 	DebugOptions.markAbstract();
+};
+
+Slot.prototype.makeActive = function(){
+	this.slotShape.makeActive();
+};
+
+Slot.prototype.makeInactive = function(){
+	this.slotShape.makeInactive();
+};
+Slot.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
 };
 /**
  * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
@@ -13167,7 +13327,7 @@ EditableSlot.prototype.updateEdit = function(data, visibleText){
 EditableSlot.prototype.finishEdit = function(data){
 	DebugOptions.assert(this.editing);
 	if(this.editing) {
-		this.setData(data, false, true);
+		this.setData(data, true, true); //Sanitize data
 		this.slotShape.deselect();
 		this.editing = false;
 	}
@@ -13850,9 +14010,22 @@ function NumSlot(parent,key,value,positive,integer){
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.num;
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+	this.minVal = null;
+	this.maxVal = null;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
+NumSlot.prototype.addLimits = function(min, max, displayUnits){
+	this.labelText = displayUnits + " (" + min + "-" + max + ")";
+	this.minVal = min;
+	this.maxVal = max;
+};
+NumSlot.prototype.sanitizeData = function(data){
+	data = RoundSlot.prototype.sanitizeData.call(this, data);
+	if(data == null) return null;
+	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+	return new NumData(value, data.isValid);
+};
 /* StringSlot is a subclass of RectSlot.
  * It creates a RectSlot optimized for use with strings.
  * It automatically converts any results into StringData and has a snapType of numStrBool.
@@ -14141,6 +14314,9 @@ BlockSlot.prototype.countDevicesInUse=function(deviceClass){
 	}
 	return 0;
 };
+BlockSlot.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
 BlockSlot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){
@@ -14294,7 +14470,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 
 
 
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal){
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
@@ -14304,10 +14480,13 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 	this.maxVal = maxVal;
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
+	this.displayUnits = displayUnits;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	this.addPart(new NumSlot(this,"NumS_out", 0, this.positive, true)); //integer
+	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
+	this.addPart(numSlot);
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
@@ -14404,8 +14583,8 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
  * Most relay on the HummingbirdManager to remove redundant code.
  */
 
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal);
+function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
@@ -14413,14 +14592,14 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 
 function B_HBServo(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180);
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
 
 
 function B_HBMotor(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100, "Speed");
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -14428,7 +14607,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 
 function B_HBVibration(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100, "Intensity");
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -14436,7 +14615,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 function B_HBLed(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -14543,7 +14722,7 @@ Block.setDisplaySuffix(B_HBDistInch, "inches");
 
 /* Output Blocks */
 function B_FlutterServo(x, y) {
-	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180);
+	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180, "Angle");
 }
 B_FlutterServo.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_FlutterServo.prototype.constructor = B_FlutterServo;
@@ -15782,14 +15961,21 @@ B_DeviceShaken.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new BoolData(status.result=="1",true));
 		}
 		else{
-			return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
-
+B_DeviceShaken.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
+};
 
 
 function B_DeviceSSID(x,y){
@@ -15815,7 +16001,12 @@ B_DeviceSSID.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			}
 		}
 	}
 	else{
@@ -15849,12 +16040,20 @@ B_DevicePressure.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DevicePressure.prototype.checkActive = function(){
+	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
@@ -15883,12 +16082,20 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceRelativeAltitude.prototype.checkActive = function(){
+	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
@@ -15917,12 +16124,20 @@ B_DeviceOrientation.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceOrientation.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
 };
 
 
@@ -15968,12 +16183,20 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceAcceleration.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
 };
 Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
@@ -16007,12 +16230,20 @@ B_DeviceLocation.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceLocation.prototype.checkActive = function(){
+	return TabletSensors.sensors.gps;
 };
 /////////////////
 
@@ -16029,7 +16260,6 @@ B_Display.prototype.startAction=function(){
 	DisplayBox.displayText(message);
 	return new ExecutionStatusDone(); //Done running
 };
-
 
 
 

@@ -155,12 +155,17 @@ BlockPalette.endScroll=function(){
 	}
 };
 BlockPalette.showDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].showDeviceDropDowns(deviceClass);
-	}
+	BlockPalette.passRecursively("showDeviceDropDowns", deviceClass);
 };
 BlockPalette.hideDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<BlockPalette.categories.length;i++){
-		BlockPalette.categories[i].hideDeviceDropDowns(deviceClass);
-	}
+	BlockPalette.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+BlockPalette.updateAvailableSensors = function(){
+	BlockPalette.passRecursively("updateAvailableSensors");
+};
+BlockPalette.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	BlockPalette.categories.forEach(function(category){
+		category[functionName].apply(category,args);
+	});
 };

@@ -190,14 +190,19 @@ Category.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
 Category.prototype.showDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showDeviceDropDowns(deviceClass);
-	}
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
 Category.prototype.hideDeviceDropDowns=function(deviceClass){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideDeviceDropDowns(deviceClass);
-	}
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Category.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+Category.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.displayStacks.forEach(function(stack){
+		stack[functionName].apply(stack,args);
+	});
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;

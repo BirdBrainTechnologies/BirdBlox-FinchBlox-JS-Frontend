@@ -470,6 +470,10 @@ CodeManager.countDevicesInUse=function(deviceClass){
 CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
+CodeManager.updateAvailableSensors = function(){
+	TabManager.updateAvailableSensors();
+	BlockPalette.updateAvailableSensors();
+};
 
 CodeManager.createXml=function(){
 	var CM=CodeManager;

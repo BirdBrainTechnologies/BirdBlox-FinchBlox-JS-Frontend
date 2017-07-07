@@ -5,6 +5,7 @@ function SlotShape(slot){
 	this.slot = slot;
 	this.visible = false;
 	this.built = false;
+	this.active = true;
 }
 SlotShape.setConstants = function(){
 
@@ -35,4 +36,21 @@ SlotShape.prototype.updateDim = function(){
 };
 SlotShape.prototype.updateAlign = function(){
 	DebugOptions.markAbstract();
+};
+SlotShape.prototype.makeActive = function(){
+	if(!this.active) {
+		this.active = true;
+	}
+};
+SlotShape.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+	}
+};
+SlotShape.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
 };

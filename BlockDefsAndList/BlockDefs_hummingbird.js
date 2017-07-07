@@ -3,8 +3,8 @@
  * Most relay on the HummingbirdManager to remove redundant code.
  */
 
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal);
+function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
@@ -12,14 +12,14 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 
 function B_HBServo(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180);
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
 
 
 function B_HBMotor(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100, "Speed");
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -27,7 +27,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 
 function B_HBVibration(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100, "Intensity");
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -35,7 +35,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 function B_HBLed(x,y){
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100);
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;

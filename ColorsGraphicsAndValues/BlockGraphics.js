@@ -366,14 +366,16 @@ BlockGraphics.buildPath.doubleLoop=function(x,y,width,height,innerHeight1,innerH
 	return path;
 }
 BlockGraphics.create=function(){}
-BlockGraphics.create.block=function(category,group,returnsValue){
+BlockGraphics.create.block=function(category,group,returnsValue,active){
+	if(!active) category = "inactive";
 	var path=GuiElements.create.path(group);
 	var fill=Colors.getGradient(category);
 	path.setAttributeNS(null,"fill",fill);
-	BlockGraphics.update.stroke(path,category,returnsValue);
+	BlockGraphics.update.stroke(path,category,returnsValue,active);
 	return path;
 }
-BlockGraphics.create.slot=function(group,type,category){
+BlockGraphics.create.slot=function(group,type,category,active){
+	if(!active) category = "inactive";
 	var bG=BlockGraphics.reporter;
 	var path=GuiElements.create.path(group);
 	if(type==2){
@@ -385,7 +387,7 @@ BlockGraphics.create.slot=function(group,type,category){
 		path.setAttributeNS(null,"fill",bG.slotFill);
 	}
 	return path;
-}
+};
 BlockGraphics.create.slotHitBox=function(group){
 	var rectE=GuiElements.create.rect(group);
 	rectE.setAttributeNS(null,"fill","#000");
@@ -456,7 +458,8 @@ BlockGraphics.update.glow=function(path){
 	path.setAttributeNS(null,"stroke",glow.color);
 	path.setAttributeNS(null,"stroke-width",glow.strokeW);
 };
-BlockGraphics.update.stroke=function(path,category,returnsValue){
+BlockGraphics.update.stroke=function(path,category,returnsValue,active){
+	if(!active) category = "inactive";
 	if(returnsValue){
 		var outline=Colors.getColor(category);
 		path.setAttributeNS(null,"stroke",outline);
@@ -465,6 +468,16 @@ BlockGraphics.update.stroke=function(path,category,returnsValue){
 	else{
 		path.setAttributeNS(null,"stroke-width",0);
 	}
+};
+BlockGraphics.update.hexSlotGradient = function(path, category, active){
+	if(!active) category = "inactive";
+	path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
+};
+BlockGraphics.update.blockActive = function(path,category,returnsValue,active){
+	if(!active) category = "inactive";
+	const fill=Colors.getGradient(category);
+	path.setAttributeNS(null,"fill",fill);
+	BlockGraphics.update.stroke(path,category,returnsValue,active);
 };
 BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
 	var bG=BlockGraphics.highlight;

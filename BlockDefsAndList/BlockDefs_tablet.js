@@ -25,14 +25,21 @@ B_DeviceShaken.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new BoolData(status.result=="1",true));
 		}
 		else{
-			return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
-
+B_DeviceShaken.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
+};
 
 
 function B_DeviceSSID(x,y){
@@ -58,7 +65,12 @@ B_DeviceSSID.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			}
 		}
 	}
 	else{
@@ -92,12 +104,20 @@ B_DevicePressure.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DevicePressure.prototype.checkActive = function(){
+	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
@@ -126,12 +146,20 @@ B_DeviceRelativeAltitude.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceRelativeAltitude.prototype.checkActive = function(){
+	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
@@ -160,12 +188,20 @@ B_DeviceOrientation.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new StringData(status.result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceOrientation.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
 };
 
 
@@ -211,12 +247,20 @@ B_DeviceAcceleration.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(result,true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceAcceleration.prototype.checkActive = function(){
+	return TabletSensors.sensors.accelerometer;
 };
 Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
@@ -250,12 +294,20 @@ B_DeviceLocation.prototype.updateAction=function(){
 			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
 		}
 		else{
-			return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			if(status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+			}
 		}
 	}
 	else{
 		return new ExecutionStatusRunning(); //Still running
 	}
+};
+B_DeviceLocation.prototype.checkActive = function(){
+	return TabletSensors.sensors.gps;
 };
 /////////////////
 
@@ -272,7 +324,6 @@ B_Display.prototype.startAction=function(){
 	DisplayBox.displayText(message);
 	return new ExecutionStatusDone(); //Done running
 };
-
 
 
 

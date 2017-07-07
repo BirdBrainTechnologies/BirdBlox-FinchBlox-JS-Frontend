@@ -40,3 +40,7 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 CallbackManager.robot.discovered = function(robotList){
 	return true;
 };
+CallbackManager.device = {};
+CallbackManager.device.availableSensors = function(sensorList){
+	TabletSensors.updateAvailable(sensorList);
+};

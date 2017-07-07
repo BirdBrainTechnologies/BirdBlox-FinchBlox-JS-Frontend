@@ -1,7 +1,7 @@
 "use strict";
 /* Output Blocks */
 function B_FlutterServo(x, y) {
-	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180);
+	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180, "Angle");
 }
 B_FlutterServo.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_FlutterServo.prototype.constructor = B_FlutterServo;

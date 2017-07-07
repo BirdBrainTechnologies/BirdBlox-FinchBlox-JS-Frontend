@@ -250,3 +250,6 @@ TabManager.getActiveZoom = function(){
 	}
 	return TabManager.activeTab.getZoom();
 };
+TabManager.updateAvailableSensors = function(){
+	TabManager.passRecursively("updateAvailableSensors");
+};

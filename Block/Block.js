@@ -34,6 +34,7 @@ function Block(type,returnType,x,y,category){ //Type: 0=Command, 1=Reporter, 2=P
 	this.running=0; //Running: 0=Not started, 1=Waiting for slots to finish, 2=Running, 3=Completed.
 	this.category=category;
 	this.isGlowing=false;
+	this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
 	
 	this.stack=null; //It has no Stack yet.
 	this.path=this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -131,7 +132,7 @@ Block.prototype.getAbsY=function(){
  * @return {object} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath=function(){
-	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue);
+	const pathE=BlockGraphics.create.block(this.category,this.group,this.returnsValue,this.active);
 	TouchReceiver.addListenersChild(pathE,this);
 	return pathE;
 };
@@ -788,7 +789,7 @@ Block.prototype.glow=function(){
 };
 /* Recursively removes the outline. */
 Block.prototype.stopGlow=function(){
-	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue);
+	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue,this.active);
 	this.isGlowing=false;
 	if(this.blockSlot1!=null){
 		this.blockSlot1.stopGlow();
@@ -798,6 +799,28 @@ Block.prototype.stopGlow=function(){
 	}
 	if(this.bottomOpen&&this.nextBlock!=null){
 		this.nextBlock.stopGlow();
+	}
+};
+
+Block.prototype.makeActive = function(){
+	if(!this.active){
+		this.active = true;
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		this.passRecursively("makeActive");
+	}
+};
+Block.prototype.makeInactive = function(){
+	if(this.active){
+		this.active = false;
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		this.passRecursively("makeInactive");
+	}
+};
+Block.prototype.setActive = function(active){
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
 	}
 };
 
@@ -957,6 +980,13 @@ Block.prototype.countDevicesInUse=function(deviceClass){
 		largest=Math.max(largest,this.nextBlock.countDevicesInUse(deviceClass));
 	}
 	return largest;
+};
+Block.prototype.checkActive = function(){
+	return true;
+};
+Block.prototype.updateAvailableSensors = function(){
+	this.setActive(this.checkActive());
+	this.passRecursively("updateAvailableSensors");
 };
 Block.prototype.passRecursively=function(functionName){
 	let args = Array.prototype.slice.call(arguments, 1);

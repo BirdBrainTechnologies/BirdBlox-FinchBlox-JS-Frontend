@@ -27,6 +27,7 @@ Colors.setCategory=function(){
 		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
+		"inactive": "#a3a3a3"
 	};
 };
 Colors.setMultipliers=function(){

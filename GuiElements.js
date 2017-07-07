@@ -132,6 +132,7 @@ GuiElements.setConstants=function(){
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
+	TabletSensors();
 
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();

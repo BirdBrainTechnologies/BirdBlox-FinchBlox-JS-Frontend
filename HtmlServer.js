@@ -45,13 +45,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr();
-			}*/
-			if(callbackFn != null) {
+			if(callbackErr != null) {
+				callbackErr(418, "I'm a teapot");
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('3000');
-			}
+			}*/
 		}, 20);
 		return;
 	}
@@ -76,7 +76,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 						if(HtmlServer.logHttp){
 							GuiElements.alert("HTTP ERROR: " + xhttp.status);
 						}
-						callbackErr(xhttp.status);
+						callbackErr(xhttp.status, xhttp.responseText);
 					}
 					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
@@ -113,9 +113,11 @@ HtmlServer.sendRequest=function(request,requestStatus){
 			callbackFn.requestStatus.result=response;
 		};
 		callbackFn.requestStatus=requestStatus;
-		var callbackErr=function(){
+		var callbackErr=function(code, result){
 			callbackErr.requestStatus.finished=true;
 			callbackErr.requestStatus.error=true;
+			callbackErr.requestStatus.code = code;
+			callbackErr.requestStatus.result = result;
 		};
 		callbackErr.requestStatus=requestStatus;
 		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
