@@ -76,6 +76,14 @@ DeviceManager.prototype.updateTotalStatus = function(){
 DeviceManager.prototype.getTotalStatus = function(){
 	return this.connectionStatus;
 };
+DeviceManager.prototype.deviceIsConnected = function(index){
+	if(index >= this.getDeviceCount()) {
+		return false;
+	}
+	else {
+		return this.connectedDevices[index].getStatus() === DeviceManager.statuses.connected;
+	}
+};
 DeviceManager.prototype.updateSelectableDevices = function(){
 	var oldCount=this.selectableDevices;
 	var inUse=CodeManager.countDevicesInUse(this.deviceClass);

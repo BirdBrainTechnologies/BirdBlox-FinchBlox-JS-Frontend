@@ -546,6 +546,10 @@ BlockStack.prototype.countDevicesInUse=function(deviceClass){
 BlockStack.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+BlockStack.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);

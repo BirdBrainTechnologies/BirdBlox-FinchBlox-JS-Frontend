@@ -940,6 +940,22 @@ Device.stopAll = function(){
 	var request = new HttpRequestBuilder("devices/stop");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+Device.configureBlock = function(blockClass){
+	return;
+	blockClass.prototype.updateConnectionStatus = function(){
+		this.updateActive();
+	};
+	blockClass.prototype.checkActive = function(){
+		if(this.slots[0] == null) return;
+		const index = this.slots[0].getDataNotFromChild().getValue();
+		return this.deviceClass.getManager().deviceIsConnected(index);
+	};
+	const oldUpdateFn = blockClass.prototype.updateAlignRI;
+	blockClass.prototype.updateAlignRI = function(x, y){
+		this.updateActive();
+		return oldUpdateFn.call(this, x, y);
+	};
+};
 /**
  * Created by Tom on 6/14/2017.
  */
@@ -1048,6 +1064,14 @@ DeviceManager.prototype.updateTotalStatus = function(){
 };
 DeviceManager.prototype.getTotalStatus = function(){
 	return this.connectionStatus;
+};
+DeviceManager.prototype.deviceIsConnected = function(index){
+	if(index >= this.getDeviceCount()) {
+		return false;
+	}
+	else {
+		return this.connectedDevices[index].getStatus() === DeviceManager.statuses.connected;
+	}
 };
 DeviceManager.prototype.updateSelectableDevices = function(){
 	var oldCount=this.selectableDevices;
@@ -4209,7 +4233,7 @@ TitleBar.updateZoomPart2=function(){
 
 
 function BlockPalette(){
-	BlockPalette.categories=new Array();
+	BlockPalette.categories = [];
 	BlockPalette.selectedCat=null;
 	BlockPalette.createCatBg();
 	BlockPalette.createPalBg();
@@ -4371,6 +4395,10 @@ BlockPalette.hideDeviceDropDowns=function(deviceClass){
 BlockPalette.updateAvailableSensors = function(){
 	BlockPalette.passRecursively("updateAvailableSensors");
 };
+BlockPalette.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	BlockPalette.passRecursively.apply(BlockPalette, arguments);
+};
 BlockPalette.passRecursively = function(functionName){
 	const args = Array.prototype.slice.call(arguments, 1);
 	BlockPalette.categories.forEach(function(category){
@@ -4504,6 +4532,10 @@ DisplayStack.prototype.showDeviceDropDowns=function(deviceClass){
 };
 DisplayStack.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
+};
+DisplayStack.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 DisplayStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -4774,6 +4806,10 @@ Category.prototype.hideDeviceDropDowns=function(deviceClass){
 };
 Category.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
+};
+Category.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 Category.prototype.passRecursively = function(functionName){
 	const args = Array.prototype.slice.call(arguments, 1);
@@ -7764,7 +7800,16 @@ CodeManager.updateAvailableSensors = function(){
 	TabManager.updateAvailableSensors();
 	BlockPalette.updateAvailableSensors();
 };
-
+CodeManager.updateConnectionStatus = function(){
+	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
+};
+CodeManager.passRecursivelyDown = function(message, includePalette) {
+	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
+	TabManager.passRecursivelyDown.apply(TabManager, args);
+	if(includePalette) {
+		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
+	}
+};
 CodeManager.createXml=function(){
 	var CM=CodeManager;
 	var xmlDoc = XmlWriter.newDoc("project");
@@ -8112,6 +8157,10 @@ TabManager.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
+TabManager.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	TabManager.passRecursively.apply(TabManager, arguments);
+};
 TabManager.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	for(var i=0;i<TabManager.tabList.length;i++){
@@ -8448,6 +8497,10 @@ Tab.prototype.countDevicesInUse=function(deviceClass){
 };
 Tab.prototype.updateAvailableSensors = function() {
 	this.passRecursively("updateAvailableSensors");
+};
+Tab.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -10209,6 +10262,10 @@ BlockStack.prototype.countDevicesInUse=function(deviceClass){
 BlockStack.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+BlockStack.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 BlockStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);
@@ -10305,13 +10362,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Hello');
-			}
+			}*/
 		}, 20);
 		return;
 	}
@@ -10618,6 +10675,7 @@ CallbackManager.dialog.alertResponded = function(){
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	CodeManager.updateConnectionStatus();
 	return true;
 };
 CallbackManager.robot.discovered = function(robotList){
@@ -10994,7 +11052,13 @@ SaveManager.markEdited=function(){
 		SaveManager.autoSave();
 	}
 };
-
+SaveManager.currentDoc = function(){ //Autosaves
+	if(SaveManager.fileName == null) return null;
+	var result = {};
+	result.data = XmlWriter.docToText(CodeManager.createXml());
+	result.filename = SaveManager.fileName;
+	return result;
+};
 
 
 
@@ -11823,6 +11887,12 @@ Block.prototype.setActive = function(active){
 		this.makeInactive();
 	}
 };
+Block.prototype.checkActive = function(){
+	return true;
+};
+Block.prototype.updateActive = function(){
+	this.setActive(this.checkActive());
+};
 
 Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
 	xmlBlocks.appendChild(this.createXml(xmlDoc));
@@ -11981,12 +12051,20 @@ Block.prototype.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
-Block.prototype.checkActive = function(){
-	return true;
-};
 Block.prototype.updateAvailableSensors = function(){
 	this.setActive(this.checkActive());
 	this.passRecursively("updateAvailableSensors");
+};
+Block.prototype.updateConnectionStatus = function(){
+
+};
+Block.prototype.passRecursivelyDown = function(message){
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+	if(message === "updateConnectionStatus") {
+		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 Block.prototype.passRecursively=function(functionName){
 	let args = Array.prototype.slice.call(arguments, 1);
@@ -12939,6 +13017,11 @@ Slot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
 
+Slot.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+
 /**
  * Calls the given function on its children
  * @param {string} functionName - The name of the function being called
@@ -13714,13 +13797,14 @@ BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return data;
 };
 function DeviceDropSlot(parent, key, deviceClass, shortText) {
+	this.assignUpdateActive(parent);
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
 	const data = new SelectionData(this.prefixText + 1, 0);
-	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.select, Slot.snapTypes.none, data, false);
 
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
@@ -13735,6 +13819,21 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
+DeviceDropSlot.prototype.assignUpdateActive = function(parent){
+	const me = this;
+	const oldFn = parent.checkActive.bind(parent);
+	parent.checkActive = function(){
+		const index = me.getDataNotFromChild().getValue();
+		return oldFn() && me.deviceClass.getManager().deviceIsConnected(index);
+	};
+};
+DeviceDropSlot.prototype.setData = function(data, sanitize, updateDim){
+	DropSlot.prototype.setData.call(this, data, sanitize, updateDim);
+	this.parent.updateActive();
+};
+DeviceDropSlot.prototype.updateConnectionStatus = function(){
+	this.parent.updateActive();
+};
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
 	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	for (let i = 0; i < deviceCount; i++) {
@@ -13797,17 +13896,17 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		return 1;
 	}
 };
-
-DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
-	const numData = data.asNum();
+DeviceDropSlot.prototype.selectionDataFromValue = function(value){
+	const numData = (new StringData(value).asNum());
 	if(!numData.isValid) return null;
-	const value = numData.getValue();
-	if(value < 0) return null;
-	if(value % 1 !== 0) return null;
-	if(!Number.isInteger(value)) return null;
-	if(value >= 30) return null; // TODO: implement connection limit
-	return data;
+	const numVal = numData.getValueWithC(true, true);
+	if(numVal >= 30) return null; // TODO: implement connection limit
+	return new SelectionData(this.prefixText + (numVal + 1), numVal);
 };
+DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	return null;
+};
+
 //@fix Write documentation.
 
 function SoundDropSlot(parent,key, isRecording){
@@ -14222,6 +14321,10 @@ BlockSlot.prototype.countDevicesInUse=function(deviceClass){
 BlockSlot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+BlockSlot.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 BlockSlot.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){
@@ -14371,9 +14474,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	}
 	return new ExecutionStatusRunning(); // Still running
 };
-
-
-
+Device.configureBlock(B_DeviceWithPortsSensorBase);
 
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -14429,7 +14530,7 @@ B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-
+Device.configureBlock(B_DeviceWithPortsOutputBase);
 
 
 
@@ -14483,6 +14584,8 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
+Device.configureBlock(B_DeviceWithPortsTriLed);
+
 /* This file contains the implementations for Blocks in the hummingbird category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  * Most relay on the HummingbirdManager to remove redundant code.

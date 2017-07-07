@@ -823,6 +823,12 @@ Block.prototype.setActive = function(active){
 		this.makeInactive();
 	}
 };
+Block.prototype.checkActive = function(){
+	return true;
+};
+Block.prototype.updateActive = function(){
+	this.setActive(this.checkActive());
+};
 
 Block.prototype.writeToXml=function(xmlDoc,xmlBlocks){
 	xmlBlocks.appendChild(this.createXml(xmlDoc));
@@ -981,12 +987,20 @@ Block.prototype.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
-Block.prototype.checkActive = function(){
-	return true;
-};
 Block.prototype.updateAvailableSensors = function(){
 	this.setActive(this.checkActive());
 	this.passRecursively("updateAvailableSensors");
+};
+Block.prototype.updateConnectionStatus = function(){
+
+};
+Block.prototype.passRecursivelyDown = function(message){
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+	if(message === "updateConnectionStatus") {
+		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 Block.prototype.passRecursively=function(functionName){
 	let args = Array.prototype.slice.call(arguments, 1);

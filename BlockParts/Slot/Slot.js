@@ -488,6 +488,11 @@ Slot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
 
+Slot.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+
 /**
  * Calls the given function on its children
  * @param {string} functionName - The name of the function being called

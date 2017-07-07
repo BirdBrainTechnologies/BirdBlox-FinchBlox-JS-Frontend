@@ -231,6 +231,10 @@ TabManager.countDevicesInUse=function(deviceClass){
 	}
 	return largest;
 };
+TabManager.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	TabManager.passRecursively.apply(TabManager, arguments);
+};
 TabManager.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	for(var i=0;i<TabManager.tabList.length;i++){

@@ -1,11 +1,12 @@
 function DeviceDropSlot(parent, key, deviceClass, shortText) {
+	this.assignUpdateActive(parent);
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
 	const data = new SelectionData(this.prefixText + 1, 0);
-	DropSlot.call(this, parent, key, EditableSlot.inputTypes.num, Slot.snapTypes.none, data, false);
+	DropSlot.call(this, parent, key, EditableSlot.inputTypes.select, Slot.snapTypes.none, data, false);
 
 	this.deviceClass = deviceClass;
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
@@ -20,6 +21,21 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
+DeviceDropSlot.prototype.assignUpdateActive = function(parent){
+	const me = this;
+	const oldFn = parent.checkActive.bind(parent);
+	parent.checkActive = function(){
+		const index = me.getDataNotFromChild().getValue();
+		return oldFn() && me.deviceClass.getManager().deviceIsConnected(index);
+	};
+};
+DeviceDropSlot.prototype.setData = function(data, sanitize, updateDim){
+	DropSlot.prototype.setData.call(this, data, sanitize, updateDim);
+	this.parent.updateActive();
+};
+DeviceDropSlot.prototype.updateConnectionStatus = function(){
+	this.parent.updateActive();
+};
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
 	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	for (let i = 0; i < deviceCount; i++) {
@@ -82,14 +98,13 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		return 1;
 	}
 };
-
-DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
-	const numData = data.asNum();
+DeviceDropSlot.prototype.selectionDataFromValue = function(value){
+	const numData = (new StringData(value).asNum());
 	if(!numData.isValid) return null;
-	const value = numData.getValue();
-	if(value < 0) return null;
-	if(value % 1 !== 0) return null;
-	if(!Number.isInteger(value)) return null;
-	if(value >= 30) return null; // TODO: implement connection limit
-	return data;
+	const numVal = numData.getValueWithC(true, true);
+	if(numVal >= 30) return null; // TODO: implement connection limit
+	return new SelectionData(this.prefixText + (numVal + 1), numVal);
+};
+DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
+	return null;
 };

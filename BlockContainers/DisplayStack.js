@@ -126,6 +126,10 @@ DisplayStack.prototype.showDeviceDropDowns=function(deviceClass){
 DisplayStack.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
+DisplayStack.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
 DisplayStack.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock,args);

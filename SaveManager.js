@@ -212,6 +212,12 @@ SaveManager.markEdited=function(){
 		SaveManager.autoSave();
 	}
 };
-
+SaveManager.currentDoc = function(){ //Autosaves
+	if(SaveManager.fileName == null) return null;
+	var result = {};
+	result.data = XmlWriter.docToText(CodeManager.createXml());
+	result.filename = SaveManager.fileName;
+	return result;
+};
 
 
