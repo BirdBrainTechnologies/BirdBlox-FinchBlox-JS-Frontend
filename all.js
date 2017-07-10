@@ -9812,7 +9812,7 @@ FileContextMenu.prototype.addOptions=function(){
 			dialog.reloadDialog();
 		});
 		this.close();
-	}.bind(this), VectorPaths.edit);
+	}.bind(this), VectorPaths.trash);
 };
 FileContextMenu.prototype.close=function(){
 	this.bubbleOverlay.hide();
