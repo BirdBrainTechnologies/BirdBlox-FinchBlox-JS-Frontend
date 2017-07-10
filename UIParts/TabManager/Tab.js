@@ -73,15 +73,6 @@ Tab.prototype.checkBroadcastRunning=function(message){
 	}
 	return false;
 };
-Tab.prototype.checkBroadcastMessageAvailable=function(message){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i].checkBroadcastMessageAvailable(message)){
-			return true;
-		}
-	}
-	return false;
-};
 Tab.prototype.updateAvailableMessages=function(){
 	this.passRecursively("updateAvailableMessages");
 };

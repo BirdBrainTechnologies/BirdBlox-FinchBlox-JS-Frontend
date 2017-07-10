@@ -433,11 +433,6 @@ BlockStack.prototype.checkBroadcastRunning=function(message){
 	}
 	return false;
 };
-/* Recursively checks if a given message is still in use by any of the DropSlots.
- */
-BlockStack.prototype.checkBroadcastMessageAvailable=function(message){
-	return this.firstBlock.checkBroadcastMessageAvailable(message);
-};
 /* Recursively updates the available broadcast messages.
  */
 BlockStack.prototype.updateAvailableMessages=function(){

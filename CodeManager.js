@@ -435,16 +435,6 @@ CodeManager.addBroadcastMessage=function(message){
 };
 /* @fix Write documentation.
  */
-CodeManager.removeUnusedMessages=function(){ //TODO: remove this
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
-			messages.splice(i,1);
-		}
-	}
-};
-/* @fix Write documentation.
- */
 CodeManager.updateAvailableMessages=function(){
 	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();

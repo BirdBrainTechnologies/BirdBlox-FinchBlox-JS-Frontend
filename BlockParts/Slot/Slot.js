@@ -411,14 +411,6 @@ Slot.prototype.convertData = function(data){
 	return null;
 };
 
-/**
- * Overridden by subclasses. Checks if a given message is still in use by any of the DropSlots.
- * @param {string} message - the message to check
- */
-Slot.prototype.checkBroadcastMessageAvailable = function(message){
-	return false;
-};
-
 /** Overridden by subclasses. Updates the available broadcast messages. */
 Slot.prototype.updateAvailableMessages = function(){
 

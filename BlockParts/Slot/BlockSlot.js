@@ -168,13 +168,6 @@ BlockSlot.prototype.stopGlow=function(){
 		this.child.stopGlow();
 	}
 };
-/* Recursively checks if a given message is still in use by any of the DropSlots. */
-BlockSlot.prototype.checkBroadcastMessageAvailable=function(message){
-	if(this.hasChild){
-		return this.child.checkBroadcastMessageAvailable(message);
-	}
-	return false;
-};
 /* Recursively updates the available broadcast messages.
  */
 BlockSlot.prototype.updateAvailableMessages=function(){
