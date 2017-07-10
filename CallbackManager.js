@@ -50,6 +50,7 @@ CallbackManager.dialog.alertResponded = function(){
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	CodeManager.updateConnectionStatus();
 	return true;

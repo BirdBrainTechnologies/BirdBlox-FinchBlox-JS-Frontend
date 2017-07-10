@@ -141,6 +141,7 @@ GuiElements.setConstants=function(){
 	RecordingManager();
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
+	FileContextMenu.setGraphics();
 
 	NewInputPad.setConstants();
 	SoundInputPad.setConstants();

@@ -21,11 +21,13 @@ OpenDialog.prototype.show = function(){
 	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 4 - RD.bnMargin * 4;
-	var file = this.files[index];
+	const cols = 3;
+	const RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+	const file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
+	/*
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createExportBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
@@ -34,6 +36,14 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createDeleteBn(file, currentX, y, contentGroup);
+	*/
+
+	let currentX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDuplicateBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createMoreBn(file, currentX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
@@ -70,6 +80,15 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
 		SaveManager.userExportFile(file);
 	});
+};
+OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+		const x1 = this.contentRelToAbsX(x);
+		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		const y1 = this.contentRelToAbsY(y);
+		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		new FileContextMenu(this, file, x1, x2, y1, y2);
+	}.bind(this));
 };
 OpenDialog.prototype.createNewBn = function(){
 	let RD = RowDialog;

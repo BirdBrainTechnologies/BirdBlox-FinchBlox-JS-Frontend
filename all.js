@@ -1390,6 +1390,7 @@ GuiElements.setConstants=function(){
 	RecordingManager();
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
+	FileContextMenu.setGraphics();
 
 	NewInputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -2675,6 +2676,11 @@ function VectorPaths(){
 	VP.copy.width = 24;
 	VP.copy.height = 24;
 	VP.copy.path = "M 4 1 C 2.9 1 2 1.9 2 3 L 2 17 L 4 17 L 4 3 L 16 3 L 16 1 L 4 1 z M 8 5 C 6.9 5 6 5.9 6 7 L 6 21 C 6 22.1 6.9 23 8 23 L 19 23 C 20.1 23 21 22.1 21 21 L 21 7 C 21 5.9 20.1 5 19 5 L 8 5 z M 8 7 L 19 7 L 19 21 L 8 21 L 8 7 z";
+	VP.dots = {};
+	VP.dots.width = 24;
+	VP.dots.height = 24;
+	VP.dots.path = "M 12 4 C 10.9 4 10 4.9 10 6 C 10 7.1 10.9 8 12 8 C 13.1 8 14 7.1 14 6 C 14 4.9 13.1 4 12 4 z M 12 10 C 10.9 10 10 10.9 10 12 C 10 13.1 10.9 14 12 14 C 13.1 14 14 13.1 14 12 C 14 10.9 13.1 10 12 10 z M 12 16 C 10.9 16 10 16.9 10 18 C 10 19.1 10.9 20 12 20 C 13.1 20 14 19.1 14 18 C 14 16.9 13.1 16 12 16 z ";
+	VP.file = VP.dots;
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -4868,6 +4874,9 @@ Button.setGraphics=function(){
 	Button.defaultFont="Arial";
 	Button.defaultFontWeight="normal";
 	Button.defaultCharHeight=12;
+
+	Button.defaultIconH = 15;
+	Button.defaultSideMargin = 10;
 };
 Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
@@ -4930,6 +4939,12 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	if(charH==null){
 		charH=Button.defaultCharHeight;
 	}
+	if(iconHeight == null){
+		iconHeight = Button.defaultIconH;
+	}
+	if(sideMargin == null){
+		sideMargin = Button.defaultSideMargin;
+	}
 	this.hasIcon = true;
 	this.hasText = true;
 	
@@ -4966,20 +4981,23 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	if(charH==null){
 		charH=Button.defaultCharHeight;
 	}
+	if(iconHeight == null){
+		iconHeight = Button.defaultIconH;
+	}
 	this.hasIcon = true;
 	this.hasText = true;
 
-	var sideMargin = (this.height - iconHeight) / 2;
-	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	const sideMargin = (this.height - iconHeight) / 2;
+	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
 	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
-	var textMaxW = this.width - iconW - sideMargin * 2;
+	const textMaxW = this.width - iconW - sideMargin;
 	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
 	this.group.appendChild(this.textE);
-	var textW=GuiElements.measure.textWidth(this.textE);
-	var iconX = sideMargin;
-	var iconY = (this.height-iconHeight)/2;
-	var textX = (this.width - textW) / 2;
-	textX = Math.max(iconW + sideMargin * 2, textX);
+	const textW=GuiElements.measure.textWidth(this.textE);
+	const iconX = sideMargin;
+	const iconY = (this.height-iconHeight)/2;
+	var textX = (iconX + iconW + this.width - textW) / 2;
+	//textX = Math.max(iconW + sideMargin * 2, textX);
 	var textY = (this.height+charH)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
@@ -6563,8 +6581,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
 	this.bnHeight=SmoothMenuBnList.bnHeight;
 	this.bnMargin=Button.defaultMargin;
 	this.bnsGenerated=false;
-	this.bnTextList=[];
-	this.bnFunctionsList=[];
+	this.options = [];
 	this.bns=null;
 
 	this.build();
@@ -6601,15 +6618,20 @@ SmoothMenuBnList.prototype.build = function(){
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func){
+SmoothMenuBnList.prototype.addOption=function(text,func,icon){
+	if(func == null){
+		func = null;
+	}
+	if(icon == null){
+		icon = null;
+	}
+
 	this.bnsGenerated=false;
-	this.bnTextList.push(text);
-	if(func==null){
-		this.bnFunctionsList.push(null);
-	}
-	else{
-		this.bnFunctionsList.push(func);
-	}
+	const option = {};
+	option.func = func;
+	option.text = text;
+	option.icon = icon;
+	this.options.push(option);
 };
 SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
@@ -6638,7 +6660,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		var currentY=0;
 		var currentX=0;
 		var column=0;
-		var count=this.bnTextList.length;
+		var count=this.options.length;
 		var bnWidth=0;
 		for(var i=0;i<count;i++){
 			if(column==columns){
@@ -6653,7 +6675,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
 				}
 			}
-			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.options[i]));
 			currentX+=bnWidth+this.bnMargin;
 			column++;
 		}
@@ -6676,8 +6698,9 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 		var columns = 1;
 		var MBL = MenuBnList;
 		var longestW = 0;
-		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+		for (let i = 0; i < this.options.length; i++) {
+			const string = this.options[i].text;
+			var currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -6689,21 +6712,24 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 	}
 };
 SmoothMenuBnList.prototype.isEmpty=function(){
-	return this.bnTextList.length==0;
+	return this.options.length === 0;
 };
 SmoothMenuBnList.prototype.clearBnsArray=function(){
 	if(this.bns!=null){
-		for(var i=0;i<this.bns.length;i++){
+		for(let i=0;i<this.bns.length;i++){
 			this.bns[i].remove();
 		}
 	}
 	this.bns=[];
 };
-SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
-	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(text);
-	bn.setCallbackFunction(func,true);
-	bn.partOfOverlay=this.partOfOverlay;
+SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
+	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
+	bn.addText(option.text);
+	bn.setCallbackFunction(option.func,true);
+	if(option.icon != null){
+		bn.addSideTextAndIcon(option.icon, null, option.text);
+	}
+	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
@@ -6741,11 +6767,10 @@ SmoothMenuBnList.prototype.isScrolling = function(){
 	return !this.scrollStatus.still;
 };
 SmoothMenuBnList.prototype.previewHeight = function(){
-	let height = 0;
-	let internalHeight = (this.bnHeight + this.bnMargin) * this.bnTextList.length - this.bnMargin;
-	internalHeight = Math.max(internalHeight, 0);
+	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
+	height = Math.max(height, 0);
 	if(this.maxHeight!=null){
-		height = Math.min(internalHeight, this.maxHeight);
+		height = Math.min(height, this.maxHeight);
 	}
 	return height;
 };
@@ -9032,11 +9057,13 @@ OpenDialog.prototype.show = function(){
 	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 4 - RD.bnMargin * 4;
-	var file = this.files[index];
+	const cols = 3;
+	const RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+	const file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
+	/*
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createExportBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
@@ -9045,6 +9072,14 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createDeleteBn(file, currentX, y, contentGroup);
+	*/
+
+	let currentX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDuplicateBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createMoreBn(file, currentX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
@@ -9081,6 +9116,15 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
 		SaveManager.userExportFile(file);
 	});
+};
+OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+		const x1 = this.contentRelToAbsX(x);
+		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		const y1 = this.contentRelToAbsY(y);
+		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		new FileContextMenu(this, file, x1, x2, y1, y2);
+	}.bind(this));
 };
 OpenDialog.prototype.createNewBn = function(){
 	let RD = RowDialog;
@@ -9723,6 +9767,56 @@ DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
+};
+/**
+ * Created by Tom on 7/10/2017.
+ */
+function FileContextMenu(dialog, file, x1, x2, y1, y2){
+	this.file=file;
+	this.dialog = dialog;
+	this.x1=x1;
+	this.y1=y1;
+	this.x2=x2;
+	this.y2=y2;
+	this.showMenu();
+}
+FileContextMenu.setGraphics=function(){
+	const FCM=FileContextMenu;
+	FCM.bnMargin=Button.defaultMargin;
+	FCM.bgColor=Colors.lightGray;
+	FCM.blockShift=20;
+	FCM.width = 110;
+};
+FileContextMenu.prototype.showMenu=function(){
+	const FCM=FileContextMenu;
+	this.group=GuiElements.create.group(0,0);
+	const layer = GuiElements.layers.overlayOverlay;
+	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
+	const overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, FCM.bgColor,FCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.addOptions();
+	const height = this.menuBnList.previewHeight();
+	this.bubbleOverlay.display(this.x1,this.x2,this.y1,this.y2,FCM.width,height);
+	this.menuBnList.show();
+};
+FileContextMenu.prototype.addOptions=function(){
+	this.menuBnList.addOption("Share", function(){
+		SaveManager.userExportFile(this.file);
+		this.close();
+	}.bind(this), VectorPaths.share);
+	this.menuBnList.addOption("Delete", function(){
+		const dialog = this.dialog;
+		SaveManager.userDeleteFile(false, this.file, function(){
+			dialog.reloadDialog();
+		});
+		this.close();
+	}.bind(this), VectorPaths.edit);
+};
+FileContextMenu.prototype.close=function(){
+	this.bubbleOverlay.hide();
+	this.menuBnList.hide()
 };
 function OverflowArrows(){
 	var OA = OverflowArrows;
@@ -10766,6 +10860,7 @@ CallbackManager.dialog.alertResponded = function(){
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	CodeManager.updateConnectionStatus();
 	return true;
