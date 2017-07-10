@@ -11265,7 +11265,7 @@ SaveManager.userOpenDialog = function(){
 	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
 };
 SaveManager.addTypeToRequest = function(request, isRecording){
-	request.addParam("type", "recording" ? isRecording : "file");
+	request.addParam("type", isRecording ? "recording" : "file");
 };
 
 //Refactoring...
