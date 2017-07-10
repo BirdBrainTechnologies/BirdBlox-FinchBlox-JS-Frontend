@@ -2,37 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/DisplayBox/DisplayBoxManager.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/UIParts/DisplayBox/NewDisplayBox.js" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/BlockParts/Slot/Old/OldDropSlot.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/BlockParts/Slot/Old/OldRectSlot.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/BlockParts/Slot/Old/OldRoundSlot.js" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_deviceWithPorts.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_deviceWithPorts.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_tablet.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/IndexSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/IndexSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/NumSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/NumSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/RoundSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/RoundSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/Slot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/Device.js" afterPath="$PROJECT_DIR$/Device/Device.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SVGIcons/VectorPaths.js" afterPath="$PROJECT_DIR$/SVGIcons/VectorPaths.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TouchReceiver.js" afterPath="$PROJECT_DIR$/TouchReceiver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/DisplayNum.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/DisplayNum.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/TitleBar.js" afterPath="$PROJECT_DIR$/UIParts/TitleBar.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -55,8 +26,8 @@
       <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1554">
-              <caret line="74" column="20" lean-forward="false" selection-start-line="74" selection-start-column="20" selection-end-line="74" selection-end-column="20" />
+            <state relative-caret-position="693">
+              <caret line="54" column="25" lean-forward="false" selection-start-line="54" selection-start-column="25" selection-end-line="54" selection-end-column="25" />
               <folding />
             </state>
           </provider>
@@ -187,7 +158,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SoundDropSlot.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SoundDropSlot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="546">
@@ -207,11 +178,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1008">
-              <caret line="117" column="13" lean-forward="true" selection-start-line="117" selection-start-column="13" selection-end-line="117" selection-end-column="13" />
+            <state relative-caret-position="425">
+              <caret line="107" column="45" lean-forward="true" selection-start-line="107" selection-start-column="45" selection-end-line="107" selection-end-column="45" />
               <folding>
                 <element signature="e#631#1115#0" expanded="false" />
                 <element signature="e#655#994#0" expanded="false" />
@@ -227,31 +198,19 @@
                 <element signature="e#1550#1713#0" expanded="false" />
                 <element signature="e#1675#1708#0" expanded="false" />
                 <element signature="e#2026#2230#0" expanded="false" />
-                <element signature="e#2480#2588#0" expanded="false" />
-                <element signature="e#2840#2959#0" expanded="false" />
-                <element signature="e#2858#2956#0" expanded="false" />
-                <element signature="e#3147#4181#0" expanded="false" />
-                <element signature="e#3173#3294#0" expanded="false" />
-                <element signature="e#3333#3376#0" expanded="false" />
-                <element signature="e#3382#4179#0" expanded="false" />
-                <element signature="e#3488#4161#0" expanded="false" />
-                <element signature="e#3533#3627#0" expanded="false" />
-                <element signature="e#3654#3927#0" expanded="false" />
-                <element signature="e#3954#4157#0" expanded="false" />
-                <element signature="e#4270#4526#0" expanded="false" />
-                <element signature="e#4937#5156#0" expanded="false" />
-                <element signature="e#5232#5779#0" expanded="false" />
-                <element signature="e#5258#5285#0" expanded="false" />
-                <element signature="e#5560#5775#0" expanded="false" />
-                <element signature="e#5585#5622#0" expanded="false" />
-                <element signature="e#5631#5637#0" expanded="false" />
-                <element signature="e#5670#5772#0" expanded="false" />
-                <element signature="e#7988#8305#0" expanded="false" />
-                <element signature="e#8203#8237#0" expanded="false" />
-                <element signature="e#8249#8283#0" expanded="false" />
-                <element signature="e#8340#8526#0" expanded="false" />
-                <element signature="e#8494#8524#0" expanded="false" />
-                <element signature="e#8563#8761#0" expanded="false" />
+                <element signature="e#4949#5168#0" expanded="false" />
+                <element signature="e#5244#5791#0" expanded="false" />
+                <element signature="e#5270#5297#0" expanded="false" />
+                <element signature="e#5572#5787#0" expanded="false" />
+                <element signature="e#5597#5634#0" expanded="false" />
+                <element signature="e#5643#5649#0" expanded="false" />
+                <element signature="e#5682#5784#0" expanded="false" />
+                <element signature="e#8000#8317#0" expanded="false" />
+                <element signature="e#8215#8249#0" expanded="false" />
+                <element signature="e#8261#8295#0" expanded="false" />
+                <element signature="e#8352#8538#0" expanded="false" />
+                <element signature="e#8506#8536#0" expanded="false" />
+                <element signature="e#8575#8773#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -452,11 +411,11 @@
         <option value="$PROJECT_DIR$/UIParts/InputPad/DisplayNum.js" />
         <option value="$PROJECT_DIR$/UIParts/TitleBar.js" />
         <option value="$PROJECT_DIR$/SVGIcons/VectorPaths.js" />
-        <option value="$PROJECT_DIR$/SaveManager.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" />
+        <option value="$PROJECT_DIR$/SaveManager.js" />
       </list>
     </option>
   </component>
@@ -1116,7 +1075,7 @@
       <workItem from="1499350667616" duration="20379000" />
       <workItem from="1499433296843" duration="26110000" />
       <workItem from="1499532056849" duration="15210000" />
-      <workItem from="1499692704553" duration="192000" />
+      <workItem from="1499692704553" duration="1068000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1213,7 +1172,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1222896000" />
+    <option name="totallyTimeSpent" value="1223772000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
@@ -1506,6 +1465,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1620,14 +1580,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1554">
-          <caret line="74" column="20" lean-forward="false" selection-start-line="74" selection-start-column="20" selection-end-line="74" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
@@ -1739,54 +1691,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/SaveManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1008">
-          <caret line="117" column="13" lean-forward="true" selection-start-line="117" selection-start-column="13" selection-end-line="117" selection-end-column="13" />
-          <folding>
-            <element signature="e#631#1115#0" expanded="false" />
-            <element signature="e#655#994#0" expanded="false" />
-            <element signature="e#687#728#0" expanded="false" />
-            <element signature="e#854#945#0" expanded="false" />
-            <element signature="e#951#991#0" expanded="false" />
-            <element signature="e#999#1113#0" expanded="false" />
-            <element signature="e#1061#1085#0" expanded="false" />
-            <element signature="e#1164#1257#0" expanded="false" />
-            <element signature="e#1296#1325#0" expanded="false" />
-            <element signature="e#1362#1482#0" expanded="false" />
-            <element signature="e#1516#1717#0" expanded="false" />
-            <element signature="e#1550#1713#0" expanded="false" />
-            <element signature="e#1675#1708#0" expanded="false" />
-            <element signature="e#2026#2230#0" expanded="false" />
-            <element signature="e#2480#2588#0" expanded="false" />
-            <element signature="e#2840#2959#0" expanded="false" />
-            <element signature="e#2858#2956#0" expanded="false" />
-            <element signature="e#3147#4181#0" expanded="false" />
-            <element signature="e#3173#3294#0" expanded="false" />
-            <element signature="e#3333#3376#0" expanded="false" />
-            <element signature="e#3382#4179#0" expanded="false" />
-            <element signature="e#3488#4161#0" expanded="false" />
-            <element signature="e#3533#3627#0" expanded="false" />
-            <element signature="e#3654#3927#0" expanded="false" />
-            <element signature="e#3954#4157#0" expanded="false" />
-            <element signature="e#4270#4526#0" expanded="false" />
-            <element signature="e#4937#5156#0" expanded="false" />
-            <element signature="e#5232#5779#0" expanded="false" />
-            <element signature="e#5258#5285#0" expanded="false" />
-            <element signature="e#5560#5775#0" expanded="false" />
-            <element signature="e#5585#5622#0" expanded="false" />
-            <element signature="e#5631#5637#0" expanded="false" />
-            <element signature="e#5670#5772#0" expanded="false" />
-            <element signature="e#7988#8305#0" expanded="false" />
-            <element signature="e#8203#8237#0" expanded="false" />
-            <element signature="e#8249#8283#0" expanded="false" />
-            <element signature="e#8340#8526#0" expanded="false" />
-            <element signature="e#8494#8524#0" expanded="false" />
-            <element signature="e#8563#8761#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HtmlServer.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
@@ -1871,6 +1775,50 @@
         <state relative-caret-position="546">
           <caret line="26" column="2" lean-forward="true" selection-start-line="26" selection-start-column="2" selection-end-line="26" selection-end-column="2" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="693">
+          <caret line="54" column="25" lean-forward="false" selection-start-line="54" selection-start-column="25" selection-end-line="54" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SaveManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="107" column="45" lean-forward="true" selection-start-line="107" selection-start-column="45" selection-end-line="107" selection-end-column="45" />
+          <folding>
+            <element signature="e#631#1115#0" expanded="false" />
+            <element signature="e#655#994#0" expanded="false" />
+            <element signature="e#687#728#0" expanded="false" />
+            <element signature="e#854#945#0" expanded="false" />
+            <element signature="e#951#991#0" expanded="false" />
+            <element signature="e#999#1113#0" expanded="false" />
+            <element signature="e#1061#1085#0" expanded="false" />
+            <element signature="e#1164#1257#0" expanded="false" />
+            <element signature="e#1296#1325#0" expanded="false" />
+            <element signature="e#1362#1482#0" expanded="false" />
+            <element signature="e#1516#1717#0" expanded="false" />
+            <element signature="e#1550#1713#0" expanded="false" />
+            <element signature="e#1675#1708#0" expanded="false" />
+            <element signature="e#2026#2230#0" expanded="false" />
+            <element signature="e#4949#5168#0" expanded="false" />
+            <element signature="e#5244#5791#0" expanded="false" />
+            <element signature="e#5270#5297#0" expanded="false" />
+            <element signature="e#5572#5787#0" expanded="false" />
+            <element signature="e#5597#5634#0" expanded="false" />
+            <element signature="e#5643#5649#0" expanded="false" />
+            <element signature="e#5682#5784#0" expanded="false" />
+            <element signature="e#8000#8317#0" expanded="false" />
+            <element signature="e#8215#8249#0" expanded="false" />
+            <element signature="e#8261#8295#0" expanded="false" />
+            <element signature="e#8352#8538#0" expanded="false" />
+            <element signature="e#8506#8536#0" expanded="false" />
+            <element signature="e#8575#8773#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -11039,7 +11039,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	request.addParam("recording", "" + isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
