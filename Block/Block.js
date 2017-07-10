@@ -359,39 +359,39 @@ Block.prototype.updateDim=function(){
 		bG=BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
 	let width=0;
-	width+=bG.hMargin; //The left margin of the Block.
+	width += bG.hMargin; //The left margin of the Block.
 	let height=0;
 	for(let i=0;i<this.parts.length;i++){
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
-		width+=this.parts[i].width; //Fill the width of the middle of the Block
+		width += this.parts[i].width; //Fill the width of the middle of the Block
 		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
 			height=this.parts[i].height;
 		}
 		if(i<this.parts.length-1){
-			width+=BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+			width += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 	}
-	width+=bG.hMargin; //Add the right margin of the Block.
-	height+=2*bG.vMargin; //Add the bottom and top margins of the Block.
+	width += bG.hMargin; //Add the right margin of the Block.
+	height += 2*bG.vMargin; //Add the bottom and top margins of the Block.
 	if(height<bG.height){ //If the height is less than the min height, fix it.
 		height=bG.height;
 	}
 	if(this.hasBlockSlot1){ //If it has a BlockSlot update that.
 		this.topHeight=height; //The topHeight is the height of everything avove the BlockSlot.
 		this.blockSlot1.updateDim(); //Update the BlockSlot.
-		height+=this.blockSlot1.height; //The total height, however, includes the BlockSlot.
-		height+=BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
+		height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
+		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
 	}
 	if(this.hasBlockSlot2){ //If the Block has a second BlockSlot...
 		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
 		this.midHeight=this.midLabel.height; //Add the Label's height to the total.
-		this.midHeight+=2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
+		this.midHeight += 2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
 		if(this.midHeight<bG.height){ //If it's less than the minimum, adjust it.
 			this.midHeight=bG.height;
 		}
-		height+=this.midHeight; //Add the midHeight to the total.
+		height += this.midHeight; //Add the midHeight to the total.
 		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
-		height+=this.blockSlot2.height; //Add its height to the total.
+		height += this.blockSlot2.height; //Add its height to the total.
 	}
 	//If the Block was a loop or DoubleLoop now we are dealing with its actual properties (not those of command)
 	bG=BlockGraphics.getType(this.type);
@@ -443,11 +443,11 @@ Block.prototype.updateAlignRI=function(x,y){
 	if(this.bottomOpen||this.topOpen){
 		bG=BlockGraphics.command;
 	}
-	xCoord+=bG.hMargin;
+	xCoord += bG.hMargin;
 	for(let i=0;i<this.parts.length;i++){
-		xCoord+=this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
+		xCoord += this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
 		if(i<this.parts.length-1){
-			xCoord+=BlockGraphics.block.pMargin;
+			xCoord += BlockGraphics.block.pMargin;
 		}
 	}
 };
@@ -644,7 +644,8 @@ Block.prototype.addHeights=function(){
 	}
 };
 /**
- * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
+ * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks.
+ * Mutually recursive with copyFrom.
  * @param {number} x - The new Block's x coord.
  * @param {number} y - The new Block's y coord.
  * @return {Block} - This Block's copy.
@@ -667,7 +668,8 @@ Block.prototype.duplicate = function(x, y){
 	return myCopy;
 };
 /**
- * Takes a Block and copies its slot data.  Duplicates all blocks below the
+ * Takes a Block and copies its slot data.  Duplicates all blocks below the Block and in its slots.
+ * Mutually recursive with duplicate.
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
  */
 Block.prototype.copyFrom = function(block){
@@ -687,7 +689,8 @@ Block.prototype.copyFrom = function(block){
 	}
 };
 
-/* Returns an entirely text-based version of the Block for display in dialogs.
+/**
+ * Returns an entirely text-based version of the Block for display in dialogs.
  * May exclude a slot and replace if with "___".
  * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
  * @return {string} - The finished text summary.
@@ -695,14 +698,15 @@ Block.prototype.copyFrom = function(block){
 Block.prototype.textSummary=function(slotToExclude){
 	let summary="";
 	for(let i=0;i<this.parts.length;i++){
-		if(this.parts[i]==slotToExclude){
-			summary+="___"; //Replace slot with underscores.
+		if(this.parts[i] === slotToExclude){
+			//Replace slot with underscores.
+			summary += "___";
 		}
 		else{
-			summary+=this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
+			summary += this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
 		}
 		if(i<this.parts.length-1){ //Add space between part descriptions.
-			summary+=" ";
+			summary += " ";
 		}
 	}
 	return summary;
