@@ -144,7 +144,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 	});
 };
 SaveManager.userDuplicateFile = function(filename, nextAction){
-	SaveManager.promptDuplicate(filename, "Enter name for duplicate file", nextAction);
+	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
 };
 SaveManager.promptDuplicate = function(message, filename, nextAction){
 	SaveManager.getAvailableName(filename, function(availableName){
