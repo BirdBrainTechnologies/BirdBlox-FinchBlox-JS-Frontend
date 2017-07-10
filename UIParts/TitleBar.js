@@ -2,6 +2,7 @@ function TitleBar(){
 	let TB=TitleBar;
 	TB.titleTextVisble = true;
 	TB.titleText = "";
+	TB.debugEnabled = false;
 	TitleBar.createBar();
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
@@ -83,12 +84,15 @@ TitleBar.makeButtons=function(){
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
+	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
 	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
 	TB.viewMenu=new ViewMenu(TB.viewBn);
 	TB.debugBn=null;
+	if(TB.debugEnabled) {
+		TB.enableDebug();
+	}
 	/*
 	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
@@ -147,6 +151,7 @@ TitleBar.updateText = function(){
 };
 TitleBar.enableDebug=function(){
 	var TB=TitleBar;
+	TB.debugEnabled = true;
 	var TBLayer=GuiElements.layers.titlebar;
 	if(TB.debugBn==null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
@@ -155,6 +160,7 @@ TitleBar.enableDebug=function(){
 	}
 };
 TitleBar.hideDebug = function(){
+	TitleBar.debugEnabled = false;
 	TitleBar.debugBn.remove();
 	TitleBar.debugBn = null;
 };

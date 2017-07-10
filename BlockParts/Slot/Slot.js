@@ -488,7 +488,15 @@ Slot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
 
+Slot.prototype.updateConnectionStatus = function(){
+
+};
+
 Slot.prototype.passRecursivelyDown = function(message){
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+	if(message === "updateConnectionStatus") {
+		this.updateConnectionStatus.apply(this, funArgs);
+	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };

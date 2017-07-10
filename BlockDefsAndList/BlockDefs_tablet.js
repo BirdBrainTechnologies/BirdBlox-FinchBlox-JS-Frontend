@@ -315,13 +315,20 @@ B_DeviceLocation.prototype.checkActive = function(){
 function B_Display(x,y){
 	CommandBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Display"));
-	this.addPart(new StringSlot(this,"StrS_msg","hello"));
+	this.addPart(new StringSlot(this,"StrS_msg","Hello"));
+	this.addPart(new LabelText(this, "at"));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
+	dS.addOption(new SelectionData("Position 1", "position1"));
+	dS.addOption(new SelectionData("Position 2", "position2"));
+	dS.addOption(new SelectionData("Position 3", "position3"));
+	this.addPart(dS);
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;
 B_Display.prototype.startAction=function(){
-	var message=this.slots[0].getData().getValue();
-	DisplayBox.displayText(message);
+	const message = this.slots[0].getData().getValue();
+	const position = this.slots[1].getData().getValue();
+	DisplayBoxManager.displayText(message, position);
 	return new ExecutionStatusDone(); //Done running
 };
 

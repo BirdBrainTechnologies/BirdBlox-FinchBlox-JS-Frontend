@@ -96,3 +96,10 @@ DropSlot.prototype.sanitizeData = function(data){
 	}
 	return this.sanitizeNonSelectionData(data);
 };
+DropSlot.prototype.dataToString = function(data){
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if(data.type === Data.types.string) {
+		result = "\"" +result + "\"";
+	}
+	return result;
+};

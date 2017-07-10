@@ -249,7 +249,7 @@ TouchReceiver.touchStartDisplayBox=function(e){
 		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="displayBox";
 		TR.target=null;
-		DisplayBox.hide();
+		DisplayBoxManager.hide();
 		TR.touchDown = false;
 		e.stopPropagation();
 	}

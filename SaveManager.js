@@ -61,11 +61,9 @@ SaveManager.autoSave = function(nextAction){
 };
 SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
-	SaveManager.autoSave(function(){
-		const request = new HttpRequestBuilder("data/open");
-		request.addParam("filename", fileName);
-		HtmlServer.sendRequestWithCallback(request.toString());
-	});
+	const request = new HttpRequestBuilder("data/open");
+	request.addParam("filename", fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
@@ -145,50 +143,49 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 		}
 	});
 };
-SaveManager.userDuplicateFile = function(filename){
-	SaveManager.promptDuplicate(filename, "Enter name for duplicate file");
+SaveManager.userDuplicateFile = function(filename, nextAction){
+	SaveManager.promptDuplicate(filename, "Enter name for duplicate file", nextAction);
 };
-SaveManager.promptDuplicate = function(message, filename){
+SaveManager.promptDuplicate = function(message, filename, nextAction){
 	SaveManager.getAvailableName(filename, function(availableName){
-		SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+		SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 	});
 };
-SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName){
+SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
 	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
 		if(!cancelled){
-			SaveManager.sanitizeDuplicate(response.trim(), filename);
+			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
 	});
 };
-SaveManager.sanitizeDuplicate = function(proposedName, filename){
+SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction){
 	if(proposedName === ""){
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename);
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
-				SaveManager.duplicate(filename, availableName);
+				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.duplicate = function(filename, newName){
+SaveManager.duplicate = function(filename, newName, nextAction){
 	const request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
 	request.addParam("newFilename", newName);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userExportFile = function(filename){
-	if(SaveManager.fileName == null) return;
-	SaveManager.export();
+	SaveManager.exportFile(filename);
 };
-SaveManager.export=function(filename){
+SaveManager.exportFile = function(filename){
 	const request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -219,5 +216,25 @@ SaveManager.currentDoc = function(){ //Autosaves
 	result.filename = SaveManager.fileName;
 	return result;
 };
-
-
+SaveManager.saveAndName = function(message, nextAction){
+	let title = "Enter name";
+	if(SaveManager.fileName == null){
+		if (nextAction != null) nextAction();
+		return;
+	}
+	SaveManager.autoSave(function () {
+		if (SaveManager.named) {
+			if (nextAction != null) nextAction();
+		}
+		else {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
+				SaveManager.named = true;
+				if (nextAction != null) nextAction();
+			});
+		}
+	});
+};
+SaveManager.userOpenDialog = function(){
+	const message = "Please name this file before opening a different file";
+	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
+};

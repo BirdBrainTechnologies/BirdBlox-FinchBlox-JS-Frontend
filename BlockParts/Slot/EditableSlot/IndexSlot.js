@@ -1,14 +1,16 @@
 /**
  * Created by Tom on 7/7/2017.
  */
-function IndexSlot(parent,key) {
+function IndexSlot(parent,key,includeAll) {
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.any;
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 	this.addOption(new SelectionData("last", "last"));
 	this.addOption(new SelectionData("random", "random"));
-	this.addOption(new SelectionData("all", "all"));
+	if(includeAll) {
+		this.addOption(new SelectionData("all", "all"));
+	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
 IndexSlot.prototype.constructor = IndexSlot;

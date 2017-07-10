@@ -203,7 +203,7 @@ B_AddToList.prototype.startAction=function(){
 function B_DeleteItemOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"delete"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",true));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -236,7 +236,7 @@ function B_InsertItemAtOfList(x,y){
 	this.addPart(new LabelText(this,"insert"));
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -252,7 +252,9 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 		var itemD=this.slots[0].getData();
 		var index=listData.getIndex(indexD);
 		if(index==null||indexD.getValue()>array.length){
-			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
+			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue()>array.length;
+			insertAtEnd = insertAtEnd || (indexD.isSelection());
+			if(insertAtEnd){
 				if(itemD.isValid){
 					array.push(itemD);
 				}
@@ -277,7 +279,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 function B_ReplaceItemOfListWith(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"replace item"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
@@ -343,7 +345,7 @@ B_CopyListToList.prototype.startAction=function(){
 function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"item"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 }

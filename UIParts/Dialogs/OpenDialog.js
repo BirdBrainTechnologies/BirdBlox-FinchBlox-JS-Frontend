@@ -4,27 +4,36 @@
 
 function OpenDialog(listOfFiles){
 	this.files=listOfFiles.split("\n");
-	if(listOfFiles == ""){
+	if(listOfFiles === ""){
 		this.files = [];
 	}
-	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
+	RowDialog.call(this, true, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
-
+	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+};
+OpenDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	let largeBnWidth = width - RD.smallBnWidth * 4 - RD.bnMargin * 4;
 	var file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
-	let renameBnX = largeBnWidth + RD.bnMargin;
-	this.createRenameBn(file, renameBnX, y, contentGroup);
-	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
-	this.createDeleteBn(file, deleteBnX, y, contentGroup);
+
+	let currentX = largeBnWidth + RD.bnMargin;
+	this.createExportBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDuplicateBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createRenameBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDeleteBn(file, currentX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
@@ -47,6 +56,33 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 			me.reloadDialog();
 		});
 	});
+};
+OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function(){
+		SaveManager.userDuplicateFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
+		SaveManager.userExportFile(file);
+	});
+};
+OpenDialog.prototype.createNewBn = function(){
+	let RD = RowDialog;
+	let OD = OpenDialog;
+	let x = RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	button.addText("New");
+	button.setCallbackFunction(function(){
+		this.closeDialog();
+		SaveManager.userNew();
+	}.bind(this), true);
+	return button;
 };
 OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();
