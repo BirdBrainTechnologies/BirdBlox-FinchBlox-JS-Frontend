@@ -16,6 +16,9 @@ RectSlotShape.setConstants = function(){
 	RSS.valueText.fill = BlockGraphics.valueText.fill;
 	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
 	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+
+	RSS.slotSelectedFill = BlockGraphics.reporter.slotSelectedFill;
+	RSS.slotFill = BlockGraphics.reporter.slotFill;
 };
 RectSlotShape.prototype.buildSlot=function(){
 	EditableSlotShape.prototype.buildSlot.call(this);
@@ -30,4 +33,14 @@ RectSlotShape.prototype.updateDim = function(){
 RectSlotShape.prototype.updateAlign = function(){
 	EditableSlotShape.prototype.updateAlign.call(this);
 	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+};
+RectSlotShape.prototype.select = function(){
+	const RSS = RectSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+};
+RectSlotShape.prototype.deselect = function(){
+	const RSS = RectSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotFill);
 };
