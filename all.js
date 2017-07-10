@@ -940,22 +940,6 @@ Device.stopAll = function(){
 	var request = new HttpRequestBuilder("devices/stop");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-Device.configureBlock = function(blockClass){
-	return;
-	blockClass.prototype.updateConnectionStatus = function(){
-		this.updateActive();
-	};
-	blockClass.prototype.checkActive = function(){
-		if(this.slots[0] == null) return;
-		const index = this.slots[0].getDataNotFromChild().getValue();
-		return this.deviceClass.getManager().deviceIsConnected(index);
-	};
-	const oldUpdateFn = blockClass.prototype.updateAlignRI;
-	blockClass.prototype.updateAlignRI = function(x, y){
-		this.updateActive();
-		return oldUpdateFn.call(this, x, y);
-	};
-};
 /**
  * Created by Tom on 6/14/2017.
  */
@@ -1404,8 +1388,9 @@ GuiElements.setConstants=function(){
 	BlockContextMenu.setGraphics();
 	DiscoverDialog.setConstants();
 	RecordingManager();
-	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	OpenDialog.setConstants();
+	FileContextMenu.setGraphics();
 
 	NewInputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -1416,7 +1401,7 @@ GuiElements.setConstants=function(){
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
 	RecordingDialog.setConstants();
-	DisplayBox.setGraphics();
+	NewDisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
@@ -1441,7 +1426,7 @@ GuiElements.buildUI=function(){
 
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
-	DisplayBox(); //Builds the display box for the display block to show messages in.
+	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
@@ -2131,8 +2116,9 @@ GuiElements.updateDims = function(){
 	GuiElements.passUpdateZoom();
 };
 GuiElements.passUpdateZoom = function(){
+	Overlay.closeOverlaysExcept(TitleBar.viewMenu);
 	GuiElements.checkSmallMode();
-	DisplayBox.updateZoom();
+	DisplayBoxManager.updateZoom();
 	TitleBar.updateZoomPart1();
 	BlockPalette.updateZoom();
 	TitleBar.updateZoomPart2();
@@ -2682,6 +2668,18 @@ function VectorPaths(){
 	VP.hide.path = "m 60.619,42.561 60.6191,47.69339 -11.502,9.10408 -49.1171,-38.66427 -49.0796,38.66427 -11.53937,-9.10408 60.61897,-47.69339 z m 0,-42.5606 60.6191,47.6933 -11.502,9.0667 -49.1171,-38.6268 -49.0796,38.6268 -11.53937,-9.0667 60.61897,-47.6933 z";
 	VP.hide.width = 121.238;
 	VP.hide.height = 99.358;
+	VP.share = {};
+	VP.share.width = 24.000;
+	VP.share.height = 24.000;
+	VP.share.path = "M 18 2 C 16.34 2 15 3.34 15 5 C 15 5.24 15.039844 5.4692187 15.089844 5.6992188 L 8.0390625 9.8105469 C 7.4990625 9.3105469 6.79 9 6 9 C 4.34 9 3 10.34 3 12 C 3 13.66 4.34 15 6 15 C 6.79 15 7.4990625 14.689453 8.0390625 14.189453 L 15.160156 18.349609 C 15.110156 18.559609 15.080078 18.78 15.080078 19 C 15.080078 20.61 16.39 21.919922 18 21.919922 C 19.61 21.919922 20.919922 20.61 20.919922 19 C 20.919922 17.39 19.61 16.080078 18 16.080078 C 17.24 16.080078 16.559063 16.379609 16.039062 16.849609 L 8.9101562 12.699219 C 8.9601563 12.469219 9 12.24 9 12 C 9 11.76 8.9601563 11.530781 8.9101562 11.300781 L 15.960938 7.1894531 C 16.500937 7.6894531 17.21 8 18 8 C 19.66 8 21 6.66 21 5 C 21 3.34 19.66 2 18 2 z";
+	VP.copy = {};
+	VP.copy.width = 24;
+	VP.copy.height = 24;
+	VP.copy.path = "M 4 1 C 2.9 1 2 1.9 2 3 L 2 17 L 4 17 L 4 3 L 16 3 L 16 1 L 4 1 z M 8 5 C 6.9 5 6 5.9 6 7 L 6 21 C 6 22.1 6.9 23 8 23 L 19 23 C 20.1 23 21 22.1 21 21 L 21 7 C 21 5.9 20.1 5 19 5 L 8 5 z M 8 7 L 19 7 L 19 21 L 8 21 L 8 7 z";
+	VP.dots = {};
+	VP.dots.width = 24;
+	VP.dots.height = 24;
+	VP.dots.path = "M 12 4 C 10.9 4 10 4.9 10 6 C 10 7.1 10.9 8 12 8 C 13.1 8 14 7.1 14 6 C 14 4.9 13.1 4 12 4 z M 12 10 C 10.9 10 10 10.9 10 12 C 10 13.1 10.9 14 12 14 C 13.1 14 14 13.1 14 12 C 14 10.9 13.1 10 12 10 z M 12 16 C 10.9 16 10 16.9 10 18 C 10 19.1 10.9 20 12 20 C 13.1 20 14 19.1 14 18 C 14 16.9 13.1 16 12 16 z ";
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -3369,6 +3367,15 @@ Sound.boolToType = function(isRecording){
 		return Sound.type.effect;
 	}
 };
+Sound.lookupById = function(id){
+	let result = null;
+	Sound.soundList.forEach(function(sound){
+		if(sound.id === id) {
+			result = sound;
+		}
+	});
+	return result;
+};
 
 
 /* TouchReceiver is a static class that handles all touch events.
@@ -3620,7 +3627,7 @@ TouchReceiver.touchStartDisplayBox=function(e){
 		Overlay.closeOverlays(); //Close any visible overlays.
 		TR.targetType="displayBox";
 		TR.target=null;
-		DisplayBox.hide();
+		DisplayBoxManager.hide();
 		TR.touchDown = false;
 		e.stopPropagation();
 	}
@@ -4058,6 +4065,7 @@ function TitleBar(){
 	let TB=TitleBar;
 	TB.titleTextVisble = true;
 	TB.titleText = "";
+	TB.debugEnabled = false;
 	TitleBar.createBar();
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
@@ -4139,12 +4147,15 @@ TitleBar.makeButtons=function(){
 
 	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
+	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
 	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
 	TB.viewMenu=new ViewMenu(TB.viewBn);
 	TB.debugBn=null;
+	if(TB.debugEnabled) {
+		TB.enableDebug();
+	}
 	/*
 	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
@@ -4203,6 +4214,7 @@ TitleBar.updateText = function(){
 };
 TitleBar.enableDebug=function(){
 	var TB=TitleBar;
+	TB.debugEnabled = true;
 	var TBLayer=GuiElements.layers.titlebar;
 	if(TB.debugBn==null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
@@ -4211,6 +4223,7 @@ TitleBar.enableDebug=function(){
 	}
 };
 TitleBar.hideDebug = function(){
+	TitleBar.debugEnabled = false;
 	TitleBar.debugBn.remove();
 	TitleBar.debugBn = null;
 };
@@ -4860,6 +4873,9 @@ Button.setGraphics=function(){
 	Button.defaultFont="Arial";
 	Button.defaultFontWeight="normal";
 	Button.defaultCharHeight=12;
+
+	Button.defaultIconH = 15;
+	Button.defaultSideMargin = 10;
 };
 Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
@@ -4922,6 +4938,12 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	if(charH==null){
 		charH=Button.defaultCharHeight;
 	}
+	if(iconHeight == null){
+		iconHeight = Button.defaultIconH;
+	}
+	if(sideMargin == null){
+		sideMargin = Button.defaultSideMargin;
+	}
 	this.hasIcon = true;
 	this.hasText = true;
 	
@@ -4958,20 +4980,23 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	if(charH==null){
 		charH=Button.defaultCharHeight;
 	}
+	if(iconHeight == null){
+		iconHeight = Button.defaultIconH;
+	}
 	this.hasIcon = true;
 	this.hasText = true;
 
-	var sideMargin = (this.height - iconHeight) / 2;
-	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
+	const sideMargin = (this.height - iconHeight) / 2;
+	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
 	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
-	var textMaxW = this.width - iconW - sideMargin * 2;
+	const textMaxW = this.width - iconW - sideMargin;
 	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
 	this.group.appendChild(this.textE);
-	var textW=GuiElements.measure.textWidth(this.textE);
-	var iconX = sideMargin;
-	var iconY = (this.height-iconHeight)/2;
-	var textX = (this.width - textW) / 2;
-	textX = Math.max(iconW + sideMargin * 2, textX);
+	const textW=GuiElements.measure.textWidth(this.textE);
+	const iconX = sideMargin;
+	const iconY = (this.height-iconHeight)/2;
+	var textX = (iconX + iconW + this.width - textW) / 2;
+	//textX = Math.max(iconW + sideMargin * 2, textX);
 	var textY = (this.height+charH)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
@@ -5830,7 +5855,7 @@ DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
 }
 DisplayNum.prototype.getString=function(){
 	if(!this.isNum){
-		return this.data.asString().getValue();
+		return null;
 	}
 	var rVal="";
 	if(this.isNegative){
@@ -6555,8 +6580,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
 	this.bnHeight=SmoothMenuBnList.bnHeight;
 	this.bnMargin=Button.defaultMargin;
 	this.bnsGenerated=false;
-	this.bnTextList=[];
-	this.bnFunctionsList=[];
+	this.options = [];
 	this.bns=null;
 
 	this.build();
@@ -6593,15 +6617,20 @@ SmoothMenuBnList.prototype.build = function(){
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func){
+SmoothMenuBnList.prototype.addOption=function(text,func,icon){
+	if(func == null){
+		func = null;
+	}
+	if(icon == null){
+		icon = null;
+	}
+
 	this.bnsGenerated=false;
-	this.bnTextList.push(text);
-	if(func==null){
-		this.bnFunctionsList.push(null);
-	}
-	else{
-		this.bnFunctionsList.push(func);
-	}
+	const option = {};
+	option.func = func;
+	option.text = text;
+	option.icon = icon;
+	this.options.push(option);
 };
 SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
@@ -6630,7 +6659,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		var currentY=0;
 		var currentX=0;
 		var column=0;
-		var count=this.bnTextList.length;
+		var count=this.options.length;
 		var bnWidth=0;
 		for(var i=0;i<count;i++){
 			if(column==columns){
@@ -6645,7 +6674,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
 				}
 			}
-			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.options[i]));
 			currentX+=bnWidth+this.bnMargin;
 			column++;
 		}
@@ -6668,8 +6697,9 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 		var columns = 1;
 		var MBL = MenuBnList;
 		var longestW = 0;
-		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+		for (let i = 0; i < this.options.length; i++) {
+			const string = this.options[i].text;
+			var currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -6681,21 +6711,24 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 	}
 };
 SmoothMenuBnList.prototype.isEmpty=function(){
-	return this.bnTextList.length==0;
+	return this.options.length === 0;
 };
 SmoothMenuBnList.prototype.clearBnsArray=function(){
 	if(this.bns!=null){
-		for(var i=0;i<this.bns.length;i++){
+		for(let i=0;i<this.bns.length;i++){
 			this.bns[i].remove();
 		}
 	}
 	this.bns=[];
 };
-SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
-	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(text);
-	bn.setCallbackFunction(func,true);
-	bn.partOfOverlay=this.partOfOverlay;
+SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
+	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
+	bn.addText(option.text);
+	bn.setCallbackFunction(option.func,true);
+	if(option.icon != null){
+		bn.addSideTextAndIcon(option.icon, null, option.text);
+	}
+	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
@@ -6733,11 +6766,10 @@ SmoothMenuBnList.prototype.isScrolling = function(){
 	return !this.scrollStatus.still;
 };
 SmoothMenuBnList.prototype.previewHeight = function(){
-	let height = 0;
-	let internalHeight = (this.bnHeight + this.bnMargin) * this.bnTextList.length - this.bnMargin;
-	internalHeight = Math.max(internalHeight, 0);
+	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
+	height = Math.max(height, 0);
 	if(this.maxHeight!=null){
-		height = Math.min(internalHeight, this.maxHeight);
+		height = Math.min(height, this.maxHeight);
 	}
 	return height;
 };
@@ -7261,14 +7293,57 @@ Highlighter.hide=function(){
 		Highlighter.visible=false;
 	}
 };
-function DisplayBox(){
-	var DB=DisplayBox;
-	DB.layer=GuiElements.layers.display;
-	DB.buildElements();
-	DB.visible=false;
+/**
+ * Created by Tom on 7/8/2017.
+ */
+function DisplayBoxManager(){
+	const DBM = DisplayBoxManager;
+	DBM.boxes = [];
+	for(let i = 0; i < 3; i++) {
+		DBM.boxes[i] = new NewDisplayBox(i);
+	}
+	DBM.build();
 }
-DisplayBox.setGraphics=function(){
-	var DB=DisplayBox;
+DisplayBoxManager.build = function(){
+	const DBM = DisplayBoxManager;
+	DBM.boxes.forEach(function(box){
+		box.build();
+	});
+};
+DisplayBoxManager.displayText = function(message, positionString) {
+	const DBM = DisplayBoxManager;
+	if(positionString === "position1") {
+		DBM.boxes[0].displayText(message);
+	} else if(positionString === "position2") {
+		DBM.boxes[1].displayText(message);
+	} else if(positionString === "position3") {
+		DBM.boxes[2].displayText(message);
+	} else {
+		DebugOptions.assert(false);
+	}
+};
+DisplayBoxManager.hide = function(){
+	const DBM = DisplayBoxManager;
+	DBM.boxes.forEach(function(box){
+		box.hide();
+	});
+};
+DisplayBoxManager.updateZoom = function(){
+	NewDisplayBox.updateZoom();
+	DisplayBoxManager.boxes.forEach(function(box){
+		box.updateZoom();
+	})
+};
+/**
+ * Created by Tom on 7/8/2017.
+ */
+function NewDisplayBox(position) {
+	this.position = position;
+	this.visible = false;
+	this.layer = GuiElements.layers.display;
+}
+NewDisplayBox.setGraphics=function(){
+	const DB = NewDisplayBox;
 	DB.bgColor=Colors.white;
 	DB.fontColor=Colors.black;
 	DB.fontSize=35;
@@ -7277,50 +7352,56 @@ DisplayBox.setGraphics=function(){
 	DB.charHeight=25;
 	DB.screenMargin=60;
 	DB.rectH=50;
-	
+	DB.margin = 10;
 	DB.rectX=DB.screenMargin;
-	DB.rectY=GuiElements.height-DB.rectH-DB.screenMargin;
 	DB.rectW=GuiElements.width-2*DB.screenMargin;
 };
-DisplayBox.buildElements=function(){
-	var DB=DisplayBox;
-	DB.rectE=GuiElements.draw.rect(DB.rectX,DB.rectY,DB.rectW,DB.rectH,DB.bgColor);
-	DB.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
-	TouchReceiver.addListenersDisplayBox(DB.rectE);
-	TouchReceiver.addListenersDisplayBox(DB.textE);
+NewDisplayBox.prototype.build=function(){
+	const DB=NewDisplayBox;
+	this.rectY = this.getRectY();
+	this.rectE=GuiElements.draw.rect(DB.rectX,this.rectY,DB.rectW,DB.rectH,DB.bgColor);
+	this.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
+	TouchReceiver.addListenersDisplayBox(this.rectE);
+	TouchReceiver.addListenersDisplayBox(this.textE);
 };
-DisplayBox.updateZoom=function(){
-	var DB=DisplayBox;
-	DB.setGraphics();
-	var textW=GuiElements.measure.textWidth(DB.textE);
-	var textX=DB.rectX+DB.rectW/2-textW/2;
-	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
-	GuiElements.move.text(DB.textE,textX,textY);
-	GuiElements.update.rect(DB.rectE,DB.rectX,DB.rectY,DB.rectW,DB.rectH);
+NewDisplayBox.prototype.getRectY = function(){
+	const DB=NewDisplayBox;
+	const fromBottom = 2 - this.position;
+	return GuiElements.height - (DB.rectH + DB.margin) * fromBottom - DB.rectH - DB.screenMargin;
 };
-DisplayBox.displayText=function(text){
-	var DB=DisplayBox;
-	GuiElements.update.textLimitWidth(DB.textE,text,DB.rectW);
-	var textW=GuiElements.measure.textWidth(DB.textE);
-	var textX=DB.rectX+DB.rectW/2-textW/2;
-	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
-	GuiElements.move.text(DB.textE,textX,textY);
-	DB.show();
+NewDisplayBox.updateZoom = function(){
+	NewDisplayBox.setGraphics();
 };
-DisplayBox.show=function(){
-	var DB=DisplayBox;
-	if(!DB.visible){
-		DB.layer.appendChild(DB.rectE);
-		DB.layer.appendChild(DB.textE);
-		DB.visible=true;
+NewDisplayBox.prototype.updateZoom = function(){
+	const DB=NewDisplayBox;
+	this.rectY = this.getRectY();
+	const textW=GuiElements.measure.textWidth(this.textE);
+	const textX=DB.rectX+DB.rectW/2-textW/2;
+	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	GuiElements.update.rect(this.rectE,DB.rectX,this.rectY,DB.rectW,DB.rectH);
+};
+NewDisplayBox.prototype.displayText=function(text){
+	const DB=NewDisplayBox;
+	GuiElements.update.textLimitWidth(this.textE,text,DB.rectW);
+	const textW=GuiElements.measure.textWidth(this.textE);
+	const textX=DB.rectX+DB.rectW/2-textW/2;
+	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
+	GuiElements.move.text(this.textE,textX,textY);
+	this.show();
+};
+NewDisplayBox.prototype.show=function(){
+	if(!this.visible){
+		this.layer.appendChild(this.rectE);
+		this.layer.appendChild(this.textE);
+		this.visible=true;
 	}
 };
-DisplayBox.hide=function(){
-	var DB=DisplayBox;
-	if(DB.visible){
-		DB.textE.remove();
-		DB.rectE.remove();
-		DB.visible=false;
+NewDisplayBox.prototype.hide=function(){
+	if(this.visible){
+		this.textE.remove();
+		this.rectE.remove();
+		this.visible=false;
 	}
 };
 
@@ -7564,7 +7645,7 @@ CodeManager.stop=function(){
 	Device.stopAll(); //Stop any motors and LEDs on the devices
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
-	DisplayBox.hide(); //Hide any messages being displayed.
+	DisplayBoxManager.hide(); //Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
 	                       // Note: Tones are not allowed to be async, so they 
 	                       // must be stopped manually
@@ -8959,27 +9040,46 @@ RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackF
 
 function OpenDialog(listOfFiles){
 	this.files=listOfFiles.split("\n");
-	if(listOfFiles == ""){
+	if(listOfFiles === ""){
 		this.files = [];
 	}
-	RowDialog.call(this, true, "Open", this.files.length, 0, 0);
+	RowDialog.call(this, true, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
-
+	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+};
+OpenDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
-	var file = this.files[index];
+	const cols = 3;
+	const RD = RowDialog;
+	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+	const file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
-	let renameBnX = largeBnWidth + RD.bnMargin;
-	this.createRenameBn(file, renameBnX, y, contentGroup);
-	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
-	this.createDeleteBn(file, deleteBnX, y, contentGroup);
+
+	/*
+	let currentX = largeBnWidth + RD.bnMargin;
+	this.createExportBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDuplicateBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createRenameBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDeleteBn(file, currentX, y, contentGroup);
+	*/
+
+	let currentX = largeBnWidth + RD.bnMargin;
+	this.createRenameBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createDuplicateBn(file, currentX, y, contentGroup);
+	currentX += RD.bnMargin + RD.smallBnWidth;
+	this.createMoreBn(file, currentX, y, contentGroup);
 };
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
@@ -9002,6 +9102,42 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 			me.reloadDialog();
 		});
 	});
+};
+OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function(){
+		SaveManager.userDuplicateFile(file, function(){
+			me.reloadDialog();
+		});
+	});
+};
+OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
+		SaveManager.userExportFile(file);
+	});
+};
+OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+		const x1 = this.contentRelToAbsX(x);
+		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		const y1 = this.contentRelToAbsY(y);
+		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		new FileContextMenu(this, file, x1, x2, y1, y2);
+	}.bind(this));
+};
+OpenDialog.prototype.createNewBn = function(){
+	let RD = RowDialog;
+	let OD = OpenDialog;
+	let x = RD.bnMargin;
+	let y = this.getExtraBottomY();
+	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	button.addText("New");
+	button.setCallbackFunction(function(){
+		this.closeDialog();
+		SaveManager.userNew();
+	}.bind(this), true);
+	return button;
 };
 OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();
@@ -9631,6 +9767,56 @@ DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
+};
+/**
+ * Created by Tom on 7/10/2017.
+ */
+function FileContextMenu(dialog, file, x1, x2, y1, y2){
+	this.file=file;
+	this.dialog = dialog;
+	this.x1=x1;
+	this.y1=y1;
+	this.x2=x2;
+	this.y2=y2;
+	this.showMenu();
+}
+FileContextMenu.setGraphics=function(){
+	const FCM=FileContextMenu;
+	FCM.bnMargin=Button.defaultMargin;
+	FCM.bgColor=Colors.lightGray;
+	FCM.blockShift=20;
+	FCM.width = 110;
+};
+FileContextMenu.prototype.showMenu=function(){
+	const FCM=FileContextMenu;
+	this.group=GuiElements.create.group(0,0);
+	const layer = GuiElements.layers.overlayOverlay;
+	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
+	const overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, FCM.bgColor,FCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.addOptions();
+	const height = this.menuBnList.previewHeight();
+	this.bubbleOverlay.display(this.x1,this.x2,this.y1,this.y2,FCM.width,height);
+	this.menuBnList.show();
+};
+FileContextMenu.prototype.addOptions=function(){
+	this.menuBnList.addOption("Share", function(){
+		SaveManager.userExportFile(this.file);
+		this.close();
+	}.bind(this), VectorPaths.share);
+	this.menuBnList.addOption("Delete", function(){
+		const dialog = this.dialog;
+		SaveManager.userDeleteFile(false, this.file, function(){
+			dialog.reloadDialog();
+		});
+		this.close();
+	}.bind(this), VectorPaths.trash);
+};
+FileContextMenu.prototype.close=function(){
+	this.bubbleOverlay.hide();
+	this.menuBnList.hide()
 };
 function OverflowArrows(){
 	var OA = OverflowArrows;
@@ -10362,13 +10548,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}
-			/*if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Hello');
 			}*/
+			if(callbackFn != null) {
+				//callbackFn('[{"name":"hi","id":"there"}]');
+				callbackFn('Requesting permission');
+			}
 		}, 20);
 		return;
 	}
@@ -10641,7 +10827,6 @@ CallbackManager.data = {};
 CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	named = named === "true";
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
@@ -10674,6 +10859,7 @@ CallbackManager.dialog.alertResponded = function(){
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	CodeManager.updateConnectionStatus();
 	return true;
@@ -10901,11 +11087,9 @@ SaveManager.autoSave = function(nextAction){
 };
 SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
-	SaveManager.autoSave(function(){
-		const request = new HttpRequestBuilder("data/open");
-		request.addParam("filename", fileName);
-		HtmlServer.sendRequestWithCallback(request.toString());
-	});
+	const request = new HttpRequestBuilder("data/open");
+	request.addParam("filename", fileName);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
@@ -10948,8 +11132,8 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
-	request.addParam("recording", "" + isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	SaveManager.addTypeToRequest(request, isRecording);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
@@ -10962,7 +11146,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 SaveManager.delete = function(isRecording, filename, nextAction){
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
@@ -10972,7 +11156,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 	DebugOptions.validateNonNull(callbackFn);
 	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		let json = {};
 		try {
@@ -10985,50 +11169,49 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 		}
 	});
 };
-SaveManager.userDuplicateFile = function(filename){
-	SaveManager.promptDuplicate(filename, "Enter name for duplicate file");
+SaveManager.userDuplicateFile = function(filename, nextAction){
+	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
 };
-SaveManager.promptDuplicate = function(message, filename){
+SaveManager.promptDuplicate = function(message, filename, nextAction){
 	SaveManager.getAvailableName(filename, function(availableName){
-		SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+		SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 	});
 };
-SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName){
+SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
 	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
 		if(!cancelled){
-			SaveManager.sanitizeDuplicate(response.trim(), filename);
+			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
 	});
 };
-SaveManager.sanitizeDuplicate = function(proposedName, filename){
+SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction){
 	if(proposedName === ""){
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename);
+		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){
-				SaveManager.duplicate(filename, availableName);
+				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if(!alreadySanitized){
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if(!alreadyAvailable){
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName);
+				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.duplicate = function(filename, newName){
+SaveManager.duplicate = function(filename, newName, nextAction){
 	const request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
 	request.addParam("newFilename", newName);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userExportFile = function(filename){
-	if(SaveManager.fileName == null) return;
-	SaveManager.export();
+	SaveManager.exportFile(filename);
 };
-SaveManager.export=function(filename){
+SaveManager.exportFile = function(filename){
 	const request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -11059,9 +11242,31 @@ SaveManager.currentDoc = function(){ //Autosaves
 	result.filename = SaveManager.fileName;
 	return result;
 };
-
-
-
+SaveManager.saveAndName = function(message, nextAction){
+	let title = "Enter name";
+	if(SaveManager.fileName == null){
+		if (nextAction != null) nextAction();
+		return;
+	}
+	SaveManager.autoSave(function () {
+		if (SaveManager.named) {
+			if (nextAction != null) nextAction();
+		}
+		else {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
+				SaveManager.named = true;
+				if (nextAction != null) nextAction();
+			});
+		}
+	});
+};
+SaveManager.userOpenDialog = function(){
+	const message = "Please name this file before opening a different file";
+	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
+};
+SaveManager.addTypeToRequest = function(request, isRecording){
+	request.addParam("type", isRecording ? "recording" : "file");
+};
 
 //Refactoring...
 /**
@@ -11605,9 +11810,10 @@ Block.prototype.highlight=function(){
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
  * @param {Block} block - The first Block in the stack to attach to this Block.
  */
-Block.prototype.snap=function(block){ //Fix! documentation
+Block.prototype.snap=function(block){
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
-	let bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	//Get the bottom Block in the stack to be inserted.
+	let bottomStackBlock=block.getLastBlock();
 	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
 	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
 		let bG=BlockGraphics.command;
@@ -11618,7 +11824,7 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	//If the Block we are inserting is part of a stack...
 	if(block.stack!=null) {
 		//Make it glow if this stack is running
-		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code. x3 in Stack, BlockStack, and Slot ---Refactor Marker---
+		if (stack.isRunning && !block.stack.isRunning) { //TODO: remove duplicate code. x3 in Stack, BlockStack, and Slot
 			block.glow(); //Recursively applied glow effect
 		}
 		//Stop the stack being added if this stack is stopped
@@ -11654,12 +11860,14 @@ Block.prototype.snap=function(block){ //Fix! documentation
 		oldG.remove(); //Remove the old stack's group.
 	}
 	if(this.stack!=null) {
-		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		//Update the dimensions now that the movement is complete.
+		this.stack.updateDim();
+		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
 	}
 };
 /**
- * Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+ * Disconnects this Block from the Blocks above it and returns the newly-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
  */
 Block.prototype.unsnap=function(){
@@ -11684,7 +11892,7 @@ Block.prototype.unsnap=function(){
  * Recursively finds and returns the last Block in this BlockStack.
  * @return {Block} - The last Block in this BlockStack.
  */
-Block.prototype.getLastBlock=function(obj){
+Block.prototype.getLastBlock=function(){
 	if(this.nextBlock==null){
 		return this; //This Block is the last one.
 	}
@@ -11704,9 +11912,6 @@ Block.prototype.addHeights=function(){
 		return this.height; //This is the last Block. Return its height.
 	}
 };
-/* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
- * @return {Block} - This Block's copy.
- */
 /**
  * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @param {number} x - The new Block's x coord.
@@ -11715,7 +11920,9 @@ Block.prototype.addHeights=function(){
  */
 Block.prototype.duplicate = function(x, y){
 	let myCopy = null;
-	if(this.variable != null){ //Copy variable data if this is a variable Block.
+	// First we use this Block's constructor to create a new block of the same type
+	// If this Block is a list or variable Block, we must pass that data to the constructor
+	if(this.variable != null){
 		myCopy = new this.constructor(x, y, this.variable);
 	}
 	else if(this.list != null){
@@ -11724,15 +11931,16 @@ Block.prototype.duplicate = function(x, y){
 	else {
 		myCopy = new this.constructor(x, y);
 	}
+	// Then we tell the new block to copy its data from this Block
 	myCopy.copyFrom(this);
 	return myCopy;
 };
 /**
- * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * Takes a Block and copies its slot data.  Duplicates all blocks below the
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
  */
 Block.prototype.copyFrom = function(block){
-	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	DebugOptions.assert(block.blockTypeName === this.blockTypeName);
 	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);
 	}
@@ -12347,6 +12555,9 @@ RectSlotShape.setConstants = function(){
 	RSS.valueText.fill = BlockGraphics.valueText.fill;
 	RSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
 	RSS.valueText.selectedFill = BlockGraphics.valueText.selectedFill;
+
+	RSS.slotSelectedFill = BlockGraphics.reporter.slotSelectedFill;
+	RSS.slotFill = BlockGraphics.reporter.slotFill;
 };
 RectSlotShape.prototype.buildSlot=function(){
 	EditableSlotShape.prototype.buildSlot.call(this);
@@ -12361,6 +12572,16 @@ RectSlotShape.prototype.updateDim = function(){
 RectSlotShape.prototype.updateAlign = function(){
 	EditableSlotShape.prototype.updateAlign.call(this);
 	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+};
+RectSlotShape.prototype.select = function(){
+	const RSS = RectSlotShape;
+	EditableSlotShape.prototype.select.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+};
+RectSlotShape.prototype.deselect = function(){
+	const RSS = RectSlotShape;
+	EditableSlotShape.prototype.deselect.call(this);
+	GuiElements.update.color(this.slotE,RSS.slotFill);
 };
 /**
  * Created by Tom on 6/29/2017.
@@ -13017,7 +13238,15 @@ Slot.prototype.updateAvailableSensors = function(){
 	this.passRecursively("updateAvailableSensors");
 };
 
+Slot.prototype.updateConnectionStatus = function(){
+
+};
+
 Slot.prototype.passRecursivelyDown = function(message){
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+	if(message === "updateConnectionStatus") {
+		this.updateConnectionStatus.apply(this, funArgs);
+	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
@@ -13274,7 +13503,7 @@ EditableSlot.prototype.createInputSystem = function(){
 EditableSlot.prototype.updateEdit = function(data, visibleText){
 	DebugOptions.assert(this.editing);
 	if(visibleText == null){
-		visibleText = data.asString().getValue();
+		visibleText = this.dataToString(data);
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
@@ -13293,7 +13522,10 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim){
 	}
 	if(data == null) return;
 	this.enteredData = data;
-	this.changeText(this.enteredData.asString().getValue(), updateDim);
+	this.changeText(this.dataToString(this.enteredData), updateDim);
+};
+EditableSlot.prototype.dataToString = function(data){
+	return data.asString().getValue();
 };
 EditableSlot.prototype.sanitizeData = function(data) {
 	if(data == null) return null;
@@ -13315,7 +13547,7 @@ EditableSlot.prototype.sanitizeData = function(data) {
 EditableSlot.prototype.textSummary = function(){
 	let result = "...";
 	if(!this.hasChild){ //If it has a child, just use an ellipsis.
-		result = this.enteredData.asString().getValue();
+		result = this.dataToString(this.enteredData);
 	}
 	return this.formatTextSummary(result);
 };
@@ -13447,6 +13679,13 @@ RoundSlot.prototype.sanitizeData = function(data){
 RoundSlot.prototype.addLabelText = function(text){
 	this.labelText = text;
 };
+RoundSlot.prototype.dataToString = function(data){
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if(data.type === Data.types.string) {
+		result = "\"" +result + "\"";
+	}
+	return result;
+};
 /**
  * Created by Tom on 7/4/2017.
  */
@@ -13545,6 +13784,13 @@ DropSlot.prototype.sanitizeData = function(data){
 	}
 	return this.sanitizeNonSelectionData(data);
 };
+DropSlot.prototype.dataToString = function(data){
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if(data.type === Data.types.string) {
+		result = "\"" +result + "\"";
+	}
+	return result;
+};
 /**
  * Created by Tom on 7/4/2017.
  */
@@ -13642,6 +13888,13 @@ DropSlot.prototype.sanitizeData = function(data){
 		return this.selectionDataFromValue(value);
 	}
 	return this.sanitizeNonSelectionData(data);
+};
+DropSlot.prototype.dataToString = function(data){
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if(data.type === Data.types.string) {
+		result = "\"" +result + "\"";
+	}
+	return result;
 };
 //@fix Write documentation.
 
@@ -13669,6 +13922,8 @@ VarDropSlot.prototype.populatePad=function(selectPad){
 	});
 };
 VarDropSlot.prototype.selectionDataFromValue = function(value){
+	DebugOptions.validateNonNull(value);
+	if(value.constructor === Variable) return value.getSelectionData();
 	const variable = CodeManager.findVar(value);
 	if(variable == null) return null;
 	return variable.getSelectionData();
@@ -13719,6 +13974,8 @@ ListDropSlot.prototype.populatePad = function(selectPad){
 	});
 };
 ListDropSlot.prototype.selectionDataFromValue = function(value){
+	DebugOptions.validateNonNull(value);
+	if(value.constructor === List) return value.getSelectionData();
 	const list = CodeManager.findList(value);
 	if(list == null) return null;
 	return list.getSelectionData();
@@ -13815,6 +14072,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	} else {
 		this.labelText.hide();
 	}
+	this.parent.updateActive();
 }
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
@@ -13922,32 +14180,18 @@ SoundDropSlot.prototype.createInputSystem = function(){
 	const y2 = this.relToAbsY(this.height);
 	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
 };
-SoundDropSlot.prototype.populatePad = function(selectPad){
-	/*const me = this;
-	let list = Sound.getSoundList(this.isRecording);
-	list.forEach(function(sound){
-		selectPad.addOption(new SelectionData(sound.name, sound.id));
-	});*/
+SoundDropSlot.prototype.sanitizeNonSelectionData = function(data) {
+	return null
 };
-/* TODO: Sound previewing
-SoundDropSlot.prototype.edit=function(){
-	const me = this;
-	DropSlot.prototype.edit.call(this, function(){
-		if(me.enteredData != null) {
-			if(!this.isRecording) {
-				let soundId = me.enteredData.getValue();
-				Sound.playAndStopPrev(soundId, false);
-			}
-		}
-		else{
-			GuiElements.alert("No data");
-		}
-	});
+SoundDropSlot.prototype.selectionDataFromValue = function(value) {
+	if (this.isRecording) {
+		return new SelectionData(value, value);
+	} else {
+		let sound = Sound.lookupById(value);
+		if (sound != null) return new SelectionData(sound.name, sound.id);
+		return new SelectionData(value, value);
+	}
 };
-SoundDropSlot.prototype.deselect=function(){
-	DropSlot.prototype.deselect.call(this);
-	Sound.stopAllSounds();
-};*/
 /* BoolSlot is a subclass of HexSlot.
  * It creates a RectSlot optimized for use with booleans.
  * It has a snapType of bool.
@@ -13988,7 +14232,11 @@ function NumSlot(parent,key,value,positive,integer){
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
 NumSlot.prototype.addLimits = function(min, max, displayUnits){
-	this.labelText = displayUnits + " (" + min + "-" + max + ")";
+	if(displayUnits == null){
+		this.labelText = "(" + min + " - " + max + ")";
+	} else {
+		this.labelText = displayUnits + " (" + min + " - " + max + ")";
+	}
 	this.minVal = min;
 	this.maxVal = max;
 	this.limitsSet =true;
@@ -14040,14 +14288,16 @@ NumOrStringSlot.prototype.populatePad = function(selectPad){
 /**
  * Created by Tom on 7/7/2017.
  */
-function IndexSlot(parent,key) {
+function IndexSlot(parent,key,includeAll) {
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.any;
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 	this.addOption(new SelectionData("last", "last"));
 	this.addOption(new SelectionData("random", "random"));
-	this.addOption(new SelectionData("all", "all"));
+	if(includeAll) {
+		this.addOption(new SelectionData("all", "all"));
+	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
 IndexSlot.prototype.constructor = IndexSlot;
@@ -14474,7 +14724,6 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	}
 	return new ExecutionStatusRunning(); // Still running
 };
-Device.configureBlock(B_DeviceWithPortsSensorBase);
 
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -14530,9 +14779,6 @@ B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-Device.configureBlock(B_DeviceWithPortsOutputBase);
-
-
 
 function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
@@ -14542,11 +14788,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new LabelText(this, "TRI-LED"));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
-	this.addPart(new NumSlot(this,"NumS_r", 0, true, true)); //Positive integer.
+	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true);
+	ledSlot1.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot1); //Positive integer.
 	this.addPart(new LabelText(this, "G"));
-	this.addPart(new NumSlot(this,"NumS_g", 0, true, true)); //Positive integer.
+	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true);
+	ledSlot2.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot2); //Positive integer.
 	this.addPart(new LabelText(this, "B"));
-	this.addPart(new NumSlot(this,"NumS_b", 0, true, true)); //Positive integer.
+	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true);
+	ledSlot3.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot3); //Positive integer.
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
@@ -14584,8 +14836,6 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-Device.configureBlock(B_DeviceWithPortsTriLed);
-
 /* This file contains the implementations for Blocks in the hummingbird category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  * Most relay on the HummingbirdManager to remove redundant code.
@@ -16259,13 +16509,20 @@ B_DeviceLocation.prototype.checkActive = function(){
 function B_Display(x,y){
 	CommandBlock.call(this,x,y,"tablet");
 	this.addPart(new LabelText(this,"Display"));
-	this.addPart(new StringSlot(this,"StrS_msg","hello"));
+	this.addPart(new StringSlot(this,"StrS_msg","Hello"));
+	this.addPart(new LabelText(this, "at"));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
+	dS.addOption(new SelectionData("Position 1", "position1"));
+	dS.addOption(new SelectionData("Position 2", "position2"));
+	dS.addOption(new SelectionData("Position 3", "position3"));
+	this.addPart(dS);
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;
 B_Display.prototype.startAction=function(){
-	var message=this.slots[0].getData().getValue();
-	DisplayBox.displayText(message);
+	const message = this.slots[0].getData().getValue();
+	const position = this.slots[1].getData().getValue();
+	DisplayBoxManager.displayText(message, position);
 	return new ExecutionStatusDone(); //Done running
 };
 
@@ -16446,7 +16703,9 @@ B_ChangeTempoBy.prototype.startAction=function(){
 function B_SetTempoTo(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"set tempo to"));
-	this.addPart(new NumSlot(this,"NumS_tempo",60,true)); //Positive
+	const nS = new NumSlot(this,"NumS_tempo",60,true); //Positive
+	nS.addLimits(20, 500, null);
+	this.addPart(nS);
 	this.addPart(new LabelText(this,"bpm"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
@@ -16675,7 +16934,7 @@ B_AddToList.prototype.startAction=function(){
 function B_DeleteItemOfList(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"delete"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",true));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -16708,7 +16967,7 @@ function B_InsertItemAtOfList(x,y){
 	this.addPart(new LabelText(this,"insert"));
 	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
 	this.addPart(new LabelText(this,"at"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 }
@@ -16724,7 +16983,9 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 		var itemD=this.slots[0].getData();
 		var index=listData.getIndex(indexD);
 		if(index==null||indexD.getValue()>array.length){
-			if(indexD.type==Data.types.num&&indexD.getValue()>array.length){
+			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue()>array.length;
+			insertAtEnd = insertAtEnd || (indexD.isSelection());
+			if(insertAtEnd){
 				if(itemD.isValid){
 					array.push(itemD);
 				}
@@ -16749,7 +17010,7 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 function B_ReplaceItemOfListWith(x,y){
 	CommandBlock.call(this,x,y,"lists");
 	this.addPart(new LabelText(this,"replace item"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1"));
 	this.addPart(new LabelText(this,"with"));
@@ -16815,7 +17076,7 @@ B_CopyListToList.prototype.startAction=function(){
 function B_ItemOfList(x,y){
 	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
 	this.addPart(new LabelText(this,"item"));
-	this.addPart(new IndexSlot(this,"NumS_idx"));
+	this.addPart(new IndexSlot(this,"NumS_idx",false));
 	this.addPart(new LabelText(this,"of"));
 	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
 }

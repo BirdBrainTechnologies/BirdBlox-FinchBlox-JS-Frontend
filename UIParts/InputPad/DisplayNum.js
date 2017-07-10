@@ -67,7 +67,7 @@ DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
 }
 DisplayNum.prototype.getString=function(){
 	if(!this.isNum){
-		return this.data.asString().getValue();
+		return null;
 	}
 	var rVal="";
 	if(this.isNegative){

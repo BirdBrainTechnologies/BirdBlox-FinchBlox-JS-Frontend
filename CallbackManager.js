@@ -17,7 +17,6 @@ CallbackManager.data = {};
 CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	named = named === "true";
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
@@ -50,6 +49,7 @@ CallbackManager.dialog.alertResponded = function(){
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
+	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	CodeManager.updateConnectionStatus();
 	return true;

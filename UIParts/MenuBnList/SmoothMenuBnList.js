@@ -16,8 +16,7 @@ function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
 	this.bnHeight=SmoothMenuBnList.bnHeight;
 	this.bnMargin=Button.defaultMargin;
 	this.bnsGenerated=false;
-	this.bnTextList=[];
-	this.bnFunctionsList=[];
+	this.options = [];
 	this.bns=null;
 
 	this.build();
@@ -54,15 +53,20 @@ SmoothMenuBnList.prototype.build = function(){
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func){
+SmoothMenuBnList.prototype.addOption=function(text,func,icon){
+	if(func == null){
+		func = null;
+	}
+	if(icon == null){
+		icon = null;
+	}
+
 	this.bnsGenerated=false;
-	this.bnTextList.push(text);
-	if(func==null){
-		this.bnFunctionsList.push(null);
-	}
-	else{
-		this.bnFunctionsList.push(func);
-	}
+	const option = {};
+	option.func = func;
+	option.text = text;
+	option.icon = icon;
+	this.options.push(option);
 };
 SmoothMenuBnList.prototype.show=function(){
 	this.generateBns();
@@ -91,7 +95,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 		var currentY=0;
 		var currentX=0;
 		var column=0;
-		var count=this.bnTextList.length;
+		var count=this.options.length;
 		var bnWidth=0;
 		for(var i=0;i<count;i++){
 			if(column==columns){
@@ -106,7 +110,7 @@ SmoothMenuBnList.prototype.generateBns=function(){
 					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
 				}
 			}
-			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
+			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.options[i]));
 			currentX+=bnWidth+this.bnMargin;
 			column++;
 		}
@@ -129,8 +133,9 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 		var columns = 1;
 		var MBL = MenuBnList;
 		var longestW = 0;
-		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+		for (let i = 0; i < this.options.length; i++) {
+			const string = this.options[i].text;
+			var currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -142,21 +147,24 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 	}
 };
 SmoothMenuBnList.prototype.isEmpty=function(){
-	return this.bnTextList.length==0;
+	return this.options.length === 0;
 };
 SmoothMenuBnList.prototype.clearBnsArray=function(){
 	if(this.bns!=null){
-		for(var i=0;i<this.bns.length;i++){
+		for(let i=0;i<this.bns.length;i++){
 			this.bns[i].remove();
 		}
 	}
 	this.bns=[];
 };
-SmoothMenuBnList.prototype.generateBn=function(x,y,width,text,func){
-	var bn=new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(text);
-	bn.setCallbackFunction(func,true);
-	bn.partOfOverlay=this.partOfOverlay;
+SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
+	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
+	bn.addText(option.text);
+	bn.setCallbackFunction(option.func,true);
+	if(option.icon != null){
+		bn.addSideTextAndIcon(option.icon, null, option.text);
+	}
+	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
@@ -194,11 +202,10 @@ SmoothMenuBnList.prototype.isScrolling = function(){
 	return !this.scrollStatus.still;
 };
 SmoothMenuBnList.prototype.previewHeight = function(){
-	let height = 0;
-	let internalHeight = (this.bnHeight + this.bnMargin) * this.bnTextList.length - this.bnMargin;
-	internalHeight = Math.max(internalHeight, 0);
+	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
+	height = Math.max(height, 0);
 	if(this.maxHeight!=null){
-		height = Math.min(internalHeight, this.maxHeight);
+		height = Math.min(height, this.maxHeight);
 	}
 	return height;
 };

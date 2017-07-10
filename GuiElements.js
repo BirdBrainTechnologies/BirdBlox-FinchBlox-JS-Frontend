@@ -139,8 +139,9 @@ GuiElements.setConstants=function(){
 	BlockContextMenu.setGraphics();
 	DiscoverDialog.setConstants();
 	RecordingManager();
-	OpenDialog.setConstants();
 	RowDialog.setConstants();
+	OpenDialog.setConstants();
+	FileContextMenu.setGraphics();
 
 	NewInputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -151,7 +152,7 @@ GuiElements.setConstants=function(){
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
 	RecordingDialog.setConstants();
-	DisplayBox.setGraphics();
+	NewDisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
@@ -176,7 +177,7 @@ GuiElements.buildUI=function(){
 
 	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
-	DisplayBox(); //Builds the display box for the display block to show messages in.
+	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
@@ -866,8 +867,9 @@ GuiElements.updateDims = function(){
 	GuiElements.passUpdateZoom();
 };
 GuiElements.passUpdateZoom = function(){
+	Overlay.closeOverlaysExcept(TitleBar.viewMenu);
 	GuiElements.checkSmallMode();
-	DisplayBox.updateZoom();
+	DisplayBoxManager.updateZoom();
 	TitleBar.updateZoomPart1();
 	BlockPalette.updateZoom();
 	TitleBar.updateZoomPart2();

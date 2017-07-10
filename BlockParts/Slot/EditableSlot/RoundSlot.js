@@ -74,3 +74,10 @@ RoundSlot.prototype.sanitizeData = function(data){
 RoundSlot.prototype.addLabelText = function(text){
 	this.labelText = text;
 };
+RoundSlot.prototype.dataToString = function(data){
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if(data.type === Data.types.string) {
+		result = "\"" +result + "\"";
+	}
+	return result;
+};

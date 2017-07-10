@@ -17,6 +17,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	} else {
 		this.labelText.hide();
 	}
+	this.parent.updateActive();
 }
 
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);

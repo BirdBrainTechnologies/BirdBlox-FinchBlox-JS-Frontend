@@ -39,7 +39,7 @@ EditableSlot.prototype.createInputSystem = function(){
 EditableSlot.prototype.updateEdit = function(data, visibleText){
 	DebugOptions.assert(this.editing);
 	if(visibleText == null){
-		visibleText = data.asString().getValue();
+		visibleText = this.dataToString(data);
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
@@ -58,7 +58,10 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim){
 	}
 	if(data == null) return;
 	this.enteredData = data;
-	this.changeText(this.enteredData.asString().getValue(), updateDim);
+	this.changeText(this.dataToString(this.enteredData), updateDim);
+};
+EditableSlot.prototype.dataToString = function(data){
+	return data.asString().getValue();
 };
 EditableSlot.prototype.sanitizeData = function(data) {
 	if(data == null) return null;
@@ -80,7 +83,7 @@ EditableSlot.prototype.sanitizeData = function(data) {
 EditableSlot.prototype.textSummary = function(){
 	let result = "...";
 	if(!this.hasChild){ //If it has a child, just use an ellipsis.
-		result = this.enteredData.asString().getValue();
+		result = this.dataToString(this.enteredData);
 	}
 	return this.formatTextSummary(result);
 };

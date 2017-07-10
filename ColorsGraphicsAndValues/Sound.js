@@ -140,3 +140,12 @@ Sound.boolToType = function(isRecording){
 		return Sound.type.effect;
 	}
 };
+Sound.lookupById = function(id){
+	let result = null;
+	Sound.soundList.forEach(function(sound){
+		if(sound.id === id) {
+			result = sound;
+		}
+	});
+	return result;
+};

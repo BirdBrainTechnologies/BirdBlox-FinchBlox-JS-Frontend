@@ -13,29 +13,15 @@ SoundDropSlot.prototype.createInputSystem = function(){
 	const y2 = this.relToAbsY(this.height);
 	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
 };
-SoundDropSlot.prototype.populatePad = function(selectPad){
-	/*const me = this;
-	let list = Sound.getSoundList(this.isRecording);
-	list.forEach(function(sound){
-		selectPad.addOption(new SelectionData(sound.name, sound.id));
-	});*/
+SoundDropSlot.prototype.sanitizeNonSelectionData = function(data) {
+	return null
 };
-/* TODO: Sound previewing
-SoundDropSlot.prototype.edit=function(){
-	const me = this;
-	DropSlot.prototype.edit.call(this, function(){
-		if(me.enteredData != null) {
-			if(!this.isRecording) {
-				let soundId = me.enteredData.getValue();
-				Sound.playAndStopPrev(soundId, false);
-			}
-		}
-		else{
-			GuiElements.alert("No data");
-		}
-	});
+SoundDropSlot.prototype.selectionDataFromValue = function(value) {
+	if (this.isRecording) {
+		return new SelectionData(value, value);
+	} else {
+		let sound = Sound.lookupById(value);
+		if (sound != null) return new SelectionData(sound.name, sound.id);
+		return new SelectionData(value, value);
+	}
 };
-SoundDropSlot.prototype.deselect=function(){
-	DropSlot.prototype.deselect.call(this);
-	Sound.stopAllSounds();
-};*/

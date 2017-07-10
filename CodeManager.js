@@ -238,7 +238,7 @@ CodeManager.stop=function(){
 	Device.stopAll(); //Stop any motors and LEDs on the devices
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
-	DisplayBox.hide(); //Hide any messages being displayed.
+	DisplayBoxManager.hide(); //Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
 	                       // Note: Tones are not allowed to be async, so they 
 	                       // must be stopped manually

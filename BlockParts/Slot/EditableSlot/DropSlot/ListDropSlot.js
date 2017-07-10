@@ -28,6 +28,8 @@ ListDropSlot.prototype.populatePad = function(selectPad){
 	});
 };
 ListDropSlot.prototype.selectionDataFromValue = function(value){
+	DebugOptions.validateNonNull(value);
+	if(value.constructor === List) return value.getSelectionData();
 	const list = CodeManager.findList(value);
 	if(list == null) return null;
 	return list.getSelectionData();

@@ -541,9 +541,10 @@ Block.prototype.highlight=function(){
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
  * @param {Block} block - The first Block in the stack to attach to this Block.
  */
-Block.prototype.snap=function(block){ //Fix! documentation
+Block.prototype.snap=function(block){
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
-	let bottomStackBlock=block.getLastBlock(); //The bottom Block in the stack to be inserted.
+	//Get the bottom Block in the stack to be inserted.
+	let bottomStackBlock=block.getLastBlock();
 	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
 	if(!bottomStackBlock.bottomOpen&&this.nextBlock!=null){
 		let bG=BlockGraphics.command;
@@ -554,7 +555,7 @@ Block.prototype.snap=function(block){ //Fix! documentation
 	//If the Block we are inserting is part of a stack...
 	if(block.stack!=null) {
 		//Make it glow if this stack is running
-		if (stack.isRunning && !block.stack.isRunning) { //Fix! remove duplicate code. x3 in Stack, BlockStack, and Slot ---Refactor Marker---
+		if (stack.isRunning && !block.stack.isRunning) { //TODO: remove duplicate code. x3 in Stack, BlockStack, and Slot
 			block.glow(); //Recursively applied glow effect
 		}
 		//Stop the stack being added if this stack is stopped
@@ -590,12 +591,14 @@ Block.prototype.snap=function(block){ //Fix! documentation
 		oldG.remove(); //Remove the old stack's group.
 	}
 	if(this.stack!=null) {
-		this.stack.updateDim(); //Update the dimensions now that the movement is complete.
+		//Update the dimensions now that the movement is complete.
+		this.stack.updateDim();
+		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
 	}
 };
 /**
- * Disconnects this Block from the Blocks above it and returns the new;y-created BlockStack. Calls updateDim on parent.
+ * Disconnects this Block from the Blocks above it and returns the newly-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
  */
 Block.prototype.unsnap=function(){
@@ -620,7 +623,7 @@ Block.prototype.unsnap=function(){
  * Recursively finds and returns the last Block in this BlockStack.
  * @return {Block} - The last Block in this BlockStack.
  */
-Block.prototype.getLastBlock=function(obj){
+Block.prototype.getLastBlock=function(){
 	if(this.nextBlock==null){
 		return this; //This Block is the last one.
 	}
@@ -640,9 +643,6 @@ Block.prototype.addHeights=function(){
 		return this.height; //This is the last Block. Return its height.
 	}
 };
-/* Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
- * @return {Block} - This Block's copy.
- */
 /**
  * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks. Uses Recursion.
  * @param {number} x - The new Block's x coord.
@@ -651,7 +651,9 @@ Block.prototype.addHeights=function(){
  */
 Block.prototype.duplicate = function(x, y){
 	let myCopy = null;
-	if(this.variable != null){ //Copy variable data if this is a variable Block.
+	// First we use this Block's constructor to create a new block of the same type
+	// If this Block is a list or variable Block, we must pass that data to the constructor
+	if(this.variable != null){
 		myCopy = new this.constructor(x, y, this.variable);
 	}
 	else if(this.list != null){
@@ -660,15 +662,16 @@ Block.prototype.duplicate = function(x, y){
 	else {
 		myCopy = new this.constructor(x, y);
 	}
+	// Then we tell the new block to copy its data from this Block
 	myCopy.copyFrom(this);
 	return myCopy;
 };
 /**
- * Takes a Block and copy's its slot data and subsequent blocks into this Block.  Used in duplication.
+ * Takes a Block and copies its slot data.  Duplicates all blocks below the
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
  */
 Block.prototype.copyFrom = function(block){
-	DebugOptions.assert(block.blockTypeName == this.blockTypeName);
+	DebugOptions.assert(block.blockTypeName === this.blockTypeName);
 	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);
 	}

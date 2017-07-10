@@ -24,6 +24,8 @@ VarDropSlot.prototype.populatePad=function(selectPad){
 	});
 };
 VarDropSlot.prototype.selectionDataFromValue = function(value){
+	DebugOptions.validateNonNull(value);
+	if(value.constructor === Variable) return value.getSelectionData();
 	const variable = CodeManager.findVar(value);
 	if(variable == null) return null;
 	return variable.getSelectionData();

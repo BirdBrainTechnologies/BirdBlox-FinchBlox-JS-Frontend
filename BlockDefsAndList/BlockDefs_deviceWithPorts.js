@@ -53,7 +53,6 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	}
 	return new ExecutionStatusRunning(); // Still running
 };
-Device.configureBlock(B_DeviceWithPortsSensorBase);
 
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -109,9 +108,6 @@ B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-Device.configureBlock(B_DeviceWithPortsOutputBase);
-
-
 
 function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
@@ -121,11 +117,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new LabelText(this, "TRI-LED"));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
-	this.addPart(new NumSlot(this,"NumS_r", 0, true, true)); //Positive integer.
+	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true);
+	ledSlot1.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot1); //Positive integer.
 	this.addPart(new LabelText(this, "G"));
-	this.addPart(new NumSlot(this,"NumS_g", 0, true, true)); //Positive integer.
+	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true);
+	ledSlot2.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot2); //Positive integer.
 	this.addPart(new LabelText(this, "B"));
-	this.addPart(new NumSlot(this,"NumS_b", 0, true, true)); //Positive integer.
+	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true);
+	ledSlot3.addLimits(0, 100, "Intensity");
+	this.addPart(ledSlot3); //Positive integer.
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
@@ -163,4 +165,3 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-Device.configureBlock(B_DeviceWithPortsTriLed);
