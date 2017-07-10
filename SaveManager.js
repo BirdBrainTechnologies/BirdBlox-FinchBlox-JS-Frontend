@@ -106,7 +106,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
@@ -120,7 +120,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 SaveManager.delete = function(isRecording, filename, nextAction){
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
@@ -130,7 +130,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 	DebugOptions.validateNonNull(callbackFn);
 	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		let json = {};
 		try {
@@ -237,4 +237,7 @@ SaveManager.saveAndName = function(message, nextAction){
 SaveManager.userOpenDialog = function(){
 	const message = "Please name this file before opening a different file";
 	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
+};
+SaveManager.addTypeToRequest = function(request, isRecording){
+	request.addParam("type", "recording" ? isRecording : "file");
 };

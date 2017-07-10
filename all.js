@@ -11132,7 +11132,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
@@ -11146,7 +11146,7 @@ SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 SaveManager.delete = function(isRecording, filename, nextAction){
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
@@ -11156,7 +11156,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
 	DebugOptions.validateNonNull(callbackFn);
 	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
-	request.addParam("recording", "" + isRecording);
+	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		let json = {};
 		try {
@@ -11263,6 +11263,9 @@ SaveManager.saveAndName = function(message, nextAction){
 SaveManager.userOpenDialog = function(){
 	const message = "Please name this file before opening a different file";
 	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
+};
+SaveManager.addTypeToRequest = function(request, isRecording){
+	request.addParam("type", "recording" ? isRecording : "file");
 };
 
 //Refactoring...
@@ -14213,7 +14216,11 @@ function NumSlot(parent,key,value,positive,integer){
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
 NumSlot.prototype.addLimits = function(min, max, displayUnits){
-	this.labelText = displayUnits + " (" + min + " - " + max + ")";
+	if(displayUnits == null){
+		this.labelText = "(" + min + " - " + max + ")";
+	} else {
+		this.labelText = displayUnits + " (" + min + " - " + max + ")";
+	}
 	this.minVal = min;
 	this.maxVal = max;
 	this.limitsSet =true;
@@ -16680,7 +16687,9 @@ B_ChangeTempoBy.prototype.startAction=function(){
 function B_SetTempoTo(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"set tempo to"));
-	this.addPart(new NumSlot(this,"NumS_tempo",60,true)); //Positive
+	const nS = new NumSlot(this,"NumS_tempo",60,true); //Positive
+	nS.addLimits(20, 500, null);
+	this.addPart(nS);
 	this.addPart(new LabelText(this,"bpm"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);

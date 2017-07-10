@@ -170,7 +170,9 @@ B_ChangeTempoBy.prototype.startAction=function(){
 function B_SetTempoTo(x,y){
 	CommandBlock.call(this,x,y,"sound");
 	this.addPart(new LabelText(this,"set tempo to"));
-	this.addPart(new NumSlot(this,"NumS_tempo",60,true)); //Positive
+	const nS = new NumSlot(this,"NumS_tempo",60,true); //Positive
+	nS.addLimits(20, 500, null);
+	this.addPart(nS);
 	this.addPart(new LabelText(this,"bpm"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);

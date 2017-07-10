@@ -26,7 +26,11 @@ function NumSlot(parent,key,value,positive,integer){
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
 NumSlot.prototype.addLimits = function(min, max, displayUnits){
-	this.labelText = displayUnits + " (" + min + " - " + max + ")";
+	if(displayUnits == null){
+		this.labelText = "(" + min + " - " + max + ")";
+	} else {
+		this.labelText = displayUnits + " (" + min + " - " + max + ")";
+	}
 	this.minVal = min;
 	this.maxVal = max;
 	this.limitsSet =true;
