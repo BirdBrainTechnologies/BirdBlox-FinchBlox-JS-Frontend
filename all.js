@@ -10826,7 +10826,6 @@ CallbackManager.data = {};
 CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	named = named === "true";
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
@@ -11936,11 +11935,10 @@ Block.prototype.duplicate = function(x, y){
 	return myCopy;
 };
 /**
- * Takes a Block and copies its slot data and subsequent blocks into this Block.  Used in duplication.
+ * Takes a Block and copies its slot data.  Duplicates all blocks below the
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
  */
 Block.prototype.copyFrom = function(block){
-	//
 	DebugOptions.assert(block.blockTypeName === this.blockTypeName);
 	for(let i=0;i<this.slots.length;i++){ //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);

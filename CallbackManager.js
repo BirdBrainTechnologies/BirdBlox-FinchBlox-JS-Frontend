@@ -17,7 +17,6 @@ CallbackManager.data = {};
 CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	named = named === "true";
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
