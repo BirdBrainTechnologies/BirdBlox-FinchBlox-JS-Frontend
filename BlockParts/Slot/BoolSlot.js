@@ -1,8 +1,10 @@
-/* BoolSlot is a subclass of HexSlot.
+/**
+ * BoolSlot is a subclass of HexSlot.
  * It creates a RectSlot optimized for use with booleans.
  * It has a snapType of bool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
+ * @param {Block} parent
+ * @param {string} key
  */
 function BoolSlot(parent,key){
 	//Make HexSlot.

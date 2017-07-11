@@ -619,7 +619,7 @@ Block.prototype.snap = function(block){
 Block.prototype.unsnap = function(){
 	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
 	if(this.parent != null){
-		if(this.parent.isSlot || this.parent.isBlockSlot){ //Sees if it is attached to a Slot not another Block.
+		if(this.parent.isSlot || this.parent.isBlockSlot){ //Checks if it is attached to a Slot not another Block.
 			this.parent.removeChild(); //Leave the Slot.
 			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
 		}
