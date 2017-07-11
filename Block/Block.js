@@ -1,5 +1,4 @@
 "use strict";
-//Refactoring...
 /**
  * Block is an abstract class that represents an executable block.
  * Blocks are nearly always contained within BlockStacks or DisplayStacks.
@@ -58,6 +57,7 @@ function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter,
 		this.blockSlot2 = new BlockSlot(this);
 	}
 }
+
 /**
  * Sets the possible values for Block.returnTypes.
  */
@@ -69,6 +69,7 @@ Block.setConstants = function(){
 	Block.returnTypes.bool = 3;
 	Block.returnTypes.list = 4;
 };
+
 /**
  * Converts an x coord relative to the Block to an x coord relative to the screen
  * @param {number} x
@@ -127,6 +128,7 @@ Block.prototype.getAbsX = function(){
 Block.prototype.getAbsY = function(){
 	return this.relToAbsY(0);
 };
+
 /**
  * Creates and returns the main SVG path element for the Block.
  * @return {object} - The main SVG path element for the Block.
@@ -136,6 +138,7 @@ Block.prototype.generatePath = function(){
 	TouchReceiver.addListenersChild(pathE,this);
 	return pathE;
 };
+
 /**
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
  * @param {LabelText|BlockIcon|Slot} part - part to add.
@@ -146,6 +149,7 @@ Block.prototype.addPart = function(part){
 		this.slots.push(part);
 	}
 };
+
 /**
  * Moves the Block and sets its this.x and this.y values.
  * @param {number} x - New x coord.
@@ -157,6 +161,7 @@ Block.prototype.move = function(x,y){
 	//All parts of the Block are contained within its group to allow for easy movement.
 	GuiElements.move.group(this.group, x, y);
 };
+
 /**
  * Recursively stops the Block, its Slots, and any subsequent Blocks.
  */
@@ -176,6 +181,7 @@ Block.prototype.stop = function(){
 		this.nextBlock.stop(); //Stop the next Block.
 	}
 };
+
 /**
  * Updates this currently executing Block and returns if the Block is still running
  * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
@@ -220,6 +226,7 @@ Block.prototype.updateRun = function(){
 	}
 	return myExecStatus; //Return a boolean indicating if this Block is done.
 };
+
 /**
  * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {ExecutionStatus} - indicating if it has finished.
@@ -227,6 +234,7 @@ Block.prototype.updateRun = function(){
 Block.prototype.startAction = function(){
 	return new ExecutionStatusRunning(); //Still running
 };
+
 /**
  * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {ExecutionStatus} - The next Block to run or a boolean indicating if it has finished.
@@ -234,6 +242,7 @@ Block.prototype.startAction = function(){
 Block.prototype.updateAction = function(){
 	return new ExecutionStatusRunning(); //Still running //Fix! by default this should be false.
 };
+
 /**
  * Once the Block is done executing, this function is used by a Slot to retrieve the Block's result.
  * Only used if Block returns a value.
@@ -248,6 +257,7 @@ Block.prototype.getResultData = function(){
 	}
 	return null; //If called when the block is not done running, return null. This should never happen.
 };
+
 /**
  * Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
  * @param {BlockStack} stack - The stack the Blocks will be moved to.
@@ -269,6 +279,7 @@ Block.prototype.changeStack = function(stack){
 		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
 	}
 };
+
 /**
  * Each BlockStack keeps track of its bounding rectangle.  This function recursively tells the Blocks to update it.
  * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
@@ -287,6 +298,7 @@ Block.prototype.updateStackDim = function(){
 		this.nextBlock.updateStackDim(); //Tell the next block to update.
 	}
 };
+
 /**
  * Handles more of the recursion for updateStackDim.
  * RI stands for Recursive Inside.  RI functions update slots but not subsequent Blocks or BlockSlots.
@@ -299,6 +311,7 @@ Block.prototype.updateStackDimRI = function(){
 	}
 	this.updateStackDimO(); //Update this Block.
 };
+
 /**
  * Checks to see if the Block is outside the bounding box of its Stack and if so adjusts it.
  * It is called recursively by updateStackDim and updateStackDimRI.
@@ -349,6 +362,7 @@ Block.prototype.updateStackDimO = function(){
 	//The Stacks dimensions now include the Block.
 	//Note that the r box is also the visual bounding box of the stack as well as the reporter snap bounding box.
 };
+
 /**
  * Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
@@ -403,6 +417,7 @@ Block.prototype.updateDim = function(){
 		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
 };
+
 /**
  * Recursively adjusts the positioning of all the parts of the Block (Slots, children, labels, etc.)
  * The BlockStack calls this function after the updateDim function, so all sizes are correct.
@@ -426,6 +441,7 @@ Block.prototype.updateAlign = function(x,y){
 	}
 	return this.width;
 };
+
 /**
  * Adjusts the positioning of the Block's internal parts.  Recursively updates their children.
  * @param {number} x - The x coord this block should have when completed.
@@ -451,6 +467,7 @@ Block.prototype.updateAlignRI = function(x,y){
 		}
 	}
 };
+
 /**
  * Resizes the path of the Block to the specified width and height.  The sizes of its BlockSlots are also considered.
  * @param {number} width - The desired width of the Block.
@@ -475,6 +492,7 @@ Block.prototype.resize = function(width,height){
 	//Tell BlockGraphics to change the path description to match the new properties.
 	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
 };
+
 /**
  * Recursively searches for the Block with best fits the currently moving BlockStack.
  * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
@@ -525,6 +543,7 @@ Block.prototype.findBestFit = function(){
 	}
 	return hasMatch;
 };
+
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
@@ -537,6 +556,7 @@ Block.prototype.highlight = function(){
 		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen = false");
 	}
 };
+
 /**
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
  * @param {Block} block - The first Block in the stack to attach to this Block.
@@ -554,17 +574,10 @@ Block.prototype.snap = function(block){
 	let stack = this.stack;
 	//If the Block we are inserting is part of a stack...
 	if(block.stack != null) {
-		//Make it glow if this stack is running
-		if (stack.isRunning && !block.stack.isRunning) { //TODO: remove duplicate code. x3 in Stack, BlockStack, and Slot
-			block.glow(); //Recursively applied glow effect
-		}
-		//Stop the stack being added if this stack is stopped
-		else if (!stack.isRunning && block.stack.isRunning) {
-			block.stack.stop();
-		}
-		//The added block is stopped, but still glows as part of a running stack.
-		else if (stack.isRunning && block.isRunning) {
-			block.stop();
+		block.stack.stop();
+		if(stack.isRunning) {
+			// Make it glow if this stack is running
+			block.glow();
 		}
 	}
 	let upperBlock = this; //The Block which will go above the inserted stack.
@@ -597,6 +610,7 @@ Block.prototype.snap = function(block){
 		this.stack.tab.updateArrows();
 	}
 };
+
 /**
  * Disconnects this Block from the Blocks above it and returns the newly-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
@@ -619,6 +633,7 @@ Block.prototype.unsnap = function(){
 	//If the Block already had no parent, just return this Block's stack.
 	return this.stack;
 };
+
 /**
  * Recursively finds and returns the last Block in this BlockStack.
  * @return {Block} - The last Block in this BlockStack.
@@ -631,6 +646,7 @@ Block.prototype.getLastBlock = function(){
 		return this.nextBlock.getLastBlock(); //Try the next Block.
 	}
 };
+
 /**
  * Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
  * @return {number} - The height of this Block and all subsequent Blocks.
@@ -643,6 +659,7 @@ Block.prototype.addHeights = function(){
 		return this.height; //This is the last Block. Return its height.
 	}
 };
+
 /**
  * Returns a copy of this Block, its Slots, subsequent Blocks, and nested Blocks.
  * Mutually recursive with copyFrom.
@@ -667,6 +684,7 @@ Block.prototype.duplicate = function(x, y){
 	myCopy.copyFrom(this);
 	return myCopy;
 };
+
 /**
  * Takes a Block and copies its slot data.  Duplicates all blocks below the Block and in its slots.
  * Mutually recursive with duplicate.
@@ -688,6 +706,7 @@ Block.prototype.copyFrom = function(block){
 		this.nextBlock.parent = this;
 	}
 };
+
 /**
  * Returns an entirely text-based version of the Block for display in dialogs.
  * May exclude a slot and replace if with "___".
@@ -710,18 +729,21 @@ Block.prototype.textSummary = function(slotToExclude){
 	}
 	return summary;
 };
+
 /**
  * Overridden by subclasses. Alerts Block that the flag was clicked. Most Blocks won't respond to this directly.
  */
 Block.prototype.eventFlagClicked = function(){
 
 };
+
 /**
  * Overridden by subclasses. Passes broadcast message to Block.
  */
 Block.prototype.eventBroadcast = function(message){
 
 };
+
 /**
  * Overridden by subclasses. Checks if a broadcast with the given message is currently running on this block.
  * Used to tell Broadcast and wait blocks if they can stop waiting.
@@ -729,6 +751,7 @@ Block.prototype.eventBroadcast = function(message){
 Block.prototype.checkBroadcastRunning = function(message){
 	return false;
 };
+
 /**
  * Recursively updates the available broadcast messages.
  */
@@ -746,26 +769,33 @@ Block.prototype.updateAvailableMessages = function(){
 		this.nextBlock.updateAvailableMessages();
 	}
 };
+
 /**
  * Deletes the Block's running memory (memory reserved for computations related to execution)
- * Also deletes the runMem of the Block's slots.
+ * Also deletes the runMem of the Block's slots, but not runMem of Blocks in those Slots
  */
 Block.prototype.clearMem = function(){
-	this.runMem = new function(){}; //Delete all runMem.
-	for(let i = 0;i < this.slots.length;i++){ //NOT recursive.
-		this.slots[i].clearMem(); //Removes resultData and resets running state to 0.
+	//Delete all runMem.
+	this.runMem = new function(){};
+	for(let i = 0;i < this.slots.length;i++){
+		this.slots[i].clearMem(); //Removes resultData and resets running state to 0 (NOT recursive).
 	}
 };
+
 /**
  * Returns the result of the Block's execution.
  * The data is then removed to prevent the result from being returned again.
  */
 Block.prototype.getResultData = function(){
+	DebugOptions.assert(this.resultData != null);
 	let result = this.resultData;
 	this.resultData = null;
 	return result;
 };
-/* Recursively adds a white outline to indicate that the BlockStack is running. */
+
+/**
+ * Recursively adds a white outline to indicate that the BlockStack is running.
+ */
 Block.prototype.glow = function(){
 	BlockGraphics.update.glow(this.path);
 	this.isGlowing = true; //Used by other classes to determine things like highlight color.
@@ -779,7 +809,10 @@ Block.prototype.glow = function(){
 		this.nextBlock.glow();
 	}
 };
-/* Recursively removes the outline. */
+
+/**
+ * Recursively removes the outline.
+ */
 Block.prototype.stopGlow = function(){
 	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue,this.active);
 	this.isGlowing = false;
@@ -794,20 +827,37 @@ Block.prototype.stopGlow = function(){
 	}
 };
 
-Block.prototype.makeActive = function(){
-	if(!this.active){
-		this.active = true;
-		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
-		this.passRecursively("makeActive");
-	}
-};
+/**
+ * Changes the Block's appearance and its Slots (but not their children) to indicate that this Block
+ * is inactive and cannot be run.  Used by sensors that a device does not support and robot blocks for
+ * robots that are not connected
+ */
 Block.prototype.makeInactive = function(){
 	if(this.active){
 		this.active = false;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
-		this.passRecursively("makeInactive");
+		this.slots.forEach(function(slot) {
+			slot.makeInactive();
+		});
 	}
 };
+
+/**
+ * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
+ */
+Block.prototype.makeActive = function(){
+	if(!this.active){
+		this.active = true;
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		this.slots.forEach(function(slot) {
+			slot.makeActive();
+		});
+	}
+};
+
+/**
+ * @param {boolean} active
+ */
 Block.prototype.setActive = function(active){
 	if(active){
 		this.makeActive();
@@ -815,23 +865,45 @@ Block.prototype.setActive = function(active){
 		this.makeInactive();
 	}
 };
+
+/**
+ * Returns a value indicating if this block is active.  Overrided by subclasses.
+ * @return {boolean}
+ */
 Block.prototype.checkActive = function(){
+	// Most Blocks are always active
 	return true;
 };
+
+/**
+ * Uses checkActive and setActive to update the Blocks appearance
+ */
 Block.prototype.updateActive = function(){
 	this.setActive(this.checkActive());
 };
 
+/**
+ * Recursively writes this Block and those below it to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @param {Document} xmlBlocks - The <Blocks> tag in the document
+ */
 Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 	xmlBlocks.appendChild(this.createXml(xmlDoc));
 	if(this.bottomOpen&&this.nextBlock != null){
 		this.nextBlock.writeToXml(xmlDoc,xmlBlocks);
 	}
 };
+
+/**
+ * Writes this Block to XML (non recursive)
+ * @param {Document} xmlDoc - The document to write to
+ */
 Block.prototype.createXml = function(xmlDoc){
 	let block = XmlWriter.createElement(xmlDoc,"block");
 	XmlWriter.setAttribute(block,"type",this.blockTypeName);
 	let slots = XmlWriter.createElement(xmlDoc,"slots");
+	// Indicates that we are using the new saving system, which uses keys assigned to each Slot to identify
+	// which data goes to which Slot.  The old system uses the order of appearance in the XML to match data to Slots
 	XmlWriter.setAttribute(slots,"keyVal","true");
 	for(let i = 0;i < this.slots.length;i++){
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
@@ -847,70 +919,126 @@ Block.prototype.createXml = function(xmlDoc){
 	}
 	return block;
 };
+
+/**
+ * Reads a Block from XML and returns the Block or null if the data is corrupt
+ * @param blockNode {Document} - Block node of th XML file being read
+ * @return {Block|null} - The imported Block, or null if the data is corrupt
+ */
 Block.importXml = function(blockNode){
+	// Get the correct class of the Block
 	let type = XmlWriter.getAttribute(blockNode,"type");
 	let block;
 	try {
-		if (type.substring(0, 2) == "B_") {
+		// All classes start with "B_"
+		if (type.substring(0, 2) === "B_") {
+			// Find the constructor's import function
 			if(window[type].importXml != null){
+				// If the Block has a special import function, use that
 				return window[type].importXml(blockNode);
 			}
 			else {
+				// Otherwise, use the Block's constructor
 				block = new window[type](0, 0);
+				// Copy the data into the Block
+				block.copyFromXml(blockNode);
+				return block;
 			}
 		}
 		else{
+			// The data is corrupt
 			return null;
 		}
 	}
 	catch(e) {
+		// The data is corrupt
 		return null;
 	}
-	block.copyFromXml(blockNode);
-	return block;
 };
+
+/**
+ * Copies the data from the Block tag into the Block
+ * @param {Document} blockNode - The node to copy the data from
+ */
+Block.prototype.copyFromXml = function(blockNode){
+	let slotsNode = XmlWriter.findSubElement(blockNode,"slots");
+	// Copy the data about the Slots into the Block.
+	this.importSlotXml(slotsNode);
+	let blockSlotsNode = XmlWriter.findSubElement(blockNode,"blockSlots");
+	let blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	// Copy data about BlockSlots
+	if(this.blockSlot1 != null&&blockSlotNodes.length >= 1){
+		this.blockSlot1.importXml(blockSlotNodes[0]);
+	}
+	if(this.blockSlot2 != null&&blockSlotNodes.length >= 2){
+		this.blockSlot2.importXml(blockSlotNodes[1]);
+	}
+};
+
+/**
+ * Imports the data about the Slots into the Block.
+ * @param {Document} slotsNode - The node to copy the data from
+ */
 Block.prototype.importSlotXml = function(slotsNode){
-	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") == "true";
+	// Determine if we are using the key/value system or legacy, order dependant system.
+	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") === "true";
 	let slotNodes = XmlWriter.findSubElements(slotsNode,"slot");
 	if(keyVal){
-		for(let i = 0;i < this.slots.length;i++){
-			let key = this.slots[i].getKey();
-			let slot = XmlWriter.findNodeByKey(slotNodes, key);
+		// Import data for each slot
+		this.slots.forEach(function(slot){
+			let key = slot.getKey();
+			let slotNode = XmlWriter.findNodeByKey(slotNodes, key);
+			// Import data if that key exists.  Otherwise, leave the Slot at default values
 			if(slot != null) {
-				this.slots[i].importXml(slot);
+				slot.importXml(slotNode);
 			}
-		}
+		});
 	}
 	else{
+		// Import the data for each Slot in order
 		for(let i = 0;i < slotNodes.length&&i < this.slots.length;i++){
 			this.slots[i].importXml(slotNodes[i]);
 		}
 	}
 };
-Block.prototype.copyFromXml = function(blockNode){
-	let slotsNode = XmlWriter.findSubElement(blockNode,"slots");
-	this.importSlotXml(slotsNode);
-	let blockSlotsNode = XmlWriter.findSubElement(blockNode,"blockSlots");
-	let blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
-	if(this.blockSlot1 != null&&blockSlotNodes.length>=1){
-		this.blockSlot1.importXml(blockSlotNodes[0]);
-	}
-	if(this.blockSlot2 != null&&blockSlotNodes.length>=2){
-		this.blockSlot2.importXml(blockSlotNodes[1]);
-	}
-};
+
+/**
+ * Recursively notifies the Block that a variable has changed names
+ * @param {Variable} variable - The variable that was renamed
+ */
 Block.prototype.renameVariable = function(variable){
-	this.passRecursively("renameVariable",variable);
+	this.passRecursively("renameVariable", variable);
 };
+
+/**
+ * Recursively notifies the Block that a variable has been deleted
+ * @param {Variable} variable - The variable that was deleted
+ */
 Block.prototype.deleteVariable = function(variable){
-	this.passRecursively("deleteVariable",variable);
+	this.passRecursively("deleteVariable", variable);
 };
+
+/**
+ * Recursively notifies the Block that a list has changed names
+ * @param {List} list - The list that was renamed
+ */
 Block.prototype.renameList = function(list){
-	this.passRecursively("renameList",list);
+	this.passRecursively("renameList", list);
 };
+
+/**
+ * Recursively notifies the Block that a list has been deleted
+ * @param {List} list - The list that was deleted
+ */
 Block.prototype.deleteList = function(list){
-	this.passRecursively("deleteList",list);
+	this.passRecursively("deleteList", list);
 };
+
+/**
+ * Recursively determines if a variable is in use
+ * @param {Variable} variable - The variable to check
+ * @return {boolean} - true iff the variable is used in at least one Block
+ */
 Block.prototype.checkVariableUsed = function(variable){
 	for(let i = 0;i < this.slots.length;i++){
 		if(this.slots[i].checkVariableUsed(variable)){
@@ -934,6 +1062,12 @@ Block.prototype.checkVariableUsed = function(variable){
 	}
 	return false;
 };
+
+/**
+ * Recursively determines if a list is in use
+ * @param {List} list - The list to check
+ * @return {boolean} - true iff the list is used in at least one Block
+ */
 Block.prototype.checkListUsed = function(list){
 	for(let i = 0;i < this.slots.length;i++){
 		if(this.slots[i].checkListUsed(list)){
@@ -957,14 +1091,32 @@ Block.prototype.checkListUsed = function(list){
 	}
 	return false;
 };
+
+/**
+ * Recursively tells the device DropDown menus to switch to label mode, as multiple devices are no longer connected
+ * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
+ */
 Block.prototype.hideDeviceDropDowns = function(deviceClass){
 	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
+
+/**
+ * Recursively tells the device DropDown menus to switch to DropDown mode, as multiple devices are now connected
+ * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
+ */
 Block.prototype.showDeviceDropDowns = function(deviceClass){
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
+
+/**
+ * Recursively counts the maximum selected DropDown value for a DeviceDropDown of the specified deviceClass
+ * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
+ * @return {number} - The maximum value + 1 (since selections are 0-indexed)
+ */
 Block.prototype.countDevicesInUse = function(deviceClass){
+	// At least 1 option is available on all DropDowns
 	let largest = 1;
+	// Find the largest result of all calls
 	for(let i = 0;i < this.slots.length;i++){
 		largest = Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
 	}
@@ -979,21 +1131,27 @@ Block.prototype.countDevicesInUse = function(deviceClass){
 	}
 	return largest;
 };
+
+/**
+ * Called when the available sensors changes. Each Block checks if it is still enabled and then passes the message.
+ */
 Block.prototype.updateAvailableSensors = function(){
-	this.setActive(this.checkActive());
+	this.updateActive();
 	this.passRecursively("updateAvailableSensors");
 };
+
+/**
+ * Called when a Robot's status changes.  Overrided by subclasses.
+ */
 Block.prototype.updateConnectionStatus = function(){
 
 };
-Block.prototype.passRecursivelyDown = function(message){
-	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus") {
-		this.updateConnectionStatus.apply(this, funArgs);
-	}
-	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
-	this.passRecursively.apply(this, arguments);
-};
+
+/**
+ * Calls a function on all the Block's slots.  All parameters after the functionName are passed to the function
+ * as arguments
+ * @param functionName - The name of the function to call on each child
+ */
 Block.prototype.passRecursively = function(functionName){
 	let args = Array.prototype.slice.call(arguments, 1);
 	for(let i = 0;i < this.slots.length;i++){
@@ -1010,27 +1168,79 @@ Block.prototype.passRecursively = function(functionName){
 		this.nextBlock[functionName].apply(this.nextBlock,args);
 	}
 };
+
+/**
+ * Recursively instructs all slots to pass a message.  The message is likely a function name that is called when
+ * it reaches an object of the correct type.  Subsequent arguments are passed as well.
+ * @param {string} message - Possibly the name of the function to call to send the message
+ */
+Block.prototype.passRecursivelyDown = function(message){
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+	// If the message is intended for Blocks...
+	if(message === "updateConnectionStatus") {
+		// Call the message and pass in the arguments
+		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	// Add "passRecursivelyDown" as the first argument
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	// Call passRecursivelyDown on all children
+	this.passRecursively.apply(this, arguments);
+};
+
+/**
+ * Instructs the Block to display its result of execution
+ * @param {Data} data - The result to display
+ */
 Block.prototype.displayResult = function(data){
+	// Get the string representation of the data
 	let value = data.asString().getValue();
+	// Display it, not as an error
 	this.displayValue(value, false);
 };
+
+/**
+ * Shows a bubble below the Block with the provided message
+ * @param {string} message - The message to show
+ * @param {boolean} error - Indicates if the bubble should be formatted like an error
+ */
 Block.prototype.displayValue = function(message, error){
+	// Get the coords where to show the bubble
 	let x = this.getAbsX();
 	let y = this.getAbsY();
 	let width = this.relToAbsX(this.width) - x;
 	let height = this.relToAbsY(this.height) - y;
-	GuiElements.displayValue(message,x,y,width,height, error);
+	// Display a bubble at the location
+	GuiElements.displayValue(message, x, y, width, height, error);
 };
+
+/**
+ * Show a bubble with the error
+ * @param {string} message - The error to show
+ */
 Block.prototype.displayError = function(message){
 	this.displayValue(message, true);
 };
+
+/**
+ * Takes a subclass of Block and modifies its display function to include a suffix (used to display sensor units)
+ * @param Class - The subclass of Block to modify
+ * @param {string} suffix - The string to append to the normal display response
+ */
 Block.setDisplaySuffix = function(Class, suffix){
+	// Use setDeviceSuffixFn with a function that just returns the suffix
 	Block.setDeviceSuffixFn(Class, function(){
 		return suffix;
 	});
 };
+
+/**
+ * Takes a subclass of Block and modifies its display function to append a suffix, determined from a function
+ * @param Class - The subclass of Block to modify
+ * @param {function} suffixFn - function () -> string that returns the desired suffix
+ */
 Block.setDeviceSuffixFn = function(Class, suffixFn){
 	Class.prototype.displayResult = function(data){
+		// Only valid data is followed by a suffix
 		if(data.isValid) {
 			let value = data.asString().getValue();
 			this.displayValue(value + " " + suffixFn(), false);

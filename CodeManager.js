@@ -95,7 +95,7 @@ CodeManager.move.update=function(x,y){
 		move.topY = move.offsetY+y;
 		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
-		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
+		move.stack.move(CodeManager.dragAbsToRelX(move.topX),CodeManager.dragAbsToRelY(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.

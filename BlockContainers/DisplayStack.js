@@ -100,18 +100,6 @@ DisplayStack.prototype.duplicate=function(x,y){
 	var copyStack=new BlockStack(firstCopyBlock,tab);
 	return copyStack;
 };
-//DisplayStack.prototype.findBestFitTop=function()
-//DisplayStack.prototype.snap=function(block)
-//DisplayStack.prototype.highlight=function()
-//DisplayStack.prototype.shiftOver=function(x,y)
-DisplayStack.prototype.getSprite=function(){
-	if(TabManager.activeTab!=null){
-		return TabManager.activeTab.getSprite();
-	}
-	else{
-		return null;
-	}
-}
 DisplayStack.prototype.delete=function(){
 	this.group.remove();
 };
