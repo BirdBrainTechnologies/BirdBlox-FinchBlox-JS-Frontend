@@ -29,6 +29,11 @@ CallbackManager.data.close = function(){
 	SaveManager.backendClose();
 	return true;
 };
+CallbackManager.data.filesChanged = function(){
+	if(OpenDialog.currentDialog != null){
+		OpenDialog.currentDialog.reloadDialog();
+	}
+};
 /* CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);
 	return true;

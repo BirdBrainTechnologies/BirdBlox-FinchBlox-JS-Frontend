@@ -884,8 +884,8 @@ Block.prototype.updateActive = function(){
 
 /**
  * Recursively writes this Block and those below it to XML
- * @param {Document} xmlDoc - The document to write to
- * @param {Document} xmlBlocks - The <Blocks> tag in the document
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Node} xmlBlocks - The <Blocks> tag in the document
  */
 Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 	xmlBlocks.appendChild(this.createXml(xmlDoc));
@@ -896,7 +896,8 @@ Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 
 /**
  * Writes this Block to XML (non recursive)
- * @param {Document} xmlDoc - The document to write to
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc){
 	let block = XmlWriter.createElement(xmlDoc,"block");
@@ -922,7 +923,7 @@ Block.prototype.createXml = function(xmlDoc){
 
 /**
  * Reads a Block from XML and returns the Block or null if the data is corrupt
- * @param blockNode {Document} - Block node of th XML file being read
+ * @param blockNode {Node} - Block node of th XML file being read
  * @return {Block|null} - The imported Block, or null if the data is corrupt
  */
 Block.importXml = function(blockNode){
@@ -958,7 +959,7 @@ Block.importXml = function(blockNode){
 
 /**
  * Copies the data from the Block tag into the Block
- * @param {Document} blockNode - The node to copy the data from
+ * @param {Node} blockNode - The node to copy the data from
  */
 Block.prototype.copyFromXml = function(blockNode){
 	let slotsNode = XmlWriter.findSubElement(blockNode,"slots");
@@ -977,7 +978,7 @@ Block.prototype.copyFromXml = function(blockNode){
 
 /**
  * Imports the data about the Slots into the Block.
- * @param {Document} slotsNode - The node to copy the data from
+ * @param {Node} slotsNode - The node to copy the data from
  */
 Block.prototype.importSlotXml = function(slotsNode){
 	// Determine if we are using the key/value system or legacy, order dependant system.

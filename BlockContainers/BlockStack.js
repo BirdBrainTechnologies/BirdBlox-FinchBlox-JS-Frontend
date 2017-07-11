@@ -323,7 +323,7 @@ BlockStack.prototype.snap = function(block) {
 	}
 	/* Move this BlockStack up by the height of the of the stack the Block belongs to.
 	 * This compensates for the amount existing Blocks will be shifted down by the newly-added Blocks. */
-	this.move(this.x, this.y - block.stack.dim.rh); // TODO: this.dim clarification
+	this.move(this.x, this.y - block.stack.getHeight());
 
 	// The new top Block.
 	const topStackBlock = block;
@@ -501,7 +501,8 @@ BlockStack.prototype.updateTabDim = function() {
 
 /**
  * Writes the BlockStack to XML
- * @param {Document} xmlDoc - The document to write to
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {
 	const stack = XmlWriter.createElement(xmlDoc, "stack");
@@ -516,7 +517,7 @@ BlockStack.prototype.createXml = function(xmlDoc) {
 
 /**
  * Creates a BlockStack from XML
- * @param {Document} stackNode - The tag to import from
+ * @param {Node} stackNode - The tag to import from
  * @param {Tab} tab - The Tab to import into
  */
 BlockStack.importXml = function(stackNode, tab) {

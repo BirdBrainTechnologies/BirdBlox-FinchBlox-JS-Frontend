@@ -48,8 +48,8 @@ HexSlot.prototype.getDataNotFromChild=function(){
 
 /**
  * @inheritDoc
- * @param {Document} xmlDoc
- * @returns {Document}
+ * @param {DOMParser} xmlDoc
+ * @returns {Node}
  */
 HexSlot.prototype.createXml=function(xmlDoc){
 	const slot = Slot.prototype.createXml.call(this, xmlDoc);
@@ -59,7 +59,7 @@ HexSlot.prototype.createXml=function(xmlDoc){
 
 /**
  * @inheritDoc
- * @param {Document} slotNode
+ * @param {Node} slotNode
  * @return {HexSlot}
  */
 HexSlot.prototype.importXml=function(slotNode){

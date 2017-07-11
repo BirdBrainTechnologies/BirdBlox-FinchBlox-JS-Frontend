@@ -15,8 +15,10 @@ OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+	OpenDialog.currentDialog = null;
 };
 OpenDialog.prototype.show = function(){
+	OpenDialog.currentDialog = this;
 	RowDialog.prototype.show.call(this);
 	this.createNewBn();
 };
@@ -118,4 +120,8 @@ OpenDialog.showDialog = function(){
 		var openDialog = new OpenDialog(response);
 		openDialog.show();
 	});
+};
+OpenDialog.prototype.closeDialog = function(){
+	OpenDialog.currentDialog = null;
+	RowDialog.prototype.closeDialog.call(this);
 };
