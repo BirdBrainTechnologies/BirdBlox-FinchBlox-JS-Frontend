@@ -13960,7 +13960,13 @@ EditableSlot.prototype.copyFrom = function(slot) {
 	this.setData(slot.enteredData, false, false);
 };
 /**
- * Created by Tom on 7/3/2017.
+ * RectSlots generally hold strings and are edited through a prompt dialog
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} snapType
+ * @param {number} outputType
+ * @param {Data} data
+ * @constructor
  */
 function RectSlot(parent, key, snapType, outputType, data){
 	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
@@ -13969,19 +13975,35 @@ function RectSlot(parent, key, snapType, outputType, data){
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
 RectSlot.prototype.constructor = RectSlot;
+
+/**
+ * @inheritDoc
+ */
 RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
 	let isSlot = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
 };
+
+/**
+ * @inheritDoc
+ * @param {string} textSummary
+ * @return {string}
+ */
 RectSlot.prototype.formatTextSummary = function(textSummary) {
 	return "[" + textSummary + "]";
 };
+
+/**
+ * @inheritDoc
+ * @return {InputDialog}
+ */
 RectSlot.prototype.createInputSystem = function(){
 	return new InputDialog(this.parent.textSummary(this), true);
 };
 /**
  * Created by Tom on 7/3/2017.
  */
+//TODO: Resume refactor here!!
 function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer){
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
@@ -14582,69 +14604,96 @@ function BoolSlot(parent,key){
 }
 BoolSlot.prototype = Object.create(HexSlot.prototype);
 BoolSlot.prototype.constructor = BoolSlot;
-/* NumSlot is a subclass of RoundSlot.
+/**
+ * NumSlot is a subclass of RoundSlot.
  * It creates a RoundSlot optimized for use with numbers.
  * It automatically converts any results into NumData and has a snapType of numStrBool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {number} value - The initial number stored in the Slot.
- * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
- * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} value
+ * @param {boolean} [positive] - Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} [integer] - Determines if the NumPad will have the decimal point Button disabled.
  */
-function NumSlot(parent,key,value,positive,integer){
-	if(positive==null){ //Optional parameters are false by default.
-		positive=false;
+function NumSlot(parent, key, value, positive, integer) {
+	// Optional parameters are false by default.
+	if (positive == null) {
+		positive = false;
 	}
-	if(integer==null){
-		integer=false;
+	if (integer == null) {
+		integer = false;
 	}
-	//Make RoundSlot.
 	const inputType = EditableSlot.inputTypes.num;
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.num;
+
+	// Make RoundSlot.
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+
+	// Limits can be set later
 	this.minVal = null;
 	this.maxVal = null;
 	this.limitsSet = false;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
-NumSlot.prototype.addLimits = function(min, max, displayUnits){
-	if(displayUnits == null){
+
+/**
+ * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
+ * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
+ * @param {number} min
+ * @param {number} max
+ * @param {string} [displayUnits] - The units/label to show before the min/max
+ */
+NumSlot.prototype.addLimits = function(min, max, displayUnits) {
+	if (displayUnits == null) {
 		this.labelText = "(" + min + " - " + max + ")";
 	} else {
 		this.labelText = displayUnits + " (" + min + " - " + max + ")";
 	}
 	this.minVal = min;
 	this.maxVal = max;
-	this.limitsSet =true;
+	this.limitsSet = true;
 };
-NumSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data|null} data
+ * @return {Data|null}
+ */
+NumSlot.prototype.sanitizeData = function(data) {
+	// Forces Data to NumData
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(this.limitsSet) {
+	if (data == null) return null;
+	// Applies limits
+	if (this.limitsSet) {
 		const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
 		return new NumData(value, data.isValid);
-	}
-	else {
+	} else {
 		return data.asNum();
 	}
 };
-/* StringSlot is a subclass of RectSlot.
+/**
+ * StringSlot is a subclass of RectSlot.
  * It creates a RectSlot optimized for use with strings.
  * It automatically converts any results into StringData and has a snapType of numStrBool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
+ * @param {Block} parent
+ * @param {string} key
  * @param {string} value - The initial string stored in the Slot.
  */
-function StringSlot(parent,key,value){
+function StringSlot(parent, key, value) {
 	//Make RectSlot.
 	RectSlot.call(this, parent, key, Slot.snapTypes.numStrBool, Slot.outputTypes.string, new StringData(value));
 }
 StringSlot.prototype = Object.create(RectSlot.prototype);
 StringSlot.prototype.constructor = StringSlot;
 /**
- * Created by Tom on 7/4/2017.
+ * NumOrStringSlots are used in the equals Block, as they make it easy to enter numbers but do allow text to be entered
+ * @param {Block} parent
+ * @param {string} key
+ * @param {Data} data
+ * @constructor
  */
 function NumOrStringSlot(parent, key, data){
 	const inputType = EditableSlot.inputTypes.any;
@@ -14654,37 +14703,61 @@ function NumOrStringSlot(parent, key, data){
 }
 NumOrStringSlot.prototype = Object.create(RoundSlot.prototype);
 NumOrStringSlot.prototype.constructor = NumOrStringSlot;
+
+/**
+ * @inheritDoc
+ * @param {InputWidget.SelectPad} selectPad
+ */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
 	selectPad.addAction("Enter text", function(callbackFn){
+		// When "Enter text" is selected, create a new inputDialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+			// When the inputDialog is closed, tell the selectPad to set the data to the result of the inputDialog.
+			// CLose the selectPad if the inputDialog wasn't canceled.
 			callbackFn(data, !cancelled);
 		}, this.enteredData);
 	}.bind(this)); //TODO: clean up edit text options
 };
-
 /**
- * Created by Tom on 7/7/2017.
+ * IndexSlots are used to select indexes in Lists. They have special options for "last" "random" and "all"
+ * @param {Block} parent
+ * @param {string} key
+ * @param {boolean} includeAll - indicates whether "all" should be an option
+ * @constructor
  */
-function IndexSlot(parent,key,includeAll) {
+function IndexSlot(parent, key, includeAll) {
+	// inputType doesn't matter as much since we have our own sanitize function
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
+	// Both SelectionData and NumData must be allowed
 	const outputType = Slot.outputTypes.any;
+	// Default value is 1
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
+
+	// Add selectable options
 	this.addOption(new SelectionData("last", "last"));
 	this.addOption(new SelectionData("random", "random"));
-	if(includeAll) {
+	if (includeAll) {
 		this.addOption(new SelectionData("all", "all"));
 	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
 IndexSlot.prototype.constructor = IndexSlot;
-IndexSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data|null} data
+ * @return {Data|null}
+ */
+IndexSlot.prototype.sanitizeData = function(data) {
+	// Checks to ensure SelectionData is valid
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(!data.isSelection()) {
+	if (data == null) return null;
+	if (!data.isSelection()) {
+		// If it isn't selectionData, make sure it is a positive integer, fixing it as necessary
 		const numData = data.asNum();
-		if(!numData.isValid) return null;
+		if (!numData.isValid) return null;
 		let value = numData.getValueWithC(true, true);
 		value = Math.max(1, value);
 		return new NumData(value);
