@@ -32,8 +32,8 @@ SaveManager.loadData = function(data) {
 		//TODO: fail file open
 	}
 };
-SaveManager.backendSetName = function(fileName){
-	SaveManager.named = true;
+SaveManager.backendSetName = function(fileName, named){
+	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
 };

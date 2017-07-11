@@ -95,7 +95,7 @@ CodeManager.move.update=function(x,y){
 		move.topY = move.offsetY+y;
 		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
-		move.stack.move(move.stack.setAbsX(move.topX),move.stack.setAbsX(move.topY)); //Move the BlockStack to the correct location.
+		move.stack.move(CodeManager.dragAbsToRelX(move.topX),CodeManager.dragAbsToRelY(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
@@ -431,16 +431,6 @@ CodeManager.checkBroadcastMessage=function(message){
 CodeManager.addBroadcastMessage=function(message){
 	if(CodeManager.checkBroadcastMessage(message)){
 		CodeManager.broadcastList.push(message);
-	}
-};
-/* @fix Write documentation.
- */
-CodeManager.removeUnusedMessages=function(){ //TODO: remove this
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
-			messages.splice(i,1);
-		}
 	}
 };
 /* @fix Write documentation.

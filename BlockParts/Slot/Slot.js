@@ -411,14 +411,6 @@ Slot.prototype.convertData = function(data){
 	return null;
 };
 
-/**
- * Overridden by subclasses. Checks if a given message is still in use by any of the DropSlots.
- * @param {string} message - the message to check
- */
-Slot.prototype.checkBroadcastMessageAvailable = function(message){
-	return false;
-};
-
 /** Overridden by subclasses. Updates the available broadcast messages. */
 Slot.prototype.updateAvailableMessages = function(){
 
@@ -538,8 +530,8 @@ Slot.prototype.checkListUsed = function(list){
 
 /**
  * Appends information about this Slot to the document
- * @param {Document} xmlDoc - The document to append to
- * @return {Document} - The document with the Slot appended
+ * @param {DOMParser} xmlDoc - The document to append to
+ * @return {Node} - The XML node of the Slot
  */
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
@@ -556,7 +548,7 @@ Slot.prototype.createXml = function(xmlDoc){
 
 /**
  * Imports the data from the node to this Slot
- * @param {Document} slotNode
+ * @param {Node} slotNode
  * @return {Slot} - A reference to this Slot
  */
 Slot.prototype.importXml = function(slotNode) {

@@ -7,7 +7,7 @@ function HtmlServer(){
 	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.decodeHtml = function(message){
-	return decodeURIComponent(message);
+	return decodeURIComponent(message.replace(/\+/g, " "));
 };
 HtmlServer.encodeHtml=function(message){
 	/*if(message==""){

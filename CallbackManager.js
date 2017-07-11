@@ -20,14 +20,19 @@ CallbackManager.data.open = function(fileName, data, named) {
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
-CallbackManager.data.setName = function(fileName){
+CallbackManager.data.setName = function(fileName, named){
 	fileName = HtmlServer.decodeHtml(fileName);
-	SaveManager.backendSetName(fileName);
+	SaveManager.backendSetName(fileName, named);
 	return true;
 };
 CallbackManager.data.close = function(){
 	SaveManager.backendClose();
 	return true;
+};
+CallbackManager.data.filesChanged = function(){
+	if(OpenDialog.currentDialog != null){
+		OpenDialog.currentDialog.reloadDialog();
+	}
 };
 /* CallbackManager.data.import = function(fileName){
 	SaveManager.import(fileName);

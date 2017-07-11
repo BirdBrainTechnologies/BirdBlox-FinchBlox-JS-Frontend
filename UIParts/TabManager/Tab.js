@@ -32,9 +32,6 @@ Tab.prototype.removeStack=function(stack){
 	var index=this.stackList.indexOf(stack);
 	this.stackList.splice(index,1);
 };
-Tab.prototype.getSprite=function(){
-	return this.sprite;
-}
 Tab.prototype.relToAbsX=function(x){
 	return x * this.zoomFactor + this.scrollX;
 };
@@ -69,15 +66,6 @@ Tab.prototype.checkBroadcastRunning=function(message){
 			if(stacks[i].checkBroadcastRunning(message)){
 				return true;
 			}
-		}
-	}
-	return false;
-};
-Tab.prototype.checkBroadcastMessageAvailable=function(message){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i].checkBroadcastMessageAvailable(message)){
-			return true;
 		}
 	}
 	return false;
@@ -243,7 +231,6 @@ Tab.prototype.createXml=function(xmlDoc){
 	return tab;
 };
 Tab.importXml=function(tabNode){
-	//var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
 	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
 	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
 	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);

@@ -74,14 +74,6 @@ TabManager.checkBroadcastRunning=function(message){
 	}
 	return false;
 };
-TabManager.checkBroadcastMessageAvailable=function(message){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
-			return true;
-		}
-	}
-	return false;
-};
 TabManager.updateAvailableMessages=function(){
 	TabManager.passRecursively("updateAvailableMessages");
 };
