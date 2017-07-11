@@ -1240,6 +1240,24 @@ TabletSensors.updateAvailable = function(sensorList){
 	});
 	CodeManager.updateAvailableSensors();
 };
+TabletSensors.addSensor = function(sensor){
+	const TS = TabletSensors;
+	if(TS.sensors[sensor] != null) {
+		TS.sensors[sensor] = true;
+		CodeManager.updateAvailableSensors();
+		return true;
+	}
+	return false;
+};
+TabletSensors.removeSensor = function(sensor){
+	const TS = TabletSensors;
+	if(TS.sensors[sensor] != null) {
+		TS.sensors[sensor] = false;
+		CodeManager.updateAvailableSensors();
+		return true;
+	}
+	return false;
+};
 TabletSensors.clear = function(){
 	const sensors = TabletSensors.sensors = {};
 	sensors.accelerometer = false;
@@ -10990,6 +11008,12 @@ CallbackManager.device = {};
 CallbackManager.device.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
 };
+CallbackManager.device.addSensor = function(sensor){
+	return TabletSensors.addSensor(sensor);
+};
+CallbackManager.device.removeSensor = function(sensor){
+	return TabletSensors.removeSensor(sensor);
+};
 function XmlWriter(){
 
 }
@@ -13080,11 +13104,13 @@ DropSlotShape.prototype.deselect = function(){
  * Slots can be edited in different ways, as indicated by their shape.
  * Slots can accept different types of Blocks and can automatically convert Data into a certain type.
  * Block implementations first update their Slots (compute their values) before accessing them during execution.
- * Slots must implement highlight(); textSummary(); getDataNotFromChild(); createXml(); importXml(); TODO: Update this list
+ * Each Slot has a slotShape, as determined by the subclass that manages the appearance of the slot when nothing
+ * is snapped to it.
+ * Slots must implement highlight(); textSummary(); and getDataNotFromChild();
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
+ * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot.
  * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
  */
 function Slot(parent, key, snapType, outputType){
@@ -13106,6 +13132,8 @@ function Slot(parent, key, snapType, outputType){
 	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
 	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
 	this.resultData = null; //passed to Block for use in implementation.
+	/** @type {SlotShape} */
+	this.slotShape = undefined;
 }
 Slot.setConstants = function(){
 	//The type of Blocks which can be attached to the Slot.
@@ -13181,7 +13209,7 @@ Slot.prototype.snap = function(block){
 	}
 	this.hasChild = true;
 	this.child = block; //Set child.
-	this.hideSlot(); //Slot graphics are covered and should be hidden.
+	this.slotShape.hide(); //Slot graphics are covered and should be hidden.
 	if(block.stack != null) {
 		const oldG = block.stack.group; //Old group can be deleted.
 		block.stack.remove(); //TODO: use delete() instead.
@@ -13264,7 +13292,7 @@ Slot.prototype.getData = function(){
 	}
 	//If it isn't done executing and has a child, throw an error.
 	DebugOptions.assert(!this.hasChild);
-	DebugOptions.assert(false); //TODO: see if this is ok.
+	DebugOptions.assert(false);
 };
 
 /**
@@ -13286,7 +13314,7 @@ Slot.prototype.updateStackDim = function(){
 Slot.prototype.removeChild = function(){
 	this.hasChild = false;
 	this.child = null;
-	this.showSlot();
+	this.slotShape.show();
 };
 
 /**
@@ -13379,7 +13407,6 @@ Slot.prototype.checkFit = function(outputType){
 };
 
 // These functions convert between screen (absolute) coordinates and local (relative) coordinates.
-// TODO: Build these with higher-order functions.
 /**
  * @param {number} x
  * @returns {number}
@@ -13612,7 +13639,6 @@ Slot.prototype.checkListUsed = function(list){
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
 	const slot = XmlWriter.createElement(xmlDoc,"slot");
-	//XmlWriter.setAttribute(slot,"type","Slot"); //TODO: See why this was here
 	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
 		const child = XmlWriter.createElement(xmlDoc,"child");
@@ -13646,22 +13672,6 @@ Slot.prototype.importXml = function(slotNode) {
  */
 Slot.prototype.getKey = function(){
 	return this.key;
-};
-
-/**
- * Shows the Slot's graphic.
- * TODO: Remove this function
- */
-Slot.prototype.showSlot = function(){
-	this.slotShape.show();
-};
-
-/**
- * Hide's the Slot's graphic.
- * TODO: Remove this function
- */
-Slot.prototype.hideSlot = function(){
-	this.slotShape.hide();
 };
 
 /**
@@ -13742,153 +13752,128 @@ HexSlot.prototype.textSummary=function(){
 HexSlot.prototype.getDataNotFromChild=function(){
 	return new BoolData(false,false); //The Slot is empty. Return default value of false.
 };
-
 /**
- * @inheritDoc
- * @param {DOMParser} xmlDoc
- * @returns {Node}
+ * EditableSlot is an abstract class representing Slots that can have a value directly entered into them
+ * in addition to accepting Blocks.
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} inputType
+ * @param {number} snapType
+ * @param {number} outputType - [any, num, string, select] The type of data that can be directly entered
+ * @param {Data} data - The initial value of the Slot
+ * @constructor
  */
-HexSlot.prototype.createXml=function(xmlDoc){
-	const slot = Slot.prototype.createXml.call(this, xmlDoc);
-	XmlWriter.setAttribute(slot,"type","HexSlot");
-	return slot;
-};
-
-/**
- * @inheritDoc
- * @param {Node} slotNode
- * @return {HexSlot}
- */
-HexSlot.prototype.importXml=function(slotNode){
-	const type = XmlWriter.getAttribute(slotNode, "type");
-	// The save file appears to have the wrong type of Slot. The data is left at default value.
-	// TODO: Remove this check and just validate the data.
-	if(type !== "HexSlot"){
-		return this;
-	}
-	// Get the nodes for this Slot's child.
-	const childNode = XmlWriter.findSubElement(slotNode, "child");
-	const blockNode = XmlWriter.findSubElement(childNode, "block");
-	if(blockNode != null) {
-		// Import the Block from the save file
-		const childBlock = Block.importXml(blockNode);
-		// If import succeeds, connect the Block
-		if (childBlock != null) {
-			this.snap(childBlock);
-		}
-	}
-	// Return a reference to this Slot.
-	return this;
-};
-/**
- * Created by Tom on 6/30/2017.
- */
-function EditableSlot(parent, key, inputType, snapType, outputType, data){
+function EditableSlot(parent, key, inputType, snapType, outputType, data) {
 	Slot.call(this, parent, key, snapType, outputType);
 	this.inputType = inputType;
 	this.enteredData = data;
 	this.editing = false;
-	//TODO: perhaps build the slot here?
+	//TODO: make the slotShape be an extra argument
 }
 EditableSlot.prototype = Object.create(Slot.prototype);
 EditableSlot.prototype.constructor = EditableSlot;
-EditableSlot.setConstants = function(){
-	/* The type of Data which can be directly entered into the Slot. */
+EditableSlot.setConstants = function() {
+	/* The type of Data that can be directly entered into the Slot. */
 	EditableSlot.inputTypes = {};
 	EditableSlot.inputTypes.any = 0;
 	EditableSlot.inputTypes.num = 1;
 	EditableSlot.inputTypes.string = 2;
 	EditableSlot.inputTypes.select = 3;
 };
-EditableSlot.prototype.changeText = function(text, updateDim){
+/**
+ * @param {string} text - The text to set the slotShape to display
+ * @param {boolean} updateDim - Should the Stack be told to update after this?
+ */
+EditableSlot.prototype.changeText = function(text, updateDim) {
 	this.slotShape.changeText(text);
-	if(updateDim && this.parent.stack!=null) {
+	if (updateDim && this.parent.stack != null) {
 		this.parent.stack.updateDim(); //Update dimensions.
 	}
 };
-EditableSlot.prototype.edit = function(){
+/**
+ * Tells the Slot to display an inputSys so it can be edited.
+ */
+EditableSlot.prototype.edit = function() {
 	DebugOptions.assert(!this.hasChild);
-	if(!this.editing){
+	if (!this.editing) {
 		this.editing = true;
 		this.slotShape.select();
 		const inputSys = this.createInputSystem();
 		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
 	}
 };
-EditableSlot.prototype.createInputSystem = function(){
+EditableSlot.prototype.createInputSystem = function() {
 	DebugOptions.markAbstract();
 };
-EditableSlot.prototype.updateEdit = function(data, visibleText){
+EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	DebugOptions.assert(this.editing);
-	if(visibleText == null){
+	if (visibleText == null) {
 		visibleText = this.dataToString(data);
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
 };
-EditableSlot.prototype.finishEdit = function(data){
+EditableSlot.prototype.finishEdit = function(data) {
 	DebugOptions.assert(this.editing);
-	if(this.editing) {
+	if (this.editing) {
 		this.setData(data, true, true); //Sanitize data
 		this.slotShape.deselect();
 		this.editing = false;
 	}
 };
-EditableSlot.prototype.setData = function(data, sanitize, updateDim){
-	if(sanitize){
+EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
+	if (sanitize) {
 		data = this.sanitizeData(data);
 	}
-	if(data == null) return;
+	if (data == null) return;
 	this.enteredData = data;
 	this.changeText(this.dataToString(this.enteredData), updateDim);
 };
-EditableSlot.prototype.dataToString = function(data){
+EditableSlot.prototype.dataToString = function(data) {
 	return data.asString().getValue();
 };
 EditableSlot.prototype.sanitizeData = function(data) {
-	if(data == null) return null;
+	if (data == null) return null;
 	const inputTypes = EditableSlot.inputTypes;
-	if(this.inputType === inputTypes.string) {
+	if (this.inputType === inputTypes.string) {
 		data = data.asString();
-	}
-	else if(this.inputType === inputTypes.num) {
+	} else if (this.inputType === inputTypes.num) {
 		data = data.asNum();
-	}
-	else if(this.inputType === inputTypes.select) {
+	} else if (this.inputType === inputTypes.select) {
 		data = data.asSelection();
 	}
-	if(data.isValid) {
+	if (data.isValid) {
 		return data;
 	}
 	return null;
 };
-EditableSlot.prototype.textSummary = function(){
+EditableSlot.prototype.textSummary = function() {
 	let result = "...";
-	if(!this.hasChild){ //If it has a child, just use an ellipsis.
+	if (!this.hasChild) { //If it has a child, just use an ellipsis.
 		result = this.dataToString(this.enteredData);
 	}
 	return this.formatTextSummary(result);
 };
-EditableSlot.prototype.formatTextSummary = function(textSummary){
+EditableSlot.prototype.formatTextSummary = function(textSummary) {
 	DebugOptions.markAbstract();
 };
-EditableSlot.prototype.getDataNotFromChild = function(){
+EditableSlot.prototype.getDataNotFromChild = function() {
 	return this.enteredData;
 };
-EditableSlot.prototype.createXml = function(xmlDoc){
+EditableSlot.prototype.createXml = function(xmlDoc) {
 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
 	let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
 	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
 	slot.appendChild(enteredData);
 	return slot;
 };
-EditableSlot.prototype.importXml=function(slotNode){
+EditableSlot.prototype.importXml = function(slotNode) {
 	Slot.prototype.importXml.call(this, slotNode);
 	const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
 	const dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
-	if(dataNode != null){
+	if (dataNode != null) {
 		const data = Data.importXml(dataNode);
-		if(data != null){
+		if (data != null) {
 			this.setData(data, true, false);
 		}
 	}
@@ -13897,7 +13882,7 @@ EditableSlot.prototype.importXml=function(slotNode){
 /**
  * @param {EditableSlot} slot
  */
-EditableSlot.prototype.copyFrom = function(slot){
+EditableSlot.prototype.copyFrom = function(slot) {
 	Slot.prototype.copyFrom.call(this, slot);
 	this.setData(slot.enteredData, false, false);
 };

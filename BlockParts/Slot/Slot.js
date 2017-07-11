@@ -5,11 +5,13 @@
  * Slots can be edited in different ways, as indicated by their shape.
  * Slots can accept different types of Blocks and can automatically convert Data into a certain type.
  * Block implementations first update their Slots (compute their values) before accessing them during execution.
- * Slots must implement highlight(); textSummary(); getDataNotFromChild(); createXml(); importXml(); TODO: Update this list
+ * Each Slot has a slotShape, as determined by the subclass that manages the appearance of the slot when nothing
+ * is snapped to it.
+ * Slots must implement highlight(); textSummary(); and getDataNotFromChild();
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of. Slots can't change their parents.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot. TODO: Update bool
+ * @param {number} snapType - [none, numStrBool, bool, list, any] The type of Blocks which can be attached to the Slot.
  * @param {number} outputType - [any, num, string, bool, list] The type of Data the Slot should convert to.
  */
 function Slot(parent, key, snapType, outputType){
@@ -31,6 +33,8 @@ function Slot(parent, key, snapType, outputType){
 	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
 	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
 	this.resultData = null; //passed to Block for use in implementation.
+	/** @type {SlotShape} */
+	this.slotShape = undefined;
 }
 Slot.setConstants = function(){
 	//The type of Blocks which can be attached to the Slot.
@@ -106,7 +110,7 @@ Slot.prototype.snap = function(block){
 	}
 	this.hasChild = true;
 	this.child = block; //Set child.
-	this.hideSlot(); //Slot graphics are covered and should be hidden.
+	this.slotShape.hide(); //Slot graphics are covered and should be hidden.
 	if(block.stack != null) {
 		const oldG = block.stack.group; //Old group can be deleted.
 		block.stack.remove(); //TODO: use delete() instead.
@@ -189,7 +193,7 @@ Slot.prototype.getData = function(){
 	}
 	//If it isn't done executing and has a child, throw an error.
 	DebugOptions.assert(!this.hasChild);
-	DebugOptions.assert(false); //TODO: see if this is ok.
+	DebugOptions.assert(false);
 };
 
 /**
@@ -211,7 +215,7 @@ Slot.prototype.updateStackDim = function(){
 Slot.prototype.removeChild = function(){
 	this.hasChild = false;
 	this.child = null;
-	this.showSlot();
+	this.slotShape.show();
 };
 
 /**
@@ -304,7 +308,6 @@ Slot.prototype.checkFit = function(outputType){
 };
 
 // These functions convert between screen (absolute) coordinates and local (relative) coordinates.
-// TODO: Build these with higher-order functions.
 /**
  * @param {number} x
  * @returns {number}
@@ -537,7 +540,6 @@ Slot.prototype.checkListUsed = function(list){
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
 	const slot = XmlWriter.createElement(xmlDoc,"slot");
-	//XmlWriter.setAttribute(slot,"type","Slot"); //TODO: See why this was here
 	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
 		const child = XmlWriter.createElement(xmlDoc,"child");
@@ -571,22 +573,6 @@ Slot.prototype.importXml = function(slotNode) {
  */
 Slot.prototype.getKey = function(){
 	return this.key;
-};
-
-/**
- * Shows the Slot's graphic.
- * TODO: Remove this function
- */
-Slot.prototype.showSlot = function(){
-	this.slotShape.show();
-};
-
-/**
- * Hide's the Slot's graphic.
- * TODO: Remove this function
- */
-Slot.prototype.hideSlot = function(){
-	this.slotShape.hide();
 };
 
 /**
