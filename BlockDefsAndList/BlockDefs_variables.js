@@ -1,84 +1,124 @@
-//@fix Write documentation.
+/* Implementation of blocks that deal with variables and lists.  Most of these blocks have a DropSlot to select
+ * the list to read/modify.  Some of the List Blocks allow this Slot to be given either an existing List
+ * or a ListData, such as returned from the Split block.
+ */
 
-function B_Variable(x,y,variable){
-	ReporterBlock.call(this,x,y,"variables",Block.returnTypes.string);
-	if (variable != null) {
-		this.variable=variable;
-		this.addPart(new LabelText(this,this.variable.getName()));
-	}
+
+/**
+ * Variable Blocks are special since their constructor takes an extra Variable parameter.
+ * @param {number} x
+ * @param {number} y
+ * @param {Variable} variable - The variable that this Block will return the value of
+ * @constructor
+ */
+function B_Variable(x, y, variable) {
+	ReporterBlock.call(this, x, y, "variables", Block.returnTypes.string);
+	this.variable = variable;
+	this.addPart(new LabelText(this, this.variable.getName()));
 }
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
-B_Variable.prototype.startAction=function(){
+/* Return the value of the variable */
+B_Variable.prototype.startAction = function() {
 	return new ExecutionStatusResult(this.variable.getData());
 };
-B_Variable.prototype.createXml=function(xmlDoc){
-	var block=XmlWriter.createElement(xmlDoc,"block");
-	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	XmlWriter.setAttribute(block,"variable",this.variable.getName());
+/**
+ * @inheritDoc
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node} - The node for this Block
+ */
+B_Variable.prototype.createXml = function(xmlDoc) {
+	const block = XmlWriter.createElement(xmlDoc, "block");
+	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+	XmlWriter.setAttribute(block, "variable", this.variable.getName());
 	return block;
 };
-B_Variable.prototype.setVar=function(variable){
-	if (variable != null) {
-		this.variable=variable;
-		this.addPart(new LabelText(this,this.variable.getName()));
-	}
-}
-B_Variable.prototype.renameVar=function(){
-	this.variable.rename();	
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_Variable.prototype.renameVar = function() {
+	// Shows dialog for new name
+	this.variable.rename();
 };
-B_Variable.prototype.deleteVar=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_Variable.prototype.deleteVar = function() {
+	// Deletes variable if unused, or shows confirmation dialog
 	this.variable.delete();
 };
-B_Variable.prototype.renameVariable=function(variable){
-	if(variable==this.variable){
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+B_Variable.prototype.renameVariable = function(variable) {
+	if (variable === this.variable) {
+		// Update the block by changing its label
 		this.parts[0].remove();
-		this.parts[0]=new LabelText(this,this.variable.getName());
-		if(this.stack!=null){
+		this.parts[0] = new LabelText(this, this.variable.getName());
+		if (this.stack != null) {
+			// The stack may now be a different size
 			this.stack.updateDim();
 		}
 	}
 };
-B_Variable.prototype.deleteVariable=function(variable){
-	if(variable==this.variable){
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+B_Variable.prototype.deleteVariable = function(variable) {
+	if (variable === this.variable) {
+		// Delete occurrences of this Block
 		this.unsnap().delete();
 	}
 };
-B_Variable.prototype.checkVariableUsed=function(variable){
-	if(variable==this.variable){
-		return new ExecutionStatusRunning();
-	}
-	return new ExecutionStatusDone();
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+B_Variable.prototype.checkVariableUsed = function(variable) {
+	return variable === this.variable
 };
-B_Variable.importXml=function(blockNode){
-	var variableName=XmlWriter.getAttribute(blockNode,"variable");
-	var variable=CodeManager.findVar(variableName);
-	if(variable!=null){
-		return new B_Variable(0,0,variable);
+/**
+ * Creates a variable Block from XML
+ * @param {Node} blockNode - The node to import from
+ * @return {Block|null} - The imported Block
+ */
+B_Variable.importXml = function(blockNode) {
+	const variableName = XmlWriter.getAttribute(blockNode, "variable");
+	const variable = CodeManager.findVar(variableName);
+	if (variable != null) {
+		return new B_Variable(0, 0, variable);
 	}
 	return null;
 };
 
 
 
-
-function B_SetTo(x,y){
-	CommandBlock.call(this,x,y,"variables");
-	this.addPart(new LabelText(this,"set"));
-	this.addPart(new VarDropSlot(this,"VDS_1"));
-	this.addPart(new LabelText(this,"to"));
+function B_SetTo(x, y) {
+	CommandBlock.call(this, x, y, "variables");
+	this.addPart(new LabelText(this, "set"));
+	this.addPart(new VarDropSlot(this, "VDS_1"));
+	this.addPart(new LabelText(this, "to"));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
-B_SetTo.prototype.startAction=function(){
-	var variableD=this.slots[0].getData();
-	var data=this.slots[1].getData();
-	var type=data.type;
-	var types=Data.types;
-	if(type==types.bool||type==types.num||type==types.string) {
+/* Sets the variable to the provided value */
+B_SetTo.prototype.startAction = function() {
+	// Get the selection data that refers to a variable
+	const variableD = this.slots[0].getData();
+	// Get the data to assign to the variable
+	const data = this.slots[1].getData();
+	const type = data.type;
+	const types = Data.types;
+	if (type === types.bool || type === types.num || type === types.string) {
+		// If the selection data is not empty
 		if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
-			var variable = variableD.getValue();
+			// Extract the indicated variable
+			const variable = variableD.getValue();
+			// And set its value
 			variable.setData(data);
 		}
 	}
@@ -87,111 +127,146 @@ B_SetTo.prototype.startAction=function(){
 
 
 
-function B_ChangeBy(x,y){
-	CommandBlock.call(this,x,y,"variables");
-	this.addPart(new LabelText(this,"change"));
-	this.addPart(new VarDropSlot(this,"VDS_1"));
-	this.addPart(new LabelText(this,"by"));
-	this.addPart(new NumSlot(this,"NumS_val",1));
+function B_ChangeBy(x, y) {
+	CommandBlock.call(this, x, y, "variables");
+	this.addPart(new LabelText(this, "change"));
+	this.addPart(new VarDropSlot(this, "VDS_1"));
+	this.addPart(new LabelText(this, "by"));
+	this.addPart(new NumSlot(this, "NumS_val", 1));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
-B_ChangeBy.prototype.startAction=function(){
-	var variableD=this.slots[0].getData();
-	var incrementD=this.slots[1].getData();
-	if(variableD.type === Data.types.selection && !variableD.isEmpty()){
-		var variable=variableD.getValue();
-		var currentD=variable.getData().asNum();
-		var newV=incrementD.getValue()+currentD.getValue();
-		var isValid=currentD.isValid&&incrementD.isValid;
-		var newD=new NumData(newV,isValid);
+/* Adds the value to the indicated variable */
+B_ChangeBy.prototype.startAction = function() {
+	const variableD = this.slots[0].getData();
+	const incrementD = this.slots[1].getData();
+	if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
+		const variable = variableD.getValue();
+		const currentD = variable.getData().asNum();
+		const newV = incrementD.getValue() + currentD.getValue();
+		const isValid = currentD.isValid && incrementD.isValid;
+		const newD = new NumData(newV, isValid);
 		variable.setData(newD);
 	}
 	return new ExecutionStatusDone();
 };
 
 
-//Done
-function B_List(x,y,list){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
-	if (list != null) {
-		this.list=list;
-		this.addPart(new LabelText(this,this.list.getName()));
-	}
+/**
+ * Variable Blocks are special since their constructor takes an extra List parameter.
+ * @param {number} x
+ * @param {number} y
+ * @param {List} list - The list that this Block should return the value of
+ * @constructor
+ */
+function B_List(x, y, list) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
+	this.list = list;
+	this.addPart(new LabelText(this, this.list.getName()));
 }
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
-B_List.prototype.startAction=function(){
+/* Returns a StringData representing the List's contents, comma separated */
+B_List.prototype.startAction = function() {
 	return new ExecutionStatusResult(this.list.getData().asString());
 };
-B_List.prototype.createXml=function(xmlDoc){
-	var block=XmlWriter.createElement(xmlDoc,"block");
-	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	XmlWriter.setAttribute(block,"list",this.list.getName());
+/**
+ * Writes the Block to Xml
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node} - The Block node
+ */
+B_List.prototype.createXml = function(xmlDoc) {
+	const block = XmlWriter.createElement(xmlDoc, "block");
+	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+	XmlWriter.setAttribute(block, "list", this.list.getName());
 	return block;
 };
-B_List.prototype.setList=function(list){
+/**
+ * Imports a List Block from the provided XML node
+ * @param {Node} blockNode - The node to import from
+ * @return {Block|null} - The imported Block
+ */
+B_List.importXml = function(blockNode) {
+	// The list is stored as a string
+	const listName = XmlWriter.getAttribute(blockNode, "list");
+	const list = CodeManager.findList(listName);
 	if (list != null) {
-		this.list=list;
-		this.addPart(new LabelText(this,this.list.getName()));
-	}
-}
-B_List.importXml=function(blockNode){
-	var listName=XmlWriter.getAttribute(blockNode,"list");
-	var list=CodeManager.findList(listName);
-	if(list!=null){
-		return new B_List(0,0,list);
+		return new B_List(0, 0, list);
 	}
 	return null;
 };
-B_List.prototype.renameLi=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_List.prototype.renameLi = function() {
 	this.list.rename();
 };
-B_List.prototype.deleteLi=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_List.prototype.deleteLi = function() {
 	this.list.delete();
 };
-B_List.prototype.renameList=function(list){
-	if(list==this.list){
+/**
+ * @inheritDoc
+ * @param {List} list
+ */
+B_List.prototype.renameList = function(list) {
+	if (list === this.list) {
 		this.parts[0].remove();
-		this.parts[0]=new LabelText(this,this.list.getName());
-		if(this.stack!=null){
+		this.parts[0] = new LabelText(this, this.list.getName());
+		if (this.stack != null) {
 			this.stack.updateDim();
 		}
 	}
 };
-B_List.prototype.deleteList=function(list){
-	if(list==this.list){
+/**
+ * @inheritDoc
+ * @param {List} list
+ */
+B_List.prototype.deleteList = function(list) {
+	if (list === this.list) {
 		this.unsnap().delete();
 	}
 };
-B_List.prototype.checkListUsed=function(list){
-	if(list==this.list){
-		return new ExecutionStatusRunning();
-	}
-	return new ExecutionStatusDone();
+/**
+ * @inheritDoc
+ * @param {List} list
+ * @return {boolean}
+ */
+B_List.prototype.checkListUsed = function(list) {
+	return list === this.list
 };
 
 
-//Done
-function B_AddToList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"add"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
-	this.addPart(new LabelText(this,"to"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_AddToList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "add"));
+	/* Any type can be added to a list */
+	const snapType = Slot.snapTypes.numStrBool;
+	const inputType = Slot.outputTypes.any;
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
+	this.addPart(new LabelText(this, "to"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
-B_AddToList.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var list=listD.getValue();
-		var array=list.getData().getValue();
-		var itemD=this.slots[0].getData();
-		if(itemD.isValid){
+/* Adds the item to the list */
+B_AddToList.prototype.startAction = function() {
+	/* Gets the SelectionData referring to the list */
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		/* Extracts the List from the SelectionData */
+		const list = listD.getValue();
+		/* Gets the array value of the ListData stored in the List */
+		const array = list.getData().getValue();
+		/* Gets the item to add */
+		const itemD = this.slots[0].getData();
+		/* Adds the item to the array */
+		if (itemD.isValid) {
 			array.push(itemD);
-		}
-		else{
+		} else {
 			array.push(itemD.asString());
 		}
 	}
@@ -199,29 +274,31 @@ B_AddToList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_DeleteItemOfList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"delete"));
-	this.addPart(new IndexSlot(this,"NumS_idx",true));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_DeleteItemOfList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "delete"));
+	this.addPart(new IndexSlot(this, "NumS_idx", true));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
-B_DeleteItemOfList.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[0].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		if(indexD.type === Data.types.selection && indexD.getValue() === "all"){
+/* Deletes the item from the List if it exists */
+B_DeleteItemOfList.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[0].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		if (indexD.type === Data.types.selection && indexD.getValue() === "all") {
+			// Delete everything from the List
 			list.setData(new ListData());
-		}
-		else {
-			var index = listData.getIndex(indexD);
+		} else {
+			const index = listData.getIndex(indexD);
 			if (index != null) {
+				// Delete the indicated index
 				array.splice(index, 1);
 			}
 		}
@@ -230,44 +307,46 @@ B_DeleteItemOfList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_InsertItemAtOfList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"insert"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
-	this.addPart(new LabelText(this,"at"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_InsertItemAtOfList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "insert"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
+	this.addPart(new LabelText(this, "at"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
-B_InsertItemAtOfList.prototype.startAction=function(){
-	var listD=this.slots[2].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[1].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		var itemD=this.slots[0].getData();
-		var index=listData.getIndex(indexD);
-		if(index==null||indexD.getValue()>array.length){
-			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue()>array.length;
+/* Inserts the item at the indicated position */
+B_InsertItemAtOfList.prototype.startAction = function() {
+	const listD = this.slots[2].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[1].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		const itemD = this.slots[0].getData();
+		const index = listData.getIndex(indexD);
+		// If the value the user provided is too large, insert after the last element
+		if (index == null || indexD.getValue() > array.length) {
+			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue() > array.length;
+			// Or if the user selected "last" (the only SelectionData)
 			insertAtEnd = insertAtEnd || (indexD.isSelection());
-			if(insertAtEnd){
-				if(itemD.isValid){
+			if (insertAtEnd) {
+				if (itemD.isValid) {
 					array.push(itemD);
-				}
-				else{
+				} else {
 					array.push(itemD.asString());
 				}
 			}
 			return new ExecutionStatusDone();
 		}
-		if(itemD.isValid){
+		// If everything is valid, simply insert the item
+		if (itemD.isValid) {
 			array.splice(index, 0, itemD);
-		}
-		else{
+		} else {
 			array.splice(index, 0, itemD.asString());
 		}
 	}
@@ -275,35 +354,37 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_ReplaceItemOfListWith(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"replace item"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
-	this.addPart(new LabelText(this,"with"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
+
+function B_ReplaceItemOfListWith(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "replace item"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.addPart(new LabelText(this, "with"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
-B_ReplaceItemOfListWith.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[0].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		var itemD=this.slots[2].getData();
-		var index=listData.getIndex(indexD);
-		if(index==null){
+/* Replaces the item at the specified index with another one */
+B_ReplaceItemOfListWith.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[0].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		const itemD = this.slots[2].getData();
+		const index = listData.getIndex(indexD);
+		if (index == null) {
+			// Index is out of bounds, do nothing
 			return new ExecutionStatusDone();
 		}
-		if(itemD.isValid){
-			array[index]=itemD;
-		}
-		else{
-			array[index]=itemD.asString();
+		// Replace the item
+		if (itemD.isValid) {
+			array[index] = itemD;
+		} else {
+			array[index] = itemD.asString();
 		}
 	}
 	return new ExecutionStatusDone();
@@ -311,29 +392,37 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 
 
 
-function B_CopyListToList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"copy"));
-	this.addPart(new ListDropSlot(this,"LDS_from",Slot.snapTypes.list));
-	this.addPart(new LabelText(this,"to"));
-	this.addPart(new ListDropSlot(this,"LDS_to"));
+function B_CopyListToList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "copy"));
+	/* This Slot also accepts ListData, such as data from the Split block */
+	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
+	this.addPart(new LabelText(this, "to"));
+	/* This Slot must have an already existing List, not a ListData */
+	this.addPart(new ListDropSlot(this, "LDS_to"));
 }
 B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
-B_CopyListToList.prototype.startAction=function(){
-	var listD1=this.slots[0].getData();
-	var listD2=this.slots[1].getData();
-	if(listD2.type === Data.types.selection && !listD2.isEmpty()){
-		if(listD1.type === Data.types.selection && !listD1.isEmpty()) {
+/* Copies one list to another */
+B_CopyListToList.prototype.startAction = function() {
+	const listD1 = this.slots[0].getData();
+	const listD2 = this.slots[1].getData();
+	// If the second list is valid
+	if (listD2.type === Data.types.selection && !listD2.isEmpty()) {
+		let listDataToCopy;
+		if (listD1.type === Data.types.selection && !listD1.isEmpty()) {
+			// Retrieve the first list's data if it was selected from the DropSlot
 			listDataToCopy = listD1.getValue().getData();
-		}
-		else if(listD1.type === Data.types.list){
+		} else if (listD1.type === Data.types.list) {
+			// Retrieve the ListData
 			listDataToCopy = listD1;
-		}
-		else{
+		} else {
+			// First list is of wrong type of Data. Exit.
 			return new ExecutionStatusDone();
 		}
+		// Get the List from the SelectionData
 		const listToCopyTo = listD2.getValue();
+		// Copy the Data to it
 		listToCopyTo.setData(listDataToCopy.duplicate());
 	}
 	return new ExecutionStatusDone();
@@ -341,101 +430,116 @@ B_CopyListToList.prototype.startAction=function(){
 
 
 
-//Done
-function B_ItemOfList(x,y){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"item"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+function B_ItemOfList(x, y) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "item"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	// Accepts both Lists and ListData
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
-B_ItemOfList.prototype.startAction = function(){
-	var listD=this.slots[1].getData();
-	var indexD;
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
+/* Gets the item form the list */
+B_ItemOfList.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	let indexD;
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		// If the list was selected, retrieve it
 		indexD = this.slots[0].getData();
-		var list = listD.getValue();
-		var listData=list.getData();
-		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
-	}
-	else if(listD.type === Data.types.list){
+		const list = listD.getValue();
+		const listData = list.getData();
+		// Index in and return the value
+		return new ExecutionStatusResult(this.getItemOfList(listData, indexD));
+	} else if (listD.type === Data.types.list) {
 		indexD = this.slots[0].getData();
-		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
-	}
-	else {
+		// Index in and return the value
+		return new ExecutionStatusResult(this.getItemOfList(listD, indexD));
+	} else {
+		// Bad Data, exit
 		return new ExecutionStatusResult(new StringData("", false));
 	}
 };
-B_ItemOfList.prototype.getItemOfList=function(listData,indexD){
-	var array = listData.getValue();
-	var index=listData.getIndex(indexD);
-	if(index==null){
+/**
+ * Gets the item from the ListData at the specified index
+ * TODO: move this function into ListData
+ * @param {ListData} listData - the Data to read from
+ * @param {NumData} indexD - The index to retrieve
+ * @return {StringData} - The retrieved data, as a StringData
+ */
+B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
+	const array = listData.getValue();
+	const index = listData.getIndex(indexD);
+	if (index == null) {
 		return new StringData("", false);
-	}
-	else {
+	} else {
 		return array[index];
 	}
 };
 
 
-//Done
-function B_LengthOfList(x,y){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.num);
-	this.addPart(new LabelText(this,"length of"));
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+
+function B_LengthOfList(x, y) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
+	this.addPart(new LabelText(this, "length of"));
+	// Accepts both Lists and ListData
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
-B_LengthOfList.prototype.startAction=function(){
-	var listD=this.slots[0].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
-		var list = listD.getValue();
-		var array = list.getData().getValue();
+/* Returns the number of items in the List or ListData */
+B_LengthOfList.prototype.startAction = function() {
+	const listD = this.slots[0].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const list = listD.getValue();
+		const array = list.getData().getValue();
 		return new ExecutionStatusResult(new NumData(array.length));
-	}
-	else if(listD.type === Data.types.list){
+	} else if (listD.type === Data.types.list) {
 		return new ExecutionStatusResult(new NumData(listD.getValue().length));
-	}
-	else {
-		return new ExecutionStatusResult(new NumData(0,false));
+	} else {
+		return new ExecutionStatusResult(new NumData(0, false));
 	}
 };
 
 
-//Done
-function B_ListContainsItem(x,y){
-	PredicateBlock.call(this,x,y,"lists");
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
-	this.addPart(new LabelText(this,"contains"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
+
+function B_ListContainsItem(x, y) {
+	PredicateBlock.call(this, x, y, "lists");
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.addPart(new LabelText(this, "contains"));
+	const snapType = Slot.snapTypes.numStrBool;
+	const inputType = Slot.outputTypes.any;
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
-B_ListContainsItem.prototype.startAction=function(){
-	var listD=this.slots[0].getData();
-	var itemD;
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
-		var list = listD.getValue();
-		var listData=list.getData();
-		itemD=this.slots[1].getData();
-		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
-	}
-	else if(listD.type === Data.types.list){
-		itemD=this.slots[1].getData();
-		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
-	}
-	else {
-		return new ExecutionStatusResult(new BoolData(false,true));
+/* Returns BoolData indicating if the item is in the List */
+B_ListContainsItem.prototype.startAction = function() {
+	const listD = this.slots[0].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const list = listD.getValue();
+		const listData = list.getData();
+		const itemD = this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listData, itemD));
+	} else if (listD.type === Data.types.list) {
+		const itemD = this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listD, itemD));
+	} else {
+		return new ExecutionStatusResult(new BoolData(false, true));
 	}
 };
-B_ListContainsItem.prototype.checkListContainsItem=function(listData,itemD){
-	var array = listData.getValue();
-	for(var i=0;i<array.length;i++){
-		if(Data.checkEquality(itemD,array[i])){
-			return new BoolData(true,true);
+/**
+ * Returns BoolData indicating if the item is in the List
+ * @param {ListData} listData - The list to examine
+ * @param {Data} itemD - The item to check
+ * @return {BoolData} - true iff itemD appears in listData
+ */
+B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
+	const array = listData.getValue();
+	for (let i = 0; i < array.length; i++) {
+		if (Data.checkEquality(itemD, array[i])) {
+			return new BoolData(true, true);
 		}
 	}
-	return new BoolData(false,true);
+	return new BoolData(false, true);
 };

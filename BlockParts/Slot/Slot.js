@@ -379,6 +379,7 @@ Slot.prototype.clearMem = function(){
 
 /**
  * Converts the provided data to match the Slot's output type and returns it.
+ * TODO: make NumSlot override this and lock value to min/max.  Perhaps combine with sanitize
  * @param {Data} data - The Data to convert.
  * @return {Data} - The converted Data.
  */

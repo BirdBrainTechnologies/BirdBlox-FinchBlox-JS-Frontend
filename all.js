@@ -10164,8 +10164,8 @@ BlockStack.prototype.updateRun = function() {
 
 /**
  * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
- * @param {Block|undefined} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
- * @param {string|undefined} broadcastMessage - Indicates if execution was triggered by a broadcast
+ * @param {Block} [startBlock] - The first Block to execute. By default, this.firstBlock is used.
+ * @param {string} [broadcastMessage] - Indicates if execution was triggered by a broadcast
  */
 BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
 	if (startBlock == null) {
@@ -11417,6 +11417,7 @@ function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter,
 	this.group = GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
 	this.parent = null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
 	this.parts = []; //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	/** @type {Slot[]} */
 	this.slots = []; //The slots array just holds the Slots.
 	this.running = 0; //Running: 0 = Not started, 1 = Waiting for slots to finish, 2 = Running, 3 = Completed.
 	this.category = category;
@@ -13453,6 +13454,7 @@ Slot.prototype.clearMem = function(){
 
 /**
  * Converts the provided data to match the Slot's output type and returns it.
+ * TODO: make NumSlot override this and lock value to min/max.  Perhaps combine with sanitize
  * @param {Data} data - The Data to convert.
  * @return {Data} - The converted Data.
  */
@@ -14978,22 +14980,33 @@ BlockIcon.prototype.duplicate=function(parentCopy){
 BlockIcon.prototype.textSummary=function(){
 	return this.altText;
 }
+/* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
+ * of the defined Blocks are just subclasses of the Blocks here.
+ */
+
 /**
- * Created by Tom on 6/14/2017.
+ * A Block that polls a sensor
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @param {string} sensorType - Needed for the http request
+ * @param {string} displayName - Name present on Block
+ * @param {number} numberOfPorts - Used to populate PortSlot
+ * @constructor
  */
 function B_DeviceWithPortsSensorBase(x, y, deviceClass, sensorType, displayName, numberOfPorts){
 	ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.sensorType = sensorType;
-	this.displayName = displayName;
+	this.displayName = displayName; //TODO: perhapse remove this
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
-	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
+	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts));
 }
 B_DeviceWithPortsSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceWithPortsSensorBase.prototype.constructor = B_DeviceWithPortsSensorBase;
-/* Generic Hummingbird input functions. */
+/* Sends the request for the sensor data. */
 B_DeviceWithPortsSensorBase.prototype.startAction=function(){
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -15015,26 +15028,38 @@ B_DeviceWithPortsSensorBase.prototype.startAction=function(){
 		return new ExecutionStatusError(); // Invalid port, exit early
 	}
 };
+/* Returns the result of the request */
 B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
-	var status = this.runMem.requestStatus;
+	const status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
 			this.displayError(this.deviceClass.getNotConnectedMessage());
 			return new ExecutionStatusError();
 		} else {
-			var result = new StringData(status.result);
-			if(result.isNumber()){
-				return new ExecutionStatusResult(result.asNum());
-			}
-			else{
-				return new ExecutionStatusResult(new NumData(0, false));
-			}
+			const result = new StringData(status.result);
+			return new ExecutionStatusResult(result.asNum());
 		}
 	}
 	return new ExecutionStatusRunning(); // Still running
 };
 
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits){
+
+/**
+ * A Block that sets an output
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @param {string} outputType - Needed for the http request
+ * @param {string} displayName - Name present on Block
+ * @param {number} numberOfPorts - Used to populate PortSlot
+ * @param {string} valueKey - Needed for the http request. The key used to send the value in the slot
+ * @param {number} minVal - The minimum value the output can take
+ * @param {number} maxVal - The maximum value the output can take
+ * @param {string} displayUnits - The units to display on the inputPad
+ * @constructor
+ */
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
+									 minVal, maxVal, displayUnits){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
@@ -15054,6 +15079,7 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
+/* Sends the request */
 B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -15063,7 +15089,7 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 	}
 	let mem = this.runMem;
 	let port = this.slots[1].getData().getValue();
-	let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true); // [0,180]
+	let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
 	if (port != null && port > 0 && port <= this.numberOfPorts) {
 		mem.requestStatus = {};
 		mem.requestStatus.finished = false;
@@ -15076,6 +15102,7 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Invalid port, exit early
 	}
 };
+/* Waits until the request completes */
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
@@ -15089,6 +15116,15 @@ B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	}
 };
 
+
+/**
+ * Block that sets a Tri-LED
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @param {number} numberOfPorts - Number of Tri-LED ports on the device
+ * @constructor
+ */
 function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
@@ -15097,20 +15133,21 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new LabelText(this, "TRI-LED"));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
-	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true);
+	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
-	this.addPart(ledSlot1); //Positive integer.
+	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "G"));
-	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true);
+	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, "Intensity");
-	this.addPart(ledSlot2); //Positive integer.
+	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "B"));
-	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true);
+	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, "Intensity");
-	this.addPart(ledSlot3); //Positive integer.
+	this.addPart(ledSlot3);
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
+/* Sends the request */
 B_DeviceWithPortsTriLed.prototype.startAction = function() {
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -15145,27 +15182,26 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
-/* This file contains the implementations for Blocks in the hummingbird category.
- * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
- * Most relay on the HummingbirdManager to remove redundant code.
+/* This file contains the implementations of hummingbird blocks
  */
-
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, diaplayUnits);
+function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey,
+		minVal, maxVal, displayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 
 
-function B_HBServo(x,y){
+function B_HBServo(x, y) {
 	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
 
 
-function B_HBMotor(x,y){
+
+function B_HBMotor(x, y) {
 	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100, "Speed");
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
@@ -15173,7 +15209,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 
 
-function B_HBVibration(x,y){
+function B_HBVibration(x, y) {
 	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100, "Intensity");
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
@@ -15181,7 +15217,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 
-function B_HBLed(x,y){
+function B_HBLed(x, y) {
 	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
@@ -15190,29 +15226,32 @@ B_HBLed.prototype.constructor = B_HBLed;
 
 
 function B_HummingbirdSensorBase(x, y, sensorType, displayName) {
-	B_DeviceWithPortsSensorBase.call(this, x,y, DeviceHummingbird, sensorType, displayName, 4);
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbird, sensorType, displayName, 4);
 }
 B_HummingbirdSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
-function B_HBLight(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Light");
+
+function B_HBLight(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Light");
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
 
 
-function B_HBTempC(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature C");
+
+function B_HBTempC(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "Temperature C");
 }
 B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
 Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 
-function B_HBDistCM(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance CM");
+
+function B_HBDistCM(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "distance", "Distance CM");
 }
 B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -15220,43 +15259,45 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 
 
-function B_HBKnob(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "sensor", "Knob");
+function B_HBKnob(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Knob");
 }
 B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
 
 
-function B_HBSound(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "sound", "Sound");
+
+function B_HBSound(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "sound", "Sound");
 }
 B_HBSound.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBSound.prototype.constructor = B_HBSound;
 
 
-///// <Special> /////
-
-
-function B_HBTriLed(x,y){
-	B_DeviceWithPortsTriLed.call(this,x,y, DeviceHummingbird, 2);
+function B_HBTriLed(x, y) {
+	B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbird, 2);
 }
 B_HBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_HBTriLed.prototype.constructor = B_HBTriLed;
 
 
-function B_HBTempF(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "temperature", "Temperature F");
+/* Special Blocks */
+
+
+function B_HBTempF(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "Temperature F");
 }
 B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
-B_HBTempF.prototype.updateAction=function(){
-	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
-	if(status.hasError() || status.isRunning()){
+/* Waits for the request to finish then converts C to F. */
+B_HBTempF.prototype.updateAction = function() {
+	const status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
 		let resultC = status.getResult();
-		if(resultC != null && resultC.isValid) {
-			let result=new NumData(Math.round(resultC.getValue()*1.8+32));
+		if (resultC != null && resultC.isValid) {
+			let result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -15266,19 +15307,21 @@ B_HBTempF.prototype.updateAction=function(){
 Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 
-function B_HBDistInch(x,y){
-	B_HummingbirdSensorBase.call(this,x,y, "distance", "Distance Inch");
+
+function B_HBDistInch(x, y) {
+	B_HummingbirdSensorBase.call(this, x, y, "distance", "Distance Inch");
 }
 B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;
-B_HBDistInch.prototype.updateAction=function(){
-	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
-	if(status.hasError() || status.isRunning()){
+/* Waits for the request to finish then converts cm to in. */
+B_HBDistInch.prototype.updateAction = function() {
+	const status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
 		let resultMm = status.getResult();
-		if(resultMm != null && resultMm.isValid) {
-			let result=new NumData((resultMm.getValue()/2.54).toFixed(1)*1);
+		if (resultMm != null && resultMm.isValid) {
+			let result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -15287,33 +15330,39 @@ B_HBDistInch.prototype.updateAction=function(){
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");
 
-/* Output Blocks */
+
+/* This file contains implementations of flutter Blocks */
+
+
+/* Output blocks */
 function B_FlutterServo(x, y) {
-	B_DeviceWithPortsOutputBase.call(this, x,y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180, "Angle");
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceFlutter, "servo", "Servo", 3, "angle", 0, 180, "Angle");
 }
 B_FlutterServo.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_FlutterServo.prototype.constructor = B_FlutterServo;
 
 
-function B_FlutterTriLed(x,y){
-	B_DeviceWithPortsTriLed.call(this,x,y, DeviceFlutter, 3);
+
+function B_FlutterTriLed(x, y) {
+	B_DeviceWithPortsTriLed.call(this, x, y, DeviceFlutter, 3);
 }
 B_FlutterTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_FlutterTriLed.prototype.constructor = B_FlutterTriLed;
 
 
+
 function B_FlutterBuzzer(x, y) {
 	CommandBlock.call(this, x, y, "flutter");
-	this.addPart(new DeviceDropSlot(this,"DDS_1", DeviceFlutter, true));
+	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this,"NumS_vol", 20, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this, "NumS_vol", 20, true, true)); //Positive integer.
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this,"NumS_freq", 10000, true, true)); //Positive integer.
+	this.addPart(new NumSlot(this, "NumS_freq", 10000, true, true)); //Positive integer.
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
-/* Generic flutter single output functions. */
+/* Sends request */
 B_FlutterBuzzer.prototype.startAction = function() {
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = DeviceFlutter.getManager().getDevice(deviceIndex);
@@ -15327,34 +15376,37 @@ B_FlutterBuzzer.prototype.startAction = function() {
 	device.setBuzzer(this.runMem.requestStatus, volume, frequency);
 	return new ExecutionStatusRunning();
 };
+/* Waits for request to finish */
 B_FlutterBuzzer.prototype.updateAction = function() {
-	if(this.runMem.requestStatus.finished){
-		if(this.runMem.requestStatus.error){
+	if (this.runMem.requestStatus.finished) {
+		if (this.runMem.requestStatus.error) {
 			this.displayError(DeviceFlutter.getNotConnectedMessage());
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
-	}
-	else{
+	} else {
 		return new ExecutionStatusRunning();
 	}
 };
 
 
 
-
 /* Input Blocks */
 function B_FlutterSensorBase(x, y, sensorType, displayName) {
-	B_DeviceWithPortsSensorBase.call(this, x,y, DeviceFlutter, sensorType, displayName, 3);
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceFlutter, sensorType, displayName, 3);
 }
 B_FlutterSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_FlutterSensorBase.constructor = B_FlutterSensorBase;
+
+
 
 function B_FlutterLight(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "light", "Light");
 }
 B_FlutterLight.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterLight.prototype.constructor = B_FlutterLight;
+
+
 
 function B_FlutterTempC(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "temperature", "Temperature C");
@@ -15373,11 +15425,13 @@ B_FlutterDistCM.prototype.constructor = B_FlutterDistCM;
 Block.setDisplaySuffix(B_FlutterDistCM, "cm");
 
 
+
 function B_FlutterKnob(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "sensor", "Knob");
 }
 B_FlutterKnob.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterKnob.prototype.constructor = B_FlutterKnob;
+
 
 
 function B_FlutterSoil(x, y) {
@@ -15387,11 +15441,13 @@ B_FlutterSoil.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterSoil.prototype.constructor = B_FlutterSoil;
 
 
+
 function B_FlutterSound(x, y) {
 	B_FlutterSensorBase.call(this, x, y, "sound", "Sound");
 }
 B_FlutterSound.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterSound.prototype.constructor = B_FlutterSound;
+
 
 
 function B_FlutterTempF(x, y) {
@@ -15400,23 +15456,22 @@ function B_FlutterTempF(x, y) {
 B_FlutterTempF.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterTempF.prototype.constructor = B_FlutterTempF;
 /* Waits for the request to finish then converts C to F. */
-B_FlutterTempF.prototype.updateAction=function(){
-	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
-	if(status.hasError() || status.isRunning()){
+B_FlutterTempF.prototype.updateAction = function() {
+	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
 		let resultC = status.getResult();
-		if(resultC != null && resultC.isValid) {
-			let result=new NumData(Math.round(resultC.getValue()*1.8+32));
+		if (resultC != null && resultC.isValid) {
+			let result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
 		}
 	}
 };
-Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
-
 Block.setDisplaySuffix(B_FlutterTempF, String.fromCharCode(176) + "F");
+
 
 
 function B_FlutterDistInch(x, y) {
@@ -15425,23 +15480,21 @@ function B_FlutterDistInch(x, y) {
 B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
-B_FlutterDistInch.prototype.updateAction=function(){
+B_FlutterDistInch.prototype.updateAction = function() {
 	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
-	if(status.hasError() || status.isRunning()){
+	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
 		let resultMm = status.getResult();
-		if(resultMm != null && resultMm.isValid) {
-			let result=new NumData((resultMm.getValue()/2.54).toFixed(1)*1);
+		if (resultMm != null && resultMm.isValid) {
+			let result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
 		}
 	}
 };
-
 Block.setDisplaySuffix(B_FlutterDistInch, "inches");
-
 /* This file contains the implementations for Blocks in the control category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
@@ -15458,8 +15511,8 @@ B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
 B_WhenFlagTapped.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
+/* Does nothing */
 B_WhenFlagTapped.prototype.startAction = function() {
-	//Done running. This Block does nothing except respond to an event.
 	return new ExecutionStatusDone();
 };
 
@@ -15474,24 +15527,25 @@ function B_WhenIReceive(x, y) {
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
 B_WhenIReceive.prototype.eventBroadcast = function(message) {
-	// Get message from Slot (returns instantly since snapping is not allowed)
-	const myMessage = this.slots[0].getDataNotFromChild();
-	if (myMessage.isSelection()) {
-		if (myMessage.isEmpty()) {
-			return
+	// Get data from Slot (returns instantly since snapping is not allowed)
+	const data = this.slots[0].getDataNotFromChild();
+	let shouldRun = false;
+	if (data.isSelection()) {
+		const selection = data.getValue();
+		if(selection === "any_message") {
+			shouldRun = true;
 		}
+	} else if (data.asString().getValue() === message) {
+		shouldRun = true;
 	}
-	if (myMessage != null) {
-		var myMessageStr = myMessage.getValue();
-		if (myMessageStr == "any_message" || myMessageStr == message) {
-			this.stack.stop();
-			this.stack.startRun(null, message);
-		}
+	if (shouldRun) {
+		this.stack.stop();
+		this.stack.startRun(null, message);
 	}
 };
-/* Does nothing. */
+/* Does nothing */
 B_WhenIReceive.prototype.startAction = function() {
-	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
+	return new ExecutionStatusDone();
 };
 
 
@@ -15506,14 +15560,14 @@ B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
 B_Wait.prototype.updateAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -15532,7 +15586,7 @@ B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_WaitUntil.prototype.startAction = function() {
-	var stopWaiting = this.slots[0].getData().getValue();
+	const stopWaiting = this.slots[0].getData().getValue();
 	if (stopWaiting) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -15579,7 +15633,7 @@ B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	mem.timesD = this.slots[0].getData();
 	mem.times = mem.timesD.getValueWithC(true, true);
 	mem.count = 0;
@@ -15597,7 +15651,7 @@ B_Repeat.prototype.updateAction = function() {
 		if (blockSlotStatus.hasError()) {
 			return blockSlotStatus;
 		} else {
-			var mem = this.runMem;
+			const mem = this.runMem;
 			mem.count++;
 			if (mem.count >= mem.times) {
 				return new ExecutionStatusDone(); //Done running
@@ -15620,7 +15674,7 @@ B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
 /* Checks condition and either stops running or executes contents. */
 B_RepeatUntil.prototype.startAction = function() {
-	var stopRepeating = this.slots[0].getData().getValue();
+	const stopRepeating = this.slots[0].getData().getValue();
 	if (stopRepeating) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -15653,7 +15707,7 @@ B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
 /* Either stops running or executes contents. */
 B_If.prototype.startAction = function() {
-	var check = this.slots[0].getData().getValue();
+	const check = this.slots[0].getData().getValue();
 	if (check) {
 		this.blockSlot1.startRun();
 		return new ExecutionStatusRunning(); //Still running
@@ -15697,7 +15751,6 @@ B_IfElse.prototype.updateAction = function() {
 
 
 
-
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
 	this.addPart(new LabelText(this, "broadcast"));
@@ -15707,16 +15760,19 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	var message = this.slots[0].getData();
-	if (message.getValue() !== "") {
-		CodeManager.message = new StringData(message.getValue());
-		CodeManager.eventBroadcast(message.getValue());
+	const message = this.slots[0].getData().asString().getValue();
+	if (message !== "") {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
 	}
 	return new ExecutionStatusRunning();
 };
+/* Does nothing */
 B_Broadcast.prototype.updateAction = function() {
 	return new ExecutionStatusDone();
 };
+
+
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
@@ -15726,15 +15782,17 @@ function B_BroadcastAndWait(x, y) {
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
+/* Broadcasts the message */
 B_BroadcastAndWait.prototype.startAction = function() {
-	var message = this.slots[0].getData();
-	if (message != null) {
-		this.runMem.message = message.getValue();
-		CodeManager.message = new StringData(this.runMem.message);
-		CodeManager.eventBroadcast(this.runMem.message);
+	const message = this.slots[0].asString().getData().getValue();
+	if (message !== "") {
+		this.runMem.message = message;
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
 	}
 	return new ExecutionStatusRunning();
 };
+/* Checks if the broadcast is still running */
 B_BroadcastAndWait.prototype.updateAction = function() {
 	if (CodeManager.checkBroadcastRunning(this.runMem.message)) {
 		return new ExecutionStatusRunning();
@@ -15743,19 +15801,22 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 	}
 };
 
+
+
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
 	this.addPart(new LabelText(this, "message"));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
+/* Returns the last broadcast message */
 B_Message.prototype.startAction = function() {
 	return new ExecutionStatusResult(CodeManager.message);
 };
 
 
 
-function B_Stop(x, y) { //No bottom slot
+function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
 	this.addPart(new LabelText(this, "stop"));
 	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
@@ -15768,140 +15829,148 @@ function B_Stop(x, y) { //No bottom slot
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
+/* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
-	var selection = this.slots[0].getData().getValue();
-	if (selection == "all") {
+	const selection = this.slots[0].getData().getValue();
+	if (selection === "all") {
 		CodeManager.stop();
-	} else if (selection == "this_script") {
+	} else if (selection === "this_script") {
 		this.stack.stop();
-	} else if (selection == "all_but_this_script") {
+	} else if (selection === "all_but_this_script") {
 		TabManager.stopAllButStack(this.stack);
 	}
 	return new ExecutionStatusDone();
 };
-/* This file contains the implementations for Blocks in the sensing category.
- * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
- * Many of these will use the this.stack.getSprite() method, which is not done yet.
+/* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
+ * TODO: merge with tablet
  */
 
-function B_Ask(x,y){
-	CommandBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"ask"));
-	this.addPart(new StringSlot(this,"StrS_msg","what's your name?"));
-	this.addPart(new LabelText(this,"and wait"));
+
+
+/* TODO: make sure dialogs don't show while a save dialog is up */
+function B_Ask(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "ask"));
+	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
+	this.addPart(new LabelText(this, "and wait"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
 /* Show a dialog with the question unless another dialog is already visible or has been displayed recently. */
-B_Ask.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.question=this.slots[0].getData().getValue(); //Form the question
-	mem.questionDisplayed=false; //Has the dialog request been issued yet?
-	if(HtmlServer.dialogVisible){ //If there is already a dialog, we will wait until it is closed.
-		mem.waitingForDialog=true; //We are waiting.
-	}
-	else{
-		mem.waitingForDialog=false; //We are not waiting for a dialog to disappear.
-		//There is a delay between repeated dialogs to give the user time to stop the program.
-		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
-			this.showQuestion(); //Show the dialog.
+B_Ask.prototype.startAction = function() {
+	const mem = this.runMem;
+	mem.question = this.slots[0].getData().getValue();
+	mem.questionDisplayed = false;
+	// If there is already a dialog, we will wait until it is closed.
+	if (HtmlServer.dialogVisible) { 
+		mem.waitingForDialog = true;
+	} else {
+		mem.waitingForDialog = false;
+		// There is a delay between repeated dialogs to give the user time to stop the program.
+		// Check if we can show the dialog or should delay.
+		if (CodeManager.checkDialogDelay()) { 
+			this.showQuestion();
 		}
 	}
 	return new ExecutionStatusRunning();
 };
 /* Waits until the dialog has been displayed and completed. */
-B_Ask.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(mem.waitingForDialog){ //If we are waiting for a dialog to close...
-		if(!HtmlServer.dialogVisible){ //...And the dialog is closed...
-			mem.waitingForDialog=false; //...Then we can stop waiting.
+B_Ask.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (mem.waitingForDialog) {   // If we are waiting for a dialog to close...
+		if (!HtmlServer.dialogVisible) {   //...And the dialog is closed...
+			mem.waitingForDialog = false;   //...Then we can stop waiting.
 		}
-		return new ExecutionStatusRunning(); //Still running.
-	}
-	else if(!mem.questionDisplayed){ //If the question has not yet been displayed...
-		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
-			if(HtmlServer.dialogVisible){ //Make sure there still isn't a dialog visible.
-				mem.waitingForDialog=true;
-			}
-			else{
-				this.showQuestion(); //Display the question.
+		return new ExecutionStatusRunning();   // Still running.
+	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
+		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
+				mem.waitingForDialog = true;
+			} else {
+				this.showQuestion();   // Display the question.
 			}
 		}
-		return new ExecutionStatusRunning(); //Still running.
-	}
-	else{
-		if(mem.finished==true){ //Question has been answered.
-			CodeManager.updateDialogDelay(); //Tell CodeManager to reset the dialog delay clock.
-			return new ExecutionStatusDone(); //Done running
-		}
-		else{ //Waiting on answer from user.
-			return new ExecutionStatusRunning(); //Still running
+		return new ExecutionStatusRunning();   // Still running.
+	} else {
+		if (mem.finished === true) {   // Question has been answered.
+			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
+			return new ExecutionStatusDone();   // Done running
+		} else {   // Waiting on answer from user.
+			return new ExecutionStatusRunning();   // Still running
 		}
 	}
 };
-B_Ask.prototype.showQuestion=function(){
-	var mem=this.runMem;
-	mem.finished=false; //Will be changed once answered.
-	var callbackFn=function(cancelled,response){
-		if(cancelled){
-			CodeManager.answer = new StringData("", true); //"" is the default answer.
+/* Sends the request to show the dialog */
+B_Ask.prototype.showQuestion = function() {
+	const mem = this.runMem;
+	mem.finished = false;   // Will be changed once answered.
+	const callbackFn = function(cancelled, response) {
+		if (cancelled) {
+			CodeManager.answer = new StringData("", true);   //"" is the default answer.
+		} else {
+			CodeManager.answer = new StringData(response, true);   // Store the user's answer in the CodeManager.
 		}
-		else{
-			CodeManager.answer = new StringData(response, true); //Store the user's anser in the CodeManager.
-		}
-		callbackFn.mem.finished=true; //Done waiting.
+		callbackFn.mem.finished = true;   // Done waiting.
 	};
-	callbackFn.mem=mem;
-	var callbackErr=function(){ //If an error occurs...
-		CodeManager.answer = new StringData("", true); //"" is the default answer.
-		callbackErr.mem.finished=true; //Done waiting.
+	callbackFn.mem = mem;
+	const callbackErr = function() {   // If an error occurs...
+		CodeManager.answer = new StringData("", true);   //"" is the default answer.
+		callbackErr.mem.finished = true;   // Done waiting.
 	};
-	callbackErr.mem=mem;
-	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr); //Make the request.
-	mem.questionDisplayed=true; //Prevents displaying twice.
+	callbackErr.mem = mem;
+	HtmlServer.showDialog("Question", mem.question, "", callbackFn, callbackErr);   // Make the request.
+	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
 
 
-
-function B_Answer(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"answer"));
+function B_Answer(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "answer"));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
 B_Answer.prototype.constructor = B_Answer;
-B_Answer.prototype.startAction=function(){
+B_Answer.prototype.startAction = function() {
 	return new ExecutionStatusResult(CodeManager.answer);
 };
 
-function B_ResetTimer(x,y){
-	CommandBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"reset timer"));
+
+
+function B_ResetTimer(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "reset timer"));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
-B_ResetTimer.prototype.startAction=function(){
-	CodeManager.timerForSensingBlock=new Date().getTime();
+/* Reset the timer in CodeManager */
+B_ResetTimer.prototype.startAction = function() {
+	CodeManager.timerForSensingBlock = new Date().getTime();
 	return new ExecutionStatusDone();
 };
 
-function B_Timer(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"timer"));
+
+
+function B_Timer(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "timer"));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
-B_Timer.prototype.startAction=function(){
-	var now=new Date().getTime();
-	var start=CodeManager.timerForSensingBlock;
-	return new ExecutionStatusResult(new NumData(Math.round((now-start)/100)/10));
+/* Get the time and convert it to seconds */
+B_Timer.prototype.startAction = function() {
+	const now = new Date().getTime();
+	const start = CodeManager.timerForSensingBlock;
+	/* Round to 1 decimal */
+	return new ExecutionStatusResult(new NumData(Math.round((now - start) / 100) / 10));
 };
 Block.setDisplaySuffix(B_Timer, "s");
 
-function B_CurrentTime(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"current"));
+
+
+function B_CurrentTime(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "current"));
 	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
 	dS.addOption(new SelectionData("year", "year"));
 	dS.addOption(new SelectionData("month", "month"));
@@ -15915,393 +15984,405 @@ function B_CurrentTime(x,y){
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
-B_CurrentTime.prototype.startAction=function(){
-	var unitD=this.slots[0].getData();
-	if(unitD==null){
-		return new ExecutionStatusResult(new NumData(0,false));
+/* Returns the current time in the desired units */
+B_CurrentTime.prototype.startAction = function() {
+	const unitD = this.slots[0].getData();
+	if (unitD == null) {
+		return new ExecutionStatusResult(new NumData(0, false));
 	}
-	var unit=unitD.getValue();
-	if(unit=="year"){
+	const unit = unitD.getValue();
+	if (unit === "year") {
 		return new ExecutionStatusResult(new NumData(new Date().getFullYear()));
-	}
-	else if(unit=="month"){
-		return new ExecutionStatusResult(new NumData(new Date().getMonth()+1));
-	}
-	else if(unit=="date"){
+	} else if (unit === "month") {
+		return new ExecutionStatusResult(new NumData(new Date().getMonth() + 1));
+	} else if (unit === "date") {
 		return new ExecutionStatusResult(new NumData(new Date().getDate()));
-	}
-	else if(unit=="day of the week"){
-		return new ExecutionStatusResult(new NumData(new Date().getDay()+1));
-	}
-	else if(unit=="hour"){
+	} else if (unit === "day of the week") {
+		return new ExecutionStatusResult(new NumData(new Date().getDay() + 1));
+	} else if (unit === "hour") {
 		return new ExecutionStatusResult(new NumData(new Date().getHours()));
-	}
-	else if(unit=="minute"){
+	} else if (unit === "minute") {
 		return new ExecutionStatusResult(new NumData(new Date().getMinutes()));
-	}
-	else if(unit=="second"){
+	} else if (unit === "second") {
 		return new ExecutionStatusResult(new NumData(new Date().getSeconds()));
-	}
-	else if(unit=="time in milliseconds"){
+	} else if (unit === "time in milliseconds") {
 		return new ExecutionStatusResult(new NumData(new Date().getTime()));
 	}
 	return new ExecutionStatusResult(new NumData(0, false));
 };
-/* This file contains the implementations for Blocks in the operators category.
- * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
- */
 
-function B_Add(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,"+"));
-	this.addPart(new NumSlot(this,"NumS_2",0));
+
+
+function B_Display(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "Display"));
+	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+	this.addPart(new LabelText(this, "at"));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
+	dS.addOption(new SelectionData("Position 1", "position1"));
+	dS.addOption(new SelectionData("Position 2", "position2"));
+	dS.addOption(new SelectionData("Position 3", "position3"));
+	this.addPart(dS);
+}
+B_Display.prototype = Object.create(CommandBlock.prototype);
+B_Display.prototype.constructor = B_Display;
+/* Displays the value on the screen */
+B_Display.prototype.startAction = function() {
+	const message = this.slots[0].getData().getValue();
+	const position = this.slots[1].getData().getValue();
+	DisplayBoxManager.displayText(message, position);
+	return new ExecutionStatusDone(); // Done running
+};
+/* This file contains the implementations for Blocks in the operators category. */
+function B_Add(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, "+"));
+	this.addPart(new NumSlot(this, "NumS_2", 0));
 }
 B_Add.prototype = Object.create(ReporterBlock.prototype);
 B_Add.prototype.constructor = B_Add;
-/* Sets the result to the sum of the Slots. Result is valid only if both inputs are. */
-B_Add.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val=data1.getValue()+data2.getValue();
-	return new ExecutionStatusResult(new NumData(val,isValid));
+/* Returns the sum of the Slots. Result is valid only if both inputs are. */
+B_Add.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const isValid = data1.isValid && data2.isValid;
+	const val = data1.getValue() + data2.getValue();
+	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
 
 
-function B_Subtract(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,String.fromCharCode(8211)));
-	this.addPart(new NumSlot(this,"NumS_2",0));
+function B_Subtract(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, String.fromCharCode(8211)));
+	this.addPart(new NumSlot(this, "NumS_2", 0));
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
 /* Sets the result to the difference between the Slots. Result is valid only if both inputs are. */
-B_Subtract.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val=data1.getValue()-data2.getValue();
-	return new ExecutionStatusResult(new NumData(val,isValid));
+B_Subtract.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const isValid = data1.isValid && data2.isValid;
+	const val = data1.getValue() - data2.getValue();
+	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
 
 
-function B_Multiply(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,"*"));
-	this.addPart(new NumSlot(this,"NumS_2",0));
+function B_Multiply(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, "*"));
+	this.addPart(new NumSlot(this, "NumS_2", 0));
 }
 B_Multiply.prototype = Object.create(ReporterBlock.prototype);
 B_Multiply.prototype.constructor = B_Multiply;
 /* Sets the result to the product of the Slots. Result is valid only if both inputs are. */
-B_Multiply.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val=data1.getValue()*data2.getValue();
-	return new ExecutionStatusResult(new NumData(val,isValid));
+B_Multiply.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const isValid = data1.isValid && data2.isValid;
+	const val = data1.getValue() * data2.getValue();
+	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
 
 
-function B_Divide(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,"/"));
-	this.addPart(new NumSlot(this,"NumS_2",1));
+function B_Divide(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, "/"));
+	this.addPart(new NumSlot(this, "NumS_2", 1));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
-/* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2!=0. */
-B_Divide.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var val=val1/val2;
-	if(val2==0){
-		val=0; //Return invalid 0 if told to divide by 0.
-		isValid=false;
+/* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2 != 0. */
+B_Divide.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const val1 = data1.getValue();
+	const val2 = data2.getValue();
+	let isValid = data1.isValid && data2.isValid;
+	let val = val1 / val2;
+	if (val2 === 0) {
+		val = 0; // Return invalid 0 if told to divide by 0.
+		isValid = false;
 	}
-	return new ExecutionStatusResult(new NumData(val,isValid));
+	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
 
 
-function B_Mod(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",17));
-	this.addPart(new LabelText(this,"mod"));
-	this.addPart(new NumSlot(this,"NumS_2",10));
+function B_Mod(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 17));
+	this.addPart(new LabelText(this, "mod"));
+	this.addPart(new NumSlot(this, "NumS_2", 10));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
 /* Sets the result to the first Slot mod the second Slot. Valid if Slots are valid and second isn't 0. */
-B_Mod.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var result=((val1%val2)+val2)%val2;
-	if(val2==0){
-		result=0;
-		isValid=false;
+B_Mod.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const val1 = data1.getValue();
+	const val2 = data2.getValue();
+	let isValid = data1.isValid && data2.isValid;
+	let result = ((val1 % val2) + val2) % val2;
+	if (val2 === 0) {
+		result = 0;
+		isValid = false;
 	}
-	return new ExecutionStatusResult(new NumData(result,isValid));
+	return new ExecutionStatusResult(new NumData(result, isValid));
 };
 
 
 
-function B_Round(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"round"));
-	this.addPart(new NumSlot(this,"NumS_1",0.5));
+function B_Round(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "round"));
+	this.addPart(new NumSlot(this, "NumS_1", 0.5));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
 /* Sets the result to the rounded value of the Slot. Is valid only if Slot is. */
-B_Round.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var isValid=data1.isValid;
-	var val=data1.getValueWithC(false,true); //Integer
-	return new ExecutionStatusResult(new NumData(val,isValid));
+B_Round.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const isValid = data1.isValid;
+	const val = data1.getValueWithC(false, true); // Integer
+	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
 
 
-function B_PickRandom(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"pick random"));
-	this.addPart(new NumSlot(this,"NumS_min",1));
-	this.addPart(new LabelText(this,"to"));
-	this.addPart(new NumSlot(this,"NumS_max",10));
+function B_PickRandom(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "pick random"));
+	this.addPart(new NumSlot(this, "NumS_min", 1));
+	this.addPart(new LabelText(this, "to"));
+	this.addPart(new NumSlot(this, "NumS_max", 10));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
 B_PickRandom.prototype.constructor = B_PickRandom;
-B_PickRandom.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	var isValid=data1.isValid&&data2.isValid;
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var integer = (val1===(val1|0)&&val2===(val2|0));
-	var rVal;
-	var min=val1;
-	var max=val2;
-	if(min>max){
-		min=val2;
-		max=val1;
+B_PickRandom.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	const isValid = data1.isValid && data2.isValid;
+	const val1 = data1.getValue();
+	const val2 = data2.getValue();
+	const integer = Number.isInteger(val1) && Number.isInteger(val2);
+	let min = val1;
+	let max = val2;
+	let rVal;
+	if (min > max) {
+		min = val2;
+		max = val1;
 	}
-	if(integer){
+	if (integer) {
 		rVal = Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-	else{
+	} else {
 		rVal = Math.random() * (max - min) + min;
 	}
-	return new ExecutionStatusResult(new NumData(rVal,isValid));
+	return new ExecutionStatusResult(new NumData(rVal, isValid));
 };
 
 
 
-function B_LessThan(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,"<"));
-	this.addPart(new NumSlot(this,"NumS_2",0));
+function B_LessThan(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, "<"));
+	this.addPart(new NumSlot(this, "NumS_2", 0));
 }
 B_LessThan.prototype = Object.create(PredicateBlock.prototype);
 B_LessThan.prototype.constructor = B_LessThan;
-/* Result is a valid boolean indicating is Slot1<Slot2. */
-B_LessThan.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
-	var val2=this.slots[1].getData().getValue();
-	return new ExecutionStatusResult(new BoolData(val1<val2));
+/* Result is a valid boolean indicating is Slot1 < Slot2. */
+B_LessThan.prototype.startAction = function() {
+	const val1 = this.slots[0].getData().getValue();
+	const val2 = this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1 < val2));
 };
 
 
 
-function B_EqualTo(x,y){//needs to work with strings
-	PredicateBlock.call(this,x,y,"operators");
+function B_EqualTo(x, y) { // needs to work with strings
+	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new NumOrStringSlot(this, "RndS_item1", new NumData(0)));
-	this.addPart(new LabelText(this,"="));
+	this.addPart(new LabelText(this, "="));
 	this.addPart(new NumOrStringSlot(this, "RndS_item2", new NumData(0)));
 }
 B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
 /* Compares data of any type to determine equality. Result is always valid. */
-B_EqualTo.prototype.startAction=function(){
-	var data1=this.slots[0].getData();
-	var data2=this.slots[1].getData();
-	return new ExecutionStatusResult(new BoolData(Data.checkEquality(data1,data2)));
+B_EqualTo.prototype.startAction = function() {
+	const data1 = this.slots[0].getData();
+	const data2 = this.slots[1].getData();
+	return new ExecutionStatusResult(new BoolData(Data.checkEquality(data1, data2)));
 };
 
 
 
-function B_GreaterThan(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new NumSlot(this,"NumS_1",0));
-	this.addPart(new LabelText(this,">"));
-	this.addPart(new NumSlot(this,"NumS_2",0));
+function B_GreaterThan(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new NumSlot(this, "NumS_1", 0));
+	this.addPart(new LabelText(this, ">"));
+	this.addPart(new NumSlot(this, "NumS_2", 0));
 }
 B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
 B_GreaterThan.prototype.constructor = B_GreaterThan;
-/* Result is a valid boolean indicating is Slot1>Slot2. */
-B_GreaterThan.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
-	var val2=this.slots[1].getData().getValue();
-	return new ExecutionStatusResult(new BoolData(val1>val2));
+/* Result is a valid boolean indicating is Slot1 > Slot2. */
+B_GreaterThan.prototype.startAction = function() {
+	const val1 = this.slots[0].getData().getValue();
+	const val2 = this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1 > val2));
 };
 
 
 
-function B_And(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new BoolSlot(this,"BoolS_1"));
-	this.addPart(new LabelText(this,"and"));
-	this.addPart(new BoolSlot(this,"BoolS_2"));
+function B_And(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new BoolSlot(this, "BoolS_1"));
+	this.addPart(new LabelText(this, "and"));
+	this.addPart(new BoolSlot(this, "BoolS_2"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
 /* Result is true if both are true. Always valid. */
-B_And.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
-	var val2=this.slots[1].getData().getValue();
-	return new ExecutionStatusResult(new BoolData(val1&&val2));
+B_And.prototype.startAction = function() {
+	const val1 = this.slots[0].getData().getValue();
+	const val2 = this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1 && val2));
 };
 
 
 
-function B_Or(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new BoolSlot(this,"BoolS_1"));
-	this.addPart(new LabelText(this,"or"));
-	this.addPart(new BoolSlot(this,"BoolS_2"));
+function B_Or(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new BoolSlot(this, "BoolS_1"));
+	this.addPart(new LabelText(this, "or"));
+	this.addPart(new BoolSlot(this, "BoolS_2"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
 /* Result is true if either is true. Always valid. */
-B_Or.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
-	var val2=this.slots[1].getData().getValue();
-	return new ExecutionStatusResult(new BoolData(val1||val2));
+B_Or.prototype.startAction = function() {
+	const val1 = this.slots[0].getData().getValue();
+	const val2 = this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new BoolData(val1 || val2));
 };
 
 
 
-function B_Not(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"not"));
-	this.addPart(new BoolSlot(this,"BoolS_1"));
+function B_Not(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "not"));
+	this.addPart(new BoolSlot(this, "BoolS_1"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
 /* Result is true if Slot is false. Always valid. */
-B_Not.prototype.startAction=function(){
-	var val1=this.slots[0].getData().getValue();
+B_Not.prototype.startAction = function() {
+	const val1 = this.slots[0].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(!val1));
 };
 
 
 
-function B_True(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"true"));
+function B_True(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "true"));
 }
 B_True.prototype = Object.create(PredicateBlock.prototype);
 B_True.prototype.constructor = B_True;
 /* Result is true. */
-B_True.prototype.startAction=function(){
+B_True.prototype.startAction = function() {
 	return new ExecutionStatusResult(new BoolData(true));
 };
 
 
 
-function B_False(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"false"));
+function B_False(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "false"));
 }
 B_False.prototype = Object.create(PredicateBlock.prototype);
 B_False.prototype.constructor = B_False;
 /* Result is false. */
-B_False.prototype.startAction=function(){
+B_False.prototype.startAction = function() {
 	return new ExecutionStatusResult(new BoolData(false));
 };
 
 
 
-function B_LetterOf(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"letter"));
-	this.addPart(new NumSlot(this,"NumS_idx",1,true,true));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new StringSlot(this,"StrS_text","world"));
+function B_LetterOf(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "letter"));
+	this.addPart(new NumSlot(this, "NumS_idx", 1, true, true));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
 /* Result is nth letter of word. Makes n and integer in range. Always valid. */
-B_LetterOf.prototype.startAction=function(){
-	var word=this.slots[1].getData().getValue();
-	var index=this.slots[0].getData().getValueInR(1,word.length,true,true);
-	if(word.length>0) {
-		return new ExecutionStatusResult(StringData(word.substring(index - 1, index)));
-	}
-	else{
-		return new ExecutionStatusResult(StringData("")); //Letter of empty string is empty string.
+B_LetterOf.prototype.startAction = function() {
+	const word = this.slots[1].getData().getValue();
+	const index = this.slots[0].getData().getValueInR(1, word.length, true, true);
+	if (word.length > 0) {
+		return new ExecutionStatusResult(new StringData(word.substring(index - 1, index)));
+	} else {
+		return new ExecutionStatusResult(new StringData("")); // Letter of empty string is empty string.
 	}
 };
 
 
 
-function B_LengthOf(x,y){
-	ReporterBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"length of"));
-	this.addPart(new StringSlot(this,"StrS_text","world"));
+function B_LengthOf(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "length of"));
+	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
 /* Result is length of word. Always valid. */
-B_LengthOf.prototype.startAction=function(){
-	var word=this.slots[0].getData().getValue();
+B_LengthOf.prototype.startAction = function() {
+	const word = this.slots[0].getData().getValue();
 	return new ExecutionStatusResult(new NumData(word.length));
 };
 
 
 
-function B_join(x,y){
-	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"join"));
-	this.addPart(new StringSlot(this,"StrS_1","hello "));
-	this.addPart(new LabelText(this,"and"));
-	this.addPart(new StringSlot(this,"StrS_2","world"));
+function B_join(x, y) {
+	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "join"));
+	this.addPart(new StringSlot(this, "StrS_1", "hello "));
+	this.addPart(new LabelText(this, "and"));
+	this.addPart(new StringSlot(this, "StrS_2", "world"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
 /* Result is Slots concatenated. Always valid. */
-B_join.prototype.startAction=function(){
-	var word1=this.slots[0].getData().getValue();
-	var word2=this.slots[1].getData().getValue();
-	return new ExecutionStatusResult(new StringData(word1+word2));
+B_join.prototype.startAction = function() {
+	const word1 = this.slots[0].getData().getValue();
+	const word2 = this.slots[1].getData().getValue();
+	return new ExecutionStatusResult(new StringData(word1 + word2));
 };
 
 
 
-function B_Split(x,y){
-	ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
-	this.addPart(new LabelText(this,"split"));
-	this.addPart(new StringSlot(this,"StrS_1","hello world"));
-	this.addPart(new LabelText(this,"by"));
+function B_Split(x, y) {
+	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
+	this.addPart(new LabelText(this, "split"));
+	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
+	this.addPart(new LabelText(this, "by"));
 
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const data = new SelectionData("whitespace", "whitespace");
-	const dS=new DropSlot(this,"DS_separator", inputType, snapType, data);
+	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
 	dS.addEnterText("Edit text");
 	dS.addOption(new SelectionData("letter", "letter"));
 	dS.addOption(new SelectionData("whitespace", "whitespace"));
@@ -16310,40 +16391,37 @@ function B_Split(x,y){
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
 /* Returns a list made from splitting the string by the provided character. */
-B_Split.prototype.startAction=function(){
-	var string1=this.slots[0].getData().getValue();
-	var splitD=this.slots[1].getData();
-	var resultArray;
-	if(splitD.type==Data.types.string){
-		var splitStr=splitD.getValue();
-		resultArray=string1.split(splitStr);
-	}
-	else if(splitD.type==Data.types.selection){
-		var selection=splitD.getValue();
-		if(selection=="letter"){
-			resultArray=string1.split("");
+B_Split.prototype.startAction = function() {
+	const string1 = this.slots[0].getData().getValue();
+	const splitD = this.slots[1].getData();
+	let resultArray;
+	if (splitD.type === Data.types.string) {
+		const splitStr = splitD.getValue();
+		resultArray = string1.split(splitStr);
+	} else if (splitD.type === Data.types.selection) {
+		const selection = splitD.getValue();
+		if (selection === "letter") {
+			resultArray = string1.split("");
+		} else if (selection === "whitespace") {
+			resultArray = string1.split(/\s+/);
 		}
-		else if(selection=="whitespace"){
-			resultArray=string1.split(/\s+/);
-		}
+	} else {
+		resultArray = [];
 	}
-	else{
-		resultArray=[];
-	}
-	var dataArray=new Array(resultArray.length);
-	for(var i=0;i<resultArray.length;i++){
-		dataArray[i]=new StringData(resultArray[i]);
+	const dataArray = new Array(resultArray.length);
+	for (let i = 0; i < resultArray.length; i++) {
+		dataArray[i] = new StringData(resultArray[i]);
 	}
 	return new ExecutionStatusResult(new ListData(dataArray));
 };
 
 
 
-function B_IsAType(x,y){
-	PredicateBlock.call(this,x,y,"operators");
-	this.addPart(new LabelText(this,"is"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.any,Slot.outputTypes.any,new NumData(5)));
-	this.addPart(new LabelText(this,"a"));
+function B_IsAType(x, y) {
+	PredicateBlock.call(this, x, y, "operators");
+	this.addPart(new LabelText(this, "is"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
+	this.addPart(new LabelText(this, "a"));
 	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("number", "number"));
 	dS.addOption(new SelectionData("text", "text"));
@@ -16351,61 +16429,48 @@ function B_IsAType(x,y){
 	dS.addOption(new SelectionData("list", "list"));
 	dS.addOption(new SelectionData("invalid number", "invalid_num"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this,"?"));
+	this.addPart(new LabelText(this, "?"));
 }
 B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
-/* Result is Slots concatenated. Always valid. */
-B_IsAType.prototype.startAction=function(){
-	var data=this.slots[0].getData();
-	var selectionD=this.slots[1].getData();
-	var selection=selectionD.getValue();
-	if(selectionD.type==Data.types.string){
-		if(selection=="invalid number"){
-			selection="invalid_num";
-		}
-	}
-	var types=Data.types;
-	if(selection=="number"){
-		if(data.type==types.num&&data.isValid){
+/* Returns whether the data is of the selected type */
+B_IsAType.prototype.startAction = function() {
+	const data = this.slots[0].getData();
+	const selectionD = this.slots[1].getData();
+	const selection = selectionD.getValue();
+	const types = Data.types;
+	if (selection === "number") {
+		if (data.type === types.num && data.isValid) {
 			return new ExecutionStatusResult(new BoolData(true));
-		}
-		else if(data.type==types.string&&data.isNumber()){
+		} else if (data.type === types.string && data.isNumber()) {
 			return new ExecutionStatusResult(new BoolData(true));
-		}
-		else{
+		} else {
 			return new ExecutionStatusResult(new BoolData(false));
 		}
-	}
-	else if(selection=="text"){
-		return new ExecutionStatusResult(new BoolData(data.type==types.string&&!data.isNumber()));
-	}
-	else if(selection=="boolean"){
-		return new ExecutionStatusResult(new BoolData(data.type==types.bool));
-	}
-	else if(selection=="list"){
-		return new ExecutionStatusResult(new BoolData(data.type==types.list));
-	}
-	else if(selection=="invalid_num"){
-		if(data.type==types.num&&!data.isValid){
+	} else if (selection === "text") {
+		return new ExecutionStatusResult(new BoolData(data.type === types.string && !data.isNumber()));
+	} else if (selection === "boolean") {
+		return new ExecutionStatusResult(new BoolData(data.type === types.bool));
+	} else if (selection === "list") {
+		return new ExecutionStatusResult(new BoolData(data.type === types.list));
+	} else if (selection === "invalid_num") {
+		const invalidNumStr = (new NumData(0 / 0).asString().getValue()); // "not a valid number"
+		if (data.type === types.num && !data.isValid) {
 			return new ExecutionStatusResult(new BoolData(true));
-		}
-		else if(data.type==types.string&&data.getValue()==(new NumData(0/0).asString().getValue())){
+		} else if (data.type === types.string && data.getValue() === invalidNumStr) {
 			return new ExecutionStatusResult(new BoolData(true));
-		}
-		else{
+		} else {
 			return new ExecutionStatusResult(new BoolData(false));
 		}
-	}
-	else{
+	} else {
 		return new ExecutionStatusResult(new BoolData(false));
 	}
 };
 
 
 
-function B_mathOfNumber(x,y){
-	ReporterBlock.call(this,x,y,"operators");
+function B_mathOfNumber(x, y) {
+	ReporterBlock.call(this, x, y, "operators");
 	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
@@ -16427,342 +16492,321 @@ function B_mathOfNumber(x,y){
 	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
 	this.addPart(dS);
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new NumSlot(this,"NumS_val",10));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new NumSlot(this, "NumS_val", 10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;
-B_mathOfNumber.prototype.startAction=function(){
-	var operator=this.slots[0].getData().getValue();
-	var data=this.slots[1].getData();
-	var value=data.getValue();
-	var isValid=data.isValid;
-	if(operator=="sin"){
-		value=Math.sin(value/180*Math.PI);
-	}
-	else if(operator=="cos"){
-		value=Math.cos(value/180*Math.PI);
-	}
-	else if(operator=="tan"){
-		value=Math.tan(value/180*Math.PI);
-		if(Math.abs(value)>1000000000){
-			value=1/0;
+/* Applies selected operation to input */
+B_mathOfNumber.prototype.startAction = function() {
+	const operator = this.slots[0].getData().getValue();
+	const data = this.slots[1].getData();
+	let value = data.getValue();
+	let isValid = data.isValid;
+	if (operator === "sin") {
+		value = Math.sin(value / 180 * Math.PI);
+	} else if (operator === "cos") {
+		value = Math.cos(value / 180 * Math.PI);
+	} else if (operator === "tan") {
+		value = Math.tan(value / 180 * Math.PI);
+		if (Math.abs(value) > 1000000000) {
+			value = 1 / 0;
 		}
-	}
-	else if(operator=="asin"){
-		value=Math.asin(value)/Math.PI*180;
-	}
-	else if(operator=="acos"){
-		value=Math.acos(value)/Math.PI*180;
-	}
-	else if(operator=="atan"){
-		value=Math.atan(value)/Math.PI*180;
-	}
-	else if(operator=="ln"){
-		value=Math.log(value);
-	}
-	else if(operator=="log") {
+	} else if (operator === "asin") {
+		value = Math.asin(value) / Math.PI * 180;
+	} else if (operator === "acos") {
+		value = Math.acos(value) / Math.PI * 180;
+	} else if (operator === "atan") {
+		value = Math.atan(value) / Math.PI * 180;
+	} else if (operator === "ln") {
+		value = Math.log(value);
+	} else if (operator === "log") {
 		try {
 			value = Math.log10(value);
+		} catch (e) {
+			value = Math.log(10) / Math.log(value);
 		}
-		catch(e){
-			value=Math.log(10) / Math.log(value);
-		}
+	} else if (operator === "e^") {
+		value = Math.exp(value);
+	} else if (operator === "10^") {
+		value = Math.pow(10, value);
+	} else if (operator === "ceiling") {
+		value = Math.ceil(value);
+	} else if (operator === "floor") {
+		value = Math.floor(value);
+	} else if (operator === "abs") {
+		value = Math.abs(value);
+	} else if (operator === "sqrt") {
+		value = Math.sqrt(value);
 	}
-	else if(operator=="e^"){
-		value=Math.exp(value);
+	if (!isFinite(value) || isNaN(value)) {
+		value = 0;
+		isValid = false;
 	}
-	else if(operator=="10^"){
-		value=Math.pow(10,value);
-	}
-	else if(operator=="ceiling"){
-		value=Math.ceil(value);
-	}
-	else if(operator=="floor"){
-		value=Math.floor(value);
-	}
-	else if(operator=="abs"){
-		value=Math.abs(value);
-	}
-	else if(operator=="sqrt"){
-		value=Math.sqrt(value);
-	}
-	if(!isFinite(value)||isNaN(value)){
-		value=0;
-		isValid=false;
-	}
-	return new ExecutionStatusResult(new NumData(value,isValid));
+	return new ExecutionStatusResult(new NumData(value, isValid));
 };
-/* This file contains the implementations for Blocks in the tablet category.
- * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
- */
+/* This file contains the implementations for Blocks in the tablet category. */
+/* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
-function B_DeviceShaken(x,y){
-	PredicateBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"Device Shaken"));
+
+
+function B_DeviceShaken(x, y) {
+	PredicateBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "Device Shaken"));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
 /* Make the request. */
-B_DeviceShaken.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceShaken.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/shake";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_DeviceShaken.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			return new ExecutionStatusResult(new BoolData(status.result=="1",true));
-		}
-		else{
-			if(status.result.length > 0) {
+B_DeviceShaken.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new BoolData(false,false)); //false is default.
+				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DeviceShaken.prototype.checkActive = function(){
+B_DeviceShaken.prototype.checkActive = function() {
 	return TabletSensors.sensors.accelerometer;
 };
 
 
-function B_DeviceSSID(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"Device SSID"));
+
+function B_DeviceSSID(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Device SSID"));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
 /* Make the request. */
-B_DeviceSSID.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceSSID.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/ssid";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_DeviceSSID.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			return new ExecutionStatusResult(new StringData(status.result,true));
-		}
-		else{
-			if(status.result.length > 0) {
+B_DeviceSSID.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			return new ExecutionStatusResult(new StringData(status.result, true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+				return new ExecutionStatusResult(new StringData("", false)); //"" is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
 
 
 
-function B_DevicePressure(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"Device Pressure"));
+function B_DevicePressure(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "Device Pressure"));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
 /* Make the request. */
-B_DevicePressure.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DevicePressure.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/pressure";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_DevicePressure.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			var result=parseFloat(status.result);
-			return new ExecutionStatusResult(new NumData(result,true));
-		}
-		else{
-			if(status.result.length > 0) {
+B_DevicePressure.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			const result = Number(status.result);
+			return new ExecutionStatusResult(new NumData(result, true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+				return new ExecutionStatusResult(new NumData(0, false)); //0 is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DevicePressure.prototype.checkActive = function(){
+B_DevicePressure.prototype.checkActive = function() {
 	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 
-function B_DeviceRelativeAltitude(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"Device Relative Altitude"));
+
+function B_DeviceRelativeAltitude(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "Device Relative Altitude"));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
 /* Make the request. */
-B_DeviceRelativeAltitude.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceRelativeAltitude.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/altitude";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_DeviceRelativeAltitude.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			var result=parseFloat(status.result);
-			return new ExecutionStatusResult(new NumData(result,true));
-		}
-		else{
-			if(status.result.length > 0) {
+B_DeviceRelativeAltitude.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			const result = Number(status.result);
+			return new ExecutionStatusResult(new NumData(result, true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+				return new ExecutionStatusResult(new NumData(0, false)); //0 is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DeviceRelativeAltitude.prototype.checkActive = function(){
+B_DeviceRelativeAltitude.prototype.checkActive = function() {
 	return TabletSensors.sensors.barometer;
 };
 Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 
 
-function B_DeviceOrientation(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"Device Orientation"));
+function B_DeviceOrientation(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Device Orientation"));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
 /* Make the request. */
-B_DeviceOrientation.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceOrientation.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/orientation";
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_DeviceOrientation.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			return new ExecutionStatusResult(new StringData(status.result,true));
-		}
-		else{
-			if(status.result.length > 0) {
+B_DeviceOrientation.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			return new ExecutionStatusResult(new StringData(status.result, true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new StringData("",false)); //"" is default.
+				return new ExecutionStatusResult(new StringData("", false)); //"" is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DeviceOrientation.prototype.checkActive = function(){
+B_DeviceOrientation.prototype.checkActive = function() {
 	return TabletSensors.sensors.accelerometer;
 };
 
 
 
-function B_DeviceAcceleration(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
-	this.addPart(new LabelText(this,"Device"));
+function B_DeviceAcceleration(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
+	this.addPart(new LabelText(this, "Device"));
 	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
 	dS.addOption(new SelectionData("Total", "total"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this,"Acceleration"));
+	this.addPart(new LabelText(this, "Acceleration"));
 }
 B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
 /* Make the request. */
-B_DeviceAcceleration.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceAcceleration.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/acceleration";
-	mem.requestStatus=function(){};
-	mem.axis=this.slots[0].getData().getValue();
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	mem.axis = this.slots[0].getData().getValue();
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. Then get the correct axis. */
-B_DeviceAcceleration.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
-			var parts = status.result.split(" ");
-			var result;
-			if(mem.axis == "total") {
-				let x = parseFloat(parts[0]);
-				let y = parseFloat(parts[1]);
-				let z = parseFloat(parts[2]);
-				result = Math.sqrt(x*x + y*y + z*z);
+B_DeviceAcceleration.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			const parts = status.result.split(" ");
+			let result;
+			if (mem.axis === "total") {
+				let x = Number(parts[0]);
+				let y = Number(parts[1]);
+				let z = Number(parts[2]);
+				result = Math.sqrt(x * x + y * y + z * z);
 			} else {
-				result = parseFloat(parts[mem.axis]);
+				result = Number(parts[mem.axis]);
 			}
-			return new ExecutionStatusResult(new NumData(result,true));
-		}
-		else{
-			if(status.result.length > 0) {
+			return new ExecutionStatusResult(new NumData(result, true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+				return new ExecutionStatusResult(new NumData(0, false)); //0 is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DeviceAcceleration.prototype.checkActive = function(){
+B_DeviceAcceleration.prototype.checkActive = function() {
 	return TabletSensors.sensors.accelerometer;
 };
 Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 
-function B_DeviceLocation(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.num);
-	this.addPart(new LabelText(this,"Device"));
+
+function B_DeviceLocation(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
+	this.addPart(new LabelText(this, "Device"));
 	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData("Latitude", 0));
 	dS.addOption(new SelectionData("Latitude", 0));
 	dS.addOption(new SelectionData("Longitude", 1));
@@ -16771,346 +16815,387 @@ function B_DeviceLocation(x,y){
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceLocation.prototype.constructor = B_DeviceLocation;
 /* Make the request. */
-B_DeviceLocation.prototype.startAction=function(){
-	var mem=this.runMem;
+B_DeviceLocation.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.request = "tablet/location";
-	mem.requestStatus=function(){};
-	mem.axis=this.slots[0].getData().getValue();
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	mem.requestStatus = function() {};
+	mem.axis = this.slots[0].getData().getValue();
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. Then get the correct axis. */
-B_DeviceLocation.prototype.updateAction=function(){
-	var mem=this.runMem;
-	var status=mem.requestStatus;
-	if(status.finished==true){
-		if(status.error==false){
+B_DeviceLocation.prototype.updateAction = function() {
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
 			var result = status.result.split(" ")[mem.axis];
-			return new ExecutionStatusResult(new NumData(parseFloat(result),true));
-		}
-		else{
-			if(status.result.length > 0) {
+			return new ExecutionStatusResult(new NumData(Number(result), true));
+		} else {
+			if (status.result.length > 0) {
 				this.displayError(status.result);
 				return new ExecutionStatusError();
 			} else {
-				return new ExecutionStatusResult(new NumData(0,false)); //0 is default.
+				return new ExecutionStatusResult(new NumData(0, false)); //0 is default.
 			}
 		}
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
-B_DeviceLocation.prototype.checkActive = function(){
+B_DeviceLocation.prototype.checkActive = function() {
 	return TabletSensors.sensors.gps;
 };
-/////////////////
-
-
-function B_Display(x,y){
-	CommandBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"Display"));
-	this.addPart(new StringSlot(this,"StrS_msg","Hello"));
-	this.addPart(new LabelText(this, "at"));
-	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
-	dS.addOption(new SelectionData("Position 1", "position1"));
-	dS.addOption(new SelectionData("Position 2", "position2"));
-	dS.addOption(new SelectionData("Position 3", "position3"));
-	this.addPart(dS);
-}
-B_Display.prototype = Object.create(CommandBlock.prototype);
-B_Display.prototype.constructor = B_Display;
-B_Display.prototype.startAction=function(){
-	const message = this.slots[0].getData().getValue();
-	const position = this.slots[1].getData().getValue();
-	DisplayBoxManager.displayText(message, position);
-	return new ExecutionStatusDone(); //Done running
-};
+/* Implementations of sound Blocks */
 
 
 
-
-
-
+/**
+ * Template used to make 4 sound playing Blocks
+ * @param {number} x
+ * @param {number} y
+ * @param {string} label - The text to display on the Block
+ * @param {boolean} isRecording - Whether the Block should display recordings or sounds in the SoundDropSlot
+ * @param {boolean} waitUntilDone - Whether the Block should wait until the sound is done playing to advance
+ * @constructor
+ */
 function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
-	CommandBlock.call(this,x,y,"sound");
+	CommandBlock.call(this, x, y, "sound");
 	this.isRecording = isRecording;
 	this.waitUntilDone = waitUntilDone;
 	this.addPart(new LabelText(this, label));
-	let dS=new SoundDropSlot(this,"SDS_1", isRecording);
+	let dS = new SoundDropSlot(this, "SDS_1", isRecording);
 	this.addPart(dS);
 }
 B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
 B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
-B_PlaySoundOrRecording.prototype.startAction=function(){
-	let soundData=this.slots[0].getData();
-	if(soundData == null){
+/* Makes request using Sound class */
+B_PlaySoundOrRecording.prototype.startAction = function() {
+	let soundData = this.slots[0].getData();
+	if (soundData.isEmpty()) {
 		return new ExecutionStatusDone();
 	}
-	let soundId=soundData.getValue();
+	let soundId = soundData.getValue();
 	let status = {};
 	this.runMem.playStatus = status;
 	status.donePlaying = false;
 	status.requestSent = false;
 	Sound.play(soundId, this.isRecording, status);
-	return new ExecutionStatusRunning(); //Still running
+	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait for the request to finish. */
-B_PlaySoundOrRecording.prototype.updateAction=function(){
-	let mem=this.runMem;
-	let status=mem.playStatus;
+B_PlaySoundOrRecording.prototype.updateAction = function() {
+	let mem = this.runMem;
+	let status = mem.playStatus;
 	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
-	if(done){
-		return new ExecutionStatusDone(); //Done running
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	if (done) {
+		return new ExecutionStatusDone(); // Done running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
 
 
-function B_PlaySound(x,y){
-	B_PlaySoundOrRecording.call(this,x,y,"play sound", false, false);
+
+function B_PlaySound(x, y) {
+	B_PlaySoundOrRecording.call(this, x, y, "play sound", false, false);
 }
 B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySound.prototype.constructor = B_PlaySound;
 
-function B_PlaySoundUntilDone(x,y){
-	B_PlaySoundOrRecording.call(this,x,y,"play sound until done", false, true);
+
+
+function B_PlaySoundUntilDone(x, y) {
+	B_PlaySoundOrRecording.call(this, x, y, "play sound until done", false, true);
 }
 B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 
-function B_PlayRecording(x,y){
-	B_PlaySoundOrRecording.call(this,x,y,"play recording", true, false);
+
+
+function B_PlayRecording(x, y) {
+	B_PlaySoundOrRecording.call(this, x, y, "play recording", true, false);
 }
 B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecording.prototype.constructor = B_PlayRecording;
 
-function B_PlayRecordingUntilDone(x,y){
-	B_PlaySoundOrRecording.call(this,x,y,"play recording until done", true, true);
+
+
+function B_PlayRecordingUntilDone(x, y) {
+	B_PlaySoundOrRecording.call(this, x, y, "play recording until done", true, true);
 }
 B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
 
 
 
-function B_StopAllSounds(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"stop all sounds"));
+function B_StopAllSounds(x, y) {
+	CommandBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "stop all sounds"));
 }
 B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
-B_StopAllSounds.prototype.startAction=function(){
-	var mem=this.runMem;
+/* Send request */
+B_StopAllSounds.prototype.startAction = function() {
+	const mem = this.runMem;
 	mem.requestStatus = {};
 	Sound.stopAllSounds(mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+	return new ExecutionStatusRunning(); // Still running
 };
-B_StopAllSounds.prototype.updateAction=function(){
-	if(this.runMem.requestStatus.finished){
-		return new ExecutionStatusDone(); //Done running
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+/* Wait for request to be sent */
+B_StopAllSounds.prototype.updateAction = function() {
+	if (this.runMem.requestStatus.finished) {
+		return new ExecutionStatusDone(); // Done running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
 
 
 
-function B_RestForBeats(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"rest for"));
-	this.addPart(new NumSlot(this,"NumS_dur",0.2,true)); //Positive
-	this.addPart(new LabelText(this,"beats"));
+function B_RestForBeats(x, y) {
+	CommandBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "rest for"));
+	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
+	this.addPart(new LabelText(this, "beats"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
-B_RestForBeats.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.startTime=new Date().getTime();
-	var beats=this.slots[0].getData().getValueWithC(true); //Positive
-	mem.delayTime=CodeManager.beatsToMs(beats);
-	return new ExecutionStatusRunning(); //Still running
+/* Store the current time */
+B_RestForBeats.prototype.startAction = function() {
+	const mem = this.runMem;
+	mem.startTime = new Date().getTime();
+	const beats = this.slots[0].getData().getValueWithC(true); // Positive
+	mem.delayTime = CodeManager.beatsToMs(beats);
+	return new ExecutionStatusRunning(); // Still running
 };
-B_RestForBeats.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(new Date().getTime()>=mem.startTime+mem.delayTime){
-		return new ExecutionStatusDone(); //Done running
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+/* Wait until the time is up */
+B_RestForBeats.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
+		return new ExecutionStatusDone(); // Done running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
 
 
-function B_PlayNoteForBeats(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"play note"));
-	this.addPart(new NumSlot(this,"NumS_note",60,true,true)); //Positive integer
-	this.addPart(new LabelText(this,"for"));
-	this.addPart(new NumSlot(this,"NumS_dur",1,true)); //Positive
-	this.addPart(new LabelText(this,"beats"));
+
+function B_PlayNoteForBeats(x, y) {
+	CommandBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "play note"));
+	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
+	this.addPart(new LabelText(this, "for"));
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
+	this.addPart(new LabelText(this, "beats"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
-B_PlayNoteForBeats.prototype.startAction=function(){
-	var mem=this.runMem;
-	var note=this.slots[0].getData().getValueWithC(true,true);
-	var beats=this.slots[1].getData().getValueWithC(true); //Positive
-	mem.soundDuration=CodeManager.beatsToMs(beats);
-	mem.request = "sound/note?note="+note+"&duration="+mem.soundDuration;
-	mem.timerStarted=false;
-	mem.requestStatus=function(){};
-	HtmlServer.sendRequest(mem.request,mem.requestStatus);
-	return new ExecutionStatusRunning(); //Still running
+/* Send request */
+B_PlayNoteForBeats.prototype.startAction = function() {
+	const mem = this.runMem;
+	const note = this.slots[0].getData().getValueWithC(true, true);
+	const beats = this.slots[1].getData().getValueWithC(true); // Positive
+	mem.soundDuration = CodeManager.beatsToMs(beats);
+	mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
+	mem.timerStarted = false;
+	mem.requestStatus = function() {};
+	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	return new ExecutionStatusRunning(); // Still running
 };
-B_PlayNoteForBeats.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(!mem.timerStarted){
-		var status=mem.requestStatus;
-		if(status.finished==true){
-			mem.startTime=new Date().getTime();
-			mem.timerStarted=true;
-		}
-		else{
-			return new ExecutionStatusRunning(); //Still running
+/* When the request is sent, start a timer then wait for the timer to expire */
+B_PlayNoteForBeats.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (!mem.timerStarted) {
+		const status = mem.requestStatus;
+		if (status.finished === true) {
+			mem.startTime = new Date().getTime();
+			mem.timerStarted = true;
+		} else {
+			return new ExecutionStatusRunning(); // Still running
 		}
 	}
-	if(new Date().getTime()>=mem.startTime+mem.soundDuration){
-		return new ExecutionStatusDone(); //Done running
-	}
-	else{
-		return new ExecutionStatusRunning(); //Still running
+	if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
+		return new ExecutionStatusDone(); // Done running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
 	}
 };
 
-function B_ChangeTempoBy(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"change tempo by"));
-	this.addPart(new NumSlot(this,"NumS_amt",20));
+
+
+function B_ChangeTempoBy(x, y) {
+	CommandBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "change tempo by"));
+	this.addPart(new NumSlot(this, "NumS_amt", 20));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
-B_ChangeTempoBy.prototype.startAction=function(){
-	var slotData=this.slots[0].getData();
-	if(slotData.isValid) {
-		var newTempo = CodeManager.sound.tempo +slotData.getValue();
+/* Changes the tempo stored in CodeManager */
+B_ChangeTempoBy.prototype.startAction = function() {
+	const slotData = this.slots[0].getData();
+	if (slotData.isValid) {
+		const newTempo = CodeManager.sound.tempo + slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
 	return new ExecutionStatusDone();
 };
 
-function B_SetTempoTo(x,y){
-	CommandBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"set tempo to"));
-	const nS = new NumSlot(this,"NumS_tempo",60,true); //Positive
+
+
+function B_SetTempoTo(x, y) {
+	CommandBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "set tempo to"));
+	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	this.addPart(new LabelText(this,"bpm"));
+	this.addPart(new LabelText(this, "bpm"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
-B_SetTempoTo.prototype.startAction=function(){
-	var slotData=this.slots[0].getData();
-	if(slotData.isValid) {
-		var newTempo = slotData.getValue();
+/* Sets the tempo stored in CodeManager */
+B_SetTempoTo.prototype.startAction = function() {
+	const slotData = this.slots[0].getData();
+	if (slotData.isValid) {
+		const newTempo = slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
 	return new ExecutionStatusDone();
 };
 
-function B_Tempo(x,y){
-	ReporterBlock.call(this,x,y,"sound");
-	this.addPart(new LabelText(this,"tempo"));
+
+
+function B_Tempo(x, y) {
+	ReporterBlock.call(this, x, y, "sound");
+	this.addPart(new LabelText(this, "tempo"));
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
-B_Tempo.prototype.startAction=function(){
+/* Retrieve the tempo */
+B_Tempo.prototype.startAction = function() {
 	return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
 };
+/* Implementation of blocks that deal with variables and lists.  Most of these blocks have a DropSlot to select
+ * the list to read/modify.  Some of the List Blocks allow this Slot to be given either an existing List
+ * or a ListData, such as returned from the Split block.
+ */
 
-//@fix Write documentation.
 
-function B_Variable(x,y,variable){
-	ReporterBlock.call(this,x,y,"variables",Block.returnTypes.string);
-	if (variable != null) {
-		this.variable=variable;
-		this.addPart(new LabelText(this,this.variable.getName()));
-	}
+/**
+ * Variable Blocks are special since their constructor takes an extra Variable parameter.
+ * @param {number} x
+ * @param {number} y
+ * @param {Variable} variable - The variable that this Block will return the value of
+ * @constructor
+ */
+function B_Variable(x, y, variable) {
+	ReporterBlock.call(this, x, y, "variables", Block.returnTypes.string);
+	this.variable = variable;
+	this.addPart(new LabelText(this, this.variable.getName()));
 }
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
-B_Variable.prototype.startAction=function(){
+/* Return the value of the variable */
+B_Variable.prototype.startAction = function() {
 	return new ExecutionStatusResult(this.variable.getData());
 };
-B_Variable.prototype.createXml=function(xmlDoc){
-	var block=XmlWriter.createElement(xmlDoc,"block");
-	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	XmlWriter.setAttribute(block,"variable",this.variable.getName());
+/**
+ * @inheritDoc
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node} - The node for this Block
+ */
+B_Variable.prototype.createXml = function(xmlDoc) {
+	const block = XmlWriter.createElement(xmlDoc, "block");
+	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+	XmlWriter.setAttribute(block, "variable", this.variable.getName());
 	return block;
 };
-B_Variable.prototype.setVar=function(variable){
-	if (variable != null) {
-		this.variable=variable;
-		this.addPart(new LabelText(this,this.variable.getName()));
-	}
-}
-B_Variable.prototype.renameVar=function(){
-	this.variable.rename();	
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_Variable.prototype.renameVar = function() {
+	// Shows dialog for new name
+	this.variable.rename();
 };
-B_Variable.prototype.deleteVar=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_Variable.prototype.deleteVar = function() {
+	// Deletes variable if unused, or shows confirmation dialog
 	this.variable.delete();
 };
-B_Variable.prototype.renameVariable=function(variable){
-	if(variable==this.variable){
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+B_Variable.prototype.renameVariable = function(variable) {
+	if (variable === this.variable) {
+		// Update the block by changing its label
 		this.parts[0].remove();
-		this.parts[0]=new LabelText(this,this.variable.getName());
-		if(this.stack!=null){
+		this.parts[0] = new LabelText(this, this.variable.getName());
+		if (this.stack != null) {
+			// The stack may now be a different size
 			this.stack.updateDim();
 		}
 	}
 };
-B_Variable.prototype.deleteVariable=function(variable){
-	if(variable==this.variable){
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+B_Variable.prototype.deleteVariable = function(variable) {
+	if (variable === this.variable) {
+		// Delete occurrences of this Block
 		this.unsnap().delete();
 	}
 };
-B_Variable.prototype.checkVariableUsed=function(variable){
-	if(variable==this.variable){
-		return new ExecutionStatusRunning();
-	}
-	return new ExecutionStatusDone();
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+B_Variable.prototype.checkVariableUsed = function(variable) {
+	return variable === this.variable
 };
-B_Variable.importXml=function(blockNode){
-	var variableName=XmlWriter.getAttribute(blockNode,"variable");
-	var variable=CodeManager.findVar(variableName);
-	if(variable!=null){
-		return new B_Variable(0,0,variable);
+/**
+ * Creates a variable Block from XML
+ * @param {Node} blockNode - The node to import from
+ * @return {Block|null} - The imported Block
+ */
+B_Variable.importXml = function(blockNode) {
+	const variableName = XmlWriter.getAttribute(blockNode, "variable");
+	const variable = CodeManager.findVar(variableName);
+	if (variable != null) {
+		return new B_Variable(0, 0, variable);
 	}
 	return null;
 };
 
 
 
-
-function B_SetTo(x,y){
-	CommandBlock.call(this,x,y,"variables");
-	this.addPart(new LabelText(this,"set"));
-	this.addPart(new VarDropSlot(this,"VDS_1"));
-	this.addPart(new LabelText(this,"to"));
+function B_SetTo(x, y) {
+	CommandBlock.call(this, x, y, "variables");
+	this.addPart(new LabelText(this, "set"));
+	this.addPart(new VarDropSlot(this, "VDS_1"));
+	this.addPart(new LabelText(this, "to"));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
-B_SetTo.prototype.startAction=function(){
-	var variableD=this.slots[0].getData();
-	var data=this.slots[1].getData();
-	var type=data.type;
-	var types=Data.types;
-	if(type==types.bool||type==types.num||type==types.string) {
+/* Sets the variable to the provided value */
+B_SetTo.prototype.startAction = function() {
+	// Get the selection data that refers to a variable
+	const variableD = this.slots[0].getData();
+	// Get the data to assign to the variable
+	const data = this.slots[1].getData();
+	const type = data.type;
+	const types = Data.types;
+	if (type === types.bool || type === types.num || type === types.string) {
+		// If the selection data is not empty
 		if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
-			var variable = variableD.getValue();
+			// Extract the indicated variable
+			const variable = variableD.getValue();
+			// And set its value
 			variable.setData(data);
 		}
 	}
@@ -17119,111 +17204,146 @@ B_SetTo.prototype.startAction=function(){
 
 
 
-function B_ChangeBy(x,y){
-	CommandBlock.call(this,x,y,"variables");
-	this.addPart(new LabelText(this,"change"));
-	this.addPart(new VarDropSlot(this,"VDS_1"));
-	this.addPart(new LabelText(this,"by"));
-	this.addPart(new NumSlot(this,"NumS_val",1));
+function B_ChangeBy(x, y) {
+	CommandBlock.call(this, x, y, "variables");
+	this.addPart(new LabelText(this, "change"));
+	this.addPart(new VarDropSlot(this, "VDS_1"));
+	this.addPart(new LabelText(this, "by"));
+	this.addPart(new NumSlot(this, "NumS_val", 1));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
-B_ChangeBy.prototype.startAction=function(){
-	var variableD=this.slots[0].getData();
-	var incrementD=this.slots[1].getData();
-	if(variableD.type === Data.types.selection && !variableD.isEmpty()){
-		var variable=variableD.getValue();
-		var currentD=variable.getData().asNum();
-		var newV=incrementD.getValue()+currentD.getValue();
-		var isValid=currentD.isValid&&incrementD.isValid;
-		var newD=new NumData(newV,isValid);
+/* Adds the value to the indicated variable */
+B_ChangeBy.prototype.startAction = function() {
+	const variableD = this.slots[0].getData();
+	const incrementD = this.slots[1].getData();
+	if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
+		const variable = variableD.getValue();
+		const currentD = variable.getData().asNum();
+		const newV = incrementD.getValue() + currentD.getValue();
+		const isValid = currentD.isValid && incrementD.isValid;
+		const newD = new NumData(newV, isValid);
 		variable.setData(newD);
 	}
 	return new ExecutionStatusDone();
 };
 
 
-//Done
-function B_List(x,y,list){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
-	if (list != null) {
-		this.list=list;
-		this.addPart(new LabelText(this,this.list.getName()));
-	}
+/**
+ * Variable Blocks are special since their constructor takes an extra List parameter.
+ * @param {number} x
+ * @param {number} y
+ * @param {List} list - The list that this Block should return the value of
+ * @constructor
+ */
+function B_List(x, y, list) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
+	this.list = list;
+	this.addPart(new LabelText(this, this.list.getName()));
 }
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
-B_List.prototype.startAction=function(){
+/* Returns a StringData representing the List's contents, comma separated */
+B_List.prototype.startAction = function() {
 	return new ExecutionStatusResult(this.list.getData().asString());
 };
-B_List.prototype.createXml=function(xmlDoc){
-	var block=XmlWriter.createElement(xmlDoc,"block");
-	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	XmlWriter.setAttribute(block,"list",this.list.getName());
+/**
+ * Writes the Block to Xml
+ * @param {DOMParser} xmlDoc - The document to write to
+ * @return {Node} - The Block node
+ */
+B_List.prototype.createXml = function(xmlDoc) {
+	const block = XmlWriter.createElement(xmlDoc, "block");
+	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+	XmlWriter.setAttribute(block, "list", this.list.getName());
 	return block;
 };
-B_List.prototype.setList=function(list){
+/**
+ * Imports a List Block from the provided XML node
+ * @param {Node} blockNode - The node to import from
+ * @return {Block|null} - The imported Block
+ */
+B_List.importXml = function(blockNode) {
+	// The list is stored as a string
+	const listName = XmlWriter.getAttribute(blockNode, "list");
+	const list = CodeManager.findList(listName);
 	if (list != null) {
-		this.list=list;
-		this.addPart(new LabelText(this,this.list.getName()));
-	}
-}
-B_List.importXml=function(blockNode){
-	var listName=XmlWriter.getAttribute(blockNode,"list");
-	var list=CodeManager.findList(listName);
-	if(list!=null){
-		return new B_List(0,0,list);
+		return new B_List(0, 0, list);
 	}
 	return null;
 };
-B_List.prototype.renameLi=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_List.prototype.renameLi = function() {
 	this.list.rename();
 };
-B_List.prototype.deleteLi=function(){
+/**
+ * Called from the Block's context menu if it is in a DisplayStack
+ */
+B_List.prototype.deleteLi = function() {
 	this.list.delete();
 };
-B_List.prototype.renameList=function(list){
-	if(list==this.list){
+/**
+ * @inheritDoc
+ * @param {List} list
+ */
+B_List.prototype.renameList = function(list) {
+	if (list === this.list) {
 		this.parts[0].remove();
-		this.parts[0]=new LabelText(this,this.list.getName());
-		if(this.stack!=null){
+		this.parts[0] = new LabelText(this, this.list.getName());
+		if (this.stack != null) {
 			this.stack.updateDim();
 		}
 	}
 };
-B_List.prototype.deleteList=function(list){
-	if(list==this.list){
+/**
+ * @inheritDoc
+ * @param {List} list
+ */
+B_List.prototype.deleteList = function(list) {
+	if (list === this.list) {
 		this.unsnap().delete();
 	}
 };
-B_List.prototype.checkListUsed=function(list){
-	if(list==this.list){
-		return new ExecutionStatusRunning();
-	}
-	return new ExecutionStatusDone();
+/**
+ * @inheritDoc
+ * @param {List} list
+ * @return {boolean}
+ */
+B_List.prototype.checkListUsed = function(list) {
+	return list === this.list
 };
 
 
-//Done
-function B_AddToList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"add"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
-	this.addPart(new LabelText(this,"to"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_AddToList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "add"));
+	/* Any type can be added to a list */
+	const snapType = Slot.snapTypes.numStrBool;
+	const inputType = Slot.outputTypes.any;
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
+	this.addPart(new LabelText(this, "to"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
-B_AddToList.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var list=listD.getValue();
-		var array=list.getData().getValue();
-		var itemD=this.slots[0].getData();
-		if(itemD.isValid){
+/* Adds the item to the list */
+B_AddToList.prototype.startAction = function() {
+	/* Gets the SelectionData referring to the list */
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		/* Extracts the List from the SelectionData */
+		const list = listD.getValue();
+		/* Gets the array value of the ListData stored in the List */
+		const array = list.getData().getValue();
+		/* Gets the item to add */
+		const itemD = this.slots[0].getData();
+		/* Adds the item to the array */
+		if (itemD.isValid) {
 			array.push(itemD);
-		}
-		else{
+		} else {
 			array.push(itemD.asString());
 		}
 	}
@@ -17231,29 +17351,31 @@ B_AddToList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_DeleteItemOfList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"delete"));
-	this.addPart(new IndexSlot(this,"NumS_idx",true));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_DeleteItemOfList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "delete"));
+	this.addPart(new IndexSlot(this, "NumS_idx", true));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
-B_DeleteItemOfList.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[0].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		if(indexD.type === Data.types.selection && indexD.getValue() === "all"){
+/* Deletes the item from the List if it exists */
+B_DeleteItemOfList.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[0].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		if (indexD.type === Data.types.selection && indexD.getValue() === "all") {
+			// Delete everything from the List
 			list.setData(new ListData());
-		}
-		else {
-			var index = listData.getIndex(indexD);
+		} else {
+			const index = listData.getIndex(indexD);
 			if (index != null) {
+				// Delete the indicated index
 				array.splice(index, 1);
 			}
 		}
@@ -17262,44 +17384,46 @@ B_DeleteItemOfList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_InsertItemAtOfList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"insert"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
-	this.addPart(new LabelText(this,"at"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
+
+function B_InsertItemAtOfList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "insert"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
+	this.addPart(new LabelText(this, "at"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
-B_InsertItemAtOfList.prototype.startAction=function(){
-	var listD=this.slots[2].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[1].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		var itemD=this.slots[0].getData();
-		var index=listData.getIndex(indexD);
-		if(index==null||indexD.getValue()>array.length){
-			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue()>array.length;
+/* Inserts the item at the indicated position */
+B_InsertItemAtOfList.prototype.startAction = function() {
+	const listD = this.slots[2].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[1].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		const itemD = this.slots[0].getData();
+		const index = listData.getIndex(indexD);
+		// If the value the user provided is too large, insert after the last element
+		if (index == null || indexD.getValue() > array.length) {
+			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue() > array.length;
+			// Or if the user selected "last" (the only SelectionData)
 			insertAtEnd = insertAtEnd || (indexD.isSelection());
-			if(insertAtEnd){
-				if(itemD.isValid){
+			if (insertAtEnd) {
+				if (itemD.isValid) {
 					array.push(itemD);
-				}
-				else{
+				} else {
 					array.push(itemD.asString());
 				}
 			}
 			return new ExecutionStatusDone();
 		}
-		if(itemD.isValid){
+		// If everything is valid, simply insert the item
+		if (itemD.isValid) {
 			array.splice(index, 0, itemD);
-		}
-		else{
+		} else {
 			array.splice(index, 0, itemD.asString());
 		}
 	}
@@ -17307,35 +17431,37 @@ B_InsertItemAtOfList.prototype.startAction=function(){
 };
 
 
-//Done
-function B_ReplaceItemOfListWith(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"replace item"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1"));
-	this.addPart(new LabelText(this,"with"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
+
+function B_ReplaceItemOfListWith(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "replace item"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.addPart(new LabelText(this, "with"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
-B_ReplaceItemOfListWith.prototype.startAction=function(){
-	var listD=this.slots[1].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()){
-		var indexD=this.slots[0].getData();
-		var list=listD.getValue();
-		var listData=list.getData();
-		var array=listData.getValue();
-		var itemD=this.slots[2].getData();
-		var index=listData.getIndex(indexD);
-		if(index==null){
+/* Replaces the item at the specified index with another one */
+B_ReplaceItemOfListWith.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const indexD = this.slots[0].getData();
+		const list = listD.getValue();
+		const listData = list.getData();
+		const array = listData.getValue();
+		const itemD = this.slots[2].getData();
+		const index = listData.getIndex(indexD);
+		if (index == null) {
+			// Index is out of bounds, do nothing
 			return new ExecutionStatusDone();
 		}
-		if(itemD.isValid){
-			array[index]=itemD;
-		}
-		else{
-			array[index]=itemD.asString();
+		// Replace the item
+		if (itemD.isValid) {
+			array[index] = itemD;
+		} else {
+			array[index] = itemD.asString();
 		}
 	}
 	return new ExecutionStatusDone();
@@ -17343,29 +17469,37 @@ B_ReplaceItemOfListWith.prototype.startAction=function(){
 
 
 
-function B_CopyListToList(x,y){
-	CommandBlock.call(this,x,y,"lists");
-	this.addPart(new LabelText(this,"copy"));
-	this.addPart(new ListDropSlot(this,"LDS_from",Slot.snapTypes.list));
-	this.addPart(new LabelText(this,"to"));
-	this.addPart(new ListDropSlot(this,"LDS_to"));
+function B_CopyListToList(x, y) {
+	CommandBlock.call(this, x, y, "lists");
+	this.addPart(new LabelText(this, "copy"));
+	/* This Slot also accepts ListData, such as data from the Split block */
+	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
+	this.addPart(new LabelText(this, "to"));
+	/* This Slot must have an already existing List, not a ListData */
+	this.addPart(new ListDropSlot(this, "LDS_to"));
 }
 B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
-B_CopyListToList.prototype.startAction=function(){
-	var listD1=this.slots[0].getData();
-	var listD2=this.slots[1].getData();
-	if(listD2.type === Data.types.selection && !listD2.isEmpty()){
-		if(listD1.type === Data.types.selection && !listD1.isEmpty()) {
+/* Copies one list to another */
+B_CopyListToList.prototype.startAction = function() {
+	const listD1 = this.slots[0].getData();
+	const listD2 = this.slots[1].getData();
+	// If the second list is valid
+	if (listD2.type === Data.types.selection && !listD2.isEmpty()) {
+		let listDataToCopy;
+		if (listD1.type === Data.types.selection && !listD1.isEmpty()) {
+			// Retrieve the first list's data if it was selected from the DropSlot
 			listDataToCopy = listD1.getValue().getData();
-		}
-		else if(listD1.type === Data.types.list){
+		} else if (listD1.type === Data.types.list) {
+			// Retrieve the ListData
 			listDataToCopy = listD1;
-		}
-		else{
+		} else {
+			// First list is of wrong type of Data. Exit.
 			return new ExecutionStatusDone();
 		}
+		// Get the List from the SelectionData
 		const listToCopyTo = listD2.getValue();
+		// Copy the Data to it
 		listToCopyTo.setData(listDataToCopy.duplicate());
 	}
 	return new ExecutionStatusDone();
@@ -17373,103 +17507,118 @@ B_CopyListToList.prototype.startAction=function(){
 
 
 
-//Done
-function B_ItemOfList(x,y){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"item"));
-	this.addPart(new IndexSlot(this,"NumS_idx",false));
-	this.addPart(new LabelText(this,"of"));
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+function B_ItemOfList(x, y) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "item"));
+	this.addPart(new IndexSlot(this, "NumS_idx", false));
+	this.addPart(new LabelText(this, "of"));
+	// Accepts both Lists and ListData
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
-B_ItemOfList.prototype.startAction = function(){
-	var listD=this.slots[1].getData();
-	var indexD;
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
+/* Gets the item form the list */
+B_ItemOfList.prototype.startAction = function() {
+	const listD = this.slots[1].getData();
+	let indexD;
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		// If the list was selected, retrieve it
 		indexD = this.slots[0].getData();
-		var list = listD.getValue();
-		var listData=list.getData();
-		return new ExecutionStatusResult(this.getItemOfList(listData,indexD));
-	}
-	else if(listD.type === Data.types.list){
+		const list = listD.getValue();
+		const listData = list.getData();
+		// Index in and return the value
+		return new ExecutionStatusResult(this.getItemOfList(listData, indexD));
+	} else if (listD.type === Data.types.list) {
 		indexD = this.slots[0].getData();
-		return new ExecutionStatusResult(this.getItemOfList(listD,indexD));
-	}
-	else {
+		// Index in and return the value
+		return new ExecutionStatusResult(this.getItemOfList(listD, indexD));
+	} else {
+		// Bad Data, exit
 		return new ExecutionStatusResult(new StringData("", false));
 	}
 };
-B_ItemOfList.prototype.getItemOfList=function(listData,indexD){
-	var array = listData.getValue();
-	var index=listData.getIndex(indexD);
-	if(index==null){
+/**
+ * Gets the item from the ListData at the specified index
+ * TODO: move this function into ListData
+ * @param {ListData} listData - the Data to read from
+ * @param {NumData} indexD - The index to retrieve
+ * @return {StringData} - The retrieved data, as a StringData
+ */
+B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
+	const array = listData.getValue();
+	const index = listData.getIndex(indexD);
+	if (index == null) {
 		return new StringData("", false);
-	}
-	else {
+	} else {
 		return array[index];
 	}
 };
 
 
-//Done
-function B_LengthOfList(x,y){
-	ReporterBlock.call(this,x,y,"lists",Block.returnTypes.num);
-	this.addPart(new LabelText(this,"length of"));
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
+
+function B_LengthOfList(x, y) {
+	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
+	this.addPart(new LabelText(this, "length of"));
+	// Accepts both Lists and ListData
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
-B_LengthOfList.prototype.startAction=function(){
-	var listD=this.slots[0].getData();
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
-		var list = listD.getValue();
-		var array = list.getData().getValue();
+/* Returns the number of items in the List or ListData */
+B_LengthOfList.prototype.startAction = function() {
+	const listD = this.slots[0].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const list = listD.getValue();
+		const array = list.getData().getValue();
 		return new ExecutionStatusResult(new NumData(array.length));
-	}
-	else if(listD.type === Data.types.list){
+	} else if (listD.type === Data.types.list) {
 		return new ExecutionStatusResult(new NumData(listD.getValue().length));
-	}
-	else {
-		return new ExecutionStatusResult(new NumData(0,false));
+	} else {
+		return new ExecutionStatusResult(new NumData(0, false));
 	}
 };
 
 
-//Done
-function B_ListContainsItem(x,y){
-	PredicateBlock.call(this,x,y,"lists");
-	this.addPart(new ListDropSlot(this,"LDS_1",Slot.snapTypes.list));
-	this.addPart(new LabelText(this,"contains"));
-	this.addPart(new RectSlot(this,"RectS_item",Slot.snapTypes.numStrBool,Slot.outputTypes.any,new StringData("thing")));
+
+function B_ListContainsItem(x, y) {
+	PredicateBlock.call(this, x, y, "lists");
+	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.addPart(new LabelText(this, "contains"));
+	const snapType = Slot.snapTypes.numStrBool;
+	const inputType = Slot.outputTypes.any;
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
-B_ListContainsItem.prototype.startAction=function(){
-	var listD=this.slots[0].getData();
-	var itemD;
-	if(listD.type === Data.types.selection && !listD.isEmpty()) {
-		var list = listD.getValue();
-		var listData=list.getData();
-		itemD=this.slots[1].getData();
-		return new ExecutionStatusResult(this.checkListContainsItem(listData,itemD));
-	}
-	else if(listD.type === Data.types.list){
-		itemD=this.slots[1].getData();
-		return new ExecutionStatusResult(this.checkListContainsItem(listD,itemD));
-	}
-	else {
-		return new ExecutionStatusResult(new BoolData(false,true));
+/* Returns BoolData indicating if the item is in the List */
+B_ListContainsItem.prototype.startAction = function() {
+	const listD = this.slots[0].getData();
+	if (listD.type === Data.types.selection && !listD.isEmpty()) {
+		const list = listD.getValue();
+		const listData = list.getData();
+		const itemD = this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listData, itemD));
+	} else if (listD.type === Data.types.list) {
+		const itemD = this.slots[1].getData();
+		return new ExecutionStatusResult(this.checkListContainsItem(listD, itemD));
+	} else {
+		return new ExecutionStatusResult(new BoolData(false, true));
 	}
 };
-B_ListContainsItem.prototype.checkListContainsItem=function(listData,itemD){
-	var array = listData.getValue();
-	for(var i=0;i<array.length;i++){
-		if(Data.checkEquality(itemD,array[i])){
-			return new BoolData(true,true);
+/**
+ * Returns BoolData indicating if the item is in the List
+ * @param {ListData} listData - The list to examine
+ * @param {Data} itemD - The item to check
+ * @return {BoolData} - true iff itemD appears in listData
+ */
+B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
+	const array = listData.getValue();
+	for (let i = 0; i < array.length; i++) {
+		if (Data.checkEquality(itemD, array[i])) {
+			return new BoolData(true, true);
 		}
 	}
-	return new BoolData(false,true);
+	return new BoolData(false, true);
 };
 function Test(){
 	var stack1;
