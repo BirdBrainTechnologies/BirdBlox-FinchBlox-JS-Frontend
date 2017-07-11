@@ -29,6 +29,7 @@ function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter,
 	this.group = GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
 	this.parent = null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
 	this.parts = []; //The parts of a Block include its LabelText, BlockIcons, and Slots.
+	/** @type {Slot[]} */
 	this.slots = []; //The slots array just holds the Slots.
 	this.running = 0; //Running: 0 = Not started, 1 = Waiting for slots to finish, 2 = Running, 3 = Completed.
 	this.category = category;

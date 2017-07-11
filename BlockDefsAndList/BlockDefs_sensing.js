@@ -1,126 +1,133 @@
-/* This file contains the implementations for Blocks in the sensing category.
- * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
- * Many of these will use the this.stack.getSprite() method, which is not done yet.
+/* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
+ * TODO: merge with tablet
  */
 
-function B_Ask(x,y){
-	CommandBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"ask"));
-	this.addPart(new StringSlot(this,"StrS_msg","what's your name?"));
-	this.addPart(new LabelText(this,"and wait"));
+
+
+/* TODO: make sure dialogs don't show while a save dialog is up */
+function B_Ask(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "ask"));
+	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
+	this.addPart(new LabelText(this, "and wait"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
 /* Show a dialog with the question unless another dialog is already visible or has been displayed recently. */
-B_Ask.prototype.startAction=function(){
-	var mem=this.runMem;
-	mem.question=this.slots[0].getData().getValue(); //Form the question
-	mem.questionDisplayed=false; //Has the dialog request been issued yet?
-	if(HtmlServer.dialogVisible){ //If there is already a dialog, we will wait until it is closed.
-		mem.waitingForDialog=true; //We are waiting.
-	}
-	else{
-		mem.waitingForDialog=false; //We are not waiting for a dialog to disappear.
-		//There is a delay between repeated dialogs to give the user time to stop the program.
-		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
-			this.showQuestion(); //Show the dialog.
+B_Ask.prototype.startAction = function() {
+	const mem = this.runMem;
+	mem.question = this.slots[0].getData().getValue();
+	mem.questionDisplayed = false;
+	// If there is already a dialog, we will wait until it is closed.
+	if (HtmlServer.dialogVisible) { 
+		mem.waitingForDialog = true;
+	} else {
+		mem.waitingForDialog = false;
+		// There is a delay between repeated dialogs to give the user time to stop the program.
+		// Check if we can show the dialog or should delay.
+		if (CodeManager.checkDialogDelay()) { 
+			this.showQuestion();
 		}
 	}
 	return new ExecutionStatusRunning();
 };
 /* Waits until the dialog has been displayed and completed. */
-B_Ask.prototype.updateAction=function(){
-	var mem=this.runMem;
-	if(mem.waitingForDialog){ //If we are waiting for a dialog to close...
-		if(!HtmlServer.dialogVisible){ //...And the dialog is closed...
-			mem.waitingForDialog=false; //...Then we can stop waiting.
+B_Ask.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (mem.waitingForDialog) {   // If we are waiting for a dialog to close...
+		if (!HtmlServer.dialogVisible) {   //...And the dialog is closed...
+			mem.waitingForDialog = false;   //...Then we can stop waiting.
 		}
-		return new ExecutionStatusRunning(); //Still running.
-	}
-	else if(!mem.questionDisplayed){ //If the question has not yet been displayed...
-		if(CodeManager.checkDialogDelay()) { //Check if we can show the dialog or should delay.
-			if(HtmlServer.dialogVisible){ //Make sure there still isn't a dialog visible.
-				mem.waitingForDialog=true;
-			}
-			else{
-				this.showQuestion(); //Display the question.
+		return new ExecutionStatusRunning();   // Still running.
+	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
+		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
+				mem.waitingForDialog = true;
+			} else {
+				this.showQuestion();   // Display the question.
 			}
 		}
-		return new ExecutionStatusRunning(); //Still running.
-	}
-	else{
-		if(mem.finished==true){ //Question has been answered.
-			CodeManager.updateDialogDelay(); //Tell CodeManager to reset the dialog delay clock.
-			return new ExecutionStatusDone(); //Done running
-		}
-		else{ //Waiting on answer from user.
-			return new ExecutionStatusRunning(); //Still running
+		return new ExecutionStatusRunning();   // Still running.
+	} else {
+		if (mem.finished === true) {   // Question has been answered.
+			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
+			return new ExecutionStatusDone();   // Done running
+		} else {   // Waiting on answer from user.
+			return new ExecutionStatusRunning();   // Still running
 		}
 	}
 };
-B_Ask.prototype.showQuestion=function(){
-	var mem=this.runMem;
-	mem.finished=false; //Will be changed once answered.
-	var callbackFn=function(cancelled,response){
-		if(cancelled){
-			CodeManager.answer = new StringData("", true); //"" is the default answer.
+/* Sends the request to show the dialog */
+B_Ask.prototype.showQuestion = function() {
+	const mem = this.runMem;
+	mem.finished = false;   // Will be changed once answered.
+	const callbackFn = function(cancelled, response) {
+		if (cancelled) {
+			CodeManager.answer = new StringData("", true);   //"" is the default answer.
+		} else {
+			CodeManager.answer = new StringData(response, true);   // Store the user's answer in the CodeManager.
 		}
-		else{
-			CodeManager.answer = new StringData(response, true); //Store the user's anser in the CodeManager.
-		}
-		callbackFn.mem.finished=true; //Done waiting.
+		callbackFn.mem.finished = true;   // Done waiting.
 	};
-	callbackFn.mem=mem;
-	var callbackErr=function(){ //If an error occurs...
-		CodeManager.answer = new StringData("", true); //"" is the default answer.
-		callbackErr.mem.finished=true; //Done waiting.
+	callbackFn.mem = mem;
+	const callbackErr = function() {   // If an error occurs...
+		CodeManager.answer = new StringData("", true);   //"" is the default answer.
+		callbackErr.mem.finished = true;   // Done waiting.
 	};
-	callbackErr.mem=mem;
-	HtmlServer.showDialog("Question",mem.question,"",callbackFn,callbackErr); //Make the request.
-	mem.questionDisplayed=true; //Prevents displaying twice.
+	callbackErr.mem = mem;
+	HtmlServer.showDialog("Question", mem.question, "", callbackFn, callbackErr);   // Make the request.
+	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
 
 
-
-function B_Answer(x,y){
-	ReporterBlock.call(this,x,y,"tablet",Block.returnTypes.string);
-	this.addPart(new LabelText(this,"answer"));
+function B_Answer(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "answer"));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
 B_Answer.prototype.constructor = B_Answer;
-B_Answer.prototype.startAction=function(){
+B_Answer.prototype.startAction = function() {
 	return new ExecutionStatusResult(CodeManager.answer);
 };
 
-function B_ResetTimer(x,y){
-	CommandBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"reset timer"));
+
+
+function B_ResetTimer(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "reset timer"));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
-B_ResetTimer.prototype.startAction=function(){
-	CodeManager.timerForSensingBlock=new Date().getTime();
+/* Reset the timer in CodeManager */
+B_ResetTimer.prototype.startAction = function() {
+	CodeManager.timerForSensingBlock = new Date().getTime();
 	return new ExecutionStatusDone();
 };
 
-function B_Timer(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"timer"));
+
+
+function B_Timer(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "timer"));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
-B_Timer.prototype.startAction=function(){
-	var now=new Date().getTime();
-	var start=CodeManager.timerForSensingBlock;
-	return new ExecutionStatusResult(new NumData(Math.round((now-start)/100)/10));
+/* Get the time and convert it to seconds */
+B_Timer.prototype.startAction = function() {
+	const now = new Date().getTime();
+	const start = CodeManager.timerForSensingBlock;
+	/* Round to 1 decimal */
+	return new ExecutionStatusResult(new NumData(Math.round((now - start) / 100) / 10));
 };
 Block.setDisplaySuffix(B_Timer, "s");
 
-function B_CurrentTime(x,y){
-	ReporterBlock.call(this,x,y,"tablet");
-	this.addPart(new LabelText(this,"current"));
+
+
+function B_CurrentTime(x, y) {
+	ReporterBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "current"));
 	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
 	dS.addOption(new SelectionData("year", "year"));
 	dS.addOption(new SelectionData("month", "month"));
@@ -134,35 +141,52 @@ function B_CurrentTime(x,y){
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
-B_CurrentTime.prototype.startAction=function(){
-	var unitD=this.slots[0].getData();
-	if(unitD==null){
-		return new ExecutionStatusResult(new NumData(0,false));
+/* Returns the current time in the desired units */
+B_CurrentTime.prototype.startAction = function() {
+	const unitD = this.slots[0].getData();
+	if (unitD == null) {
+		return new ExecutionStatusResult(new NumData(0, false));
 	}
-	var unit=unitD.getValue();
-	if(unit=="year"){
+	const unit = unitD.getValue();
+	if (unit === "year") {
 		return new ExecutionStatusResult(new NumData(new Date().getFullYear()));
-	}
-	else if(unit=="month"){
-		return new ExecutionStatusResult(new NumData(new Date().getMonth()+1));
-	}
-	else if(unit=="date"){
+	} else if (unit === "month") {
+		return new ExecutionStatusResult(new NumData(new Date().getMonth() + 1));
+	} else if (unit === "date") {
 		return new ExecutionStatusResult(new NumData(new Date().getDate()));
-	}
-	else if(unit=="day of the week"){
-		return new ExecutionStatusResult(new NumData(new Date().getDay()+1));
-	}
-	else if(unit=="hour"){
+	} else if (unit === "day of the week") {
+		return new ExecutionStatusResult(new NumData(new Date().getDay() + 1));
+	} else if (unit === "hour") {
 		return new ExecutionStatusResult(new NumData(new Date().getHours()));
-	}
-	else if(unit=="minute"){
+	} else if (unit === "minute") {
 		return new ExecutionStatusResult(new NumData(new Date().getMinutes()));
-	}
-	else if(unit=="second"){
+	} else if (unit === "second") {
 		return new ExecutionStatusResult(new NumData(new Date().getSeconds()));
-	}
-	else if(unit=="time in milliseconds"){
+	} else if (unit === "time in milliseconds") {
 		return new ExecutionStatusResult(new NumData(new Date().getTime()));
 	}
 	return new ExecutionStatusResult(new NumData(0, false));
+};
+
+
+
+function B_Display(x, y) {
+	CommandBlock.call(this, x, y, "tablet");
+	this.addPart(new LabelText(this, "Display"));
+	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+	this.addPart(new LabelText(this, "at"));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
+	dS.addOption(new SelectionData("Position 1", "position1"));
+	dS.addOption(new SelectionData("Position 2", "position2"));
+	dS.addOption(new SelectionData("Position 3", "position3"));
+	this.addPart(dS);
+}
+B_Display.prototype = Object.create(CommandBlock.prototype);
+B_Display.prototype.constructor = B_Display;
+/* Displays the value on the screen */
+B_Display.prototype.startAction = function() {
+	const message = this.slots[0].getData().getValue();
+	const position = this.slots[1].getData().getValue();
+	DisplayBoxManager.displayText(message, position);
+	return new ExecutionStatusDone(); // Done running
 };

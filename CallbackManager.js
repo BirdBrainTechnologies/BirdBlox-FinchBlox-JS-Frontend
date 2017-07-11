@@ -66,3 +66,9 @@ CallbackManager.device = {};
 CallbackManager.device.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
 };
+CallbackManager.device.addSensor = function(sensor){
+	return TabletSensors.addSensor(sensor);
+};
+CallbackManager.device.removeSensor = function(sensor){
+	return TabletSensors.removeSensor(sensor);
+};

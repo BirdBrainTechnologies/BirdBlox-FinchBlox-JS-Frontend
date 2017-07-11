@@ -26,6 +26,24 @@ TabletSensors.updateAvailable = function(sensorList){
 	});
 	CodeManager.updateAvailableSensors();
 };
+TabletSensors.addSensor = function(sensor){
+	const TS = TabletSensors;
+	if(TS.sensors[sensor] != null) {
+		TS.sensors[sensor] = true;
+		CodeManager.updateAvailableSensors();
+		return true;
+	}
+	return false;
+};
+TabletSensors.removeSensor = function(sensor){
+	const TS = TabletSensors;
+	if(TS.sensors[sensor] != null) {
+		TS.sensors[sensor] = false;
+		CodeManager.updateAvailableSensors();
+		return true;
+	}
+	return false;
+};
 TabletSensors.clear = function(){
 	const sensors = TabletSensors.sensors = {};
 	sensors.accelerometer = false;

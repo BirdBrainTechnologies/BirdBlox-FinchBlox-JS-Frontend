@@ -249,8 +249,8 @@ BlockStack.prototype.updateRun = function() {
 
 /**
  * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
- * @param {Block|undefined} startBlock - (optional) The first Block to execute. By default, this.firstBlock is used.
- * @param {string|undefined} broadcastMessage - Indicates if execution was triggered by a broadcast
+ * @param {Block} [startBlock] - The first Block to execute. By default, this.firstBlock is used.
+ * @param {string} [broadcastMessage] - Indicates if execution was triggered by a broadcast
  */
 BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
 	if (startBlock == null) {

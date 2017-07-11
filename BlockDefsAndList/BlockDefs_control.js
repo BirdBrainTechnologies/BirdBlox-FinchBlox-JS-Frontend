@@ -14,8 +14,8 @@ B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
 B_WhenFlagTapped.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
+/* Does nothing */
 B_WhenFlagTapped.prototype.startAction = function() {
-	//Done running. This Block does nothing except respond to an event.
 	return new ExecutionStatusDone();
 };
 
@@ -30,24 +30,25 @@ function B_WhenIReceive(x, y) {
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
 B_WhenIReceive.prototype.eventBroadcast = function(message) {
-	// Get message from Slot (returns instantly since snapping is not allowed)
-	const myMessage = this.slots[0].getDataNotFromChild();
-	if (myMessage.isSelection()) {
-		if (myMessage.isEmpty()) {
-			return
+	// Get data from Slot (returns instantly since snapping is not allowed)
+	const data = this.slots[0].getDataNotFromChild();
+	let shouldRun = false;
+	if (data.isSelection()) {
+		const selection = data.getValue();
+		if(selection === "any_message") {
+			shouldRun = true;
 		}
+	} else if (data.asString().getValue() === message) {
+		shouldRun = true;
 	}
-	if (myMessage != null) {
-		var myMessageStr = myMessage.getValue();
-		if (myMessageStr == "any_message" || myMessageStr == message) {
-			this.stack.stop();
-			this.stack.startRun(null, message);
-		}
+	if (shouldRun) {
+		this.stack.stop();
+		this.stack.startRun(null, message);
 	}
 };
-/* Does nothing. */
+/* Does nothing */
 B_WhenIReceive.prototype.startAction = function() {
-	return new ExecutionStatusDone(); //Done running. This Block does nothing except respond to an event.
+	return new ExecutionStatusDone();
 };
 
 
@@ -62,14 +63,14 @@ B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
 B_Wait.prototype.updateAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -88,7 +89,7 @@ B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_WaitUntil.prototype.startAction = function() {
-	var stopWaiting = this.slots[0].getData().getValue();
+	const stopWaiting = this.slots[0].getData().getValue();
 	if (stopWaiting) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -135,7 +136,7 @@ B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
-	var mem = this.runMem;
+	const mem = this.runMem;
 	mem.timesD = this.slots[0].getData();
 	mem.times = mem.timesD.getValueWithC(true, true);
 	mem.count = 0;
@@ -153,7 +154,7 @@ B_Repeat.prototype.updateAction = function() {
 		if (blockSlotStatus.hasError()) {
 			return blockSlotStatus;
 		} else {
-			var mem = this.runMem;
+			const mem = this.runMem;
 			mem.count++;
 			if (mem.count >= mem.times) {
 				return new ExecutionStatusDone(); //Done running
@@ -176,7 +177,7 @@ B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
 /* Checks condition and either stops running or executes contents. */
 B_RepeatUntil.prototype.startAction = function() {
-	var stopRepeating = this.slots[0].getData().getValue();
+	const stopRepeating = this.slots[0].getData().getValue();
 	if (stopRepeating) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -209,7 +210,7 @@ B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
 /* Either stops running or executes contents. */
 B_If.prototype.startAction = function() {
-	var check = this.slots[0].getData().getValue();
+	const check = this.slots[0].getData().getValue();
 	if (check) {
 		this.blockSlot1.startRun();
 		return new ExecutionStatusRunning(); //Still running
@@ -253,7 +254,6 @@ B_IfElse.prototype.updateAction = function() {
 
 
 
-
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
 	this.addPart(new LabelText(this, "broadcast"));
@@ -263,16 +263,19 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	var message = this.slots[0].getData();
-	if (message.getValue() !== "") {
-		CodeManager.message = new StringData(message.getValue());
-		CodeManager.eventBroadcast(message.getValue());
+	const message = this.slots[0].getData().asString().getValue();
+	if (message !== "") {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
 	}
 	return new ExecutionStatusRunning();
 };
+/* Does nothing */
 B_Broadcast.prototype.updateAction = function() {
 	return new ExecutionStatusDone();
 };
+
+
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
@@ -282,15 +285,17 @@ function B_BroadcastAndWait(x, y) {
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
+/* Broadcasts the message */
 B_BroadcastAndWait.prototype.startAction = function() {
-	var message = this.slots[0].getData();
-	if (message != null) {
-		this.runMem.message = message.getValue();
-		CodeManager.message = new StringData(this.runMem.message);
-		CodeManager.eventBroadcast(this.runMem.message);
+	const message = this.slots[0].asString().getData().getValue();
+	if (message !== "") {
+		this.runMem.message = message;
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
 	}
 	return new ExecutionStatusRunning();
 };
+/* Checks if the broadcast is still running */
 B_BroadcastAndWait.prototype.updateAction = function() {
 	if (CodeManager.checkBroadcastRunning(this.runMem.message)) {
 		return new ExecutionStatusRunning();
@@ -299,19 +304,22 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 	}
 };
 
+
+
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
 	this.addPart(new LabelText(this, "message"));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
+/* Returns the last broadcast message */
 B_Message.prototype.startAction = function() {
 	return new ExecutionStatusResult(CodeManager.message);
 };
 
 
 
-function B_Stop(x, y) { //No bottom slot
+function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
 	this.addPart(new LabelText(this, "stop"));
 	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
@@ -324,13 +332,14 @@ function B_Stop(x, y) { //No bottom slot
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
+/* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
-	var selection = this.slots[0].getData().getValue();
-	if (selection == "all") {
+	const selection = this.slots[0].getData().getValue();
+	if (selection === "all") {
 		CodeManager.stop();
-	} else if (selection == "this_script") {
+	} else if (selection === "this_script") {
 		this.stack.stop();
-	} else if (selection == "all_but_this_script") {
+	} else if (selection === "all_but_this_script") {
 		TabManager.stopAllButStack(this.stack);
 	}
 	return new ExecutionStatusDone();
