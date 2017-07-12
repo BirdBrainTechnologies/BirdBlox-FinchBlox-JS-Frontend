@@ -331,8 +331,8 @@
       <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="60" column="5" lean-forward="false" selection-start-line="60" selection-start-column="5" selection-end-line="60" selection-end-column="5" />
+            <state relative-caret-position="396">
+              <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
               <folding>
                 <element signature="n#!!block;n#SaveManager#0" expanded="false" />
                 <element signature="e#278#437#0" expanded="false" />
@@ -366,7 +366,6 @@
                 <element signature="e#3755#4028#0" expanded="false" />
                 <element signature="e#4055#4258#0" expanded="false" />
                 <element signature="e#4371#4642#0" expanded="false" />
-                <element signature="e#4714#4987#0" expanded="false" />
                 <element signature="e#4886#4977#0" expanded="false" />
                 <element signature="e#4911#4974#0" expanded="false" />
                 <element signature="e#5053#5275#0" expanded="false" />
@@ -413,8 +412,8 @@
       <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="609">
-              <caret line="69" column="7" lean-forward="true" selection-start-line="69" selection-start-column="7" selection-end-line="69" selection-end-column="7" />
+            <state relative-caret-position="774">
+              <caret line="114" column="41" lean-forward="true" selection-start-line="114" selection-start-column="41" selection-end-line="114" selection-end-column="41" />
               <folding>
                 <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
                 <element signature="e#135#158#0" expanded="false" />
@@ -423,17 +422,17 @@
                 <element signature="e#1014#1419#0" expanded="false" />
                 <element signature="e#1801#1955#0" expanded="false" />
                 <element signature="e#1880#1940#0" expanded="false" />
-                <element signature="e#2563#2750#0" expanded="false" />
-                <element signature="e#2664#2746#0" expanded="false" />
-                <element signature="e#2714#2741#0" expanded="false" />
-                <element signature="e#2824#2970#0" expanded="false" />
-                <element signature="e#2926#2966#0" expanded="false" />
-                <element signature="e#3042#3397#0" expanded="false" />
-                <element signature="e#3125#3382#0" expanded="false" />
-                <element signature="e#3444#3775#0" expanded="false" />
-                <element signature="e#3687#3738#0" expanded="false" />
-                <element signature="e#4110#4253#0" expanded="false" />
-                <element signature="e#4179#4249#0" expanded="false" />
+                <element signature="e#2559#2746#0" expanded="false" />
+                <element signature="e#2660#2742#0" expanded="false" />
+                <element signature="e#2710#2737#0" expanded="false" />
+                <element signature="e#2820#2966#0" expanded="false" />
+                <element signature="e#2922#2962#0" expanded="false" />
+                <element signature="e#3038#3393#0" expanded="false" />
+                <element signature="e#3121#3378#0" expanded="false" />
+                <element signature="e#3440#3771#0" expanded="false" />
+                <element signature="e#3683#3734#0" expanded="false" />
+                <element signature="e#4106#4249#0" expanded="false" />
+                <element signature="e#4175#4245#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -460,7 +459,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>this.valueKey</find>
       <find>parseFloat</find>
       <find>setVar</find>
       <find>B_Variable</find>
@@ -490,6 +488,7 @@
       <find>inactive</find>
       <find>blockActive</find>
       <find>autoSave</find>
+      <find>reloadDialog</find>
     </findStrings>
     <replaceStrings>
       <replace>RoundSlotShape</replace>
@@ -1300,7 +1299,7 @@
       <workItem from="1499692704553" duration="22137000" />
       <workItem from="1499778478126" duration="18634000" />
       <workItem from="1499799120796" duration="9678000" />
-      <workItem from="1499862512765" duration="15125000" />
+      <workItem from="1499862512765" duration="15888000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1397,7 +1396,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1288278000" />
+    <option name="totallyTimeSpent" value="1289041000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3044,8 +3043,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SaveManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="60" column="5" lean-forward="false" selection-start-line="60" selection-start-column="5" selection-end-line="60" selection-end-column="5" />
+        <state relative-caret-position="396">
+          <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
           <folding>
             <element signature="n#!!block;n#SaveManager#0" expanded="false" />
             <element signature="e#278#437#0" expanded="false" />
@@ -3079,7 +3078,6 @@
             <element signature="e#3755#4028#0" expanded="false" />
             <element signature="e#4055#4258#0" expanded="false" />
             <element signature="e#4371#4642#0" expanded="false" />
-            <element signature="e#4714#4987#0" expanded="false" />
             <element signature="e#4886#4977#0" expanded="false" />
             <element signature="e#4911#4974#0" expanded="false" />
             <element signature="e#5053#5275#0" expanded="false" />
@@ -3124,8 +3122,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="69" column="7" lean-forward="true" selection-start-line="69" selection-start-column="7" selection-end-line="69" selection-end-column="7" />
+        <state relative-caret-position="774">
+          <caret line="114" column="41" lean-forward="true" selection-start-line="114" selection-start-column="41" selection-end-line="114" selection-end-column="41" />
           <folding>
             <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
             <element signature="e#135#158#0" expanded="false" />
@@ -3134,17 +3132,17 @@
             <element signature="e#1014#1419#0" expanded="false" />
             <element signature="e#1801#1955#0" expanded="false" />
             <element signature="e#1880#1940#0" expanded="false" />
-            <element signature="e#2563#2750#0" expanded="false" />
-            <element signature="e#2664#2746#0" expanded="false" />
-            <element signature="e#2714#2741#0" expanded="false" />
-            <element signature="e#2824#2970#0" expanded="false" />
-            <element signature="e#2926#2966#0" expanded="false" />
-            <element signature="e#3042#3397#0" expanded="false" />
-            <element signature="e#3125#3382#0" expanded="false" />
-            <element signature="e#3444#3775#0" expanded="false" />
-            <element signature="e#3687#3738#0" expanded="false" />
-            <element signature="e#4110#4253#0" expanded="false" />
-            <element signature="e#4179#4249#0" expanded="false" />
+            <element signature="e#2559#2746#0" expanded="false" />
+            <element signature="e#2660#2742#0" expanded="false" />
+            <element signature="e#2710#2737#0" expanded="false" />
+            <element signature="e#2820#2966#0" expanded="false" />
+            <element signature="e#2922#2962#0" expanded="false" />
+            <element signature="e#3038#3393#0" expanded="false" />
+            <element signature="e#3121#3378#0" expanded="false" />
+            <element signature="e#3440#3771#0" expanded="false" />
+            <element signature="e#3683#3734#0" expanded="false" />
+            <element signature="e#4106#4249#0" expanded="false" />
+            <element signature="e#4175#4245#0" expanded="false" />
           </folding>
         </state>
       </provider>
