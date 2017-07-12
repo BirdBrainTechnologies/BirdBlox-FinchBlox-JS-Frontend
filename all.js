@@ -949,21 +949,21 @@ function DeviceWithPorts(name, id){
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
 DeviceWithPorts.prototype.readSensor = function(status, sensorType, port){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in/" + sensorType);
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in");
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("sensor", sensorType);
 	HtmlServer.sendRequest(request.toString(), status);
 };
 DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/" + outputType);
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/" + outputType);
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam(valueKey, value);
 	HtmlServer.sendRequest(request.toString(), status);
 };
 DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/triled");
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/triled");
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("red", red);
@@ -14508,58 +14508,104 @@ DropSlot.prototype.dataToString = function(data) {
 };
 /**
  * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable
- * @param key
- * @param parent
+ * @param {string} key
+ * @param {Block} parent
  * @constructor
  */
-function VarDropSlot(key, parent){
+function VarDropSlot(parent, key) {
 	const variables = CodeManager.variableList;
+	// When created, a variable slot shows the most recently created variable as its value
 	let data = SelectionData.empty();
-	if(variables.length > 0){
-		const lastVar = variables[variables.length-1];
+	if (variables.length > 0) {
+		const lastVar = variables[variables.length - 1];
 		data = lastVar.getSelectionData();
 	}
-	DropSlot.call(this, key, parent, null, null, data, true);
+	// Variable Blocks are nullable, even though they have a default value
+	DropSlot.call(this, parent, key, null, null, data, true);
 }
 VarDropSlot.prototype = Object.create(DropSlot.prototype);
 VarDropSlot.prototype.constructor = VarDropSlot;
-VarDropSlot.prototype.populatePad=function(selectPad){
-	CodeManager.variableList.forEach(function(variable){
-		selectPad.addOption(new SelectionData(variable.getName(), variable));
+
+/**
+ * @inheritDoc
+ * @param {InputWidget.SelectPad} selectPad
+ */
+VarDropSlot.prototype.populatePad = function(selectPad) {
+	// Add each variable as an option
+	CodeManager.variableList.forEach(function(variable) {
+		selectPad.addOption(variable.getSelectionData());
 	});
-	selectPad.addAction("Create variable", function(callback){
-		CodeManager.newVariable(function(variable){
+	// Add the Create variable option
+	selectPad.addAction("Create variable", function(callback) {
+		// When selected, tell the CodeManager to open a dialog to create a variable
+		CodeManager.newVariable(function(variable) {
+			// If successful, save the newly created variable as the value
 			callback(variable.getSelectionData(), true);
-		}, function(){
+		}, function() {
+			// Otherwise, leave the pad open
 			callback(null, false);
+			// TODO: could just remove the above line entirely
 		})
 	});
 };
-VarDropSlot.prototype.selectionDataFromValue = function(value){
+
+/**
+ * @inheritDoc
+ * @param {boolean|string|number|Variable} value
+ * @return {SelectionData|null}
+ */
+VarDropSlot.prototype.selectionDataFromValue = function(value) {
 	DebugOptions.validateNonNull(value);
-	if(value.constructor === Variable) return value.getSelectionData();
+	// If the value is a Variable, use its SelectionData
+	if (value.constructor === Variable) return value.getSelectionData();
+	// Otherwise, assume the value is a string and look it up in CodeManager
+	// TODO: perhaps verify the value is a string
 	const variable = CodeManager.findVar(value);
-	if(variable == null) return null;
+	if (variable == null) return null;
+	// If we find something, use that
 	return variable.getSelectionData();
 };
-VarDropSlot.prototype.renameVariable=function(variable){
-	if(this.enteredData != null && this.enteredData.getValue() === variable){
+
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+VarDropSlot.prototype.renameVariable = function(variable) {
+	// If the variable that was renamed is the same as this Slot's value...
+	if (this.enteredData != null && this.enteredData.getValue() === variable) {
+		// Change the name appearing on this Slot
 		this.setData(variable.getSelectionData(), false, true);
 	}
 };
-VarDropSlot.prototype.deleteVariable=function(variable){
-	if(this.enteredData != null && this.enteredData.getValue() === variable){
+
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ */
+VarDropSlot.prototype.deleteVariable = function(variable) {
+	// If the variable that was renamed is the same as this Slot's value...
+	if (this.enteredData != null && this.enteredData.getValue() === variable) {
+		// Change the Data to empty
 		this.setData(SelectionData.empty(), false, true);
 	}
 };
-VarDropSlot.prototype.checkVariableUsed=function(variable){
-	if(this.enteredData != null&&this.enteredData.getValue() === variable){
-		return true;
-	}
-	return false;
-};
-//@fix Write documentation.
 
+/**
+ * @inheritDoc
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+VarDropSlot.prototype.checkVariableUsed = function(variable) {
+	// Returns that this variable is in use if it matches this Slot's value
+	return this.enteredData != null && this.enteredData.getValue() === variable;
+};
+/**
+ *
+ * @param parent
+ * @param key
+ * @param snapType
+ * @constructor
+ */
 function ListDropSlot(parent,key,snapType){
 	if(snapType == null){
 		snapType = Slot.snapTypes.none
@@ -14616,16 +14662,35 @@ ListDropSlot.prototype.checkListUsed=function(list){
 	return false;
 };
 
-
+/**
+ * PortSlots select a port for Robot input/output Blocks.  They store the Data as NumData (not SelectionData)
+ * for legacy support
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} maxPorts - The number of ports to list as options
+ * @constructor
+ */
 function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
-    for(let portNum = 1; portNum <= this.maxPorts; portNum++) {
-        this.addOption(new NumData(portNum), "port " + portNum.toString());
-    }
+	for (let portNum = 1; portNum <= this.maxPorts; portNum++) {
+		this.addOption(new NumData(portNum), "port " + portNum.toString());
+	}
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
 PortSlot.prototype.constructor = PortSlot;
+
+/**
+ * PortSlots only allow NumData integers from 1 to maxPorts
+ * @param {Data} data
+ * @return {Data|null}
+ */
+PortSlot.prototype.sanitizeData = function(data) {
+	data = EditableSlot.prototype.sanitizeData.call(this, data);
+	if (data == null) return null;
+	const value = data.asNum().getValueInR(1, this.maxPorts, true, true);
+	return new NumData(value, data.isValid);
+};
 /**
  * A DropSlot which lists available broadcasts (obtained from CodeManager.broadcastList) and allows the creation
  * of new broadcasts (through an Enter Text option). Reporter blocks that return strings can e attached to the Slot
@@ -14898,30 +14963,51 @@ DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
 };
 
-//@fix Write documentation.
-
-function SoundDropSlot(parent,key, isRecording){
-	DropSlot.call(this,parent,key);
+/**
+ * SoundDropSlots select a sound or recording from a list. Uses the SoundInputPad instead of InputPad
+ * @param {Block} parent
+ * @param {string} key
+ * @param {boolean} isRecording - Whether this Slot should list build in sounds or recordings
+ * @constructor
+ */
+function SoundDropSlot(parent, key, isRecording) {
+	DropSlot.call(this, parent, key);
 	this.isRecording = isRecording;
 }
 SoundDropSlot.prototype = Object.create(DropSlot.prototype);
 SoundDropSlot.prototype.constructor = SoundDropSlot;
-SoundDropSlot.prototype.createInputSystem = function(){
+
+/**
+ * @inheritDoc
+ * @return {SoundInputPad}
+ */
+SoundDropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
 	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
 };
+
+/**
+ * Only selectionData is valid
+ * @inheritDoc
+ * @param {Data} data
+ * @return {Data|null}
+ * TODO: Technically this isn't necessary since the inputType is selection anyway
+ */
 SoundDropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	return null
 };
 SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 	if (this.isRecording) {
+		// If it is a recording, use the name of the recording as the display name
 		return new SelectionData(value, value);
 	} else {
+		// Otherwise, look up the correct name and use that
 		let sound = Sound.lookupById(value);
 		if (sound != null) return new SelectionData(sound.name, sound.id);
+		// If the sound can't be found (maybe it isn't in this version of he app), use the value as the display name
 		return new SelectionData(value, value);
 	}
 };

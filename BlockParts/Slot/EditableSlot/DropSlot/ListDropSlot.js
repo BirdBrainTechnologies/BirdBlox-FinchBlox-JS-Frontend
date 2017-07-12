@@ -1,5 +1,10 @@
-//@fix Write documentation.
-
+/**
+ *
+ * @param parent
+ * @param key
+ * @param snapType
+ * @constructor
+ */
 function ListDropSlot(parent,key,snapType){
 	if(snapType == null){
 		snapType = Slot.snapTypes.none
