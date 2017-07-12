@@ -9122,7 +9122,7 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
 		SaveManager.userDeleteFile(false, file, function(){
-			me.reloadDialog();
+			//me.reloadDialog();
 		});
 	});
 };
@@ -9130,7 +9130,7 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
 	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
 		SaveManager.userRenameFile(false, file, function(){
-			me.reloadDialog();
+			//me.reloadDialog();
 		});
 	});
 };
