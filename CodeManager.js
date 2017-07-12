@@ -502,6 +502,7 @@ CodeManager.createXml=function(){
 CodeManager.importXml=function(projectNode){
 	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
+	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");

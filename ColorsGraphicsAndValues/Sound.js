@@ -87,6 +87,10 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 		}
 	}, callbackError);
 };
+Sound.changeFile = function(){
+	Sound.recordingList = [];
+	Sound.loadSounds(true);
+};
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));

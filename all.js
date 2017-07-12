@@ -3334,6 +3334,10 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 		}
 	}, callbackError);
 };
+Sound.changeFile = function(){
+	Sound.recordingList = [];
+	Sound.loadSounds(true);
+};
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
@@ -7986,6 +7990,7 @@ CodeManager.createXml=function(){
 CodeManager.importXml=function(projectNode){
 	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
+	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
