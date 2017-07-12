@@ -5,6 +5,7 @@
  * GuiElements is run once the browser has loaded all the js and html files.
  */
 function GuiElements(){
+	debug.innerHTML = "";
 	let svg2=document.getElementById("frontSvg");
 	let svg1=document.getElementById("middleSvg");
 	let svg0=document.getElementById("backSvg");
