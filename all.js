@@ -4,7 +4,7 @@ const FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -1426,7 +1426,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	debug.innerHTML = message; //The iPad app does not support alert dialogs
+	//debug.innerHTML = message; //The iPad app does not support alert dialogs
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -10723,13 +10723,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(callbackErr != null) {
+			/*if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}
-			/*if(callbackFn != null) {
+			}*/
+			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Requesting permission');
-			}*/
+			}
 		}, 20);
 		return;
 	}
