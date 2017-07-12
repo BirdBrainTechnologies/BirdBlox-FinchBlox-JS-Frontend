@@ -53,3 +53,9 @@ SoundDropSlot.prototype.renameRecording = function(oldName, newName) {
 		//TODO: should be fine to make sanitize false
 	}
 };
+SoundDropSlot.prototype.deleteRecording = function(recording) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === recording) {
+		this.setData(SelectionData.empty(), true, true);
+	}
+};

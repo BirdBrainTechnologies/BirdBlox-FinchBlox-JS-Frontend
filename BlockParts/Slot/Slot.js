@@ -498,6 +498,9 @@ Slot.prototype.passRecursivelyDown = function(message){
 	if(message === "renameRecording" && this.renameRecording != null) {
 		this.renameRecording.apply(this, funArgs);
 	}
+	if(message === "deleteRecording" && this.deleteRecording != null) {
+		this.deleteRecording.apply(this, funArgs);
+	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };

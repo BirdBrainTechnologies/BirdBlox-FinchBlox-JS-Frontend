@@ -592,3 +592,6 @@ CodeManager.dragRelToAbsY=function(y){
 CodeManager.renameRecording = function(oldName, newName){
 	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
 };
+CodeManager.deleteRecording = function(recording){
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};

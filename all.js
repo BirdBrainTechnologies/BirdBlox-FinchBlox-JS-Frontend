@@ -8080,6 +8080,9 @@ CodeManager.dragRelToAbsY=function(y){
 CodeManager.renameRecording = function(oldName, newName){
 	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
 };
+CodeManager.deleteRecording = function(recording){
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};
 function TabManager(){
 	var TM=TabManager;
 	TM.tabList=new Array();
@@ -13647,6 +13650,9 @@ Slot.prototype.passRecursivelyDown = function(message){
 	if(message === "renameRecording" && this.renameRecording != null) {
 		this.renameRecording.apply(this, funArgs);
 	}
+	if(message === "deleteRecording" && this.deleteRecording != null) {
+		this.deleteRecording.apply(this, funArgs);
+	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
@@ -15099,6 +15105,12 @@ SoundDropSlot.prototype.renameRecording = function(oldName, newName) {
 	if(this.enteredData.getValue() === oldName) {
 		this.setData(new SelectionData(newName, newName), true, true);
 		//TODO: should be fine to make sanitize false
+	}
+};
+SoundDropSlot.prototype.deleteRecording = function(recording) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === recording) {
+		this.setData(SelectionData.empty(), true, true);
 	}
 };
 /**
