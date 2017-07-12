@@ -588,3 +588,6 @@ CodeManager.dragRelToAbsX=function(x){
 CodeManager.dragRelToAbsY=function(y){
 	return y * TabManager.getActiveZoom();
 };
+CodeManager.renameRecording = function(oldName, newName){
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+};

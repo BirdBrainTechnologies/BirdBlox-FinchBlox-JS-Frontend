@@ -492,8 +492,11 @@ Slot.prototype.updateConnectionStatus = function(){
 
 Slot.prototype.passRecursivelyDown = function(message){
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus") {
+	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
 		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	if(message === "renameRecording" && this.renameRecording != null) {
+		this.renameRecording.apply(this, funArgs);
 	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);

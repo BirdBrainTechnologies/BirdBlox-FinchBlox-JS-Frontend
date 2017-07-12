@@ -46,3 +46,10 @@ SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 		return new SelectionData(value, value);
 	}
 };
+SoundDropSlot.prototype.renameRecording = function(oldName, newName) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === oldName) {
+		this.setData(new SelectionData(newName, newName), true, true);
+		//TODO: should be fine to make sanitize false
+	}
+};

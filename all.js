@@ -8072,6 +8072,9 @@ CodeManager.dragRelToAbsX=function(x){
 CodeManager.dragRelToAbsY=function(y){
 	return y * TabManager.getActiveZoom();
 };
+CodeManager.renameRecording = function(oldName, newName){
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+};
 function TabManager(){
 	var TM=TabManager;
 	TM.tabList=new Array();
@@ -11311,7 +11314,14 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	let callback = nextAction;
+	if(isRecording){
+		callback = function(){
+			CodeManager.renameRecording(oldFilename, newName);
+			if(nextAction != null) nextAction();
+		}
+	}
+	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
@@ -13626,8 +13636,11 @@ Slot.prototype.updateConnectionStatus = function(){
 
 Slot.prototype.passRecursivelyDown = function(message){
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus") {
+	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
 		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	if(message === "renameRecording" && this.renameRecording != null) {
+		this.renameRecording.apply(this, funArgs);
 	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -15074,6 +15087,13 @@ SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 		if (sound != null) return new SelectionData(sound.name, sound.id);
 		// If the sound can't be found (maybe it isn't in this version of he app), use the value as the display name
 		return new SelectionData(value, value);
+	}
+};
+SoundDropSlot.prototype.renameRecording = function(oldName, newName) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === oldName) {
+		this.setData(new SelectionData(newName, newName), true, true);
+		//TODO: should be fine to make sanitize false
 	}
 };
 /**
