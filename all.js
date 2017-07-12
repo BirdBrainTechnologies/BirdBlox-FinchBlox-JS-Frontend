@@ -8864,7 +8864,7 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
 		this.visible = true;
-		if(RowDialog.currentDialog != null){
+		if(RowDialog.currentDialog != null && RowDialog.currentDialog !== this){
 			RowDialog.currentDialog.closeDialog();
 		}
 		RowDialog.currentDialog=this;
@@ -10723,13 +10723,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Requesting permission');
-			}
+			}*/
 		}, 20);
 		return;
 	}
