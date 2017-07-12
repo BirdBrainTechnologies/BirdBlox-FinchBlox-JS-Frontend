@@ -836,7 +836,7 @@ Block.prototype.stopGlow = function(){
 Block.prototype.makeInactive = function(){
 	if(this.active){
 		this.active = false;
-		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
 		this.slots.forEach(function(slot) {
 			slot.makeInactive();
 		});
@@ -849,7 +849,7 @@ Block.prototype.makeInactive = function(){
 Block.prototype.makeActive = function(){
 	if(!this.active){
 		this.active = true;
-		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active);
+		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
 		this.slots.forEach(function(slot) {
 			slot.makeActive();
 		});

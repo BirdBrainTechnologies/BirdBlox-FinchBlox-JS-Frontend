@@ -473,11 +473,13 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active){
 	if(!active) category = "inactive";
 	path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
 };
-BlockGraphics.update.blockActive = function(path,category,returnsValue,active){
+BlockGraphics.update.blockActive = function(path,category,returnsValue,active,gowing){
 	if(!active) category = "inactive";
 	const fill=Colors.getGradient(category);
 	path.setAttributeNS(null,"fill",fill);
-	BlockGraphics.update.stroke(path,category,returnsValue,active);
+	if(!gowing) {
+		BlockGraphics.update.stroke(path, category, returnsValue, active);
+	}
 };
 BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
 	var bG=BlockGraphics.highlight;
