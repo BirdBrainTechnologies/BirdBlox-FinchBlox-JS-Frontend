@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CallbackManager.js" afterPath="$PROJECT_DIR$/CallbackManager.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -409,11 +409,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="774">
-              <caret line="114" column="41" lean-forward="true" selection-start-line="114" selection-start-column="41" selection-end-line="114" selection-end-column="41" />
+            <state relative-caret-position="459">
+              <caret line="67" column="30" lean-forward="true" selection-start-line="67" selection-start-column="30" selection-end-line="67" selection-end-column="30" />
               <folding>
                 <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
                 <element signature="e#135#158#0" expanded="false" />
@@ -433,6 +433,30 @@
                 <element signature="e#3683#3734#0" expanded="false" />
                 <element signature="e#4106#4249#0" expanded="false" />
                 <element signature="e#4175#4245#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/CallbackManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="693">
+              <caret line="75" column="48" lean-forward="false" selection-start-line="75" selection-start-column="48" selection-end-line="75" selection-end-column="48" />
+              <folding>
+                <element signature="e#150#208#0" expanded="false" />
+                <element signature="e#263#319#0" expanded="false" />
+                <element signature="e#408#556#0" expanded="false" />
+                <element signature="e#614#722#0" expanded="false" />
+                <element signature="e#763#809#0" expanded="false" />
+                <element signature="e#857#945#0" expanded="false" />
+                <element signature="e#896#943#0" expanded="false" />
+                <element signature="e#947#1164#0" expanded="false" />
+                <element signature="e#1264#1282#0" expanded="false" />
+                <element signature="e#1359#1377#0" expanded="false" />
+                <element signature="e#1429#1447#0" expanded="false" />
+                <element signature="e#1544#1704#0" expanded="false" />
+                <element signature="e#1760#1777#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -572,7 +596,6 @@
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/BroadcastDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" />
-        <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/TabletSensors.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/PortSlot.js" />
@@ -583,6 +606,7 @@
         <option value="$PROJECT_DIR$/Block/Block.js" />
         <option value="$PROJECT_DIR$/SaveManager.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
+        <option value="$PROJECT_DIR$/CallbackManager.js" />
       </list>
     </option>
   </component>
@@ -1299,7 +1323,7 @@
       <workItem from="1499692704553" duration="22137000" />
       <workItem from="1499778478126" duration="18634000" />
       <workItem from="1499799120796" duration="9678000" />
-      <workItem from="1499862512765" duration="15888000" />
+      <workItem from="1499862512765" duration="16792000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1396,7 +1420,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1289041000" />
+    <option name="totallyTimeSpent" value="1289945000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2477,28 +2501,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CallbackManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="69" column="15" lean-forward="true" selection-start-line="69" selection-start-column="15" selection-end-line="69" selection-end-column="15" />
-          <folding>
-            <element signature="e#150#208#0" expanded="false" />
-            <element signature="e#263#319#0" expanded="false" />
-            <element signature="e#408#556#0" expanded="false" />
-            <element signature="e#614#722#0" expanded="false" />
-            <element signature="e#763#809#0" expanded="false" />
-            <element signature="e#857#945#0" expanded="false" />
-            <element signature="e#896#943#0" expanded="false" />
-            <element signature="e#947#1164#0" expanded="false" />
-            <element signature="e#1264#1282#0" expanded="false" />
-            <element signature="e#1359#1377#0" expanded="false" />
-            <element signature="e#1429#1447#0" expanded="false" />
-            <element signature="e#1544#1704#0" expanded="false" />
-            <element signature="e#1760#1777#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2268">
@@ -3122,8 +3124,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="774">
-          <caret line="114" column="41" lean-forward="true" selection-start-line="114" selection-start-column="41" selection-end-line="114" selection-end-column="41" />
+        <state relative-caret-position="459">
+          <caret line="67" column="30" lean-forward="true" selection-start-line="67" selection-start-column="30" selection-end-line="67" selection-end-column="30" />
           <folding>
             <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
             <element signature="e#135#158#0" expanded="false" />
@@ -3143,6 +3145,28 @@
             <element signature="e#3683#3734#0" expanded="false" />
             <element signature="e#4106#4249#0" expanded="false" />
             <element signature="e#4175#4245#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CallbackManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="693">
+          <caret line="75" column="48" lean-forward="false" selection-start-line="75" selection-start-column="48" selection-end-line="75" selection-end-column="48" />
+          <folding>
+            <element signature="e#150#208#0" expanded="false" />
+            <element signature="e#263#319#0" expanded="false" />
+            <element signature="e#408#556#0" expanded="false" />
+            <element signature="e#614#722#0" expanded="false" />
+            <element signature="e#763#809#0" expanded="false" />
+            <element signature="e#857#945#0" expanded="false" />
+            <element signature="e#896#943#0" expanded="false" />
+            <element signature="e#947#1164#0" expanded="false" />
+            <element signature="e#1264#1282#0" expanded="false" />
+            <element signature="e#1359#1377#0" expanded="false" />
+            <element signature="e#1429#1447#0" expanded="false" />
+            <element signature="e#1544#1704#0" expanded="false" />
+            <element signature="e#1760#1777#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -72,3 +72,6 @@ CallbackManager.tablet.addSensor = function(sensor){
 CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };
+CallbackManager.echo = function(request){
+	HtmlServer.sendRequestWithCallback(request);
+};
