@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CallbackManager.js" afterPath="$PROJECT_DIR$/CallbackManager.js" />
-    </list>
+    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="" />
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -441,8 +439,8 @@
       <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CallbackManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="693">
-              <caret line="75" column="48" lean-forward="false" selection-start-line="75" selection-start-column="48" selection-end-line="75" selection-end-column="48" />
+            <state relative-caret-position="672">
+              <caret line="74" column="39" lean-forward="false" selection-start-line="74" selection-start-column="32" selection-end-line="74" selection-end-column="39" />
               <folding>
                 <element signature="e#150#208#0" expanded="false" />
                 <element signature="e#263#319#0" expanded="false" />
@@ -1323,7 +1321,7 @@
       <workItem from="1499692704553" duration="22137000" />
       <workItem from="1499778478126" duration="18634000" />
       <workItem from="1499799120796" duration="9678000" />
-      <workItem from="1499862512765" duration="16792000" />
+      <workItem from="1499862512765" duration="17680000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1420,7 +1418,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1289945000" />
+    <option name="totallyTimeSpent" value="1290833000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3151,8 +3149,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CallbackManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="693">
-          <caret line="75" column="48" lean-forward="false" selection-start-line="75" selection-start-column="48" selection-end-line="75" selection-end-column="48" />
+        <state relative-caret-position="672">
+          <caret line="74" column="39" lean-forward="false" selection-start-line="74" selection-start-column="32" selection-end-line="74" selection-end-column="39" />
           <folding>
             <element signature="e#150#208#0" expanded="false" />
             <element signature="e#263#319#0" expanded="false" />
