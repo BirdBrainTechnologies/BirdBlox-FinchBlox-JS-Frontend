@@ -8836,6 +8836,9 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
 		this.visible = true;
+		if(RowDialog.currentDialog != null){
+			RowDialog.currentDialog.closeDialog();
+		}
 		RowDialog.currentDialog=this;
 		this.calcHeights();
 		this.calcWidths();
@@ -9083,8 +9086,8 @@ OpenDialog.setConstants = function(){
 	OpenDialog.currentDialog = null;
 };
 OpenDialog.prototype.show = function(){
-	OpenDialog.currentDialog = this;
 	RowDialog.prototype.show.call(this);
+	OpenDialog.currentDialog = this;
 	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
