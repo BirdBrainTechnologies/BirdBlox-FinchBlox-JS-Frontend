@@ -34,7 +34,7 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
 DebugMenu.prototype.loadFile=function(){
-	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
+	HtmlServer.showDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
 		if(!cancelled){
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
@@ -79,7 +79,7 @@ DebugMenu.prototype.optionClearLog=function(){
 	GuiElements.alert("");
 };
 DebugMenu.prototype.optionSetJsUrl=function(){
-	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, function(cancel, url) {
+	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
 		if(!cancel && url != ""){
 			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
 			HtmlServer.sendRequestWithCallback(request);
@@ -96,7 +96,7 @@ DebugMenu.prototype.optionSendRequest=function(){
 		message = "Request: http://localhost:22179/[...]"
 	}
 	var me = this;
-	HtmlServer.showDialog("Send request", message, this.lastRequest, function(cancel, request) {
+	HtmlServer.showDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
 		if(!cancel && (request != "" || me.lastRequest != "")){
 			if(request == ""){
 				request = me.lastRequest;

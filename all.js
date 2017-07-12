@@ -715,7 +715,7 @@ Variable.prototype.rename=function(){
 		}
 	};
 	callbackFn.variable=this;
-	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
 };
 Variable.prototype.delete=function(){
 	if(CodeManager.checkVariableUsed(this)) {
@@ -794,7 +794,7 @@ List.prototype.rename=function(){
 		}
 	};
 	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
 };
 List.prototype.delete=function(){
 	if(CodeManager.checkListUsed(this)) {
@@ -5500,7 +5500,8 @@ function InputDialog(textSummary, acceptsEmptyString){
 InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const oldVal = data.asString().getValue();
-	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,function(cancelled,response){
+	const shouldPrefill = data.type === Data.types.string;
+	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
 		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
 			this.currentData = new StringData(response);
 			this.cancelled = false;
@@ -7040,7 +7041,7 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
 DebugMenu.prototype.loadFile=function(){
-	HtmlServer.showDialog("Load File", "Paste file contents", "", function(cancelled, resp){
+	HtmlServer.showDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
 		if(!cancelled){
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
@@ -7085,7 +7086,7 @@ DebugMenu.prototype.optionClearLog=function(){
 	GuiElements.alert("");
 };
 DebugMenu.prototype.optionSetJsUrl=function(){
-	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, function(cancel, url) {
+	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
 		if(!cancel && url != ""){
 			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
 			HtmlServer.sendRequestWithCallback(request);
@@ -7102,7 +7103,7 @@ DebugMenu.prototype.optionSendRequest=function(){
 		message = "Request: http://localhost:22179/[...]"
 	}
 	var me = this;
-	HtmlServer.showDialog("Send request", message, this.lastRequest, function(cancel, request) {
+	HtmlServer.showDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
 		if(!cancel && (request != "" || me.lastRequest != "")){
 			if(request == ""){
 				request = me.lastRequest;
@@ -7781,7 +7782,7 @@ CodeManager.removeVariable=function(variable){
 /* @fix Write documentation.
  */
 CodeManager.newVariable=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create variable","Enter variable name","",function(cancelled,result) {
+	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
 			const variable = new Variable(result);
@@ -7829,7 +7830,7 @@ CodeManager.removeList=function(list){
 /* @fix Write documentation.
  */
 CodeManager.newList=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create list","Enter list name","",function(cancelled,result) {
+	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
 			const list = new List(result);
@@ -7876,7 +7877,7 @@ CodeManager.newBroadcastMessage=function(slot){
 			slot.setSelectionData('"'+result+'"',new StringData(result));
 		}
 	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
 };
 /* @fix Write documentation.
  */
@@ -10772,7 +10773,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
-HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
+HtmlServer.showDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	//GuiElements.alert("Showing...");
@@ -10786,7 +10787,11 @@ HtmlServer.showDialog=function(title,question,prefill,callbackFn,callbackErr){
 		var request = "tablet/dialog";
 		request+="?title=" + HS.encodeHtml(title);
 		request+="&question="+HS.encodeHtml(question);
-		request+="&prefill="+HS.encodeHtml(prefill);
+		if(shouldPrefill) {
+			request += "&prefill=" + HS.encodeHtml(prefill);
+		} else {
+			request += "&placeholder=" + HS.encodeHtml(prefill);
+		}
 		request+="&selectAll=true";
 		var onDialogPresented=function(result){
 			//GuiElements.alert("dialog presented...");
@@ -11244,7 +11249,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
 	if(message == null){
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
+	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
 		if(!cancelled){
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
@@ -11321,7 +11326,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction){
 	});
 };
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
+	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
 		if(!cancelled){
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
@@ -16186,7 +16191,7 @@ B_Ask.prototype.showQuestion = function() {
 		callbackErr.mem.finished = true;   // Done waiting.
 	};
 	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", callbackFn, callbackErr);   // Make the request.
+	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 

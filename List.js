@@ -57,7 +57,7 @@ List.prototype.rename=function(){
 		}
 	};
 	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
 };
 List.prototype.delete=function(){
 	if(CodeManager.checkListUsed(this)) {
