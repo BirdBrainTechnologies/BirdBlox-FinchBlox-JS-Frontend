@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Flutter.js" afterPath="$PROJECT_DIR$/Flutter.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/List.js" afterPath="$PROJECT_DIR$/List.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" afterPath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Menu/DebugMenu.js" afterPath="$PROJECT_DIR$/UIParts/Menu/DebugMenu.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Variable.js" afterPath="$PROJECT_DIR$/Variable.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -44,8 +35,8 @@
       <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="164" column="50" lean-forward="true" selection-start-line="164" selection-start-column="50" selection-end-line="164" selection-end-column="50" />
+            <state relative-caret-position="336">
+              <caret line="147" column="5" lean-forward="true" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
               <folding>
                 <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
                 <element signature="e#290#350#0" expanded="false" />
@@ -274,8 +265,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>newDoc{Document</find>
-      <find>newDoc{Document}</find>
       <find>{Document}</find>
       <find>this.type</find>
       <find>cx1</find>
@@ -304,6 +293,8 @@
       <find>//([a-z])</find>
       <find>HtmlServer.showDialog</find>
       <find>HtmlServer.showDialog(</find>
+      <find>.</find>
+      <find>.wav</find>
     </findStrings>
     <replaceStrings>
       <replace>RoundSlotShape</replace>
@@ -1042,7 +1033,7 @@
       <workItem from="1499692704553" duration="22137000" />
       <workItem from="1499778478126" duration="18634000" />
       <workItem from="1499799120796" duration="9678000" />
-      <workItem from="1499862512765" duration="1489000" />
+      <workItem from="1499862512765" duration="2138000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1139,7 +1130,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1274642000" />
+    <option name="totallyTimeSpent" value="1275291000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1244,6 +1235,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2243,6 +2237,52 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-44">
           <caret line="54" column="0" lean-forward="true" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#EditableSlot#0" expanded="false" />
+            <element signature="n#!!block;n#EditableSlot#0" expanded="false" />
+            <element signature="e#907#1151#0" expanded="false" />
+            <element signature="e#910#976#0" expanded="false" />
+            <element signature="e#1154#1307#0" expanded="false" />
+            <element signature="e#1370#1511#0" expanded="false" />
+            <element signature="e#1451#1509#0" expanded="false" />
+            <element signature="e#1514#1626#0" expanded="false" />
+            <element signature="e#1668#1936#0" expanded="false" />
+            <element signature="e#1728#1934#0" expanded="false" />
+            <element signature="e#1939#2012#0" expanded="false" />
+            <element signature="e#2067#2100#0" expanded="false" />
+            <element signature="e#2103#2359#0" expanded="false" />
+            <element signature="e#2424#2598#0" expanded="false" />
+            <element signature="e#2488#2533#0" expanded="false" />
+            <element signature="e#2601#2723#0" expanded="false" />
+            <element signature="e#2775#2953#0" expanded="false" />
+            <element signature="e#2832#2951#0" expanded="false" />
+            <element signature="e#2956#3238#0" expanded="false" />
+            <element signature="e#3308#3484#0" expanded="false" />
+            <element signature="e#3325#3363#0" expanded="false" />
+            <element signature="e#3487#3641#0" expanded="false" />
+            <element signature="e#3695#3734#0" expanded="false" />
+            <element signature="e#3737#4100#0" expanded="false" />
+            <element signature="e#4154#4565#0" expanded="false" />
+            <element signature="e#4327#4357#0" expanded="false" />
+            <element signature="e#4402#4429#0" expanded="false" />
+            <element signature="e#4477#4510#0" expanded="false" />
+            <element signature="e#4530#4549#0" expanded="false" />
+            <element signature="e#4568#4610#0" expanded="false" />
+            <element signature="e#4659#4840#0" expanded="false" />
+            <element signature="e#4703#4798#0" expanded="false" />
+            <element signature="e#4843#4997#0" expanded="false" />
+            <element signature="e#5063#5096#0" expanded="false" />
+            <element signature="e#5099#5227#0" expanded="false" />
+            <element signature="e#5284#5313#0" expanded="false" />
+            <element signature="e#5316#5478#0" expanded="false" />
+            <element signature="e#5531#5766#0" expanded="false" />
+            <element signature="e#5769#5843#0" expanded="false" />
+            <element signature="e#5898#6239#0" expanded="false" />
+            <element signature="e#6116#6223#0" expanded="false" />
+            <element signature="e#6179#6220#0" expanded="false" />
+            <element signature="e#6242#6294#0" expanded="false" />
+            <element signature="e#6344#6437#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2455,8 +2495,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HtmlServer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="164" column="50" lean-forward="true" selection-start-line="164" selection-start-column="50" selection-end-line="164" selection-end-column="50" />
+        <state relative-caret-position="336">
+          <caret line="147" column="5" lean-forward="true" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
           <folding>
             <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
             <element signature="e#290#350#0" expanded="false" />
