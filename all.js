@@ -6070,6 +6070,9 @@ SoundInputPad.prototype.updateDim = function(){
 	const maxHeight = GuiElements.height - SIP.margin * 2;
 	const soundCount = Sound.getSoundList(this.isRecording).length;
 	let desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
+	if(this.isRecording){
+		desiredHeight += SIP.margin + SIP.rowHeight;
+	}
 	desiredHeight = Math.max(0, desiredHeight);
 	this.height = Math.min(desiredHeight, maxHeight);
 	this.innerHeight = desiredHeight;
@@ -6082,11 +6085,25 @@ SoundInputPad.prototype.createRows = function(){
 		this.createRow(sound, y);
 		y += SIP.margin + SIP.rowHeight;
 	}.bind(this));
+	if(this.isRecording) {
+		this.createRecordBn(0, y, SIP.width);
+	}
 };
 SoundInputPad.prototype.createRow = function(sound, y){
 	const SIP = SoundInputPad;
-	this.createMainBn(sound, 0, y, SIP.mainBnWidth);
+	this.createMainBn(sound, 0, y, SIP.mainBnWidth, SIP.rowHeight, this.group);
 	this.createPlayBn(sound, SIP.margin + SIP.mainBnWidth, y, SIP.playBnWidth);
+};
+SoundInputPad.prototype.createRecordBn = function(x, y, width){
+	const SIP = SoundInputPad;
+	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	button.addText("Record sounds");
+	button.markAsOverlayPart(this.bubbleOverlay);
+	button.setCallbackFunction(function(){
+		RecordingDialog.showDialog();
+		this.close();
+	}.bind(this), true);
+	button.makeScrollable();
 };
 SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
