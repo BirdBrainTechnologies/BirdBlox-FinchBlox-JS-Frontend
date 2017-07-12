@@ -10251,7 +10251,7 @@ BlockStack.prototype.findBestFitTop = function() {
  */
 BlockStack.prototype.snap = function(block) {
 	block.stack.stop();
-	if (stack.isRunning) {
+	if (this.isRunning) {
 		// Make it glow if this stack is running
 		block.glow();
 	}
@@ -12032,7 +12032,7 @@ Block.prototype.snap = function(block){
 Block.prototype.unsnap = function(){
 	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
 	if(this.parent != null){
-		if(this.parent.isSlot || this.parent.isBlockSlot){ //Sees if it is attached to a Slot not another Block.
+		if(this.parent.isSlot || this.parent.isBlockSlot){ //Checks if it is attached to a Slot not another Block.
 			this.parent.removeChild(); //Leave the Slot.
 			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
 		}
@@ -13129,7 +13129,9 @@ function Slot(parent, key, snapType, outputType){
 	this.height = 0;
 	this.x = 0;
 	this.y = 0;
-	this.isSlot = true; //All Block parts have this property. //TODO: Remove unused field
+
+	//All Block parts have this property.  Used to allow Blocks to identify if their parent is a Slot
+	this.isSlot = true;
 	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
 	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
 	this.resultData = null; //passed to Block for use in implementation.
@@ -13713,9 +13715,9 @@ Slot.prototype.setActive = function(active){
  * @constructor
  * @param {Block} parent - The Block this Slot is a part of.
  * @param {string} key - The name of the Slot. Used for reading and writing save files.
- * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the RoundSlot.
+ * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the HexSlot.
  */
-function HexSlot(parent,key,snapType){
+function HexSlot(parent, key, snapType) {
 	Slot.call(this, parent, key, snapType, Slot.outputTypes.bool); //Call constructor.
 	this.slotShape = new HexSlotShape(this);
 	this.slotShape.show();
@@ -13727,21 +13729,20 @@ HexSlot.prototype.constructor = HexSlot;
  * @inheritDoc
  * TODO: fix BlockGraphics
  */
-HexSlot.prototype.highlight=function(){
+HexSlot.prototype.highlight = function() {
 	const slotGraphicShowing = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,2,slotGraphicShowing);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 2, slotGraphicShowing);
 };
 
 /**
  * @inheritDoc
  * @return {string}
  */
-HexSlot.prototype.textSummary=function(){
+HexSlot.prototype.textSummary = function() {
 	//Angle brackets are used because it is a HexSlot.
-	if(this.hasChild){ //If it has a child, just use an ellipsis.
+	if (this.hasChild) { //If it has a child, just use an ellipsis.
 		return "<...>";
-	}
-	else{ //Otherwise, it is empty.
+	} else { //Otherwise, it is empty.
 		return "<>";
 	}
 };
@@ -13750,12 +13751,13 @@ HexSlot.prototype.textSummary=function(){
  * @inheritDoc
  * @return {Data}
  */
-HexSlot.prototype.getDataNotFromChild=function(){
-	return new BoolData(false,false); //The Slot is empty. Return default value of false.
+HexSlot.prototype.getDataNotFromChild = function() {
+	return new BoolData(false, false); //The Slot is empty. Return default value of false.
 };
 /**
  * EditableSlot is an abstract class representing Slots that can have a value directly entered into them
  * in addition to accepting Blocks.
+ * Subclasses must implement createInputSystem() and formatTextSummary()
  * @param {Block} parent
  * @param {string} key
  * @param {number} inputType
@@ -13773,6 +13775,7 @@ function EditableSlot(parent, key, inputType, snapType, outputType, data) {
 }
 EditableSlot.prototype = Object.create(Slot.prototype);
 EditableSlot.prototype.constructor = EditableSlot;
+
 EditableSlot.setConstants = function() {
 	/* The type of Data that can be directly entered into the Slot. */
 	EditableSlot.inputTypes = {};
@@ -13781,6 +13784,7 @@ EditableSlot.setConstants = function() {
 	EditableSlot.inputTypes.string = 2;
 	EditableSlot.inputTypes.select = 3;
 };
+
 /**
  * @param {string} text - The text to set the slotShape to display
  * @param {boolean} updateDim - Should the Stack be told to update after this?
@@ -13791,8 +13795,9 @@ EditableSlot.prototype.changeText = function(text, updateDim) {
 		this.parent.stack.updateDim(); //Update dimensions.
 	}
 };
+
 /**
- * Tells the Slot to display an inputSys so it can be edited.
+ * Tells the Slot to display an inputSys so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
 	DebugOptions.assert(!this.hasChild);
@@ -13803,9 +13808,19 @@ EditableSlot.prototype.edit = function() {
 		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
 	}
 };
+
+/**
+ * Generates and displays an interface to modify the Slot's value
+ */
 EditableSlot.prototype.createInputSystem = function() {
 	DebugOptions.markAbstract();
 };
+
+/**
+ * Called by the InputSystem to change the Slot's data and displayed text
+ * @param {Data} data - The Data the Slot should set its value to
+ * @param {string} [visibleText] - The text the Slot should display as its value. Should correspond to Data.
+ */
 EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	DebugOptions.assert(this.editing);
 	if (visibleText == null) {
@@ -13814,14 +13829,26 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	this.enteredData = data;
 	this.changeText(visibleText, true);
 };
+
+/**
+ * Called when an InputSystem finishes editing the Slot
+ * @param {Data} data - The Data the Slot should be set to
+ */
 EditableSlot.prototype.finishEdit = function(data) {
 	DebugOptions.assert(this.editing);
 	if (this.editing) {
-		this.setData(data, true, true); //Sanitize data
+		this.setData(data, true, true); //Sanitize data, updateDims
 		this.slotShape.deselect();
 		this.editing = false;
 	}
 };
+
+/**
+ * Assigns the Slot's Data and updates its text.w
+ * @param {Data} data - The Data to set to
+ * @param {boolean} sanitize - indicates whether the Data should be run through sanitizeData first
+ * @param {boolean} updateDim - indicates if the Stack should updateDim after this
+ */
 EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
 	if (sanitize) {
 		data = this.sanitizeData(data);
@@ -13830,12 +13857,27 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
 	this.enteredData = data;
 	this.changeText(this.dataToString(this.enteredData), updateDim);
 };
+
+/**
+ * Converts the Slot's data to a displayable string. Subclasses override this method to apply formatting
+ * @param {Data} data
+ * @return {string}
+ */
 EditableSlot.prototype.dataToString = function(data) {
 	return data.asString().getValue();
 };
+
+/**
+ * Validates that the Data is compatible with this Slot. May attempt to fix invalid Data.
+ * By default, this function just converts the data to the correct type. Subclasses override this method.
+ * Makes use of inputType
+ * @param {Data|null} data - The Data to sanitize
+ * @return {Data|null} - The sanitized Data or null if the Data cannot be sanitized
+ */
 EditableSlot.prototype.sanitizeData = function(data) {
 	if (data == null) return null;
 	const inputTypes = EditableSlot.inputTypes;
+	// Only valid Data of the correct type is allowed
 	if (this.inputType === inputTypes.string) {
 		data = data.asString();
 	} else if (this.inputType === inputTypes.num) {
@@ -13848,6 +13890,11 @@ EditableSlot.prototype.sanitizeData = function(data) {
 	}
 	return null;
 };
+
+/**
+ * @inheritDoc
+ * @return {string}
+ */
 EditableSlot.prototype.textSummary = function() {
 	let result = "...";
 	if (!this.hasChild) { //If it has a child, just use an ellipsis.
@@ -13855,12 +13902,30 @@ EditableSlot.prototype.textSummary = function() {
 	}
 	return this.formatTextSummary(result);
 };
+
+/**
+ * Takes a textSummary and performs string manipulation to format it according to the Slot type
+ * @param {string} textSummary
+ * @return {string}
+ */
 EditableSlot.prototype.formatTextSummary = function(textSummary) {
 	DebugOptions.markAbstract();
 };
+
+/**
+ * Reads the Data from the Slot, assuming that the Slot has no children.
+ * @return {Data} - The Data stored in the Slot
+ */
 EditableSlot.prototype.getDataNotFromChild = function() {
 	return this.enteredData;
 };
+
+/**
+ * Converts the Slot and its children into XML, storing the value in the enteredData as well
+ * @inheritDoc
+ * @param {DOMParser} xmlDoc
+ * @return {Node}
+ */
 EditableSlot.prototype.createXml = function(xmlDoc) {
 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
 	let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
@@ -13868,6 +13933,12 @@ EditableSlot.prototype.createXml = function(xmlDoc) {
 	slot.appendChild(enteredData);
 	return slot;
 };
+
+/**
+ * @inheritDoc
+ * @param {Node} slotNode
+ * @return {EditableSlot}
+ */
 EditableSlot.prototype.importXml = function(slotNode) {
 	Slot.prototype.importXml.call(this, slotNode);
 	const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
@@ -13880,7 +13951,9 @@ EditableSlot.prototype.importXml = function(slotNode) {
 	}
 	return this;
 };
+
 /**
+ * @inheritDoc
  * @param {EditableSlot} slot
  */
 EditableSlot.prototype.copyFrom = function(slot) {
@@ -13888,7 +13961,13 @@ EditableSlot.prototype.copyFrom = function(slot) {
 	this.setData(slot.enteredData, false, false);
 };
 /**
- * Created by Tom on 7/3/2017.
+ * RectSlots generally hold strings and are edited through a prompt dialog
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} snapType
+ * @param {number} outputType
+ * @param {Data} data
+ * @constructor
  */
 function RectSlot(parent, key, snapType, outputType, data){
 	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
@@ -13897,19 +13976,35 @@ function RectSlot(parent, key, snapType, outputType, data){
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
 RectSlot.prototype.constructor = RectSlot;
+
+/**
+ * @inheritDoc
+ */
 RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
 	let isSlot = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
 };
+
+/**
+ * @inheritDoc
+ * @param {string} textSummary
+ * @return {string}
+ */
 RectSlot.prototype.formatTextSummary = function(textSummary) {
 	return "[" + textSummary + "]";
 };
+
+/**
+ * @inheritDoc
+ * @return {InputDialog}
+ */
 RectSlot.prototype.createInputSystem = function(){
 	return new InputDialog(this.parent.textSummary(this), true);
 };
 /**
  * Created by Tom on 7/3/2017.
  */
+//TODO: Resume refactor here!!
 function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer){
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
@@ -14496,11 +14591,13 @@ SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 		return new SelectionData(value, value);
 	}
 };
-/* BoolSlot is a subclass of HexSlot.
+/**
+ * BoolSlot is a subclass of HexSlot.
  * It creates a RectSlot optimized for use with booleans.
  * It has a snapType of bool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
+ * @param {Block} parent
+ * @param {string} key
  */
 function BoolSlot(parent,key){
 	//Make HexSlot.
@@ -14508,69 +14605,96 @@ function BoolSlot(parent,key){
 }
 BoolSlot.prototype = Object.create(HexSlot.prototype);
 BoolSlot.prototype.constructor = BoolSlot;
-/* NumSlot is a subclass of RoundSlot.
+/**
+ * NumSlot is a subclass of RoundSlot.
  * It creates a RoundSlot optimized for use with numbers.
  * It automatically converts any results into NumData and has a snapType of numStrBool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
- * @param {number} value - The initial number stored in the Slot.
- * @param {boolean} positive - (optional) Determines if the NumPad will have the plus/minus Button disabled.
- * @param {boolean} integer - (optional) Determines if the NumPad will have the decimal point Button disabled.
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} value
+ * @param {boolean} [positive] - Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} [integer] - Determines if the NumPad will have the decimal point Button disabled.
  */
-function NumSlot(parent,key,value,positive,integer){
-	if(positive==null){ //Optional parameters are false by default.
-		positive=false;
+function NumSlot(parent, key, value, positive, integer) {
+	// Optional parameters are false by default.
+	if (positive == null) {
+		positive = false;
 	}
-	if(integer==null){
-		integer=false;
+	if (integer == null) {
+		integer = false;
 	}
-	//Make RoundSlot.
 	const inputType = EditableSlot.inputTypes.num;
 	const snapType = Slot.snapTypes.numStrBool;
 	const outputType = Slot.outputTypes.num;
+
+	// Make RoundSlot.
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+
+	// Limits can be set later
 	this.minVal = null;
 	this.maxVal = null;
 	this.limitsSet = false;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
-NumSlot.prototype.addLimits = function(min, max, displayUnits){
-	if(displayUnits == null){
+
+/**
+ * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
+ * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
+ * @param {number} min
+ * @param {number} max
+ * @param {string} [displayUnits] - The units/label to show before the min/max
+ */
+NumSlot.prototype.addLimits = function(min, max, displayUnits) {
+	if (displayUnits == null) {
 		this.labelText = "(" + min + " - " + max + ")";
 	} else {
 		this.labelText = displayUnits + " (" + min + " - " + max + ")";
 	}
 	this.minVal = min;
 	this.maxVal = max;
-	this.limitsSet =true;
+	this.limitsSet = true;
 };
-NumSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data|null} data
+ * @return {Data|null}
+ */
+NumSlot.prototype.sanitizeData = function(data) {
+	// Forces Data to NumData
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(this.limitsSet) {
+	if (data == null) return null;
+	// Applies limits
+	if (this.limitsSet) {
 		const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
 		return new NumData(value, data.isValid);
-	}
-	else {
+	} else {
 		return data.asNum();
 	}
 };
-/* StringSlot is a subclass of RectSlot.
+/**
+ * StringSlot is a subclass of RectSlot.
  * It creates a RectSlot optimized for use with strings.
  * It automatically converts any results into StringData and has a snapType of numStrBool.
  * @constructor
- * @param {Block} parent - The Block this Slot is a part of.
+ * @param {Block} parent
+ * @param {string} key
  * @param {string} value - The initial string stored in the Slot.
  */
-function StringSlot(parent,key,value){
+function StringSlot(parent, key, value) {
 	//Make RectSlot.
 	RectSlot.call(this, parent, key, Slot.snapTypes.numStrBool, Slot.outputTypes.string, new StringData(value));
 }
 StringSlot.prototype = Object.create(RectSlot.prototype);
 StringSlot.prototype.constructor = StringSlot;
 /**
- * Created by Tom on 7/4/2017.
+ * NumOrStringSlots are used in the equals Block, as they make it easy to enter numbers but do allow text to be entered
+ * @param {Block} parent
+ * @param {string} key
+ * @param {Data} data
+ * @constructor
  */
 function NumOrStringSlot(parent, key, data){
 	const inputType = EditableSlot.inputTypes.any;
@@ -14580,247 +14704,361 @@ function NumOrStringSlot(parent, key, data){
 }
 NumOrStringSlot.prototype = Object.create(RoundSlot.prototype);
 NumOrStringSlot.prototype.constructor = NumOrStringSlot;
+
+/**
+ * @inheritDoc
+ * @param {InputWidget.SelectPad} selectPad
+ */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
 	selectPad.addAction("Enter text", function(callbackFn){
+		// When "Enter text" is selected, create a new inputDialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+			// When the inputDialog is closed, tell the selectPad to set the data to the result of the inputDialog.
+			// CLose the selectPad if the inputDialog wasn't canceled.
 			callbackFn(data, !cancelled);
 		}, this.enteredData);
 	}.bind(this)); //TODO: clean up edit text options
 };
-
 /**
- * Created by Tom on 7/7/2017.
+ * IndexSlots are used to select indexes in Lists. They have special options for "last" "random" and "all"
+ * @param {Block} parent
+ * @param {string} key
+ * @param {boolean} includeAll - indicates whether "all" should be an option
+ * @constructor
  */
-function IndexSlot(parent,key,includeAll) {
+function IndexSlot(parent, key, includeAll) {
+	// inputType doesn't matter as much since we have our own sanitize function
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
+	// Both SelectionData and NumData must be allowed
 	const outputType = Slot.outputTypes.any;
+	// Default value is 1
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
+
+	// Add selectable options
 	this.addOption(new SelectionData("last", "last"));
 	this.addOption(new SelectionData("random", "random"));
-	if(includeAll) {
+	if (includeAll) {
 		this.addOption(new SelectionData("all", "all"));
 	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
 IndexSlot.prototype.constructor = IndexSlot;
-IndexSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data|null} data
+ * @return {Data|null}
+ */
+IndexSlot.prototype.sanitizeData = function(data) {
+	// Checks to ensure SelectionData is valid
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(!data.isSelection()) {
+	if (data == null) return null;
+	if (!data.isSelection()) {
+		// If it isn't selectionData, make sure it is a positive integer, fixing it as necessary
 		const numData = data.asNum();
-		if(!numData.isValid) return null;
+		if (!numData.isValid) return null;
 		let value = numData.getValueWithC(true, true);
 		value = Math.max(1, value);
 		return new NumData(value);
 	}
 	return data;
 };
-function BlockSlot(parent){
-	this.child=null;
-	//this.width=0;
-	this.height=0;
-	this.x=0;
-	this.y=0;
-	this.parent=parent;
-	this.isBlockSlot=true;
-	this.hasChild=false;
-	this.isRunning=false;
-	this.currentBlock=null;
+/**
+ * BlockSlots are included in Blocks like if/else and loops to hold a stack of Blocks inside the slot. They are very
+ * different from Slots, and are not a subclass of Slot. They do pass messages recursively to their children, and
+ * compute the height of the stack of children they contain.
+ * @param {Block} parent - The Block this Slot is part of
+ * @constructor
+ */
+function BlockSlot(parent) {
+	this.parent = parent;
+	this.child = null;
+	this.hasChild = false;
+	this.height = 0;
+	this.x = 0;
+	this.y = 0;
+	this.isBlockSlot = true;   // Used so Blocks can identify if their parent is a BlockSlot
+	this.isRunning = false;
+	this.currentBlock = null;   // Currently executing Block in the slot
 }
-BlockSlot.prototype.getAbsX=function(){
+
+/**
+ * @return {number}
+ */
+BlockSlot.prototype.getAbsX = function() {
 	return this.parent.stack.relToAbsX(this.x);
 };
-BlockSlot.prototype.getAbsY=function(){
+/**
+ * @return {number}
+ */
+BlockSlot.prototype.getAbsY = function() {
 	return this.parent.stack.relToAbsY(this.y);
 };
-BlockSlot.prototype.updateDim=function(){
-	var bG=BlockGraphics.getType(this.type);
-	if(this.hasChild){
+
+/**
+ * Recursively computes the height of the BlockSlot
+ */
+BlockSlot.prototype.updateDim = function() {
+	if (this.hasChild) {
 		this.child.updateDim();
-		this.height=this.child.addHeights();
+		this.height = this.child.addHeights();
+	} else {
+		this.height = BlockGraphics.loop.bottomH;
 	}
-	else{
-		//this.width=0;
-		this.height=BlockGraphics.loop.bottomH;
+};
+
+/**
+ * Moves the BlockSlot and children to the specified coords and recursively updates their alignment
+ * @param {number} x
+ * @param {number} y
+ */
+BlockSlot.prototype.updateAlign = function(x, y) {
+	this.x = x;
+	this.y = y;
+	if (this.hasChild) {
+		this.child.updateAlign(x, y);
 	}
-}
-BlockSlot.prototype.updateAlign=function(x,y){
-	this.x=x;
-	this.y=y;
-	if(this.hasChild){
-		this.child.updateAlign(x,y);
+};
+
+/**
+ * Connects the specified to this BlockSlot, potentially displacing the BlockSlot's existing children
+ * @param {Block} block - The Block to add to this BlockSlot
+ */
+BlockSlot.prototype.snap = function(block) {
+	// Displace existing block, if more Blocks can't go below this one
+	if (!block.getLastBlock().bottomOpen && this.child != null) {
+		const BG = BlockGraphics.command;
+		this.child.unsnap().shiftOver(BG.shiftX, block.stack.getHeight() + BG.shiftY);
 	}
-}
-BlockSlot.prototype.snap=function(block){
-	if(!block.getLastBlock().bottomOpen&&this.child!=null){
-		var BG=BlockGraphics.command;
-		this.child.unsnap().shiftOver(BG.shiftX,block.stack.getHeight()+BG.shiftY);
-	}
-	var stack=this.parent.stack;
-	if(stack!=null&&block.stack!=null) {
-		if (stack.isRunning && !block.stack.isRunning) {
+
+	// Set the stack's execution status and glow
+	const stack = this.parent.stack;
+	if (stack != null && block.stack != null) {
+		block.stack.stop();
+		if(stack.isRunning) {
 			block.glow();
 		}
-		else if (!stack.isRunning && block.stack.isRunning) { //Blocks that are added are stopped.
-			block.stack.stop();
-		}
-		else if (stack.isRunning && block.isRunning) { //The added block is stopped, but still glows as part of a running stack.
-			block.stop();
-		}
 	}
-	block.parent=this;
-	if(this.hasChild){
-		var lastBlock=block.getLastBlock();
-		var prevChild=this.child;
-		lastBlock.nextBlock=prevChild;
-		prevChild.parent=lastBlock;
+
+	// Fix relationships between Blocks
+	block.parent = this;
+	if (this.hasChild) {
+		const lastBlock = block.getLastBlock();
+		const prevChild = this.child;
+		lastBlock.nextBlock = prevChild;
+		prevChild.parent = lastBlock;
 	}
-	this.hasChild=true;
-	this.child=block;
-	if(block.stack!=null) {
-		var oldG = block.stack.group;
+	this.hasChild = true;
+	this.child = block;
+
+	if (block.stack != null) {
+		// Remove the old BlockStack and transfer the Block to this one
+		const oldG = block.stack.group;
 		block.stack.remove();
 		block.changeStack(this.parent.stack);
 		oldG.remove();
 	}
-	if(stack!=null) {
+	if (stack != null) {
+		// Update the positions of everything
 		this.parent.stack.updateDim();
 	}
-}
-BlockSlot.prototype.changeStack=function(stack){
-	if(this.hasChild){
+};
+
+/**
+ * Recursively change's this BlockSlot's children's stacks to the specified stack
+ * @param {BlockStack} stack
+ */
+BlockSlot.prototype.changeStack = function(stack) {
+	if (this.hasChild) {
 		this.child.changeStack(stack);
 	}
-}
-BlockSlot.prototype.updateStackDim=function(stack){
-	if(this.hasChild){
+};
+
+/**
+ * Recursively tells children to update the stack dimensions
+ * @param {BlockStack} stack
+ */
+BlockSlot.prototype.updateStackDim = function(stack) {
+	if (this.hasChild) {
 		this.child.updateStackDim(stack);
 	}
-}
-BlockSlot.prototype.removeChild=function(){
-	this.hasChild=false;
-	this.child=null;
-}
-BlockSlot.prototype.findBestFit=function(){
-	var move=CodeManager.move;
-	var fit=CodeManager.fit;
-	var x=this.getAbsX();
-	var y=this.getAbsY();
-	if(move.topOpen){
-		var snap=BlockGraphics.command.snap;
-		if(move.pInRange(move.topX,move.topY,x-snap.left,y-snap.top,snap.left+snap.right,snap.top+snap.bottom)){
-			var xDist=move.topX-x;
-			var yDist=move.topY-y;
-			var dist=xDist*xDist+yDist*yDist;
-			if(!fit.found||dist<fit.dist){
-				fit.found=true;
-				fit.bestFit=this;
-				fit.dist=dist;
+};
+
+/**
+ * Sets this BlockSlot to have no children
+ */
+BlockSlot.prototype.removeChild = function() {
+	this.hasChild = false;
+	this.child = null;
+};
+
+/**
+ * Checks if the moving Block could fit in this BlockStack and then passes the findBestFit message recursively
+ */
+BlockSlot.prototype.findBestFit = function() {
+	const move = CodeManager.move;
+	const fit = CodeManager.fit;
+	const x = this.getAbsX();
+	const y = this.getAbsY();
+	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
+	if (move.topOpen) {
+		const snap = BlockGraphics.command.snap;
+		if (move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
+			const xDist = move.topX - x;
+			const yDist = move.topY - y;
+			const dist = xDist * xDist + yDist * yDist;
+			if (!fit.found || dist < fit.dist) {
+				fit.found = true;
+				fit.bestFit = this;
+				fit.dist = dist;
 			}
 		}
 	}
-	if(this.hasChild){
+	// Check if it fits in this BlockSlot's children
+	if (this.hasChild) {
 		this.child.findBestFit();
 	}
-}
-BlockSlot.prototype.highlight=function(){
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),0,0,0,false,this.parent.isGlowing);
 };
-BlockSlot.prototype.duplicate=function(parentCopy){
-	var myCopy=new BlockSlot(parentCopy);
-	if(this.hasChild){
-		myCopy.snap(this.child.duplicate(0,0));
-	}
-	return myCopy;
+
+/**
+ * Adds indicator that moving Block will snap to this BlockSlot if released
+ */
+BlockSlot.prototype.highlight = function() {
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.parent.isGlowing);
 };
-BlockSlot.prototype.copyFrom=function(blockSlot){
-	if(blockSlot.hasChild){
-		this.snap(blockSlot.child.duplicate(0,0));
+
+/**
+ * Duplicates Blocks from the provided blockSlot into this BlockSlot recursively
+ * @param {BlockSlot} blockSlot
+ */
+BlockSlot.prototype.copyFrom = function(blockSlot) {
+	if (blockSlot.hasChild) {
+		this.snap(blockSlot.child.duplicate(0, 0));
 	}
 };
-BlockSlot.prototype.startRun=function(){
-	if(!this.isRunning&&this.hasChild){
-		this.isRunning=true;
-		this.currentBlock=this.child;
+
+/**
+ * Prepares this BlockSlot for execution
+ */
+BlockSlot.prototype.startRun = function() {
+	if (!this.isRunning && this.hasChild) {
+		this.isRunning = true;
+		this.currentBlock = this.child;
 	}
-}
-BlockSlot.prototype.stop=function(){
-	if(this.isRunning&&this.hasChild){
+};
+
+/**
+ * Recursively stops this BlockSlot and its children's execution
+ */
+BlockSlot.prototype.stop = function() {
+	if (this.isRunning && this.hasChild) {
 		this.child.stop();
 	}
-	this.isRunning=false;
+	this.isRunning = false;
 };
-BlockSlot.prototype.updateRun=function(){
-	if(this.isRunning){
-		if(this.currentBlock.stack!=this.parent.stack){ //If the current Block has been removed, don't run it.
-			this.isRunning=false;
+
+/**
+ * Updates execution of the BlockSlot
+ * @return {ExecutionStatus} - Indicates whether this BlockSlot is still executing
+ */
+BlockSlot.prototype.updateRun = function() {
+	if (this.isRunning) {
+		if (this.currentBlock.stack !== this.parent.stack) {
+			//If the current Block has been removed, don't run it.
+			this.isRunning = false;
 			return new ExecutionStatusDone();
 		}
+		// Run the current Block
 		let execStatus = this.currentBlock.updateRun();
-		if(!execStatus.isRunning()){
-			if(execStatus.hasError()){
-				this.isRunning=false;
+		if (!execStatus.isRunning()) {
+			// If the current Block is done, show an error or move on to the next one
+			if (execStatus.hasError()) {
+				this.isRunning = false;
 				return execStatus;
 			} else {
 				this.currentBlock = this.currentBlock.nextBlock;
 			}
 		}
-		if(this.currentBlock!=null){
+		if (this.currentBlock != null) {
 			return new ExecutionStatusRunning();
-		} else{
+		} else {
+			// Done with all Blocks in the BlockSlot
 			this.isRunning = false;
 			return new ExecutionStatusDone();
 		}
-	} else{
+	} else {
 		return new ExecutionStatusDone();
 	}
 };
-BlockSlot.prototype.glow=function(){
-	if(this.hasChild){
+
+/**
+ * Recursively makes children glow
+ */
+BlockSlot.prototype.glow = function() {
+	if (this.hasChild) {
 		this.child.glow();
 	}
 };
-BlockSlot.prototype.stopGlow=function(){
-	if(this.hasChild){
+
+/**
+ * Recursively makes children stop glowing
+ */
+BlockSlot.prototype.stopGlow = function() {
+	if (this.hasChild) {
 		this.child.stopGlow();
 	}
 };
-/* Recursively updates the available broadcast messages.
+
+/**
+ * Recursively updates the available broadcast messages.
  */
-BlockSlot.prototype.updateAvailableMessages=function(){
-	if(this.hasChild){
+BlockSlot.prototype.updateAvailableMessages = function() {
+	if (this.hasChild) {
 		this.child.updateAvailableMessages();
 	}
 };
 
-BlockSlot.prototype.createXml=function(xmlDoc){
-	var blockSlot=XmlWriter.createElement(xmlDoc,"blockSlot");
-	if(this.hasChild){
-		var blocks=XmlWriter.createElement(xmlDoc,"blocks");
-		this.child.writeToXml(xmlDoc,blocks);
+/**
+ * Creates XML for this BlockSlot
+ * @param {DOMParser} xmlDoc - The document to modify
+ * @return {Node} - The XML representing this BlockSlot
+ */
+BlockSlot.prototype.createXml = function(xmlDoc) {
+	const blockSlot = XmlWriter.createElement(xmlDoc, "blockSlot");
+	if (this.hasChild) {
+		const blocks = XmlWriter.createElement(xmlDoc, "blocks");
+		this.child.writeToXml(xmlDoc, blocks);
 		blockSlot.appendChild(blocks);
 	}
 	return blockSlot;
 };
-BlockSlot.prototype.importXml=function(blockSlotNode){
-	var blocksNode=XmlWriter.findSubElement(blockSlotNode,"blocks");
-	var blockNodes=XmlWriter.findSubElements(blocksNode,"block");
-	if(blockNodes.length>0){
-		var firstBlock=null;
-		var i=0;
-		while(firstBlock==null&&i<blockNodes.length){
-			firstBlock=Block.importXml(blockNodes[i]);
+
+/**
+ * Copies data from XML into this BlockSlot
+ * @param {Node} blockSlotNode
+ */
+BlockSlot.prototype.importXml = function(blockSlotNode) {
+	const blocksNode = XmlWriter.findSubElement(blockSlotNode, "blocks");
+	const blockNodes = XmlWriter.findSubElements(blocksNode, "block");
+	if (blockNodes.length > 0) {
+		let firstBlock = null;
+		let i = 0;
+		while (firstBlock == null && i < blockNodes.length) {
+			// Get the first Block to import correctly
+			firstBlock = Block.importXml(blockNodes[i]);
 			i++;
 		}
-		if(firstBlock==null){
+		if (firstBlock == null) {
+			// No Blocks imported correctly
 			return;
 		}
 		this.snap(firstBlock);
-		var previousBlock=firstBlock;
-		while(i<blockNodes.length) {
-			var newBlock = Block.importXml(blockNodes[i]);
+		let previousBlock = firstBlock;
+		// Import the rest of the Blocks
+		while (i < blockNodes.length) {
+			const newBlock = Block.importXml(blockNodes[i]);
 			if (newBlock != null) {
 				previousBlock.snap(newBlock);
 				previousBlock = newBlock;
@@ -14829,53 +15067,98 @@ BlockSlot.prototype.importXml=function(blockSlotNode){
 		}
 	}
 };
-BlockSlot.prototype.renameVariable=function(variable){
-	this.passRecursively("renameVariable",variable);
+
+/**
+ * @param {Variable} variable
+ */
+BlockSlot.prototype.renameVariable = function(variable) {
+	this.passRecursively("renameVariable", variable);
 };
-BlockSlot.prototype.deleteVariable=function(variable){
-	this.passRecursively("deleteVariable",variable);
+
+/**
+ * @param {Variable} variable
+ */
+BlockSlot.prototype.deleteVariable = function(variable) {
+	this.passRecursively("deleteVariable", variable);
 };
-BlockSlot.prototype.renameList=function(list){
-	this.passRecursively("renameList",list);
+
+/**
+ * @param {List} list
+ */
+BlockSlot.prototype.renameList = function(list) {
+	this.passRecursively("renameList", list);
 };
-BlockSlot.prototype.deleteList=function(list){
-	this.passRecursively("deleteList",list);
+
+/**
+ * @param {List} list
+ */
+BlockSlot.prototype.deleteList = function(list) {
+	this.passRecursively("deleteList", list);
 };
-BlockSlot.prototype.checkVariableUsed=function(variable){
-	if(this.hasChild){
+
+/**
+ * @param {Variable} variable
+ */
+BlockSlot.prototype.checkVariableUsed = function(variable) {
+	if (this.hasChild) {
 		return this.child.checkVariableUsed(variable);
 	}
 	return false;
 };
-BlockSlot.prototype.checkListUsed=function(list){
-	if(this.hasChild){
+
+/**
+ * @param {List} list
+ */
+BlockSlot.prototype.checkListUsed = function(list) {
+	if (this.hasChild) {
 		return this.child.checkListUsed(list);
 	}
 	return false;
 };
-BlockSlot.prototype.hideDeviceDropDowns=function(deviceClass){
+
+/**
+ * @param deviceClass - a subclass of Device
+ */
+BlockSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
 	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-BlockSlot.prototype.showDeviceDropDowns=function(deviceClass){
+
+/**
+ * @param deviceClass - a subclass of Device
+ */
+BlockSlot.prototype.showDeviceDropDowns = function(deviceClass) {
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-BlockSlot.prototype.countDevicesInUse=function(deviceClass){
-	if(this.hasChild){
+
+/**
+ * @param deviceClass - a subclass of Device
+ */
+BlockSlot.prototype.countDevicesInUse = function(deviceClass) {
+	if (this.hasChild) {
 		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
 };
-BlockSlot.prototype.updateAvailableSensors = function(){
+
+BlockSlot.prototype.updateAvailableSensors = function() {
 	this.passRecursively("updateAvailableSensors");
 };
-BlockSlot.prototype.passRecursivelyDown = function(message){
+
+/**
+ * @param {string} message
+ */
+BlockSlot.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
-BlockSlot.prototype.passRecursively=function(functionName){
-	var args = Array.prototype.slice.call(arguments, 1);
-	if(this.hasChild){
-		this.child[functionName].apply(this.child,args);
+
+/**
+ * @param {string} functionName
+ */
+BlockSlot.prototype.passRecursively = function(functionName) {
+	const args = Array.prototype.slice.call(arguments, 1);
+	if (this.hasChild) {
+		this.child[functionName].apply(this.child, args);
 	}
 };
 //Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".

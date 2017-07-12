@@ -29,7 +29,9 @@ function Slot(parent, key, snapType, outputType){
 	this.height = 0;
 	this.x = 0;
 	this.y = 0;
-	this.isSlot = true; //All Block parts have this property. //TODO: Remove unused field
+
+	//All Block parts have this property.  Used to allow Blocks to identify if their parent is a Slot
+	this.isSlot = true;
 	this.running = 0; //Running: 0 = Not started 2 = Running 3 = Completed //TODO: Switch to enum
 	this.resultIsFromChild = false; //The result to return comes from a child Block, not a direct input.
 	this.resultData = null; //passed to Block for use in implementation.

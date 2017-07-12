@@ -1,6 +1,7 @@
 /**
  * Created by Tom on 7/3/2017.
  */
+//TODO: Resume refactor here!!
 function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer){
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
