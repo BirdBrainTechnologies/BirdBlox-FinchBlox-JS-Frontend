@@ -111,7 +111,14 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	let callback = nextAction;
+	if(isRecording){
+		callback = function(){
+			CodeManager.renameRecording(oldFilename, newName);
+			if(nextAction != null) nextAction();
+		}
+	}
+	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";

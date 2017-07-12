@@ -3334,6 +3334,10 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 		}
 	}, callbackError);
 };
+Sound.changeFile = function(){
+	Sound.recordingList = [];
+	Sound.loadSounds(true);
+};
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
@@ -7986,6 +7990,7 @@ CodeManager.createXml=function(){
 CodeManager.importXml=function(projectNode){
 	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
+	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
@@ -8071,6 +8076,12 @@ CodeManager.dragRelToAbsX=function(x){
 };
 CodeManager.dragRelToAbsY=function(y){
 	return y * TabManager.getActiveZoom();
+};
+CodeManager.renameRecording = function(oldName, newName){
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+};
+CodeManager.deleteRecording = function(recording){
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
 };
 function TabManager(){
 	var TM=TabManager;
@@ -8853,7 +8864,7 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn){
 RowDialog.prototype.show = function(){
 	if(!this.visible) {
 		this.visible = true;
-		if(RowDialog.currentDialog != null){
+		if(RowDialog.currentDialog != null && RowDialog.currentDialog !== this){
 			RowDialog.currentDialog.closeDialog();
 		}
 		RowDialog.currentDialog=this;
@@ -9128,7 +9139,8 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDuplicateBn(file, currentX, y, contentGroup);
+	//this.createDuplicateBn(file, currentX, y, contentGroup);
+	this.createExportBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };
@@ -9857,10 +9869,17 @@ FileContextMenu.prototype.showMenu=function(){
 	this.menuBnList.show();
 };
 FileContextMenu.prototype.addOptions=function(){
-	this.menuBnList.addOption("Share", function(){
+	this.menuBnList.addOption("Duplicate", function(){
+		const dialog = this.dialog;
+		SaveManager.userDuplicateFile(this.file, function(){
+			dialog.reloadDialog();
+		});
+		this.close();
+	}.bind(this), VectorPaths.copy);
+	/*this.menuBnList.addOption("Share", function(){
 		SaveManager.userExportFile(this.file);
 		this.close();
-	}.bind(this), VectorPaths.share);
+	}.bind(this), VectorPaths.share);*/
 	this.menuBnList.addOption("Delete", function(){
 		const dialog = this.dialog;
 		SaveManager.userDeleteFile(false, this.file, function(){
@@ -10704,13 +10723,13 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
+			if(callbackErr != null) {
 				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
+			}
+			/*if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
 				callbackFn('Requesting permission');
-			}
+			}*/
 		}, 20);
 		return;
 	}
@@ -11311,7 +11330,14 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	let callback = nextAction;
+	if(isRecording){
+		callback = function(){
+			CodeManager.renameRecording(oldFilename, newName);
+			if(nextAction != null) nextAction();
+		}
+	}
+	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
@@ -13626,8 +13652,14 @@ Slot.prototype.updateConnectionStatus = function(){
 
 Slot.prototype.passRecursivelyDown = function(message){
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus") {
+	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
 		this.updateConnectionStatus.apply(this, funArgs);
+	}
+	if(message === "renameRecording" && this.renameRecording != null) {
+		this.renameRecording.apply(this, funArgs);
+	}
+	if(message === "deleteRecording" && this.deleteRecording != null) {
+		this.deleteRecording.apply(this, funArgs);
 	}
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -15074,6 +15106,19 @@ SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 		if (sound != null) return new SelectionData(sound.name, sound.id);
 		// If the sound can't be found (maybe it isn't in this version of he app), use the value as the display name
 		return new SelectionData(value, value);
+	}
+};
+SoundDropSlot.prototype.renameRecording = function(oldName, newName) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === oldName) {
+		this.setData(new SelectionData(newName, newName), true, true);
+		//TODO: should be fine to make sanitize false
+	}
+};
+SoundDropSlot.prototype.deleteRecording = function(recording) {
+	if (!this.isRecording) return;
+	if(this.enteredData.getValue() === recording) {
+		this.setData(SelectionData.empty(), true, true);
 	}
 };
 /**

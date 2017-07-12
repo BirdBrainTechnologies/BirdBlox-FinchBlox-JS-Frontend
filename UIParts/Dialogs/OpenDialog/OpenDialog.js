@@ -43,7 +43,8 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDuplicateBn(file, currentX, y, contentGroup);
+	//this.createDuplicateBn(file, currentX, y, contentGroup);
+	this.createExportBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };

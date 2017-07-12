@@ -32,10 +32,17 @@ FileContextMenu.prototype.showMenu=function(){
 	this.menuBnList.show();
 };
 FileContextMenu.prototype.addOptions=function(){
-	this.menuBnList.addOption("Share", function(){
+	this.menuBnList.addOption("Duplicate", function(){
+		const dialog = this.dialog;
+		SaveManager.userDuplicateFile(this.file, function(){
+			dialog.reloadDialog();
+		});
+		this.close();
+	}.bind(this), VectorPaths.copy);
+	/*this.menuBnList.addOption("Share", function(){
 		SaveManager.userExportFile(this.file);
 		this.close();
-	}.bind(this), VectorPaths.share);
+	}.bind(this), VectorPaths.share);*/
 	this.menuBnList.addOption("Delete", function(){
 		const dialog = this.dialog;
 		SaveManager.userDeleteFile(false, this.file, function(){
