@@ -7007,6 +7007,7 @@ FileMenu.prototype.optionExit=function(){
 		HtmlServer.sendRequest("tablet/exit");
 	});
 };
+
 function DebugMenu(button){
 	Menu.call(this,button,130);
 	this.lastRequest = "";
