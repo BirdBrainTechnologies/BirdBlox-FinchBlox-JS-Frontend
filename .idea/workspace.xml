@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/PortSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/PortSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceWithPorts.js" afterPath="$PROJECT_DIR$/Device/DeviceWithPorts.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -25,70 +22,7 @@
     <favorites_list name="Git" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ListDropSlot.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="28" column="52" lean-forward="true" selection-start-line="28" selection-start-column="52" selection-end-line="28" selection-end-column="52" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BlockDefs_deviceWithPorts.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_deviceWithPorts.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-236">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DeviceWithPorts.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Device/DeviceWithPorts.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="30" column="2" lean-forward="true" selection-start-line="30" selection-start-column="2" selection-end-line="30" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="VarDropSlot.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" column="111" lean-forward="true" selection-start-line="1" selection-start-column="3" selection-end-line="1" selection-end-column="111" />
-              <folding>
-                <element signature="n#!!block;n#VarDropSlot#0" expanded="false" />
-                <element signature="e#415#507#0" expanded="false" />
-                <element signature="e#750#816#0" expanded="false" />
-                <element signature="e#873#1503#0" expanded="false" />
-                <element signature="e#963#1019#0" expanded="false" />
-                <element signature="e#1116#1499#0" expanded="false" />
-                <element signature="e#1242#1361#0" expanded="false" />
-                <element signature="e#1374#1495#0" expanded="false" />
-                <element signature="e#1506#1609#0" expanded="false" />
-                <element signature="e#1673#2113#0" expanded="false" />
-                <element signature="e#1838#1910#0" expanded="false" />
-                <element signature="e#2116#2168#0" expanded="false" />
-                <element signature="e#2227#2485#0" expanded="false" />
-                <element signature="e#2377#2483#0" expanded="false" />
-                <element signature="e#2488#2540#0" expanded="false" />
-                <element signature="e#2599#2837#0" expanded="false" />
-                <element signature="e#2749#2835#0" expanded="false" />
-                <element signature="e#2840#2913#0" expanded="false" />
-                <element signature="e#2975#3129#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -218,11 +152,11 @@
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js" />
         <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/TabletSensors.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/PortSlot.js" />
-        <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" />
         <option value="$PROJECT_DIR$/Device/DeviceWithPorts.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js" />
+        <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js" />
       </list>
     </option>
   </component>
@@ -497,6 +431,20 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
             <PATH_ELEMENT USER_OBJECT="SoundsForUI">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="HummingbirdDragAndDrop-">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ExecutionStatus">
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
@@ -893,7 +841,7 @@
       <workItem from="1499692704553" duration="22137000" />
       <workItem from="1499778478126" duration="18634000" />
       <workItem from="1499799120796" duration="9678000" />
-      <workItem from="1499862512765" duration="12267000" />
+      <workItem from="1499862512765" duration="13242000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -990,7 +938,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1285420000" />
+    <option name="totallyTimeSpent" value="1286395000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1003,9 +951,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="2391" y="-9" width="2418" height="1318" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.096161954" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.096161954" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3282353" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30982143" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -2767,56 +2714,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js">
+    <entry file="file://$PROJECT_DIR$/Device/DeviceWithPorts.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" column="111" lean-forward="true" selection-start-line="1" selection-start-column="3" selection-end-line="1" selection-end-column="111" />
-          <folding>
-            <element signature="n#!!block;n#VarDropSlot#0" expanded="false" />
-            <element signature="e#415#507#0" expanded="false" />
-            <element signature="e#750#816#0" expanded="false" />
-            <element signature="e#873#1503#0" expanded="false" />
-            <element signature="e#963#1019#0" expanded="false" />
-            <element signature="e#1116#1499#0" expanded="false" />
-            <element signature="e#1242#1361#0" expanded="false" />
-            <element signature="e#1374#1495#0" expanded="false" />
-            <element signature="e#1506#1609#0" expanded="false" />
-            <element signature="e#1673#2113#0" expanded="false" />
-            <element signature="e#1838#1910#0" expanded="false" />
-            <element signature="e#2116#2168#0" expanded="false" />
-            <element signature="e#2227#2485#0" expanded="false" />
-            <element signature="e#2377#2483#0" expanded="false" />
-            <element signature="e#2488#2540#0" expanded="false" />
-            <element signature="e#2599#2837#0" expanded="false" />
-            <element signature="e#2749#2835#0" expanded="false" />
-            <element signature="e#2840#2913#0" expanded="false" />
-            <element signature="e#2975#3129#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="28" column="52" lean-forward="true" selection-start-line="28" selection-start-column="52" selection-end-line="28" selection-end-column="52" />
+        <state relative-caret-position="231">
+          <caret line="11" column="35" lean-forward="true" selection-start-line="11" selection-start-column="35" selection-end-line="11" selection-end-column="35" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_deviceWithPorts.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-236">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="520">
+          <caret line="36" column="65" lean-forward="true" selection-start-line="36" selection-start-column="65" selection-end-line="36" selection-end-column="65" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Device/DeviceWithPorts.js">
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="30" column="2" lean-forward="true" selection-start-line="30" selection-start-column="2" selection-end-line="30" selection-end-column="2" />
+        <state relative-caret-position="336">
+          <caret line="16" column="43" lean-forward="true" selection-start-line="16" selection-start-column="43" selection-end-line="16" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="60" column="0" lean-forward="false" selection-start-line="60" selection-start-column="0" selection-end-line="63" selection-end-column="3" />
           <folding />
         </state>
       </provider>

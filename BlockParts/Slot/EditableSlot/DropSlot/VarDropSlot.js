@@ -1,5 +1,5 @@
 /**
- * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable
+ * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable.
  * @param {string} key
  * @param {Block} parent
  * @constructor
