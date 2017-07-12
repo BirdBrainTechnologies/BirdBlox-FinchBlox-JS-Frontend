@@ -1221,7 +1221,7 @@ function TabletSensors(){
 	TabletSensors.requestAvailable();
 }
 TabletSensors.requestAvailable = function(){
-	const request = new HttpRequestBuilder("device/availableSensors");
+	const request = new HttpRequestBuilder("tablet/availableSensors");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		TabletSensors.updateAvailable(response);
 	});
@@ -11009,14 +11009,14 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 CallbackManager.robot.discovered = function(robotList){
 	return true;
 };
-CallbackManager.device = {};
-CallbackManager.device.availableSensors = function(sensorList){
+CallbackManager.tablet = {};
+CallbackManager.tablet.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
 };
-CallbackManager.device.addSensor = function(sensor){
+CallbackManager.tablet.addSensor = function(sensor){
 	return TabletSensors.addSensor(sensor);
 };
-CallbackManager.device.removeSensor = function(sensor){
+CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };
 function XmlWriter(){
@@ -14006,29 +14006,57 @@ RectSlot.prototype.createInputSystem = function(){
 	return new InputDialog(this.parent.textSummary(this), true);
 };
 /**
- * Created by Tom on 7/3/2017.
+ * RoundSlots are Slots that generally hold numbers and are edited using the InputPad.  They can have special optios
+ * on the InputPad that allow specific NumData, StringData, or SelectionData to be entered.
+ * TODO: Make RoundSlot and DropSlot subclasses of a shared class to remove redundant code
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} inputType
+ * @param {number} snapType
+ * @param {number} outputType
+ * @param {Data} data
+ * @param {boolean} positive - Whether the Slot should be limited to positive inputs
+ * @param {boolean} integer - Whether the Slot should be limited to integer inputs
+ * @constructor
  */
-//TODO: Resume refactor here!!
-function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer){
+function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer) {
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
 	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
 	this.slotShape.show();
+	// A list of additional options to show on the InputPad
 	this.optionsList = [];
 	this.positive = positive;
 	this.integer = integer;
+	// Text for the label that appears at te top of the pad
 	this.labelText = "";
 }
 RoundSlot.prototype = Object.create(EditableSlot.prototype);
 RoundSlot.prototype.constructor = RoundSlot;
-RoundSlot.prototype.highlight=function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlot.prototype.highlight = function() {
 	const isSlot = !this.hasChild; //TODO: Fix! unclear.
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,1,isSlot);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 1, isSlot);
 };
+
+/**
+ * @inheritDoc
+ * @param {string} textSummary
+ * @return {string}
+ */
 RoundSlot.prototype.formatTextSummary = function(textSummary) {
 	return "(" + textSummary + ")";
 };
+
+/**
+ * Adds an additional option to be selected from the InputPad
+ * @param {Data} data
+ * @param {string} displayText
+ */
 RoundSlot.prototype.addOption = function(data, displayText) {
-	if(displayText == null){
+	if (displayText == null) {
 		displayText = null;
 	}
 	const option = {};
@@ -14036,74 +14064,123 @@ RoundSlot.prototype.addOption = function(data, displayText) {
 	option.data = data;
 	this.optionsList.push(option);
 };
-RoundSlot.prototype.populatePad = function(selectPad){
-	this.optionsList.forEach(function(option){
+
+/**
+ * Adds additional options to the InputPad's SelectPad
+ * @param {InputWidget.SelectPad} selectPad - the SelectPad that will be added to this Slot's InputPad
+ */
+RoundSlot.prototype.populatePad = function(selectPad) {
+	this.optionsList.forEach(function(option) {
 		selectPad.addOption(option.data, option.displayText);
 	});
 };
-RoundSlot.prototype.createInputSystem = function(){
+
+/**
+ * @inheritDoc
+ * @return {NewInputPad}
+ */
+RoundSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
 	const inputPad = new NewInputPad(x1, x2, y1, y2);
 
-	if(this.labelText !== "") {
+	// Add label to the top of the pad
+	if (this.labelText !== "") {
 		inputPad.addWidget(new InputWidget.Label(this.labelText));
 	}
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
-	if(!selectPad.isEmpty()) {
+	if (!selectPad.isEmpty()) {
 		inputPad.addWidget(selectPad);
 	}
 
 	inputPad.addWidget(new InputWidget.NumPad(this.positive, this.integer));
 	return inputPad;
 };
-RoundSlot.prototype.selectionDataFromValue = function(value){
-	for(let i = 0; i < this.optionsList.length; i++) {
+
+/**
+ * Creates SelectionData from the provided value, if that value is a valid option. Otherwise returns null
+ * @param {number|boolean|string} value
+ * @return {SelectionData|null}
+ */
+RoundSlot.prototype.selectionDataFromValue = function(value) {
+	for (let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(option.data.getValue() === value) {
+		if (option.data.getValue() === value) {
 			return option.data;
 		}
 	}
 	return null;
 };
-RoundSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data} data
+ * @return {Data|null}
+ */
+RoundSlot.prototype.sanitizeData = function(data) {
+	// Convert Data to the correct type
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(data.isSelection()) {
+	if (data == null) return null;
+	if (data.isSelection()) {
+		// Never trust the displayText of user-provided SelectionData. Instead, look it up based on value
 		const value = data.getValue();
 		return this.selectionDataFromValue(value);
 	}
+	// If the Data is not SelectionData and it's of the correct type, it must be valid
 	return data;
 };
-RoundSlot.prototype.addLabelText = function(text){
+
+/**
+ * Sets the labelText to the provided string
+ * @param {string} text
+ */
+RoundSlot.prototype.addLabelText = function(text) {
 	this.labelText = text;
 };
-RoundSlot.prototype.dataToString = function(data){
+
+/**
+ * Formats the string to be displayed by wrapping StringData in quotes
+ * TODO: Determine when strings should be wrapped in quotes.  Currently, RectSlots don't but RoundSlots and DropSlots do
+ * @inheritDoc
+ * @param {Data} data
+ * @return {string}
+ */
+RoundSlot.prototype.dataToString = function(data) {
 	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if(data.type === Data.types.string) {
-		result = "\"" +result + "\"";
+	if (data.type === Data.types.string) {
+		result = "\"" + result + "\"";
 	}
 	return result;
 };
 /**
- * Created by Tom on 7/4/2017.
+ * DropSlots have their data selected using the InputPad and often hold SelectionData
+ * TODO: reduce redundancy with RoundSlot
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} [inputType=select]
+ * @param {number} [snapType=none]
+ * @param {Data} [data=SelectionData.empty()] - The initial Data
+ * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
+ * @constructor
  */
-function DropSlot(parent, key, inputType, snapType, data, nullable){
-	if(inputType == null){
+function DropSlot(parent, key, inputType, snapType, data, nullable) {
+	if (inputType == null) {
 		inputType = EditableSlot.inputTypes.select;
 	}
-	if(snapType == null){
+	if (snapType == null) {
 		snapType = Slot.snapTypes.none;
 	}
-	if(data == null) {
-		DebugOptions.assert(nullable !== true);
-		nullable = false;
+	if (data == null) {
+		// If no Data was provided, it must be nullable
+		DebugOptions.assert(nullable !== false);
+		nullable = true;
 		data = SelectionData.empty();
-	} else if(nullable == null){
+	} else if (nullable == null) {
+		// If data was provided and nullable is not defined, set it to false
 		nullable = false;
 	}
 	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
@@ -14114,21 +14191,43 @@ function DropSlot(parent, key, inputType, snapType, data, nullable){
 }
 DropSlot.prototype = Object.create(EditableSlot.prototype);
 DropSlot.prototype.constructor = DropSlot;
-DropSlot.prototype.highlight = function(){ //TODO: fix BlockGraphics
+
+/**
+ * @inheritDoc
+ * TODO: fix BlockGraphics
+ */
+DropSlot.prototype.highlight = function() {
 	const isSlot = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
+
+/**
+ * @inheritDoc
+ * @param {string} textSummary
+ * @return {string}
+ */
 DropSlot.prototype.formatTextSummary = function(textSummary) {
 	return "[" + textSummary + "]";
 };
-DropSlot.prototype.addEnterText = function(displayText){
+
+/**
+ * Adds an option that opens a dialog so the user can enter text
+ * @param {string} displayText - The text used to display the option
+ */
+DropSlot.prototype.addEnterText = function(displayText) {
 	const option = {};
 	option.displayText = displayText;
 	option.isAction = true;
 	this.optionsList.push(option);
 };
+
+/**
+ * Adds an option, that when selected set the Slot to the provided value
+ * @param {Data} data
+ * @param {string} [displayText=null]
+ */
 DropSlot.prototype.addOption = function(data, displayText) {
-	if(displayText == null){
+	if (displayText == null) {
 		displayText = null;
 	}
 	const option = {};
@@ -14137,12 +14236,20 @@ DropSlot.prototype.addOption = function(data, displayText) {
 	option.isAction = false;
 	this.optionsList.push(option);
 };
-DropSlot.prototype.populatePad = function(selectPad){
-	this.optionsList.forEach(function(option){
-		if(option.isAction) {
-			selectPad.addAction(option.displayText, function(callbackFn){
+
+/**
+ * Adds the options to the InputPad's SelectPad
+ * @param {InputWidget.SelectPad} selectPad - The pad to add the options to
+ */
+DropSlot.prototype.populatePad = function(selectPad) {
+	this.optionsList.forEach(function(option) {
+		// All actions are Edit Text actions
+		if (option.isAction) {
+			selectPad.addAction(option.displayText, function(callbackFn) {
+				// When selected, the item shows a text entry dialog
 				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
-				inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
+					// When the dialog is closed, the item runns the callback with the data the user entered
 					callbackFn(data, !cancelled);
 				}, this.enteredData);
 			}.bind(this)); //TODO: clean up edit text options
@@ -14151,7 +14258,12 @@ DropSlot.prototype.populatePad = function(selectPad){
 		}
 	}.bind(this));
 };
-DropSlot.prototype.createInputSystem = function(){
+
+/**
+ * Creates an InputPad with a SelectPad with this Slot's options
+ * @return {NewInputPad}
+ */
+DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
@@ -14164,51 +14276,86 @@ DropSlot.prototype.createInputSystem = function(){
 
 	return inputPad;
 };
-DropSlot.prototype.selectionDataFromValue = function(value){
-	for(let i = 0; i < this.optionsList.length; i++) {
+
+/**
+ * Creates SelectionData from the provided value, if that value is a valid option. Otherwise returns null
+ * @param {number|boolean|string} value
+ * @return {SelectionData|null}
+ */
+DropSlot.prototype.selectionDataFromValue = function(value) {
+	for (let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(!option.isAction && option.data.getValue() === value) {
+		if (!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
 	}
+	return null;
 };
-DropSlot.prototype.sanitizeNonSelectionData = function(data){
+
+/**
+ * Overrided by subclasses to sanitize other types of Data. By default, all non-selection Data is valid
+ * @param {Data} data
+ * @return {Data|null}
+ */
+DropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	return data;
 };
-DropSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data} data
+ * @return {Data|null}
+ */
+DropSlot.prototype.sanitizeData = function(data) {
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(data.isSelection()) {
+	if (data == null) return null;
+	if (data.isSelection()) {
 		const value = data.getValue();
-		if(value === "" && this.nullable) {
+		if (value === "" && this.nullable) {
 			return SelectionData.empty();
 		}
 		return this.selectionDataFromValue(value);
 	}
 	return this.sanitizeNonSelectionData(data);
 };
-DropSlot.prototype.dataToString = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data} data
+ * @return {string}
+ */
+DropSlot.prototype.dataToString = function(data) {
 	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if(data.type === Data.types.string) {
-		result = "\"" +result + "\"";
+	if (data.type === Data.types.string) {
+		result = "\"" + result + "\"";
 	}
 	return result;
 };
 /**
- * Created by Tom on 7/4/2017.
+ * DropSlots have their data selected using the InputPad and often hold SelectionData
+ * TODO: reduce redundancy with RoundSlot
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} [inputType=select]
+ * @param {number} [snapType=none]
+ * @param {Data} [data=SelectionData.empty()] - The initial Data
+ * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
+ * @constructor
  */
-function DropSlot(parent, key, inputType, snapType, data, nullable){
-	if(inputType == null){
+function DropSlot(parent, key, inputType, snapType, data, nullable) {
+	if (inputType == null) {
 		inputType = EditableSlot.inputTypes.select;
 	}
-	if(snapType == null){
+	if (snapType == null) {
 		snapType = Slot.snapTypes.none;
 	}
-	if(data == null) {
-		DebugOptions.assert(nullable !== true);
-		nullable = false;
+	if (data == null) {
+		// If no Data was provided, it must be nullable
+		DebugOptions.assert(nullable !== false);
+		nullable = true;
 		data = SelectionData.empty();
-	} else if(nullable == null){
+	} else if (nullable == null) {
+		// If data was provided and nullable is not defined, set it to false
 		nullable = false;
 	}
 	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
@@ -14219,21 +14366,43 @@ function DropSlot(parent, key, inputType, snapType, data, nullable){
 }
 DropSlot.prototype = Object.create(EditableSlot.prototype);
 DropSlot.prototype.constructor = DropSlot;
-DropSlot.prototype.highlight = function(){ //TODO: fix BlockGraphics
+
+/**
+ * @inheritDoc
+ * TODO: fix BlockGraphics
+ */
+DropSlot.prototype.highlight = function() {
 	const isSlot = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
+
+/**
+ * @inheritDoc
+ * @param {string} textSummary
+ * @return {string}
+ */
 DropSlot.prototype.formatTextSummary = function(textSummary) {
 	return "[" + textSummary + "]";
 };
-DropSlot.prototype.addEnterText = function(displayText){
+
+/**
+ * Adds an option that opens a dialog so the user can enter text
+ * @param {string} displayText - The text used to display the option
+ */
+DropSlot.prototype.addEnterText = function(displayText) {
 	const option = {};
 	option.displayText = displayText;
 	option.isAction = true;
 	this.optionsList.push(option);
 };
+
+/**
+ * Adds an option, that when selected set the Slot to the provided value
+ * @param {Data} data
+ * @param {string} [displayText=null]
+ */
 DropSlot.prototype.addOption = function(data, displayText) {
-	if(displayText == null){
+	if (displayText == null) {
 		displayText = null;
 	}
 	const option = {};
@@ -14242,12 +14411,20 @@ DropSlot.prototype.addOption = function(data, displayText) {
 	option.isAction = false;
 	this.optionsList.push(option);
 };
-DropSlot.prototype.populatePad = function(selectPad){
-	this.optionsList.forEach(function(option){
-		if(option.isAction) {
-			selectPad.addAction(option.displayText, function(callbackFn){
+
+/**
+ * Adds the options to the InputPad's SelectPad
+ * @param {InputWidget.SelectPad} selectPad - The pad to add the options to
+ */
+DropSlot.prototype.populatePad = function(selectPad) {
+	this.optionsList.forEach(function(option) {
+		// All actions are Edit Text actions
+		if (option.isAction) {
+			selectPad.addAction(option.displayText, function(callbackFn) {
+				// When selected, the item shows a text entry dialog
 				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
-				inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
+					// When the dialog is closed, the item runns the callback with the data the user entered
 					callbackFn(data, !cancelled);
 				}, this.enteredData);
 			}.bind(this)); //TODO: clean up edit text options
@@ -14256,7 +14433,12 @@ DropSlot.prototype.populatePad = function(selectPad){
 		}
 	}.bind(this));
 };
-DropSlot.prototype.createInputSystem = function(){
+
+/**
+ * Creates an InputPad with a SelectPad with this Slot's options
+ * @return {NewInputPad}
+ */
+DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
@@ -14269,38 +14451,67 @@ DropSlot.prototype.createInputSystem = function(){
 
 	return inputPad;
 };
-DropSlot.prototype.selectionDataFromValue = function(value){
-	for(let i = 0; i < this.optionsList.length; i++) {
+
+/**
+ * Creates SelectionData from the provided value, if that value is a valid option. Otherwise returns null
+ * @param {number|boolean|string} value
+ * @return {SelectionData|null}
+ */
+DropSlot.prototype.selectionDataFromValue = function(value) {
+	for (let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if(!option.isAction && option.data.getValue() === value) {
+		if (!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
 	}
+	return null;
 };
-DropSlot.prototype.sanitizeNonSelectionData = function(data){
+
+/**
+ * Overrided by subclasses to sanitize other types of Data. By default, all non-selection Data is valid
+ * @param {Data} data
+ * @return {Data|null}
+ */
+DropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	return data;
 };
-DropSlot.prototype.sanitizeData = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data} data
+ * @return {Data|null}
+ */
+DropSlot.prototype.sanitizeData = function(data) {
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
-	if(data == null) return null;
-	if(data.isSelection()) {
+	if (data == null) return null;
+	if (data.isSelection()) {
 		const value = data.getValue();
-		if(value === "" && this.nullable) {
+		if (value === "" && this.nullable) {
 			return SelectionData.empty();
 		}
 		return this.selectionDataFromValue(value);
 	}
 	return this.sanitizeNonSelectionData(data);
 };
-DropSlot.prototype.dataToString = function(data){
+
+/**
+ * @inheritDoc
+ * @param {Data} data
+ * @return {string}
+ */
+DropSlot.prototype.dataToString = function(data) {
 	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if(data.type === Data.types.string) {
-		result = "\"" +result + "\"";
+	if (data.type === Data.types.string) {
+		result = "\"" + result + "\"";
 	}
 	return result;
 };
-//@fix Write documentation.
-
+/**
+ * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable
+ * @param key
+ * @param parent
+ * @constructor
+ */
 function VarDropSlot(key, parent){
 	const variables = CodeManager.variableList;
 	let data = SelectionData.empty();
@@ -14415,103 +14626,184 @@ function PortSlot(parent, key, maxPorts) {
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
 PortSlot.prototype.constructor = PortSlot;
-//@fix Write documentation.
-
-function BroadcastDropSlot(parent,key,isHatBlock){
-	if(isHatBlock == null){
+/**
+ * A DropSlot which lists available broadcasts (obtained from CodeManager.broadcastList) and allows the creation
+ * of new broadcasts (through an Enter Text option). Reporter blocks that return strings can e attached to the Slot
+ * unless it is within a HatBlock
+ * @param {Block} parent
+ * @param {string} key
+ * @param {boolean} [isHatBlock=false] - Whether the slot is in a HatBlock and should include a "any message" option
+ * @constructor
+ */
+function BroadcastDropSlot(parent, key, isHatBlock) {
+	if (isHatBlock == null) {
 		isHatBlock = false;
 	}
 	let snapType = Slot.snapTypes.numStrBool;
-	if(isHatBlock){
+	if (isHatBlock) {
 		snapType = Slot.snapTypes.none;
 	}
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
-	if(isHatBlock) {
+	if (isHatBlock) {
 		this.addOption(new SelectionData("any message", "any_message"));
 	}
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
 BroadcastDropSlot.prototype.constructor = BroadcastDropSlot;
-BroadcastDropSlot.prototype.populatePad = function(selectPad){
+
+/**
+ * @inheritDoc
+ * @param {InputWidget.SelectPad} selectPad
+ */
+BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 	DropSlot.prototype.populatePad.call(this, selectPad);
+	// Refresh the list of messages
 	CodeManager.updateAvailableMessages();
 	const messages = CodeManager.broadcastList;
-	messages.forEach(function(message){
-		selectPad.addOption(new StringData(message), '"'+message+'"');
+	// Add an option for each message
+	messages.forEach(function(message) {
+		// Broadcasts are surrounded in quotes
+		// TODO: make use of quotes around strings more consistent
+		selectPad.addOption(new StringData(message), '"' + message + '"');
 	});
-	selectPad.addAction("new", function(callbackFn){
+	// Add an Edit Text option
+	selectPad.addAction("new", function(callbackFn) {
+		// When the option is selected, show a dialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), false);
-		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
+		inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
+			// When the dialog is closed, notify the InputSystem of the result using a callback
 			callbackFn(data, !cancelled);
 		}, this.enteredData);
 	}.bind(this));
 };
-BroadcastDropSlot.prototype.updateAvailableMessages=function(){
-	if(this.enteredData !== null && this.enteredData.type === Data.types.string){
+
+/**
+ * @inheritDoc
+ * Adds the selected message to the list of available messages. Does not use recursion since BroadCastDropSlots
+ * only appear on CommandBlocks/HatBlocks are therefore can't be stacked in each other
+ */
+BroadcastDropSlot.prototype.updateAvailableMessages = function() {
+	if (this.enteredData !== null && this.enteredData.type === Data.types.string) {
 		CodeManager.addBroadcastMessage(this.enteredData.getValue());
 	}
 };
-BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data){
+
+/**
+ * For a BroadcastDropSlot, non-selection Data must be StringData
+ * @param {Data} data
+ * @return {Data|null}
+ */
+BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	data = data.asString();
-	if(!data.isValid) return null;
+	if (!data.isValid) return null;
 	return data;
 };
+/**
+ * DeviceDropSlots appear on Blocks that control robots.  When only one robot is connected, they appear as an ordinary
+ * label, but when multiple robots are connected, tey act as a DropSlot, displaying options for each connected robot.
+ * @param {Block} parent
+ * @param {string} key
+ * @param deviceClass - A subclass of Device indicating the type of robot the Slot is selecting from
+ * @param {boolean} [shortText=false] - Whether the Slot should abbreviate the name of the Device using its initials
+ * @constructor
+ */
 function DeviceDropSlot(parent, key, deviceClass, shortText) {
+	// When the Slot's value changes, its parent Block must re-check if it is active
 	this.assignUpdateActive(parent);
 	if (shortText == null) {
 		shortText = false;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
+	// The values of the SelectionData are 0 - indexed, but they appear as 1 - indexed
 	const data = new SelectionData(this.prefixText + 1, 0);
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.select, Slot.snapTypes.none, data, false);
 
 	this.deviceClass = deviceClass;
+
+	// The Slot also has label text to display, depending on how many devices are available
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
+	// Check to see which state it should start in
 	const deviceCount = deviceClass.getManager().getSelectableDeviceCount();
 	if (deviceCount <= 1) {
 		this.switchToLabel();
 	} else {
 		this.labelText.hide();
 	}
+
+	// The parent Block may not be active if the device in the DropSlot is not connected
 	this.parent.updateActive();
 }
-
 DeviceDropSlot.prototype = Object.create(DropSlot.prototype);
 DeviceDropSlot.prototype.constructor = DeviceDropSlot;
+
+/**
+ * Modifies the checkActive function of the parent so that the selected device on the DropSlot must be connected
+ * in order for the Block to be active
+ * TODO: This is a bit strange and perhaps should be done in the Block's constructor in BlockDefs
+ * @param {Block} parent - This Block's parent
+ */
 DeviceDropSlot.prototype.assignUpdateActive = function(parent){
 	const me = this;
+	// Get a copy of the old checkActive function
 	const oldFn = parent.checkActive.bind(parent);
 	parent.checkActive = function(){
+		// The new checkActive function runs the old function and makes sure this device is connected
 		const index = me.getDataNotFromChild().getValue();
 		return oldFn() && me.deviceClass.getManager().deviceIsConnected(index);
 	};
 };
+
+/**
+ * When the Slot's value changes, the parent Block may become active/inactive
+ * @inheritDoc
+ * @param {Data} data
+ * @param {boolean} sanitize
+ * @param {boolean} updateDim
+ */
 DeviceDropSlot.prototype.setData = function(data, sanitize, updateDim){
 	DropSlot.prototype.setData.call(this, data, sanitize, updateDim);
 	this.parent.updateActive();
 };
+
+/**
+ * When the connection status of a robot changes, the parent Block may become active/inactive
+ */
 DeviceDropSlot.prototype.updateConnectionStatus = function(){
 	this.parent.updateActive();
 };
+
+/**
+ * The DropSlot asks the deviceManager to determine how many devices to show
+ * @inheritDoc
+ * @param {InputWidget.SelectPad} selectPad - the pad to populate
+ */
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
 	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	for (let i = 0; i < deviceCount; i++) {
-		//We'll store a 0-indexed value but display it +1.
+		// We'll store a 0-indexed value but display it +1.
 		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
+		// TODO: should probably use the full name when showing the list
 	}
 };
 
+/**
+ * Changes the appearance of the Slot so it looks like a label instead of a Slot
+ */
 DeviceDropSlot.prototype.switchToLabel = function() {
 	if (!this.labelMode) {
 		this.labelMode = true;
 		this.labelText.show();
 		this.slotShape.hide();
+		// When there's a label, only one device is connected
 		this.setData(new SelectionData(this.prefixText + 1, 0), false, true);
 	}
 };
 
+/**
+ * Changes the appearance of the Slot so it looks like a slot instead of a label
+ */
 DeviceDropSlot.prototype.switchToSlot = function() {
 	if (this.labelMode) {
 		this.labelMode = false;
@@ -14520,6 +14812,12 @@ DeviceDropSlot.prototype.switchToSlot = function() {
 	}
 };
 
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @return {number}
+ */
 DeviceDropSlot.prototype.updateAlign = function(x, y) {
 	if (this.labelMode) {
 		return LabelText.prototype.updateAlign.call(this.labelText, x, y);
@@ -14528,6 +14826,9 @@ DeviceDropSlot.prototype.updateAlign = function(x, y) {
 	}
 };
 
+/**
+ * @inheritDoc
+ */
 DeviceDropSlot.prototype.updateDim = function() {
 	if (this.labelMode) {
 		LabelText.prototype.updateDim.call(this.labelText);
@@ -14537,18 +14838,32 @@ DeviceDropSlot.prototype.updateDim = function() {
 	}
 };
 
+/**
+ * Receives the recursively passed message and acts on it
+ * @param deviceClass - A subclass of Device
+ */
 DeviceDropSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
 	if(this.deviceClass === deviceClass) {
 		this.switchToLabel();
 	}
 };
 
+/**
+ * Receives the recursively passed message and acts on it
+ * @param deviceClass - A subclass of Device
+ */
 DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
 	if(this.deviceClass === deviceClass) {
 		this.switchToSlot();
 	}
 };
 
+/**
+ * Called by DeviceManager and used to determine how many devices to list.
+ * @inheritDoc
+ * @param deviceClass - A subclass of Device
+ * @return {number} - The minimum number of devices to show in the DeviceDropSlots, according to this Slot
+ */
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.deviceClass === deviceClass) {
 		const myVal = this.getDataNotFromChild().getValue();
@@ -14557,13 +14872,28 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		return 1;
 	}
 };
+
+/**
+ * DeviceDropSlots always have a value that is SelectionData with an integer value
+ * @inheritDoc
+ * @param {number|string|boolean} value
+ * @return {SelectionData}
+ */
 DeviceDropSlot.prototype.selectionDataFromValue = function(value){
 	const numData = (new StringData(value).asNum());
 	if(!numData.isValid) return null;
 	const numVal = numData.getValueWithC(true, true);
+	// Prevents rendering huge lists
 	if(numVal >= 30) return null; // TODO: implement connection limit
 	return new SelectionData(this.prefixText + (numVal + 1), numVal);
 };
+
+/**
+ * No Data other than SelectionData is valid
+ * @inheritDoc
+ * @param {Data} data
+ * @return {Data|null}
+ */
 DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
 };

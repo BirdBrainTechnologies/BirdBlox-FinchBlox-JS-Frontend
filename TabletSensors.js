@@ -7,7 +7,7 @@ function TabletSensors(){
 	TabletSensors.requestAvailable();
 }
 TabletSensors.requestAvailable = function(){
-	const request = new HttpRequestBuilder("device/availableSensors");
+	const request = new HttpRequestBuilder("tablet/availableSensors");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		TabletSensors.updateAvailable(response);
 	});
