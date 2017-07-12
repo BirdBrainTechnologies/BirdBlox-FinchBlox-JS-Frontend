@@ -317,7 +317,7 @@ BlockStack.prototype.findBestFitTop = function() {
  */
 BlockStack.prototype.snap = function(block) {
 	block.stack.stop();
-	if (stack.isRunning) {
+	if (this.isRunning) {
 		// Make it glow if this stack is running
 		block.glow();
 	}
