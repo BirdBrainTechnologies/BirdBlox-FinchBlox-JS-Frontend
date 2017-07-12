@@ -75,7 +75,7 @@ B_Ask.prototype.showQuestion = function() {
 		callbackErr.mem.finished = true;   // Done waiting.
 	};
 	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", callbackFn, callbackErr);   // Make the request.
+	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 

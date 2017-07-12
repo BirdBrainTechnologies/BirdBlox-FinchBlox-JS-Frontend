@@ -318,7 +318,7 @@ CodeManager.removeVariable=function(variable){
 /* @fix Write documentation.
  */
 CodeManager.newVariable=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create variable","Enter variable name","",function(cancelled,result) {
+	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
 			const variable = new Variable(result);
@@ -366,7 +366,7 @@ CodeManager.removeList=function(list){
 /* @fix Write documentation.
  */
 CodeManager.newList=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create list","Enter list name","",function(cancelled,result) {
+	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
 			const list = new List(result);
@@ -413,7 +413,7 @@ CodeManager.newBroadcastMessage=function(slot){
 			slot.setSelectionData('"'+result+'"',new StringData(result));
 		}
 	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
 };
 /* @fix Write documentation.
  */

@@ -62,13 +62,13 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 CallbackManager.robot.discovered = function(robotList){
 	return true;
 };
-CallbackManager.device = {};
-CallbackManager.device.availableSensors = function(sensorList){
+CallbackManager.tablet = {};
+CallbackManager.tablet.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
 };
-CallbackManager.device.addSensor = function(sensor){
+CallbackManager.tablet.addSensor = function(sensor){
 	return TabletSensors.addSensor(sensor);
 };
-CallbackManager.device.removeSensor = function(sensor){
+CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };

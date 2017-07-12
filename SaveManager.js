@@ -75,7 +75,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
 	if(message == null){
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,function(cancelled,response){
+	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
 		if(!cancelled){
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
@@ -152,7 +152,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction){
 	});
 };
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, function(cancelled, response){
+	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
 		if(!cancelled){
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}

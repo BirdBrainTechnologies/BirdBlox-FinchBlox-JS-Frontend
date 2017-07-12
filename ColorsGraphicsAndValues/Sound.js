@@ -48,7 +48,7 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 		}
 	};
 	Sound.getDuration(id, isRecording, function(duration){
-		id = id.split(".wav").join(""); //TODO: remove .wav replacement
+		//id = id.split(".wav").join(""); //TODO: remove .wav replacement
 		let request = new HttpRequestBuilder("sound/play");
 		request.addParam("filename", id);
 		request.addParam("type", Sound.boolToType(isRecording));
@@ -107,9 +107,9 @@ Sound.loadSounds = function(isRecording, callbackFn){
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
 	let name = id;
-	if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
+	/*if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
 		name = name.substring(0, name.length - 4);
-	}
+	}*/
 	name = name.split("_").join(" ");
 	name = name.replace(/\b\w/g, l => l.toUpperCase());
 	return name;

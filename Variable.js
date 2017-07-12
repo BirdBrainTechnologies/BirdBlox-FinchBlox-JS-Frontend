@@ -50,7 +50,7 @@ Variable.prototype.rename=function(){
 		}
 	};
 	callbackFn.variable=this;
-	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
 };
 Variable.prototype.delete=function(){
 	if(CodeManager.checkVariableUsed(this)) {

@@ -1,5 +1,9 @@
-//@fix Write documentation.
-
+/**
+ * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable
+ * @param key
+ * @param parent
+ * @constructor
+ */
 function VarDropSlot(key, parent){
 	const variables = CodeManager.variableList;
 	let data = SelectionData.empty();
