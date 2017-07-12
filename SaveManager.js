@@ -55,6 +55,10 @@ SaveManager.userNew = function(){
 	});
 };
 SaveManager.autoSave = function(nextAction){
+	if(SaveManager.fileName == null){
+		if (nextAction != null) nextAction();
+		return;
+	}
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	const request = new HttpRequestBuilder("data/autoSave");
 	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
