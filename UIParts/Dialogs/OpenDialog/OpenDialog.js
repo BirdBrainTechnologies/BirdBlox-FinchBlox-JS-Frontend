@@ -18,8 +18,8 @@ OpenDialog.setConstants = function(){
 	OpenDialog.currentDialog = null;
 };
 OpenDialog.prototype.show = function(){
-	OpenDialog.currentDialog = this;
 	RowDialog.prototype.show.call(this);
+	OpenDialog.currentDialog = this;
 	this.createNewBn();
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
