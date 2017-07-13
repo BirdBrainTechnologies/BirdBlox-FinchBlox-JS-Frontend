@@ -287,7 +287,7 @@ B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
 /* Broadcasts the message */
 B_BroadcastAndWait.prototype.startAction = function() {
-	const message = this.slots[0].asString().getData().getValue();
+	const message = this.slots[0].getData().asString().getValue();
 	if (message !== "") {
 		this.runMem.message = message;
 		CodeManager.message = new StringData(message);
