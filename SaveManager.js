@@ -67,7 +67,7 @@ SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	HtmlServer.sendRequestWithCallback(request.toString(),CodeManager.markLoading);
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
@@ -246,7 +246,7 @@ SaveManager.saveAndName = function(message, nextAction){
 	});
 };
 SaveManager.userOpenDialog = function(){
-	const message = "Please name this file before opening a different file";
+	const message = "Please name this file";
 	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
 };
 SaveManager.addTypeToRequest = function(request, isRecording){
