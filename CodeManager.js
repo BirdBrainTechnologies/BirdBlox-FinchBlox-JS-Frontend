@@ -500,7 +500,6 @@ CodeManager.createXml=function(){
 	return xmlDoc;
 };
 CodeManager.importXml=function(projectNode){
-	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
 	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
@@ -524,6 +523,7 @@ CodeManager.importXml=function(projectNode){
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
 	CodeManager.modifiedTime = new Date().getTime();
@@ -594,4 +594,8 @@ CodeManager.renameRecording = function(oldName, newName){
 };
 CodeManager.deleteRecording = function(recording){
 	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};
+CodeManager.markLoading = function(){
+	TitleBar.setText("Loading...");
+	TouchReceiver.disableInteraction(1000);
 };

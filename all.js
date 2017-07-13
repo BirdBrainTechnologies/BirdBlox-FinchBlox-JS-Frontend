@@ -3426,6 +3426,7 @@ function TouchReceiver(){
 	TR.zooming = false; //There are not two touches on the screen.
 	TR.dragging = false;
 	TR.moveThreshold = 10;
+	TR.interactionEnabeled = true;
 	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
 	var handlerUp="touchend";
 	var handlerDown="touchstart";
@@ -3469,6 +3470,14 @@ TouchReceiver.handleDocumentDown=function(event){
 		Overlay.closeOverlays(); //Close any visible overlays.
 	}
 };
+TouchReceiver.disableInteraction = function(timeOut){
+	const TR = TouchReceiver;
+	TR.interactionEnabeled = false;
+};
+TouchReceiver.enableInteraction = function(){
+	const TR = TouchReceiver;
+	TR.interactionEnabeled = true;
+};
 /* Returns the touch x coord from the event arguments
  * @param {event} event - passed event arguments.
  * @return {number} - x coord.
@@ -3500,10 +3509,14 @@ TouchReceiver.getTouchY=function(e, i){
  * @return {boolean} - returns true iff !TR.touchDown
  */
 TouchReceiver.touchstart=function(e, preventD){
+	const TR = TouchReceiver;
+	if(!TR.interactionEnabeled) {
+		e.preventDefault();
+		return false;
+	}
 	if(preventD == null){
 		preventD = true;
 	}
-	var TR=TouchReceiver; //shorthand
 	if(preventD) {
 		//GuiElements.alert("Prevented 1");
 		e.preventDefault(); //Stops 300 ms delay events
@@ -3696,6 +3709,10 @@ TouchReceiver.touchStartTabRow=function(tabRow, index, e){
 TouchReceiver.touchmove=function(e){
 	var TR=TouchReceiver;
 	var shouldPreventDefault = true;
+	if(!TR.interactionEnabeled) {
+		e.preventDefault();
+		return;
+	}
 	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
 		TR.dragging = true;
 		if(TR.longTouch) {
@@ -7989,7 +8006,6 @@ CodeManager.createXml=function(){
 	return xmlDoc;
 };
 CodeManager.importXml=function(projectNode){
-	TitleBar.setText("Loading...");
 	CodeManager.deleteAll();
 	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
@@ -8013,6 +8029,7 @@ CodeManager.importXml=function(projectNode){
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
 	CodeManager.modifiedTime = new Date().getTime();
@@ -8083,6 +8100,10 @@ CodeManager.renameRecording = function(oldName, newName){
 };
 CodeManager.deleteRecording = function(recording){
 	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};
+CodeManager.markLoading = function(){
+	TitleBar.setText("Loading...");
+	TouchReceiver.disableInteraction(1000);
 };
 function TabManager(){
 	var TM=TabManager;
@@ -11287,7 +11308,7 @@ SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	HtmlServer.sendRequestWithCallback(request.toString());
+	HtmlServer.sendRequestWithCallback(request.toString(),CodeManager.markLoading);
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
@@ -11466,7 +11487,7 @@ SaveManager.saveAndName = function(message, nextAction){
 	});
 };
 SaveManager.userOpenDialog = function(){
-	const message = "Please name this file before opening a different file";
+	const message = "Please name this file";
 	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
 };
 SaveManager.addTypeToRequest = function(request, isRecording){
