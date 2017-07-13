@@ -599,3 +599,9 @@ CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
 };
+CodeManager.fileClosed = function(){
+	BlockPalette.fileClosed();
+};
+CodeManager.fileOpened = function(){
+	BlockPalette.fileOpened();
+};

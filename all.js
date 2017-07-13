@@ -2399,7 +2399,7 @@ BlockList.populateCat_looks=function(category){
 
 }
 BlockList.populateCat_sound=function(category){
-	category.addButton("Record sounds",RecordingDialog.showDialog);
+	category.addButton("Record sounds",RecordingDialog.showDialog,true);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
 	category.addBlockByName("B_PlayRecordingUntilDone");
@@ -4468,6 +4468,12 @@ BlockPalette.passRecursively = function(functionName){
 		category[functionName].apply(category,args);
 	});
 };
+BlockPalette.fileClosed = function(){
+	BlockPalette.passRecursively("fileClosed");
+};
+BlockPalette.fileOpened = function(){
+	BlockPalette.passRecursively("fileOpened");
+};
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
@@ -4734,6 +4740,7 @@ function Category(buttonX,buttonY,index){
 	this.blocks=new Array();
 	this.displayStacks=new Array();
 	this.buttons=new Array();
+	this.buttonsThatRequireFile = [];
 	this.labels=new Array();
 	this.finalized = false;
 	this.fillGroup();
@@ -4802,10 +4809,25 @@ Category.prototype.addBlock=function(block){
 	}
 }
 
+Category.prototype.fileOpened = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.enable();
+	});
+};
+Category.prototype.fileClosed = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.disable();
+	});
+};
+
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
-Category.prototype.addButton=function(text,callback){
+Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
+	if(onlyActiveIfOpen == null) {
+		onlyActiveIfOpen = false;
+	}
+
 	var width = BlockPalette.insideBnW;
 	var height = BlockPalette.insideBnH;
 	if(this.lastHadStud){
@@ -4819,6 +4841,10 @@ Category.prototype.addButton=function(text,callback){
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud=false;
+	if(onlyActiveIfOpen && !SaveManager.fileIsOpen()){
+		button.disable();
+		this.buttonsThatRequireFile.push(button);
+	}
 };
 Category.prototype.addLabel=function(text){
 	var BP=BlockPalette;
@@ -8113,6 +8139,12 @@ CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
 };
+CodeManager.fileClosed = function(){
+	BlockPalette.fileClosed();
+};
+CodeManager.fileOpened = function(){
+	BlockPalette.fileOpened();
+};
 function TabManager(){
 	var TM=TabManager;
 	TM.tabList=new Array();
@@ -11263,6 +11295,7 @@ SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
+	CodeManager.fileOpened();
 };
 SaveManager.loadData = function(data) {
 	if (data.length > 0) {
@@ -11285,6 +11318,7 @@ SaveManager.backendSetName = function(fileName, named){
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
+	CodeManager.fileOpened();
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
@@ -11294,6 +11328,7 @@ SaveManager.loadBlank = function(){
 	SaveManager.fileName = null;
 	SaveManager.named = false;
 	SaveManager.loadData("<project><tabs></tabs></project>");
+	CodeManager.fileClosed();
 };
 SaveManager.userNew = function(){
 	SaveManager.autoSave(function(){
@@ -11503,6 +11538,9 @@ SaveManager.userOpenDialog = function(){
 };
 SaveManager.addTypeToRequest = function(request, isRecording){
 	request.addParam("type", isRecording ? "recording" : "file");
+};
+SaveManager.fileIsOpen = function(){
+	return SaveManager.fileName != null;
 };
 
 /**
