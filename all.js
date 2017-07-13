@@ -3427,6 +3427,7 @@ function TouchReceiver(){
 	TR.dragging = false;
 	TR.moveThreshold = 10;
 	TR.interactionEnabeled = true;
+	TR.interactionTimeOut = null;
 	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
 	var handlerUp="touchend";
 	var handlerDown="touchstart";
@@ -3473,10 +3474,17 @@ TouchReceiver.handleDocumentDown=function(event){
 TouchReceiver.disableInteraction = function(timeOut){
 	const TR = TouchReceiver;
 	TR.interactionEnabeled = false;
+	TR.interactionTimeOut = window.setTimeout(function(){
+		TouchReceiver.enableInteraction();
+	}, timeOut);
 };
 TouchReceiver.enableInteraction = function(){
 	const TR = TouchReceiver;
 	TR.interactionEnabeled = true;
+	if(TR.interactionTimeOut != null){
+		window.clearTimeout(TR.interactionTimeOut);
+		TR.interactionTimeOut = null;
+	}
 };
 /* Returns the touch x coord from the event arguments
  * @param {event} event - passed event arguments.
