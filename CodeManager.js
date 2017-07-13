@@ -595,7 +595,7 @@ CodeManager.renameRecording = function(oldName, newName){
 CodeManager.deleteRecording = function(recording){
 	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
 };
-CodeManager.markLoading = function(){
-	TitleBar.setText("Loading...");
+CodeManager.markLoading = function(message){
+	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
 };

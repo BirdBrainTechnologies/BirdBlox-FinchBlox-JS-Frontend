@@ -8101,8 +8101,8 @@ CodeManager.renameRecording = function(oldName, newName){
 CodeManager.deleteRecording = function(recording){
 	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
 };
-CodeManager.markLoading = function(){
-	TitleBar.setText("Loading...");
+CodeManager.markLoading = function(message){
+	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
 };
 function TabManager(){
@@ -11308,7 +11308,9 @@ SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	HtmlServer.sendRequestWithCallback(request.toString(),CodeManager.markLoading);
+	HtmlServer.sendRequestWithCallback(request.toString(),function(){
+		CodeManager.markLoading("Loading...");
+	});
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
@@ -11448,6 +11450,7 @@ SaveManager.saveAsNew = function(){
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.saving = false;
+		CodeManager.markLoading("Saving...");
 	}, function(){
 		SaveManager.saving = false;
 	}, true, xmlDocText);
