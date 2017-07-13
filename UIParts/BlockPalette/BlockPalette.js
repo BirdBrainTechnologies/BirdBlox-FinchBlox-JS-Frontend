@@ -173,3 +173,9 @@ BlockPalette.passRecursively = function(functionName){
 		category[functionName].apply(category,args);
 	});
 };
+BlockPalette.fileClosed = function(){
+	BlockPalette.passRecursively("fileClosed");
+};
+BlockPalette.fileOpened = function(){
+	BlockPalette.passRecursively("fileOpened");
+};

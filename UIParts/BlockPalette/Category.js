@@ -23,6 +23,7 @@ function Category(buttonX,buttonY,index){
 	this.blocks=new Array();
 	this.displayStacks=new Array();
 	this.buttons=new Array();
+	this.buttonsThatRequireFile = [];
 	this.labels=new Array();
 	this.finalized = false;
 	this.fillGroup();
@@ -91,10 +92,25 @@ Category.prototype.addBlock=function(block){
 	}
 }
 
+Category.prototype.fileOpened = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.enable();
+	});
+};
+Category.prototype.fileClosed = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.disable();
+	});
+};
+
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
-Category.prototype.addButton=function(text,callback){
+Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
+	if(onlyActiveIfOpen == null) {
+		onlyActiveIfOpen = false;
+	}
+
 	var width = BlockPalette.insideBnW;
 	var height = BlockPalette.insideBnH;
 	if(this.lastHadStud){
@@ -108,6 +124,10 @@ Category.prototype.addButton=function(text,callback){
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud=false;
+	if(onlyActiveIfOpen && !SaveManager.fileIsOpen()){
+		button.disable();
+		this.buttonsThatRequireFile.push(button);
+	}
 };
 Category.prototype.addLabel=function(text){
 	var BP=BlockPalette;
