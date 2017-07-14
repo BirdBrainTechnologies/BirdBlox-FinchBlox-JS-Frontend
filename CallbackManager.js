@@ -20,6 +20,7 @@ CallbackManager.data.open = function(fileName, data, named) {
 	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
+CallbackManager.data.open = DebugOptions.safeFunc(CallbackManager.data.open);
 CallbackManager.data.setName = function(fileName, named){
 	fileName = HtmlServer.decodeHtml(fileName);
 	SaveManager.backendSetName(fileName, named);

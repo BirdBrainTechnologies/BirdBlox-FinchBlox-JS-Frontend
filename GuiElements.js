@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
+	Data.setConstants();
 	HtmlServer();
 	SettingsManager();
 	GuiElements.setGuiConstants();
@@ -102,8 +103,7 @@ GuiElements.setGuiConstants=function(){
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	Data.setConstants();
-	/* If a class is static and does not build a part of the UI, 
+	/* If a class is static and does not build a part of the UI,
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
