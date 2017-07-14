@@ -594,7 +594,6 @@ CodeManager.deleteRecording = function(recording){
 CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
-	GuiElements.alert("marked");
 };
 CodeManager.fileClosed = function(){
 	BlockPalette.fileClosed();

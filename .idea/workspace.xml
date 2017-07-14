@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CodeManager.js" afterPath="$PROJECT_DIR$/CodeManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -56,12 +55,13 @@
       <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="76" column="26" lean-forward="false" selection-start-line="76" selection-start-column="20" selection-end-line="76" selection-end-column="26" />
+            <state relative-caret-position="378">
+              <caret line="223" column="13" lean-forward="false" selection-start-line="223" selection-start-column="12" selection-end-line="223" selection-end-column="13" />
               <folding>
                 <element signature="e#1383#1412#0" expanded="false" />
                 <element signature="e#1876#2181#0" expanded="false" />
                 <element signature="e#1911#1965#0" expanded="false" />
+                <element signature="e#2228#2535#0" expanded="false" />
                 <element signature="e#2479#2484#0" expanded="false" />
                 <element signature="e#2612#2694#0" expanded="false" />
                 <element signature="e#2785#2893#0" expanded="false" />
@@ -128,8 +128,8 @@
       <file leaf-file-name="CodeManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CodeManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="691">
-              <caret line="606" column="38" lean-forward="false" selection-start-line="606" selection-start-column="38" selection-end-line="606" selection-end-column="38" />
+            <state relative-caret-position="441">
+              <caret line="596" column="2" lean-forward="true" selection-start-line="596" selection-start-column="2" selection-end-line="596" selection-end-column="2" />
               <folding>
                 <element signature="e#15#141#0" expanded="false" />
                 <element signature="n#!!block;n#CodeManager#0" expanded="false" />
@@ -540,7 +540,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>html</find>
       <find>menu</find>
       <find>HtmlServer(</find>
       <find>menuBnList</find>
@@ -570,6 +569,7 @@
       <find>unmarklo</find>
       <find>unmarkloa</find>
       <find>cancel</find>
+      <find>marked</find>
     </findStrings>
     <replaceStrings>
       <replace>\1 \2</replace>
@@ -1169,7 +1169,7 @@
       <workItem from="1499862512765" duration="29097000" />
       <workItem from="1499957960656" duration="5259000" />
       <workItem from="1499987913963" duration="1497000" />
-      <workItem from="1500040613503" duration="18551000" />
+      <workItem from="1500040613503" duration="18650000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1266,7 +1266,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1327557000" />
+    <option name="totallyTimeSpent" value="1327656000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2742,14 +2742,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="120" column="0" lean-forward="false" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/SaveManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="76" column="26" lean-forward="false" selection-start-line="76" selection-start-column="20" selection-end-line="76" selection-end-column="26" />
+        <state relative-caret-position="378">
+          <caret line="223" column="13" lean-forward="false" selection-start-line="223" selection-start-column="12" selection-end-line="223" selection-end-column="13" />
           <folding>
             <element signature="e#1383#1412#0" expanded="false" />
             <element signature="e#1876#2181#0" expanded="false" />
             <element signature="e#1911#1965#0" expanded="false" />
+            <element signature="e#2228#2535#0" expanded="false" />
             <element signature="e#2479#2484#0" expanded="false" />
             <element signature="e#2612#2694#0" expanded="false" />
             <element signature="e#2785#2893#0" expanded="false" />
@@ -2812,18 +2821,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/TitleBar.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="120" column="0" lean-forward="false" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CodeManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="691">
-          <caret line="606" column="38" lean-forward="false" selection-start-line="606" selection-start-column="38" selection-end-line="606" selection-end-column="38" />
+        <state relative-caret-position="441">
+          <caret line="596" column="2" lean-forward="true" selection-start-line="596" selection-start-column="2" selection-end-line="596" selection-end-column="2" />
           <folding>
             <element signature="e#15#141#0" expanded="false" />
             <element signature="n#!!block;n#CodeManager#0" expanded="false" />
