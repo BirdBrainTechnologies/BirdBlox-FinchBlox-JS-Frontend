@@ -10,6 +10,9 @@ function BlockPalette(){
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
 	BlockPalette.visible = true;
+	if(GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+		GuiElements.hidePaletteLayers(true);
+	}
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.mainVMargin=10;

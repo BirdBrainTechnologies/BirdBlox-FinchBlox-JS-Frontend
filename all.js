@@ -1321,6 +1321,7 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 			GuiElements.load.zoom = true;
+			GuiElements.checkSmallMode();
 			checkIfDone();
 		});
 		GuiElements.getOsVersion(function(){
@@ -1364,7 +1365,6 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
-	GuiElements.checkSmallMode();
 };
 /* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -2208,6 +2208,7 @@ GuiElements.hidePaletteLayers = function(skipUpdate){
 	let GE = GuiElements;
 	if(GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = false;
+		SettingsManager.sideBarVisible.writeValue("false");
 		GE.layers.paletteBG.hide();
 		GE.layers.paletteScroll.style.visibility = "hidden";
 		GE.layers.trash.hide();
@@ -2225,6 +2226,7 @@ GuiElements.showPaletteLayers = function(skipUpdate){
 	}
 	if(!GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = true;
+		SettingsManager.sideBarVisible.writeValue("true");
 		GE.layers.paletteBG.show();
 		GE.layers.paletteScroll.style.visibility = "visible";
 		GE.layers.trash.show();
@@ -2240,6 +2242,9 @@ GuiElements.checkSmallMode = function(){
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
 	if(!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
+	}
+	if(!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
+		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };
 /* BlockList is a static class that holds a list of blocks and categories.
@@ -4332,6 +4337,9 @@ function BlockPalette(){
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
 	BlockPalette.visible = true;
+	if(GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+		GuiElements.hidePaletteLayers(true);
+	}
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.mainVMargin=10;
@@ -10865,13 +10873,15 @@ function SettingsManager(){
 	const SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
 	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");
+	SM.sideBarVisible = new Setting("sideBarVisible", "true");
 }
 SettingsManager.loadSettings = function(callbackFn){
 	const SM = SettingsManager;
-
-	SM.enableSnapNoise.readValue(function(){
-		SM.zoom.readValue(callbackFn);
-	})
+	SM.sideBarVisible.readValue(function(){
+		SM.enableSnapNoise.readValue(function(){
+			SM.zoom.readValue(callbackFn);
+		});
+	});
 };
 /* HtmlServer is a static class that will manage HTTP requests.
  * This class is not nearly finished.
@@ -10925,7 +10935,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('1.2');
+				callbackFn('1');
 			}
 		}, 20);
 		return;

@@ -54,6 +54,7 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 			GuiElements.load.zoom = true;
+			GuiElements.checkSmallMode();
 			checkIfDone();
 		});
 		GuiElements.getOsVersion(function(){
@@ -97,7 +98,6 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
-	GuiElements.checkSmallMode();
 };
 /* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
@@ -941,6 +941,7 @@ GuiElements.hidePaletteLayers = function(skipUpdate){
 	let GE = GuiElements;
 	if(GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = false;
+		SettingsManager.sideBarVisible.writeValue("false");
 		GE.layers.paletteBG.hide();
 		GE.layers.paletteScroll.style.visibility = "hidden";
 		GE.layers.trash.hide();
@@ -958,6 +959,7 @@ GuiElements.showPaletteLayers = function(skipUpdate){
 	}
 	if(!GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = true;
+		SettingsManager.sideBarVisible.writeValue("true");
 		GE.layers.paletteBG.show();
 		GE.layers.paletteScroll.style.visibility = "visible";
 		GE.layers.trash.show();
@@ -973,5 +975,8 @@ GuiElements.checkSmallMode = function(){
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
 	if(!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
+	}
+	if(!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
+		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };

@@ -50,7 +50,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('1.2');
+				callbackFn('1');
 			}
 		}, 20);
 		return;
