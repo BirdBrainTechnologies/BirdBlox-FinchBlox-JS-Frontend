@@ -11,8 +11,8 @@ CategoryBN.setGraphics=function(){
 	CategoryBN.fontSize=15;
 	CategoryBN.font="Arial";
 	CategoryBN.forground="#fff";
-	CategoryBN.height=25;
-	CategoryBN.colorW=6;
+	CategoryBN.height=30;
+	CategoryBN.colorW=8;
 	CategoryBN.labelLMargin=6;
 	CategoryBN.charHeight=10;
 	

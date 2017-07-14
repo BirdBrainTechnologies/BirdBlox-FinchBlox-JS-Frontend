@@ -23,6 +23,7 @@ BoolData.prototype.asString=function(){
 	}
 }
 BoolData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value","false");
-	return new BoolData(value=="true");
+	let value = XmlWriter.getTextNode(dataNode, "value");
+	if(value == null) return null;
+	return new BoolData(value == "true");
 };

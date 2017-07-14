@@ -11,6 +11,9 @@ function List(name,data){
 List.prototype.getName=function(){
 	return this.name;
 };
+List.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
+};
 List.prototype.changeName=function(newName){
 	if(this.name!=this.newName){
 		this.name=newName;
@@ -54,7 +57,7 @@ List.prototype.rename=function(){
 		}
 	};
 	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
 };
 List.prototype.delete=function(){
 	if(CodeManager.checkListUsed(this)) {

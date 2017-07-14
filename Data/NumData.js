@@ -44,10 +44,10 @@ NumData.prototype.getValueInR=function(min,max,positive,integer){
 	if(integer==true){
 		val=Math.round(val);
 	}
-	if(val<min){
+	if(min != null && val<min){
 		val=min;
 	}
-	if(val>max){
+	if(max != null && val>max){
 		val=max;
 	}
 	return val;
@@ -63,11 +63,13 @@ NumData.prototype.getValueWithC=function(positive,integer){
 	return val;
 };
 NumData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value",0,true);
-	if((value+"").indexOf(".")==-1){
-		return new NumData(parseInt(value));
-	}
-	else{
-		return new NumData(parseFloat(value));
+	const value=XmlWriter.getTextNode(dataNode,"value",null,true);
+	if(value == null) return null;
+	const stringData = new StringData(value);
+	const numData = stringData.asNum();
+	if(numData.isValid){
+		return numData;
+	} else {
+		return null;
 	}
 };

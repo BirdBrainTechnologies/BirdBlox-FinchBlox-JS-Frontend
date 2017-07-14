@@ -4,7 +4,7 @@ function InputPad(){
 InputPad.setGraphics=function(){
 	InputPad.buttonW=50;
 	InputPad.buttonH=40;
-	InputPad.buttonMargin=8;
+	InputPad.buttonMargin=Button.defaultMargin;
 	/*InputPad.triangleW=15;
 	InputPad.triangleH=7;*/
 	InputPad.fontSize=34;
@@ -44,11 +44,15 @@ InputPad.buildPad=function(){
 	IP.group=GuiElements.create.group(0,0);
 	IP.visible=false;
 	/*IP.makeBg();*/
-	IP.bubbleOverlay=new BubbleOverlay(IP.bg,IP.buttonMargin,IP.group,IP);
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	IP.bubbleOverlay=new BubbleOverlay(overlayType, IP.bg,IP.buttonMargin,IP.group,IP,null,layer);
 	IP.bnGroup=GuiElements.create.group(0,0);
 	IP.makeBns();
-	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
-	IP.menuBnList.isOverlayPart=true;
+	//IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin);
+	IP.menuBnList=new SmoothMenuBnList(IP, IP.group,0,0);
+	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
+	IP.previewFn = null;
 };
 /*InputPad.makeBg=function(){
 	var IP=InputPad;
@@ -61,8 +65,13 @@ InputPad.buildPad=function(){
 InputPad.resetPad=function(columns){//removes any options which may have been added to the pad
 	var IP=InputPad;
 	IP.close();
-	IP.menuBnList=new MenuBnList(IP.group,0,0,IP.buttonMargin,null,columns);
-	IP.menuBnList.isOverlayPart=true;
+	if(columns == 1){
+		IP.menuBnList = new SmoothMenuBnList(IP, IP.group, 0, 0);
+	} else {
+		IP.menuBnList = new MenuBnList(IP.group, 0, 0, IP.buttonMargin, null, columns);
+	}
+	IP.menuBnList.markAsOverlayPart(IP.bubbleOverlay);
+	IP.previewFn = null;
 };
 InputPad.addOption=function(text,data){
 	var dataFunction=function(){InputPad.menuBnSelected(text,data)};
@@ -197,8 +206,9 @@ InputPad.bsPressed=function(){
 InputPad.okPressed=function(){
 	InputPad.close();
 };
-InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
+InputPad.showDropdown=function(slot,leftX,rightX,upperY,lowerY,menuWidth, previewFn){
 	var IP=InputPad;
+	IP.previewFn = previewFn;
 	IP.visible=true;
 	IP.usingNumberPad=false;
 	IP.specialCommand="";
@@ -212,14 +222,15 @@ InputPad.showDropdown=function(slot,x,upperY,lowerY,menuWidth){
 	IP.width=IP.menuBnList.width;//+2*IP.buttonMargin;
 	IP.height=IP.menuBnList.height;//+2*IP.buttonMargin;
 	//IP.menuBnList.move(0,0);
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
 	IP.menuBnList.show();
-	IP.bubbleOverlay.display(x,upperY,lowerY,IP.width,IP.height);
 	/*IP.tallH=IP.height+IP.triangleH;
 	IP.move(x,upperY,lowerY);
 	GuiElements.layers.inputPad.appendChild(IP.group);*/
 };
-InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
+InputPad.showNumPad=function(slot,leftX,rightX,upperY,lowerY,positive,integer){
 	var IP=InputPad;
+	IP.previewFn = null;
 	IP.usingNumberPad=true;
 	IP.specialCommand="";
 	IP.width=InputPad.BnAreaW;
@@ -273,7 +284,10 @@ InputPad.showNumPad=function(slot,x,upperY,lowerY,positive,integer){
 	else{
 		IP.decimalBn.enable();
 	}
-	IP.bubbleOverlay.display(x,upperY,lowerY,IP.width,IP.height);
+	IP.bubbleOverlay.display(leftX,rightX,upperY,lowerY,IP.width,IP.height);
+	if(IP.menuBnList.updatePosition != null){
+		IP.menuBnList.updatePosition();
+	}
 	/*InputPad.move(x,upperY,lowerY);*/
 };
 /*InputPad.move=function(x,upperY,lowerY){
@@ -356,7 +370,13 @@ InputPad.menuBnSelected=function(text,data){
 		IP.nonNumericData=data;
 	}
 	SaveManager.markEdited();
-	IP.close();
+	if(IP.previewFn != null){
+		IP.updateSlot();
+		IP.previewFn();
+	}
+	else {
+		IP.close();
+	}
 };
 
 InputPad.makeBns=function(){
@@ -386,21 +406,21 @@ InputPad.makeNumBn=function(x,y,num){
 	var button=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	button.addText(num,IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	button.setCallbackFunction(function(){InputPad.numPressed(num)},false);
-	button.isOverlayPart=true;
+	button.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makePlusMinusBn=function(x,y){
 	var IP=InputPad;
 	IP.plusMinusBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.plusMinusBn.addText(String.fromCharCode(177),IP.font,IP.fontSize,IP.fontWeight,IP.plusMinusH);
 	IP.plusMinusBn.setCallbackFunction(InputPad.plusMinusPressed,false);
-	IP.plusMinusBn.isOverlayPart=true;
+	IP.plusMinusBn.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeDecimalBn=function(x,y){
 	var IP=InputPad;
 	IP.decimalBn=new Button(x,y,IP.buttonW,IP.buttonH,IP.bnGroup);
 	IP.decimalBn.addText(".",IP.font,IP.fontSize,IP.fontWeight,IP.charHeight);
 	IP.decimalBn.setCallbackFunction(InputPad.decimalPressed,false);
-	IP.decimalBn.isOverlayPart=true;
+	IP.decimalBn.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeBsBn=function(x,y){
 	var IP=InputPad;
@@ -408,12 +428,20 @@ InputPad.makeBsBn=function(x,y){
 	IP.bsButton.addIcon(VectorPaths.backspace,IP.bsBnH);
 	IP.bsButton.setCallbackFunction(InputPad.bsPressed,false);
 	IP.bsButton.setCallbackFunction(InputPad.bsReleased,true);
-	IP.bsButton.isOverlayPart=true;
+	IP.bsButton.markAsOverlayPart(IP.bubbleOverlay);
 };
 InputPad.makeOkBn=function(x,y){
 	var IP=InputPad;
 	var button=new Button(x,y,IP.longBnW,IP.buttonH,IP.bnGroup);
 	button.addIcon(VectorPaths.checkmark,IP.okBnH);
 	button.setCallbackFunction(InputPad.okPressed,true);
-	button.isOverlayPart=true;
+	button.markAsOverlayPart(IP.bubbleOverlay);
+};
+InputPad.relToAbsX = function(x){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsX(x)
+};
+InputPad.relToAbsY = function(y){
+	var IP = InputPad;
+	return IP.bubbleOverlay.relToAbsY(y)
 };

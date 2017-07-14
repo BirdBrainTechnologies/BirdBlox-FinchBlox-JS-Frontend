@@ -28,8 +28,7 @@ DisplayBox.buildElements=function(){
 };
 DisplayBox.updateZoom=function(){
 	var DB=DisplayBox;
-	DB.rectY=GuiElements.height-DB.rectH-DB.screenMargin;
-	DB.rectW=GuiElements.width-2*DB.screenMargin;
+	DB.setGraphics();
 	var textW=GuiElements.measure.textWidth(DB.textE);
 	var textX=DB.rectX+DB.rectW/2-textW/2;
 	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;

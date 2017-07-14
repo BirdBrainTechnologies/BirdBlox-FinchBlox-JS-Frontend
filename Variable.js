@@ -9,6 +9,9 @@ function Variable(name, data){
 Variable.prototype.getName=function(){
 	return this.name;
 };
+Variable.prototype.getSelectionData = function(){
+	return new SelectionData(this.name, this);
+};
 Variable.prototype.getData=function(){
 	return this.data;
 };
@@ -47,7 +50,7 @@ Variable.prototype.rename=function(){
 		}
 	};
 	callbackFn.variable=this;
-	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,callbackFn);
+	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
 };
 Variable.prototype.delete=function(){
 	if(CodeManager.checkVariableUsed(this)) {
