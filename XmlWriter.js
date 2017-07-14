@@ -27,10 +27,12 @@ XmlWriter.escape=function(string){
 	string=string.replace(/>/g, '&gt;');
 	string=string.replace(/"/g, '&quot;');
 	string=string.replace(/'/g, '&apos;');
+	string=string.replace(/ /g, '&#32;');
 	return string;
 };
 XmlWriter.unEscape=function(string) {
 	string = string + "";
+	string=string.replace(/&#32;/g, ' ');
 	string = string.replace(/&apos;/g, "'");
 	string = string.replace(/&quot;/g, '"');
 	string = string.replace(/&gt;/g, '>');
@@ -131,9 +133,21 @@ XmlWriter.getTextNode=function(element,name,defaultVal,isNum){
 		}
 		return val;
 	}
+	else if(childNodes.length === 0){
+		return "";
+	}
 	return defaultVal;
 };
 XmlWriter.docToText=function(xmlDoc){
 	var serializer = new XMLSerializer();
 	return serializer.serializeToString(xmlDoc);
+};
+XmlWriter.findNodeByKey = function(nodes, key){
+	for(var i = 0; i < nodes.length; i++){
+		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+		if(nodeKey == key){
+			return nodes[i];
+		}
+	}
+	return null;
 };

@@ -268,17 +268,17 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Shaken
 
     Get request format:
-    http://localhost:22179/iPad/shake
+    http://localhost:22179/tablet/shake
     Example response:
     1
 
-\[Response\]: 1 if shaken since last time `/iPad/shake` was called, 
+\[Response\]: 1 if shaken since last time `/tablet/shake` was called, 
 0 otherwise.
 
 #### Device Location
 
     Get request format:
-    http://localhost:22179/iPad/location
+    http://localhost:22179/tablet/location
     Example response:
     20.17589 -70.85694
 
@@ -287,7 +287,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device SSID
 
     Get request format:
-    http://localhost:22179/iPad/ssid
+    http://localhost:22179/tablet/ssid
     Example response:
     MyWiFiNetworkName
 
@@ -296,7 +296,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Pressure
 
     Get request format:
-    http://localhost:22179/iPad/pressure
+    http://localhost:22179/tablet/pressure
     Example response:
     94.81456
 
@@ -305,7 +305,7 @@ Turns off all LEDs and motors but leaves servos in current positions.
 #### Device Relative Altitude
 
     Get request format:
-    http://localhost:22179/iPad/altitude
+    http://localhost:22179/tablet/altitude
     Example response:
     -1.256
 
@@ -316,7 +316,7 @@ barometer
 #### Device Orientation
 
     Get request format:
-    http://localhost:22179/iPad/orientation
+    http://localhost:22179/tablet/orientation
     Example responses:
     Faceup
     Landscape: home button on left
@@ -338,9 +338,9 @@ and if so, what the response was.
 For dialogs requesting a typed response:
 
     Get request format:
-    http://localhost:22179/iPad/dialog/[title]/[question]/[hint]
+    http://localhost:22179/tablet/dialog?title=[title]&question=[question]&holder=[hint]
     Example:
-    http://localhost:22179/iPad/dialog/Name/What%20is%20your%20name%3F/name
+    http://localhost:22179/tablet/dialog?title=Name&question=What%20is%20your%20name%3F&holder=name
     
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -353,9 +353,9 @@ just ignore them.
 For dialogs with 2 choices (like yes/no):
 
     Get request format:
-    http://localhost:22179/iPad/choice/[title]/[question]/[option1]/[option2]
+    http://localhost:22179/tablet/choice?title=[title]&question=[question]&button1=[option1]&button2=[option2]
     Example:
-    http://localhost:22179/iPad/choice/Save/Save%20changes%3F/Yes/No
+    http://localhost:22179/tablet/choice?title=Save&question=Save%20changes%3F&button1=Yes&button2=No
 
 Title: text displayed at the top of the dialog  
 Question: text displayed in the middle of the dialog  
@@ -368,7 +368,7 @@ on their status.
 For typed dialogs:
 
     Get request format:
-    http://localhost:22179/iPad/dialog_response
+    http://localhost:22179/tablet/dialog_response
     Example responses:
     No Response
     Cancelled
@@ -384,7 +384,7 @@ escaped, even single quotes.
 For choice dialogs:
 
     Get request format:
-    http://localhost:22179/iPad/choice_response
+    http://localhost:22179/tablet/choice_response
     Example responses:
     0
     1
@@ -398,21 +398,20 @@ and `2` for the second option.
 #### Read setting
 
     Get request format:
-    http://localhost:22179/settings/get/[key]
+    http://localhost:22179/settings/get?key=[key]
     Example:
-    http://localhost:22179/settings/get/zoom
+    http://localhost:22179/settings/get?key=zoom
     Example responses:
     1.5999999999999999
-    Default
     
-`Default` indicates that the key does not have an assigned value
+A 404 response is generated if the key does not have an assigned value.
     
 #### Write setting
 
     Get request format:
-    http://localhost:22179/settings/set/[key]/[value]
+    http://localhost:22179/settings/set?key=[key]&value=[value]
     Example:
-    http://localhost:22179/settings/set/zoom/1
+    http://localhost:22179/settings/set?key=zoom&value=1
 
 ### File Management
 
@@ -613,7 +612,7 @@ function B_Wait(x,y){
     CommandBlock.call(this,x,y,"control");
       //Build Block out of things found in the BlockParts folder
     this.addPart(new LabelText(this,"wait"));
-    this.addPart(new NumSlot(this,1,true)); //Must be positive.
+    this.addPart(new NumSlot(this,"TEMPKEY",1,true)); //Must be positive.
     this.addPart(new LabelText(this,"secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
@@ -645,16 +644,16 @@ function B_Split(x,y){
     ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
       //Add parts with default values
     this.addPart(new LabelText(this,"split"));
-    this.addPart(new StringSlot(this,"hello world"));
+    this.addPart(new StringSlot(this,"TEMPKEY","hello world"));
     this.addPart(new LabelText(this,"by"));
       //New DropSlot which numbers, strings, and bools can snap to
-    var dS=new DropSlot(this,Slot.snapTypes.numStrBool);
+    var dS=new DropSlot(this,"TEMPKEY",Slot.snapTypes.numStrBool);
       //Add options to select from
       //"enter_text" is a special option; tells InputPad to show prompt dialog
-    dS.addOption("Enter text",new SelectionData("enter_text"));
-    dS.addOption("letter",new SelectionData("letter"));
-    dS.addOption("whitespace",new SelectionData("whitespace"));
-    dS.setSelectionData("whitespace",new SelectionData("whitespace"));
+    dS.addOption(new SelectionData("Enter text", "enter_text"));
+    dS.addOption(new SelectionData("letter", "letter"));
+    dS.addOption(new SelectionData("whitespace", "whitespace"));
+    dS.setSelectionData(new SelectionData("whitespace", "whitespace"));
     this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);

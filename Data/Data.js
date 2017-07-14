@@ -7,12 +7,12 @@ function Data(type,value,isValid){
 	}
 }
 Data.setConstants=function(){
-	Data.types=new function(){};
+	Data.types=function(){};
 	Data.types.num=0;
 	Data.types.bool=1;
 	Data.types.string=2;
 	Data.types.list=3;
-	Data.types.selection=4;//A selection from a block's drop down.  Could be a sprite, variable, etc.
+	Data.types.selection=4;//A selection from a block's drop down.  Could be a sound, variable, string, etc.
 };
 Data.prototype.asNum=function(){
 	return new NumData(0,false);
@@ -26,8 +26,17 @@ Data.prototype.asString=function(){
 Data.prototype.asList=function(){
 	return new ListData(null,false);
 };
+Data.prototype.asSelection = function(){
+	return SelectionData.empty(false);
+};
 Data.prototype.getValue=function(){ //might remove
 	return this.value;
+};
+Data.prototype.isSelection = function(){
+	return this.type === Data.types.selection;
+};
+Data.prototype.isNumber = function(){
+	return false;
 };
 Data.checkEquality=function(data1,data2){
 	var val1=data1.getValue();
@@ -61,7 +70,6 @@ Data.checkEquality=function(data1,data2){
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
-
 Data.prototype.createXml=function(xmlDoc){
 	var data=XmlWriter.createElement(xmlDoc,"data");
 	XmlWriter.setAttribute(data,"type",this.getDataTypeName());

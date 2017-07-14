@@ -4,9 +4,16 @@ function Category(buttonX,buttonY,index){
 	this.buttonY=buttonY;
 	this.x=0;
 	this.y=TitleBar.height+BlockPalette.catH;
-	this.maxX=this.x;
-	this.maxY=this.y;
-	this.group=this.createGroup();
+	/* this.maxX=this.x;
+	this.maxY=this.y; */
+	this.group = GuiElements.create.group(0,0);
+	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+		BlockPalette.width, BlockPalette.height, 0, 0);
+	/*
+	TouchReceiver.createScrollFixTimer(this.scrollDiv);
+	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
+	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
+	*/
 	this.id=BlockList.getCatId(index);
 	this.name=BlockList.getCatName(index);
 	this.currentBlockX=BlockPalette.mainHMargin;
@@ -16,17 +23,16 @@ function Category(buttonX,buttonY,index){
 	this.blocks=new Array();
 	this.displayStacks=new Array();
 	this.buttons=new Array();
+	this.buttonsThatRequireFile = [];
+	this.labels=new Array();
+	this.finalized = false;
 	this.fillGroup();
 	this.scrolling=false;
 	this.scrollXOffset=0;
 	this.scrollYOffset=0;
-
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
-}
-Category.prototype.createGroup=function(){
-	return GuiElements.create.group(this.x,this.y);
 }
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
@@ -41,6 +47,10 @@ Category.prototype.clearGroup=function(){
 		this.buttons[i].remove();
 	}
 	this.buttons=new Array();
+	for(var i=0;i<this.labels.length;i++){
+		this.group.removeChild(this.labels[i]);
+	}
+	this.labels=new Array();
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -82,10 +92,27 @@ Category.prototype.addBlock=function(block){
 	}
 }
 
+Category.prototype.fileOpened = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.enable();
+	});
+};
+Category.prototype.fileClosed = function(){
+	this.buttonsThatRequireFile.forEach(function(button){
+		button.disable();
+	});
+};
+
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
 }
-Category.prototype.addButton=function(text,width,height,callback){
+Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
+	if(onlyActiveIfOpen == null) {
+		onlyActiveIfOpen = false;
+	}
+
+	var width = BlockPalette.insideBnW;
+	var height = BlockPalette.insideBnH;
 	if(this.lastHadStud){
 		this.currentBlockY+=BlockGraphics.command.bumpDepth;
 	}
@@ -97,6 +124,10 @@ Category.prototype.addButton=function(text,width,height,callback){
 	this.currentBlockY+=BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud=false;
+	if(onlyActiveIfOpen && !SaveManager.fileIsOpen()){
+		button.disable();
+		this.buttonsThatRequireFile.push(button);
+	}
 };
 Category.prototype.addLabel=function(text){
 	var BP=BlockPalette;
@@ -104,6 +135,7 @@ Category.prototype.addLabel=function(text){
 	var y=this.currentBlockY;
 	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
 	this.group.appendChild(labelE);
+	this.labels.push(labelE);
 	var height=GuiElements.measure.textHeight(labelE);
 	GuiElements.move.element(labelE,x,y+height);
 	this.currentBlockY+=height;
@@ -116,10 +148,14 @@ Category.prototype.trimBottom=function(){
 	}
 	this.currentBlockY-=BlockPalette.blockMargin;
 	this.currentBlockY+=BlockPalette.mainVMargin;
+};
+Category.prototype.finalize = function(){
+	this.finalized = true;
 	this.height=this.currentBlockY;
 	this.updateWidth();
-	this.setMinCoords();
-}
+	//this.updateSmoothScrollSet();
+};
+
 Category.prototype.select=function(){
 	if(BlockPalette.selectedCat==this){
 		return;
@@ -127,46 +163,16 @@ Category.prototype.select=function(){
 	if(BlockPalette.selectedCat!=null){
 		BlockPalette.selectedCat.deselect();
 	}
-	GuiElements.layers.palette.appendChild(this.group);
 	BlockPalette.selectedCat=this;
 	this.button.select();
+	this.smoothScrollBox.show();
 }
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
-	this.group.remove();
+	this.smoothScrollBox.hide();
 	this.button.deselect();
 }
-Category.prototype.startScroll=function(x,y){
-	if(!this.scrolling) {
-		this.scrolling = true;
-		this.scrollXOffset = this.x - x;
-		this.scrollYOffset = this.y - y;
-		this.updateWidth();
-		this.setMinCoords();
-	}
-};
-Category.prototype.updateScroll=function(x,y){
-	if(this.scrolling) {
-		this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
-	}
-};
-Category.prototype.scroll=function(x,y){
-	if(this.scrolling) {
-		var minX=Math.min(this.x,this.minX);
-		x = Math.max(minX,x);
-		x = Math.min(this.maxX,x);
-		var minY=Math.min(this.y,this.minY);
-		y = Math.max(minY,y);
-		y = Math.min(this.maxY,y);
-		this.x=x;
-		this.y=y;
-		GuiElements.move.group(this.group, this.x, this.y);
-	}
-};
-Category.prototype.endScroll=function(){
-	this.scrolling=false;
-};
-Category.prototype.updateWidth=function(){
+Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
 		var blockW=this.blocks[i].width;
@@ -174,27 +180,57 @@ Category.prototype.updateWidth=function(){
 			currentWidth=blockW;
 		}
 	}
-	this.width=currentWidth+2*BlockPalette.mainHMargin;
+	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
 };
-Category.prototype.setMinCoords=function(){
-	var vScrollRange=this.height-BlockPalette.height;
-	this.minY=this.maxY-vScrollRange;
-	var hScrollRange=this.width-BlockPalette.width;
-	this.minX=this.maxX-hScrollRange;
+Category.prototype.updateWidth=function(){
+	if(!this.finalized) return;
+	this.computeWidth();
+	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+Category.prototype.relToAbsX=function(x){
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.relToAbsX(x);
+};
+Category.prototype.relToAbsY=function(y){
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.relToAbsY(y);
+};
+Category.prototype.absToRelX=function(x){
+	if(!this.finalized) return x;
+	return this.smoothScrollBox.absToRelX(x);
+};
+Category.prototype.absToRelY=function(y){
+	if(!this.finalized) return y;
+	return this.smoothScrollBox.absToRelY(y);
 };
 Category.prototype.getAbsX=function(){
-	return this.x;
+	return this.relToAbsX(0);
 };
 Category.prototype.getAbsY=function(){
-	return this.y;
+	return this.relToAbsY(0);
 };
-Category.prototype.showHBDropDowns=function(){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].showHBDropDowns();
-	}
+Category.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-Category.prototype.hideHBDropDowns=function(){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].hideHBDropDowns();
-	}
+Category.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+Category.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+Category.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+Category.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.displayStacks.forEach(function(stack){
+		stack[functionName].apply(stack,args);
+	});
+};
+Category.prototype.updateZoom = function(){
+	if(!this.finalized) return;
+	this.smoothScrollBox.move(0, BlockPalette.y);
+	this.smoothScrollBox.updateZoom();
+	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };

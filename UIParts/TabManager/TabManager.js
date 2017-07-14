@@ -1,79 +1,63 @@
 function TabManager(){
 	var TM=TabManager;
-	TM.buildTabBar();
 	TM.tabList=new Array();
 	TM.activeTab=null;
 	TM.createInitialTab();
 	TabManager.createTabSpaceBg();
 	TM.isRunning=false;
 	TM.scrolling=false;
+	TM.zooming = false;
 }
 TabManager.setGraphics=function(){
 	var TM=TabManager;
 	TM.bg=Colors.black;
-	TM.tabAreaHeight=TitleBar.height;
-	TM.activeTabFill=Colors.lightGray;
-	TM.hiddenTabFill=Colors.darkGray;
-	TM.tabSlantWidth=15;
-	TM.tabHMargin=7;
-	TM.tabMinW=80;
-	
-	TM.labelFill=Colors.white;
-	TM.labelFont="Arial";
-	TM.labelFontSize=14;
-	TM.labelFontCharH=12;
-	
-	TM.bgHeight=TitleBar.height+TM.tabAreaHeight;
-	TM.bgWidth=GuiElements.width;
-	TM.tabAreaX=BlockPalette.width;
-	TM.tabAreaY=TitleBar.height;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
 
-	TM.tabSpaceX=BlockPalette.width;
-	TM.tabSpaceY=TitleBar.height+TM.tabAreaHeight;
+	TM.minZoom = 0.35;
+	TM.maxZoom = 3;
+
+	TM.tabAreaX=BlockPalette.width;
+	if(GuiElements.smallMode){
+		TM.tabAreaX=0;
+	}
+	TM.tabAreaY=TitleBar.height;
+	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
+
+	/* No longer different from tabArea since tab bar was removed */
+	TM.tabSpaceX=TM.tabAreaX;
+	TM.tabSpaceY=TitleBar.height;
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	TM.spaceScrollMargin=50;
 };
-TabManager.buildTabBar=function(){
-	var TM=TabManager;
-	TM.tabBgRect=GuiElements.draw.rect(0,0,TM.bgWidth,TM.bgHeight,TM.bg);
-	GuiElements.layers.TabsBg.appendChild(TM.tabBgRect);
-	TM.tabBarG=GuiElements.create.group(TM.tabAreaX,TM.tabAreaY);
-	GuiElements.layers.TabsBg.appendChild(TM.tabBarG);
-};
 TabManager.createTabSpaceBg=function(){
 	var TM=TabManager;
 	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
-	TouchReceiver.addListenersTabSpace(TM.bgRect)
+	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
 TabManager.updatePositions=function(){
-	var x=0;
-	for(var i=0;i<TabManager.tabList.length;i++){
-		x=TabManager.tabList[i].updatePosition(x);
-	}
-}
+	/* This might not be needed now that tabs aren't visible */
+};
 TabManager.addTab=function(tab){
 	TabManager.tabList.push(tab);
-}
+};
 TabManager.removeTab=function(tab){
 	var index=TabManager.tabList.indexOf(tab);
 	TabManager.stackList.splice(index,1);
-}
+};
 TabManager.createInitialTab=function(){
 	var TM=TabManager;
-	var t=new Tab(null,"Scripts");
+	var t=new Tab();
 	TM.activateTab(TM.tabList[0]);
 	TM.updatePositions();
-}
+};
 TabManager.activateTab=function(tab){
 	if(TabManager.activeTab!=null){
 		TabManager.activeTab.deactivate();
 	}
 	tab.activate();
 	TabManager.activeTab=tab;
-}
+};
 TabManager.eventFlagClicked=function(){
 	TabManager.passRecursively("eventFlagClicked");
 };
@@ -90,28 +74,27 @@ TabManager.checkBroadcastRunning=function(message){
 	}
 	return false;
 };
-TabManager.checkBroadcastMessageAvailable=function(message){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
-			return true;
-		}
-	}
-	return false;
-};
 TabManager.updateAvailableMessages=function(){
 	TabManager.passRecursively("updateAvailableMessages");
 };
+/**
+ * @returns {ExecutionStatus}
+ */
 TabManager.updateRun=function(){	
 	if(!this.isRunning){
 		return false;
 	}
 	var rVal=false;
 	for(var i=0;i<TabManager.tabList.length;i++){
-		rVal=TabManager.tabList[i].updateRun()||rVal;
+		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning=rVal;
-	return this.isRunning;
-}
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusDone();
+	}
+};
 TabManager.stop=function(){
 	TabManager.passRecursively("stop");
 	this.isRunning=false;
@@ -123,7 +106,7 @@ TabManager.startRun=function(){
 	TabManager.isRunning=true;
 	CodeManager.startUpdateTimer();
 }
-TabManager.startScoll=function(x,y){
+TabManager.startScroll=function(x,y){
 	var TM=TabManager;
 	if(!TM.scrolling){
 		TM.scrolling=true;
@@ -143,10 +126,30 @@ TabManager.endScroll=function(){
 		TM.activeTab.endScroll();
 	}
 };
+TabManager.startZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(!TM.zooming){
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.updateZooming = function(x1, y1, x2, y2){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
+	}
+};
+TabManager.endZooming = function(){
+	var TM=TabManager;
+	if(TM.zooming){
+		TM.zooming = false;
+		TM.activeTab.endZooming();
+	}
+};
 TabManager.createXml=function(xmlDoc){
 	var TM=TabManager;
 	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
-	XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
+	//XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
 	for(var i=0;i<TM.tabList.length;i++){
 		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
 	}
@@ -156,7 +159,7 @@ TabManager.importXml=function(tabsNode){
 	var TM=TabManager;
 	if(tabsNode!=null) {
 		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
-		var active = XmlWriter.getAttribute(tabsNode, "active");
+		//var active = XmlWriter.getAttribute(tabsNode, "active");
 		for (var i = 0; i < tabNodes.length; i++) {
 			Tab.importXml(tabNodes[i]);
 		}
@@ -165,16 +168,7 @@ TabManager.importXml=function(tabsNode){
 	if(TM.tabList.length==0){
 		TM.createInitialTab();
 	}
-	else if(active==null){
-		TM.activateTab(TM.tabList[0]);
-	}
 	else{
-		for(i=0;i<TM.tabList.length;i++){
-			if(TM.tabList[i].name==active){
-				TM.activateTab(TM.tabList[i]);
-				return;
-			}
-		}
 		TM.activateTab(TM.tabList[0]);
 	}
 };
@@ -216,18 +210,22 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
-TabManager.hideHBDropDowns=function(){
-	TabManager.passRecursively("hideHBDropDowns");
+TabManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-TabManager.showHBDropDowns=function(){
-	TabManager.passRecursively("showHBDropDowns");
+TabManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
 };
-TabManager.countHBsInUse=function(){
+TabManager.countDevicesInUse=function(deviceClass){
 	var largest=1;
 	for(var i=0;i<TabManager.tabList.length;i++){
-		largest=Math.max(largest,TabManager.tabList[i].countHBsInUse());
+		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
+};
+TabManager.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	TabManager.passRecursively.apply(TabManager, arguments);
 };
 TabManager.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -238,10 +236,16 @@ TabManager.passRecursively=function(functionName){
 };
 TabManager.updateZoom=function(){
 	var TM=TabManager;
-	TM.bgWidth=GuiElements.width;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
-	GuiElements.update.rect(TM.tabBgRect,0,0,TM.bgWidth,TM.bgHeight);
+	TM.setGraphics();
 	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
+};
+TabManager.getActiveZoom = function(){
+	if(TabManager.activateTab == null){
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
+};
+TabManager.updateAvailableSensors = function(){
+	TabManager.passRecursively("updateAvailableSensors");
 };

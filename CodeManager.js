@@ -1,3 +1,5 @@
+"use strict";
+
 /* CodeManager is a static class that controls block execution.
  * It also moves the BlockStack that the user is dragging.
  */
@@ -11,8 +13,9 @@ function CodeManager(){
 	move.touchY=0; //The y coord of the user's finger.
 	move.topX=0; //The top-left corner's x coord of the BlockStack being moved.
 	move.topY=0; //The top-left corner's y-coord of the BlockStack being moved.
-	move.height=0; //The height of the BlockStack (used to determine overlap with slots).
-	move.width=0; //The width of the BlockStack.
+	move.bottomX=0; //The bottom-right corner
+	move.bottomY=0;
+	move.showTrash = false; //The trash can only shows if the blocks originated from the tabSpace
 	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
 	move.returnType;
 
@@ -37,6 +40,8 @@ function CodeManager(){
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
 	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+	CodeManager.modifiedTime = new Date().getTime();
+	CodeManager.createdTime = new Date().getTime();
 }
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
  * These functions are called by the TouchReciever class when the user drags a BlockStack.
@@ -51,15 +56,16 @@ CodeManager.move=function(){};
 CodeManager.move.start=function(block,x,y){
 	var move=CodeManager.move; //shorthand
 	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
-		GuiElements.overlay.close(); //Close any visible overlays.
+		Overlay.closeOverlays(); //Close any visible overlays.
 		move.moving=true; //Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
 		var stack=block.unsnap();
 		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
-		move.height=stack.dim.rh; //Store the BlockStack's dimensions.
-		move.width=stack.dim.rw;
+		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
+		move.bottomY=stack.relToAbsY(stack.dim.rh);
 		move.returnType=stack.returnType; //Store the BlockStack's return type.
+		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
 		
 		//Store other information about how the BlockStack can connect to other Blocks.
 		move.bottomOpen=stack.getLastBlock().bottomOpen;
@@ -83,16 +89,21 @@ CodeManager.move.start=function(block,x,y){
 CodeManager.move.update=function(x,y){
 	var move=CodeManager.move; //shorthand
 	if(move.moving){ //Only update if a BlockStack is currently moving.
-		move.touchX=x;
-		move.touchY=y;
-		move.topX=move.offsetX+move.touchX;
-		move.topY=move.offsetY+move.touchY;
-		move.stack.move(move.topX,move.topY); //Move the BlockStack to the correct location.
+		move.touchX = x;
+		move.touchY = y;
+		move.topX = move.offsetX+x;
+		move.topY = move.offsetY+y;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
+		move.stack.move(CodeManager.dragAbsToRelX(move.topX),CodeManager.dragAbsToRelY(move.topY)); //Move the BlockStack to the correct location.
 		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if(BlockPalette.IsStackOverPalette()){
+		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
-		}
-		else{
+			if(move.showTrash) {
+				BlockPalette.ShowTrash();
+			}
+		} else {
+			BlockPalette.HideTrash();
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(CodeManager.fit.found){
@@ -103,35 +114,41 @@ CodeManager.move.update=function(x,y){
 			}
 		}
 	}
-}
+};
 /* Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
  */
 CodeManager.move.end=function(){
 	var move=CodeManager.move; //shorthand
 	var fit=CodeManager.fit; //shorthand
 	if(move.moving){ //Only run if a BlockStack is currently moving.
-		move.topX=move.offsetX+move.touchX;
-		move.topY=move.offsetY+move.touchY;
+		move.topX = move.offsetX+move.touchX;
+		move.topY = move.offsetY+move.touchY;
+		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
-		if(BlockPalette.IsStackOverPalette()){
+		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
 			move.stack.delete();
-		}
-		else{
+			if(move.showTrash) {
+				SaveManager.markEdited();
+			}
+		} else {
 			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
+				Sound.playSnap();
 			}
 			else{
 				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
 				move.stack.land();
 				move.stack.updateDim(); //Fix! this line of code might not be needed.
 			}
+			SaveManager.markEdited();
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
-		SaveManager.markEdited();
+		BlockPalette.HideTrash();
 	}
 };
 /* Drops the BlockStack where it is without attaching it to anything or deleting it.
@@ -202,7 +219,7 @@ CodeManager.findBestFit=function(){
 CodeManager.updateRun=function(){
 	var CM=CodeManager;
 	var startingReservation=CM.reservedStackHBoutput;
-	if(!TabManager.updateRun()){ //A recursive call.  Returns true if any Blocks are running.
+	if(!TabManager.updateRun().isRunning()){ //A recursive call.  Returns true if any Blocks are running.
 		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
 	}
 	var now=new Date().getTime();
@@ -214,11 +231,11 @@ CodeManager.updateRun=function(){
 /* Recursively stops all Block execution.
  */
 CodeManager.stop=function(){
-	HummingbirdManager.stopHummingbirds(); //Stop any motors and LEDs on the Hummingbirds
+	Device.stopAll(); //Stop any motors and LEDs on the devices
 	TabManager.stop(); //Recursive call.
 	CodeManager.stopUpdateTimer(); //Stop the update timer.
-	DisplayBox.hide(); //Hide any messages being displayed.
-	Sounds.stopAllSounds() // Stops all sounds and tones
+	DisplayBoxManager.hide(); //Hide any messages being displayed.
+	Sound.stopAllSounds() // Stops all sounds and tones
 	                       // Note: Tones are not allowed to be async, so they 
 	                       // must be stopped manually
 }
@@ -236,7 +253,7 @@ CodeManager.stopUpdateTimer=function(){
 CodeManager.startUpdateTimer=function(){
 	if(!CodeManager.isRunning){ //If the timer is not running...
 		//...Start the timer.
-		CodeManager.updateTimer = self.setInterval(function () { CodeManager.updateRun() }, CodeManager.updateInterval);
+		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
 		CodeManager.isRunning=true;
 	}
 }
@@ -263,6 +280,7 @@ CodeManager.updateDialogDelay=function(){
 	CM.lastDialogDisplayTime=now;
 };
 CodeManager.checkHBOutputDelay=function(stack){
+	return true;
 	var CM=CodeManager;
 	var now=new Date().getTime();
 	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
@@ -295,16 +313,18 @@ CodeManager.removeVariable=function(variable){
 };
 /* @fix Write documentation.
  */
-CodeManager.newVariable=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newVariable=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
-			new Variable(result);
+			const variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(variable);
+		} else {
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create variable","Enter variable name","",callbackFn);
+	});
 };
 CodeManager.checkVarName=function(name){
 	name=name.trim();
@@ -341,16 +361,18 @@ CodeManager.removeList=function(list){
 };
 /* @fix Write documentation.
  */
-CodeManager.newList=function(){
-	var callbackFn=function(cancelled,result) {
+CodeManager.newList=function(callbackCreate, callbackCancel){
+	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
-			new List(result);
+			const list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
+			if(callbackCreate != null) callbackCreate(list);
+		} else{
+			if(callbackCancel != null) callbackCancel();
 		}
-	};
-	HtmlServer.showDialog("Create list","Enter list name","",callbackFn);
+	});
 };
 /* @fix Write documentation.
  */
@@ -387,7 +409,7 @@ CodeManager.newBroadcastMessage=function(slot){
 			slot.setSelectionData('"'+result+'"',new StringData(result));
 		}
 	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",callbackFn);
+	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
 };
 /* @fix Write documentation.
  */
@@ -409,18 +431,8 @@ CodeManager.addBroadcastMessage=function(message){
 };
 /* @fix Write documentation.
  */
-CodeManager.removeUnusedMessages=function(){
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		if(!TabManager.checkBroadcastMessageAvailable(messages[i])){
-			messages.splice(i,1);
-		}
-	}
-};
-/* @fix Write documentation.
- */
 CodeManager.updateAvailableMessages=function(){
-	CodeManager.broadcastList=new Array();
+	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();
 };
 /* @fix Write documentation.
@@ -428,23 +440,36 @@ CodeManager.updateAvailableMessages=function(){
 CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
-CodeManager.hideHBDropDowns=function(){
-	TabManager.hideHBDropDowns();
-	BlockPalette.hideHBDropDowns();
+CodeManager.hideDeviceDropDowns=function(deviceClass){
+	TabManager.hideDeviceDropDowns(deviceClass);
+	BlockPalette.hideDeviceDropDowns(deviceClass);
 };
-CodeManager.showHBDropDowns=function(){
-	TabManager.showHBDropDowns();
-	BlockPalette.showHBDropDowns();
+CodeManager.showDeviceDropDowns=function(deviceClass){
+	TabManager.showDeviceDropDowns(deviceClass);
+	BlockPalette.showDeviceDropDowns(deviceClass);
 };
-CodeManager.countHBsInUse=function(){
-	return TabManager.countHBsInUse();
+CodeManager.countDevicesInUse=function(deviceClass){
+	return TabManager.countDevicesInUse(deviceClass);
 };
 /* @fix Write documentation.
  */
 CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
-
+CodeManager.updateAvailableSensors = function(){
+	TabManager.updateAvailableSensors();
+	BlockPalette.updateAvailableSensors();
+};
+CodeManager.updateConnectionStatus = function(){
+	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
+};
+CodeManager.passRecursivelyDown = function(message, includePalette) {
+	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
+	TabManager.passRecursivelyDown.apply(TabManager, args);
+	if(includePalette) {
+		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
+	}
+};
 CodeManager.createXml=function(){
 	var CM=CodeManager;
 	var xmlDoc = XmlWriter.newDoc("project");
@@ -455,8 +480,8 @@ CodeManager.createXml=function(){
 	}
 	XmlWriter.setAttribute(project,"name",fileName);
 	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
-	XmlWriter.setAttribute(project,"created",new Date().getTime());
-	XmlWriter.setAttribute(project,"modified",new Date().getTime());
+	XmlWriter.setAttribute(project,"created",CodeManager.createdTime);
+	XmlWriter.setAttribute(project,"modified",CodeManager.modifiedTime);
 	var variables=XmlWriter.createElement(xmlDoc,"variables");
 	for(var i=0;i<CM.variableList.length;i++){
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
@@ -472,6 +497,9 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
+	Sound.changeFile();
+	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
+	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
 	if(variablesNode!=null) {
 		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
@@ -489,7 +517,12 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.getCategory("variables").refreshGroup();
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
-	HummingbirdManager.updateSelectableHBs();
+	DeviceManager.updateSelectableDevices();
+	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
+};
+CodeManager.updateModified = function(){
+	CodeManager.modifiedTime = new Date().getTime();
 };
 CodeManager.deleteAll=function(){
 	var CM=CodeManager;
@@ -539,4 +572,36 @@ CodeManager.setSoundTempo=function(newTempo){
 			CodeManager.sound.tempo=newTempo;
 		}
 	}
+};
+CodeManager.dragAbsToRelX=function(x){
+	return x / TabManager.getActiveZoom();
+};
+CodeManager.dragAbsToRelY=function(y){
+	return y / TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsX=function(x){
+	return x * TabManager.getActiveZoom();
+};
+CodeManager.dragRelToAbsY=function(y){
+	return y * TabManager.getActiveZoom();
+};
+CodeManager.renameRecording = function(oldName, newName){
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+};
+CodeManager.deleteRecording = function(recording){
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};
+CodeManager.markLoading = function(message){
+	TitleBar.setText(message);
+	TouchReceiver.disableInteraction(1000);
+};
+CodeManager.fileClosed = function(){
+	BlockPalette.fileClosed();
+};
+CodeManager.fileOpened = function(){
+	BlockPalette.fileOpened();
+};
+CodeManager.cancelLoading = function(){
+	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };

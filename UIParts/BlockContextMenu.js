@@ -6,7 +6,7 @@ function BlockContextMenu(block,x,y){
 }
 BlockContextMenu.setGraphics=function(){
 	var BCM=BlockContextMenu;
-	BCM.bnMargin=8;
+	BCM.bnMargin=Button.defaultMargin;
 	BCM.bgColor=Colors.black;
 	BCM.blockShift=20;
 };
@@ -14,11 +14,13 @@ BlockContextMenu.prototype.showMenu=function(){
 	var BCM=BlockContextMenu;
 	this.group=GuiElements.create.group(0,0);
 	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
-	this.menuBnList.isOverlayPart=true;
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	this.menuBnList.show();
-	this.bubbleOverlay=new BubbleOverlay(BCM.bgColor,BCM.bnMargin,this.group,this);
-	this.bubbleOverlay.display(this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
+	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
 };
 BlockContextMenu.prototype.addOptions=function(){
 	if(this.block.stack.isDisplayStack){
@@ -56,11 +58,16 @@ BlockContextMenu.prototype.addOptions=function(){
 		}
 	}
 	else {
+		var BCM = this;
 		var funcDup = function () {
 			funcDup.BCM.duplicate();
 		};
 		funcDup.BCM = this;
 		this.menuBnList.addOption("Duplicate", funcDup);
+		this.menuBnList.addOption("Delete",function(){
+			BCM.block.unsnap().delete();
+			BCM.close();
+		})
 	}
 };
 BlockContextMenu.prototype.duplicate=function(){

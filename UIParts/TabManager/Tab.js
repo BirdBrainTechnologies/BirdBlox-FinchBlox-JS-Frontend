@@ -1,89 +1,48 @@
-function Tab(sprite,name){
-	this.name=name;
-	this.sprite=sprite;
-	this.textE=this.generateText(this.name);
-	this.pathE=this.generatePath();
+function Tab(){
 	this.mainG=GuiElements.create.group(0,0);
 	this.scrollX=0;
 	this.scrollY=0;
+	this.zoomFactor = 1;
 	this.visible=false;
 	TabManager.addTab(this);
 	this.stackList=new Array();
 	this.isRunning=false;
 	this.scrolling=false;
-	this.scrollXOffset=0;
-	this.scrollYOffset=0;
-	this.dim=function(){};
+	this.zooming = false;
+	this.scrollXOffset=50;
+	this.scrollYOffset=100;
+	this.zoomStartDist=null;
+	this.startZoom = null;
+	this.updateTransform();
+	this.overFlowArr = new OverflowArrows();
+	this.dim={};
 	this.dim.x1=0;
 	this.dim.y1=0;
 	this.dim.x2=0;
 	this.dim.y2=0;
-	this.dim.width=0;
-	this.dim.height=0;
-}
-Tab.prototype.generatePath=function(){
-	var TM=TabManager;
-	var pathE=GuiElements.create.path();
-	GuiElements.update.color(pathE,TM.hiddenTabFill);
-	return pathE;
-}
-Tab.prototype.generateText=function(text){
-	var TM=TabManager;
-	var textE=GuiElements.draw.text(0,0,text,TM.labelFontSize,TM.labelFill,TM.labelFont,"normal");
-	this.textHeight=TM.labelFontCharH;
-	return textE;
-}
-Tab.prototype.updatePosition=function(x){
-	var TM=TabManager;
-	this.textWidth=GuiElements.measure.textWidth(this.textE);
-	this.width=this.textWidth+TM.tabSlantWidth*2+TM.tabHMargin*2;
-	this.height=TM.tabAreaHeight;
-	this.textY=this.textHeight/2+this.height/2;
-	if(this.width<TM.tabMinW){
-		this.width=TM.tabMinW;
-		this.textX=this.width/2-this.textWidth/2;
-	}
-	else{
-		this.textX=x+TM.tabSlantWidth+TM.tabHMargin;
-	}
-	GuiElements.update.trapezoid(this.pathE,x,0,this.width,this.height,TM.tabSlantWidth);
-	GuiElements.move.text(this.textE,this.textX,this.textY);
-	if(!this.visible){
-		TM.tabBarG.appendChild(this.pathE);
-		TM.tabBarG.appendChild(this.textE);
-		this.visible=true;
-	}
-	return x+this.width;
 }
 Tab.prototype.activate=function(){
 	GuiElements.layers.activeTab.appendChild(this.mainG);
-	GuiElements.update.color(this.pathE,TabManager.activeTabFill);
-}
-Tab.prototype.deactivate=function(){
-	this.mainG.remove();
-	GuiElements.update.color(this.pathE,TabManager.hiddenTabFill);
-}
+	this.overFlowArr.show();
+};
 Tab.prototype.addStack=function(stack){
 	this.stackList.push(stack);
-}
+};
 Tab.prototype.removeStack=function(stack){
 	var index=this.stackList.indexOf(stack);
 	this.stackList.splice(index,1);
 };
-Tab.prototype.getSprite=function(){
-	return this.sprite;
-}
 Tab.prototype.relToAbsX=function(x){
-	return x+this.scrollX;
+	return x * this.zoomFactor + this.scrollX;
 };
 Tab.prototype.relToAbsY=function(y){
-	return y+this.scrollY;
+	return y * this.zoomFactor + this.scrollY;
 };
 Tab.prototype.absToRelX=function(x){
-	return x-this.scrollX;
+	return (x - this.scrollX) / this.zoomFactor;
 };
 Tab.prototype.absToRelY=function(y){
-	return y-this.scrollY;
+	return (y - this.scrollY) / this.zoomFactor;
 };
 Tab.prototype.getAbsX=function(){
 	return this.relToAbsX(0);
@@ -111,18 +70,12 @@ Tab.prototype.checkBroadcastRunning=function(message){
 	}
 	return false;
 };
-Tab.prototype.checkBroadcastMessageAvailable=function(message){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i].checkBroadcastMessageAvailable(message)){
-			return true;
-		}
-	}
-	return false;
-};
 Tab.prototype.updateAvailableMessages=function(){
 	this.passRecursively("updateAvailableMessages");
 };
+/**
+ * @returns {ExecutionStatus}
+ */
 Tab.prototype.updateRun=function(){
 	if(!this.isRunning){
 		return false;
@@ -130,11 +83,15 @@ Tab.prototype.updateRun=function(){
 	var stacks=this.stackList;
 	var rVal=false;
 	for(var i=0;i<stacks.length;i++){
-		rVal=stacks[i].updateRun()||rVal;
+		rVal = stacks[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning=rVal;
-	return this.isRunning;
-}
+	if(this.isRunning){
+		return new ExecutionStatusRunning();
+	} else{
+		return new ExecutionStatusDone();
+	}
+};
 Tab.prototype.stop=function(){
 	this.passRecursively("stop");
 	this.isRunning=false;
@@ -161,13 +118,18 @@ Tab.prototype.startScroll=function(x,y){
 };
 Tab.prototype.updateScroll=function(x,y){
 	if(this.scrolling) {
-		this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);
+		this.scrollX=this.scrollXOffset + x;
+		this.scrollY=this.scrollYOffset + y;
+		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+		this.updateArrowsShift();
+		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
 	}
 };
 Tab.prototype.scroll=function(x,y) {
-	//this.scrollX=x;
-	//this.scrollY=y;
-	//GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	/*
+	this.scrollX=x;
+	this.scrollY=y;
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
 	var dim=this.dim;
 	var x1=x+dim.xDiff;
 	var y1=y+dim.yDiff;
@@ -177,28 +139,67 @@ Tab.prototype.scroll=function(x,y) {
 	this.scrollX=newObjX-dim.xDiff;
 	this.scrollY=newObjY-dim.yDiff;
 	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
+	*/
 };
 Tab.prototype.endScroll=function(){
-	this.scrolling=false;
+	this.scrolling = false;
 };
 Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
-	var minX;
-	var maxX;
-	if(objectW<containerW){
-		if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
-			return objectX;
-		}
-		minX=Math.min(containerX,objectX);
-		maxX=Math.max(containerX+containerW-objectW,objectX);
+	// var minX;
+	// var maxX;
+	// if(objectW<containerW){
+	// 	if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
+	// 		return objectX;
+	// 	}
+	// 	minX=Math.min(containerX,objectX);
+	// 	maxX=Math.max(containerX+containerW-objectW,objectX);
+	// }
+	// else{
+	// 	minX=Math.min(containerX+containerW-objectW,objectX);
+	// 	maxX=Math.max(containerX,objectX);
+	// }
+	// var rVal=targetX;
+	// rVal=Math.min(rVal,maxX);
+	// rVal=Math.max(rVal,minX);
+	// return rVal;
+};
+Tab.prototype.startZooming = function(x1, y1, x2, y2){
+	if(!this.zooming) {
+		this.zooming = true;
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		this.scrollXOffset = this.scrollX - x;
+		this.scrollYOffset = this.scrollY - y;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.startZoom = this.zoomFactor;
+		this.updateTabDim();
 	}
-	else{
-		minX=Math.min(containerX+containerW-objectW,objectX);
-		maxX=Math.max(containerX,objectX);
+};
+Tab.prototype.updateZooming = function(x1, y1, x2, y2){
+	if(this.zooming){
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
+		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+		var zoomRatio = this.zoomFactor / this.startZoom;
+		this.scrollX=this.scrollXOffset * zoomRatio + x;
+		this.scrollY=this.scrollYOffset * zoomRatio + y;
+		this.updateTransform();
+		this.updateArrowsShift();
 	}
-	var rVal=targetX;
-	rVal=Math.min(rVal,maxX);
-	rVal=Math.max(rVal,minX);
-	return rVal;
+};
+Tab.prototype.updateTransform=function(){
+	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
+	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
+};
+Tab.prototype.endZooming = function(){
+	this.zooming = false;
 };
 Tab.prototype.updateTabDim=function(){
 	var dim=this.dim;
@@ -215,20 +216,13 @@ Tab.prototype.updateTabDim=function(){
 		dim.x2=0;
 		dim.y2=0;
 	}
-	dim.x1-=TabManager.spaceScrollMargin;
-	dim.y1-=TabManager.spaceScrollMargin;
-	dim.x2+=TabManager.spaceScrollMargin;
-	dim.y2+=TabManager.spaceScrollMargin;
-	dim.width=dim.x2-dim.x1;
-	dim.height=dim.y2-dim.y1;
-	dim.xDiff=this.dim.x1;
-	dim.yDiff=this.dim.y1;
 };
 Tab.prototype.createXml=function(xmlDoc){
 	var tab=XmlWriter.createElement(xmlDoc,"tab");
-	XmlWriter.setAttribute(tab,"name",this.name);
+	//XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab,"x",this.scrollX);
 	XmlWriter.setAttribute(tab,"y",this.scrollY);
+	XmlWriter.setAttribute(tab,"zoom",this.zoomFactor);
 	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
 	for(var i=0;i<this.stackList.length;i++){
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
@@ -237,13 +231,14 @@ Tab.prototype.createXml=function(xmlDoc){
 	return tab;
 };
 Tab.importXml=function(tabNode){
-	var name=XmlWriter.getAttribute(tabNode,"name","Sprite1");
 	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
 	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
-	var tab=new Tab(null,name);
+	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	var tab=new Tab();
 	tab.scrollX=x;
 	tab.scrollY=y;
-	GuiElements.move.group(tab.mainG,tab.scrollX,tab.scrollY);
+	tab.zoomFactor = zoom;
+	tab.updateTransform();
 	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
 	if(stacksNode!=null){
 		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
@@ -251,12 +246,11 @@ Tab.importXml=function(tabNode){
 			BlockStack.importXml(stackNodes[i],tab);
 		}
 	}
+	tab.updateArrows();
 	return tab;
 };
 Tab.prototype.delete=function(){
 	this.passRecursively("delete");
-	this.textE.remove();
-	this.pathE.remove();
 	this.mainG.remove();
 };
 Tab.prototype.renameVariable=function(variable){
@@ -289,19 +283,26 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Tab.prototype.hideHBDropDowns=function(){
-	this.passRecursively("hideHBDropDowns");
+Tab.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
 };
-Tab.prototype.showHBDropDowns=function(){
-	this.passRecursively("showHBDropDowns");
+Tab.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
-Tab.prototype.countHBsInUse=function(){
+Tab.prototype.countDevicesInUse=function(deviceClass){
 	var largest=1;
 	var stacks=this.stackList;
 	for(var i=0;i<stacks.length;i++){
-		largest=Math.max(largest,stacks[i].countHBsInUse());
+		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
+};
+Tab.prototype.updateAvailableSensors = function() {
+	this.passRecursively("updateAvailableSensors");
+};
+Tab.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
 };
 Tab.prototype.passRecursively=function(functionName){
 	var args = Array.prototype.slice.call(arguments, 1);
@@ -314,4 +315,26 @@ Tab.prototype.passRecursively=function(functionName){
 			i--;
 		}
 	}
+};
+Tab.prototype.getZoom=function(){
+	return this.zoomFactor;
+};
+Tab.prototype.updateZoom=function(){
+	this.overFlowArr.updateZoom();
+	this.updateArrows();
+};
+Tab.prototype.updateArrows=function(){
+	this.updateTabDim();
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
+};
+Tab.prototype.updateArrowsShift=function(){
+	var x1 = this.relToAbsX(this.dim.x1)
+	var y1 = this.relToAbsY(this.dim.y1)
+	var x2 = this.relToAbsX(this.dim.x2)
+	var y2 = this.relToAbsY(this.dim.y2)
+	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
