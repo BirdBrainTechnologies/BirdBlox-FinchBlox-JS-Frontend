@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Setting.js" afterPath="$PROJECT_DIR$/Setting.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -193,11 +193,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="163" column="4" lean-forward="false" selection-start-line="163" selection-start-column="4" selection-end-line="163" selection-end-column="4" />
+            <state relative-caret-position="63">
+              <caret line="881" column="32" lean-forward="false" selection-start-line="881" selection-start-column="32" selection-end-line="881" selection-end-column="32" />
               <folding>
                 <element signature="e#15#254#0" expanded="false" />
                 <element signature="e#750#803#0" expanded="false" />
@@ -344,13 +344,6 @@
                 <element signature="e#34376#34516#0" expanded="false" />
                 <element signature="e#34553#34711#0" expanded="false" />
                 <element signature="e#34752#35043#0" expanded="false" />
-                <element signature="e#35091#36024#0" expanded="false" />
-                <element signature="e#35158#36020#0" expanded="false" />
-                <element signature="e#35191#35829#0" expanded="false" />
-                <element signature="e#35406#35532#0" expanded="false" />
-                <element signature="e#35638#35810#0" expanded="false" />
-                <element signature="e#35904#35981#0" expanded="false" />
-                <element signature="e#35993#36015#0" expanded="false" />
                 <element signature="e#36026#36191#0" expanded="false" />
                 <element signature="e#36238#36955#0" expanded="false" />
                 <element signature="e#36241#36309#0" expanded="false" />
@@ -369,6 +362,16 @@
                 <element signature="e#38021#38229#0" expanded="false" />
                 <element signature="e#38193#38227#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Setting.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Setting.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="670">
+              <caret line="56" column="18" lean-forward="false" selection-start-line="56" selection-start-column="18" selection-end-line="56" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -500,7 +503,6 @@
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" />
         <option value="$PROJECT_DIR$/Data/NumData.js" />
         <option value="$PROJECT_DIR$/SettingsManager.js" />
-        <option value="$PROJECT_DIR$/Setting.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
@@ -518,6 +520,7 @@
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/RoundSlot.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/BroadcastDropSlot.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
+        <option value="$PROJECT_DIR$/Setting.js" />
       </list>
     </option>
   </component>
@@ -1023,7 +1026,7 @@
       <workItem from="1499862512765" duration="29097000" />
       <workItem from="1499957960656" duration="5259000" />
       <workItem from="1499987913963" duration="1497000" />
-      <workItem from="1500040613503" duration="15289000" />
+      <workItem from="1500040613503" duration="15446000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1120,7 +1123,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1324295000" />
+    <option name="totallyTimeSpent" value="1324452000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1629,14 +1632,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1">
           <caret line="25" column="32" lean-forward="true" selection-start-line="25" selection-start-column="32" selection-end-line="25" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Setting.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="35" column="26" lean-forward="true" selection-start-line="35" selection-start-column="26" selection-end-line="35" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -2687,8 +2682,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="163" column="4" lean-forward="false" selection-start-line="163" selection-start-column="4" selection-end-line="163" selection-end-column="4" />
+        <state relative-caret-position="63">
+          <caret line="881" column="32" lean-forward="false" selection-start-line="881" selection-start-column="32" selection-end-line="881" selection-end-column="32" />
           <folding>
             <element signature="e#15#254#0" expanded="false" />
             <element signature="e#750#803#0" expanded="false" />
@@ -2835,13 +2830,6 @@
             <element signature="e#34376#34516#0" expanded="false" />
             <element signature="e#34553#34711#0" expanded="false" />
             <element signature="e#34752#35043#0" expanded="false" />
-            <element signature="e#35091#36024#0" expanded="false" />
-            <element signature="e#35158#36020#0" expanded="false" />
-            <element signature="e#35191#35829#0" expanded="false" />
-            <element signature="e#35406#35532#0" expanded="false" />
-            <element signature="e#35638#35810#0" expanded="false" />
-            <element signature="e#35904#35981#0" expanded="false" />
-            <element signature="e#35993#36015#0" expanded="false" />
             <element signature="e#36026#36191#0" expanded="false" />
             <element signature="e#36238#36955#0" expanded="false" />
             <element signature="e#36241#36309#0" expanded="false" />
@@ -2860,6 +2848,14 @@
             <element signature="e#38021#38229#0" expanded="false" />
             <element signature="e#38193#38227#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Setting.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="670">
+          <caret line="56" column="18" lean-forward="false" selection-start-line="56" selection-start-column="18" selection-end-line="56" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>

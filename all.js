@@ -10855,7 +10855,7 @@ Setting.prototype.readValue = function(callbackFn){
 		callbackFn(this.value);
 	}.bind(this), function(){
 		if(callbackFn != null) callbackFn(this.value);
-	})
+	}.bind(this));
 };
 function SettingsManager(){
 	const SM = SettingsManager;
