@@ -14,7 +14,7 @@
  */
 function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer) {
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
-	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
+	this.slotShape = new RoundSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 	// A list of additional options to show on the InputPad
 	this.optionsList = [];
@@ -133,19 +133,4 @@ RoundSlot.prototype.sanitizeData = function(data) {
  */
 RoundSlot.prototype.addLabelText = function(text) {
 	this.labelText = text;
-};
-
-/**
- * Formats the string to be displayed by wrapping StringData in quotes
- * TODO: Determine when strings should be wrapped in quotes.  Currently, RectSlots don't but RoundSlots and DropSlots do
- * @inheritDoc
- * @param {Data} data
- * @return {string}
- */
-RoundSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if (data.type === Data.types.string) {
-		result = "\"" + result + "\"";
-	}
-	return result;
 };

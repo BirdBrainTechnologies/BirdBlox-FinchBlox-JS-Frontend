@@ -44,10 +44,10 @@ NumData.prototype.getValueInR=function(min,max,positive,integer){
 	if(integer==true){
 		val=Math.round(val);
 	}
-	if(val<min){
+	if(min != null && val<min){
 		val=min;
 	}
-	if(val>max){
+	if(max != null && val>max){
 		val=max;
 	}
 	return val;

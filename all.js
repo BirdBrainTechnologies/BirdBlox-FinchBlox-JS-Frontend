@@ -4,7 +4,7 @@ const FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -311,10 +311,10 @@ NumData.prototype.getValueInR=function(min,max,positive,integer){
 	if(integer==true){
 		val=Math.round(val);
 	}
-	if(val<min){
+	if(min != null && val<min){
 		val=min;
 	}
-	if(val>max){
+	if(max != null && val>max){
 		val=max;
 	}
 	return val;
@@ -1295,6 +1295,7 @@ document.addEventListener('DOMContentLoaded', function() {
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	HtmlServer();
+	SettingsManager();
 	GuiElements.setGuiConstants();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
@@ -2146,37 +2147,31 @@ GuiElements.passUpdateZoom = function(){
 	RowDialog.updateZoom();
 };
 GuiElements.configureZoom = function(callback){
-	var GE = GuiElements;
-	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
-		GE.computedZoom = GE.computeZoomFromDims(response);
-		//GuiElements.alert("Requesting zoom from settings.");
-		HtmlServer.getSetting("zoom",function(result){
-			GE.alert("Dealing with zoom from settings");
-			GE.zoomMultiple = parseFloat(result);
+	const GE = GuiElements;
+	SettingsManager.loadSettings(function(){
+		const callbackFn = function(){
+			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			//GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
-		},function(){
-			GE.alert("Error reading zoom from settings");
-			GE.zoomMultiple = 1;
-			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
-			callback();
-		}, "1");
-	},function(){
-		GE.alert("Error reading dims");
-		callback();
-	}, null, null, "200,200");
+		};
+		HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+			GE.computedZoom = GE.computeZoomFromDims(response);
+			callbackFn();
+		}, function(){
+			callbackFn();
+		});
+	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
@@ -2699,6 +2694,30 @@ function VectorPaths(){
 	VP.dots.width = 24;
 	VP.dots.height = 24;
 	VP.dots.path = "M 12 4 C 10.9 4 10 4.9 10 6 C 10 7.1 10.9 8 12 8 C 13.1 8 14 7.1 14 6 C 14 4.9 13.1 4 12 4 z M 12 10 C 10.9 10 10 10.9 10 12 C 10 13.1 10.9 14 12 14 C 13.1 14 14 13.1 14 12 C 14 10.9 13.1 10 12 10 z M 12 16 C 10.9 16 10 16.9 10 18 C 10 19.1 10.9 20 12 20 C 13.1 20 14 19.1 14 18 C 14 16.9 13.1 16 12 16 z ";
+	VP.volumeUp = {};
+	VP.volumeUp.width = 24;
+	VP.volumeUp.height = 24;
+	VP.volumeUp.path = "M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z";
+	VP.volumeMute = {};
+	VP.volumeMute.width = 9;
+	VP.volumeMute.height = 16;
+	VP.volumeMute.path = "m 0,5 0,6 4,0 5,5 0,-16 -5,5 -4,0 z";
+	VP.zoomIn = {};
+	VP.zoomIn.width = 17.490;
+	VP.zoomIn.height = 17.490;
+	VP.zoomIn.path = "m 6.5,0 c -3.59,0 -6.5,2.91 -6.5,6.5 0,3.59 2.91,6.5 6.5,6.5 1.61,0 3.090469,-0.590313 4.230469,-1.570312 l 0.269531,0.28125 0,0.789062 5,4.990234 1.490234,-1.490234 -4.990234,-5 -0.789062,0 -0.28125,-0.269531 c 0.979999,-1.14 1.570312,-2.620469 1.570312,-4.230469 0,-3.59 -2.91,-6.5 -6.5,-6.5 z m 0,2 c 2.49,0 4.5,2.01 4.5,4.5 0,2.49 -2.01,4.5 -4.5,4.5 -2.49,0 -4.5,-2.01 -4.5,-4.5 0,-2.49 2.01,-4.5 4.5,-4.5 z m -0.5,2 0,2 -2,0 0,1 2,0 0,2 1,0 0,-2 2,0 0,-1 -2,0 0,-2 -1,0 z";
+	VP.zoomOut = {};
+	VP.zoomOut.width = 24;
+	VP.zoomOut.height = 24;
+	VP.zoomOut.path = "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z";
+	VP.resetZoom = {};
+	VP.resetZoom.width = 17.490;
+	VP.resetZoom.height = 17.490;
+	VP.resetZoom.path = "m 6.5,0 c -3.59,0 -6.5,2.91 -6.5,6.5 0,3.59 2.91,6.5 6.5,6.5 1.61,0 3.090469,-0.590314 4.230469,-1.570312 l 0.269531,0.28125 0,0.789062 5,4.990234 1.490234,-1.490234 -4.990234,-5 -0.789062,0 -0.28125,-0.269531 c 0.979998,-1.14 1.570312,-2.620469 1.570312,-4.230469 0,-3.59 -2.91,-6.5 -6.5,-6.5 z m 0,2 c 2.49,0 4.5,2.01 4.5,4.5 0,2.49 -2.01,4.5 -4.5,4.5 -2.49,0 -4.5,-2.01 -4.5,-4.5 0,-2.49 2.01,-4.5 4.5,-4.5 z m 0,1.7792969 c -0.5877027,0 -1.0381972,0.2332712 -1.3496094,0.6992187 -0.3090707,0.4636061 -0.4628906,1.1383715 -0.4628906,2.0234375 0,0.8827249 0.1538199,1.5574899 0.4628906,2.0234379 0.3114122,0.463606 0.7619067,0.695312 1.3496094,0.695312 0.587703,0 1.036632,-0.231706 1.345703,-0.695312 0.311412,-0.465948 0.466797,-1.140713 0.466797,-2.0234379 0,-0.885066 -0.155385,-1.5598314 -0.466797,-2.0234375 -0.309071,-0.4659475 -0.758,-0.6992187 -1.345703,-0.6992187 z m 0,0.5625 c 0.3676067,0 0.643539,0.1804331 0.826172,0.5410156 0.184974,0.3582411 0.277344,0.8979757 0.277344,1.6191406 0,0.7188239 -0.09237,1.2585579 -0.277344,1.6191409 -0.182633,0.358241 -0.4585653,0.537109 -0.826172,0.537109 -0.3652654,0 -0.6411977,-0.178868 -0.8261719,-0.537109 -0.1826326,-0.360583 -0.2734375,-0.900317 -0.2734375,-1.6191409 0,-0.7211649 0.090805,-1.2608995 0.2734375,-1.6191406 0.1849742,-0.3605825 0.4609065,-0.5410156 0.8261719,-0.5410156 z";
+	VP.settings = {};
+	VP.settings.width = 24;
+	VP.settings.height = 24;
+	VP.settings.path = "M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z";
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -3400,6 +3419,14 @@ Sound.lookupById = function(id){
 		}
 	});
 	return result;
+};
+Sound.playSnap = function(){
+	if(SettingsManager.enableSnapNoise.getValue() === "true") {
+		let snapSoundRequest = new HttpRequestBuilder("sound/play");
+		snapSoundRequest.addParam("type", Sound.type.ui);
+		snapSoundRequest.addParam("filename", Sound.click);
+		HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+	}
 };
 
 
@@ -4200,8 +4227,8 @@ TitleBar.makeButtons=function(){
 	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
 	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
-	TB.viewMenu=new ViewMenu(TB.viewBn);
+	TB.viewBn.addIcon(VectorPaths.settings,TB.bnIconH);
+	TB.viewMenu=new SettingsMenu(TB.viewBn);
 	TB.debugBn=null;
 	if(TB.debugEnabled) {
 		TB.enableDebug();
@@ -6946,7 +6973,7 @@ function Menu(button,width){
 Menu.prototype = Object.create(Overlay.prototype);
 Menu.prototype.constructor = Menu;
 Menu.setGraphics=function(){
-	Menu.defaultWidth=100;
+	Menu.defaultWidth=170;
 	Menu.bnMargin=Button.defaultMargin;
 	Menu.bgColor=Colors.black;
 };
@@ -6969,7 +6996,8 @@ Menu.prototype.createMenuBnList=function(){
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close){
+Menu.prototype.addOption=function(text,func,close,icon){
+	icon = null;
 	if(close==null){
 		close=true;
 	}
@@ -6984,7 +7012,7 @@ Menu.prototype.addOption=function(text,func,close){
 	callbackFn.menu=this;
 	callbackFn.func=func;
 	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn);
+	this.menuBnList.addOption(text,callbackFn,icon);
 };
 Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;
@@ -7223,6 +7251,42 @@ ViewMenu.prototype.optionZoomOut=function(){
 ViewMenu.prototype.optionResetZoom=function(){
 	GuiElements.zoomMultiple=1;
 	GuiElements.updateZoom();
+};
+function SettingsMenu(button){
+	Menu.call(this,button);
+}
+SettingsMenu.prototype = Object.create(Menu.prototype);
+SettingsMenu.prototype.constructor = SettingsMenu;
+SettingsMenu.prototype.loadOptions = function() {
+	this.addOption("Zoom in", this.optionZoomIn,false, VectorPaths.zoomIn);
+	this.addOption("Zoom out", this.optionZoomOut,false, VectorPaths.zoomOut);
+	this.addOption("Reset zoom", this.optionResetZoom,true, VectorPaths.resetZoom);
+	if(SettingsManager.enableSnapNoise.getValue() === "true") {
+		this.addOption("Disable snap noise", this.disableSnapping, true, VectorPaths.volumeMute);
+	} else {
+		this.addOption("Enable snap noise", this.enableSnapping, true, VectorPaths.volumeUp);
+	}
+};
+SettingsMenu.prototype.optionZoomIn=function(){
+	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple + GuiElements.zoomAmount);
+	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
+	GuiElements.updateZoom();
+};
+SettingsMenu.prototype.optionZoomOut=function(){
+	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple - GuiElements.zoomAmount);
+	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
+	GuiElements.updateZoom();
+};
+SettingsMenu.prototype.optionResetZoom=function(){
+	SettingsManager.zoom.writeValue(1);
+	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
+	GuiElements.updateZoom();
+};
+SettingsMenu.prototype.enableSnapping = function(){
+	SettingsManager.enableSnapNoise.writeValue("true");
+};
+SettingsMenu.prototype.disableSnapping = function(){
+	SettingsManager.enableSnapNoise.writeValue("false");
 };
 
 
@@ -7677,11 +7741,7 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
-
-				let snapSoundRequest = new HttpRequestBuilder("sound/play");
-				snapSoundRequest.addParam("type", Sound.type.ui);
-				snapSoundRequest.addParam("filename", Sound.click);
-				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+				Sound.playSnap();
 			}
 			else{
 				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
@@ -9530,6 +9590,7 @@ RecordingDialog.prototype.hide = function(){
 RecordingDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
+	Sound.stopAllSounds();
 };
 RecordingDialog.prototype.createRecordButton = function(){
 	let RD = RowDialog;
@@ -10738,6 +10799,76 @@ HttpRequestBuilder.prototype.toString = function(){
 };
 
 
+function Setting(key, defaultVal, number, integer, min, max) {
+	if(number == null) {
+		number = false;
+	}
+	if(integer == null) {
+		integer = false;
+	}
+	if(min == null) {
+		max = null;
+	}
+	if(max == null) {
+		max = null;
+	}
+
+	this.key = key;
+	this.defaultVal = defaultVal;
+	this.number = number;
+	this.integer = integer;
+	this.min = min;
+	this.max = max;
+	this.value = defaultVal;
+}
+Setting.prototype.getValue = function(){
+	return this.value;
+};
+/*
+Setting.prototype.setValue = function(value){
+	this.value = value;
+};
+*/
+Setting.prototype.writeValue = function(value){
+	this.value = value;
+	if(this.number) {
+		this.value = (new NumData(value)).getValueInR(this.min, this.max);
+	}
+	const request = new HttpRequestBuilder("settings/set");
+	request.addParam("key", this.key);
+	request.addParam("value", HtmlServer.encodeHtml(value));
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+Setting.prototype.readValue = function(callbackFn){
+	const request = new HttpRequestBuilder("settings/get");
+	request.addParam("key", this.key);
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
+		let res = result;
+		if(this.number) {
+			const numData = (new StringData(res)).asNum();
+			if(numData.isValid) {
+				this.value = numData.getValueInR(this.min, this.max, false, this.integer);
+			}
+		} else {
+			this.value = res;
+		}
+		callbackFn(this.value);
+	}.bind(this), function(){
+		if(callbackFn != null) callbackFn(this.value);
+	})
+};
+function SettingsManager(){
+	const SM = SettingsManager;
+	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
+	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");
+}
+SettingsManager.loadSettings = function(callbackFn){
+	const SM = SettingsManager;
+
+	SM.enableSnapNoise.readValue(function(){
+		SM.zoom.readValue(callbackFn);
+	})
+};
 /* HtmlServer is a static class that will manage HTTP requests.
  * This class is not nearly finished.
  */
@@ -13934,7 +14065,7 @@ EditableSlot.prototype.changeText = function(text, updateDim) {
 };
 
 /**
- * Tells the Slot to display an inputSys so it can be edited. Also sets the slotShape to appear selected
+ * Tells the Slot to display an InputSystem so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
 	DebugOptions.assert(!this.hasChild);
@@ -13996,7 +14127,7 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
 };
 
 /**
- * Converts the Slot's data to a displayable string. Subclasses override this method to apply formatting
+ * Converts the Slot's data to a displayable string. Subclasses override this method to apply formatting.
  * @param {Data} data
  * @return {string}
  */
@@ -14108,7 +14239,7 @@ EditableSlot.prototype.copyFrom = function(slot) {
  */
 function RectSlot(parent, key, snapType, outputType, data){
 	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
-	this.slotShape = new RectSlotShape(this, data.asString().getValue());
+	this.slotShape = new RectSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
@@ -14154,7 +14285,7 @@ RectSlot.prototype.createInputSystem = function(){
  */
 function RoundSlot(parent, key, inputType, snapType, outputType, data, positive, integer) {
 	EditableSlot.call(this, parent, key, inputType, snapType, outputType, data);
-	this.slotShape = new RoundSlotShape(this, data.asString().getValue());
+	this.slotShape = new RoundSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 	// A list of additional options to show on the InputPad
 	this.optionsList = [];
@@ -14274,21 +14405,6 @@ RoundSlot.prototype.sanitizeData = function(data) {
 RoundSlot.prototype.addLabelText = function(text) {
 	this.labelText = text;
 };
-
-/**
- * Formats the string to be displayed by wrapping StringData in quotes
- * TODO: Determine when strings should be wrapped in quotes.  Currently, RectSlots don't but RoundSlots and DropSlots do
- * @inheritDoc
- * @param {Data} data
- * @return {string}
- */
-RoundSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if (data.type === Data.types.string) {
-		result = "\"" + result + "\"";
-	}
-	return result;
-};
 /**
  * DropSlots have their data selected using the InputPad and often hold SelectionData
  * TODO: reduce redundancy with RoundSlot
@@ -14317,7 +14433,7 @@ function DropSlot(parent, key, inputType, snapType, data, nullable) {
 		nullable = false;
 	}
 	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
-	this.slotShape = new DropSlotShape(this, data.asString().getValue());
+	this.slotShape = new DropSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 	this.optionsList = [];
 	this.nullable = nullable;
@@ -14451,19 +14567,6 @@ DropSlot.prototype.sanitizeData = function(data) {
 	}
 	return this.sanitizeNonSelectionData(data);
 };
-
-/**
- * @inheritDoc
- * @param {Data} data
- * @return {string}
- */
-DropSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if (data.type === Data.types.string) {
-		result = "\"" + result + "\"";
-	}
-	return result;
-};
 /**
  * DropSlots have their data selected using the InputPad and often hold SelectionData
  * TODO: reduce redundancy with RoundSlot
@@ -14492,7 +14595,7 @@ function DropSlot(parent, key, inputType, snapType, data, nullable) {
 		nullable = false;
 	}
 	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
-	this.slotShape = new DropSlotShape(this, data.asString().getValue());
+	this.slotShape = new DropSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 	this.optionsList = [];
 	this.nullable = nullable;
@@ -14625,19 +14728,6 @@ DropSlot.prototype.sanitizeData = function(data) {
 		return this.selectionDataFromValue(value);
 	}
 	return this.sanitizeNonSelectionData(data);
-};
-
-/**
- * @inheritDoc
- * @param {Data} data
- * @return {string}
- */
-DropSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if (data.type === Data.types.string) {
-		result = "\"" + result + "\"";
-	}
-	return result;
 };
 /**
  * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable.
@@ -14930,6 +15020,20 @@ BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	data = data.asString();
 	if (!data.isValid) return null;
 	return data;
+};
+
+/**
+ * BroadCastDropSlots wrap broadcasts in quotes
+ * @inheritDoc
+ * @param {Data} data
+ * @return {string}
+ */
+BroadcastDropSlot.prototype.dataToString = function(data) {
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if (data.type === Data.types.string) {
+		result = "\"" + result + "\"";
+	}
+	return result;
 };
 /**
  * DeviceDropSlots appear on Blocks that control robots.  When only one robot is connected, they appear as an ordinary
@@ -15235,7 +15339,6 @@ function NumSlot(parent, key, value, positive, integer) {
 	// Limits can be set later
 	this.minVal = null;
 	this.maxVal = null;
-	this.limitsSet = false;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
@@ -15243,19 +15346,19 @@ NumSlot.prototype.constructor = NumSlot;
 /**
  * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
  * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
- * @param {number} min
- * @param {number} max
+ * @param {number} [min]
+ * @param {number} [max]
  * @param {string} [displayUnits] - The units/label to show before the min/max
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
+	this.minVal = min;
+	this.maxVal = max;
+	if(min == null || max == null) return;
 	if (displayUnits == null) {
 		this.labelText = "(" + min + " - " + max + ")";
 	} else {
 		this.labelText = displayUnits + " (" + min + " - " + max + ")";
 	}
-	this.minVal = min;
-	this.maxVal = max;
-	this.limitsSet = true;
 };
 
 /**
@@ -15267,13 +15370,8 @@ NumSlot.prototype.sanitizeData = function(data) {
 	// Forces Data to NumData
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
-	// Applies limits
-	if (this.limitsSet) {
-		const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
-		return new NumData(value, data.isValid);
-	} else {
-		return data.asNum();
-	}
+	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+	return new NumData(value, data.isValid);
 };
 /**
  * StringSlot is a subclass of RectSlot.
@@ -17191,7 +17289,9 @@ B_False.prototype.startAction = function() {
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new LabelText(this, "letter"));
-	this.addPart(new NumSlot(this, "NumS_idx", 1, true, true));
+	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
+	nS.addLimits(1);
+	this.addPart(nS);
 	this.addPart(new LabelText(this, "of"));
 	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }

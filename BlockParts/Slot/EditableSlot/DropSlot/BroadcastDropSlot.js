@@ -70,3 +70,17 @@ BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data) {
 	if (!data.isValid) return null;
 	return data;
 };
+
+/**
+ * BroadCastDropSlots wrap broadcasts in quotes
+ * @inheritDoc
+ * @param {Data} data
+ * @return {string}
+ */
+BroadcastDropSlot.prototype.dataToString = function(data) {
+	let result = EditableSlot.prototype.dataToString.call(this, data);
+	if (data.type === Data.types.string) {
+		result = "\"" + result + "\"";
+	}
+	return result;
+};

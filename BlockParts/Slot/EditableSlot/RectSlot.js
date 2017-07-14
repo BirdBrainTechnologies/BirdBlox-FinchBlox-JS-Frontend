@@ -9,7 +9,7 @@
  */
 function RectSlot(parent, key, snapType, outputType, data){
 	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
-	this.slotShape = new RectSlotShape(this, data.asString().getValue());
+	this.slotShape = new RectSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);

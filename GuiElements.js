@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	HtmlServer();
+	SettingsManager();
 	GuiElements.setGuiConstants();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
@@ -879,37 +880,31 @@ GuiElements.passUpdateZoom = function(){
 	RowDialog.updateZoom();
 };
 GuiElements.configureZoom = function(callback){
-	var GE = GuiElements;
-	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
-		GE.computedZoom = GE.computeZoomFromDims(response);
-		//GuiElements.alert("Requesting zoom from settings.");
-		HtmlServer.getSetting("zoom",function(result){
-			GE.alert("Dealing with zoom from settings");
-			GE.zoomMultiple = parseFloat(result);
+	const GE = GuiElements;
+	SettingsManager.loadSettings(function(){
+		const callbackFn = function(){
+			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			//GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
-		},function(){
-			GE.alert("Error reading zoom from settings");
-			GE.zoomMultiple = 1;
-			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
-			callback();
-		}, "1");
-	},function(){
-		GE.alert("Error reading dims");
-		callback();
-	}, null, null, "200,200");
+		};
+		HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+			GE.computedZoom = GE.computeZoomFromDims(response);
+			callbackFn();
+		}, function(){
+			callbackFn();
+		});
+	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims

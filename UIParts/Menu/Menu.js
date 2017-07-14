@@ -30,7 +30,7 @@ function Menu(button,width){
 Menu.prototype = Object.create(Overlay.prototype);
 Menu.prototype.constructor = Menu;
 Menu.setGraphics=function(){
-	Menu.defaultWidth=100;
+	Menu.defaultWidth=170;
 	Menu.bnMargin=Button.defaultMargin;
 	Menu.bgColor=Colors.black;
 };
@@ -53,7 +53,8 @@ Menu.prototype.createMenuBnList=function(){
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close){
+Menu.prototype.addOption=function(text,func,close,icon){
+	icon = null;
 	if(close==null){
 		close=true;
 	}
@@ -68,7 +69,7 @@ Menu.prototype.addOption=function(text,func,close){
 	callbackFn.menu=this;
 	callbackFn.func=func;
 	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn);
+	this.menuBnList.addOption(text,callbackFn,icon);
 };
 Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;

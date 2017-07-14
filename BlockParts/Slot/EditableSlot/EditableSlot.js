@@ -41,7 +41,7 @@ EditableSlot.prototype.changeText = function(text, updateDim) {
 };
 
 /**
- * Tells the Slot to display an inputSys so it can be edited. Also sets the slotShape to appear selected
+ * Tells the Slot to display an InputSystem so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
 	DebugOptions.assert(!this.hasChild);
@@ -103,7 +103,7 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
 };
 
 /**
- * Converts the Slot's data to a displayable string. Subclasses override this method to apply formatting
+ * Converts the Slot's data to a displayable string. Subclasses override this method to apply formatting.
  * @param {Data} data
  * @return {string}
  */

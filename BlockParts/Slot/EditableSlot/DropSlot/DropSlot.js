@@ -26,7 +26,7 @@ function DropSlot(parent, key, inputType, snapType, data, nullable) {
 		nullable = false;
 	}
 	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
-	this.slotShape = new DropSlotShape(this, data.asString().getValue());
+	this.slotShape = new DropSlotShape(this, this.dataToString(data));
 	this.slotShape.show();
 	this.optionsList = [];
 	this.nullable = nullable;
@@ -159,17 +159,4 @@ DropSlot.prototype.sanitizeData = function(data) {
 		return this.selectionDataFromValue(value);
 	}
 	return this.sanitizeNonSelectionData(data);
-};
-
-/**
- * @inheritDoc
- * @param {Data} data
- * @return {string}
- */
-DropSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
-	if (data.type === Data.types.string) {
-		result = "\"" + result + "\"";
-	}
-	return result;
 };

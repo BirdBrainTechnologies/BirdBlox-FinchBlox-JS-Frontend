@@ -153,3 +153,11 @@ Sound.lookupById = function(id){
 	});
 	return result;
 };
+Sound.playSnap = function(){
+	if(SettingsManager.enableSnapNoise.getValue() === "true") {
+		let snapSoundRequest = new HttpRequestBuilder("sound/play");
+		snapSoundRequest.addParam("type", Sound.type.ui);
+		snapSoundRequest.addParam("filename", Sound.click);
+		HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+	}
+};
