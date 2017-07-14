@@ -22,7 +22,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
-	GuiElements.alert("Loading");
+	//GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){

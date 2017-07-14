@@ -4,7 +4,7 @@ const FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -50,7 +50,7 @@ DebugOptions.shouldLogErrors=function(){
 };
 DebugOptions.shouldSkipInitSettings=function(){
 	var DO = DebugOptions;
-	return DO.enabled && (DO.mouse || DO.skipInitSettings);
+	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
 DebugOptions.shouldSkipHtmlRequests = function(){
 	var DO = DebugOptions;
@@ -1289,7 +1289,7 @@ function GuiElements(){
 }
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
-	GuiElements.alert("Loading");
+	//GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 GuiElements.loadInitialSettings=function(callback){
@@ -10921,7 +10921,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Requesting permission');
+				callbackFn('43');
 			}
 		}, 20);
 		return;

@@ -2,7 +2,7 @@
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	DO.mouse = true;
 	DO.addVirtualHB = true;
@@ -48,7 +48,7 @@ DebugOptions.shouldLogErrors=function(){
 };
 DebugOptions.shouldSkipInitSettings=function(){
 	var DO = DebugOptions;
-	return DO.enabled && (DO.mouse || DO.skipInitSettings);
+	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
 DebugOptions.shouldSkipHtmlRequests = function(){
 	var DO = DebugOptions;
