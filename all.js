@@ -8101,7 +8101,9 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
+	TitleBar.setText("Test1");
 	Sound.changeFile();
+	TitleBar.setText("Test2");
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
@@ -8119,10 +8121,13 @@ CodeManager.importXml=function(projectNode){
 		}
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
+	TitleBar.setText("Test3");
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	TitleBar.setText("Test4");
 	TitleBar.setText(SaveManager.fileName);
+	TitleBar.setText("Test5");
 	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
