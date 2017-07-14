@@ -70,8 +70,11 @@ SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
+	CodeManager.markLoading("Loading...");
 	HtmlServer.sendRequestWithCallback(request.toString(),function(){
-		CodeManager.markLoading("Loading...");
+
+	}, function(){
+		CodeManager.cancelLoading();
 	});
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
@@ -210,10 +213,11 @@ SaveManager.saveAsNew = function(){
 	SaveManager.saving = true;
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	CodeManager.markLoading("Saving...");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.saving = false;
-		CodeManager.markLoading("Saving...");
 	}, function(){
+		CodeManager.cancelLoading();
 		SaveManager.saving = false;
 	}, true, xmlDocText);
 };

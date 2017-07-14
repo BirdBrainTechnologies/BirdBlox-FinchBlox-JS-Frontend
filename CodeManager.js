@@ -497,9 +497,7 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
-	GuiElements.alert("Test1");
 	Sound.changeFile();
-	GuiElements.alert("Test2");
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
@@ -517,13 +515,10 @@ CodeManager.importXml=function(projectNode){
 		}
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
-	GuiElements.alert("Test3");
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
-	GuiElements.alert("Test4");
 	TitleBar.setText(SaveManager.fileName);
-	GuiElements.alert("Test5");
 	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
@@ -599,10 +594,15 @@ CodeManager.deleteRecording = function(recording){
 CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
+	GuiElements.alert("marked");
 };
 CodeManager.fileClosed = function(){
 	BlockPalette.fileClosed();
 };
 CodeManager.fileOpened = function(){
 	BlockPalette.fileOpened();
+};
+CodeManager.cancelLoading = function(){
+	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };
