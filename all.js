@@ -4,7 +4,7 @@ const FrontendVersion = 393;
 
 function DebugOptions(){
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	DO.mouse = false;
 	DO.addVirtualHB = true;
@@ -1428,7 +1428,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	//debug.innerHTML = message; //The iPad app does not support alert dialogs
+	debug.innerHTML = message; //The iPad app does not support alert dialogs
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -10925,7 +10925,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('43');
+				callbackFn('1.2');
 			}
 		}, 20);
 		return;
