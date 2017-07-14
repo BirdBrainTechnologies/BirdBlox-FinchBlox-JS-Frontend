@@ -1428,7 +1428,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	//debug.innerHTML = message; //The iPad app does not support alert dialogs
+	debug.innerHTML = message; //The iPad app does not support alert dialogs
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -8101,9 +8101,9 @@ CodeManager.createXml=function(){
 };
 CodeManager.importXml=function(projectNode){
 	CodeManager.deleteAll();
-	TitleBar.setText("Test1");
+	GuiElements.alert("Test1");
 	Sound.changeFile();
-	TitleBar.setText("Test2");
+	GuiElements.alert("Test2");
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
 	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
@@ -8121,13 +8121,13 @@ CodeManager.importXml=function(projectNode){
 		}
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
-	TitleBar.setText("Test3");
+	GuiElements.alert("Test3");
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
-	TitleBar.setText("Test4");
+	GuiElements.alert("Test4");
 	TitleBar.setText(SaveManager.fileName);
-	TitleBar.setText("Test5");
+	GuiElements.alert("Test5");
 	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
