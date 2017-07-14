@@ -26,7 +26,7 @@ SaveManager.loadData = function(data) {
 		if (project == null) {
 			SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
 		} else {
-			CodeManager.importXml(project);
+			(DebugOptions.safeFunc(CodeManager.importXml))(project);
 		}
 	} else{
 		SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
