@@ -27,7 +27,6 @@ function NumSlot(parent, key, value, positive, integer) {
 	// Limits can be set later
 	this.minVal = null;
 	this.maxVal = null;
-	this.limitsSet = false;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
@@ -35,19 +34,19 @@ NumSlot.prototype.constructor = NumSlot;
 /**
  * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
  * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
- * @param {number} min
- * @param {number} max
+ * @param {number} [min]
+ * @param {number} [max]
  * @param {string} [displayUnits] - The units/label to show before the min/max
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
+	this.minVal = min;
+	this.maxVal = max;
+	if(min == null || max == null) return;
 	if (displayUnits == null) {
 		this.labelText = "(" + min + " - " + max + ")";
 	} else {
 		this.labelText = displayUnits + " (" + min + " - " + max + ")";
 	}
-	this.minVal = min;
-	this.maxVal = max;
-	this.limitsSet = true;
 };
 
 /**
@@ -59,11 +58,6 @@ NumSlot.prototype.sanitizeData = function(data) {
 	// Forces Data to NumData
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
-	// Applies limits
-	if (this.limitsSet) {
-		const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
-		return new NumData(value, data.isValid);
-	} else {
-		return data.asNum();
-	}
+	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+	return new NumData(value, data.isValid);
 };

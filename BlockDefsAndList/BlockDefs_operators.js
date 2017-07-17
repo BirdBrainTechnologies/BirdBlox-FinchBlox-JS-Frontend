@@ -286,7 +286,9 @@ B_False.prototype.startAction = function() {
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new LabelText(this, "letter"));
-	this.addPart(new NumSlot(this, "NumS_idx", 1, true, true));
+	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
+	nS.addLimits(1);
+	this.addPart(nS);
 	this.addPart(new LabelText(this, "of"));
 	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }

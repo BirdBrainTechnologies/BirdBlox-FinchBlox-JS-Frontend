@@ -50,7 +50,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Requesting permission');
+				callbackFn('Hello');
 			}
 		}, 20);
 		return;

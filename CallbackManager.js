@@ -29,6 +29,10 @@ CallbackManager.data.close = function(){
 	SaveManager.backendClose();
 	return true;
 };
+CallbackManager.data.markLoading = function(){
+	SaveManager.backendMarkLoading();
+	return true;
+};
 CallbackManager.data.filesChanged = function(){
 	if(OpenDialog.currentDialog != null){
 		OpenDialog.currentDialog.reloadDialog();

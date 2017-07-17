@@ -137,11 +137,7 @@ CodeManager.move.end=function(){
 			if(fit.found){
 				//Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
-
-				let snapSoundRequest = new HttpRequestBuilder("sound/play");
-				snapSoundRequest.addParam("type", Sound.type.ui);
-				snapSoundRequest.addParam("filename", Sound.click);
-				HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+				Sound.playSnap();
 			}
 			else{
 				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
@@ -522,6 +518,7 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	BlockPalette.refresh();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };
@@ -604,4 +601,8 @@ CodeManager.fileClosed = function(){
 };
 CodeManager.fileOpened = function(){
 	BlockPalette.fileOpened();
+};
+CodeManager.cancelLoading = function(){
+	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };

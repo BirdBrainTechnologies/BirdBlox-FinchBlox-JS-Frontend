@@ -10,6 +10,9 @@ function BlockPalette(){
 	BlockPalette.selectFirstCat();
 	BlockPalette.scrolling=false;
 	BlockPalette.visible = true;
+	if(GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+		GuiElements.hidePaletteLayers(true);
+	}
 }
 BlockPalette.setGraphics=function(){
 	BlockPalette.mainVMargin=10;
@@ -89,17 +92,17 @@ BlockPalette.createCategories=function(){
 		currentY+=CategoryBN.height+CategoryBN.vMargin;
 	}
 	
-}
+};
 BlockPalette.getCategory=function(id){
 	var i=0;
 	while(BlockPalette.categories[i].id!=id){
 		i++;
 	}
 	return BlockPalette.categories[i];
-}
+};
 BlockPalette.selectFirstCat=function(){
 	BlockPalette.categories[0].select();
-}
+};
 /*BlockPalette.getAbsX=function(){
 	return 0;
 }
@@ -178,4 +181,9 @@ BlockPalette.fileClosed = function(){
 };
 BlockPalette.fileOpened = function(){
 	BlockPalette.passRecursively("fileOpened");
+};
+BlockPalette.refresh = function(){
+	BlockPalette.categories.forEach(function(category){
+		category.refreshGroup();
+	})
 };

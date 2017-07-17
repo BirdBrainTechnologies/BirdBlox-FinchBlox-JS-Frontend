@@ -100,6 +100,7 @@ RecordingDialog.prototype.hide = function(){
 RecordingDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
+	Sound.stopAllSounds();
 };
 RecordingDialog.prototype.createRecordButton = function(){
 	let RD = RowDialog;

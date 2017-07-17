@@ -87,8 +87,8 @@ TitleBar.makeButtons=function(){
 	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
 	//TB.fileMenu=new FileMenu(TB.fileBn);
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.viewBn.addIcon(VectorPaths.view,TB.bnIconH);
-	TB.viewMenu=new ViewMenu(TB.viewBn);
+	TB.viewBn.addIcon(VectorPaths.settings,TB.bnIconH);
+	TB.viewMenu=new SettingsMenu(TB.viewBn);
 	TB.debugBn=null;
 	if(TB.debugEnabled) {
 		TB.enableDebug();

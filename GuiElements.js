@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
+	Data.setConstants();
 	HtmlServer();
+	SettingsManager();
 	GuiElements.setGuiConstants();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
@@ -52,6 +54,7 @@ GuiElements.loadInitialSettings=function(callback){
 			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
 			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
 			GuiElements.load.zoom = true;
+			GuiElements.checkSmallMode();
 			checkIfDone();
 		});
 		GuiElements.getOsVersion(function(){
@@ -95,14 +98,12 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
-	GuiElements.checkSmallMode();
 };
 /* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
 GuiElements.setConstants=function(){
-	Data.setConstants();
-	/* If a class is static and does not build a part of the UI, 
+	/* If a class is static and does not build a part of the UI,
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
@@ -160,7 +161,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
-	//debug.innerHTML = message; //The iPad app does not support alert dialogs
+	debug.innerHTML = message; //The iPad app does not support alert dialogs
 };
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
@@ -879,37 +880,31 @@ GuiElements.passUpdateZoom = function(){
 	RowDialog.updateZoom();
 };
 GuiElements.configureZoom = function(callback){
-	var GE = GuiElements;
-	HtmlServer.sendRequestWithCallback("properties/dims",function(response){
-		GE.computedZoom = GE.computeZoomFromDims(response);
-		//GuiElements.alert("Requesting zoom from settings.");
-		HtmlServer.getSetting("zoom",function(result){
-			GE.alert("Dealing with zoom from settings");
-			GE.zoomMultiple = parseFloat(result);
+	const GE = GuiElements;
+	SettingsManager.loadSettings(function(){
+		const callbackFn = function(){
+			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
 			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
-				//GuiElements.alert("Zoom from settings was invalid 2: " + GE.zoomFactor);
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
+				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			//GuiElements.alert("Computed zoom: " + GE.computedZoom);
 			callback();
-		},function(){
-			GE.alert("Error reading zoom from settings");
-			GE.zoomMultiple = 1;
-			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
-			callback();
-		}, "1");
-	},function(){
-		GE.alert("Error reading dims");
-		callback();
-	}, null, null, "200,200");
+		};
+		HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+			GE.computedZoom = GE.computeZoomFromDims(response);
+			callbackFn();
+		}, function(){
+			callbackFn();
+		});
+	});
 };
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
@@ -946,6 +941,7 @@ GuiElements.hidePaletteLayers = function(skipUpdate){
 	let GE = GuiElements;
 	if(GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = false;
+		SettingsManager.sideBarVisible.writeValue("false");
 		GE.layers.paletteBG.hide();
 		GE.layers.paletteScroll.style.visibility = "hidden";
 		GE.layers.trash.hide();
@@ -963,6 +959,7 @@ GuiElements.showPaletteLayers = function(skipUpdate){
 	}
 	if(!GuiElements.paletteLayersVisible){
 		GuiElements.paletteLayersVisible = true;
+		SettingsManager.sideBarVisible.writeValue("true");
 		GE.layers.paletteBG.show();
 		GE.layers.paletteScroll.style.visibility = "visible";
 		GE.layers.trash.show();
@@ -978,5 +975,8 @@ GuiElements.checkSmallMode = function(){
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
 	if(!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
+	}
+	if(!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
+		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };

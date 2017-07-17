@@ -26,7 +26,7 @@ SaveManager.loadData = function(data) {
 		if (project == null) {
 			SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
 		} else {
-			CodeManager.importXml(project);
+			(DebugOptions.safeFunc(CodeManager.importXml))(project);
 		}
 	} else{
 		SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
@@ -41,6 +41,10 @@ SaveManager.backendSetName = function(fileName, named){
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
+};
+SaveManager.backendMarkLoading = function(){
+	OpenDialog.closeDialog();
+	CodeManager.markLoading("Loading...");
 };
 
 SaveManager.loadBlank = function(){
@@ -70,8 +74,11 @@ SaveManager.userOpenFile = function(fileName){
 	if(SaveManager.fileName === fileName) {return;}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
+	CodeManager.markLoading("Loading...");
 	HtmlServer.sendRequestWithCallback(request.toString(),function(){
-		CodeManager.markLoading("Loading...");
+
+	}, function(){
+		CodeManager.cancelLoading();
 	});
 };
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
@@ -210,10 +217,11 @@ SaveManager.saveAsNew = function(){
 	SaveManager.saving = true;
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	CodeManager.markLoading("Saving...");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(){
 		SaveManager.saving = false;
-		CodeManager.markLoading("Saving...");
 	}, function(){
+		CodeManager.cancelLoading();
 		SaveManager.saving = false;
 	}, true, xmlDocText);
 };

@@ -73,6 +73,9 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	TouchReceiver.addListenersBN(this.textE,this);
 }
 Button.prototype.addIcon=function(pathId,height){
+	if(height == null){
+		height = Button.defaultIconH;
+	}
 	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=true;
