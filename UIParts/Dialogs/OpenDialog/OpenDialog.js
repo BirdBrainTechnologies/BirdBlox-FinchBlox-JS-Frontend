@@ -16,11 +16,15 @@ OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
+	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
 };
 OpenDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
 	OpenDialog.currentDialog = this;
 	this.createNewBn();
+	if(GuiElements.isIos) {
+		this.createCloudBn();
+	}
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	const cols = 3;
@@ -116,6 +120,16 @@ OpenDialog.prototype.reloadDialog = function(){
 		openDialog.setScroll(thisScroll);
 	});
 };
+OpenDialog.prototype.createCloudBn = function(){
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	const x = this.width - RD.bnMargin - OD.cloudBnWidth;
+	let button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
+	button.addIcon(VectorPaths.cloud);
+	button.setCallbackFunction(function(){
+		HtmlServer.sendRequestWithCallback("cloud/showPicker");
+	}, true);
+};
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
 		var openDialog = new OpenDialog(response);
@@ -125,4 +139,9 @@ OpenDialog.showDialog = function(){
 OpenDialog.prototype.closeDialog = function(){
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
+};
+OpenDialog.closeDialog = function(){
+	if(OpenDialog.currentDialog != null) {
+		OpenDialog.currentDialog.closeDialog();
+	}
 };

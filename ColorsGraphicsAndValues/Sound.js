@@ -65,13 +65,17 @@ Sound.play = function(id, isRecording, status){
 	else{
 		status.donePlaying = false;
 		status.requestSent = false;
-		const endPlaying = function(){
-			status.donePlaying = true;
-			status.requestSent = true;
-		};
+		status.error = false;
 		Sound.playWithCallback(id, isRecording, function(){
 			status.requestSent = true;
-		}, endPlaying, endPlaying);
+		}, function(){
+			status.donePlaying = false;
+			status.requestSent = false;
+			status.error = true;
+		}, function(){
+			status.donePlaying = true;
+			status.requestSent = true;
+		});
 	}
 };
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){

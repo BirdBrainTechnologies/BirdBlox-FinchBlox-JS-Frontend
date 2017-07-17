@@ -14,13 +14,12 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.open = function(fileName, data, named) {
+CallbackManager.data.open = function(fileName, data, named, closeDialog) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named);
+	SaveManager.backendOpen(fileName, data, named, closeDialog);
 	return true;
 };
-CallbackManager.data.open = DebugOptions.safeFunc(CallbackManager.data.open);
 CallbackManager.data.setName = function(fileName, named){
 	fileName = HtmlServer.decodeHtml(fileName);
 	SaveManager.backendSetName(fileName, named);

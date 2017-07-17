@@ -2723,6 +2723,10 @@ function VectorPaths(){
 	VP.settings.width = 24;
 	VP.settings.height = 24;
 	VP.settings.path = "M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z";
+	VP.cloud = {};
+	VP.cloud.width = 24;
+	VP.cloud.height = 16;
+	VP.cloud.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z";
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -3337,13 +3341,17 @@ Sound.play = function(id, isRecording, status){
 	else{
 		status.donePlaying = false;
 		status.requestSent = false;
-		const endPlaying = function(){
-			status.donePlaying = true;
-			status.requestSent = true;
-		};
+		status.error = false;
 		Sound.playWithCallback(id, isRecording, function(){
 			status.requestSent = true;
-		}, endPlaying, endPlaying);
+		}, function(){
+			status.donePlaying = false;
+			status.requestSent = false;
+			status.error = true;
+		}, function(){
+			status.donePlaying = true;
+			status.requestSent = true;
+		});
 	}
 };
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
@@ -4419,17 +4427,17 @@ BlockPalette.createCategories=function(){
 		currentY+=CategoryBN.height+CategoryBN.vMargin;
 	}
 	
-}
+};
 BlockPalette.getCategory=function(id){
 	var i=0;
 	while(BlockPalette.categories[i].id!=id){
 		i++;
 	}
 	return BlockPalette.categories[i];
-}
+};
 BlockPalette.selectFirstCat=function(){
 	BlockPalette.categories[0].select();
-}
+};
 /*BlockPalette.getAbsX=function(){
 	return 0;
 }
@@ -4508,6 +4516,11 @@ BlockPalette.fileClosed = function(){
 };
 BlockPalette.fileOpened = function(){
 	BlockPalette.passRecursively("fileOpened");
+};
+BlockPalette.refresh = function(){
+	BlockPalette.categories.forEach(function(category){
+		category.refreshGroup();
+	})
 };
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
@@ -5061,6 +5074,9 @@ Button.prototype.addText=function(text,font,size,weight,height){
 	TouchReceiver.addListenersBN(this.textE,this);
 }
 Button.prototype.addIcon=function(pathId,height){
+	if(height == null){
+		height = Button.defaultIconH;
+	}
 	this.removeContent();
 	this.hasIcon=true;
 	this.foregroundInverts=true;
@@ -8130,6 +8146,7 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	BlockPalette.refresh();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };
@@ -8972,10 +8989,10 @@ RowDialog.setConstants=function(){
 	RowDialog.titleBarColor=Colors.lightGray;
 	RowDialog.titleBarFontC=Colors.white;
 	RowDialog.bgColor=Colors.black;
-	RowDialog.titleBarH=30;
 	RowDialog.centeredBnWidth=100;
 	RowDialog.bnHeight=MenuBnList.bnHeight;
 	RowDialog.bnMargin=5;
+	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
 	RowDialog.minWidth = 400;
 	RowDialog.minHeight = 200;
 	RowDialog.hintMargin = 5;
@@ -9246,11 +9263,15 @@ OpenDialog.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
+	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
 };
 OpenDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
 	OpenDialog.currentDialog = this;
 	this.createNewBn();
+	if(GuiElements.isIos) {
+		this.createCloudBn();
+	}
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	const cols = 3;
@@ -9346,6 +9367,16 @@ OpenDialog.prototype.reloadDialog = function(){
 		openDialog.setScroll(thisScroll);
 	});
 };
+OpenDialog.prototype.createCloudBn = function(){
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	const x = this.width - RD.bnMargin - OD.cloudBnWidth;
+	let button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
+	button.addIcon(VectorPaths.cloud);
+	button.setCallbackFunction(function(){
+		HtmlServer.sendRequestWithCallback("cloud/showPicker");
+	}, true);
+};
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
 		var openDialog = new OpenDialog(response);
@@ -9355,6 +9386,11 @@ OpenDialog.showDialog = function(){
 OpenDialog.prototype.closeDialog = function(){
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
+};
+OpenDialog.closeDialog = function(){
+	if(OpenDialog.currentDialog != null) {
+		OpenDialog.currentDialog.closeDialog();
+	}
 };
 /**
  * Created by Tom on 6/18/2017.
@@ -10935,7 +10971,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 			}*/
 			if(callbackFn != null) {
 				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('1');
+				callbackFn('Hello');
 			}
 		}, 20);
 		return;
@@ -11210,13 +11246,12 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.open = function(fileName, data, named) {
+CallbackManager.data.open = function(fileName, data, named, closeDialog) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named);
+	SaveManager.backendOpen(fileName, data, named, closeDialog);
 	return true;
 };
-CallbackManager.data.open = DebugOptions.safeFunc(CallbackManager.data.open);
 CallbackManager.data.setName = function(fileName, named){
 	fileName = HtmlServer.decodeHtml(fileName);
 	SaveManager.backendSetName(fileName, named);
@@ -11437,7 +11472,10 @@ SaveManager.setConstants = function(){
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
-SaveManager.backendOpen = function(fileName, data, named) {
+SaveManager.backendOpen = function(fileName, data, named, closeDialog) {
+	if(closeDialog) {
+		OpenDialog.closeDialog();
+	}
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
@@ -17878,6 +17916,10 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 	let status = mem.playStatus;
 	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
 	if (done) {
+		if (status.error) {
+			this.displayError("Sound not found");
+			return new ExecutionStatusError();
+		}
 		return new ExecutionStatusDone(); // Done running
 	} else {
 		return new ExecutionStatusRunning(); // Still running

@@ -518,6 +518,7 @@ CodeManager.importXml=function(projectNode){
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
 	DeviceManager.updateSelectableDevices();
+	BlockPalette.refresh();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };

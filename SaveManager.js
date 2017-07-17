@@ -10,7 +10,10 @@ SaveManager.setConstants = function(){
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
-SaveManager.backendOpen = function(fileName, data, named) {
+SaveManager.backendOpen = function(fileName, data, named, closeDialog) {
+	if(closeDialog) {
+		OpenDialog.closeDialog();
+	}
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
