@@ -10,10 +10,7 @@ SaveManager.setConstants = function(){
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
-SaveManager.backendOpen = function(fileName, data, named, closeDialog) {
-	if(closeDialog) {
-		OpenDialog.closeDialog();
-	}
+SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
@@ -44,6 +41,10 @@ SaveManager.backendSetName = function(fileName, named){
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
+};
+SaveManager.backendMarkLoading = function(){
+	OpenDialog.closeDialog();
+	CodeManager.markLoading("Loading...");
 };
 
 SaveManager.loadBlank = function(){

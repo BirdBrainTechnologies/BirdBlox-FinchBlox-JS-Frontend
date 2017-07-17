@@ -14,10 +14,10 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.open = function(fileName, data, named, closeDialog) {
+CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named, closeDialog);
+	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
 CallbackManager.data.setName = function(fileName, named){
@@ -27,6 +27,10 @@ CallbackManager.data.setName = function(fileName, named){
 };
 CallbackManager.data.close = function(){
 	SaveManager.backendClose();
+	return true;
+};
+CallbackManager.data.markLoading = function(){
+	SaveManager.backendMarkLoading();
 	return true;
 };
 CallbackManager.data.filesChanged = function(){

@@ -17,6 +17,7 @@ OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
 	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
+	OpenDialog.tabRowHeight = RowDialog.titleBarH;
 };
 OpenDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
@@ -129,6 +130,18 @@ OpenDialog.prototype.createCloudBn = function(){
 	button.setCallbackFunction(function(){
 		HtmlServer.sendRequestWithCallback("cloud/showPicker");
 	}, true);
+};
+OpenDialog.prototype.createTabRow = function(){
+	const OD = OpenDialog;
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
+
+	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+
+	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.show();
+	return tabRow;
 };
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){

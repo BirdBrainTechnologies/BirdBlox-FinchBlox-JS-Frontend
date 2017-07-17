@@ -685,7 +685,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 		var stillX = mem.lastX == null || mem.lastX == div.scrollLeft;
 		var still = stillX && stillY;
 
-		statusObj.still = still;
+		if (statusObj != null) statusObj.still = still;
 		if(!GuiElements.isIos) return;
 
 		mem.lastY = div.scrollTop;

@@ -4128,7 +4128,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 		var stillX = mem.lastX == null || mem.lastX == div.scrollLeft;
 		var still = stillX && stillY;
 
-		statusObj.still = still;
+		if (statusObj != null) statusObj.still = still;
 		if(!GuiElements.isIos) return;
 
 		mem.lastY = div.scrollTop;
@@ -9264,6 +9264,7 @@ OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
 	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
+	OpenDialog.tabRowHeight = RowDialog.titleBarH;
 };
 OpenDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
@@ -9376,6 +9377,18 @@ OpenDialog.prototype.createCloudBn = function(){
 	button.setCallbackFunction(function(){
 		HtmlServer.sendRequestWithCallback("cloud/showPicker");
 	}, true);
+};
+OpenDialog.prototype.createTabRow = function(){
+	const OD = OpenDialog;
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
+
+	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+
+	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.show();
+	return tabRow;
 };
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
@@ -11246,10 +11259,10 @@ CallbackManager.sounds.permissionGranted = function(){
 	return true;
 };
 CallbackManager.data = {};
-CallbackManager.data.open = function(fileName, data, named, closeDialog) {
+CallbackManager.data.open = function(fileName, data, named) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named, closeDialog);
+	SaveManager.backendOpen(fileName, data, named);
 	return true;
 };
 CallbackManager.data.setName = function(fileName, named){
@@ -11259,6 +11272,10 @@ CallbackManager.data.setName = function(fileName, named){
 };
 CallbackManager.data.close = function(){
 	SaveManager.backendClose();
+	return true;
+};
+CallbackManager.data.markLoading = function(){
+	SaveManager.backendMarkLoading();
 	return true;
 };
 CallbackManager.data.filesChanged = function(){
@@ -11472,10 +11489,7 @@ SaveManager.setConstants = function(){
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
-SaveManager.backendOpen = function(fileName, data, named, closeDialog) {
-	if(closeDialog) {
-		OpenDialog.closeDialog();
-	}
+SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
@@ -11506,6 +11520,10 @@ SaveManager.backendSetName = function(fileName, named){
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
+};
+SaveManager.backendMarkLoading = function(){
+	OpenDialog.closeDialog();
+	CodeManager.markLoading("Loading...");
 };
 
 SaveManager.loadBlank = function(){
