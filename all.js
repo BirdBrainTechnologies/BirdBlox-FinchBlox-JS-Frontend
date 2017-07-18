@@ -989,6 +989,15 @@ DeviceManager.setStatics = function(){
 	statuses.disconnected = 0;
 	statuses.connected = 1;
 	statuses.noDevices = 2;
+
+	/*
+	statuses.disconnected = 0;
+	statuses.incompatibleFirmware = 1;
+	statuses.oldFirmware = 2;
+	statuses.connected = 3;
+	statuses.noDevices = 4;
+	*/
+
 	DM.totalStatus = statuses.noDevices;
 	DM.statusListener = null;
 };
@@ -1032,20 +1041,6 @@ DeviceManager.prototype.removeAllDevices = function(){
 	this.connectedDevices = [];
 	this.devicesChanged();
 };
-DeviceManager.prototype.updateTotalStatus = function(){
-	if(this.getDeviceCount() == 0){
-		this.connectionStatus = 2;
-		return;
-	}
-	var request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/totalStatus");
-	var me = this;
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		me.connectionStatus = parseInt(result);
-		if (isNaN(me.connectionStatus)) {
-			me.connectionStatus = 0;
-		}
-	});
-};
 DeviceManager.prototype.getTotalStatus = function(){
 	return this.connectionStatus;
 };
@@ -1054,7 +1049,9 @@ DeviceManager.prototype.deviceIsConnected = function(index){
 		return false;
 	}
 	else {
-		return this.connectedDevices[index].getStatus() === DeviceManager.statuses.connected;
+		const deviceStatus = this.connectedDevices[index].getStatus();
+		const statuses = DeviceManager.statuses;
+		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
 };
 DeviceManager.prototype.updateSelectableDevices = function(){
@@ -2312,18 +2309,176 @@ BlockList.catCount = function() {
 /**
  * @param {Category} category
  */
+BlockList.populateCat_tablet = function(category) {
+	category.addBlockByName("B_DeviceShaken");
+	category.addBlockByName("B_DeviceLocation");
+	category.addBlockByName("B_DeviceSSID");
+	category.addBlockByName("B_DevicePressure");
+	category.addBlockByName("B_DeviceRelativeAltitude");
+	category.addBlockByName("B_DeviceAcceleration");
+	category.addBlockByName("B_DeviceOrientation");
+	category.addSpace();
+	category.addBlockByName("B_Display");
+	category.addSpace();
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Answer");
+	category.addSpace();
+	category.addBlockByName("B_ResetTimer");
+	category.addBlockByName("B_Timer");
+	category.addSpace();
+	category.addBlockByName("B_CurrentTime");
+	category.trimBottom();
+	category.finalize();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_operators = function(category) {
+	category.addBlockByName("B_Add");
+	category.addBlockByName("B_Subtract");
+	category.addBlockByName("B_Multiply");
+	category.addBlockByName("B_Divide");
+	category.addSpace();
+	category.addBlockByName("B_Mod");
+	category.addBlockByName("B_Round");
+	category.addBlockByName("B_mathOfNumber");
+	category.addBlockByName("B_PickRandom");
+	category.addSpace();
+	category.addBlockByName("B_LessThan");
+	category.addBlockByName("B_EqualTo");
+	category.addBlockByName("B_GreaterThan");
+	category.addSpace();
+	category.addBlockByName("B_And");
+	category.addBlockByName("B_Or");
+	category.addBlockByName("B_Not");
+	category.addSpace();
+	category.addBlockByName("B_True");
+	category.addBlockByName("B_False");
+	category.addSpace();
+	category.addBlockByName("B_LetterOf");
+	category.addBlockByName("B_LengthOf");
+	category.addBlockByName("B_join");
+	category.addBlockByName("B_Split");
+	category.addSpace();
+	category.addBlockByName("B_IsAType");
+	category.trimBottom();
+	category.finalize();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_control = function(category) {
+	category.addBlockByName("B_WhenFlagTapped");
+	category.addBlockByName("B_WhenIReceive");
+	category.addSpace();
+	category.addBlockByName("B_Broadcast");
+	category.addBlockByName("B_BroadcastAndWait");
+	category.addBlockByName("B_Message");
+	category.addSpace();
+	category.addBlockByName("B_Wait");
+	category.addBlockByName("B_WaitUntil");
+	category.addSpace();
+	category.addBlockByName("B_Forever");
+	category.addBlockByName("B_Repeat");
+	category.addBlockByName("B_RepeatUntil");
+	category.addSpace();
+	category.addBlockByName("B_If");
+	category.addBlockByName("B_IfElse");
+	category.addSpace();
+	category.addBlockByName("B_Stop");
+	category.trimBottom();
+	category.finalize();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_sound = function(category) {
+	category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	category.addSpace();
+	category.addBlockByName("B_PlayRecording");
+	category.addBlockByName("B_PlayRecordingUntilDone");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlaySoundUntilDone");
+	category.addBlockByName("B_StopAllSounds");
+	category.addSpace();
+	category.addBlockByName("B_RestForBeats");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.addSpace();
+	category.addBlockByName("B_ChangeTempoBy");
+	category.addBlockByName("B_SetTempoTo");
+	category.addBlockByName("B_Tempo");
+	category.trimBottom();
+	category.finalize();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_variables = function(category) {
+	category.addButton("Create variable", CodeManager.newVariable);
+	category.addSpace();
+
+	const variables = CodeManager.variableList;
+	if (variables.length > 0) {
+		// We show a variable Block for every variable
+		variables.forEach(function(variable) {
+			category.addVariableBlock(variable);
+		});
+		category.addSpace();
+
+		// These Blocks let the variable be selected from a DropSlot, so we only need one of each of them
+		category.addBlockByName("B_SetTo");
+		category.addBlockByName("B_ChangeBy");
+	}
+
+	category.addSpace();
+	category.addButton("Create list", CodeManager.newList);
+	category.addSpace();
+
+	const lists = CodeManager.listList;
+	if (lists.length > 0) {
+		lists.forEach(function(list) {
+			category.addListBlock(list);
+		});
+		category.addSpace();
+		category.addBlockByName("B_AddToList");
+		category.addBlockByName("B_DeleteItemOfList");
+		category.addBlockByName("B_InsertItemAtOfList");
+		category.addBlockByName("B_ReplaceItemOfListWith");
+		category.addBlockByName("B_CopyListToList");
+	}
+
+	// These list functions can take input from the Split block, so we show them even if there are no Lists
+	category.addBlockByName("B_ItemOfList");
+	category.addBlockByName("B_LengthOfList");
+	category.addBlockByName("B_ListContainsItem");
+	category.trimBottom();
+	category.finalize();
+};
+
+/**
+ * Robot Blocks are stored in collapsible sets for each type of Robot.  This function creates the groupings
+ * and BlockList.populateItem_[deviceClassId] fills a given group
+ * @param {Category} category
+ */
 BlockList.populateCat_robots = function(category) {
+	// A list of names and ids to give the Collapsible Set constructor
 	let nameIdList = [];
 	let typeList = Device.getTypeList();
 	typeList.forEach(function(deviceClass) {
-		entry = {};
+		let entry = {};
 		entry.name = deviceClass.getDeviceTypeName();
 		entry.id = deviceClass.getDeviceTypeId();
 		nameIdList.push(entry);
 	});
+	// Create the set and add it to the category
 	const set = category.addCollapsibleSet(nameIdList);
 
-	for(let i = 0; i < typeList.length; i++) {
+	for (let i = 0; i < typeList.length; i++) {
+		// Populate each item in the set
 		const item = set.getItem(i);
 		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
@@ -2371,210 +2526,6 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterSoil");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_motion = function(category) {
-	category.addBlockByName("B_Move");
-	category.addBlockByName("B_TurnRight");
-	category.addBlockByName("B_TurnLeft");
-	category.addSpace();
-	category.addBlockByName("B_PointInDirection");
-	category.addBlockByName("B_PointTowards");
-	category.addSpace();
-	category.addBlockByName("B_GoToXY");
-	category.addBlockByName("B_GoTo");
-	category.addBlockByName("B_GlideToXY");
-	category.addSpace();
-	category.addBlockByName("B_ChangeXBy");
-	category.addBlockByName("B_SetXTo");
-	category.addBlockByName("B_ChangeYBy");
-	category.addBlockByName("B_SetYTo");
-	category.addSpace();
-	category.addBlockByName("B_IfOnEdgeBounce");
-	category.addSpace();
-	category.addBlockByName("B_XPosition");
-	category.addBlockByName("B_YPosition");
-	category.addBlockByName("B_Direction");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_looks = function(category) {
-	category.addBlockByName("B_alert");
-	category.addBlockByName("B_SetTitleBarColor");
-	category.addSpace();
-	category.addBlockByName("B_SayForSecs");
-	category.addBlockByName("B_Say");
-	category.addBlockByName("B_ThinkForSecs");
-	category.addBlockByName("B_Think");
-	category.addSpace();
-	category.addBlockByName("B_ChangeSizeBy");
-	category.addBlockByName("B_SetSizeTo");
-	category.addBlockByName("B_Size");
-	category.addSpace();
-	category.addBlockByName("B_Show");
-	category.addBlockByName("B_Hide");
-	category.addSpace();
-	category.addBlockByName("B_GoToFront");
-	category.addBlockByName("B_GoBackLayers");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_sound = function(category) {
-	category.addButton("Record sounds", RecordingDialog.showDialog, true);
-	category.addSpace();
-	category.addBlockByName("B_PlayRecording");
-	category.addBlockByName("B_PlayRecordingUntilDone");
-	category.addBlockByName("B_PlaySound");
-	category.addBlockByName("B_PlaySoundUntilDone");
-	category.addBlockByName("B_StopAllSounds");
-	category.addSpace();
-	category.addBlockByName("B_RestForBeats");
-	category.addBlockByName("B_PlayNoteForBeats");
-	category.addSpace();
-	category.addBlockByName("B_ChangeTempoBy");
-	category.addBlockByName("B_SetTempoTo");
-	category.addBlockByName("B_Tempo");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_tablet = function(category) {
-	category.addBlockByName("B_DeviceShaken");
-	category.addBlockByName("B_DeviceLocation");
-	category.addBlockByName("B_DeviceSSID");
-	category.addBlockByName("B_DevicePressure");
-	category.addBlockByName("B_DeviceRelativeAltitude");
-	category.addBlockByName("B_DeviceAcceleration");
-	category.addBlockByName("B_DeviceOrientation");
-	category.addSpace();
-	category.addBlockByName("B_Display");
-	category.addSpace();
-	category.addBlockByName("B_Ask");
-	category.addBlockByName("B_Answer");
-	category.addSpace();
-	category.addBlockByName("B_ResetTimer");
-	category.addBlockByName("B_Timer");
-	category.addSpace();
-	category.addBlockByName("B_CurrentTime");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_control = function(category) {
-	category.addBlockByName("B_WhenFlagTapped");
-	//category.addBlockByName("B_WhenIAmTapped");
-	category.addBlockByName("B_WhenIReceive");
-	category.addSpace();
-	category.addBlockByName("B_Broadcast");
-	category.addBlockByName("B_BroadcastAndWait");
-	category.addBlockByName("B_Message");
-	category.addSpace();
-	category.addBlockByName("B_Wait");
-	category.addBlockByName("B_WaitUntil");
-	category.addSpace();
-	category.addBlockByName("B_Forever");
-	category.addBlockByName("B_Repeat");
-	category.addBlockByName("B_RepeatUntil");
-	category.addSpace();
-	category.addBlockByName("B_If");
-	category.addBlockByName("B_IfElse");
-	category.addSpace();
-	category.addBlockByName("B_Stop");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_operators = function(category) {
-	category.addBlockByName("B_Add");
-	category.addBlockByName("B_Subtract");
-	category.addBlockByName("B_Multiply");
-	category.addBlockByName("B_Divide");
-	category.addSpace();
-	category.addBlockByName("B_Mod");
-	category.addBlockByName("B_Round");
-	category.addBlockByName("B_mathOfNumber");
-	category.addBlockByName("B_PickRandom");
-	category.addSpace();
-	category.addBlockByName("B_LessThan");
-	category.addBlockByName("B_EqualTo");
-	category.addBlockByName("B_GreaterThan");
-	category.addSpace();
-	category.addBlockByName("B_And");
-	category.addBlockByName("B_Or");
-	category.addBlockByName("B_Not");
-	category.addSpace();
-	category.addBlockByName("B_True");
-	category.addBlockByName("B_False");
-	category.addSpace();
-	category.addBlockByName("B_LetterOf");
-	category.addBlockByName("B_LengthOf");
-	category.addBlockByName("B_join");
-	category.addBlockByName("B_Split");
-	category.addSpace();
-	category.addBlockByName("B_IsAType");
-	category.trimBottom();
-	category.finalize();
-};
-
-/**
- * @param {Category} category
- */
-BlockList.populateCat_variables = function(category) {
-	category.addButton("Create variable", CodeManager.newVariable);
-	category.addSpace();
-
-	const variables = CodeManager.variableList;
-	if (variables.length > 0) {
-		variables.forEach(function(variable) {
-			category.addVariableBlock(variable);
-		});
-		category.addSpace();
-		category.addBlockByName("B_SetTo");
-		category.addBlockByName("B_ChangeBy");
-	}
-
-	category.addSpace();
-	category.addButton("Create list", CodeManager.newList);
-	category.addSpace();
-
-	const lists = CodeManager.listList;
-	if (lists.length > 0) {
-		lists.forEach(function(list) {
-			category.addListBlock(list);
-		});
-		category.addSpace();
-		category.addBlockByName("B_AddToList");
-		category.addBlockByName("B_DeleteItemOfList");
-		category.addBlockByName("B_InsertItemAtOfList");
-		category.addBlockByName("B_ReplaceItemOfListWith");
-		category.addBlockByName("B_CopyListToList");
-	}
-
-	category.addBlockByName("B_ItemOfList");
-	category.addBlockByName("B_LengthOfList");
-	category.addBlockByName("B_ListContainsItem");
-	category.trimBottom();
-	category.finalize();
 };
 
 //Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
@@ -4490,7 +4441,7 @@ BlockPalette.createCategories=function(){
 			firstColumn=false;
 			currentY=BlockPalette.catVMargin;
 		}
-		var currentCat=new Category(currentX,currentY,i);
+		var currentCat=new Category(currentX,currentY,BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
 		currentY+=CategoryBN.height+CategoryBN.vMargin;
@@ -4560,15 +4511,6 @@ BlockPalette.endScroll=function(){
 		BP.scrolling=false;
 		BP.selectedCat.endScroll();
 	}
-};
-BlockPalette.showDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("showDeviceDropDowns", deviceClass);
-};
-BlockPalette.hideDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-BlockPalette.updateAvailableSensors = function(){
-	BlockPalette.passRecursively("updateAvailableSensors");
 };
 BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
@@ -4738,7 +4680,6 @@ DisplayStack.prototype.delete = function() {
  * @param deviceClass
  */
 DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -4746,20 +4687,25 @@ DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
  * @param deviceClass
  */
 DisplayStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
-};
-
-DisplayStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**
  * @param {string} message
  */
 DisplayStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -4835,8 +4781,7 @@ register touch event
 
 
 */
-function Category(buttonX,buttonY,index){
-	this.index=index;
+function Category(buttonX,buttonY, name, id){
 	this.buttonX=buttonX;
 	this.buttonY=buttonY;
 	this.x=0;
@@ -4851,8 +4796,8 @@ function Category(buttonX,buttonY,index){
 	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
 	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
 	*/
-	this.id=BlockList.getCatId(index);
-	this.name=BlockList.getCatName(index);
+	this.id=id;
+	this.name=name;
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -5082,15 +5027,6 @@ Category.prototype.getAbsX=function(){
 Category.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
 };
-Category.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-Category.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Category.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
 Category.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -5185,15 +5121,6 @@ CollapsibleSet.prototype.remove = function() {
 
 CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
 	this.passRecursively("setSuggestedCollapse", id, collapsed);
-};
-CollapsibleSet.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-CollapsibleSet.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-CollapsibleSet.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
 };
 CollapsibleSet.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
@@ -5397,15 +5324,6 @@ CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed){
 	}
 };
 
-CollapsibleItem.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-CollapsibleItem.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-CollapsibleItem.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
 CollapsibleItem.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -5827,6 +5745,7 @@ DeviceStatusLight.setConstants=function(){
 	var DSL=DeviceStatusLight;
 	DSL.greenColor="#0f0";
 	DSL.redColor="#f00";
+	DSL.yellowColor="#ff0";
 	DSL.startColor=Colors.black;
 	DSL.offColor=Colors.darkGray;
 	DSL.radius=6;
@@ -8566,12 +8485,10 @@ CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
 CodeManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.hideDeviceDropDowns(deviceClass);
-	BlockPalette.hideDeviceDropDowns(deviceClass);
+	CodeManager.passRecursivelyDown("hideDeviceDropDowns", true, deviceClass);
 };
 CodeManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.showDeviceDropDowns(deviceClass);
-	BlockPalette.showDeviceDropDowns(deviceClass);
+	CodeManager.passRecursivelyDown("showDeviceDropDowns", true, deviceClass);
 };
 CodeManager.countDevicesInUse=function(deviceClass){
 	return TabManager.countDevicesInUse(deviceClass);
@@ -8582,8 +8499,8 @@ CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
 CodeManager.updateAvailableSensors = function(){
-	TabManager.updateAvailableSensors();
-	BlockPalette.updateAvailableSensors();
+	TabManager.passRecursivelyDown("updateAvailableSensors");
+	BlockPalette.passRecursivelyDown("updateAvailableSensors");
 };
 CodeManager.updateConnectionStatus = function(){
 	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
@@ -8943,12 +8860,6 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
-TabManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-TabManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
-};
 TabManager.countDevicesInUse=function(deviceClass){
 	var largest=0;
 	for(var i=0;i<TabManager.tabList.length;i++){
@@ -8978,9 +8889,6 @@ TabManager.getActiveZoom = function(){
 		return 1;
 	}
 	return TabManager.activeTab.getZoom();
-};
-TabManager.updateAvailableSensors = function(){
-	TabManager.passRecursively("updateAvailableSensors");
 };
 function Tab(){
 	this.mainG=GuiElements.create.group(0,0);
@@ -9267,12 +9175,6 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Tab.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Tab.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
 Tab.prototype.countDevicesInUse=function(deviceClass){
 	var largest=0;
 	var stacks=this.stackList;
@@ -9280,9 +9182,6 @@ Tab.prototype.countDevicesInUse=function(deviceClass){
 		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
-};
-Tab.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 Tab.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
@@ -11537,18 +11436,18 @@ BlockStack.prototype.checkListUsed = function(list) {
 };
 
 /**
+ * Updates dimensions after device dropdowns become visible
  * @param deviceClass
  */
 BlockStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
 /**
+ * Updates dimensions after device dropdowns become hidden
  * @param deviceClass
  */
 BlockStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -11560,16 +11459,22 @@ BlockStack.prototype.countDevicesInUse = function(deviceClass) {
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
 
-BlockStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
-};
-
 /**
  * @param {string} message
  */
 BlockStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -12666,7 +12571,7 @@ Block.prototype.getAbsY = function(){
 
 /**
  * Creates and returns the main SVG path element for the Block.
- * @return {object} - The main SVG path element for the Block.
+ * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function(){
 	const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
@@ -13629,22 +13534,6 @@ Block.prototype.checkListUsed = function(list){
 };
 
 /**
- * Recursively tells the device DropDown menus to switch to label mode, as multiple devices are no longer connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively tells the device DropDown menus to switch to DropDown mode, as multiple devices are now connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts the maximum selected DropDown value for a DeviceDropDown of the specified deviceClass
  * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
  * @return {number} - The maximum value + 1 (since selections are 0-indexed)
@@ -13673,14 +13562,6 @@ Block.prototype.countDevicesInUse = function(deviceClass){
  */
 Block.prototype.updateAvailableSensors = function(){
 	this.updateActive();
-	this.passRecursively("updateAvailableSensors");
-};
-
-/**
- * Called when a Robot's status changes.  Overrided by subclasses.
- */
-Block.prototype.updateConnectionStatus = function(){
-
 };
 
 /**
@@ -13711,12 +13592,15 @@ Block.prototype.passRecursively = function(functionName){
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	// If the message is intended for Blocks...
-	if(message === "updateConnectionStatus") {
-		// Call the message and pass in the arguments
-		this.updateConnectionStatus.apply(this, funArgs);
+	// If the message implemented by this Block...
+
+	if(myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
+		// Implemented by all Blocks, used by Tablet Blocks
+		this.updateAvailableSensors.apply(this, funArgs);
 	}
+
 	// Add "passRecursivelyDown" as the first argument
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	// Call passRecursivelyDown on all children
@@ -13873,68 +13757,131 @@ function DoubleLoopBlock(x, y, category, midLabelText) {
 DoubleLoopBlock.prototype = Object.create(Block.prototype);
 DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the visual aspects of a Slot.
+ * Abstract class, subclasses correspond to different types of Slots.
+ * @param {Slot} slot - The Slot this SlotShape is a part of.  Used for retrieving category information, etc.
+ * @constructor
  */
-function SlotShape(slot){
+function SlotShape(slot) {
 	this.slot = slot;
+
+	// SlotShapes are only shown when no Blocks are connected to the Slot
 	this.visible = false;
+
+	// The graphics for the shape are created when show() or buildSlot() is called
 	this.built = false;
+
+	// Some slots appear different if the Block that are attached to is inactive (gray)
 	this.active = true;
 }
-SlotShape.setConstants = function(){
+
+/**
+ * SlotShape has no constants yet
+ */
+SlotShape.setConstants = function() {
 
 };
-SlotShape.prototype.show = function(){
-	if(this.visible) return;
+
+/**
+ * Builds the slot and makes it visible
+ */
+SlotShape.prototype.show = function() {
+	if (this.visible) return;
 	this.visible = true;
-	if(!this.built) this.buildSlot();
+	if (!this.built) this.buildSlot();
 	this.slot.parent.group.appendChild(this.group);
 	this.updateDim();
 	this.updateAlign();
 };
-SlotShape.prototype.hide = function(){
-	if(!this.visible) return;
+
+/**
+ * Hides the slot
+ */
+SlotShape.prototype.hide = function() {
+	if (!this.visible) return;
 	this.visible = false;
 	this.group.remove();
 };
-SlotShape.prototype.buildSlot = function(){
-	if(this.built) return;
+
+/**
+ * Creates the Slot's graphics
+ */
+SlotShape.prototype.buildSlot = function() {
+	if (this.built) return;
 	this.built = true;
 	this.group = GuiElements.create.group(0, 0);
+	// Overridden by subclasses
 };
-SlotShape.prototype.move = function(x, y){
+
+/**
+ * Moves the SlotShape to the coords (relative to the Block)
+ * @param {number} x
+ * @param {number} y
+ */
+SlotShape.prototype.move = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
 	GuiElements.move.group(this.group, x, y);
 };
-SlotShape.prototype.updateDim = function(){
+
+/**
+ * Computes the SlotShape's width and height properties
+ */
+SlotShape.prototype.updateDim = function() {
 	DebugOptions.markAbstract();
 };
-SlotShape.prototype.updateAlign = function(){
+
+/**
+ * Moves the SlotShapes sub-parts to line up properly
+ */
+SlotShape.prototype.updateAlign = function() {
 	DebugOptions.markAbstract();
 };
-SlotShape.prototype.makeActive = function(){
-	if(!this.active) {
+
+/**
+ * Makes the SlotShape appear active
+ */
+SlotShape.prototype.makeActive = function() {
+	if (!this.active) {
 		this.active = true;
 	}
+	// Subclasses may change appearance
 };
-SlotShape.prototype.makeInactive = function(){
-	if(this.active){
+
+/**
+ * Makes the SlotShape appear inactive
+ */
+SlotShape.prototype.makeInactive = function() {
+	if (this.active) {
 		this.active = false;
 	}
+	// Subclasses may change appearance
 };
-SlotShape.prototype.setActive = function(active){
-	if(active){
+
+/**
+ * Sets the SlotShape to appear active/inactive
+ * @param {boolean} active
+ */
+SlotShape.prototype.setActive = function(active) {
+	if (active) {
 		this.makeActive();
 	} else {
 		this.makeInactive();
 	}
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Abstract subclass of SlotShape for Slots that allow values (strings/numbers) to be directly entered into the Slot
+ * EditableSlotShape can be controlled by an InputSystem
+ * @param {Slot} slot
+ * @param {string} initialText - The initial value to display
+ * @param {object} dimConstants - An object provided by the subclass with constants for colors/margins
+ * @constructor
  */
 function EditableSlotShape(slot, initialText, dimConstants){
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
+
+	// Text can be in one of three color states: selected, deselected, and grayed
 	this.isGray = false;
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);
@@ -14220,6 +14167,48 @@ DropSlotShape.prototype.deselect = function(){
 	GuiElements.update.color(this.triE,DSS.triColor);
 };
 /**
+ * An interface for parts of a Block such as LabelText, BlockIcons, and Slots.
+ * @param {Block} parent - The Block this part is a member of
+ * @constructor
+ */
+function BlockPart(parent){
+	DebugOptions.markAbstract();
+	this.parent = parent;
+	this.isSlot = false;
+	this.width = NaN;
+	this.height = NaN;
+}
+
+/**
+ * Move the part to the specified location and returns where the next part should be.
+ * Called by the Block any time it has changed size/shape
+ * @param {number} x - The x coord the part should have relative to the Block it is in
+ * @param {number} y - The y coord ths part should have measured from the center of the part
+ * @return {number} - The width of the part, indicating how much the next item in the Block should be shifted over.
+ */
+BlockPart.prototype.updateAlign = function(x, y) {
+	DebugOptions.markAbstract();
+	return this.width;
+};
+
+/**
+ * Makes this part recalculate its dimensions, which it stores in this.width and this.height for the Block to retrieve.
+ */
+BlockPart.prototype.updateDim = function() {
+	DebugOptions.markAbstract();
+	this.width = NaN;
+	this.height = NaN;
+};
+
+/**
+ * Creates a text representation of the part
+ * @return {string}
+ */
+BlockPart.prototype.textSummary = function() {
+	DebugOptions.markAbstract();
+	return "";
+};
+/**
  * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
  * attached.
  * Every Slot has a parent Block which it relies on heavily.
@@ -14259,6 +14248,9 @@ function Slot(parent, key, snapType, outputType){
 	/** @type {SlotShape} */
 	this.slotShape = undefined;
 }
+Slot.prototype = Object.create(BlockPart.prototype);
+Slot.prototype.constructor = Slot;
+
 Slot.setConstants = function(){
 	//The type of Blocks which can be attached to the Slot.
 	Slot.snapTypes = {};
@@ -14676,22 +14668,6 @@ Slot.prototype.deleteList = function(list){
 };
 
 /**
- * Recursively hides device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively shows device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts devices in use of a certain device type
  * @param deviceClass - A subclass of the Device class
  * @returns {number}
@@ -14703,27 +14679,38 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
 	return 0;
 };
 
-Slot.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
-
-Slot.prototype.updateConnectionStatus = function(){
-
-};
-
+/**
+ * Calls the given function on its children, children's children, etc.
+ * Intercepts messages intended for this object and calls them
+ * @param {string} message - The message to send
+ */
 Slot.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+	if(myMessage === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+		// Implemented by DeviceDropSlots
 		this.updateConnectionStatus.apply(this, funArgs);
 	}
-	if(message === "renameRecording" && this.renameRecording != null) {
+	if(myMessage === "renameRecording" && this.renameRecording != null) {
+		// Implemented by SoundDropSlots
 		this.renameRecording.apply(this, funArgs);
 	}
-	if(message === "deleteRecording" && this.deleteRecording != null) {
+	if(myMessage === "deleteRecording" && this.deleteRecording != null) {
+		// Implemented by SoundDropSlots
 		this.deleteRecording.apply(this, funArgs);
 	}
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -16678,29 +16665,11 @@ BlockSlot.prototype.checkListUsed = function(list) {
 /**
  * @param deviceClass - a subclass of Device
  */
-BlockSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
-BlockSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
 BlockSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.hasChild) {
 		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
-};
-
-BlockSlot.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**
@@ -16720,94 +16689,170 @@ BlockSlot.prototype.passRecursively = function(functionName) {
 		this.child[functionName].apply(this.child, args);
 	}
 };
-//Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
-
-function LabelText(parent,text){
+/**
+ * Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
+ * @param {Block} parent - The Block this LabelText is a member of
+ * @param {string} text - The text to display
+ * @constructor
+ */
+function LabelText(parent, text) {
 	DebugOptions.validateNonNull(parent, text);
-	this.text=text;
-	this.width=0;
-	this.height=BlockGraphics.labelText.charHeight;
-	this.x=0;
-	this.y=0;
-	this.parent=parent;
-	this.textE=this.generateText(text);
-	this.isSlot=false;
-	this.visible=true;
+	this.text = text;
+	this.width = 0;   // Computed later with updateDim
+	this.height = BlockGraphics.labelText.charHeight;
+	this.x = 0;
+	this.y = 0;
+	this.parent = parent;
+	this.textE = this.generateText(text);
+	this.isSlot = false;   // All BlockParts have this property
+	this.visible = true;
 }
-LabelText.prototype.updateAlign=function(x,y){
-	this.move(x,y+this.height/2);
+LabelText.prototype = Object.create(BlockPart.prototype);
+LabelText.prototype.constructor = LabelText;
+
+/**
+ * @param {number} x - The x coord the text should have relative to the Block it is in
+ * @param {number} y - The y coord ths text should have measured from the center of the text
+ * @return {number} - The width of the text, indicating how much the next item should be shifted over.
+ */
+LabelText.prototype.updateAlign = function(x, y) {
+	this.move(x, y + this.height / 2);
 	return this.width;
 };
-LabelText.prototype.updateDim=function(){
-	if(this.width==0){
+
+/**
+ * Computes the dimensions of the text and stores them in this.height and this.width
+ */
+LabelText.prototype.updateDim = function() {
+	// Dimensions are only computed once, since text can't change
+	if (this.width === 0) {
 		GuiElements.layers.temp.appendChild(this.textE);
-		this.width=GuiElements.measure.textWidth(this.textE);
+		this.width = GuiElements.measure.textWidth(this.textE);
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}
 };
-LabelText.prototype.generateText=function(text){
-	var obj=BlockGraphics.create.labelText(text,this.parent.group);
-	TouchReceiver.addListenersChild(obj,this.parent);
+
+/**
+ * Creates text in the SVG from the specified string
+ * @param {string} text - The text to create
+ * @return {Node} - The SVG text element
+ */
+LabelText.prototype.generateText = function(text) {
+	const obj = BlockGraphics.create.labelText(text, this.parent.group);
+	TouchReceiver.addListenersChild(obj, this.parent);
 	return obj;
 };
-LabelText.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	BlockGraphics.update.text(this.textE,x,y);
+
+/**
+ * Moves text to coords and stores them in this.x and this.y
+ * @param {number} x
+ * @param {number} y
+ */
+LabelText.prototype.move = function(x, y) {
+	this.x = x;
+	this.y = y;
+	BlockGraphics.update.text(this.textE, x, y);
 };
-LabelText.prototype.duplicate=function(parentCopy){
-	return new LabelText(parentCopy,this.text);
-};
-LabelText.prototype.textSummary=function(){
+
+/**
+ * Creates a string representation of the label
+ * @return {string}
+ */
+LabelText.prototype.textSummary = function() {
 	return this.text;
 };
-LabelText.prototype.show=function(){
-	if(!this.visible){
+
+/**
+ * Unhides the label
+ */
+LabelText.prototype.show = function() {
+	if (!this.visible) {
 		this.parent.group.appendChild(this.textE);
-		this.visible=true;
+		this.visible = true;
 	}
 };
-LabelText.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Removes the label from the SVG
+ */
+LabelText.prototype.hide = function() {
+	if (this.visible) {
 		this.textE.remove();
-		this.visible=false;
+		this.visible = false;
 	}
 };
-LabelText.prototype.remove=function(){
+
+/**
+ * Intended to permanently remove label from SVG
+ */
+LabelText.prototype.remove = function() {
 	this.textE.remove();
 };
-function BlockIcon(parent,pathId,color,altText,height){
-	this.pathId=pathId;
-	this.color=color;
-	this.altText=altText;
-	this.width=VectorIcon.computeWidth(pathId,height);
-	this.height=height;
-	this.x=0;
-	this.y=0;
-	this.parent=parent;
-	this.icon=new VectorIcon(0,0,pathId,color,height,this.parent.group);
-	TouchReceiver.addListenersChild(this.icon.pathE,this.parent);
-	this.isSlot=false;
+/**
+ * Adds a colored icon that can be used as part of a Block. Used in the "when flag tapped" Block
+ * @param {Block} parent - The Block this icon is a part of
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ * @param {string} color - Hex representation of the color to use
+ * @param {string} altText - Text representation of icon is used for creating text summary
+ * @param {number} height - Height of the icon. Icon will automatically center vertically
+ * @constructor
+ */
+function BlockIcon(parent, pathId, color, altText, height) {
+	DebugOptions.validateNonNull(parent, pathId, color, altText);
+	DebugOptions.validateNumbers(height);
+	this.pathId = pathId;
+	this.color = color;
+	this.altText = altText;
+	this.width = VectorIcon.computeWidth(pathId, height);
+	this.height = height;
+	this.x = 0;
+	this.y = 0;
+	this.parent = parent;
+	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
+	this.isSlot = false;
 }
-BlockIcon.prototype.updateAlign=function(x,y){
-	this.move(x,y-this.height/2);
+BlockIcon.prototype = Object.create(BlockPart.prototype);
+BlockIcon.prototype.constructor = BlockIcon;
+
+/**
+ * @param {number} x - The x coord the icon should have relative to the Block it is in
+ * @param {number} y - The y coord ths icon should have measured from the center of the icon
+ * @return {number} - The width of the icon, indicating how much the next item should be shifted over.
+ */
+BlockIcon.prototype.updateAlign = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.move(x, y - this.height / 2);
 	return this.width;
-}
-BlockIcon.prototype.updateDim=function(){
-	
-}
-BlockIcon.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	this.icon.move(x,y);
-}
-BlockIcon.prototype.duplicate=function(parentCopy){
-	return new BlockIcon(parentCopy,this.pathId,this.color,this.altText,this.height);
-}
-BlockIcon.prototype.textSummary=function(){
+};
+
+/**
+ * BlockIcons are of constant size, so updateDim does nothing
+ */
+BlockIcon.prototype.updateDim = function() {
+
+};
+
+/**
+ * Moves the icon and sets this.x and this.y to the specified coordinates
+ * @param {number} x
+ * @param {number} y
+ */
+BlockIcon.prototype.move = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.x = x;
+	this.y = y;
+	this.icon.move(x, y);
+};
+
+/**
+ * Creates a text representation of the BlockIcon
+ * @return {string}
+ */
+BlockIcon.prototype.textSummary = function() {
 	return this.altText;
-}
+};
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
  * of the defined Blocks are just subclasses of the Blocks here.
  */

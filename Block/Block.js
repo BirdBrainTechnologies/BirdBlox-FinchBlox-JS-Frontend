@@ -132,7 +132,7 @@ Block.prototype.getAbsY = function(){
 
 /**
  * Creates and returns the main SVG path element for the Block.
- * @return {object} - The main SVG path element for the Block.
+ * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function(){
 	const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
@@ -1095,22 +1095,6 @@ Block.prototype.checkListUsed = function(list){
 };
 
 /**
- * Recursively tells the device DropDown menus to switch to label mode, as multiple devices are no longer connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively tells the device DropDown menus to switch to DropDown mode, as multiple devices are now connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts the maximum selected DropDown value for a DeviceDropDown of the specified deviceClass
  * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
  * @return {number} - The maximum value + 1 (since selections are 0-indexed)
@@ -1139,14 +1123,6 @@ Block.prototype.countDevicesInUse = function(deviceClass){
  */
 Block.prototype.updateAvailableSensors = function(){
 	this.updateActive();
-	this.passRecursively("updateAvailableSensors");
-};
-
-/**
- * Called when a Robot's status changes.  Overrided by subclasses.
- */
-Block.prototype.updateConnectionStatus = function(){
-
 };
 
 /**
@@ -1177,12 +1153,15 @@ Block.prototype.passRecursively = function(functionName){
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	// If the message is intended for Blocks...
-	if(message === "updateConnectionStatus") {
-		// Call the message and pass in the arguments
-		this.updateConnectionStatus.apply(this, funArgs);
+	// If the message implemented by this Block...
+
+	if(myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
+		// Implemented by all Blocks, used by Tablet Blocks
+		this.updateAvailableSensors.apply(this, funArgs);
 	}
+
 	// Add "passRecursivelyDown" as the first argument
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	// Call passRecursivelyDown on all children

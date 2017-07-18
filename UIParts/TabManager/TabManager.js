@@ -210,12 +210,6 @@ TabManager.checkListUsed=function(list){
 	}
 	return false;
 };
-TabManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-TabManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
-};
 TabManager.countDevicesInUse=function(deviceClass){
 	var largest=0;
 	for(var i=0;i<TabManager.tabList.length;i++){
@@ -245,7 +239,4 @@ TabManager.getActiveZoom = function(){
 		return 1;
 	}
 	return TabManager.activeTab.getZoom();
-};
-TabManager.updateAvailableSensors = function(){
-	TabManager.passRecursively("updateAvailableSensors");
 };

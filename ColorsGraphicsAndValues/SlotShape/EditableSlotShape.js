@@ -1,10 +1,17 @@
 /**
- * Created by Tom on 6/29/2017.
+ * Abstract subclass of SlotShape for Slots that allow values (strings/numbers) to be directly entered into the Slot
+ * EditableSlotShape can be controlled by an InputSystem
+ * @param {Slot} slot
+ * @param {string} initialText - The initial value to display
+ * @param {object} dimConstants - An object provided by the subclass with constants for colors/margins
+ * @constructor
  */
 function EditableSlotShape(slot, initialText, dimConstants){
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
+
+	// Text can be in one of three color states: selected, deselected, and grayed
 	this.isGray = false;
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);

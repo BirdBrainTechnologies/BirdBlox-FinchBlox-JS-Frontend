@@ -86,7 +86,7 @@ BlockPalette.createCategories=function(){
 			firstColumn=false;
 			currentY=BlockPalette.catVMargin;
 		}
-		var currentCat=new Category(currentX,currentY,i);
+		var currentCat=new Category(currentX,currentY,BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
 		currentY+=CategoryBN.height+CategoryBN.vMargin;
@@ -156,15 +156,6 @@ BlockPalette.endScroll=function(){
 		BP.scrolling=false;
 		BP.selectedCat.endScroll();
 	}
-};
-BlockPalette.showDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("showDeviceDropDowns", deviceClass);
-};
-BlockPalette.hideDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-BlockPalette.updateAvailableSensors = function(){
-	BlockPalette.passRecursively("updateAvailableSensors");
 };
 BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);

@@ -602,18 +602,18 @@ BlockStack.prototype.checkListUsed = function(list) {
 };
 
 /**
+ * Updates dimensions after device dropdowns become visible
  * @param deviceClass
  */
 BlockStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
 /**
+ * Updates dimensions after device dropdowns become hidden
  * @param deviceClass
  */
 BlockStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -625,16 +625,22 @@ BlockStack.prototype.countDevicesInUse = function(deviceClass) {
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
 
-BlockStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
-};
-
 /**
  * @param {string} message
  */
 BlockStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**

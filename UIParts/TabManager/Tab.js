@@ -283,12 +283,6 @@ Tab.prototype.checkListUsed=function(list){
 	}
 	return false;
 };
-Tab.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Tab.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
 Tab.prototype.countDevicesInUse=function(deviceClass){
 	var largest=0;
 	var stacks=this.stackList;
@@ -296,9 +290,6 @@ Tab.prototype.countDevicesInUse=function(deviceClass){
 		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
-};
-Tab.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 Tab.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");

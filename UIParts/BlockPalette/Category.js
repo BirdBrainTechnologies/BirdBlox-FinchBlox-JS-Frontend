@@ -1,5 +1,4 @@
-function Category(buttonX,buttonY,index){
-	this.index=index;
+function Category(buttonX,buttonY, name, id){
 	this.buttonX=buttonX;
 	this.buttonY=buttonY;
 	this.x=0;
@@ -14,8 +13,8 @@ function Category(buttonX,buttonY,index){
 	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
 	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
 	*/
-	this.id=BlockList.getCatId(index);
-	this.name=BlockList.getCatName(index);
+	this.id=id;
+	this.name=name;
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -244,15 +243,6 @@ Category.prototype.getAbsX=function(){
 };
 Category.prototype.getAbsY=function(){
 	return this.relToAbsY(0);
-};
-Category.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-Category.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Category.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
 };
 Category.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");

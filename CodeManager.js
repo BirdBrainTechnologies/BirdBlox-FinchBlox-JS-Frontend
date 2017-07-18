@@ -441,12 +441,10 @@ CodeManager.eventBroadcast=function(message){
 	TabManager.eventBroadcast(message);
 };
 CodeManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.hideDeviceDropDowns(deviceClass);
-	BlockPalette.hideDeviceDropDowns(deviceClass);
+	CodeManager.passRecursivelyDown("hideDeviceDropDowns", true, deviceClass);
 };
 CodeManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.showDeviceDropDowns(deviceClass);
-	BlockPalette.showDeviceDropDowns(deviceClass);
+	CodeManager.passRecursivelyDown("showDeviceDropDowns", true, deviceClass);
 };
 CodeManager.countDevicesInUse=function(deviceClass){
 	return TabManager.countDevicesInUse(deviceClass);
@@ -457,8 +455,8 @@ CodeManager.checkBroadcastRunning=function(message){
 	return TabManager.checkBroadcastRunning(message);
 };
 CodeManager.updateAvailableSensors = function(){
-	TabManager.updateAvailableSensors();
-	BlockPalette.updateAvailableSensors();
+	TabManager.passRecursivelyDown("updateAvailableSensors");
+	BlockPalette.passRecursivelyDown("updateAvailableSensors");
 };
 CodeManager.updateConnectionStatus = function(){
 	CodeManager.passRecursivelyDown("updateConnectionStatus", true);

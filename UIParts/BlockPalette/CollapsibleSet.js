@@ -69,15 +69,6 @@ CollapsibleSet.prototype.remove = function() {
 CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
 	this.passRecursively("setSuggestedCollapse", id, collapsed);
 };
-CollapsibleSet.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-CollapsibleSet.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-CollapsibleSet.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
 CollapsibleSet.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);

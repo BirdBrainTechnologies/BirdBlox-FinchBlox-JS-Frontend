@@ -352,29 +352,11 @@ BlockSlot.prototype.checkListUsed = function(list) {
 /**
  * @param deviceClass - a subclass of Device
  */
-BlockSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
-BlockSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
 BlockSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.hasChild) {
 		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
-};
-
-BlockSlot.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**

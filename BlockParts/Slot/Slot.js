@@ -38,6 +38,9 @@ function Slot(parent, key, snapType, outputType){
 	/** @type {SlotShape} */
 	this.slotShape = undefined;
 }
+Slot.prototype = Object.create(BlockPart.prototype);
+Slot.prototype.constructor = Slot;
+
 Slot.setConstants = function(){
 	//The type of Blocks which can be attached to the Slot.
 	Slot.snapTypes = {};
@@ -455,22 +458,6 @@ Slot.prototype.deleteList = function(list){
 };
 
 /**
- * Recursively hides device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively shows device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts devices in use of a certain device type
  * @param deviceClass - A subclass of the Device class
  * @returns {number}
@@ -482,27 +469,38 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
 	return 0;
 };
 
-Slot.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
-
-Slot.prototype.updateConnectionStatus = function(){
-
-};
-
+/**
+ * Calls the given function on its children, children's children, etc.
+ * Intercepts messages intended for this object and calls them
+ * @param {string} message - The message to send
+ */
 Slot.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+	if(myMessage === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+		// Implemented by DeviceDropSlots
 		this.updateConnectionStatus.apply(this, funArgs);
 	}
-	if(message === "renameRecording" && this.renameRecording != null) {
+	if(myMessage === "renameRecording" && this.renameRecording != null) {
+		// Implemented by SoundDropSlots
 		this.renameRecording.apply(this, funArgs);
 	}
-	if(message === "deleteRecording" && this.deleteRecording != null) {
+	if(myMessage === "deleteRecording" && this.deleteRecording != null) {
+		// Implemented by SoundDropSlots
 		this.deleteRecording.apply(this, funArgs);
 	}
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**

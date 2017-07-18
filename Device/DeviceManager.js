@@ -16,6 +16,15 @@ DeviceManager.setStatics = function(){
 	statuses.disconnected = 0;
 	statuses.connected = 1;
 	statuses.noDevices = 2;
+
+	/*
+	statuses.disconnected = 0;
+	statuses.incompatibleFirmware = 1;
+	statuses.oldFirmware = 2;
+	statuses.connected = 3;
+	statuses.noDevices = 4;
+	*/
+
 	DM.totalStatus = statuses.noDevices;
 	DM.statusListener = null;
 };
@@ -59,20 +68,6 @@ DeviceManager.prototype.removeAllDevices = function(){
 	this.connectedDevices = [];
 	this.devicesChanged();
 };
-DeviceManager.prototype.updateTotalStatus = function(){
-	if(this.getDeviceCount() == 0){
-		this.connectionStatus = 2;
-		return;
-	}
-	var request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/totalStatus");
-	var me = this;
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		me.connectionStatus = parseInt(result);
-		if (isNaN(me.connectionStatus)) {
-			me.connectionStatus = 0;
-		}
-	});
-};
 DeviceManager.prototype.getTotalStatus = function(){
 	return this.connectionStatus;
 };
@@ -81,7 +76,9 @@ DeviceManager.prototype.deviceIsConnected = function(index){
 		return false;
 	}
 	else {
-		return this.connectedDevices[index].getStatus() === DeviceManager.statuses.connected;
+		const deviceStatus = this.connectedDevices[index].getStatus();
+		const statuses = DeviceManager.statuses;
+		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
 };
 DeviceManager.prototype.updateSelectableDevices = function(){
