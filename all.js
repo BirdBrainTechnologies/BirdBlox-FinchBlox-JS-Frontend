@@ -1068,7 +1068,9 @@ DeviceManager.prototype.updateSelectableDevices = function(){
 	else if(newCount>1&&oldCount<=1){
 		CodeManager.showDeviceDropDowns(this.deviceClass);
 	}
-	BlockPalette.getCategory("robots").refreshGroup();
+
+	const suggestedCollapse = newCount === 0;
+	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
 DeviceManager.prototype.getSelectableDeviceCount=function(){
 	return this.selectableDevices;
@@ -1156,6 +1158,7 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 	DeviceManager.forEach(function(manager){
 		manager.updateConnectionStatus(deviceId, status);
 	});
+	CodeManager.updateConnectionStatus();
 };
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;
@@ -1362,6 +1365,7 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
+	GuiElements.isAndroid = false;
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
@@ -1378,6 +1382,7 @@ GuiElements.setConstants=function(){
 	BlockList();
 	Colors();
 	Button.setGraphics();
+	CloseButton.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphicsPart1();
@@ -1394,6 +1399,9 @@ GuiElements.setConstants=function(){
 
 	Block.setConstants();
 	BlockPalette.setGraphics();
+	CollapsibleSet.setConstants();
+	CollapsibleItem.setConstants();
+
 	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
@@ -2086,8 +2094,9 @@ GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
 		GuiElements.osVersion = resp;
 		var parts = resp.split(" ");
-		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
-		GuiElements.isIos = (parts.length >= 1 && parts[0] == "iOS");
+		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
+		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
+		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
 		callback();
 	}, function(){
 		GuiElements.osVersion="";
@@ -2250,107 +2259,124 @@ GuiElements.checkSmallMode = function(){
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
-/* Populates the list of category names. Run by GuiElements. */
-function BlockList(){
-	BlockList.categories=new Array();
-	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
-	var cat=BlockList.categories;
-	// Catetory names should be capitalized in the way they should be displayed on screen.
+/**
+ * Populates the list of category names. Run by GuiElements.
+ */
+function BlockList() {
+	const cat = BlockList.categories = [];
+
+	// List only includes categories that will appear in the BlockPalette in order.
+	// Category names should be capitalized in the way they should be displayed on screen.
 	cat.push("Robots");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
-	//cat.push("Motion");
-	//cat.push("Looks");
-	//cat.push("Pen");
-
 	cat.push("Control");
-	//cat.push("Sensing");
-
 	cat.push("Variables");
 }
-/* Returns the id for a category given its index in the category list. Ids are lowercase.
+
+/**
+ * Returns the id for a category given its index in the category list. Ids are lowercase.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's id (its name in lowercase).
  */
-BlockList.getCatId=function(index){
+BlockList.getCatId = function(index) {
 	return BlockList.categories[index].toLowerCase();
 };
-/* Returns the category's name given its index in the category list.
+
+/**
+ * Returns the category's name given its index in the category list.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's name.
  */
-BlockList.getCatName=function(index){
+BlockList.getCatName = function(index) {
 	return BlockList.categories[index];
 };
-/* Returns the length of the category list.
+
+/**
+ * Returns the length of the category list.
  * @return {number} - The length of the category list.
  */
-BlockList.catCount=function(){
+BlockList.catCount = function() {
 	return BlockList.categories.length;
 };
 
-/* The following functions populate a Category for the BlockPalette.
- * @param {Category} category - the Category object to populate.
+/*
+ * The following functions populate a Category for the BlockPalette.
  * Each function has the same structure.
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
- * category.trimBottom() is used to remove any extra space at the bottom of the category.
+ * category.trimBottom() is used to remove any extra space at the bottom of the category. category.finalize() finishes
+ * the operation.
+ */
+
+/**
+ * @param {Category} category
  */
 BlockList.populateCat_robots = function(category) {
-	let anyConnected = false;
-	Device.getTypeList().forEach(function(deviceClass){
-		if(deviceClass.getManager().getDeviceCount() > 0) {
-			anyConnected = true;
-			category.addLabel(deviceClass.getDeviceTypeName());
-			category.addSpace();
-			BlockList["populateCat_" + deviceClass.getDeviceTypeId()](category);
-			category.addSpace();
-		}
+	let nameIdList = [];
+	let typeList = Device.getTypeList();
+	typeList.forEach(function(deviceClass) {
+		entry = {};
+		entry.name = deviceClass.getDeviceTypeName();
+		entry.id = deviceClass.getDeviceTypeId();
+		nameIdList.push(entry);
 	});
-	if(!anyConnected) {
-		category.addLabel("Connect a robot first...");
-		category.addSpace();
+	const set = category.addCollapsibleSet(nameIdList);
+
+	for(let i = 0; i < typeList.length; i++) {
+		const item = set.getItem(i);
+		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
 	category.trimBottom();
 	category.finalize();
 };
-BlockList.populateCat_hummingbird=function(category){
-	category.addBlockByName("B_HBServo");
-	category.addBlockByName("B_HBMotor");
-	category.addBlockByName("B_HBVibration");
-	category.addSpace();
-	category.addBlockByName("B_HBLed");
-	category.addBlockByName("B_HBTriLed");
-	category.addSpace();
-	category.addBlockByName("B_HBLight");
-	category.addBlockByName("B_HBTempC");
-	category.addBlockByName("B_HBTempF");
-	category.addBlockByName("B_HBDistCM");
-	category.addBlockByName("B_HBDistInch");
-	category.addBlockByName("B_HBKnob");
-	category.addBlockByName("B_HBSound");
-	category.trimBottom();
-	category.finalize();
 
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_hummingbird = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_HBServo");
+	collapsibleItem.addBlockByName("B_HBMotor");
+	collapsibleItem.addBlockByName("B_HBVibration");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLed");
+	collapsibleItem.addBlockByName("B_HBTriLed");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLight");
+	collapsibleItem.addBlockByName("B_HBTempC");
+	collapsibleItem.addBlockByName("B_HBTempF");
+	collapsibleItem.addBlockByName("B_HBDistCM");
+	collapsibleItem.addBlockByName("B_HBDistInch");
+	collapsibleItem.addBlockByName("B_HBKnob");
+	collapsibleItem.addBlockByName("B_HBSound");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
 };
-BlockList.populateCat_flutter=function(category){
-	category.addBlockByName("B_FlutterServo");
-	category.addBlockByName("B_FlutterTriLed");
-	category.addBlockByName("B_FlutterBuzzer");
-	category.addSpace();
-	category.addBlockByName("B_FlutterLight");
-	category.addBlockByName("B_FlutterTempC");
-	category.addBlockByName("B_FlutterTempF");
-	category.addBlockByName("B_FlutterDistCM");
-	category.addBlockByName("B_FlutterDistInch");
-	category.addBlockByName("B_FlutterKnob");
-	category.addBlockByName("B_FlutterSound");
-	category.addBlockByName("B_FlutterSoil");
-	category.trimBottom();
-	category.finalize();
 
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_flutter = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FlutterServo");
+	collapsibleItem.addBlockByName("B_FlutterTriLed");
+	collapsibleItem.addBlockByName("B_FlutterBuzzer");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FlutterLight");
+	collapsibleItem.addBlockByName("B_FlutterTempC");
+	collapsibleItem.addBlockByName("B_FlutterTempF");
+	collapsibleItem.addBlockByName("B_FlutterDistCM");
+	collapsibleItem.addBlockByName("B_FlutterDistInch");
+	collapsibleItem.addBlockByName("B_FlutterKnob");
+	collapsibleItem.addBlockByName("B_FlutterSound");
+	collapsibleItem.addBlockByName("B_FlutterSoil");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
 };
-BlockList.populateCat_motion=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_motion = function(category) {
 	category.addBlockByName("B_Move");
 	category.addBlockByName("B_TurnRight");
 	category.addBlockByName("B_TurnLeft");
@@ -2374,9 +2400,12 @@ BlockList.populateCat_motion=function(category){
 	category.addBlockByName("B_Direction");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_looks=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_looks = function(category) {
 	category.addBlockByName("B_alert");
 	category.addBlockByName("B_SetTitleBarColor");
 	category.addSpace();
@@ -2396,10 +2425,13 @@ BlockList.populateCat_looks=function(category){
 	category.addBlockByName("B_GoBackLayers");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_sound=function(category){
-	category.addButton("Record sounds",RecordingDialog.showDialog,true);
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_sound = function(category) {
+	category.addButton("Record sounds", RecordingDialog.showDialog, true);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
 	category.addBlockByName("B_PlayRecordingUntilDone");
@@ -2415,12 +2447,12 @@ BlockList.populateCat_sound=function(category){
 	category.addBlockByName("B_Tempo");
 	category.trimBottom();
 	category.finalize();
-
 };
-BlockList.populateCat_pen=function(category){
-	
-}
-BlockList.populateCat_tablet=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_tablet = function(category) {
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -2440,9 +2472,12 @@ BlockList.populateCat_tablet=function(category){
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
 	category.finalize();
-
 };
-BlockList.populateCat_control=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_control = function(category) {
 	category.addBlockByName("B_WhenFlagTapped");
 	//category.addBlockByName("B_WhenIAmTapped");
 	category.addBlockByName("B_WhenIReceive");
@@ -2464,12 +2499,12 @@ BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_Stop");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_sensing=function(category){
-
-}
-BlockList.populateCat_operators=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_operators = function(category) {
 	category.addBlockByName("B_Add");
 	category.addBlockByName("B_Subtract");
 	category.addBlockByName("B_Multiply");
@@ -2499,36 +2534,34 @@ BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
 	category.finalize();
+};
 
-
-}
-// @fix Write Documentation.
-BlockList.populateCat_variables=function(category){
-	var callbackFn=function(){
-		CodeManager.newVariable();
-	};
-	category.addButton("Create variable",callbackFn);
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_variables = function(category) {
+	category.addButton("Create variable", CodeManager.newVariable);
 	category.addSpace();
-	var variables=CodeManager.variableList;
-	if(variables.length>0){
-		for(var i=0;i<variables.length;i++){
-			category.addVariableBlock(variables[i]);
-		}
+
+	const variables = CodeManager.variableList;
+	if (variables.length > 0) {
+		variables.forEach(function(variable) {
+			category.addVariableBlock(variable);
+		});
 		category.addSpace();
 		category.addBlockByName("B_SetTo");
 		category.addBlockByName("B_ChangeBy");
 	}
-	callbackFn=function(){
-		CodeManager.newList();
-	};
+
 	category.addSpace();
-	category.addButton("Create list",callbackFn);
+	category.addButton("Create list", CodeManager.newList);
 	category.addSpace();
-	var lists=CodeManager.listList;
-	if(lists.length>0){
-		for(var i=0;i<lists.length;i++){
-			category.addListBlock(lists[i]);
-		}
+
+	const lists = CodeManager.listList;
+	if (lists.length > 0) {
+		lists.forEach(function(list) {
+			category.addListBlock(list);
+		});
 		category.addSpace();
 		category.addBlockByName("B_AddToList");
 		category.addBlockByName("B_DeleteItemOfList");
@@ -2536,12 +2569,12 @@ BlockList.populateCat_variables=function(category){
 		category.addBlockByName("B_ReplaceItemOfListWith");
 		category.addBlockByName("B_CopyListToList");
 	}
+
 	category.addBlockByName("B_ItemOfList");
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
 	category.finalize();
-
 };
 
 //Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
@@ -2727,6 +2760,18 @@ function VectorPaths(){
 	VP.cloud.width = 24;
 	VP.cloud.height = 16;
 	VP.cloud.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z";
+	VP.cloudDownload = {};
+	VP.cloudDownload.width = 24;
+	VP.cloudDownload.height = 16;
+	VP.cloudDownload.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z m -2.35,2.96 -5,5 -5,-5 3,0 0,-4 4,0 0,4 3,0 z";
+	VP.letterX = {};
+	VP.letterX.width = 4.430;
+	VP.letterX.height = 4.430;
+	VP.letterX.path = "m 0,0.69785501 0.69785501,-0.69785501 1.51201679,1.522593 1.5225833,-1.522593 0.6978509,0.69785501 -1.5225889,1.51201679 1.5225889,1.5225833 -0.6978509,0.6978509 -1.5225833,-1.5225889 -1.51201679,1.5225889 -0.69785501,-0.6978509 1.522593,-1.5225833 z";
+	VP.cloudUpload = {};
+	VP.cloudUpload.width = 24;
+	VP.cloudUpload.height = 16;
+	VP.cloudUpload.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z m -5.35,2.96 0,4 -4,0 0,-4 -3,0 5,-5 5,5 -3,0 z";
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -3750,6 +3795,14 @@ TouchReceiver.touchStartTabRow=function(tabRow, index, e){
 		tabRow.selectTab(index);
 	}
 };
+TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
+	const TR = TouchReceiver;
+	if(TR.touchstart(e, false)){
+		Overlay.closeOverlays();
+		TR.targetType="collapsibleItem";
+		TR.target=collapsibleItem;
+	}
+};
 
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
@@ -3853,11 +3906,18 @@ TouchReceiver.touchmove=function(e){
 			if (TR.targetType == "smoothMenuBnList") {
 				shouldPreventDefault = false;
 			}
+
+			if(TR.targetType === "collapsibleItem") {
+				shouldPreventDefault = false;
+				TR.targetType = "scrollBox";
+				TR.target = null;
+			}
 		}
 	}
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
 	shouldPreventDefault &= TR.targetType != "button" || !TR.target.scrollable;
 	shouldPreventDefault &= TR.targetType != "scrollBox";
+	shouldPreventDefault &= TR.targetType != "collapsibleItem";
 	if(shouldPreventDefault){
 		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
@@ -3925,6 +3985,9 @@ TouchReceiver.touchend=function(e){
 		}
 		else if(TR.targetType=="smoothMenuBnList"){
 			shouldPreventDefault = false;
+		}
+		else if(TR.targetType === "collapsibleItem"){
+			TR.target.toggle();
 		}
 	}
 	else{
@@ -4113,6 +4176,12 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
 	element.parent=parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartSmoothMenuBnList(this.parent,e);
+	}, false);
+};
+TouchReceiver.addListenersCollapsibleItem=function(element,item){
+	const TR=TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartCollapsibleItem(item, e);
 	}, false);
 };
 TouchReceiver.addEventListenerSafe=function(element,type, func){
@@ -4501,6 +4570,9 @@ BlockPalette.hideDeviceDropDowns=function(deviceClass){
 BlockPalette.updateAvailableSensors = function(){
 	BlockPalette.passRecursively("updateAvailableSensors");
 };
+BlockPalette.setSuggestedCollapse = function(id, collapsed) {
+	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
+};
 BlockPalette.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);
@@ -4709,7 +4781,7 @@ CategoryBN.setGraphics=function(){
 	CategoryBN.bg=Colors.black;
 	CategoryBN.fontSize=15;
 	CategoryBN.font="Arial";
-	CategoryBN.forground="#fff";
+	CategoryBN.foreground="#fff";
 	CategoryBN.height=30;
 	CategoryBN.colorW=8;
 	CategoryBN.labelLMargin=6;
@@ -4733,7 +4805,7 @@ CategoryBN.prototype.buildGraphics=function(){
 	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
 	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
 	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.forground,CBN.font);
+	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.foreground,CBN.font);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);
@@ -4790,6 +4862,7 @@ function Category(buttonX,buttonY,index){
 	this.buttons=new Array();
 	this.buttonsThatRequireFile = [];
 	this.labels=new Array();
+	this.collapsibleSets = [];
 	this.finalized = false;
 	this.fillGroup();
 	this.scrolling=false;
@@ -4798,24 +4871,32 @@ function Category(buttonX,buttonY,index){
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
-}
+};
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
-}
+};
 Category.prototype.clearGroup=function(){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].delete();
-	}
-	this.blocks=new Array();
-	this.displayStacks=new Array();
-	for(var i=0;i<this.buttons.length;i++){
-		this.buttons[i].remove();
-	}
-	this.buttons=new Array();
-	for(var i=0;i<this.labels.length;i++){
-		this.group.removeChild(this.labels[i]);
-	}
-	this.labels=new Array();
+	this.displayStacks.forEach(function(stack) {
+		stack.delete();
+	});
+	this.blocks = [];
+	this.displayStacks = [];
+
+	this.buttons.forEach(function(button){
+		button.remove();
+	});
+	this.buttons = [];
+
+	this.labels.forEach(function(label){
+		label.remove();
+	});
+	this.labels = [];
+
+	this.collapsibleSets.forEach(function(set){
+		set.remove();
+	});
+	this.collapsibleSets = [];
+
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -4855,7 +4936,17 @@ Category.prototype.addBlock=function(block){
 	if(block.bottomOpen){
 		this.lastHadStud=true;
 	}
-}
+};
+Category.prototype.addCollapsibleSet = function(nameIdList){
+	const x = this.currentBlockX;
+	const y = this.currentBlockY;
+	const set = new CollapsibleSet(y, nameIdList, this, this.group);
+	this.collapsibleSets.push(set);
+	this.lastHadStud = false;
+	this.currentBlockY += set.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	return set;
+};
 
 Category.prototype.fileOpened = function(){
 	this.buttonsThatRequireFile.forEach(function(button){
@@ -4870,7 +4961,7 @@ Category.prototype.fileClosed = function(){
 
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
-}
+};
 Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
 	if(onlyActiveIfOpen == null) {
 		onlyActiveIfOpen = false;
@@ -4931,12 +5022,12 @@ Category.prototype.select=function(){
 	BlockPalette.selectedCat=this;
 	this.button.select();
 	this.smoothScrollBox.show();
-}
+};
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
 	this.smoothScrollBox.hide();
 	this.button.deselect();
-}
+};
 Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
@@ -4945,11 +5036,28 @@ Category.prototype.computeWidth = function(){
 			currentWidth=blockW;
 		}
 	}
+	this.collapsibleSets.forEach(function(set){
+		const width = set.width;
+		currentWidth = Math.max(width, currentWidth);
+	});
 	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
 };
 Category.prototype.updateWidth=function(){
 	if(!this.finalized) return;
 	this.computeWidth();
+	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+Category.prototype.updateDimSet = function(){
+	if(!this.finalized) return;
+	this.computeWidth();
+	let currentH = BlockPalette.mainVMargin;
+	this.collapsibleSets.forEach(function(set){
+		currentH += set.height;
+		currentH += BlockPalette.blockMargin;
+	});
+	currentH-=BlockPalette.blockMargin;
+	currentH+=BlockPalette.mainVMargin;
+	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
 Category.prototype.relToAbsX=function(x){
@@ -4992,12 +5100,321 @@ Category.prototype.passRecursively = function(functionName){
 	this.displayStacks.forEach(function(stack){
 		stack[functionName].apply(stack,args);
 	});
+	this.collapsibleSets.forEach(function(set){
+		set[functionName].apply(set,args);
+	});
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;
 	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
+};
+Category.prototype.setSuggestedCollapse = function(id, collapsed) {
+	this.collapsibleSets.forEach(function(set){
+		set.setSuggestedCollapse(id, collapsed);
+	});
+};
+/**
+ * Created by Tom on 7/17/2017.
+ */
+function CollapsibleSet(y, nameIdList, category, group) {
+	this.y = y;
+	this.category = category;
+	this.group = group;
+	this.collapsibleItems = [];
+	nameIdList.forEach(function(entry){
+		this.collapsibleItems.push(new CollapsibleItem(entry.name, entry.id, this, group));
+	}.bind(this));
+	this.updateDimAlign();
+}
+CollapsibleSet.setConstants = function(){
+	const CS = CollapsibleSet;
+	CS.itemMargin = 0;
+};
+CollapsibleSet.prototype.getItemList = function(){
+	return this.collapsibleItems;
+};
+CollapsibleSet.prototype.getItem = function(index) {
+	return this.collapsibleItems[index];
+};
+CollapsibleSet.prototype.findItem = function(id) {
+	const items = this.collapsibleItems;
+	for(let i = 0; i < items.length; i++) {
+		if(items[i].id === id) {
+			return i;
+		}
+	}
+	DebugOptions.throw("Collapsible item not found.");
+};
+CollapsibleSet.prototype.expand = function(index) {
+	this.collapsibleItems[index].expand();
+	this.updateDimAlign();
+};
+CollapsibleSet.prototype.collapse = function(index) {
+	this.collapsibleItems[index].collapse();
+	this.updateDimAlign();
+};
+CollapsibleSet.prototype.updateDimAlign = function() {
+	const CS = CollapsibleSet;
+	let currentY = this.y;
+	let width = 0;
+	this.collapsibleItems.forEach(function(item) {
+		currentY += item.updateDimAlign(currentY);
+		currentY += CS.itemMargin;
+		width = Math.max(width, item.getWidth());
+	});
+	currentY -= CS.itemMargin;
+	this.height = currentY;
+	this.width = width;
+	this.category.updateDimSet();
+};
+CollapsibleSet.prototype.updateWidth = function() {
+	let width = 0;
+	this.collapsibleItems.forEach(function(item) {
+		width = Math.max(width, item.getWidth());
+	});
+	this.width = width;
+	this.category.updateWidth();
+};
+CollapsibleSet.prototype.remove = function() {
+	this.collapsibleItems.forEach(function(item){
+		item.remove();
+	});
+};
+
+CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
+	this.passRecursively("setSuggestedCollapse", id, collapsed);
+};
+CollapsibleSet.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+CollapsibleSet.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+CollapsibleSet.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+CollapsibleSet.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+CollapsibleSet.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.collapsibleItems.forEach(function(item){
+		item[functionName].apply(item,args);
+	});
+};
+/**
+ * Created by Tom on 7/17/2017.
+ */
+function CollapsibleItem(name, id, collapsibleSet, group) {
+	const CI = CollapsibleItem;
+	this.x = 0;
+	this.name = name;
+	this.id = id;
+	this.set = collapsibleSet;
+	this.group = GuiElements.create.group(0, 0, group);
+	this.innerGroup = GuiElements.create.group(0, CI.hitboxHeight);
+	this.currentBlockX = BlockPalette.mainHMargin;
+	this.currentBlockY = BlockPalette.mainVMargin;
+	this.blocks = [];
+	this.displayStacks = [];
+	this.lastHadStud = false;
+	this.finalized = false;
+	this.collapsed = true;
+	this.suggestedCollapse = true;
+	this.createLabel();
+}
+CollapsibleItem.setConstants = function() {
+	const CI = CollapsibleItem;
+	CI.hitboxHeight = 25;
+	CI.hitboxWidth = BlockPalette.width;
+
+	CI.labelFont = BlockPalette.labelFont;
+	CI.labelFontSize = BlockPalette.labelFontSize;
+	CI.labelFontCharHeight = BlockPalette.labelFontCharHeight;
+	CI.labelColor = BlockPalette.labelColor;
+
+	CI.triBoxWidth = CI.hitboxHeight;
+	CI.triangleWidth = 10;
+	CI.triangleHeight = 5;
+};
+CollapsibleItem.prototype.createLabel = function() {
+	const CI = CollapsibleItem;
+	this.triE = GuiElements.create.path();
+	GuiElements.update.color(this.triE, CI.labelColor);
+	this.updateTriangle();
+
+	const labelY = (CI.hitboxHeight + CI.labelFontCharHeight) / 2;
+	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFontSize, CI.labelColor, CI.labelFont);
+	this.hitboxE = GuiElements.draw.rect(0, 0, CI.hitboxWidth, CI.hitboxHeight, CI.labelColor);
+	GuiElements.update.opacity(this.hitboxE, 0);
+	this.group.appendChild(this.label);
+	this.group.appendChild(this.triE);
+	this.group.appendChild(this.hitboxE);
+
+	TouchReceiver.addListenersCollapsibleItem(this.hitboxE, this);
+
+};
+CollapsibleItem.prototype.updateTriangle = function() {
+	let vertical = !this.collapsed;
+	const CI = CollapsibleItem;
+	let pointX;
+	let pointY;
+	if (!vertical) {
+		pointX = (CI.triBoxWidth + CI.triangleHeight) / 2;
+		pointY = CI.hitboxHeight / 2;
+	} else {
+		pointX = CI.triBoxWidth / 2;
+		pointY = (CI.hitboxHeight + CI.triangleHeight) / 2;
+	}
+	return GuiElements.update.triangleFromPoint(this.triE, pointX, pointY, CI.triangleWidth, -CI.triangleHeight, vertical);
+};
+CollapsibleItem.prototype.addBlockByName=function(blockName){
+	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
+	this.addBlock(block);
+};
+CollapsibleItem.prototype.addBlock=function(block){
+	this.blocks.push(block);
+	if(this.lastHadStud && !block.topOpen){
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+		block.move(this.currentBlockX, this.currentBlockY);
+	}
+	if(block.hasHat){
+		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
+		block.move(this.currentBlockX, this.currentBlockY);
+	}
+	const displayStack = new DisplayStack(block, this.innerGroup, this);
+	this.displayStacks.push(displayStack);
+	this.currentBlockY += displayStack.firstBlock.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud=false;
+	if (block.bottomOpen) {
+		this.lastHadStud = true;
+	}
+};
+CollapsibleItem.prototype.addSpace=function(){
+	this.currentBlockY += BlockPalette.sectionMargin;
+};
+CollapsibleItem.prototype.trimBottom=function(){
+	if(this.lastHadStud){
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+	this.currentBlockY -= BlockPalette.blockMargin;
+	this.currentBlockY += BlockPalette.mainVMargin;
+};
+CollapsibleItem.prototype.finalize = function(){
+	this.finalized = true;
+	this.innerHeight = this.currentBlockY;
+	this.updateWidth();
+};
+CollapsibleItem.prototype.updateDimAlign = function(newY) {
+	this.y = newY;
+	GuiElements.move.group(this.group, this.x, this.y);
+	return this.getHeight();
+};
+CollapsibleItem.prototype.getWidth = function(){
+	if(this.collapsed) {
+		return 0;
+	} else {
+		return this.innerWidth;
+	}
+};
+CollapsibleItem.prototype.getHeight = function(){
+	const CI = CollapsibleItem;
+	if(this.collapsed) {
+		return CI.hitboxHeight;
+	} else {
+		return CI.hitboxHeight + this.innerHeight;
+	}
+};
+CollapsibleItem.prototype.computeWidth = function() {
+	let currentWidth = 0;
+	for(let i = 0; i < this.blocks.length; i++){
+		const blockW = this.blocks[i].width;
+		if(blockW > currentWidth){
+			currentWidth = blockW;
+		}
+	}
+	this.innerWidth = currentWidth;
+};
+CollapsibleItem.prototype.collapse = function() {
+	if(!this.collapsed) {
+		this.collapsed = true;
+		this.innerGroup.remove();
+		this.updateTriangle();
+		this.set.updateDimAlign();
+	}
+};
+CollapsibleItem.prototype.expand = function() {
+	if(this.collapsed) {
+		this.collapsed = false;
+		this.group.appendChild(this.innerGroup);
+		this.updateTriangle();
+		this.set.updateDimAlign();
+	}
+};
+CollapsibleItem.prototype.updateWidth = function() {
+	this.computeWidth();
+	this.set.updateWidth();
+};
+CollapsibleItem.prototype.relToAbsX=function(x){
+	const CI = CollapsibleItem;
+	return this.set.category.relToAbsX(x + this.x);
+};
+CollapsibleItem.prototype.relToAbsY=function(y){
+	const CI = CollapsibleItem;
+	return this.set.category.relToAbsY(y + this.y + CI.hitboxHeight);
+};
+CollapsibleItem.prototype.absToRelX=function(x){
+	const CI = CollapsibleItem;
+	return this.set.category.absToRelX(x) - this.x;
+};
+CollapsibleItem.prototype.absToRelY=function(y){
+	const CI = CollapsibleItem;
+	return this.set.category.absToRelY(y) - this.y - CI.hitboxHeight;
+};
+CollapsibleItem.prototype.remove = function(){
+	this.group.remove();
+};
+CollapsibleItem.prototype.toggle = function(){
+	if(this.collapsed) {
+		this.expand();
+	} else {
+		this.collapse();
+	}
+};
+CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed){
+	if(id !== this.id) return;
+	if(collapsed !== this.suggestedCollapse){
+		this.suggestedCollapse = collapsed;
+		if(collapsed) {
+			this.collapse();
+		} else {
+			this.expand();
+		}
+	}
+};
+
+CollapsibleItem.prototype.showDeviceDropDowns=function(deviceClass){
+	this.passRecursively("showDeviceDropDowns", deviceClass);
+};
+CollapsibleItem.prototype.hideDeviceDropDowns=function(deviceClass){
+	this.passRecursively("hideDeviceDropDowns", deviceClass);
+};
+CollapsibleItem.prototype.updateAvailableSensors = function(){
+	this.passRecursively("updateAvailableSensors");
+};
+CollapsibleItem.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+CollapsibleItem.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.displayStacks.forEach(function(stack){
+		stack[functionName].apply(stack,args);
+	});
 };
 function Button(x,y,width,height,parent){
 	DebugOptions.validateNumbers(x, y, width, height);
@@ -5520,6 +5937,9 @@ TabRow.setConstants = function(){
 	TR.font="Arial";
 	TR.fontWeight="bold";
 	TR.charHeight=12;
+
+	TR.closeHeight = 30;
+	TR.closeMargin = 9;
 };
 TabRow.prototype.show = function(){
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
@@ -5528,10 +5948,11 @@ TabRow.prototype.show = function(){
 		this.visuallySelectTab(this.selectedTab);
 	}
 };
-TabRow.prototype.addTab = function(text, id){
+TabRow.prototype.addTab = function(text, id, closeFn){
 	let entry = {};
 	entry.text = text;
 	entry.id = id;
+	entry.closeFn = closeFn;
 	this.tabList.push(entry);
 };
 TabRow.prototype.createTabs = function(){
@@ -5539,27 +5960,49 @@ TabRow.prototype.createTabs = function(){
 	let tabWidth = this.width / tabCount;
 	this.tabEList = [];
 	this.tabList.forEach(function(entry, index){
-		this.tabEList.push(this.createTab(index, entry.text, tabWidth, index * tabWidth));
+		const tabX = index * tabWidth;
+		const hasClose = entry.closeFn != null;
+		this.tabEList.push(this.createTab(index, entry.text, tabWidth, tabX, hasClose));
+		if (hasClose) {
+			this.createClose(tabWidth, tabX, entry.closeFn);
+		}
 	}.bind(this));
 };
-TabRow.prototype.createTab = function(index, text, width, x){
-	let TR = TabRow;
+TabRow.prototype.createTab = function(index, text, width, x, hasClose){
+	const TR = TabRow;
+
+	let textMaxWidth = width - 2 * TR.slantW;
+	const closeSpace = 2 * TR.closeMargin + TR.closeHeight;
+	if (hasClose) {
+		textMaxWidth = width - closeSpace - TR.slantW;
+	}
 	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
 	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
-	GuiElements.update.textLimitWidth(textE, text, width);
+	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
+
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (width - textW) / 2;
+	if (hasClose) {
+		textX = Math.min(textX, x + width - textW - closeSpace);
+	}
 	let textY = (this.height + TR.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
+
 	TouchReceiver.addListenersTabRow(textE, this, index);
 	TouchReceiver.addListenersTabRow(tabE, this, index);
 	this.group.appendChild(textE);
 	return tabE;
 };
+TabRow.prototype.createClose = function(tabX, tabW, closeFn) {
+	const TR = TabRow;
+	const cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
+	const cy = this.height / 2;
+	const closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
+};
 TabRow.prototype.selectTab = function(index){
 	if(index !== this.selectTab) {
-		this.selectTab = index;
+		this.selectedTab = index;
 		this.visuallySelectTab(index);
 		if (this.callbackFn != null) this.callbackFn(this.tabList[index].id);
 	}
@@ -5574,6 +6017,60 @@ TabRow.prototype.setCallbackFunction = function(callback){
 };
 TabRow.prototype.markAsOverlayPart = function(overlay){
 	this.partOfOverlay = overlay;
+};
+/**
+ * Created by Tom on 7/17/2017.
+ */
+function CloseButton(cx, cy, height, callbackFn, group){
+	const CB = CloseButton;
+	this.pressed = false;
+	this.group = group;
+	this.circleE = GuiElements.draw.circle(cx, cy, height / 2, CB.bg, this.group);
+	const iconH = height * CB.iconHMult;
+	this.icon = new VectorIcon(cx - iconH / 2, cy - iconH / 2, VectorPaths.letterX, CB.foreground, iconH, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+	TouchReceiver.addListenersBN(this.circleE,this);
+	this.callbackFn = callbackFn;
+}
+CloseButton.setGraphics=function(){
+	const CB = CloseButton;
+	CB.bg = Button.bg;
+	CB.foreground = Button.foreground;
+	CB.highlightBg = Button.highlightBg;
+	CB.highlightFore = Button.highlightFore;
+	CB.iconHMult = 0.5;
+};
+CloseButton.prototype.press=function(){
+	if(!this.pressed){
+		this.pressed=true;
+		this.setColor(true);
+	}
+};
+CloseButton.prototype.release=function(){
+	if(this.pressed){
+		this.pressed = false;
+		this.setColor(false);
+		this.callbackFn();
+	}
+};
+CloseButton.prototype.interrupt=function(){
+	if(this.pressed){
+		this.pressed = false;
+		this.setColor(false);
+	}
+};
+CloseButton.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+CloseButton.prototype.setColor = function(isPressed) {
+	const CB = CloseButton;
+	if (isPressed) {
+		this.icon.setColor(CB.highlightFore);
+		GuiElements.update.color(this.circleE, CB.highlightBg);
+	} else {
+		this.icon.setColor(CB.foreground);
+		GuiElements.update.color(this.circleE, CB.bg);
+	}
 };
 /**
  * Created by Tom on 7/3/2017.
@@ -8145,8 +8642,8 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.getCategory("variables").refreshGroup();
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
-	DeviceManager.updateSelectableDevices();
 	BlockPalette.refresh();
+	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };
@@ -8453,7 +8950,7 @@ TabManager.showDeviceDropDowns=function(deviceClass){
 	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
 };
 TabManager.countDevicesInUse=function(deviceClass){
-	var largest=1;
+	var largest=0;
 	for(var i=0;i<TabManager.tabList.length;i++){
 		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}
@@ -8777,7 +9274,7 @@ Tab.prototype.showDeviceDropDowns=function(deviceClass){
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
 Tab.prototype.countDevicesInUse=function(deviceClass){
-	var largest=1;
+	var largest=0;
 	var stacks=this.stackList;
 	for(var i=0;i<stacks.length;i++){
 		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
@@ -8994,7 +9491,7 @@ RowDialog.setConstants=function(){
 	RowDialog.bnMargin=5;
 	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
 	RowDialog.minWidth = 400;
-	RowDialog.minHeight = 200;
+	RowDialog.minHeight = 400;
 	RowDialog.hintMargin = 5;
 
 	RowDialog.fontSize=16;
@@ -9141,7 +9638,6 @@ RowDialog.prototype.createHintText = function(){
 };
 RowDialog.prototype.closeDialog = function(){
 	if(this.visible) {
-		RowDialog.currentDialog = null;
 		this.hide();
 		GuiElements.unblockInteraction();
 	}
@@ -9175,6 +9671,9 @@ RowDialog.prototype.hide = function(){
 			this.scrollBox.hide();
 		}
 		this.scrollBox = null;
+		if(RowDialog.currentDialog === this) {
+			RowDialog.currentDialog = null;
+		}
 	}
 };
 RowDialog.prototype.reloadRows = function(rowCount){
@@ -9249,17 +9748,21 @@ RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackF
  * Created by Tom on 6/13/2017.
  */
 
-function OpenDialog(listOfFiles){
-	this.files=listOfFiles.split("\n");
-	if(listOfFiles === ""){
-		this.files = [];
+function OpenDialog(fileList){
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	this.fileList = fileList;
+	this.files = fileList.localFiles;
+	if(GuiElements.isAndroid) {
+		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+	} else {
+		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
-	RowDialog.call(this, true, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
-OpenDialog.constructor = OpenDialog;
+OpenDialog.prototype.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
@@ -9272,6 +9775,9 @@ OpenDialog.prototype.show = function(){
 	this.createNewBn();
 	if(GuiElements.isIos) {
 		this.createCloudBn();
+	}
+	if(GuiElements.isAndroid){
+		this.createTabRow();
 	}
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
@@ -9296,7 +9802,11 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	//this.createDuplicateBn(file, currentX, y, contentGroup);
-	this.createExportBn(file, currentX, y, contentGroup);
+	if(this.fileList.signedIn) {
+		this.createUploadBn(file, currentX, y, contentGroup);
+	} else {
+		this.createExportBn(file, currentX, y, contentGroup);
+	}
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };
@@ -9306,6 +9816,7 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
+
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
@@ -9336,13 +9847,26 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 		SaveManager.userExportFile(file);
 	});
 };
+OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function(){
+		const request = new HttpRequestBuilder("cloud/upload");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	});
+};
+
 OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
 	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
 		const x1 = this.contentRelToAbsX(x);
 		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
 		const y1 = this.contentRelToAbsY(y);
 		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		new FileContextMenu(this, file, x1, x2, y1, y2);
+		let type = FileContextMenu.types.localSignedOut;
+		if(this.fileList.signedIn) {
+			type = FileContextMenu.types.localSignedIn;
+		}
+		new FileContextMenu(this, file, type, x1, x2, y1, y2);
 	}.bind(this));
 };
 OpenDialog.prototype.createNewBn = function(){
@@ -9362,10 +9886,12 @@ OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();
 	let me = this;
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		me.closeDialog();
-		var openDialog = new OpenDialog(response);
-		openDialog.show();
-		openDialog.setScroll(thisScroll);
+		if(OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+			openDialog.setScroll(thisScroll);
+		}
 	});
 };
 OpenDialog.prototype.createCloudBn = function(){
@@ -9383,16 +9909,23 @@ OpenDialog.prototype.createTabRow = function(){
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
-	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	tabRow.addTab("On Device", "device");
+	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
-	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.setCallbackFunction(this.tabSelected.bind(this));
 	tabRow.show();
 	return tabRow;
 };
+OpenDialog.prototype.tabSelected = function(tab){
+	if(tab === "cloud") {
+		const cloudDialog = new OpenCloudDialog(this.fileList);
+		this.hide();
+		cloudDialog.show();
+	}
+};
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		var openDialog = new OpenDialog(response);
+		var openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
 	});
 };
@@ -9404,6 +9937,228 @@ OpenDialog.closeDialog = function(){
 	if(OpenDialog.currentDialog != null) {
 		OpenDialog.currentDialog.closeDialog();
 	}
+};
+OpenDialog.filesChanged = function(){
+	if(OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenDialog){
+		OpenDialog.currentDialog.reloadDialog();
+	}
+};
+/**
+ * Created by Tom on 7/17/2017.
+ */
+function OpenCloudDialog(fileList, cloudFileList, error){
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	this.fileList = fileList;
+	this.loading = cloudFileList == null && this.fileList.signedIn;
+	let count = 1;
+	let hintText = "";
+
+	if(this.fileList.signedIn) {
+		if (error != null) {
+			hintText = error;
+		} else if (this.loading) {
+			hintText = "Loading...";
+		} else {
+			hintText = "No saved programs"
+		}
+		this.files = cloudFileList;
+		if(this.files == null){
+			this.files = [];
+		}
+		count = this.files.length;
+	}
+
+	RD.call(this, false, "Open", count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
+	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addHintText(hintText);
+
+	if (this.loading) {
+		this.loadFiles();
+	}
+}
+OpenCloudDialog.prototype = Object.create(RowDialog.prototype);
+OpenCloudDialog.prototype.constructor = OpenCloudDialog;
+OpenCloudDialog.prototype.show = function(){
+	RowDialog.prototype.show.call(this);
+	OpenDialog.currentDialog = this;
+	this.createTabRow();
+};
+OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup){
+	const RD = RowDialog;
+	if(this.fileList.signedIn) {
+		const cols = 2;
+		const file = this.files[index];
+
+		const largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+		this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+
+		let currentX = largeBnWidth + RD.bnMargin;
+		this.createRenameBn(file, currentX, y, contentGroup);
+		currentX += RD.bnMargin + RD.smallBnWidth;
+		this.createMoreBn(file, currentX, y, contentGroup);
+
+	} else {
+		this.createSignInBn(width, 0, y, contentGroup);
+	}
+};
+OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function(){
+		const request = new HttpRequestBuilder("cloud/download");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	}.bind(this));
+	button.addSideTextAndIcon(VectorPaths.cloudDownload, null, file);
+};
+OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup){
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function(){
+		HtmlServer.sendRequestWithCallback("cloud/signIn");
+	}.bind(this));
+	button.addText("Sign in");
+};
+OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
+		const request = new HttpRequestBuilder("cloud/rename");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	});
+};
+OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+		const x1 = this.contentRelToAbsX(x);
+		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		const y1 = this.contentRelToAbsY(y);
+		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		new FileContextMenu(this, file, FileContextMenu.types.cloud, x1, x2, y1, y2);
+	}.bind(this));
+};
+
+OpenCloudDialog.prototype.createTabRow = function(){
+	const OD = OpenDialog;
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
+
+	tabRow.addTab("On Device", "device");
+	let signOutFn = null;
+	if(this.fileList.signedIn) {
+		signOutFn = this.userSignOut.bind(this);
+	}
+	tabRow.addTab(this.fileList.getCloudTitle(), "cloud", signOutFn);
+
+	tabRow.setCallbackFunction(this.tabSelected.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+OpenCloudDialog.prototype.tabSelected = function(tab){
+	if(tab === "device") {
+		const openDialog = new OpenDialog(this.fileList);
+		this.hide();
+		openDialog.show();
+		openDialog.reloadDialog();
+	}
+};
+OpenCloudDialog.prototype.closeDialog = function(){
+	OpenDialog.currentDialog = null;
+	RowDialog.prototype.closeDialog.call(this);
+};
+OpenCloudDialog.prototype.reloadToOpen = function() {
+	const me = this;
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		if(OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+		}
+	});
+};
+OpenCloudDialog.prototype.reloadDialog = function(cloudFileList){
+	if(cloudFileList == null) {
+		cloudFileList = null;
+	}
+
+	let thisScroll = this.getScroll();
+	let me = this;
+	HtmlServer.sendRequestWithCallback("data/files",function(response){
+		if(OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
+			openDialog.show();
+			openDialog.setScroll(thisScroll);
+		}
+	});
+};
+OpenCloudDialog.prototype.createStatusRow = function(){
+
+};
+OpenCloudDialog.prototype.userSignOut = function(){
+	DebugOptions.assert(this.fileList.account != null);
+	let message = "Disconnect account " + this.fileList.account + "?\n";
+	message += "Downloaded files will remain on this device.";
+	const me = this;
+	HtmlServer.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result){
+		if (result === "2") {
+			me.signOut();
+		}
+	});
+};
+OpenCloudDialog.prototype.signOut = function(){
+	const me = this;
+	HtmlServer.sendRequestWithCallback("cloud/signOut", function(){
+		me.reloadDialog();
+	});
+};
+OpenCloudDialog.prototype.loadFiles = function() {
+	const me = this;
+	HtmlServer.sendRequestWithCallback("cloud/list",function(response){
+		if(OpenDialog.currentDialog === me) {
+			const object = JSON.parse(response);
+			let files = object.files;
+			if (files != null) {
+				me.closeDialog();
+				const cloudDialog = new OpenCloudDialog(me.fileList, files);
+				cloudDialog.show();
+			}
+		}
+	}, function(status, error){
+		if(OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const cloudDialog = new OpenCloudDialog(me.fileList, null, error);
+			cloudDialog.show();
+		}
+	});
+};
+OpenCloudDialog.filesChanged = function(jsonString){
+	if(OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenCloudDialog){
+		if(jsonString != null) {
+			jsonString = JSON.parse(jsonString).files;
+		}
+		OpenDialog.currentDialog.reloadDialog(jsonString);
+	}
+};
+/**
+ * Created by Tom on 7/17/2017.
+ */
+function FileList(jsonString) {
+	const object = JSON.parse(jsonString);
+	this.localFiles = object.files;
+	if (this.localFiles == null) {
+		this.localFiles = []
+	}
+	this.signedIn = object.signedIn === true;
+	if (!GuiElements.isAndroid) {
+		this.signedIn = false;
+	}
+	this.account = object.account;
+	if (this.account == null || !this.signedIn) {
+		this.account = null;
+	}
+}
+FileList.prototype.getCloudTitle = function(){
+	if (this.account != null) {
+		return "Cloud - " + this.account;
+	}
+	return "Cloud";
 };
 /**
  * Created by Tom on 6/18/2017.
@@ -9515,6 +10270,7 @@ ConnectMultipleDialog.prototype.createTabRow = function(){
 	return tabRow;
 };
 ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
+	const test = ConnectMultipleDialog.currentDialog;
 	if(deviceClass == null){
 		deviceClass = this.deviceClass;
 	}
@@ -10022,17 +10778,24 @@ DiscoverDialog.prototype.closeDialog = function(){
 /**
  * Created by Tom on 7/10/2017.
  */
-function FileContextMenu(dialog, file, x1, x2, y1, y2){
+function FileContextMenu(dialog, file, type, x1, x2, y1, y2){
 	this.file=file;
 	this.dialog = dialog;
 	this.x1=x1;
 	this.y1=y1;
 	this.x2=x2;
 	this.y2=y2;
+	this.type = type;
 	this.showMenu();
 }
 FileContextMenu.setGraphics=function(){
 	const FCM=FileContextMenu;
+	FCM.types = {};
+	FCM.types.localSignedIn = 1;
+	FCM.types.localSignedOut = 2;
+	FCM.types.cloud = 3;
+
+
 	FCM.bnMargin=Button.defaultMargin;
 	FCM.bgColor=Colors.lightGray;
 	FCM.blockShift=20;
@@ -10053,23 +10816,35 @@ FileContextMenu.prototype.showMenu=function(){
 	this.menuBnList.show();
 };
 FileContextMenu.prototype.addOptions=function(){
-	this.menuBnList.addOption("Duplicate", function(){
-		const dialog = this.dialog;
-		SaveManager.userDuplicateFile(this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
-	}.bind(this), VectorPaths.copy);
-	/*this.menuBnList.addOption("Share", function(){
-		SaveManager.userExportFile(this.file);
-		this.close();
-	}.bind(this), VectorPaths.share);*/
+	const FCM = FileContextMenu;
+	if(this.type === FCM.types.localSignedIn) {
+		this.menuBnList.addOption("Share", function(){
+			SaveManager.userExportFile(this.file);
+			this.close();
+		}.bind(this), VectorPaths.share);
+	}
+	if(this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
+		this.menuBnList.addOption("Duplicate", function () {
+			const dialog = this.dialog;
+			SaveManager.userDuplicateFile(this.file, function () {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}.bind(this), VectorPaths.copy);
+	}
 	this.menuBnList.addOption("Delete", function(){
-		const dialog = this.dialog;
-		SaveManager.userDeleteFile(false, this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
+		if(this.type === FCM.types.cloud) {
+			const request = new HttpRequestBuilder("cloud/delete");
+			request.addParam("filename", this.file);
+			HtmlServer.sendRequestWithCallback(request.toString());
+			this.close();
+		} else {
+			const dialog = this.dialog;
+			SaveManager.userDeleteFile(false, this.file, function () {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}
 	}.bind(this), VectorPaths.trash);
 };
 FileContextMenu.prototype.close=function(){
@@ -10979,12 +11754,15 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Hello');
+			if(request === "cloud/list" && false) {
+				if(callbackErr != null) {
+					callbackErr(418, "I'm a teapot");
+				}
+			} else {
+				if(callbackFn != null) {
+					//callbackFn('[{"name":"hi","id":"there"}]');
+					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+				}
 			}
 		}, 20);
 		return;
@@ -11279,18 +12057,25 @@ CallbackManager.data.markLoading = function(){
 	return true;
 };
 CallbackManager.data.filesChanged = function(){
-	if(OpenDialog.currentDialog != null){
-		OpenDialog.currentDialog.reloadDialog();
-	}
-};
-/* CallbackManager.data.import = function(fileName){
-	SaveManager.import(fileName);
+	OpenDialog.filesChanged();
 	return true;
 };
-CallbackManager.data.openData = function(fileName, data){
-	SaveManager.openData(fileName, data);
+
+CallbackManager.cloud = {};
+CallbackManager.cloud.filesChanged = function(newFiles){
+	OpenCloudDialog.filesChanged(newFiles);
 	return true;
-}; */
+};
+CallbackManager.cloud.downloadComplete = function(filename) {
+	filename = HtmlServer.decodeHtml(filename);
+	OpenDialog.filesChanged();
+	return true;
+};
+CallbackManager.cloud.signIn = function(){
+	OpenDialog.filesChanged();
+	OpenCloudDialog.filesChanged();
+};
+
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
@@ -11305,7 +12090,6 @@ CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
-	CodeManager.updateConnectionStatus();
 	return true;
 };
 CallbackManager.robot.discovered = function(robotList){
@@ -12867,7 +13651,7 @@ Block.prototype.showDeviceDropDowns = function(deviceClass){
  */
 Block.prototype.countDevicesInUse = function(deviceClass){
 	// At least 1 option is available on all DropDowns
-	let largest = 1;
+	let largest = 0;
 	// Find the largest result of all calls
 	for(let i = 0;i < this.slots.length;i++){
 		largest = Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
@@ -15192,7 +15976,8 @@ DeviceDropSlot.prototype.updateConnectionStatus = function(){
  * @param {InputWidget.SelectPad} selectPad - the pad to populate
  */
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
-	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	let deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	deviceCount = Math.max(1, deviceCount);
 	for (let i = 0; i < deviceCount; i++) {
 		// We'll store a 0-indexed value but display it +1.
 		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
@@ -15281,7 +16066,7 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		const myVal = this.getDataNotFromChild().getValue();
 		return myVal + 1;
 	} else {
-		return 1;
+		return 0;
 	}
 };
 

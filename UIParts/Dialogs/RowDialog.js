@@ -27,7 +27,7 @@ RowDialog.setConstants=function(){
 	RowDialog.bnMargin=5;
 	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
 	RowDialog.minWidth = 400;
-	RowDialog.minHeight = 200;
+	RowDialog.minHeight = 400;
 	RowDialog.hintMargin = 5;
 
 	RowDialog.fontSize=16;
@@ -174,7 +174,6 @@ RowDialog.prototype.createHintText = function(){
 };
 RowDialog.prototype.closeDialog = function(){
 	if(this.visible) {
-		RowDialog.currentDialog = null;
 		this.hide();
 		GuiElements.unblockInteraction();
 	}
@@ -208,6 +207,9 @@ RowDialog.prototype.hide = function(){
 			this.scrollBox.hide();
 		}
 		this.scrollBox = null;
+		if(RowDialog.currentDialog === this) {
+			RowDialog.currentDialog = null;
+		}
 	}
 };
 RowDialog.prototype.reloadRows = function(rowCount){

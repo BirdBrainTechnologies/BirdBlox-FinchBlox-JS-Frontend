@@ -1,107 +1,124 @@
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
-/* Populates the list of category names. Run by GuiElements. */
-function BlockList(){
-	BlockList.categories=new Array();
-	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
-	var cat=BlockList.categories;
-	// Catetory names should be capitalized in the way they should be displayed on screen.
+/**
+ * Populates the list of category names. Run by GuiElements.
+ */
+function BlockList() {
+	const cat = BlockList.categories = [];
+
+	// List only includes categories that will appear in the BlockPalette in order.
+	// Category names should be capitalized in the way they should be displayed on screen.
 	cat.push("Robots");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
-	//cat.push("Motion");
-	//cat.push("Looks");
-	//cat.push("Pen");
-
 	cat.push("Control");
-	//cat.push("Sensing");
-
 	cat.push("Variables");
 }
-/* Returns the id for a category given its index in the category list. Ids are lowercase.
+
+/**
+ * Returns the id for a category given its index in the category list. Ids are lowercase.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's id (its name in lowercase).
  */
-BlockList.getCatId=function(index){
+BlockList.getCatId = function(index) {
 	return BlockList.categories[index].toLowerCase();
 };
-/* Returns the category's name given its index in the category list.
+
+/**
+ * Returns the category's name given its index in the category list.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's name.
  */
-BlockList.getCatName=function(index){
+BlockList.getCatName = function(index) {
 	return BlockList.categories[index];
 };
-/* Returns the length of the category list.
+
+/**
+ * Returns the length of the category list.
  * @return {number} - The length of the category list.
  */
-BlockList.catCount=function(){
+BlockList.catCount = function() {
 	return BlockList.categories.length;
 };
 
-/* The following functions populate a Category for the BlockPalette.
- * @param {Category} category - the Category object to populate.
+/*
+ * The following functions populate a Category for the BlockPalette.
  * Each function has the same structure.
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
- * category.trimBottom() is used to remove any extra space at the bottom of the category.
+ * category.trimBottom() is used to remove any extra space at the bottom of the category. category.finalize() finishes
+ * the operation.
+ */
+
+/**
+ * @param {Category} category
  */
 BlockList.populateCat_robots = function(category) {
-	let anyConnected = false;
-	Device.getTypeList().forEach(function(deviceClass){
-		if(deviceClass.getManager().getDeviceCount() > 0) {
-			anyConnected = true;
-			category.addLabel(deviceClass.getDeviceTypeName());
-			category.addSpace();
-			BlockList["populateCat_" + deviceClass.getDeviceTypeId()](category);
-			category.addSpace();
-		}
+	let nameIdList = [];
+	let typeList = Device.getTypeList();
+	typeList.forEach(function(deviceClass) {
+		entry = {};
+		entry.name = deviceClass.getDeviceTypeName();
+		entry.id = deviceClass.getDeviceTypeId();
+		nameIdList.push(entry);
 	});
-	if(!anyConnected) {
-		category.addLabel("Connect a robot first...");
-		category.addSpace();
+	const set = category.addCollapsibleSet(nameIdList);
+
+	for(let i = 0; i < typeList.length; i++) {
+		const item = set.getItem(i);
+		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
 	category.trimBottom();
 	category.finalize();
 };
-BlockList.populateCat_hummingbird=function(category){
-	category.addBlockByName("B_HBServo");
-	category.addBlockByName("B_HBMotor");
-	category.addBlockByName("B_HBVibration");
-	category.addSpace();
-	category.addBlockByName("B_HBLed");
-	category.addBlockByName("B_HBTriLed");
-	category.addSpace();
-	category.addBlockByName("B_HBLight");
-	category.addBlockByName("B_HBTempC");
-	category.addBlockByName("B_HBTempF");
-	category.addBlockByName("B_HBDistCM");
-	category.addBlockByName("B_HBDistInch");
-	category.addBlockByName("B_HBKnob");
-	category.addBlockByName("B_HBSound");
-	category.trimBottom();
-	category.finalize();
 
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_hummingbird = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_HBServo");
+	collapsibleItem.addBlockByName("B_HBMotor");
+	collapsibleItem.addBlockByName("B_HBVibration");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLed");
+	collapsibleItem.addBlockByName("B_HBTriLed");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLight");
+	collapsibleItem.addBlockByName("B_HBTempC");
+	collapsibleItem.addBlockByName("B_HBTempF");
+	collapsibleItem.addBlockByName("B_HBDistCM");
+	collapsibleItem.addBlockByName("B_HBDistInch");
+	collapsibleItem.addBlockByName("B_HBKnob");
+	collapsibleItem.addBlockByName("B_HBSound");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
 };
-BlockList.populateCat_flutter=function(category){
-	category.addBlockByName("B_FlutterServo");
-	category.addBlockByName("B_FlutterTriLed");
-	category.addBlockByName("B_FlutterBuzzer");
-	category.addSpace();
-	category.addBlockByName("B_FlutterLight");
-	category.addBlockByName("B_FlutterTempC");
-	category.addBlockByName("B_FlutterTempF");
-	category.addBlockByName("B_FlutterDistCM");
-	category.addBlockByName("B_FlutterDistInch");
-	category.addBlockByName("B_FlutterKnob");
-	category.addBlockByName("B_FlutterSound");
-	category.addBlockByName("B_FlutterSoil");
-	category.trimBottom();
-	category.finalize();
 
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_flutter = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FlutterServo");
+	collapsibleItem.addBlockByName("B_FlutterTriLed");
+	collapsibleItem.addBlockByName("B_FlutterBuzzer");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FlutterLight");
+	collapsibleItem.addBlockByName("B_FlutterTempC");
+	collapsibleItem.addBlockByName("B_FlutterTempF");
+	collapsibleItem.addBlockByName("B_FlutterDistCM");
+	collapsibleItem.addBlockByName("B_FlutterDistInch");
+	collapsibleItem.addBlockByName("B_FlutterKnob");
+	collapsibleItem.addBlockByName("B_FlutterSound");
+	collapsibleItem.addBlockByName("B_FlutterSoil");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
 };
-BlockList.populateCat_motion=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_motion = function(category) {
 	category.addBlockByName("B_Move");
 	category.addBlockByName("B_TurnRight");
 	category.addBlockByName("B_TurnLeft");
@@ -125,9 +142,12 @@ BlockList.populateCat_motion=function(category){
 	category.addBlockByName("B_Direction");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_looks=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_looks = function(category) {
 	category.addBlockByName("B_alert");
 	category.addBlockByName("B_SetTitleBarColor");
 	category.addSpace();
@@ -147,10 +167,13 @@ BlockList.populateCat_looks=function(category){
 	category.addBlockByName("B_GoBackLayers");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_sound=function(category){
-	category.addButton("Record sounds",RecordingDialog.showDialog,true);
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_sound = function(category) {
+	category.addButton("Record sounds", RecordingDialog.showDialog, true);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
 	category.addBlockByName("B_PlayRecordingUntilDone");
@@ -166,12 +189,12 @@ BlockList.populateCat_sound=function(category){
 	category.addBlockByName("B_Tempo");
 	category.trimBottom();
 	category.finalize();
-
 };
-BlockList.populateCat_pen=function(category){
-	
-}
-BlockList.populateCat_tablet=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_tablet = function(category) {
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -191,9 +214,12 @@ BlockList.populateCat_tablet=function(category){
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
 	category.finalize();
-
 };
-BlockList.populateCat_control=function(category){
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_control = function(category) {
 	category.addBlockByName("B_WhenFlagTapped");
 	//category.addBlockByName("B_WhenIAmTapped");
 	category.addBlockByName("B_WhenIReceive");
@@ -215,12 +241,12 @@ BlockList.populateCat_control=function(category){
 	category.addBlockByName("B_Stop");
 	category.trimBottom();
 	category.finalize();
+};
 
-}
-BlockList.populateCat_sensing=function(category){
-
-}
-BlockList.populateCat_operators=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_operators = function(category) {
 	category.addBlockByName("B_Add");
 	category.addBlockByName("B_Subtract");
 	category.addBlockByName("B_Multiply");
@@ -250,36 +276,34 @@ BlockList.populateCat_operators=function(category){
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
 	category.finalize();
+};
 
-
-}
-// @fix Write Documentation.
-BlockList.populateCat_variables=function(category){
-	var callbackFn=function(){
-		CodeManager.newVariable();
-	};
-	category.addButton("Create variable",callbackFn);
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_variables = function(category) {
+	category.addButton("Create variable", CodeManager.newVariable);
 	category.addSpace();
-	var variables=CodeManager.variableList;
-	if(variables.length>0){
-		for(var i=0;i<variables.length;i++){
-			category.addVariableBlock(variables[i]);
-		}
+
+	const variables = CodeManager.variableList;
+	if (variables.length > 0) {
+		variables.forEach(function(variable) {
+			category.addVariableBlock(variable);
+		});
 		category.addSpace();
 		category.addBlockByName("B_SetTo");
 		category.addBlockByName("B_ChangeBy");
 	}
-	callbackFn=function(){
-		CodeManager.newList();
-	};
+
 	category.addSpace();
-	category.addButton("Create list",callbackFn);
+	category.addButton("Create list", CodeManager.newList);
 	category.addSpace();
-	var lists=CodeManager.listList;
-	if(lists.length>0){
-		for(var i=0;i<lists.length;i++){
-			category.addListBlock(lists[i]);
-		}
+
+	const lists = CodeManager.listList;
+	if (lists.length > 0) {
+		lists.forEach(function(list) {
+			category.addListBlock(list);
+		});
 		category.addSpace();
 		category.addBlockByName("B_AddToList");
 		category.addBlockByName("B_DeleteItemOfList");
@@ -287,10 +311,10 @@ BlockList.populateCat_variables=function(category){
 		category.addBlockByName("B_ReplaceItemOfListWith");
 		category.addBlockByName("B_CopyListToList");
 	}
+
 	category.addBlockByName("B_ItemOfList");
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
 	category.finalize();
-
 };

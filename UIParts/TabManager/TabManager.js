@@ -217,7 +217,7 @@ TabManager.showDeviceDropDowns=function(deviceClass){
 	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
 };
 TabManager.countDevicesInUse=function(deviceClass){
-	var largest=1;
+	var largest=0;
 	for(var i=0;i<TabManager.tabList.length;i++){
 		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}

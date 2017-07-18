@@ -95,6 +95,7 @@ GuiElements.setGuiConstants=function(){
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
+	GuiElements.isAndroid = false;
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
@@ -111,6 +112,7 @@ GuiElements.setConstants=function(){
 	BlockList();
 	Colors();
 	Button.setGraphics();
+	CloseButton.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphicsPart1();
@@ -127,6 +129,9 @@ GuiElements.setConstants=function(){
 
 	Block.setConstants();
 	BlockPalette.setGraphics();
+	CollapsibleSet.setConstants();
+	CollapsibleItem.setConstants();
+
 	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
@@ -819,8 +824,9 @@ GuiElements.getOsVersion=function(callback){
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
 		GuiElements.osVersion = resp;
 		var parts = resp.split(" ");
-		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
-		GuiElements.isIos = (parts.length >= 1 && parts[0] == "iOS");
+		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
+		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
+		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
 		callback();
 	}, function(){
 		GuiElements.osVersion="";

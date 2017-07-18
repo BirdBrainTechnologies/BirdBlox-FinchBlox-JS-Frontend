@@ -27,6 +27,9 @@ TabRow.setConstants = function(){
 	TR.font="Arial";
 	TR.fontWeight="bold";
 	TR.charHeight=12;
+
+	TR.closeHeight = 30;
+	TR.closeMargin = 9;
 };
 TabRow.prototype.show = function(){
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
@@ -35,10 +38,11 @@ TabRow.prototype.show = function(){
 		this.visuallySelectTab(this.selectedTab);
 	}
 };
-TabRow.prototype.addTab = function(text, id){
+TabRow.prototype.addTab = function(text, id, closeFn){
 	let entry = {};
 	entry.text = text;
 	entry.id = id;
+	entry.closeFn = closeFn;
 	this.tabList.push(entry);
 };
 TabRow.prototype.createTabs = function(){
@@ -46,27 +50,49 @@ TabRow.prototype.createTabs = function(){
 	let tabWidth = this.width / tabCount;
 	this.tabEList = [];
 	this.tabList.forEach(function(entry, index){
-		this.tabEList.push(this.createTab(index, entry.text, tabWidth, index * tabWidth));
+		const tabX = index * tabWidth;
+		const hasClose = entry.closeFn != null;
+		this.tabEList.push(this.createTab(index, entry.text, tabWidth, tabX, hasClose));
+		if (hasClose) {
+			this.createClose(tabWidth, tabX, entry.closeFn);
+		}
 	}.bind(this));
 };
-TabRow.prototype.createTab = function(index, text, width, x){
-	let TR = TabRow;
+TabRow.prototype.createTab = function(index, text, width, x, hasClose){
+	const TR = TabRow;
+
+	let textMaxWidth = width - 2 * TR.slantW;
+	const closeSpace = 2 * TR.closeMargin + TR.closeHeight;
+	if (hasClose) {
+		textMaxWidth = width - closeSpace - TR.slantW;
+	}
 	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
 	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
-	GuiElements.update.textLimitWidth(textE, text, width);
+	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
+
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (width - textW) / 2;
+	if (hasClose) {
+		textX = Math.min(textX, x + width - textW - closeSpace);
+	}
 	let textY = (this.height + TR.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
+
 	TouchReceiver.addListenersTabRow(textE, this, index);
 	TouchReceiver.addListenersTabRow(tabE, this, index);
 	this.group.appendChild(textE);
 	return tabE;
 };
+TabRow.prototype.createClose = function(tabX, tabW, closeFn) {
+	const TR = TabRow;
+	const cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
+	const cy = this.height / 2;
+	const closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
+};
 TabRow.prototype.selectTab = function(index){
 	if(index !== this.selectTab) {
-		this.selectTab = index;
+		this.selectedTab = index;
 		this.visuallySelectTab(index);
 		if (this.callbackFn != null) this.callbackFn(this.tabList[index].id);
 	}

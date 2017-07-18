@@ -10,7 +10,7 @@ CategoryBN.setGraphics=function(){
 	CategoryBN.bg=Colors.black;
 	CategoryBN.fontSize=15;
 	CategoryBN.font="Arial";
-	CategoryBN.forground="#fff";
+	CategoryBN.foreground="#fff";
 	CategoryBN.height=30;
 	CategoryBN.colorW=8;
 	CategoryBN.labelLMargin=6;
@@ -34,7 +34,7 @@ CategoryBN.prototype.buildGraphics=function(){
 	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
 	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
 	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.forground,CBN.font);
+	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.foreground,CBN.font);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);

@@ -1117,7 +1117,7 @@ Block.prototype.showDeviceDropDowns = function(deviceClass){
  */
 Block.prototype.countDevicesInUse = function(deviceClass){
 	// At least 1 option is available on all DropDowns
-	let largest = 1;
+	let largest = 0;
 	// Find the largest result of all calls
 	for(let i = 0;i < this.slots.length;i++){
 		largest = Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));

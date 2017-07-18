@@ -34,18 +34,25 @@ CallbackManager.data.markLoading = function(){
 	return true;
 };
 CallbackManager.data.filesChanged = function(){
-	if(OpenDialog.currentDialog != null){
-		OpenDialog.currentDialog.reloadDialog();
-	}
-};
-/* CallbackManager.data.import = function(fileName){
-	SaveManager.import(fileName);
+	OpenDialog.filesChanged();
 	return true;
 };
-CallbackManager.data.openData = function(fileName, data){
-	SaveManager.openData(fileName, data);
+
+CallbackManager.cloud = {};
+CallbackManager.cloud.filesChanged = function(newFiles){
+	OpenCloudDialog.filesChanged(newFiles);
 	return true;
-}; */
+};
+CallbackManager.cloud.downloadComplete = function(filename) {
+	filename = HtmlServer.decodeHtml(filename);
+	OpenDialog.filesChanged();
+	return true;
+};
+CallbackManager.cloud.signIn = function(){
+	OpenDialog.filesChanged();
+	OpenCloudDialog.filesChanged();
+};
+
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return false;
@@ -60,7 +67,6 @@ CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
-	CodeManager.updateConnectionStatus();
 	return true;
 };
 CallbackManager.robot.discovered = function(robotList){

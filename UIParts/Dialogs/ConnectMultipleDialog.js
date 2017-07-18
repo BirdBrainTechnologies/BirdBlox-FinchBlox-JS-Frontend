@@ -108,6 +108,7 @@ ConnectMultipleDialog.prototype.createTabRow = function(){
 	return tabRow;
 };
 ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
+	const test = ConnectMultipleDialog.currentDialog;
 	if(deviceClass == null){
 		deviceClass = this.deviceClass;
 	}

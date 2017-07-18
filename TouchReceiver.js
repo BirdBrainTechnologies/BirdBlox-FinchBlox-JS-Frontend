@@ -307,6 +307,14 @@ TouchReceiver.touchStartTabRow=function(tabRow, index, e){
 		tabRow.selectTab(index);
 	}
 };
+TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
+	const TR = TouchReceiver;
+	if(TR.touchstart(e, false)){
+		Overlay.closeOverlays();
+		TR.targetType="collapsibleItem";
+		TR.target=collapsibleItem;
+	}
+};
 
 /* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
@@ -410,11 +418,18 @@ TouchReceiver.touchmove=function(e){
 			if (TR.targetType == "smoothMenuBnList") {
 				shouldPreventDefault = false;
 			}
+
+			if(TR.targetType === "collapsibleItem") {
+				shouldPreventDefault = false;
+				TR.targetType = "scrollBox";
+				TR.target = null;
+			}
 		}
 	}
 	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
 	shouldPreventDefault &= TR.targetType != "button" || !TR.target.scrollable;
 	shouldPreventDefault &= TR.targetType != "scrollBox";
+	shouldPreventDefault &= TR.targetType != "collapsibleItem";
 	if(shouldPreventDefault){
 		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
@@ -482,6 +497,9 @@ TouchReceiver.touchend=function(e){
 		}
 		else if(TR.targetType=="smoothMenuBnList"){
 			shouldPreventDefault = false;
+		}
+		else if(TR.targetType === "collapsibleItem"){
+			TR.target.toggle();
 		}
 	}
 	else{
@@ -670,6 +688,12 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
 	element.parent=parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartSmoothMenuBnList(this.parent,e);
+	}, false);
+};
+TouchReceiver.addListenersCollapsibleItem=function(element,item){
+	const TR=TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		TouchReceiver.touchStartCollapsibleItem(item, e);
 	}, false);
 };
 TouchReceiver.addEventListenerSafe=function(element,type, func){

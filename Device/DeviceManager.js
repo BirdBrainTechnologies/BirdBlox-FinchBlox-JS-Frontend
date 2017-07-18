@@ -95,7 +95,9 @@ DeviceManager.prototype.updateSelectableDevices = function(){
 	else if(newCount>1&&oldCount<=1){
 		CodeManager.showDeviceDropDowns(this.deviceClass);
 	}
-	BlockPalette.getCategory("robots").refreshGroup();
+
+	const suggestedCollapse = newCount === 0;
+	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
 DeviceManager.prototype.getSelectableDeviceCount=function(){
 	return this.selectableDevices;
@@ -183,6 +185,7 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 	DeviceManager.forEach(function(manager){
 		manager.updateConnectionStatus(deviceId, status);
 	});
+	CodeManager.updateConnectionStatus();
 };
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;

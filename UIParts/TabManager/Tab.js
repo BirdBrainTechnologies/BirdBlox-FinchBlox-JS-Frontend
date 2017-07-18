@@ -290,7 +290,7 @@ Tab.prototype.showDeviceDropDowns=function(deviceClass){
 	this.passRecursively("showDeviceDropDowns", deviceClass);
 };
 Tab.prototype.countDevicesInUse=function(deviceClass){
-	var largest=1;
+	var largest=0;
 	var stacks=this.stackList;
 	for(var i=0;i<stacks.length;i++){
 		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));

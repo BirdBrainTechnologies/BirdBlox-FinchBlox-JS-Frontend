@@ -1,17 +1,24 @@
 /**
  * Created by Tom on 7/10/2017.
  */
-function FileContextMenu(dialog, file, x1, x2, y1, y2){
+function FileContextMenu(dialog, file, type, x1, x2, y1, y2){
 	this.file=file;
 	this.dialog = dialog;
 	this.x1=x1;
 	this.y1=y1;
 	this.x2=x2;
 	this.y2=y2;
+	this.type = type;
 	this.showMenu();
 }
 FileContextMenu.setGraphics=function(){
 	const FCM=FileContextMenu;
+	FCM.types = {};
+	FCM.types.localSignedIn = 1;
+	FCM.types.localSignedOut = 2;
+	FCM.types.cloud = 3;
+
+
 	FCM.bnMargin=Button.defaultMargin;
 	FCM.bgColor=Colors.lightGray;
 	FCM.blockShift=20;
@@ -32,23 +39,35 @@ FileContextMenu.prototype.showMenu=function(){
 	this.menuBnList.show();
 };
 FileContextMenu.prototype.addOptions=function(){
-	this.menuBnList.addOption("Duplicate", function(){
-		const dialog = this.dialog;
-		SaveManager.userDuplicateFile(this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
-	}.bind(this), VectorPaths.copy);
-	/*this.menuBnList.addOption("Share", function(){
-		SaveManager.userExportFile(this.file);
-		this.close();
-	}.bind(this), VectorPaths.share);*/
+	const FCM = FileContextMenu;
+	if(this.type === FCM.types.localSignedIn) {
+		this.menuBnList.addOption("Share", function(){
+			SaveManager.userExportFile(this.file);
+			this.close();
+		}.bind(this), VectorPaths.share);
+	}
+	if(this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
+		this.menuBnList.addOption("Duplicate", function () {
+			const dialog = this.dialog;
+			SaveManager.userDuplicateFile(this.file, function () {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}.bind(this), VectorPaths.copy);
+	}
 	this.menuBnList.addOption("Delete", function(){
-		const dialog = this.dialog;
-		SaveManager.userDeleteFile(false, this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
+		if(this.type === FCM.types.cloud) {
+			const request = new HttpRequestBuilder("cloud/delete");
+			request.addParam("filename", this.file);
+			HtmlServer.sendRequestWithCallback(request.toString());
+			this.close();
+		} else {
+			const dialog = this.dialog;
+			SaveManager.userDeleteFile(false, this.file, function () {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}
 	}.bind(this), VectorPaths.trash);
 };
 FileContextMenu.prototype.close=function(){

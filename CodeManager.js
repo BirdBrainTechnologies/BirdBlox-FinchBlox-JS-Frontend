@@ -517,8 +517,8 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.getCategory("variables").refreshGroup();
 	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
 	TabManager.importXml(tabsNode);
-	DeviceManager.updateSelectableDevices();
 	BlockPalette.refresh();
+	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };

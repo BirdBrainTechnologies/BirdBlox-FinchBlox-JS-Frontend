@@ -2,17 +2,21 @@
  * Created by Tom on 6/13/2017.
  */
 
-function OpenDialog(listOfFiles){
-	this.files=listOfFiles.split("\n");
-	if(listOfFiles === ""){
-		this.files = [];
+function OpenDialog(fileList){
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	this.fileList = fileList;
+	this.files = fileList.localFiles;
+	if(GuiElements.isAndroid) {
+		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+	} else {
+		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
-	RowDialog.call(this, true, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
-OpenDialog.constructor = OpenDialog;
+OpenDialog.prototype.constructor = OpenDialog;
 OpenDialog.setConstants = function(){
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	OpenDialog.currentDialog = null;
@@ -25,6 +29,9 @@ OpenDialog.prototype.show = function(){
 	this.createNewBn();
 	if(GuiElements.isIos) {
 		this.createCloudBn();
+	}
+	if(GuiElements.isAndroid){
+		this.createTabRow();
 	}
 };
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
@@ -49,7 +56,11 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	//this.createDuplicateBn(file, currentX, y, contentGroup);
-	this.createExportBn(file, currentX, y, contentGroup);
+	if(this.fileList.signedIn) {
+		this.createUploadBn(file, currentX, y, contentGroup);
+	} else {
+		this.createExportBn(file, currentX, y, contentGroup);
+	}
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };
@@ -59,6 +70,7 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
 		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
+
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
 	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
@@ -89,13 +101,26 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 		SaveManager.userExportFile(file);
 	});
 };
+OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup){
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function(){
+		const request = new HttpRequestBuilder("cloud/upload");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	});
+};
+
 OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
 	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
 		const x1 = this.contentRelToAbsX(x);
 		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
 		const y1 = this.contentRelToAbsY(y);
 		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		new FileContextMenu(this, file, x1, x2, y1, y2);
+		let type = FileContextMenu.types.localSignedOut;
+		if(this.fileList.signedIn) {
+			type = FileContextMenu.types.localSignedIn;
+		}
+		new FileContextMenu(this, file, type, x1, x2, y1, y2);
 	}.bind(this));
 };
 OpenDialog.prototype.createNewBn = function(){
@@ -115,10 +140,12 @@ OpenDialog.prototype.reloadDialog = function(){
 	let thisScroll = this.getScroll();
 	let me = this;
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		me.closeDialog();
-		var openDialog = new OpenDialog(response);
-		openDialog.show();
-		openDialog.setScroll(thisScroll);
+		if(OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+			openDialog.setScroll(thisScroll);
+		}
 	});
 };
 OpenDialog.prototype.createCloudBn = function(){
@@ -136,16 +163,23 @@ OpenDialog.prototype.createTabRow = function(){
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
-	tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
+	tabRow.addTab("On Device", "device");
+	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
-	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
+	tabRow.setCallbackFunction(this.tabSelected.bind(this));
 	tabRow.show();
 	return tabRow;
 };
+OpenDialog.prototype.tabSelected = function(tab){
+	if(tab === "cloud") {
+		const cloudDialog = new OpenCloudDialog(this.fileList);
+		this.hide();
+		cloudDialog.show();
+	}
+};
 OpenDialog.showDialog = function(){
 	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		var openDialog = new OpenDialog(response);
+		var openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
 	});
 };
@@ -156,5 +190,10 @@ OpenDialog.prototype.closeDialog = function(){
 OpenDialog.closeDialog = function(){
 	if(OpenDialog.currentDialog != null) {
 		OpenDialog.currentDialog.closeDialog();
+	}
+};
+OpenDialog.filesChanged = function(){
+	if(OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenDialog){
+		OpenDialog.currentDialog.reloadDialog();
 	}
 };

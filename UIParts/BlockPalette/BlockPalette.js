@@ -166,6 +166,9 @@ BlockPalette.hideDeviceDropDowns=function(deviceClass){
 BlockPalette.updateAvailableSensors = function(){
 	BlockPalette.passRecursively("updateAvailableSensors");
 };
+BlockPalette.setSuggestedCollapse = function(id, collapsed) {
+	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
+};
 BlockPalette.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);

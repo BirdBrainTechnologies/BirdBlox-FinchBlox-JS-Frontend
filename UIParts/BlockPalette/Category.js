@@ -25,6 +25,7 @@ function Category(buttonX,buttonY,index){
 	this.buttons=new Array();
 	this.buttonsThatRequireFile = [];
 	this.labels=new Array();
+	this.collapsibleSets = [];
 	this.finalized = false;
 	this.fillGroup();
 	this.scrolling=false;
@@ -33,24 +34,32 @@ function Category(buttonX,buttonY,index){
 }
 Category.prototype.createButton=function(){
 	return new CategoryBN(this.buttonX,this.buttonY,this);
-}
+};
 Category.prototype.fillGroup=function(){
 	BlockList["populateCat_"+this.id](this);
-}
+};
 Category.prototype.clearGroup=function(){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].delete();
-	}
-	this.blocks=new Array();
-	this.displayStacks=new Array();
-	for(var i=0;i<this.buttons.length;i++){
-		this.buttons[i].remove();
-	}
-	this.buttons=new Array();
-	for(var i=0;i<this.labels.length;i++){
-		this.group.removeChild(this.labels[i]);
-	}
-	this.labels=new Array();
+	this.displayStacks.forEach(function(stack) {
+		stack.delete();
+	});
+	this.blocks = [];
+	this.displayStacks = [];
+
+	this.buttons.forEach(function(button){
+		button.remove();
+	});
+	this.buttons = [];
+
+	this.labels.forEach(function(label){
+		label.remove();
+	});
+	this.labels = [];
+
+	this.collapsibleSets.forEach(function(set){
+		set.remove();
+	});
+	this.collapsibleSets = [];
+
 	this.currentBlockX=BlockPalette.mainHMargin;
 	this.currentBlockY=BlockPalette.mainVMargin;
 	this.lastHadStud=false;
@@ -90,7 +99,17 @@ Category.prototype.addBlock=function(block){
 	if(block.bottomOpen){
 		this.lastHadStud=true;
 	}
-}
+};
+Category.prototype.addCollapsibleSet = function(nameIdList){
+	const x = this.currentBlockX;
+	const y = this.currentBlockY;
+	const set = new CollapsibleSet(y, nameIdList, this, this.group);
+	this.collapsibleSets.push(set);
+	this.lastHadStud = false;
+	this.currentBlockY += set.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	return set;
+};
 
 Category.prototype.fileOpened = function(){
 	this.buttonsThatRequireFile.forEach(function(button){
@@ -105,7 +124,7 @@ Category.prototype.fileClosed = function(){
 
 Category.prototype.addSpace=function(){
 	this.currentBlockY+=BlockPalette.sectionMargin;
-}
+};
 Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
 	if(onlyActiveIfOpen == null) {
 		onlyActiveIfOpen = false;
@@ -166,12 +185,12 @@ Category.prototype.select=function(){
 	BlockPalette.selectedCat=this;
 	this.button.select();
 	this.smoothScrollBox.show();
-}
+};
 Category.prototype.deselect=function(){
 	BlockPalette.selectedCat=null;
 	this.smoothScrollBox.hide();
 	this.button.deselect();
-}
+};
 Category.prototype.computeWidth = function(){
 	var currentWidth=0;
 	for(var i=0;i<this.blocks.length;i++){
@@ -180,11 +199,28 @@ Category.prototype.computeWidth = function(){
 			currentWidth=blockW;
 		}
 	}
+	this.collapsibleSets.forEach(function(set){
+		const width = set.width;
+		currentWidth = Math.max(width, currentWidth);
+	});
 	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
 };
 Category.prototype.updateWidth=function(){
 	if(!this.finalized) return;
 	this.computeWidth();
+	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+Category.prototype.updateDimSet = function(){
+	if(!this.finalized) return;
+	this.computeWidth();
+	let currentH = BlockPalette.mainVMargin;
+	this.collapsibleSets.forEach(function(set){
+		currentH += set.height;
+		currentH += BlockPalette.blockMargin;
+	});
+	currentH-=BlockPalette.blockMargin;
+	currentH+=BlockPalette.mainVMargin;
+	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
 Category.prototype.relToAbsX=function(x){
@@ -227,10 +263,18 @@ Category.prototype.passRecursively = function(functionName){
 	this.displayStacks.forEach(function(stack){
 		stack[functionName].apply(stack,args);
 	});
+	this.collapsibleSets.forEach(function(set){
+		set[functionName].apply(set,args);
+	});
 };
 Category.prototype.updateZoom = function(){
 	if(!this.finalized) return;
 	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
+};
+Category.prototype.setSuggestedCollapse = function(id, collapsed) {
+	this.collapsibleSets.forEach(function(set){
+		set.setSuggestedCollapse(id, collapsed);
+	});
 };

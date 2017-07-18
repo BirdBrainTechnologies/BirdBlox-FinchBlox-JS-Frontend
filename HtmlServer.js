@@ -45,12 +45,15 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('Hello');
+			if(request === "cloud/list" && false) {
+				if(callbackErr != null) {
+					callbackErr(418, "I'm a teapot");
+				}
+			} else {
+				if(callbackFn != null) {
+					//callbackFn('[{"name":"hi","id":"there"}]');
+					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+				}
 			}
 		}, 20);
 		return;
