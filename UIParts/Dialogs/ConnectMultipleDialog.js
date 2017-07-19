@@ -34,13 +34,16 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	let statusX = 0;
 	let numberX = statusX + DeviceStatusLight.radius * 2;
 	let mainBnX = numberX + CMD.numberWidth;
-	let removeBnX = width - RowDialog.smallBnWidth;
-	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+	let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+	let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+	let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+
 
 	let robot = this.deviceClass.getManager().getDevice(index);
 	this.createStatusLight(robot, statusX, y, contentGroup);
 	this.createNumberText(index, numberX, y, contentGroup);
 	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createInfoBn(robot, index, infoBnX, y, contentGroup);
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
@@ -70,6 +73,24 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
 	button.setCallbackFunction(function(){
 		this.deviceClass.getManager().removeDevice(index);
 	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup){
+	let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+
+	const statuses = Device.firmwareStatuses;
+	function updateStatus(firmwareStatus) {
+		if(firmwareStatus === statuses.old) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
+		} else if(firmwareStatus === statuses.incompatible) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
+		} else {
+			button.addIcon(VectorPaths.info, RowDialog.iconH);
+		}
+	}
+	updateStatus(robot.getFirmwareStatus());
+	robot.setFirmwareStatusListener(updateStatus);
+
 	return button;
 };
 ConnectMultipleDialog.prototype.show = function(){

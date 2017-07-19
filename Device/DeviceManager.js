@@ -15,10 +15,10 @@ DeviceManager.setStatics = function(){
 	const statuses = DeviceManager.statuses = {};
 
 	statuses.disconnected = 0;
-	statuses.incompatibleFirmware = 0.1;
-	statuses.oldFirmware = 0.2;
-	statuses.connected = 1;
-	statuses.noDevices = 2;
+	statuses.incompatibleFirmware = 1;
+	statuses.oldFirmware = 2;
+	statuses.connected = 3;
+	statuses.noDevices = 4;
 
 	DM.totalStatus = statuses.noDevices;
 	DM.statusListener = null;
@@ -62,9 +62,6 @@ DeviceManager.prototype.removeAllDevices = function(){
 	});
 	this.connectedDevices = [];
 	this.devicesChanged();
-};
-DeviceManager.prototype.getTotalStatus = function(){
-	return this.connectionStatus;
 };
 DeviceManager.prototype.deviceIsConnected = function(index){
 	if(index >= this.getDeviceCount()) {
@@ -148,24 +145,26 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
 		robot = this.connectedDevices[index];
 	}
 	if(robot != null){
-		const statuses = DeviceManager.statuses;
-		robot.setStatus(status? statuses.connected : statuses.disconnected);
+		robot.setConnected(status);
+	}
+};
+DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status){
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if(index >= 0) {
+		robot = this.connectedDevices[index];
+	}
+	if(robot != null){
+		robot.setFirmwareStatus(status);
 	}
 };
 DeviceManager.prototype.getStatus = function(){
 	const statuses = DeviceManager.statuses;
-	let disconnected = false;
-	let hasDevice = this.connectedDevices.length > 0;
+	let status = statuses.noDevices;
 	this.connectedDevices.forEach(function(device){
-		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
+		status = Math.min(status, device.getStatus());
 	});
-	if(!hasDevice){
-		this.connectionStatus = statuses.noDevices;
-	} else if(disconnected) {
-		this.connectionStatus = statuses.disconnected;
-	} else {
-		this.connectionStatus = statuses.connected;
-	}
+	this.connectionStatus = status;
 	return this.connectionStatus;
 };
 DeviceManager.updateSelectableDevices = function(){
@@ -179,10 +178,16 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 	});
 	CodeManager.updateConnectionStatus();
 };
+DeviceManager.updateFirmwareStatus = function(deviceId, status) {
+	DeviceManager.forEach(function(manager){
+		manager.updateFirmwareStatus(deviceId, status);
+	});
+	CodeManager.updateConnectionStatus();
+};
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;
 	let totalStatus = DM.getStatus();
-	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
+	if(DM.statusListener != null) DM.statusListener(totalStatus);
 	return totalStatus;
 };
 DeviceManager.getStatus = function(){

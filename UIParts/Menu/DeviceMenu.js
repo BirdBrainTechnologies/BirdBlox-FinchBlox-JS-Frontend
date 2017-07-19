@@ -20,7 +20,6 @@ DeviceMenu.prototype.loadOptions=function(){
 		}
 	});
 	if(connectedClass != null){
-		var currentDevice = connectedClass.getManager().getDevice(0);
 		this.addDeviceOption(connectedClass);
 		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
 			connectedClass.getManager().removeAllDevices();
@@ -35,24 +34,19 @@ DeviceMenu.prototype.loadOptions=function(){
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
 DeviceMenu.prototype.addDeviceOption = function(connectedClass){
-	const device = connectedClass.getDevice(0);
-	const status = DeviceManager.getStatus();
-	const statuses = DeviceManager.statuses;
+	const device = connectedClass.getManager().getDevice(0);
+	const status = device.getFirmwareStatus();
+	const statuses = Device.firmwareStatuses;
 	let icon = null;
 	let color = null;
-	let tapFn = function(){};
-	if(status === statuses.oldFirmware) {
+	if(status === statuses.old) {
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.yellowColor;
-		tapFn = device.
-	} else if(status === statuses.incompatibleFirmware) {
+	} else if(status === statuses.incompatible) {
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.redColor;
 	}
-
-	this.addOption("",function(){
-
-	},false, this.createAddIconToBnFn(VectorPaths.warning, currentDevice.name, DeviceStatusLight.redColor));
+	this.addOption("",device.showFirmwareInfo.bind(device),false, this.createAddIconToBnFn(icon, device.name, color));
 };
 DeviceMenu.prototype.previewOpen=function(){
 	let connectionCount = 0;

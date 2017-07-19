@@ -1109,9 +1109,18 @@ List.prototype.getIndex=function(indexData){
 function Device(name, id){
 	this.name = name;
 	this.id = id;
-	this.status = DeviceManager.statuses.disconnected;
+	this.connected = false;
+	this.firmwareStatus = Device.firmwareStatuses.upToDate;
 	this.statusListener = null;
+	this.firmwareStatusListener = null;
 }
+Device.setStatics = function(){
+	const states = Device.firmwareStatuses = {};
+	states.upToDate = "upToDate";
+	states.old = "old";
+	states.incompatible = "incompatible";
+};
+Device.setStatics();
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
 		if(shorten || typeName.length > maxChars){
@@ -1123,10 +1132,14 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	deviceClass.getDeviceTypeId = function(){
 		return typeId;
 	};
-	deviceClass.getNotConnectedMessage = function(){
-		return typeName + " not connected";
+	deviceClass.getNotConnectedMessage = function(errorCode, errorResult){
+		if(errorResult == null || true) {
+			return typeName + " not connected";
+		} else {
+			return errorResult;
+		}
 	};
-	var manager = new DeviceManager(deviceClass);
+	const manager = new DeviceManager(deviceClass);
 	deviceClass.getManager = function(){
 		return manager;
 	};
@@ -1141,25 +1154,54 @@ Device.prototype.getDeviceTypeId = function(){
 	return this.constructor.getDeviceTypeId();
 };
 Device.prototype.disconnect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 Device.prototype.connect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-Device.prototype.setStatus = function(status){
-	this.status = status;
-	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
+Device.prototype.setConnected = function(isConnected){
+	this.connected = isConnected;
+	if(this.statusListener != null) this.statusListener(this.getStatus());
+	DeviceManager.updateStatus();
+};
+Device.prototype.setFirmwareStatus = function(status) {
+	this.firmwareStatus = status;
+	if(this.statusListener != null) this.statusListener(this.getStatus());
+	if(this.firmwareStatusListener != null) this.firmwareStatusListener(this.getFirmwareStatus());
 	DeviceManager.updateStatus();
 };
 Device.prototype.getStatus = function(){
-	return this.status;
+	const statuses = DeviceManager.statuses;
+	const firmwareStatuses = Device.firmwareStatuses;
+	if(!this.connected) {
+		return statuses.disconnected;
+	} else {
+		if(this.firmwareStatus === firmwareStatuses.incompatible) {
+			return statuses.incompatibleFirmware;
+		} else if(this.firmwareStatus === firmwareStatuses.old) {
+			return statuses.oldFirmware;
+		} else {
+			return statuses.connected;
+		}
+	}
 };
-Device.prototype.setStatusListener = function(object){
-	this.statusListener = object;
+Device.prototype.getFirmwareStatus = function(){
+	return this.firmwareStatus;
+};
+Device.prototype.setStatusListener = function(callbackFn){
+	this.statusListener = callbackFn;
+};
+Device.prototype.setFirmwareStatusListener = function(callbackFn){
+	this.firmwareStatusListener = callbackFn;
+};
+Device.prototype.showFirmwareInfo = function(){
+	const request = new HttpRequestBuilder("robot/firmware");
+	request.addParam("id", this.id);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
@@ -1192,7 +1234,7 @@ Device.getTypeList = function(){
 	return [DeviceHummingbird, DeviceFlutter];
 };
 Device.stopAll = function(){
-	var request = new HttpRequestBuilder("devices/stop");
+	const request = new HttpRequestBuilder("devices/stop");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 /**
@@ -1241,17 +1283,12 @@ function DeviceManager(deviceClass){
 DeviceManager.setStatics = function(){
 	const DM = DeviceManager;
 	const statuses = DeviceManager.statuses = {};
-	statuses.disconnected = 0;
-	statuses.connected = 1;
-	statuses.noDevices = 2;
 
-	/*
 	statuses.disconnected = 0;
 	statuses.incompatibleFirmware = 1;
 	statuses.oldFirmware = 2;
 	statuses.connected = 3;
 	statuses.noDevices = 4;
-	*/
 
 	DM.totalStatus = statuses.noDevices;
 	DM.statusListener = null;
@@ -1295,9 +1332,6 @@ DeviceManager.prototype.removeAllDevices = function(){
 	});
 	this.connectedDevices = [];
 	this.devicesChanged();
-};
-DeviceManager.prototype.getTotalStatus = function(){
-	return this.connectionStatus;
 };
 DeviceManager.prototype.deviceIsConnected = function(index){
 	if(index >= this.getDeviceCount()) {
@@ -1381,24 +1415,26 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
 		robot = this.connectedDevices[index];
 	}
 	if(robot != null){
-		const statuses = DeviceManager.statuses;
-		robot.setStatus(status? statuses.connected : statuses.disconnected);
+		robot.setConnected(status);
+	}
+};
+DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status){
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if(index >= 0) {
+		robot = this.connectedDevices[index];
+	}
+	if(robot != null){
+		robot.setFirmwareStatus(status);
 	}
 };
 DeviceManager.prototype.getStatus = function(){
 	const statuses = DeviceManager.statuses;
-	let disconnected = false;
-	let hasDevice = this.connectedDevices.length > 0;
+	let status = statuses.noDevices;
 	this.connectedDevices.forEach(function(device){
-		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
+		status = Math.min(status, device.getStatus());
 	});
-	if(!hasDevice){
-		this.connectionStatus = statuses.noDevices;
-	} else if(disconnected) {
-		this.connectionStatus = statuses.disconnected;
-	} else {
-		this.connectionStatus = statuses.connected;
-	}
+	this.connectionStatus = status;
 	return this.connectionStatus;
 };
 DeviceManager.updateSelectableDevices = function(){
@@ -1412,10 +1448,16 @@ DeviceManager.updateConnectionStatus = function(deviceId, status){
 	});
 	CodeManager.updateConnectionStatus();
 };
+DeviceManager.updateFirmwareStatus = function(deviceId, status) {
+	DeviceManager.forEach(function(manager){
+		manager.updateFirmwareStatus(deviceId, status);
+	});
+	CodeManager.updateConnectionStatus();
+};
 DeviceManager.updateStatus = function(){
 	const DM = DeviceManager;
 	let totalStatus = DM.getStatus();
-	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
+	if(DM.statusListener != null) DM.statusListener(totalStatus);
 	return totalStatus;
 };
 DeviceManager.getStatus = function(){
@@ -3019,6 +3061,14 @@ function VectorPaths(){
 	VP.cloudUpload.width = 24;
 	VP.cloudUpload.height = 16;
 	VP.cloudUpload.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z m -5.35,2.96 0,4 -4,0 0,-4 -3,0 5,-5 5,5 -3,0 z";
+	VP.warning = {};
+	VP.warning.width = 22;
+	VP.warning.height = 19;
+	VP.warning.path = "m 0,19 22,0 -11,-19 -11,19 z m 12,-3 -2,0 0,-2 2,0 0,2 z m 0,-4 -2,0 0,-4 2,0 0,4 z";
+	VP.info = {};
+	VP.info.width = 20;
+	VP.info.height = 20;
+	VP.info.path = "m 10,0 c -5.52,0 -10,4.48 -10,10 0,5.52 4.48,10 10,10 5.52,0 10,-4.48 10,-10 0,-5.52 -4.48,-10 -10,-10 z m 1,15 -2,0 0,-6 2,0 0,6 z m 0,-8 -2,0 0,-2 2,0 0,2 z";
 }
 function ImageLists(){
 	var IL=ImageLists;
@@ -5954,6 +6004,7 @@ function Button(x,y,width,height,parent){
 	this.hasIcon=false;
 	this.hasImage=false;
 	this.foregroundInverts=false;
+	this.iconInverts = false;
 	this.callback=null;
 	this.delayedCallback=null;
 	this.toggles=false;
@@ -5984,7 +6035,7 @@ Button.prototype.buildBg=function(){
 	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
 	this.group.appendChild(this.bgRect);
 	TouchReceiver.addListenersBN(this.bgRect,this);
-}
+};
 Button.prototype.addText=function(text,font,size,weight,height){
 	DebugOptions.validateNonNull(text);
 	this.removeContent();
@@ -6019,7 +6070,7 @@ Button.prototype.addIcon=function(pathId,height){
 	}
 	this.removeContent();
 	this.hasIcon=true;
-	this.foregroundInverts=true;
+	this.iconInverts=true;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
@@ -6031,6 +6082,7 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	if(color == null){
 		color = Button.foreground;
 		this.foregroundInverts = true;
+		this.iconInverts = true;
 	}
 	if(font==null){
 		font=Button.defaultFont;
@@ -6068,11 +6120,15 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
-Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color, iconColor, leftSide, shiftCenter){
 	this.removeContent();
 	if(color == null){
 		color = this.currentForeground();
 		this.foregroundInverts = true;
+	}
+	if(iconColor == null) {
+		iconColor = this.currentForeground();
+		this.iconInverts = true;
 	}
 	if(font==null){
 		font=Button.defaultFont;
@@ -6089,24 +6145,50 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	if(iconHeight == null){
 		iconHeight = Button.defaultIconH;
 	}
+	if(leftSide == null){
+		leftSide = true;
+	}
+	if(shiftCenter == null) {
+		shiftCenter = true;
+	}
 	this.hasIcon = true;
 	this.hasText = true;
 
 	const sideMargin = (this.height - iconHeight) / 2;
 	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
 	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
-	const textMaxW = this.width - iconW - sideMargin;
+	const textMaxW = this.width - iconW - sideMargin * 3;
 	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
 	this.group.appendChild(this.textE);
 	const textW=GuiElements.measure.textWidth(this.textE);
-	const iconX = sideMargin;
+
+	let iconX;
+	if(leftSide) {
+		iconX = sideMargin;
+	} else {
+		iconX = this.width - iconW - sideMargin;
+	}
 	const iconY = (this.height-iconHeight)/2;
-	var textX = (iconX + iconW + this.width - textW) / 2;
-	//textX = Math.max(iconW + sideMargin * 2, textX);
-	var textY = (this.height+charH)/2;
+
+	let textX;
+	if(!shiftCenter) {
+		textX = (this.width - textW) / 2;
+	} else if(leftSide) {
+		textX = (iconX + iconW + this.width - textW) / 2;
+	} else {
+		textX = (this.width - textW - iconW - sideMargin) / 2;
+	}
+
+	if(leftSide) {
+		textX = Math.max(textX, iconX + iconW + sideMargin);
+	} else {
+		textX = Math.min(textX, iconX - textW - sideMargin);
+	}
+
+	const textY = (this.height+charH)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
-	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
+	this.icon=new VectorIcon(iconX,iconY,pathId,iconColor,iconHeight,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
 Button.prototype.addImage=function(imageData,height){
@@ -6122,7 +6204,7 @@ Button.prototype.addImage=function(imageData,height){
 Button.prototype.addColorIcon=function(pathId,height,color){
 	this.removeContent();
 	this.hasIcon=true;
-	this.foregroundInverts=false;
+	this.iconInverts=false;
 	var iconW=VectorIcon.computeWidth(pathId,height);
 	var iconX=(this.width-iconW)/2;
 	var iconY=(this.height-height)/2;
@@ -6160,7 +6242,7 @@ Button.prototype.disable=function(){
 		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.disabledFore);
 		}
-		if(this.hasIcon&&this.foregroundInverts){
+		if(this.hasIcon&&this.iconInverts){
 			this.icon.setColor(Button.disabledFore);
 		}
 	}
@@ -6235,7 +6317,7 @@ Button.prototype.setColor=function(isPressed){
 		if(this.hasText&&this.foregroundInverts){
 			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
 		}
-		if(this.hasIcon&&this.foregroundInverts){
+		if(this.hasIcon&&this.iconInverts){
 			this.icon.setColor(Button.highlightFore);
 		}
 		if(this.hasImage){
@@ -6247,7 +6329,7 @@ Button.prototype.setColor=function(isPressed){
 		if (this.hasText && this.foregroundInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
-		if (this.hasIcon && this.foregroundInverts) {
+		if (this.hasIcon && this.iconInverts) {
 			this.icon.setColor(Button.foreground);
 		}
 		if(this.hasImage){
@@ -6343,7 +6425,7 @@ function DeviceStatusLight(x,centerY,parent,statusProvider){
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	this.statusProvider = statusProvider;
-	this.statusProvider.setStatusListener(this);
+	this.statusProvider.setStatusListener(this.updateStatus.bind(this));
 	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
@@ -6366,7 +6448,9 @@ DeviceStatusLight.prototype.updateStatus=function(status){
 	const statuses = DeviceManager.statuses;
 	if (status === statuses.connected) {
 		color = DSL.greenColor;
-	} else if (status === statuses.disconnected) {
+	} else if (status === statuses.oldFirmware) {
+		color = DSL.yellowColor;
+	} else if (status === statuses.incompatibleFirmware || status === statuses.disconnected) {
 		color = DSL.redColor;
 	} else {
 		color = DSL.offColor;
@@ -6765,6 +6849,7 @@ InputWidget.Label.setConstants = function(){
 	L.font="Arial";
 	L.fontWeight="bold";
 	L.charHeight=12;
+	L.margin = 2;
 	L.color = Colors.white;
 };
 InputWidget.Label.prototype.show = function(x, y, parentGroup){
@@ -6773,12 +6858,13 @@ InputWidget.Label.prototype.show = function(x, y, parentGroup){
 	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = NewInputPad.width / 2 - textW / 2;
-	GuiElements.move.text(this.textE, textX, y + L.charHeight);
+	const textY = y + L.charHeight + L.margin;
+	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
 InputWidget.Label.prototype.updateDim = function(){
 	const L = InputWidget.Label;
-	this.height = L.charHeight;
+	this.height = L.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
 /**
@@ -7822,19 +7908,19 @@ SmoothMenuBnList.prototype.build = function(){
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func,icon){
+SmoothMenuBnList.prototype.addOption=function(text,func,addTextFn){
 	if(func == null){
 		func = null;
 	}
-	if(icon == null){
-		icon = null;
+	if(addTextFn == null){
+		addTextFn = null;
 	}
 
 	this.bnsGenerated=false;
 	const option = {};
 	option.func = func;
 	option.text = text;
-	option.icon = icon;
+	option.addTextFn = addTextFn;
 	this.options.push(option);
 };
 SmoothMenuBnList.prototype.show=function(){
@@ -7928,10 +8014,11 @@ SmoothMenuBnList.prototype.clearBnsArray=function(){
 };
 SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
 	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(option.text);
 	bn.setCallbackFunction(option.func,true);
-	if(option.icon != null){
-		bn.addSideTextAndIcon(option.icon, null, option.text);
+	if(option.addTextFn != null){
+		option.addTextFn(bn);
+	} else {
+		bn.addText(option.text);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
@@ -8041,8 +8128,10 @@ Menu.prototype.createMenuBnList=function(){
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close,icon){
-	icon = null;
+Menu.prototype.addOption=function(text,func,close,addTextFn){
+	if(addTextFn == null) {
+		addTextFn = null;
+	}
 	if(close==null){
 		close=true;
 	}
@@ -8057,7 +8146,7 @@ Menu.prototype.addOption=function(text,func,close,icon){
 	callbackFn.menu=this;
 	callbackFn.func=func;
 	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn,icon);
+	this.menuBnList.addOption(text,callbackFn,addTextFn);
 };
 Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;
@@ -8303,13 +8392,13 @@ function SettingsMenu(button){
 SettingsMenu.prototype = Object.create(Menu.prototype);
 SettingsMenu.prototype.constructor = SettingsMenu;
 SettingsMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut,false, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom,true, VectorPaths.resetZoom);
+	this.addOption("Zoom in", this.optionZoomIn,false); //, VectorPaths.zoomIn);
+	this.addOption("Zoom out", this.optionZoomOut,false); //, VectorPaths.zoomOut);
+	this.addOption("Reset zoom", this.optionResetZoom,true); //, VectorPaths.resetZoom);
 	if(SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption("Disable snap noise", this.disableSnapping, true, VectorPaths.volumeMute);
+		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption("Enable snap noise", this.enableSnapping, true, VectorPaths.volumeUp);
+		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 };
 SettingsMenu.prototype.optionZoomIn=function(){
@@ -8355,8 +8444,7 @@ DeviceMenu.prototype.loadOptions=function(){
 		}
 	});
 	if(connectedClass != null){
-		var currentDevice = connectedClass.getManager().getDevice(0);
-		this.addOption(currentDevice.name,function(){},false);
+		this.addDeviceOption(connectedClass);
 		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
 			connectedClass.getManager().removeAllDevices();
 		});
@@ -8369,12 +8457,37 @@ DeviceMenu.prototype.loadOptions=function(){
 	}
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
+DeviceMenu.prototype.addDeviceOption = function(connectedClass){
+	const device = connectedClass.getManager().getDevice(0);
+	const status = device.getFirmwareStatus();
+	const statuses = Device.firmwareStatuses;
+	let icon = null;
+	let color = null;
+	if(status === statuses.old) {
+		icon = VectorPaths.warning;
+		color = DeviceStatusLight.yellowColor;
+	} else if(status === statuses.incompatible) {
+		icon = VectorPaths.warning;
+		color = DeviceStatusLight.redColor;
+	}
+	this.addOption("",device.showFirmwareInfo.bind(device),false, this.createAddIconToBnFn(icon, device.name, color));
+};
 DeviceMenu.prototype.previewOpen=function(){
 	let connectionCount = 0;
 	Device.getTypeList().forEach(function(deviceClass){
 		connectionCount += deviceClass.getManager().getDeviceCount();
 	});
 	return (connectionCount<=1);
+};
+DeviceMenu.prototype.createAddIconToBnFn = function(iconId, text, color) {
+	if(iconId == null){
+		return function(bn) {
+			bn.addText(text);
+		}
+	}
+	return function(bn) {
+		bn.addSideTextAndIcon(iconId, null, text, null, null, null, null, null, color, true, false);
+	}
 };
 function BlockContextMenu(block,x,y){
 	this.block=block;
@@ -10700,13 +10813,16 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	let statusX = 0;
 	let numberX = statusX + DeviceStatusLight.radius * 2;
 	let mainBnX = numberX + CMD.numberWidth;
-	let removeBnX = width - RowDialog.smallBnWidth;
-	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+	let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+	let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+	let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+
 
 	let robot = this.deviceClass.getManager().getDevice(index);
 	this.createStatusLight(robot, statusX, y, contentGroup);
 	this.createNumberText(index, numberX, y, contentGroup);
 	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createInfoBn(robot, index, infoBnX, y, contentGroup);
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
@@ -10736,6 +10852,24 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
 	button.setCallbackFunction(function(){
 		this.deviceClass.getManager().removeDevice(index);
 	}.bind(this), true);
+	return button;
+};
+ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup){
+	let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+
+	const statuses = Device.firmwareStatuses;
+	function updateStatus(firmwareStatus) {
+		if(firmwareStatus === statuses.old) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
+		} else if(firmwareStatus === statuses.incompatible) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
+		} else {
+			button.addIcon(VectorPaths.info, RowDialog.iconH);
+		}
+	}
+	updateStatus(robot.getFirmwareStatus());
+	robot.setFirmwareStatusListener(updateStatus);
+
 	return button;
 };
 ConnectMultipleDialog.prototype.show = function(){
@@ -11303,7 +11437,7 @@ FileContextMenu.setGraphics=function(){
 	FCM.bnMargin=Button.defaultMargin;
 	FCM.bgColor=Colors.lightGray;
 	FCM.blockShift=20;
-	FCM.width = 110;
+	FCM.width = 115;
 };
 FileContextMenu.prototype.showMenu=function(){
 	const FCM=FileContextMenu;
@@ -11322,21 +11456,21 @@ FileContextMenu.prototype.showMenu=function(){
 FileContextMenu.prototype.addOptions=function(){
 	const FCM = FileContextMenu;
 	if(this.type === FCM.types.localSignedIn) {
-		this.menuBnList.addOption("Share", function(){
+		this.menuBnList.addOption("", function(){
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), VectorPaths.share);
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
 	}
 	if(this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
-		this.menuBnList.addOption("Duplicate", function () {
+		this.menuBnList.addOption("", function () {
 			const dialog = this.dialog;
 			SaveManager.userDuplicateFile(this.file, function () {
 				dialog.reloadDialog();
 			});
 			this.close();
-		}.bind(this), VectorPaths.copy);
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
 	}
-	this.menuBnList.addOption("Delete", function(){
+	this.menuBnList.addOption("", function(){
 		if(this.type === FCM.types.cloud) {
 			const request = new HttpRequestBuilder("cloud/delete");
 			request.addParam("filename", this.file);
@@ -11349,7 +11483,12 @@ FileContextMenu.prototype.addOptions=function(){
 			});
 			this.close();
 		}
-	}.bind(this), VectorPaths.trash);
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
+};
+FileContextMenu.prototype.createAddIconToBnFn = function(iconId, text) {
+	return function(bn) {
+		bn.addSideTextAndIcon(iconId, null, text, null, null, null, null, null, null, true, false);
+	}
 };
 FileContextMenu.prototype.close=function(){
 	this.bubbleOverlay.hide();
@@ -12264,7 +12403,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(request === "cloud/list" && false) {
+			if(true) {
 				if(callbackErr != null) {
 					callbackErr(418, "I'm a teapot");
 				}
@@ -12600,6 +12739,22 @@ CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
+	return true;
+};
+CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	const statuses = Device.firmwareStatuses;
+	let firmwareStatus;
+	if(status === "upToDate") {
+		firmwareStatus = statuses.upToDate;
+	} else if(status === "old") {
+		firmwareStatus = statuses.old;
+	} else if(status === "incompatible") {
+		firmwareStatus = statuses.incompatible;
+	} else {
+		return false;
+	}
+	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
 	return true;
 };
 CallbackManager.robot.discovered = function(robotList){
@@ -17670,7 +17825,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	const status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
@@ -17743,7 +17898,8 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -17810,7 +17966,8 @@ B_DeviceWithPortsTriLed.prototype.startAction = function() {
 B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -18017,7 +18174,8 @@ B_FlutterBuzzer.prototype.startAction = function() {
 B_FlutterBuzzer.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			this.displayError(DeviceFlutter.getNotConnectedMessage());
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();

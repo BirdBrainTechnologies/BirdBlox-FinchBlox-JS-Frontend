@@ -69,6 +69,22 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	const statuses = Device.firmwareStatuses;
+	let firmwareStatus;
+	if(status === "upToDate") {
+		firmwareStatus = statuses.upToDate;
+	} else if(status === "old") {
+		firmwareStatus = statuses.old;
+	} else if(status === "incompatible") {
+		firmwareStatus = statuses.incompatible;
+	} else {
+		return false;
+	}
+	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
+	return true;
+};
 CallbackManager.robot.discovered = function(robotList){
 	return true;
 };

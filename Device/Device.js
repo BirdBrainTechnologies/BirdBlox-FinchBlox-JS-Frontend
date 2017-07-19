@@ -5,9 +5,17 @@ function Device(name, id){
 	this.name = name;
 	this.id = id;
 	this.connected = false;
-	this.firmwareState =
+	this.firmwareStatus = Device.firmwareStatuses.upToDate;
 	this.statusListener = null;
+	this.firmwareStatusListener = null;
 }
+Device.setStatics = function(){
+	const states = Device.firmwareStatuses = {};
+	states.upToDate = "upToDate";
+	states.old = "old";
+	states.incompatible = "incompatible";
+};
+Device.setStatics();
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
 	deviceClass.getDeviceTypeName = function(shorten, maxChars){
 		if(shorten || typeName.length > maxChars){
@@ -19,10 +27,14 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	deviceClass.getDeviceTypeId = function(){
 		return typeId;
 	};
-	deviceClass.getNotConnectedMessage = function(){
-		return typeName + " not connected";
+	deviceClass.getNotConnectedMessage = function(errorCode, errorResult){
+		if(errorResult == null || true) {
+			return typeName + " not connected";
+		} else {
+			return errorResult;
+		}
 	};
-	var manager = new DeviceManager(deviceClass);
+	const manager = new DeviceManager(deviceClass);
 	deviceClass.getManager = function(){
 		return manager;
 	};
@@ -37,34 +49,54 @@ Device.prototype.getDeviceTypeId = function(){
 	return this.constructor.getDeviceTypeId();
 };
 Device.prototype.disconnect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 Device.prototype.connect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
+	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-Device.prototype.setStatus = function(status){
-	this.status = status;
-	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
+Device.prototype.setConnected = function(isConnected){
+	this.connected = isConnected;
+	if(this.statusListener != null) this.statusListener(this.getStatus());
+	DeviceManager.updateStatus();
+};
+Device.prototype.setFirmwareStatus = function(status) {
+	this.firmwareStatus = status;
+	if(this.statusListener != null) this.statusListener(this.getStatus());
+	if(this.firmwareStatusListener != null) this.firmwareStatusListener(this.getFirmwareStatus());
 	DeviceManager.updateStatus();
 };
 Device.prototype.getStatus = function(){
-	return this.status;
-};
-Device.prototype.setStatusListener = function(object){
-	this.statusListener = object;
-};
-Device.prototype.alertOldFirmware = function(){
-	if(true) {
-		let message = "A firmware update is available for your device";
-		message += " \"" + this.name + "\". ";
-		HtmlServer.showChoiceDialog("Old firmware", "A firmware update is available for your device \"")
+	const statuses = DeviceManager.statuses;
+	const firmwareStatuses = Device.firmwareStatuses;
+	if(!this.connected) {
+		return statuses.disconnected;
 	} else {
-		HtmlServer.showChoiceDialog("Old firmware", "Your")
+		if(this.firmwareStatus === firmwareStatuses.incompatible) {
+			return statuses.incompatibleFirmware;
+		} else if(this.firmwareStatus === firmwareStatuses.old) {
+			return statuses.oldFirmware;
+		} else {
+			return statuses.connected;
+		}
 	}
+};
+Device.prototype.getFirmwareStatus = function(){
+	return this.firmwareStatus;
+};
+Device.prototype.setStatusListener = function(callbackFn){
+	this.statusListener = callbackFn;
+};
+Device.prototype.setFirmwareStatusListener = function(callbackFn){
+	this.firmwareStatusListener = callbackFn;
+};
+Device.prototype.showFirmwareInfo = function(){
+	const request = new HttpRequestBuilder("robot/firmware");
+	request.addParam("id", this.id);
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);
@@ -97,6 +129,6 @@ Device.getTypeList = function(){
 	return [DeviceHummingbird, DeviceFlutter];
 };
 Device.stopAll = function(){
-	var request = new HttpRequestBuilder("devices/stop");
+	const request = new HttpRequestBuilder("devices/stop");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };

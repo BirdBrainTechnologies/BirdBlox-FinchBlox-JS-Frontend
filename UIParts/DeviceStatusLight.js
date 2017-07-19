@@ -7,7 +7,7 @@ function DeviceStatusLight(x,centerY,parent,statusProvider){
 	this.parentGroup=parent;
 	this.circleE=this.generateCircle();
 	this.statusProvider = statusProvider;
-	this.statusProvider.setStatusListener(this);
+	this.statusProvider.setStatusListener(this.updateStatus.bind(this));
 	this.updateStatus(statusProvider.getStatus());
 }
 DeviceStatusLight.setConstants=function(){
@@ -30,7 +30,9 @@ DeviceStatusLight.prototype.updateStatus=function(status){
 	const statuses = DeviceManager.statuses;
 	if (status === statuses.connected) {
 		color = DSL.greenColor;
-	} else if (status === statuses.disconnected) {
+	} else if (status === statuses.oldFirmware) {
+		color = DSL.yellowColor;
+	} else if (status === statuses.incompatibleFirmware || status === statuses.disconnected) {
 		color = DSL.redColor;
 	} else {
 		color = DSL.offColor;

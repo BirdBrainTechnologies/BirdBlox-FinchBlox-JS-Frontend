@@ -128,4 +128,8 @@ function VectorPaths(){
 	VP.warning.width = 22;
 	VP.warning.height = 19;
 	VP.warning.path = "m 0,19 22,0 -11,-19 -11,19 z m 12,-3 -2,0 0,-2 2,0 0,2 z m 0,-4 -2,0 0,-4 2,0 0,4 z";
+	VP.info = {};
+	VP.info.width = 20;
+	VP.info.height = 20;
+	VP.info.path = "m 10,0 c -5.52,0 -10,4.48 -10,10 0,5.52 4.48,10 10,10 5.52,0 10,-4.48 10,-10 0,-5.52 -4.48,-10 -10,-10 z m 1,15 -2,0 0,-6 2,0 0,6 z m 0,-8 -2,0 0,-2 2,0 0,2 z";
 }
