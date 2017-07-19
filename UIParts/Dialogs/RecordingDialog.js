@@ -3,7 +3,9 @@
  */
 function RecordingDialog(listOfRecordings){
 	let RecD = RecordingDialog;
-	this.recordings=listOfRecordings.map(x => x.id);
+	this.recordings=listOfRecordings.map(function(x){
+		return x.id;
+	});
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
