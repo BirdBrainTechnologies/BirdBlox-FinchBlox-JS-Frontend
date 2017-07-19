@@ -24,7 +24,7 @@ B_Variable.prototype.startAction = function() {
 };
 /**
  * @inheritDoc
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The node for this Block
  */
 B_Variable.prototype.createXml = function(xmlDoc) {
@@ -172,7 +172,7 @@ B_List.prototype.startAction = function() {
 };
 /**
  * Writes the Block to Xml
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The Block node
  */
 B_List.prototype.createXml = function(xmlDoc) {

@@ -501,7 +501,7 @@ BlockStack.prototype.updateTabDim = function() {
 
 /**
  * Writes the BlockStack to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {

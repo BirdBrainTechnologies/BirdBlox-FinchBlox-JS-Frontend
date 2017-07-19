@@ -1,12 +1,16 @@
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics for a RectSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function RectSlotShape(slot, initialText){
+function RectSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, RectSlotShape);
 }
 RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RectSlotShape.prototype.constructor = RectSlotShape;
-RectSlotShape.setConstants = function(){
+
+RectSlotShape.setConstants = function() {
 	const RSS = RectSlotShape;
 	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
 	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
@@ -20,27 +24,51 @@ RectSlotShape.setConstants = function(){
 	RSS.slotSelectedFill = BlockGraphics.reporter.slotSelectedFill;
 	RSS.slotFill = BlockGraphics.reporter.slotFill;
 };
-RectSlotShape.prototype.buildSlot=function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-RectSlotShape.prototype.buildBackground = function(){
-	this.slotE = BlockGraphics.create.slot(this.group,3);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildBackground = function() {
+	this.slotE = BlockGraphics.create.slot(this.group, 3);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot);
 };
-RectSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-RectSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 3, true); //Fix! BG
 };
-RectSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.select = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
-RectSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.deselect = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotFill);
+	GuiElements.update.color(this.slotE, RSS.slotFill);
 };

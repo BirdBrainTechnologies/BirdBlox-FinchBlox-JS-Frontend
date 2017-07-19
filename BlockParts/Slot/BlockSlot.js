@@ -255,7 +255,7 @@ BlockSlot.prototype.updateAvailableMessages = function() {
 
 /**
  * Creates XML for this BlockSlot
- * @param {DOMParser} xmlDoc - The document to modify
+ * @param {Document} xmlDoc - The document to modify
  * @return {Node} - The XML representing this BlockSlot
  */
 BlockSlot.prototype.createXml = function(xmlDoc) {

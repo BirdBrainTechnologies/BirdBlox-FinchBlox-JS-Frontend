@@ -885,7 +885,7 @@ Block.prototype.updateActive = function(){
 
 /**
  * Recursively writes this Block and those below it to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @param {Node} xmlBlocks - The <Blocks> tag in the document
  */
 Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
@@ -897,7 +897,7 @@ Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 
 /**
  * Writes this Block to XML (non recursive)
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc){

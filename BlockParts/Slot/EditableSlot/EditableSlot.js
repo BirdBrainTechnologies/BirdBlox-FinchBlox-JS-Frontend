@@ -167,7 +167,7 @@ EditableSlot.prototype.getDataNotFromChild = function() {
 /**
  * Converts the Slot and its children into XML, storing the value in the enteredData as well
  * @inheritDoc
- * @param {DOMParser} xmlDoc
+ * @param {Document} xmlDoc
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {

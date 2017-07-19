@@ -128,407 +128,662 @@ function UserException(message) {
 	this.name = 'UserException';
 	this.stack = (new Error()).stack;
 }
-function Data(type,value,isValid){
-	this.type=type;
-	this.value=value;
-	this.isValid=isValid;
-	if(isValid==null){
-		this.isValid=true;
+/**
+ * Data is used hold type information about values passed between executing Blocks.  It creates a sort of type system
+ * for the values obtained during Block execution.  For example, when an addition Block is run, it accepts two
+ * receives two NumData instances and returns a new NumData instance.  Since Blocks of the wrong type can often be
+ * snapped together (for example, the joinStrings Block can be put into a multiplication Block), all types of Data
+ * can be converted into any other type of Data (using asNum(), asString(), etc.).  However, whether the data is "valid"
+ * is also tracked, with nonsensical conversions always flagging the data as invalid.  Blocks can choose how to respond
+ * when the data they receive is invalid.  Data can also be saved to XML, which is used to save the contents of
+ * EditableSlots and values of variables to file.
+ *
+ * The types of data are invisible to the user, and those Data is always automatically converted to the most reasonable
+ * type automatically without the user's knowledge.
+ *
+ * All Data is treated as immutable
+ *
+ * Note that the Data class is abstract
+ *
+ * @param {number} type - [num, bool, string, list, selection]
+ * @param {*} value - The value being stored in the Data, should correspond to the type of Data
+ * @param {boolean} [isValid=true] - Whether the Data has not gone through any illegal conversions (equivalent of NaN)
+ * @constructor
+ */
+function Data(type, value, isValid) {
+	this.type = type;
+	this.value = value;
+	this.isValid = isValid;
+	if (isValid == null) {
+		this.isValid = true;
 	}
 }
-Data.setConstants=function(){
-	Data.types=function(){};
-	Data.types.num=0;
-	Data.types.bool=1;
-	Data.types.string=2;
-	Data.types.list=3;
-	Data.types.selection=4;//A selection from a block's drop down.  Could be a sound, variable, string, etc.
+
+Data.setConstants = function() {
+	Data.types = {};
+	Data.types.num = 0;
+	Data.types.bool = 1;
+	Data.types.string = 2;
+	Data.types.list = 3;
+	Data.types.selection = 4; //A selection from a block's drop down.  Could be a sound, variable, string, etc.
 };
-Data.prototype.asNum=function(){
-	return new NumData(0,false);
+
+/* These functions manage the conversion of one type of data into another.  By default, they produce invalid Data
+ * initialized to default values.  Subclasses provide better conversion functions where applicable
+ */
+
+Data.prototype.asNum = function() {
+	return new NumData(0, false);
 };
-Data.prototype.asBool=function(){
-	return new BoolData(false,false);
+Data.prototype.asBool = function() {
+	return new BoolData(false, false);
 };
-Data.prototype.asString=function(){
-	return new StringData("",false);
+Data.prototype.asString = function() {
+	return new StringData("", false);
 };
-Data.prototype.asList=function(){
-	return new ListData(null,false);
+Data.prototype.asList = function() {
+	return new ListData(null, false);
 };
-Data.prototype.asSelection = function(){
+Data.prototype.asSelection = function() {
 	return SelectionData.empty(false);
 };
-Data.prototype.getValue=function(){ //might remove
+
+/**
+ * Extracts the value from the data
+ * @return {*}
+ */
+Data.prototype.getValue = function() {
 	return this.value;
 };
-Data.prototype.isSelection = function(){
+
+/**
+ * Determines whether the Data is SelectionData
+ * @return {boolean}
+ */
+Data.prototype.isSelection = function() {
 	return this.type === Data.types.selection;
 };
-Data.prototype.isNumber = function(){
+
+/**
+ * Determines whether the Data will produce a valid number when asNum() is called.  For example,
+ * StringData("3").asNum() is valid with value 3.
+ * @return {boolean}
+ */
+Data.prototype.isNumber = function() {
 	return false;
 };
-Data.checkEquality=function(data1,data2){
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var string1=data1.asString().getValue();
-	var string2=data2.asString().getValue();
-	var numD1=data1.asNum();
-	var numD2=data2.asNum();
-	var types=Data.types;
-	var isValid=data1.isValid&&data2.isValid;
-	if(data1.type==data2.type){ //If the types match, just compare directly.
-		return isValid&&val1==val2; //Invalid data is never equal.
-	}
-	else if(data1.type==types.string||data2.type==types.string){ //If one is a string...
-		if(string1==string2) { //If both strings match, result is true.
+
+/**
+ * Determines if two Data should be considered equal by the equality Block.
+ * @param {Data} data1
+ * @param {Data} data2
+ * @return {boolean}
+ */
+Data.checkEquality = function(data1, data2) {
+	const val1 = data1.getValue();
+	const val2 = data2.getValue();
+	const string1 = data1.asString().getValue();
+	const string2 = data2.asString().getValue();
+	const numD1 = data1.asNum();
+	const numD2 = data2.asNum();
+	const types = Data.types;
+	const isValid = data1.isValid && data2.isValid;
+	if (data1.type === data2.type) { //If the types match, just compare directly.
+		return isValid && val1 === val2; //Invalid data is never equal.
+	} else if (data1.type === types.string || data2.type === types.string) { //If one is a string...
+		if (string1 === string2) { //If both strings match, result is true.
 			return true;
-		}
-		else if(data1.type==types.num||data2.type==types.num){ //Still the numbers could match like "3.0"=3.
-			if(numD1.isValid&&numD2.isValid){ //If both are valid numbers...
-				return numD1.getValue()==numD2.getValue(); //Compare numerical values.
-			}
-			else{
+		} else if (data1.type === types.num || data2.type === types.num) { //Still the numbers could match like "3.0"=3.
+			if (numD1.isValid && numD2.isValid) { //If both are valid numbers...
+				return numD1.getValue() === numD2.getValue(); //Compare numerical values.
+			} else {
 				return false; //A string and unequal/invalid number are not equal.
 			}
-		}
-		else{
+		} else {
 			return false; //Two unequal, nonnumerical strings are unequal.
 		}
-	}
-	else{
+	} else {
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
-Data.prototype.createXml=function(xmlDoc){
-	var data=XmlWriter.createElement(xmlDoc,"data");
-	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
-	XmlWriter.setAttribute(data,"isValid",this.isValid);
-	var value=XmlWriter.createElement(xmlDoc,"value");
-	var valueString=this.getValue()+"";
-	if(this.getValue().constructor.name=="Variable"){
-		valueString=this.getValue().name;
+
+/**
+ * Converts the Data to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node}
+ */
+Data.prototype.createXml = function(xmlDoc) {
+	// We store the type of Data, whether it is valid, and what its value is
+
+	const data = XmlWriter.createElement(xmlDoc, "data");
+	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
+	XmlWriter.setAttribute(data, "isValid", this.isValid);
+
+	// The value is converted to a string by appending "".  For Variables and Lists, the name is used.
+	const value = XmlWriter.createElement(xmlDoc, "value");
+	let valueString = this.getValue() + "";
+	if (this.getValue().constructor.name === "Variable") {
+		valueString = this.getValue().name;
+	} else if (this.getValue().constructor.name === "List") {
+		valueString = this.getValue().name;
 	}
-	else if(this.getValue().constructor.name=="List"){
-		valueString=this.getValue().name;
-	}
-	var valueText=XmlWriter.createTextNode(xmlDoc,valueString);
+	const valueText = XmlWriter.createTextNode(xmlDoc, valueString);
 	value.appendChild(valueText);
 	data.appendChild(value);
 	return data;
 };
-Data.importXml=function(dataNode){
-	var typeName=XmlWriter.getAttribute(dataNode,"type");
-	var type=Data.getDataTypeFromName(typeName);
-	if(type==null){
+
+/**
+ * Reads data from XML.  Returns null if Data is corrupt
+ * @param {Node} dataNode
+ * @return {Data|null}
+ */
+Data.importXml = function(dataNode) {
+	const typeName = XmlWriter.getAttribute(dataNode, "type");
+	const type = Data.getDataTypeFromName(typeName);
+	if (type == null) {
 		return null;
 	}
 	return type.importXml(dataNode);
 };
-Data.prototype.getDataTypeName=function(){
-	if(this.type==Data.types.num){
+
+/**
+ * Gets the string representation of this Data's type
+ * @return {string}
+ */
+Data.prototype.getDataTypeName = function() {
+	if (this.type === Data.types.num) {
 		return "num";
-	}
-	else if(this.type==Data.types.bool){
+	} else if (this.type === Data.types.bool) {
 		return "bool";
-	}
-	else if(this.type==Data.types.string){
+	} else if (this.type === Data.types.string) {
 		return "string";
-	}
-	else if(this.type==Data.types.list){
+	} else if (this.type === Data.types.list) {
 		return "list";
-	}
-	else if(this.type==Data.types.selection){
+	} else if (this.type === Data.types.selection) {
 		return "selection";
-	}
-	else{
-		return null;
+	} else {
+		DebugOptions.throw("Data is not a valid type");
 	}
 };
-Data.getDataTypeFromName=function(typeName){
-	if(typeName=="num"){
+
+/**
+ * Gets the class of Data from a string representing its type or null of the type is invalid
+ * @param {string} typeName
+ * @return {*|null} - A subclass of Data corresponding to the type, or null if no such subclass exists
+ */
+Data.getDataTypeFromName = function(typeName) {
+	if (typeName === "num") {
 		return NumData;
-	}
-	else if(typeName=="bool"){
+	} else if (typeName === "bool") {
 		return BoolData;
-	}
-	else if(typeName=="string"){
+	} else if (typeName === "string") {
 		return StringData;
-	}
-	else if(typeName=="list"){
+	} else if (typeName === "list") {
 		return ListData;
-	}
-	else if(typeName=="selection"){
+	} else if (typeName === "selection") {
 		return SelectionData;
-	}
-	else{
-		return null;
-	}
-};
-function NumData(value,isValid){
-	if(isNaN(value)||!isFinite(value)){
-		value=0;
-		isValid=false;
-	}
-	Data.call(this,Data.types.num,value,isValid);
-}
-NumData.prototype = Object.create(Data.prototype);
-NumData.prototype.constructor = NumData;
-NumData.prototype.asNum=function(){
-	return this;
-};
-NumData.prototype.asBool=function(){
-	if(this.getValue()==1){
-		return new BoolData(true,this.isValid);
-	}
-	else if(this.getValue()==0){
-		return new BoolData(false,this.isValid);
-	}
-	else{
-		return new BoolData(false,false);
-	}
-};
-NumData.prototype.asString=function(){
-	if(this.isValid){
-		var num=this.getValue();
-		num=+num.toFixed(10);
-		return new StringData(num+"",true);
-	}
-	else{
-		return new StringData("not a valid number");
-	}
-};
-NumData.prototype.asPositiveString=function(){ //Converts to a string but avoids scientific notation
-	var num=Math.abs(this.getValue());
-	num=+num.toFixed(10);
-	return new StringData(num+"",true);
-};
-NumData.prototype.getValueInR=function(min,max,positive,integer){
-	var val=this.getValue();
-	if(positive==true&&val<0){
-		val=0;
-	}
-	if(integer==true){
-		val=Math.round(val);
-	}
-	if(min != null && val<min){
-		val=min;
-	}
-	if(max != null && val>max){
-		val=max;
-	}
-	return val;
-};
-NumData.prototype.getValueWithC=function(positive,integer){
-	var val=this.getValue();
-	if(positive==true&&val<0){
-		val=0;
-	}
-	if(integer==true){
-		val=Math.round(val);
-	}
-	return val;
-};
-NumData.importXml=function(dataNode){
-	const value=XmlWriter.getTextNode(dataNode,"value",null,true);
-	if(value == null) return null;
-	const stringData = new StringData(value);
-	const numData = stringData.asNum();
-	if(numData.isValid){
-		return numData;
 	} else {
 		return null;
 	}
 };
-function BoolData(value,isValid){
-	Data.call(this,Data.types.bool,value,isValid);
+/**
+ * Data that contains a number value
+ * @param value
+ * @param isValid
+ * @constructor
+ */
+function NumData(value, isValid) {
+	if (isNaN(value) || !isFinite(value)) {
+		value = 0;
+		isValid = false;
+	}
+	Data.call(this, Data.types.num, value, isValid);
+}
+NumData.prototype = Object.create(Data.prototype);
+NumData.prototype.constructor = NumData;
+
+/**
+ * @return {NumData}
+ */
+NumData.prototype.asNum = function() {
+	return this;
+};
+
+/**
+ * 0 becomes false and 1 becomes true.  Anything else is invalid
+ * @return {BoolData}
+ */
+NumData.prototype.asBool = function() {
+	if (this.getValue() === 1) {
+		return new BoolData(true, this.isValid);
+	} else if (this.getValue() === 0) {
+		return new BoolData(false, this.isValid);
+	} else {
+		return new BoolData(false, false);
+	}
+};
+
+/**
+ * Rounds number and displays it
+ * @return {StringData}
+ */
+NumData.prototype.asString = function() {
+	if (this.isValid) {
+		let num = this.getValue();
+		num = +num.toFixed(10);
+		return new StringData(num + "", true);
+	} else {
+		return new StringData("not a valid number");
+	}
+};
+
+/**
+ * Converts to a string but avoids scientific notation
+ * @return {StringData}
+ */
+NumData.prototype.asPositiveString = function() {
+	let num = Math.abs(this.getValue());
+	num = +num.toFixed(10);
+	return new StringData(num + "", true);
+};
+
+/**
+ * Gets the NumData's value within a range.
+ * @param {number} [min] - The lower bound
+ * @param {number} [max] - The upper bound
+ * @param {boolean} positive - Whether the number should be non-negative
+ * @param {boolean} integer - Whether the number should be rounded to the nearest integer
+ * @return {number}
+ */
+NumData.prototype.getValueInR = function(min, max, positive, integer) {
+	let val = this.getValue();
+	if (positive === true && val < 0) {
+		val = 0;
+	}
+	if (integer === true) {
+		val = Math.round(val);
+	}
+	if (min != null && val < min) {
+		val = min;
+	}
+	if (max != null && val > max) {
+		val = max;
+	}
+	return val;
+};
+
+/**
+ * Returns the value of the NumData, possibly non-negative or rounded to the nearest integer
+ * @param {boolean} positive - Whether the number should be non-negative
+ * @param {boolean} integer - Whether the number should be rounded to the nearest integer
+ * @return {number}
+ */
+NumData.prototype.getValueWithC = function(positive, integer) {
+	let val = this.getValue();
+	if (positive === true && val < 0) {
+		val = 0;
+	}
+	if (integer === true) {
+		val = Math.round(val);
+	}
+	return val;
+};
+
+/**
+ * Imports the NumData from XML
+ * @param {Node} dataNode
+ * @return {NumData|null}
+ */
+NumData.importXml = function(dataNode) {
+	const value = XmlWriter.getTextNode(dataNode, "value", null, true);
+	if (value == null) return null;
+	// We use StringData to help with the conversion
+	const stringData = new StringData(value);
+	const numData = stringData.asNum();
+	if (numData.isValid) {
+		return numData;
+	} else {
+		// It's not a number.  Treat it as corrupt.
+		return null;
+	}
+};
+/**
+ * Data that contains a boolean value
+ * @param {boolean} value
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function BoolData(value, isValid) {
+	Data.call(this, Data.types.bool, value, isValid);
 }
 BoolData.prototype = Object.create(Data.prototype);
 BoolData.prototype.constructor = BoolData;
-BoolData.prototype.asNum=function(){
-	if(this.getValue()){
-		return new NumData(1,this.isValid);
+
+/**
+ * Converts true to 1 and false to 0
+ * @return {NumData}
+ */
+BoolData.prototype.asNum = function() {
+	if (this.getValue()) {
+		return new NumData(1, this.isValid);
+	} else {
+		return new NumData(0, this.isValid);
 	}
-	else{
-		return new NumData(0,this.isValid);
-	}
-}
-BoolData.prototype.asBool=function(){
-	return this;
-}
-BoolData.prototype.asString=function(){
-	if(this.getValue()){
-		return new StringData("true",true);
-	}
-	else{
-		return new StringData("false",true);
-	}
-}
-BoolData.importXml=function(dataNode){
-	let value = XmlWriter.getTextNode(dataNode, "value");
-	if(value == null) return null;
-	return new BoolData(value == "true");
 };
-function StringData(value,isValid){
-	Data.call(this,Data.types.string,value,isValid);
+
+/**
+ * @return {BoolData}
+ */
+BoolData.prototype.asBool = function() {
+	return this;
+};
+
+/**
+ * @return {StringData}
+ */
+BoolData.prototype.asString = function() {
+	if (this.getValue()) {
+		return new StringData("true", true);
+	} else {
+		return new StringData("false", true);
+	}
+};
+
+/**
+ * @param {Document} dataNode
+ * @return {BoolData|null}
+ */
+BoolData.importXml = function(dataNode) {
+	let value = XmlWriter.getTextNode(dataNode, "value");
+	if (value == null) return null;
+	return new BoolData(value === "true");
+};
+/**
+ * Data that contains a string.
+ * @param {string} value
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function StringData(value, isValid) {
+	Data.call(this, Data.types.string, value, isValid);
 }
 StringData.prototype = Object.create(Data.prototype);
 StringData.prototype.constructor = StringData;
-StringData.prototype.asNum=function(){
-	if(this.isNumber()){
-		return new NumData(parseFloat(this.getValue()),this.isValid);
+
+/**
+ * If the value could represent a number, it is converted to valid NumData.  Otherwise, invalid NumData(0) is returned
+ * @return {NumData}
+ */
+StringData.prototype.asNum = function() {
+	if (this.isNumber()) {
+		return new NumData(parseFloat(this.getValue()), this.isValid);
+	} else {
+		return new NumData(0, false);
 	}
-	else{
-		return new NumData(0,false);
+};
+
+/**
+ * The string is a valid boolean if it is "true" or "false" (any casing)
+ * @return {BoolData}
+ */
+StringData.prototype.asBool = function() {
+	if (this.getValue().toUpperCase() === "TRUE") {
+		return new BoolData(true, this.isValid);
+	} else if (this.getValue().toUpperCase() === "FALSE") {
+		return new BoolData(false, this.isValid);
 	}
-}
-StringData.prototype.asBool=function(){
-	if(this.getValue().toUpperCase()=="TRUE"){
-		return new BoolData(true,this.isValid);
-	}
-	else if(this.getValue().toUpperCase()=="FALSE"){
-		return new BoolData(false,this.isValid);
-	}
-	return new BoolData(false,false);
-}
-StringData.prototype.asString=function(){
+	return new BoolData(false, false);
+};
+
+/**
+ * @return {StringData}
+ */
+StringData.prototype.asString = function() {
 	return this;
-}
-StringData.prototype.isNumber=function(){ //Checks to see if the number can be converted to a valid number
-	var numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/  //from https://en.wikipedia.org/wiki/Regular_expression
+};
+
+/**
+ * Checks to see if the number can be converted to a valid number
+ * @return {boolean}
+ */
+StringData.prototype.isNumber = function() {
+	//from https://en.wikipedia.org/wiki/Regular_expression
+	const numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
 	return numberRE.test(this.getValue());
-}
-StringData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value");
-	if(value == null) return null;
+};
+
+/**
+ * Imports StringData from XML
+ * @param {Node} dataNode
+ * @return {StringData|null}
+ */
+StringData.importXml = function(dataNode) {
+	const value = XmlWriter.getTextNode(dataNode, "value");
+	if (value == null) return null;
 	return new StringData(value);
 };
-//Not implemented
-function ListData(value,isValid){
-	if(value==null){
-		value=new Array();
+/**
+ * ListData holds an array of Data objects as its value.  So to access a string in index 2 of a ListData, you'd do:
+ * myListData.getValue()[2].asString().getValue()
+ * @param {Array} [value=[]]
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function ListData(value, isValid) {
+	if (value == null) {
+		value = [];
 	}
-	Data.call(this,Data.types.list,value,isValid);
+	Data.call(this, Data.types.list, value, isValid);
 }
 ListData.prototype = Object.create(Data.prototype);
 ListData.prototype.constructor = ListData;
-ListData.prototype.duplicate=function(){
-	var arrayCopy=new Array();
-	for(var i=0;i<this.value.length;i++){
+
+/**
+ * Creates a copy of the ListData
+ * @return {ListData}
+ */
+ListData.prototype.duplicate = function() {
+	const arrayCopy = [];
+	for (let i = 0; i < this.value.length; i++) {
 		arrayCopy.push(this.value[i]);
 	}
-	return new ListData(arrayCopy,this.isValid);
+	return new ListData(arrayCopy, this.isValid);
 };
-ListData.prototype.asNum=function(){
-	if(this.value.length==1){
+
+/**
+ * Is a num if it only has one item and that item is a num
+ * @return {NumData}
+ */
+ListData.prototype.asNum = function() {
+	if (this.value.length === 1) {
 		return this.value[0].asNum();
-	}
-	else{
-		return new NumData(0,false);
+	} else {
+		return new NumData(0, false);
 	}
 };
-ListData.prototype.asString=function(){
-	var resultStr="";
-	for(var i=0;i<this.value.length;i++){
-		resultStr+=this.value[i].asString().getValue();
-		if(i<this.value.length-1){
-			resultStr+=", ";
+
+/**
+ * Prints all elements, comma separated, to a string
+ * @return {StringData}
+ */
+ListData.prototype.asString = function() {
+	let resultStr = "";
+	for (let i = 0; i < this.value.length; i++) {
+		resultStr += this.value[i].asString().getValue();
+		if (i < this.value.length - 1) {
+			resultStr += ", ";
 		}
 	}
-	return new StringData(resultStr,true);
+	return new StringData(resultStr, true);
 };
-ListData.prototype.asBool=function(){
-	if(this.value.length==1){
+
+/**
+ * Is a Bool if it only has one value and that value is a bool
+ * @return {BoolData}
+ */
+ListData.prototype.asBool = function() {
+	if (this.value.length === 1) {
 		return this.value[0].asBool();
-	}
-	else{
-		return new BoolData(false,false);
+	} else {
+		return new BoolData(false, false);
 	}
 };
-ListData.prototype.asList=function(){
+
+/**
+ * @return {ListData}
+ */
+ListData.prototype.asList = function() {
 	return this;
 };
-ListData.prototype.getIndex=function(indexData){
-	var array=this.getValue();
-	if(array.length==0){
-		return null;
+
+/**
+ * Converts NumData/SelectionData referring to an index into a number that refers to an index in the ListData, or null
+ * @param {Data|null} indexData
+ * @return {number|null}
+ */
+ListData.prototype.getIndex = function(indexData) {
+	const array = this.getValue();
+	if (array.length === 0) {
+		return null; // There are no valid indices to return
 	}
-	if(indexData==null){
-		return null;
+	if (indexData == null) {
+		return null; // The index data is already invalid
 	}
-	var indexV=indexData.getValue();
-	var min=1;
-	var max=array.length;
-	if(indexData.type==Data.types.selection){
-		if(indexV=="last"){
-			return array.length-1;
-		}
-		else if(indexV=="random"){
+	const indexV = indexData.getValue();
+	const min = 1;
+	const max = array.length;
+	if (indexData.type === Data.types.selection) {
+		if (indexV === "last") {
+			// Return the index of the last item
+			return array.length - 1;
+		} else if (indexV === "random") {
+			// Return an index of a random item
 			return Math.floor(Math.random() * array.length);
-		}
-		else{
+		} else {
+			// The data is not valid.  Return null.
 			return null;
 		}
-	}
-	else if(indexData.type==Data.types.num){
-		if(!indexData.isValid){
+	} else {
+		// If it isn't selectionData, the index should be NumData
+		indexData = indexData.asNum();
+		if (!indexData.isValid) {
+			// The data is not valid.  Return null.
 			return null;
 		}
-		return indexData.getValueInR(min,max,true,true)-1;
-	}
-	else{
-		return null;
+		// Clamps the index to the bounds of the array
+		return indexData.getValueInR(min, max, true, true) - 1;
 	}
 };
-ListData.prototype.createXml=function(xmlDoc){
-	var data=XmlWriter.createElement(xmlDoc,"data");
-	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
-	XmlWriter.setAttribute(data,"isValid",this.isValid);
-	var value=xmlDoc.createElement("value");
-	for(var i=0;i<this.value.length;i++){
+
+/**
+ * @inheritDoc
+ * @param {Document} xmlDoc
+ * @return {Node}
+ */
+ListData.prototype.createXml = function(xmlDoc) {
+	const data = XmlWriter.createElement(xmlDoc, "data");
+	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
+	XmlWriter.setAttribute(data, "isValid", this.isValid);
+
+	// The value is a list of Data objects
+	const value = xmlDoc.createElement("value");
+	for (let i = 0; i < this.value.length; i++) {
 		value.appendChild(this.value[i].createXml(xmlDoc));
 	}
 	data.appendChild(value);
 	return data;
 };
-ListData.importXml=function(dataNode){
-	var valueNode=XmlWriter.findSubElement(dataNode,"value");
-	var dataNodes=XmlWriter.findSubElements(valueNode,"data");
-	var valueArray=[];
-	for(var i=0;i<dataNodes.length;i++){
-		var dataEntry=Data.importXml(dataNodes[i]);
-		if(dataEntry!=null){
+
+/**
+ * Creates a ListData from XML
+ * @param {Node} dataNode
+ * @return {ListData}
+ */
+ListData.importXml = function(dataNode) {
+	const valueNode = XmlWriter.findSubElement(dataNode, "value");
+	const dataNodes = XmlWriter.findSubElements(valueNode, "data");
+	const valueArray = [];
+	for (let i = 0; i < dataNodes.length; i++) {
+		// Add every valid data node
+		const dataEntry = Data.importXml(dataNodes[i]);
+		if (dataEntry != null) {
 			valueArray.push(dataEntry);
 		}
 	}
 	return new ListData(valueArray);
 };
-function SelectionData(displayText, value, isValid){
+/**
+ * Effectively the "enum" datatype.  Used for selections from DropSlots.  Has both displayText (what the user sees
+ * the option listed as) and a value (used internally) that could be anything (number, string).  Selecting a Variable
+ * or List from a DropSlot results in SelectionData with a value that's a reference to a Variable or List.  However,
+ * when SelectionData is written to XML, the value is first turned into a string.  The Block using the SelectionData
+ * reconstructs the correct value from the string.
+ *
+ * SelectionData uses "" as the value for "Empty SelectionData" (essentially null) when nothing it selected.
+ *
+ * @param {string} displayText - The text shown to the user on the DropSlot with this data
+ * @param {*} value - Used internally, type depends on context
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function SelectionData(displayText, value, isValid) {
+	// Only the empty SelectionData can have "" as the value.  So value === "" implies displayText === ""
+	DebugOptions.assert(value !== "" || displayText === "");
+
 	DebugOptions.validateNonNull(displayText, value);
-	Data.call(this,Data.types.selection, value, isValid);
+	Data.call(this, Data.types.selection, value, isValid);
 	this.displayText = displayText;
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
-SelectionData.prototype.asString = function(){
+
+/**
+ * When converted to a string, the display text is used
+ * @return {StringData}
+ */
+SelectionData.prototype.asString = function() {
 	return new StringData(this.displayText, true);
 };
-SelectionData.prototype.asSelection = function(){
+
+/**
+ * @return {SelectionData}
+ */
+SelectionData.prototype.asSelection = function() {
 	return this;
 };
-SelectionData.prototype.isEmpty = function(){
+
+/**
+ * Returns whether this SelectionData is the empty (null) SelectionData.
+ * @return {boolean}
+ */
+SelectionData.prototype.isEmpty = function() {
 	return this.value === "";
 };
-SelectionData.importXml=function(dataNode){
+
+/**
+ * Generates SelectionData from XML.  When imported, displayText = "" and value is a string.  All DropSlots/RoundSlots
+ * sanitize the data and reconstruct the original displayText and value.  This prevents the user from editing their
+ * save file to put arbitrary, invalid displayText in the SelectionData.  It also allows us to change the displayed
+ * text of an option without breaking save files
+ * @param {Node} dataNode
+ * @return {SelectionData|null}
+ */
+SelectionData.importXml = function(dataNode) {
 	const value = XmlWriter.getTextNode(dataNode, "value");
-	if(value == null) return null;
+	if (value == null) return null;
 	return new SelectionData("", value);
 };
-SelectionData.empty = function(isValid){
+
+/**
+ * Returns new empty SelectionData
+ * TODO: perhaps remove isValid parameter
+ * @param {boolean} [isValid=true]
+ * @return {SelectionData}
+ */
+SelectionData.empty = function(isValid) {
 	return new SelectionData("", "", isValid);
 };
-
-
 /**
  * Created by Tom on 6/2/2017.
  */
@@ -2528,74 +2783,115 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.finalize();
 };
 
-//Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
+/*
+ * Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
+ */
 
-function Colors(){
+function Colors() {
 	Colors.setCommon();
 	Colors.setCategory();
 	Colors.setMultipliers();
 }
-Colors.setCommon=function(){
-	Colors.white="#fff";
-	Colors.lightGray="#3d3d3d";
-	Colors.darkGray="#262626";
-	Colors.black="#000";
+
+Colors.setCommon = function() {
+	Colors.white = "#fff";
+	Colors.lightGray = "#3d3d3d";
+	Colors.darkGray = "#262626";
+	Colors.black = "#000";
 };
-Colors.setCategory=function(){
+
+Colors.setCategory = function() {
 	Colors.categoryColors = {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
 		"flutter": "#FF9600",
-		"motion": "#0000FF",
-		"looks": "#8800FF",
-		"sound": "#EE00FF", //FF0088
-		"pen": "#00CC99",
-		"tablet": "#019EFF", //7F7F7F
+		"sound": "#EE00FF",
+		"tablet": "#019EFF",
 		"control": "#FFCC00",
-		"sensing": "#019EFF",
 		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
 		"inactive": "#a3a3a3"
 	};
 };
-Colors.setMultipliers=function(){
-	Colors.gradStart=1;
-	Colors.gradEnd=0.5;
-	Colors.gradDarkStart=0.25;
-	Colors.gradDarkEnd=0.5;
+
+Colors.setMultipliers = function() {
+	// Used for gradients
+	Colors.gradStart = 1;
+	Colors.gradEnd = 0.5;
+	Colors.gradDarkStart = 0.25;
+	Colors.gradDarkEnd = 0.5;
 };
-Colors.createGradients=function(){
-	Colors.createGradientSet("gradient_",Colors.gradStart,Colors.gradEnd);
-	Colors.createGradientSet("gradient_dark_",Colors.gradDarkStart,Colors.gradDarkEnd);
+
+/**
+ * Creates normal and dark gradients for all categories
+ */
+Colors.createGradients = function() {
+	Colors.createGradientSet("gradient_", Colors.gradStart, Colors.gradEnd);
+	Colors.createGradientSet("gradient_dark_", Colors.gradDarkStart, Colors.gradDarkEnd);
 };
-Colors.createGradientSet=function(name,multStart,multEnd){
+
+/**
+ * Creates gradients for all categories
+ * @param {string} name
+ * @param {number} multStart
+ * @param {number} multEnd
+ */
+Colors.createGradientSet = function(name, multStart, multEnd) {
 	Object.keys(Colors.categoryColors).map(function(category) {
 		let color = Colors.categoryColors[category];
-		Colors.createGradientFromColorAndMults(name,category,color,multStart,multEnd);
+		Colors.createGradientFromColorAndMults(name, category, color, multStart, multEnd);
 	});
 };
-Colors.createGradientFromColorAndMults=function(name,catId,color,multStart,multEnd){
-	var darken=Colors.darkenColor;
-	var color1=darken(color,multStart);
-	var color2=darken(color,multEnd);
-	GuiElements.create.gradient(name+catId,color1,color2);
+
+/**
+ * Creates a gradient in the SVG going from one darkness to another
+ * @param {string} name - Used to identify the type of gradient ("gradient_" or "gradient_dark_")
+ * @param {string} catId - Used to get the specific gradient
+ * @param {string} color - color in hex
+ * @param {number} multStart - number from 0 to 1 to determine the darkness of the start color
+ * @param {number} multEnd - number from 0 to 1 for end color darkness
+ */
+Colors.createGradientFromColorAndMults = function(name, catId, color, multStart, multEnd) {
+	const darken = Colors.darkenColor;
+	const color1 = darken(color, multStart);
+	const color2 = darken(color, multEnd);
+	GuiElements.create.gradient(name + catId, color1, color2);
 };
-Colors.darkenColor=function(color,amt){
+
+/**
+ * Multiplies the rgb values by amt to make them darker
+ * @param {string} color - color in hex
+ * @param {number} amt - number from 0 to 1
+ * @return {string} - color in hex
+ */
+Colors.darkenColor = function(color, amt) {
 	// Source:
 	// stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-	var col = parseInt(color.slice(1),16);
-    var result = (((col & 0x0000FF) * amt) | ((((col>> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
-	while(result.length<6){
-		result="0"+result;
+	const col = parseInt(color.slice(1), 16);
+	let result = (((col & 0x0000FF) * amt) | ((((col >> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
+	while (result.length < 6) {
+		result = "0" + result;
 	}
-	return "#"+result;
+	return "#" + result;
 };
-Colors.getColor=function(category){
+
+/**
+ * Gets the color for a category
+ * @param {string} category
+ * @return {string} - color in hex
+ */
+Colors.getColor = function(category) {
 	return Colors.categoryColors[category];
 };
-Colors.getGradient=function(category){
-	return "url(#gradient_"+category+")";
+
+/**
+ * Gets the gradient specified
+ * @param {string} category - Should start with "gradient_" or "gradient_dark_"
+ * @return {string} - Url to gradient
+ */
+Colors.getGradient = function(category) {
+	return "url(#gradient_" + category + ")";
 };
 function VectorPaths(){
 	var VP=VectorPaths;
@@ -2733,9 +3029,17 @@ function ImageLists(){
 	IL.hBIcon.height=334;
 }
 
-//Static.  Makes block shapes for the SVG.
+/*
+ * Static class holds all constants and functions required for Block rendering.
+ * Note that some of the constants are repeated for each type of Block, so be sure to edit all of them if you're
+ * editing one.
+ */
 
-function BlockGraphics(){
+/**
+ * Initializes the static class by setting all constants
+ */
+function BlockGraphics() {
+	// Set constants for blocks
 	BlockGraphics.SetBlock();
 	BlockGraphics.SetCommand();
 	BlockGraphics.SetReporter();
@@ -2743,192 +3047,255 @@ function BlockGraphics(){
 	BlockGraphics.SetString();
 	BlockGraphics.SetHat();
 	BlockGraphics.SetLoop();
+
+	// Set constants for block parts
 	BlockGraphics.SetLabelText();
 	BlockGraphics.SetValueText();
+
+	// Set constants for Slots
 	BlockGraphics.SetDropSlot();
 	BlockGraphics.SetHighlight();
 	BlockGraphics.SetHitBox();
 	BlockGraphics.SetGlow();
+
+	// Pre-compute some strings useful for rendering blocks
 	BlockGraphics.CalcCommand();
 	BlockGraphics.CalcPaths();
 }
-BlockGraphics.SetBlock=function(){
-	BlockGraphics.block=function(){};
-	BlockGraphics.block.pMargin=7; //Margin between parts
-};
-BlockGraphics.SetCommand=function(){
-	BlockGraphics.command=function(){};
-	BlockGraphics.command.height=34; //27
-	BlockGraphics.command.width=40;
-	BlockGraphics.command.vMargin=5;
-	BlockGraphics.command.hMargin=7;
-	//BlockGraphics.command.pMargin=5; //Margin between parts
-	BlockGraphics.command.bumpOffset=7;
-	BlockGraphics.command.bumpDepth=4;
-	BlockGraphics.command.bumpTopWidth=15;
-	BlockGraphics.command.bumpBottomWidth=7;
-	BlockGraphics.command.cornerRadius=3;
-	BlockGraphics.command.snap=function(){};
-	BlockGraphics.command.snap.left=20;
-	BlockGraphics.command.snap.right=20;
-	BlockGraphics.command.snap.top=20;
-	BlockGraphics.command.snap.bottom=20;
-	BlockGraphics.command.shiftX=20;
-	BlockGraphics.command.shiftY=20;
-}
-BlockGraphics.SetReporter=function(){
-	BlockGraphics.reporter=function(){};
-	BlockGraphics.reporter.height=30;//22
-	BlockGraphics.reporter.width=30;//22
-	BlockGraphics.reporter.vMargin=6;
-	BlockGraphics.reporter.hMargin=10;//5
-	//BlockGraphics.reporter.pMargin=5; //Margin between parts
-	BlockGraphics.reporter.slotHeight=22;//18
-	BlockGraphics.reporter.slotWidth=22;//18
-	BlockGraphics.reporter.slotHMargin=10;//5 //Margin at side of slot
-	//BlockGraphics.reporter.slotStrokeC="none";
-	//BlockGraphics.reporter.slotStrokeW=1;
-	BlockGraphics.reporter.strokeW=1;
-	BlockGraphics.reporter.slotFill="#fff";
-	BlockGraphics.reporter.slotSelectedFill="#000";
-}
-BlockGraphics.SetPredicate=function(){
-	BlockGraphics.predicate=function(){};
-	BlockGraphics.predicate.height=30;//16
-	BlockGraphics.predicate.width=27;
-	BlockGraphics.predicate.vMargin=6;
-	BlockGraphics.predicate.hMargin=10;
-	//BlockGraphics.predicate.pMargin=5; //Margin between parts
-	BlockGraphics.predicate.hexEndL=10;
-	BlockGraphics.predicate.slotHeight=18;
-	BlockGraphics.predicate.slotWidth=25;
-	BlockGraphics.predicate.slotHMargin=5;
-	BlockGraphics.predicate.slotHexEndL=7;
-}
-BlockGraphics.SetString=function(){
-	BlockGraphics.string=function(){};
-	BlockGraphics.string.slotHeight=22;//14
-	BlockGraphics.string.slotWidth=22;//5
-	BlockGraphics.string.slotHMargin=4;//2
-	//BlockGraphics.string.slotHMargin=5;
-}
-BlockGraphics.SetHat=function(){
-	BlockGraphics.hat=function(){};
-	BlockGraphics.hat.hRadius=60;
-	BlockGraphics.hat.vRadius=40;
-	BlockGraphics.hat.topW=80;
-	BlockGraphics.hat.width=90;
-	BlockGraphics.hat.hatHEstimate=10;
-	//BlockGraphics.hat.height=20;
-}
-BlockGraphics.SetLoop=function(){
-	BlockGraphics.loop=function(){};
-	//BlockGraphics.loop.height=40;
-	BlockGraphics.loop.width=40;
-	BlockGraphics.loop.bottomH=7;
-	BlockGraphics.loop.side=7;
-}
-BlockGraphics.SetLabelText=function(){
-	BlockGraphics.labelText=function(){};
-	BlockGraphics.labelText.font="Arial";
-	BlockGraphics.labelText.fontSize=12;
-	BlockGraphics.labelText.fontWeight="bold";
-	BlockGraphics.labelText.fill="#ffffff";
-	BlockGraphics.labelText.charHeight=10;
-	/*BlockGraphics.labelText.charWidth=3;*/
-}
-BlockGraphics.SetValueText=function(){
-	BlockGraphics.valueText=function(){};
-	BlockGraphics.valueText.font="Arial";
-	BlockGraphics.valueText.fontSize=12;
-	BlockGraphics.valueText.fontWeight="normal";
-	BlockGraphics.valueText.fill="#000000";
-	BlockGraphics.valueText.charHeight=10;
-	BlockGraphics.valueText.selectedFill="#fff";
-	BlockGraphics.valueText.grayedFill="#aaa";
-	/*BlockGraphics.valueText.charWidth=3;*/
-}
-BlockGraphics.SetDropSlot=function(){
-	BlockGraphics.dropSlot=function(){};
-	BlockGraphics.dropSlot.slotHeight=22;
-	BlockGraphics.dropSlot.slotWidth=25;
-	BlockGraphics.dropSlot.slotHMargin=5;
-	BlockGraphics.dropSlot.triH=6;
-	BlockGraphics.dropSlot.triW=8;
-	//BlockGraphics.dropSlot.menuWidth=100;
-	BlockGraphics.dropSlot.bg="#000";
-	BlockGraphics.dropSlot.bgOpacity=0.25;
-	BlockGraphics.dropSlot.selectedBg="#000";
-	BlockGraphics.dropSlot.selectedBgOpacity=1;
-	BlockGraphics.dropSlot.triColor="#000";
-	BlockGraphics.dropSlot.textFill="#fff";
-	BlockGraphics.dropSlot.selectedTriColor="#fff";
-}
-BlockGraphics.SetHighlight=function(){
-	BlockGraphics.highlight=function(){};
-	BlockGraphics.highlight.margin=5;
-	BlockGraphics.highlight.hexEndL=15;
-	BlockGraphics.highlight.slotHexEndL=10;
-	BlockGraphics.highlight.strokeC="#fff";
-	BlockGraphics.highlight.strokeDarkC="#000";
-	BlockGraphics.highlight.strokeW=3;
-	BlockGraphics.highlight.commandL=10;
-}
-BlockGraphics.SetHitBox=function(){
-	BlockGraphics.hitBox=function(){};
-	BlockGraphics.hitBox.hMargin=BlockGraphics.block.pMargin/2;
-	BlockGraphics.hitBox.vMargin=3;
-};
-BlockGraphics.SetGlow=function(){
-	BlockGraphics.glow=function(){};
-	BlockGraphics.glow.color="#fff";
-	BlockGraphics.glow.strokeW=2;
+
+/* Constants for all Blocks */
+BlockGraphics.SetBlock = function() {
+	BlockGraphics.block = {};
+	BlockGraphics.block.pMargin = 7; // Margin between parts
 };
 
-BlockGraphics.CalcCommand=function(){
-	var com=BlockGraphics.command;
-	com.extraHeight=2*com.cornerRadius;
-	com.extraWidth=2*com.cornerRadius+com.bumpTopWidth+com.bumpOffset;
-	com.bumpSlantWidth=(com.bumpTopWidth-com.bumpBottomWidth)/2;
-}
-BlockGraphics.CalcPaths=function(){
-	var com=BlockGraphics.command;
-	var path1="";
-	//path1+="m "+com.x+","+com.y;
-	path1+=" "+com.bumpOffset+",0";
-	path1+=" "+com.bumpSlantWidth+","+com.bumpDepth;
-	path1+=" "+com.bumpBottomWidth+",0";
-	path1+=" "+com.bumpSlantWidth+","+(0-com.bumpDepth);
-	path1+=" ";
-	var path2=",0";
-	path2+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+com.cornerRadius+" "+com.cornerRadius;
-	path2+=" l 0,";
-	var path3="";
-	path3+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+com.cornerRadius;
-	path3+=" l ";
-	var path4=",0";
-	path4+=" "+(0-com.bumpSlantWidth)+","+com.bumpDepth;
-	path4+=" "+(0-com.bumpBottomWidth)+",0";
-	path4+=" "+(0-com.bumpSlantWidth)+","+(0-com.bumpDepth);
-	path4+=" "+(0-com.bumpOffset)+",0";
-	path4+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
-	path4+=" ";
-	var path4NoBump=",0";
-	path4NoBump+=" "+(0-com.bumpSlantWidth-com.bumpBottomWidth-com.bumpSlantWidth-com.bumpOffset)+",0";
-	path4NoBump+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
-	path4NoBump+=" ";
-	var path5="";
-	path5+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+com.cornerRadius+" "+(0-com.cornerRadius);
-	path5+=" z";
-	com.path1=path1;
-	com.path2=path2;
-	com.path3=path3;
-	com.path4=path4;
-	com.path4NoBump=path4NoBump;
-	com.path5=path5;
+/* Used by CommandBlocks, LoopBlocks, and HatBlocks */
+BlockGraphics.SetCommand = function() {
+	BlockGraphics.command = {};
+
+	// Minimum dimensions
+	BlockGraphics.command.height = 34;
+	BlockGraphics.command.width = 40;
+
+	BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
+	BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
+
+	BlockGraphics.command.bumpOffset = 7;
+	BlockGraphics.command.bumpDepth = 4;
+	BlockGraphics.command.bumpTopWidth = 15;
+	BlockGraphics.command.bumpBottomWidth = 7;
+	BlockGraphics.command.cornerRadius = 3;
+
+	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
+	BlockGraphics.command.snap = {};
+	BlockGraphics.command.snap.left = 20;
+	BlockGraphics.command.snap.right = 20;
+	BlockGraphics.command.snap.top = 20;
+	BlockGraphics.command.snap.bottom = 20;
+
+	// How much Blocks are shifted down and to the right when they are bumped out of position by another Block
+	BlockGraphics.command.shiftX = 20;
+	BlockGraphics.command.shiftY = 20;
 };
-BlockGraphics.getType=function(type){
-	switch(type){
+
+/* Used by RoundSlots and ReporterBlocks */
+BlockGraphics.SetReporter = function() {
+	BlockGraphics.reporter = {};
+
+	// Minimum dimensions
+	BlockGraphics.reporter.height = 30;
+	BlockGraphics.reporter.width = 30;
+
+	BlockGraphics.reporter.vMargin = 6;
+	BlockGraphics.reporter.hMargin = 10;
+
+	// Slot constants
+	BlockGraphics.reporter.slotHeight = 22;
+	BlockGraphics.reporter.slotWidth = 22;
+	BlockGraphics.reporter.slotHMargin = 10; // Space to sides of content
+
+	BlockGraphics.reporter.strokeW = 1;
+	BlockGraphics.reporter.slotFill = "#fff";
+	BlockGraphics.reporter.slotSelectedFill = "#000";
+};
+
+/* Used by HexSlots and HexBlocks */
+BlockGraphics.SetPredicate = function() {
+	BlockGraphics.predicate = {};
+
+	// Minimum dimensions
+	BlockGraphics.predicate.height = 30;
+	BlockGraphics.predicate.width = 27;
+
+	BlockGraphics.predicate.vMargin = 6;
+	BlockGraphics.predicate.hMargin = 10;
+
+	// Width of pointy part of hexagons
+	BlockGraphics.predicate.hexEndL = 10;
+
+	// Slot constants
+	BlockGraphics.predicate.slotHeight = 18;
+	BlockGraphics.predicate.slotWidth = 25;
+	BlockGraphics.predicate.slotHMargin = 5;
+	BlockGraphics.predicate.slotHexEndL = 7;
+};
+
+/* Used be RectSlots */
+BlockGraphics.SetString = function() {
+	BlockGraphics.string = {};
+	BlockGraphics.string.slotHeight = 22;
+	BlockGraphics.string.slotWidth = 22;
+	BlockGraphics.string.slotHMargin = 4;
+};
+
+/* Additional constants for HatBlocks */
+BlockGraphics.SetHat = function() {
+	BlockGraphics.hat = {};
+
+	// Radius of ellipse at top of Block
+	BlockGraphics.hat.hRadius = 60;
+	BlockGraphics.hat.vRadius = 40;
+
+	// Width of ellipse
+	BlockGraphics.hat.topW = 80;
+
+	// Minimum width is larger than CommandBlocks to leave room for ellipse
+	BlockGraphics.hat.width = 90;
+
+	// Additional height added by ellipse.  Used for spacing Blocks in the Palette
+	BlockGraphics.hat.hatHEstimate = 10;
+};
+
+/* Additional constants for LoopBlocks */
+BlockGraphics.SetLoop = function() {
+	BlockGraphics.loop = {};
+
+	// Minimum width of loop blocks
+	BlockGraphics.loop.width = 40;
+	
+	BlockGraphics.loop.bottomH = 7;
+	BlockGraphics.loop.side = 7;
+};
+
+/* LabelText constants */
+BlockGraphics.SetLabelText = function() {
+	BlockGraphics.labelText = {};
+	BlockGraphics.labelText.font = "Arial";
+	BlockGraphics.labelText.fontSize = 12;
+	BlockGraphics.labelText.fontWeight = "bold";
+	BlockGraphics.labelText.fill = "#ffffff";
+	BlockGraphics.labelText.charHeight = 10;
+};
+
+/* Constants for text in Slots */
+BlockGraphics.SetValueText = function() {
+	BlockGraphics.valueText = {};
+	BlockGraphics.valueText.font = "Arial";
+	BlockGraphics.valueText.fontSize = 12;
+	BlockGraphics.valueText.fontWeight = "normal";
+	BlockGraphics.valueText.fill = "#000000";
+	BlockGraphics.valueText.charHeight = 10;
+	BlockGraphics.valueText.selectedFill = "#fff";
+	BlockGraphics.valueText.grayedFill = "#aaa";
+};
+
+/* Constants for DropSlots */
+BlockGraphics.SetDropSlot = function() {
+	BlockGraphics.dropSlot = {};
+	BlockGraphics.dropSlot.slotHeight = 22;
+	BlockGraphics.dropSlot.slotWidth = 25;
+	BlockGraphics.dropSlot.slotHMargin = 5;
+	BlockGraphics.dropSlot.triH = 6;
+	BlockGraphics.dropSlot.triW = 8;
+	BlockGraphics.dropSlot.bg = "#000";
+	BlockGraphics.dropSlot.bgOpacity = 0.25;
+	BlockGraphics.dropSlot.selectedBg = "#000";
+	BlockGraphics.dropSlot.selectedBgOpacity = 1;
+	BlockGraphics.dropSlot.triColor = "#000";
+	BlockGraphics.dropSlot.textFill = "#fff";
+	BlockGraphics.dropSlot.selectedTriColor = "#fff";
+};
+
+/* Constants for indicator that shows where Blocks will be snapped */
+BlockGraphics.SetHighlight = function() {
+	BlockGraphics.highlight = {};
+	BlockGraphics.highlight.margin = 5;
+	BlockGraphics.highlight.hexEndL = 15;
+	BlockGraphics.highlight.slotHexEndL = 10;
+	BlockGraphics.highlight.strokeC = "#fff";
+	BlockGraphics.highlight.strokeDarkC = "#000";
+	BlockGraphics.highlight.strokeW = 3;
+	BlockGraphics.highlight.commandL = 10;
+};
+
+/* Constants for Slot hit box */
+BlockGraphics.SetHitBox = function() {
+	BlockGraphics.hitBox = {};
+	BlockGraphics.hitBox.hMargin = BlockGraphics.block.pMargin / 2;
+	BlockGraphics.hitBox.vMargin = 3;
+};
+
+/* Constants for outline on running Blocks */
+BlockGraphics.SetGlow = function() {
+	BlockGraphics.glow = function() {};
+	BlockGraphics.glow.color = "#fff";
+	BlockGraphics.glow.strokeW = 2;
+};
+
+/* Computes intermediate values from constants */
+BlockGraphics.CalcCommand = function() {
+	const com = BlockGraphics.command;
+	com.extraHeight = 2 * com.cornerRadius;
+	com.extraWidth = 2 * com.cornerRadius + com.bumpTopWidth + com.bumpOffset;
+	com.bumpSlantWidth = (com.bumpTopWidth - com.bumpBottomWidth) / 2;
+};
+
+/* Generates pre-made parts of paths. Final paths are generated by inserting numbers between pre-made strings */
+BlockGraphics.CalcPaths = function() {
+	const com = BlockGraphics.command;
+	let path1 = "";
+	//path1+="m "+com.x+","+com.y;
+	path1 += " " + com.bumpOffset + ",0";
+	path1 += " " + com.bumpSlantWidth + "," + com.bumpDepth;
+	path1 += " " + com.bumpBottomWidth + ",0";
+	path1 += " " + com.bumpSlantWidth + "," + (0 - com.bumpDepth);
+	path1 += " ";
+	let path2 = ",0";
+	path2 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + com.cornerRadius;
+	path2 += " l 0,";
+	let path3 = "";
+	path3 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + com.cornerRadius;
+	path3 += " l ";
+	let path4 = ",0";
+	path4 += " " + (0 - com.bumpSlantWidth) + "," + com.bumpDepth;
+	path4 += " " + (0 - com.bumpBottomWidth) + ",0";
+	path4 += " " + (0 - com.bumpSlantWidth) + "," + (0 - com.bumpDepth);
+	path4 += " " + (0 - com.bumpOffset) + ",0";
+	path4 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+	path4 += " ";
+	let path4NoBump = ",0";
+	path4NoBump += " " + (0 - com.bumpSlantWidth - com.bumpBottomWidth - com.bumpSlantWidth - com.bumpOffset) + ",0";
+	path4NoBump += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+	path4NoBump += " ";
+	let path5 = "";
+	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
+	path5 += " z";
+	com.path1 = path1;
+	com.path2 = path2;
+	com.path3 = path3;
+	com.path4 = path4;
+	com.path4NoBump = path4NoBump;
+	com.path5 = path5;
+};
+
+/* Types of blocks are referred to by numbers, as indicated by this function */
+
+/**
+ * @param {number} type
+ * @return {object}
+ */
+BlockGraphics.getType = function(type) {
+	switch (type) {
 		case 0:
 			return BlockGraphics.command;
 		case 1:
@@ -2944,360 +3311,539 @@ BlockGraphics.getType=function(type){
 		case 6:
 			return BlockGraphics.loop;
 	}
-}
+};
 
-BlockGraphics.buildPath=function(){}
-BlockGraphics.buildPath.command=function(x,y,width,height){
-	var path="";
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
+/* Group of functions that generate strings for SVG paths */
+BlockGraphics.buildPath = {};
 
-	path+=width-BlockGraphics.command.extraWidth;
-	path+=BlockGraphics.command.path2;
-	path+=height-BlockGraphics.command.extraHeight;
-	path+=BlockGraphics.command.path3;
-	path+=BlockGraphics.command.extraWidth-width;
-	path+=BlockGraphics.command.path4+"l 0,";
-	path+=BlockGraphics.command.extraHeight-height;
-	path+=BlockGraphics.command.path5;
+/**
+ * Creates the path of a CommandBlock
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.command = function(x, y, width, height) {
+	let path = "";
+	path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y;
+	path += BlockGraphics.command.path1;
+
+	path += width - BlockGraphics.command.extraWidth;
+	path += BlockGraphics.command.path2;
+	path += height - BlockGraphics.command.extraHeight;
+	path += BlockGraphics.command.path3;
+	path += BlockGraphics.command.extraWidth - width;
+	path += BlockGraphics.command.path4 + "l 0,";
+	path += BlockGraphics.command.extraHeight - height;
+	path += BlockGraphics.command.path5;
 	return path;
-}
-BlockGraphics.buildPath.highlightCommand=function(x,y){
-	var path="";
-	path+="m "+x+","+y;
-	path+="l "+BlockGraphics.command.cornerRadius+",0";
-	path+=BlockGraphics.command.path1;
-	path+=BlockGraphics.highlight.commandL+",0";
+};
+
+/**
+ * Creates the path of a highlight between two CommandBlocks
+ * @param {number} x
+ * @param {number} y
+ * @return {string}
+ */
+BlockGraphics.buildPath.highlightCommand = function(x, y) {
+	let path = "";
+	path += "m " + x + "," + y;
+	path += "l " + BlockGraphics.command.cornerRadius + ",0";
+	path += BlockGraphics.command.path1;
+	path += BlockGraphics.highlight.commandL + ",0";
 	return path;
-}
-BlockGraphics.buildPath.reporter=function(x,y,width,height){
-	var radius=height/2;
-	var flatWidth=width-height;
-	var path="";
-	path+="m "+(x+radius)+","+(y+height);
-	path+=" a "+radius+" "+radius+" 0 0 1 0 "+(0-height);
-	path+=" l "+flatWidth+",0";
-	path+=" a "+radius+" "+radius+" 0 0 1 0 "+height;
-	path+=" z";
+};
+
+/**
+ * Creates round path of a reporter Block/Slot
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.reporter = function(x, y, width, height) {
+	const radius = height / 2;
+	const flatWidth = width - height;
+	let path = "";
+	path += "m " + (x + radius) + "," + (y + height);
+	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
+	path += " l " + flatWidth + ",0";
+	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.predicate=function(x,y,width,height,isSlot,isHighlight){
-	var hexEndL;
-	var halfHeight=height/2;
-	var bG;
-	if(isHighlight){
-		bG=BlockGraphics.highlight;
-	} else{
-		bG=BlockGraphics.predicate;
+};
+
+/**
+ * Creates the hexagonal path of a Slot/Block/highlight
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} isSlot
+ * @param {boolean} isHighlight
+ * @return {string}
+ */
+BlockGraphics.buildPath.predicate = function(x, y, width, height, isSlot, isHighlight) {
+	let hexEndL;
+	let halfHeight = height / 2;
+	let bG;
+	if (isHighlight) {
+		bG = BlockGraphics.highlight;
+	} else {
+		bG = BlockGraphics.predicate;
 	}
-	if(isSlot){
-		hexEndL=bG.slotHexEndL;
-	} else{
-		hexEndL=bG.hexEndL;
+	if (isSlot) {
+		hexEndL = bG.slotHexEndL;
+	} else {
+		hexEndL = bG.hexEndL;
 	}
-	var flatWidth=width-2*hexEndL;
-	var path="";
-	path+="m "+x+","+(y+halfHeight);
-	path+=" "+hexEndL+","+(0-halfHeight);
-	path+=" "+flatWidth+",0";
-	path+=" "+hexEndL+","+halfHeight;
-	path+=" "+(0-hexEndL)+","+halfHeight;
-	path+=" "+(0-flatWidth)+",0";
-	path+=" "+(0-hexEndL)+","+(0-halfHeight);
-	path+=" z";
+	let flatWidth = width - 2 * hexEndL;
+	let path = "";
+	path += "m " + x + "," + (y + halfHeight);
+	path += " " + hexEndL + "," + (0 - halfHeight);
+	path += " " + flatWidth + ",0";
+	path += " " + hexEndL + "," + halfHeight;
+	path += " " + (0 - hexEndL) + "," + halfHeight;
+	path += " " + (0 - flatWidth) + ",0";
+	path += " " + (0 - hexEndL) + "," + (0 - halfHeight);
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.string=function(x,y,width,height){
-	var path="";
-	path+="m "+x+","+y;
-	path+=" "+width+",0";
-	path+=" 0,"+height;
-	path+=" "+(0-width)+",0";
-	path+=" z";
+};
+
+/* Creates the rectangular path of a RectSlot */
+BlockGraphics.buildPath.string = function(x, y, width, height) {
+	let path = "";
+	path += "m " + x + "," + y;
+	path += " " + width + ",0";
+	path += " 0," + height;
+	path += " " + (0 - width) + ",0";
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.hat=function(x,y,width,height){
-	var path="";
-	var hat=BlockGraphics.hat;
-	var flatWidth=width-hat.topW-BlockGraphics.command.cornerRadius;
-	var flatHeight=height-BlockGraphics.command.cornerRadius*2;
-	path+="m "+x+","+y;
-	path+=" a "+hat.hRadius+" "+hat.vRadius+" 0 0 1 "+hat.topW+" 0";
-	path+=" l "+flatWidth;	
-	path+=BlockGraphics.command.path2;
-	path+=flatHeight;
-	path+=BlockGraphics.command.path3;
-	path+=BlockGraphics.command.extraWidth-width;
-	path+=BlockGraphics.command.path4;
-	path+="z";
+};
+
+/* Creates the path of a HatBlock */
+BlockGraphics.buildPath.hat = function(x, y, width, height) {
+	let path = "";
+	let hat = BlockGraphics.hat;
+	let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
+	let flatHeight = height - BlockGraphics.command.cornerRadius * 2;
+	path += "m " + x + "," + y;
+	path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
+	path += " l " + flatWidth;
+	path += BlockGraphics.command.path2;
+	path += flatHeight;
+	path += BlockGraphics.command.path3;
+	path += BlockGraphics.command.extraWidth - width;
+	path += BlockGraphics.command.path4;
+	path += "z";
 	return path;
-}
-BlockGraphics.buildPath.loop=function(x,y,width,height,innerHeight,bottomOpen){
-	if(bottomOpen==null){
-		bottomOpen=true;
+};
+
+/**
+ * Creates the path of a LoopBlock
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} innerHeight - The height of the space in the middle of the loop
+ * @param {boolean} [bottomOpen=true] - Whether a bump should be placed on the bottom of the path
+ * @return {string}
+ */
+BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottomOpen) {
+	if (bottomOpen == null) {
+		bottomOpen = true;
 	}
-	var path="";
-	var loop=BlockGraphics.loop;
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
-	path+=width-BlockGraphics.command.extraWidth;
-	path+=BlockGraphics.command.path2;
-	path+=height-innerHeight-2*BlockGraphics.command.cornerRadius-loop.bottomH;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width+loop.side)+",0";
-	path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+BlockGraphics.command.bumpDepth;
-	path+=" "+(0-BlockGraphics.command.bumpBottomWidth)+",0";
-	path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+(0-BlockGraphics.command.bumpDepth);
-	path+=" "+(0-BlockGraphics.command.bumpOffset)+",0";
-	path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+(0-BlockGraphics.command.cornerRadius)+" "+BlockGraphics.command.cornerRadius;
-	path+=" l 0,"+(innerHeight-2*BlockGraphics.command.cornerRadius);
-	path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius;
-	path+=" l "+(width-2*BlockGraphics.command.cornerRadius-loop.side);
-	path+=BlockGraphics.command.path2;
-	path+=loop.bottomH-2*BlockGraphics.command.cornerRadius;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width);
-	if(bottomOpen){
-		path+=BlockGraphics.command.path4+"l 0,";
+	let path = "";
+	const loop = BlockGraphics.loop;
+	const comm = BlockGraphics.command;
+	path += "m " + (x + comm.cornerRadius) + "," + y;
+	path += comm.path1;
+	path += width - comm.extraWidth;
+	path += comm.path2;
+	path += height - innerHeight - 2 * comm.cornerRadius - loop.bottomH;
+	path += comm.path3;
+	path += (comm.extraWidth - width + loop.side) + ",0";
+	path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+	path += " " + (0 - comm.bumpBottomWidth) + ",0";
+	path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+	path += " " + (0 - comm.bumpOffset) + ",0";
+	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+	path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
+	path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+	path += comm.path2;
+	path += loop.bottomH - 2 * comm.cornerRadius;
+	path += comm.path3;
+	path += (comm.extraWidth - width);
+	if (bottomOpen) {
+		path += comm.path4 + "l 0,";
+	} else {
+		path += comm.path4NoBump + "l 0,";
 	}
-	else{
-		path+=BlockGraphics.command.path4NoBump+"l 0,";
-	}
-	path+=(0-height+2*BlockGraphics.command.cornerRadius);
-	path+=BlockGraphics.command.path5;
+	path += (0 - height + 2 * comm.cornerRadius);
+	path += comm.path5;
 	return path;
-}
-BlockGraphics.buildPath.doubleLoop=function(x,y,width,height,innerHeight1,innerHeight2,midHeight){
-	var path="";
-	var loop=BlockGraphics.loop;
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
-	path+=width-BlockGraphics.command.extraWidth;
-	var innerHeight=innerHeight1;
-	var currentH=height-midHeight-innerHeight1-innerHeight2-2*BlockGraphics.command.cornerRadius-loop.bottomH;
-	for(var i=0;i<2;i++){
-		path+=BlockGraphics.command.path2;
-		path+=currentH;
-		path+=BlockGraphics.command.path3;
-		path+=(BlockGraphics.command.extraWidth-width+loop.side)+",0";
-		path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+BlockGraphics.command.bumpDepth;
-		path+=" "+(0-BlockGraphics.command.bumpBottomWidth)+",0";
-		path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+(0-BlockGraphics.command.bumpDepth);
-		path+=" "+(0-BlockGraphics.command.bumpOffset)+",0";
-		path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+(0-BlockGraphics.command.cornerRadius)+" "+BlockGraphics.command.cornerRadius;
-		path+=" l 0,"+(innerHeight-2*BlockGraphics.command.cornerRadius);
-		path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius;
-		path+=" l "+(width-2*BlockGraphics.command.cornerRadius-loop.side);
-		innerHeight=innerHeight2;
-		var currentH=midHeight-2*BlockGraphics.command.cornerRadius;
+};
+
+/**
+ * Creates the path of a DoubleLoopBlock (used for if/else Block)
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} innerHeight1 - The height of the first space
+ * @param {number} innerHeight2 - The height of the second space
+ * @param {number} midHeight - The height of the part of the Block between the spaces
+ * @return {string}
+ */
+BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1, innerHeight2, midHeight) {
+	let path = "";
+	const loop = BlockGraphics.loop;
+	const comm = BlockGraphics.command;
+	path += "m " + (x + comm.cornerRadius) + "," + y;
+	path += comm.path1;
+	path += width - comm.extraWidth;
+	let innerHeight = innerHeight1;
+	let currentH = height - midHeight - innerHeight1 - innerHeight2 - 2 * comm.cornerRadius - loop.bottomH;
+	for (let i = 0; i < 2; i++) {
+		path += comm.path2;
+		path += currentH;
+		path += comm.path3;
+		path += (comm.extraWidth - width + loop.side) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+		path += " " + (0 - comm.bumpBottomWidth) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+		path += " " + (0 - comm.bumpOffset) + ",0";
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
+		path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+		innerHeight = innerHeight2;
+		currentH = midHeight - 2 * comm.cornerRadius;
 	}
-	path+=BlockGraphics.command.path2;
-	path+=loop.bottomH-2*BlockGraphics.command.cornerRadius;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width);
-	path+=BlockGraphics.command.path4+"l 0,";
-	path+=(0-height+2*BlockGraphics.command.cornerRadius);
-	path+=BlockGraphics.command.path5;
+	path += comm.path2;
+	path += loop.bottomH - 2 * comm.cornerRadius;
+	path += comm.path3;
+	path += (comm.extraWidth - width);
+	path += comm.path4 + "l 0,";
+	path += (0 - height + 2 * comm.cornerRadius);
+	path += comm.path5;
 	return path;
-}
-BlockGraphics.create=function(){}
-BlockGraphics.create.block=function(category,group,returnsValue,active){
-	if(!active) category = "inactive";
-	var path=GuiElements.create.path(group);
-	var fill=Colors.getGradient(category);
-	path.setAttributeNS(null,"fill",fill);
-	BlockGraphics.update.stroke(path,category,returnsValue,active);
+};
+
+/* Group of functions that create the SVG elements for Blocks/Slots */
+BlockGraphics.create = {};
+
+/**
+ * Creates the path element for the Block
+ * @param {string} category - indicates which category's gradient to use
+ * @param {Element} group - SVG group, Path will automatically be added to this group
+ * @param {boolean} returnsValue - Whether the block returns a value and should be given an outline
+ * @param {boolean} active - Whether the block is currently runnable or should be grayed out
+ * @return {Element} - SVG path element for the background of the Block
+ */
+BlockGraphics.create.block = function(category, group, returnsValue, active) {
+	if (!active) category = "inactive";
+	const path = GuiElements.create.path(group);
+	const fill = Colors.getGradient(category);
+	path.setAttributeNS(null, "fill", fill);
+	BlockGraphics.update.stroke(path, category, returnsValue, active);
 	return path;
-}
-BlockGraphics.create.slot=function(group,type,category,active){
-	if(!active) category = "inactive";
-	var bG=BlockGraphics.reporter;
-	var path=GuiElements.create.path(group);
-	if(type==2){
-		path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
-	}
-	else{
-		path.setAttributeNS(null,"stroke",bG.slotStrokeC);
-		path.setAttributeNS(null,"stroke-width",bG.slotStrokeW);
-		path.setAttributeNS(null,"fill",bG.slotFill);
+};
+
+/**
+ * Creates the SVG path element for a Slot
+ * @param {Element} group - SVG group, Path will automatically be added to this group
+ * @param {number} type - number representing the type/shape of slot
+ * @param {string} category - indicates which category's gradient to use
+ * @param {boolean} active - Whether the Slot is currently active or should be grayed out
+ */
+BlockGraphics.create.slot = function(group, type, category, active) {
+	if (!active) category = "inactive";
+	const bG = BlockGraphics.reporter;
+	const path = GuiElements.create.path(group);
+	if (type === 2) {
+		path.setAttributeNS(null, "fill", "url(#gradient_dark_" + category + ")");
+	} else {
+		path.setAttributeNS(null, "fill", bG.slotFill);
 	}
 	return path;
 };
-BlockGraphics.create.slotHitBox=function(group){
-	var rectE=GuiElements.create.rect(group);
-	rectE.setAttributeNS(null,"fill","#000");
-	GuiElements.update.opacity(rectE,0);
+
+/**
+ * Creates the hit box for a slot.  Does not worry about position or size
+ * @param {Element} group
+ */
+BlockGraphics.create.slotHitBox = function(group) {
+	const rectE = GuiElements.create.rect(group);
+	rectE.setAttributeNS(null, "fill", "#000");
+	GuiElements.update.opacity(rectE, 0);
 	return rectE;
-}
-BlockGraphics.create.labelText=function(text,group){
-	var bG=BlockGraphics.labelText;
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"font-family",bG.font);
-	textElement.setAttributeNS(null,"font-size",bG.fontSize);
-	textElement.setAttributeNS(null,"font-weight",bG.fontWeight);
-	textElement.setAttributeNS(null,"fill",bG.fill);
-	textElement.setAttributeNS(null,"class","noselect");
-	var textNode = document.createTextNode(text);
+};
+
+/**
+ * Creates text for LabelText
+ * @param {string} text
+ * @param {Element} group
+ */
+BlockGraphics.create.labelText = function(text, group) {
+	const bG = BlockGraphics.labelText;
+	const textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "font-family", bG.font);
+	textElement.setAttributeNS(null, "font-size", bG.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "fill", bG.fill);
+	textElement.setAttributeNS(null, "class", "noselect");
+	const textNode = document.createTextNode(text);
 	textElement.appendChild(textNode);
 	group.appendChild(textElement);
 	return textElement;
-}
-BlockGraphics.create.valueText=function(text,group){
-	var bG=BlockGraphics.valueText;
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"font-family",bG.font);
-	textElement.setAttributeNS(null,"font-size",bG.fontSize);
-	textElement.setAttributeNS(null,"font-weight",bG.fontWeight);
-	textElement.setAttributeNS(null,"fill",bG.fill);
-	textElement.setAttributeNS(null,"class","noselect");
-	GuiElements.update.text(textElement,text);
+};
+
+/**
+ * Creates text for inside Slot
+ * @param {string} text
+ * @param {Element} group
+ */
+BlockGraphics.create.valueText = function(text, group) {
+	const bG = BlockGraphics.valueText;
+	const textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "font-family", bG.font);
+	textElement.setAttributeNS(null, "font-size", bG.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "fill", bG.fill);
+	textElement.setAttributeNS(null, "class", "noselect");
+	GuiElements.update.text(textElement, text);
 	group.appendChild(textElement);
 	return textElement;
-}
+};
 
-BlockGraphics.update=function(){}
-BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight1,innerHeight2,midHeight,bottomOpen){
-	var pathD;
-	switch(type){
+/* Group of functions used for modifying existing SVG elements */
+BlockGraphics.update = {};
+
+/**
+ * Updates a path's shape, size and location.  Necessary parameters depend on type.
+ * @param {Element} path
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} [type]
+ * @param {boolean} [isSlot]
+ * @param {number} [innerHeight1]
+ * @param {number} [innerHeight2]
+ * @param {number} [midHeight]
+ * @param {boolean} [bottomOpen]
+ * @return {*}
+ */
+BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, innerHeight1, innerHeight2, midHeight, bottomOpen) {
+	let pathD;
+	switch (type) {
 		case 0:
-			pathD=BlockGraphics.buildPath.command(x,y,width,height);
+			pathD = BlockGraphics.buildPath.command(x, y, width, height);
 			break;
 		case 1:
-			pathD=BlockGraphics.buildPath.reporter(x,y,width,height);
+			pathD = BlockGraphics.buildPath.reporter(x, y, width, height);
 			break;
 		case 2:
-			pathD=BlockGraphics.buildPath.predicate(x,y,width,height,isSlot,false);
+			pathD = BlockGraphics.buildPath.predicate(x, y, width, height, isSlot, false);
 			break;
 		case 3:
-			pathD=BlockGraphics.buildPath.string(x,y,width,height);
+			pathD = BlockGraphics.buildPath.string(x, y, width, height);
 			break;
 		case 4:
-			pathD=BlockGraphics.buildPath.hat(x,y,width,height);
+			pathD = BlockGraphics.buildPath.hat(x, y, width, height);
 			break;
 		case 5:
-			pathD=BlockGraphics.buildPath.loop(x,y,width,height,innerHeight1,bottomOpen);
+			pathD = BlockGraphics.buildPath.loop(x, y, width, height, innerHeight1, bottomOpen);
 			break;
 		case 6:
-			pathD=BlockGraphics.buildPath.doubleLoop(x,y,width,height,innerHeight1,innerHeight2,midHeight);
+			pathD = BlockGraphics.buildPath.doubleLoop(x, y, width, height, innerHeight1, innerHeight2, midHeight);
 			break;
 	}
-	path.setAttributeNS(null,"d",pathD);
+	path.setAttributeNS(null, "d", pathD);
 	return path;
 };
-BlockGraphics.update.text=function(text,x,y){
-	text.setAttributeNS(null,"x",x);
-	text.setAttributeNS(null,"y",y);
-}
-BlockGraphics.update.glow=function(path){
-	var glow=BlockGraphics.glow;
-	path.setAttributeNS(null,"stroke",glow.color);
-	path.setAttributeNS(null,"stroke-width",glow.strokeW);
+
+/**
+ * Moves text to location
+ * @param {Element} text
+ * @param {number} x
+ * @param {number} y
+ */
+BlockGraphics.update.text = function(text, x, y) {
+	text.setAttributeNS(null, "x", x);
+	text.setAttributeNS(null, "y", y);
 };
-BlockGraphics.update.stroke=function(path,category,returnsValue,active){
-	if(!active) category = "inactive";
-	if(returnsValue){
-		var outline=Colors.getColor(category);
-		path.setAttributeNS(null,"stroke",outline);
-		path.setAttributeNS(null,"stroke-width",BlockGraphics.reporter.strokeW);
+
+/**
+ * Makes a path start glowing (adds a white outline)
+ * @param {Element} path
+ */
+BlockGraphics.update.glow = function(path) {
+	const glow = BlockGraphics.glow;
+	path.setAttributeNS(null, "stroke", glow.color);
+	path.setAttributeNS(null, "stroke-width", glow.strokeW);
+};
+
+/**
+ * Updates the outline of a path
+ * @param {Element} path
+ * @param {string} category
+ * @param {boolean} returnsValue
+ * @param {boolean} active
+ */
+BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
+	if (!active) category = "inactive";
+	if (returnsValue) {
+		const outline = Colors.getColor(category);
+		path.setAttributeNS(null, "stroke", outline);
+		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
+	} else {
+		path.setAttributeNS(null, "stroke-width", 0);
 	}
-	else{
-		path.setAttributeNS(null,"stroke-width",0);
-	}
 };
-BlockGraphics.update.hexSlotGradient = function(path, category, active){
-	if(!active) category = "inactive";
-	path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
+
+/**
+ * Updates a HexSlot's fill
+ * @param {Element} path
+ * @param {string} category
+ * @param {boolean} active
+ */
+BlockGraphics.update.hexSlotGradient = function(path, category, active) {
+	if (!active) category = "inactive";
+	path.setAttributeNS(null, "fill", "url(#gradient_dark_" + category + ")");
 };
-BlockGraphics.update.blockActive = function(path,category,returnsValue,active,gowing){
-	if(!active) category = "inactive";
-	const fill=Colors.getGradient(category);
-	path.setAttributeNS(null,"fill",fill);
-	if(!gowing) {
+
+/**
+ * Change whether the Block appears active or inactive
+ * @param {string} path
+ * @param {string} category
+ * @param {boolean} returnsValue
+ * @param {boolean} active
+ * @param {boolean} glowing
+ */
+BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
+	if (!active) category = "inactive";
+	const fill = Colors.getGradient(category);
+	path.setAttributeNS(null, "fill", fill);
+	if (!glowing) {
 		BlockGraphics.update.stroke(path, category, returnsValue, active);
 	}
 };
-BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
-	var bG=BlockGraphics.highlight;
-	var pathD;
-	var hX=x-bG.margin;
-	var hY=y-bG.margin;
-	var hWidth=width+2*bG.margin;
-	var hHeight=height+2*bG.margin;
-	switch(type){
+
+/**
+ * Creates the string for the path of the highlight indicator
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} type
+ * @param {boolean} isSlot
+ * @return {string}
+ */
+BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) {
+	const bG = BlockGraphics.highlight;
+	let pathD;
+	const hX = x - bG.margin;
+	const hY = y - bG.margin;
+	const hWidth = width + 2 * bG.margin;
+	const hHeight = height + 2 * bG.margin;
+	switch (type) {
 		case 0:
-			pathD=BlockGraphics.buildPath.highlightCommand(x,y);
+			pathD = BlockGraphics.buildPath.highlightCommand(x, y);
 			break;
 		case 1:
-			pathD=BlockGraphics.buildPath.reporter(hX,hY,hWidth,hHeight);
+			pathD = BlockGraphics.buildPath.reporter(hX, hY, hWidth, hHeight);
 			break;
 		case 2:
-			pathD=BlockGraphics.buildPath.predicate(hX,hY,hWidth,hHeight,isSlot,true);
+			pathD = BlockGraphics.buildPath.predicate(hX, hY, hWidth, hHeight, isSlot, true);
 			break;
 		case 3:
-			pathD=BlockGraphics.buildPath.string(hX,hY,hWidth,hHeight);
+			pathD = BlockGraphics.buildPath.string(hX, hY, hWidth, hHeight);
 			break;
 	}
 	return pathD;
-}
-//Move?:
-BlockGraphics.bringToFront=function(obj,layer){
-	obj.remove();
-	layer.appendChild(obj);
-}
-
-
-/*BlockGraphics.create.command=function(x,y,width,height,category){
-	var pathD=BlockGraphics.buildPath.command(x,y,width,height);
-	var commandPath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	commandPath.setAttributeNS(null,"d",pathD);
-	commandPath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return commandPath;
-}
-BlockGraphics.create.reporter=function(x,y,width,height,category){
-	var pathD=BlockGraphics.buildPath.reporter(x,y,width,height);
-	var reporterPath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	reporterPath.setAttributeNS(null,"d",pathD);
-	reporterPath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return reporterPath;
-}
-BlockGraphics.create.predicate=function(x,y,width,height,category,isSlot){
-	var pathD=BlockGraphics.buildPath.predicate(x,y,width,height,isSlot);
-	var predicatePath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	predicatePath.setAttributeNS(null,"d",pathD);
-	predicatePath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return predicatePath;
-}*/
-
-
+};
 
 /**
- * Created by Tom on 6/18/2017.
+ * Moves an element to the top of a group by removing it an re-adding it
+ * @param {Element} obj
+ * @param {Element} layer
  */
-function Sound(id, isRecording, name){
+BlockGraphics.bringToFront = function(obj, layer) {
+	obj.remove();
+	layer.appendChild(obj);
+};
+/* Recordings and sound effects are cached by static properties in the Sound class.  An instance of the sound class
+ * represents a single sound or recording.  Sound playback is handled by static functions.  Note that sound recording
+ * is handled by the RecordingManager, not in the Sound class
+ */
+
+/* The frontend should never deal with file extensions.  All information about sounds/recordings should have the
+ * file extension removed before the frontend sees it
+ */
+
+/**
+ * Information about a sound
+ * @param {string} id - Used in communication between the frontend/backend
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @constructor
+ */
+function Sound(id, isRecording){
+	// Ids are used in save files while names are shown in the UI.
+	// If we decide to change display names for built-in sounds, we will keep ids the same.
 	this.id = id;
-	if(name == null){
-		name = Sound.nameFromId(id, isRecording);
-	}
-	this.name = name;
+	this.name = Sound.nameFromId(id, isRecording);
 	this.isRecording = isRecording;
 }
+
 Sound.setConstants = function(){
+	// Cached lists
 	Sound.soundList = [];
 	Sound.recordingList = [];
+
+	// List of data about currently playing sounds
 	Sound.playingSoundStatuses = [];
+
+	// Enum for types of sounds
 	Sound.type = {};
-	Sound.type.effect = "effect";
-	Sound.type.ui = "ui";
-	Sound.type.recording = "recording";
+	Sound.type.effect = "effect"; // Sounds built in to app
+	Sound.type.ui = "ui"; // Sounds used in UI, not sound blocks (snap sound, for example)
+	Sound.type.recording = "recording"; // Sounds local to project, recorded by user
+
+	// Load into cache
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
+
+	// Sound when Blocks are snapped together
 	Sound.click = "click2";
 };
+
+/**
+ * Stops all playing sounds and plays the specified sound
+ * @param {string} id - The sound to play
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @param {function} sentCallback - Called when command to play sound is received by backend successfully
+ * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
+ * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
+ */
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
 		Sound.playWithCallback(id, isRecording, sentCallback, errorCallback, donePlayingCallback);
 	});
 };
+
+/**
+ * Plays the specified sound
+ * @param {string} id - The sound to play
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @param {function} sentCallback - Called when command to play sound is received by backend successfully
+ * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
+ * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
+ */
 Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	let status = {};
 	status.donePlayingCallback = donePlayingCallback;
@@ -3330,6 +3876,13 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 		}, errorFn);
 	}, errorFn);
 };
+
+/**
+ * Plays the specified sound and tracks progress with a status object
+ * @param {string} id
+ * @param {boolean} isRecording
+ * @param {object} status
+ */
 Sound.play = function(id, isRecording, status){
 	if(status == null){
 		Sound.playWithCallback(id, isRecording);
@@ -3350,6 +3903,14 @@ Sound.play = function(id, isRecording, status){
 		});
 	}
 };
+
+/**
+ * Looks up the duration of the sound
+ * @param {number} id
+ * @param {boolean} isRecording
+ * @param {function} callbackFn - called with the duration as a number
+ * @param {function} callbackError
+ */
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 	let request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
@@ -3363,10 +3924,19 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 		}
 	}, callbackError);
 };
+
+/**
+ * Tells the Sound class that the file has changed.  Prompts cache of recordings to be reloaded
+ */
 Sound.changeFile = function(){
 	Sound.recordingList = [];
 	Sound.loadSounds(true);
 };
+
+/**
+ * @param {boolean} isRecording
+ * @param {function} [callbackFn] - Called with a list of Sounds when that are loaded
+ */
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
@@ -3384,6 +3954,13 @@ Sound.loadSounds = function(isRecording, callbackFn){
 		if(callbackFn != null) callbackFn(resultList);
 	});
 };
+
+/**
+ * Determine's a Sound's name from its id.  idRecording implies id == name.
+ * @param {string} id
+ * @param {boolean} isRecording
+ * @return {string}
+ */
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
 	let name = id;
@@ -3394,6 +3971,12 @@ Sound.nameFromId = function(id, isRecording){
 	name = name.replace(/\b\w/g, l => l.toUpperCase());
 	return name;
 };
+
+/**
+ * Stops all running sounds and calls the donePlaying callbacks of the sounds
+ * @param {object} status - A status object for the request
+ * @param {function} callbackFn - Called when the request completes (even if there is an error)
+ */
 Sound.stopAllSounds=function(status, callbackFn){
 	if(status == null) status = {};
 	let request = new HttpRequestBuilder("sound/stopAll");
@@ -3407,12 +3990,24 @@ Sound.stopAllSounds=function(status, callbackFn){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), callback, callback);
 };
+
+/**
+ * Reads from the cached list of sounds
+ * @param {boolean} isRecording
+ * @return {Array}
+ */
 Sound.getSoundList = function(isRecording){
 	if(isRecording) {
 		return Sound.recordingList;
 	}
 	return Sound.soundList;
 };
+
+/**
+ * Retrieves the string to put as the type parameter for the request
+ * @param {boolean} isRecording
+ * @return {string}
+ */
 Sound.boolToType = function(isRecording){
 	if(isRecording){
 		return Sound.type.recording;
@@ -3420,6 +4015,12 @@ Sound.boolToType = function(isRecording){
 		return Sound.type.effect;
 	}
 };
+
+/**
+ * Returns the name of the sound effect with the provided id, or null if no such sound exists.
+ * @param {string} id (of sound effect, not recording)
+ * @return {string|null}
+ */
 Sound.lookupById = function(id){
 	let result = null;
 	Sound.soundList.forEach(function(sound){
@@ -3429,6 +4030,10 @@ Sound.lookupById = function(id){
 	});
 	return result;
 };
+
+/**
+ * Plays the snap sound effect if it is enabled
+ */
 Sound.playSnap = function(){
 	if(SettingsManager.enableSnapNoise.getValue() === "true") {
 		let snapSoundRequest = new HttpRequestBuilder("sound/play");
@@ -11335,7 +11940,7 @@ BlockStack.prototype.updateTabDim = function() {
 
 /**
  * Writes the BlockStack to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {
@@ -13324,7 +13929,7 @@ Block.prototype.updateActive = function(){
 
 /**
  * Recursively writes this Block and those below it to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @param {Node} xmlBlocks - The <Blocks> tag in the document
  */
 Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
@@ -13336,7 +13941,7 @@ Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 
 /**
  * Writes this Block to XML (non recursive)
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc){
@@ -13871,12 +14476,14 @@ SlotShape.prototype.setActive = function(active) {
 /**
  * Abstract subclass of SlotShape for Slots that allow values (strings/numbers) to be directly entered into the Slot
  * EditableSlotShape can be controlled by an InputSystem
+ * EditableSlots have text to display the entered value and a rectangular hit box that is slightly larger than
+ * the visual elements of the SlotShape
  * @param {Slot} slot
  * @param {string} initialText - The initial value to display
  * @param {object} dimConstants - An object provided by the subclass with constants for colors/margins
  * @constructor
  */
-function EditableSlotShape(slot, initialText, dimConstants){
+function EditableSlotShape(slot, initialText, dimConstants) {
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
@@ -13886,84 +14493,126 @@ function EditableSlotShape(slot, initialText, dimConstants){
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);
 EditableSlotShape.prototype.constructor = EditableSlotShape;
-EditableSlotShape.setConstants = function(){
+
+EditableSlotShape.setConstants = function() {
 	const ESS = EditableSlotShape;
 	ESS.charHeight = BlockGraphics.valueText.charHeight;
 	ESS.hitBox = {};
 	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
 	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;
 };
-EditableSlotShape.prototype.buildSlot = function(){
+
+/**
+ * Create the visual elements of the Slot, but no need to position them correctly
+ */
+EditableSlotShape.prototype.buildSlot = function() {
 	SlotShape.prototype.buildSlot.call(this);
 	this.buildBackground();
 
-	this.textE=BlockGraphics.create.valueText(this.text,this.group);
+	this.textE = BlockGraphics.create.valueText(this.text, this.group);
 	GuiElements.update.color(this.textE, this.dimConstants.valueText.fill);
 	this.hitBoxE = BlockGraphics.create.slotHitBox(this.group);
 
+	// When the SlotShape is touched, tell TR the Slot was touched
 	TouchReceiver.addListenersSlot(this.textE, this.slot);
-	TouchReceiver.addListenersSlot(this.hitBoxE,this.slot);
+	TouchReceiver.addListenersSlot(this.hitBoxE, this.slot);
 };
-EditableSlotShape.prototype.buildBackground = function(){
+
+/**
+ * Create the element representing the background
+ */
+EditableSlotShape.prototype.buildBackground = function() {
 	GuiElements.markAbstract();
 };
 
-EditableSlotShape.prototype.changeText=function(text){
-	this.text=text; //Store value
-	GuiElements.update.text(this.textE,text); //Update text.
+/**
+ * Set the text of the SlotShape
+ * @param {string} text
+ */
+EditableSlotShape.prototype.changeText = function(text) {
+	this.text = text; //Store value
+	GuiElements.update.text(this.textE, text); //Update text.
 	this.updateDim();
 	this.updateAlign();
 };
-EditableSlotShape.prototype.select=function(){
+
+/**
+ * Make the SlotShape appear selected
+ */
+EditableSlotShape.prototype.select = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 };
-EditableSlotShape.prototype.deselect=function(){
+
+/**
+ * Make the SlotShape appear deselected
+ */
+EditableSlotShape.prototype.deselect = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.fill);
+	GuiElements.update.color(this.textE, dC.valueText.fill);
 };
-EditableSlotShape.prototype.grayOutValue=function(){
+
+/**
+ * Make the SlotShape's text grayed out
+ */
+EditableSlotShape.prototype.grayOutValue = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+	GuiElements.update.color(this.textE, dC.valueText.grayedFill);
 	this.isGray = true;
 };
-EditableSlotShape.prototype.unGrayOutValue=function(){
+
+/**
+ * Stop the SlotShape's text from being grayed out
+ */
+EditableSlotShape.prototype.unGrayOutValue = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 	this.isGray = false;
 };
-EditableSlotShape.prototype.updateDim = function(){
+
+/**
+ * Compute the width and height of the SlotShape.  Called agin when text changes
+ */
+EditableSlotShape.prototype.updateDim = function() {
 	const dC = this.dimConstants;
 	this.textW = GuiElements.measure.textWidth(this.textE); //Measure text element.
 	let width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
 	let height = dC.slotHeight; //Has no child, so is just the default height.
-	if(width < dC.slotWidth){ //Check if width is less than the minimum.
+	if (width < dC.slotWidth) { //Check if width is less than the minimum.
 		width = dC.slotWidth;
 	}
 	this.width = width; //Save computations.
 	this.height = height;
 };
-EditableSlotShape.prototype.updateAlign = function(){
+
+/**
+ * Move all the parts of the SlotShape to the correct location
+ */
+EditableSlotShape.prototype.updateAlign = function() {
 	const dC = this.dimConstants;
-	const textX=(this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW/2; //Centers the text horizontally.
-	const textY=EditableSlotShape.charHeight/2+this.height/2; //Centers the text vertically
-	BlockGraphics.update.text(this.textE,textX,textY); //Move the text.
-	const bGHB=BlockGraphics.hitBox; //Get data about the size of the hit box.
-	const hitX=bGHB.hMargin; //Compute its x and y coords.
-	const hitY=bGHB.vMargin;
-	const hitW=this.width+bGHB.hMargin*2; //Compute its width and height.
-	const hitH=this.height+bGHB.vMargin*2;
-	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH); //Move/resize its rectangle.
+	const textX = (this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW / 2; //Centers the text horizontally.
+	const textY = EditableSlotShape.charHeight / 2 + this.height / 2; //Centers the text vertically
+	BlockGraphics.update.text(this.textE, textX, textY); //Move the text.
+	const bGHB = BlockGraphics.hitBox; //Get data about the size of the hit box.
+	const hitX = bGHB.hMargin; //Compute its x and y coords.
+	const hitY = bGHB.vMargin;
+	const hitW = this.width + bGHB.hMargin * 2; //Compute its width and height.
+	const hitH = this.height + bGHB.vMargin * 2;
+	GuiElements.update.rect(this.hitBoxE, hitX, hitY, hitW, hitH); //Move/resize its rectangle.
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics for a RectSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function RectSlotShape(slot, initialText){
+function RectSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, RectSlotShape);
 }
 RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RectSlotShape.prototype.constructor = RectSlotShape;
-RectSlotShape.setConstants = function(){
+
+RectSlotShape.setConstants = function() {
 	const RSS = RectSlotShape;
 	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
 	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
@@ -13977,79 +14626,130 @@ RectSlotShape.setConstants = function(){
 	RSS.slotSelectedFill = BlockGraphics.reporter.slotSelectedFill;
 	RSS.slotFill = BlockGraphics.reporter.slotFill;
 };
-RectSlotShape.prototype.buildSlot=function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-RectSlotShape.prototype.buildBackground = function(){
-	this.slotE = BlockGraphics.create.slot(this.group,3);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildBackground = function() {
+	this.slotE = BlockGraphics.create.slot(this.group, 3);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot);
 };
-RectSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-RectSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 3, true); //Fix! BG
 };
-RectSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.select = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
-RectSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.deselect = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotFill);
+	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics of a HexSlot
+ * @param {Slot} slot
+ * @constructor
  */
-function HexSlotShape(slot){
+function HexSlotShape(slot) {
 	SlotShape.call(this, slot);
 }
 HexSlotShape.prototype = Object.create(SlotShape.prototype);
 HexSlotShape.prototype.constructor = HexSlotShape;
-HexSlotShape.setConstants = function(){
+
+HexSlotShape.setConstants = function() {
 	const HSS = HexSlotShape;
-	const bG=BlockGraphics.predicate;
+	const bG = BlockGraphics.predicate;
 	HSS.slotWidth = bG.slotWidth;
 	HSS.slotHeight = bG.slotHeight;
 };
-HexSlotShape.prototype.buildSlot = function(){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.buildSlot = function() {
 	const HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
-	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category,this.active);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
+	this.slotE = BlockGraphics.create.slot(this.group, 2, this.slot.parent.category, this.active);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot); //Adds event listeners.
 };
-HexSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.updateDim = function() {
 	const HSS = HexSlotShape;
-	this.width=HSS.slotWidth;
-	this.height=HSS.slotHeight;
+	this.width = HSS.slotWidth;
+	this.height = HSS.slotHeight;
 };
-HexSlotShape.prototype.updateAlign = function(){
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.updateAlign = function() {
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 2, true);
 };
-HexSlotShape.prototype.makeActive = function(){
-	if(!this.active) {
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.makeActive = function() {
+	if (!this.active) {
 		this.active = true;
 		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
 	}
 };
-HexSlotShape.prototype.makeInactive = function(){
-	if(this.active){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.makeInactive = function() {
+	if (this.active) {
 		this.active = false;
 		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
 	}
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics for a RoundSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function RoundSlotShape(slot, initialText){
+function RoundSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, RoundSlotShape);
 }
 RoundSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RoundSlotShape.prototype.constructor = RoundSlotShape;
-RoundSlotShape.setConstants = function(){
+
+RoundSlotShape.setConstants = function() {
 	const RSS = RoundSlotShape;
 	const bG = BlockGraphics.reporter;
 	RSS.slotLMargin = bG.slotHMargin;
@@ -14065,39 +14765,66 @@ RoundSlotShape.setConstants = function(){
 	RSS.slotSelectedFill = bG.slotSelectedFill;
 	RSS.slotFill = bG.slotFill;
 };
-RoundSlotShape.prototype.buildSlot=function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-RoundSlotShape.prototype.buildBackground = function(){
-	this.slotE = BlockGraphics.create.slot(this.group,1);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.buildBackground = function() {
+	this.slotE = BlockGraphics.create.slot(this.group, 1);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot);
 };
-RoundSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-RoundSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,1,true);//Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
 };
-RoundSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.select = function() {
 	const RSS = RoundSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
-RoundSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.deselect = function() {
 	const RSS = RoundSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotFill);
+	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the DropDown graphic for a DropSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function DropSlotShape(slot, initialText){
+function DropSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, DropSlotShape);
 }
 DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 DropSlotShape.prototype.constructor = DropSlotShape;
-DropSlotShape.setConstants = function(){
+DropSlotShape.setConstants = function() {
 	const DSS = DropSlotShape;
 	const bG = BlockGraphics.dropSlot;
 	DSS.bgColor = bG.bg;
@@ -14119,52 +14846,89 @@ DropSlotShape.setConstants = function(){
 	DSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
 	DSS.valueText.selectedFill = bG.textFill;
 };
-DropSlotShape.prototype.buildSlot = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-DropSlotShape.prototype.buildBackground = function(){
-	this.bgE=this.generateBg();
-	this.triE=this.generateTri();
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildBackground = function() {
+	this.bgE = this.generateBg();
+	this.triE = this.generateTri();
 };
-DropSlotShape.prototype.generateBg=function(){
+
+/**
+ * Creates the dark, semi-transparent background of the Slot
+ * @return {Node} - The rectangle for the background
+ */
+DropSlotShape.prototype.generateBg = function() {
 	const DSS = DropSlotShape;
-	const bgE=GuiElements.create.rect(this.group);
-	GuiElements.update.color(bgE,DSS.bgColor);
-	GuiElements.update.opacity(bgE,DSS.bgOpacity);
-	TouchReceiver.addListenersSlot(bgE,this.slot);
+	const bgE = GuiElements.create.rect(this.group);
+	GuiElements.update.color(bgE, DSS.bgColor);
+	GuiElements.update.opacity(bgE, DSS.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE, this.slot);
 	return bgE;
 };
-DropSlotShape.prototype.generateTri=function(){
+
+/**
+ * Creates the triangle for the side of the DropSlotShape
+ * @return {Node} - an SVG path object
+ */
+DropSlotShape.prototype.generateTri = function() {
 	const DSS = DropSlotShape;
-	const triE=GuiElements.create.path(this.group);
-	GuiElements.update.color(triE,DSS.triColor);
-	TouchReceiver.addListenersSlot(triE,this.slot);
+	const triE = GuiElements.create.path(this.group);
+	GuiElements.update.color(triE, DSS.triColor);
+	TouchReceiver.addListenersSlot(triE, this.slot);
 	return triE;
 };
-DropSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-DropSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateAlign = function() {
 	const DSS = DropSlotShape;
+	// Align the text and hit box of the Slot
 	EditableSlotShape.prototype.updateAlign.call(this);
 
-	const triX=this.width - DSS.slotRMargin + DSS.textMargin;
-	const triY=this.height/2 - DSS.triH/2;
-	GuiElements.update.triangle(this.triE,triX,triY,DSS.triW,0-DSS.triH);
+	// Compute the location of the triangle
+	const triX = this.width - DSS.slotRMargin + DSS.textMargin;
+	const triY = this.height / 2 - DSS.triH / 2;
+	GuiElements.update.triangle(this.triE, triX, triY, DSS.triW, 0 - DSS.triH);
 
-	GuiElements.update.rect(this.bgE,0,0,this.width,this.height);
+	// Align the background
+	GuiElements.update.rect(this.bgE, 0, 0, this.width, this.height);
 };
-DropSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.select = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.selectedBgOpacity);
-	GuiElements.update.color(this.triE,DSS.selectedTriColor);
+	GuiElements.update.opacity(this.bgE, DSS.selectedBgOpacity);
+	GuiElements.update.color(this.triE, DSS.selectedTriColor);
 };
-DropSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.deselect = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.bgOpacity);
-	GuiElements.update.color(this.triE,DSS.triColor);
+	GuiElements.update.opacity(this.bgE, DSS.bgOpacity);
+	GuiElements.update.color(this.triE, DSS.triColor);
 };
 /**
  * An interface for parts of a Block such as LabelText, BlockIcons, and Slots.
@@ -14750,7 +15514,7 @@ Slot.prototype.checkListUsed = function(list){
 
 /**
  * Appends information about this Slot to the document
- * @param {DOMParser} xmlDoc - The document to append to
+ * @param {Document} xmlDoc - The document to append to
  * @return {Node} - The XML node of the Slot
  */
 Slot.prototype.createXml = function(xmlDoc){
@@ -15037,7 +15801,7 @@ EditableSlot.prototype.getDataNotFromChild = function() {
 /**
  * Converts the Slot and its children into XML, storing the value in the enteredData as well
  * @inheritDoc
- * @param {DOMParser} xmlDoc
+ * @param {Document} xmlDoc
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {
@@ -16568,7 +17332,7 @@ BlockSlot.prototype.updateAvailableMessages = function() {
 
 /**
  * Creates XML for this BlockSlot
- * @param {DOMParser} xmlDoc - The document to modify
+ * @param {Document} xmlDoc - The document to modify
  * @return {Node} - The XML representing this BlockSlot
  */
 BlockSlot.prototype.createXml = function(xmlDoc) {
@@ -18980,7 +19744,7 @@ B_Variable.prototype.startAction = function() {
 };
 /**
  * @inheritDoc
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The node for this Block
  */
 B_Variable.prototype.createXml = function(xmlDoc) {
@@ -19128,7 +19892,7 @@ B_List.prototype.startAction = function() {
 };
 /**
  * Writes the Block to Xml
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The Block node
  */
 B_List.prototype.createXml = function(xmlDoc) {

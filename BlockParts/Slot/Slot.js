@@ -540,7 +540,7 @@ Slot.prototype.checkListUsed = function(list){
 
 /**
  * Appends information about this Slot to the document
- * @param {DOMParser} xmlDoc - The document to append to
+ * @param {Document} xmlDoc - The document to append to
  * @return {Node} - The XML node of the Slot
  */
 Slot.prototype.createXml = function(xmlDoc){
