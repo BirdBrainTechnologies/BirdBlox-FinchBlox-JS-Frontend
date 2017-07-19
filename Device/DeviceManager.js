@@ -13,17 +13,12 @@ function DeviceManager(deviceClass){
 DeviceManager.setStatics = function(){
 	const DM = DeviceManager;
 	const statuses = DeviceManager.statuses = {};
+
 	statuses.disconnected = 0;
+	statuses.incompatibleFirmware = 0.1;
+	statuses.oldFirmware = 0.2;
 	statuses.connected = 1;
 	statuses.noDevices = 2;
-
-	/*
-	statuses.disconnected = 0;
-	statuses.incompatibleFirmware = 1;
-	statuses.oldFirmware = 2;
-	statuses.connected = 3;
-	statuses.noDevices = 4;
-	*/
 
 	DM.totalStatus = statuses.noDevices;
 	DM.statusListener = null;

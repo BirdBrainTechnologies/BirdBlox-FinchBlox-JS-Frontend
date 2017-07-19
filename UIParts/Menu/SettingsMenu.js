@@ -4,13 +4,13 @@ function SettingsMenu(button){
 SettingsMenu.prototype = Object.create(Menu.prototype);
 SettingsMenu.prototype.constructor = SettingsMenu;
 SettingsMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut,false, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom,true, VectorPaths.resetZoom);
+	this.addOption("Zoom in", this.optionZoomIn,false); //, VectorPaths.zoomIn);
+	this.addOption("Zoom out", this.optionZoomOut,false); //, VectorPaths.zoomOut);
+	this.addOption("Reset zoom", this.optionResetZoom,true); //, VectorPaths.resetZoom);
 	if(SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption("Disable snap noise", this.disableSnapping, true, VectorPaths.volumeMute);
+		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption("Enable snap noise", this.enableSnapping, true, VectorPaths.volumeUp);
+		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 };
 SettingsMenu.prototype.optionZoomIn=function(){

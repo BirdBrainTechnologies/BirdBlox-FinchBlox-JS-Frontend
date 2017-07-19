@@ -12,6 +12,7 @@ InputWidget.Label.setConstants = function(){
 	L.font="Arial";
 	L.fontWeight="bold";
 	L.charHeight=12;
+	L.margin = 2;
 	L.color = Colors.white;
 };
 InputWidget.Label.prototype.show = function(x, y, parentGroup){
@@ -20,11 +21,12 @@ InputWidget.Label.prototype.show = function(x, y, parentGroup){
 	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = NewInputPad.width / 2 - textW / 2;
-	GuiElements.move.text(this.textE, textX, y + L.charHeight);
+	const textY = y + L.charHeight + L.margin;
+	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
 InputWidget.Label.prototype.updateDim = function(){
 	const L = InputWidget.Label;
-	this.height = L.charHeight;
+	this.height = L.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };

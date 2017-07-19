@@ -53,19 +53,19 @@ SmoothMenuBnList.prototype.build = function(){
 SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
 	this.maxHeight=maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func,icon){
+SmoothMenuBnList.prototype.addOption=function(text,func,addTextFn){
 	if(func == null){
 		func = null;
 	}
-	if(icon == null){
-		icon = null;
+	if(addTextFn == null){
+		addTextFn = null;
 	}
 
 	this.bnsGenerated=false;
 	const option = {};
 	option.func = func;
 	option.text = text;
-	option.icon = icon;
+	option.addTextFn = addTextFn;
 	this.options.push(option);
 };
 SmoothMenuBnList.prototype.show=function(){
@@ -159,10 +159,11 @@ SmoothMenuBnList.prototype.clearBnsArray=function(){
 };
 SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
 	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(option.text);
 	bn.setCallbackFunction(option.func,true);
-	if(option.icon != null){
-		bn.addSideTextAndIcon(option.icon, null, option.text);
+	if(option.addTextFn != null){
+		option.addTextFn(bn);
+	} else {
+		bn.addText(option.text);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();

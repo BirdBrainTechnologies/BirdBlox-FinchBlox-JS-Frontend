@@ -4,7 +4,8 @@
 function Device(name, id){
 	this.name = name;
 	this.id = id;
-	this.status = DeviceManager.statuses.disconnected;
+	this.connected = false;
+	this.firmwareState =
 	this.statusListener = null;
 }
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
@@ -55,6 +56,15 @@ Device.prototype.getStatus = function(){
 };
 Device.prototype.setStatusListener = function(object){
 	this.statusListener = object;
+};
+Device.prototype.alertOldFirmware = function(){
+	if(true) {
+		let message = "A firmware update is available for your device";
+		message += " \"" + this.name + "\". ";
+		HtmlServer.showChoiceDialog("Old firmware", "A firmware update is available for your device \"")
+	} else {
+		HtmlServer.showChoiceDialog("Old firmware", "Your")
+	}
 };
 Device.fromJson = function(deviceClass, json){
 	return new deviceClass(json.name, json.id);

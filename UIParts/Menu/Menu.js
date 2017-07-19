@@ -53,8 +53,10 @@ Menu.prototype.createMenuBnList=function(){
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close,icon){
-	icon = null;
+Menu.prototype.addOption=function(text,func,close,addTextFn){
+	if(addTextFn == null) {
+		addTextFn = null;
+	}
 	if(close==null){
 		close=true;
 	}
@@ -69,7 +71,7 @@ Menu.prototype.addOption=function(text,func,close,icon){
 	callbackFn.menu=this;
 	callbackFn.func=func;
 	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn,icon);
+	this.menuBnList.addOption(text,callbackFn,addTextFn);
 };
 Menu.prototype.buildMenu=function(){
 	var mBL=this.menuBnList;

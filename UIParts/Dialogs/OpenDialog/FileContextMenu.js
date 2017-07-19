@@ -22,7 +22,7 @@ FileContextMenu.setGraphics=function(){
 	FCM.bnMargin=Button.defaultMargin;
 	FCM.bgColor=Colors.lightGray;
 	FCM.blockShift=20;
-	FCM.width = 110;
+	FCM.width = 115;
 };
 FileContextMenu.prototype.showMenu=function(){
 	const FCM=FileContextMenu;
@@ -41,21 +41,21 @@ FileContextMenu.prototype.showMenu=function(){
 FileContextMenu.prototype.addOptions=function(){
 	const FCM = FileContextMenu;
 	if(this.type === FCM.types.localSignedIn) {
-		this.menuBnList.addOption("Share", function(){
+		this.menuBnList.addOption("", function(){
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), VectorPaths.share);
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
 	}
 	if(this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
-		this.menuBnList.addOption("Duplicate", function () {
+		this.menuBnList.addOption("", function () {
 			const dialog = this.dialog;
 			SaveManager.userDuplicateFile(this.file, function () {
 				dialog.reloadDialog();
 			});
 			this.close();
-		}.bind(this), VectorPaths.copy);
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
 	}
-	this.menuBnList.addOption("Delete", function(){
+	this.menuBnList.addOption("", function(){
 		if(this.type === FCM.types.cloud) {
 			const request = new HttpRequestBuilder("cloud/delete");
 			request.addParam("filename", this.file);
@@ -68,7 +68,12 @@ FileContextMenu.prototype.addOptions=function(){
 			});
 			this.close();
 		}
-	}.bind(this), VectorPaths.trash);
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
+};
+FileContextMenu.prototype.createAddIconToBnFn = function(iconId, text) {
+	return function(bn) {
+		bn.addSideTextAndIcon(iconId, null, text, null, null, null, null, null, null, true, false);
+	}
 };
 FileContextMenu.prototype.close=function(){
 	this.bubbleOverlay.hide();
