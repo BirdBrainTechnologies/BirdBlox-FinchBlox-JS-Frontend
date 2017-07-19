@@ -9469,6 +9469,7 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	me.hide();
 	let dialog = new ConnectMultipleDialog(deviceClass);
 	dialog.show();
+	ConnectMultipleDialog.currentDialog = this;
 	if(deviceClass === this.deviceClass) {
 		dialog.setScroll(thisScroll);
 	}
