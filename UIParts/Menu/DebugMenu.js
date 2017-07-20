@@ -22,7 +22,7 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Send request", this.optionSendRequest);
 	this.addOption("Log HTTP", this.optionLogHttp);
 	this.addOption("HB names", this.optionHBs);
-	this.addOption("Allow virtual Robots", this.optionVirtualHBs);
+	this.addOption("Allow virtual Robots", DebugOptions.enableVirtualDevices);
 	this.addOption("Clear log", this.optionClearLog);
 	this.addOption("Connect Multiple", function(){
 		ConnectMultipleDialog.showDialog();
@@ -71,9 +71,6 @@ DebugMenu.prototype.optionHBs=function(){
 };
 DebugMenu.prototype.optionLogHttp=function(){
 	HtmlServer.logHttp=true;
-};
-DebugMenu.prototype.optionVirtualHBs=function(){
-	DiscoverDialog.allowVirtualDevices=true;
 };
 DebugMenu.prototype.optionClearLog=function(){
 	GuiElements.alert("");

@@ -1,7 +1,10 @@
 /**
- * Created by Tom on 6/14/2017.
+ * Manages communication with a Hummingbird
+ * @param {string} name
+ * @param {string} id
+ * @constructor
  */
-function DeviceHummingbird(name, id){
+function DeviceHummingbird(name, id) {
 	DeviceWithPorts.call(this, name, id);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);

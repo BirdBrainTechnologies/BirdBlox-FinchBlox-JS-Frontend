@@ -45,10 +45,6 @@ RobotConnectionList.prototype.discoverRobots=function(){
 	let me = this;
 	this.deviceClass.getManager().discover(function(response){
 		me.updateRobotList(response);
-	},function(){
-		if(DiscoverDialog.allowVirtualDevices){
-			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
-		}
 	});
 };
 RobotConnectionList.prototype.updateRobotList=function(robotArray){

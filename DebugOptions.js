@@ -1,12 +1,13 @@
 "use strict";
 
 function DebugOptions(){
-	var DO = DebugOptions;
+	const DO = DebugOptions;
 	DO.enabled = true;
 
 	DO.mouse = true;
 	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
+	DO.allowVirtualDevices = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
 	DO.logErrors = true;
@@ -29,12 +30,12 @@ DebugOptions.applyActions = function(){
 	var DO = DebugOptions;
 	if(!DO.enabled) return;
 	if(DO.addVirtualHB){
-		let virHB = new DeviceHummingbird("Virtual HB","idOfVirtualHb");
-		DeviceHummingbird.getManager().setOneDevice(virHB);
+		let virHB = DO.createVirtualDevice(DeviceHummingbird, "");
+		DeviceHummingbird.getManager().appendDevice(virHB);
 	}
 	if(DO.addVirtualFlutter){
-		let virtual = new DeviceFlutter("Virtual F","idOfVirtualF");
-		DeviceFlutter.getManager().setOneDevice(virtual);
+		let virHB = DO.createVirtualDevice(DeviceFlutter, "");
+		DeviceFlutter.getManager().appendDevice(virHB);
 	}
 	if(DO.showVersion){
 		GuiElements.alert("Version: "+GuiElements.appVersion);
@@ -57,6 +58,19 @@ DebugOptions.shouldSkipHtmlRequests = function(){
 DebugOptions.shouldLogHttp=function(){
 	var DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
+};
+DebugOptions.shouldAllowVirtualDevices = function(){
+	const DO = DebugOptions;
+	return DO.allowVirtualDevices && DO.enabled;
+};
+DebugOptions.enableVirtualDevices = function() {
+	const DO = DebugOptions;
+	DO.allowVirtualDevices = true;
+};
+DebugOptions.createVirtualDevice = function(deviceClass, id) {
+	const typeName = deviceClass.getDeviceTypeName(true);
+	const name = "Virtual" + typeName + id;
+	return new deviceClass(name, name);
 };
 DebugOptions.safeFunc = function(func){
 	if(func == null) return null;

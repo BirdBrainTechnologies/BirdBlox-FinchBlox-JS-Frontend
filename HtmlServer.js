@@ -53,6 +53,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				if(callbackFn != null) {
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('[{"name":"hi","id":"there"}]');
 				}
 			}
 		}, 20);

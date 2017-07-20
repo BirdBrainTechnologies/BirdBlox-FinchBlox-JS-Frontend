@@ -18,7 +18,6 @@ DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
 DiscoverDialog.setConstants = function(){
 	DiscoverDialog.updateInterval = 500;
-	DiscoverDialog.allowVirtualDevices = false;
 };
 DiscoverDialog.prototype.show = function(){
 	var DD = DiscoverDialog;
@@ -30,11 +29,7 @@ DiscoverDialog.prototype.show = function(){
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
-		if(DiscoverDialog.allowVirtualDevices) {
-			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
-		}
-	});
+	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this));
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
