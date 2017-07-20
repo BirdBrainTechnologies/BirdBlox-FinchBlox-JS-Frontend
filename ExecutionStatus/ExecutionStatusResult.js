@@ -1,22 +1,18 @@
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a completed block that returns a value
+ * @param {Data} result - The data from execution
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a completed block
- * @class
- * @augments ExecutionStatus
- * @param {Data!} result - The error that occurred
- */
-function ExecutionStatusResult(result){
-	/** @type {Data!} */
+function ExecutionStatusResult(result) {
 	this.result = result;
 }
 ExecutionStatusResult.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusResult.constructor = ExecutionStatusResult;
+
 /**
  * @inheritDoc
+ * @return {Data}
  */
-ExecutionStatusResult.prototype.getResult = function(){
+ExecutionStatusResult.prototype.getResult = function() {
 	return this.result;
 };
