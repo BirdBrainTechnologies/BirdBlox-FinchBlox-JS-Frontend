@@ -14,6 +14,8 @@ function BlockPalette() {
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.visible = true;
+	// Stores a group featuring a trash icon that appears when Blocks are dragged over it
+	BlockPalette.trash = null;
 	if (GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
 		// Hide the Palette if it should be hidden but isn't
 		GuiElements.hidePaletteLayers(true);
@@ -43,11 +45,14 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.white;
 
-	BlockPalette.trash = null;
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.white;
 };
+
+/**
+ * Called when the zoom level changes or the screen is resized to recompute dimensions
+ */
 BlockPalette.updateZoom = function() {
 	let BP = BlockPalette;
 	BP.setGraphics();
@@ -58,62 +63,92 @@ BlockPalette.updateZoom = function() {
 		BlockPalette.categories[i].updateZoom();
 	}
 };
+
+/**
+ * Creates the gray rectangle below the CategoryBNs
+ */
 BlockPalette.createCatBg = function() {
 	let BP = BlockPalette;
 	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
 	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
 };
+
+/**
+ * Creates the long black rectangle on the left of the screen
+ */
 BlockPalette.createPalBg = function() {
 	let BP = BlockPalette;
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
-	//TouchReceiver.addListenersPalette(BP.palRect);
 };
+
+/**
+ * Creates the categories listed in the BlockList
+ */
 BlockPalette.createCategories = function() {
-	var catCount = BlockList.catCount();
-	var firstColumn = true;
-	var numberOfRows = Math.ceil(catCount / 2);
-	var col1X = BlockPalette.catHMargin;
-	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
-	var currentY = BlockPalette.catVMargin;
-	var currentX = col1X;
-	var usedRows = 0;
-	for (var i = 0; i < catCount; i++) {
+	const catCount = BlockList.catCount();
+	const numberOfRows = Math.ceil(catCount / 2);
+
+	// Automatically alternates between two columns while adding categories
+	const col1X = BlockPalette.catHMargin;
+	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+
+	let firstColumn = true;
+	let currentY = BlockPalette.catVMargin;
+	let currentX = col1X;
+	let usedRows = 0;
+	for (let i = 0; i < catCount; i++) {
 		if (firstColumn && usedRows >= numberOfRows) {
 			currentX = col2X;
 			firstColumn = false;
 			currentY = BlockPalette.catVMargin;
 		}
-		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
 		currentY += CategoryBN.height + CategoryBN.vMargin;
 	}
-
 };
+
+/**
+ * Retrieves the category with the given id.  Called when a specific category needs to be refreshed
+ * @param {string} id
+ * @return {Category}
+ */
 BlockPalette.getCategory = function(id) {
-	var i = 0;
-	while (BlockPalette.categories[i].id != id) {
+	let i = 0;
+	while (BlockPalette.categories[i].id !== id) {
 		i++;
 	}
 	return BlockPalette.categories[i];
 };
+
+/**
+ * Selects the first category, making it visible on the screen
+ */
 BlockPalette.selectFirstCat = function() {
 	BlockPalette.categories[0].select();
 };
-/*BlockPalette.getAbsX=function(){
-	return 0;
-}
-BlockPalette.getAbsY=function(){
-	return TitleBar.height+BlockPalette.catH;
-}*/
+
+/**
+ * Determines whether the specified point is over the Palette.  Used for determining if Blocks should be deleted
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
+ */
 BlockPalette.isStackOverPalette = function(x, y) {
+	const BP = BlockPalette;
 	if (!GuiElements.paletteLayersVisible) return false;
-	return CodeManager.move.pInRange(x, y, 0, BlockPalette.catY, BlockPalette.width, GuiElements.height - TitleBar.height);
+	return CodeManager.move.pInRange(x, y, 0, BP.catY, BP.width, GuiElements.height - TitleBar.height);
 };
-BlockPalette.ShowTrash = function() {
+
+/**
+ * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
+ */
+BlockPalette.showTrash = function() {
 	let BP = BlockPalette;
+	// If the trash is not visible
 	if (!BP.trash) {
 		BP.trash = GuiElements.create.group(0, 0);
 		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
@@ -129,32 +164,50 @@ BlockPalette.ShowTrash = function() {
 		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
-BlockPalette.HideTrash = function() {
+
+/**
+ * Removes the trash icon
+ */
+BlockPalette.hideTrash = function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
 		BP.trash.remove();
 		BP.trash = null;
 	}
 };
+
+/**
+ * Recursively tells a specific section of a category to expand/collapse
+ * @param {string} id - The id of the section
+ * @param {boolean} collapsed - Whether the section should expand or collapse
+ */
 BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
 };
+
+/**
+ * Recursively passes message to all children (Categories and their children) of the Palette
+ * @param {string} message
+ */
 BlockPalette.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);
 };
+
+/**
+ * Recursively passes a message to all categories
+ * @param {string} functionName - The function to call on each category
+ */
 BlockPalette.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
 	BlockPalette.categories.forEach(function(category) {
 		category[functionName].apply(category, args);
 	});
 };
-BlockPalette.fileClosed = function() {
-	BlockPalette.passRecursively("fileClosed");
-};
-BlockPalette.fileOpened = function() {
-	BlockPalette.passRecursively("fileOpened");
-};
+
+/**
+ * Reloads all categories.  Called when a new file is opened.
+ */
 BlockPalette.refresh = function() {
 	BlockPalette.categories.forEach(function(category) {
 		category.refreshGroup();

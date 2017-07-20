@@ -414,19 +414,12 @@ BlockStack.prototype.land = function() {
 };
 
 /**
- * Removes the stack from the Tab's list.
- */
-BlockStack.prototype.remove = function() {
-	this.tab.removeStack(this);
-};
-
-/**
  * Stops execution and removes the BlockStack digitally and visually.
  */
-BlockStack.prototype.delete = function() {
+BlockStack.prototype.remove = function() {
 	this.stop();
 	this.group.remove();
-	this.remove();   // Remove from Tab's list.
+	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
 

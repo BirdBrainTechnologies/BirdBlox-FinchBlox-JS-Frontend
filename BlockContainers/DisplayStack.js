@@ -134,7 +134,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
 /**
  * Removes the DisplayStack
  */
-DisplayStack.prototype.delete = function() {
+DisplayStack.prototype.remove = function() {
 	this.group.remove();
 };
 

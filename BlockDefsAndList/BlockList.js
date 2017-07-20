@@ -47,8 +47,7 @@ BlockList.catCount = function() {
  * The following functions populate a Category for the BlockPalette.
  * Each function has the same structure.
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
- * category.trimBottom() is used to remove any extra space at the bottom of the category. category.finalize() finishes
- * the operation.
+ * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 
 /**
@@ -73,7 +72,6 @@ BlockList.populateCat_tablet = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -108,7 +106,6 @@ BlockList.populateCat_operators = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -134,7 +131,6 @@ BlockList.populateCat_control = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_Stop");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -156,7 +152,6 @@ BlockList.populateCat_sound = function(category) {
 	category.addBlockByName("B_SetTempoTo");
 	category.addBlockByName("B_Tempo");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -201,7 +196,6 @@ BlockList.populateCat_variables = function(category) {
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -228,7 +222,6 @@ BlockList.populateCat_robots = function(category) {
 		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
 	category.trimBottom();
-	category.finalize();
 };
 
 /**

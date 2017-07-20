@@ -323,9 +323,9 @@ Tab.prototype.updateArrows=function(){
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 Tab.prototype.updateArrowsShift=function(){
-	var x1 = this.relToAbsX(this.dim.x1)
-	var y1 = this.relToAbsY(this.dim.y1)
-	var x2 = this.relToAbsX(this.dim.x2)
-	var y2 = this.relToAbsY(this.dim.y2)
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };

@@ -2968,8 +2968,7 @@ BlockList.catCount = function() {
  * The following functions populate a Category for the BlockPalette.
  * Each function has the same structure.
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
- * category.trimBottom() is used to remove any extra space at the bottom of the category. category.finalize() finishes
- * the operation.
+ * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 
 /**
@@ -2994,7 +2993,6 @@ BlockList.populateCat_tablet = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -3029,7 +3027,6 @@ BlockList.populateCat_operators = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -3055,7 +3052,6 @@ BlockList.populateCat_control = function(category) {
 	category.addSpace();
 	category.addBlockByName("B_Stop");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -3077,7 +3073,6 @@ BlockList.populateCat_sound = function(category) {
 	category.addBlockByName("B_SetTempoTo");
 	category.addBlockByName("B_Tempo");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -3122,7 +3117,6 @@ BlockList.populateCat_variables = function(category) {
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -3149,7 +3143,6 @@ BlockList.populateCat_robots = function(category) {
 		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
 	category.trimBottom();
-	category.finalize();
 };
 
 /**
@@ -5456,6 +5449,8 @@ function BlockPalette() {
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
 	BlockPalette.visible = true;
+	// Stores a group featuring a trash icon that appears when Blocks are dragged over it
+	BlockPalette.trash = null;
 	if (GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
 		// Hide the Palette if it should be hidden but isn't
 		GuiElements.hidePaletteLayers(true);
@@ -5485,11 +5480,14 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.white;
 
-	BlockPalette.trash = null;
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.white;
 };
+
+/**
+ * Called when the zoom level changes or the screen is resized to recompute dimensions
+ */
 BlockPalette.updateZoom = function() {
 	let BP = BlockPalette;
 	BP.setGraphics();
@@ -5500,62 +5498,92 @@ BlockPalette.updateZoom = function() {
 		BlockPalette.categories[i].updateZoom();
 	}
 };
+
+/**
+ * Creates the gray rectangle below the CategoryBNs
+ */
 BlockPalette.createCatBg = function() {
 	let BP = BlockPalette;
 	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
 	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
 };
+
+/**
+ * Creates the long black rectangle on the left of the screen
+ */
 BlockPalette.createPalBg = function() {
 	let BP = BlockPalette;
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
-	//TouchReceiver.addListenersPalette(BP.palRect);
 };
+
+/**
+ * Creates the categories listed in the BlockList
+ */
 BlockPalette.createCategories = function() {
-	var catCount = BlockList.catCount();
-	var firstColumn = true;
-	var numberOfRows = Math.ceil(catCount / 2);
-	var col1X = BlockPalette.catHMargin;
-	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
-	var currentY = BlockPalette.catVMargin;
-	var currentX = col1X;
-	var usedRows = 0;
-	for (var i = 0; i < catCount; i++) {
+	const catCount = BlockList.catCount();
+	const numberOfRows = Math.ceil(catCount / 2);
+
+	// Automatically alternates between two columns while adding categories
+	const col1X = BlockPalette.catHMargin;
+	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+
+	let firstColumn = true;
+	let currentY = BlockPalette.catVMargin;
+	let currentX = col1X;
+	let usedRows = 0;
+	for (let i = 0; i < catCount; i++) {
 		if (firstColumn && usedRows >= numberOfRows) {
 			currentX = col2X;
 			firstColumn = false;
 			currentY = BlockPalette.catVMargin;
 		}
-		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
 		currentY += CategoryBN.height + CategoryBN.vMargin;
 	}
-
 };
+
+/**
+ * Retrieves the category with the given id.  Called when a specific category needs to be refreshed
+ * @param {string} id
+ * @return {Category}
+ */
 BlockPalette.getCategory = function(id) {
-	var i = 0;
-	while (BlockPalette.categories[i].id != id) {
+	let i = 0;
+	while (BlockPalette.categories[i].id !== id) {
 		i++;
 	}
 	return BlockPalette.categories[i];
 };
+
+/**
+ * Selects the first category, making it visible on the screen
+ */
 BlockPalette.selectFirstCat = function() {
 	BlockPalette.categories[0].select();
 };
-/*BlockPalette.getAbsX=function(){
-	return 0;
-}
-BlockPalette.getAbsY=function(){
-	return TitleBar.height+BlockPalette.catH;
-}*/
+
+/**
+ * Determines whether the specified point is over the Palette.  Used for determining if Blocks should be deleted
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
+ */
 BlockPalette.isStackOverPalette = function(x, y) {
+	const BP = BlockPalette;
 	if (!GuiElements.paletteLayersVisible) return false;
-	return CodeManager.move.pInRange(x, y, 0, BlockPalette.catY, BlockPalette.width, GuiElements.height - TitleBar.height);
+	return CodeManager.move.pInRange(x, y, 0, BP.catY, BP.width, GuiElements.height - TitleBar.height);
 };
-BlockPalette.ShowTrash = function() {
+
+/**
+ * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
+ */
+BlockPalette.showTrash = function() {
 	let BP = BlockPalette;
+	// If the trash is not visible
 	if (!BP.trash) {
 		BP.trash = GuiElements.create.group(0, 0);
 		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
@@ -5571,32 +5599,50 @@ BlockPalette.ShowTrash = function() {
 		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
-BlockPalette.HideTrash = function() {
+
+/**
+ * Removes the trash icon
+ */
+BlockPalette.hideTrash = function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
 		BP.trash.remove();
 		BP.trash = null;
 	}
 };
+
+/**
+ * Recursively tells a specific section of a category to expand/collapse
+ * @param {string} id - The id of the section
+ * @param {boolean} collapsed - Whether the section should expand or collapse
+ */
 BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
 };
+
+/**
+ * Recursively passes message to all children (Categories and their children) of the Palette
+ * @param {string} message
+ */
 BlockPalette.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);
 };
+
+/**
+ * Recursively passes a message to all categories
+ * @param {string} functionName - The function to call on each category
+ */
 BlockPalette.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
 	BlockPalette.categories.forEach(function(category) {
 		category[functionName].apply(category, args);
 	});
 };
-BlockPalette.fileClosed = function() {
-	BlockPalette.passRecursively("fileClosed");
-};
-BlockPalette.fileOpened = function() {
-	BlockPalette.passRecursively("fileOpened");
-};
+
+/**
+ * Reloads all categories.  Called when a new file is opened.
+ */
 BlockPalette.refresh = function() {
 	BlockPalette.categories.forEach(function(category) {
 		category.refreshGroup();
@@ -5738,7 +5784,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
 /**
  * Removes the DisplayStack
  */
-DisplayStack.prototype.delete = function() {
+DisplayStack.prototype.remove = function() {
 	this.group.remove();
 };
 
@@ -5781,173 +5827,241 @@ DisplayStack.prototype.passRecursively = function(functionName) {
 	let args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock, args);
 };
-function CategoryBN(x,y,category){
-	this.x=x;
-	this.y=y;
-	this.category=category;
-	this.loadCatData();
+/**
+ * A button shown in the BlockPalette and used to activate a Category
+ * @param {number} x
+ * @param {number} y
+ * @param {Category} category
+ * @constructor
+ */
+function CategoryBN(x, y, category) {
+	this.x = x;
+	this.y = y;
+	this.category = category;
+	this.text = this.category.name;
+	this.catId = this.category.id;
+	this.fill = Colors.getGradient(this.catId);
 	this.buildGraphics();
 }
-CategoryBN.setGraphics=function(){
-	const BP=BlockPalette;
+
+CategoryBN.setGraphics = function() {
+	const BP = BlockPalette;
 	const CBN = CategoryBN;
-	CBN.bg=Colors.black;
-	CBN.font=Font.uiFont(15);
-	CBN.foreground="#fff";
-	CBN.height=30;
-	CBN.colorW=8;
-	CBN.labelLMargin=6;
+	CBN.bg = Colors.black;
+	CBN.font = Font.uiFont(15);
+	CBN.foreground = "#fff";
+	CBN.height = 30;
+	CBN.colorW = 8;   // The width of the band of color on the left
+	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
 
-	CBN.hMargin=BP.catHMargin;
-	CBN.width=(BP.width-2*BP.catHMargin-CBN.hMargin)/2;
-	var numberOfRows=Math.ceil(BlockList.catCount()/2);
-	CBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CBN.height)/(numberOfRows-1);
-	CBN.labelX=CBN.colorW+CBN.labelLMargin;
-	CBN.labelY=(CBN.height+CBN.font.charHeight)/2;
-}
-CategoryBN.prototype.loadCatData=function(){
-	this.text=this.category.name;
-	this.catId=this.category.id;
-	this.fill=Colors.getGradient(this.catId);
-}
+	CBN.hMargin = BP.catHMargin;
+	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
+	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
+	CBN.vMargin = (BP.catH - 2 * BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+	CBN.labelX = CBN.colorW + CBN.labelLMargin;
+	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+};
 
-CategoryBN.prototype.buildGraphics=function(){
-	var CBN=CategoryBN;
-	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
-	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
-	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.font,CBN.foreground);
+/**
+ * Renders the visuals of the CategoryBN
+ */
+CategoryBN.prototype.buildGraphics = function() {
+	const CBN = CategoryBN;
+	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
+	this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
+	this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
+	this.label = GuiElements.draw.text(CBN.labelX, CBN.labelY, this.text, CBN.font, CBN.foreground);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);
 	GuiElements.layers.categories.appendChild(this.group);
 	this.addListeners();
-}
-CategoryBN.prototype.select=function(){
-	this.bgRect.setAttributeNS(null,"fill",this.fill);
-}
-CategoryBN.prototype.deselect=function(){
-	this.bgRect.setAttributeNS(null,"fill",CategoryBN.bg);
-}
-CategoryBN.prototype.addListeners=function(){
-	var TR=TouchReceiver;
-	var cat=this.category;
-	TouchReceiver.addListenersCat(this.bgRect,cat);
-	TouchReceiver.addListenersCat(this.colorRect,cat);
-	TouchReceiver.addListenersCat(this.label,cat);
-}
+};
 
-/* outline
-tell blockpalette to select cat
-cat index
-highlight
-register touch event
+/**
+ * Makes the button appear selected
+ */
+CategoryBN.prototype.select = function() {
+	this.bgRect.setAttributeNS(null, "fill", this.fill);
+};
 
+/**
+ * Makes the button appear deselected
+ */
+CategoryBN.prototype.deselect = function() {
+	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
+};
 
+/**
+ * Adds event listeners to the parts of the button
+ */
+CategoryBN.prototype.addListeners = function() {
+	const TR = TouchReceiver;
+	const cat = this.category;
+	TouchReceiver.addListenersCat(this.bgRect, cat);
+	TouchReceiver.addListenersCat(this.colorRect, cat);
+	TouchReceiver.addListenersCat(this.label, cat);
+};
+/**
+ * Represents a selection of Blocks available in the BlockPalette.  Each Category has a button which, when pressed,
+ * brings it to the foreground.
+ * The contents of a category is determined by the BlockList static class. Each category has a dedicated function in
+ * BlockList that populates its contents.
+ *
+ * @param {number} buttonX - The x coord of the CategoryBN's location
+ * @param {number} buttonY - The y coord of the CategoryBN
+ * @param {string} name - The display name of the category to show on the button
+ * @param {string} id - The id used to refer to the category
+ * @constructor
+ */
+function Category(buttonX, buttonY, name, id) {
+	this.buttonX = buttonX;
+	this.buttonY = buttonY;
+	this.id = id;
+	this.name = name;
 
-*/
-function Category(buttonX,buttonY, name, id){
-	this.buttonX=buttonX;
-	this.buttonY=buttonY;
-	this.x=0;
-	this.y=TitleBar.height+BlockPalette.catH;
-	/* this.maxX=this.x;
-	this.maxY=this.y; */
-	this.group = GuiElements.create.group(0,0);
+	this.x = 0;
+	this.y = TitleBar.height + BlockPalette.catH;
+
+	this.group = GuiElements.create.group(0, 0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
 		BlockPalette.width, BlockPalette.height, 0, 0);
-	/*
-	TouchReceiver.createScrollFixTimer(this.scrollDiv);
-	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
-	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
-	*/
-	this.id=id;
-	this.name=name;
-	this.currentBlockX=BlockPalette.mainHMargin;
-	this.currentBlockY=BlockPalette.mainVMargin;
-	this.lastHadStud=false;
-	this.button=this.createButton();
-	this.blocks=new Array();
-	this.displayStacks=new Array();
-	this.buttons=new Array();
-	this.buttonsThatRequireFile = [];
-	this.labels=new Array();
-	this.collapsibleSets = [];
-	this.finalized = false;
+	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
+
+	this.prepareToFill();
 	this.fillGroup();
-	this.scrolling=false;
-	this.scrollXOffset=0;
-	this.scrollYOffset=0;
 }
-Category.prototype.createButton=function(){
-	return new CategoryBN(this.buttonX,this.buttonY,this);
-};
-Category.prototype.fillGroup=function(){
-	BlockList["populateCat_"+this.id](this);
-};
-Category.prototype.clearGroup=function(){
-	this.displayStacks.forEach(function(stack) {
-		stack.delete();
-	});
+
+/**
+ * Prepares this Category to be filled with Block/Buttons/etc.
+ */
+Category.prototype.prepareToFill = function() {
+	// Initialize arrays to track contents
 	this.blocks = [];
 	this.displayStacks = [];
-
-	this.buttons.forEach(function(button){
-		button.remove();
-	});
 	this.buttons = [];
-
-	this.labels.forEach(function(label){
-		label.remove();
-	});
 	this.labels = [];
-
-	this.collapsibleSets.forEach(function(set){
-		set.remove();
-	});
 	this.collapsibleSets = [];
 
-	this.currentBlockX=BlockPalette.mainHMargin;
-	this.currentBlockY=BlockPalette.mainVMargin;
-	this.lastHadStud=false;
+	// Keep track of current position in category
+	this.currentBlockX = BlockPalette.mainHMargin;
+	this.currentBlockY = BlockPalette.mainVMargin;
+	this.lastHadStud = false;
+
+	// Used to determine when filling the category is done
+	this.finalized = false;
 };
-Category.prototype.refreshGroup=function(){
+
+/**
+ * Uses a function in BlockList to fill this Category, and marks the Category as finalized once filled.
+ */
+Category.prototype.fillGroup = function() {
+	DebugOptions.assert(!this.finalized);
+	BlockList["populateCat_" + this.id](this);
+	this.finalize();
+};
+
+/**
+ * Removes all contents of the category so it can be rebuilt
+ */
+Category.prototype.clearGroup = function() {
+	this.displayStacks.forEach(function(stack) {
+		stack.remove();
+	});
+	this.buttons.forEach(function(button) {
+		button.remove();
+	});
+	this.labels.forEach(function(label) {
+		label.remove();
+	});
+	this.collapsibleSets.forEach(function(set) {
+		set.remove();
+	});
+};
+
+/**
+ * Removes all contents and rebuilds the category.  Called when available blocks should change
+ */
+Category.prototype.refreshGroup = function() {
 	this.clearGroup();
+	this.prepareToFill();
 	this.fillGroup();
 };
-Category.prototype.addBlockByName=function(blockName){
-	var block=new window[blockName](this.currentBlockX,this.currentBlockY);
+
+/**
+ * Marks this category as no longer being filled
+ */
+Category.prototype.finalize = function() {
+	DebugOptions.assert(!this.finalized);
+	this.finalized = true;
+	this.height = this.currentBlockY;
+	this.updateWidth();
+};
+
+/**
+ * Add a Block with the specified name
+ * @param {string} blockName
+ */
+Category.prototype.addBlockByName = function(blockName) {
+	DebugOptions.assert(!this.finalized);
+	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
 	this.addBlock(block);
 };
-Category.prototype.addVariableBlock=function(variable){
-	var block=new B_Variable(this.currentBlockX,this.currentBlockY,variable);
+
+/**
+ * Add a Variable Block for the specified variable
+ * @param {Variable} variable
+ */
+Category.prototype.addVariableBlock = function(variable) {
+	DebugOptions.assert(!this.finalized);
+	const block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
 	this.addBlock(block);
 };
-Category.prototype.addListBlock=function(list){
-	var block=new B_List(this.currentBlockX,this.currentBlockY,list);
+
+/**
+ * Add a List Block for the specified List
+ * @param {List} list
+ */
+Category.prototype.addListBlock = function(list) {
+	DebugOptions.assert(!this.finalized);
+	const block = new B_List(this.currentBlockX, this.currentBlockY, list);
 	this.addBlock(block);
 };
-Category.prototype.addBlock=function(block){
+
+/**
+ * Add a Block that has already been created
+ * @param {Block} block
+ */
+Category.prototype.addBlock = function(block) {
+	DebugOptions.assert(!this.finalized);
 	this.blocks.push(block);
-	if(this.lastHadStud&&!block.topOpen){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
-		block.move(this.currentBlockX,this.currentBlockY);
+	// If the last Block had a stud and the top of this Block is flat, we shift this Block down a bit
+	if (this.lastHadStud && !block.topOpen) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	if(block.hasHat){
-		this.currentBlockY+=BlockGraphics.hat.hatHEstimate;
-		block.move(this.currentBlockX,this.currentBlockY);
+	// If this Block is a hat block, we make room for the hat
+	if (block.hasHat) {
+		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
+		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	var displayStack=new DisplayStack(block,this.group,this);
+	// We put the Block in a DisplayStack
+	const displayStack = new DisplayStack(block, this.group, this);
 	this.displayStacks.push(displayStack);
-	var height=displayStack.firstBlock.height;
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
-	this.lastHadStud=false;
-	if(block.bottomOpen){
-		this.lastHadStud=true;
-	}
+	// Update the coords for the next Block
+	this.currentBlockY += displayStack.firstBlock.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud = block.bottomOpen;
 };
-Category.prototype.addCollapsibleSet = function(nameIdList){
+
+/**
+ * Creates and adds a CollapsibleSet with a CollapsibleItem for each entry in the nameIdList.
+ * Used in the Robots category
+ * @param {Array<object>} nameIdList - An array or objects, each with fields for name and id
+ * @return {CollapsibleSet}
+ */
+Category.prototype.addCollapsibleSet = function(nameIdList) {
+	DebugOptions.assert(!this.finalized);
 	const x = this.currentBlockX;
 	const y = this.currentBlockY;
 	const set = new CollapsibleSet(y, nameIdList, this, this.group);
@@ -5958,187 +6072,273 @@ Category.prototype.addCollapsibleSet = function(nameIdList){
 	return set;
 };
 
-Category.prototype.fileOpened = function(){
-	this.buttonsThatRequireFile.forEach(function(button){
-		button.enable();
-	});
-};
-Category.prototype.fileClosed = function(){
-	this.buttonsThatRequireFile.forEach(function(button){
-		button.disable();
-	});
+/**
+ * Adds space between Blocks to denote sections
+ */
+Category.prototype.addSpace = function() {
+	DebugOptions.assert(!this.finalized);
+	this.currentBlockY += BlockPalette.sectionMargin;
 };
 
-Category.prototype.addSpace=function(){
-	this.currentBlockY+=BlockPalette.sectionMargin;
-};
-Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
-	if(onlyActiveIfOpen == null) {
-		onlyActiveIfOpen = false;
+/**
+ * Adds a Button with the specified callback function
+ * @param {string} text - The text to place on the Button
+ * @param {function} callback - Called when the Button is tapped
+ * @param {boolean} onlyEnabledIfOpen - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ */
+Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
+	DebugOptions.assert(!this.finalized);
+	if (onlyEnabledIfOpen == null) {
+		onlyEnabledIfOpen = false;
 	}
 
-	var width = BlockPalette.insideBnW;
-	var height = BlockPalette.insideBnH;
-	if(this.lastHadStud){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
+	const width = BlockPalette.insideBnW;
+	const height = BlockPalette.insideBnH;
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
 	}
-	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
-	var BP=BlockPalette;
+
+	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
+	const BP = BlockPalette;
 	button.addText(text);
-	button.setCallbackFunction(callback,true);
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
+	button.setCallbackFunction(callback, true);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
 	this.buttons.push(button);
-	this.lastHadStud=false;
-	if(onlyActiveIfOpen && !SaveManager.fileIsOpen()){
+	this.lastHadStud = false;
+	if (onlyEnabledIfOpen && !SaveManager.fileIsOpen()) {
 		button.disable();
-		this.buttonsThatRequireFile.push(button);
 	}
 };
-Category.prototype.addLabel=function(text){
-	var BP=BlockPalette;
-	var x=this.currentBlockX;
-	var y=this.currentBlockY;
-	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
+
+/**
+ * Adds a text label
+ * @param {string} text - The text to display
+ */
+Category.prototype.addLabel = function(text) {
+	DebugOptions.assert(!this.finalized);
+	const BP = BlockPalette;
+	const x = this.currentBlockX;
+	const y = this.currentBlockY;
+	const labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
 	this.group.appendChild(labelE);
 	this.labels.push(labelE);
-	var height=GuiElements.measure.textHeight(labelE);
-	GuiElements.move.element(labelE,x,y+height);
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
-	this.lastHadStud=false;
-};
-Category.prototype.trimBottom=function(){
-	if(this.lastHadStud){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
-	}
-	this.currentBlockY-=BlockPalette.blockMargin;
-	this.currentBlockY+=BlockPalette.mainVMargin;
-};
-Category.prototype.finalize = function(){
-	this.finalized = true;
-	this.height=this.currentBlockY;
-	this.updateWidth();
-	//this.updateSmoothScrollSet();
+	const height = GuiElements.measure.textHeight(labelE);
+	GuiElements.move.element(labelE, x, y + height);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud = false;
 };
 
-Category.prototype.select=function(){
-	if(BlockPalette.selectedCat==this){
+/**
+ * Removes some of the space at the bottom so the height measurement is correct
+ */
+Category.prototype.trimBottom = function() {
+	DebugOptions.assert(!this.finalized);
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+	this.currentBlockY -= BlockPalette.blockMargin;
+	this.currentBlockY += BlockPalette.mainVMargin;
+};
+
+/**
+ * Brings the category to the foreground and marks it as selected in the BlockPalette
+ */
+Category.prototype.select = function() {
+	if (BlockPalette.selectedCat === this) {
 		return;
 	}
-	if(BlockPalette.selectedCat!=null){
+	if (BlockPalette.selectedCat != null) {
 		BlockPalette.selectedCat.deselect();
 	}
-	BlockPalette.selectedCat=this;
+	BlockPalette.selectedCat = this;
 	this.button.select();
 	this.smoothScrollBox.show();
 };
-Category.prototype.deselect=function(){
-	BlockPalette.selectedCat=null;
+
+/**
+ * Removes the category from the foreground
+ */
+Category.prototype.deselect = function() {
+	BlockPalette.selectedCat = null;
 	this.smoothScrollBox.hide();
 	this.button.deselect();
 };
-Category.prototype.computeWidth = function(){
-	var currentWidth=0;
-	for(var i=0;i<this.blocks.length;i++){
-		var blockW=this.blocks[i].width;
-		if(blockW>currentWidth){
-			currentWidth=blockW;
+
+/**
+ * Computes the width of the Category and stores it in this.width
+ */
+Category.prototype.computeWidth = function() {
+	let currentWidth = 0;
+	// The width is the maximum width across DisplayStacks and CollapsibleSets
+	for (let i = 0; i < this.blocks.length; i++) {
+		const blockW = this.blocks[i].width;
+		if (blockW > currentWidth) {
+			currentWidth = blockW;
 		}
 	}
-	this.collapsibleSets.forEach(function(set){
+	this.collapsibleSets.forEach(function(set) {
 		const width = set.width;
 		currentWidth = Math.max(width, currentWidth);
 	});
-	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
+	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
 };
-Category.prototype.updateWidth=function(){
-	if(!this.finalized) return;
+
+/**
+ * Recomputes the width of the Category and updates the smoothScrollBox to match it
+ */
+Category.prototype.updateWidth = function() {
+	if (!this.finalized) return;
 	this.computeWidth();
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
-Category.prototype.updateDimSet = function(){
-	if(!this.finalized) return;
+
+/**
+ * Updates the dimensions of a Category that contains a CollapsibleSet.  Called by the CollapsibleSet after
+ * expand/collapse
+ */
+Category.prototype.updateDimSet = function() {
+	if (!this.finalized) return;
 	this.computeWidth();
 	let currentH = BlockPalette.mainVMargin;
-	this.collapsibleSets.forEach(function(set){
+	this.collapsibleSets.forEach(function(set) {
 		currentH += set.height;
 		currentH += BlockPalette.blockMargin;
 	});
-	currentH-=BlockPalette.blockMargin;
-	currentH+=BlockPalette.mainVMargin;
+	currentH -= BlockPalette.blockMargin;
+	currentH += BlockPalette.mainVMargin;
 	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
-Category.prototype.relToAbsX=function(x){
-	if(!this.finalized) return x;
+
+/* Convert coordinates relative to the Category to coords relative to the screen */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Category.prototype.relToAbsX = function(x) {
+	if (!this.finalized) return x;
 	return this.smoothScrollBox.relToAbsX(x);
 };
-Category.prototype.relToAbsY=function(y){
-	if(!this.finalized) return y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Category.prototype.relToAbsY = function(y) {
+	if (!this.finalized) return y;
 	return this.smoothScrollBox.relToAbsY(y);
 };
-Category.prototype.absToRelX=function(x){
-	if(!this.finalized) return x;
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Category.prototype.absToRelX = function(x) {
+	if (!this.finalized) return x;
 	return this.smoothScrollBox.absToRelX(x);
 };
-Category.prototype.absToRelY=function(y){
-	if(!this.finalized) return y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Category.prototype.absToRelY = function(y) {
+	if (!this.finalized) return y;
 	return this.smoothScrollBox.absToRelY(y);
 };
-Category.prototype.getAbsX=function(){
+/**
+ * @return {number}
+ */
+Category.prototype.getAbsX = function() {
 	return this.relToAbsX(0);
 };
-Category.prototype.getAbsY=function(){
+/**
+ * @return {number}
+ */
+Category.prototype.getAbsY = function() {
 	return this.relToAbsY(0);
 };
-Category.prototype.passRecursivelyDown = function(message){
+
+/**
+ * Passes a message to Slots/Blocks/CollapsibleSets within this Category
+ * @param {string} message
+ */
+Category.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
-Category.prototype.passRecursively = function(functionName){
+/**
+ * @param {string} functionName
+ */
+Category.prototype.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
-	this.displayStacks.forEach(function(stack){
-		stack[functionName].apply(stack,args);
+	this.displayStacks.forEach(function(stack) {
+		stack[functionName].apply(stack, args);
 	});
-	this.collapsibleSets.forEach(function(set){
-		set[functionName].apply(set,args);
+	this.collapsibleSets.forEach(function(set) {
+		set[functionName].apply(set, args);
 	});
 };
-Category.prototype.updateZoom = function(){
-	if(!this.finalized) return;
+
+/**
+ * Updates the dimensions of the category in response to a screen resize
+ */
+Category.prototype.updateZoom = function() {
+	if (!this.finalized) return;
 	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
+
+/**
+ * Passes a suggested collapse/expand message to any collapsible sets within this category
+ * @param {string} id
+ * @param {boolean} collapsed
+ */
 Category.prototype.setSuggestedCollapse = function(id, collapsed) {
-	this.collapsibleSets.forEach(function(set){
+	this.collapsibleSets.forEach(function(set) {
 		set.setSuggestedCollapse(id, collapsed);
 	});
 };
 /**
- * Created by Tom on 7/17/2017.
+ * Represents a set of items that can be collapsed/expanded and each contain Blocks.  Meant for use in the BlockPalette
+ * @param {number} y - The y coordinate the set should appear at
+ * @param {Array<object>} nameIdList - An array of entries, each containing a field for name and id
+ * @param {Category} category - The Category this set is a part of
+ * @param {Element} group - The SVG group element this set should be added to
+ * @constructor
  */
 function CollapsibleSet(y, nameIdList, category, group) {
 	this.y = y;
 	this.category = category;
 	this.group = group;
+	// Create a collapsibleItem for each entry of the nameIdList
 	this.collapsibleItems = [];
 	nameIdList.forEach(function(entry){
 		this.collapsibleItems.push(new CollapsibleItem(entry.name, entry.id, this, group));
 	}.bind(this));
+	// Stack the collapsibleItems appropriately
 	this.updateDimAlign();
 }
+
 CollapsibleSet.setConstants = function(){
 	const CS = CollapsibleSet;
 	CS.itemMargin = 0;
 };
-CollapsibleSet.prototype.getItemList = function(){
-	return this.collapsibleItems;
-};
+
+/**
+ * Retrieves the CollapsibleItem at the specified index
+ * @param {number} index
+ * @return {CollapsibleItem}
+ */
 CollapsibleSet.prototype.getItem = function(index) {
 	return this.collapsibleItems[index];
 };
+
+/**
+ * Finds the index of a CollapsibleItem by id.  Throws an error if the item is not found
+ * @param {string} id
+ * @return {number}
+ */
 CollapsibleSet.prototype.findItem = function(id) {
 	const items = this.collapsibleItems;
 	for(let i = 0; i < items.length; i++) {
@@ -6148,14 +6348,28 @@ CollapsibleSet.prototype.findItem = function(id) {
 	}
 	DebugOptions.throw("Collapsible item not found.");
 };
+
+/**
+ * Expands the collapsible item at the specified index, then updates the dimensions
+ * @param {number} index
+ */
 CollapsibleSet.prototype.expand = function(index) {
 	this.collapsibleItems[index].expand();
 	this.updateDimAlign();
 };
+
+/**
+ * Collapses the collapsible item at the specified index, then updates the dimensions
+ * @param {number} index
+ */
 CollapsibleSet.prototype.collapse = function(index) {
 	this.collapsibleItems[index].collapse();
 	this.updateDimAlign();
 };
+
+/**
+ * Updates the dimensions and alignment of the CollapsibleSet and notifies its Category to update dimensions
+ */
 CollapsibleSet.prototype.updateDimAlign = function() {
 	const CS = CollapsibleSet;
 	let currentY = this.y;
@@ -6170,6 +6384,11 @@ CollapsibleSet.prototype.updateDimAlign = function() {
 	this.width = width;
 	this.category.updateDimSet();
 };
+
+/**
+ * Computes and stores the width of the CollapsibleSet and alerts its Category that the width may have changed
+ * Triggered when a block inside changes width
+ */
 CollapsibleSet.prototype.updateWidth = function() {
 	let width = 0;
 	this.collapsibleItems.forEach(function(item) {
@@ -6178,15 +6397,25 @@ CollapsibleSet.prototype.updateWidth = function() {
 	this.width = width;
 	this.category.updateWidth();
 };
+
+/**
+ * Removes the CollapsibleSet from the SVG
+ */
 CollapsibleSet.prototype.remove = function() {
 	this.collapsibleItems.forEach(function(item){
 		item.remove();
 	});
 };
 
+/**
+ * Passes a suggested expand/collapse message to all CollapsibleItems
+ * @param {string} id
+ * @param {boolean} collapsed
+ */
 CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
 	this.passRecursively("setSuggestedCollapse", id, collapsed);
 };
+
 CollapsibleSet.prototype.passRecursivelyDown = function(message){
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -6198,7 +6427,12 @@ CollapsibleSet.prototype.passRecursively = function(functionName){
 	});
 };
 /**
- * Created by Tom on 7/17/2017.
+ * A set of DisplayStacks under a header in the BlockPalette that can expand or collapse when selected
+ * @param {string} name - THe name to show in the header
+ * @param {string} id - The id of this item
+ * @param {CollapsibleSet} collapsibleSet - The set this item is a member of
+ * @param {Element} group - The group this item should add itself to
+ * @constructor
  */
 function CollapsibleItem(name, id, collapsibleSet, group) {
 	const CI = CollapsibleItem;
@@ -6207,17 +6441,15 @@ function CollapsibleItem(name, id, collapsibleSet, group) {
 	this.id = id;
 	this.set = collapsibleSet;
 	this.group = GuiElements.create.group(0, 0, group);
+	// This group is where the Blocks are added.  It is right below the header and is added/removed to expand/collapse
 	this.innerGroup = GuiElements.create.group(0, CI.hitboxHeight);
-	this.currentBlockX = BlockPalette.mainHMargin;
-	this.currentBlockY = BlockPalette.mainVMargin;
-	this.blocks = [];
-	this.displayStacks = [];
-	this.lastHadStud = false;
-	this.finalized = false;
 	this.collapsed = true;
 	this.suggestedCollapse = true;
 	this.createLabel();
+
+	this.prepareToFill();
 }
+
 CollapsibleItem.setConstants = function() {
 	const CI = CollapsibleItem;
 	CI.hitboxHeight = 25;
@@ -6230,8 +6462,13 @@ CollapsibleItem.setConstants = function() {
 	CI.triangleWidth = 10;
 	CI.triangleHeight = 5;
 };
+
+/**
+ * Creates the header above the blocks, which includes a triangle, a label, and a hit box around both
+ */
 CollapsibleItem.prototype.createLabel = function() {
 	const CI = CollapsibleItem;
+
 	this.triE = GuiElements.create.path();
 	GuiElements.update.color(this.triE, CI.labelColor);
 	this.updateTriangle();
@@ -6245,8 +6482,11 @@ CollapsibleItem.prototype.createLabel = function() {
 	this.group.appendChild(this.hitboxE);
 
 	TouchReceiver.addListenersCollapsibleItem(this.hitboxE, this);
-
 };
+
+/**
+ * Changes the path of the triangle to be horizontal/vertical depending on the state of the item
+ */
 CollapsibleItem.prototype.updateTriangle = function() {
 	let vertical = !this.collapsed;
 	const CI = CollapsibleItem;
@@ -6261,17 +6501,51 @@ CollapsibleItem.prototype.updateTriangle = function() {
 	}
 	return GuiElements.update.triangleFromPoint(this.triE, pointX, pointY, CI.triangleWidth, -CI.triangleHeight, vertical);
 };
-CollapsibleItem.prototype.addBlockByName=function(blockName){
+
+/**
+ * prepares the item to be filled with Blocks
+ */
+CollapsibleItem.prototype.prepareToFill = function() {
+	this.currentBlockX = BlockPalette.mainHMargin;
+	this.currentBlockY = BlockPalette.mainVMargin;
+	this.blocks = [];
+	this.displayStacks = [];
+	this.lastHadStud = false;
+	this.finalized = false;
+};
+
+/**
+ * Marks this category as no longer being filled
+ */
+CollapsibleItem.prototype.finalize = function() {
+	DebugOptions.assert(!this.finalized);
+	this.finalized = true;
+	this.innerHeight = this.currentBlockY;
+	this.updateWidth();
+};
+
+/**
+ * Add a Block with the specified name
+ * @param {string} blockName
+ */
+CollapsibleItem.prototype.addBlockByName = function(blockName) {
+	DebugOptions.assert(!this.finalized);
 	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
 	this.addBlock(block);
 };
-CollapsibleItem.prototype.addBlock=function(block){
+
+/**
+ * Add a Block that has already been created
+ * @param {Block} block
+ */
+CollapsibleItem.prototype.addBlock = function(block) {
+	DebugOptions.assert(!this.finalized);
 	this.blocks.push(block);
-	if(this.lastHadStud && !block.topOpen){
+	if (this.lastHadStud && !block.topOpen) {
 		this.currentBlockY += BlockGraphics.command.bumpDepth;
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	if(block.hasHat){
+	if (block.hasHat) {
 		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
@@ -6279,107 +6553,177 @@ CollapsibleItem.prototype.addBlock=function(block){
 	this.displayStacks.push(displayStack);
 	this.currentBlockY += displayStack.firstBlock.height;
 	this.currentBlockY += BlockPalette.blockMargin;
-	this.lastHadStud=false;
-	if (block.bottomOpen) {
-		this.lastHadStud = true;
-	}
+	this.lastHadStud = block.bottomOpen;
 };
-CollapsibleItem.prototype.addSpace=function(){
+
+/**
+ * Adds space between Blocks to denote sections
+ */
+CollapsibleItem.prototype.addSpace = function() {
+	DebugOptions.assert(!this.finalized);
 	this.currentBlockY += BlockPalette.sectionMargin;
 };
-CollapsibleItem.prototype.trimBottom=function(){
-	if(this.lastHadStud){
+
+/**
+ * Removes some of the space at the bottom so the height measurement is correct
+ */
+CollapsibleItem.prototype.trimBottom = function() {
+	DebugOptions.assert(!this.finalized);
+	if (this.lastHadStud) {
 		this.currentBlockY += BlockGraphics.command.bumpDepth;
 	}
 	this.currentBlockY -= BlockPalette.blockMargin;
 	this.currentBlockY += BlockPalette.mainVMargin;
 };
-CollapsibleItem.prototype.finalize = function(){
-	this.finalized = true;
-	this.innerHeight = this.currentBlockY;
-	this.updateWidth();
-};
+
+/**
+ * Updates the dimensions and alignment of the CollapsibleItem
+ * @param {number} newY - The y coord the item should have when done
+ * @return {number} - The height of the item, so the next item knows where to go
+ */
 CollapsibleItem.prototype.updateDimAlign = function(newY) {
 	this.y = newY;
 	GuiElements.move.group(this.group, this.x, this.y);
 	return this.getHeight();
 };
-CollapsibleItem.prototype.getWidth = function(){
-	if(this.collapsed) {
+
+/**
+ * Retrieves the width of the item, given its current collapsed/expanded state
+ * @return {number}
+ */
+CollapsibleItem.prototype.getWidth = function() {
+	if (this.collapsed) {
 		return 0;
 	} else {
 		return this.innerWidth;
 	}
 };
-CollapsibleItem.prototype.getHeight = function(){
+
+/**
+ * Retrieves the height of the item, given its current collapsed/expanded state
+ * @return {number}
+ */
+CollapsibleItem.prototype.getHeight = function() {
 	const CI = CollapsibleItem;
-	if(this.collapsed) {
+	if (this.collapsed) {
 		return CI.hitboxHeight;
 	} else {
 		return CI.hitboxHeight + this.innerHeight;
 	}
 };
+
+/**
+ * Computes and stores the width of the item
+ */
 CollapsibleItem.prototype.computeWidth = function() {
 	let currentWidth = 0;
-	for(let i = 0; i < this.blocks.length; i++){
+	for (let i = 0; i < this.blocks.length; i++) {
 		const blockW = this.blocks[i].width;
-		if(blockW > currentWidth){
+		if (blockW > currentWidth) {
 			currentWidth = blockW;
 		}
 	}
 	this.innerWidth = currentWidth;
 };
+
+/**
+ * Hides the Blocks below the header and tells the set to update its dimensions
+ */
 CollapsibleItem.prototype.collapse = function() {
-	if(!this.collapsed) {
+	if (!this.collapsed) {
 		this.collapsed = true;
 		this.innerGroup.remove();
 		this.updateTriangle();
 		this.set.updateDimAlign();
 	}
 };
+
+/**
+ * Shows the Blocks below the header and tells the set to update its dimensions
+ */
 CollapsibleItem.prototype.expand = function() {
-	if(this.collapsed) {
+	if (this.collapsed) {
 		this.collapsed = false;
 		this.group.appendChild(this.innerGroup);
 		this.updateTriangle();
 		this.set.updateDimAlign();
 	}
 };
+
+/**
+ * Computes and stores the width of the item and tells the set to update its width
+ */
 CollapsibleItem.prototype.updateWidth = function() {
 	this.computeWidth();
 	this.set.updateWidth();
 };
-CollapsibleItem.prototype.relToAbsX=function(x){
+
+/* Converts between coordinates relative to the item and coordinates relative to the screen */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CollapsibleItem.prototype.relToAbsX = function(x) {
 	const CI = CollapsibleItem;
 	return this.set.category.relToAbsX(x + this.x);
 };
-CollapsibleItem.prototype.relToAbsY=function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CollapsibleItem.prototype.relToAbsY = function(y) {
 	const CI = CollapsibleItem;
 	return this.set.category.relToAbsY(y + this.y + CI.hitboxHeight);
 };
-CollapsibleItem.prototype.absToRelX=function(x){
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CollapsibleItem.prototype.absToRelX = function(x) {
 	const CI = CollapsibleItem;
 	return this.set.category.absToRelX(x) - this.x;
 };
-CollapsibleItem.prototype.absToRelY=function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CollapsibleItem.prototype.absToRelY = function(y) {
 	const CI = CollapsibleItem;
 	return this.set.category.absToRelY(y) - this.y - CI.hitboxHeight;
 };
-CollapsibleItem.prototype.remove = function(){
+
+/**
+ * Removes the item from the SVG
+ */
+CollapsibleItem.prototype.remove = function() {
 	this.group.remove();
 };
-CollapsibleItem.prototype.toggle = function(){
-	if(this.collapsed) {
+
+/**
+ * Toggles the item's expand/collapse state
+ */
+CollapsibleItem.prototype.toggle = function() {
+	if (this.collapsed) {
 		this.expand();
 	} else {
 		this.collapse();
 	}
 };
-CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed){
-	if(id !== this.id) return;
-	if(collapsed !== this.suggestedCollapse){
+
+/**
+ * Prompts the item to set its expand/collapse state if it matches the id and the user has not overridden the suggested
+ * state
+ * @param {string} id - The id of the relevant item
+ * @param {boolean} collapsed - Whether the suggested state is collapsed or expanded
+ */
+CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed) {
+	if (id !== this.id) return;
+	/* We only change the state if the current state matches the previous suggested state.  That way if the user,
+	 * for example, manually collapses the item, then connects 3 devices, it won't expand each time.
+	 */
+	if (collapsed !== this.suggestedCollapse) {
 		this.suggestedCollapse = collapsed;
-		if(collapsed) {
+		if (collapsed) {
 			this.collapse();
 		} else {
 			this.expand();
@@ -6387,14 +6731,15 @@ CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed){
 	}
 };
 
-CollapsibleItem.prototype.passRecursivelyDown = function(message){
+/* Passes messages to DisplayStacks */
+CollapsibleItem.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
-CollapsibleItem.prototype.passRecursively = function(functionName){
+CollapsibleItem.prototype.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
-	this.displayStacks.forEach(function(stack){
-		stack[functionName].apply(stack,args);
+	this.displayStacks.forEach(function(stack) {
+		stack[functionName].apply(stack, args);
 	});
 };
 function Button(x,y,width,height,parent){
@@ -9255,10 +9600,10 @@ CodeManager.move.update=function(x,y){
 		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
 			if(move.showTrash) {
-				BlockPalette.ShowTrash();
+				BlockPalette.showTrash();
 			}
 		} else {
-			BlockPalette.HideTrash();
+			BlockPalette.hideTrash();
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(CodeManager.fit.found){
@@ -9282,7 +9627,7 @@ CodeManager.move.end=function(){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
-			move.stack.delete();
+			move.stack.remove();
 			if(move.showTrash) {
 				SaveManager.markEdited();
 			}
@@ -9303,7 +9648,7 @@ CodeManager.move.end=function(){
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
-		BlockPalette.HideTrash();
+		BlockPalette.hideTrash();
 	}
 };
 /* Drops the BlockStack where it is without attaching it to anything or deleting it.
@@ -9748,12 +10093,6 @@ CodeManager.deleteRecording = function(recording){
 CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
-};
-CodeManager.fileClosed = function(){
-	BlockPalette.fileClosed();
-};
-CodeManager.fileOpened = function(){
-	BlockPalette.fileOpened();
 };
 CodeManager.cancelLoading = function(){
 	TitleBar.setText(SaveManager.fileName);
@@ -10326,10 +10665,10 @@ Tab.prototype.updateArrows=function(){
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 Tab.prototype.updateArrowsShift=function(){
-	var x1 = this.relToAbsX(this.dim.x1)
-	var y1 = this.relToAbsY(this.dim.y1)
-	var x2 = this.relToAbsX(this.dim.x2)
-	var y2 = this.relToAbsY(this.dim.y2)
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 /**
@@ -12367,19 +12706,12 @@ BlockStack.prototype.land = function() {
 };
 
 /**
- * Removes the stack from the Tab's list.
- */
-BlockStack.prototype.remove = function() {
-	this.tab.removeStack(this);
-};
-
-/**
  * Stops execution and removes the BlockStack digitally and visually.
  */
-BlockStack.prototype.delete = function() {
+BlockStack.prototype.remove = function() {
 	this.stop();
 	this.group.remove();
-	this.remove();   // Remove from Tab's list.
+	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
 
@@ -13318,7 +13650,6 @@ SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
-	CodeManager.fileOpened();
 };
 SaveManager.loadData = function(data) {
 	if (data.length > 0) {
@@ -13341,7 +13672,6 @@ SaveManager.backendSetName = function(fileName, named){
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
-	CodeManager.fileOpened();
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
@@ -13355,7 +13685,6 @@ SaveManager.loadBlank = function(){
 	SaveManager.fileName = null;
 	SaveManager.named = false;
 	SaveManager.loadData("<project><tabs></tabs></project>");
-	CodeManager.fileClosed();
 };
 SaveManager.userNew = function(){
 	SaveManager.autoSave(function(){

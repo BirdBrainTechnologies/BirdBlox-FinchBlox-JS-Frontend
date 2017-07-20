@@ -14,7 +14,6 @@ SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
-	CodeManager.fileOpened();
 };
 SaveManager.loadData = function(data) {
 	if (data.length > 0) {
@@ -37,7 +36,6 @@ SaveManager.backendSetName = function(fileName, named){
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
-	CodeManager.fileOpened();
 };
 SaveManager.backendClose = function(){
 	SaveManager.loadBlank();
@@ -51,7 +49,6 @@ SaveManager.loadBlank = function(){
 	SaveManager.fileName = null;
 	SaveManager.named = false;
 	SaveManager.loadData("<project><tabs></tabs></project>");
-	CodeManager.fileClosed();
 };
 SaveManager.userNew = function(){
 	SaveManager.autoSave(function(){

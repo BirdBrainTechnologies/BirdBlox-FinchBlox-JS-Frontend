@@ -100,10 +100,10 @@ CodeManager.move.update=function(x,y){
 		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
 			Highlighter.hide(); //Hide any existing highlight.
 			if(move.showTrash) {
-				BlockPalette.ShowTrash();
+				BlockPalette.showTrash();
 			}
 		} else {
-			BlockPalette.HideTrash();
+			BlockPalette.hideTrash();
 			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if(CodeManager.fit.found){
@@ -127,7 +127,7 @@ CodeManager.move.end=function(){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
-			move.stack.delete();
+			move.stack.remove();
 			if(move.showTrash) {
 				SaveManager.markEdited();
 			}
@@ -148,7 +148,7 @@ CodeManager.move.end=function(){
 		}
 		Highlighter.hide(); //Hide any existing highlight.
 		move.moving=false; //There are now no moving BlockStacks.
-		BlockPalette.HideTrash();
+		BlockPalette.hideTrash();
 	}
 };
 /* Drops the BlockStack where it is without attaching it to anything or deleting it.
@@ -593,12 +593,6 @@ CodeManager.deleteRecording = function(recording){
 CodeManager.markLoading = function(message){
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
-};
-CodeManager.fileClosed = function(){
-	BlockPalette.fileClosed();
-};
-CodeManager.fileOpened = function(){
-	BlockPalette.fileOpened();
 };
 CodeManager.cancelLoading = function(){
 	TitleBar.setText(SaveManager.fileName);
