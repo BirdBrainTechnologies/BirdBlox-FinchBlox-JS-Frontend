@@ -25,8 +25,6 @@ CollapsibleItem.setConstants = function() {
 	CI.hitboxWidth = BlockPalette.width;
 
 	CI.labelFont = BlockPalette.labelFont;
-	CI.labelFontSize = BlockPalette.labelFontSize;
-	CI.labelFontCharHeight = BlockPalette.labelFontCharHeight;
 	CI.labelColor = BlockPalette.labelColor;
 
 	CI.triBoxWidth = CI.hitboxHeight;
@@ -39,8 +37,8 @@ CollapsibleItem.prototype.createLabel = function() {
 	GuiElements.update.color(this.triE, CI.labelColor);
 	this.updateTriangle();
 
-	const labelY = (CI.hitboxHeight + CI.labelFontCharHeight) / 2;
-	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFontSize, CI.labelColor, CI.labelFont);
+	const labelY = (CI.hitboxHeight + CI.labelFont.charHeight) / 2;
+	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFont, CI.labelColor);
 	this.hitboxE = GuiElements.draw.rect(0, 0, CI.hitboxWidth, CI.hitboxHeight, CI.labelColor);
 	GuiElements.update.opacity(this.hitboxE, 0);
 	this.group.appendChild(this.label);

@@ -30,11 +30,9 @@ RowDialog.setConstants=function(){
 	RowDialog.minHeight = 400;
 	RowDialog.hintMargin = 5;
 
-	RowDialog.fontSize=16;
-	RowDialog.font="Arial";
-	RowDialog.titleFontWeight="bold";
+	RowDialog.titleBarFont = Font.uiFont(16).bold();
+	RowDialog.hintTextFont = Font.uiFont(16);
 	RowDialog.centeredfontWeight="bold";
-	RowDialog.charHeight=12;
 	RowDialog.smallBnWidth = 45;
 	RowDialog.iconH = 15;
 };
@@ -113,9 +111,9 @@ RowDialog.prototype.createTitleRect=function(){
 };
 RowDialog.prototype.createTitleLabel=function(title){
 	var RD=RowDialog;
-	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
+	var textE=GuiElements.draw.text(0,0,title,RD.titleBarFont,RD.titleBarFontC);
 	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=RD.titleBarH/2+RD.charHeight/2;
+	var y=RD.titleBarH/2+RD.titleBarFont.charHeight/2;
 	GuiElements.move.text(textE,x,y);
 	this.group.appendChild(textE);
 	return textE;
@@ -164,11 +162,11 @@ RowDialog.prototype.createScrollBox = function(){
 };
 RowDialog.prototype.createHintText = function(){
 	var RD = RowDialog;
-	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
 	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
 	let x = this.width / 2 - textWidth / 2;
-	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
+	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };

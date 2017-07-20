@@ -17,15 +17,12 @@ RecordingDialog.setConstants = function(){
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	RecD.coverRectOpacity = 0.8;
 	RecD.coverRectColor = Colors.black;
-	RecD.counterFont = "Arial";
 	RecD.counterColor = Colors.white;
-	RecD.counterFontSize = 60;
-	RecD.counterFontWeight = "normal";
+	RecD.counterFont = Font.uiFont(60);
 	RecD.counterBottomMargin = 50;
 	RecD.recordColor = "#f00";
-	RecD.recordTextSize = 25;
-	RecD.recordTextCharH = 18;
-	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.recordFont = Font.uiFont(25);
+	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
 
 };
@@ -109,7 +106,7 @@ RecordingDialog.prototype.createRecordButton = function(){
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
+		"Record", RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function(){
 		RecordingManager.startRecording();
 	}, true);
@@ -176,7 +173,7 @@ RecordingDialog.prototype.drawCoverRect = function(){
 };
 RecordingDialog.prototype.drawTimeCounter = function(){
 	let RD = RecordingDialog;
-	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
 	let height = GuiElements.measure.textHeight(textE);

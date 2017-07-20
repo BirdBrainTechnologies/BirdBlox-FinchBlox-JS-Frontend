@@ -23,10 +23,7 @@ TabRow.setConstants = function(){
 	TR.selectedColor = Colors.black;
 	TR.foregroundColor = Colors.white;
 
-	TR.fontSize=16;
-	TR.font="Arial";
-	TR.fontWeight="bold";
-	TR.charHeight=12;
+	TR.font = Font.uiFont(16).bold();
 
 	TR.closeHeight = 30;
 	TR.closeMargin = 9;
@@ -68,7 +65,7 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose){
 	}
 	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
-	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
+	let textE = GuiElements.draw.text(0, 0, "", TR.font, TR.foregroundColor);
 	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
 
 	let textW = GuiElements.measure.textWidth(textE);
@@ -76,7 +73,7 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose){
 	if (hasClose) {
 		textX = Math.min(textX, x + width - textW - closeSpace);
 	}
-	let textY = (this.height + TR.charHeight) / 2;
+	let textY = (this.height + TR.font.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 
 	TouchReceiver.addListenersTabRow(textE, this, index);

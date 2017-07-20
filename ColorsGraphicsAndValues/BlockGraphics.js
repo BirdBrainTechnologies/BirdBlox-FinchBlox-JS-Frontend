@@ -149,21 +149,15 @@ BlockGraphics.SetLoop = function() {
 /* LabelText constants */
 BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
-	BlockGraphics.labelText.font = "Arial";
-	BlockGraphics.labelText.fontSize = 12;
-	BlockGraphics.labelText.fontWeight = "bold";
+	BlockGraphics.labelText.font = Font.uiFont(12).bold();
 	BlockGraphics.labelText.fill = "#ffffff";
-	BlockGraphics.labelText.charHeight = 10;
 };
 
 /* Constants for text in Slots */
 BlockGraphics.SetValueText = function() {
 	BlockGraphics.valueText = {};
-	BlockGraphics.valueText.font = "Arial";
-	BlockGraphics.valueText.fontSize = 12;
-	BlockGraphics.valueText.fontWeight = "normal";
+	BlockGraphics.valueText.font = Font.uiFont(12);
 	BlockGraphics.valueText.fill = "#000000";
-	BlockGraphics.valueText.charHeight = 10;
 	BlockGraphics.valueText.selectedFill = "#fff";
 	BlockGraphics.valueText.grayedFill = "#aaa";
 };
@@ -560,9 +554,9 @@ BlockGraphics.create.slotHitBox = function(group) {
 BlockGraphics.create.labelText = function(text, group) {
 	const bG = BlockGraphics.labelText;
 	const textElement = GuiElements.create.text();
-	textElement.setAttributeNS(null, "font-family", bG.font);
-	textElement.setAttributeNS(null, "font-size", bG.fontSize);
-	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
 	textElement.setAttributeNS(null, "fill", bG.fill);
 	textElement.setAttributeNS(null, "class", "noselect");
 	const textNode = document.createTextNode(text);
@@ -579,9 +573,9 @@ BlockGraphics.create.labelText = function(text, group) {
 BlockGraphics.create.valueText = function(text, group) {
 	const bG = BlockGraphics.valueText;
 	const textElement = GuiElements.create.text();
-	textElement.setAttributeNS(null, "font-family", bG.font);
-	textElement.setAttributeNS(null, "font-size", bG.fontSize);
-	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
 	textElement.setAttributeNS(null, "fill", bG.fill);
 	textElement.setAttributeNS(null, "class", "noselect");
 	GuiElements.update.text(textElement, text);

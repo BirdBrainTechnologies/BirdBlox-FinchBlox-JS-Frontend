@@ -9,8 +9,8 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 		fontColor = RB.errorFontColor;
 		bgColor = RB.errorBgColor;
 	}
-	var height=RB.charHeight;
-	var textE=GuiElements.draw.text(0,height,text,RB.fontSize,fontColor,RB.font,RB.fontWeight);
+	var height=RB.font.charHeight;
+	var textE=GuiElements.draw.text(0,height,text,RB.font,fontColor);
 	GuiElements.update.textLimitWidth(textE,text,GuiElements.width-RB.hMargin*2);
 	var width=GuiElements.measure.textWidth(textE);
 	var group=GuiElements.create.group(0,0);
@@ -27,10 +27,7 @@ ResultBubble.setConstants=function(){
 	RB.errorFontColor = Colors.white;
 	RB.bgColor=Colors.white;
 	RB.errorBgColor = "#c00000";
-	RB.fontSize=16;
-	RB.font="Arial";
-	RB.fontWeight="normal";
-	RB.charHeight=12;
+	RB.font = Font.uiFont(16);
 	RB.margin=4;
 	/*RB.lifetime=3000;*/
 	RB.hMargin=20;

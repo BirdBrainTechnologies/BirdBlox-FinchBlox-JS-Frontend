@@ -20,13 +20,9 @@ ConnectMultipleDialog.setConstants = function(){
 	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	CMD.tabRowHeight = RowDialog.titleBarH;
 	CMD.numberWidth = 35;
-	CMD.plusFontSize=26;
-	CMD.plusCharHeight=18;
+	CMD.plusFont = Font.uiFont(26);
 
-	CMD.numberFontSize=16;
-	CMD.numberFont="Arial";
-	CMD.numberFontWeight="normal";
-	CMD.numberCharHeight=12;
+	CMD.numberFont = Font.uiFont(16);
 	CMD.numberColor = Colors.white;
 };
 ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
@@ -51,10 +47,10 @@ ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, conten
 };
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
 	let CMD = ConnectMultipleDialog;
-	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (CMD.numberWidth - textW) / 2;
-	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 	contentGroup.appendChild(textE);
 	return textE;
@@ -107,7 +103,7 @@ ConnectMultipleDialog.prototype.createConnectBn = function(){
 	let x = (this.width - bnWidth) / 2;
 	let y = this.getExtraBottomY();
 	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
-	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	button.addText("+", CMD.plusFont);
 	let upperY = y + this.y;
 	let lowerY = upperY + RowDialog.bnHeight;
 	let connectionX = this.x + this.width / 2;

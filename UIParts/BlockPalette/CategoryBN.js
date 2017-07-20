@@ -6,22 +6,21 @@ function CategoryBN(x,y,category){
 	this.buildGraphics();
 }
 CategoryBN.setGraphics=function(){
-	var BP=BlockPalette;
-	CategoryBN.bg=Colors.black;
-	CategoryBN.fontSize=15;
-	CategoryBN.font="Arial";
-	CategoryBN.foreground="#fff";
-	CategoryBN.height=30;
-	CategoryBN.colorW=8;
-	CategoryBN.labelLMargin=6;
-	CategoryBN.charHeight=10;
-	
-	CategoryBN.hMargin=BP.catHMargin;
-	CategoryBN.width=(BP.width-2*BP.catHMargin-CategoryBN.hMargin)/2;
+	const BP=BlockPalette;
+	const CBN = CategoryBN;
+	CBN.bg=Colors.black;
+	CBN.font=Font.uiFont(15);
+	CBN.foreground="#fff";
+	CBN.height=30;
+	CBN.colorW=8;
+	CBN.labelLMargin=6;
+
+	CBN.hMargin=BP.catHMargin;
+	CBN.width=(BP.width-2*BP.catHMargin-CBN.hMargin)/2;
 	var numberOfRows=Math.ceil(BlockList.catCount()/2);
-	CategoryBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CategoryBN.height)/(numberOfRows-1);
-	CategoryBN.labelX=CategoryBN.colorW+CategoryBN.labelLMargin;
-	CategoryBN.labelY=(CategoryBN.height+CategoryBN.charHeight)/2;
+	CBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CBN.height)/(numberOfRows-1);
+	CBN.labelX=CBN.colorW+CBN.labelLMargin;
+	CBN.labelY=(CBN.height+CBN.font.charHeight)/2;
 }
 CategoryBN.prototype.loadCatData=function(){
 	this.text=this.category.name;
@@ -34,7 +33,7 @@ CategoryBN.prototype.buildGraphics=function(){
 	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
 	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
 	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.foreground,CBN.font);
+	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.font,CBN.foreground);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);

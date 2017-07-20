@@ -8,7 +8,7 @@ function LabelText(parent, text) {
 	DebugOptions.validateNonNull(parent, text);
 	this.text = text;
 	this.width = 0;   // Computed later with updateDim
-	this.height = BlockGraphics.labelText.charHeight;
+	this.height = BlockGraphics.labelText.font.charHeight;
 	this.x = 0;
 	this.y = 0;
 	this.parent = parent;

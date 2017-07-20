@@ -136,7 +136,7 @@ Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
 	}
 	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
 	var BP=BlockPalette;
-	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
+	button.addText(text);
 	button.setCallbackFunction(callback,true);
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;

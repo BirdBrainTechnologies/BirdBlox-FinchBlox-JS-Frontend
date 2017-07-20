@@ -13,10 +13,7 @@ InputWidget.NumPad.setConstants = function(){
 	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
 	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
-	NP.fontSize=34;
-	NP.font="Arial";
-	NP.fontWeight="bold";
-	NP.charHeight=25;
+	NP.font=Font.uiFont(34).bold();
 	NP.plusMinusH=22;
 	NP.bsIconH=25;
 	NP.okIconH=NP.bsIconH;
@@ -65,7 +62,7 @@ InputWidget.NumPad.prototype.makeBns = function(){
 InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn){
 	const NP = InputWidget.NumPad;
 	let button=new Button(x,y,NP.bnWidth,NP.bnHeight,this.group);
-	button.addText(text,NP.font,NP.fontSize,NP.fontWeight,NP.charHeight);
+	button.addText(text,NP.font);
 	button.setCallbackFunction(callbackFn,false);
 	button.markAsOverlayPart(this.overlay);
 	return button;

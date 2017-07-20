@@ -23,10 +23,7 @@ TitleBar.setGraphicsPart1=function(){
 	TB.flagFill="#0f0";
 	TB.stopFill="#f00";
 	TB.titleColor=Colors.white;
-	TB.font="Arial";
-	TB.fontWeight="Bold";
-	TB.fontSize=16;
-	TB.fontCharHeight=12;
+	TB.font=Font.uiFont(16).bold();
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
@@ -115,7 +112,7 @@ TitleBar.removeButtons = function(){
 };
 TitleBar.makeTitleText=function(){
 	var TB=TitleBar;
-	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
+	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.font,TB.titleColor);
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 TitleBar.setText=function(text){
@@ -140,7 +137,7 @@ TitleBar.updateText = function(){
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		let width=GuiElements.measure.textWidth(TB.titleLabel);
 		let x=GuiElements.width/2-width/2;
-		let y=TB.height/2+TB.fontCharHeight/2;
+		let y=TB.height/2+TB.font.charHeight/2;
 		if(x < TB.titleLeftX) {
 			x = TB.titleLeftX;
 		} else if(x + width > TB.titleRightX) {

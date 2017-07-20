@@ -21,7 +21,7 @@ EditableSlotShape.prototype.constructor = EditableSlotShape;
 
 EditableSlotShape.setConstants = function() {
 	const ESS = EditableSlotShape;
-	ESS.charHeight = BlockGraphics.valueText.charHeight;
+	ESS.charHeight = BlockGraphics.valueText.font.charHeight;
 	ESS.hitBox = {};
 	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
 	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;

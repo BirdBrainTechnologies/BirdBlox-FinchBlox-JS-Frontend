@@ -441,27 +441,25 @@ GuiElements.draw.image=function(imageName,x,y,width,height,parent){
 	}
 	return imageElement;
 };
-/* Creates a SVG text element with text in it with specified formatting and returns it.
+/**
+ * Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
  * @param {number} y - The text element's y coord.
  * @param {string} text - The text contained within the element.
- * @param {number} fontSize - The font size of the text.
+ * @param {Font} font - The font of the text.
  * @param {string} color - The text's color in the form "#fff".
- * @param {string} font - the font family of the text.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text.
- * @return {SVG text} - The text element which was created.
+ * @param {null} [test]
  */
-GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
+GuiElements.draw.text=function(x,y,text,font,color,test){
+	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	var textElement=GuiElements.create.text();
 	textElement.setAttributeNS(null,"x",x);
 	textElement.setAttributeNS(null,"y",y);
-	textElement.setAttributeNS(null,"font-family",font);
-	textElement.setAttributeNS(null,"font-size",fontSize);
-	if(weight!=null){
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
+	textElement.setAttributeNS(null,"font-family",font.fontFamily);
+	textElement.setAttributeNS(null,"font-size",font.fontSize);
+	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
 	textElement.setAttributeNS(null,"fill",color);
 	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
 	text+=""; //Make text into a string
@@ -470,7 +468,7 @@ GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
 	return textElement;
-}
+};
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything.
  */
@@ -767,20 +765,19 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
 };
 
 
-/* Measures the width of a string if it were used to create a text element with certain formatting.
+/**
+ * Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
- * @param {string} font - The font family of the text element.
- * @param {string} font - The font size of the text element.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text element.
+ * @param {Font} font - The font family of the text element.
+ * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font,size,weight){
+GuiElements.measure.stringWidth=function(text,font,test){
+	DebugOptions.assert(test == null);
 	var textElement=GuiElements.create.text(); //Make the text element.
-	textElement.setAttributeNS(null,"font-family",font); //Set the attributes.
-	textElement.setAttributeNS(null,"font-size",size);
-	if(weight!=null){ //Set weight if specified.
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
+	textElement.setAttributeNS(null,"font-family",font.fontFamily); //Set the attributes.
+	textElement.setAttributeNS(null,"font-size",font.fontSize);
+	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
 	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
 	var textNode = document.createTextNode(text); //Add the text to the text element.
 	textElement.textNode=textNode;

@@ -2377,27 +2377,25 @@ GuiElements.draw.image=function(imageName,x,y,width,height,parent){
 	}
 	return imageElement;
 };
-/* Creates a SVG text element with text in it with specified formatting and returns it.
+/**
+ * Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
  * @param {number} y - The text element's y coord.
  * @param {string} text - The text contained within the element.
- * @param {number} fontSize - The font size of the text.
+ * @param {Font} font - The font of the text.
  * @param {string} color - The text's color in the form "#fff".
- * @param {string} font - the font family of the text.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text.
- * @return {SVG text} - The text element which was created.
+ * @param {null} [test]
  */
-GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
+GuiElements.draw.text=function(x,y,text,font,color,test){
+	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	var textElement=GuiElements.create.text();
 	textElement.setAttributeNS(null,"x",x);
 	textElement.setAttributeNS(null,"y",y);
-	textElement.setAttributeNS(null,"font-family",font);
-	textElement.setAttributeNS(null,"font-size",fontSize);
-	if(weight!=null){
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
+	textElement.setAttributeNS(null,"font-family",font.fontFamily);
+	textElement.setAttributeNS(null,"font-size",font.fontSize);
+	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
 	textElement.setAttributeNS(null,"fill",color);
 	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
 	text+=""; //Make text into a string
@@ -2406,7 +2404,7 @@ GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
 	textElement.textNode=textNode;
 	textElement.appendChild(textNode);
 	return textElement;
-}
+};
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything.
  */
@@ -2703,20 +2701,19 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
 };
 
 
-/* Measures the width of a string if it were used to create a text element with certain formatting.
+/**
+ * Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
- * @param {string} font - The font family of the text element.
- * @param {string} font - The font size of the text element.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text element.
+ * @param {Font} font - The font family of the text element.
+ * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font,size,weight){
+GuiElements.measure.stringWidth=function(text,font,test){
+	DebugOptions.assert(test == null);
 	var textElement=GuiElements.create.text(); //Make the text element.
-	textElement.setAttributeNS(null,"font-family",font); //Set the attributes.
-	textElement.setAttributeNS(null,"font-size",size);
-	if(weight!=null){ //Set weight if specified.
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
+	textElement.setAttributeNS(null,"font-family",font.fontFamily); //Set the attributes.
+	textElement.setAttributeNS(null,"font-size",font.fontSize);
+	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
 	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
 	var textNode = document.createTextNode(text); //Add the text to the text element.
 	textElement.textNode=textNode;
@@ -3308,6 +3305,55 @@ Colors.getGradient = function(category) {
 	return "url(#gradient_" + category + ")";
 };
 /**
+ * Contains data about a font.  Immutable and typically generated using the Font.uiFont(size) function.
+ * Properties are accessed directly to be read, but should not be assigned.  charHeight is a computed property that
+ * indicates how tall the text will be when it appears on the screen and is used for centring text vertically.
+ * @param {string} fontFamily - The font to use.  So far, everything is Arial
+ * @param {number} fontSize
+ * @param {string} fontWeight - ["bold", "normal"]
+ * @constructor
+ */
+function Font(fontFamily, fontSize, fontWeight) {
+	this.fontFamily = fontFamily;
+	this.fontSize = fontSize;
+	this.charHeight = this.lookupCharH(fontSize);
+	this.fontWeight = fontWeight;
+}
+
+/**
+ * Computes the charHeight of the font, given its size.  May need to be adjusted if more fonts are being used
+ * @param {number} fontSize
+ * @return {number}
+ */
+Font.prototype.lookupCharH = function(fontSize){
+	return 0.6639 * fontSize + 1.644;
+};
+
+/**
+ * Returns a Font that is identical to this font but bold
+ * @return {Font}
+ */
+Font.prototype.bold = function(){
+	return new Font(this.fontFamily, this.fontSize, "bold");
+};
+
+/**
+ * Returns a Font that is identical to this font but not bold
+ * @return {Font}
+ */
+Font.prototype.unBold = function(){
+	return new Font(this.fontFamily, this.fontSize, "normal");
+};
+
+/**
+ * Returns the default font of a given size.
+ * @param {number} fontSize
+ * @return {Font}
+ */
+Font.uiFont = function(fontSize){
+	return new Font("Arial", fontSize, "normal");
+};
+/**
  * This static class hold objects which encode path information for icons.  Each entry contains information about
  * the width, height and path of the icon.  To add a new icon:
  * 1) Go to https://material.io/icons/ and search for the icon
@@ -3625,21 +3671,15 @@ BlockGraphics.SetLoop = function() {
 /* LabelText constants */
 BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
-	BlockGraphics.labelText.font = "Arial";
-	BlockGraphics.labelText.fontSize = 12;
-	BlockGraphics.labelText.fontWeight = "bold";
+	BlockGraphics.labelText.font = Font.uiFont(12).bold();
 	BlockGraphics.labelText.fill = "#ffffff";
-	BlockGraphics.labelText.charHeight = 10;
 };
 
 /* Constants for text in Slots */
 BlockGraphics.SetValueText = function() {
 	BlockGraphics.valueText = {};
-	BlockGraphics.valueText.font = "Arial";
-	BlockGraphics.valueText.fontSize = 12;
-	BlockGraphics.valueText.fontWeight = "normal";
+	BlockGraphics.valueText.font = Font.uiFont(12);
 	BlockGraphics.valueText.fill = "#000000";
-	BlockGraphics.valueText.charHeight = 10;
 	BlockGraphics.valueText.selectedFill = "#fff";
 	BlockGraphics.valueText.grayedFill = "#aaa";
 };
@@ -4036,9 +4076,9 @@ BlockGraphics.create.slotHitBox = function(group) {
 BlockGraphics.create.labelText = function(text, group) {
 	const bG = BlockGraphics.labelText;
 	const textElement = GuiElements.create.text();
-	textElement.setAttributeNS(null, "font-family", bG.font);
-	textElement.setAttributeNS(null, "font-size", bG.fontSize);
-	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
 	textElement.setAttributeNS(null, "fill", bG.fill);
 	textElement.setAttributeNS(null, "class", "noselect");
 	const textNode = document.createTextNode(text);
@@ -4055,9 +4095,9 @@ BlockGraphics.create.labelText = function(text, group) {
 BlockGraphics.create.valueText = function(text, group) {
 	const bG = BlockGraphics.valueText;
 	const textElement = GuiElements.create.text();
-	textElement.setAttributeNS(null, "font-family", bG.font);
-	textElement.setAttributeNS(null, "font-size", bG.fontSize);
-	textElement.setAttributeNS(null, "font-weight", bG.fontWeight);
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
 	textElement.setAttributeNS(null, "fill", bG.fill);
 	textElement.setAttributeNS(null, "class", "noselect");
 	GuiElements.update.text(textElement, text);
@@ -5246,10 +5286,7 @@ TitleBar.setGraphicsPart1=function(){
 	TB.flagFill="#0f0";
 	TB.stopFill="#f00";
 	TB.titleColor=Colors.white;
-	TB.font="Arial";
-	TB.fontWeight="Bold";
-	TB.fontSize=16;
-	TB.fontCharHeight=12;
+	TB.font=Font.uiFont(16).bold();
 	
 	TB.buttonH=TB.height-2*TB.buttonMargin;
 	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
@@ -5338,7 +5375,7 @@ TitleBar.removeButtons = function(){
 };
 TitleBar.makeTitleText=function(){
 	var TB=TitleBar;
-	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
+	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.font,TB.titleColor);
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 TitleBar.setText=function(text){
@@ -5363,7 +5400,7 @@ TitleBar.updateText = function(){
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
 		let width=GuiElements.measure.textWidth(TB.titleLabel);
 		let x=GuiElements.width/2-width/2;
-		let y=TB.height/2+TB.fontCharHeight/2;
+		let y=TB.height/2+TB.font.charHeight/2;
 		if(x < TB.titleLeftX) {
 			x = TB.titleLeftX;
 		} else if(x + width > TB.titleRightX) {
@@ -5405,107 +5442,106 @@ TitleBar.updateZoomPart2=function(){
 };
 
 
-function BlockPalette(){
-	BlockPalette.categories = [];
-	BlockPalette.selectedCat=null;
-	BlockPalette.createCatBg();
-	BlockPalette.createPalBg();
-	BlockPalette.createScrollSvg();
+/**
+ * The BlockPalette is the side panel on the left that holds all the Blocks.  BlockPalette is a static class, since
+ * there is only one Palette.  The BlockPalette class creates and manages a set of Categories, each of which
+ * controls the Blocks inside it and the CategoryBN that brings it into the foreground.
+ * @constructor
+ */
+function BlockPalette() {
+	BlockPalette.categories = [];   // List of categories
+	BlockPalette.selectedCat = null;   // category in the foreground
+	BlockPalette.createCatBg();   // Black bar along left side of screen
+	BlockPalette.createPalBg();   // Dark gray rectangle behind the CategoryBNs
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
-	BlockPalette.scrolling=false;
 	BlockPalette.visible = true;
-	if(GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+	if (GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+		// Hide the Palette if it should be hidden but isn't
 		GuiElements.hidePaletteLayers(true);
 	}
 }
-BlockPalette.setGraphics=function(){
-	BlockPalette.mainVMargin=10;
-	BlockPalette.mainHMargin=Button.defaultMargin;
-	BlockPalette.blockMargin=5;
-	BlockPalette.sectionMargin=10;
-	BlockPalette.insideBnH = 38; // Dimensions for buttons within a category
-	BlockPalette.insideBnW = 150;
+BlockPalette.setGraphics = function() {
 
-	BlockPalette.width=253;
-	BlockPalette.catVMargin=Button.defaultMargin;
-	BlockPalette.catHMargin=Button.defaultMargin;
-	BlockPalette.catH=30*3 + BlockPalette.catVMargin*4; //132
-	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
-	BlockPalette.catY=TitleBar.height;
-	BlockPalette.y=BlockPalette.catY+BlockPalette.catH;
-	BlockPalette.bg=Colors.black;
-	BlockPalette.catBg=Colors.darkGray;
+	// Dimensions used within a category
+	BlockPalette.mainVMargin = 10;   // The space before the first Block in a Category
+	BlockPalette.mainHMargin = Button.defaultMargin;   // The space between the Blocks and the left side of the screen
+	BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
+	BlockPalette.sectionMargin = 10;   // The additional space added between sections
+	BlockPalette.insideBnH = 38;   // Height of buttons within a category (such as Create Variable button)
+	BlockPalette.insideBnW = 150;   // Width of buttons within a category
 
-	BlockPalette.bnDefaultFont="Arial";
-	BlockPalette.bnDefaultFontSize=16;
-	BlockPalette.bnDefaultFontCharHeight=12;
+	// Dimensions for the region with CategoryBNs
+	BlockPalette.width = 253;
+	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
+	BlockPalette.catHMargin = Button.defaultMargin;
+	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 4;   // 3 rows of BNs, 4 margins, 30 = height per BN
+	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
+	BlockPalette.catY = TitleBar.height;
+	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
+	BlockPalette.bg = Colors.black;
+	BlockPalette.catBg = Colors.darkGray;
 
-	BlockPalette.labelFont="Arial";
-	BlockPalette.labelFontSize=13;
-	BlockPalette.labelFontCharHeight=12;
-	BlockPalette.labelColor=Colors.white;
+	BlockPalette.labelFont = Font.uiFont(13);
+	BlockPalette.labelColor = Colors.white;
 
 	BlockPalette.trash = null;
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.white;
 };
-BlockPalette.updateZoom=function(){
-	let BP=BlockPalette;
+BlockPalette.updateZoom = function() {
+	let BP = BlockPalette;
 	BP.setGraphics();
-	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
-	GuiElements.update.rect(BP.catRect,0,BP.catY,BP.width,BP.catH);
-	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
-	for(let i = 0; i < BlockPalette.categories.length; i++){
+	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
+	GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
+	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+	for (let i = 0; i < BlockPalette.categories.length; i++) {
 		BlockPalette.categories[i].updateZoom();
 	}
 };
-BlockPalette.createCatBg=function(){
-	let BP=BlockPalette;
-	BP.catRect=GuiElements.draw.rect(0,BP.catY,BP.width,BP.catH,BP.catBg);
+BlockPalette.createCatBg = function() {
+	let BP = BlockPalette;
+	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
-	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
+	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
 };
-BlockPalette.createPalBg=function(){
-	let BP=BlockPalette;
-	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
+BlockPalette.createPalBg = function() {
+	let BP = BlockPalette;
+	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 	//TouchReceiver.addListenersPalette(BP.palRect);
 };
-BlockPalette.createScrollSvg = function(){
-	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
-};
-BlockPalette.createCategories=function(){
-	var catCount=BlockList.catCount();
-	var firstColumn=true;
-	var numberOfRows=Math.ceil(catCount/2);
-	var col1X=BlockPalette.catHMargin;
-	var col2X=BlockPalette.catHMargin+CategoryBN.hMargin+CategoryBN.width;
-	var currentY=BlockPalette.catVMargin;
-	var currentX=col1X;
-	var usedRows=0;
-	for(var i=0;i<catCount;i++){
-		if(firstColumn&&usedRows>=numberOfRows){
-			currentX=col2X;
-			firstColumn=false;
-			currentY=BlockPalette.catVMargin;
+BlockPalette.createCategories = function() {
+	var catCount = BlockList.catCount();
+	var firstColumn = true;
+	var numberOfRows = Math.ceil(catCount / 2);
+	var col1X = BlockPalette.catHMargin;
+	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+	var currentY = BlockPalette.catVMargin;
+	var currentX = col1X;
+	var usedRows = 0;
+	for (var i = 0; i < catCount; i++) {
+		if (firstColumn && usedRows >= numberOfRows) {
+			currentX = col2X;
+			firstColumn = false;
+			currentY = BlockPalette.catVMargin;
 		}
-		var currentCat=new Category(currentX,currentY,BlockList.getCatName(i), BlockList.getCatId(i));
+		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
-		currentY+=CategoryBN.height+CategoryBN.vMargin;
+		currentY += CategoryBN.height + CategoryBN.vMargin;
 	}
-	
+
 };
-BlockPalette.getCategory=function(id){
-	var i=0;
-	while(BlockPalette.categories[i].id!=id){
+BlockPalette.getCategory = function(id) {
+	var i = 0;
+	while (BlockPalette.categories[i].id != id) {
 		i++;
 	}
 	return BlockPalette.categories[i];
 };
-BlockPalette.selectFirstCat=function(){
+BlockPalette.selectFirstCat = function() {
 	BlockPalette.categories[0].select();
 };
 /*BlockPalette.getAbsX=function(){
@@ -5514,75 +5550,55 @@ BlockPalette.selectFirstCat=function(){
 BlockPalette.getAbsY=function(){
 	return TitleBar.height+BlockPalette.catH;
 }*/
-BlockPalette.isStackOverPalette=function(x,y){
-	if(!GuiElements.paletteLayersVisible) return false;
-	return CodeManager.move.pInRange(x,y,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
+BlockPalette.isStackOverPalette = function(x, y) {
+	if (!GuiElements.paletteLayersVisible) return false;
+	return CodeManager.move.pInRange(x, y, 0, BlockPalette.catY, BlockPalette.width, GuiElements.height - TitleBar.height);
 };
-BlockPalette.ShowTrash=function() {
+BlockPalette.ShowTrash = function() {
 	let BP = BlockPalette;
 	if (!BP.trash) {
-		BP.trash = GuiElements.create.group(0,0);
+		BP.trash = GuiElements.create.group(0, 0);
 		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 		GuiElements.update.opacity(trashBg, BP.trashOpacity);
 		BP.trash.appendChild(trashBg);
 
 		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
-		let imgX = BP.width/2 - trashWidth/2;  // Center X
-		let imgY = BP.y + BP.height/2 - BP.trashHeight/2;  // Center Y
+		let imgX = BP.width / 2 - trashWidth / 2; // Center X
+		let imgY = BP.y + BP.height / 2 - BP.trashHeight / 2; // Center Y
 		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
 		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
-BlockPalette.HideTrash=function() {
+BlockPalette.HideTrash = function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
 		BP.trash.remove();
 		BP.trash = null;
 	}
 };
-BlockPalette.startScroll=function(x,y){
-	var BP=BlockPalette;
-	if(!BP.scrolling){
-		BP.scrolling=true;
-		BP.selectedCat.startScroll(x,y);
-	}
-};
-BlockPalette.updateScroll=function (x,y){
-	var BP=BlockPalette;
-	if(BP.scrolling){
-		BP.selectedCat.updateScroll(x,y);
-	}
-};
-BlockPalette.endScroll=function(){
-	var BP=BlockPalette;
-	if(BP.scrolling){
-		BP.scrolling=false;
-		BP.selectedCat.endScroll();
-	}
-};
 BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
 };
-BlockPalette.passRecursivelyDown = function(message){
+BlockPalette.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);
 };
-BlockPalette.passRecursively = function(functionName){
+BlockPalette.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
-	BlockPalette.categories.forEach(function(category){
-		category[functionName].apply(category,args);
+	BlockPalette.categories.forEach(function(category) {
+		category[functionName].apply(category, args);
 	});
 };
-BlockPalette.fileClosed = function(){
+BlockPalette.fileClosed = function() {
 	BlockPalette.passRecursively("fileClosed");
 };
-BlockPalette.fileOpened = function(){
+BlockPalette.fileOpened = function() {
 	BlockPalette.passRecursively("fileOpened");
 };
-BlockPalette.refresh = function(){
-	BlockPalette.categories.forEach(function(category){
+BlockPalette.refresh = function() {
+	BlockPalette.categories.forEach(function(category) {
 		category.refreshGroup();
 	})
 };
@@ -5773,22 +5789,21 @@ function CategoryBN(x,y,category){
 	this.buildGraphics();
 }
 CategoryBN.setGraphics=function(){
-	var BP=BlockPalette;
-	CategoryBN.bg=Colors.black;
-	CategoryBN.fontSize=15;
-	CategoryBN.font="Arial";
-	CategoryBN.foreground="#fff";
-	CategoryBN.height=30;
-	CategoryBN.colorW=8;
-	CategoryBN.labelLMargin=6;
-	CategoryBN.charHeight=10;
-	
-	CategoryBN.hMargin=BP.catHMargin;
-	CategoryBN.width=(BP.width-2*BP.catHMargin-CategoryBN.hMargin)/2;
+	const BP=BlockPalette;
+	const CBN = CategoryBN;
+	CBN.bg=Colors.black;
+	CBN.font=Font.uiFont(15);
+	CBN.foreground="#fff";
+	CBN.height=30;
+	CBN.colorW=8;
+	CBN.labelLMargin=6;
+
+	CBN.hMargin=BP.catHMargin;
+	CBN.width=(BP.width-2*BP.catHMargin-CBN.hMargin)/2;
 	var numberOfRows=Math.ceil(BlockList.catCount()/2);
-	CategoryBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CategoryBN.height)/(numberOfRows-1);
-	CategoryBN.labelX=CategoryBN.colorW+CategoryBN.labelLMargin;
-	CategoryBN.labelY=(CategoryBN.height+CategoryBN.charHeight)/2;
+	CBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CBN.height)/(numberOfRows-1);
+	CBN.labelX=CBN.colorW+CBN.labelLMargin;
+	CBN.labelY=(CBN.height+CBN.font.charHeight)/2;
 }
 CategoryBN.prototype.loadCatData=function(){
 	this.text=this.category.name;
@@ -5801,7 +5816,7 @@ CategoryBN.prototype.buildGraphics=function(){
 	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
 	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
 	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.foreground,CBN.font);
+	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.font,CBN.foreground);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);
@@ -5969,7 +5984,7 @@ Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
 	}
 	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
 	var BP=BlockPalette;
-	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
+	button.addText(text);
 	button.setCallbackFunction(callback,true);
 	this.currentBlockY+=height;
 	this.currentBlockY+=BlockPalette.blockMargin;
@@ -6209,8 +6224,6 @@ CollapsibleItem.setConstants = function() {
 	CI.hitboxWidth = BlockPalette.width;
 
 	CI.labelFont = BlockPalette.labelFont;
-	CI.labelFontSize = BlockPalette.labelFontSize;
-	CI.labelFontCharHeight = BlockPalette.labelFontCharHeight;
 	CI.labelColor = BlockPalette.labelColor;
 
 	CI.triBoxWidth = CI.hitboxHeight;
@@ -6223,8 +6236,8 @@ CollapsibleItem.prototype.createLabel = function() {
 	GuiElements.update.color(this.triE, CI.labelColor);
 	this.updateTriangle();
 
-	const labelY = (CI.hitboxHeight + CI.labelFontCharHeight) / 2;
-	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFontSize, CI.labelColor, CI.labelFont);
+	const labelY = (CI.hitboxHeight + CI.labelFont.charHeight) / 2;
+	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFont, CI.labelColor);
 	this.hitboxE = GuiElements.draw.rect(0, 0, CI.hitboxWidth, CI.hitboxHeight, CI.labelColor);
 	GuiElements.update.opacity(this.hitboxE, 0);
 	this.group.appendChild(this.label);
@@ -6418,10 +6431,7 @@ Button.setGraphics=function(){
 
 	Button.defaultMargin = 5;
 
-	Button.defaultFontSize=16;
-	Button.defaultFont="Arial";
-	Button.defaultFontWeight="normal";
-	Button.defaultCharHeight=12;
+	Button.defaultFont = Font.uiFont(16);
 
 	Button.defaultIconH = 15;
 	Button.defaultSideMargin = 10;
@@ -6431,30 +6441,20 @@ Button.prototype.buildBg=function(){
 	this.group.appendChild(this.bgRect);
 	TouchReceiver.addListenersBN(this.bgRect,this);
 };
-Button.prototype.addText=function(text,font,size,weight,height){
+Button.prototype.addText=function(text,font){
 	DebugOptions.validateNonNull(text);
 	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
 	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(height==null){
-		height=Button.defaultCharHeight;
-	}
-	DebugOptions.validateNumbers(size, height);
 	this.foregroundInverts = true;
 	
-	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,Button.foreground);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width);
 	this.group.appendChild(this.textE);
 	var textW=GuiElements.measure.textWidth(this.textE);
 	var textX=(this.width-textW)/2;
-	var textY=(this.height+height)/2;
+	var textY=(this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	this.hasText=true;
 	TouchReceiver.addListenersBN(this.textE,this);
@@ -6472,7 +6472,7 @@ Button.prototype.addIcon=function(pathId,height){
 	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
-Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, color){
 	this.removeContent();
 	if(color == null){
 		color = Button.foreground;
@@ -6481,15 +6481,6 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	}
 	if(font==null){
 		font=Button.defaultFont;
-	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
 	}
 	if(iconHeight == null){
 		iconHeight = Button.defaultIconH;
@@ -6501,7 +6492,7 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	this.hasText = true;
 	
 	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,color);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width - iconW - sideMargin);
 	this.group.appendChild(this.textE);
 	var textW=GuiElements.measure.textWidth(this.textE);
@@ -6509,13 +6500,13 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	var iconX = (this.width - totalW) / 2;
 	var iconY = (this.height-iconHeight)/2;
 	var textX = iconX + iconW + sideMargin;
-	var textY = (this.height+charH)/2;
+	var textY = (this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
 	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
-Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color, iconColor, leftSide, shiftCenter){
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, color, iconColor, leftSide, shiftCenter){
 	this.removeContent();
 	if(color == null){
 		color = this.currentForeground();
@@ -6527,15 +6518,6 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	}
 	if(font==null){
 		font=Button.defaultFont;
-	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
 	}
 	if(iconHeight == null){
 		iconHeight = Button.defaultIconH;
@@ -6551,7 +6533,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 
 	const sideMargin = (this.height - iconHeight) / 2;
 	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,color);
 	const textMaxW = this.width - iconW - sideMargin * 3;
 	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
 	this.group.appendChild(this.textE);
@@ -6580,7 +6562,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 		textX = Math.min(textX, iconX - textW - sideMargin);
 	}
 
-	const textY = (this.height+charH)/2;
+	const textY = (this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
 	this.icon=new VectorIcon(iconX,iconY,pathId,iconColor,iconHeight,this.group);
@@ -6936,10 +6918,7 @@ TabRow.setConstants = function(){
 	TR.selectedColor = Colors.black;
 	TR.foregroundColor = Colors.white;
 
-	TR.fontSize=16;
-	TR.font="Arial";
-	TR.fontWeight="bold";
-	TR.charHeight=12;
+	TR.font = Font.uiFont(16).bold();
 
 	TR.closeHeight = 30;
 	TR.closeMargin = 9;
@@ -6981,7 +6960,7 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose){
 	}
 	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
-	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
+	let textE = GuiElements.draw.text(0, 0, "", TR.font, TR.foregroundColor);
 	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
 
 	let textW = GuiElements.measure.textWidth(textE);
@@ -6989,7 +6968,7 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose){
 	if (hasClose) {
 		textX = Math.min(textX, x + width - textW - closeSpace);
 	}
-	let textY = (this.height + TR.charHeight) / 2;
+	let textY = (this.height + TR.font.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 
 	TouchReceiver.addListenersTabRow(textE, this, index);
@@ -7240,26 +7219,23 @@ InputWidget.Label.prototype = Object.create(InputWidget.prototype);
 InputWidget.Label.prototype.constructor = InputWidget.Label;
 InputWidget.Label.setConstants = function(){
 	const L = InputWidget.Label;
-	L.fontSize=16; //TODO: Get rid of font redundancy
-	L.font="Arial";
-	L.fontWeight="bold";
-	L.charHeight=12;
+	L.font = Font.uiFont(16).bold();
 	L.margin = 2;
 	L.color = Colors.white;
 };
 InputWidget.Label.prototype.show = function(x, y, parentGroup){
 	const L = InputWidget.Label;
-	this.textE = GuiElements.draw.text(x, y, "", L.fontSize, L.color, L.font, L.fontWeight);
+	this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
 	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = NewInputPad.width / 2 - textW / 2;
-	const textY = y + L.charHeight + L.margin;
+	const textY = y + L.font.charHeight + L.margin;
 	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
 InputWidget.Label.prototype.updateDim = function(){
 	const L = InputWidget.Label;
-	this.height = L.charHeight + 2 * L.margin;
+	this.height = L.font.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
 /**
@@ -7277,10 +7253,7 @@ InputWidget.NumPad.setConstants = function(){
 	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
 	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
-	NP.fontSize=34;
-	NP.font="Arial";
-	NP.fontWeight="bold";
-	NP.charHeight=25;
+	NP.font=Font.uiFont(34).bold();
 	NP.plusMinusH=22;
 	NP.bsIconH=25;
 	NP.okIconH=NP.bsIconH;
@@ -7329,7 +7302,7 @@ InputWidget.NumPad.prototype.makeBns = function(){
 InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn){
 	const NP = InputWidget.NumPad;
 	let button=new Button(x,y,NP.bnWidth,NP.bnHeight,this.group);
-	button.addText(text,NP.font,NP.fontSize,NP.fontWeight,NP.charHeight);
+	button.addText(text,NP.font);
 	button.setCallbackFunction(callbackFn,false);
 	button.markAsOverlayPart(this.overlay);
 	return button;
@@ -7914,8 +7887,8 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 		fontColor = RB.errorFontColor;
 		bgColor = RB.errorBgColor;
 	}
-	var height=RB.charHeight;
-	var textE=GuiElements.draw.text(0,height,text,RB.fontSize,fontColor,RB.font,RB.fontWeight);
+	var height=RB.font.charHeight;
+	var textE=GuiElements.draw.text(0,height,text,RB.font,fontColor);
 	GuiElements.update.textLimitWidth(textE,text,GuiElements.width-RB.hMargin*2);
 	var width=GuiElements.measure.textWidth(textE);
 	var group=GuiElements.create.group(0,0);
@@ -7932,10 +7905,7 @@ ResultBubble.setConstants=function(){
 	RB.errorFontColor = Colors.white;
 	RB.bgColor=Colors.white;
 	RB.errorBgColor = "#c00000";
-	RB.fontSize=16;
-	RB.font="Arial";
-	RB.fontWeight="normal";
-	RB.charHeight=12;
+	RB.font = Font.uiFont(16);
 	RB.margin=4;
 	/*RB.lifetime=3000;*/
 	RB.hMargin=20;
@@ -9127,10 +9097,7 @@ NewDisplayBox.setGraphics=function(){
 	const DB = NewDisplayBox;
 	DB.bgColor=Colors.white;
 	DB.fontColor=Colors.black;
-	DB.fontSize=35;
-	DB.font="Arial";
-	DB.fontWeight="normal";
-	DB.charHeight=25;
+	DB.font = Font.uiFont(35);
 	DB.screenMargin=60;
 	DB.rectH=50;
 	DB.margin = 10;
@@ -9141,7 +9108,7 @@ NewDisplayBox.prototype.build=function(){
 	const DB=NewDisplayBox;
 	this.rectY = this.getRectY();
 	this.rectE=GuiElements.draw.rect(DB.rectX,this.rectY,DB.rectW,DB.rectH,DB.bgColor);
-	this.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
+	this.textE=GuiElements.draw.text(0,0,"",DB.font,DB.fontColor);
 	TouchReceiver.addListenersDisplayBox(this.rectE);
 	TouchReceiver.addListenersDisplayBox(this.textE);
 };
@@ -9158,7 +9125,7 @@ NewDisplayBox.prototype.updateZoom = function(){
 	this.rectY = this.getRectY();
 	const textW=GuiElements.measure.textWidth(this.textE);
 	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
+	const textY=this.rectY+DB.rectH/2+DB.font.charHeight/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	GuiElements.update.rect(this.rectE,DB.rectX,this.rectY,DB.rectW,DB.rectH);
 };
@@ -9167,7 +9134,7 @@ NewDisplayBox.prototype.displayText=function(text){
 	GuiElements.update.textLimitWidth(this.textE,text,DB.rectW);
 	const textW=GuiElements.measure.textWidth(this.textE);
 	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
+	const textY=this.rectY+DB.rectH/2+DB.font.charHeight/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	this.show();
 };
@@ -10537,11 +10504,9 @@ RowDialog.setConstants=function(){
 	RowDialog.minHeight = 400;
 	RowDialog.hintMargin = 5;
 
-	RowDialog.fontSize=16;
-	RowDialog.font="Arial";
-	RowDialog.titleFontWeight="bold";
+	RowDialog.titleBarFont = Font.uiFont(16).bold();
+	RowDialog.hintTextFont = Font.uiFont(16);
 	RowDialog.centeredfontWeight="bold";
-	RowDialog.charHeight=12;
 	RowDialog.smallBnWidth = 45;
 	RowDialog.iconH = 15;
 };
@@ -10620,9 +10585,9 @@ RowDialog.prototype.createTitleRect=function(){
 };
 RowDialog.prototype.createTitleLabel=function(title){
 	var RD=RowDialog;
-	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
+	var textE=GuiElements.draw.text(0,0,title,RD.titleBarFont,RD.titleBarFontC);
 	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=RD.titleBarH/2+RD.charHeight/2;
+	var y=RD.titleBarH/2+RD.titleBarFont.charHeight/2;
 	GuiElements.move.text(textE,x,y);
 	this.group.appendChild(textE);
 	return textE;
@@ -10671,11 +10636,11 @@ RowDialog.prototype.createScrollBox = function(){
 };
 RowDialog.prototype.createHintText = function(){
 	var RD = RowDialog;
-	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
 	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
 	let x = this.width / 2 - textWidth / 2;
-	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
+	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };
@@ -11225,13 +11190,9 @@ ConnectMultipleDialog.setConstants = function(){
 	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	CMD.tabRowHeight = RowDialog.titleBarH;
 	CMD.numberWidth = 35;
-	CMD.plusFontSize=26;
-	CMD.plusCharHeight=18;
+	CMD.plusFont = Font.uiFont(26);
 
-	CMD.numberFontSize=16;
-	CMD.numberFont="Arial";
-	CMD.numberFontWeight="normal";
-	CMD.numberCharHeight=12;
+	CMD.numberFont = Font.uiFont(16);
 	CMD.numberColor = Colors.white;
 };
 ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
@@ -11256,10 +11217,10 @@ ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, conten
 };
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
 	let CMD = ConnectMultipleDialog;
-	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (CMD.numberWidth - textW) / 2;
-	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 	contentGroup.appendChild(textE);
 	return textE;
@@ -11312,7 +11273,7 @@ ConnectMultipleDialog.prototype.createConnectBn = function(){
 	let x = (this.width - bnWidth) / 2;
 	let y = this.getExtraBottomY();
 	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
-	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	button.addText("+", CMD.plusFont);
 	let upperY = y + this.y;
 	let lowerY = upperY + RowDialog.bnHeight;
 	let connectionX = this.x + this.width / 2;
@@ -11388,15 +11349,12 @@ RecordingDialog.setConstants = function(){
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	RecD.coverRectOpacity = 0.8;
 	RecD.coverRectColor = Colors.black;
-	RecD.counterFont = "Arial";
 	RecD.counterColor = Colors.white;
-	RecD.counterFontSize = 60;
-	RecD.counterFontWeight = "normal";
+	RecD.counterFont = Font.uiFont(60);
 	RecD.counterBottomMargin = 50;
 	RecD.recordColor = "#f00";
-	RecD.recordTextSize = 25;
-	RecD.recordTextCharH = 18;
-	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.recordFont = Font.uiFont(25);
+	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
 
 };
@@ -11480,7 +11438,7 @@ RecordingDialog.prototype.createRecordButton = function(){
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
+		"Record", RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function(){
 		RecordingManager.startRecording();
 	}, true);
@@ -11547,7 +11505,7 @@ RecordingDialog.prototype.drawCoverRect = function(){
 };
 RecordingDialog.prototype.drawTimeCounter = function(){
 	let RD = RecordingDialog;
-	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
 	let height = GuiElements.measure.textHeight(textE);
@@ -12820,7 +12778,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 	}
 	if(DebugOptions.shouldSkipHtmlRequests()) {
 		setTimeout(function () {
-			if(true) {
+			if(false) {
 				if(callbackErr != null) {
 					callbackErr(418, "I'm a teapot");
 				}
@@ -15069,7 +15027,7 @@ EditableSlotShape.prototype.constructor = EditableSlotShape;
 
 EditableSlotShape.setConstants = function() {
 	const ESS = EditableSlotShape;
-	ESS.charHeight = BlockGraphics.valueText.charHeight;
+	ESS.charHeight = BlockGraphics.valueText.font.charHeight;
 	ESS.hitBox = {};
 	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
 	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;
@@ -18036,7 +17994,7 @@ function LabelText(parent, text) {
 	DebugOptions.validateNonNull(parent, text);
 	this.text = text;
 	this.width = 0;   // Computed later with updateDim
-	this.height = BlockGraphics.labelText.charHeight;
+	this.height = BlockGraphics.labelText.font.charHeight;
 	this.x = 0;
 	this.y = 0;
 	this.parent = parent;

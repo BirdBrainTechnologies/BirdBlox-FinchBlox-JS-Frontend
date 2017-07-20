@@ -32,10 +32,7 @@ Button.setGraphics=function(){
 
 	Button.defaultMargin = 5;
 
-	Button.defaultFontSize=16;
-	Button.defaultFont="Arial";
-	Button.defaultFontWeight="normal";
-	Button.defaultCharHeight=12;
+	Button.defaultFont = Font.uiFont(16);
 
 	Button.defaultIconH = 15;
 	Button.defaultSideMargin = 10;
@@ -45,30 +42,20 @@ Button.prototype.buildBg=function(){
 	this.group.appendChild(this.bgRect);
 	TouchReceiver.addListenersBN(this.bgRect,this);
 };
-Button.prototype.addText=function(text,font,size,weight,height){
+Button.prototype.addText=function(text,font){
 	DebugOptions.validateNonNull(text);
 	this.removeContent();
 	if(font==null){
 		font=Button.defaultFont;
 	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(height==null){
-		height=Button.defaultCharHeight;
-	}
-	DebugOptions.validateNumbers(size, height);
 	this.foregroundInverts = true;
 	
-	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,Button.foreground);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width);
 	this.group.appendChild(this.textE);
 	var textW=GuiElements.measure.textWidth(this.textE);
 	var textX=(this.width-textW)/2;
-	var textY=(this.height+height)/2;
+	var textY=(this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	this.hasText=true;
 	TouchReceiver.addListenersBN(this.textE,this);
@@ -86,7 +73,7 @@ Button.prototype.addIcon=function(pathId,height){
 	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
-Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, color){
 	this.removeContent();
 	if(color == null){
 		color = Button.foreground;
@@ -95,15 +82,6 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	}
 	if(font==null){
 		font=Button.defaultFont;
-	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
 	}
 	if(iconHeight == null){
 		iconHeight = Button.defaultIconH;
@@ -115,7 +93,7 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	this.hasText = true;
 	
 	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,color);
 	GuiElements.update.textLimitWidth(this.textE,text,this.width - iconW - sideMargin);
 	this.group.appendChild(this.textE);
 	var textW=GuiElements.measure.textWidth(this.textE);
@@ -123,13 +101,13 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	var iconX = (this.width - totalW) / 2;
 	var iconY = (this.height-iconHeight)/2;
 	var textX = iconX + iconW + sideMargin;
-	var textY = (this.height+charH)/2;
+	var textY = (this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
 	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 };
-Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color, iconColor, leftSide, shiftCenter){
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, color, iconColor, leftSide, shiftCenter){
 	this.removeContent();
 	if(color == null){
 		color = this.currentForeground();
@@ -141,15 +119,6 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 	}
 	if(font==null){
 		font=Button.defaultFont;
-	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
 	}
 	if(iconHeight == null){
 		iconHeight = Button.defaultIconH;
@@ -165,7 +134,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 
 	const sideMargin = (this.height - iconHeight) / 2;
 	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
+	this.textE=GuiElements.draw.text(0,0,"",font,color);
 	const textMaxW = this.width - iconW - sideMargin * 3;
 	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
 	this.group.appendChild(this.textE);
@@ -194,7 +163,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, s
 		textX = Math.min(textX, iconX - textW - sideMargin);
 	}
 
-	const textY = (this.height+charH)/2;
+	const textY = (this.height+font.charHeight)/2;
 	GuiElements.move.text(this.textE,textX,textY);
 	TouchReceiver.addListenersBN(this.textE,this);
 	this.icon=new VectorIcon(iconX,iconY,pathId,iconColor,iconHeight,this.group);

@@ -8,10 +8,7 @@ DisplayBox.setGraphics=function(){
 	var DB=DisplayBox;
 	DB.bgColor=Colors.white;
 	DB.fontColor=Colors.black;
-	DB.fontSize=35;
-	DB.font="Arial";
-	DB.fontWeight="normal";
-	DB.charHeight=25;
+	DB.font=Font.uiFont(35);
 	DB.screenMargin=60;
 	DB.rectH=50;
 	
@@ -22,7 +19,7 @@ DisplayBox.setGraphics=function(){
 DisplayBox.buildElements=function(){
 	var DB=DisplayBox;
 	DB.rectE=GuiElements.draw.rect(DB.rectX,DB.rectY,DB.rectW,DB.rectH,DB.bgColor);
-	DB.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
+	DB.textE=GuiElements.draw.text(0,0,"",DB.font,DB.fontColor);
 	TouchReceiver.addListenersDisplayBox(DB.rectE);
 	TouchReceiver.addListenersDisplayBox(DB.textE);
 };
@@ -31,7 +28,7 @@ DisplayBox.updateZoom=function(){
 	DB.setGraphics();
 	var textW=GuiElements.measure.textWidth(DB.textE);
 	var textX=DB.rectX+DB.rectW/2-textW/2;
-	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
+	var textY=DB.rectY+DB.rectH/2+DB.font.charHeight/2;
 	GuiElements.move.text(DB.textE,textX,textY);
 	GuiElements.update.rect(DB.rectE,DB.rectX,DB.rectY,DB.rectW,DB.rectH);
 };
@@ -40,7 +37,7 @@ DisplayBox.displayText=function(text){
 	GuiElements.update.textLimitWidth(DB.textE,text,DB.rectW);
 	var textW=GuiElements.measure.textWidth(DB.textE);
 	var textX=DB.rectX+DB.rectW/2-textW/2;
-	var textY=DB.rectY+DB.rectH/2+DB.charHeight/2;
+	var textY=DB.rectY+DB.rectH/2+DB.font.charHeight/2;
 	GuiElements.move.text(DB.textE,textX,textY);
 	DB.show();
 };
