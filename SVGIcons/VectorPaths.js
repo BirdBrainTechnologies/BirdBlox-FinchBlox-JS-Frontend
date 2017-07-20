@@ -1,5 +1,23 @@
+/**
+ * This static class hold objects which encode path information for icons.  Each entry contains information about
+ * the width, height and path of the icon.  To add a new icon:
+ * 1) Go to https://material.io/icons/ and search for the icon
+ * 2) Download an SVG of the icon (or make one yourself in Inkscape)
+ * 3) Select all objects and use Path > Object to Path to turn them into paths
+ * 4) Merge all paths into one with Path > Union
+ * 5) Go to File > Document Properties > Resize page to drawing or selection
+ * 6) Save the file as an SVG
+ * 7) Use the dimensions as the width/height
+ * 8) Open the file in a text editor, and copy out the string for the path
+ * 9) Create an entry in VectorPaths with the width/height/path information
+ * 10) You may notice that the icon is off-center when you try to use it.  That means the starting point of the path is
+ *     wrong.  Try changing the path to start with "m 0,0", or "m x,y" where x and y are the locations of the initial
+ *     point in the Inkscape file
+ *
+ * @constructor
+ */
 function VectorPaths(){
-	var VP=VectorPaths;
+	const VP=VectorPaths;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -41,7 +59,7 @@ function VectorPaths(){
 	VP.view.width=759.309;
 	VP.view.height=511.321;
 	VP.trash = {};
-	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z"
+	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z";
 	VP.trash.width = 311.111;
 	VP.trash.height = 364.012;
 	VP.square = {};

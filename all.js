@@ -3307,8 +3307,26 @@ Colors.getColor = function(category) {
 Colors.getGradient = function(category) {
 	return "url(#gradient_" + category + ")";
 };
+/**
+ * This static class hold objects which encode path information for icons.  Each entry contains information about
+ * the width, height and path of the icon.  To add a new icon:
+ * 1) Go to https://material.io/icons/ and search for the icon
+ * 2) Download an SVG of the icon (or make one yourself in Inkscape)
+ * 3) Select all objects and use Path > Object to Path to turn them into paths
+ * 4) Merge all paths into one with Path > Union
+ * 5) Go to File > Document Properties > Resize page to drawing or selection
+ * 6) Save the file as an SVG
+ * 7) Use the dimensions as the width/height
+ * 8) Open the file in a text editor, and copy out the string for the path
+ * 9) Create an entry in VectorPaths with the width/height/path information
+ * 10) You may notice that the icon is off-center when you try to use it.  That means the starting point of the path is
+ *     wrong.  Try changing the path to start with "m 0,0", or "m x,y" where x and y are the locations of the initial
+ *     point in the Inkscape file
+ *
+ * @constructor
+ */
 function VectorPaths(){
-	var VP=VectorPaths;
+	const VP=VectorPaths;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -3350,7 +3368,7 @@ function VectorPaths(){
 	VP.view.width=759.309;
 	VP.view.height=511.321;
 	VP.trash = {};
-	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z"
+	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z";
 	VP.trash.width = 311.111;
 	VP.trash.height = 364.012;
 	VP.square = {};
@@ -3442,15 +3460,20 @@ function VectorPaths(){
 	VP.info.height = 20;
 	VP.info.path = "m 10,0 c -5.52,0 -10,4.48 -10,10 0,5.52 4.48,10 10,10 5.52,0 10,-4.48 10,-10 0,-5.52 -4.48,-10 -10,-10 z m 1,15 -2,0 0,-6 2,0 0,6 z m 0,-8 -2,0 0,-2 2,0 0,2 z";
 }
-function ImageLists(){
-	var IL=ImageLists;
-	IL.hBIcon=function(){};
-	IL.hBIcon.lightName="hBIconWhite";
-	IL.hBIcon.darkName="hBIconDarkGray";
-	IL.hBIcon.width=526;
-	IL.hBIcon.height=334;
+/**
+ * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
+ * are better and don't take time to load.  Each record is an object and can be passed to UI-related functions
+ * that need a reference to an image
+ * @constructor
+ */
+function ImageLists() {
+	const IL = ImageLists;
+	IL.hBIcon = {};
+	IL.hBIcon.lightName = "hBIconWhite";
+	IL.hBIcon.darkName = "hBIconDarkGray";
+	IL.hBIcon.width = 526;
+	IL.hBIcon.height = 334;
 }
-
 /*
  * Static class holds all constants and functions required for Block rendering.
  * Note that some of the constants are repeated for each type of Block, so be sure to edit all of them if you're
@@ -8944,41 +8967,75 @@ BlockContextMenu.prototype.close=function(){
 	this.block=null;
 	this.bubbleOverlay.hide();
 };
-function VectorIcon(x,y,pathId,color,height,parent){
-	this.x=x;
-	this.y=y;
-	this.color=color;
-	this.height=height;
-	this.pathId=pathId;
-	this.parent=parent;
-	this.pathE=null;
+/**
+ * A VectorIcon controls an SVG path element. It draws the information for the path from VectorPaths.js and rescales
+ * the path appropriately.
+ * @param {number} x - The x coord of the path
+ * @param {number} y - The y coord of the path
+ * @param {object} pathId - The object from VectorPaths containing the information about the path to draw
+ * @param {string} color - Color in hex
+ * @param {number} height - The height the path should be.  Width is computed from this
+ * @param {Element} parent - An SVG group element the path should go inside
+ * @constructor
+ */
+function VectorIcon(x, y, pathId, color, height, parent) {
+	this.x = x;
+	this.y = y;
+	this.color = color;
+	this.height = height;
+	this.pathId = pathId;
+	this.parent = parent;
+	this.pathE = null;
 	this.draw();
 }
-VectorIcon.computeWidth=function(pathId,height){
-	var scale=height/pathId.height;
-	return scale*pathId.width;
-}
-VectorIcon.prototype.draw=function(){
-	this.scale=this.height/this.pathId.height;
-	this.width=this.scale*this.pathId.width;
-	this.group=GuiElements.create.group(this.x,this.y,this.parent);
-	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
-	this.pathE=GuiElements.create.path(this.group);
-	this.pathE.setAttributeNS(null,"d",this.pathId.path);
-	this.pathE.setAttributeNS(null,"fill",this.color);
-	this.group.appendChild(this.pathE);
-}
-VectorIcon.prototype.setColor=function(color){
-	this.color=color;
-	this.pathE.setAttributeNS(null,"fill",this.color);
-}
-VectorIcon.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
+
+/**
+ * Static function used to preview the width of a VectorIcon before it is drawn
+ * @param {object} pathId - An object from VectorPaths
+ * @param {number} height - The height to use for the previewed path
+ * @return {number} - The width the icon would have, if created
+ */
+VectorIcon.computeWidth = function(pathId, height) {
+	const scale = height / pathId.height;
+	return scale * pathId.width;
 };
+
+/**
+ * Creates the SVG pathE and the group to contain it
+ */
+VectorIcon.prototype.draw = function() {
+	this.scale = this.height / this.pathId.height;
+	this.width = this.scale * this.pathId.width;
+	this.group = GuiElements.create.group(this.x, this.y, this.parent);
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.pathE = GuiElements.create.path(this.group);
+	this.pathE.setAttributeNS(null, "d", this.pathId.path);
+	this.pathE.setAttributeNS(null, "fill", this.color);
+	this.group.appendChild(this.pathE);
+};
+
+/**
+ * Changes the color of the icon
+ * @param {string} color - color in hex
+ */
+VectorIcon.prototype.setColor = function(color) {
+	this.color = color;
+	this.pathE.setAttributeNS(null, "fill", this.color);
+};
+
+/**
+ * Moves the icon to the specified coordinates
+ * @param {number} x
+ * @param{number} y
+ */
+VectorIcon.prototype.move = function(x, y) {
+	this.x = x;
+	this.y = y;
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+};
+
 /* Deletes the icon and removes the path from its parent group. */
-VectorIcon.prototype.remove=function(){
+VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
 //Highlights where the current block will go
