@@ -94,12 +94,12 @@ CallbackManager.robot.discovered = function(robotTypeId, robotList){
 };
 CallbackManager.robot.discoverTimeOut = function(robotTypeId) {
 	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
-	DeviceManager.discoverTimeOut(robotTypeId);
+	DeviceManager.possiblyRescan(robotTypeId);
 	return true;
 };
 CallbackManager.robot.stopDiscover = function(robotTypeId) {
 	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
-	DeviceManager.backendStopDiscover(robotTypeId);
+	DeviceManager.possiblyRescan(robotTypeId);
 	return true;
 };
 

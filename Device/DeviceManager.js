@@ -63,6 +63,20 @@ DeviceManager.prototype.getDevice = function(index) {
 };
 
 /**
+ * Attempts to find the index of the robot with the specified id. Returns -1 if the robot is not found
+ * @param {string} id
+ * @return {number}
+ */
+DeviceManager.prototype.lookupRobotIndexById = function(id) {
+	for (let i = 0; i < this.connectedDevices.length; i++) {
+		if (this.connectedDevices[i].id === id) {
+			return i;
+		}
+	}
+	return -1;
+};
+
+/**
  * Called to replace a device as the current index with a different device. Issues a Bluetooth connection request
  * to the new device and a disconnection request to the old device.
  * TODO: make switching places of two connected devices easier
@@ -209,19 +223,9 @@ DeviceManager.prototype.devicesChanged = function() {
 };
 
 /**
- * Attempts to find the index of the robot with the specified id. Returns -1 if the robot is not found
- * @param {string} id
- * @return {number}
+ * Start scanning if not scanning already
+ * @param {function} renewDiscoverFn - type () -> boolean, called to determine if a scan should be restarted.
  */
-DeviceManager.prototype.lookupRobotIndexById = function(id) {
-	for (let i = 0; i < this.connectedDevices.length; i++) {
-		if (this.connectedDevices[i].id === id) {
-			return i;
-		}
-	}
-	return -1;
-};
-
 DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	if(!this.scanning) {
 		this.scanning = true;
@@ -246,7 +250,7 @@ DeviceManager.prototype.getDiscoverCache = function() {
 	return this.discoverCache;
 };
 
-DeviceManager.prototype.discoverTimeOut = function(robotTypeId) {
+DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
 	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
 		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
 			this.startDiscover(this.renewDiscoverFn);
@@ -283,35 +287,6 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 		newList = newList.concat(this.createVirtualDeviceList());
 	}
 	return newList;
-};
-
-/**
- * Issues a request to determine which robots (of this type) are currently available to connect to
- * @param {function} [callbackFn] - type Array<Device> -> (),  called with the list of Devices
- * @param {function} [callbackErr] - called if an error occurs sending the request
- * @param {boolean} [includeConnected=false] - Indicates whether devices that are currently connected should also be included
- * @param {string|null} [excludeId=null] - An id of a Device to exclude from the list. Ignored if null
- */
-DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeIndex) {
-	if (includeConnected == null) {
-		includeConnected = false;
-	}
-	if (excludeId == null) {
-		excludeId = null;
-	}
-	/* If virtual devices are enabled for debugging and there's an error with the request, we pretend there wasn't
-	 * an error and return a list of virtual devices */
-	if (DebugOptions.shouldAllowVirtualDevices() && callbackFn != null) {
-		callbackErr = function() {
-			callbackFn(this.createVirtualDeviceList())
-		}.bind(this);
-	}
-	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
-		if (callbackFn == null) return;
-
-		callbackFn(this.fromJsonArrayString(response, includeConnected, excludeIndex));
-	}.bind(this), callbackErr);
 };
 
 DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
@@ -497,14 +472,8 @@ DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
 	});
 };
 
-DeviceManager.discoverTimeOut = function(robotTypeId) {
+DeviceManager.possiblyRescan = function(robotTypeId) {
 	DeviceManager.forEach(function(manager) {
-		manager.discoverTimeOut(robotTypeId);
-	});
-};
-
-DeviceManager.backendStopDiscover = function(robotTypeId) {
-	DeviceManager.forEach(function(manager) {
-		manager.backendStopDiscover(robotTypeId);
+		manager.possiblyRescan(robotTypeId);
 	});
 };
