@@ -1695,6 +1695,8 @@ DeviceManager.prototype.discoverTimeOut = function(robotTypeId) {
 	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
 		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
 			this.startDiscover(this.renewDiscoverFn);
+		} else {
+			this.markStoppedDiscover();
 		}
 	}
 };
@@ -1766,10 +1768,7 @@ DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
 
 DeviceManager.prototype.backendStopDiscover = function(robotTypeId) {
 	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
-		this.deviceDiscoverCallback = null;
-		this.discoverCache = null;
-		this.renewDiscoverFn = null;
-		this.scanning = false;
+		this.markStoppedDiscover();
 	}
 };
 
@@ -1782,6 +1781,10 @@ DeviceManager.prototype.backendStopDiscover = function(robotTypeId) {
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
 	let request = new HttpRequestBuilder("robot/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	this.markStoppedDiscover();
+};
+
+DeviceManager.prototype.markStoppedDiscover = function() {
 	this.deviceDiscoverCallback = null;
 	this.discoverCache = null;
 	this.renewDiscoverFn = null;
