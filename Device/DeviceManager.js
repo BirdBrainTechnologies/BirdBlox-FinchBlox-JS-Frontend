@@ -132,7 +132,7 @@ DeviceManager.prototype.swapDevices = function(index1, index2) {
  * @param newDevice
  */
 DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
-	const newIndex = this.lookupRobotIndexById(newDevice);
+	const newIndex = this.lookupRobotIndexById(newDevice.id);
 	if (newIndex > -1) {
 		this.swapDevices(index, newIndex);
 	} else {
