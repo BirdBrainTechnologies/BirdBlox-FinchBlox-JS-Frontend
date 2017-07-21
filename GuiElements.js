@@ -632,9 +632,9 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	div.classList.remove("smoothScrollX");
 	div.classList.remove("smoothScrollY");
 	if(scrollX && scrollY) {
-		div.classList.add("smoothScrollXY");
+		div.classList.add("smoothScrollY");
 	} else if(scrollX) {
-		div.classList.add("smoothScrollX");
+		div.classList.add("noScroll");
 	} else if(scrollY) {
 		div.classList.add("smoothScrollY");
 	} else {

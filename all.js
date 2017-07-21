@@ -2687,9 +2687,9 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	div.classList.remove("smoothScrollX");
 	div.classList.remove("smoothScrollY");
 	if(scrollX && scrollY) {
-		div.classList.add("smoothScrollXY");
+		div.classList.add("smoothScrollY");
 	} else if(scrollX) {
-		div.classList.add("smoothScrollX");
+		div.classList.add("noScroll");
 	} else if(scrollY) {
 		div.classList.add("smoothScrollY");
 	} else {
@@ -3318,7 +3318,7 @@ function Colors() {
 Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#3d3d3d";
-	Colors.darkGray = "#262626";
+	Colors.darkGray = "#333";
 	Colors.darkDarkGray = "#222";
 	Colors.black = "#000";
 };
