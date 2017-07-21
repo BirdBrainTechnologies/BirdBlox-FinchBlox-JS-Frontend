@@ -313,6 +313,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 		Overlay.closeOverlays();
 		TR.targetType="collapsibleItem";
 		TR.target=collapsibleItem;
+		e.stopPropagation();
 	}
 };
 
