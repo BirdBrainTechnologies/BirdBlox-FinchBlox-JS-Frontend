@@ -11026,7 +11026,7 @@ RowDialog.prototype.calcHeights = function(){
 };
 RowDialog.prototype.calcWidths=function(){
 	var RD = RowDialog;
-	let thirdWidth = GuiElements.width / 3;
+	let thirdWidth = GuiElements.width / 2;
 	this.width = Math.min(GuiElements.width, Math.max(thirdWidth, RD.minWidth));
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;

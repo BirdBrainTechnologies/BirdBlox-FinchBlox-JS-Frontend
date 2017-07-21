@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -132,11 +132,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RowDialog.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="RowDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="89" column="54" lean-forward="true" selection-start-line="89" selection-start-column="54" selection-end-line="89" selection-end-column="54" />
+            <state relative-caret-position="504">
+              <caret line="93" column="42" lean-forward="false" selection-start-line="93" selection-start-column="42" selection-end-line="93" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -152,11 +152,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Colors.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Colors.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="14" column="32" lean-forward="true" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
+            <state relative-caret-position="546">
+              <caret line="26" column="29" lean-forward="true" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -469,7 +469,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
         <option value="$PROJECT_DIR$/Data/StringData.js" />
         <option value="$PROJECT_DIR$/Data/ListData.js" />
         <option value="$PROJECT_DIR$/Data/BoolData.js" />
@@ -520,6 +519,7 @@
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
+        <option value="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
       </list>
     </option>
   </component>
@@ -897,7 +897,7 @@
       <workItem from="1500490458671" duration="11158000" />
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
-      <workItem from="1500644734391" duration="18276000" />
+      <workItem from="1500644734391" duration="18319000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -994,7 +994,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1456719000" />
+    <option name="totallyTimeSpent" value="1456762000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1396,6 +1396,79 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="373">
           <caret line="260" column="3" lean-forward="true" selection-start-line="260" selection-start-column="3" selection-end-line="260" selection-end-column="3" />
+          <folding>
+            <element signature="n#!!doc;n#CollapsibleItem#0" expanded="false" />
+            <element signature="n#!!block;n#CollapsibleItem#0" expanded="false" />
+            <element signature="e#918#1178#0" expanded="false" />
+            <element signature="e#1181#1290#0" expanded="false" />
+            <element signature="e#1342#1975#0" expanded="false" />
+            <element signature="e#1978#2082#0" expanded="false" />
+            <element signature="e#2137#2550#0" expanded="false" />
+            <element signature="e#2243#2332#0" expanded="false" />
+            <element signature="e#2338#2427#0" expanded="false" />
+            <element signature="e#2553#2606#0" expanded="false" />
+            <element signature="e#2660#2856#0" expanded="false" />
+            <element signature="e#2859#2915#0" expanded="false" />
+            <element signature="e#2964#3091#0" expanded="false" />
+            <element signature="e#3094#3169#0" expanded="false" />
+            <element signature="e#3233#3376#0" expanded="false" />
+            <element signature="e#3379#3455#0" expanded="false" />
+            <element signature="e#3509#4120#0" expanded="false" />
+            <element signature="e#3617#3732#0" expanded="false" />
+            <element signature="e#3752#3866#0" expanded="false" />
+            <element signature="e#4123#4178#0" expanded="false" />
+            <element signature="e#4227#4320#0" expanded="false" />
+            <element signature="e#4323#4410#0" expanded="false" />
+            <element signature="e#4461#4686#0" expanded="false" />
+            <element signature="e#4525#4586#0" expanded="false" />
+            <element signature="e#4689#4909#0" expanded="false" />
+            <element signature="e#4968#5066#0" expanded="false" />
+            <element signature="e#5069#5175#0" expanded="false" />
+            <element signature="e#5224#5301#0" expanded="false" />
+            <element signature="e#5247#5263#0" expanded="false" />
+            <element signature="e#5269#5299#0" expanded="false" />
+            <element signature="e#5304#5411#0" expanded="false" />
+            <element signature="e#5461#5600#0" expanded="false" />
+            <element signature="e#5513#5543#0" expanded="false" />
+            <element signature="e#5549#5598#0" expanded="false" />
+            <element signature="e#5603#5655#0" expanded="false" />
+            <element signature="e#5708#5918#0" expanded="false" />
+            <element signature="e#5779#5883#0" expanded="false" />
+            <element signature="e#5849#5880#0" expanded="false" />
+            <element signature="e#5921#6008#0" expanded="false" />
+            <element signature="e#6057#6194#0" expanded="false" />
+            <element signature="e#6081#6192#0" expanded="false" />
+            <element signature="e#6197#6284#0" expanded="false" />
+            <element signature="e#6331#6483#0" expanded="false" />
+            <element signature="e#6354#6481#0" expanded="false" />
+            <element signature="e#6486#6576#0" expanded="false" />
+            <element signature="e#6628#6678#0" expanded="false" />
+            <element signature="e#6681#6775#0" expanded="false" />
+            <element signature="e#6776#6824#0" expanded="false" />
+            <element signature="e#6875#6956#0" expanded="false" />
+            <element signature="e#6958#7006#0" expanded="false" />
+            <element signature="e#7057#7156#0" expanded="false" />
+            <element signature="e#7158#7206#0" expanded="false" />
+            <element signature="e#7257#7338#0" expanded="false" />
+            <element signature="e#7340#7388#0" expanded="false" />
+            <element signature="e#7439#7538#0" expanded="false" />
+            <element signature="e#7541#7581#0" expanded="false" />
+            <element signature="e#7628#7653#0" expanded="false" />
+            <element signature="e#7656#7707#0" expanded="false" />
+            <element signature="e#7754#7829#0" expanded="false" />
+            <element signature="e#7777#7798#0" expanded="false" />
+            <element signature="e#7804#7827#0" expanded="false" />
+            <element signature="e#7832#8105#0" expanded="false" />
+            <element signature="e#8179#8583#0" expanded="false" />
+            <element signature="e#8211#8423#0" expanded="false" />
+            <element signature="e#8467#8581#0" expanded="false" />
+            <element signature="e#8524#8549#0" expanded="false" />
+            <element signature="e#8555#8578#0" expanded="false" />
+            <element signature="e#8586#8624#0" expanded="false" />
+            <element signature="e#8691#8805#0" expanded="false" />
+            <element signature="e#8874#9026#0" expanded="false" />
+            <element signature="e#8976#9022#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1862,14 +1935,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="89" column="54" lean-forward="true" selection-start-line="89" selection-start-column="54" selection-end-line="89" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MyCSS.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
@@ -2061,8 +2126,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="14" column="32" lean-forward="true" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
+        <state relative-caret-position="546">
+          <caret line="26" column="29" lean-forward="true" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="93" column="42" lean-forward="false" selection-start-line="93" selection-start-column="42" selection-end-line="93" selection-end-column="42" />
           <folding />
         </state>
       </provider>
