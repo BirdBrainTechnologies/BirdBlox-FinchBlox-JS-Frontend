@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceManager.js" afterPath="$PROJECT_DIR$/Device/DeviceManager.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -212,7 +212,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DeviceManager.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DeviceManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="231">
@@ -309,6 +309,16 @@
                 <element signature="e#17026#17121#0" expanded="false" />
                 <element signature="e#17069#17117#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="273">
+              <caret line="80" column="109" lean-forward="false" selection-start-line="80" selection-start-column="109" selection-end-line="80" selection-end-column="109" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -536,8 +546,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>scrollXOffset</find>
-      <find>finalized</find>
       <find>computeWidth</find>
       <find>VectorPaths</find>
       <find>s.remove</find>
@@ -566,6 +574,8 @@
       <find>stop</find>
       <find>time</find>
       <find>discover</find>
+      <find>HTTP E</find>
+      <find>setor</find>
     </findStrings>
     <replaceStrings>
       <replace>let</replace>
@@ -634,7 +644,6 @@
         <option value="$PROJECT_DIR$/SVGIcons/VectorPaths.js" />
         <option value="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
         <option value="$PROJECT_DIR$/UIParts/Button.js" />
-        <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/UIParts/InputPad/LabelWidget.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Font.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
@@ -660,6 +669,7 @@
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
         <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
+        <option value="$PROJECT_DIR$/HtmlServer.js" />
       </list>
     </option>
   </component>
@@ -1031,7 +1041,7 @@
       <workItem from="1500490458671" duration="11158000" />
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
-      <workItem from="1500644734391" duration="15635000" />
+      <workItem from="1500644734391" duration="15887000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1128,7 +1138,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1454078000" />
+    <option name="totallyTimeSpent" value="1454330000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1304,6 +1314,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="294">
           <caret line="14" column="33" lean-forward="true" selection-start-line="14" selection-start-column="33" selection-end-line="14" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1334,16 +1345,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="58" column="37" lean-forward="false" selection-start-line="58" selection-start-column="37" selection-end-line="58" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="47" column="20" lean-forward="false" selection-start-line="47" selection-start-column="20" selection-end-line="47" selection-end-column="20" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1588,6 +1589,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -2193,6 +2195,14 @@
             <element signature="e#17026#17121#0" expanded="false" />
             <element signature="e#17069#17117#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="80" column="109" lean-forward="false" selection-start-line="80" selection-start-column="109" selection-end-line="80" selection-end-column="109" />
+          <folding />
         </state>
       </provider>
     </entry>

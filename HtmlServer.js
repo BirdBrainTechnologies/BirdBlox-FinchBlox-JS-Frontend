@@ -78,7 +78,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				else {
 					if(callbackErr!=null){
 						if(HtmlServer.logHttp){
-							GuiElements.alert("HTTP ERROR: " + xhttp.status);
+							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);
 					}
