@@ -29,15 +29,17 @@ DiscoverDialog.prototype.show = function(){
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this));
+	this.deviceClass.getManager().startDiscover(function() {
+		return this.visible;
+	}.bind(this));
+	this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
 		return;
 	}
-	this.discoveredDevices = deviceList;
+	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
 	this.reloadRows(this.discoveredDevices.length);
-
 };
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);

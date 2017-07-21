@@ -245,10 +245,11 @@ Device.fromJsonArray = function(deviceClass, json) {
 /**
  * Constructs an array of Devices from a string representing a JSON array
  * @param deviceClass - Subclass of device, the type of devices to construct
- * @param {string} deviceList - String representation of json array
+ * @param {string|null} deviceList - String representation of json array
  * @return {Array}
  */
 Device.fromJsonArrayString = function(deviceClass, deviceList) {
+	if (deviceList == null) return [];
 	let json = [];
 	try {
 		json = JSON.parse(deviceList);

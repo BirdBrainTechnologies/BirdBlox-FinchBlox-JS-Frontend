@@ -25,9 +25,7 @@ RobotConnectionList.setConstants = function(){
 	RCL.width=200;
 };
 RobotConnectionList.prototype.show = function(){
-	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
-		this.showWithList("");
-	}.bind(this));
+	this.showWithList(this.deviceClass.getManager().getDiscoverCache());
 };
 RobotConnectionList.prototype.showWithList = function(list){
 	let RCL = RobotConnectionList;
@@ -39,9 +37,11 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
+	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
 };
 RobotConnectionList.prototype.discoverRobots=function(){
+	return;
 	let me = this;
 	this.deviceClass.getManager().discover(function(response){
 		me.updateRobotList(response);
@@ -53,6 +53,7 @@ RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
+	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray);
 	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();

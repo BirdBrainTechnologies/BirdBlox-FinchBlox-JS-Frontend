@@ -17,6 +17,9 @@ function DeviceManager(deviceClass) {
 	/* The number of devices listed in each DeviceDropSlot to select from.  Determined when updateSelectableDevices
 	 * is called. */
 	this.selectableDevices = 0;
+	this.deviceDiscoverCallback = null;
+	this.renewDiscoverFn = null;
+	this.discoverCache = null;
 }
 
 DeviceManager.setStatics = function() {
@@ -189,6 +192,59 @@ DeviceManager.prototype.lookupRobotIndexById = function(id) {
 	return -1;
 };
 
+DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
+	let request = new HttpRequestBuilder("robot/startDiscover");
+	request.addParam("type", this.deviceClass.getDeviceTypeId());
+	HtmlServer.sendRequestWithCallback(request.toString());
+	this.renewDiscoverFn = renewDiscoverFn;
+};
+
+DeviceManager.prototype.registerDiscoverCallback = function(callbackFn) {
+	this.deviceDiscoverCallback = callbackFn;
+};
+
+DeviceManager.prototype.removeDiscoverCallback = function() {
+	this.deviceDiscoverCallback = null;
+};
+
+DeviceManager.prototype.getDiscoverCache = function() {
+	return this.discoverCache;
+};
+
+DeviceManager.prototype.discoverTimeOut = function(robotTypeId) {
+	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
+		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
+			this.startDiscover(this.renewDiscoverFn);
+		}
+	}
+};
+
+DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeId) {
+	// Get the devices from the request
+	let robotList = Device.fromJsonArrayString(this.deviceClass, robotListString);
+	// Accumulate devices that are not currently connected
+	let disconnectedRobotsList = [];
+	robotList.forEach(function(robot) {
+		// Try to find the device
+		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+		// Only include the device if we didn't find it and it isn't the excludeId robot
+		if (connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id)) {
+			// Include the device in the list
+			disconnectedRobotsList.push(robot);
+		}
+	}.bind(this));
+
+	// If we're including connected devices, add them at the top
+	let newList = disconnectedRobotsList;
+	if (includeConnected) {
+		newList = this.connectedDevices.concat(robotList);
+	}
+	if (DebugOptions.shouldAllowVirtualDevices()) {
+		newList = newList.concat(this.createVirtualDeviceList());
+	}
+	return newList;
+};
+
 /**
  * Issues a request to determine which robots (of this type) are currently available to connect to
  * @param {function} [callbackFn] - type Array<Device> -> (),  called with the list of Devices
@@ -214,32 +270,23 @@ DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConn
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
 		if (callbackFn == null) return;
 
-		// Get the devices from the request
-		let robotList = Device.fromJsonArrayString(this.deviceClass, response);
-		// Accumulate devices that are not currently connected
-		let disconnectedRobotsList = [];
-		robotList.forEach(function(robot) {
-			// Try to find the device
-			let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
-			// Only include the device if we didn't find it and it isn't the excludeId robot
-			if (connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id)) {
-				// Include the device in the list
-				disconnectedRobotsList.push(robot);
-			}
-		}.bind(this));
-
-		// If we're including connected devices, add them at the top
-		let newList = disconnectedRobotsList;
-		if (includeConnected) {
-			newList = this.connectedDevices.concat(robotList);
-		}
-		if (DebugOptions.shouldAllowVirtualDevices()) {
-			newList = newList.concat(this.createVirtualDeviceList());
-		}
-
-		// Run the callback with the results
-		callbackFn(newList);
+		callbackFn(this.fromJsonArrayString(response, includeConnected, excludeId));
 	}.bind(this), callbackErr);
+};
+
+DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
+	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
+		this.discoverCache = robotList;
+		if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
+	}
+};
+
+DeviceManager.prototype.backendStopDiscover = function(robotTypeId) {
+	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
+		this.deviceDiscoverCallback = null;
+		this.discoverCache = null;
+		this.renewDiscoverFn = null;
+	}
 };
 
 /**
@@ -249,8 +296,11 @@ DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConn
  * @param {function} callbackErr
  */
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
-	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
+	let request = new HttpRequestBuilder("robot/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	this.deviceDiscoverCallback = null;
+	this.discoverCache = null;
+	this.renewDiscoverFn = null;
 };
 
 /**
@@ -396,4 +446,22 @@ DeviceManager.minStatus = function(status1, status2) {
  */
 DeviceManager.setStatusListener = function(callbackFn) {
 	DeviceManager.statusListener = callbackFn;
+};
+
+DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
+	DeviceManager.forEach(function(manager) {
+		manager.backendDiscovered(robotTypeId, robotList);
+	});
+};
+
+DeviceManager.discoverTimeOut = function(robotTypeId) {
+	DeviceManager.forEach(function(manager) {
+		manager.discoverTimeOut(robotTypeId);
+	});
+};
+
+DeviceManager.backendStopDiscover = function(robotTypeId) {
+	DeviceManager.forEach(function(manager) {
+		manager.backendStopDiscover(robotTypeId);
+	});
 };

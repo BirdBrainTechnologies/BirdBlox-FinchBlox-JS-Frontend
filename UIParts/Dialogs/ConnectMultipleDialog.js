@@ -95,7 +95,9 @@ ConnectMultipleDialog.prototype.show = function(){
 	RowDialog.prototype.show.call(this);
 	this.createConnectBn();
 	this.createTabRow();
-	this.deviceClass.getManager().discover();
+	this.deviceClass.getManager().startDiscover(function() {
+		return this.visible;
+	}.bind(this));
 };
 ConnectMultipleDialog.prototype.createConnectBn = function(){
 	let CMD = ConnectMultipleDialog;

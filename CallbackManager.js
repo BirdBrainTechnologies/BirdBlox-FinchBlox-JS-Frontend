@@ -7,7 +7,7 @@ function CallbackManager(){
 CallbackManager.sounds = {};
 CallbackManager.sounds.recordingEnded = function(){
 	RecordingManager.interruptRecording();
-	return false;
+	return true;
 };
 CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
@@ -51,6 +51,7 @@ CallbackManager.cloud.downloadComplete = function(filename) {
 CallbackManager.cloud.signIn = function(){
 	OpenDialog.filesChanged();
 	OpenCloudDialog.filesChanged();
+	return true;
 };
 
 CallbackManager.dialog = {};
@@ -85,9 +86,23 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
 	return true;
 };
-CallbackManager.robot.discovered = function(robotList){
+CallbackManager.robot.discovered = function(robotTypeId, robotList){
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	robotList = HtmlServer.decodeHtml(robotList);
+	DeviceManager.backendDiscovered(robotTypeId, robotList);
 	return true;
 };
+CallbackManager.robot.discoverTimeOut = function(robotTypeId) {
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	DeviceManager.discoverTimeOut(robotTypeId);
+	return true;
+};
+CallbackManager.robot.stopDiscover = function(robotTypeId) {
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	DeviceManager.backendStopDiscover(robotTypeId);
+	return true;
+};
+
 CallbackManager.tablet = {};
 CallbackManager.tablet.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
