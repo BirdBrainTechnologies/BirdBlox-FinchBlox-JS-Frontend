@@ -12102,7 +12102,7 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.x = x;
 	this.upperY = upperY;
 	this.lowerY = lowerY;
-	this.index = this;
+	this.index = index;
 	this.deviceClass = deviceClass;
 	this.visible = false;
 	if(index != null){
@@ -12145,7 +12145,8 @@ RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
-	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray, true, this.index);
+	const includeConnected = this.index !== null;
+	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray, includeConnected, this.index);
 	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();
