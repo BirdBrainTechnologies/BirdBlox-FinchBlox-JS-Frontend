@@ -155,8 +155,8 @@
       <file leaf-file-name="Colors.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="24" column="27" lean-forward="true" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
+            <state relative-caret-position="294">
+              <caret line="14" column="30" lean-forward="false" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -897,7 +897,7 @@
       <workItem from="1500490458671" duration="11158000" />
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
-      <workItem from="1500644734391" duration="18021000" />
+      <workItem from="1500644734391" duration="18102000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -994,7 +994,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1456464000" />
+    <option name="totallyTimeSpent" value="1456545000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2061,8 +2061,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="24" column="27" lean-forward="true" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
+        <state relative-caret-position="294">
+          <caret line="14" column="30" lean-forward="false" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
           <folding />
         </state>
       </provider>
