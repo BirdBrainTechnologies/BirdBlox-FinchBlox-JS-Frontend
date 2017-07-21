@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CallbackManager.js" afterPath="$PROJECT_DIR$/CallbackManager.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/Device.js" afterPath="$PROJECT_DIR$/Device/Device.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceManager.js" afterPath="$PROJECT_DIR$/Device/DeviceManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceFlutter.js" afterPath="$PROJECT_DIR$/Device/DeviceFlutter.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/DeviceWithPorts.js" afterPath="$PROJECT_DIR$/Device/DeviceWithPorts.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,120 +23,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DeviceManager.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
+      <file leaf-file-name="Device.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Device/Device.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="547">
-              <caret line="462" column="33" lean-forward="false" selection-start-line="462" selection-start-column="14" selection-end-line="462" selection-end-column="33" />
-              <folding>
-                <element signature="e#702#739#0" expanded="false" />
-                <element signature="e#801#930#0" expanded="false" />
-                <element signature="e#1096#1606#0" expanded="false" />
-                <element signature="e#1127#1148#0" expanded="false" />
-                <element signature="e#1192#1375#0" expanded="false" />
-                <element signature="e#1379#1463#0" expanded="false" />
-                <element signature="e#1504#1577#0" expanded="false" />
-                <element signature="e#1777#1818#0" expanded="false" />
-                <element signature="e#1821#1968#0" expanded="false" />
-                <element signature="e#2021#2112#0" expanded="false" />
-                <element signature="e#2115#2470#0" expanded="false" />
-                <element signature="e#2534#2723#0" expanded="false" />
-                <element signature="e#2726#2845#0" expanded="false" />
-                <element signature="e#2901#3066#0" expanded="false" />
-                <element signature="e#3069#3181#0" expanded="false" />
-                <element signature="e#3241#3330#0" expanded="false" />
-                <element signature="e#3333#3465#0" expanded="false" />
-                <element signature="e#3525#3714#0" expanded="false" />
-                <element signature="e#3583#3628#0" expanded="false" />
-                <element signature="e#3717#3783#0" expanded="false" />
-                <element signature="e#3838#3972#0" expanded="false" />
-                <element signature="e#3888#3915#0" expanded="false" />
-                <element signature="e#3975#4213#0" expanded="false" />
-                <element signature="e#4274#4540#0" expanded="false" />
-                <element signature="e#4313#4333#0" expanded="false" />
-                <element signature="e#4339#4538#0" expanded="false" />
-                <element signature="e#4543#5113#0" expanded="false" />
-                <element signature="e#5175#5800#0" expanded="false" />
-                <element signature="e#5450#5507#0" expanded="false" />
-                <element signature="e#5548#5605#0" expanded="false" />
-                <element signature="e#5803#5910#0" expanded="false" />
-                <element signature="e#5973#6008#0" expanded="false" />
-                <element signature="e#6011#6119#0" expanded="false" />
-                <element signature="e#6172#6278#0" expanded="false" />
-                <element signature="e#6281#6433#0" expanded="false" />
-                <element signature="e#6494#6631#0" expanded="false" />
-                <element signature="e#6552#6617#0" expanded="false" />
-                <element signature="e#6596#6614#0" expanded="false" />
-                <element signature="e#8092#8173#0" expanded="false" />
-                <element signature="e#8506#9019#0" expanded="false" />
-                <element signature="e#9118#9873#0" expanded="false" />
-                <element signature="e#9234#9397#0" expanded="false" />
-                <element signature="e#9496#9547#0" expanded="false" />
-                <element signature="e#10372#10660#0" expanded="false" />
-                <element signature="e#10978#11097#0" expanded="false" />
-                <element signature="e#11159#11339#0" expanded="false" />
-                <element signature="e#11246#11323#0" expanded="false" />
-                <element signature="e#11342#11559#0" expanded="false" />
-                <element signature="e#11641#11837#0" expanded="false" />
-                <element signature="e#11731#11775#0" expanded="false" />
-                <element signature="e#11796#11835#0" expanded="false" />
-                <element signature="e#11840#11992#0" expanded="false" />
-                <element signature="e#12067#12263#0" expanded="false" />
-                <element signature="e#12157#12201#0" expanded="false" />
-                <element signature="e#12222#12261#0" expanded="false" />
-                <element signature="e#12266#12380#0" expanded="false" />
-                <element signature="e#12428#12675#0" expanded="false" />
-                <element signature="e#12554#12607#0" expanded="false" />
-                <element signature="e#12678#12885#0" expanded="false" />
-                <element signature="e#13034#13098#0" expanded="false" />
-                <element signature="e#13150#13238#0" expanded="false" />
-                <element signature="e#13193#13234#0" expanded="false" />
-                <element signature="e#13241#13487#0" expanded="false" />
-                <element signature="e#13559#13706#0" expanded="false" />
-                <element signature="e#13602#13663#0" expanded="false" />
-                <element signature="e#13709#13903#0" expanded="false" />
-                <element signature="e#13968#14108#0" expanded="false" />
-                <element signature="e#14011#14065#0" expanded="false" />
-                <element signature="e#14111#14200#0" expanded="false" />
-                <element signature="e#14241#14391#0" expanded="false" />
-                <element signature="e#14394#14511#0" expanded="false" />
-                <element signature="e#14549#14762#0" expanded="false" />
-                <element signature="e#14646#14710#0" expanded="false" />
-                <element signature="e#14765#14947#0" expanded="false" />
-                <element signature="e#15001#15147#0" expanded="false" />
-                <element signature="e#15004#15109#0" expanded="false" />
-                <element signature="e#15150#15351#0" expanded="false" />
-                <element signature="e#15407#15454#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="46" column="18" lean-forward="true" selection-start-line="46" selection-start-column="18" selection-end-line="46" selection-end-column="18" />
+            <state relative-caret-position="478">
+              <caret line="218" column="53" lean-forward="true" selection-start-line="218" selection-start-column="4" selection-end-line="218" selection-end-column="53" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ConnectMultipleDialog.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js">
+      <file leaf-file-name="DeviceFlutter.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Device/DeviceFlutter.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="95" column="27" lean-forward="true" selection-start-line="95" selection-start-column="27" selection-end-line="95" selection-end-column="27" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CallbackManager.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="95" column="47" lean-forward="false" selection-start-line="95" selection-start-column="47" selection-end-line="95" selection-end-column="47" />
+            <state relative-caret-position="457">
+              <caret line="24" column="45" lean-forward="true" selection-start-line="24" selection-start-column="45" selection-end-line="24" selection-end-column="45" />
               <folding />
             </state>
           </provider>
@@ -229,7 +127,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/BlockGraphics.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
         <option value="$PROJECT_DIR$/Data/StringData.js" />
@@ -244,8 +141,6 @@
         <option value="$PROJECT_DIR$/UIParts/DeviceStatusLight.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/DeviceMenu.js" />
         <option value="$PROJECT_DIR$/Device/DeviceHummingbird.js" />
-        <option value="$PROJECT_DIR$/Device/DeviceWithPorts.js" />
-        <option value="$PROJECT_DIR$/Device/DeviceFlutter.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/ExecutionStatus/ExecutionStatus.js" />
         <option value="$PROJECT_DIR$/ExecutionStatus/ExecutionStatusDone.js" />
@@ -274,12 +169,15 @@
         <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/FileContextMenu.js" />
         <option value="$PROJECT_DIR$/TouchReceiver.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
-        <option value="$PROJECT_DIR$/Device/Device.js" />
         <option value="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
         <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
         <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
+        <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js" />
+        <option value="$PROJECT_DIR$/Device/Device.js" />
+        <option value="$PROJECT_DIR$/Device/DeviceFlutter.js" />
+        <option value="$PROJECT_DIR$/Device/DeviceWithPorts.js" />
       </list>
     </option>
   </component>
@@ -645,7 +543,7 @@
       <workItem from="1500490458671" duration="11158000" />
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
-      <workItem from="1500644734391" duration="5519000" />
+      <workItem from="1500644734391" duration="7616000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -742,7 +640,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1443962000" />
+    <option name="totallyTimeSpent" value="1446059000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -836,13 +734,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Data/ListData.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Data/NumData.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -858,20 +749,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Data/StringData.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Device/DeviceWithPorts.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="29" column="97" lean-forward="true" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="97" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Device/DeviceHummingbird.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1000,13 +877,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="798">
           <caret line="38" column="51" lean-forward="false" selection-start-line="38" selection-start-column="51" selection-end-line="38" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Device/DeviceFlutter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1496,14 +1366,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Device/Device.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="251" column="4" lean-forward="false" selection-start-line="251" selection-start-column="4" selection-end-line="251" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="462">
@@ -1512,10 +1374,89 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1008">
+          <caret line="48" column="53" lean-forward="true" selection-start-line="48" selection-start-column="53" selection-end-line="48" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CallbackManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="499">
+          <caret line="88" column="32" lean-forward="false" selection-start-line="88" selection-start-column="22" selection-end-line="88" selection-end-column="32" />
+          <folding>
+            <element signature="n#!!doc;n#CallbackManager#0" expanded="false" />
+            <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
+            <element signature="e#150#207#0" expanded="false" />
+            <element signature="e#262#318#0" expanded="false" />
+            <element signature="e#407#555#0" expanded="false" />
+            <element signature="e#613#721#0" expanded="false" />
+            <element signature="e#762#808#0" expanded="false" />
+            <element signature="e#855#907#0" expanded="false" />
+            <element signature="e#955#1000#0" expanded="false" />
+            <element signature="e#1086#1144#0" expanded="false" />
+            <element signature="e#1206#1296#0" expanded="false" />
+            <element signature="e#1339#1417#0" expanded="false" />
+            <element signature="e#1519#1537#0" expanded="false" />
+            <element signature="e#1614#1632#0" expanded="false" />
+            <element signature="e#1684#1702#0" expanded="false" />
+            <element signature="e#1799#1920#0" expanded="false" />
+            <element signature="e#1993#2421#0" expanded="false" />
+            <element signature="e#2129#2171#0" expanded="false" />
+            <element signature="e#2198#2235#0" expanded="false" />
+            <element signature="e#2271#2317#0" expanded="false" />
+            <element signature="e#2323#2343#0" expanded="false" />
+            <element signature="e#2490#2663#0" expanded="false" />
+            <element signature="e#2727#2840#0" expanded="false" />
+            <element signature="e#2901#3018#0" expanded="false" />
+            <element signature="e#3112#3159#0" expanded="false" />
+            <element signature="e#3212#3256#0" expanded="false" />
+            <element signature="e#3312#3359#0" expanded="false" />
+            <element signature="e#3401#3450#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="91" column="39" lean-forward="true" selection-start-line="91" selection-start-column="39" selection-end-line="91" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_hummingbird.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="89" column="44" lean-forward="true" selection-start-line="89" selection-start-column="44" selection-end-line="89" selection-end-column="44" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Device/Device.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="478">
+          <caret line="218" column="53" lean-forward="true" selection-start-line="218" selection-start-column="4" selection-end-line="218" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Device/DeviceHummingbird.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="547">
-          <caret line="462" column="33" lean-forward="false" selection-start-line="462" selection-start-column="14" selection-end-line="462" selection-end-column="33" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#702#739#0" expanded="false" />
             <element signature="e#801#930#0" expanded="false" />
@@ -1599,26 +1540,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CallbackManager.js">
+    <entry file="file://$PROJECT_DIR$/Device/DeviceWithPorts.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="95" column="47" lean-forward="false" selection-start-line="95" selection-start-column="47" selection-end-line="95" selection-end-column="47" />
+        <state relative-caret-position="273">
+          <caret line="13" column="54" lean-forward="false" selection-start-line="13" selection-start-column="54" selection-end-line="13" selection-end-column="54" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js">
+    <entry file="file://$PROJECT_DIR$/Device/DeviceFlutter.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="95" column="27" lean-forward="true" selection-start-line="95" selection-start-column="27" selection-end-line="95" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="46" column="18" lean-forward="true" selection-start-line="46" selection-start-column="18" selection-end-line="46" selection-end-column="18" />
+        <state relative-caret-position="457">
+          <caret line="24" column="45" lean-forward="true" selection-start-line="24" selection-start-column="45" selection-end-line="24" selection-end-column="45" />
           <folding />
         </state>
       </provider>

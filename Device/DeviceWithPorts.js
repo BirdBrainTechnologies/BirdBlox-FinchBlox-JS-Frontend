@@ -18,7 +18,8 @@ DeviceWithPorts.prototype.constructor = Device;
  * @param {number} port - Added to the request to indicate the port.
  */
 DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in");
+	const request = new HttpRequestBuilder("robot/in");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("sensor", sensorType);
@@ -34,7 +35,8 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
  * @param {string} valueKey - The key to use when adding the value as a parameter to the request
  */
 DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/" + outputType);
+	const request = new HttpRequestBuilder("robot/out/" + outputType);
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam(valueKey, value);
@@ -50,7 +52,8 @@ DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, 
  * @param {number} blue
  */
 DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/triled");
+	const request = new HttpRequestBuilder("robot/out/triled");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("red", red);

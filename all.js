@@ -1225,7 +1225,8 @@ Device.prototype.getDeviceTypeId = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.disconnect = function() {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
+	const request = new HttpRequestBuilder("robot/disconnect");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
@@ -1235,7 +1236,8 @@ Device.prototype.disconnect = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.connect = function() {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
+	const request = new HttpRequestBuilder("robot/connect");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
@@ -1316,7 +1318,8 @@ Device.prototype.setFirmwareStatusListener = function(callbackFn) {
  * with choices "Close" and "Update Firmware".
  */
 Device.prototype.showFirmwareInfo = function() {
-	const request = new HttpRequestBuilder("robot/firmware");
+	const request = new HttpRequestBuilder("robot/showInfo");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
@@ -1374,7 +1377,7 @@ Device.getTypeList = function() {
  * Sends a request to the backend to turn off all motors, servos, LEDs, etc. on all robots
  */
 Device.stopAll = function() {
-	const request = new HttpRequestBuilder("devices/stop");
+	const request = new HttpRequestBuilder("robot/stopAll");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 /**
@@ -1397,7 +1400,8 @@ DeviceWithPorts.prototype.constructor = Device;
  * @param {number} port - Added to the request to indicate the port.
  */
 DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in");
+	const request = new HttpRequestBuilder("robot/in");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("sensor", sensorType);
@@ -1413,7 +1417,8 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
  * @param {string} valueKey - The key to use when adding the value as a parameter to the request
  */
 DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/" + outputType);
+	const request = new HttpRequestBuilder("robot/out/" + outputType);
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam(valueKey, value);
@@ -1429,7 +1434,8 @@ DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, 
  * @param {number} blue
  */
 DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/triled");
+	const request = new HttpRequestBuilder("robot/out/triled");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("red", red);
@@ -1936,7 +1942,8 @@ DeviceFlutter.prototype.constructor = DeviceFlutter;
  * @param {number} frequency - The frequency of the sound the buzzer produces
  */
 DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/buzzer");
+	const request = new HttpRequestBuilder("robot/out/buzzer");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("volume", volume);
 	request.addParam("frequency", frequency);
