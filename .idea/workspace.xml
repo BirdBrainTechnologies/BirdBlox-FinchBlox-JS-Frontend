@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -153,11 +152,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Colors.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Colors.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="20" column="29" lean-forward="true" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+            <state relative-caret-position="504">
+              <caret line="24" column="27" lean-forward="true" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -203,11 +202,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GuiElements.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GuiElements.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="636" column="35" lean-forward="false" selection-start-line="636" selection-start-column="35" selection-end-line="636" selection-end-column="35" />
+            <state relative-caret-position="672">
+              <caret line="649" column="0" lean-forward="true" selection-start-line="649" selection-start-column="0" selection-end-line="649" selection-end-column="0" />
               <folding>
                 <element signature="e#15#254#0" expanded="false" />
                 <element signature="n#!!block;n#GuiElements#0" expanded="false" />
@@ -397,7 +396,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>VectorPaths</find>
       <find>s.remove</find>
       <find>stack.delete</find>
       <find>blocks</find>
@@ -427,6 +425,7 @@
       <find>HTTP E</find>
       <find>setor</find>
       <find>black</find>
+      <find>nosc</find>
     </findStrings>
     <replaceStrings>
       <replace>let</replace>
@@ -519,8 +518,8 @@
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/CategoryBN.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js" />
-        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
         <option value="$PROJECT_DIR$/GuiElements.js" />
+        <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
       </list>
     </option>
   </component>
@@ -898,7 +897,7 @@
       <workItem from="1500490458671" duration="11158000" />
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
-      <workItem from="1500644734391" duration="17644000" />
+      <workItem from="1500644734391" duration="18021000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -995,7 +994,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1456087000" />
+    <option name="totallyTimeSpent" value="1456464000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1871,14 +1870,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="20" column="29" lean-forward="true" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MyCSS.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
@@ -1889,8 +1880,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GuiElements.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="636" column="35" lean-forward="false" selection-start-line="636" selection-start-column="35" selection-end-line="636" selection-end-column="35" />
+        <state relative-caret-position="672">
+          <caret line="649" column="0" lean-forward="true" selection-start-line="649" selection-start-column="0" selection-end-line="649" selection-end-column="0" />
           <folding>
             <element signature="e#15#254#0" expanded="false" />
             <element signature="n#!!block;n#GuiElements#0" expanded="false" />
@@ -2065,6 +2056,14 @@
             <element signature="e#38209#38243#0" expanded="false" />
             <element signature="e#38319#38376#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="24" column="27" lean-forward="true" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
+          <folding />
         </state>
       </provider>
     </entry>
