@@ -12182,7 +12182,7 @@ RobotConnectionList.prototype.addBnListOption=function(robot){
 		if(me.index == null){
 			me.deviceClass.getManager().appendDevice(robot);
 		} else {
-			me.deviceClass.getManager().setDevice(me.index, robot);
+			me.deviceClass.getManager().setOrSwapDevice(me.index, robot);
 		}
 	});
 };
