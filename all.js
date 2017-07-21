@@ -3317,8 +3317,8 @@ function Colors() {
 
 Colors.setCommon = function() {
 	Colors.white = "#fff";
-	Colors.lightGray = "#3d3d3d";
-	Colors.darkGray = "#262626";
+	Colors.lightGray = "#3D3D3D";
+	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
 };
