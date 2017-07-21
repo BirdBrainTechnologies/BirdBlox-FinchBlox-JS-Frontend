@@ -2030,7 +2030,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.blockerOpacity=0.5;
 
 	GuiElements.isKindle = false;
-	GuiElements.isIos = true;
+	GuiElements.isIos = false;
 	GuiElements.isAndroid = false;
 
 	GuiElements.paletteLayersVisible = true;
@@ -2760,7 +2760,6 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
-		GuiElements.isIos = true;
 		callback();
 	}, function(){
 		GuiElements.osVersion="";
