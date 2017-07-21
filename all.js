@@ -2234,10 +2234,11 @@ GuiElements.buildUI=function(){
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
+	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
+
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 
 	TabManager(); //Creates the tab-switching interface below the title bar
-	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
@@ -11012,7 +11013,8 @@ RowDialog.prototype.calcHeights = function(){
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	let minHeight = Math.max(GuiElements.height / 1.5, RD.minHeight);
+	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	let minHeight = Math.max(shorterDim / 1.5, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
 	if(!this.autoHeight) totalHeight = 0;
@@ -11027,7 +11029,8 @@ RowDialog.prototype.calcHeights = function(){
 RowDialog.prototype.calcWidths=function(){
 	var RD = RowDialog;
 	let thirdWidth = GuiElements.width / 2;
-	this.width = Math.min(GuiElements.width, Math.max(thirdWidth, RD.minWidth));
+	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	this.width = Math.min(GuiElements.width, Math.max(shorterDim / 1.5, RD.minWidth));
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;
 	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;

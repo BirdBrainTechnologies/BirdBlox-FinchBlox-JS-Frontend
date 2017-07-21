@@ -179,10 +179,11 @@ GuiElements.buildUI=function(){
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
+	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
+
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 
 	TabManager(); //Creates the tab-switching interface below the title bar
-	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter, 
 	the white ring which shows which slot a Block will connect to. */
