@@ -2084,8 +2084,8 @@ GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	Data.setConstants();
 	HtmlServer();
-	SettingsManager();
 	GuiElements.setGuiConstants();
+	SettingsManager();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;
@@ -5593,7 +5593,7 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.width = 253;
 	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
 	BlockPalette.catHMargin = Button.defaultMargin;
-	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 4;   // 3 rows of BNs, 4 margins, 30 = height per BN
+	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
@@ -5980,7 +5980,7 @@ CategoryBN.setGraphics = function() {
 	CBN.hMargin = BP.catHMargin;
 	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
 	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
-	CBN.vMargin = (BP.catH - 2 * BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };

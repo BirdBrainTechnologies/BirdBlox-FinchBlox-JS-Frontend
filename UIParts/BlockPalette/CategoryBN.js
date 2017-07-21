@@ -28,7 +28,7 @@ CategoryBN.setGraphics = function() {
 	CBN.hMargin = BP.catHMargin;
 	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
 	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
-	CBN.vMargin = (BP.catH - 2 * BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };

@@ -29,8 +29,8 @@ GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	Data.setConstants();
 	HtmlServer();
-	SettingsManager();
 	GuiElements.setGuiConstants();
+	SettingsManager();
 	GuiElements.load = {};
 	GuiElements.load.version = false;
 	GuiElements.load.zoom = false;

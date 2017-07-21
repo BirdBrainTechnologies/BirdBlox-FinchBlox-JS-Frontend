@@ -35,7 +35,7 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.width = 253;
 	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
 	BlockPalette.catHMargin = Button.defaultMargin;
-	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 4;   // 3 rows of BNs, 4 margins, 30 = height per BN
+	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
