@@ -175,7 +175,7 @@ GuiElements.throwError=function(errMessage){
 }
 /* Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI=function(){
-	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage
+	document.body.style.backgroundColor=Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
