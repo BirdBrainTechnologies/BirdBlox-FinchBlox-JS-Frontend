@@ -18,7 +18,7 @@ function CategoryBN(x, y, category) {
 CategoryBN.setGraphics = function() {
 	const BP = BlockPalette;
 	const CBN = CategoryBN;
-	CBN.bg = Colors.black;
+	CBN.bg = Colors.darkDarkGray;
 	CBN.font = Font.uiFont(15);
 	CBN.foreground = "#fff";
 	CBN.height = 30;

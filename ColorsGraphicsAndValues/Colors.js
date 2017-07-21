@@ -13,6 +13,7 @@ Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#3d3d3d";
 	Colors.darkGray = "#262626";
+	Colors.darkDarkGray = "#050505";
 	Colors.black = "#000";
 };
 

@@ -3319,6 +3319,7 @@ Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#3d3d3d";
 	Colors.darkGray = "#262626";
+	Colors.darkDarkGray = "#050505";
 	Colors.black = "#000";
 };
 
@@ -5595,8 +5596,8 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.black;
-	BlockPalette.catBg = Colors.darkGray;
+	BlockPalette.bg = Colors.darkDarkGray;
+	BlockPalette.catBg = Colors.darkDarkGray;
 
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.white;
@@ -5968,7 +5969,7 @@ function CategoryBN(x, y, category) {
 CategoryBN.setGraphics = function() {
 	const BP = BlockPalette;
 	const CBN = CategoryBN;
-	CBN.bg = Colors.black;
+	CBN.bg = Colors.darkDarkGray;
 	CBN.font = Font.uiFont(15);
 	CBN.foreground = "#fff";
 	CBN.height = 30;

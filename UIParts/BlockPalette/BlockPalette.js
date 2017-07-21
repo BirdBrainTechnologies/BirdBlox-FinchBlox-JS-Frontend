@@ -39,8 +39,8 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.black;
-	BlockPalette.catBg = Colors.darkGray;
+	BlockPalette.bg = Colors.darkDarkGray;
+	BlockPalette.catBg = Colors.darkDarkGray;
 
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.white;
