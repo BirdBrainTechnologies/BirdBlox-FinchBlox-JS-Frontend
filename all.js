@@ -2188,7 +2188,6 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
-	DiscoverDialog.setConstants();
 	RecordingManager();
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
