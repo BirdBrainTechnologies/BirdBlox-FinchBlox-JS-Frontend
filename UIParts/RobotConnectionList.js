@@ -35,7 +35,6 @@ RobotConnectionList.prototype.showWithList = function(list){
 	let overlayType = Overlay.types.connectionList;
 	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
-	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
 };
@@ -82,7 +81,6 @@ RobotConnectionList.prototype.addBnListOption=function(robot){
 	});
 };
 RobotConnectionList.prototype.close=function(){
-	this.updateTimer=window.clearInterval(this.updateTimer);
 	this.bubbleOverlay.hide();
 	this.visible = false;
 	if(this.menuBnList != null) this.menuBnList.hide();
