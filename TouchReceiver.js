@@ -718,6 +718,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 
 		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
 		if(TouchReceiver.touchDown || !still) return;
+		if(div.scrollHeight === height) return;
 		if (div.scrollTop <= 0) {
 			div.scrollTop = 1;
 		}
@@ -729,6 +730,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };
 TouchReceiver.setInitialScrollFix = function(div) {
+	if(!GuiElements.isIos) return;
 	if (div.scrollTop <= 0) {
 		div.scrollTop = 1;
 	}

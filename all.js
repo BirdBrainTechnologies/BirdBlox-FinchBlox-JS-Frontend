@@ -2030,7 +2030,7 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.blockerOpacity=0.5;
 
 	GuiElements.isKindle = false;
-	GuiElements.isIos = false;
+	GuiElements.isIos = true;
 	GuiElements.isAndroid = false;
 
 	GuiElements.paletteLayersVisible = true;
@@ -2760,6 +2760,7 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		GuiElements.isIos = true;
 		callback();
 	}, function(){
 		GuiElements.osVersion="";
@@ -5240,6 +5241,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 
 		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
 		if(TouchReceiver.touchDown || !still) return;
+		if(div.scrollHeight === height) return;
 		if (div.scrollTop <= 0) {
 			div.scrollTop = 1;
 		}
@@ -5251,6 +5253,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };
 TouchReceiver.setInitialScrollFix = function(div) {
+	if(!GuiElements.isIos) return;
 	if (div.scrollTop <= 0) {
 		div.scrollTop = 1;
 	}
