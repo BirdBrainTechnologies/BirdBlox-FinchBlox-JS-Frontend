@@ -6544,7 +6544,7 @@ function CollapsibleItem(name, id, collapsibleSet, group) {
 
 CollapsibleItem.setConstants = function() {
 	const CI = CollapsibleItem;
-	CI.hitboxHeight = 25;
+	CI.hitboxHeight = 30;
 	CI.hitboxWidth = BlockPalette.width;
 
 	CI.labelFont = BlockPalette.labelFont;
