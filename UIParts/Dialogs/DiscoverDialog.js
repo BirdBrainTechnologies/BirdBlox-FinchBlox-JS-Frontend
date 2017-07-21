@@ -11,21 +11,14 @@ function DiscoverDialog(deviceClass){
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
 	this.discoveredDevices = [];
-	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
 	this.addHintText(deviceClass.getConnectionInstructions());
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
-DiscoverDialog.setConstants = function(){
-	DiscoverDialog.updateInterval = 500;
-};
 DiscoverDialog.prototype.show = function(){
 	var DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
-	if(!this.updateTimer.isRunning()) {
-		this.updateTimer.start();
-		this.discoverDevices();
-	}
+	this.discoverDevices();
 };
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
@@ -56,6 +49,5 @@ DiscoverDialog.prototype.selectDevice = function(device){
 };
 DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
-	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };

@@ -722,7 +722,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj){
 		if (div.scrollTop <= 0) {
 			div.scrollTop = 1;
 		}
-		else if (div.scrollHeight - height - 1 <= div.scrollTop) {
+		else if (div.scrollHeight - height - 1 <= div.scrollTop && div.scrollTop > 1) {
 			div.scrollTop = div.scrollHeight - height - 2;
 		}
 	};

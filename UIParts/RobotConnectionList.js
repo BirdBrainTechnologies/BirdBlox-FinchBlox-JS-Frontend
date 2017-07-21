@@ -8,10 +8,9 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.x = x;
 	this.upperY = upperY;
 	this.lowerY = lowerY;
-	this.index = index;
+	this.index = this;
 	this.deviceClass = deviceClass;
 	this.visible = false;
-	this.robotId = null;
 	if(index != null){
 		this.robotId = this.deviceClass.getManager().getDevice(index);
 	}
@@ -53,7 +52,7 @@ RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
 		return;
 	}
-	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray);
+	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray, true, this.index);
 	let oldScroll=null;
 	if(this.menuBnList!=null){
 		oldScroll=this.menuBnList.getScroll();

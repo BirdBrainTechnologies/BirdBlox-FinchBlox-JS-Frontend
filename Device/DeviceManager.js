@@ -111,6 +111,35 @@ DeviceManager.prototype.setOneDevice = function(newDevice) {
 };
 
 /**
+ * Swaps the the devices at the specified indices of the connectedDevices list. Requires that both devices are already
+ * connected.
+ * @param {number} index1
+ * @param {number} index2
+ */
+DeviceManager.prototype.swapDevices = function(index1, index2) {
+	const device1 = this.connectedDevices[index1];
+	const device2 = this.connectedDevices[index2];
+	this.connectedDevices[index1] = device2;
+	this.connectedDevices[index2] = device1;
+	this.devicesChanged();
+};
+
+/**
+ * If newDevice is not already connected, connects to it and replaces the device at the specified index
+ * If the newDevice is already connected, swaps the positions of it and the device at the specified index
+ * @param index
+ * @param newDevice
+ */
+DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
+	const newIndex = this.lookupRobotIndexById(newDevice);
+	if (newIndex > -1) {
+		this.swapDevices(index, newIndex);
+	} else {
+		this.setDevice(index, newDevice);
+	}
+};
+
+/**
  * Disconnects from all the devices, making the list empty
  */
 DeviceManager.prototype.removeAllDevices = function() {
@@ -219,7 +248,7 @@ DeviceManager.prototype.discoverTimeOut = function(robotTypeId) {
 	}
 };
 
-DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeId) {
+DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeIndex) {
 	// Get the devices from the request
 	let robotList = Device.fromJsonArrayString(this.deviceClass, robotListString);
 	// Accumulate devices that are not currently connected
@@ -228,7 +257,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 		// Try to find the device
 		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
 		// Only include the device if we didn't find it and it isn't the excludeId robot
-		if (connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id)) {
+		if (connectedRobotIndex === -1) {
 			// Include the device in the list
 			disconnectedRobotsList.push(robot);
 		}
@@ -238,6 +267,9 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 	let newList = disconnectedRobotsList;
 	if (includeConnected) {
 		newList = this.connectedDevices.concat(robotList);
+		if (excludeIndex != null) {
+			newList.splice(excludeIndex, 1);
+		}
 	}
 	if (DebugOptions.shouldAllowVirtualDevices()) {
 		newList = newList.concat(this.createVirtualDeviceList());
@@ -252,7 +284,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
  * @param {boolean} [includeConnected=false] - Indicates whether devices that are currently connected should also be included
  * @param {string|null} [excludeId=null] - An id of a Device to exclude from the list. Ignored if null
  */
-DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeId) {
+DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeIndex) {
 	if (includeConnected == null) {
 		includeConnected = false;
 	}
@@ -270,7 +302,7 @@ DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConn
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
 		if (callbackFn == null) return;
 
-		callbackFn(this.fromJsonArrayString(response, includeConnected, excludeId));
+		callbackFn(this.fromJsonArrayString(response, includeConnected, excludeIndex));
 	}.bind(this), callbackErr);
 };
 

@@ -250,7 +250,7 @@ Tab.importXml=function(tabNode){
 	return tab;
 };
 Tab.prototype.delete=function(){
-	this.passRecursively("delete");
+	this.passRecursively("remove");
 	this.mainG.remove();
 };
 Tab.prototype.renameVariable=function(variable){
