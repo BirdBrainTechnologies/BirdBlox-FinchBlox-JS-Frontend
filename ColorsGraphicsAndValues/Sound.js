@@ -195,8 +195,8 @@ Sound.nameFromId = function(id, isRecording){
 
 /**
  * Stops all running sounds and calls the donePlaying callbacks of the sounds
- * @param {object} status - A status object for the request
- * @param {function} callbackFn - Called when the request completes (even if there is an error)
+ * @param {object} [status] - A status object for the request
+ * @param {function} [callbackFn] - Called when the request completes (even if there is an error)
  */
 Sound.stopAllSounds=function(status, callbackFn){
 	if(status == null) status = {};

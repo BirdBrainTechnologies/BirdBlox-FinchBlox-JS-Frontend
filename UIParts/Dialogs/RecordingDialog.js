@@ -1,5 +1,6 @@
 /**
- * A dialog for creating and managing recordings
+ * A dialog for creating and managing recordings.  RecordingDialogs interact with the RecordingManager for making
+ * recordings, the Sound class for playing recordings, and SaveManager for renaming and deleting recordings
  * @param {Array<Sound>} listOfRecordings - The list of recordings for the open file
  * @constructor
  */
@@ -18,6 +19,7 @@ function RecordingDialog(listOfRecordings) {
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
+
 RecordingDialog.setConstants = function() {
 	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
@@ -32,6 +34,14 @@ RecordingDialog.setConstants = function() {
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
 };
+
+/**
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
@@ -42,9 +52,19 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
+
+/**
+ * Creates the button for each recording that plays the recording when tapped
+ * @param {Sound} recording
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
 	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
-	let state = {};
+	// Track whether the button is currently playing the recording
+	const state = {};
 	state.playing = false;
 	let me = this;
 	let showPlay = function() {
@@ -53,14 +73,19 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 	let showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
+	// When the button is tapped...
 	button.setCallbackFunction(function() {
+		// Check the state...
 		if (state.playing) {
+			// Stop the sound
 			Sound.stopAllSounds();
 		} else {
+			// Start the sound
 			Sound.playAndStopPrev(recording, true, function() {
 				state.playing = true;
 				showStop();
 			}, null, function() {
+				// When the sound stops, change the icon and state
 				if (me.visible) {
 					state.playing = false;
 					showPlay();
@@ -68,8 +93,17 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 			});
 		}
 	}, true);
+	// Start with the play icon
 	showPlay();
 };
+
+/**
+ * Create the button for deleting recordings
+ * @param {string} file - The name of the recording to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
@@ -78,6 +112,14 @@ RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 		});
 	});
 };
+
+/**
+ * Create te button for renaming recordings
+ * @param {string} file - The name of the recording to rename
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
@@ -86,31 +128,53 @@ RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 		});
 	});
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.show = function() {
+	// Create the rows, title bar, etc.
 	RowDialog.prototype.show.call(this);
 	RecordingDialog.currentDialog = this;
+	// Create the controls at the bottom.  These buttons are all hidden when created.
 	this.recordButton = this.createRecordButton();
 	this.discardButton = this.createDiscardButton();
 	this.saveButton = this.createSaveButton();
 	this.pauseButton = this.createPauseButton();
 	this.resumeRecordingBn = this.createResumeRecordingBn();
+	// Show the controls that correspond to the current state
 	this.goToState(this.state);
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.hide = function() {
 	RowDialog.prototype.hide.call(this);
 	this.setCounterVisibility(false);
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
 	Sound.stopAllSounds();
 };
+
+/**
+ * Create the control for recording sounds
+ * @return {Button}
+ */
 RecordingDialog.prototype.createRecordButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
+	// gets the location of additional content
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function() {
@@ -118,6 +182,13 @@ RecordingDialog.prototype.createRecordButton = function() {
 	}, true);
 	return button;
 };
+
+/**
+ * Create a control that is 1/3 the width of the record button
+ * @param {number} buttonPosition - [0, 1, 2], whether the button is in the first, second, or third position
+ * @param {function} callbackFn - Called on tap
+ * @return {Button}
+ */
 RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
 	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
@@ -127,6 +198,11 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
+
+/**
+ * Creates the button for discarding the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createDiscardButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -136,6 +212,11 @@ RecordingDialog.prototype.createDiscardButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
 	return button;
 };
+
+/**
+ * Creates the button for saving (stopping) the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createSaveButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -146,6 +227,11 @@ RecordingDialog.prototype.createSaveButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
 	return button;
 };
+
+/**
+ * Creates the button for pausing the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createPauseButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -156,6 +242,11 @@ RecordingDialog.prototype.createPauseButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
 	return button;
 };
+
+/**
+ * Creates the button to unpause recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createResumeRecordingBn = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -166,6 +257,11 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
 	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
 	return button;
 };
+
+/**
+ * Draws the dark rectangle to cover the dialog while recording
+ * @return {Element}
+ */
 RecordingDialog.prototype.drawCoverRect = function() {
 	let halfStep = RowDialog.bnMargin / 2;
 	let x = this.x + halfStep;
@@ -177,6 +273,11 @@ RecordingDialog.prototype.drawCoverRect = function() {
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
 };
+
+/**
+ * Draws the recording elapsed timer counter with "0:00" as the string
+ * @return {Element} - An SVG text element
+ */
 RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
@@ -194,12 +295,21 @@ RecordingDialog.prototype.drawTimeCounter = function() {
 	GuiElements.move.text(textE, x, y);
 	return textE;
 };
+
+/**
+ * Creates and shows a RecordingDialog after retrieving a list of recordings from the frontend
+ */
 RecordingDialog.showDialog = function() {
 	RecordingManager.listRecordings(function(result) {
 		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
+
+/**
+ * shows/hides parts of the dialog according to the recording state provided.
+ * @param {RecordingManager.recordingStates} state - The state this RecordingDialog should enter
+ */
 RecordingDialog.prototype.goToState = function(state) {
 	let RecD = RecordingDialog;
 	this.state = state;
@@ -230,22 +340,39 @@ RecordingDialog.prototype.goToState = function(state) {
 		this.getCenteredButton(0).disable();
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has started
+ */
 RecordingDialog.startedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has stopped
+ */
 RecordingDialog.stoppedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
 		RecordingDialog.currentDialog.reloadDialog();
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has paused
+ */
 RecordingDialog.pausedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
 	}
 };
+
+/**
+ * Re-retrieves the list of names from the backend and reloads the dialog with it
+ * @inheritDoc
+ */
 RecordingDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
@@ -256,6 +383,11 @@ RecordingDialog.prototype.reloadDialog = function() {
 		dialog.setScroll(thisScroll);
 	});
 };
+
+/**
+ * Shows/hides the counter and coverRect
+ * @param {boolean} visible - Whether the counter and background behind it should be visible
+ */
 RecordingDialog.prototype.setCounterVisibility = function(visible) {
 	if (visible) {
 		if (this.coverRect == null) {
@@ -275,6 +407,11 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 		}
 	}
 };
+
+/**
+ * Sets the text of the counter according to the provided time.  Formats the time into hh:mm:ss or mm:ss
+ * @param {number} time - elapsed time in ms
+ */
 RecordingDialog.prototype.updateCounter = function(time) {
 	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
@@ -299,6 +436,11 @@ RecordingDialog.prototype.updateCounter = function(time) {
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 };
+
+/**
+ * Updates the counter of the current RecordingDialog.  Called by the RecordingManager
+ * @param time
+ */
 RecordingDialog.updateCounter = function(time) {
 	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);
