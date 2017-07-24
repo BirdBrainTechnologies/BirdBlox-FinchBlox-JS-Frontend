@@ -12265,6 +12265,8 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	if(index != null){
 		this.robotId = this.deviceClass.getManager().getDevice(index);
 	}
+	this.updatePending = false;
+	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
 RobotConnectionList.setConstants = function(){
 	let RCL=RobotConnectionList;
@@ -12289,19 +12291,21 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
 };
-RobotConnectionList.prototype.discoverRobots=function(){
-	return;
-	let me = this;
-	this.deviceClass.getManager().discover(function(response){
-		me.updateRobotList(response);
-	});
+RobotConnectionList.prototype.checkPendingUpdate = function(){
+	if(this.updatePending){
+		this.updateRobotList(this.deviceClass.getManager().getDiscoverCache());
+	}
 };
 RobotConnectionList.prototype.updateRobotList=function(robotArray){
 	const RCL = RobotConnectionList;
 	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
 	if(TouchReceiver.touchDown || !this.visible || isScrolling){
+		this.updatePending = true;
+		this.updateTimer.start();
 		return;
 	}
+	this.updatePending = false;
+	this.updateTimer.stop();
 	const includeConnected = this.index !== null;
 	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray, includeConnected, this.index);
 	let oldScroll=null;
