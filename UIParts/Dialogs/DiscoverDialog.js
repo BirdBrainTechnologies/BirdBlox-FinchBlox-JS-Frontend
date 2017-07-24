@@ -12,11 +12,13 @@ function DiscoverDialog(deviceClass){
 	this.deviceClass = deviceClass;
 	this.discoveredDevices = [];
 	this.addHintText(deviceClass.getConnectionInstructions());
+	this.updatePending = false;
+	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
 DiscoverDialog.prototype.show = function(){
-	var DD = DiscoverDialog;
+	const DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
 	this.discoverDevices();
 };
@@ -27,10 +29,22 @@ DiscoverDialog.prototype.discoverDevices = function() {
 	}.bind(this));
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
+DiscoverDialog.prototype.checkPendingUpdate = function(){
+	if(this.updatePending){
+		this.updateDeviceList(this.deviceClass.getManager().getDiscoverCache());
+	}
+};
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
+	if(!this.visible) {
+		this.updatePending = true;
+		this.updateTimer.start();
 		return;
 	}
+	else if(TouchReceiver.touchDown || this.isScrolling()){
+		return;
+	}
+	this.updatePending = false;
+	this.updateTimer.stop();
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 };
