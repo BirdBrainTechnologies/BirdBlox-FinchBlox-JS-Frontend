@@ -2892,6 +2892,7 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		GuiElements.isAndroid = true;
 		callback();
 	}, function(){
 		GuiElements.osVersion="";
@@ -4583,8 +4584,8 @@ Sound.nameFromId = function(id, isRecording){
 
 /**
  * Stops all running sounds and calls the donePlaying callbacks of the sounds
- * @param {object} status - A status object for the request
- * @param {function} callbackFn - Called when the request completes (even if there is an error)
+ * @param {object} [status] - A status object for the request
+ * @param {function} [callbackFn] - Called when the request completes (even if there is an error)
  */
 Sound.stopAllSounds=function(status, callbackFn){
 	if(status == null) status = {};
@@ -11413,15 +11414,18 @@ RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackF
 	return button;
 };
 /**
- * Created by Tom on 6/13/2017.
+ * A dialog for opening and managing local files.  On iOS, a cloud button is included for opening cloud files, and
+ * on Android an additional tab opens an OpenCloudDialog for managing cloud files.
+ * @param {FileList} fileList - A list of files and account information retrieved from the backend
+ * @constructor
  */
-
-function OpenDialog(fileList){
+function OpenDialog(fileList) {
 	const OD = OpenDialog;
 	const RD = RowDialog;
 	this.fileList = fileList;
 	this.files = fileList.localFiles;
-	if(GuiElements.isAndroid) {
+	if (GuiElements.isAndroid) {
+		// On Android, space is needed for the row of tabs
 		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
 	} else {
 		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
@@ -11431,46 +11435,49 @@ function OpenDialog(fileList){
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.prototype.constructor = OpenDialog;
-OpenDialog.setConstants = function(){
+
+OpenDialog.setConstants = function() {
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
-	OpenDialog.currentDialog = null;
+	OpenDialog.currentDialog = null; // The currently open dialog, can also be an OpenCloudDialog
 	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
 	OpenDialog.tabRowHeight = RowDialog.titleBarH;
 };
-OpenDialog.prototype.show = function(){
+
+/**
+ * @inheritDoc
+ */
+OpenDialog.prototype.show = function() {
 	RowDialog.prototype.show.call(this);
 	OpenDialog.currentDialog = this;
 	this.createNewBn();
-	if(GuiElements.isIos) {
+	if (GuiElements.isIos) {
 		this.createCloudBn();
 	}
-	if(GuiElements.isAndroid){
+	if (GuiElements.isAndroid) {
 		this.createTabRow();
 	}
 };
-OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+/**
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	const cols = 3;
 	const RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
 	const file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
-	/*
-	let currentX = largeBnWidth + RD.bnMargin;
-	this.createExportBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDuplicateBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createRenameBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDeleteBn(file, currentX, y, contentGroup);
-	*/
-
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	//this.createDuplicateBn(file, currentX, y, contentGroup);
-	if(this.fileList.signedIn) {
+	if (this.fileList.signedIn) {
+		// If signed in, the export button is replaced with an upload button (the export button goes in the more menu)
 		this.createUploadBn(file, currentX, y, contentGroup);
 	} else {
 		this.createExportBn(file, currentX, y, contentGroup);
@@ -11478,40 +11485,81 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };
-OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
-	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
+
+/**
+ * Creates the button which shows the file name and opens the file when tapped
+ * @param {string} file - The name of the file
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
+	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
 		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
 
-OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
-	var me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
-		SaveManager.userDeleteFile(false, file, function(){
-			me.reloadDialog();
-		});
-	});
-};
-OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
-	var me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
-		SaveManager.userRenameFile(false, file, function(){
-			me.reloadDialog();
-		});
-	});
-};
-OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup){
+/**
+ * Creates the button for deleting files.  This button has been moved into the more menu, so this function is not used
+ * anymore.
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function(){
-		SaveManager.userDuplicateFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+		SaveManager.userDeleteFile(false, file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
+
+/**
+ * Creates the button for renaming files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		SaveManager.userRenameFile(false, file, function() {
+			me.reloadDialog();
+		});
+	});
+};
+
+/**
+ * Creates a button for duplicating files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function() {
+		SaveManager.userDuplicateFile(file, function() {
+			me.reloadDialog();
+		});
+	});
+};
+
+/**
+ * Creates a button for exporting files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function() {
 		let x1 = this.contentRelToAbsX(x);
 		let x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
 		let y1 = this.contentRelToAbsY(y);
@@ -11523,46 +11571,70 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 		SaveManager.userExportFile(file, x1, x2, y1, y2);
 	}.bind(this));
 };
-OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup){
+
+/**
+ * Creates a button for uploading files.  Only available on Android
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup) {
 	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function() {
 		const request = new HttpRequestBuilder("cloud/upload");
 		request.addParam("filename", file);
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 };
 
-OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
-	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+/**
+ * Creates a button for more actions, which are listed in a dropdown
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
 		const x1 = this.contentRelToAbsX(x);
 		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
 		const y1 = this.contentRelToAbsY(y);
 		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
 		let type = FileContextMenu.types.localSignedOut;
-		if(this.fileList.signedIn) {
+		if (this.fileList.signedIn) {
 			type = FileContextMenu.types.localSignedIn;
 		}
 		new FileContextMenu(this, file, type, x1, x2, y1, y2);
 	}.bind(this));
 };
-OpenDialog.prototype.createNewBn = function(){
+
+/**
+ * Creates a button at the bottom of the dialog for opening a blank, new file.
+ * @return {Button}
+ */
+OpenDialog.prototype.createNewBn = function() {
 	let RD = RowDialog;
 	let OD = OpenDialog;
 	let x = RD.bnMargin;
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText("New");
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		this.closeDialog();
 		SaveManager.userNew();
 	}.bind(this), true);
 	return button;
 };
-OpenDialog.prototype.reloadDialog = function(){
+
+/**
+ * Re-retrieves the list of open files from the backend and reloads the dialog
+ */
+OpenDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
-	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		if(OpenDialog.currentDialog === me) {
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (OpenDialog.currentDialog === me) {
 			me.closeDialog();
 			const openDialog = new OpenDialog(new FileList(response));
 			openDialog.show();
@@ -11570,17 +11642,26 @@ OpenDialog.prototype.reloadDialog = function(){
 		}
 	});
 };
-OpenDialog.prototype.createCloudBn = function(){
+
+/**
+ * Creates a button in the top-right corner of the dialog for opening from cloud storage (iOS only)
+ */
+OpenDialog.prototype.createCloudBn = function() {
 	const OD = OpenDialog;
 	const RD = RowDialog;
 	const x = this.width - RD.bnMargin - OD.cloudBnWidth;
 	let button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
 	button.addIcon(VectorPaths.cloud);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		HtmlServer.sendRequestWithCallback("cloud/showPicker");
 	}, true);
 };
-OpenDialog.prototype.createTabRow = function(){
+
+/**
+ * Creates tabs for opening the the OpenCloudDialog (Android only)
+ * @return {TabRow}
+ */
+OpenDialog.prototype.createTabRow = function() {
 	const OD = OpenDialog;
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
@@ -11592,30 +11673,51 @@ OpenDialog.prototype.createTabRow = function(){
 	tabRow.show();
 	return tabRow;
 };
-OpenDialog.prototype.tabSelected = function(tab){
-	if(tab === "cloud") {
+
+/**
+ * Switches to the OpenCloudDialog if its tab is selected
+ * @param {string} tab - The id of the selected tab
+ */
+OpenDialog.prototype.tabSelected = function(tab) {
+	if (tab === "cloud") {
 		const cloudDialog = new OpenCloudDialog(this.fileList);
 		this.hide();
 		cloudDialog.show();
 	}
 };
-OpenDialog.showDialog = function(){
-	HtmlServer.sendRequestWithCallback("data/files",function(response){
+
+/**
+ * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
+ */
+OpenDialog.showDialog = function() {
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		var openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
 	});
 };
-OpenDialog.prototype.closeDialog = function(){
+
+/**
+ * @inheritDoc
+ */
+OpenDialog.prototype.closeDialog = function() {
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
 };
-OpenDialog.closeDialog = function(){
-	if(OpenDialog.currentDialog != null) {
+
+/**
+ * Closes the currently open dialog
+ */
+OpenDialog.closeDialog = function() {
+	if (OpenDialog.currentDialog != null) {
 		OpenDialog.currentDialog.closeDialog();
 	}
 };
-OpenDialog.filesChanged = function(){
-	if(OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenDialog){
+
+/**
+ * Reloads the currently open dialog, if that dialog is an OpenDialog
+ */
+OpenDialog.filesChanged = function() {
+	if (OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenDialog) {
 		OpenDialog.currentDialog.reloadDialog();
 	}
 };
@@ -11841,15 +11943,20 @@ function FileList(jsonString) {
  */
 FileList.prototype.getCloudTitle = function(){
 	if (this.account != null) {
-		return "Cloud - " + this.account;
+		return this.account;
 	}
 	return "Cloud";
 };
 /**
- * Created by Tom on 6/18/2017.
+ * A tabbed dialog for connecting multiple devices.  Each type of device has a tab in which devices can be reordered,
+ * added, and removed.  A status light for each device indicates if it is connected and an info button shows
+ * whether the firmware is up to date
+ * @param deviceClass - A subclass of Device, the tab that should be open to start
+ * @constructor
  */
-function ConnectMultipleDialog(deviceClass){
+function ConnectMultipleDialog(deviceClass) {
 	let CMD = ConnectMultipleDialog;
+	// Store the open tab so it can be reopened by default next time
 	CMD.lastClass = deviceClass;
 	let title = "Connect Multiple";
 	this.deviceClass = deviceClass;
@@ -11860,7 +11967,8 @@ function ConnectMultipleDialog(deviceClass){
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
-ConnectMultipleDialog.setConstants = function(){
+
+ConnectMultipleDialog.setConstants = function() {
 	let CMD = ConnectMultipleDialog;
 	CMD.currentDialog = null;
 
@@ -11872,7 +11980,16 @@ ConnectMultipleDialog.setConstants = function(){
 	CMD.numberFont = Font.uiFont(16);
 	CMD.numberColor = Colors.white;
 };
-ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+/**
+ * Creates the status light, main button, info button, and remove button
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let CMD = ConnectMultipleDialog;
 	let statusX = 0;
 	let numberX = statusX + DeviceStatusLight.radius * 2;
@@ -11881,7 +11998,6 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
 	let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
 
-
 	let robot = this.deviceClass.getManager().getDevice(index);
 	this.createStatusLight(robot, statusX, y, contentGroup);
 	this.createNumberText(index, numberX, y, contentGroup);
@@ -11889,10 +12005,28 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
 	this.createInfoBn(robot, index, infoBnX, y, contentGroup);
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
-ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
-	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
+
+/**
+ * Creates a light to indicate the status of the provided robot
+ * @param {Device} robot
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {DeviceStatusLight}
+ */
+ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup) {
+	return new DeviceStatusLight(x, y + RowDialog.bnHeight / 2, contentGroup, robot);
 };
-ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
+
+/**
+ * Creates a number for the row.  Since the blocks control a Device with a certain number, is is important for the
+ * user to know when device is, say, Hummingbird 3
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup) {
 	let CMD = ConnectMultipleDialog;
 	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
 	let textW = GuiElements.measure.textWidth(textE);
@@ -11902,30 +12036,65 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
 	contentGroup.appendChild(textE);
 	return textE;
 };
-ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup){
+
+/**
+ * Creates a button which shows which robot is connected in that position of the list. Tapping the button allows the
+ * robot to be replaced with a different robot
+ *
+ * @param {Device} robot - The robot currently in this location
+ * @param {number} index
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
 	let connectionX = this.x + this.width / 2;
-	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function(){
+	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
 		let upperY = this.contentRelToAbsY(y);
 		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		// When tapped, a list of robots to connect from appears
 		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
 	}.bind(this));
 };
-ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup){
+
+/**
+ * Creates the button for removing a robot from the list
+ * @param {Device} robot
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup) {
 	let button = RowDialog.createSmallBn(x, y, contentGroup);
 	button.addText("X");
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		this.deviceClass.getManager().removeDevice(index);
 	}.bind(this), true);
 	return button;
 };
-ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup){
+
+/**
+ * Creates a button which shows info about the device's firmware
+ * @param {Device} robot
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup) {
 	let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 
+	// The appearance of the button changes depending on the firmwareStatus
 	const statuses = Device.firmwareStatuses;
 	function updateStatus(firmwareStatus) {
-		if(firmwareStatus === statuses.old) {
+		if (firmwareStatus === statuses.old) {
 			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
-		} else if(firmwareStatus === statuses.incompatible) {
+		} else if (firmwareStatus === statuses.incompatible) {
 			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
 		} else {
 			button.addIcon(VectorPaths.info, RowDialog.iconH);
@@ -11936,7 +12105,12 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
 
 	return button;
 };
-ConnectMultipleDialog.prototype.show = function(){
+
+/**
+ * Creates the dialog and starts a scan for the current device type
+ * @inheritDoc
+ */
+ConnectMultipleDialog.prototype.show = function() {
 	let CMD = ConnectMultipleDialog;
 	RowDialog.prototype.show.call(this);
 	CMD.currentDialog = this;
@@ -11946,39 +12120,57 @@ ConnectMultipleDialog.prototype.show = function(){
 		return this.visible;
 	}.bind(this));
 };
-ConnectMultipleDialog.prototype.createConnectBn = function(){
+
+/**
+ * Creates a "+" button for connecting to another robot
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createConnectBn = function() {
 	let CMD = ConnectMultipleDialog;
 	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
 	let x = (this.width - bnWidth) / 2;
+	// Gets the location to add the button
 	let y = this.getExtraBottomY();
-	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
+	let button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
 	button.addText("+", CMD.plusFont);
 	let upperY = y + this.y;
 	let lowerY = upperY + RowDialog.bnHeight;
 	let connectionX = this.x + this.width / 2;
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
+		// Shows a list of devices to connect
 		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
 	}.bind(this), true);
 	return button;
 };
-ConnectMultipleDialog.prototype.createTabRow = function(){
+
+/**
+ * Creates a row of tabs for each device type, which when selected, reload the dialog for that tab
+ * @return {TabRow}
+ */
+ConnectMultipleDialog.prototype.createTabRow = function() {
 	let CMD = ConnectMultipleDialog;
 	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
-	Device.getTypeList().forEach(function(deviceClass){
+	Device.getTypeList().forEach(function(deviceClass) {
 		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
 	});
+	// When a tab is selected, reloadDialog will be called with the class of the device type
 	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
 	tabRow.show();
 	return tabRow;
 };
-ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
-	const test = ConnectMultipleDialog.currentDialog;
-	if(deviceClass == null){
+
+/**
+ * Reloads the dialog with the provided device type's tab open, or the last selected type if none is provided
+ * @param [deviceClass] - subclass of Device
+ */
+ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
+	if (deviceClass == null) {
 		deviceClass = this.deviceClass;
 	}
-	if(deviceClass !== this.deviceClass){
+	if (deviceClass !== this.deviceClass) {
+		// Stop discovery before switching tabs
 		this.deviceClass.getManager().stopDiscover();
 	}
 	let thisScroll = this.getScroll();
@@ -11986,31 +12178,45 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	me.hide();
 	let dialog = new ConnectMultipleDialog(deviceClass);
 	dialog.show();
-	if(deviceClass === this.deviceClass) {
+	if (deviceClass === this.deviceClass) {
 		dialog.setScroll(thisScroll);
 	}
 };
-ConnectMultipleDialog.prototype.closeDialog = function(){
+
+/**
+ * Closes the dialog and stops discovery
+ * @inheritDoc
+ */
+ConnectMultipleDialog.prototype.closeDialog = function() {
 	let CMD = ConnectMultipleDialog;
 	RowDialog.prototype.closeDialog.call(this);
 	CMD.currentDialog = null;
 	this.deviceClass.getManager().stopDiscover();
 };
-ConnectMultipleDialog.reloadDialog = function(){
+
+/**
+ * Reloads the currently open dialog
+ */
+ConnectMultipleDialog.reloadDialog = function() {
 	let CMD = ConnectMultipleDialog;
-	if(CMD.currentDialog != null){
+	if (CMD.currentDialog != null) {
 		CMD.currentDialog.reloadDialog();
 	}
 };
-ConnectMultipleDialog.showDialog = function(){
+
+/**
+ * Creates and shows a ConnectMultipleDialog with the default tab open
+ */
+ConnectMultipleDialog.showDialog = function() {
 	let CMD = ConnectMultipleDialog;
-	if(CMD.lastClass == null) {
+	if (CMD.lastClass == null) {
 		CMD.lastClass = Device.getTypeList()[0];
 	}
 	(new ConnectMultipleDialog(CMD.lastClass)).show();
 };
 /**
- * A dialog for creating and managing recordings
+ * A dialog for creating and managing recordings.  RecordingDialogs interact with the RecordingManager for making
+ * recordings, the Sound class for playing recordings, and SaveManager for renaming and deleting recordings
  * @param {Array<Sound>} listOfRecordings - The list of recordings for the open file
  * @constructor
  */
@@ -12029,6 +12235,7 @@ function RecordingDialog(listOfRecordings) {
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
+
 RecordingDialog.setConstants = function() {
 	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
@@ -12043,6 +12250,14 @@ RecordingDialog.setConstants = function() {
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
 };
+
+/**
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
@@ -12053,9 +12268,19 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
+
+/**
+ * Creates the button for each recording that plays the recording when tapped
+ * @param {Sound} recording
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
 	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
-	let state = {};
+	// Track whether the button is currently playing the recording
+	const state = {};
 	state.playing = false;
 	let me = this;
 	let showPlay = function() {
@@ -12064,14 +12289,19 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 	let showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
+	// When the button is tapped...
 	button.setCallbackFunction(function() {
+		// Check the state...
 		if (state.playing) {
+			// Stop the sound
 			Sound.stopAllSounds();
 		} else {
+			// Start the sound
 			Sound.playAndStopPrev(recording, true, function() {
 				state.playing = true;
 				showStop();
 			}, null, function() {
+				// When the sound stops, change the icon and state
 				if (me.visible) {
 					state.playing = false;
 					showPlay();
@@ -12079,8 +12309,17 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 			});
 		}
 	}, true);
+	// Start with the play icon
 	showPlay();
 };
+
+/**
+ * Create the button for deleting recordings
+ * @param {string} file - The name of the recording to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
@@ -12089,6 +12328,14 @@ RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 		});
 	});
 };
+
+/**
+ * Create te button for renaming recordings
+ * @param {string} file - The name of the recording to rename
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
 RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	let me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
@@ -12097,31 +12344,53 @@ RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 		});
 	});
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.show = function() {
+	// Create the rows, title bar, etc.
 	RowDialog.prototype.show.call(this);
 	RecordingDialog.currentDialog = this;
+	// Create the controls at the bottom.  These buttons are all hidden when created.
 	this.recordButton = this.createRecordButton();
 	this.discardButton = this.createDiscardButton();
 	this.saveButton = this.createSaveButton();
 	this.pauseButton = this.createPauseButton();
 	this.resumeRecordingBn = this.createResumeRecordingBn();
+	// Show the controls that correspond to the current state
 	this.goToState(this.state);
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.hide = function() {
 	RowDialog.prototype.hide.call(this);
 	this.setCounterVisibility(false);
 };
+
+/**
+ * @inheritDoc
+ */
 RecordingDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
 	Sound.stopAllSounds();
 };
+
+/**
+ * Create the control for recording sounds
+ * @return {Button}
+ */
 RecordingDialog.prototype.createRecordButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
+	// gets the location of additional content
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function() {
@@ -12129,6 +12398,13 @@ RecordingDialog.prototype.createRecordButton = function() {
 	}, true);
 	return button;
 };
+
+/**
+ * Create a control that is 1/3 the width of the record button
+ * @param {number} buttonPosition - [0, 1, 2], whether the button is in the first, second, or third position
+ * @param {function} callbackFn - Called on tap
+ * @return {Button}
+ */
 RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
 	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
@@ -12138,6 +12414,11 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
+
+/**
+ * Creates the button for discarding the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createDiscardButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -12147,6 +12428,11 @@ RecordingDialog.prototype.createDiscardButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
 	return button;
 };
+
+/**
+ * Creates the button for saving (stopping) the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createSaveButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -12157,6 +12443,11 @@ RecordingDialog.prototype.createSaveButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
 	return button;
 };
+
+/**
+ * Creates the button for pausing the current recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createPauseButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -12167,6 +12458,11 @@ RecordingDialog.prototype.createPauseButton = function() {
 	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
 	return button;
 };
+
+/**
+ * Creates the button to unpause recording
+ * @return {Button}
+ */
 RecordingDialog.prototype.createResumeRecordingBn = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
@@ -12177,6 +12473,11 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
 	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
 	return button;
 };
+
+/**
+ * Draws the dark rectangle to cover the dialog while recording
+ * @return {Element}
+ */
 RecordingDialog.prototype.drawCoverRect = function() {
 	let halfStep = RowDialog.bnMargin / 2;
 	let x = this.x + halfStep;
@@ -12188,6 +12489,11 @@ RecordingDialog.prototype.drawCoverRect = function() {
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
 };
+
+/**
+ * Draws the recording elapsed timer counter with "0:00" as the string
+ * @return {Element} - An SVG text element
+ */
 RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
@@ -12205,12 +12511,21 @@ RecordingDialog.prototype.drawTimeCounter = function() {
 	GuiElements.move.text(textE, x, y);
 	return textE;
 };
+
+/**
+ * Creates and shows a RecordingDialog after retrieving a list of recordings from the frontend
+ */
 RecordingDialog.showDialog = function() {
 	RecordingManager.listRecordings(function(result) {
 		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
+
+/**
+ * shows/hides parts of the dialog according to the recording state provided.
+ * @param {RecordingManager.recordingStates} state - The state this RecordingDialog should enter
+ */
 RecordingDialog.prototype.goToState = function(state) {
 	let RecD = RecordingDialog;
 	this.state = state;
@@ -12241,22 +12556,39 @@ RecordingDialog.prototype.goToState = function(state) {
 		this.getCenteredButton(0).disable();
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has started
+ */
 RecordingDialog.startedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has stopped
+ */
 RecordingDialog.stoppedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
 		RecordingDialog.currentDialog.reloadDialog();
 	}
 };
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has paused
+ */
 RecordingDialog.pausedRecording = function() {
 	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
 	}
 };
+
+/**
+ * Re-retrieves the list of names from the backend and reloads the dialog with it
+ * @inheritDoc
+ */
 RecordingDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
@@ -12267,6 +12599,11 @@ RecordingDialog.prototype.reloadDialog = function() {
 		dialog.setScroll(thisScroll);
 	});
 };
+
+/**
+ * Shows/hides the counter and coverRect
+ * @param {boolean} visible - Whether the counter and background behind it should be visible
+ */
 RecordingDialog.prototype.setCounterVisibility = function(visible) {
 	if (visible) {
 		if (this.coverRect == null) {
@@ -12286,6 +12623,11 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 		}
 	}
 };
+
+/**
+ * Sets the text of the counter according to the provided time.  Formats the time into hh:mm:ss or mm:ss
+ * @param {number} time - elapsed time in ms
+ */
 RecordingDialog.prototype.updateCounter = function(time) {
 	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
@@ -12310,6 +12652,11 @@ RecordingDialog.prototype.updateCounter = function(time) {
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 };
+
+/**
+ * Updates the counter of the current RecordingDialog.  Called by the RecordingManager
+ * @param time
+ */
 RecordingDialog.updateCounter = function(time) {
 	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);

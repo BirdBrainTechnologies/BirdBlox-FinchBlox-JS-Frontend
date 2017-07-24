@@ -831,6 +831,7 @@ GuiElements.getOsVersion=function(callback){
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		GuiElements.isAndroid = true;
 		callback();
 	}, function(){
 		GuiElements.osVersion="";

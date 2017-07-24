@@ -27,7 +27,7 @@ function FileList(jsonString) {
  */
 FileList.prototype.getCloudTitle = function(){
 	if (this.account != null) {
-		return "Cloud - " + this.account;
+		return this.account;
 	}
 	return "Cloud";
 };
