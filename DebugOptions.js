@@ -57,7 +57,7 @@ DebugOptions.shouldSkipHtmlRequests = function(){
 };
 DebugOptions.shouldUseJSDialogs = function(){
 	var DO = DebugOptions;
-	return DO.enabled && (DO.mouse);
+	return DO.enabled && (DO.mouse) && false;
 };
 DebugOptions.shouldLogHttp=function(){
 	var DO = DebugOptions;

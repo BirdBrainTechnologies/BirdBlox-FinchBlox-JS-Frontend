@@ -59,7 +59,7 @@ DebugOptions.shouldSkipHtmlRequests = function(){
 };
 DebugOptions.shouldUseJSDialogs = function(){
 	var DO = DebugOptions;
-	return DO.enabled && (DO.mouse);
+	return DO.enabled && (DO.mouse) && false;
 };
 DebugOptions.shouldLogHttp=function(){
 	var DO = DebugOptions;
@@ -13992,11 +13992,11 @@ CallbackManager.cloud.signIn = function(){
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
 	response = HtmlServer.decodeHtml(response);
-	DialogManager.promptCallback(cancelled, response);
+	DialogManager.promptDialogResponded(cancelled, response);
 	return true;
 };
 CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	DialogManager.choiceCallback(cancelled, firstSelected);
+	DialogManager.choiceDialogResponded(cancelled, firstSelected);
 	return true;
 };
 CallbackManager.robot = {};
