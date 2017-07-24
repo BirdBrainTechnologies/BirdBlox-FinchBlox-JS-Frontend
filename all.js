@@ -2220,7 +2220,7 @@ GuiElements.setConstants=function(){
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
 	RecordingDialog.setConstants();
-	NewDisplayBox.setGraphics();
+	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
@@ -9525,22 +9525,36 @@ Highlighter.hide=function(){
 	}
 };
 /**
- * Created by Tom on 7/8/2017.
+ * Manages three DisplayBoxes on the bottom of the screen.  DisplayBoxes are triggered by the display block and
+ * which box is shown depends on the position parameter of the block
+ * @constructor
  */
 function DisplayBoxManager(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes = [];
+	// Create 3 boxes
 	for(let i = 0; i < 3; i++) {
-		DBM.boxes[i] = new NewDisplayBox(i);
+		DBM.boxes[i] = new DisplayBox(i);
 	}
+	// Build each box
 	DBM.build();
 }
+
+/**
+ * Builds all the Manager's boxes
+ */
 DisplayBoxManager.build = function(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.build();
 	});
 };
+
+/**
+ * Makes the specified DisplayBox display the message
+ * @param {string} message - The message to display
+ * @param {string} positionString - "position#", The position of the box, as a string
+ */
 DisplayBoxManager.displayText = function(message, positionString) {
 	const DBM = DisplayBoxManager;
 	if(positionString === "position1") {
@@ -9550,89 +9564,131 @@ DisplayBoxManager.displayText = function(message, positionString) {
 	} else if(positionString === "position3") {
 		DBM.boxes[2].displayText(message);
 	} else {
+		// Invalid data stored in slot
 		DebugOptions.assert(false);
 	}
 };
+
+/**
+ * Hides all DisplayBoxes (when one is tapped)
+ */
 DisplayBoxManager.hide = function(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.hide();
 	});
 };
+
+/**
+ * Resizes all DisplayBoxes
+ */
 DisplayBoxManager.updateZoom = function(){
-	NewDisplayBox.updateZoom();
+	DisplayBox.updateZoom();
 	DisplayBoxManager.boxes.forEach(function(box){
 		box.updateZoom();
 	})
 };
 /**
- * Created by Tom on 7/8/2017.
+ * Displays text in a large, white box at the bottom of the screen.  Triggered by display Block.  No SVG elements
+ * are created until build() is called.
+ * @param {number} position - A 0-indexed number indicating the position of the DisplayBox on the screen
+ * @constructor
  */
-function NewDisplayBox(position) {
+function DisplayBox(position) {
 	this.position = position;
 	this.visible = false;
 	this.layer = GuiElements.layers.display;
 }
-NewDisplayBox.setGraphics=function(){
-	const DB = NewDisplayBox;
-	DB.bgColor=Colors.white;
-	DB.fontColor=Colors.black;
+
+DisplayBox.setGraphics = function() {
+	const DB = DisplayBox;
+	DB.bgColor = Colors.white;
+	DB.fontColor = Colors.black;
 	DB.font = Font.uiFont(35);
-	DB.screenMargin=60;
-	DB.rectH=50;
+	DB.screenMargin = 60;
+	DB.rectH = 50;
 	DB.margin = 10;
-	DB.rectX=DB.screenMargin;
-	DB.rectW=GuiElements.width-2*DB.screenMargin;
+	DB.rectX = DB.screenMargin;
+	DB.rectW = GuiElements.width - 2 * DB.screenMargin;
 };
-NewDisplayBox.prototype.build=function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Builds the elements of the box
+ */
+DisplayBox.prototype.build = function() {
+	const DB = DisplayBox;
 	this.rectY = this.getRectY();
-	this.rectE=GuiElements.draw.rect(DB.rectX,this.rectY,DB.rectW,DB.rectH,DB.bgColor);
-	this.textE=GuiElements.draw.text(0,0,"",DB.font,DB.fontColor);
+	this.rectE = GuiElements.draw.rect(DB.rectX, this.rectY, DB.rectW, DB.rectH, DB.bgColor);
+	this.textE = GuiElements.draw.text(0, 0, "", DB.font, DB.fontColor);
 	TouchReceiver.addListenersDisplayBox(this.rectE);
 	TouchReceiver.addListenersDisplayBox(this.textE);
 };
-NewDisplayBox.prototype.getRectY = function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Computes the y-cord of the box based on the position and constants
+ * @return {number}
+ */
+DisplayBox.prototype.getRectY = function() {
+	const DB = DisplayBox;
 	const fromBottom = 2 - this.position;
 	return GuiElements.height - (DB.rectH + DB.margin) * fromBottom - DB.rectH - DB.screenMargin;
 };
-NewDisplayBox.updateZoom = function(){
-	NewDisplayBox.setGraphics();
+
+/**
+ * Resets the graphics
+ */
+DisplayBox.updateZoom = function() {
+	DisplayBox.setGraphics();
 };
-NewDisplayBox.prototype.updateZoom = function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Resizes the box
+ */
+DisplayBox.prototype.updateZoom = function() {
+	const DB = DisplayBox;
 	this.rectY = this.getRectY();
-	const textW=GuiElements.measure.textWidth(this.textE);
-	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.font.charHeight/2;
-	GuiElements.move.text(this.textE,textX,textY);
-	GuiElements.update.rect(this.rectE,DB.rectX,this.rectY,DB.rectW,DB.rectH);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	GuiElements.move.text(this.textE, textX, textY);
+	GuiElements.update.rect(this.rectE, DB.rectX, this.rectY, DB.rectW, DB.rectH);
 };
-NewDisplayBox.prototype.displayText=function(text){
-	const DB=NewDisplayBox;
-	GuiElements.update.textLimitWidth(this.textE,text,DB.rectW);
-	const textW=GuiElements.measure.textWidth(this.textE);
-	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.font.charHeight/2;
-	GuiElements.move.text(this.textE,textX,textY);
+
+/**
+ * Sets the text of the box
+ * @param {string} text - The text to show
+ */
+DisplayBox.prototype.displayText = function(text) {
+	const DB = DisplayBox;
+	GuiElements.update.textLimitWidth(this.textE, text, DB.rectW);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	GuiElements.move.text(this.textE, textX, textY);
 	this.show();
 };
-NewDisplayBox.prototype.show=function(){
-	if(!this.visible){
+
+/**
+ * Make the DisplayBox visible
+ */
+DisplayBox.prototype.show = function() {
+	if (!this.visible) {
 		this.layer.appendChild(this.rectE);
 		this.layer.appendChild(this.textE);
-		this.visible=true;
-	}
-};
-NewDisplayBox.prototype.hide=function(){
-	if(this.visible){
-		this.textE.remove();
-		this.rectE.remove();
-		this.visible=false;
+		this.visible = true;
 	}
 };
 
+/**
+ * Hides the DisplayBox
+ */
+DisplayBox.prototype.hide = function() {
+	if (this.visible) {
+		this.textE.remove();
+		this.rectE.remove();
+		this.visible = false;
+	}
+};
 
 
 /* CodeManager is a static class that controls block execution.

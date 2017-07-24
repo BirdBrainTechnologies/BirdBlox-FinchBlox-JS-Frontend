@@ -159,7 +159,7 @@ GuiElements.setConstants=function(){
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
 	RecordingDialog.setConstants();
-	NewDisplayBox.setGraphics();
+	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
