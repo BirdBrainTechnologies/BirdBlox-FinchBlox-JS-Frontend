@@ -91,8 +91,8 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
 };
 ConnectMultipleDialog.prototype.show = function(){
 	let CMD = ConnectMultipleDialog;
-	CMD.currentDialog = this;
 	RowDialog.prototype.show.call(this);
+	CMD.currentDialog = this;
 	this.createConnectBn();
 	this.createTabRow();
 	this.deviceClass.getManager().startDiscover(function() {

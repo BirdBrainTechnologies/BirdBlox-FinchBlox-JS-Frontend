@@ -17,10 +17,17 @@ function DeviceManager(deviceClass) {
 	/* The number of devices listed in each DeviceDropSlot to select from.  Determined when updateSelectableDevices
 	 * is called. */
 	this.selectableDevices = 0;
-	this.deviceDiscoverCallback = null;
-	this.renewDiscoverFn = null;
-	this.discoverCache = null;
+
+	/* Whether a scan is currently running */
 	this.scanning = false;
+
+	/** @type {function|null} - A function to call when new devices are discovered */
+	this.deviceDiscoverCallback = null;
+	/** @type {function|null} - A function to call to determine if a new scan should be run when the scan stops
+	 * Often checks if a dialog for that device type is currently open */
+	this.renewDiscoverFn = null;
+	/** @type {string|null} - A cache of the scan results, updated through callbacks from the backend */
+	this.discoverCache = null;
 }
 
 DeviceManager.setStatics = function() {
@@ -227,9 +234,9 @@ DeviceManager.prototype.devicesChanged = function() {
  * @param {function} renewDiscoverFn - type () -> boolean, called to determine if a scan should be restarted.
  */
 DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
+	this.renewDiscoverFn = renewDiscoverFn;
 	if(!this.scanning) {
 		this.scanning = true;
-		this.renewDiscoverFn = renewDiscoverFn;
 		this.discoverCache = null;
 
 		let request = new HttpRequestBuilder("robot/startDiscover");
@@ -238,21 +245,33 @@ DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	}
 };
 
+/**
+ * Adds a function to the DeviceManager which is called with a list of devices whenever devices are discovered
+ * @param {function} callbackFn - type: string -> (), function provided by UI part
+ */
 DeviceManager.prototype.registerDiscoverCallback = function(callbackFn) {
 	this.deviceDiscoverCallback = callbackFn;
 };
 
-DeviceManager.prototype.removeDiscoverCallback = function() {
-	this.deviceDiscoverCallback = null;
-};
-
+/**
+ * Retrieves the list of devices that was discovered during the current scan, or null if no scan results are available
+ * used for the ConnectMultipleDialog when the used opens a RobotConnectionList
+ * @return {null|string} - A JSON Array as a string or null
+ */
 DeviceManager.prototype.getDiscoverCache = function() {
 	return this.discoverCache;
 };
 
+/**
+ * Checks if a connection dialog is open by calling the renewDiscoverFn and starts a new scan if it is.
+ * Clears all data from the previous scan
+ * @param {string} robotTypeId - id of the affected DeviceManager
+ */
 DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
 	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
 		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
+			this.scanning = false;
+			this.discoverCache = null;
 			this.startDiscover(this.renewDiscoverFn);
 		} else {
 			this.markStoppedDiscover();
@@ -260,6 +279,13 @@ DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
 	}
 };
 
+/**
+ * Retrieves an array of Devices
+ * @param robotListString
+ * @param includeConnected
+ * @param excludeIndex
+ * @return {Array}
+ */
 DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeIndex) {
 	// Get the devices from the request
 	let robotList = Device.fromJsonArrayString(this.deviceClass, robotListString);
@@ -296,17 +322,11 @@ DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
 	}
 };
 
-DeviceManager.prototype.backendStopDiscover = function(robotTypeId) {
-	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
-		this.markStoppedDiscover();
-	}
-};
-
 /**
  * Issues a request to tell the backend to stop scanning for devices. Called when a discover dialog is closed
  * TODO: change backend to this doesn't need to be called when switching between Flutter/Hummingbird tabs
- * @param {function} callbackFn
- * @param {function} callbackErr
+ * @param {function} [callbackFn]
+ * @param {function} [callbackErr]
  */
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
 	let request = new HttpRequestBuilder("robot/stopDiscover");
@@ -314,6 +334,9 @@ DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
 	this.markStoppedDiscover();
 };
 
+/**
+ * Clears the cache and other fields to reflect that a scan is no longer running
+ */
 DeviceManager.prototype.markStoppedDiscover = function() {
 	this.deviceDiscoverCallback = null;
 	this.discoverCache = null;
@@ -466,12 +489,21 @@ DeviceManager.setStatusListener = function(callbackFn) {
 	DeviceManager.statusListener = callbackFn;
 };
 
+/**
+ * Notifies all DeviceManagers that robots have been discovered
+ * @param {string} robotTypeId - The ID of the type of robot being scanned for
+ * @param {string} robotList - A JSON Array as a string representing the discovered devices
+ */
 DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
 	DeviceManager.forEach(function(manager) {
 		manager.backendDiscovered(robotTypeId, robotList);
 	});
 };
 
+/**
+ * Notifies all DeviceManagers that a scan has just ended, so they can possibly start a new scan
+ * @param {string} robotTypeId - The ID of the type of robot that was being scanned for
+ */
 DeviceManager.possiblyRescan = function(robotTypeId) {
 	DeviceManager.forEach(function(manager) {
 		manager.possiblyRescan(robotTypeId);
