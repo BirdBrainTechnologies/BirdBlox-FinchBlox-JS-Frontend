@@ -61,7 +61,7 @@ CallbackManager.dialog.promptResponded = function(cancelled, response){
 	return true;
 };
 CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	(DebugOptions.safeFunc(DialogManager.choiceDialogResponded))(cancelled, firstSelected);
+	DialogManager.choiceDialogResponded(cancelled, firstSelected);
 	return true;
 };
 CallbackManager.robot = {};

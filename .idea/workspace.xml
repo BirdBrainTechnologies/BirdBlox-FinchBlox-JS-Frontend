@@ -44,8 +44,8 @@
       <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CallbackManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="64" column="16" lean-forward="true" selection-start-line="64" selection-start-column="16" selection-end-line="64" selection-end-column="16" />
+            <state relative-caret-position="210">
+              <caret line="65" column="2" lean-forward="true" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="2" />
               <folding>
                 <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
                 <element signature="e#150#207#0" expanded="false" />
@@ -58,16 +58,16 @@
                 <element signature="e#1086#1144#0" expanded="false" />
                 <element signature="e#1206#1296#0" expanded="false" />
                 <element signature="e#1339#1417#0" expanded="false" />
-                <element signature="e#2114#2542#0" expanded="false" />
-                <element signature="e#2250#2292#0" expanded="false" />
-                <element signature="e#2319#2356#0" expanded="false" />
-                <element signature="e#2392#2438#0" expanded="false" />
-                <element signature="e#2444#2464#0" expanded="false" />
-                <element signature="e#2611#2784#0" expanded="false" />
-                <element signature="e#3227#3274#0" expanded="false" />
-                <element signature="e#3327#3371#0" expanded="false" />
-                <element signature="e#3427#3474#0" expanded="false" />
-                <element signature="e#3516#3565#0" expanded="false" />
+                <element signature="e#2089#2517#0" expanded="false" />
+                <element signature="e#2225#2267#0" expanded="false" />
+                <element signature="e#2294#2331#0" expanded="false" />
+                <element signature="e#2367#2413#0" expanded="false" />
+                <element signature="e#2419#2439#0" expanded="false" />
+                <element signature="e#2586#2759#0" expanded="false" />
+                <element signature="e#3202#3249#0" expanded="false" />
+                <element signature="e#3302#3346#0" expanded="false" />
+                <element signature="e#3402#3449#0" expanded="false" />
+                <element signature="e#3491#3540#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -703,7 +703,7 @@
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
       <workItem from="1500644734391" duration="23320000" />
-      <workItem from="1500902406435" duration="16313000" />
+      <workItem from="1500902406435" duration="17207000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -800,7 +800,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1478076000" />
+    <option name="totallyTimeSpent" value="1478970000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2282,18 +2282,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="332">
-          <caret line="59" column="44" lean-forward="false" selection-start-line="59" selection-start-column="44" selection-end-line="59" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DialogManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
           <caret line="61" column="0" lean-forward="false" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="332">
+          <caret line="59" column="44" lean-forward="false" selection-start-line="59" selection-start-column="44" selection-end-line="59" selection-end-column="44" />
           <folding />
         </state>
       </provider>
@@ -2364,8 +2364,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CallbackManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="64" column="16" lean-forward="true" selection-start-line="64" selection-start-column="16" selection-end-line="64" selection-end-column="16" />
+        <state relative-caret-position="210">
+          <caret line="65" column="2" lean-forward="true" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="2" />
           <folding>
             <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
             <element signature="e#150#207#0" expanded="false" />
@@ -2378,16 +2378,16 @@
             <element signature="e#1086#1144#0" expanded="false" />
             <element signature="e#1206#1296#0" expanded="false" />
             <element signature="e#1339#1417#0" expanded="false" />
-            <element signature="e#2114#2542#0" expanded="false" />
-            <element signature="e#2250#2292#0" expanded="false" />
-            <element signature="e#2319#2356#0" expanded="false" />
-            <element signature="e#2392#2438#0" expanded="false" />
-            <element signature="e#2444#2464#0" expanded="false" />
-            <element signature="e#2611#2784#0" expanded="false" />
-            <element signature="e#3227#3274#0" expanded="false" />
-            <element signature="e#3327#3371#0" expanded="false" />
-            <element signature="e#3427#3474#0" expanded="false" />
-            <element signature="e#3516#3565#0" expanded="false" />
+            <element signature="e#2089#2517#0" expanded="false" />
+            <element signature="e#2225#2267#0" expanded="false" />
+            <element signature="e#2294#2331#0" expanded="false" />
+            <element signature="e#2367#2413#0" expanded="false" />
+            <element signature="e#2419#2439#0" expanded="false" />
+            <element signature="e#2586#2759#0" expanded="false" />
+            <element signature="e#3202#3249#0" expanded="false" />
+            <element signature="e#3302#3346#0" expanded="false" />
+            <element signature="e#3402#3449#0" expanded="false" />
+            <element signature="e#3491#3540#0" expanded="false" />
           </folding>
         </state>
       </provider>
