@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,54 +22,64 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+            <state relative-caret-position="420">
+              <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OpenCloudDialog.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenCloudDialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="17" column="42" lean-forward="true" selection-start-line="17" selection-start-column="42" selection-end-line="17" selection-end-column="42" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CallbackManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="231">
+              <caret line="57" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="70" />
               <folding>
-                <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
-                <element signature="e#208#322#0" expanded="false" />
-                <element signature="e#328#415#0" expanded="false" />
-                <element signature="e#664#878#0" expanded="false" />
-                <element signature="e#918#1120#0" expanded="false" />
-                <element signature="e#1036#1064#0" expanded="false" />
-                <element signature="e#1091#1118#0" expanded="false" />
-                <element signature="e#1194#2267#0" expanded="false" />
-                <element signature="e#1404#1809#0" expanded="false" />
-                <element signature="e#2042#2102#0" expanded="false" />
-                <element signature="e#2108#2168#0" expanded="false" />
-                <element signature="e#2348#2502#0" expanded="false" />
-                <element signature="e#2427#2487#0" expanded="false" />
-                <element signature="e#2577#2767#0" expanded="false" />
-                <element signature="e#2677#2763#0" expanded="false" />
-                <element signature="e#2731#2758#0" expanded="false" />
-                <element signature="e#2841#3030#0" expanded="false" />
-                <element signature="e#2940#3026#0" expanded="false" />
-                <element signature="e#2994#3021#0" expanded="false" />
-                <element signature="e#3945#4215#0" expanded="false" />
-                <element signature="e#4053#4211#0" expanded="false" />
-                <element signature="e#4288#4782#0" expanded="false" />
-                <element signature="e#4371#4767#0" expanded="false" />
-                <element signature="e#4655#4707#0" expanded="false" />
-                <element signature="e#4829#5160#0" expanded="false" />
-                <element signature="e#5072#5123#0" expanded="false" />
-                <element signature="e#5208#5523#0" expanded="false" />
-                <element signature="e#5329#5519#0" expanded="false" />
-                <element signature="e#5369#5516#0" expanded="false" />
-                <element signature="e#5572#5925#0" expanded="false" />
-                <element signature="e#5853#5915#0" expanded="false" />
-                <element signature="e#5973#6293#0" expanded="false" />
-                <element signature="e#6343#6467#0" expanded="false" />
-                <element signature="e#6366#6465#0" expanded="false" />
-                <element signature="e#6503#6660#0" expanded="false" />
-                <element signature="e#6572#6656#0" expanded="false" />
-                <element signature="e#6707#6789#0" expanded="false" />
-                <element signature="e#6826#6914#0" expanded="false" />
-                <element signature="e#6866#6912#0" expanded="false" />
-                <element signature="e#6952#7095#0" expanded="false" />
-                <element signature="e#7046#7093#0" expanded="false" />
+                <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
+                <element signature="e#150#207#0" expanded="false" />
+                <element signature="e#262#318#0" expanded="false" />
+                <element signature="e#407#555#0" expanded="false" />
+                <element signature="e#613#721#0" expanded="false" />
+                <element signature="e#762#808#0" expanded="false" />
+                <element signature="e#855#907#0" expanded="false" />
+                <element signature="e#955#1000#0" expanded="false" />
+                <element signature="e#1086#1144#0" expanded="false" />
+                <element signature="e#1206#1296#0" expanded="false" />
+                <element signature="e#1339#1417#0" expanded="false" />
+                <element signature="e#2089#2517#0" expanded="false" />
+                <element signature="e#2225#2267#0" expanded="false" />
+                <element signature="e#2294#2331#0" expanded="false" />
+                <element signature="e#2367#2413#0" expanded="false" />
+                <element signature="e#2419#2439#0" expanded="false" />
+                <element signature="e#2586#2759#0" expanded="false" />
+                <element signature="e#3202#3249#0" expanded="false" />
+                <element signature="e#3302#3346#0" expanded="false" />
+                <element signature="e#3402#3449#0" expanded="false" />
+                <element signature="e#3491#3540#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TabRow.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UIParts/TabRow/TabRow.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="185">
+              <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -190,7 +199,6 @@
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/BlockPalette.js" />
         <option value="$PROJECT_DIR$/SettingsManager.js" />
         <option value="$PROJECT_DIR$/UIParts/BlockPalette/CollapsibleItem.js" />
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
         <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
         <option value="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
@@ -210,6 +218,7 @@
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
+        <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
       </list>
     </option>
   </component>
@@ -629,7 +638,7 @@
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
       <workItem from="1500644734391" duration="23320000" />
-      <workItem from="1500902406435" duration="21725000" />
+      <workItem from="1500902406435" duration="23235000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -726,7 +735,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1483488000" />
+    <option name="totallyTimeSpent" value="1484998000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -820,13 +829,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/BlockContainers/DisplayStack.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="457">
-          <caret line="136" column="44" lean-forward="true" selection-start-line="136" selection-start-column="44" selection-end-line="136" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_variables.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -1944,14 +1946,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenCloudDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -2186,10 +2180,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/TabRow/TabRow.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/CallbackManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="37" />
+        <state relative-caret-position="231">
+          <caret line="57" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="70" />
           <folding>
             <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
             <element signature="e#150#207#0" expanded="false" />
@@ -2218,51 +2220,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#OpenDialog#0" expanded="false" />
-            <element signature="e#208#322#0" expanded="false" />
-            <element signature="e#328#415#0" expanded="false" />
-            <element signature="e#664#878#0" expanded="false" />
-            <element signature="e#918#1120#0" expanded="false" />
-            <element signature="e#1036#1064#0" expanded="false" />
-            <element signature="e#1091#1118#0" expanded="false" />
-            <element signature="e#1194#2267#0" expanded="false" />
-            <element signature="e#1404#1809#0" expanded="false" />
-            <element signature="e#2042#2102#0" expanded="false" />
-            <element signature="e#2108#2168#0" expanded="false" />
-            <element signature="e#2348#2502#0" expanded="false" />
-            <element signature="e#2427#2487#0" expanded="false" />
-            <element signature="e#2577#2767#0" expanded="false" />
-            <element signature="e#2677#2763#0" expanded="false" />
-            <element signature="e#2731#2758#0" expanded="false" />
-            <element signature="e#2841#3030#0" expanded="false" />
-            <element signature="e#2940#3026#0" expanded="false" />
-            <element signature="e#2994#3021#0" expanded="false" />
-            <element signature="e#3945#4215#0" expanded="false" />
-            <element signature="e#4053#4211#0" expanded="false" />
-            <element signature="e#4288#4782#0" expanded="false" />
-            <element signature="e#4371#4767#0" expanded="false" />
-            <element signature="e#4655#4707#0" expanded="false" />
-            <element signature="e#4829#5160#0" expanded="false" />
-            <element signature="e#5072#5123#0" expanded="false" />
-            <element signature="e#5208#5523#0" expanded="false" />
-            <element signature="e#5329#5519#0" expanded="false" />
-            <element signature="e#5369#5516#0" expanded="false" />
-            <element signature="e#5572#5925#0" expanded="false" />
-            <element signature="e#5853#5915#0" expanded="false" />
-            <element signature="e#5973#6293#0" expanded="false" />
-            <element signature="e#6343#6467#0" expanded="false" />
-            <element signature="e#6366#6465#0" expanded="false" />
-            <element signature="e#6503#6660#0" expanded="false" />
-            <element signature="e#6572#6656#0" expanded="false" />
-            <element signature="e#6707#6789#0" expanded="false" />
-            <element signature="e#6826#6914#0" expanded="false" />
-            <element signature="e#6866#6912#0" expanded="false" />
-            <element signature="e#6952#7095#0" expanded="false" />
-            <element signature="e#7046#7093#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="420">
+          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenCloudDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="17" column="42" lean-forward="true" selection-start-line="17" selection-start-column="42" selection-end-line="17" selection-end-column="42" />
+          <folding />
         </state>
       </provider>
     </entry>
