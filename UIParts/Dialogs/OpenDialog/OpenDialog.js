@@ -98,8 +98,16 @@ OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup){
 OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
 	const me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
-		SaveManager.userExportFile(file);
-	});
+		let x1 = this.contentRelToAbsX(x);
+		let x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		let y1 = this.contentRelToAbsY(y);
+		let y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		x1 = GuiElements.relToAbsX(x1);
+		x2 = GuiElements.relToAbsX(x2);
+		y1 = GuiElements.relToAbsX(y1);
+		y2 = GuiElements.relToAbsX(y2);
+		SaveManager.userExportFile(file, x1, x2, y1, y2);
+	}.bind(this));
 };
 OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup){
 	const me = this;

@@ -202,12 +202,18 @@ SaveManager.duplicate = function(filename, newName, nextAction){
 	request.addParam("newFilename", newName);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
-SaveManager.userExportFile = function(filename){
-	SaveManager.exportFile(filename);
+SaveManager.userExportFile = function(filename, x1, x2, y1, y2){
+	SaveManager.exportFile(filename, x1, x2, y1, y2);
 };
-SaveManager.exportFile = function(filename){
+SaveManager.exportFile = function(filename, x1, x2, y1, y2){
 	const request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
+	if(x1 != null && x2 != null && y1 != null && y2 != null) {
+		request.addParam("tlx", x1);
+		request.addParam("tly", y1);
+		request.addParam("brx", x2);
+		request.addParam("bry", y2);
+	}
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 SaveManager.saveAsNew = function(){
