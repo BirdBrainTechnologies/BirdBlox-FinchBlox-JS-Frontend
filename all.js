@@ -1672,6 +1672,7 @@ DeviceManager.prototype.devicesChanged = function() {
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 	DeviceManager.updateStatus();
+	CodeManager.updateConnectionStatus();
 };
 
 /**
