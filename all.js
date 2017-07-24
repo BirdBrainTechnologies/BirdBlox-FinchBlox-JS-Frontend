@@ -12383,11 +12383,11 @@ DiscoverDialog.prototype.checkPendingUpdate = function(){
 };
 DiscoverDialog.prototype.updateDeviceList = function(deviceList){
 	if(!this.visible) {
-		this.updatePending = true;
-		this.updateTimer.start();
 		return;
 	}
 	else if(TouchReceiver.touchDown || this.isScrolling()){
+		this.updatePending = true;
+		this.updateTimer.start();
 		return;
 	}
 	this.updatePending = false;
