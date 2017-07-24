@@ -10820,7 +10820,7 @@ RecordingManager.startRecording=function(){
 			RecordingDialog.startedRecording();
 		} else if(result == "Permission denied"){
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
-			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
+			DialogManager.showAlertDialog("Permission denied", message,"Dismiss");
 		} else if(result == "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
@@ -13640,76 +13640,6 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
-HtmlServer.showPromptDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	//GuiElements.alert("Showing...");
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var newText=prompt(question);
-		HtmlServer.dialogVisible=false;
-		callbackFn(newText==null,newText);
-	}
-	else{
-		var HS=HtmlServer;
-		var request = "tablet/dialog";
-		request+="?title=" + HS.encodeHtml(title);
-		request+="&question="+HS.encodeHtml(question);
-		if(shouldPrefill) {
-			request += "&prefill=" + HS.encodeHtml(prefill);
-		} else {
-			request += "&placeholder=" + HS.encodeHtml(prefill);
-		}
-		request+="&selectAll=true";
-		var onDialogPresented=function(result){
-			//GuiElements.alert("dialog presented...");
-			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
-		}
-		onDialogPresented.callbackFn=callbackFn;
-		onDialogPresented.callbackErr=callbackErr;
-		var onDialogFail=function(){
-			//GuiElements.alert("dialog failed...");
-			HtmlServer.dialogVisible=false;
-			if(onDialogFail.callbackErr!=null) {
-				onDialogFail.callbackErr();
-			}
-		}
-		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
-	}
-}
-HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/dialog_response";
-	var onResponseReceived=function(response){
-		if(response=="No Response"){
-			HS.sendRequestWithCallback(request,onResponseReceived,function(){
-				//GuiElements.alert("Error2");
-				HtmlServer.dialogVisible=false;
-				callbackErr();
-			});
-			//GuiElements.alert("No resp");
-		}
-		else if(response=="Cancelled"){
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(true);
-			//GuiElements.alert("Cancelled");
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			var trimmed=response.substring(1,response.length-1);
-			onResponseReceived.callbackFn(false,trimmed);
-			//GuiElements.alert("Done");
-		}
-	}
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HtmlServer.dialogVisible=false;
-		if(callbackErr != null) {
-			callbackErr();
-		}
-	});
-}
 HtmlServer.getFileName=function(callbackFn,callbackErr){
 	var HS=HtmlServer;
 	var onResponseReceived=function(response){
@@ -13723,81 +13653,6 @@ HtmlServer.getFileName=function(callbackFn,callbackErr){
 	onResponseReceived.callbackFn=callbackFn;
 	onResponseReceived.callbackErr=callbackErr;
 	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
-};
-HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=confirm(question);
-		HtmlServer.dialogVisible=false;
-		if(swapIfMouse){
-			result=!result;
-		}
-		if(result){
-			callbackFn("1");
-		}
-		else{
-			callbackFn("2");
-		}
-	}
-	else {
-		var HS = HtmlServer;
-		var request = "tablet/choice";
-		request += "?title=" + HS.encodeHtml(title);
-		request += "&question=" + HS.encodeHtml(question);
-		request += "&button1=" + HS.encodeHtml(option1);
-		request += "&button2=" + HS.encodeHtml(option2);
-		var onDialogPresented = function (result) {
-			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
-		};
-		onDialogPresented.callbackFn = callbackFn;
-		onDialogPresented.callbackErr = callbackErr;
-		var onDialogFail = function () {
-			HtmlServer.dialogVisible = false;
-			if (onDialogFail.callbackErr != null) {
-				onDialogFail.callbackErr();
-			}
-		};
-		onDialogFail.callbackErr = callbackErr;
-		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
-	}
-};
-HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/choice_response";
-	var onResponseReceived=function(response){
-		if(response=="0"){
-			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HS.dialogVisible = false;
-		if (callbackErr != null) {
-			callbackErr();
-		}
-	});
-};
-HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=alert(message);
-		HtmlServer.dialogVisible=false;
-	}
-	else {
-		var HS = HtmlServer;
-		var request = new HttpRequestBuilder("tablet/dialog/alert");
-		request.addParam("title", HS.encodeHtml(title));
-		request.addParam("message", HS.encodeHtml(message));
-		request.addParam("button", HS.encodeHtml(button));
-		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
-	}
 };
 
 HtmlServer.getSetting=function(key,callbackFn,callbackErr){
@@ -13860,7 +13715,9 @@ DialogManager.showChoiceDialog = function(title,question,option1,option2,swapIfM
 		request.addParam("title", title);
 		request.addParam("question", question);
 		request.addParam("button1", option1);
-		request.addParam("button2", option2);
+		if(option2 != null) {
+			request.addParam("button2", option2);
+		}
 		const onDialogPresented = function () {
 			DM.choiceCallback = callbackFn;
 		};
@@ -13924,6 +13781,13 @@ DialogManager.showPromptDialog=function(title,question,prefill,shouldPrefill,cal
 		};
 		HS.sendRequestWithCallback(request.toString(),onDialogPresented,onDialogPresented);
 	}
+};
+DialogManager.showAlertDialog = function(title,message,button,callbackFn,callbackErr){
+	if(DebugOptions.shouldUseJSDialogs()) {
+		if (callbackFn != null) callbackFn();
+		return;
+	}
+	DialogManager.showChoiceDialog(title, message, button, null, true, callbackFn, callbackErr);
 };
 DialogManager.promptDialogResponded = function(cancelled, response){
 	const DM = DialogManager;
@@ -14305,7 +14169,12 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 	if(proposedName === ""){
 		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
 	} else if(proposedName === oldFilename) {
-		if(nextAction != null) nextAction();
+		if(!isRecording && SaveManager.fileName === oldFilename && !SaveManager.named) {
+			const request = new HttpRequestBuilder("/data/markAsNamed");
+			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+		} else {
+			if (nextAction != null) nextAction();
+		}
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){

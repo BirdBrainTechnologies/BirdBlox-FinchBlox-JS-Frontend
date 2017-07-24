@@ -99,7 +99,12 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 	if(proposedName === ""){
 		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
 	} else if(proposedName === oldFilename) {
-		if(nextAction != null) nextAction();
+		if(!isRecording && SaveManager.fileName === oldFilename && !SaveManager.named) {
+			const request = new HttpRequestBuilder("/data/markAsNamed");
+			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+		} else {
+			if (nextAction != null) nextAction();
+		}
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
 			if(alreadySanitized && alreadyAvailable){

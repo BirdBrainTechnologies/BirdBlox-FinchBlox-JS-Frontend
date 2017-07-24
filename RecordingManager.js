@@ -32,7 +32,7 @@ RecordingManager.startRecording=function(){
 			RecordingDialog.startedRecording();
 		} else if(result == "Permission denied"){
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
-			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
+			DialogManager.showAlertDialog("Permission denied", message,"Dismiss");
 		} else if(result == "Requesting permission") {
 			RM.awaitingPermission = true;
 		}

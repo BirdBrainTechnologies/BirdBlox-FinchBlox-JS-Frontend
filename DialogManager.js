@@ -46,7 +46,9 @@ DialogManager.showChoiceDialog = function(title,question,option1,option2,swapIfM
 		request.addParam("title", title);
 		request.addParam("question", question);
 		request.addParam("button1", option1);
-		request.addParam("button2", option2);
+		if(option2 != null) {
+			request.addParam("button2", option2);
+		}
 		const onDialogPresented = function () {
 			DM.choiceCallback = callbackFn;
 		};
@@ -110,6 +112,13 @@ DialogManager.showPromptDialog=function(title,question,prefill,shouldPrefill,cal
 		};
 		HS.sendRequestWithCallback(request.toString(),onDialogPresented,onDialogPresented);
 	}
+};
+DialogManager.showAlertDialog = function(title,message,button,callbackFn,callbackErr){
+	if(DebugOptions.shouldUseJSDialogs()) {
+		if (callbackFn != null) callbackFn();
+		return;
+	}
+	DialogManager.showChoiceDialog(title, message, button, null, true, callbackFn, callbackErr);
 };
 DialogManager.promptDialogResponded = function(cancelled, response){
 	const DM = DialogManager;
