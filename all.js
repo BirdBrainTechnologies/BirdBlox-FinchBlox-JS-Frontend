@@ -12339,6 +12339,7 @@ RobotConnectionList.prototype.addBnListOption=function(robot){
 RobotConnectionList.prototype.close=function(){
 	this.bubbleOverlay.hide();
 	this.visible = false;
+	this.updateTimer.stop();
 	if(this.menuBnList != null) this.menuBnList.hide();
 };
 RobotConnectionList.prototype.relToAbsX = function(x){
@@ -12414,6 +12415,7 @@ DiscoverDialog.prototype.selectDevice = function(device){
 };
 DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
+	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
 /**

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
     </list>
     <ignored path="Git.iws" />
@@ -21,7 +22,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="RowDialog.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="RowDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="378">
@@ -34,8 +35,8 @@
       <file leaf-file-name="DiscoverDialog.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="546">
-              <caret line="35" column="2" lean-forward="true" selection-start-line="35" selection-start-column="2" selection-end-line="35" selection-end-column="2" />
+            <state relative-caret-position="646">
+              <caret line="65" column="28" lean-forward="false" selection-start-line="65" selection-start-column="28" selection-end-line="65" selection-end-column="28" />
               <folding>
                 <element signature="e#1703#1973#0" expanded="false" />
                 <element signature="e#1885#1937#0" expanded="false" />
@@ -45,11 +46,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RobotConnectionList.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="RobotConnectionList.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="21" column="21" lean-forward="true" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
+            <state relative-caret-position="504">
+              <caret line="90" column="4" lean-forward="false" selection-start-line="90" selection-start-column="4" selection-end-line="90" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -198,8 +199,8 @@
         <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
         <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
-        <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
+        <option value="$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js" />
       </list>
     </option>
   </component>
@@ -619,7 +620,7 @@
       <workItem from="1500557988815" duration="19933000" />
       <workItem from="1500580018236" duration="7118000" />
       <workItem from="1500644734391" duration="23320000" />
-      <workItem from="1500902406435" duration="10599000" />
+      <workItem from="1500902406435" duration="10741000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -716,7 +717,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1472362000" />
+    <option name="totallyTimeSpent" value="1472504000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1905,14 +1906,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="347" column="115" lean-forward="false" selection-start-line="347" selection-start-column="115" selection-end-line="347" selection-end-column="115" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-320">
@@ -1971,10 +1964,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="90" column="4" lean-forward="false" selection-start-line="90" selection-start-column="4" selection-end-line="90" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="546">
-          <caret line="35" column="2" lean-forward="true" selection-start-line="35" selection-start-column="2" selection-end-line="35" selection-end-column="2" />
+        <state relative-caret-position="646">
+          <caret line="65" column="28" lean-forward="false" selection-start-line="65" selection-start-column="28" selection-end-line="65" selection-end-column="28" />
           <folding>
             <element signature="e#1703#1973#0" expanded="false" />
             <element signature="e#1885#1937#0" expanded="false" />
@@ -1983,10 +1984,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/RobotConnectionList.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="21" column="21" lean-forward="true" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
+        <state relative-caret-position="378">
+          <caret line="347" column="115" lean-forward="false" selection-start-line="347" selection-start-column="115" selection-end-line="347" selection-end-column="115" />
           <folding />
         </state>
       </provider>

@@ -88,6 +88,7 @@ RobotConnectionList.prototype.addBnListOption=function(robot){
 RobotConnectionList.prototype.close=function(){
 	this.bubbleOverlay.hide();
 	this.visible = false;
+	this.updateTimer.stop();
 	if(this.menuBnList != null) this.menuBnList.hide();
 };
 RobotConnectionList.prototype.relToAbsX = function(x){

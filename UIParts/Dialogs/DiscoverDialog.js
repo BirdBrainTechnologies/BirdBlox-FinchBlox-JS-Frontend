@@ -63,5 +63,6 @@ DiscoverDialog.prototype.selectDevice = function(device){
 };
 DiscoverDialog.prototype.closeDialog = function(){
 	RowDialog.prototype.closeDialog.call(this);
+	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
