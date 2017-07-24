@@ -56,13 +56,13 @@ CallbackManager.cloud.signIn = function(){
 
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	return false;
+	response = HtmlServer.decodeHtml(response);
+	DialogManager.promptCallback(cancelled, response);
+	return true;
 };
 CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	return false;
-};
-CallbackManager.dialog.alertResponded = function(){
-	return false;
+	DialogManager.choiceCallback(cancelled, firstSelected);
+	return true;
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){

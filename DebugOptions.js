@@ -55,6 +55,10 @@ DebugOptions.shouldSkipHtmlRequests = function(){
 	var DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
+DebugOptions.shouldUseJSDialogs = function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.mouse);
+};
 DebugOptions.shouldLogHttp=function(){
 	var DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
@@ -84,7 +88,7 @@ DebugOptions.safeFunc = function(func){
 			catch(err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				HtmlServer.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
+				DialogManager.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
 			}
 		}
 	}

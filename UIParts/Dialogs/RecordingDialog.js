@@ -1,17 +1,24 @@
 /**
- * Created by Tom on 6/16/2017.
+ * A dialog for creating and managing recordings
+ * @param {Array<Sound>} listOfRecordings - The list of recordings for the open file
+ * @constructor
  */
-function RecordingDialog(listOfRecordings){
-	let RecD = RecordingDialog;
-	this.recordings=listOfRecordings.map(x => x.id);
+function RecordingDialog(listOfRecordings) {
+	const RecD = RecordingDialog;
+	// Create an array of ids
+	this.recordings = listOfRecordings.map(function(x) {
+		return x.id;
+	});
+	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
+	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
 	this.state = RecordingManager.recordingStates.stopped;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
-RecordingDialog.setConstants = function(){
+RecordingDialog.setConstants = function() {
 	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
@@ -24,9 +31,8 @@ RecordingDialog.setConstants = function(){
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
-
 };
-RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	let recording = this.recordings[index];
@@ -36,26 +42,26 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
-RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
 	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
 	let state = {};
 	state.playing = false;
 	let me = this;
-	let showPlay = function(){
+	let showPlay = function() {
 		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
 	};
-	let showStop = function(){
+	let showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
-	button.setCallbackFunction(function(){
-		if(state.playing){
+	button.setCallbackFunction(function() {
+		if (state.playing) {
 			Sound.stopAllSounds();
 		} else {
-			Sound.playAndStopPrev(recording, true, function(){
+			Sound.playAndStopPrev(recording, true, function() {
 				state.playing = true;
 				showStop();
-			}, null, function(){
-				if(me.visible) {
+			}, null, function() {
+				if (me.visible) {
 					state.playing = false;
 					showPlay();
 				}
@@ -64,23 +70,23 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 	}, true);
 	showPlay();
 };
-RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
-		RecordingManager.userDeleteFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+		RecordingManager.userDeleteFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
-		RecordingManager.userRenameFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		RecordingManager.userRenameFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.show = function(){
+RecordingDialog.prototype.show = function() {
 	RowDialog.prototype.show.call(this);
 	RecordingDialog.currentDialog = this;
 	this.recordButton = this.createRecordButton();
@@ -90,16 +96,16 @@ RecordingDialog.prototype.show = function(){
 	this.resumeRecordingBn = this.createResumeRecordingBn();
 	this.goToState(this.state);
 };
-RecordingDialog.prototype.hide = function(){
+RecordingDialog.prototype.hide = function() {
 	RowDialog.prototype.hide.call(this);
 	this.setCounterVisibility(false);
 };
-RecordingDialog.prototype.closeDialog = function(){
+RecordingDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
 	Sound.stopAllSounds();
 };
-RecordingDialog.prototype.createRecordButton = function(){
+RecordingDialog.prototype.createRecordButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
@@ -107,12 +113,12 @@ RecordingDialog.prototype.createRecordButton = function(){
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", RecD.recordFont, RecD.recordColor);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
 	return button;
 };
-RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
 	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
 	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
@@ -121,46 +127,46 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
-RecordingDialog.prototype.createDiscardButton = function(){
+RecordingDialog.prototype.createDiscardButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(0, function(){
+	let button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
 	return button;
 };
-RecordingDialog.prototype.createSaveButton = function(){
+RecordingDialog.prototype.createSaveButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(1, function(){
+	let button = this.createOneThirdBn(1, function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
 	return button;
 };
-RecordingDialog.prototype.createPauseButton = function(){
+RecordingDialog.prototype.createPauseButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
 	return button;
 };
-RecordingDialog.prototype.createResumeRecordingBn = function(){
+RecordingDialog.prototype.createResumeRecordingBn = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
 	return button;
 };
-RecordingDialog.prototype.drawCoverRect = function(){
+RecordingDialog.prototype.drawCoverRect = function() {
 	let halfStep = RowDialog.bnMargin / 2;
 	let x = this.x + halfStep;
 	let y = this.y + this.getExtraTopY() + halfStep;
@@ -171,7 +177,7 @@ RecordingDialog.prototype.drawCoverRect = function(){
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
 };
-RecordingDialog.prototype.drawTimeCounter = function(){
+RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
@@ -180,7 +186,7 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	let x = this.x + this.width / 2 - width / 2;
 	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
 	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
-	if(span < 2 * RecordingDialog.counterBottomMargin){
+	if (span < 2 * RecordingDialog.counterBottomMargin) {
 		y = this.getExtraBottomY() - span / 2;
 	}
 	y += this.y;
@@ -188,17 +194,17 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	GuiElements.move.text(textE, x, y);
 	return textE;
 };
-RecordingDialog.showDialog = function(){
-	RecordingManager.listRecordings(function(result){
+RecordingDialog.showDialog = function() {
+	RecordingManager.listRecordings(function(result) {
 		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
-RecordingDialog.prototype.goToState = function(state){
+RecordingDialog.prototype.goToState = function(state) {
 	let RecD = RecordingDialog;
 	this.state = state;
 	let states = RecordingManager.recordingStates;
-	if(state === states.stopped){
+	if (state === states.stopped) {
 		this.recordButton.show();
 		this.discardButton.hide();
 		this.saveButton.hide();
@@ -206,8 +212,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(false);
 		this.getCenteredButton(0).enable();
-	}
-	else if(state === states.recording){
+	} else if (state === states.recording) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -215,8 +220,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(true);
 		this.getCenteredButton(0).disable();
-	}
-	else if(state === states.paused){
+	} else if (state === states.paused) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -226,34 +230,34 @@ RecordingDialog.prototype.goToState = function(state){
 		this.getCenteredButton(0).disable();
 	}
 };
-RecordingDialog.startedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.startedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
 	}
 };
-RecordingDialog.stoppedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.stoppedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
 		RecordingDialog.currentDialog.reloadDialog();
 	}
 };
-RecordingDialog.pausedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.pausedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
 	}
 };
-RecordingDialog.prototype.reloadDialog = function(){
+RecordingDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
-	RecordingManager.listRecordings(function(response){
+	RecordingManager.listRecordings(function(response) {
 		me.closeDialog();
 		let dialog = new RecordingDialog(response);
 		dialog.show();
 		dialog.setScroll(thisScroll);
 	});
 };
-RecordingDialog.prototype.setCounterVisibility = function(visible){
-	if(visible){
+RecordingDialog.prototype.setCounterVisibility = function(visible) {
+	if (visible) {
 		if (this.coverRect == null) {
 			this.coverRect = this.drawCoverRect();
 		}
@@ -271,21 +275,21 @@ RecordingDialog.prototype.setCounterVisibility = function(visible){
 		}
 	}
 };
-RecordingDialog.prototype.updateCounter = function(time){
-	if(this.counter == null) return;
+RecordingDialog.prototype.updateCounter = function(time) {
+	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
 	let seconds = totalSeconds % 60;
 	let totalMinutes = Math.floor(totalSeconds / 60);
 	let minutes = totalMinutes % 60;
 	let hours = Math.floor(totalMinutes / 60);
 	let secondsString = seconds + "";
-	if(secondsString.length < 2){
+	if (secondsString.length < 2) {
 		secondsString = "0" + secondsString;
 	}
 	let minutesString = minutes + "";
 	let totalString = minutesString + ":" + secondsString;
-	if(hours > 0) {
-		if(minutesString.length < 2) {
+	if (hours > 0) {
+		if (minutesString.length < 2) {
 			minutesString = "0" + minutesString;
 		}
 		totalString = hours + ":" + minutesString + ":" + secondsString;
@@ -295,8 +299,8 @@ RecordingDialog.prototype.updateCounter = function(time){
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 };
-RecordingDialog.updateCounter = function(time){
-	if(this.currentDialog != null){
+RecordingDialog.updateCounter = function(time) {
+	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);
 	}
 };

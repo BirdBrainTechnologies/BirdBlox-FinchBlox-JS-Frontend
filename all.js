@@ -57,6 +57,10 @@ DebugOptions.shouldSkipHtmlRequests = function(){
 	var DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
+DebugOptions.shouldUseJSDialogs = function(){
+	var DO = DebugOptions;
+	return DO.enabled && (DO.mouse);
+};
 DebugOptions.shouldLogHttp=function(){
 	var DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
@@ -86,7 +90,7 @@ DebugOptions.safeFunc = function(func){
 			catch(err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				HtmlServer.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
+				DialogManager.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
 			}
 		}
 	}
@@ -968,7 +972,7 @@ Variable.prototype.rename=function(){
 		}
 	};
 	callbackFn.variable=this;
-	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
+	DialogManager.showPromptDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
 };
 Variable.prototype.delete=function(){
 	if(CodeManager.checkVariableUsed(this)) {
@@ -981,7 +985,7 @@ Variable.prototype.delete=function(){
 		callbackFn.variable = this;
 		var question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
-		HtmlServer.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
 	}
 	else{
 		this.remove();
@@ -1047,7 +1051,7 @@ List.prototype.rename=function(){
 		}
 	};
 	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
+	DialogManager.showPromptDialog("Rename list","Enter list name",this.name,true,callbackFn);
 };
 List.prototype.delete=function(){
 	if(CodeManager.checkListUsed(this)) {
@@ -1060,7 +1064,7 @@ List.prototype.delete=function(){
 		callbackFn.list = this;
 		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
-		HtmlServer.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
 	}
 	else{
 		this.remove();
@@ -2165,6 +2169,7 @@ GuiElements.setConstants=function(){
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
+	DialogManager();
 	Sound.setConstants();
 	BlockList();
 	Colors();
@@ -3489,8 +3494,7 @@ Font.uiFont = function(fontSize){
  * 10) You may notice that the icon is off-center when you try to use it.  That means the starting point of the path is
  *     wrong.  Try changing the path to start with "m 0,0", or "m x,y" where x and y are the locations of the initial
  *     point in the Inkscape file
- *
- * @constructor
+ * @static
  */
 function VectorPaths(){
 	const VP=VectorPaths;
@@ -3631,7 +3635,6 @@ function VectorPaths(){
  * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
  * are better and don't take time to load.  Each record is an object and can be passed to UI-related functions
  * that need a reference to an image
- * @constructor
  */
 function ImageLists() {
 	const IL = ImageLists;
@@ -7565,7 +7568,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const oldVal = data.asString().getValue();
 	const shouldPrefill = data.type === Data.types.string;
-	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
+	DialogManager.showPromptDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
 		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
 			this.currentData = new StringData(response);
 			this.cancelled = false;
@@ -9120,7 +9123,7 @@ DebugMenu.prototype.loadOptions = function() {
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
 DebugMenu.prototype.loadFile=function(){
-	HtmlServer.showDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
+	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
 		if(!cancelled){
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
@@ -9162,7 +9165,7 @@ DebugMenu.prototype.optionClearLog=function(){
 	GuiElements.alert("");
 };
 DebugMenu.prototype.optionSetJsUrl=function(){
-	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
+	DialogManager.showPromptDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
 		if(!cancel && url != ""){
 			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
 			HtmlServer.sendRequestWithCallback(request);
@@ -9179,7 +9182,7 @@ DebugMenu.prototype.optionSendRequest=function(){
 		message = "Request: http://localhost:22179/[...]"
 	}
 	var me = this;
-	HtmlServer.showDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
+	DialogManager.showPromptDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
 		if(!cancel && (request != "" || me.lastRequest != "")){
 			if(request == ""){
 				request = me.lastRequest;
@@ -9664,9 +9667,6 @@ function CodeManager(){
 	CodeManager.sound=function(){};
 	CodeManager.sound.tempo=60; //Default tempo is 60 bpm for sound blocks.
 	CodeManager.sound.volume=50; //Default volume if 50%.
-	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
-	CodeManager.repeatDialogDelay=500;
-	CodeManager.lastDialogDisplayTime=null;
 	CodeManager.repeatHBOutDelay=67;
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
@@ -9894,22 +9894,6 @@ CodeManager.startUpdateTimer=function(){
 CodeManager.eventFlagClicked=function(){
 	TabManager.eventFlagClicked();
 }
-/**/
-CodeManager.checkDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-CodeManager.updateDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	CM.lastDialogDisplayTime=now;
-};
 CodeManager.checkHBOutputDelay=function(stack){
 	return true;
 	var CM=CodeManager;
@@ -9945,7 +9929,7 @@ CodeManager.removeVariable=function(variable){
 /* @fix Write documentation.
  */
 CodeManager.newVariable=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
+	DialogManager.showPromptDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
 			const variable = new Variable(result);
@@ -9993,7 +9977,7 @@ CodeManager.removeList=function(list){
 /* @fix Write documentation.
  */
 CodeManager.newList=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
+	DialogManager.showPromptDialog("Create list","Enter list name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
 			const list = new List(result);
@@ -10040,7 +10024,7 @@ CodeManager.newBroadcastMessage=function(slot){
 			slot.setSelectionData('"'+result+'"',new StringData(result));
 		}
 	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
+	DialogManager.showPromptDialog("Create broadcast message","Enter message name","",true,callbackFn);
 };
 /* @fix Write documentation.
  */
@@ -10807,10 +10791,13 @@ Tab.prototype.updateArrowsShift=function(){
  */
 function RecordingManager(){
 	let RM = RecordingManager;
-	RM.recordingStates = {};
-	RM.recordingStates.stopped = 0;
-	RM.recordingStates.recording = 1;
-	RM.recordingStates.paused = 2;
+
+	/** @enum {number} */
+	RM.recordingStates = {
+		stopped: 0,
+		recording: 1,
+		paused: 2
+	};
 	RM.state = RM.recordingStates.stopped;
 	RM.updateTimer = null;
 	RM.updateInterval = 200;
@@ -10873,7 +10860,7 @@ RecordingManager.discardRecording = function(){
 		RecordingDialog.stoppedRecording();
 	};
 	let message = "Are you sure you would like to delete the current recording?";
-	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
+	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
 		if(result == "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
@@ -11298,56 +11285,131 @@ RowDialog.prototype.isScrolling = function() {
 	}
 	return false;
 };
+
+/**
+ * Stores the hint text to display when there is no content.  Should be called before show()
+ * @param {string} hintText
+ */
 RowDialog.prototype.addHintText = function(hintText) {
 	this.hintText = hintText;
 };
+
+/**
+ * Called by subclasses to retrieve extraTopY
+ * @return {number} - The amount of space above the content
+ */
 RowDialog.prototype.getExtraTopY = function() {
 	return this.extraTopY;
 };
+
+/**
+ * Called by subclasses to retrieve extraBottomY
+ * @return {number} - The amount of space below the content
+ */
 RowDialog.prototype.getExtraBottomY = function() {
 	return this.extraBottomY;
 };
+
+/**
+ * Called by subclasses to retrieve the width of the dialog
+ * @return {number}
+ */
 RowDialog.prototype.getContentWidth = function() {
 	return this.contentWidth;
 };
+
+/**
+ * Called by subclasses to retrieve the generated center button
+ * @return {Button}
+ */
 RowDialog.prototype.getCenteredButton = function(i) {
 	return this.centeredButtonEs[i];
 };
+
+/* Convert between relative and abs coords for items in the contentGroup */
+/**
+ * @param {number} x
+ * @return {number}
+ */
 RowDialog.prototype.contentRelToAbsX = function(x) {
 	if (!this.visible) return x;
 	return this.scrollBox.relToAbsX(x);
 };
+/**
+ * @param {number} y
+ * @return {number}
+ */
 RowDialog.prototype.contentRelToAbsY = function(y) {
 	if (!this.visible) return y;
 	return this.scrollBox.relToAbsY(y);
 };
+
+/**
+ * Used by subclasses to create a large button for the row that calls a certain function when tapped
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
+ */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
-	var RD = RowDialog;
-	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	const RD = RowDialog;
+	const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
 	return button;
 };
+
+/**
+ * Used by subclasses to create a button with text that calls a function
+ * @param {string} text
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
+ */
 RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn) {
-	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
 	button.addText(text);
 	return button;
 };
+
+/**
+ * Used by subclasses to create a small button that calls a function when tapped
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
-	var RD = RowDialog;
-	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	const RD = RowDialog;
+	const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
 	return button;
 };
-RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn) {
+
+/**
+ * Used by subclasses to create a small button with an icon
+ * @param {object} pathId - entry of VectorPaths
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
+RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackFn) {
 	let RD = RowDialog;
 	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
-	button.addIcon(iconId, RD.iconH);
+	button.addIcon(pathId, RD.iconH);
 	return button;
 };
 /**
@@ -11710,7 +11772,7 @@ OpenCloudDialog.prototype.userSignOut = function(){
 	let message = "Disconnect account " + this.fileList.account + "?\n";
 	message += "Downloaded files will remain on this device.";
 	const me = this;
-	HtmlServer.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result){
+	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result){
 		if (result === "2") {
 			me.signOut();
 		}
@@ -11948,19 +12010,26 @@ ConnectMultipleDialog.showDialog = function(){
 	(new ConnectMultipleDialog(CMD.lastClass)).show();
 };
 /**
- * Created by Tom on 6/16/2017.
+ * A dialog for creating and managing recordings
+ * @param {Array<Sound>} listOfRecordings - The list of recordings for the open file
+ * @constructor
  */
-function RecordingDialog(listOfRecordings){
-	let RecD = RecordingDialog;
-	this.recordings=listOfRecordings.map(x => x.id);
+function RecordingDialog(listOfRecordings) {
+	const RecD = RecordingDialog;
+	// Create an array of ids
+	this.recordings = listOfRecordings.map(function(x) {
+		return x.id;
+	});
+	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
+	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
 	this.state = RecordingManager.recordingStates.stopped;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
-RecordingDialog.setConstants = function(){
+RecordingDialog.setConstants = function() {
 	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
@@ -11973,9 +12042,8 @@ RecordingDialog.setConstants = function(){
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
-
 };
-RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	let recording = this.recordings[index];
@@ -11985,26 +12053,26 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
-RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
 	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
 	let state = {};
 	state.playing = false;
 	let me = this;
-	let showPlay = function(){
+	let showPlay = function() {
 		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
 	};
-	let showStop = function(){
+	let showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
-	button.setCallbackFunction(function(){
-		if(state.playing){
+	button.setCallbackFunction(function() {
+		if (state.playing) {
 			Sound.stopAllSounds();
 		} else {
-			Sound.playAndStopPrev(recording, true, function(){
+			Sound.playAndStopPrev(recording, true, function() {
 				state.playing = true;
 				showStop();
-			}, null, function(){
-				if(me.visible) {
+			}, null, function() {
+				if (me.visible) {
 					state.playing = false;
 					showPlay();
 				}
@@ -12013,23 +12081,23 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
 	}, true);
 	showPlay();
 };
-RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
-		RecordingManager.userDeleteFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+		RecordingManager.userDeleteFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
-		RecordingManager.userRenameFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		RecordingManager.userRenameFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.show = function(){
+RecordingDialog.prototype.show = function() {
 	RowDialog.prototype.show.call(this);
 	RecordingDialog.currentDialog = this;
 	this.recordButton = this.createRecordButton();
@@ -12039,16 +12107,16 @@ RecordingDialog.prototype.show = function(){
 	this.resumeRecordingBn = this.createResumeRecordingBn();
 	this.goToState(this.state);
 };
-RecordingDialog.prototype.hide = function(){
+RecordingDialog.prototype.hide = function() {
 	RowDialog.prototype.hide.call(this);
 	this.setCounterVisibility(false);
 };
-RecordingDialog.prototype.closeDialog = function(){
+RecordingDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
 	Sound.stopAllSounds();
 };
-RecordingDialog.prototype.createRecordButton = function(){
+RecordingDialog.prototype.createRecordButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
@@ -12056,12 +12124,12 @@ RecordingDialog.prototype.createRecordButton = function(){
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", RecD.recordFont, RecD.recordColor);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
 	return button;
 };
-RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
 	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
 	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
@@ -12070,46 +12138,46 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
-RecordingDialog.prototype.createDiscardButton = function(){
+RecordingDialog.prototype.createDiscardButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(0, function(){
+	let button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
 	return button;
 };
-RecordingDialog.prototype.createSaveButton = function(){
+RecordingDialog.prototype.createSaveButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(1, function(){
+	let button = this.createOneThirdBn(1, function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
 	return button;
 };
-RecordingDialog.prototype.createPauseButton = function(){
+RecordingDialog.prototype.createPauseButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
 	return button;
 };
-RecordingDialog.prototype.createResumeRecordingBn = function(){
+RecordingDialog.prototype.createResumeRecordingBn = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
 	return button;
 };
-RecordingDialog.prototype.drawCoverRect = function(){
+RecordingDialog.prototype.drawCoverRect = function() {
 	let halfStep = RowDialog.bnMargin / 2;
 	let x = this.x + halfStep;
 	let y = this.y + this.getExtraTopY() + halfStep;
@@ -12120,7 +12188,7 @@ RecordingDialog.prototype.drawCoverRect = function(){
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
 };
-RecordingDialog.prototype.drawTimeCounter = function(){
+RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
@@ -12129,7 +12197,7 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	let x = this.x + this.width / 2 - width / 2;
 	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
 	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
-	if(span < 2 * RecordingDialog.counterBottomMargin){
+	if (span < 2 * RecordingDialog.counterBottomMargin) {
 		y = this.getExtraBottomY() - span / 2;
 	}
 	y += this.y;
@@ -12137,17 +12205,17 @@ RecordingDialog.prototype.drawTimeCounter = function(){
 	GuiElements.move.text(textE, x, y);
 	return textE;
 };
-RecordingDialog.showDialog = function(){
-	RecordingManager.listRecordings(function(result){
+RecordingDialog.showDialog = function() {
+	RecordingManager.listRecordings(function(result) {
 		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
-RecordingDialog.prototype.goToState = function(state){
+RecordingDialog.prototype.goToState = function(state) {
 	let RecD = RecordingDialog;
 	this.state = state;
 	let states = RecordingManager.recordingStates;
-	if(state === states.stopped){
+	if (state === states.stopped) {
 		this.recordButton.show();
 		this.discardButton.hide();
 		this.saveButton.hide();
@@ -12155,8 +12223,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(false);
 		this.getCenteredButton(0).enable();
-	}
-	else if(state === states.recording){
+	} else if (state === states.recording) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -12164,8 +12231,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(true);
 		this.getCenteredButton(0).disable();
-	}
-	else if(state === states.paused){
+	} else if (state === states.paused) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -12175,34 +12241,34 @@ RecordingDialog.prototype.goToState = function(state){
 		this.getCenteredButton(0).disable();
 	}
 };
-RecordingDialog.startedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.startedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
 	}
 };
-RecordingDialog.stoppedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.stoppedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
 		RecordingDialog.currentDialog.reloadDialog();
 	}
 };
-RecordingDialog.pausedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+RecordingDialog.pausedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
 	}
 };
-RecordingDialog.prototype.reloadDialog = function(){
+RecordingDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
-	RecordingManager.listRecordings(function(response){
+	RecordingManager.listRecordings(function(response) {
 		me.closeDialog();
 		let dialog = new RecordingDialog(response);
 		dialog.show();
 		dialog.setScroll(thisScroll);
 	});
 };
-RecordingDialog.prototype.setCounterVisibility = function(visible){
-	if(visible){
+RecordingDialog.prototype.setCounterVisibility = function(visible) {
+	if (visible) {
 		if (this.coverRect == null) {
 			this.coverRect = this.drawCoverRect();
 		}
@@ -12220,21 +12286,21 @@ RecordingDialog.prototype.setCounterVisibility = function(visible){
 		}
 	}
 };
-RecordingDialog.prototype.updateCounter = function(time){
-	if(this.counter == null) return;
+RecordingDialog.prototype.updateCounter = function(time) {
+	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
 	let seconds = totalSeconds % 60;
 	let totalMinutes = Math.floor(totalSeconds / 60);
 	let minutes = totalMinutes % 60;
 	let hours = Math.floor(totalMinutes / 60);
 	let secondsString = seconds + "";
-	if(secondsString.length < 2){
+	if (secondsString.length < 2) {
 		secondsString = "0" + secondsString;
 	}
 	let minutesString = minutes + "";
 	let totalString = minutesString + ":" + secondsString;
-	if(hours > 0) {
-		if(minutesString.length < 2) {
+	if (hours > 0) {
+		if (minutesString.length < 2) {
 			minutesString = "0" + minutesString;
 		}
 		totalString = hours + ":" + minutesString + ":" + secondsString;
@@ -12244,8 +12310,8 @@ RecordingDialog.prototype.updateCounter = function(time){
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 };
-RecordingDialog.updateCounter = function(time){
-	if(this.currentDialog != null){
+RecordingDialog.updateCounter = function(time) {
+	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);
 	}
 };
@@ -12350,70 +12416,117 @@ RobotConnectionList.prototype.relToAbsY = function(y){
 	if(!this.visible) return y;
 	return this.bubbleOverlay.relToAbsY(y);
 };
+
+
 /**
- * Created by Tom on 6/14/2017.
+ * A dialog for discovering and connecting to a certain type of robot
+ * @param deviceClass - subclass of Device, type of robot to scan for
+ * @constructor
  */
-
-
-
-function DiscoverDialog(deviceClass){
+function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
 	let title = "Connect " + deviceClass.getDeviceTypeName(false);
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
-	this.discoveredDevices = [];
 	this.addHintText(deviceClass.getConnectionInstructions());
+
+	/** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
+	this.discoveredDevices = [];
+
+	/* If an update happens at an inconvenient time (like while scrolling), the dialog is not reloaded; rather
+	 * updatePending is set to true, the timer is started, and the reload occurs at a better time */
 	this.updatePending = false;
 	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
-DiscoverDialog.prototype.show = function(){
+
+/**
+ * Shows the dialog and starts the scan for devices
+ * @inheritDoc
+ */
+DiscoverDialog.prototype.show = function() {
 	const DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
 	this.discoverDevices();
 };
+
+/**
+ * Starts the scan for devices and registers the dialog to receive updates when devices are detected
+ */
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
+	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
+		// Tell the device manager that it should scan again if the dialog is still open
 		return this.visible;
 	}.bind(this));
+	// When a device is detected, update the dialog
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
-DiscoverDialog.prototype.checkPendingUpdate = function(){
-	if(this.updatePending){
+
+/**
+ * Checks if there is a pending update and updates the dialog if there is
+ */
+DiscoverDialog.prototype.checkPendingUpdate = function() {
+	if (this.updatePending) {
 		this.updateDeviceList(this.deviceClass.getManager().getDiscoverCache());
 	}
 };
-DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	if(!this.visible) {
+
+/**
+ * Reloads the dialog with the information from the new device list, or sets a pending update if the user is scrolling
+ * or is touching the screen
+ * @param {string} deviceList - A string representing a JSON array of devices
+ */
+DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
+	if (!this.visible) {
 		return;
-	}
-	else if(TouchReceiver.touchDown || this.isScrolling()){
+	} else if (TouchReceiver.touchDown || this.isScrolling()) {
 		this.updatePending = true;
 		this.updateTimer.start();
 		return;
 	}
 	this.updatePending = false;
 	this.updateTimer.stop();
+	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
 	this.reloadRows(this.discoveredDevices.length);
 };
-DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
+
+/**
+ * Creates the connection button for each discovered device
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
+	// TODO: use RowDialog.createMainBnWithText instead
+	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
 	button.addText(this.discoveredDevices[index].name);
-	var me = this;
-	button.setCallbackFunction(function(){
+	const me = this;
+	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
 	}, true);
 	button.makeScrollable();
 };
-DiscoverDialog.prototype.selectDevice = function(device){
+
+/**
+ * Connects to a device and closes the dialog
+ * @param device
+ */
+DiscoverDialog.prototype.selectDevice = function(device) {
 	this.deviceClass.getManager().setOneDevice(device);
 	this.closeDialog();
 };
-DiscoverDialog.prototype.closeDialog = function(){
+
+/**
+ * Stops the update timer and discover
+ */
+DiscoverDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
@@ -13527,7 +13640,7 @@ HtmlServer.getHBRequest=function(hBIndex,request,params){
 HtmlServer.getUrlForRequest=function(request){
 	return "http://localhost:"+HtmlServer.port+"/"+request;
 }
-HtmlServer.showDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
+HtmlServer.showPromptDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
 	TouchReceiver.touchInterrupt();
 	HtmlServer.dialogVisible=true;
 	//GuiElements.alert("Showing...");
@@ -13700,6 +13813,127 @@ HtmlServer.sendFinishedLoadingRequest = function(){
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
 /**
+ * Created by Tom on 6/21/2017.
+ */
+function DialogManager() {
+	let DM = DialogManager;
+	DM.repeatDialogDelay = 500;
+	DM.lastDialogDisplayTime = null;
+
+	DM.dialogVisible = false;
+	DM.choiceCallback = null;
+	DM.promptCallback = null;
+}
+DialogManager.checkDialogDelay = function() {
+	let DM = DialogManager;
+	let now = new Date().getTime();
+	return DM.lastDialogDisplayTime == null || now - DM.repeatDialogDelay >= DM.lastDialogDisplayTime;
+};
+DialogManager.updateDialogDelay = function() {
+	let DM = DialogManager;
+	DM.lastDialogDisplayTime = new Date().getTime();
+};
+DialogManager.showChoiceDialog = function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr) {
+	const DM = DialogManager;
+	if(DM.dialogVisible) {
+		if (callbackErr != null) callbackErr();
+		return;
+	}
+	TouchReceiver.touchInterrupt();
+	DM.dialogVisible = true;
+	if(DebugOptions.shouldUseJSDialogs()){ //Kept for debugging on a PC
+		let result = confirm(question);
+		DM.dialogVisible = false;
+		if(swapIfMouse){
+			result=!result;
+		}
+		if(result){
+			callbackFn("1");
+		}
+		else{
+			callbackFn("2");
+		}
+	}
+	else {
+		const HS = HtmlServer;
+		const request = new HttpRequestBuilder("tablet/choice");
+		request.addParam("title", title);
+		request.addParam("question", question);
+		request.addParam("button1", option1);
+		request.addParam("button2", option2);
+		const onDialogPresented = function () {
+			DM.choiceCallback = callbackFn;
+		};
+		const onDialogFail = function () {
+			DM.dialogVisible = false;
+			if (callbackErr != null) {
+				callbackErr();
+			}
+		};
+		HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);
+	}
+};
+DialogManager.choiceDialogResponded = function(cancelled, firstSelected){
+	const DM = DialogManager;
+	DM.dialogVisible = false;
+	if(DM.choiceCallback != null){
+		let resp;
+		if(cancelled) {
+			resp = "3";
+		} else if(firstSelected){
+			resp = "1";
+		} else {
+			resp = "2";
+		}
+		DM.choiceCallback(resp);
+	}
+	DM.choiceCallback = null;
+};
+DialogManager.showPromptDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
+	const DM = DialogManager;
+	if(DM.dialogVisible) {
+		if (callbackErr != null) callbackErr();
+		return;
+	}
+	TouchReceiver.touchInterrupt();
+	DM.dialogVisible = true;
+	if(DebugOptions.shouldUseJSDialogs()){ //Kept for debugging on a PC
+		const newText = prompt(question);
+		DM.dialogVisible=false;
+		callbackFn(newText == null,newText);
+	}
+	else{
+		const HS=HtmlServer;
+		const request = new HttpRequestBuilder("tablet/dialog");
+		request.addParam("title", title);
+		request.addParam("question", question);
+		if(shouldPrefill) {
+			request.addParam("prefill", prefill);
+		} else {
+			request.addParam("placeholder", prefill);
+		}
+		request.addParam("selectAll", "true");
+		const onDialogPresented=function(result){
+			DM.promptCallback = callbackFn;
+		};
+		const onDialogFail=function(){
+			DM.dialogVisible=false;
+			if(callbackErr!=null) {
+				callbackErr();
+			}
+		};
+		HS.sendRequestWithCallback(request.toString(),onDialogPresented,onDialogPresented);
+	}
+};
+DialogManager.promptDialogResponded = function(cancelled, response){
+	const DM = DialogManager;
+	DM.dialogVisible = false;
+	if(DM.promptCallback != null){
+		DM.promptCallback(cancelled, response);
+	}
+	DM.promptCallback = null;
+};
+/**
  * Created by Tom on 6/17/2017.
  */
 function CallbackManager(){
@@ -13757,13 +13991,13 @@ CallbackManager.cloud.signIn = function(){
 
 CallbackManager.dialog = {};
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	return false;
+	response = HtmlServer.decodeHtml(response);
+	DialogManager.promptCallback(cancelled, response);
+	return true;
 };
 CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	return false;
-};
-CallbackManager.dialog.alertResponded = function(){
-	return false;
+	DialogManager.choiceCallback(cancelled, firstSelected);
+	return true;
 };
 CallbackManager.robot = {};
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
@@ -14060,7 +14294,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
 	if(message == null){
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
+	DialogManager.showPromptDialog(title,message,defaultName,true,function(cancelled,response){
 		if(!cancelled){
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
@@ -14103,7 +14337,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
+	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response === "2") {
 			SaveManager.delete(isRecording, filename, nextAction);
 		}
@@ -14144,7 +14378,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction){
 	});
 };
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
+	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response){
 		if(!cancelled){
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
@@ -19710,7 +19944,7 @@ B_Ask.prototype.startAction = function() {
 		mem.waitingForDialog = false;
 		// There is a delay between repeated dialogs to give the user time to stop the program.
 		// Check if we can show the dialog or should delay.
-		if (CodeManager.checkDialogDelay()) { 
+		if (DialogManager.checkDialogDelay()) {
 			this.showQuestion();
 		}
 	}
@@ -19725,7 +19959,7 @@ B_Ask.prototype.updateAction = function() {
 		}
 		return new ExecutionStatusRunning();   // Still running.
 	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
-		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+		if (DialogManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
 			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
 				mem.waitingForDialog = true;
 			} else {
@@ -19735,7 +19969,7 @@ B_Ask.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
+			DialogManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running
@@ -19760,7 +19994,7 @@ B_Ask.prototype.showQuestion = function() {
 		callbackErr.mem.finished = true;   // Done waiting.
 	};
 	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 

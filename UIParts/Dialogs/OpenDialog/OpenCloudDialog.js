@@ -151,7 +151,7 @@ OpenCloudDialog.prototype.userSignOut = function(){
 	let message = "Disconnect account " + this.fileList.account + "?\n";
 	message += "Downloaded files will remain on this device.";
 	const me = this;
-	HtmlServer.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result){
+	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result){
 		if (result === "2") {
 			me.signOut();
 		}

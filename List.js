@@ -57,7 +57,7 @@ List.prototype.rename=function(){
 		}
 	};
 	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
+	DialogManager.showPromptDialog("Rename list","Enter list name",this.name,true,callbackFn);
 };
 List.prototype.delete=function(){
 	if(CodeManager.checkListUsed(this)) {
@@ -70,7 +70,7 @@ List.prototype.delete=function(){
 		callbackFn.list = this;
 		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
-		HtmlServer.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
 	}
 	else{
 		this.remove();

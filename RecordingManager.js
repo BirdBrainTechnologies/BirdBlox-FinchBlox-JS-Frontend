@@ -3,10 +3,13 @@
  */
 function RecordingManager(){
 	let RM = RecordingManager;
-	RM.recordingStates = {};
-	RM.recordingStates.stopped = 0;
-	RM.recordingStates.recording = 1;
-	RM.recordingStates.paused = 2;
+
+	/** @enum {number} */
+	RM.recordingStates = {
+		stopped: 0,
+		recording: 1,
+		paused: 2
+	};
 	RM.state = RM.recordingStates.stopped;
 	RM.updateTimer = null;
 	RM.updateInterval = 200;
@@ -69,7 +72,7 @@ RecordingManager.discardRecording = function(){
 		RecordingDialog.stoppedRecording();
 	};
 	let message = "Are you sure you would like to delete the current recording?";
-	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
+	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
 		if(result == "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);

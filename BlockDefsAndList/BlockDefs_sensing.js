@@ -25,7 +25,7 @@ B_Ask.prototype.startAction = function() {
 		mem.waitingForDialog = false;
 		// There is a delay between repeated dialogs to give the user time to stop the program.
 		// Check if we can show the dialog or should delay.
-		if (CodeManager.checkDialogDelay()) { 
+		if (DialogManager.checkDialogDelay()) {
 			this.showQuestion();
 		}
 	}
@@ -40,7 +40,7 @@ B_Ask.prototype.updateAction = function() {
 		}
 		return new ExecutionStatusRunning();   // Still running.
 	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
-		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+		if (DialogManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
 			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
 				mem.waitingForDialog = true;
 			} else {
@@ -50,7 +50,7 @@ B_Ask.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
+			DialogManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running
@@ -75,7 +75,7 @@ B_Ask.prototype.showQuestion = function() {
 		callbackErr.mem.finished = true;   // Done waiting.
 	};
 	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 

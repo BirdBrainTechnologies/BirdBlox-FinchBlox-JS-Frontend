@@ -13,8 +13,7 @@
  * 10) You may notice that the icon is off-center when you try to use it.  That means the starting point of the path is
  *     wrong.  Try changing the path to start with "m 0,0", or "m x,y" where x and y are the locations of the initial
  *     point in the Inkscape file
- *
- * @constructor
+ * @static
  */
 function VectorPaths(){
 	const VP=VectorPaths;

@@ -88,7 +88,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
 	if(message == null){
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
+	DialogManager.showPromptDialog(title,message,defaultName,true,function(cancelled,response){
 		if(!cancelled){
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
@@ -131,7 +131,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 };
 SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
+	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
 		if(response === "2") {
 			SaveManager.delete(isRecording, filename, nextAction);
 		}
@@ -172,7 +172,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction){
 	});
 };
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
+	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response){
 		if(!cancelled){
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}

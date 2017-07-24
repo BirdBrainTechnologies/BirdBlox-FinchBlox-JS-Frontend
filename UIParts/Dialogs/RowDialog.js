@@ -354,55 +354,130 @@ RowDialog.prototype.isScrolling = function() {
 	}
 	return false;
 };
+
+/**
+ * Stores the hint text to display when there is no content.  Should be called before show()
+ * @param {string} hintText
+ */
 RowDialog.prototype.addHintText = function(hintText) {
 	this.hintText = hintText;
 };
+
+/**
+ * Called by subclasses to retrieve extraTopY
+ * @return {number} - The amount of space above the content
+ */
 RowDialog.prototype.getExtraTopY = function() {
 	return this.extraTopY;
 };
+
+/**
+ * Called by subclasses to retrieve extraBottomY
+ * @return {number} - The amount of space below the content
+ */
 RowDialog.prototype.getExtraBottomY = function() {
 	return this.extraBottomY;
 };
+
+/**
+ * Called by subclasses to retrieve the width of the dialog
+ * @return {number}
+ */
 RowDialog.prototype.getContentWidth = function() {
 	return this.contentWidth;
 };
+
+/**
+ * Called by subclasses to retrieve the generated center button
+ * @return {Button}
+ */
 RowDialog.prototype.getCenteredButton = function(i) {
 	return this.centeredButtonEs[i];
 };
+
+/* Convert between relative and abs coords for items in the contentGroup */
+/**
+ * @param {number} x
+ * @return {number}
+ */
 RowDialog.prototype.contentRelToAbsX = function(x) {
 	if (!this.visible) return x;
 	return this.scrollBox.relToAbsX(x);
 };
+/**
+ * @param {number} y
+ * @return {number}
+ */
 RowDialog.prototype.contentRelToAbsY = function(y) {
 	if (!this.visible) return y;
 	return this.scrollBox.relToAbsY(y);
 };
+
+/**
+ * Used by subclasses to create a large button for the row that calls a certain function when tapped
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
+ */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
-	var RD = RowDialog;
-	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	const RD = RowDialog;
+	const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
 	return button;
 };
+
+/**
+ * Used by subclasses to create a button with text that calls a function
+ * @param {string} text
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
+ */
 RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn) {
-	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
 	button.addText(text);
 	return button;
 };
+
+/**
+ * Used by subclasses to create a small button that calls a function when tapped
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
-	var RD = RowDialog;
-	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	const RD = RowDialog;
+	const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
 	return button;
 };
-RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn) {
+
+/**
+ * Used by subclasses to create a small button with an icon
+ * @param {object} pathId - entry of VectorPaths
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
+RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackFn) {
 	let RD = RowDialog;
 	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
-	button.addIcon(iconId, RD.iconH);
+	button.addIcon(pathId, RD.iconH);
 	return button;
 };

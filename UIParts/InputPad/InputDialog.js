@@ -10,7 +10,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const oldVal = data.asString().getValue();
 	const shouldPrefill = data.type === Data.types.string;
-	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
+	DialogManager.showPromptDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
 		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
 			this.currentData = new StringData(response);
 			this.cancelled = false;

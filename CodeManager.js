@@ -33,9 +33,6 @@ function CodeManager(){
 	CodeManager.sound=function(){};
 	CodeManager.sound.tempo=60; //Default tempo is 60 bpm for sound blocks.
 	CodeManager.sound.volume=50; //Default volume if 50%.
-	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
-	CodeManager.repeatDialogDelay=500;
-	CodeManager.lastDialogDisplayTime=null;
 	CodeManager.repeatHBOutDelay=67;
 	CodeManager.reservedStackHBoutput=null;
 	CodeManager.lastHBOutputSendTime=null;
@@ -263,22 +260,6 @@ CodeManager.startUpdateTimer=function(){
 CodeManager.eventFlagClicked=function(){
 	TabManager.eventFlagClicked();
 }
-/**/
-CodeManager.checkDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-CodeManager.updateDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	CM.lastDialogDisplayTime=now;
-};
 CodeManager.checkHBOutputDelay=function(stack){
 	return true;
 	var CM=CodeManager;
@@ -314,7 +295,7 @@ CodeManager.removeVariable=function(variable){
 /* @fix Write documentation.
  */
 CodeManager.newVariable=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
+	DialogManager.showPromptDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkVarName(result)) {
 			result=result.trim();
 			const variable = new Variable(result);
@@ -362,7 +343,7 @@ CodeManager.removeList=function(list){
 /* @fix Write documentation.
  */
 CodeManager.newList=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
+	DialogManager.showPromptDialog("Create list","Enter list name","",true,function(cancelled,result) {
 		if(!cancelled&&CodeManager.checkListName(result)) {
 			result=result.trim();
 			const list = new List(result);
@@ -409,7 +390,7 @@ CodeManager.newBroadcastMessage=function(slot){
 			slot.setSelectionData('"'+result+'"',new StringData(result));
 		}
 	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
+	DialogManager.showPromptDialog("Create broadcast message","Enter message name","",true,callbackFn);
 };
 /* @fix Write documentation.
  */

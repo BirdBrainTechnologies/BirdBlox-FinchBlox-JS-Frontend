@@ -8,7 +8,7 @@ function Flutter(name, id) {
 // TODO: Move this function somewhere else?
 Flutter.prototype.promptRename = function(callbackFn) {
 	let inst = this;
-	HtmlServer.showDialog("Rename", "Enter new name", this.name, true, function(cancelled, result) {
+	DialogManager.showPromptDialog("Rename", "Enter new name", this.name, true, function(cancelled, result) {
 		if (!cancelled) {
 			result = result.trim();
 			if (result.length > 30) {
