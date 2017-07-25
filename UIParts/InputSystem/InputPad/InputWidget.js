@@ -14,7 +14,7 @@ function InputWidget() {
  * @param {number} y - The y coord where the InputWidget should appear
  * @param {Element} parentGroup - The SVG group the elements of the widget should be added to
  * @param {BubbleOverlay} overlay - The overlay of the InputPad containing the widget. Used for getting relToAbs coords
- * @param {SlotShape} slotShape - The SlotShape of the Slot being edited
+ * @param {EditableSlotShape} slotShape - The SlotShape of the Slot being edited
  * @param {function} updateFn - type (Data, string) -> (), to call to update the Data of the InputPad
  * @param {function} finishFn - type (Data) -> (), to call to finish editing the Slot
  * @param {Data} data - The initial Data stored in the Slot

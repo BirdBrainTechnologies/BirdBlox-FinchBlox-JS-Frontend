@@ -42,7 +42,7 @@ InputPad.prototype.addWidget = function(widget) {
 /**
  * Builds the InputPad and Widgets
  * @inheritDoc
- * @param {SlotShape} slotShape
+ * @param {EditableSlotShape} slotShape
  * @param {function} updateFn
  * @param {function} finishFn
  * @param {Data} data

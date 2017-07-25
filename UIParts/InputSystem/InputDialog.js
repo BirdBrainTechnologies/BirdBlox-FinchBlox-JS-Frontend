@@ -13,7 +13,7 @@ function InputDialog(textSummary, acceptsEmptyString) {
 /**
  * Shows a dialog and sets the value of the Slot to whatever the user enters
  * @inheritDoc
- * @param {SlotShape} slotShape
+ * @param {EditableSlotShape} slotShape
  * @param {function} updateFn
  * @param {function} finishFn
  * @param {Data} data

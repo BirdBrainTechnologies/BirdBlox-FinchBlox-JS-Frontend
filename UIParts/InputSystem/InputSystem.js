@@ -13,7 +13,7 @@ function InputSystem(){
 
 /**
  * Shows the InputSystem when the Slot is edited
- * @param {SlotShape} slotShape - The slotShape of the Slot
+ * @param {EditableSlotShape} slotShape - The slotShape of the Slot
  * @param {function} updateFn - type (Data, string) -> (), called with Data and displayText to change how the Slot looks
  * @param {function} finishFn - type (Data) -> (), called to finish editing and sets the value to Data
  * @param {Data} data - The initial Data in the Slot

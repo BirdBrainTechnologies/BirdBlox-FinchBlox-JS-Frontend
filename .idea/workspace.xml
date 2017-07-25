@@ -2,22 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/UIParts/Flutter/desktop.ini" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/RoundSlot.js" afterPath="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/RoundSlot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all.js" afterPath="$PROJECT_DIR$/all.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/DisplayNum.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/DisplayNum.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputDialog.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputSystem.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/InputWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/LabelWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/LabelWidget.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/NewInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/NumPadWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/SelectPadWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SelectPadWidget.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/InputPad/SoundInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,11 +27,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="NumPadWidget.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js">
+      <file leaf-file-name="Menu.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/UIParts/Menu/Menu.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="15" column="21" lean-forward="false" selection-start-line="15" selection-start-column="21" selection-end-line="15" selection-end-column="21" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -171,15 +162,15 @@
         <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/UIParts/DisplayBox/DisplayBoxManager.js" />
         <option value="$PROJECT_DIR$/UIParts/DisplayBox/DisplayBox.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/DisplayNum.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/NewInputPad.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/LabelWidget.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
+        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js" />
       </list>
     </option>
@@ -263,6 +254,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="ProjectPane" />
       <pane id="Scope">
         <subPane subId="Project Files">
@@ -295,6 +287,12 @@
               <item name="Root" type="cbb8eebc:String" user="Root" />
               <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
               <item name="ColorsGraphicsAndValues" type="cbb8eebc:String" user="ColorsGraphicsAndValues" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
+              <item name="ColorsGraphicsAndValues" type="cbb8eebc:String" user="ColorsGraphicsAndValues" />
+              <item name="SlotShape" type="cbb8eebc:String" user="SlotShape" />
             </path>
             <path>
               <item name="Root" type="cbb8eebc:String" user="Root" />
@@ -344,13 +342,18 @@
               <item name="Root" type="cbb8eebc:String" user="Root" />
               <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
               <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
+              <item name="Menu" type="cbb8eebc:String" user="Menu" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
+              <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
               <item name="TabManager" type="cbb8eebc:String" user="TabManager" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -589,7 +592,8 @@
       <workItem from="1500580018236" duration="7118000" />
       <workItem from="1500644734391" duration="23320000" />
       <workItem from="1500902406435" duration="27317000" />
-      <workItem from="1500948759625" duration="3668000" />
+      <workItem from="1500948759625" duration="3868000" />
+      <workItem from="1500988105455" duration="1625000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -686,7 +690,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1492748000" />
+    <option name="totallyTimeSpent" value="1494573000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -699,11 +703,11 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1835008" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1835008" sideWeight="0.49615806" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3282353" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3091335" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294643" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.49615806" order="1" side_tool="false" content_ui="tabs" />
@@ -716,6 +720,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3091335" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -779,27 +784,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/TouchReceiver.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="706" column="21" lean-forward="true" selection-start-line="706" selection-start-column="21" selection-end-line="706" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Device/Device.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="258" column="17" lean-forward="true" selection-start-line="258" selection-start-column="17" selection-end-line="258" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCSS.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="51" column="18" lean-forward="false" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="546">
@@ -1248,39 +1232,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="20" column="64" lean-forward="true" selection-start-line="20" selection-start-column="64" selection-end-line="20" selection-end-column="64" />
-          <folding>
-            <element signature="n#!!doc;n#InputDialog#0" expanded="false" />
-            <element signature="n#!!block;n#InputDialog#0" expanded="false" />
-            <element signature="e#396#609#0" expanded="false" />
-            <element signature="e#685#1363#0" expanded="false" />
-            <element signature="e#1075#1348#0" expanded="false" />
-            <element signature="e#1143#1242#0" expanded="false" />
-            <element signature="e#1248#1303#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="4" column="110" lean-forward="false" selection-start-line="4" selection-start-column="110" selection-end-line="4" selection-end-column="110" />
-          <caret line="15" column="21" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="21" />
-          <caret line="16" column="21" lean-forward="false" selection-start-line="16" selection-start-column="10" selection-end-line="16" selection-end-column="21" />
-          <caret line="17" column="21" lean-forward="false" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="21" />
-          <caret line="18" column="21" lean-forward="false" selection-start-line="18" selection-start-column="10" selection-end-line="18" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Data/NumData.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="273">
           <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1288,35 +1243,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1970">
           <caret line="112" column="35" lean-forward="false" selection-start-line="112" selection-start-column="35" selection-end-line="112" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="463">
-          <caret line="186" column="28" lean-forward="true" selection-start-line="186" selection-start-column="28" selection-end-line="186" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#InputWidget#0" expanded="false" />
-            <element signature="e#349#1133#0" expanded="false" />
-            <element signature="e#1237#1374#0" expanded="false" />
-            <element signature="e#1377#1491#0" expanded="false" />
-            <element signature="e#1537#1570#0" expanded="false" />
-            <element signature="e#1573#1637#0" expanded="false" />
-            <element signature="e#1679#1683#0" expanded="false" />
-            <element signature="e#1686#1829#0" expanded="false" />
-            <element signature="e#1877#1894#0" expanded="false" />
-            <element signature="e#1897#1996#0" expanded="false" />
-            <element signature="e#2051#2055#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1324,48 +1250,139 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="231">
           <caret line="38" column="50" lean-forward="true" selection-start-line="38" selection-start-column="50" selection-end-line="38" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/SlotShape.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="27" column="39" lean-forward="true" selection-start-line="27" selection-start-column="39" selection-end-line="27" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="11" column="0" lean-forward="true" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
           <folding>
-            <element signature="e#0#110#0" expanded="false" />
-            <element signature="e#146#168#0" expanded="false" />
-            <element signature="e#344#451#0" expanded="false" />
-            <element signature="e#454#550#0" expanded="false" />
-            <element signature="e#614#1028#0" expanded="false" />
-            <element signature="e#1031#1074#0" expanded="false" />
-            <element signature="e#1126#1234#0" expanded="false" />
+            <element signature="n#!!block;n#InputDialog#0" expanded="false" />
+            <element signature="e#693#1371#0" expanded="false" />
+            <element signature="e#1083#1356#0" expanded="false" />
+            <element signature="e#1151#1250#0" expanded="false" />
+            <element signature="e#1256#1311#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#SoundInputPad#0" expanded="false" />
+            <element signature="n#!!block;n#SoundInputPad#0" expanded="false" />
+            <element signature="e#698#988#0" expanded="false" />
+            <element signature="e#991#1135#0" expanded="false" />
+            <element signature="e#1213#2301#0" expanded="false" />
+            <element signature="e#2304#2404#0" expanded="false" />
+            <element signature="e#2452#2967#0" expanded="false" />
+            <element signature="e#2758#2809#0" expanded="false" />
+            <element signature="e#2970#3021#0" expanded="false" />
+            <element signature="e#3070#3324#0" expanded="false" />
+            <element signature="e#3174#3241#0" expanded="false" />
+            <element signature="e#3278#3322#0" expanded="false" />
+            <element signature="e#3327#3421#0" expanded="false" />
+            <element signature="e#3477#3662#0" expanded="false" />
+            <element signature="e#3665#3823#0" expanded="false" />
+            <element signature="e#3887#4204#0" expanded="false" />
+            <element signature="e#4105#4157#0" expanded="false" />
+            <element signature="e#4207#4385#0" expanded="false" />
+            <element signature="e#4454#4796#0" expanded="false" />
+            <element signature="e#4667#4749#0" expanded="false" />
+            <element signature="e#4799#4950#0" expanded="false" />
+            <element signature="e#5019#5823#0" expanded="false" />
+            <element signature="e#5318#5392#0" expanded="false" />
+            <element signature="e#5433#5776#0" expanded="false" />
+            <element signature="e#5545#5597#0" expanded="false" />
+            <element signature="e#5603#5773#0" expanded="false" />
+            <element signature="e#5826#5877#0" expanded="false" />
+            <element signature="e#5921#6074#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/SlotShape/EditableSlotShape.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="82" column="40" lean-forward="false" selection-start-line="82" selection-start-column="28" selection-end-line="82" selection-end-column="40" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="49" column="29" lean-forward="false" selection-start-line="49" selection-start-column="29" selection-end-line="49" selection-end-column="29" />
+        <state relative-caret-position="273">
+          <caret line="44" column="28" lean-forward="false" selection-start-line="44" selection-start-column="28" selection-end-line="44" selection-end-column="28" />
           <folding>
             <element signature="n#!!doc;n#InputPad#0" expanded="false" />
             <element signature="n#!!block;n#InputPad#0" expanded="false" />
             <element signature="e#993#1101#0" expanded="false" />
             <element signature="e#1104#1274#0" expanded="false" />
             <element signature="e#1323#1354#0" expanded="false" />
-            <element signature="e#1357#1528#0" expanded="false" />
-            <element signature="e#1601#2125#0" expanded="false" />
-            <element signature="e#2128#2238#0" expanded="false" />
-            <element signature="e#2281#3308#0" expanded="false" />
-            <element signature="e#2361#2598#0" expanded="false" />
-            <element signature="e#2451#2572#0" expanded="false" />
-            <element signature="e#2710#2804#0" expanded="false" />
-            <element signature="e#2970#3229#0" expanded="false" />
-            <element signature="e#3001#3226#0" expanded="false" />
-            <element signature="e#3311#3439#0" expanded="false" />
-            <element signature="e#3491#3767#0" expanded="false" />
-            <element signature="e#3574#3765#0" expanded="false" />
-            <element signature="e#3770#3830#0" expanded="false" />
-            <element signature="e#3869#4032#0" expanded="false" />
-            <element signature="e#3977#3999#0" expanded="false" />
-            <element signature="e#4035#4202#0" expanded="false" />
-            <element signature="e#4259#4349#0" expanded="false" />
-            <element signature="e#4352#4468#0" expanded="false" />
-            <element signature="e#4519#4593#0" expanded="false" />
+            <element signature="e#2136#2246#0" expanded="false" />
+            <element signature="e#2289#3316#0" expanded="false" />
+            <element signature="e#2369#2606#0" expanded="false" />
+            <element signature="e#2459#2580#0" expanded="false" />
+            <element signature="e#2718#2812#0" expanded="false" />
+            <element signature="e#2978#3237#0" expanded="false" />
+            <element signature="e#3009#3234#0" expanded="false" />
+            <element signature="e#3319#3447#0" expanded="false" />
+            <element signature="e#3499#3775#0" expanded="false" />
+            <element signature="e#3582#3773#0" expanded="false" />
+            <element signature="e#3778#3838#0" expanded="false" />
+            <element signature="e#3877#4040#0" expanded="false" />
+            <element signature="e#3985#4007#0" expanded="false" />
+            <element signature="e#4043#4210#0" expanded="false" />
+            <element signature="e#4267#4357#0" expanded="false" />
+            <element signature="e#4360#4476#0" expanded="false" />
+            <element signature="e#4527#4601#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="16" column="28" lean-forward="false" selection-start-line="16" selection-start-column="28" selection-end-line="16" selection-end-column="28" />
+          <folding>
+            <element signature="n#!!block;n#InputWidget#0" expanded="false" />
+            <element signature="e#1245#1382#0" expanded="false" />
+            <element signature="e#1385#1499#0" expanded="false" />
+            <element signature="e#1545#1578#0" expanded="false" />
+            <element signature="e#1581#1645#0" expanded="false" />
+            <element signature="e#1687#1691#0" expanded="false" />
+            <element signature="e#1694#1837#0" expanded="false" />
+            <element signature="e#1885#1902#0" expanded="false" />
+            <element signature="e#1905#2004#0" expanded="false" />
+            <element signature="e#2059#2063#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="23" column="24" lean-forward="true" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6552">
+          <caret line="312" column="61" lean-forward="false" selection-start-line="312" selection-start-column="61" selection-end-line="312" selection-end-column="61" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1414,10 +1431,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/InputSystem/InputPad/NumPadWidget.js">
+    <entry file="file://$PROJECT_DIR$/UIParts/Menu/Menu.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="15" column="21" lean-forward="false" selection-start-line="15" selection-start-column="21" selection-end-line="15" selection-end-column="21" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>

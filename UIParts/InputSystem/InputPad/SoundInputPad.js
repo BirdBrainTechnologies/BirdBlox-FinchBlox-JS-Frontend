@@ -32,7 +32,7 @@ SoundInputPad.setConstants = function() {
 
 /**
  * @inheritDoc
- * @param {SlotShape} slotShape
+ * @param {EditableSlotShape} slotShape
  * @param {function} updateFn
  * @param {function} finishFn
  * @param {Data} data
