@@ -10,7 +10,7 @@ InputWidget.SelectPad.constructor = InputWidget.SelectPad;
 InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	const layer = GuiElements.layers.frontScroll;
-	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, NewInputPad.width, layer);
+	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, InputPad.width, layer);
 	this.optionsList.forEach(function(option){
 		this.menuBnList.addOption(option.text, option.callbackFn);
 	}.bind(this));
@@ -22,7 +22,7 @@ InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slot
 InputWidget.SelectPad.prototype.updateDim = function(){
 	DebugOptions.assert(this.maxHeight !== null);
 	this.height = SmoothMenuBnList.previewHeight(this.optionsList.length, this.maxHeight);
-	this.width = NewInputPad.innerWidth;
+	this.width = InputPad.innerWidth;
 };
 InputWidget.SelectPad.prototype.fixedHeight = function(){
 	return false;

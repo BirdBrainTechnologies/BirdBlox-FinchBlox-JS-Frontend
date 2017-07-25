@@ -70,14 +70,14 @@ RoundSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * @inheritDoc
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 RoundSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	// Add label to the top of the pad
 	if (this.labelText !== "") {

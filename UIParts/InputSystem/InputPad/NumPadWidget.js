@@ -1,6 +1,3 @@
-/**
- * Created by Tom on 7/3/2017.
- */
 InputWidget.NumPad = function(positive, integer){
 	this.positive = positive;
 	this.integer = integer;
@@ -9,10 +6,10 @@ InputWidget.NumPad.prototype = Object.create(InputWidget.prototype);
 InputWidget.NumPad.prototype.constructor = InputWidget.NumPad;
 InputWidget.NumPad.setConstants = function(){
 	const NP = InputWidget.NumPad;
-	NP.bnMargin = NewInputPad.margin;
-	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
+	NP.bnMargin = InputPad.margin;
+	NP.bnWidth = (InputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
-	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
+	NP.longBnW = (InputPad.width - NP.bnMargin) / 2;
 	NP.font=Font.uiFont(34).bold();
 	NP.plusMinusH=22;
 	NP.bsIconH=25;
@@ -28,7 +25,7 @@ InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotSha
 InputWidget.NumPad.prototype.updateDim = function(x, y){
 	const NP = InputWidget.NumPad;
 	this.height = NP.bnHeight*5 + NP.bnMargin*4;
-	this.width = NewInputPad.width;
+	this.width = InputPad.width;
 };
 
 InputWidget.NumPad.prototype.grayOutUnlessZero = function(){

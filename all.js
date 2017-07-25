@@ -2211,7 +2211,7 @@ GuiElements.setConstants=function(){
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
 
-	NewInputPad.setConstants();
+	InputPad.setConstants();
 	SoundInputPad.setConstants();
 	InputWidget.NumPad.setConstants();
 	InputWidget.Label.setConstants();
@@ -7535,13 +7535,25 @@ CloseButton.prototype.setColor = function(isPressed) {
 	}
 };
 /**
- * Created by Tom on 7/3/2017.
+ * An abstract class representing a way of inputting data into an EditableSlot.  Each EditableSlot can make an
+ * InputSystem when it is told to edit(), which it provides with its slotShape, initial data, and functions to
+ * call when editing is complete.
+ * Some InputSystems require additional information, which is provided through the subclass of the constructor
+ * @constructor
  */
 function InputSystem(){
-	this.visible = false;
-	this.closed = false;
-	this.cancelled = false; //TODO: remove this?
+	this.visible = false;   // Whether the system is showing
+	this.closed = false;   // Once closed, the system cannot be opened again (only shown once)
+	this.cancelled = false;   // Whether the system set a value or was cancelled (for dialogs)
 }
+
+/**
+ * Shows the InputSystem when the Slot is edited
+ * @param {SlotShape} slotShape - The slotShape of the Slot
+ * @param {function} updateFn - type (Data, string) -> (), called with Data and displayText to change how the Slot looks
+ * @param {function} finishFn - type (Data) -> (), called to finish editing and sets the value to Data
+ * @param {Data} data - The initial Data in the Slot
+ */
 InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	DebugOptions.assert(!this.visible);
 	DebugOptions.assert(!this.closed);
@@ -7551,6 +7563,10 @@ InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	this.finishFn = finishFn;
 	this.currentData = data;
 };
+
+/**
+ * Closes the InputSystem and calls the finishFn to end the editing
+ */
 InputSystem.prototype.close = function(){
 	if(this.closed) return;
 	this.closed = true;
@@ -7558,31 +7574,57 @@ InputSystem.prototype.close = function(){
 	this.finishFn(this.currentData, this.cancelled);
 };
 /**
- * Created by Tom on 7/3/2017.
+ * A dialog used to edit the value of the Slot
+ * @param {string} textSummary - The textSummary of the Slot
+ * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
+ * @constructor
  */
-function InputDialog(textSummary, acceptsEmptyString){
+function InputDialog(textSummary, acceptsEmptyString) {
 	InputSystem.call(this);
 	this.textSummary = textSummary;
 	this.acceptsEmptyString = acceptsEmptyString;
 }
-InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
+
+/**
+ * Shows a dialog and sets the value of the Slot to whatever the user enters
+ * @inheritDoc
+ * @param {SlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const oldVal = data.asString().getValue();
+	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
 	const shouldPrefill = data.type === Data.types.string;
-	DialogManager.showPromptDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
-		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
+	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
+		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
+			// Set the data
 			this.currentData = new StringData(response);
 			this.cancelled = false;
 		} else {
+			// Mark as cancelled
 			this.cancelled = true;
 		}
 		InputSystem.prototype.close.call(this);
 	}.bind(this));
 };
 /**
- * Created by Tom on 7/3/2017.
+ * An InputSystem for editing NumSlots and DropSlots, provides a set of controls (InputWidgets) in an OverlayBubble
+ * which edit the Data in the Slot.
+ * The InputPad is flexible as it holds a stack of varying "widgets" as determined by the Slot that constructs it.
+ * Widgets are added before the InputPad is shown using addWidget.  Right now, SelectPadWidgets and NumPadWidgets
+ * are the main entry mechanisms, but more widgets could be added in the future (for example, a sliders or knobs)
+ *
+ * The coordinates of the bubble are provided as parameters
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @constructor
  */
-function NewInputPad(x1, x2, y1, y2){
+function InputPad(x1, x2, y1, y2) {
 	InputSystem.call(this);
 	this.widgets = [];
 	const coords = this.coords = {};
@@ -7591,20 +7633,35 @@ function NewInputPad(x1, x2, y1, y2){
 	coords.y1 = y1;
 	coords.y2 = y2;
 }
-NewInputPad.prototype = Object.create(InputSystem.prototype);
-NewInputPad.prototype.constructor = NewInputPad;
-NewInputPad.setConstants = function(){
-	const IP = NewInputPad;
+InputPad.prototype = Object.create(InputSystem.prototype);
+InputPad.prototype.constructor = InputPad;
+
+InputPad.setConstants = function() {
+	const IP = InputPad;
 	IP.background = Colors.black;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
 };
-NewInputPad.prototype.addWidget = function(widget){
+
+/**
+ * Adds a Widget to the InputPad.  The Widget and pad will be constructed when show() is called
+ * @param {InputWidget} widget - The Widget to add to the InputPad
+ */
+InputPad.prototype.addWidget = function(widget) {
 	this.widgets.push(widget);
 };
-NewInputPad.prototype.show = function(slotShape, updateFn, finishFn, data){
+
+/**
+ * Builds the InputPad and Widgets
+ * @inheritDoc
+ * @param {SlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
-	const IP = NewInputPad;
+	const IP = InputPad;
 	this.group = GuiElements.create.group(0, 0);
 	this.updateDim();
 	const type = Overlay.types.inputPad;
@@ -7614,11 +7671,17 @@ NewInputPad.prototype.show = function(slotShape, updateFn, finishFn, data){
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };
-NewInputPad.prototype.updateDim = function(){
-	const IP = NewInputPad;
+
+/**
+ * Computes the dimensions of the InputPad and its widgets, storing them in this.width and this.height
+ */
+InputPad.prototype.updateDim = function() {
+	const IP = InputPad;
 	let height = 0;
-	this.widgets.forEach(function(widget){
-		if(widget.fixedHeight()){
+	this.widgets.forEach(function(widget) {
+		// Some widgets have adjustable heights (like SelectPads)
+		if (widget.fixedHeight()) {
+			// Fixed-height widgets have their height computed and stored
 			widget.updateDim();
 			height += widget.height;
 		}
@@ -7627,49 +7690,92 @@ NewInputPad.prototype.updateDim = function(){
 	height -= IP.margin;
 	height = Math.max(height, 0);
 	const maxHeight = GuiElements.height - 2 * IP.margin;
+	// The remaining available screen space is computed and allocated to adjustable-height widgets
+	// TODO: currently this code only works if there is at most one adjustable-height widget
 	let allocH = (maxHeight - height);
-	this.widgets.forEach(function(widget){
-		if(!widget.fixedHeight()){
+	this.widgets.forEach(function(widget) {
+		if (!widget.fixedHeight()) {
+			// Gives all the remaining space to this widget
 			widget.setMaxHeight(allocH);
 			widget.updateDim();
+			// The widget might not use all the space, and only the space it does use is added
 			height += widget.height;
 		}
 	});
+	// Store the final results
 	this.height = height;
 	this.width = IP.width;
 };
-NewInputPad.prototype.showWidgets = function(overlay){
-	const IP = NewInputPad;
+
+/**
+ * Builds the widgets at the correct locations, assuming updateDim was already called.
+ * @param {BubbleOverlay} overlay
+ */
+InputPad.prototype.showWidgets = function(overlay) {
+	const IP = InputPad;
 	let y = 0;
-	for(let i = 0; i < this.widgets.length; i++) {
-		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.currentData);
+	for (let i = 0; i < this.widgets.length; i++) {
+		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this),
+			this.finishEdit.bind(this), this.currentData);
 		y += this.widgets[i].height + IP.margin;
 	}
 };
-NewInputPad.prototype.close = function(){
-	if(this.closed) return;
+
+/**
+ * Closes the pad and all its widgets
+ * @inheritDoc
+ */
+InputPad.prototype.close = function() {
+	if (this.closed) return;
 	InputSystem.prototype.close.call(this);
-	this.widgets.forEach(function(widget){
+	this.widgets.forEach(function(widget) {
 		widget.close();
 	});
 	this.bubbleOverlay.close();
 };
-NewInputPad.prototype.updateEdit = function(newData, text){
+
+/**
+ * Function called by Widgets to update Slot
+ * @param {Data} newData - The Data to store in the Slot
+ * @param {string} text - The text to display in the Slot
+ */
+InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
 	this.currentData = newData;
 	SaveManager.markEdited();
 };
-NewInputPad.prototype.finishEdit = function(newData){
+
+/**
+ * Function called by widgets to finish editing Slot
+ * @param {Data} newData - The Data to save to the Slot
+ */
+InputPad.prototype.finishEdit = function(newData) {
 	this.currentData = newData;
 	this.close();
+	SaveManager.markEdited();
 };
 /**
- * Created by Tom on 7/3/2017.
+ * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
+ * is responsible for drawing its own graphics and controlling the data in the Slot being edited.  The Widget is only
+ * built when show() is called.
+ * @constructor
  */
-function InputWidget(){
+function InputWidget() {
 	DebugOptions.markAbstract();
 }
-InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+
+/**
+ * Builds and displays the InputWidget, providing functions to call to update the Slot being edited
+ * @param {number} x - The x coord where the InputWidget should appear
+ * @param {number} y - The y coord where the InputWidget should appear
+ * @param {Element} parentGroup - The SVG group the elements of the widget should be added to
+ * @param {BubbleOverlay} overlay - The overlay of the InputPad containing the widget. Used for getting relToAbs coords
+ * @param {SlotShape} slotShape - The SlotShape of the Slot being edited
+ * @param {function} updateFn - type (Data, string) -> (), to call to update the Data of the InputPad
+ * @param {function} finishFn - type (Data) -> (), to call to finish editing the Slot
+ * @param {Data} data - The initial Data stored in the Slot
+ */
+InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	this.x = x;
 	this.y = y;
 	this.slotShape = slotShape;
@@ -7677,50 +7783,79 @@ InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, upd
 	this.finishFn = finishFn;
 	this.overlay = overlay;
 };
-InputWidget.prototype.updateDim = function(){
+
+/**
+ * Called by the InputPad to compute the size of the Widget.  Results stored in this.width and this.height
+ */
+InputWidget.prototype.updateDim = function() {
 	DebugOptions.markAbstract();
 };
-InputWidget.prototype.close = function(){
+
+/**
+ * Hides the InputWidget and performs and cleanup needed
+ */
+InputWidget.prototype.close = function() {
 
 };
-InputWidget.prototype.fixedHeight = function(){
+
+/**
+ * Returns whether this InputWidget is a fixed height (rather than adjusting based on content and available space)
+ * @return {boolean}
+ */
+InputWidget.prototype.fixedHeight = function() {
 	return true;
 };
-InputWidget.prototype.setMaxHeight = function(height){
+
+/**
+ * Used to assign a maximum height to an adjustable-height widget
+ * @param {number} height
+ */
+InputWidget.prototype.setMaxHeight = function(height) {
 
 };
 /**
- * Created by Tom on 7/3/2017.
+ * Displays centered text in an InputPad
+ * @param {string} text - The text to display
+ * @constructor
  */
-InputWidget.Label = function(text){
+InputWidget.Label = function(text) {
 	this.text = text;
 };
 InputWidget.Label.prototype = Object.create(InputWidget.prototype);
 InputWidget.Label.prototype.constructor = InputWidget.Label;
-InputWidget.Label.setConstants = function(){
+
+InputWidget.Label.setConstants = function() {
 	const L = InputWidget.Label;
 	L.font = Font.uiFont(16).bold();
 	L.margin = 2;
 	L.color = Colors.white;
 };
-InputWidget.Label.prototype.show = function(x, y, parentGroup){
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ */
+InputWidget.Label.prototype.show = function(x, y, parentGroup) {
 	const L = InputWidget.Label;
 	this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
-	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
+	GuiElements.update.textLimitWidth(this.textE, this.text, InputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = NewInputPad.width / 2 - textW / 2;
+	const textX = InputPad.width / 2 - textW / 2;
 	const textY = y + L.font.charHeight + L.margin;
 	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
-InputWidget.Label.prototype.updateDim = function(){
+
+/**
+ * Computes the height of the label
+ */
+InputWidget.Label.prototype.updateDim = function() {
 	const L = InputWidget.Label;
 	this.height = L.font.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
-/**
- * Created by Tom on 7/3/2017.
- */
 InputWidget.NumPad = function(positive, integer){
 	this.positive = positive;
 	this.integer = integer;
@@ -7729,10 +7864,10 @@ InputWidget.NumPad.prototype = Object.create(InputWidget.prototype);
 InputWidget.NumPad.prototype.constructor = InputWidget.NumPad;
 InputWidget.NumPad.setConstants = function(){
 	const NP = InputWidget.NumPad;
-	NP.bnMargin = NewInputPad.margin;
-	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
+	NP.bnMargin = InputPad.margin;
+	NP.bnWidth = (InputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
-	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
+	NP.longBnW = (InputPad.width - NP.bnMargin) / 2;
 	NP.font=Font.uiFont(34).bold();
 	NP.plusMinusH=22;
 	NP.bsIconH=25;
@@ -7748,7 +7883,7 @@ InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotSha
 InputWidget.NumPad.prototype.updateDim = function(x, y){
 	const NP = InputWidget.NumPad;
 	this.height = NP.bnHeight*5 + NP.bnMargin*4;
-	this.width = NewInputPad.width;
+	this.width = InputPad.width;
 };
 
 InputWidget.NumPad.prototype.grayOutUnlessZero = function(){
@@ -7908,103 +8043,149 @@ InputWidget.NumPad.prototype.okPressed=function(){
 InputWidget.NumPad.prototype.sendUpdate = function(){
 	this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 };
-// handles displaying numbers entered using the inputpad
-function DisplayNum(initialData){
+/**
+ * Handles displaying numbers entered using the NumPadWidget.  Properties of the number are divided into a number of
+ * fields to make modification easier and, avoid rounding errors, and allow for trailing 0s.  They are recombined into
+ * Data when getData() is called, and getString() gets the text to display while editing.
+ * @param {Data|NumData} initialData - The Data to initially store. If anything other than NumData, the Data will be
+ *                                     cleared when any modification occurs.
+ * @constructor
+ */
+function DisplayNum(initialData) {
+	// Whether the the Data is currently NumData. If not, it will be replaced on modification.
 	this.isNum = initialData.type === Data.types.num;
-	if(!this.isNum){
+	if (!this.isNum) {
+		// If the Data is not NumData it is simply stored as is.
 		this.data = initialData;
 		return;
 	}
-	this.isNegative=(initialData.getValue()<0);
-	var asStringData=initialData.asPositiveString();
-	var parts=asStringData.getValue().split(".");
-	this.integerPart=parts[0];
-	if(this.integerPart==""){
-		this.integerPart="0";
+	// NumData is broken across multiple fields.
+	// A boolean tracks if the number is negative
+	this.isNegative = (initialData.getValue() < 0);
+	// A positive string representation of the number, without scientific notation
+	const asStringData = initialData.asPositiveString();
+	const parts = asStringData.getValue().split(".");
+	// The integer part is everything before the decimal point, stored as a string
+	this.integerPart = parts[0];
+	if (this.integerPart === "") {
+		this.integerPart = "0";
 	}
-	this.decimalPart="";
-	this.hasDecimalPoint=(parts.length>1);
-	if(this.hasDecimalPoint){
-		this.decimalPart=parts[1];
-	}
-}
-DisplayNum.prototype.backspace=function(){
-	if(!this.isNum) return;
-	if(this.hasDecimalPoint&&this.decimalPart!=""){
-		var newL=this.decimalPart.length-1;
-		this.decimalPart=this.decimalPart.substring(0,newL);
-	}
-	else if(this.hasDecimalPoint){
-		this.hasDecimalPoint=false;
-	}
-	else if(this.integerPart.length>1){
-		var newL=this.integerPart.length-1;
-		this.integerPart=this.integerPart.substring(0,newL);
-	}
-	else if(this.integerPart!="0"){
-		this.integerPart="0";
-	}
-	else if(this.isNegative){
-		this.isNegative=false;
+	// The decimal part is everything after the decimal point, also as a string (which allows for trailing 0s
+	// Storing data as a string prevents loss of precision while editing
+	this.decimalPart = "";
+	/* Stores whether there is a decimal point following the integerPart.  Always true if the length of the
+	 * decimalPart is greater than 0. */
+	this.hasDecimalPoint = (parts.length > 1);
+	if (this.hasDecimalPoint) {
+		this.decimalPart = parts[1];
 	}
 }
-DisplayNum.prototype.switchSign=function(){
-	if(!this.isNum) return;
-	this.isNegative=!this.isNegative;
-}
-DisplayNum.prototype.addDecimalPoint=function(){
-	if(!this.isNum) return;
-	if(!this.hasDecimalPoint){
-		this.hasDecimalPoint=true;
-		this.decimalPart="";
+
+/**
+ * Removes the last digit of NumData
+ */
+DisplayNum.prototype.backspace = function() {
+	// Non-NumData is not modified
+	if (!this.isNum) return;
+	if (this.hasDecimalPoint && this.decimalPart !== "") {
+		// If there is a decimal part, cut off the last digit
+		const newL = this.decimalPart.length - 1;
+		this.decimalPart = this.decimalPart.substring(0, newL);
+	} else if (this.hasDecimalPoint) {
+		// If there's a decimal point but no decimalPart, remove the point
+		this.hasDecimalPoint = false;
+	} else if (this.integerPart.length > 1) {
+		// If there's an integer part that's longer than 1 digit, cut off the last digit
+		const newL = this.integerPart.length - 1;
+		this.integerPart = this.integerPart.substring(0, newL);
+	} else if (this.integerPart !== "0") {
+		// If there's just one digit and it isn't 0, make the number 0.
+		this.integerPart = "0";
+	} else if (this.isNegative) {
+		// If only a "-0" is left, change it to just "0".
+		this.isNegative = false;
 	}
-}
-DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
-	if(!this.isNum) return;
-	if(this.hasDecimalPoint){
-		if(this.decimalPart.length<5){
-			this.decimalPart+=digit;
+};
+
+/**
+ * Inverts the sign of the number
+ */
+DisplayNum.prototype.switchSign = function() {
+	if (!this.isNum) return;
+	this.isNegative = !this.isNegative;
+};
+
+/**
+ * Adds a decimal point, if possible
+ */
+DisplayNum.prototype.addDecimalPoint = function() {
+	if (!this.isNum) return;
+	if (!this.hasDecimalPoint) {
+		this.hasDecimalPoint = true;
+		this.decimalPart = "";
+	}
+};
+
+/**
+ * Adds the provided digit to the end of number
+ * @param {string} digit - ["0","1"..."9"], a length-1 string representing a digit
+ */
+DisplayNum.prototype.addDigit = function(digit) { //Digit is a string
+	if (!this.isNum) return;
+	if (this.hasDecimalPoint) {
+		// Only up to 5 decimal places can be added to avoid floating-point weirdness
+		if (this.decimalPart.length < 5) {
+			this.decimalPart += digit;
 		}
-	}
-	else if(this.integerPart!="0"){
-		if(this.integerPart.length<10){
-			this.integerPart+=digit;
+	} else if (this.integerPart !== "0") {
+		// Only up to 10 digits can be added to the integerPart
+		if (this.integerPart.length < 10) {
+			this.integerPart += digit;
 		}
+	} else if (digit !== "0") {
+		this.integerPart = digit;
 	}
-	else if(digit!="0"){
-		this.integerPart=digit;
-	}
-}
-DisplayNum.prototype.getString=function(){
-	if(!this.isNum){
+};
+
+/**
+ * Converts the DisplayNum into a string to display
+ * @return {string|null} - The string or null if the default string for the Data should be used
+ */
+DisplayNum.prototype.getString = function() {
+	if (!this.isNum) {
 		return null;
 	}
-	var rVal="";
-	if(this.isNegative){
-		rVal+="-";
+	let rVal = "";
+	if (this.isNegative) {
+		rVal += "-";
 	}
-	rVal+=this.integerPart;
-	if(this.hasDecimalPoint){
-		rVal+=".";
-		rVal+=this.decimalPart;
+	rVal += this.integerPart;
+	if (this.hasDecimalPoint) {
+		rVal += ".";
+		rVal += this.decimalPart;
 	}
 	return rVal;
-}
-DisplayNum.prototype.getData=function(){
-	if(!this.isNum){
+};
+
+/**
+ * Converts the DisplayNum into Data to be saved into the Slot
+ * @return {Data}
+ */
+DisplayNum.prototype.getData = function() {
+	if (!this.isNum) {
 		return this.data;
 	}
-	var rVal=parseInt(this.integerPart, 10);
-	if(this.hasDecimalPoint&&this.decimalPart.length>0){
-		var decPart=parseInt(this.decimalPart, 10);
-		decPart/=Math.pow(10,this.decimalPart.length);
-		rVal+=decPart;
+	let rVal = parseInt(this.integerPart, 10);
+	if (this.hasDecimalPoint && this.decimalPart.length > 0) {
+		let decPart = parseInt(this.decimalPart, 10);
+		decPart /= Math.pow(10, this.decimalPart.length);
+		rVal += decPart;
 	}
-	if(this.isNegative){
-		rVal=0-rVal;
+	if (this.isNegative) {
+		rVal = 0 - rVal;
 	}
 	return new NumData(rVal);
-}
+};
 /**
  * Created by Tom on 7/3/2017.
  */
@@ -8017,7 +8198,7 @@ InputWidget.SelectPad.constructor = InputWidget.SelectPad;
 InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	const layer = GuiElements.layers.frontScroll;
-	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, NewInputPad.width, layer);
+	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, InputPad.width, layer);
 	this.optionsList.forEach(function(option){
 		this.menuBnList.addOption(option.text, option.callbackFn);
 	}.bind(this));
@@ -8029,7 +8210,7 @@ InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slot
 InputWidget.SelectPad.prototype.updateDim = function(){
 	DebugOptions.assert(this.maxHeight !== null);
 	this.height = SmoothMenuBnList.previewHeight(this.optionsList.length, this.maxHeight);
-	this.width = NewInputPad.innerWidth;
+	this.width = InputPad.innerWidth;
 };
 InputWidget.SelectPad.prototype.fixedHeight = function(){
 	return false;
@@ -8085,11 +8266,16 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
 	return this.relToAbsY(0);
 };
 /**
- * Created by Tom on 7/6/2017.
+ * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @param {boolean} isRecording - Whether recordings rather than effects should be selected from
+ * @constructor
  */
-function SoundInputPad(x1, x2, y1, y2, isRecording){
+function SoundInputPad(x1, x2, y1, y2, isRecording) {
 	InputSystem.call(this);
-	this.widgets = [];
 	const coords = this.coords = {};
 	coords.x1 = x1;
 	coords.x2 = x2;
@@ -8099,9 +8285,10 @@ function SoundInputPad(x1, x2, y1, y2, isRecording){
 }
 SoundInputPad.prototype = Object.create(InputSystem.prototype);
 SoundInputPad.prototype.constructor = InputSystem;
-SoundInputPad.setConstants = function(){
+
+SoundInputPad.setConstants = function() {
 	const SIP = SoundInputPad;
-	SIP.margin = NewInputPad.margin;
+	SIP.margin = InputPad.margin;
 	SIP.rowHeight = SmoothMenuBnList.bnHeight;
 	SIP.width = 300;
 	SIP.playBnWidth = RowDialog.smallBnWidth;
@@ -8109,30 +8296,56 @@ SoundInputPad.setConstants = function(){
 	SIP.iconH = RowDialog.iconH;
 	SIP.background = Colors.black;
 };
+
+/**
+ * @inheritDoc
+ * @param {SlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
 SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const SIP = SoundInputPad;
+
+	// Make a group for everything
 	this.group = GuiElements.create.group(0, 0);
+
+	// Compute dimensions
 	this.updateDim();
+
+	// Create the BubbleOverlay for this pad
 	const bubbleGroup = GuiElements.create.group(0, 0);
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
 	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, SIP.margin, layer);
 	const coords = this.coords;
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
+
+	// Get the coords of the pad
 	const absX = this.bubbleOverlay.relToAbsX(0);
 	const absY = this.bubbleOverlay.relToAbsY(0);
+
+	// Generate content
 	this.createRows();
+
+	// Put it all in a scrollBox
 	const scrollLayer = GuiElements.layers.frontScroll;
-	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width, this.innerHeight, this.bubbleOverlay);
+	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width,
+		this.innerHeight, this.bubbleOverlay);
 	this.smoothScrollBox.show();
 };
-SoundInputPad.prototype.updateDim = function(){
+
+/**
+ * Computes the dimensions of the pad, incorporating the screen height and number of entries
+ */
+SoundInputPad.prototype.updateDim = function() {
 	const SIP = SoundInputPad;
 	const maxHeight = GuiElements.height - SIP.margin * 2;
+	// The number of recordings is retrieved from a cache
 	const soundCount = Sound.getSoundList(this.isRecording).length;
 	let desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
-	if(this.isRecording){
+	if (this.isRecording) {
 		desiredHeight += SIP.margin + SIP.rowHeight;
 	}
 	desiredHeight = Math.max(0, desiredHeight);
@@ -8140,57 +8353,92 @@ SoundInputPad.prototype.updateDim = function(){
 	this.innerHeight = desiredHeight;
 	this.width = SIP.width;
 };
-SoundInputPad.prototype.createRows = function(){
+
+/**
+ * Creates the content of the SoundInputPad
+ */
+SoundInputPad.prototype.createRows = function() {
 	const SIP = SoundInputPad;
 	let y = 0;
-	Sound.getSoundList(this.isRecording).forEach(function(sound){
+	Sound.getSoundList(this.isRecording).forEach(function(sound) {
 		this.createRow(sound, y);
 		y += SIP.margin + SIP.rowHeight;
 	}.bind(this));
-	if(this.isRecording) {
+	if (this.isRecording) {
 		this.createRecordBn(0, y, SIP.width);
 	}
 };
-SoundInputPad.prototype.createRow = function(sound, y){
+
+/**
+ * Creates the row for the provided Sound
+ * @param {Sound} sound
+ * @param {number} y
+ */
+SoundInputPad.prototype.createRow = function(sound, y) {
 	const SIP = SoundInputPad;
 	this.createMainBn(sound, 0, y, SIP.mainBnWidth, SIP.rowHeight, this.group);
 	this.createPlayBn(sound, SIP.margin + SIP.mainBnWidth, y, SIP.playBnWidth);
 };
-SoundInputPad.prototype.createRecordBn = function(x, y, width){
+
+/**
+ * Creates a "Record sounds" option included at the end of recording SoundInputPads
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
+SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText("Record sounds");
 	button.markAsOverlayPart(this.bubbleOverlay);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
 		this.close();
 	}.bind(this), true);
 	button.makeScrollable();
 };
+
+/**
+ * Creates the main button for the Sound, which selects the sound from the list
+ * @param {Sound} sound
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
 SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText(sound.name);
 	button.markAsOverlayPart(this.bubbleOverlay);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		this.currentData = new SelectionData(sound.name, sound.id);
 		this.close();
 	}.bind(this), true);
 	button.makeScrollable();
 };
+
+/**
+ * Creates a play/stop button for previewing a sound
+ * @param {Sound} sound
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
 SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	// Store the state of the Button
 	const mem = {};
 	mem.playing = false;
 	button.addIcon(VectorPaths.play, SIP.iconH);
 	button.markAsOverlayPart(this.bubbleOverlay);
-	const stoppedPlaying = function(){
+	const stoppedPlaying = function() {
 		mem.playing = false;
 		button.addIcon(VectorPaths.play, SIP.iconH);
 	};
-	button.setCallbackFunction(function(){
-		if(mem.playing) {
+	button.setCallbackFunction(function() {
+		// When tapped, the state of the button determines is sounds should be stopped or played
+		if (mem.playing) {
 			stoppedPlaying();
 			Sound.stopAllSounds();
 		} else {
@@ -8201,8 +8449,13 @@ SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 	}.bind(this), true);
 	button.makeScrollable();
 };
-SoundInputPad.prototype.close = function(){
-	if(this.closed) return;
+
+/**
+ * Closes the SoundInputPad.
+ * @inheritDoc
+ */
+SoundInputPad.prototype.close = function() {
+	if (this.closed) return;
 	InputSystem.prototype.close.call(this);
 	this.smoothScrollBox.hide();
 	this.bubbleOverlay.close();
@@ -17753,14 +18006,14 @@ RoundSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * @inheritDoc
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 RoundSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	// Add label to the top of the pad
 	if (this.labelText !== "") {
@@ -17922,14 +18175,14 @@ DropSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * Creates an InputPad with a SelectPad with this Slot's options
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
@@ -18084,14 +18337,14 @@ DropSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * Creates an InputPad with a SelectPad with this Slot's options
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
