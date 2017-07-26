@@ -4,7 +4,6 @@
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message.replace(/\+/g, " "));
@@ -39,7 +38,7 @@ HtmlServer.encodeHtml=function(message){
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
-	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+	if(DebugOptions.shouldLogHttp()&&request.indexOf("totalStatus")<0&&
 		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
@@ -77,7 +76,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				}
 				else {
 					if(callbackErr!=null){
-						if(HtmlServer.logHttp){
+						if(DebugOptions.shouldLogHttp()){
 							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);

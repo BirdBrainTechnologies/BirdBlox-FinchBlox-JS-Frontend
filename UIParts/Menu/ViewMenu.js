@@ -1,24 +1,29 @@
-function ViewMenu(button){
-	Menu.call(this,button);
+/**
+ * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * @param {Button} button
+ * @constructor
+ */
+function ViewMenu(button) {
+	Menu.call(this, button);
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
 ViewMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false);
-	this.addOption("Zoom out", this.optionZoomOut,false);
-	this.addOption("Reset zoom", this.optionResetZoom,true);
+	this.addOption("Zoom in", this.optionZoomIn, false);
+	this.addOption("Zoom out", this.optionZoomOut, false);
+	this.addOption("Reset zoom", this.optionResetZoom, true);
 };
-ViewMenu.prototype.optionZoomIn=function(){
-	GuiElements.zoomMultiple+=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.min(GuiElements.zoomMultiple,GuiElements.maxZoomMult);
+ViewMenu.prototype.optionZoomIn = function() {
+	GuiElements.zoomMultiple += GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.min(GuiElements.zoomMultiple, GuiElements.maxZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionZoomOut=function(){
-	GuiElements.zoomMultiple-=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.max(GuiElements.zoomMultiple,GuiElements.minZoomMult);
+ViewMenu.prototype.optionZoomOut = function() {
+	GuiElements.zoomMultiple -= GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.max(GuiElements.zoomMultiple, GuiElements.minZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionResetZoom=function(){
-	GuiElements.zoomMultiple=1;
+ViewMenu.prototype.optionResetZoom = function() {
+	GuiElements.zoomMultiple = 1;
 	GuiElements.updateZoom();
 };

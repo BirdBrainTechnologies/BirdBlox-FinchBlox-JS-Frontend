@@ -166,6 +166,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
+	if(!DebugOptions.shouldAllowLogging()) return;
 	let result = message;
 	if(DeviceHummingbird.getManager().renewDiscoverFn) {
 		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn()? "true":"false");

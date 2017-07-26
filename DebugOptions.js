@@ -1,6 +1,6 @@
 "use strict";
 
-function DebugOptions(){
+function DebugOptions() {
 	const DO = DebugOptions;
 	DO.enabled = true;
 
@@ -15,57 +15,61 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.logHttp = true;
 	DO.skipInitSettings = false;
-	DO.blockLogging = false;
+	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
-	if(DO.enabled){
+	if (DO.enabled) {
 		DO.applyConstants();
 	}
 }
-DebugOptions.applyConstants = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
+DebugOptions.applyConstants = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
 };
 
-DebugOptions.applyActions = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
-	if(DO.addVirtualHB){
+DebugOptions.applyActions = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
+	if (DO.addVirtualHB) {
 		let virHB = DO.createVirtualDevice(DeviceHummingbird, "");
 		DeviceHummingbird.getManager().appendDevice(virHB);
 	}
-	if(DO.addVirtualFlutter){
+	if (DO.addVirtualFlutter) {
 		let virHB = DO.createVirtualDevice(DeviceFlutter, "");
 		DeviceFlutter.getManager().appendDevice(virHB);
 	}
-	if(DO.showVersion){
-		GuiElements.alert("Version: "+GuiElements.appVersion);
+	if (DO.showVersion) {
+		GuiElements.alert("Version: " + GuiElements.appVersion);
 	}
-	if(DO.showDebugMenu){
+	if (DO.showDebugMenu) {
 		TitleBar.enableDebug();
 	}
 };
-DebugOptions.shouldLogErrors=function(){
+DebugOptions.shouldLogErrors = function() {
 	return DebugOptions.logErrors && DebugOptions.enabled;
 };
-DebugOptions.shouldSkipInitSettings=function(){
-	var DO = DebugOptions;
+DebugOptions.shouldSkipInitSettings = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
-DebugOptions.shouldSkipHtmlRequests = function(){
-	var DO = DebugOptions;
+DebugOptions.shouldSkipHtmlRequests = function() {
+	const DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
-DebugOptions.shouldUseJSDialogs = function(){
-	var DO = DebugOptions;
+DebugOptions.shouldUseJSDialogs = function() {
+	const DO = DebugOptions;
 	return DO.enabled && (DO.mouse) && false;
 };
-DebugOptions.shouldLogHttp=function(){
-	var DO = DebugOptions;
+DebugOptions.shouldLogHttp = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
 };
-DebugOptions.shouldAllowVirtualDevices = function(){
+DebugOptions.shouldAllowVirtualDevices = function() {
 	const DO = DebugOptions;
 	return DO.allowVirtualDevices && DO.enabled;
+};
+DebugOptions.shouldAllowLogging = function() {
+	const DO = DebugOptions;
+	return DO.allowLogging && DO.enabled;
 };
 DebugOptions.enableVirtualDevices = function() {
 	const DO = DebugOptions;
@@ -76,66 +80,64 @@ DebugOptions.createVirtualDevice = function(deviceClass, id) {
 	const name = "Virtual" + typeName + id;
 	return new deviceClass(name, name);
 };
-DebugOptions.safeFunc = function(func){
-	if(func == null) return null;
-	if(DebugOptions.shouldLogErrors()){
-		return function(){
+DebugOptions.safeFunc = function(func) {
+	if (func == null) return null;
+	if (DebugOptions.shouldLogErrors()) {
+		return function() {
 			try {
-				if(!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
+				if (!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
 					func.apply(this, arguments);
 				}
-			}
-			catch(err) {
+			} catch (err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				DialogManager.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
+				DialogManager.showChoiceDialog("ERROR", err.message + "\n" + err.stack, "OK", "OK", true, function() {});
 			}
 		}
-	}
-	else{
+	} else {
 		return func;
 	}
 };
-DebugOptions.validateNumbers = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
+DebugOptions.validateNumbers = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
 			throw new UserException("Invalid Number");
 		}
 	}
 };
-DebugOptions.validateNonNull = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] == null){
+DebugOptions.validateNonNull = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] == null) {
 			throw new UserException("Null parameter");
 		}
 	}
 };
-DebugOptions.validateOptionalNums = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))){
+DebugOptions.validateOptionalNums = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))) {
 			throw new UserException("Invalid optional number");
 		}
 	}
 };
-DebugOptions.assert = function(bool){
-	if(!bool && DebugOptions.shouldLogErrors()){
+DebugOptions.assert = function(bool) {
+	if (!bool && DebugOptions.shouldLogErrors()) {
 		throw new UserException("Assertion Failure");
 	}
 };
-DebugOptions.stopErrorLocking = function(){
+DebugOptions.stopErrorLocking = function() {
 	DebugOptions.lockErrors = false;
 };
-DebugOptions.enableLogging = function(){
-	DebugOptions.blockLogging = false;
+DebugOptions.enableLogging = function() {
+	DebugOptions.allowLogging = true;
 };
-DebugOptions.throw = function(message){
-	if(!DebugOptions.shouldLogErrors()) return;
+DebugOptions.throw = function(message) {
+	if (!DebugOptions.shouldLogErrors()) return;
 	throw new UserException(message);
 };
-DebugOptions.markAbstract = function(){
+DebugOptions.markAbstract = function() {
 	DebugOptions.throw("Abstract class may not be constructed");
 };
 

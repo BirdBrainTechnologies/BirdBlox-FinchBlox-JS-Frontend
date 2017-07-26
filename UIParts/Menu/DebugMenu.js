@@ -1,116 +1,105 @@
-function DebugMenu(button){
-	Menu.call(this,button,130);
+/**
+ * A menu which is only enabled when testing (as determined by DebugOptions) which provides options for debugging
+ * @param {Button} button
+ * @constructor
+ */
+function DebugMenu(button) {
+	Menu.call(this, button, 130);
+	// Used for storing the last request issued using the debug menu so it can be prefilled
 	this.lastRequest = "";
 	this.lastResponse = "";
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
 DebugMenu.prototype.constructor = DebugMenu;
+
+/**
+ * @inheritDoc
+ */
 DebugMenu.prototype.loadOptions = function() {
+	// Turns on logging (printing to the debug span) if disabled
 	this.addOption("Enable logging", DebugOptions.enableLogging);
+	// Provides a dialog to load a file by pasting in XML
 	this.addOption("Load file", this.loadFile);
+	// Shows the XML for the current file in a new tab
 	this.addOption("Download file", this.downloadFile);
+	// Hides the debug menu
 	this.addOption("Hide Debug", TitleBar.hideDebug);
+	// Displays the version of the frontend, as set in version.js
 	this.addOption("Version", this.optionVersion);
-	this.addOption("click.wav", function(){
-		Sound.click = "click";
-	});
-	this.addOption("click2.wav", function(){
-		Sound.click = "click2";
-	});
-	this.addOption("Set JS Url", this.optionSetJsUrl);
-	this.addOption("Reset JS Url", this.optionResetJsUrl);
+	// Sends the specified request to the backend
 	this.addOption("Send request", this.optionSendRequest);
-	this.addOption("Log HTTP", this.optionLogHttp);
-	this.addOption("HB names", this.optionHBs);
+	// Creates fake robots in the connection menus for testing
 	this.addOption("Allow virtual Robots", DebugOptions.enableVirtualDevices);
+	// Clears the debug span
 	this.addOption("Clear log", this.optionClearLog);
-	this.addOption("Connect Multiple", function(){
-		ConnectMultipleDialog.showDialog();
+	// Tests throwing an error in the JS
+	this.addOption("Throw error", function() {
+		throw new UserException("test error");
 	});
-	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
-	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
-	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
-	this.addOption("Throw error", function(){throw new UserException("test error");});
+	// Prevents the JS from shutting off when there is an error
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
-DebugMenu.prototype.loadFile=function(){
-	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
-		if(!cancelled){
+
+/**
+ * Provides a dialog to paste XML into so is can be loaded as a file
+ */
+DebugMenu.prototype.loadFile = function() {
+	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
+		if (!cancelled) {
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };
-DebugMenu.prototype.downloadFile = function(){
-	var xml = XmlWriter.docToText(CodeManager.createXml());
-	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+
+/**
+ * Opens the XML for the current file in a new tab
+ */
+DebugMenu.prototype.downloadFile = function() {
+	const xml = XmlWriter.docToText(CodeManager.createXml());
+	const url = "data:text/plain," + HtmlServer.encodeHtml(xml);
 	window.open(url, '_blank');
 };
-DebugMenu.prototype.optionNew=function(){
-	SaveManager.new();
+
+/**
+ * Prints the version of the frontend as stored in Version.js
+ */
+DebugMenu.prototype.optionVersion = function() {
+	GuiElements.alert("Version: " + GuiElements.appVersion);
 };
-DebugMenu.prototype.optionVersion=function(){
-	GuiElements.alert("Version: "+GuiElements.appVersion);
-};
-DebugMenu.prototype.optionScreenSize=function(){
-	HtmlServer.sendRequestWithCallback("tablet/screenSize",function(response){
-		GuiElements.alert("Size: "+response);
-	});
-};
-DebugMenu.prototype.optionPixelSize=function(){
-	GuiElements.alert(GuiElements.height+" "+GuiElements.width);
-};
-DebugMenu.prototype.optionZoom=function(){
-	HtmlServer.getSetting("zoom",function(response){
-		GuiElements.alert("Zoom: "+(response));
-	});
-};
-DebugMenu.prototype.optionHBs=function(){
-	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
-		GuiElements.alert("Names: "+response.split("\n").join(","));
-	});
-};
-DebugMenu.prototype.optionLogHttp=function(){
-	HtmlServer.logHttp=true;
-};
-DebugMenu.prototype.optionClearLog=function(){
+
+/**
+ * Clears the debug log
+ */
+DebugMenu.prototype.optionClearLog = function() {
 	GuiElements.alert("");
 };
-DebugMenu.prototype.optionSetJsUrl=function(){
-	DialogManager.showPromptDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
-		if(!cancel && url != ""){
-			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
-			HtmlServer.sendRequestWithCallback(request);
-		}
-	}, function(){});
-};
-DebugMenu.prototype.optionResetJsUrl=function(){
-	var request = "resetjsurl";
-	HtmlServer.sendRequestWithCallback(request);
-};
-DebugMenu.prototype.optionSendRequest=function(){
-	var message = this.lastResponse;
-	if(this.lastResponse == ""){
+
+/**
+ * Provides a dialog for sending requests to the backend
+ */
+DebugMenu.prototype.optionSendRequest = function() {
+	let message = this.lastResponse;
+	if (this.lastResponse === "") {
 		message = "Request: http://localhost:22179/[...]"
 	}
-	var me = this;
+	const me = this;
 	DialogManager.showPromptDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
-		if(!cancel && (request != "" || me.lastRequest != "")){
-			if(request == ""){
+		if (!cancel && (request !== "" || me.lastRequest !== "")) {
+			if (request === "") {
 				request = me.lastRequest;
 			}
 			me.lastRequest = request;
-			HtmlServer.sendRequestWithCallback(request, function(resp){
+			HtmlServer.sendRequestWithCallback(request, function(resp) {
 				me.lastResponse = "Response: \"" + resp + "\"";
 				me.optionSendRequest();
-			}, function(){
+			}, function() {
 				me.lastResponse = "Error sending request";
 				me.optionSendRequest();
 			});
-		}
-		else{
+		} else {
 			me.lastResponse = "";
 		}
-	}, function(){
+	}, function() {
 		me.lastResponse = "";
 	});
 };

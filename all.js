@@ -2,7 +2,7 @@
 const FrontendVersion = 393;
 
 
-function DebugOptions(){
+function DebugOptions() {
 	const DO = DebugOptions;
 	DO.enabled = true;
 
@@ -17,57 +17,61 @@ function DebugOptions(){
 	DO.errorLocked = false;
 	DO.logHttp = true;
 	DO.skipInitSettings = false;
-	DO.blockLogging = false;
+	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
-	if(DO.enabled){
+	if (DO.enabled) {
 		DO.applyConstants();
 	}
 }
-DebugOptions.applyConstants = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
+DebugOptions.applyConstants = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
 };
 
-DebugOptions.applyActions = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
-	if(DO.addVirtualHB){
+DebugOptions.applyActions = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
+	if (DO.addVirtualHB) {
 		let virHB = DO.createVirtualDevice(DeviceHummingbird, "");
 		DeviceHummingbird.getManager().appendDevice(virHB);
 	}
-	if(DO.addVirtualFlutter){
+	if (DO.addVirtualFlutter) {
 		let virHB = DO.createVirtualDevice(DeviceFlutter, "");
 		DeviceFlutter.getManager().appendDevice(virHB);
 	}
-	if(DO.showVersion){
-		GuiElements.alert("Version: "+GuiElements.appVersion);
+	if (DO.showVersion) {
+		GuiElements.alert("Version: " + GuiElements.appVersion);
 	}
-	if(DO.showDebugMenu){
+	if (DO.showDebugMenu) {
 		TitleBar.enableDebug();
 	}
 };
-DebugOptions.shouldLogErrors=function(){
+DebugOptions.shouldLogErrors = function() {
 	return DebugOptions.logErrors && DebugOptions.enabled;
 };
-DebugOptions.shouldSkipInitSettings=function(){
-	var DO = DebugOptions;
+DebugOptions.shouldSkipInitSettings = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
-DebugOptions.shouldSkipHtmlRequests = function(){
-	var DO = DebugOptions;
+DebugOptions.shouldSkipHtmlRequests = function() {
+	const DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
-DebugOptions.shouldUseJSDialogs = function(){
-	var DO = DebugOptions;
+DebugOptions.shouldUseJSDialogs = function() {
+	const DO = DebugOptions;
 	return DO.enabled && (DO.mouse) && false;
 };
-DebugOptions.shouldLogHttp=function(){
-	var DO = DebugOptions;
+DebugOptions.shouldLogHttp = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
 };
-DebugOptions.shouldAllowVirtualDevices = function(){
+DebugOptions.shouldAllowVirtualDevices = function() {
 	const DO = DebugOptions;
 	return DO.allowVirtualDevices && DO.enabled;
+};
+DebugOptions.shouldAllowLogging = function() {
+	const DO = DebugOptions;
+	return DO.allowLogging && DO.enabled;
 };
 DebugOptions.enableVirtualDevices = function() {
 	const DO = DebugOptions;
@@ -78,66 +82,64 @@ DebugOptions.createVirtualDevice = function(deviceClass, id) {
 	const name = "Virtual" + typeName + id;
 	return new deviceClass(name, name);
 };
-DebugOptions.safeFunc = function(func){
-	if(func == null) return null;
-	if(DebugOptions.shouldLogErrors()){
-		return function(){
+DebugOptions.safeFunc = function(func) {
+	if (func == null) return null;
+	if (DebugOptions.shouldLogErrors()) {
+		return function() {
 			try {
-				if(!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
+				if (!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
 					func.apply(this, arguments);
 				}
-			}
-			catch(err) {
+			} catch (err) {
 				DebugOptions.errorLocked = true;
 				GuiElements.alert("ERROR: " + err.message);
-				DialogManager.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
+				DialogManager.showChoiceDialog("ERROR", err.message + "\n" + err.stack, "OK", "OK", true, function() {});
 			}
 		}
-	}
-	else{
+	} else {
 		return func;
 	}
 };
-DebugOptions.validateNumbers = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
+DebugOptions.validateNumbers = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
 			throw new UserException("Invalid Number");
 		}
 	}
 };
-DebugOptions.validateNonNull = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] == null){
+DebugOptions.validateNonNull = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] == null) {
 			throw new UserException("Null parameter");
 		}
 	}
 };
-DebugOptions.validateOptionalNums = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))){
+DebugOptions.validateOptionalNums = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))) {
 			throw new UserException("Invalid optional number");
 		}
 	}
 };
-DebugOptions.assert = function(bool){
-	if(!bool && DebugOptions.shouldLogErrors()){
+DebugOptions.assert = function(bool) {
+	if (!bool && DebugOptions.shouldLogErrors()) {
 		throw new UserException("Assertion Failure");
 	}
 };
-DebugOptions.stopErrorLocking = function(){
+DebugOptions.stopErrorLocking = function() {
 	DebugOptions.lockErrors = false;
 };
-DebugOptions.enableLogging = function(){
-	DebugOptions.blockLogging = false;
+DebugOptions.enableLogging = function() {
+	DebugOptions.allowLogging = true;
 };
-DebugOptions.throw = function(message){
-	if(!DebugOptions.shouldLogErrors()) return;
+DebugOptions.throw = function(message) {
+	if (!DebugOptions.shouldLogErrors()) return;
 	throw new UserException(message);
 };
-DebugOptions.markAbstract = function(){
+DebugOptions.markAbstract = function() {
 	DebugOptions.throw("Abstract class may not be constructed");
 };
 
@@ -2227,6 +2229,7 @@ GuiElements.setConstants=function(){
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
+	if(!DebugOptions.shouldAllowLogging()) return;
 	let result = message;
 	if(DeviceHummingbird.getManager().renewDiscoverFn) {
 		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn()? "true":"false");
@@ -9301,95 +9304,133 @@ SmoothMenuBnList.previewHeight = function(count, maxHeight){
 	}
 	return height;
 };
-function Menu(button,width){
-	if(width==null){
-		width=Menu.defaultWidth;
+/**
+ * Abstract class that represents a menu displayed when a Button in the TitleBar is tapped.  The Menu requires a button
+ * to attach to, which it automatically configures the callbacks for.  Subclasses override the loadOptions function
+ * which is called every time the Menu is open and should call addOption() to determine which options to show. If the
+ * width of the menu is unspecified, it will be set to default
+ *
+ * @param {Button} button - The Button the Menu should attach to
+ * @param {number} [width] - The width of the Menu
+ * @constructor
+ */
+function Menu(button, width) {
+	if (width == null) {
+		width = Menu.defaultWidth;
 	}
+	// Menus are a type of Overlay
 	Overlay.call(this, Overlay.types.menu);
 	DebugOptions.validateNumbers(width);
-	this.width=width;
-	this.x=button.x;
-	this.y=button.y+button.height;
-	this.group=GuiElements.create.group(this.x,this.y);
+	this.width = width;
+	// The position of the menu is determined by the button
+	this.x = button.x;
+	this.y = button.y + button.height;
+	this.group = GuiElements.create.group(this.x, this.y);
 	TouchReceiver.addListenersOverlayPart(this.group);
-	this.bgRect=GuiElements.create.rect(this.group);
-	GuiElements.update.color(this.bgRect,Menu.bgColor);
-	this.menuBnList=null;
-	this.visible=false;
-	var callbackFn=function(){
-		callbackFn.menu.open();
-	};
-	callbackFn.menu=this;
-	button.setCallbackFunction(callbackFn,false);
-	callbackFn=function(){
-		callbackFn.menu.close();
-	};
-	callbackFn.menu=this;
-	button.setToggleFunction(callbackFn);
-	this.button=button;
-	this.alternateFn=null;
-	this.scheduleAlternate=false;
+	this.bgRect = GuiElements.create.rect(this.group);
+	GuiElements.update.color(this.bgRect, Menu.bgColor);
+	this.menuBnList = null;
+	this.visible = false;
+
+	// Configure callbacks
+	button.setCallbackFunction(this.open.bind(this), false);
+	button.setToggleFunction(this.close.bind(this));
+
+	this.button = button;
+
+	/* The alternateFn is specified using addAlternateFn() and is called if previewOpen returns false */
+	this.alternateFn = null;
+	this.scheduleAlternate = false;
 }
 Menu.prototype = Object.create(Overlay.prototype);
 Menu.prototype.constructor = Menu;
-Menu.setGraphics=function(){
-	Menu.defaultWidth=170;
-	Menu.bnMargin=Button.defaultMargin;
-	Menu.bgColor=Colors.black;
+
+Menu.setGraphics = function() {
+	Menu.defaultWidth = 170;
+	Menu.bnMargin = Button.defaultMargin;
+	Menu.bgColor = Colors.black;
 };
-Menu.prototype.move=function(){
-	this.x=this.button.x;
-	this.y=this.button.y+this.button.height;
-	GuiElements.move.group(this.group,this.x,this.y);
-	if(this.menuBnList != null) {
+
+/**
+ * Recomputes the Menu's location based on the location of the Button
+ */
+Menu.prototype.move = function() {
+	this.x = this.button.x;
+	this.y = this.button.y + this.button.height;
+	GuiElements.move.group(this.group, this.x, this.y);
+	if (this.menuBnList != null) {
 		this.menuBnList.updatePosition();
 	}
 };
-Menu.prototype.createMenuBnList=function(){
-	if(this.menuBnList!=null){
+
+/**
+ * Generates the SmoothMenuBnList for the Menu
+ */
+Menu.prototype.createMenuBnList = function() {
+	if (this.menuBnList != null) {
 		this.menuBnList.hide();
 	}
-	var bnM=Menu.bnMargin;
-	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
-	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
+	const bnM = Menu.bnMargin;
+	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
 	this.menuBnList.markAsOverlayPart(this);
-	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close,addTextFn){
-	if(addTextFn == null) {
+
+/**
+ * Adds an option to the menu.  Should be called within the loadOptions function
+ * @param {string} text - The text to display the option
+ * @param {function} func - type () -> (), the function to call when the option is tapped
+ * @param {boolean} [close=true] - Whether the Menu should close or remain open when the option is selected
+ * @param {function} [addTextFn] - type (Button) -> (), the function to call on the button to add the text.
+ *                                 If provided, no text will be added to the button; rather the function is expected
+ *                                 to do all formatting.
+ */
+Menu.prototype.addOption = function(text, func, close, addTextFn) {
+	if (addTextFn == null) {
 		addTextFn = null;
 	}
-	if(close==null){
-		close=true;
+	if (close == null) {
+		close = true;
 	}
-	var callbackFn=function(){
-		if(callbackFn.close) {
-			callbackFn.menu.close();
+	this.menuBnList.addOption(text, function() {
+		if (close) {
+			this.close();
 		}
-		if(callbackFn.func != null) {
-			callbackFn.func.call(callbackFn.menu);
+		if (func != null) {
+			func.call(this);
 		}
-	};
-	callbackFn.menu=this;
-	callbackFn.func=func;
-	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn,addTextFn);
+	}.bind(this), addTextFn);
 };
-Menu.prototype.buildMenu=function(){
-	var mBL=this.menuBnList;
+
+/**
+ * Creates the buttons and background of the menu
+ */
+Menu.prototype.buildMenu = function() {
+	const mBL = this.menuBnList;
 	mBL.generateBns();
-	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
+	GuiElements.update.rect(this.bgRect, 0, 0, mBL.width + 2 * Menu.bnMargin, mBL.height + 2 * Menu.bnMargin);
 };
-Menu.prototype.previewOpen=function(){
+
+/**
+ * Determines whether the Menu should open or the alternate function should be run.  The alternate function is run after
+ * the user releases the button, so it must be scheduled, not run immediately.
+ * @return {boolean}
+ */
+Menu.prototype.previewOpen = function() {
+	// By default, the Menu always opens.  But subclasses like the DeviceMenu override this method
 	return true;
 };
-Menu.prototype.loadOptions=function(){
 
+/**
+ * Abstract function that is called when the Menu opens to populate the options.  Calls addOption for each option
+ */
+Menu.prototype.loadOptions = function() {
+	DebugOptions.markAbstract();
 };
-Menu.prototype.open=function(){
-	if(!this.visible) {
-		if(this.previewOpen()) {
+Menu.prototype.open = function() {
+	if (!this.visible) {
+		if (this.previewOpen()) {
 			this.createMenuBnList();
 			this.loadOptions();
 			this.buildMenu();
@@ -9398,50 +9439,75 @@ Menu.prototype.open=function(){
 			this.visible = true;
 			this.addOverlayAndCloseOthers();
 			this.button.markAsOverlayPart(this);
-			this.scheduleAlternate=false;
-		}
-		else{
-			this.button.toggled=true;
-			this.scheduleAlternate=true;
+			this.scheduleAlternate = false;
+		} else {
+			this.button.toggled = true;
+			this.scheduleAlternate = true;
 		}
 	}
 };
-Menu.prototype.close=function(onlyOnDrag){
-	if(onlyOnDrag) return;
-	if(this.visible){
+
+/**
+ * closes the Menu
+ * @inheritDoc
+ */
+Menu.prototype.close = function() {
+	if (this.visible) {
 		this.group.remove();
 		this.menuBnList.hide();
-		this.visible=false;
+		this.visible = false;
 		Overlay.removeOverlay(this);
 		this.button.unToggle();
 		this.button.unmarkAsOverlayPart();
-	}
-	else if(this.scheduleAlternate){
-		this.scheduleAlternate=false;
+	} else if (this.scheduleAlternate) {
+		this.scheduleAlternate = false;
 		this.alternateFn();
 	}
 };
-Menu.prototype.addAlternateFn=function(alternateFn){
-	this.alternateFn=alternateFn;
+
+/**
+ * Sets a function which is called when previewOpen returns false
+ * @param {function} alternateFn - type () -> ()
+ */
+Menu.prototype.addAlternateFn = function(alternateFn) {
+	this.alternateFn = alternateFn;
 };
-Menu.prototype.relToAbsX = function(x){
+
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Menu.prototype.relToAbsX = function(x) {
 	return x + this.x;
 };
-Menu.prototype.relToAbsY = function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Menu.prototype.relToAbsY = function(y) {
 	return y + this.y;
 };
-Menu.prototype.updateZoom = function(){
-	if(this.menuBnList != null){
+
+/**
+ * Resizes and repositions the menu
+ */
+Menu.prototype.updateZoom = function() {
+	if (this.menuBnList != null) {
 		this.menuBnList.updateZoom();
 	}
 };
-function FileMenu(button){
-	Menu.call(this,button);
+/**
+ * Deprecated class that used to be used as a file menu
+ * @param {Button} button
+ * @constructor
+ */
+function FileMenu(button) {
+	Menu.call(this, button);
 }
 FileMenu.prototype = Object.create(Menu.prototype);
 FileMenu.prototype.constructor = FileMenu;
-FileMenu.prototype.loadOptions = function(){
-	this.addOption("New", function(){
+FileMenu.prototype.loadOptions = function() {
+	this.addOption("New", function() {
 		let request = new HttpRequestBuilder("data/createNewFile");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
@@ -9450,268 +9516,329 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Share", SaveManager.userExport);
-	this.addOption("OpenFromCloud", function(){
+	this.addOption("OpenFromCloud", function() {
 		let request = new HttpRequestBuilder("data/showCloudPicker");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 	//this.addOption("Debug", this.optionEnableDebug);
-	if(GuiElements.isKindle) {
+	if (GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);
 	}
 };
-FileMenu.prototype.optionNew=function(){
+FileMenu.prototype.optionNew = function() {
 	SaveManager.new();
 };
-FileMenu.prototype.optionEnableDebug=function(){
+FileMenu.prototype.optionEnableDebug = function() {
 	TitleBar.enableDebug();
 };
-FileMenu.prototype.optionExit=function(){
+FileMenu.prototype.optionExit = function() {
 	SaveManager.checkPromptSave(function() {
 		HtmlServer.sendRequest("tablet/exit");
 	});
 };
-
-function DebugMenu(button){
-	Menu.call(this,button,130);
+/**
+ * A menu which is only enabled when testing (as determined by DebugOptions) which provides options for debugging
+ * @param {Button} button
+ * @constructor
+ */
+function DebugMenu(button) {
+	Menu.call(this, button, 130);
+	// Used for storing the last request issued using the debug menu so it can be prefilled
 	this.lastRequest = "";
 	this.lastResponse = "";
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
 DebugMenu.prototype.constructor = DebugMenu;
+
+/**
+ * @inheritDoc
+ */
 DebugMenu.prototype.loadOptions = function() {
+	// Turns on logging (printing to the debug span) if disabled
 	this.addOption("Enable logging", DebugOptions.enableLogging);
+	// Provides a dialog to load a file by pasting in XML
 	this.addOption("Load file", this.loadFile);
+	// Shows the XML for the current file in a new tab
 	this.addOption("Download file", this.downloadFile);
+	// Hides the debug menu
 	this.addOption("Hide Debug", TitleBar.hideDebug);
+	// Displays the version of the frontend, as set in version.js
 	this.addOption("Version", this.optionVersion);
-	this.addOption("click.wav", function(){
-		Sound.click = "click";
-	});
-	this.addOption("click2.wav", function(){
-		Sound.click = "click2";
-	});
-	this.addOption("Set JS Url", this.optionSetJsUrl);
-	this.addOption("Reset JS Url", this.optionResetJsUrl);
+	// Sends the specified request to the backend
 	this.addOption("Send request", this.optionSendRequest);
-	this.addOption("Log HTTP", this.optionLogHttp);
-	this.addOption("HB names", this.optionHBs);
+	// Creates fake robots in the connection menus for testing
 	this.addOption("Allow virtual Robots", DebugOptions.enableVirtualDevices);
+	// Clears the debug span
 	this.addOption("Clear log", this.optionClearLog);
-	this.addOption("Connect Multiple", function(){
-		ConnectMultipleDialog.showDialog();
+	// Tests throwing an error in the JS
+	this.addOption("Throw error", function() {
+		throw new UserException("test error");
 	});
-	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
-	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
-	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
-	this.addOption("Throw error", function(){throw new UserException("test error");});
+	// Prevents the JS from shutting off when there is an error
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
-DebugMenu.prototype.loadFile=function(){
-	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
-		if(!cancelled){
+
+/**
+ * Provides a dialog to paste XML into so is can be loaded as a file
+ */
+DebugMenu.prototype.loadFile = function() {
+	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
+		if (!cancelled) {
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };
-DebugMenu.prototype.downloadFile = function(){
-	var xml = XmlWriter.docToText(CodeManager.createXml());
-	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+
+/**
+ * Opens the XML for the current file in a new tab
+ */
+DebugMenu.prototype.downloadFile = function() {
+	const xml = XmlWriter.docToText(CodeManager.createXml());
+	const url = "data:text/plain," + HtmlServer.encodeHtml(xml);
 	window.open(url, '_blank');
 };
-DebugMenu.prototype.optionNew=function(){
-	SaveManager.new();
+
+/**
+ * Prints the version of the frontend as stored in Version.js
+ */
+DebugMenu.prototype.optionVersion = function() {
+	GuiElements.alert("Version: " + GuiElements.appVersion);
 };
-DebugMenu.prototype.optionVersion=function(){
-	GuiElements.alert("Version: "+GuiElements.appVersion);
-};
-DebugMenu.prototype.optionScreenSize=function(){
-	HtmlServer.sendRequestWithCallback("tablet/screenSize",function(response){
-		GuiElements.alert("Size: "+response);
-	});
-};
-DebugMenu.prototype.optionPixelSize=function(){
-	GuiElements.alert(GuiElements.height+" "+GuiElements.width);
-};
-DebugMenu.prototype.optionZoom=function(){
-	HtmlServer.getSetting("zoom",function(response){
-		GuiElements.alert("Zoom: "+(response));
-	});
-};
-DebugMenu.prototype.optionHBs=function(){
-	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
-		GuiElements.alert("Names: "+response.split("\n").join(","));
-	});
-};
-DebugMenu.prototype.optionLogHttp=function(){
-	HtmlServer.logHttp=true;
-};
-DebugMenu.prototype.optionClearLog=function(){
+
+/**
+ * Clears the debug log
+ */
+DebugMenu.prototype.optionClearLog = function() {
 	GuiElements.alert("");
 };
-DebugMenu.prototype.optionSetJsUrl=function(){
-	DialogManager.showPromptDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
-		if(!cancel && url != ""){
-			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
-			HtmlServer.sendRequestWithCallback(request);
-		}
-	}, function(){});
-};
-DebugMenu.prototype.optionResetJsUrl=function(){
-	var request = "resetjsurl";
-	HtmlServer.sendRequestWithCallback(request);
-};
-DebugMenu.prototype.optionSendRequest=function(){
-	var message = this.lastResponse;
-	if(this.lastResponse == ""){
+
+/**
+ * Provides a dialog for sending requests to the backend
+ */
+DebugMenu.prototype.optionSendRequest = function() {
+	let message = this.lastResponse;
+	if (this.lastResponse === "") {
 		message = "Request: http://localhost:22179/[...]"
 	}
-	var me = this;
+	const me = this;
 	DialogManager.showPromptDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
-		if(!cancel && (request != "" || me.lastRequest != "")){
-			if(request == ""){
+		if (!cancel && (request !== "" || me.lastRequest !== "")) {
+			if (request === "") {
 				request = me.lastRequest;
 			}
 			me.lastRequest = request;
-			HtmlServer.sendRequestWithCallback(request, function(resp){
+			HtmlServer.sendRequestWithCallback(request, function(resp) {
 				me.lastResponse = "Response: \"" + resp + "\"";
 				me.optionSendRequest();
-			}, function(){
+			}, function() {
 				me.lastResponse = "Error sending request";
 				me.optionSendRequest();
 			});
-		}
-		else{
+		} else {
 			me.lastResponse = "";
 		}
-	}, function(){
+	}, function() {
 		me.lastResponse = "";
 	});
 };
-function ViewMenu(button){
-	Menu.call(this,button);
+/**
+ * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * @param {Button} button
+ * @constructor
+ */
+function ViewMenu(button) {
+	Menu.call(this, button);
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
 ViewMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false);
-	this.addOption("Zoom out", this.optionZoomOut,false);
-	this.addOption("Reset zoom", this.optionResetZoom,true);
+	this.addOption("Zoom in", this.optionZoomIn, false);
+	this.addOption("Zoom out", this.optionZoomOut, false);
+	this.addOption("Reset zoom", this.optionResetZoom, true);
 };
-ViewMenu.prototype.optionZoomIn=function(){
-	GuiElements.zoomMultiple+=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.min(GuiElements.zoomMultiple,GuiElements.maxZoomMult);
+ViewMenu.prototype.optionZoomIn = function() {
+	GuiElements.zoomMultiple += GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.min(GuiElements.zoomMultiple, GuiElements.maxZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionZoomOut=function(){
-	GuiElements.zoomMultiple-=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.max(GuiElements.zoomMultiple,GuiElements.minZoomMult);
+ViewMenu.prototype.optionZoomOut = function() {
+	GuiElements.zoomMultiple -= GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.max(GuiElements.zoomMultiple, GuiElements.minZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionResetZoom=function(){
-	GuiElements.zoomMultiple=1;
+ViewMenu.prototype.optionResetZoom = function() {
+	GuiElements.zoomMultiple = 1;
 	GuiElements.updateZoom();
 };
-function SettingsMenu(button){
-	Menu.call(this,button);
+/**
+ * Provides a menu for adjusting the zoom and other settings
+ * @param {Button} button
+ * @constructor
+ */
+function SettingsMenu(button) {
+	Menu.call(this, button);
 }
 SettingsMenu.prototype = Object.create(Menu.prototype);
 SettingsMenu.prototype.constructor = SettingsMenu;
+
+/**
+ * @inheritDoc
+ */
 SettingsMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false); //, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut,false); //, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom,true); //, VectorPaths.resetZoom);
-	if(SettingsManager.enableSnapNoise.getValue() === "true") {
+	// Used to have icons, but they didn't work two well and have been disabled
+	this.addOption("Zoom in", this.optionZoomIn, false); //, VectorPaths.zoomIn);
+	this.addOption("Zoom out", this.optionZoomOut, false); //, VectorPaths.zoomOut);
+	this.addOption("Reset zoom", this.optionResetZoom, true); //, VectorPaths.resetZoom);
+	if (SettingsManager.enableSnapNoise.getValue() === "true") {
 		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
 		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 };
-SettingsMenu.prototype.optionZoomIn=function(){
+
+/**
+ * Increases the zoom level and updates the UI
+ */
+SettingsMenu.prototype.optionZoomIn = function() {
 	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple + GuiElements.zoomAmount);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.optionZoomOut=function(){
+
+/**
+ * Decreases the zoom level and updates the UI
+ */
+SettingsMenu.prototype.optionZoomOut = function() {
 	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple - GuiElements.zoomAmount);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.optionResetZoom=function(){
+
+/**
+ * Sets the zoom level back to default
+ */
+SettingsMenu.prototype.optionResetZoom = function() {
 	SettingsManager.zoom.writeValue(1);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.enableSnapping = function(){
+
+/**
+ * Enables the sound on Block snap
+ */
+SettingsMenu.prototype.enableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("true");
 };
-SettingsMenu.prototype.disableSnapping = function(){
+
+/**
+ * Disables the sound on Block snap
+ */
+SettingsMenu.prototype.disableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("false");
 };
-
-
-function DeviceMenu(button){
-	Menu.call(this,button,DeviceMenu.width);
-	this.addAlternateFn(function(){
+/**
+ * A menu which displays information about the connected device and provides options to connect to/disconnect from
+ * devices
+ * @param {button} button
+ * @constructor
+ */
+function DeviceMenu(button) {
+	Menu.call(this, button, DeviceMenu.width);
+	this.addAlternateFn(function() {
+		// If more than one device is connected, the connect multiple dialog is used instead
 		ConnectMultipleDialog.showDialog();
 	});
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
 DeviceMenu.prototype.constructor = ViewMenu;
-DeviceMenu.setGraphics=function(){
-	DeviceMenu.width=150;
+
+DeviceMenu.setGraphics = function() {
+	DeviceMenu.width = 150;
 	DeviceMenu.maxDeviceNameChars = 8;
 };
-DeviceMenu.prototype.loadOptions=function(){
+
+/**
+ * @inheritDoc
+ */
+DeviceMenu.prototype.loadOptions = function() {
 	let connectedClass = null;
-	Device.getTypeList().forEach(function(deviceClass){
-		if(deviceClass.getManager().getDeviceCount() > 0){
+	Device.getTypeList().forEach(function(deviceClass) {
+		/* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
+		 * is it the connectedClass */
+		if (deviceClass.getManager().getDeviceCount() > 0) {
 			connectedClass = deviceClass;
 		}
 	});
-	if(connectedClass != null){
+	if (connectedClass != null) {
+		// If there is a device connected, we add an option to display firmware info about the device
 		this.addDeviceOption(connectedClass);
-		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+		// And we add an option to disconnect from it.
+		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-		Device.getTypeList().forEach(function(deviceClass){
-			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+		// If no devices are connected, we add an option to connect to each type of device
+		Device.getTypeList().forEach(function(deviceClass) {
+			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
 				(new DiscoverDialog(deviceClass)).show();
 			});
 		}, this);
 	}
+	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
-DeviceMenu.prototype.addDeviceOption = function(connectedClass){
+
+/**
+ * Adds an option for getting firmware info about the currently connected device.  The option includes a yellow/red
+ * warning icon if firmware is out of date
+ * @param connectedClass - Subclass of Device
+ */
+DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
 	const device = connectedClass.getManager().getDevice(0);
 	const status = device.getFirmwareStatus();
 	const statuses = Device.firmwareStatuses;
 	let icon = null;
 	let color = null;
-	if(status === statuses.old) {
+	if (status === statuses.old) {
+		// If the firmware is old but usable, a yellow icon is used
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.yellowColor;
-	} else if(status === statuses.incompatible) {
+	} else if (status === statuses.incompatible) {
+		// If the firmware is not usable, a red icon is used
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.redColor;
 	}
-	this.addOption("",device.showFirmwareInfo.bind(device),false, this.createAddIconToBnFn(icon, device.name, color));
+	this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
 };
-DeviceMenu.prototype.previewOpen=function(){
+
+/**
+ * Determines whether multiple devices are connected, in which case the connect multiple dialog should be opened
+ * @inheritDoc
+ * @return {boolean}
+ */
+DeviceMenu.prototype.previewOpen = function() {
 	let connectionCount = 0;
-	Device.getTypeList().forEach(function(deviceClass){
+	Device.getTypeList().forEach(function(deviceClass) {
 		connectionCount += deviceClass.getManager().getDeviceCount();
 	});
-	return (connectionCount<=1);
+	return (connectionCount <= 1);
 };
-DeviceMenu.prototype.createAddIconToBnFn = function(iconId, text, color) {
-	if(iconId == null){
+
+/**
+ * Creates a function to format a button based on the provided options
+ * @param {string} [pathId] - Object from VectorPaths to use as an icon on the side of the button
+ * @param {string} text - Test to place on the button
+ * @param {string} [color] - The color of the icon in hex (not needed if no icon will be added)
+ * @return {function} - type (Button) -> (), a function to format the provided button with the specified icon and text
+ */
+DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
+	if (pathId == null) {
 		return function(bn) {
 			bn.addText(text);
 		}
 	}
 	return function(bn) {
-		bn.addSideTextAndIcon(iconId, null, text, null, null, null, null, null, color, true, false);
+		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
 	}
 };
 function BlockContextMenu(block,x,y){
@@ -14383,7 +14510,6 @@ SettingsManager.loadSettings = function(callbackFn){
 function HtmlServer(){
 	HtmlServer.port=22179;
 	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
 }
 HtmlServer.decodeHtml = function(message){
 	return decodeURIComponent(message.replace(/\+/g, " "));
@@ -14418,7 +14544,7 @@ HtmlServer.encodeHtml=function(message){
 HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
-	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
+	if(DebugOptions.shouldLogHttp()&&request.indexOf("totalStatus")<0&&
 		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
@@ -14456,7 +14582,7 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 				}
 				else {
 					if(callbackErr!=null){
-						if(HtmlServer.logHttp){
+						if(DebugOptions.shouldLogHttp()){
 							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);
