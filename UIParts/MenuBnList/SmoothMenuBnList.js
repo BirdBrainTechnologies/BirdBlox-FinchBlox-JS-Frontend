@@ -162,11 +162,11 @@ SmoothMenuBnList.prototype.generateBns = function() {
 SmoothMenuBnList.prototype.computeWidth = function() {
 	if (this.width == null) {
 		const columns = 1;
-		const MBL = MenuBnList;
+		const MBL = SmoothMenuBnList;
 		let longestW = 0;
 		for (let i = 0; i < this.options.length; i++) {
 			const string = this.options[i].text;
-			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}

@@ -124,9 +124,11 @@ CodeManager.move.end=function(){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
-			move.stack.remove();
 			if(move.showTrash) {
+				UndoManager.deleteStack(move.stack);
 				SaveManager.markEdited();
+			} else {
+				move.stack.remove();
 			}
 		} else {
 			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
@@ -499,6 +501,7 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.refresh();
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
+	UndoManager.clearUndos();
 	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){

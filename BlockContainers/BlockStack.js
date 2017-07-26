@@ -512,6 +512,7 @@ BlockStack.prototype.createXml = function(xmlDoc) {
  * Creates a BlockStack from XML
  * @param {Node} stackNode - The tag to import from
  * @param {Tab} tab - The Tab to import into
+ * @return {BlockStack|null} stack - The imported stack
  */
 BlockStack.importXml = function(stackNode, tab) {
 	const x = XmlWriter.getAttribute(stackNode, "x", 0, true);
@@ -529,7 +530,7 @@ BlockStack.importXml = function(stackNode, tab) {
 	}
 	if (firstBlock == null) {
 		// All Blocks could not import.  Exit.
-		return;
+		return null;
 	}
 	const stack = new BlockStack(firstBlock, tab);
 	stack.move(x, y);
@@ -544,6 +545,7 @@ BlockStack.importXml = function(stackNode, tab) {
 		i++;
 	}
 	stack.updateDim();
+	return stack;
 };
 
 /**

@@ -28,6 +28,8 @@ TabManager.setGraphics=function(){
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	TM.spaceScrollMargin=50;
+	TM.undoDeleteMarginBase = 40;
+	TM.undoDeleteMarginRand = 40;
 };
 TabManager.createTabSpaceBg=function(){
 	var TM=TabManager;
@@ -146,6 +148,9 @@ TabManager.endZooming = function(){
 		TM.activeTab.endZooming();
 	}
 };
+TabManager.undoDelete = function(stackNode) {
+	return TabManager.activeTab.undoDelete(stackNode);
+};
 TabManager.createXml=function(xmlDoc){
 	var TM=TabManager;
 	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
@@ -235,7 +240,7 @@ TabManager.updateZoom=function(){
 	TabManager.passRecursively("updateZoom");
 };
 TabManager.getActiveZoom = function(){
-	if(TabManager.activateTab == null){
+	if(TabManager.activeTab == null){
 		return 1;
 	}
 	return TabManager.activeTab.getZoom();

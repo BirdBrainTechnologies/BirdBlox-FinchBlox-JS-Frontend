@@ -35,8 +35,9 @@ TitleBar.setGraphicsPart1=function(){
 TitleBar.setGraphicsPart2 = function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
+	TB.flagBnX=TB.stopBnX-TB.buttonW-TB.buttonMargin;
+	TB.undoBnX=TB.flagBnX-TB.buttonW-3*TB.buttonMargin;
+	TB.debugX=TB.undoBnX-TB.longButtonW-3*TB.buttonMargin;
 
 	TB.fileBnX=TB.buttonMargin;
 	if(GuiElements.smallMode) {
@@ -44,7 +45,6 @@ TitleBar.setGraphicsPart2 = function(){
 		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
-	TB.undoBnX=TB.viewBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
@@ -89,7 +89,8 @@ TitleBar.makeButtons=function(){
 	TB.viewMenu=new SettingsMenu(TB.viewBn);
 
 	TB.undoButton = new Button(TB.undoBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.6);
+	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+	UndoManager.setUndoButton(TB.undoButton);
 
 	TB.debugBn=null;
 	if(TB.debugEnabled) {

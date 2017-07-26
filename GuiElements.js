@@ -162,6 +162,7 @@ GuiElements.setConstants=function(){
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
+	UndoManager();
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
@@ -779,8 +780,7 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
  * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font,test){
-	DebugOptions.assert(test == null);
+GuiElements.measure.stringWidth=function(text,font){
 	var textElement=GuiElements.create.text(); //Make the text element.
 	textElement.setAttributeNS(null,"font-family",font.fontFamily); //Set the attributes.
 	textElement.setAttributeNS(null,"font-size",font.fontSize);

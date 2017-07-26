@@ -2264,6 +2264,7 @@ GuiElements.setConstants=function(){
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
+	UndoManager();
 };
 /* Debugging function which displays information on screen */
 GuiElements.alert=function(message){
@@ -2881,8 +2882,7 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
  * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font,test){
-	DebugOptions.assert(test == null);
+GuiElements.measure.stringWidth=function(text,font){
 	var textElement=GuiElements.create.text(); //Make the text element.
 	textElement.setAttributeNS(null,"font-family",font.fontFamily); //Set the attributes.
 	textElement.setAttributeNS(null,"font-size",font.fontSize);
@@ -3675,7 +3675,7 @@ function VectorPaths(){
 	VP.undoDelete = {};
 	VP.undoDelete.width = 87.924;
 	VP.undoDelete.height = 113.045;
-	VP.undoDelete.path = "m 328.17131,121.34682 -6.28125,6.2793 -21.98047,0 0,12.56054 87.92383,0 0,-12.56054 -21.98047,0 -6.28125,-6.2793 -31.40039,0 z m -21.98242,25.12109 0,75.36329 c 0,6.90831 5.65224,12.56054 12.56055,12.56054 l 50.24218,0 c 6.90832,0 12.56055,-5.65223 12.56055,-12.56054 l 0,-75.36329 -75.36328,0 z m 35.52344,12.25586 0,13.23243 c 32.63892,-0.75632 39.13249,32.15793 17.60156,42.08984 8.4063,-6.82329 9.65417,-28.23254 -17.60156,-27.66406 l 0,13.51953 -25.80078,-21.14063 25.80078,-20.03711 z";
+	VP.undoDelete.path = "m 28.262,0 -6.28125,6.2793 -21.98047,0 0,12.56054 87.92383,0 0,-12.56054 -21.98047,0 -6.28125,-6.2793 -31.40039,0 z m -21.98242,25.12109 0,75.36329 c 0,6.90831 5.65224,12.56054 12.56055,12.56054 l 50.24218,0 c 6.90832,0 12.56055,-5.65223 12.56055,-12.56054 l 0,-75.36329 -75.36328,0 z m 35.52344,12.25586 0,13.23243 c 32.63892,-0.75632 39.13249,32.15793 17.60156,42.08984 8.4063,-6.82329 9.65417,-28.23254 -17.60156,-27.66406 l 0,13.51953 -25.80078,-21.14063 25.80078,-20.03711 z";
 }
 /**
  * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
@@ -5471,8 +5471,9 @@ TitleBar.setGraphicsPart1=function(){
 TitleBar.setGraphicsPart2 = function(){
 	var TB=TitleBar;
 	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
+	TB.flagBnX=TB.stopBnX-TB.buttonW-TB.buttonMargin;
+	TB.undoBnX=TB.flagBnX-TB.buttonW-3*TB.buttonMargin;
+	TB.debugX=TB.undoBnX-TB.longButtonW-3*TB.buttonMargin;
 
 	TB.fileBnX=TB.buttonMargin;
 	if(GuiElements.smallMode) {
@@ -5480,7 +5481,6 @@ TitleBar.setGraphicsPart2 = function(){
 		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
-	TB.undoBnX=TB.viewBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
@@ -5525,7 +5525,8 @@ TitleBar.makeButtons=function(){
 	TB.viewMenu=new SettingsMenu(TB.viewBn);
 
 	TB.undoButton = new Button(TB.undoBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.6);
+	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+	UndoManager.setUndoButton(TB.undoButton);
 
 	TB.debugBn=null;
 	if(TB.debugEnabled) {
@@ -9196,11 +9197,11 @@ SmoothMenuBnList.prototype.generateBns = function() {
 SmoothMenuBnList.prototype.computeWidth = function() {
 	if (this.width == null) {
 		const columns = 1;
-		const MBL = MenuBnList;
+		const MBL = SmoothMenuBnList;
 		let longestW = 0;
 		for (let i = 0; i < this.options.length; i++) {
 			const string = this.options[i].text;
-			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -10312,9 +10313,11 @@ CodeManager.move.end=function(){
 		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
 		//If the BlockStack overlaps with the BlockPalette, delete it.
 		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
-			move.stack.remove();
 			if(move.showTrash) {
+				UndoManager.deleteStack(move.stack);
 				SaveManager.markEdited();
+			} else {
+				move.stack.remove();
 			}
 		} else {
 			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
@@ -10687,6 +10690,7 @@ CodeManager.importXml=function(projectNode){
 	BlockPalette.refresh();
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
+	UndoManager.clearUndos();
 	TouchReceiver.enableInteraction();
 };
 CodeManager.updateModified = function(){
@@ -10797,6 +10801,8 @@ TabManager.setGraphics=function(){
 	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
 	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
 	TM.spaceScrollMargin=50;
+	TM.undoDeleteMarginBase = 40;
+	TM.undoDeleteMarginRand = 40;
 };
 TabManager.createTabSpaceBg=function(){
 	var TM=TabManager;
@@ -10915,6 +10921,9 @@ TabManager.endZooming = function(){
 		TM.activeTab.endZooming();
 	}
 };
+TabManager.undoDelete = function(stackNode) {
+	return TabManager.activeTab.undoDelete(stackNode);
+};
 TabManager.createXml=function(xmlDoc){
 	var TM=TabManager;
 	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
@@ -11004,7 +11013,7 @@ TabManager.updateZoom=function(){
 	TabManager.passRecursively("updateZoom");
 };
 TabManager.getActiveZoom = function(){
-	if(TabManager.activateTab == null){
+	if(TabManager.activeTab == null){
 		return 1;
 	}
 	return TabManager.activeTab.getZoom();
@@ -11020,8 +11029,8 @@ function Tab(){
 	this.isRunning=false;
 	this.scrolling=false;
 	this.zooming = false;
-	this.scrollXOffset=50;
-	this.scrollYOffset=100;
+	this.scrollXOffset=0;
+	this.scrollYOffset=0;
 	this.zoomStartDist=null;
 	this.startZoom = null;
 	this.updateTransform();
@@ -11263,6 +11272,20 @@ Tab.importXml=function(tabNode){
 Tab.prototype.delete=function(){
 	this.passRecursively("remove");
 	this.mainG.remove();
+};
+Tab.prototype.undoDelete = function(stackNode) {
+	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+
+	const x = this.absToRelX(xMargin + BlockPalette.width);
+	const y = this.absToRelY(yMargin + TitleBar.height);
+	const stack = BlockStack.importXml(stackNode, this);
+	if(stack == null) {
+		return false;
+	}
+	stack.move(x, y);
+	this.updateArrows();
+	return true;
 };
 Tab.prototype.renameVariable=function(variable){
 	this.passRecursively("renameVariable",variable);
@@ -14232,6 +14255,7 @@ BlockStack.prototype.createXml = function(xmlDoc) {
  * Creates a BlockStack from XML
  * @param {Node} stackNode - The tag to import from
  * @param {Tab} tab - The Tab to import into
+ * @return {BlockStack|null} stack - The imported stack
  */
 BlockStack.importXml = function(stackNode, tab) {
 	const x = XmlWriter.getAttribute(stackNode, "x", 0, true);
@@ -14249,7 +14273,7 @@ BlockStack.importXml = function(stackNode, tab) {
 	}
 	if (firstBlock == null) {
 		// All Blocks could not import.  Exit.
-		return;
+		return null;
 	}
 	const stack = new BlockStack(firstBlock, tab);
 	stack.move(x, y);
@@ -14264,6 +14288,7 @@ BlockStack.importXml = function(stackNode, tab) {
 		i++;
 	}
 	stack.updateDim();
+	return stack;
 };
 
 /**
@@ -15346,6 +15371,58 @@ SaveManager.addTypeToRequest = function(request, isRecording){
 };
 SaveManager.fileIsOpen = function(){
 	return SaveManager.fileName != null;
+};
+function UndoManager() {
+	const UM = UndoManager;
+	UM.undoButton = null;
+	UM.undoStack = [];
+	UM.undoLimit = 20;
+}
+
+UndoManager.setUndoButton = function(button) {
+	const UM = UndoManager;
+	UM.undoButton = button;
+	UM.undoButton.setCallbackFunction(UndoManager.undoDelete, true);
+	UM.updateButtonEnabled();
+};
+
+UndoManager.deleteStack = function(stack) {
+	const UM = UndoManager;
+	const doc = XmlWriter.newDoc("undoData");
+	const stackData = stack.createXml(doc);
+	stack.remove();
+	UM.undoStack.push(stackData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+};
+
+UndoManager.undoDelete = function(){
+	const UM = UndoManager;
+	if(UM.undoStack.length === 0) return;
+	let success = false;
+	while (!success) {
+		const stackData = UM.undoStack.pop();
+		success = success || TabManager.undoDelete(stackData);
+	}
+	UM.updateButtonEnabled();
+};
+
+UndoManager.updateButtonEnabled = function(){
+	const UM = UndoManager;
+	if(UM.undoButton == null) return;
+	if(UM.undoStack.length > 0) {
+		UM.undoButton.enable();
+	} else {
+		UM.undoButton.disable();
+	}
+};
+
+UndoManager.clearUndos = function() {
+	const UM = UndoManager;
+	UM.undoStack = [];
+	UM.updateButtonEnabled();
 };
 
 /**

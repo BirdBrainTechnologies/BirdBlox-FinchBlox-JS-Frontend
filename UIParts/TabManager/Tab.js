@@ -9,8 +9,8 @@ function Tab(){
 	this.isRunning=false;
 	this.scrolling=false;
 	this.zooming = false;
-	this.scrollXOffset=50;
-	this.scrollYOffset=100;
+	this.scrollXOffset=0;
+	this.scrollYOffset=0;
 	this.zoomStartDist=null;
 	this.startZoom = null;
 	this.updateTransform();
@@ -252,6 +252,20 @@ Tab.importXml=function(tabNode){
 Tab.prototype.delete=function(){
 	this.passRecursively("remove");
 	this.mainG.remove();
+};
+Tab.prototype.undoDelete = function(stackNode) {
+	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+
+	const x = this.absToRelX(xMargin + BlockPalette.width);
+	const y = this.absToRelY(yMargin + TitleBar.height);
+	const stack = BlockStack.importXml(stackNode, this);
+	if(stack == null) {
+		return false;
+	}
+	stack.move(x, y);
+	this.updateArrows();
+	return true;
 };
 Tab.prototype.renameVariable=function(variable){
 	this.passRecursively("renameVariable",variable);
