@@ -11482,11 +11482,12 @@ Tab.prototype.delete = function() {
 };
 
 /**
- * Creates a stack based on the provided stackNode
- * @param stackNode
- * @return {boolean}
+ * Creates a stack based on the stackNode provided by the UndoManager in the top left corner
+ * @param {Node} stackNode - The XML node for the stack
+ * @return {boolean} - Whether the stack was created (false if the XML is invalid)
  */
 Tab.prototype.undoDelete = function(stackNode) {
+	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
 	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 
@@ -11501,6 +11502,11 @@ Tab.prototype.undoDelete = function(stackNode) {
 	return true;
 };
 
+/**
+ *
+ * @param deviceClass
+ * @return {number}
+ */
 Tab.prototype.countDevicesInUse = function(deviceClass) {
 	var largest = 0;
 	var stacks = this.stackList;
