@@ -13,14 +13,17 @@ BlockContextMenu.setGraphics=function(){
 BlockContextMenu.prototype.showMenu=function(){
 	var BCM=BlockContextMenu;
 	this.group=GuiElements.create.group(0,0);
-	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
+
 	let layer = GuiElements.layers.inputPad;
 	let overlayType = Overlay.types.inputPad;
 	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
+	const height = this.menuBnList.previewHeight();
+	const width = this.menuBnList.previewWidth();
+	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,height);
 	this.menuBnList.show();
-	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
 };
 BlockContextMenu.prototype.addOptions=function(){
 	if(this.block.stack.isDisplayStack){
@@ -65,7 +68,7 @@ BlockContextMenu.prototype.addOptions=function(){
 		funcDup.BCM = this;
 		this.menuBnList.addOption("Duplicate", funcDup);
 		this.menuBnList.addOption("Delete",function(){
-			BCM.block.unsnap().delete();
+			BCM.block.unsnap().remove();
 			BCM.close();
 		})
 	}
@@ -83,4 +86,5 @@ BlockContextMenu.prototype.duplicate=function(){
 BlockContextMenu.prototype.close=function(){
 	this.block=null;
 	this.bubbleOverlay.hide();
+	this.menuBnList.hide();
 };

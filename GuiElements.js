@@ -136,7 +136,6 @@ GuiElements.setConstants=function(){
 	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
-	MenuBnList.setGraphics();
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();

@@ -40,6 +40,7 @@ CallbackManager.data.filesChanged = function(){
 
 CallbackManager.cloud = {};
 CallbackManager.cloud.filesChanged = function(newFiles){
+	newFiles = HtmlServer.decodeHtml(newFiles);
 	OpenCloudDialog.filesChanged(newFiles);
 	return true;
 };

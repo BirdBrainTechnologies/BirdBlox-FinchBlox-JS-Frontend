@@ -40,7 +40,7 @@ RowDialog.setConstants = function() {
 	RowDialog.titleBarFontC = Colors.white;
 	RowDialog.bgColor = Colors.black;
 	RowDialog.centeredBnWidth = 100;
-	RowDialog.bnHeight = MenuBnList.bnHeight;
+	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
 	RowDialog.bnMargin = 5;
 	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
 

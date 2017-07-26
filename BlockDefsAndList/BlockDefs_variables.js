@@ -69,7 +69,7 @@ B_Variable.prototype.renameVariable = function(variable) {
 B_Variable.prototype.deleteVariable = function(variable) {
 	if (variable === this.variable) {
 		// Delete occurrences of this Block
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**
@@ -226,7 +226,7 @@ B_List.prototype.renameList = function(list) {
  */
 B_List.prototype.deleteList = function(list) {
 	if (list === this.list) {
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**
