@@ -419,53 +419,81 @@ Tab.prototype.undoDelete = function(stackNode) {
 };
 
 /**
- *
- * @param deviceClass
+ * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device
+ * @param deviceClass - Subclass of device
  * @return {number}
  */
 Tab.prototype.countDevicesInUse = function(deviceClass) {
-	var largest = 0;
-	var stacks = this.stackList;
-	for (var i = 0; i < stacks.length; i++) {
+	let largest = 0;
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
 		largest = Math.max(largest, stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
 };
+
+/**
+ * Passes a message down to the Blocks/Slots in the tab
+ * @param {string} message - The message to send.  Probably a function in the target object
+ */
 Tab.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
+
+/**
+ * Calls the function on all Stacks in this tab
+ * @param {function} functionName - The name of the function to call
+ */
 Tab.prototype.passRecursively = function(functionName) {
-	var args = Array.prototype.slice.call(arguments, 1);
-	var stacks = this.stackList;
-	for (var i = 0; i < stacks.length; i++) {
-		var currentStack = stacks[i];
-		var currentL = stacks.length;
+	const args = Array.prototype.slice.call(arguments, 1);
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		const currentStack = stacks[i];
+		const currentL = stacks.length;
 		currentStack[functionName].apply(currentStack, args);
-		if (currentL != stacks.length) {
+		if (currentL !== stacks.length) {
 			i--;
 		}
 	}
 };
+
+/**
+ * Retrieves the zoom from the tab
+ * @return {number}
+ */
 Tab.prototype.getZoom = function() {
 	return this.zoomFactor;
 };
+
+/**
+ * Updates the UI for the new zoom level
+ */
 Tab.prototype.updateZoom = function() {
 	this.overFlowArr.updateZoom();
 	this.updateArrows();
 };
+
+/**
+ * Makes the arrows appear/disappear depending on the size/position of the canvas
+ */
 Tab.prototype.updateArrows = function() {
 	this.updateTabDim();
-	var x1 = this.relToAbsX(this.dim.x1);
-	var y1 = this.relToAbsY(this.dim.y1);
-	var x2 = this.relToAbsX(this.dim.x2);
-	var y2 = this.relToAbsY(this.dim.y2);
+	const x1 = this.relToAbsX(this.dim.x1);
+	const y1 = this.relToAbsY(this.dim.y1);
+	const x2 = this.relToAbsX(this.dim.x2);
+	const y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
+
+/**
+ * Like updateArrows but avoids recomputing the size of the Tab, since it assumes that the canvas has only been zoomed
+ * and the Blocks have not changed
+ */
 Tab.prototype.updateArrowsShift = function() {
-	var x1 = this.relToAbsX(this.dim.x1);
-	var y1 = this.relToAbsY(this.dim.y1);
-	var x2 = this.relToAbsX(this.dim.x2);
-	var y2 = this.relToAbsY(this.dim.y2);
+	const x1 = this.relToAbsX(this.dim.x1);
+	const y1 = this.relToAbsY(this.dim.y1);
+	const x2 = this.relToAbsX(this.dim.x2);
+	const y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
