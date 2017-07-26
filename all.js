@@ -1331,6 +1331,23 @@ Device.prototype.showFirmwareInfo = function() {
 };
 
 /**
+ * Alerts the user that the device has incompatible firmware and provides a link to update instructions
+ * @param {string} oldFirmware
+ * @param {string} minFirmware
+ */
+Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
+	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
+	msg += "\nDevice firmware version: " + oldFirmware;
+	msg += "\nRequired firmware version: " + minFirmware;
+	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+		if (result === "2") {
+			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+			HtmlServer.sendRequestWithCallback(request.toString());
+		}
+	});
+};
+
+/**
  * Constructs a Device instance from a JSON object with fields for name and id
  * @param deviceClass - Subclass of device, the type of device to construct
  * @param {object} json
@@ -1841,6 +1858,16 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 	}
 };
 
+DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		const robot = this.connectedDevices[index];
+		this.connectedDevices.splice(index, 1);
+		this.devicesChanged();
+		robot.notifyIncompatible(oldFirmware, minFirmware);
+	}
+};
+
 /**
  * Computes, stores, and returns this DeviceManager's connectionStatus
  * @return {DeviceManager.statuses}
@@ -1949,6 +1976,18 @@ DeviceManager.setStatusListener = function(callbackFn) {
 DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
 	DeviceManager.forEach(function(manager) {
 		manager.backendDiscovered(robotTypeId, robotList);
+	});
+};
+
+/**
+ * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * @param {string} robotId - The id of the robot to disconnect
+ * @param {string} oldFirmware - The firmware on the robot
+ * @param {string} minFirmware - The minimum firmware required to be compatible
+ */
+DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	DeviceManager.forEach(function(manager) {
+		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
 	});
 };
 
@@ -3633,6 +3672,10 @@ function VectorPaths(){
 	VP.info.width = 20;
 	VP.info.height = 20;
 	VP.info.path = "m 10,0 c -5.52,0 -10,4.48 -10,10 0,5.52 4.48,10 10,10 5.52,0 10,-4.48 10,-10 0,-5.52 -4.48,-10 -10,-10 z m 1,15 -2,0 0,-6 2,0 0,6 z m 0,-8 -2,0 0,-2 2,0 0,2 z";
+	VP.undoDelete = {};
+	VP.undoDelete.width = 87.924;
+	VP.undoDelete.height = 113.045;
+	VP.undoDelete.path = "m 328.17131,121.34682 -6.28125,6.2793 -21.98047,0 0,12.56054 87.92383,0 0,-12.56054 -21.98047,0 -6.28125,-6.2793 -31.40039,0 z m -21.98242,25.12109 0,75.36329 c 0,6.90831 5.65224,12.56054 12.56055,12.56054 l 50.24218,0 c 6.90832,0 12.56055,-5.65223 12.56055,-12.56054 l 0,-75.36329 -75.36328,0 z m 35.52344,12.25586 0,13.23243 c 32.63892,-0.75632 39.13249,32.15793 17.60156,42.08984 8.4063,-6.82329 9.65417,-28.23254 -17.60156,-27.66406 l 0,13.51953 -25.80078,-21.14063 25.80078,-20.03711 z";
 }
 /**
  * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
@@ -5437,6 +5480,7 @@ TitleBar.setGraphicsPart2 = function(){
 		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
+	TB.undoBnX=TB.viewBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
@@ -5461,7 +5505,7 @@ TitleBar.makeButtons=function(){
 
 	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
+	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH * 0.8);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
 
 	if(GuiElements.smallMode) {
@@ -5479,6 +5523,10 @@ TitleBar.makeButtons=function(){
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings,TB.bnIconH);
 	TB.viewMenu=new SettingsMenu(TB.viewBn);
+
+	TB.undoButton = new Button(TB.undoBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.6);
+
 	TB.debugBn=null;
 	if(TB.debugEnabled) {
 		TB.enableDebug();
@@ -5498,6 +5546,7 @@ TitleBar.removeButtons = function(){
 	TB.stopBn.remove();
 	TB.fileBn.remove();
 	TB.viewBn.remove();
+	TB.undoButton.remove();
 	TB.hummingbirdBn.remove();
 	if(TB.debugBn != null) TB.debugBn.remove();
 	if(TB.showHideBn != null) TB.showHideBn.remove();
@@ -9673,7 +9722,7 @@ SettingsMenu.prototype.disableSnapping = function() {
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
  * devices
- * @param {button} button
+ * @param {Button} button
  * @constructor
  */
 function DeviceMenu(button) {
@@ -14813,6 +14862,12 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
+};
+CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
+	minFirmware = HtmlServer.decodeHtml(minFirmware);
+	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
 };
 CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	robotId = HtmlServer.decodeHtml(robotId);

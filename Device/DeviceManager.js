@@ -390,6 +390,16 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 	}
 };
 
+DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		const robot = this.connectedDevices[index];
+		this.connectedDevices.splice(index, 1);
+		this.devicesChanged();
+		robot.notifyIncompatible(oldFirmware, minFirmware);
+	}
+};
+
 /**
  * Computes, stores, and returns this DeviceManager's connectionStatus
  * @return {DeviceManager.statuses}
@@ -498,6 +508,18 @@ DeviceManager.setStatusListener = function(callbackFn) {
 DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
 	DeviceManager.forEach(function(manager) {
 		manager.backendDiscovered(robotTypeId, robotList);
+	});
+};
+
+/**
+ * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * @param {string} robotId - The id of the robot to disconnect
+ * @param {string} oldFirmware - The firmware on the robot
+ * @param {string} minFirmware - The minimum firmware required to be compatible
+ */
+DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	DeviceManager.forEach(function(manager) {
+		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
 	});
 };
 

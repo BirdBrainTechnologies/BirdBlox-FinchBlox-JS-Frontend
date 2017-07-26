@@ -1,7 +1,7 @@
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
  * devices
- * @param {button} button
+ * @param {Button} button
  * @constructor
  */
 function DeviceMenu(button) {

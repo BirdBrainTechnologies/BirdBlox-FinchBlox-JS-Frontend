@@ -44,6 +44,7 @@ TitleBar.setGraphicsPart2 = function(){
 		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
 	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
+	TB.undoBnX=TB.viewBnX+TB.buttonMargin+TB.buttonW;
 	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
@@ -68,7 +69,7 @@ TitleBar.makeButtons=function(){
 
 	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
 	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
+	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH * 0.8);
 	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
 
 	if(GuiElements.smallMode) {
@@ -86,6 +87,10 @@ TitleBar.makeButtons=function(){
 	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings,TB.bnIconH);
 	TB.viewMenu=new SettingsMenu(TB.viewBn);
+
+	TB.undoButton = new Button(TB.undoBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
+	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.6);
+
 	TB.debugBn=null;
 	if(TB.debugEnabled) {
 		TB.enableDebug();
@@ -105,6 +110,7 @@ TitleBar.removeButtons = function(){
 	TB.stopBn.remove();
 	TB.fileBn.remove();
 	TB.viewBn.remove();
+	TB.undoButton.remove();
 	TB.hummingbirdBn.remove();
 	if(TB.debugBn != null) TB.debugBn.remove();
 	if(TB.showHideBn != null) TB.showHideBn.remove();

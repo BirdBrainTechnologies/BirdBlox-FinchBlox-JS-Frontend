@@ -71,6 +71,12 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
+	minFirmware = HtmlServer.decodeHtml(minFirmware);
+	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+};
 CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	robotId = HtmlServer.decodeHtml(robotId);
 	const statuses = Device.firmwareStatuses;

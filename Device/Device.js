@@ -222,6 +222,23 @@ Device.prototype.showFirmwareInfo = function() {
 };
 
 /**
+ * Alerts the user that the device has incompatible firmware and provides a link to update instructions
+ * @param {string} oldFirmware
+ * @param {string} minFirmware
+ */
+Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
+	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
+	msg += "\nDevice firmware version: " + oldFirmware;
+	msg += "\nRequired firmware version: " + minFirmware;
+	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+		if (result === "2") {
+			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+			HtmlServer.sendRequestWithCallback(request.toString());
+		}
+	});
+};
+
+/**
  * Constructs a Device instance from a JSON object with fields for name and id
  * @param deviceClass - Subclass of device, the type of device to construct
  * @param {object} json
