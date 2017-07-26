@@ -9080,15 +9080,11 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
 	// May be set later with markAsOverlayPart
 	this.partOfOverlay = null;
 	this.internalHeight = 0;
-
+	// optionally set with setMaxHeight()
 	this.maxHeight = null;
-
-	this.scrolling = false;
-	this.scrollYOffset = 0;
-	this.scrollY = 0;
-	this.scrollable = false;
-
+	// Tracks whether the list is scrolling
 	this.scrollStatus = {};
+	this.scrollable = false;
 }
 
 SmoothMenuBnList.setGraphics = function() {
@@ -9170,7 +9166,7 @@ SmoothMenuBnList.prototype.hide = function() {
  * Creates the buttons for the list
  */
 SmoothMenuBnList.prototype.generateBns = function() {
-	// The width is computed and stored in
+	// The width is computed and stored in this.width
 	this.computeWidth();
 	if (!this.bnsGenerated) {
 		this.clearBnsArray();
@@ -9194,6 +9190,10 @@ SmoothMenuBnList.prototype.generateBns = function() {
 		this.updatePosition();
 	}
 };
+
+/**
+ * If the width is not set yet, computes the width of the longest button and stores it in this.width
+ */
 SmoothMenuBnList.prototype.computeWidth = function() {
 	if (this.width == null) {
 		const columns = 1;
@@ -9212,9 +9212,18 @@ SmoothMenuBnList.prototype.computeWidth = function() {
 		}
 	}
 };
+
+/**
+ * Returns whether the list is empty
+ * @return {boolean}
+ */
 SmoothMenuBnList.prototype.isEmpty = function() {
 	return this.options.length === 0;
 };
+
+/**
+ * Removes all the buttons currently in the list
+ */
 SmoothMenuBnList.prototype.clearBnsArray = function() {
 	if (this.bns != null) {
 		for (let i = 0; i < this.bns.length; i++) {
@@ -9223,10 +9232,20 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
 	}
 	this.bns = [];
 };
+
+/**
+ * Creates a button for the provided option
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {object} option - Object with fields for func, text, and/or addTextFn
+ * @return {Button}
+ */
 SmoothMenuBnList.prototype.generateBn = function(x, y, width, option) {
 	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
 	bn.setCallbackFunction(option.func, true);
 	if (option.addTextFn != null) {
+		// Provides flexibility to format the button
 		option.addTextFn(bn);
 	} else {
 		bn.addText(option.text);
@@ -9235,11 +9254,15 @@ SmoothMenuBnList.prototype.generateBn = function(x, y, width, option) {
 	bn.makeScrollable();
 	return bn;
 };
+
+/**
+ * Recomputes the location of the list and moves it
+ */
 SmoothMenuBnList.prototype.updatePosition = function() {
 	if (this.visible) {
-		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
 		let realX = this.parent.relToAbsX(this.x);
 		let realY = this.parent.relToAbsY(this.y);
+		// SmoothMenuBnLists need real absolute coords that account for the zoom level
 		realX = GuiElements.relToAbsX(realX);
 		realY = GuiElements.relToAbsY(realY);
 
@@ -9247,13 +9270,27 @@ SmoothMenuBnList.prototype.updatePosition = function() {
 			this.height, this.width, this.internalHeight);
 	}
 };
+
+/**
+ * Recomputes location
+ */
 SmoothMenuBnList.prototype.updateZoom = function() {
 	this.updatePosition();
 };
+
+/**
+ * Returns the current scroll position in the menu
+ * @return {number}
+ */
 SmoothMenuBnList.prototype.getScroll = function() {
 	if (!this.visible) return 0;
 	return this.scrollDiv.scrollTop;
 };
+
+/**
+ * Sets the current scroll position in the menu
+ * @param {number} scrollTop
+ */
 SmoothMenuBnList.prototype.setScroll = function(scrollTop) {
 	if (!this.visible) return;
 	scrollTop = Math.max(0, scrollTop);
@@ -9261,13 +9298,28 @@ SmoothMenuBnList.prototype.setScroll = function(scrollTop) {
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
 };
+
+/**
+ * Tells this list it is part of an overlay, so its buttons don't close that overlay
+ * @param {Overlay} overlay - The overlay this list is a part of
+ */
 SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
+
+/**
+ * Determines whether the list is currently being scrolled
+ * @return {boolean}
+ */
 SmoothMenuBnList.prototype.isScrolling = function() {
 	if (!this.visible) return false;
 	return !this.scrollStatus.still;
 };
+
+/**
+ * Determines the height the list will have when built
+ * @return {number}
+ */
 SmoothMenuBnList.prototype.previewHeight = function() {
 	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
 	height = Math.max(height, 0);
@@ -9276,10 +9328,22 @@ SmoothMenuBnList.prototype.previewHeight = function() {
 	}
 	return height;
 };
+
+/**
+ * Determines the width the list will have and stores it, then returns it
+ * @return {number}
+ */
 SmoothMenuBnList.prototype.previewWidth = function() {
 	this.computeWidth();
 	return this.width;
 };
+
+/**
+ * Determines the height of a list with the specified number of items
+ * @param {number} count
+ * @param {number} [maxHeight]
+ * @return {number}
+ */
 SmoothMenuBnList.previewHeight = function(count, maxHeight) {
 	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
 	height = Math.max(height, 0);
