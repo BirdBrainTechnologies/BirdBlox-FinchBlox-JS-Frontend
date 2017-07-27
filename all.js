@@ -10996,6 +10996,7 @@ CodeManager.findBestFit = function() {
 	TabManager.activeTab.findBestFit();   // Begins the recursive calls.
 };
 
+
 /**
  * Recursively updates any Blocks that are currently executing.
  * Stops the update timer if all Blocks are finished.
@@ -11042,12 +11043,6 @@ CodeManager.startUpdateTimer = function() {
 	}
 };
 
-/**
- * Recursively passes on the message that the flag button was tapped.
- */
-CodeManager.eventFlagClicked = function() {
-	TabManager.eventFlagClicked();
-};
 
 /**
  * Adds the Variable to CodeManager's list of variables
@@ -11190,6 +11185,80 @@ CodeManager.findList = function(name) {
 };
 
 /**
+ * Tells Blocks that a variable's name has changed
+ * @param {Variable} variable
+ */
+CodeManager.renameVariable = function(variable) {
+	TabManager.renameVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+
+/**
+ * Tells Blocks that a variable has been deleted
+ * @param {Variable} variable
+ */
+CodeManager.deleteVariable = function(variable) {
+	TabManager.deleteVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+
+/**
+ * Tells Blocks that a List has been renamed
+ * @param {List} list
+ */
+CodeManager.renameList = function(list) {
+	TabManager.renameList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+
+/**
+ * Tells Blocks that a List has been deleted
+ * @param {List} list
+ */
+CodeManager.deleteList = function(list) {
+	TabManager.deleteList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+};
+
+/**
+ * Recursively checks if a variable is ever used. Determines whether a prompt will be shown if the user tries
+ * to delete it.
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+CodeManager.checkVariableUsed = function(variable) {
+	return TabManager.checkVariableUsed(variable);
+};
+
+/**
+ * Recursively checks if a list is ever used.
+ * @param {List} list
+ * @return {boolean}
+ */
+CodeManager.checkListUsed = function(list) {
+	return TabManager.checkListUsed(list);
+};
+
+
+/**
+ * Recursively tells Blocks that a recording's name has changed
+ * @param {string} oldName
+ * @param {string} newName
+ */
+CodeManager.renameRecording = function(oldName, newName) {
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+};
+
+/**
+ * Recursively tells Blocks that a recording has been deleted
+ * @param {string} recording
+ */
+CodeManager.deleteRecording = function(recording) {
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+};
+
+
+/**
  * Checks if the message is original
  * @param {string} message - The message to test
  * @return {boolean} - false if that message is already a message in CodeManager.broadcastList
@@ -11232,6 +11301,23 @@ CodeManager.eventBroadcast = function(message) {
 };
 
 /**
+ * Recursively checks if a certain broadcast message is still running.
+ * @param {string} message
+ * @return {boolean}
+ */
+CodeManager.checkBroadcastRunning = function(message) {
+	return TabManager.checkBroadcastRunning(message);
+};
+
+/**
+ * Recursively passes on the message that the flag button was tapped.
+ */
+CodeManager.eventFlagClicked = function() {
+	TabManager.eventFlagClicked();
+};
+
+
+/**
  * Tells DeviceDropSlots or a certain type to hide their drop downs and just use labels
  * @param deviceClass - subclass of Device, type of slots affected
  */
@@ -11256,14 +11342,6 @@ CodeManager.countDevicesInUse = function(deviceClass) {
 	return TabManager.countDevicesInUse(deviceClass);
 };
 
-/**
- * Recursively checks if a certain broadcast message is still running.
- * @param {string} message
- * @return {boolean}
- */
-CodeManager.checkBroadcastRunning = function(message) {
-	return TabManager.checkBroadcastRunning(message);
-};
 
 /**
  * Recursively tells Blocks to become active/inactive based on the sensors that are available
@@ -11280,6 +11358,38 @@ CodeManager.updateConnectionStatus = function() {
 	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
 };
 
+
+/**
+ * Converts beats to milliseconds using the current tempo
+ * @param {number} beats
+ * @return {number}
+ */
+CodeManager.beatsToMs = function(beats) {
+	const tempo = CodeManager.sound.tempo;
+	const res = beats / tempo * 60 * 1000;
+	if (isNaN(res) || !isFinite(res)) {
+		return 0;
+	}
+	return res;
+};
+
+/**
+ * Sets the tempo, if it is valid.
+ * @param {number} newTempo
+ */
+CodeManager.setSoundTempo = function(newTempo) {
+	if (isFinite(newTempo) && !isNaN(newTempo)) {
+		if (newTempo >= 500) {
+			CodeManager.sound.tempo = 500;
+		} else if (newTempo <= 20) {
+			CodeManager.sound.tempo = 20;
+		} else {
+			CodeManager.sound.tempo = newTempo;
+		}
+	}
+};
+
+
 /**
  * Tells children to keep passing message down to Slots/Blocks
  * @param {string} message
@@ -11292,6 +11402,7 @@ CodeManager.passRecursivelyDown = function(message, includePalette) {
 		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
 	}
 };
+
 
 /**
  * Exports the project to XML
@@ -11374,89 +11485,22 @@ CodeManager.deleteAll = function() {
 };
 
 /**
- * Tells Blocks that a variable's name has changed
- * @param {Variable} variable
+ * Shows "Loading..." in the TitleBar and blocks interaction for 1 sec or until the file loads
+ * @param message
  */
-CodeManager.renameVariable = function(variable) {
-	TabManager.renameVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
+CodeManager.markLoading = function(message) {
+	TitleBar.setText(message);
+	TouchReceiver.disableInteraction(1000);
 };
 
 /**
- * Tells Blocks that a variable has been deleted
- * @param {Variable} variable
+ * Undoes markLoading, by restoring the filename and enabling interaction
  */
-CodeManager.deleteVariable = function(variable) {
-	TabManager.deleteVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
+CodeManager.cancelLoading = function() {
+	TitleBar.setText(SaveManager.fileName);
+	TouchReceiver.enableInteraction();
 };
 
-/**
- * Tells Blocks that a List has been renamed
- * @param {List} list
- */
-CodeManager.renameList = function(list) {
-	TabManager.renameList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-
-/**
- * Tells Blocks that a List has been deleted
- * @param {List} list
- */
-CodeManager.deleteList = function(list) {
-	TabManager.deleteList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-
-/**
- * Recursively checks if a variable is ever used. Determines whether a prompt will be shown if the user tries
- * to delete it.
- * @param {Variable} variable
- * @return {boolean}
- */
-CodeManager.checkVariableUsed = function(variable) {
-	return TabManager.checkVariableUsed(variable);
-};
-
-/**
- * Recursively checks if a list is ever used.
- * @param {List} list
- * @return {boolean}
- */
-CodeManager.checkListUsed = function(list) {
-	return TabManager.checkListUsed(list);
-};
-
-/**
- * Converts beats to milliseconds using the current tempo
- * @param {number} beats
- * @return {number}
- */
-CodeManager.beatsToMs = function(beats) {
-	const tempo = CodeManager.sound.tempo;
-	const res = beats / tempo * 60 * 1000;
-	if (isNaN(res) || !isFinite(res)) {
-		return 0;
-	}
-	return res;
-};
-
-/**
- * Sets the tempo, if it is valid.
- * @param {number} newTempo
- */
-CodeManager.setSoundTempo = function(newTempo) {
-	if (isFinite(newTempo) && !isNaN(newTempo)) {
-		if (newTempo >= 500) {
-			CodeManager.sound.tempo = 500;
-		} else if (newTempo <= 20) {
-			CodeManager.sound.tempo = 20;
-		} else {
-			CodeManager.sound.tempo = newTempo;
-		}
-	}
-};
 
 /* Convert between absolute and relative coords in the drag layer.  Used by moving BlockStacks to determine positions */
 /**
@@ -11486,40 +11530,6 @@ CodeManager.dragRelToAbsX = function(x) {
  */
 CodeManager.dragRelToAbsY = function(y) {
 	return y * TabManager.getActiveZoom();
-};
-
-/**
- * Recursively tells Blocks that a recording's name has changed
- * @param {string} oldName
- * @param {string} newName
- */
-CodeManager.renameRecording = function(oldName, newName) {
-	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
-};
-
-/**
- * Recursively tells Blocks that a recording has been deleted
- * @param {string} recording
- */
-CodeManager.deleteRecording = function(recording) {
-	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
-};
-
-/**
- * Shows "Loading..." in the TitleBar and blocks interaction for 1 sec or until the file loads
- * @param message
- */
-CodeManager.markLoading = function(message) {
-	TitleBar.setText(message);
-	TouchReceiver.disableInteraction(1000);
-};
-
-/**
- * Undoes markLoading, by restoring the filename and enabling interaction
- */
-CodeManager.cancelLoading = function() {
-	TitleBar.setText(SaveManager.fileName);
-	TouchReceiver.enableInteraction();
 };
 /**
  * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
