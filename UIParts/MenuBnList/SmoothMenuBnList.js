@@ -81,7 +81,7 @@ SmoothMenuBnList.prototype.setMaxHeight = function(maxHeight) {
  * Adds an option to the SmoothMenuBnList
  * @param {string} text - The text to display on the Button.  Not used if addTextFn is defined
  * @param {function|null} func - type () -> (), the function to call when the option is selected
- * @param {function|null} addTextFn - type (Button) -> (), formats the button for this option
+ * @param {function|null} [addTextFn] - type (Button) -> (), formats the button for this option
  */
 SmoothMenuBnList.prototype.addOption = function(text, func, addTextFn) {
 	if (func == null) {

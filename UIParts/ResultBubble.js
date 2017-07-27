@@ -17,7 +17,7 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	group.appendChild(textE);
 	let layer = GuiElements.layers.resultBubble;
 	let overlayType = Overlay.types.resultBubble;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,layer);
 	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
 	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
 }

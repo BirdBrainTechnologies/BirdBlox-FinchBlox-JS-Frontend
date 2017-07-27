@@ -55,7 +55,7 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
-	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, IP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };

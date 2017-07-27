@@ -45,7 +45,7 @@ FileContextMenu.prototype.showMenu = function() {
 	const layer = GuiElements.layers.overlayOverlay;
 	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
 	const overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, null, layer);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();

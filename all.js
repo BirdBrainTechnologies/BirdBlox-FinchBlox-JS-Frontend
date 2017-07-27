@@ -7370,47 +7370,72 @@ DeviceStatusLight.prototype.remove=function(){
 	this.circleE.remove();
 	this.updateTimer=window.clearInterval(this.updateTimer);
 };
-/**
- * Created by Tom on 6/26/2017.
- */
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
  * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
 function Overlay(type){
 	this.type = type;
 }
-/* All overlays have a close function */
-Overlay.prototype.close = function() {
-	DebugOptions.markAbstract();
-};
-Overlay.prototype.addOverlayAndCloseOthers = function(){
-	Overlay.closeOverlaysOfType(this.type);
-	Overlay.addOverlay(this);
-};
+
 /* Initializes the static elements of the class */
 Overlay.setStatics = function(){
 	/* Keeps track of open overlays */
 	Overlay.openOverlays = new Set();
-	Overlay.types = {};
-	Overlay.types.inputPad = 1;
-	Overlay.types.resultBubble = 2;
-	Overlay.types.menu = 3;
-	Overlay.types.connectionList = 4;
+	/** @enum {number} */
+	Overlay.types = {
+		inputPad: 1,
+		resultBubble: 2,
+		menu: 3,
+		connectionList: 4
+	};
 };
+
+/**
+ * All overlays have a close function, called when an overlay of the same type is opened for the user taps outside the
+ * overlay
+ */
+Overlay.prototype.close = function() {
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Adds the overlay to the list of open overlays and closes other overlay of the same type
+ */
+Overlay.prototype.addOverlayAndCloseOthers = function(){
+	Overlay.closeOverlaysOfType(this.type);
+	Overlay.addOverlay(this);
+};
+
+/**
+ * @param {Overlay} overlay - Adds an overlay to the set of open overlays
+ */
 Overlay.addOverlay = function(overlay){
 	if(!Overlay.openOverlays.has(overlay)) {
 		Overlay.openOverlays.add(overlay);
 	}
 };
+
+/**
+ * @param {Overlay} overlay - Removes an overlay from the set of open overlays
+ */
 Overlay.removeOverlay = function(overlay){
 	if(Overlay.openOverlays.has(overlay)) {
 		Overlay.openOverlays.delete(overlay);
 	}
 };
+
+/**
+ * Closes all open overlays
+ */
 Overlay.closeOverlays = function(){
 	Overlay.openOverlays.forEach(function(overlay){
 		overlay.close();
 	});
 };
+
+/**
+ * Closes all open overlays except the provided overlay
+ * @param {Overlay} overlay
+ */
 Overlay.closeOverlaysExcept = function(overlay){
 	Overlay.openOverlays.forEach(function(currentOverlay){
 		if(currentOverlay !== overlay) {
@@ -7418,6 +7443,11 @@ Overlay.closeOverlaysExcept = function(overlay){
 		}
 	});
 };
+
+/**
+ * Closes all overlays except those of the specified type
+ * @param {Overlay.types} type
+ */
 Overlay.closeOverlaysOfType = function(type){
 	Overlay.openOverlays.forEach(function(currentOverlay){
 		if(currentOverlay.type === type) {
@@ -7810,7 +7840,7 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
-	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, IP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };
@@ -8591,7 +8621,7 @@ SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const bubbleGroup = GuiElements.create.group(0, 0);
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, SIP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, layer);
 	const coords = this.coords;
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 
@@ -8734,152 +8764,230 @@ SoundInputPad.prototype.close = function() {
 	this.bubbleOverlay.close();
 	Sound.stopAllSounds();
 };
-function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
-	if(hMargin==null){
-		hMargin=0;
-	}
-	if(layer == null){
+/**
+ * A BubbleOverlay is a type of Overlay that places its content in a speech bubble shaped background that always
+ * is on screen.  The bubble appears above, below, left, or right of a rectangular region specified in the display()
+ * function.  The InputPad for editing Slots uses a BubbleOverlay.
+ *
+ * @param {Overlay.types} overlayType - The type of overlay (to prevent two overlays of the same type)
+ * @param {string} color - Color of the bubble in hex
+ * @param {number} margin - The size of the margin around the content
+ * @param {Element} innerGroup - The group with content to put in the overlay
+ * @param {*} parent - The object owning the BubbleOverlay. Must implement a close() function
+ * @param {Element} [layer] - The layer from GuiElements to insert the overlay into. layers.overlay is default
+ * @constructor
+ */
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, layer) {
+	if (layer == null) {
 		layer = GuiElements.layers.overlay;
 	}
 	Overlay.call(this, overlayType);
 	this.x = 0;
 	this.y = 0;
-	this.bgColor=color;
-	this.margin=margin;
-	this.hMargin=hMargin; //TODO: remove this
-	this.innerGroup=innerGroup;
-	this.parent=parent;
+	this.bgColor = color;
+	this.margin = margin;
+	this.innerGroup = innerGroup;
+	this.parent = parent;
 	this.layerG = layer;
-	this.visible=false;
+	this.visible = false;
 	this.buildBubble();
 }
 BubbleOverlay.prototype = Object.create(Overlay.prototype);
 BubbleOverlay.prototype.constructor = BubbleOverlay;
-BubbleOverlay.setGraphics=function(){
-	BubbleOverlay.triangleW=15;
-	BubbleOverlay.triangleH=7;
-	BubbleOverlay.minW=25;
-	BubbleOverlay.overlap=1;
+
+BubbleOverlay.setGraphics = function() {
+	BubbleOverlay.triangleW = 15;
+	BubbleOverlay.triangleH = 7;
+	BubbleOverlay.minW = 25;
+	BubbleOverlay.overlap = 1;
 };
-BubbleOverlay.prototype.buildBubble=function(){
+
+/**
+ * Creates the groups and graphics for the bubble
+ */
+BubbleOverlay.prototype.buildBubble = function() {
 	this.buildGroups();
 	this.makeBg();
 };
-BubbleOverlay.prototype.buildGroups=function(){
-	this.group=GuiElements.create.group(0,0);
+
+/**
+ * Creates a group for the bubble, a group for the background, and places the innerGroup in the bubble's group
+ */
+BubbleOverlay.prototype.buildGroups = function() {
+	this.group = GuiElements.create.group(0, 0);
 	TouchReceiver.addListenersOverlayPart(this.group);
-	this.bgGroup=GuiElements.create.group(0,0,this.group);
+	this.bgGroup = GuiElements.create.group(0, 0, this.group);
 	this.group.appendChild(this.innerGroup);
-	GuiElements.move.group(this.innerGroup,this.margin,this.margin);
+	GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 };
-BubbleOverlay.prototype.makeBg=function(){
-	this.bgRect=GuiElements.create.rect(this.bgGroup);
-	GuiElements.update.color(this.bgRect,this.bgColor);
-	this.triangle=GuiElements.create.path(this.bgGroup);
-	GuiElements.update.color(this.triangle,this.bgColor);
+
+/**
+ * Makes a rectangle and triangle for the background.  Position is not important yet.
+ */
+BubbleOverlay.prototype.makeBg = function() {
+	this.bgRect = GuiElements.create.rect(this.bgGroup);
+	GuiElements.update.color(this.bgRect, this.bgColor);
+	this.triangle = GuiElements.create.path(this.bgGroup);
+	GuiElements.update.color(this.triangle, this.bgColor);
 };
-BubbleOverlay.prototype.show=function(){
-	if(!this.visible) {
+
+/**
+ * Makes the bubble visible, assuming it was already displayed.
+ */
+BubbleOverlay.prototype.show = function() {
+	if (!this.visible) {
 		this.layerG.appendChild(this.group);
-		this.visible=true;
+		this.visible = true;
 		this.addOverlayAndCloseOthers();
 	}
 };
-BubbleOverlay.prototype.hide=function(){
-	if(this.visible) {
+
+/**
+ * Makes the bubble invisible.
+ */
+BubbleOverlay.prototype.hide = function() {
+	if (this.visible) {
 		this.group.remove();
-		this.visible=false;
+		this.visible = false;
 		Overlay.removeOverlay(this);
 	}
 };
-BubbleOverlay.prototype.close=function(){
+
+/**
+ * Closes the bubble and tells its parent to close
+ */
+BubbleOverlay.prototype.close = function() {
 	this.hide();
 	this.parent.close();
 };
-BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
-	DebugOptions.validateNumbers(x1,x2,y1,y2,innerWidth,innerHeight);
-	var BO=BubbleOverlay;
+
+/**
+ * Builds the bubble and makes it visible with its point on the boundry of the specified rectangle
+ * @param {number} x1 - x coord of top left point of rectangle
+ * @param {number} x2 - x coord of bottom right point of rectangle
+ * @param {number} y1 - y coord of top left point of rectangle
+ * @param {number} y2 - y coord of bottom right point of rectangle
+ * @param {number} innerWidth - The width of the content of the bubble
+ * @param {number} innerHeight - The height of the content of the bubble
+ */
+BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeight) {
+	DebugOptions.validateNumbers(x1, x2, y1, y2, innerWidth, innerHeight);
+	const BO = BubbleOverlay;
+
 	/* Compute dimensions of the bubble */
-	var width=innerWidth+2*this.margin;
-	if(width<BO.minW){
-		width=BO.minW;
+	let width = innerWidth + 2 * this.margin;
+	if (width < BO.minW) {
+		width = BO.minW;
 	}
-	var height=innerHeight+2*this.margin;
+	const height = innerHeight + 2 * this.margin;
+
 	/* Center the content in the bubble */
-	GuiElements.move.group(this.innerGroup,(width-innerWidth)/2,(height-innerHeight)/2);
+	GuiElements.move.group(this.innerGroup, (width - innerWidth) / 2, (height - innerHeight) / 2);
 
 	/* Compute dimension depending on orientation */
-	var longW = width + BO.triangleH;
-	var longH = height + BO.triangleH;
+	const longW = width + BO.triangleH;
+	const longH = height + BO.triangleH;
 
-	var attemptB = Math.max(0, y2 + longH - GuiElements.height);
-	var attemptT = Math.max(0, longH - y1);
-	var attemptR = Math.max(0, x2 + longW - GuiElements.width);
-	var attemptL = Math.max(0, longW - x1);
-	var min = Math.min(attemptT, attemptB, attemptL, attemptR);
-	var vertical = attemptT <= min || attemptB <= min;
+	/* Determine how much content is cut off if the bubble goes in each direction */
+	const attemptB = Math.max(0, y2 + longH - GuiElements.height);
+	const attemptT = Math.max(0, longH - y1);
+	const attemptR = Math.max(0, x2 + longW - GuiElements.width);
+	const attemptL = Math.max(0, longW - x1);
 
-	var topLeftX = NaN;
-	var topLeftY = NaN;
-	var x = NaN;
-	var y = NaN;
-	var triangleDir = 1;
-	if(vertical){
+	/* Find the amount of content cut off using the best attempt */
+	const min = Math.min(attemptT, attemptB, attemptL, attemptR);
+
+	/* The vertical direction is used if the top or bottom attempts were the best */
+	const vertical = attemptT <= min || attemptB <= min;
+
+	/* To be determined */
+	let topLeftX = NaN;   // The x coord of the background rect
+	let topLeftY = NaN;   // The y coord of the background rect
+	let x = NaN;   // The x coord of the point of the triangle
+	let y = NaN;   // The y coord of the point of the triangle
+	let triangleDir = 1;   // 1 or -1
+	if (vertical) {
 		x = (x1 + x2) / 2;
+		// Find the best x for the background rect
 		topLeftX = this.fitLocationToRange(x, width, GuiElements.width);
-		if(attemptB <= min){
+		if (attemptB <= min) {
 			topLeftY = y2 + BO.triangleH;
 			y = y2;
-		}
-		else{
+		} else {
 			topLeftY = y1 - longH;
 			y = y1;
 			triangleDir = -1;
 		}
-	}
-	else{
+	} else {
 		y = (y1 + y2) / 2;
+		// Find the best y for the background rect
 		topLeftY = this.fitLocationToRange(y, height, GuiElements.height);
-		if(attemptL <= min){
+		if (attemptL <= min) {
 			topLeftX = x1 - longW;
 			x = x1;
 			triangleDir = -1;
-		}
-		else{
+		} else {
 			topLeftX = x2 + BO.triangleH;
 			x = x2;
 		}
 	}
-	var triX = x - topLeftX;
-	var triY = y - topLeftY;
-	var triH = (BO.triangleH+BO.overlap)*triangleDir;
+
+	// Convert the triangle's coords from abs to rel coords
+	const triX = x - topLeftX;
+	const triY = y - topLeftY;
+	const triH = (BO.triangleH + BO.overlap) * triangleDir;
 	this.x = topLeftX;
 	this.y = topLeftY;
-	GuiElements.move.group(this.group,topLeftX,topLeftY);
-	GuiElements.update.triangleFromPoint(this.triangle,triX,triY,BO.triangleW,triH, vertical);
-	GuiElements.update.rect(this.bgRect,0,0,width,height);
+	GuiElements.move.group(this.group, topLeftX, topLeftY);
+
+	// Move the elements using the results
+	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, vertical);
+	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 };
-BubbleOverlay.prototype.fitLocationToRange = function(center, width, range){
-	var res = center - width / 2;
-	if(width > range){
+
+/**
+ * Finds the best x coord for an object the specified width that would like to be centered at the specified center
+ * but needs to fit in the specified range
+ * By symmetry, also works for y coords with height
+ * @param {number} center - The x coord the object would like to be centered at
+ * @param {number} width - The width of the object
+ * @param {number} range - The width of the space the object needs to fit within
+ * @return {number} - The x coord the object should have
+ */
+BubbleOverlay.prototype.fitLocationToRange = function(center, width, range) {
+	let res = center - width / 2;   // The object would like this x coord
+	if (width > range) {
+		// The object is bigger than the range, so we make it extend beyond both sides equally
+		// result:   --[----]--
 		res = (range - width) / 2;
-	}
-	else if(res < 0){
+	} else if (res < 0) {
+		// The object would like to be to the left of the range, so we align it to the left
+		// object wants:   --[--      ]
+		// result:    [----    ]
 		res = 0;
-	}
-	else if(res + width > range){
+	} else if (res + width > range) {
+		// The object would like to be to the right of the range, so we align it to the right
+		// object wants:   [      --]--
+		// result:    [    ----]
 		res = range - width;
 	}
 	return res;
 };
-BubbleOverlay.prototype.getVPadding=function() {
-	return this.margin*2+BubbleOverlay.triangleH;
-};
-BubbleOverlay.prototype.relToAbsX = function(x){
+
+/* Convert between rel and abs coords */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+BubbleOverlay.prototype.relToAbsX = function(x) {
 	return x + this.x + this.margin;
 };
-BubbleOverlay.prototype.relToAbsY = function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
 function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
@@ -8901,7 +9009,7 @@ function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
 	group.appendChild(textE);
 	let layer = GuiElements.layers.resultBubble;
 	let overlayType = Overlay.types.resultBubble;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
+	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,layer);
 	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
 	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
 }
@@ -9207,7 +9315,7 @@ SmoothMenuBnList.prototype.setMaxHeight = function(maxHeight) {
  * Adds an option to the SmoothMenuBnList
  * @param {string} text - The text to display on the Button.  Not used if addTextFn is defined
  * @param {function|null} func - type () -> (), the function to call when the option is selected
- * @param {function|null} addTextFn - type (Button) -> (), formats the button for this option
+ * @param {function|null} [addTextFn] - type (Button) -> (), formats the button for this option
  */
 SmoothMenuBnList.prototype.addOption = function(text, func, addTextFn) {
 	if (func == null) {
@@ -9980,93 +10088,114 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
 		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
 	}
 };
-function BlockContextMenu(block,x,y){
-	this.block=block;
-	this.x=x;
-	this.y=y;
+/**
+ * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
+ * Also used to give a rename option to variables and lists
+ *
+ * @param {Block} block
+ * @param {number} x - The x coord the menu should appear at
+ * @param {number} y - The y coord the menu should appear at
+ * @constructor
+ */
+function BlockContextMenu(block, x, y) {
+	this.block = block;
+	this.x = x;
+	this.y = y;
 	this.showMenu();
 }
-BlockContextMenu.setGraphics=function(){
-	var BCM=BlockContextMenu;
-	BCM.bnMargin=Button.defaultMargin;
-	BCM.bgColor=Colors.black;
-	BCM.blockShift=20;
+
+BlockContextMenu.setGraphics = function() {
+	const BCM = BlockContextMenu;
+	BCM.bnMargin = Button.defaultMargin;
+	BCM.bgColor = Colors.black;
+	BCM.blockShift = 20;
 };
-BlockContextMenu.prototype.showMenu=function(){
-	var BCM=BlockContextMenu;
-	this.group=GuiElements.create.group(0,0);
+
+/**
+ * Renders the menu
+ */
+BlockContextMenu.prototype.showMenu = function() {
+	const BCM = BlockContextMenu;
+	this.group = GuiElements.create.group(0, 0);
 
 	let layer = GuiElements.layers.inputPad;
 	let overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, BCM.bgColor, BCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	const height = this.menuBnList.previewHeight();
 	const width = this.menuBnList.previewWidth();
-	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,height);
+	this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
 	this.menuBnList.show();
 };
-BlockContextMenu.prototype.addOptions=function(){
-	if(this.block.stack.isDisplayStack){
-		if(this.block.blockTypeName=="B_Variable"){
-			var funcRen=function(){
-				funcRen.block.renameVar();
-				funcRen.BCM.close();
-			};
-			funcRen.block=this.block;
-			funcRen.BCM=this;
-			this.menuBnList.addOption("Rename", funcRen);
-			var funcDel=function(){
-				funcDel.block.deleteVar();
-				funcDel.BCM.close();
-			};
-			funcDel.block=this.block;
-			funcDel.BCM=this;
-			this.menuBnList.addOption("Delete", funcDel);
+
+/**
+ * Adds options to the menu based on the stack the menu is for.
+ */
+BlockContextMenu.prototype.addOptions = function() {
+	// TODO: This information should probably be passed in by the constructor, not figured out by the ContextMenu
+	if (this.block.stack.isDisplayStack) {
+		if (this.block.constructor === B_Variable) {
+
+			this.menuBnList.addOption("Rename", function() {
+				this.block.renameVar();
+				this.close();
+			}.bind(this));
+
+			this.menuBnList.addOption("Delete", function() {
+				this.block.deleteVar();
+				this.close();
+			}.bind(this));
+
 		}
-		if(this.block.blockTypeName=="B_List"){
-			var funcRen=function(){
-				funcRen.block.renameLi();
-				funcRen.BCM.close();
-			};
-			funcRen.block=this.block;
-			funcRen.BCM=this;
-			this.menuBnList.addOption("Rename", funcRen);
-			var funcDel=function(){
-				funcDel.block.deleteLi();
-				funcDel.BCM.close();
-			};
-			funcDel.block=this.block;
-			funcDel.BCM=this;
-			this.menuBnList.addOption("Delete", funcDel);
+		if (this.block.constructor === B_List) {
+
+			this.menuBnList.addOption("Rename", function() {
+				this.block.renameLi();
+				this.close();
+			}.bind(this));
+
+			this.menuBnList.addOption("Delete", function() {
+				this.block.deleteLi();
+				this.close();
+			}.bind(this));
+
 		}
-	}
-	else {
-		var BCM = this;
-		var funcDup = function () {
-			funcDup.BCM.duplicate();
-		};
-		funcDup.BCM = this;
-		this.menuBnList.addOption("Duplicate", funcDup);
-		this.menuBnList.addOption("Delete",function(){
-			BCM.block.unsnap().remove();
-			BCM.close();
-		})
+	} else {
+
+		this.menuBnList.addOption("Duplicate", function() {
+			this.duplicate();
+		}.bind(this));
+
+		this.menuBnList.addOption("Delete", function() {
+			// Delete the stack and add it to the UndoManager
+			UndoManager.deleteStack(this.block.unsnap());
+			this.close();
+		}.bind(this));
+
 	}
 };
-BlockContextMenu.prototype.duplicate=function(){
-	var BCM=BlockContextMenu;
-	var newX=this.block.getAbsX()+BCM.blockShift;
-	var newY=this.block.getAbsY()+BCM.blockShift;
-	var blockCopy=this.block.duplicate(newX,newY);
-	var tab=this.block.stack.tab;
-	var copyStack=new BlockStack(blockCopy,tab);
+
+/**
+ * Duplicates this menu's Block and all blocks below it.
+ */
+BlockContextMenu.prototype.duplicate = function() {
+	const BCM = BlockContextMenu;
+	const newX = this.block.getAbsX() + BCM.blockShift;
+	const newY = this.block.getAbsY() + BCM.blockShift;
+	const blockCopy = this.block.duplicate(newX, newY);
+	const tab = this.block.stack.tab;
+	const copyStack = new BlockStack(blockCopy, tab);
 	//copyStack.updateDim();
 	this.close();
 };
-BlockContextMenu.prototype.close=function(){
-	this.block=null;
+
+/**
+ * Closes the menu
+ */
+BlockContextMenu.prototype.close = function() {
+	this.block = null;
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide();
 };
@@ -13824,7 +13953,7 @@ RobotConnectionList.prototype.showWithList = function(list){
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
 	let overlayType = Overlay.types.connectionList;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,layer);
 	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
@@ -14050,7 +14179,7 @@ FileContextMenu.prototype.showMenu = function() {
 	const layer = GuiElements.layers.overlayOverlay;
 	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
 	const overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, null, layer);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();

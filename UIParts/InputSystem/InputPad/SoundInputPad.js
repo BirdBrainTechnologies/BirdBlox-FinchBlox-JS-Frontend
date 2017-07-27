@@ -51,7 +51,7 @@ SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const bubbleGroup = GuiElements.create.group(0, 0);
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, SIP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, layer);
 	const coords = this.coords;
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 
