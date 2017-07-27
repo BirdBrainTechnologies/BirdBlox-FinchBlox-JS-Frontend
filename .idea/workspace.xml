@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Flutter.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DialogManager.js" afterPath="$PROJECT_DIR$/DialogManager.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GuiElements.js" afterPath="$PROJECT_DIR$/GuiElements.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,12 +22,55 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="DialogManager.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/DialogManager.js">
+      <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="172" column="35" lean-forward="false" selection-start-line="172" selection-start-column="35" selection-end-line="172" selection-end-column="35" />
-              <folding />
+            <state relative-caret-position="378">
+              <caret line="157" column="0" lean-forward="false" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
+                <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+                <element signature="e#158#304#0" expanded="false" />
+                <element signature="e#347#407#0" expanded="false" />
+                <element signature="e#410#552#0" expanded="false" />
+                <element signature="e#595#1381#0" expanded="false" />
+                <element signature="e#598#679#0" expanded="false" />
+                <element signature="e#717#1001#0" expanded="false" />
+                <element signature="e#1007#1339#0" expanded="false" />
+                <element signature="e#1384#1927#0" expanded="false" />
+                <element signature="e#2026#3831#0" expanded="false" />
+                <element signature="e#2163#2265#0" expanded="false" />
+                <element signature="e#2310#2852#0" expanded="false" />
+                <element signature="e#2419#2833#0" expanded="false" />
+                <element signature="e#2435#2557#0" expanded="false" />
+                <element signature="e#2506#2552#0" expanded="false" />
+                <element signature="e#2563#2829#0" expanded="false" />
+                <element signature="e#2618#2824#0" expanded="false" />
+                <element signature="e#2874#2896#0" expanded="false" />
+                <element signature="e#2936#2964#0" expanded="false" />
+                <element signature="e#2970#3734#0" expanded="false" />
+                <element signature="e#3050#3514#0" expanded="false" />
+                <element signature="e#3083#3510#0" expanded="false" />
+                <element signature="e#3137#3220#0" expanded="false" />
+                <element signature="e#3168#3214#0" expanded="false" />
+                <element signature="e#3226#3505#0" expanded="false" />
+                <element signature="e#3258#3499#0" expanded="false" />
+                <element signature="e#3300#3439#0" expanded="false" />
+                <element signature="e#3601#3703#0" expanded="false" />
+                <element signature="e#3709#3731#0" expanded="false" />
+                <element signature="e#3747#3829#0" expanded="false" />
+                <element signature="e#3776#3826#0" expanded="false" />
+                <element signature="e#3834#4050#0" expanded="false" />
+                <element signature="e#4109#4603#0" expanded="false" />
+                <element signature="e#4139#4544#0" expanded="false" />
+                <element signature="e#4212#4287#0" expanded="false" />
+                <element signature="e#4334#4468#0" expanded="false" />
+                <element signature="e#4550#4601#0" expanded="false" />
+                <element signature="e#4606#4765#0" expanded="false" />
+                <element signature="e#4814#4880#0" expanded="false" />
+                <element signature="e#4883#4952#0" expanded="false" />
+                <element signature="e#5004#5063#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -44,10 +86,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>midX</find>
-      <find>markAsOverlayPart</find>
-      <find>visuallySelectTab</find>
-      <find>new BubbleOverlay</find>
       <find>hMargin</find>
       <find>addOverlay</find>
       <find>foregroundInverts</find>
@@ -74,6 +112,10 @@
       <find>repeatHBOutDelay</find>
       <find>markLoading</find>
       <find>Flutter</find>
+      <find>getHBRequest</find>
+      <find>getUrlForRequest</find>
+      <find>getFileName</find>
+      <find>HtmlServer.getSetting</find>
     </findStrings>
     <replaceStrings>
       <replace>optionsList</replace>
@@ -136,7 +178,6 @@
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RowDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/FileContextMenu.js" />
-        <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/DeviceMenu.js" />
         <option value="$PROJECT_DIR$/Device/DeviceManager.js" />
         <option value="$PROJECT_DIR$/Device/Device.js" />
@@ -163,11 +204,12 @@
         <option value="$PROJECT_DIR$/appendCommitPush.sh" />
         <option value="$PROJECT_DIR$/appender.py" />
         <option value="$PROJECT_DIR$/UIParts/TitleBar.js" />
-        <option value="$PROJECT_DIR$/GuiElements.js" />
         <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/CodeManager.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/DialogManager.js" />
+        <option value="$PROJECT_DIR$/GuiElements.js" />
+        <option value="$PROJECT_DIR$/HtmlServer.js" />
       </list>
     </option>
   </component>
@@ -509,7 +551,7 @@
       <workItem from="1501024094533" duration="811000" />
       <workItem from="1501032948714" duration="5657000" />
       <workItem from="1501075885204" duration="19981000" />
-      <workItem from="1501162122394" duration="19929000" />
+      <workItem from="1501162122394" duration="21237000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -606,7 +648,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1544938000" />
+    <option name="totallyTimeSpent" value="1546246000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1476,14 +1518,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Setting.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-89">
@@ -1630,14 +1664,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="84">
           <caret line="4" column="3" lean-forward="true" selection-start-line="4" selection-start-column="3" selection-end-line="4" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GuiElements.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1907">
-          <caret line="795" column="2" lean-forward="true" selection-start-line="795" selection-start-column="2" selection-end-line="795" selection-end-column="2" />
           <folding />
         </state>
       </provider>
@@ -1997,8 +2023,69 @@
     <entry file="file://$PROJECT_DIR$/DialogManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="394">
-          <caret line="172" column="35" lean-forward="false" selection-start-line="172" selection-start-column="35" selection-end-line="172" selection-end-column="35" />
+          <caret line="172" column="53" lean-forward="false" selection-start-line="172" selection-start-column="53" selection-end-line="172" selection-end-column="53" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GuiElements.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="254">
+          <caret line="82" column="17" lean-forward="false" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
+          <folding>
+            <element signature="e#1327#2575#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="157" column="0" lean-forward="false" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
+            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+            <element signature="e#158#304#0" expanded="false" />
+            <element signature="e#347#407#0" expanded="false" />
+            <element signature="e#410#552#0" expanded="false" />
+            <element signature="e#595#1381#0" expanded="false" />
+            <element signature="e#598#679#0" expanded="false" />
+            <element signature="e#717#1001#0" expanded="false" />
+            <element signature="e#1007#1339#0" expanded="false" />
+            <element signature="e#1384#1927#0" expanded="false" />
+            <element signature="e#2026#3831#0" expanded="false" />
+            <element signature="e#2163#2265#0" expanded="false" />
+            <element signature="e#2310#2852#0" expanded="false" />
+            <element signature="e#2419#2833#0" expanded="false" />
+            <element signature="e#2435#2557#0" expanded="false" />
+            <element signature="e#2506#2552#0" expanded="false" />
+            <element signature="e#2563#2829#0" expanded="false" />
+            <element signature="e#2618#2824#0" expanded="false" />
+            <element signature="e#2874#2896#0" expanded="false" />
+            <element signature="e#2936#2964#0" expanded="false" />
+            <element signature="e#2970#3734#0" expanded="false" />
+            <element signature="e#3050#3514#0" expanded="false" />
+            <element signature="e#3083#3510#0" expanded="false" />
+            <element signature="e#3137#3220#0" expanded="false" />
+            <element signature="e#3168#3214#0" expanded="false" />
+            <element signature="e#3226#3505#0" expanded="false" />
+            <element signature="e#3258#3499#0" expanded="false" />
+            <element signature="e#3300#3439#0" expanded="false" />
+            <element signature="e#3601#3703#0" expanded="false" />
+            <element signature="e#3709#3731#0" expanded="false" />
+            <element signature="e#3747#3829#0" expanded="false" />
+            <element signature="e#3776#3826#0" expanded="false" />
+            <element signature="e#3834#4050#0" expanded="false" />
+            <element signature="e#4109#4603#0" expanded="false" />
+            <element signature="e#4139#4544#0" expanded="false" />
+            <element signature="e#4212#4287#0" expanded="false" />
+            <element signature="e#4334#4468#0" expanded="false" />
+            <element signature="e#4550#4601#0" expanded="false" />
+            <element signature="e#4606#4765#0" expanded="false" />
+            <element signature="e#4814#4880#0" expanded="false" />
+            <element signature="e#4883#4952#0" expanded="false" />
+            <element signature="e#5004#5063#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

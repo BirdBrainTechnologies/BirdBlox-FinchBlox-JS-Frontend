@@ -2174,32 +2174,40 @@ TabletSensors.clear = function(){
 /* GuiElements is a static class that builds the UI and initializes the other classes.
  * It contains functions to create and modify elements of the main SVG.
  * GuiElements is run once the browser has loaded all the js and html files.
+ * It's one of the less organized classes and has quite a lot of functions in it.
  */
-function GuiElements(){
-	debug.innerHTML = "";
-	let svg2=document.getElementById("frontSvg");
-	let svg1=document.getElementById("middleSvg");
-	let svg0=document.getElementById("backSvg");
+function GuiElements() {
+	// Clear the debug span
+	document.getElementById("debug").innerHTML = "";
+	// Find parts of the html and store them
+	let svg2 = document.getElementById("frontSvg");
+	let svg1 = document.getElementById("middleSvg");
+	let svg0 = document.getElementById("backSvg");
 	GuiElements.svgs = [svg0, svg1, svg2];
-
-	GuiElements.defs=document.getElementById("SvgDefs");
-	GuiElements.loadInitialSettings(function(){
+	GuiElements.defs = document.getElementById("SvgDefs");
+	// Load settings from backend
+	GuiElements.loadInitialSettings(function() {
 		GuiElements.setConstants();
 		GuiElements.createLayers();
-		GuiElements.dialogBlock=null;
+		GuiElements.dialogBlock = null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
 	});
 }
+
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
 	GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+
+/* Redraws UI if screen dimensions change */
 window.onresize = function() {
 	GuiElements.updateZoom();
 };
-GuiElements.loadInitialSettings=function(callback){
+
+
+GuiElements.loadInitialSettings = function(callback) {
 	DebugOptions();
 	Data.setConstants();
 	HtmlServer();
@@ -2211,48 +2219,42 @@ GuiElements.loadInitialSettings=function(callback){
 	GuiElements.load.os = false;
 	GuiElements.load.lastFileName = true;
 	GuiElements.load.lastFileNamed = true;
-	if(!DebugOptions.shouldSkipInitSettings()) {
+	if (!DebugOptions.shouldSkipInitSettings()) {
 		var count = 0;
-		var checkIfDone = function () {
+		var checkIfDone = function() {
 			count++;
-			GuiElements.alert(""+GuiElements.load.version + GuiElements.load.zoom + GuiElements.load.os + GuiElements.load.lastFileName + GuiElements.load.lastFileNamed);
+			GuiElements.alert("" + GuiElements.load.version + GuiElements.load.zoom + GuiElements.load.os + GuiElements.load.lastFileName + GuiElements.load.lastFileNamed);
 			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
 				callback();
 			}
 		};
-		GuiElements.getAppVersion(function () {
+		GuiElements.getAppVersion(function() {
 			GuiElements.load.version = true;
 			checkIfDone();
 		});
-		GuiElements.configureZoom(function () {
-			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+		GuiElements.configureZoom(function() {
+			GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+			GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 			GuiElements.load.zoom = true;
 			GuiElements.checkSmallMode();
 			checkIfDone();
 		});
-		GuiElements.getOsVersion(function(){
+		GuiElements.getOsVersion(function() {
 			GuiElements.load.os = true;
 			checkIfDone();
 		});
-		/*SaveManager.getCurrentDocName(function(){
-			GuiElements.load.lastFileName = true;
-			checkIfDone();
-		}, function(){
-			GuiElements.load.lastFileNamed = true;
-			checkIfDone();
-		});*/
-	}
-	else{
+	} else {
 		callback();
 	}
 };
-GuiElements.setGuiConstants=function(){
-	GuiElements.minZoom=0.25;
-	GuiElements.maxZoom=4;
-	GuiElements.minZoomMult=0.5;
-	GuiElements.maxZoomMult=2;
-	GuiElements.zoomAmount=0.1;
+
+/** Sets constants relating to screen dimensions and the Operating System */
+GuiElements.setGuiConstants = function() {
+	GuiElements.minZoom = 0.25;
+	GuiElements.maxZoom = 4;
+	GuiElements.minZoomMult = 0.5;
+	GuiElements.maxZoomMult = 2;
+	GuiElements.zoomAmount = 0.1;
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
 	GuiElements.defaultZoomMultiple = 1;
@@ -2262,10 +2264,10 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+	GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 
-	GuiElements.blockerOpacity=0.5;
+	GuiElements.blockerOpacity = 0.5;
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
@@ -2277,7 +2279,7 @@ GuiElements.setGuiConstants=function(){
 /* Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
  * Some classes rely on constants from eachother, so the order they execute in is important. */
-GuiElements.setConstants=function(){
+GuiElements.setConstants = function() {
 	/* If a class is static and does not build a part of the UI,
 	then its main function is used to initialize its constants. */
 	VectorPaths();
@@ -2339,11 +2341,11 @@ GuiElements.setConstants=function(){
 	UndoManager();
 };
 /* Debugging function which displays information on screen */
-GuiElements.alert=function(message){
-	if(!DebugOptions.shouldAllowLogging()) return;
+GuiElements.alert = function(message) {
+	if (!DebugOptions.shouldAllowLogging()) return;
 	let result = message;
-	if(DeviceHummingbird.getManager().renewDiscoverFn) {
-		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn()? "true":"false");
+	if (DeviceHummingbird.getManager().renewDiscoverFn) {
+		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn() ? "true" : "false");
 	} else {
 		result += " None";
 	}
@@ -2352,12 +2354,12 @@ GuiElements.alert=function(message){
 /* Alerts the user that an error has occurred. Should never be called.
  * @param {string} errMessage - The error's message passed by the function that threw the error.
  */
-GuiElements.throwError=function(errMessage){
+GuiElements.throwError = function(errMessage) {
 	GuiElements.alert(errMessage); //Show the error in the debug area.
 }
 /* Once each class has its constants set, the UI can be built. UI-related classes are called. */
-GuiElements.buildUI=function(){
-	document.body.style.backgroundColor=Colors.black; //Sets the background color of the webpage
+GuiElements.buildUI = function() {
+	document.body.style.backgroundColor = Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
@@ -2367,7 +2369,7 @@ GuiElements.buildUI=function(){
 
 	TabManager(); //Creates the tab-switching interface below the title bar
 	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
-	/* Builds the SVG path element for the highlighter, 
+	/* Builds the SVG path element for the highlighter,
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
@@ -2376,76 +2378,76 @@ GuiElements.buildUI=function(){
 /* Makes an SVG group element (<g>) for each layer of the interface.
  * Layers are accessible in the form GuiElements.layers.[layerName]
  */
-GuiElements.createLayers=function(){
-	var create=GuiElements.create;//shorthand
+GuiElements.createLayers = function() {
+	var create = GuiElements.create; //shorthand
 	GuiElements.zoomGroups = [];
-	GuiElements.svgs.forEach(function(svg){
-		let zoomGroup = create.group(0,0,svg);
+	GuiElements.svgs.forEach(function(svg) {
+		let zoomGroup = create.group(0, 0, svg);
 		GuiElements.zoomGroups.push(zoomGroup);
-		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+		GuiElements.update.zoom(zoomGroup, GuiElements.zoomFactor);
 	});
 
-	GuiElements.layers={};
+	GuiElements.layers = {};
 	let i = 0;
-	var layers=GuiElements.layers;
-	layers.temp=create.layer(i);
-	layers.aTabBg=create.layer(i);
-	layers.activeTab=create.layer(i);
-	layers.TabsBg=create.layer(i);
-	layers.paletteBG=create.layer(i);
+	var layers = GuiElements.layers;
+	layers.temp = create.layer(i);
+	layers.aTabBg = create.layer(i);
+	layers.activeTab = create.layer(i);
+	layers.TabsBg = create.layer(i);
+	layers.paletteBG = create.layer(i);
 	layers.paletteScroll = document.getElementById("paletteScrollDiv");
 	i++;
-	layers.trash=create.layer(i);
-	layers.catBg=create.layer(i);
-	layers.categories=create.layer(i);
-	layers.titleBg=create.layer(i);
-	layers.titlebar=create.layer(i);
+	layers.trash = create.layer(i);
+	layers.catBg = create.layer(i);
+	layers.categories = create.layer(i);
+	layers.titleBg = create.layer(i);
+	layers.titlebar = create.layer(i);
 	layers.overflowArr = create.layer(i);
-	layers.stage=create.layer(i);
-	layers.display=create.layer(i);
-	layers.drag=create.layer(i);
-	layers.highlight=create.layer(i);
-	layers.resultBubble=create.layer(i);
-	layers.inputPad=create.layer(i);
-	layers.tabMenu=create.layer(i);
-	layers.dialogBlock=create.layer(i);
-	layers.dialog=create.layer(i);
-	layers.overlay=create.layer(i);
+	layers.stage = create.layer(i);
+	layers.display = create.layer(i);
+	layers.drag = create.layer(i);
+	layers.highlight = create.layer(i);
+	layers.resultBubble = create.layer(i);
+	layers.inputPad = create.layer(i);
+	layers.tabMenu = create.layer(i);
+	layers.dialogBlock = create.layer(i);
+	layers.dialog = create.layer(i);
+	layers.overlay = create.layer(i);
 	layers.frontScroll = document.getElementById("frontScrollDiv");
 	i++;
-	layers.overlayOverlay=create.layer(i);
+	layers.overlayOverlay = create.layer(i);
 	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
  * It may also be added to a group if included.
  */
-GuiElements.create=function(){};
+GuiElements.create = function() {};
 /* Makes a group, adds it to a parent group (if present), and returns it.
  * @param {number} x - The x offset of the group.
  * @param {number} y - The y offset of the group.
  * @param {SVG g} title - (optional) The parent group to add the group to.
  * @return {SVG g} - The group which was created.
  */
-GuiElements.create.group=function(x,y,parent){
+GuiElements.create.group = function(x, y, parent) {
 	DebugOptions.validateOptionalNums(x, y);
-	var group=document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
-	group.setAttributeNS(null,"transform","translate("+x+","+y+")"); //Move the group to (x,y).
-	if(parent!=null){ //If provided, add it to the parent.
+	var group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+	group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")"); //Move the group to (x,y).
+	if (parent != null) { //If provided, add it to the parent.
 		parent.appendChild(group);
 	}
 	return group; //Return the group.
 }
 /* Creates a group, adds it to the main SVG, and returns it. */
-GuiElements.create.layer=function(depth){
+GuiElements.create.layer = function(depth) {
 	DebugOptions.validateNumbers(depth);
-	let layerG = GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let layerG = GuiElements.create.group(0, 0, GuiElements.zoomGroups[depth]);
 	let showHideLayer = GuiElements.create.group(0, 0, layerG);
 	let layer = {};
 	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
 	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
 	layer.hide = showHideLayer.remove.bind(showHideLayer);
-	layer.show = function(){
+	layer.show = function() {
 		layerG.appendChild(showHideLayer);
 	};
 	return layer;
@@ -2455,31 +2457,31 @@ GuiElements.create.layer=function(depth){
  * @param {string} color1 - color in form "#fff" of the top of the gradient.
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  */
-GuiElements.create.gradient=function(id,color1,color2){ //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
 	DebugOptions.validateNonNull(color1, color2);
-	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
-	gradient.setAttributeNS(null,"id",id); //Set attributes.
-	gradient.setAttributeNS(null,"x1","0%");
-	gradient.setAttributeNS(null,"x2","0%");
-	gradient.setAttributeNS(null,"y1","0%");
-	gradient.setAttributeNS(null,"y2","100%");
+	var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	gradient.setAttributeNS(null, "id", id); //Set attributes.
+	gradient.setAttributeNS(null, "x1", "0%");
+	gradient.setAttributeNS(null, "x2", "0%");
+	gradient.setAttributeNS(null, "y1", "0%");
+	gradient.setAttributeNS(null, "y2", "100%");
 	GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
-	var stop1=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
-	stop1.setAttributeNS(null,"offset","0%");
-	stop1.setAttributeNS(null,"style","stop-color:"+color1+";stop-opacity:1");
+	var stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
+	stop1.setAttributeNS(null, "offset", "0%");
+	stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
 	gradient.appendChild(stop1);
-	var stop2=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
-	stop2.setAttributeNS(null,"offset","100%");
-	stop2.setAttributeNS(null,"style","stop-color:"+color2+";stop-opacity:1");
+	var stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
+	stop2.setAttributeNS(null, "offset", "100%");
+	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
 }
 /* Creates an SVG path element and returns it.
  * @param {SVG g} title - (optional) The parent group to add the group to.
  * @return {SVG path} - The path which was created.
  */
-GuiElements.create.path=function(group){
-	var path=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	if(group!=null){ //Add it to the parent group if present.
+GuiElements.create.path = function(group) {
+	var path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(path);
 	}
 	return path; //Return the path.
@@ -2487,33 +2489,33 @@ GuiElements.create.path=function(group){
 /* Creates an SVG text element and returns it.
  * @return {SVG text} - The text which was created.
  */
-GuiElements.create.text=function(){
-	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+GuiElements.create.text = function() {
+	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 	return textElement; //Return the text.
 };
-GuiElements.create.image=function(){
-	var imageElement=document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
+GuiElements.create.image = function() {
+	var imageElement = document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
 	return imageElement; //Return the text.
 };
-GuiElements.create.foreignObject = function(group){
+GuiElements.create.foreignObject = function(group) {
 	var obj = document.createElementNS("http://www.w3.org/2000/svg", 'foreignObject');
-	if(group != null){
+	if (group != null) {
 		group.appendChild(obj);
 	}
 	return obj;
 };
-GuiElements.create.svg = function(group){
+GuiElements.create.svg = function(group) {
 	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-	if(group != null){
+	if (group != null) {
 		group.appendChild(svg);
 	}
 	return svg;
 };
-GuiElements.create.scrollDiv = function(group){
+GuiElements.create.scrollDiv = function(group) {
 	var div = document.createElement("div");
 	div.style.position = "absolute";
-	if(group != null){
+	if (group != null) {
 		group.appendChild(div);
 	}
 	return div;
@@ -2522,18 +2524,18 @@ GuiElements.create.scrollDiv = function(group){
  * @param {SVG g} title - (optional) The parent group to add the group to.
  * @return {SVG rect} - The rect which was created.
  */
-GuiElements.create.rect=function(group){
-	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
-	if(group!=null){ //Add it to the parent group if present.
+GuiElements.create.rect = function(group) {
+	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(rect);
 	}
 	return rect; //Return the rect.
 }
 /* GuiElements.create contains functions that create SVG elements and assign thier attributes
- * so they are ready to be drawn on the screen. The element is then returned. 
+ * so they are ready to be drawn on the screen. The element is then returned.
  * It may also be added to a group if included.
  */
-GuiElements.draw=function(){};
+GuiElements.draw = function() {};
 /* Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
  * @param {number} x - The rect's x coord.
  * @param {number} y - The rect's y coord.
@@ -2542,14 +2544,14 @@ GuiElements.draw=function(){};
  * @param {string} color - (optional) The rect's fill color in the form "#fff".
  * @return {SVG rect} - The rect which was created.
  */
-GuiElements.draw.rect=function(x,y,width,height,color){
+GuiElements.draw.rect = function(x, y, width, height, color) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
-	rect.setAttributeNS(null,"x",x); //Set its attributes.
-	rect.setAttributeNS(null,"y",y);
-	rect.setAttributeNS(null,"width",width);
-	rect.setAttributeNS(null,"height",height);
-	if(color!=null) {
+	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	rect.setAttributeNS(null, "x", x); //Set its attributes.
+	rect.setAttributeNS(null, "y", y);
+	rect.setAttributeNS(null, "width", width);
+	rect.setAttributeNS(null, "height", height);
+	if (color != null) {
 		rect.setAttributeNS(null, "fill", color);
 	}
 	return rect; //Return the rect.
@@ -2562,20 +2564,20 @@ GuiElements.draw.rect=function(x,y,width,height,color){
  * @param {string} color - The path's fill color in the form "#fff".
  * @return {SVG path} - The path which was created.
  */
-GuiElements.draw.triangle=function(x,y,width,height,color){
+GuiElements.draw.triangle = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.triangle(triangle,x,y,width,height); //Set its path description (points).
-	triangle.setAttributeNS(null,"fill",color); //Set the fill.
+	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.triangle(triangle, x, y, width, height); //Set its path description (points).
+	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
-GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
+GuiElements.draw.triangleFromPoint = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.triangleFromPoint(triangle,x,y,width,height); //Set its path description (points).
-	triangle.setAttributeNS(null,"fill",color); //Set the fill.
+	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.triangleFromPoint(triangle, x, y, width, height); //Set its path description (points).
+	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
 /* Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
@@ -2587,38 +2589,38 @@ GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
  * @param {string} color - The path's fill color in the form "#fff".
  * @return {SVG path} - The path which was created.
  */
-GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
+GuiElements.draw.trapezoid = function(x, y, width, height, slantW, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var trapezoid=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description.
-	trapezoid.setAttributeNS(null,"fill",color); //Set the fill.
+	var trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.trapezoid(trapezoid, x, y, width, height, slantW); //Set its path description.
+	trapezoid.setAttributeNS(null, "fill", color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
 }
-GuiElements.draw.circle=function(cx,cy,radius,color,group){
+GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(cx, cy, radius);
-	var circle=document.createElementNS("http://www.w3.org/2000/svg",'circle');
-	circle.setAttributeNS(null,"cx",cx);
-	circle.setAttributeNS(null,"cy",cy);
-	circle.setAttributeNS(null,"r",radius);
-	circle.setAttributeNS(null,"fill",color);
-	if(group!=null){
+	var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+	circle.setAttributeNS(null, "cx", cx);
+	circle.setAttributeNS(null, "cy", cy);
+	circle.setAttributeNS(null, "r", radius);
+	circle.setAttributeNS(null, "fill", color);
+	if (group != null) {
 		group.appendChild(circle);
 	}
 	return circle;
 };
-GuiElements.draw.image=function(imageName,x,y,width,height,parent){
+GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var imageElement=GuiElements.create.image();
-	imageElement.setAttributeNS(null,"x",x);
-	imageElement.setAttributeNS(null,"y",y);
-	imageElement.setAttributeNS(null,"width",width);
-	imageElement.setAttributeNS(null,"height",height);
+	var imageElement = GuiElements.create.image();
+	imageElement.setAttributeNS(null, "x", x);
+	imageElement.setAttributeNS(null, "y", y);
+	imageElement.setAttributeNS(null, "width", width);
+	imageElement.setAttributeNS(null, "height", height);
 	//imageElement.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+imageName+".png");
-	imageElement.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+imageName+".png" );
+	imageElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + imageName + ".png");
 	imageElement.setAttributeNS(null, 'visibility', 'visible');
-	if(parent!=null) {
+	if (parent != null) {
 		parent.appendChild(imageElement);
 	}
 	return imageElement;
@@ -2632,66 +2634,66 @@ GuiElements.draw.image=function(imageName,x,y,width,height,parent){
  * @param {string} color - The text's color in the form "#fff".
  * @param {null} [test]
  */
-GuiElements.draw.text=function(x,y,text,font,color,test){
+GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"x",x);
-	textElement.setAttributeNS(null,"y",y);
-	textElement.setAttributeNS(null,"font-family",font.fontFamily);
-	textElement.setAttributeNS(null,"font-size",font.fontSize);
-	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
-	textElement.setAttributeNS(null,"fill",color);
-	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
-	text+=""; //Make text into a string
-	text=text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
+	var textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "x", x);
+	textElement.setAttributeNS(null, "y", y);
+	textElement.setAttributeNS(null, "font-family", font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
+	textElement.setAttributeNS(null, "fill", color);
+	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+	text += ""; //Make text into a string
+	text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
 	var textNode = document.createTextNode(text);
-	textElement.textNode=textNode;
+	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
 };
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything.
  */
-GuiElements.update=function(){};
+GuiElements.update = function() {};
 /* Changes the fill color (or text color) of any SVG element.
  * @param {SVG element} element - The element to be recolored.
  * @param {string} color - The element's new color in the form "#fff".
  */
-GuiElements.update.color=function(element,color){
+GuiElements.update.color = function(element, color) {
 	DebugOptions.validateNonNull(color);
-	element.setAttributeNS(null,"fill",color); //Recolors the element.
+	element.setAttributeNS(null, "fill", color); //Recolors the element.
 }
 /* Changes the fill opacity of any SVG element.
  * @param {SVG element} element - The element to be modified.
  * @param {number} color - The element's new opacity (from 0 to 1).
  */
-GuiElements.update.opacity=function(element,opacity){
-	element.setAttributeNS(null,"fill-opacity",opacity); //Sets the opacity.
+GuiElements.update.opacity = function(element, opacity) {
+	element.setAttributeNS(null, "fill-opacity", opacity); //Sets the opacity.
 }
 /* Sets an SVG element's stroke
  * @param {SVG element} element - The element to be modified.
  * @param {string} color - The element's new color in the form "#fff".
  * @param {number} strokeW - The width of the stroke
  */
-GuiElements.update.stroke=function(element,color,strokeW){
+GuiElements.update.stroke = function(element, color, strokeW) {
 	DebugOptions.validateNonNull(color);
-	element.setAttributeNS(null,"stroke",color);
-	element.setAttributeNS(null,"stroke-width",strokeW);
+	element.setAttributeNS(null, "stroke", color);
+	element.setAttributeNS(null, "stroke-width", strokeW);
 };
 /* Changes the text of an SVG text element.
  * @param {SVG text} textE - The text element to be modified.
  * @param {string} newText - The element's new text.
  */
-GuiElements.update.text=function(textE,newText){
-	newText+=""; //Make newText into a string
-	newText=newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	if(textE.textNode!=null) {
+GuiElements.update.text = function(textE, newText) {
+	newText += ""; //Make newText into a string
+	newText = newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
+	if (textE.textNode != null) {
 		textE.textNode.remove(); //Remove old text.
 	}
 	var textNode = document.createTextNode(newText); //Create new text.
-	textE.textNode=textNode; //Adds a reference for easy removal.
+	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
 }
 /* Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -2700,27 +2702,27 @@ GuiElements.update.text=function(textE,newText){
  * @param {string} text - The element's new text.
  * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
  */
-GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
-	GuiElements.update.text(textE,text);
-	var currentWidth=GuiElements.measure.textWidth(textE);
-	if(currentWidth<maxWidth||text==""){
+GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
+	GuiElements.update.text(textE, text);
+	var currentWidth = GuiElements.measure.textWidth(textE);
+	if (currentWidth < maxWidth || text == "") {
 		return;
 	}
-	var chars=1;
-	var maxChars=text.length;
+	var chars = 1;
+	var maxChars = text.length;
 	var currentText;
-	while(chars<=maxChars){
-		currentText=text.substring(0,chars);
-		GuiElements.update.text(textE,currentText+"...");
-		currentWidth=GuiElements.measure.textWidth(textE);
-		if(currentWidth>maxWidth){
+	while (chars <= maxChars) {
+		currentText = text.substring(0, chars);
+		GuiElements.update.text(textE, currentText + "...");
+		currentWidth = GuiElements.measure.textWidth(textE);
+		if (currentWidth > maxWidth) {
 			chars--;
 			break;
 		}
 		chars++;
 	}
-	currentText=text.substring(0,chars);
-	GuiElements.update.text(textE,currentText+"...");
+	currentText = text.substring(0, chars);
+	GuiElements.update.text(textE, currentText + "...");
 };
 /* Changes the path description of an SVG path object to make it a triangle.
  * @param {SVG path} pathE - The path element to be modified.
@@ -2729,34 +2731,34 @@ GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
  */
-GuiElements.update.triangle=function(pathE,x,y,width,height){
+GuiElements.update.triangle = function(pathE, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var xshift=width/2;
-	var path="";
-	path+="m "+x+","+y; //Draws bottom-left point.
-	path+=" "+xshift+","+(0-height); //Draws top-middle point.
-	path+=" "+xshift+","+(height); //Draws bottom-right point.
-	path+=" z"; //Closes path.
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
+	var xshift = width / 2;
+	var path = "";
+	path += "m " + x + "," + y; //Draws bottom-left point.
+	path += " " + xshift + "," + (0 - height); //Draws top-middle point.
+	path += " " + xshift + "," + (height); //Draws bottom-right point.
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical){
+GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	if(vertical == null){
+	if (vertical == null) {
 		vertical = 0;
 	}
 
-	var xshift=width/2;
-	var path="";
-	path+="m "+x+","+y; //Draws top-middle point.
-	if(vertical) {
+	var xshift = width / 2;
+	var path = "";
+	path += "m " + x + "," + y; //Draws top-middle point.
+	if (vertical) {
 		path += " " + xshift + "," + (height);
 		path += " " + (0 - width) + ",0";
-	} else{
+	} else {
 		path += " " + (height) + "," + xshift;
 		path += " 0," + (0 - width);
 	}
-	path+=" z"; //Closes path.
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
 /* Changes the path description of an SVG path object to make it a trapezoid.
  * @param {SVG path} pathE - The path element to be modified.
@@ -2766,16 +2768,16 @@ GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vert
  * @param {number} height - The path's new height. (negative will make it point down)
  * @param {number} slantW - The amount the trapezoid slopes in.
  */
-GuiElements.update.trapezoid=function(pathE,x,y,width,height,slantW){
+GuiElements.update.trapezoid = function(pathE, x, y, width, height, slantW) {
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var shortW=width-2*slantW; //The width of the top of the trapezoid.
-	var path="";
-	path+="m "+x+","+(y+height); //Draws the points.
-	path+=" "+slantW+","+(0-height);
-	path+=" "+shortW+","+0;
-	path+=" "+slantW+","+height;
-	path+=" z";
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
+	var shortW = width - 2 * slantW; //The width of the top of the trapezoid.
+	var path = "";
+	path += "m " + x + "," + (y + height); //Draws the points.
+	path += " " + slantW + "," + (0 - height);
+	path += " " + shortW + "," + 0;
+	path += " " + slantW + "," + height;
+	path += " z";
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 }
 /* Moves and resizes an SVG rect element.
  * @param {SVG rect} rect - The rect element to be modified.
@@ -2784,23 +2786,23 @@ GuiElements.update.trapezoid=function(pathE,x,y,width,height,slantW){
  * @param {number} width - The rect's new width.
  * @param {number} height - The rect's new height.
  */
-GuiElements.update.rect=function(rect,x,y,width,height){
+GuiElements.update.rect = function(rect, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	rect.setAttributeNS(null,"x",x);
-	rect.setAttributeNS(null,"y",y);
-	rect.setAttributeNS(null,"width",width);
-	rect.setAttributeNS(null,"height",height);
+	rect.setAttributeNS(null, "x", x);
+	rect.setAttributeNS(null, "y", y);
+	rect.setAttributeNS(null, "width", width);
+	rect.setAttributeNS(null, "height", height);
 }
 /* Used for zooming the main zoomGroup which holds the ui */
-GuiElements.update.zoom=function(group,scale){
+GuiElements.update.zoom = function(group, scale) {
 	DebugOptions.validateNumbers(scale);
-	group.setAttributeNS(null,"transform","scale("+scale+")");
+	group.setAttributeNS(null, "transform", "scale(" + scale + ")");
 };
-GuiElements.update.image=function(imageE,newImageName){
+GuiElements.update.image = function(imageE, newImageName) {
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
-	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
+	imageE.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + newImageName + ".png");
 };
-GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
+GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
 	DebugOptions.validateNonNull(div, svg, zoomG);
 	DebugOptions.validateNumbers(x, y, width, height, innerWidth, innerHeight);
 	/*foreignObj.setAttributeNS(null,"x",x);
@@ -2814,11 +2816,11 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	div.classList.remove("smoothScrollXY");
 	div.classList.remove("smoothScrollX");
 	div.classList.remove("smoothScrollY");
-	if(scrollX && scrollY) {
+	if (scrollX && scrollY) {
 		div.classList.add("smoothScrollY");
-	} else if(scrollX) {
+	} else if (scrollX) {
 		div.classList.add("noScroll");
-	} else if(scrollY) {
+	} else if (scrollY) {
 		div.classList.add("smoothScrollY");
 	} else {
 		div.classList.add("noScroll");
@@ -2837,25 +2839,24 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	GuiElements.update.zoom(zoomG, zoom);
 };
 
-GuiElements.makeClickThrough = function(svgE){
+GuiElements.makeClickThrough = function(svgE) {
 	svgE.style.pointerEvents = "none";
 };
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything.
  */
-GuiElements.move=function(){};
+GuiElements.move = function() {};
 /* Moves a group by changing its transform value.
  * @param {SVG g} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
  * @param {number} zoom - (Optional) The amount the group should be scaled.
  */
-GuiElements.move.group=function(group,x,y,zoom){
-	DebugOptions.validateNumbers(x,y);
-	if(zoom == null) {
+GuiElements.move.group = function(group, x, y, zoom) {
+	DebugOptions.validateNumbers(x, y);
+	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
-	}
-	else{
+	} else {
 		group.setAttributeNS(null, "transform", "matrix(" + zoom + ",0,0," + zoom + "," + x + "," + y + ")");
 	}
 };
@@ -2864,20 +2865,20 @@ GuiElements.move.group=function(group,x,y,zoom){
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
-GuiElements.move.text=function(text,x,y){
-	DebugOptions.validateNumbers(x,y);
-	text.setAttributeNS(null,"x",x);
-	text.setAttributeNS(null,"y",y);
+GuiElements.move.text = function(text, x, y) {
+	DebugOptions.validateNumbers(x, y);
+	text.setAttributeNS(null, "x", x);
+	text.setAttributeNS(null, "y", y);
 };
 /* Moves an SVG element.
  * @param {SVG element} element - The element to move.
  * @param {number} x - The new x coord of the element.
  * @param {number} y - The new y coord of the element.
  */
-GuiElements.move.element=function(element,x,y){
-	DebugOptions.validateNumbers(x,y);
-	element.setAttributeNS(null,"x",x);
-	element.setAttributeNS(null,"y",y);
+GuiElements.move.element = function(element, x, y) {
+	DebugOptions.validateNumbers(x, y);
+	element.setAttributeNS(null, "x", x);
+	element.setAttributeNS(null, "y", y);
 };
 /* Creates a clipping path (crops item) of the specified size and adds to the element if provided.
  * @param {string} id - The id to use for the clipping path.
@@ -2888,58 +2889,58 @@ GuiElements.move.element=function(element,x,y){
  * @param {SVG element} element - (optional) The element the path should be added to.
  * @return {SVG clipPath} - The finished clipping path.
  */
-GuiElements.clip=function(x,y,width,height,element){
-	DebugOptions.validateNumbers(x,y,width,height);
-	var id=Math.random()+"";
-	var clipPath=document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
-	var clipRect=GuiElements.draw.rect(x,y,width,height);
+GuiElements.clip = function(x, y, width, height, element) {
+	DebugOptions.validateNumbers(x, y, width, height);
+	var id = Math.random() + "";
+	var clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
+	var clipRect = GuiElements.draw.rect(x, y, width, height);
 	clipPath.appendChild(clipRect);
-	clipPath.setAttributeNS(null,"id",id);
+	clipPath.setAttributeNS(null, "id", id);
 	GuiElements.defs.appendChild(clipPath);
-	if(element!=null){
-		element.setAttributeNS(null,"clip-path","url(#"+id+")");
+	if (element != null) {
+		element.setAttributeNS(null, "clip-path", "url(#" + id + ")");
 	}
 	return clipPath;
 };
 /* GuiElements.measure contains functions that measure parts of the UI.
  * They return the measurement.
  */
-GuiElements.measure=function(){};
+GuiElements.measure = function() {};
 /* Measures the width of an existing SVG text element.
  * @param {SVG text} textE - The text element to measure.
  * @return {number} - The width of the text element.
  */
-GuiElements.measure.textWidth=function(textE){ //Measures an existing text SVG element
-	return GuiElements.measure.textDim(textE,false);
+GuiElements.measure.textWidth = function(textE) { //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE, false);
 };
-GuiElements.measure.textHeight=function(textE){ //Measures an existing text SVG element
-	return GuiElements.measure.textDim(textE,true);
+GuiElements.measure.textHeight = function(textE) { //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE, true);
 };
 /* Measures the width/height of an existing SVG text element.
  * @param {SVG text} textE - The text element to measure.
  * @param {bool} height - true/false for width/height, respectively.
  * @return {number} - The width/height of the text element.
  */
-GuiElements.measure.textDim=function(textE, height){ //Measures an existing text SVG element
-	if(textE.textContent==""){ //If it has no text, the width is 0.
+GuiElements.measure.textDim = function(textE, height) { //Measures an existing text SVG element
+	if (textE.textContent == "") { //If it has no text, the width is 0.
 		return 0;
 	}
 	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
-	var bbox=textE.getBBox();
-	var textD=bbox.width; //Gets the width of the bounding box.
-	if(height){
-		textD=bbox.height; //Gets the height of the bounding box.
+	var bbox = textE.getBBox();
+	var textD = bbox.width; //Gets the width of the bounding box.
+	if (height) {
+		textD = bbox.height; //Gets the height of the bounding box.
 	}
-	if(textD==0){ //The text element probably is not visible on the screen.
-		var parent=textE.parentNode; //Store the text element's current (hidden) parent.
+	if (textD == 0) { //The text element probably is not visible on the screen.
+		var parent = textE.parentNode; //Store the text element's current (hidden) parent.
 		GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
-		bbox=textE.getBBox(); //Now get its bounding box.
-		textD=bbox.width;
-		if(height){
-			textD=bbox.height;
+		bbox = textE.getBBox(); //Now get its bounding box.
+		textD = bbox.width;
+		if (height) {
+			textD = bbox.height;
 		}
 		textE.remove(); //Remove it from the temp layer.
-		if(parent!=null){
+		if (parent != null) {
 			parent.appendChild(textE); //Add it back to its old parent.
 		}
 	}
@@ -2954,24 +2955,25 @@ GuiElements.measure.textDim=function(textE, height){ //Measures an existing text
  * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font){
-	var textElement=GuiElements.create.text(); //Make the text element.
-	textElement.setAttributeNS(null,"font-family",font.fontFamily); //Set the attributes.
-	textElement.setAttributeNS(null,"font-size",font.fontSize);
-	textElement.setAttributeNS(null,"font-weight",font.fontWeight);
-	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
+GuiElements.measure.stringWidth = function(text, font) {
+	var textElement = GuiElements.create.text(); //Make the text element.
+	textElement.setAttributeNS(null, "font-family", font.fontFamily); //Set the attributes.
+	textElement.setAttributeNS(null, "font-size", font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
+	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
 	var textNode = document.createTextNode(text); //Add the text to the text element.
-	textElement.textNode=textNode;
+	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
 };
 GuiElements.measure.position = function(element) {
-	var top = 0, left = 0;
+	var top = 0,
+		left = 0;
 	do {
-		top += element.offsetTop  || 0;
+		top += element.offsetTop || 0;
 		left += element.offsetLeft || 0;
 		element = element.offsetParent;
-	} while(element);
+	} while (element);
 
 	return {
 		top: top,
@@ -2983,75 +2985,75 @@ GuiElements.measure.position = function(element) {
  * @param {string} value - The value to display
  * @fix This function has not been created yet.
  */
-GuiElements.displayValue=function(value,x,y,width,height, error){
-	if(error == null){
+GuiElements.displayValue = function(value, x, y, width, height, error) {
+	if (error == null) {
 		error = false;
 	}
 	var leftX = x;
 	var rightX = x + width;
-	var upperY=y;
-	var lowerY=y+height;
-	new ResultBubble(leftX, rightX,upperY,lowerY,value, error);
+	var upperY = y;
+	var lowerY = y + height;
+	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
 };
 /* Loads the version number from version.js */
-GuiElements.getAppVersion=function(callback){
+GuiElements.getAppVersion = function(callback) {
 	GuiElements.appVersion = FrontendVersion;
 	callback();
 };
-GuiElements.getOsVersion=function(callback){
-	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
+GuiElements.getOsVersion = function(callback) {
+	HtmlServer.sendRequestWithCallback("properties/os", function(resp) {
 		GuiElements.osVersion = resp;
 		var parts = resp.split(" ");
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
 		callback();
-	}, function(){
-		GuiElements.osVersion="";
+	}, function() {
+		GuiElements.osVersion = "";
 		GuiElements.isKindle = false;
 		callback();
 	});
 };
 /* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
-GuiElements.blockInteraction=function(){
-	if(GuiElements.dialogBlock==null) {
+GuiElements.blockInteraction = function() {
+	if (GuiElements.dialogBlock == null) {
 		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
-		GuiElements.update.opacity(rect,GuiElements.blockerOpacity);
+		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
-		GuiElements.dialogBlock=rect;
+		GuiElements.dialogBlock = rect;
 	}
 };
-GuiElements.unblockInteraction=function() {
-	if(GuiElements.dialogBlock!=null) {
+GuiElements.unblockInteraction = function() {
+	if (GuiElements.dialogBlock != null) {
 		GuiElements.dialogBlock.remove();
-		GuiElements.dialogBlock=null;
+		GuiElements.dialogBlock = null;
 	}
 };
-GuiElements.updateDialogBlockZoom = function(){
-	if(GuiElements.dialogBlock!=null) {
+GuiElements.updateDialogBlockZoom = function() {
+	if (GuiElements.dialogBlock != null) {
 		GuiElements.update.rect(GuiElements.dialogBlock, 0, 0, GuiElements.width, GuiElements.height);
 	}
 };
 /* Tells UI parts that zoom has changed. */
-GuiElements.updateZoom=function(){
+GuiElements.updateZoom = function() {
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.zoomGroups.forEach(function(zoomGroup){
-		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	GuiElements.zoomGroups.forEach(function(zoomGroup) {
+		GuiElements.update.zoom(zoomGroup, GuiElements.zoomFactor);
 	});
 	GuiElements.updateDims();
 };
-GuiElements.updateDimsPreview = function(newWidth, newHeight){
-	GuiElements.width=newWidth/GuiElements.zoomFactor;
-	GuiElements.height=newHeight/GuiElements.zoomFactor;
+GuiElements.updateDimsPreview = function(newWidth, newHeight) {
+	GuiElements.width = newWidth / GuiElements.zoomFactor;
+	GuiElements.height = newHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
-GuiElements.updateDims = function(){
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+GuiElements.updateDims = function() {
+	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+	GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
-GuiElements.passUpdateZoom = function(){
+GuiElements.passUpdateZoom = function() {
 	Overlay.closeOverlaysExcept(TitleBar.viewMenu);
 	GuiElements.checkSmallMode();
 	DisplayBoxManager.updateZoom();
@@ -3062,18 +3064,18 @@ GuiElements.passUpdateZoom = function(){
 	GuiElements.updateDialogBlockZoom();
 	RowDialog.updateZoom();
 };
-GuiElements.configureZoom = function(callback){
+GuiElements.configureZoom = function(callback) {
 	const GE = GuiElements;
-	SettingsManager.loadSettings(function(){
-		const callbackFn = function(){
+	SettingsManager.loadSettings(function() {
+		const callbackFn = function() {
 			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
-			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;
 				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
 				SettingsManager.zoom.writeValue(1);
@@ -3081,10 +3083,10 @@ GuiElements.configureZoom = function(callback){
 			}
 			callback();
 		};
-		HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+		HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
 			GE.computedZoom = GE.computeZoomFromDims(response);
 			callbackFn();
-		}, function(){
+		}, function() {
 			callbackFn();
 		});
 	});
@@ -3092,11 +3094,11 @@ GuiElements.configureZoom = function(callback){
 /* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
  */
-GuiElements.computeZoomFromDims=function(dims){
+GuiElements.computeZoomFromDims = function(dims) {
 	//GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	//GuiElements.alert("received dims: " + dims);
 	var parts = dims.split(",");
-	if(parts.length==2) {
+	if (parts.length == 2) {
 		var widthMm = parseFloat(parts[0]);
 		var heightMm = parseFloat(parts[1]);
 		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
@@ -3106,23 +3108,22 @@ GuiElements.computeZoomFromDims=function(dims){
 		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
 		//GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		return zoom * GuiElements.defaultZoomMultiple;
-	}
-	else{
+	} else {
 		return 1;
 	}
 };
-GuiElements.relToAbsX = function(x){
+GuiElements.relToAbsX = function(x) {
 	return x * GuiElements.zoomFactor;
 };
-GuiElements.relToAbsY = function(y){
+GuiElements.relToAbsY = function(y) {
 	return y * GuiElements.zoomFactor;
 };
-GuiElements.hidePaletteLayers = function(skipUpdate){
-	if(skipUpdate == null){
+GuiElements.hidePaletteLayers = function(skipUpdate) {
+	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
 	let GE = GuiElements;
-	if(GuiElements.paletteLayersVisible){
+	if (GuiElements.paletteLayersVisible) {
 		GuiElements.paletteLayersVisible = false;
 		SettingsManager.sideBarVisible.writeValue("false");
 		GE.layers.paletteBG.hide();
@@ -3130,17 +3131,17 @@ GuiElements.hidePaletteLayers = function(skipUpdate){
 		GE.layers.trash.hide();
 		GE.layers.catBg.hide();
 		GE.layers.categories.hide();
-		if(!skipUpdate) {
+		if (!skipUpdate) {
 			TabManager.updateZoom();
 		}
 	}
 };
-GuiElements.showPaletteLayers = function(skipUpdate){
+GuiElements.showPaletteLayers = function(skipUpdate) {
 	let GE = GuiElements;
-	if(skipUpdate == null){
+	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
-	if(!GuiElements.paletteLayersVisible){
+	if (!GuiElements.paletteLayersVisible) {
 		GuiElements.paletteLayersVisible = true;
 		SettingsManager.sideBarVisible.writeValue("true");
 		GE.layers.paletteBG.show();
@@ -3148,18 +3149,18 @@ GuiElements.showPaletteLayers = function(skipUpdate){
 		GE.layers.trash.show();
 		GE.layers.catBg.show();
 		GE.layers.categories.show();
-		if(!skipUpdate) {
+		if (!skipUpdate) {
 			TabManager.updateZoom();
 		}
 	}
 };
-GuiElements.checkSmallMode = function(){
+GuiElements.checkSmallMode = function() {
 	let GE = GuiElements;
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
-	if(!GE.smallMode && !GE.paletteLayersVisible) {
+	if (!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
 	}
-	if(!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
+	if (!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
 		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };
@@ -15735,21 +15736,33 @@ SettingsManager.loadSettings = function(callbackFn){
 		});
 	});
 };
-/* HtmlServer is a static class that will manage HTTP requests.
- * This class is not nearly finished.
+/**
+ * HtmlServer is a static class sends messages to the backend
  */
-function HtmlServer(){
-	HtmlServer.port=22179;
-	HtmlServer.dialogVisible=false;
+function HtmlServer() {
+	HtmlServer.port = 22179;
+	HtmlServer.dialogVisible = false;
 }
-HtmlServer.decodeHtml = function(message){
+
+/**
+ * Removes percent encoding from a string
+ * @param {string} message - The percent encoded string
+ * @return {string} - The decoded string
+ */
+HtmlServer.decodeHtml = function(message) {
 	return decodeURIComponent(message.replace(/\+/g, " "));
 };
-HtmlServer.encodeHtml=function(message){
+
+/**
+ * Applies percent encoding to a string
+ * @param {string} message - The input string
+ * @return {string} - The percent encoded string
+ */
+HtmlServer.encodeHtml = function(message) {
 	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
 	}*/
-	var eVal;
+	let eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
 		eVal = eVal.replace(/@/g, "%40");
@@ -15772,21 +15785,33 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 };
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+
+/**
+ * Sends a request to the backend and calls a callback function with the results
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string} [postData] - The post data to send in the body of the request
+ */
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
-	if(DebugOptions.shouldLogHttp()&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+	if (DebugOptions.shouldLogHttp()) {
+		// Requests are logged for debugging
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
-	if(DebugOptions.shouldSkipHtmlRequests()) {
-		setTimeout(function () {
-			if(false) {
-				if(callbackErr != null) {
+	if (DebugOptions.shouldSkipHtmlRequests()) {
+		// If we're testing on a device without a backend, we reply with a fake response
+		setTimeout(function() {
+			if (false) {
+				// We can respond with a fake error
+				if (callbackErr != null) {
 					callbackErr(418, "I'm a teapot");
 				}
 			} else {
-				if(callbackFn != null) {
+				// Or with fake data
+				if (callbackFn != null) {
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
@@ -15795,113 +15820,83 @@ HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPos
 		}, 20);
 		return;
 	}
-	if(isPost == null) {
-		isPost=false;
+	if (isPost == null) {
+		isPost = false;
 	}
-	var requestType="GET";
-	if(isPost){
-		requestType="POST";
+	let requestType = "GET";
+	if (isPost) {
+		requestType = "POST";
 	}
 	try {
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4) {
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState === 4) {
 				if (200 <= xhttp.status && xhttp.status <= 299) {
-					if(callbackFn!=null){
+					if (callbackFn != null) {
 						callbackFn(xhttp.responseText);
 					}
-				}
-				else {
-					if(callbackErr!=null){
-						if(DebugOptions.shouldLogHttp()){
+				} else {
+					if (callbackErr != null) {
+						if (DebugOptions.shouldLogHttp()) {
+							// Show the error on the screen
 							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);
 					}
-					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
 			}
 		};
-		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
-		if(isPost){
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true);
+		if (isPost) {
 			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
 			xhttp.send(postData);
+		} else {
+			xhttp.send();
 		}
-		else{
-			xhttp.send(); //Make the request
-		}
-	}
-	catch(err){
-		if(callbackErr!=null){
-			callbackErr();
+	} catch (err) {
+		if (callbackErr != null) {
+			callbackErr(0, "Sending request failed");
 		}
 	}
-};
-HtmlServer.sendRequest=function(request,requestStatus){
-	/*
-	 setTimeout(function(){
-		requestStatus.error = false;
-		requestStatus.finished = true;
-		requestStatus.result = "7";
-	}, 300);
-	return;
-	*/
-	if(requestStatus!=null){
-		requestStatus.error=false;
-		var callbackFn=function(response){
-			callbackFn.requestStatus.finished=true;
-			callbackFn.requestStatus.result=response;
-		};
-		callbackFn.requestStatus=requestStatus;
-		var callbackErr=function(code, result){
-			callbackErr.requestStatus.finished=true;
-			callbackErr.requestStatus.error=true;
-			callbackErr.requestStatus.code = code;
-			callbackErr.requestStatus.result = result;
-		};
-		callbackErr.requestStatus=requestStatus;
-		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
-	}
-	else{
-		HtmlServer.sendRequestWithCallback(request);
-	}
-}
-HtmlServer.getHBRequest=function(hBIndex,request,params){
-	DebugOptions.validateNonNull(params);
-	var res = "hummingbird/";
-	res += request;
-	res += "?id=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
-	res += params;
-	return res;
-};
-HtmlServer.getUrlForRequest=function(request){
-	return "http://localhost:"+HtmlServer.port+"/"+request;
-}
-HtmlServer.getFileName=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var onResponseReceived=function(response){
-		if(response=="File has no name."){
-			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
 };
 
-HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+/**
+ * Sends a request and changes fields of a status object to track its progress.  Used for executing blocks
+ * @param {string} request - The request to send
+ * @param {object} requestStatus - The status object
+ */
+HtmlServer.sendRequest = function(request, requestStatus) {
+	if (requestStatus != null) {
+		requestStatus.error = false;
+		const callbackFn = function(response) {
+			requestStatus.finished = true;
+			requestStatus.result = response;
+		};
+		const callbackErr = function(code, result) {
+			requestStatus.finished = true;
+			requestStatus.error = true;
+			requestStatus.code = code;
+			requestStatus.result = result;
+		};
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr);
+	} else {
+		HtmlServer.sendRequestWithCallback(request);
+	}
 };
-HtmlServer.setSetting=function(key,value){
-	var request = "settings/set";
-	request += "?key=" + HtmlServer.encodeHtml(key);
-	request += "&value=" + HtmlServer.encodeHtml(value);
-	HtmlServer.sendRequestWithCallback(request);
+
+/**
+ * Prepends localhost and the port number to the request
+ * @param {string} request - The request to modify
+ * @return {string} - The completed request
+ */
+HtmlServer.getUrlForRequest = function(request) {
+	return "http://localhost:" + HtmlServer.port + "/" + request;
 };
-HtmlServer.sendFinishedLoadingRequest = function(){
+
+/**
+ * Tells the backend that the frontend is done loading the UI
+ */
+HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
 /**
