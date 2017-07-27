@@ -1063,119 +1063,129 @@ Variable.prototype.delete=function(){
 		CodeManager.deleteVariable(this);
 	}
 };
-function List(name,data){
-	this.name=name;
-	if(data!=null){
-		this.data=data;
-	}
-	else{
-		this.data=new ListData();
+/**
+ * Represents a user-created List that is part of the current project.  A list holds ListData, which in turn contains
+ * an array.  Lists can be edited, while the ListData they pass should not be butated while another object is using it.
+ * Two Lists can't point to the same ListData, so there should never be aliasing.
+ * @param {string} name - The name of the list.  Must be unique among Lists
+ * @param {ListData} data - The data to initialize this list with
+ * @constructor
+ */
+function List(name, data) {
+	this.name = name;
+	if (data != null) {
+		this.data = data;
+	} else {
+		this.data = new ListData();
 	}
 	CodeManager.addList(this);
 }
-List.prototype.getName=function(){
+
+/**
+ * Retrieves the name of the list
+ * @return {string}
+ */
+List.prototype.getName = function() {
 	return this.name;
 };
-List.prototype.getSelectionData = function(){
+
+/**
+ * Creates SelectionData for choosing the List from a DropSlot
+ * @return {SelectionData}
+ */
+List.prototype.getSelectionData = function() {
 	return new SelectionData(this.name, this);
 };
-List.prototype.changeName=function(newName){
-	if(this.name!=this.newName){
-		this.name=newName;
-	}
-};
-List.prototype.getData=function(){
+
+/**
+ * Retrieves the ListData from the List
+ * @return {ListData}
+ */
+List.prototype.getData = function() {
 	return this.data;
 };
-List.prototype.setData=function(data){
-	this.data=data;
+
+/**
+ * Sets the List's ListData
+ * @param {ListData} data
+ */
+List.prototype.setData = function(data) {
+	this.data = data;
 };
-List.prototype.remove=function(){
-	this.data=null;
+
+/**
+ * Removes the list from the CodeManager, effectively deleting it
+ */
+List.prototype.remove = function() {
+	this.data = null;
 	CodeManager.removeList(this);
 };
-List.prototype.createXml=function(xmlDoc) {
-	var list = XmlWriter.createElement(xmlDoc, "list");
+
+/**
+ * Saves information about the List to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The XML Node for the List
+ */
+List.prototype.createXml = function(xmlDoc) {
+	const list = XmlWriter.createElement(xmlDoc, "list");
 	XmlWriter.setAttribute(list, "name", this.name);
 	list.appendChild(this.data.createXml(xmlDoc));
 	return list;
 };
-List.importXml=function(listNode){
-	var name=XmlWriter.getAttribute(listNode,"name");
-	if(name!=null){
-		var dataNode=XmlWriter.findSubElement(listNode,"data");
-		var data=new ListData();
-		if(dataNode!=null){
-			var newData=Data.importXml(dataNode);
-			if(newData!=null){
-				data=newData;
+
+/**
+ * Creates a List from XML
+ * @param {Element} listNode - The XML Node with information about the List
+ * @return {List}
+ */
+List.importXml = function(listNode) {
+	const name = XmlWriter.getAttribute(listNode, "name");
+	if (name != null) {
+		const dataNode = XmlWriter.findSubElement(listNode, "data");
+		let data = new ListData();
+		if (dataNode != null) {
+			const newData = Data.importXml(dataNode);
+			if (newData != null) {
+				data = newData;
 			}
 		}
-		return new List(name,data);
+		return new List(name, data);
 	}
 };
-List.prototype.rename=function(){
-	var callbackFn=function(cancelled,response){
-		if(!cancelled&&CodeManager.checkListName(response)){
-			callbackFn.list.name=response;
-			CodeManager.renameList(callbackFn.list);
+
+/**
+ * Prompts the user to rename the list
+ */
+List.prototype.rename = function() {
+	const callbackFn = function(cancelled, response) {
+		if (!cancelled && CodeManager.checkListName(response)) {
+			this.name = response;
+			CodeManager.renameList(this);
 		}
-	};
-	callbackFn.list=this;
-	DialogManager.showPromptDialog("Rename list","Enter list name",this.name,true,callbackFn);
+	}.bind(this);
+	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
 };
-List.prototype.delete=function(){
-	if(CodeManager.checkListUsed(this)) {
-		var callbackFn = function (response) {
-			if (response == "2") {
-				callbackFn.list.remove();
-				CodeManager.deleteList(callbackFn.list);
+
+/**
+ * Prompts the user to delete the list, or just deletes it if it is never used
+ */
+List.prototype.delete = function() {
+	if (CodeManager.checkListUsed(this)) {
+		const callbackFn = function(response) {
+			if (response === "2") {
+				this.remove();
+				CodeManager.deleteList(this);
 			}
-		};
+		}.bind(this);
 		callbackFn.list = this;
-		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
+		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
 		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
-	}
-	else{
+	} else {
 		this.remove();
 		CodeManager.deleteList(this);
 	}
 };
-/*
-List.prototype.getIndex=function(indexData){
-	var listData=this.data;
-	var array=listData.getValue();
-	if(array.length==0){
-		return null;
-	}
-	if(indexData==null){
-		return null;
-	}
-	var indexV=indexData.getValue();
-	var min=1;
-	var max=array.length;
-	if(indexData.type==Data.types.selection){
-		if(indexV=="last"){
-			return array.length-1;
-		}
-		else if(indexV=="random"){
-			return Math.floor(Math.random() * array.length);
-		}
-		else{
-			return null;
-		}
-	}
-	else if(indexData.type==Data.types.num){
-		if(!indexData.isValid){
-			return null;
-		}
-		return indexData.getValueInR(min,max,true,true)-1;
-	}
-	else{
-		return null;
-	}
-};*/
 /**
  * Device is an abstract class.  Each subclass (DeviceHummingbird, DeviceFlutter) represents a specific type of
  * robot.  Instances of the Device class have functions to to issue Bluetooth commands for connecting, disconnecting,
@@ -12494,7 +12504,7 @@ Tab.prototype.updateArrowsShift = function() {
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 /**
- * Created by Tom on 6/17/2017.
+ * A static class that manages making recordings
  */
 function RecordingManager(){
 	let RM = RecordingManager;
@@ -12512,27 +12522,48 @@ function RecordingManager(){
 	RM.pausedTime = 0;
 	RM.awaitingPermission = false;
 }
+
+/**
+ * Provides UI/Dialogs to rename a recording
+ * @param {string} oldFilename - The name of the recording to rename
+ * @param {function} nextAction - The function to run if the recording is renamed
+ */
 RecordingManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.userRenameFile(true, oldFilename, nextAction);
 };
+
+/**
+ * Provides UI/dialogs to delete a recording
+ * @param {string} filename - The name of the recording to delete
+ * @param {function} nextAction - The function to run if the recording if deleted
+ */
 RecordingManager.userDeleteFile=function(filename, nextAction){
 	SaveManager.userDeleteFile(true, filename, nextAction);
 };
+
+/**
+ * Tries to start recording
+ */
 RecordingManager.startRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/start");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		if(result == "Started"){
+		if(result === "Started"){
+			// Successfully started recording. Change state
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
-		} else if(result == "Permission denied"){
+		} else if(result === "Permission denied"){
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
 			DialogManager.showAlertDialog("Permission denied", message,"Dismiss");
-		} else if(result == "Requesting permission") {
+		} else if(result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
 	});
 };
+
+/**
+ * Tell the backend to stop recording
+ */
 RecordingManager.stopRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/stop");
@@ -12542,11 +12573,19 @@ RecordingManager.stopRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
+
+/**
+ * Called from backend when there is an unexpected interruption.
+ */
 RecordingManager.interruptRecording = function(){
 	let RM = RecordingManager;
 	RM.setState(RM.recordingStates.stopped);
 	RecordingDialog.stoppedRecording();
 };
+
+/**
+ * Tells the backend to pause recording
+ */
 RecordingManager.pauseRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/pause");
@@ -12560,6 +12599,10 @@ RecordingManager.pauseRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
 };
+
+/**
+ * Prompts the user to discard the current recording
+ */
 RecordingManager.discardRecording = function(){
 	let RM = RecordingManager;
 	let stopRec = function() {
@@ -12568,12 +12611,16 @@ RecordingManager.discardRecording = function(){
 	};
 	let message = "Are you sure you would like to delete the current recording?";
 	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
-		if(result == "2") {
+		if(result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 		}
 	}, stopRec);
 };
+
+/**
+ * Tells the backend to resume recording
+ */
 RecordingManager.resumeRecording = function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/unpause");
@@ -12587,17 +12634,24 @@ RecordingManager.resumeRecording = function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
 };
+
+/**
+ * Requests a list of recordings from the backend
+ * @param {function} callbackFn - type (Array<Sound>) -> (), called with the list of recordings
+ */
 RecordingManager.listRecordings = function(callbackFn){
 	Sound.loadSounds(true, callbackFn);
 };
+
+/**
+ * Changes the state of the RecordingManager and notifies any open Recording Dialogs to update their UI
+ * @param state
+ */
 RecordingManager.setState = function(state){
 	let RM = RecordingManager;
 	let prevState = RM.state;
 	RM.state = state;
 	let states = RM.recordingStates;
-
-
-
 	if(state === states.recording){
 		if(RM.updateTimer == null){
 			if(prevState === states.stopped) RM.pausedTime = 0;
@@ -12619,14 +12673,27 @@ RecordingManager.setState = function(state){
 		}
 	}
 };
+
+/**
+ * Updates the elapsed time counters on any open dialogs
+ */
 RecordingManager.updateCounter = function(){
 	let RM = RecordingManager;
 	RecordingDialog.updateCounter(RM.getElapsedTime());
 };
+
+/**
+ * Computes the elapsed time
+ * @return {number} - Recording time in milliseconds
+ */
 RecordingManager.getElapsedTime = function(){
 	let RM = RecordingManager;
 	return new Date().getTime() - RM.startTime + RM.pausedTime;
 };
+
+/**
+ * Starts recording if permission is granted and the app was waiting for permission
+ */
 RecordingManager.permissionGranted = function(){
 	let RM = RecordingManager;
 	if(RM.awaitingPermission){
@@ -15626,10 +15693,6 @@ BlockStack.prototype.getHeight = function() {
 	return this.dim.rh;
 };
 /**
- * Created by Tom on 6/12/2017.
- */
-
-/**
  * Represents a request to be used with HtmlServer
  * @param url {String} - The beginning of the request
  * @constructor
@@ -15639,10 +15702,11 @@ function HttpRequestBuilder(url){
 	this.request = url;
 	this.hasFirstParam = false;
 }
+
 /**
  * Adds a get parameter with the given key and value
  * @param key {String}
- * @param value {String} - The value will be escaped with
+ * @param value {String} - The value, which will be percent encoded before it is sent
  */
 HttpRequestBuilder.prototype.addParam = function(key, value){
 	if(!this.hasFirstParam){
@@ -15655,6 +15719,7 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	this.request += "=";
 	this.request += HtmlServer.encodeHtml(value);
 };
+
 /**
  * Returns the request to give to HtmlServer
  * @returns {String}

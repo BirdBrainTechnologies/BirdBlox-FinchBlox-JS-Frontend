@@ -1,113 +1,123 @@
-function List(name,data){
-	this.name=name;
-	if(data!=null){
-		this.data=data;
-	}
-	else{
-		this.data=new ListData();
+/**
+ * Represents a user-created List that is part of the current project.  A list holds ListData, which in turn contains
+ * an array.  Lists can be edited, while the ListData they pass should not be butated while another object is using it.
+ * Two Lists can't point to the same ListData, so there should never be aliasing.
+ * @param {string} name - The name of the list.  Must be unique among Lists
+ * @param {ListData} data - The data to initialize this list with
+ * @constructor
+ */
+function List(name, data) {
+	this.name = name;
+	if (data != null) {
+		this.data = data;
+	} else {
+		this.data = new ListData();
 	}
 	CodeManager.addList(this);
 }
-List.prototype.getName=function(){
+
+/**
+ * Retrieves the name of the list
+ * @return {string}
+ */
+List.prototype.getName = function() {
 	return this.name;
 };
-List.prototype.getSelectionData = function(){
+
+/**
+ * Creates SelectionData for choosing the List from a DropSlot
+ * @return {SelectionData}
+ */
+List.prototype.getSelectionData = function() {
 	return new SelectionData(this.name, this);
 };
-List.prototype.changeName=function(newName){
-	if(this.name!=this.newName){
-		this.name=newName;
-	}
-};
-List.prototype.getData=function(){
+
+/**
+ * Retrieves the ListData from the List
+ * @return {ListData}
+ */
+List.prototype.getData = function() {
 	return this.data;
 };
-List.prototype.setData=function(data){
-	this.data=data;
+
+/**
+ * Sets the List's ListData
+ * @param {ListData} data
+ */
+List.prototype.setData = function(data) {
+	this.data = data;
 };
-List.prototype.remove=function(){
-	this.data=null;
+
+/**
+ * Removes the list from the CodeManager, effectively deleting it
+ */
+List.prototype.remove = function() {
+	this.data = null;
 	CodeManager.removeList(this);
 };
-List.prototype.createXml=function(xmlDoc) {
-	var list = XmlWriter.createElement(xmlDoc, "list");
+
+/**
+ * Saves information about the List to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The XML Node for the List
+ */
+List.prototype.createXml = function(xmlDoc) {
+	const list = XmlWriter.createElement(xmlDoc, "list");
 	XmlWriter.setAttribute(list, "name", this.name);
 	list.appendChild(this.data.createXml(xmlDoc));
 	return list;
 };
-List.importXml=function(listNode){
-	var name=XmlWriter.getAttribute(listNode,"name");
-	if(name!=null){
-		var dataNode=XmlWriter.findSubElement(listNode,"data");
-		var data=new ListData();
-		if(dataNode!=null){
-			var newData=Data.importXml(dataNode);
-			if(newData!=null){
-				data=newData;
+
+/**
+ * Creates a List from XML
+ * @param {Element} listNode - The XML Node with information about the List
+ * @return {List}
+ */
+List.importXml = function(listNode) {
+	const name = XmlWriter.getAttribute(listNode, "name");
+	if (name != null) {
+		const dataNode = XmlWriter.findSubElement(listNode, "data");
+		let data = new ListData();
+		if (dataNode != null) {
+			const newData = Data.importXml(dataNode);
+			if (newData != null) {
+				data = newData;
 			}
 		}
-		return new List(name,data);
+		return new List(name, data);
 	}
 };
-List.prototype.rename=function(){
-	var callbackFn=function(cancelled,response){
-		if(!cancelled&&CodeManager.checkListName(response)){
-			callbackFn.list.name=response;
-			CodeManager.renameList(callbackFn.list);
+
+/**
+ * Prompts the user to rename the list
+ */
+List.prototype.rename = function() {
+	const callbackFn = function(cancelled, response) {
+		if (!cancelled && CodeManager.checkListName(response)) {
+			this.name = response;
+			CodeManager.renameList(this);
 		}
-	};
-	callbackFn.list=this;
-	DialogManager.showPromptDialog("Rename list","Enter list name",this.name,true,callbackFn);
+	}.bind(this);
+	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
 };
-List.prototype.delete=function(){
-	if(CodeManager.checkListUsed(this)) {
-		var callbackFn = function (response) {
-			if (response == "2") {
-				callbackFn.list.remove();
-				CodeManager.deleteList(callbackFn.list);
+
+/**
+ * Prompts the user to delete the list, or just deletes it if it is never used
+ */
+List.prototype.delete = function() {
+	if (CodeManager.checkListUsed(this)) {
+		const callbackFn = function(response) {
+			if (response === "2") {
+				this.remove();
+				CodeManager.deleteList(this);
 			}
-		};
+		}.bind(this);
 		callbackFn.list = this;
-		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
+		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
 		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
-	}
-	else{
+	} else {
 		this.remove();
 		CodeManager.deleteList(this);
 	}
 };
-/*
-List.prototype.getIndex=function(indexData){
-	var listData=this.data;
-	var array=listData.getValue();
-	if(array.length==0){
-		return null;
-	}
-	if(indexData==null){
-		return null;
-	}
-	var indexV=indexData.getValue();
-	var min=1;
-	var max=array.length;
-	if(indexData.type==Data.types.selection){
-		if(indexV=="last"){
-			return array.length-1;
-		}
-		else if(indexV=="random"){
-			return Math.floor(Math.random() * array.length);
-		}
-		else{
-			return null;
-		}
-	}
-	else if(indexData.type==Data.types.num){
-		if(!indexData.isValid){
-			return null;
-		}
-		return indexData.getValueInR(min,max,true,true)-1;
-	}
-	else{
-		return null;
-	}
-};*/

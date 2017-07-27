@@ -1,5 +1,5 @@
 /**
- * Created by Tom on 6/17/2017.
+ * A static class that manages making recordings
  */
 function RecordingManager(){
 	let RM = RecordingManager;
@@ -17,27 +17,48 @@ function RecordingManager(){
 	RM.pausedTime = 0;
 	RM.awaitingPermission = false;
 }
+
+/**
+ * Provides UI/Dialogs to rename a recording
+ * @param {string} oldFilename - The name of the recording to rename
+ * @param {function} nextAction - The function to run if the recording is renamed
+ */
 RecordingManager.userRenameFile = function(oldFilename, nextAction){
 	SaveManager.userRenameFile(true, oldFilename, nextAction);
 };
+
+/**
+ * Provides UI/dialogs to delete a recording
+ * @param {string} filename - The name of the recording to delete
+ * @param {function} nextAction - The function to run if the recording if deleted
+ */
 RecordingManager.userDeleteFile=function(filename, nextAction){
 	SaveManager.userDeleteFile(true, filename, nextAction);
 };
+
+/**
+ * Tries to start recording
+ */
 RecordingManager.startRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/start");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		if(result == "Started"){
+		if(result === "Started"){
+			// Successfully started recording. Change state
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
-		} else if(result == "Permission denied"){
+		} else if(result === "Permission denied"){
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
 			DialogManager.showAlertDialog("Permission denied", message,"Dismiss");
-		} else if(result == "Requesting permission") {
+		} else if(result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
 	});
 };
+
+/**
+ * Tell the backend to stop recording
+ */
 RecordingManager.stopRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/stop");
@@ -47,11 +68,19 @@ RecordingManager.stopRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
+
+/**
+ * Called from backend when there is an unexpected interruption.
+ */
 RecordingManager.interruptRecording = function(){
 	let RM = RecordingManager;
 	RM.setState(RM.recordingStates.stopped);
 	RecordingDialog.stoppedRecording();
 };
+
+/**
+ * Tells the backend to pause recording
+ */
 RecordingManager.pauseRecording=function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/pause");
@@ -65,6 +94,10 @@ RecordingManager.pauseRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
 };
+
+/**
+ * Prompts the user to discard the current recording
+ */
 RecordingManager.discardRecording = function(){
 	let RM = RecordingManager;
 	let stopRec = function() {
@@ -73,12 +106,16 @@ RecordingManager.discardRecording = function(){
 	};
 	let message = "Are you sure you would like to delete the current recording?";
 	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
-		if(result == "2") {
+		if(result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 		}
 	}, stopRec);
 };
+
+/**
+ * Tells the backend to resume recording
+ */
 RecordingManager.resumeRecording = function(){
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/unpause");
@@ -92,17 +129,24 @@ RecordingManager.resumeRecording = function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
 };
+
+/**
+ * Requests a list of recordings from the backend
+ * @param {function} callbackFn - type (Array<Sound>) -> (), called with the list of recordings
+ */
 RecordingManager.listRecordings = function(callbackFn){
 	Sound.loadSounds(true, callbackFn);
 };
+
+/**
+ * Changes the state of the RecordingManager and notifies any open Recording Dialogs to update their UI
+ * @param state
+ */
 RecordingManager.setState = function(state){
 	let RM = RecordingManager;
 	let prevState = RM.state;
 	RM.state = state;
 	let states = RM.recordingStates;
-
-
-
 	if(state === states.recording){
 		if(RM.updateTimer == null){
 			if(prevState === states.stopped) RM.pausedTime = 0;
@@ -124,14 +168,27 @@ RecordingManager.setState = function(state){
 		}
 	}
 };
+
+/**
+ * Updates the elapsed time counters on any open dialogs
+ */
 RecordingManager.updateCounter = function(){
 	let RM = RecordingManager;
 	RecordingDialog.updateCounter(RM.getElapsedTime());
 };
+
+/**
+ * Computes the elapsed time
+ * @return {number} - Recording time in milliseconds
+ */
 RecordingManager.getElapsedTime = function(){
 	let RM = RecordingManager;
 	return new Date().getTime() - RM.startTime + RM.pausedTime;
 };
+
+/**
+ * Starts recording if permission is granted and the app was waiting for permission
+ */
 RecordingManager.permissionGranted = function(){
 	let RM = RecordingManager;
 	if(RM.awaitingPermission){
