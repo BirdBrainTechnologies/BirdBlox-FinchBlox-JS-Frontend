@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Variable.js" afterPath="$PROJECT_DIR$/Variable.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/XmlWriter.js" afterPath="$PROJECT_DIR$/XmlWriter.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -21,31 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="UndoManager.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="UndoManager.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UndoManager.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="252">
               <caret line="12" column="3" lean-forward="true" selection-start-line="12" selection-start-column="3" selection-end-line="12" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Variable.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Variable.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2310">
-              <caret line="110" column="19" lean-forward="true" selection-start-line="110" selection-start-column="19" selection-end-line="110" selection-end-column="19" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="List.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/List.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" column="71" lean-forward="true" selection-start-line="1" selection-start-column="3" selection-end-line="1" selection-end-column="71" />
               <folding />
             </state>
           </provider>
@@ -62,8 +42,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>UnToggleFunction</find>
-      <find>untoggleFunction</find>
       <find>unToggle</find>
       <find>unmarkAsOverlayPart</find>
       <find>statusProvider</find>
@@ -92,6 +70,8 @@
       <find>addListenersMenuBnListScrollRect</find>
       <find>createScrollFixTimer(</find>
       <find>touchEnd</find>
+      <find>openDocInTab</find>
+      <find>findNodeByKey</find>
     </findStrings>
     <replaceStrings>
       <replace>$1 $2 $3</replace>
@@ -135,7 +115,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/UIParts/Menu/DebugMenu.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/SettingsMenu.js" />
         <option value="$PROJECT_DIR$/UIParts/Menu/ViewMenu.js" />
         <option value="$PROJECT_DIR$/UIParts/MenuBnList/SmoothScrollBox.js" />
@@ -186,6 +165,7 @@
         <option value="$PROJECT_DIR$/CodeManager.js" />
         <option value="$PROJECT_DIR$/UndoManager.js" />
         <option value="$PROJECT_DIR$/Variable.js" />
+        <option value="$PROJECT_DIR$/XmlWriter.js" />
       </list>
     </option>
   </component>
@@ -550,7 +530,7 @@
       <workItem from="1501024094533" duration="811000" />
       <workItem from="1501032948714" duration="5657000" />
       <workItem from="1501075885204" duration="19981000" />
-      <workItem from="1501162122394" duration="32440000" />
+      <workItem from="1501162122394" duration="33832000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -647,7 +627,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1557449000" />
+    <option name="totallyTimeSpent" value="1558841000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -741,81 +721,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Device/Device.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="130" column="0" lean-forward="true" selection-start-line="130" selection-start-column="0" selection-end-line="130" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc;n#Device#0" expanded="false" />
-            <element signature="n#!!block;n#Device#0" expanded="false" />
-            <element signature="e#894#1182#0" expanded="false" />
-            <element signature="e#1209#1247#0" expanded="false" />
-            <element signature="e#1307#1496#0" expanded="false" />
-            <element signature="e#1600#1621#0" expanded="false" />
-            <element signature="e#1649#1722#0" expanded="false" />
-            <element signature="e#1749#2402#0" expanded="false" />
-            <element signature="e#2485#4003#0" expanded="false" />
-            <element signature="e#2489#2801#0" expanded="false" />
-            <element signature="e#2863#2996#0" expanded="false" />
-            <element signature="e#2932#2962#0" expanded="false" />
-            <element signature="e#2968#2993#0" expanded="false" />
-            <element signature="e#3000#3067#0" expanded="false" />
-            <element signature="e#3110#3131#0" expanded="false" />
-            <element signature="e#3135#3445#0" expanded="false" />
-            <element signature="e#3517#3635#0" expanded="false" />
-            <element signature="e#3554#3598#0" expanded="false" />
-            <element signature="e#3604#3632#0" expanded="false" />
-            <element signature="e#3688#3718#0" expanded="false" />
-            <element signature="e#3756#3778#0" expanded="false" />
-            <element signature="e#3782#3907#0" expanded="false" />
-            <element signature="e#3960#4000#0" expanded="false" />
-            <element signature="e#4006#4146#0" expanded="false" />
-            <element signature="e#4212#4278#0" expanded="false" />
-            <element signature="e#4281#4363#0" expanded="false" />
-            <element signature="e#4410#4457#0" expanded="false" />
-            <element signature="e#4460#4623#0" expanded="false" />
-            <element signature="e#4665#4871#0" expanded="false" />
-            <element signature="e#5066#5269#0" expanded="false" />
-            <element signature="e#5272#5760#0" expanded="false" />
-            <element signature="e#5815#5953#0" expanded="false" />
-            <element signature="e#5956#6135#0" expanded="false" />
-            <element signature="e#6190#6493#0" expanded="false" />
-            <element signature="e#6496#6711#0" expanded="false" />
-            <element signature="e#6752#7159#0" expanded="false" />
-            <element signature="e#6869#6905#0" expanded="false" />
-            <element signature="e#6911#7157#0" expanded="false" />
-            <element signature="e#6974#7020#0" expanded="false" />
-            <element signature="e#7076#7113#0" expanded="false" />
-            <element signature="e#7119#7154#0" expanded="false" />
-            <element signature="e#7162#7252#0" expanded="false" />
-            <element signature="e#7301#7333#0" expanded="false" />
-            <element signature="e#7336#7375#0" expanded="false" />
-            <element signature="e#7434#7472#0" expanded="false" />
-            <element signature="e#7475#7514#0" expanded="false" />
-            <element signature="e#7581#7627#0" expanded="false" />
-            <element signature="e#7630#7876#0" expanded="false" />
-            <element signature="e#7924#8128#0" expanded="false" />
-            <element signature="e#8131#8304#0" expanded="false" />
-            <element signature="e#8378#8863#0" expanded="false" />
-            <element signature="e#8693#8859#0" expanded="false" />
-            <element signature="e#8717#8856#0" expanded="false" />
-            <element signature="e#8866#9072#0" expanded="false" />
-            <element signature="e#9119#9167#0" expanded="false" />
-            <element signature="e#9170#9418#0" expanded="false" />
-            <element signature="e#9470#9596#0" expanded="false" />
-            <element signature="e#9526#9581#0" expanded="false" />
-            <element signature="e#9599#9849#0" expanded="false" />
-            <element signature="e#9913#10088#0" expanded="false" />
-            <element signature="e#9972#10009#0" expanded="false" />
-            <element signature="e#10020#10037#0" expanded="false" />
-            <element signature="e#10091#10206#0" expanded="false" />
-            <element signature="e#10239#10286#0" expanded="false" />
-            <element signature="e#10289#10387#0" expanded="false" />
-            <element signature="e#10416#10534#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Device/DeviceManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="667">
@@ -952,14 +857,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="667">
           <caret line="155" column="0" lean-forward="false" selection-start-line="155" selection-start-column="0" selection-end-line="155" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/XmlWriter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-567">
-          <caret line="12" column="47" lean-forward="true" selection-start-line="12" selection-start-column="47" selection-end-line="12" selection-end-column="47" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1715,57 +1612,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="162" column="2" lean-forward="true" selection-start-line="162" selection-start-column="2" selection-end-line="162" selection-end-column="2" />
-          <folding>
-            <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
-            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
-            <element signature="e#158#304#0" expanded="false" />
-            <element signature="e#347#407#0" expanded="false" />
-            <element signature="e#410#552#0" expanded="false" />
-            <element signature="e#595#1381#0" expanded="false" />
-            <element signature="e#598#679#0" expanded="false" />
-            <element signature="e#717#1001#0" expanded="false" />
-            <element signature="e#1007#1339#0" expanded="false" />
-            <element signature="e#1384#1927#0" expanded="false" />
-            <element signature="e#2026#3831#0" expanded="false" />
-            <element signature="e#2163#2265#0" expanded="false" />
-            <element signature="e#2310#2852#0" expanded="false" />
-            <element signature="e#2419#2833#0" expanded="false" />
-            <element signature="e#2435#2557#0" expanded="false" />
-            <element signature="e#2506#2552#0" expanded="false" />
-            <element signature="e#2563#2829#0" expanded="false" />
-            <element signature="e#2618#2824#0" expanded="false" />
-            <element signature="e#2874#2896#0" expanded="false" />
-            <element signature="e#2936#2964#0" expanded="false" />
-            <element signature="e#2970#3734#0" expanded="false" />
-            <element signature="e#3050#3514#0" expanded="false" />
-            <element signature="e#3083#3510#0" expanded="false" />
-            <element signature="e#3137#3220#0" expanded="false" />
-            <element signature="e#3168#3214#0" expanded="false" />
-            <element signature="e#3226#3505#0" expanded="false" />
-            <element signature="e#3258#3499#0" expanded="false" />
-            <element signature="e#3300#3439#0" expanded="false" />
-            <element signature="e#3601#3703#0" expanded="false" />
-            <element signature="e#3709#3731#0" expanded="false" />
-            <element signature="e#3747#3829#0" expanded="false" />
-            <element signature="e#3776#3826#0" expanded="false" />
-            <element signature="e#3834#4050#0" expanded="false" />
-            <element signature="e#4109#4603#0" expanded="false" />
-            <element signature="e#4139#4544#0" expanded="false" />
-            <element signature="e#4212#4287#0" expanded="false" />
-            <element signature="e#4334#4468#0" expanded="false" />
-            <element signature="e#4550#4601#0" expanded="false" />
-            <element signature="e#4606#4765#0" expanded="false" />
-            <element signature="e#4814#4880#0" expanded="false" />
-            <element signature="e#4883#4952#0" expanded="false" />
-            <element signature="e#5004#5063#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HttpRequestBuilder.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="546">
@@ -2511,18 +2357,84 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UndoManager.js">
+    <entry file="file://$PROJECT_DIR$/version.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="3" lean-forward="true" selection-start-line="12" selection-start-column="3" selection-end-line="12" selection-end-column="3" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
+            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+            <element signature="e#158#304#0" expanded="false" />
+            <element signature="e#347#407#0" expanded="false" />
+            <element signature="e#410#552#0" expanded="false" />
+            <element signature="e#598#679#0" expanded="false" />
+            <element signature="e#717#1001#0" expanded="false" />
+            <element signature="e#1007#1339#0" expanded="false" />
+            <element signature="e#1384#1927#0" expanded="false" />
+            <element signature="e#2026#3831#0" expanded="false" />
+            <element signature="e#2163#2265#0" expanded="false" />
+            <element signature="e#2310#2852#0" expanded="false" />
+            <element signature="e#2419#2833#0" expanded="false" />
+            <element signature="e#2435#2557#0" expanded="false" />
+            <element signature="e#2506#2552#0" expanded="false" />
+            <element signature="e#2563#2829#0" expanded="false" />
+            <element signature="e#2618#2824#0" expanded="false" />
+            <element signature="e#2874#2896#0" expanded="false" />
+            <element signature="e#2936#2964#0" expanded="false" />
+            <element signature="e#2970#3734#0" expanded="false" />
+            <element signature="e#3050#3514#0" expanded="false" />
+            <element signature="e#3083#3510#0" expanded="false" />
+            <element signature="e#3137#3220#0" expanded="false" />
+            <element signature="e#3168#3214#0" expanded="false" />
+            <element signature="e#3226#3505#0" expanded="false" />
+            <element signature="e#3258#3499#0" expanded="false" />
+            <element signature="e#3300#3439#0" expanded="false" />
+            <element signature="e#3601#3703#0" expanded="false" />
+            <element signature="e#3709#3731#0" expanded="false" />
+            <element signature="e#3747#3829#0" expanded="false" />
+            <element signature="e#3776#3826#0" expanded="false" />
+            <element signature="e#3834#4050#0" expanded="false" />
+            <element signature="e#4109#4603#0" expanded="false" />
+            <element signature="e#4139#4544#0" expanded="false" />
+            <element signature="e#4212#4287#0" expanded="false" />
+            <element signature="e#4334#4468#0" expanded="false" />
+            <element signature="e#4550#4601#0" expanded="false" />
+            <element signature="e#4606#4765#0" expanded="false" />
+            <element signature="e#4814#4880#0" expanded="false" />
+            <element signature="e#4883#4952#0" expanded="false" />
+            <element signature="e#5004#5063#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/XmlWriter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5124">
+          <caret line="244" column="3" lean-forward="true" selection-start-line="244" selection-start-column="3" selection-end-line="244" selection-end-column="3" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Variable.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2310">
-          <caret line="110" column="19" lean-forward="true" selection-start-line="110" selection-start-column="19" selection-end-line="110" selection-end-column="19" />
+        <state relative-caret-position="-1370">
+          <caret line="25" column="58" lean-forward="true" selection-start-line="25" selection-start-column="58" selection-end-line="25" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UndoManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="12" column="3" lean-forward="true" selection-start-line="12" selection-start-column="3" selection-end-line="12" selection-end-column="3" />
           <folding />
         </state>
       </provider>
