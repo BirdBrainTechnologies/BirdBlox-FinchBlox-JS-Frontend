@@ -115,6 +115,7 @@ DialogManager.showPromptDialog=function(title,question,prefill,shouldPrefill,cal
 };
 DialogManager.showAlertDialog = function(title,message,button,callbackFn,callbackErr){
 	if(DebugOptions.shouldUseJSDialogs()) {
+		alert(message);
 		if (callbackFn != null) callbackFn();
 		return;
 	}
