@@ -75,6 +75,10 @@ DebugOptions.createVirtualDevice = function(deviceClass, id) {
 
 /* These functions all check if a certain type of debugging should be enabled and are called from other classes. */
 /** @return {boolean} */
+DebugOptions.shouldUseMouseMode = function() {
+	return DebugOptions.mouse && DebugOptions.enabled;
+};
+/** @return {boolean} */
 DebugOptions.shouldLogErrors = function() {
 	return DebugOptions.logErrors && DebugOptions.enabled;
 };

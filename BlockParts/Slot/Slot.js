@@ -598,17 +598,43 @@ Slot.prototype.textSummary = function(){
 	DebugOptions.markAbstract();
 };
 
+/**
+ * Makes the Slot appear active
+ */
 Slot.prototype.makeActive = function(){
 	this.slotShape.makeActive();
 };
 
+/**
+ * Makes the Slot appear inactive
+ */
 Slot.prototype.makeInactive = function(){
 	this.slotShape.makeInactive();
 };
+
+/**
+ * Makes the slot appear active/inactive
+ * @param {boolean} active - Whether the Slot should appear active
+ */
 Slot.prototype.setActive = function(active){
 	if(active){
 		this.makeActive();
 	} else {
 		this.makeInactive();
 	}
+};
+
+/**
+ * Called when the SlotShape is tapped
+ */
+Slot.prototype.onTap = function() {
+
+};
+
+/**
+ * Returns whether this Slot is an EditableSlot
+ * @return {boolean}
+ */
+Slot.prototype.isEditable = function() {
+	return false;
 };
