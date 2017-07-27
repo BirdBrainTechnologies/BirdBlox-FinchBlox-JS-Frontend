@@ -7408,93 +7408,141 @@ Button.prototype.unmarkAsOverlayPart = function() {
 	this.partOfOverlay = null;
 };
 /**
- * Created by Tom on 6/23/2017.
+ * A button with an arrow that shows/hides something.  Currently, this is just used for showing/hiding the palette on
+ * small screens.  The button is not created until build() is called
+ * @param {number} x - The x coord where the button should show up
+ * @param {number} y - The y coord where the button should show up
+ * @param {number} width - The width the button should have
+ * @param {number} height - The height the button should have
+ * @param {Element} parent - The group the button should be added to
+ * @param {number} iconH - The height the icon should have
+ * @constructor
  */
-function ShowHideButton(x, y, width, height, parent, iconH){
+function ShowHideButton(x, y, width, height, parent, iconH) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
 	this.height = height;
 	this.parent = parent;
-	this.iconH = iconH * 0.75;
+	this.iconH = iconH * 0.75; // The arrow icon should actually be smaller than most other icons
 	this.showFn = null;
 	this.hideFn = null;
 }
-ShowHideButton.prototype.build = function(isShowing){
+
+/**
+ * The show/hide button is actually two buttons that change when one is tapped.  This function creates both of them
+ * @param {boolean} isShowing - Whether the button should start in the "showing" state
+ */
+ShowHideButton.prototype.build = function(isShowing) {
 	this.showBn = new Button(this.x, this.y, this.width, this.height, this.parent);
 	this.showBn.addIcon(VectorPaths.show, this.iconH);
 	this.hideBn = new Button(this.x, this.y, this.width, this.height, this.parent);
 	this.hideBn.addIcon(VectorPaths.hide, this.iconH);
 
+	// The callback functions are called when the buttons are pressed, but the button changes icon when released
 	this.showBn.setCallbackFunction(this.showFn, false);
 	this.hideBn.setCallbackFunction(this.hideFn, false);
 
-	let toggle1 = function(){
+	// Function to switch to the "hidden" mode
+	let toggle1 = function() {
 		this.showBn.hide();
 		this.hideBn.show();
 	}.bind(this);
 	this.showBn.setCallbackFunction(toggle1, true);
-	this.showBn.interrupt=function(){
-		if(this.enabled&&this.pressed){
-			this.pressed=false;
+	this.showBn.interrupt = function() {
+		if (this.enabled && this.pressed) {
+			this.pressed = false;
 			this.setColor(false);
 			toggle1();
 		}
 	};
-	let toggle2 = function(){
+
+	// Function to switch to the "showing" mode
+	let toggle2 = function() {
 		this.showBn.show();
 		this.hideBn.hide();
 	}.bind(this);
 	this.hideBn.setCallbackFunction(toggle2, true);
-	this.hideBn.interrupt=function(){
-		if(this.enabled&&this.pressed){
-			this.pressed=false;
+	this.hideBn.interrupt = function() {
+		if (this.enabled && this.pressed) {
+			this.pressed = false;
 			this.setColor(false);
 			toggle2();
 		}
 	};
 
-	if(isShowing){
+	if (isShowing) {
 		this.showBn.hide();
-	} else{
+	} else {
 		this.hideBn.hide();
 	}
 };
-ShowHideButton.prototype.setCallbackFunctions = function(showFn, hideFn){
+
+/**
+ * Sets the functions to call to show/hide the associated item
+ * @param {function} showFn
+ * @param {function} hideFn
+ */
+ShowHideButton.prototype.setCallbackFunctions = function(showFn, hideFn) {
 	this.showFn = showFn;
 	this.hideFn = hideFn;
 };
-ShowHideButton.prototype.remove = function(){
+
+/**
+ * Removes the show/hide button
+ */
+ShowHideButton.prototype.remove = function() {
 	this.showBn.remove();
 	this.hideBn.remove();
 };
 
 
-function DeviceStatusLight(x,centerY,parent,statusProvider){
-	const DSL=DeviceStatusLight;
-	this.cx=x+DSL.radius;
-	this.cy=centerY;
-	this.parentGroup=parent;
-	this.circleE=this.generateCircle();
+/**
+ * A small colored circle that indicates the status of a robot or group of robots according to a statusProvider
+ * which must have setStatusListener and getStatus functions
+ * @param {number} x - The x coord of the light
+ * @param {number} centerY - The y coord of the center of the light
+ * @param {Element} parent - The group this light should add itself to
+ * @param {*} statusProvider - Any object with the functions setStatusListener and getStatus
+ * @constructor
+ */
+function DeviceStatusLight(x, centerY, parent, statusProvider) {
+	const DSL = DeviceStatusLight;
+	this.cx = x + DSL.radius;
+	this.cy = centerY;
+	this.parentGroup = parent;
+	this.circleE = this.generateCircle();
 	this.statusProvider = statusProvider;
+	// Tells the statusProvider to call updateStatus any time its status changes
 	this.statusProvider.setStatusListener(this.updateStatus.bind(this));
+	// Updates this light to match the current status of the provider
 	this.updateStatus(statusProvider.getStatus());
 }
-DeviceStatusLight.setConstants=function(){
-	var DSL=DeviceStatusLight;
-	DSL.greenColor="#0f0";
-	DSL.redColor="#f00";
-	DSL.yellowColor="#ff0";
-	DSL.startColor=Colors.black;
-	DSL.offColor=Colors.darkGray;
-	DSL.radius=6;
-	DSL.updateInterval=300;
+
+DeviceStatusLight.setConstants = function() {
+	const DSL = DeviceStatusLight;
+	DSL.greenColor = "#0f0";
+	DSL.redColor = "#f00";
+	DSL.yellowColor = "#ff0";
+	DSL.startColor = Colors.black;
+	DSL.offColor = Colors.darkGray;
+	DSL.radius = 6;
+	DSL.updateInterval = 300;
 };
-DeviceStatusLight.prototype.generateCircle=function(){
-	let DSL=DeviceStatusLight;
-	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
+
+/**
+ * Draws the circle for the light
+ */
+DeviceStatusLight.prototype.generateCircle = function() {
+	let DSL = DeviceStatusLight;
+	return GuiElements.draw.circle(this.cx, this.cy, DSL.radius, DSL.startColor, this.parentGroup);
 };
-DeviceStatusLight.prototype.updateStatus=function(status){
+
+/**
+ * Updates the color of the circle to correspond with the provided status
+ * @param {DeviceManager.statuses} status
+ */
+DeviceStatusLight.prototype.updateStatus = function(status) {
 	const DSL = DeviceStatusLight;
 	let color = null;
 	const statuses = DeviceManager.statuses;
@@ -7507,11 +7555,14 @@ DeviceStatusLight.prototype.updateStatus=function(status){
 	} else {
 		color = DSL.offColor;
 	}
-	GuiElements.update.color(this.circleE,color);
+	GuiElements.update.color(this.circleE, color);
 };
-DeviceStatusLight.prototype.remove=function(){
+
+/**
+ * Removes the light
+ */
+DeviceStatusLight.prototype.remove = function() {
 	this.circleE.remove();
-	this.updateTimer=window.clearInterval(this.updateTimer);
 };
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
  * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
@@ -9133,43 +9184,57 @@ BubbleOverlay.prototype.relToAbsX = function(x) {
 BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
-function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
-	var RB = ResultBubble;
-	if(error == null){
+/**
+ * A bubble-shaped element that holds text containing the result of executing a block that was tapped.
+ * Becomes visible as soon as it is constructed.
+ * @param {number} leftX - left boundary of the Block
+ * @param {number} rightX - right boundary of the Block
+ * @param {number} upperY - top boundary of the Block
+ * @param {number} lowerY - bottom boundary of the Block
+ * @param {string} text - The text to show in the bubble
+ * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
+ * @constructor
+ */
+function ResultBubble(leftX, rightX, upperY, lowerY, text, error) {
+	const RB = ResultBubble;
+	if (error == null) {
 		error = false;
 	}
-	var fontColor = RB.fontColor;
-	var bgColor = RB.bgColor;
-	if(error){
+	let fontColor = RB.fontColor;
+	let bgColor = RB.bgColor;
+	if (error) {
 		fontColor = RB.errorFontColor;
 		bgColor = RB.errorBgColor;
 	}
-	var height=RB.font.charHeight;
-	var textE=GuiElements.draw.text(0,height,text,RB.font,fontColor);
-	GuiElements.update.textLimitWidth(textE,text,GuiElements.width-RB.hMargin*2);
-	var width=GuiElements.measure.textWidth(textE);
-	var group=GuiElements.create.group(0,0);
+	const height = RB.font.charHeight;
+	const textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
+	GuiElements.update.textLimitWidth(textE, text, GuiElements.width - RB.hMargin * 2);
+	const width = GuiElements.measure.textWidth(textE);
+	const group = GuiElements.create.group(0, 0);
 	group.appendChild(textE);
 	let layer = GuiElements.layers.resultBubble;
 	let overlayType = Overlay.types.resultBubble;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,layer);
-	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
-	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
+	this.bubbleOverlay = new BubbleOverlay(overlayType, bgColor, RB.margin, group, this, layer);
+	this.bubbleOverlay.display(leftX, rightX, upperY, lowerY, width, height);
 }
-ResultBubble.setConstants=function(){
-	var RB=ResultBubble;
-	RB.fontColor=Colors.black;
+
+ResultBubble.setConstants = function() {
+	const RB = ResultBubble;
+	RB.fontColor = Colors.black;
 	RB.errorFontColor = Colors.white;
-	RB.bgColor=Colors.white;
+	RB.bgColor = Colors.white;
 	RB.errorBgColor = "#c00000";
 	RB.font = Font.uiFont(16);
-	RB.margin=4;
+	RB.margin = 4;
 	/*RB.lifetime=3000;*/
-	RB.hMargin=20;
+	RB.hMargin = 20;
 };
-ResultBubble.prototype.close=function(){
+
+/**
+ * Hides the result
+ */
+ResultBubble.prototype.close = function() {
 	this.bubbleOverlay.hide();
-	/*this.vanishTimer = window.clearInterval(this.vanishTimer);*/
 };
 /**
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
@@ -10413,40 +10478,64 @@ VectorIcon.prototype.move = function(x, y) {
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
-//Highlights where the current block will go
-function Highlighter(){
-	Highlighter.path=Highlighter.createPath();
-	Highlighter.visible=false;
+/**
+ * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
+ * white (or black if Blocks are running) path element which it moves around and reshapes
+ * @constructor
+ */
+function Highlighter() {
+	Highlighter.path = Highlighter.createPath();
+	Highlighter.visible = false;
 }
-Highlighter.createPath=function(){
-	var bG=BlockGraphics.highlight;
-	var path=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	path.setAttributeNS(null,"stroke",bG.strokeC);
-	path.setAttributeNS(null,"stroke-width",bG.strokeW);
-	path.setAttributeNS(null,"fill","none");
+
+/**
+ * Creates a path object for the highlighter
+ * @return {Element}
+ */
+Highlighter.createPath = function() {
+	const bG = BlockGraphics.highlight;
+	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+	path.setAttributeNS(null, "stroke", bG.strokeC);
+	path.setAttributeNS(null, "stroke-width", bG.strokeW);
+	path.setAttributeNS(null, "fill", "none");
 	return path;
-}
-Highlighter.highlight=function(x,y,width,height,type,isSlot,isGlowing){
-	var myX = CodeManager.dragAbsToRelX(x);
-	var myY = CodeManager.dragAbsToRelX(y);
-	var pathD=BlockGraphics.buildPath.highlight(myX, myY, width,height,type,isSlot);
-	Highlighter.path.setAttributeNS(null,"d",pathD);
-	if(!Highlighter.visible){
+};
+
+/**
+ * Highlights a Block/Slot based on the provided information
+ * @param {number} x - The x coord the highlighter should appear at
+ * @param {number} y - The y coord the highlighter should appear at
+ * @param {number} width - The width the highlighter should have (for slots)
+ * @param {number} height - The height the highlighter should have (for slots)
+ * @param {number} type - The type of path according to the BlockGraphics type system
+ * @param {boolean} isSlot - Whether the thing being highlighted is a Slot
+ * @param {boolean} isGlowing - Whether the thing being highlighted already has a white outline (since it is running)
+ *                              and should therefore by highlighted in black
+ */
+Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
+	const myX = CodeManager.dragAbsToRelX(x);
+	const myY = CodeManager.dragAbsToRelX(y);
+	const pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
+	Highlighter.path.setAttributeNS(null, "d", pathD);
+	if (!Highlighter.visible) {
 		GuiElements.layers.highlight.appendChild(Highlighter.path);
-		Highlighter.visible=true;
+		Highlighter.visible = true;
 	}
-	var bG=BlockGraphics.highlight;
-	if(isGlowing!=null&&isGlowing){
-		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeDarkC);
-	}
-	else{
-		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeC);
+	const bG = BlockGraphics.highlight;
+	if (isGlowing != null && isGlowing) {
+		Highlighter.path.setAttributeNS(null, "stroke", bG.strokeDarkC);
+	} else {
+		Highlighter.path.setAttributeNS(null, "stroke", bG.strokeC);
 	}
 };
-Highlighter.hide=function(){
-	if(Highlighter.visible){
+
+/**
+ * Removes the highlighter from view
+ */
+Highlighter.hide = function() {
+	if (Highlighter.visible) {
 		Highlighter.path.remove();
-		Highlighter.visible=false;
+		Highlighter.visible = false;
 	}
 };
 /**
@@ -14060,10 +14149,19 @@ RecordingDialog.updateCounter = function(time) {
 	}
 };
 /**
- * Created by Tom on 6/19/2017.
+ * Provides a list of Robots of a certain type to connect to in a BubbleOverlay.  Updates as new robots are found.
+ * The list might be associated with a specific slot of the ConnectMultipleDialog, in which case it will not list
+ * the robot that is currently in that slot and will allow robots in different slots to be selected to swap places
+ * with them.
+ * @param {number} x - The x coord of the point of the bubble
+ * @param {number} upperY - The y coord if the bubble points up
+ * @param {number} lowerY - The y coord if the bubble points down
+ * @param {number|null} [index] - The index of slot this list is associated with, or null if N/A
+ * @param deviceClass - Subclass of Device to scan for
+ * @constructor
  */
-function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
-	if(index == null){
+function RobotConnectionList(x, upperY, lowerY, index, deviceClass) {
+	if (index == null) {
 		index = null;
 	}
 	this.x = x;
@@ -14072,92 +14170,128 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.index = index;
 	this.deviceClass = deviceClass;
 	this.visible = false;
-	if(index != null){
-		this.robotId = this.deviceClass.getManager().getDevice(index);
-	}
+
+	/* Sometimes the list is told to update its entries but can't since it is currently being scrolled.  In that case,
+	 * marks a pending update and starts a timer which keeps trying to update until it succeeds */
 	this.updatePending = false;
 	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
-RobotConnectionList.setConstants = function(){
-	let RCL=RobotConnectionList;
+
+RobotConnectionList.setConstants = function() {
+	let RCL = RobotConnectionList;
 	RCL.bnMargin = 5;
-	RCL.bgColor=Colors.lightGray; //"#171717";
-	RCL.updateInterval=DiscoverDialog.updateInterval;
-	RCL.height=150;
-	RCL.width=200;
+	RCL.bgColor = Colors.lightGray;
+	RCL.updateInterval = DiscoverDialog.updateInterval;
+	RCL.height = 150;
+	RCL.width = 200;
 };
-RobotConnectionList.prototype.show = function(){
+
+/**
+ * Makes the list visible with whatever devices have been detected so far (according to the cache in DeviceManager)
+ */
+RobotConnectionList.prototype.show = function() {
 	this.showWithList(this.deviceClass.getManager().getDiscoverCache());
 };
-RobotConnectionList.prototype.showWithList = function(list){
+
+/**
+ * Shows the RobotConnectionList with entries for the robots on the provided JSON-encoded list
+ * @param {string} list - A JSON-encoded list of robots as a string
+ */
+RobotConnectionList.prototype.showWithList = function(list) {
 	let RCL = RobotConnectionList;
 	this.visible = true;
-	this.group=GuiElements.create.group(0,0);
+	this.group = GuiElements.create.group(0, 0);
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
 	let overlayType = Overlay.types.connectionList;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,layer);
-	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, RCL.bgColor, RCL.bnMargin, this.group, this, layer);
+	this.bubbleOverlay.display(this.x, this.x, this.upperY, this.lowerY, RCL.width, RCL.height);
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
 };
-RobotConnectionList.prototype.checkPendingUpdate = function(){
-	if(this.updatePending){
+
+/**
+ * Checks if the list needs to be updated and tries if it does
+ */
+RobotConnectionList.prototype.checkPendingUpdate = function() {
+	if (this.updatePending) {
 		this.updateRobotList(this.deviceClass.getManager().getDiscoverCache());
 	}
 };
-RobotConnectionList.prototype.updateRobotList=function(robotArray){
+
+/**
+ * Updates the RobotConnectionList to contain the robots in the provided list
+ * @param {string} jsonArray - A JSON-encoded array of robots as a string
+ */
+RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	const RCL = RobotConnectionList;
 	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
-	if(TouchReceiver.touchDown || !this.visible || isScrolling){
+	if (TouchReceiver.touchDown || !this.visible || isScrolling) {
+		// Can't update, mark update pending and return
 		this.updatePending = true;
 		this.updateTimer.start();
 		return;
 	}
+	// We're updating, so the pending update is cleared
 	this.updatePending = false;
 	this.updateTimer.stop();
+	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
+	 * Robots to swap places. */
 	const includeConnected = this.index !== null;
-	robotArray = this.deviceClass.getManager().fromJsonArrayString(robotArray, includeConnected, this.index);
-	let oldScroll=null;
-	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.getScroll();
+	const robotArray = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+
+	// We perform the update and try to keep the scrolling the same
+	let oldScroll = null;
+	if (this.menuBnList != null) {
+		oldScroll = this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	let layer = GuiElements.layers.overlayOverlayScroll;
-	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
+	this.menuBnList = new SmoothMenuBnList(this, this.group, 0, 0, RCL.width, layer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(RCL.height);
-	for(let i=0; i < robotArray.length;i++) {
+	for (let i = 0; i < robotArray.length; i++) {
 		this.addBnListOption(robotArray[i]);
 	}
 	this.menuBnList.show();
-	if(oldScroll != null) {
+	if (oldScroll != null) {
 		this.menuBnList.setScroll(oldScroll);
 	}
 };
-RobotConnectionList.prototype.addBnListOption=function(robot){
+
+/**
+ * Adds an option to the menuBnList for the provided robot
+ * @param {Device} robot
+ */
+RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
-	this.menuBnList.addOption(robot.name,function(){
+	this.menuBnList.addOption(robot.name, function() {
 		me.close();
-		if(me.index == null){
+		if (me.index == null) {
 			me.deviceClass.getManager().appendDevice(robot);
 		} else {
 			me.deviceClass.getManager().setOrSwapDevice(me.index, robot);
 		}
 	});
 };
-RobotConnectionList.prototype.close=function(){
+
+/**
+ * Closes the list
+ */
+RobotConnectionList.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.visible = false;
 	this.updateTimer.stop();
-	if(this.menuBnList != null) this.menuBnList.hide();
+	if (this.menuBnList != null) this.menuBnList.hide();
 };
-RobotConnectionList.prototype.relToAbsX = function(x){
-	if(!this.visible) return x;
+
+/* Convert between relative and absolute coordinates */
+RobotConnectionList.prototype.relToAbsX = function(x) {
+	if (!this.visible) return x;
 	return this.bubbleOverlay.relToAbsX(x);
 };
-RobotConnectionList.prototype.relToAbsY = function(y){
-	if(!this.visible) return y;
+RobotConnectionList.prototype.relToAbsY = function(y) {
+	if (!this.visible) return y;
 	return this.bubbleOverlay.relToAbsY(y);
 };
 
