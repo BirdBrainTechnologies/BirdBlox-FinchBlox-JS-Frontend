@@ -1,3 +1,9 @@
+# This script creates the all.js file by concatenating all the js files mentioned in HummingbirdDragAndDrop2.html
+# into one file, in order.  They also remove all occurrences of "use strict"; from the middle of the file,
+# including that line only once, at the top of the file.  They turn off mouse mode by replacing "DO.mouse = true;" with
+# "DO.mouse = false;".  All these modifications are performed with simple string.replace functions, so be careful not
+# to use these strings anywhere the script does not expect them to appear.
+
 import re
 import os
 

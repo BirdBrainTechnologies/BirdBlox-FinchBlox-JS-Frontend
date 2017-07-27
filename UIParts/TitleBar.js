@@ -2,7 +2,6 @@
  * The bar at the top of the screen.  The TitleBar is a static class which builds the title bar when TitleBar() is
  * called by GuiElements.  It changes its appearance on small screens, becoming shorter and adding a show/hide button
  * to show/hide the BlockPalette.  Its title shows the name of the current project.
- * @constructor
  */
 function TitleBar() {
 	let TB = TitleBar;
