@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RecordingManager.js" afterPath="$PROJECT_DIR$/RecordingManager.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Setting.js" afterPath="$PROJECT_DIR$/Setting.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SettingsManager.js" afterPath="$PROJECT_DIR$/SettingsManager.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -21,11 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/SaveManager.js">
+      <file leaf-file-name="SettingsManager.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/SettingsManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3019">
-              <caret line="492" column="33" lean-forward="false" selection-start-line="492" selection-start-column="33" selection-end-line="492" selection-end-column="33" />
+            <state relative-caret-position="336">
+              <caret line="16" column="35" lean-forward="false" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -115,8 +118,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputWidget.js" />
@@ -164,8 +165,10 @@
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/HttpRequestBuilder.js" />
         <option value="$PROJECT_DIR$/List.js" />
-        <option value="$PROJECT_DIR$/RecordingManager.js" />
+        <option value="$PROJECT_DIR$/Setting.js" />
         <option value="$PROJECT_DIR$/SaveManager.js" />
+        <option value="$PROJECT_DIR$/SettingsManager.js" />
+        <option value="$PROJECT_DIR$/RecordingManager.js" />
       </list>
     </option>
   </component>
@@ -183,8 +186,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="438" />
-    <option name="y" value="-19" />
+    <option name="x" value="802" />
+    <option name="y" value="-9" />
     <option name="width" value="1050" />
     <option name="height" value="1038" />
   </component>
@@ -507,7 +510,7 @@
       <workItem from="1501024094533" duration="811000" />
       <workItem from="1501032948714" duration="5657000" />
       <workItem from="1501075885204" duration="19981000" />
-      <workItem from="1501162122394" duration="25569000" />
+      <workItem from="1501162122394" duration="26236000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -604,7 +607,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1550578000" />
+    <option name="totallyTimeSpent" value="1551245000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1445,22 +1448,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Setting.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-89">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SettingsManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="5" column="1" lean-forward="true" selection-start-line="5" selection-start-column="1" selection-end-line="5" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Button.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="418">
@@ -2024,65 +2011,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RecordingManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="667">
-          <caret line="199" column="2" lean-forward="true" selection-start-line="199" selection-start-column="2" selection-end-line="199" selection-end-column="2" />
-          <folding>
-            <element signature="n#!!doc;n#RecordingManager#0" expanded="false" />
-            <element signature="n#!!block;n#RecordingManager#0" expanded="false" />
-            <element signature="e#116#137#0" expanded="false" />
-            <element signature="e#160#206#0" expanded="false" />
-            <element signature="e#375#578#0" expanded="false" />
-            <element signature="e#646#709#0" expanded="false" />
-            <element signature="e#712#912#0" expanded="false" />
-            <element signature="e#975#1035#0" expanded="false" />
-            <element signature="e#1038#1073#0" expanded="false" />
-            <element signature="e#1116#1747#0" expanded="false" />
-            <element signature="e#1282#1743#0" expanded="false" />
-            <element signature="e#1310#1451#0" expanded="false" />
-            <element signature="e#1491#1657#0" expanded="false" />
-            <element signature="e#1702#1740#0" expanded="false" />
-            <element signature="e#1750#1795#0" expanded="false" />
-            <element signature="e#1837#2119#0" expanded="false" />
-            <element signature="e#1956#2041#0" expanded="false" />
-            <element signature="e#2122#2194#0" expanded="false" />
-            <element signature="e#2243#2353#0" expanded="false" />
-            <element signature="e#2356#2403#0" expanded="false" />
-            <element signature="e#2446#2841#0" expanded="false" />
-            <element signature="e#2566#2651#0" expanded="false" />
-            <element signature="e#2679#2762#0" expanded="false" />
-            <element signature="e#2844#2904#0" expanded="false" />
-            <element signature="e#2951#3467#0" expanded="false" />
-            <element signature="e#3007#3092#0" expanded="false" />
-            <element signature="e#3278#3454#0" expanded="false" />
-            <element signature="e#3301#3451#0" expanded="false" />
-            <element signature="e#3470#3518#0" expanded="false" />
-            <element signature="e#3564#3967#0" expanded="false" />
-            <element signature="e#3686#3771#0" expanded="false" />
-            <element signature="e#3800#3887#0" expanded="false" />
-            <element signature="e#3970#4123#0" expanded="false" />
-            <element signature="e#4178#4218#0" expanded="false" />
-            <element signature="e#4221#4348#0" expanded="false" />
-            <element signature="e#4392#5073#0" expanded="false" />
-            <element signature="e#4533#4741#0" expanded="false" />
-            <element signature="e#4563#4738#0" expanded="false" />
-            <element signature="e#4776#4940#0" expanded="false" />
-            <element signature="e#4808#4937#0" expanded="false" />
-            <element signature="e#4947#5071#0" expanded="false" />
-            <element signature="e#4979#5068#0" expanded="false" />
-            <element signature="e#5076#5140#0" expanded="false" />
-            <element signature="e#5184#5268#0" expanded="false" />
-            <element signature="e#5271#5360#0" expanded="false" />
-            <element signature="e#5405#5497#0" expanded="false" />
-            <element signature="e#5500#5591#0" expanded="false" />
-            <element signature="e#5639#5807#0" expanded="false" />
-            <element signature="e#5695#5805#0" expanded="false" />
-            <element signature="e#5773#5802#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="273">
@@ -2093,8 +2021,83 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SaveManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3019">
-          <caret line="492" column="33" lean-forward="false" selection-start-line="492" selection-start-column="33" selection-end-line="492" selection-end-column="33" />
+        <state relative-caret-position="751">
+          <caret line="498" column="2" lean-forward="false" selection-start-line="498" selection-start-column="2" selection-end-line="498" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RecordingManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="751">
+          <caret line="197" column="2" lean-forward="false" selection-start-line="197" selection-start-column="2" selection-end-line="197" selection-end-column="2" />
+          <folding>
+            <element signature="n#!!doc;n#RecordingManager#0" expanded="false" />
+            <element signature="n#!!block;n#RecordingManager#0" expanded="false" />
+            <element signature="e#117#138#0" expanded="false" />
+            <element signature="e#161#207#0" expanded="false" />
+            <element signature="e#376#579#0" expanded="false" />
+            <element signature="e#648#711#0" expanded="false" />
+            <element signature="e#714#914#0" expanded="false" />
+            <element signature="e#980#1040#0" expanded="false" />
+            <element signature="e#1043#1078#0" expanded="false" />
+            <element signature="e#1124#1762#0" expanded="false" />
+            <element signature="e#1291#1758#0" expanded="false" />
+            <element signature="e#1321#1462#0" expanded="false" />
+            <element signature="e#1504#1671#0" expanded="false" />
+            <element signature="e#1717#1755#0" expanded="false" />
+            <element signature="e#1765#1810#0" expanded="false" />
+            <element signature="e#1855#2137#0" expanded="false" />
+            <element signature="e#1974#2059#0" expanded="false" />
+            <element signature="e#2140#2212#0" expanded="false" />
+            <element signature="e#2262#2372#0" expanded="false" />
+            <element signature="e#2375#2422#0" expanded="false" />
+            <element signature="e#2468#2864#0" expanded="false" />
+            <element signature="e#2588#2673#0" expanded="false" />
+            <element signature="e#2702#2785#0" expanded="false" />
+            <element signature="e#2867#2927#0" expanded="false" />
+            <element signature="e#2975#3493#0" expanded="false" />
+            <element signature="e#3031#3116#0" expanded="false" />
+            <element signature="e#3303#3480#0" expanded="false" />
+            <element signature="e#3327#3477#0" expanded="false" />
+            <element signature="e#3496#3544#0" expanded="false" />
+            <element signature="e#3591#3995#0" expanded="false" />
+            <element signature="e#3713#3798#0" expanded="false" />
+            <element signature="e#3828#3915#0" expanded="false" />
+            <element signature="e#3998#4151#0" expanded="false" />
+            <element signature="e#4207#4247#0" expanded="false" />
+            <element signature="e#4250#4377#0" expanded="false" />
+            <element signature="e#4422#5107#0" expanded="false" />
+            <element signature="e#4565#4776#0" expanded="false" />
+            <element signature="e#4597#4773#0" expanded="false" />
+            <element signature="e#4811#4975#0" expanded="false" />
+            <element signature="e#4843#4972#0" expanded="false" />
+            <element signature="e#4981#5105#0" expanded="false" />
+            <element signature="e#5013#5102#0" expanded="false" />
+            <element signature="e#5110#5174#0" expanded="false" />
+            <element signature="e#5219#5303#0" expanded="false" />
+            <element signature="e#5306#5395#0" expanded="false" />
+            <element signature="e#5441#5533#0" expanded="false" />
+            <element signature="e#5536#5627#0" expanded="false" />
+            <element signature="e#5676#5848#0" expanded="false" />
+            <element signature="e#5734#5846#0" expanded="false" />
+            <element signature="e#5814#5843#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Setting.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SettingsManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="16" column="35" lean-forward="false" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
           <folding />
         </state>
       </provider>
