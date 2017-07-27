@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/List.js" afterPath="$PROJECT_DIR$/List.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RecordingManager.js" afterPath="$PROJECT_DIR$/RecordingManager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all.js" afterPath="$PROJECT_DIR$/all.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,72 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="RecordingManager.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/RecordingManager.js">
+      <file leaf-file-name="SaveManager.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/SaveManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="646">
-              <caret line="188" column="0" lean-forward="false" selection-start-line="188" selection-start-column="0" selection-end-line="188" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc;n#RecordingManager#0" expanded="false" />
-                <element signature="n#!!block;n#RecordingManager#0" expanded="false" />
-                <element signature="e#116#137#0" expanded="false" />
-                <element signature="e#160#206#0" expanded="false" />
-                <element signature="e#375#578#0" expanded="false" />
-                <element signature="e#646#709#0" expanded="false" />
-                <element signature="e#712#912#0" expanded="false" />
-                <element signature="e#975#1035#0" expanded="false" />
-                <element signature="e#1038#1073#0" expanded="false" />
-                <element signature="e#1116#1747#0" expanded="false" />
-                <element signature="e#1282#1743#0" expanded="false" />
-                <element signature="e#1310#1451#0" expanded="false" />
-                <element signature="e#1491#1657#0" expanded="false" />
-                <element signature="e#1702#1740#0" expanded="false" />
-                <element signature="e#1750#1795#0" expanded="false" />
-                <element signature="e#1837#2119#0" expanded="false" />
-                <element signature="e#1956#2041#0" expanded="false" />
-                <element signature="e#2122#2194#0" expanded="false" />
-                <element signature="e#2243#2353#0" expanded="false" />
-                <element signature="e#2356#2403#0" expanded="false" />
-                <element signature="e#2446#2841#0" expanded="false" />
-                <element signature="e#2566#2651#0" expanded="false" />
-                <element signature="e#2679#2762#0" expanded="false" />
-                <element signature="e#2844#2904#0" expanded="false" />
-                <element signature="e#2951#3467#0" expanded="false" />
-                <element signature="e#3007#3092#0" expanded="false" />
-                <element signature="e#3278#3454#0" expanded="false" />
-                <element signature="e#3301#3451#0" expanded="false" />
-                <element signature="e#3470#3518#0" expanded="false" />
-                <element signature="e#3564#3967#0" expanded="false" />
-                <element signature="e#3686#3771#0" expanded="false" />
-                <element signature="e#3800#3887#0" expanded="false" />
-                <element signature="e#3970#4123#0" expanded="false" />
-                <element signature="e#4178#4218#0" expanded="false" />
-                <element signature="e#4221#4348#0" expanded="false" />
-                <element signature="e#4392#5073#0" expanded="false" />
-                <element signature="e#4533#4741#0" expanded="false" />
-                <element signature="e#4563#4738#0" expanded="false" />
-                <element signature="e#4776#4940#0" expanded="false" />
-                <element signature="e#4808#4937#0" expanded="false" />
-                <element signature="e#4947#5071#0" expanded="false" />
-                <element signature="e#4979#5068#0" expanded="false" />
-                <element signature="e#5076#5140#0" expanded="false" />
-                <element signature="e#5184#5268#0" expanded="false" />
-                <element signature="e#5271#5360#0" expanded="false" />
-                <element signature="e#5405#5497#0" expanded="false" />
-                <element signature="e#5500#5591#0" expanded="false" />
-                <element signature="e#5639#5807#0" expanded="false" />
-                <element signature="e#5695#5805#0" expanded="false" />
-                <element signature="e#5773#5802#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Sound.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+            <state relative-caret-position="3019">
+              <caret line="492" column="33" lean-forward="false" selection-start-line="492" selection-start-column="33" selection-end-line="492" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -178,7 +115,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/LabelWidget.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputSystem.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
@@ -229,6 +165,7 @@
         <option value="$PROJECT_DIR$/HttpRequestBuilder.js" />
         <option value="$PROJECT_DIR$/List.js" />
         <option value="$PROJECT_DIR$/RecordingManager.js" />
+        <option value="$PROJECT_DIR$/SaveManager.js" />
       </list>
     </option>
   </component>
@@ -570,7 +507,7 @@
       <workItem from="1501024094533" duration="811000" />
       <workItem from="1501032948714" duration="5657000" />
       <workItem from="1501075885204" duration="19981000" />
-      <workItem from="1501162122394" duration="22544000" />
+      <workItem from="1501162122394" duration="25569000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -667,7 +604,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1547553000" />
+    <option name="totallyTimeSpent" value="1550578000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1986,14 +1923,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/SaveManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" column="4" lean-forward="false" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DebugOptions.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="294">
@@ -2095,18 +2024,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RecordingManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="646">
-          <caret line="188" column="0" lean-forward="false" selection-start-line="188" selection-start-column="0" selection-end-line="188" selection-end-column="0" />
+        <state relative-caret-position="667">
+          <caret line="199" column="2" lean-forward="true" selection-start-line="199" selection-start-column="2" selection-end-line="199" selection-end-column="2" />
           <folding>
             <element signature="n#!!doc;n#RecordingManager#0" expanded="false" />
             <element signature="n#!!block;n#RecordingManager#0" expanded="false" />
@@ -2159,6 +2080,22 @@
             <element signature="e#5695#5805#0" expanded="false" />
             <element signature="e#5773#5802#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SaveManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3019">
+          <caret line="492" column="33" lean-forward="false" selection-start-line="492" selection-start-column="33" selection-end-line="492" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
