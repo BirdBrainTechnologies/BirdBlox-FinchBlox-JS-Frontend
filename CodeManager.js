@@ -697,7 +697,6 @@ CodeManager.importXml = function(projectNode) {
 	BlockPalette.refresh();
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
-	UndoManager.clearUndos();
 	TouchReceiver.enableInteraction();
 };
 
@@ -715,6 +714,7 @@ CodeManager.deleteAll = function() {
 	const CM = CodeManager;
 	CM.stop();
 	TabManager.deleteAll();
+	UndoManager.clearUndos();
 	CodeManager();
 };
 
