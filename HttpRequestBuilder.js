@@ -1,8 +1,4 @@
 /**
- * Created by Tom on 6/12/2017.
- */
-
-/**
  * Represents a request to be used with HtmlServer
  * @param url {String} - The beginning of the request
  * @constructor
@@ -12,10 +8,11 @@ function HttpRequestBuilder(url){
 	this.request = url;
 	this.hasFirstParam = false;
 }
+
 /**
  * Adds a get parameter with the given key and value
  * @param key {String}
- * @param value {String} - The value will be escaped with
+ * @param value {String} - The value, which will be percent encoded before it is sent
  */
 HttpRequestBuilder.prototype.addParam = function(key, value){
 	if(!this.hasFirstParam){
@@ -28,6 +25,7 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	this.request += "=";
 	this.request += HtmlServer.encodeHtml(value);
 };
+
 /**
  * Returns the request to give to HtmlServer
  * @returns {String}
