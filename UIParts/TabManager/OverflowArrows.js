@@ -1,5 +1,8 @@
-function OverflowArrows(){
-	var OA = OverflowArrows;
+/**
+ * A set of four arrows around the edges of the canvas that show off screen Blocks
+ * @constructor
+ */
+function OverflowArrows() {
 	this.group = GuiElements.create.group(0, 0);
 	this.triTop = this.makeTriangle();
 	this.triLeft = this.makeTriangle();
@@ -8,75 +11,117 @@ function OverflowArrows(){
 	this.setArrowPos();
 	this.visible = false;
 }
-OverflowArrows.prototype.makeTriangle=function(){
-	var OA = OverflowArrows;
-	var tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.white);
-	GuiElements.update.opacity(tri, OA.opacity);
-	GuiElements.makeClickThrough(tri);
-	return tri;
-};
-OverflowArrows.setConstants=function(){
-	var OA = OverflowArrows;
+
+OverflowArrows.setConstants = function() {
+	const OA = OverflowArrows;
 	OA.triangleW = 25;
 	OA.triangleH = 15;
 	OA.margin = 15;
 	OA.opacity = 0.5;
 };
-OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
-	if(left == right) {
+
+/**
+ * Creates an SVG path element of the correct color.  The actual path information will be added later.
+ * @return {Element} - The SVG path element
+ */
+OverflowArrows.prototype.makeTriangle = function() {
+	const OA = OverflowArrows;
+	const tri = GuiElements.create.path();
+	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.opacity(tri, OA.opacity);
+	GuiElements.makeClickThrough(tri);
+	return tri;
+};
+
+/**
+ * Updates the visibility of the arrows given the active region of the canvas. If the canvas extends beyond an arrow
+ * in one direction, then that arrow becomes visible to indicate off screen blocks
+ * @param {number} left - The left boundary of the canvas
+ * @param {number} right - The right boundary of the canvas
+ * @param {number} top - The top boundary of the canvas
+ * @param {number} bottom - The bottom boundary of the canvas
+ */
+OverflowArrows.prototype.setArrows = function(left, right, top, bottom) {
+	if (left === right) {
+		// If the width of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triLeft, false);
 		this.showIfTrue(this.triRight, false);
-	}
-	else{
+	} else {
 		this.showIfTrue(this.triLeft, left < this.left);
 		this.showIfTrue(this.triRight, right > this.right);
 	}
-	if(top == bottom){
+	if (top === bottom) {
+		// If the height of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triTop, false);
 		this.showIfTrue(this.triBottom, false);
-	}
-	else {
+	} else {
 		this.showIfTrue(this.triTop, top < this.top);
 		this.showIfTrue(this.triBottom, bottom > this.bottom);
 	}
 };
-OverflowArrows.prototype.showIfTrue=function(tri,shouldShow){
-	if(shouldShow){
+
+/**
+ * Sets the visibility of the triangle according to the boolean parameter
+ * @param {Element} tri - The path to set the visibility of
+ * @param {boolean} shouldShow - Whether the path should be visible of not.
+ */
+OverflowArrows.prototype.showIfTrue = function(tri, shouldShow) {
+	if (shouldShow) {
 		this.group.appendChild(tri);
-	} else{
+	} else {
 		tri.remove();
 	}
 };
-OverflowArrows.prototype.show=function(){
-	if(!this.visible) {
+
+/**
+ * Makes all overflow arrows visible
+ */
+OverflowArrows.prototype.show = function() {
+	if (!this.visible) {
 		this.visible = true;
 		GuiElements.layers.overflowArr.appendChild(this.group);
 	}
 };
-OverflowArrows.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Makes all overflow arrows hidden
+ */
+OverflowArrows.prototype.hide = function() {
+	if (this.visible) {
 		this.visible = false;
 		this.group.remove();
 	}
 };
-OverflowArrows.prototype.updateZoom=function(){
+
+/**
+ * Recomputes the positions of the overflow arrows
+ */
+OverflowArrows.prototype.updateZoom = function() {
 	this.setArrowPos();
 };
-OverflowArrows.prototype.setArrowPos=function(){
-	var OA = OverflowArrows;
+
+/**
+ * Moves overflowArrows to the correct positions and stores the boundary of the portion of the screen for the canvas
+ */
+OverflowArrows.prototype.setArrowPos = function() {
+	const OA = OverflowArrows;
 	this.left = BlockPalette.width;
-	if(!GuiElements.paletteLayersVisible) {
+	if (!GuiElements.paletteLayersVisible) {
 		this.left = 0;
 	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
-	this.midX = (this.left + this.right) / 2;
-	this.midY = (this.top + this.bottom) / 2;
 
-	GuiElements.update.triangleFromPoint(this.triTop, this.midX, this.top + OA.margin, OA.triangleW, OA.triangleH, true);
-	GuiElements.update.triangleFromPoint(this.triLeft, this.left + OA.margin, this.midY, OA.triangleW, OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triRight, this.right - OA.margin, this.midY, OA.triangleW, -OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triBottom, this.midX, this.bottom - OA.margin, OA.triangleW, -OA.triangleH, true);
+	const midX = (this.left + this.right) / 2;
+	const midY = (this.top + this.bottom) / 2;
+	const topY = this.top + OA.margin;
+	const bottomY = this.bottom - OA.margin;
+	const leftX = this.left + OA.margin;
+	const rightX = this.right - OA.margin;
+
+	GuiElements.update.triangleFromPoint(this.triTop, midX, topY, OA.triangleW, OA.triangleH, true);
+	GuiElements.update.triangleFromPoint(this.triLeft, leftX, midY, OA.triangleW, OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triRight, rightX, midY, OA.triangleW, -OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triBottom, midX, bottomY, OA.triangleW, -OA.triangleH, true);
 };

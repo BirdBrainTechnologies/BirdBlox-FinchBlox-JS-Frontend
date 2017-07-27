@@ -7426,10 +7426,19 @@ Overlay.closeOverlaysOfType = function(type){
 	});
 };
 /**
- * Created by Tom on 6/18/2017.
+ * Completely unrelated to the TabManager and Tab classes.  The TabRow provides UI for a row of tabs, which when
+ * when selected call a callback function.  They are used in the ConnectMultipleDialog and OpenDialog.  A TabRow
+ * is created through the constructor and Tabs are added with addTab.  show() causes the tabs to be built
+ * @param {number} x - The x coord of where the TabRow should be drawn
+ * @param {number} y - The y coord of where the TabRow should be drawn
+ * @param {number} width - The width of the space available to the TabRow
+ * @param {number} height - The height of the space available to the TabRow
+ * @param {Element} parent - The group the RabRow should add itself to
+ * @param {number|null} [initialTab] - The index of the tab to select first.  If null, no tab will appear selected
+ * @constructor
  */
-function TabRow(x, y, width, height, parent, initialTab){
-	if(initialTab == null){
+function TabRow(x, y, width, height, parent, initialTab) {
+	if (initialTab == null) {
 		initialTab = null;
 	}
 	this.tabList = [];
@@ -7439,11 +7448,11 @@ function TabRow(x, y, width, height, parent, initialTab){
 	this.width = width;
 	this.height = height;
 	this.callbackFn = null;
-	this.initalTab = initialTab;
 	this.selectedTab = initialTab;
 	this.partOfOverlay = null;
 }
-TabRow.setConstants = function(){
+
+TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
 	TR.deselectedColor = Colors.darkGray;
@@ -7455,25 +7464,41 @@ TabRow.setConstants = function(){
 	TR.closeHeight = 30;
 	TR.closeMargin = 9;
 };
-TabRow.prototype.show = function(){
+
+/**
+ * Builds the tabs and shows the UI
+ */
+TabRow.prototype.show = function() {
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
 	this.createTabs();
-	if(this.selectedTab != null) {
+	if (this.selectedTab != null) {
 		this.visuallySelectTab(this.selectedTab);
 	}
 };
-TabRow.prototype.addTab = function(text, id, closeFn){
+
+/**
+ * Adds a tab to the list of tabs to be built
+ * @param {string} text - The label to put on the tab
+ * @param {*} id - The id of the tab.  Sent to the callback function when a tab is selected
+ * @param {function|null} [closeFn] - The function to call when this tab is closed.  If provided, a close button will
+ *                                    be drawn on the Tab
+ */
+TabRow.prototype.addTab = function(text, id, closeFn) {
 	let entry = {};
 	entry.text = text;
 	entry.id = id;
 	entry.closeFn = closeFn;
 	this.tabList.push(entry);
 };
-TabRow.prototype.createTabs = function(){
+
+/**
+ * Renders the tabs and close buttons according to the labList
+ */
+TabRow.prototype.createTabs = function() {
 	let tabCount = this.tabList.length;
 	let tabWidth = this.width / tabCount;
 	this.tabEList = [];
-	this.tabList.forEach(function(entry, index){
+	this.tabList.forEach(function(entry, index) {
 		const tabX = index * tabWidth;
 		const hasClose = entry.closeFn != null;
 		this.tabEList.push(this.createTab(index, entry.text, tabWidth, tabX, hasClose));
@@ -7482,7 +7507,16 @@ TabRow.prototype.createTabs = function(){
 		}
 	}.bind(this));
 };
-TabRow.prototype.createTab = function(index, text, width, x, hasClose){
+
+/**
+ * Creates a tab with the specified label and width
+ * @param {number} index - The index of the tab, used to add the correct listeners to the tab
+ * @param {string} text - The text to place on the top of the tab
+ * @param {number} width - The width of the tab
+ * @param {number} x - The x coord of the tab
+ * @param {boolean} hasClose - Whether space should be reserved for a close button
+ */
+TabRow.prototype.createTab = function(index, text, width, x, hasClose) {
 	const TR = TabRow;
 
 	let textMaxWidth = width - 2 * TR.slantW;
@@ -7508,32 +7542,66 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose){
 	this.group.appendChild(textE);
 	return tabE;
 };
+
+/**
+ * Creates a button to close the tab
+ * @param {number} tabX - The x coord of the tab
+ * @param {number} tabW - The width of the tab
+ * @param {function} closeFn - The function to call when the close button is tapped
+ */
 TabRow.prototype.createClose = function(tabX, tabW, closeFn) {
 	const TR = TabRow;
 	const cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
 	const cy = this.height / 2;
 	const closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
 };
-TabRow.prototype.selectTab = function(index){
-	if(index !== this.selectTab) {
+
+/**
+ * Makes the tab appear selected and calls the callbackFn with the id of the selected tab.
+ * @param index
+ */
+TabRow.prototype.selectTab = function(index) {
+	if (index !== this.selectTab) {
 		this.selectedTab = index;
-		this.visuallySelectTab(index);
+		this.visuallySelectTab(index);   // TODO: make this also deselect the selected tab
 		if (this.callbackFn != null) this.callbackFn(this.tabList[index].id);
 	}
 };
-TabRow.prototype.visuallySelectTab = function(index){
+
+/**
+ * Makes a tab appear selected
+ * @param {number} index - The tab to select
+ */
+TabRow.prototype.visuallySelectTab = function(index) {
 	let TR = TabRow;
 	let tabE = this.tabEList[index];
 	GuiElements.update.color(tabE, TR.selectedColor);
 };
-TabRow.prototype.setCallbackFunction = function(callback){
+
+/**
+ * Registers a callback function for when tabs are selected.  The function will be called with the id of the selected
+ * tab
+ * @param {function} callback - type (type of id) -> ()
+ */
+TabRow.prototype.setCallbackFunction = function(callback) {
 	this.callbackFn = callback;
 };
-TabRow.prototype.markAsOverlayPart = function(overlay){
+
+/**
+ * Notes that the TabRow is a member of the provided overlay and shouldn't close it.
+ * @param {Overlay} overlay
+ */
+TabRow.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
 /**
- * Created by Tom on 7/17/2017.
+ * A round button with an x that calls the specified function when tapped
+ * @param {number} cx - The x coord of the center of the button
+ * @param {number} cy - The y coord of the center of the button
+ * @param {number} height - The height of the button (diameter)
+ * @param {function} callbackFn - The function to call when the button is tapped
+ * @param {Element} group - The SVG group to add the button to
+ * @constructor
  */
 function CloseButton(cx, cy, height, callbackFn, group){
 	const CB = CloseButton;
@@ -7546,6 +7614,7 @@ function CloseButton(cx, cy, height, callbackFn, group){
 	TouchReceiver.addListenersBN(this.circleE,this);
 	this.callbackFn = callbackFn;
 }
+
 CloseButton.setGraphics=function(){
 	const CB = CloseButton;
 	CB.bg = Button.bg;
@@ -7554,12 +7623,20 @@ CloseButton.setGraphics=function(){
 	CB.highlightFore = Button.highlightFore;
 	CB.iconHMult = 0.5;
 };
+
+/**
+ * Makes the button appear to be pressed
+ */
 CloseButton.prototype.press=function(){
 	if(!this.pressed){
 		this.pressed=true;
 		this.setColor(true);
 	}
 };
+
+/**
+ * Makes the button appear to be released and calls the callback
+ */
 CloseButton.prototype.release=function(){
 	if(this.pressed){
 		this.pressed = false;
@@ -7567,15 +7644,29 @@ CloseButton.prototype.release=function(){
 		this.callbackFn();
 	}
 };
+
+/**
+ * Makes the function appear to be released without triggering the callback (for when a dialog is shown)
+ */
 CloseButton.prototype.interrupt=function(){
 	if(this.pressed){
 		this.pressed = false;
 		this.setColor(false);
 	}
 };
+
+/**
+ * Marks this button as a member of the specified overlay so it doesn't close it
+ * @param {Overlay} overlay
+ */
 CloseButton.prototype.markAsOverlayPart = function(overlay){
 	this.partOfOverlay = overlay;
 };
+
+/**
+ * Sets the color of the button to match its pressed/not pressed state
+ * @param {boolean} isPressed - Whether the button is pressed
+ */
 CloseButton.prototype.setColor = function(isPressed) {
 	const CB = CloseButton;
 	if (isPressed) {
@@ -14023,8 +14114,11 @@ FileContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide()
 };
-function OverflowArrows(){
-	var OA = OverflowArrows;
+/**
+ * A set of four arrows around the edges of the canvas that show off screen Blocks
+ * @constructor
+ */
+function OverflowArrows() {
 	this.group = GuiElements.create.group(0, 0);
 	this.triTop = this.makeTriangle();
 	this.triLeft = this.makeTriangle();
@@ -14033,77 +14127,119 @@ function OverflowArrows(){
 	this.setArrowPos();
 	this.visible = false;
 }
-OverflowArrows.prototype.makeTriangle=function(){
-	var OA = OverflowArrows;
-	var tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.white);
-	GuiElements.update.opacity(tri, OA.opacity);
-	GuiElements.makeClickThrough(tri);
-	return tri;
-};
-OverflowArrows.setConstants=function(){
-	var OA = OverflowArrows;
+
+OverflowArrows.setConstants = function() {
+	const OA = OverflowArrows;
 	OA.triangleW = 25;
 	OA.triangleH = 15;
 	OA.margin = 15;
 	OA.opacity = 0.5;
 };
-OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
-	if(left == right) {
+
+/**
+ * Creates an SVG path element of the correct color.  The actual path information will be added later.
+ * @return {Element} - The SVG path element
+ */
+OverflowArrows.prototype.makeTriangle = function() {
+	const OA = OverflowArrows;
+	const tri = GuiElements.create.path();
+	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.opacity(tri, OA.opacity);
+	GuiElements.makeClickThrough(tri);
+	return tri;
+};
+
+/**
+ * Updates the visibility of the arrows given the active region of the canvas. If the canvas extends beyond an arrow
+ * in one direction, then that arrow becomes visible to indicate off screen blocks
+ * @param {number} left - The left boundary of the canvas
+ * @param {number} right - The right boundary of the canvas
+ * @param {number} top - The top boundary of the canvas
+ * @param {number} bottom - The bottom boundary of the canvas
+ */
+OverflowArrows.prototype.setArrows = function(left, right, top, bottom) {
+	if (left === right) {
+		// If the width of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triLeft, false);
 		this.showIfTrue(this.triRight, false);
-	}
-	else{
+	} else {
 		this.showIfTrue(this.triLeft, left < this.left);
 		this.showIfTrue(this.triRight, right > this.right);
 	}
-	if(top == bottom){
+	if (top === bottom) {
+		// If the height of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triTop, false);
 		this.showIfTrue(this.triBottom, false);
-	}
-	else {
+	} else {
 		this.showIfTrue(this.triTop, top < this.top);
 		this.showIfTrue(this.triBottom, bottom > this.bottom);
 	}
 };
-OverflowArrows.prototype.showIfTrue=function(tri,shouldShow){
-	if(shouldShow){
+
+/**
+ * Sets the visibility of the triangle according to the boolean parameter
+ * @param {Element} tri - The path to set the visibility of
+ * @param {boolean} shouldShow - Whether the path should be visible of not.
+ */
+OverflowArrows.prototype.showIfTrue = function(tri, shouldShow) {
+	if (shouldShow) {
 		this.group.appendChild(tri);
-	} else{
+	} else {
 		tri.remove();
 	}
 };
-OverflowArrows.prototype.show=function(){
-	if(!this.visible) {
+
+/**
+ * Makes all overflow arrows visible
+ */
+OverflowArrows.prototype.show = function() {
+	if (!this.visible) {
 		this.visible = true;
 		GuiElements.layers.overflowArr.appendChild(this.group);
 	}
 };
-OverflowArrows.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Makes all overflow arrows hidden
+ */
+OverflowArrows.prototype.hide = function() {
+	if (this.visible) {
 		this.visible = false;
 		this.group.remove();
 	}
 };
-OverflowArrows.prototype.updateZoom=function(){
+
+/**
+ * Recomputes the positions of the overflow arrows
+ */
+OverflowArrows.prototype.updateZoom = function() {
 	this.setArrowPos();
 };
-OverflowArrows.prototype.setArrowPos=function(){
-	var OA = OverflowArrows;
+
+/**
+ * Moves overflowArrows to the correct positions and stores the boundary of the portion of the screen for the canvas
+ */
+OverflowArrows.prototype.setArrowPos = function() {
+	const OA = OverflowArrows;
 	this.left = BlockPalette.width;
-	if(!GuiElements.paletteLayersVisible) {
+	if (!GuiElements.paletteLayersVisible) {
 		this.left = 0;
 	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
-	this.midX = (this.left + this.right) / 2;
-	this.midY = (this.top + this.bottom) / 2;
 
-	GuiElements.update.triangleFromPoint(this.triTop, this.midX, this.top + OA.margin, OA.triangleW, OA.triangleH, true);
-	GuiElements.update.triangleFromPoint(this.triLeft, this.left + OA.margin, this.midY, OA.triangleW, OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triRight, this.right - OA.margin, this.midY, OA.triangleW, -OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triBottom, this.midX, this.bottom - OA.margin, OA.triangleW, -OA.triangleH, true);
+	const midX = (this.left + this.right) / 2;
+	const midY = (this.top + this.bottom) / 2;
+	const topY = this.top + OA.margin;
+	const bottomY = this.bottom - OA.margin;
+	const leftX = this.left + OA.margin;
+	const rightX = this.right - OA.margin;
+
+	GuiElements.update.triangleFromPoint(this.triTop, midX, topY, OA.triangleW, OA.triangleH, true);
+	GuiElements.update.triangleFromPoint(this.triLeft, leftX, midY, OA.triangleW, OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triRight, rightX, midY, OA.triangleW, -OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triBottom, midX, bottomY, OA.triangleW, -OA.triangleH, true);
 };
 /**
  * BlockStack is a class that holds a stack of Blocks.
