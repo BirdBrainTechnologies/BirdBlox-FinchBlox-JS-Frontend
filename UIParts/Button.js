@@ -379,6 +379,17 @@ Button.prototype.interrupt = function() {
 };
 
 /**
+ * Tells the button to exit the toggled state
+ */
+Button.prototype.unToggle = function() {
+	if (this.enabled && this.toggled) {
+		this.setColor(false);
+	}
+	this.toggled = false;
+	this.pressed = false;
+};
+
+/**
  * Removes the Button (supposed to be permanent)
  */
 Button.prototype.remove = function() {

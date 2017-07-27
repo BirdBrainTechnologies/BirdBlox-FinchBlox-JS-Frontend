@@ -2127,6 +2127,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+window.onresize = function() {
+	GuiElements.updateZoom();
+};
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	Data.setConstants();
@@ -2968,7 +2971,6 @@ GuiElements.updateZoom=function(){
 	GuiElements.zoomGroups.forEach(function(zoomGroup){
 		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
 	});
-	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };
 GuiElements.updateDimsPreview = function(newWidth, newHeight){
@@ -5446,7 +5448,7 @@ function TitleBar(){
 TitleBar.setGraphicsPart1=function(){
 	var TB=TitleBar;
 	if(GuiElements.smallMode) {
-		TB.height = 44;
+		TB.height = 35;
 		TB.buttonMargin=Button.defaultMargin / 2;
 	} else {
 		TB.height = 54;
@@ -5485,7 +5487,7 @@ TitleBar.setGraphicsPart2 = function(){
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
 	TB.titleLeftX = BlockPalette.width;
-	TB.titleRightX = TB.flagBnX - TB.buttonMargin;
+	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 };
 TitleBar.createBar=function(){
@@ -7307,6 +7309,17 @@ Button.prototype.interrupt = function() {
 		this.pressed = false;
 		this.setColor(false);
 	}
+};
+
+/**
+ * Tells the button to exit the toggled state
+ */
+Button.prototype.unToggle = function() {
+	if (this.enabled && this.toggled) {
+		this.setColor(false);
+	}
+	this.toggled = false;
+	this.pressed = false;
 };
 
 /**
@@ -10039,7 +10052,7 @@ DebugMenu.prototype.loadOptions = function() {
 DebugMenu.prototype.loadFile = function() {
 	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
 		if (!cancelled) {
-			SaveManager.backendOpen("Pasted file", resp, true);
+			SaveManager.backendOpen("Pasted file blash blah blah blah blah", resp, true);
 		}
 	});
 };

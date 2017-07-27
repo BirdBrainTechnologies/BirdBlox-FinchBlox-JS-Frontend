@@ -10,7 +10,7 @@ function TitleBar(){
 TitleBar.setGraphicsPart1=function(){
 	var TB=TitleBar;
 	if(GuiElements.smallMode) {
-		TB.height = 44;
+		TB.height = 35;
 		TB.buttonMargin=Button.defaultMargin / 2;
 	} else {
 		TB.height = 54;
@@ -49,7 +49,7 @@ TitleBar.setGraphicsPart2 = function(){
 	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
 
 	TB.titleLeftX = BlockPalette.width;
-	TB.titleRightX = TB.flagBnX - TB.buttonMargin;
+	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 };
 TitleBar.createBar=function(){

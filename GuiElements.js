@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
+window.onresize = function() {
+	GuiElements.updateZoom();
+};
 GuiElements.loadInitialSettings=function(callback){
 	DebugOptions();
 	Data.setConstants();
@@ -866,7 +869,6 @@ GuiElements.updateZoom=function(){
 	GuiElements.zoomGroups.forEach(function(zoomGroup){
 		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
 	});
-	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };
 GuiElements.updateDimsPreview = function(newWidth, newHeight){

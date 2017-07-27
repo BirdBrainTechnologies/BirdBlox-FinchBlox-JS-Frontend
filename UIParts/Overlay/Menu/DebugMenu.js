@@ -46,7 +46,7 @@ DebugMenu.prototype.loadOptions = function() {
 DebugMenu.prototype.loadFile = function() {
 	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
 		if (!cancelled) {
-			SaveManager.backendOpen("Pasted file", resp, true);
+			SaveManager.backendOpen("Pasted file blash blah blah blah blah", resp, true);
 		}
 	});
 };
