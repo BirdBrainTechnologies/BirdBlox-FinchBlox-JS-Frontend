@@ -28,7 +28,7 @@ function Menu(button, width) {
 
 	// Configure callbacks
 	button.setCallbackFunction(this.open.bind(this), false);
-	button.setToggleFunction(this.close.bind(this));
+	button.setUnToggleFunction(this.close.bind(this));
 
 	this.button = button;
 

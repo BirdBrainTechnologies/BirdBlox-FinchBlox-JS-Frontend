@@ -2,22 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Tom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/BlockContextMenu.js" afterPath="$PROJECT_DIR$/UIParts/BlockContextMenu.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/FileContextMenu.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/FileContextMenu.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/InputPad.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" afterPath="$PROJECT_DIR$/UIParts/InputSystem/InputPad/SoundInputPad.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" afterPath="$PROJECT_DIR$/UIParts/MenuBnList/SmoothMenuBnList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/ResultBubble.js" afterPath="$PROJECT_DIR$/UIParts/ResultBubble.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" afterPath="$PROJECT_DIR$/UIParts/RobotConnectionList.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/DebugMenu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/DebugMenu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/DeviceMenu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/DeviceMenu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/FileMenu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/FileMenu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/Menu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/Menu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/SettingsMenu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/SettingsMenu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Menu/ViewMenu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/ViewMenu.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/UIParts/Overlay.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Overlay.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Button.js" afterPath="$PROJECT_DIR$/UIParts/Button.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Overlay/Menu/Menu.js" afterPath="$PROJECT_DIR$/UIParts/Overlay/Menu/Menu.js" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,20 +23,7 @@
     <favorites_list name="Git" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="Overlay.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/UIParts/Overlay/Overlay.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="14" column="16" lean-forward="true" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -59,14 +34,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>parentGroup</find>
-      <find>var</find>
-      <find>new SmoothMenuBnList</find>
-      <find>width == null</find>
-      <find>overlay</find>
-      <find>this.options</find>
-      <find>new MenuBn</find>
-      <find>MenuBnList</find>
       <find>this.bns</find>
       <find>SmoothMenuBnList</find>
       <find>SmoothMenuBnList(this.bubbleOverlay</find>
@@ -89,11 +56,16 @@
       <find>new BubbleOverlay</find>
       <find>hMargin</find>
       <find>addOverlay</find>
+      <find>foregroundInverts</find>
+      <find>toggleFunction</find>
+      <find>var</find>
+      <find>setToggleFunction</find>
+      <find>UnToggleFunction</find>
+      <find>untoggleFunction</find>
+      <find>unToggle</find>
+      <find>unmarkAsOverlayPart</find>
     </findStrings>
     <replaceStrings>
-      <replace>arguments.shift(&quot;passRecursivelyDown&quot;);</replace>
-      <replace>let args = arguments;\narguments.shift(&quot;passRecursivelyDown&quot;);</replace>
-      <replace>arguments.shift</replace>
       <replace>Array.prototype.unshift.call(arguments, &quot;passRecursivelyDown&quot;);</replace>
       <replace>passRecursively.apply(this, arguments);</replace>
       <replace>optionsList</replace>
@@ -120,7 +92,10 @@
       <replace>$1</replace>
       <replace>InputPad</replace>
       <replace>\n,</replace>
+      <replace>textInverts</replace>
+      <replace>untoggleFunction</replace>
       <replace>const</replace>
+      <replace>unToggleFunction</replace>
     </replaceStrings>
     <dirStrings>
       <dir>D:\Tom\Google Drive\Public\Websites\CustomSnap\GitFork\HummingbirdDragAndDrop-\SVGIcons</dir>
@@ -132,7 +107,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/DialogManager.js" />
         <option value="$PROJECT_DIR$/ColorsGraphicsAndValues/Sound.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/RecordingDialog.js" />
         <option value="$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js" />
@@ -183,6 +157,7 @@
         <option value="$PROJECT_DIR$/UIParts/BubbleOverlay.js" />
         <option value="$PROJECT_DIR$/UIParts/Overlay/BubbleOverlay.js" />
         <option value="$PROJECT_DIR$/UIParts/Overlay/Overlay.js" />
+        <option value="$PROJECT_DIR$/UIParts/Button.js" />
       </list>
     </option>
   </component>
@@ -327,24 +302,6 @@
               <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
               <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
               <item name="MenuBnList" type="cbb8eebc:String" user="MenuBnList" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
-              <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
-              <item name="Overlay" type="cbb8eebc:String" user="Overlay" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
-              <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
-              <item name="TabManager" type="cbb8eebc:String" user="TabManager" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="HummingbirdDragAndDrop-" type="cbb8eebc:String" user="HummingbirdDragAndDrop-" />
-              <item name="UIParts" type="cbb8eebc:String" user="UIParts" />
-              <item name="TabRow" type="cbb8eebc:String" user="TabRow" />
             </path>
           </expand>
           <select />
@@ -596,7 +553,7 @@
       <workItem from="1501024094533" duration="811000" />
       <workItem from="1501032948714" duration="5657000" />
       <workItem from="1501075885204" duration="19981000" />
-      <workItem from="1501162122394" duration="4958000" />
+      <workItem from="1501162122394" duration="7098000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -693,7 +650,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1529967000" />
+    <option name="totallyTimeSpent" value="1532107000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -786,20 +743,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/DiscoverDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/ConnectMultipleDialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/DisplayBox/DisplayBoxManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
@@ -1418,6 +1361,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="609">
           <caret line="32" column="45" lean-forward="true" selection-start-line="32" selection-start-column="45" selection-end-line="32" selection-end-column="45" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1747,14 +1691,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UIParts/BlockContextMenu.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="23" column="3" lean-forward="true" selection-start-line="23" selection-start-column="3" selection-end-line="23" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Overlay/BubbleOverlay.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
@@ -1813,11 +1749,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Overlay/Overlay.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="14" column="16" lean-forward="true" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
+        <state relative-caret-position="667">
+          <caret line="84" column="2" lean-forward="true" selection-start-line="84" selection-start-column="2" selection-end-line="84" selection-end-column="2" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/BlockContextMenu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1008">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UIParts/Button.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="54" lean-forward="true" selection-start-line="13" selection-start-column="54" selection-end-line="13" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SVGIcons/VectorIcon.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
