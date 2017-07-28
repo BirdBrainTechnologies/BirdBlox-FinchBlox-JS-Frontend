@@ -50,6 +50,7 @@ UndoManager.undoDelete = function(){
 		success = success || TabManager.undoDelete(stackData);
 	}
 	UM.updateButtonEnabled();
+	SaveManager.markEdited();
 };
 
 /**

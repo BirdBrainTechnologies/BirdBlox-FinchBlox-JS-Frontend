@@ -55,7 +55,9 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			return new ExecutionStatusResult(result.asNum());
+			const num = result.asNum().getValue();
+			const rounded = Math.round(num * 100) / 100;
+			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
 	return new ExecutionStatusRunning(); // Still running

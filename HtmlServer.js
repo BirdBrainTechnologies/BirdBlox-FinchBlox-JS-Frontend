@@ -74,8 +74,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					//callbackFn('[{"name":"hi","id":"there"}]');
-					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('g-13.46647535563');
+					//callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 				}
 			}

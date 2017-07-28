@@ -10377,7 +10377,7 @@ DebugMenu.prototype.loadOptions = function() {
 DebugMenu.prototype.loadFile = function() {
 	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
 		if (!cancelled) {
-			SaveManager.backendOpen("Pasted file blash blah blah blah blah", resp, true);
+			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };
@@ -11468,6 +11468,7 @@ CodeManager.findList = function(name) {
 CodeManager.renameVariable = function(variable) {
 	TabManager.renameVariable(variable);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -11477,6 +11478,7 @@ CodeManager.renameVariable = function(variable) {
 CodeManager.deleteVariable = function(variable) {
 	TabManager.deleteVariable(variable);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -11486,6 +11488,7 @@ CodeManager.deleteVariable = function(variable) {
 CodeManager.renameList = function(list) {
 	TabManager.renameList(list);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -11495,6 +11498,7 @@ CodeManager.renameList = function(list) {
 CodeManager.deleteList = function(list) {
 	TabManager.deleteList(list);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -16098,8 +16102,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					//callbackFn('[{"name":"hi","id":"there"}]');
-					callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('g-13.46647535563');
+					//callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 				}
 			}
@@ -17428,6 +17432,7 @@ UndoManager.undoDelete = function(){
 		success = success || TabManager.undoDelete(stackData);
 	}
 	UM.updateButtonEnabled();
+	SaveManager.markEdited();
 };
 
 /**
@@ -22132,7 +22137,9 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			return new ExecutionStatusResult(result.asNum());
+			const num = result.asNum().getValue();
+			const rounded = Math.round(num * 100) / 100;
+			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
 	return new ExecutionStatusRunning(); // Still running

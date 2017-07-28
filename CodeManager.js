@@ -425,6 +425,7 @@ CodeManager.findList = function(name) {
 CodeManager.renameVariable = function(variable) {
 	TabManager.renameVariable(variable);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -434,6 +435,7 @@ CodeManager.renameVariable = function(variable) {
 CodeManager.deleteVariable = function(variable) {
 	TabManager.deleteVariable(variable);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -443,6 +445,7 @@ CodeManager.deleteVariable = function(variable) {
 CodeManager.renameList = function(list) {
 	TabManager.renameList(list);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
@@ -452,6 +455,7 @@ CodeManager.renameList = function(list) {
 CodeManager.deleteList = function(list) {
 	TabManager.deleteList(list);
 	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
 
 /**
