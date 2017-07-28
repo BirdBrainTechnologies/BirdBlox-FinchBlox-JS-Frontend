@@ -414,19 +414,12 @@ BlockStack.prototype.land = function() {
 };
 
 /**
- * Removes the stack from the Tab's list.
- */
-BlockStack.prototype.remove = function() {
-	this.tab.removeStack(this);
-};
-
-/**
  * Stops execution and removes the BlockStack digitally and visually.
  */
-BlockStack.prototype.delete = function() {
+BlockStack.prototype.remove = function() {
 	this.stop();
 	this.group.remove();
-	this.remove();   // Remove from Tab's list.
+	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
 
@@ -501,7 +494,7 @@ BlockStack.prototype.updateTabDim = function() {
 
 /**
  * Writes the BlockStack to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {
@@ -519,6 +512,7 @@ BlockStack.prototype.createXml = function(xmlDoc) {
  * Creates a BlockStack from XML
  * @param {Node} stackNode - The tag to import from
  * @param {Tab} tab - The Tab to import into
+ * @return {BlockStack|null} stack - The imported stack
  */
 BlockStack.importXml = function(stackNode, tab) {
 	const x = XmlWriter.getAttribute(stackNode, "x", 0, true);
@@ -536,7 +530,7 @@ BlockStack.importXml = function(stackNode, tab) {
 	}
 	if (firstBlock == null) {
 		// All Blocks could not import.  Exit.
-		return;
+		return null;
 	}
 	const stack = new BlockStack(firstBlock, tab);
 	stack.move(x, y);
@@ -551,6 +545,7 @@ BlockStack.importXml = function(stackNode, tab) {
 		i++;
 	}
 	stack.updateDim();
+	return stack;
 };
 
 /**
@@ -602,18 +597,18 @@ BlockStack.prototype.checkListUsed = function(list) {
 };
 
 /**
+ * Updates dimensions after device dropdowns become visible
  * @param deviceClass
  */
 BlockStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
 /**
+ * Updates dimensions after device dropdowns become hidden
  * @param deviceClass
  */
 BlockStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -625,16 +620,22 @@ BlockStack.prototype.countDevicesInUse = function(deviceClass) {
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
 
-BlockStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
-};
-
 /**
  * @param {string} message
  */
 BlockStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**

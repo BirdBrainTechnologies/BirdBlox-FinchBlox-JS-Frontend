@@ -1,271 +1,499 @@
-function SaveManager(){
+/**
+ * Static class for file management.  Tracks the currently open file and deals with saving/opening files.
+ */
+function SaveManager() {
+	// The name of the name, or null when the blank canvas is open
 	SaveManager.fileName = null;
+	// Whether the user has been asked to name the file. The file is called "New Program" until the user names it.
 	SaveManager.named = false;
+	// The file is auto saved any time it is edited and one every few seconds
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
 	SaveManager.autoSaveTimer.start();
+	// Tries to avoid making multiple saves at once
 	SaveManager.saving = false;
 }
-SaveManager.setConstants = function(){
+
+SaveManager.setConstants = function() {
 	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 15;
 };
+
+/**
+ * Called when the backend would like to open a file
+ * @param {string} fileName - The name of the file
+ * @param {string} data - The content of the file
+ * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
+ */
 SaveManager.backendOpen = function(fileName, data, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
-	CodeManager.fileOpened();
 };
+
+/**
+ * Reads the file contents from the XML
+ * @param {string} data - A string of XML data
+ * TODO: Provide a way for loading to fail if critical tags are missing rather than opening a blank document
+ */
 SaveManager.loadData = function(data) {
 	if (data.length > 0) {
 		if (data.charAt(0) === "%") {
+			// The data haas an extra layer of encoding that needs to be removed
 			data = decodeURIComponent(data);
 		}
 		const xmlDoc = XmlWriter.openDoc(data);
 		const project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
-			SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
+			// There's no project tag.  The data is seriously corrupt, so we just open an empty file
+			SaveManager.loadData("<project><tabs></tabs></project>");
 		} else {
 			(DebugOptions.safeFunc(CodeManager.importXml))(project);
 		}
-	} else{
-		SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
-		//TODO: fail file open
+	} else {
+		// There's no data at all, so open an empty file
+		SaveManager.loadData("<project><tabs></tabs></project>");
 	}
 };
-SaveManager.backendSetName = function(fileName, named){
+
+/**
+ * Changes the name of the open file to match the provided name
+ * @param {string} fileName
+ * @param {boolean} named
+ */
+SaveManager.backendSetName = function(fileName, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
-	CodeManager.fileOpened();
 };
-SaveManager.backendClose = function(){
+
+/**
+ * Closes the open file and shows a blank canvas
+ */
+SaveManager.backendClose = function() {
 	SaveManager.loadBlank();
 };
-SaveManager.backendMarkLoading = function(){
+
+/**
+ * Shows that a file is loading
+ */
+SaveManager.backendMarkLoading = function() {
 	OpenDialog.closeDialog();
 	CodeManager.markLoading("Loading...");
 };
 
-SaveManager.loadBlank = function(){
+/**
+ * Loads a blank canvas
+ */
+SaveManager.loadBlank = function() {
 	SaveManager.fileName = null;
 	SaveManager.named = false;
 	SaveManager.loadData("<project><tabs></tabs></project>");
-	CodeManager.fileClosed();
 };
-SaveManager.userNew = function(){
-	SaveManager.autoSave(function(){
-		const request = new HttpRequestBuilder("data/close");
-		HtmlServer.sendRequestWithCallback(request.toString(), function(){
-			SaveManager.loadBlank();
-		});
+
+/**
+ * Tells the backend to close the existing file and opens a blank canvas
+ */
+SaveManager.userNew = function() {
+	const request = new HttpRequestBuilder("data/close");
+	HtmlServer.sendRequestWithCallback(request.toString(), function() {
+		SaveManager.loadBlank();
 	});
 };
-SaveManager.autoSave = function(nextAction){
-	if(SaveManager.fileName == null){
+
+/**
+ * Sends the current file's data to the backend to save
+ * @param {function} [nextAction] - The function to call once the data is successfully sent
+ */
+SaveManager.autoSave = function(nextAction) {
+	if (SaveManager.fileName == null) {
 		if (nextAction != null) nextAction();
 		return;
 	}
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	const request = new HttpRequestBuilder("data/autoSave");
-	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
 };
-SaveManager.userOpenFile = function(fileName){
-	if(SaveManager.fileName === fileName) {return;}
+
+/**
+ * Tells the backend to open the specified file.  The backend will call CallbackManager.data.open with the data.
+ * @param {string} fileName - The file to open
+ */
+SaveManager.userOpenFile = function(fileName) {
+	if (SaveManager.fileName === fileName) {
+		return;
+	}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");
-	HtmlServer.sendRequestWithCallback(request.toString(),function(){
+	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
-	}, function(){
+	}, function() {
 		CodeManager.cancelLoading();
 	});
 };
-SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+
+/**
+ * Prompts the user for a name for the file
+ * @param {boolean} isRecording - Whether the file is actually a recording (this reduces redundancy since the dialogs
+ *                                are the same
+ * @param {string} oldFilename - The name of the file to rename
+ * @param {function} nextAction - The function to call after the rename is done and succeeds
+ */
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
+	// We use the default message with the title "Name"
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
 };
-SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+
+/**
+ * Prompts the user to rename a file, with the specified title and message for the dialog
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title - The title of the prompt dialog
+ * @param {string|null} [message] - The message for the dialog
+ * @param {function} nextAction
+ */
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction) {
+	// We prefill the old filename
 	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
 };
-SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
-	if(message == null){
+
+/**
+ * Prompts the user to rename a file, with the specified suggested name prefilled.
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title
+ * @param {string|null} [message="Enter a file name"]
+ * @param {string} defaultName - The name to prefill into the dialog
+ * @param {function} nextAction
+ */
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
+	if (message == null) {
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
-		if(!cancelled){
+	// We ask for a new name
+	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			// We see if that name is ok
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
-// Checks if a name is legitimate and renames the current file to that name if it is.
-SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
-	if(proposedName === ""){
-		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
-	} else if(proposedName === oldFilename) {
-		if(nextAction != null) nextAction();
+
+/**
+ * Checks if a name is legitimate and renames the current file to that name if it is.
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title
+ * @param {string} proposedName - The name to check
+ * @param {function} nextAction
+ */
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
+	if (proposedName === "") {
+		const message = "Name cannot be blank. Enter a file name.";
+		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
+	} else if (proposedName === oldFilename) {
+		if (!isRecording && SaveManager.fileName === oldFilename && !SaveManager.named) {
+			const request = new HttpRequestBuilder("/data/markAsNamed");
+			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+		} else {
+			if (nextAction != null) nextAction();
+		}
 	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
-			if(alreadySanitized && alreadyAvailable){
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
-			} else if(!alreadySanitized){
+			} else if (!alreadySanitized) {
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
-			} else if(!alreadyAvailable){
+			} else if (!alreadyAvailable) {
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
 	}
 };
-SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
+
+/**
+ * Tries to rename the file, and gets a valid name if it fails
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title - The title of the dialog to use if the renaming fails
+ * @param {string} newName
+ * @param {function} nextAction
+ */
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
 	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
 	let callback = nextAction;
-	if(isRecording){
-		callback = function(){
+	if (isRecording) {
+		callback = function() {
 			CodeManager.renameRecording(oldFilename, newName);
-			if(nextAction != null) nextAction();
+			if (nextAction != null) nextAction();
 		}
 	}
 	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
-SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
+
+/**
+ * Prompts the user to delete a file
+ * @param {boolean} isRecording - Whether the file is actually a recording (to reduce redundant code)
+ * @param {string} filename - The name of the file to delete
+ * @param {function} nextAction - The action to perform if the file is deleted successfully
+ */
+SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
-		if(response === "2") {
+	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
+		if (response === "2") {
 			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);
 };
-SaveManager.delete = function(isRecording, filename, nextAction){
+
+/**
+ * Tells the backend to delete a file
+ * @param {boolean} isRecording
+ * @param {string} filename
+ * @param {function} nextAction
+ */
+SaveManager.delete = function(isRecording, filename, nextAction) {
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
-SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
-	if(isRecording == null){
+
+/**
+ * Checks if a name is a valid name for a file (meaning it is unused and has no illegal characters)
+ * @param {string} filename - The name to check
+ * @param {function} callbackFn - type (string, boolean, boolean), a function to call with the results
+ * @param {boolean} [isRecording=false] - Whether the name should be compared to recordings instead of files
+ */
+SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
+	if (isRecording == null) {
 		isRecording = false;
 	}
 	DebugOptions.validateNonNull(callbackFn);
+	// Ask the backend if the name is ok
 	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
 		let json = {};
 		try {
+			// Response is a JSON object
 			json = JSON.parse(response);
-		} catch(e){
+		} catch (e) {
 
 		}
-		if(json.availableName != null){
-			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
+		if (json.availableName != null) {
+			/* 3 fields of response:
+			 * json.availableName - A name that is close to the filename and is valid (is the filename if filename is ok
+			 * json.alreadySanitized - boolean indicating if filename was already sanitized (had no illegal characters)
+			 * json.alreadyAvailable - boolean indicating if filename is a unique name
+			 * the availableName == filename iff alreadySanitized and alreadyAvailable */
+			callbackFn(json.availableName, json.alreadySanitized === true, json.alreadyAvailable === true);
 		}
 	});
 };
-SaveManager.userDuplicateFile = function(filename, nextAction){
+
+/**
+ * Prompts the user for a name to duplicate a file
+ * @param {string} filename - The name of the file to duplicate
+ * @param {function} nextAction - The name of the function to call after successful duplication
+ */
+SaveManager.userDuplicateFile = function(filename, nextAction) {
 	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
 };
-SaveManager.promptDuplicate = function(message, filename, nextAction){
-	SaveManager.getAvailableName(filename, function(availableName){
+
+/**
+ * Prompts the user to duplicate a file, using the specified message in the dialog
+ * @param {string} message - The messsage in the duplicate dialog
+ * @param {string} filename
+ * @param {function} [nextAction]
+ */
+SaveManager.promptDuplicate = function(message, filename, nextAction) {
+	SaveManager.getAvailableName(filename, function(availableName) {
 		SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 	});
 };
-SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
-		if(!cancelled){
+
+/**
+ * Prompts the user to duplicate a file with the specified name prefilled
+ * @param {string} message
+ * @param {string} filename
+ * @param {string} defaultName - The name to prefill
+ * @param {function} [nextAction]
+ */
+SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
+	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
 	});
 };
-SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction){
-	if(proposedName === ""){
+
+/**
+ * Checks if the provided name is valid and duplicates if it is. Otherwise, prompts for a valid name
+ * @param {string} proposedName - The name to check
+ * @param {string} filename
+ * @param {function} [nextAction]
+ */
+SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
+	if (proposedName === "") {
 		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
 	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
-			if(alreadySanitized && alreadyAvailable){
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
-			} else if(!alreadySanitized){
+			} else if (!alreadySanitized) {
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
-			} else if(!alreadyAvailable){
+			} else if (!alreadyAvailable) {
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.duplicate = function(filename, newName, nextAction){
+
+/**
+ * Duplicates the file with the specified name
+ * @param {string} filename
+ * @param {string} newName
+ * @param {function} [nextAction]
+ */
+SaveManager.duplicate = function(filename, newName, nextAction) {
 	const request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
 	request.addParam("newFilename", newName);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
-SaveManager.userExportFile = function(filename){
-	SaveManager.exportFile(filename);
+
+/**
+ * Handles a request from the user to export a file
+ * @param {string} filename - The name of the file to export
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ */
+SaveManager.userExportFile = function(filename, x1, x2, y1, y2) {
+	SaveManager.exportFile(filename, x1, x2, y1, y2);
 };
-SaveManager.exportFile = function(filename){
+
+/**
+ * Tells the backend to show an export prompt for the file at the specified location
+ * @param {string} filename - The name of the file to export
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ */
+SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
 	const request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
+	if (x1 != null && x2 != null && y1 != null && y2 != null) {
+		request.addParam("tlx", x1);
+		request.addParam("tly", y1);
+		request.addParam("brx", x2);
+		request.addParam("bry", y2);
+	}
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-SaveManager.saveAsNew = function(){
+
+/**
+ * Tells the backend to save the provided data as a new document.  The backend calls CallbackManager.data.setName
+ * when completed
+ */
+SaveManager.saveAsNew = function() {
 	SaveManager.saving = true;
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	CodeManager.markLoading("Saving...");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(){
+	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 		SaveManager.saving = false;
-	}, function(){
+	}, function() {
 		CodeManager.cancelLoading();
 		SaveManager.saving = false;
 	}, true, xmlDocText);
 };
-SaveManager.markEdited=function(){
+
+/**
+ * Called any time the document is edited.  Saves changes and creates a new document if no file is open
+ */
+SaveManager.markEdited = function() {
 	CodeManager.updateModified();
-	if(SaveManager.fileName == null && !SaveManager.saving){
+	if (SaveManager.fileName == null && !SaveManager.saving) {
 		SaveManager.saveAsNew();
 	}
-	if(SaveManager.fileName != null){
+	if (SaveManager.fileName != null) {
 		SaveManager.autoSave();
 	}
 };
-SaveManager.currentDoc = function(){ //Autosaves
-	if(SaveManager.fileName == null) return null;
-	var result = {};
+
+/**
+ * Deprecated function called by the backend to get the contents of the open document
+ * @return {object} - With fields for data and filename
+ */
+SaveManager.currentDoc = function() {
+	if (SaveManager.fileName == null) return null;
+	const result = {};
 	result.data = XmlWriter.docToText(CodeManager.createXml());
 	result.filename = SaveManager.fileName;
 	return result;
 };
-SaveManager.saveAndName = function(message, nextAction){
+
+/**
+ * Saves the current file and prompts the user to name it if it isn't named
+ * @param {string} message - The message to use when prompting to name
+ * @param {function} [nextAction] - The function to call once the file is saved and named
+ */
+SaveManager.saveAndName = function(message, nextAction) {
 	let title = "Enter name";
-	if(SaveManager.fileName == null){
+	if (SaveManager.fileName == null) {
 		if (nextAction != null) nextAction();
 		return;
 	}
-	SaveManager.autoSave(function () {
+	SaveManager.autoSave(function() {
 		if (SaveManager.named) {
 			if (nextAction != null) nextAction();
-		}
-		else {
-			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
+		} else {
+			SaveManager.promptRename(false, SaveManager.fileName, title, message, function() {
 				SaveManager.named = true;
 				if (nextAction != null) nextAction();
 			});
 		}
 	});
 };
-SaveManager.userOpenDialog = function(){
+
+/**
+ * Called when the user taps the file button.  Saves the file and opens the OpenDialog.  Prompts the use to name the
+ * file if they have not already
+ */
+SaveManager.userOpenDialog = function() {
 	const message = "Please name this file";
-	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
+	SaveManager.saveAndName(message, OpenDialog.showDialog);
 };
-SaveManager.addTypeToRequest = function(request, isRecording){
+
+/**
+ * Adds a type parameter to the request indicating whether the item is a file or recording
+ * @param {HttpRequestBuilder} request - The request to modify
+ * @param {boolean} isRecording - Whether the item is a recording instead of a file
+ */
+SaveManager.addTypeToRequest = function(request, isRecording) {
 	request.addParam("type", isRecording ? "recording" : "file");
 };
-SaveManager.fileIsOpen = function(){
+
+/**
+ * Returns whether a file is open
+ * @return {boolean}
+ */
+SaveManager.fileIsOpen = function() {
 	return SaveManager.fileName != null;
 };

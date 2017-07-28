@@ -51,11 +51,13 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	const status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			return new ExecutionStatusResult(result.asNum());
+			const num = result.asNum().getValue();
+			const rounded = Math.round(num * 100) / 100;
+			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
 	return new ExecutionStatusRunning(); // Still running
@@ -124,7 +126,8 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -191,7 +194,8 @@ B_DeviceWithPortsTriLed.prototype.startAction = function() {
 B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();

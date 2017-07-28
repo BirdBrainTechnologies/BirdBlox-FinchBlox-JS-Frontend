@@ -132,7 +132,7 @@ Block.prototype.getAbsY = function(){
 
 /**
  * Creates and returns the main SVG path element for the Block.
- * @return {object} - The main SVG path element for the Block.
+ * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function(){
 	const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
@@ -554,7 +554,7 @@ Block.prototype.highlight = function(){
 		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
 	}
 	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
-		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen = false");
+		DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
 	}
 };
 
@@ -885,7 +885,7 @@ Block.prototype.updateActive = function(){
 
 /**
  * Recursively writes this Block and those below it to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @param {Node} xmlBlocks - The <Blocks> tag in the document
  */
 Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
@@ -897,7 +897,7 @@ Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
 
 /**
  * Writes this Block to XML (non recursive)
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc){
@@ -1095,29 +1095,13 @@ Block.prototype.checkListUsed = function(list){
 };
 
 /**
- * Recursively tells the device DropDown menus to switch to label mode, as multiple devices are no longer connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively tells the device DropDown menus to switch to DropDown mode, as multiple devices are now connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts the maximum selected DropDown value for a DeviceDropDown of the specified deviceClass
  * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
  * @return {number} - The maximum value + 1 (since selections are 0-indexed)
  */
 Block.prototype.countDevicesInUse = function(deviceClass){
 	// At least 1 option is available on all DropDowns
-	let largest = 1;
+	let largest = 0;
 	// Find the largest result of all calls
 	for(let i = 0;i < this.slots.length;i++){
 		largest = Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
@@ -1139,14 +1123,6 @@ Block.prototype.countDevicesInUse = function(deviceClass){
  */
 Block.prototype.updateAvailableSensors = function(){
 	this.updateActive();
-	this.passRecursively("updateAvailableSensors");
-};
-
-/**
- * Called when a Robot's status changes.  Overrided by subclasses.
- */
-Block.prototype.updateConnectionStatus = function(){
-
 };
 
 /**
@@ -1177,12 +1153,15 @@ Block.prototype.passRecursively = function(functionName){
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	// If the message is intended for Blocks...
-	if(message === "updateConnectionStatus") {
-		// Call the message and pass in the arguments
-		this.updateConnectionStatus.apply(this, funArgs);
+	// If the message implemented by this Block...
+
+	if(myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
+		// Implemented by all Blocks, used by Tablet Blocks
+		this.updateAvailableSensors.apply(this, funArgs);
 	}
+
 	// Add "passRecursivelyDown" as the first argument
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	// Call passRecursivelyDown on all children
@@ -1212,7 +1191,7 @@ Block.prototype.displayValue = function(message, error){
 	let width = this.relToAbsX(this.width) - x;
 	let height = this.relToAbsY(this.height) - y;
 	// Display a bubble at the location
-	GuiElements.displayValue(message, x, y, width, height, error);
+	ResultBubble.displayValue(message, x, y, width, height, error);
 };
 
 /**

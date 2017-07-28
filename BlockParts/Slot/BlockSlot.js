@@ -255,7 +255,7 @@ BlockSlot.prototype.updateAvailableMessages = function() {
 
 /**
  * Creates XML for this BlockSlot
- * @param {DOMParser} xmlDoc - The document to modify
+ * @param {Document} xmlDoc - The document to modify
  * @return {Node} - The XML representing this BlockSlot
  */
 BlockSlot.prototype.createXml = function(xmlDoc) {
@@ -352,29 +352,11 @@ BlockSlot.prototype.checkListUsed = function(list) {
 /**
  * @param deviceClass - a subclass of Device
  */
-BlockSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
-BlockSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
 BlockSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.hasChild) {
 		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
-};
-
-BlockSlot.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**

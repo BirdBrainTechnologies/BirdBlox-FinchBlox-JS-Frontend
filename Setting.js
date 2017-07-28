@@ -1,3 +1,12 @@
+/**
+ * Represents a setting stored on the backend.  Automatically edits and caches the backend value
+ * @param {string} key - The key of the setting (on the backend)
+ * @param {string|number} defaultVal - The default value of the setting
+ * @param {boolean} [number=false] - Whether the setting is a number
+ * @param {boolean} [integer=false] - Whether the setting only accepts integer values
+ * @param {number|null} [min] - The minimum value the setting can take (null for no minimum)
+ * @param {number|null} [max] - The maximum value the setting can take (null for no minimum)
+ */
 function Setting(key, defaultVal, number, integer, min, max) {
 	if(number == null) {
 		number = false;
@@ -13,21 +22,25 @@ function Setting(key, defaultVal, number, integer, min, max) {
 	}
 
 	this.key = key;
-	this.defaultVal = defaultVal;
 	this.number = number;
 	this.integer = integer;
 	this.min = min;
 	this.max = max;
 	this.value = defaultVal;
 }
+
+/**
+ * Gets the cached value of the setting
+ * @return {number|string}
+ */
 Setting.prototype.getValue = function(){
 	return this.value;
 };
-/*
-Setting.prototype.setValue = function(value){
-	this.value = value;
-};
-*/
+
+/**
+ * Sends a request to change the setting and updates the cached value. Validates the value to ensure it is in range
+ * @param {number|string} value - The value to store
+ */
 Setting.prototype.writeValue = function(value){
 	this.value = value;
 	if(this.number) {
@@ -35,9 +48,14 @@ Setting.prototype.writeValue = function(value){
 	}
 	const request = new HttpRequestBuilder("settings/set");
 	request.addParam("key", this.key);
-	request.addParam("value", HtmlServer.encodeHtml(value));
+	request.addParam("value", HtmlServer.encodeHtml(this.value + ""));
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+
+/**
+ * Sends a request to get the value of the setting from the backend.  Keeps the current value if it gets no response.
+ * @param {function} callbackFn - type (string|number) -> () called with value once read, or with current value if error
+ */
 Setting.prototype.readValue = function(callbackFn){
 	const request = new HttpRequestBuilder("settings/get");
 	request.addParam("key", this.key);

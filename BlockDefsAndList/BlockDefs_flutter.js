@@ -49,7 +49,8 @@ B_FlutterBuzzer.prototype.startAction = function() {
 B_FlutterBuzzer.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			this.displayError(DeviceFlutter.getNotConnectedMessage());
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();

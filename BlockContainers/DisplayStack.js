@@ -134,7 +134,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
 /**
  * Removes the DisplayStack
  */
-DisplayStack.prototype.delete = function() {
+DisplayStack.prototype.remove = function() {
 	this.group.remove();
 };
 
@@ -142,7 +142,6 @@ DisplayStack.prototype.delete = function() {
  * @param deviceClass
  */
 DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -150,20 +149,25 @@ DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
  * @param deviceClass
  */
 DisplayStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
-};
-
-DisplayStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**
  * @param {string} message
  */
 DisplayStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**

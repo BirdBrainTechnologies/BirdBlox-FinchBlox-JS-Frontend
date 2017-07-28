@@ -54,6 +54,13 @@ EditableSlot.prototype.edit = function() {
 };
 
 /**
+ * @inheritDoc
+ */
+EditableSlot.prototype.onTap = function() {
+	this.edit();
+};
+
+/**
  * Generates and displays an interface to modify the Slot's value
  */
 EditableSlot.prototype.createInputSystem = function() {
@@ -85,6 +92,14 @@ EditableSlot.prototype.finishEdit = function(data) {
 		this.slotShape.deselect();
 		this.editing = false;
 	}
+};
+
+/**
+ * Returns whether the Slot is being edited
+ * @return {boolean}
+ */
+EditableSlot.prototype.isEditing = function() {
+	return this.editing;
 };
 
 /**
@@ -167,7 +182,7 @@ EditableSlot.prototype.getDataNotFromChild = function() {
 /**
  * Converts the Slot and its children into XML, storing the value in the enteredData as well
  * @inheritDoc
- * @param {DOMParser} xmlDoc
+ * @param {Document} xmlDoc
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {
@@ -203,4 +218,12 @@ EditableSlot.prototype.importXml = function(slotNode) {
 EditableSlot.prototype.copyFrom = function(slot) {
 	Slot.prototype.copyFrom.call(this, slot);
 	this.setData(slot.enteredData, false, false);
+};
+
+/**
+ * @inheritDoc
+ * @return {boolean}
+ */
+EditableSlot.prototype.isEditable = function() {
+	return true;
 };
