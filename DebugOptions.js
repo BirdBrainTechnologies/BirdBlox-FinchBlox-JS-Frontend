@@ -13,7 +13,7 @@ function DebugOptions() {
 	 * DO is not enabled */
 	DO.logErrors = true;
 	// Whether a dialog should be presented with the content of the error
-	DO.notifyErrors = true;
+	DO.notifyErrors = false;
 
 	DO.mouse = true;
 	// On launch, virtual devices can be added
@@ -155,8 +155,7 @@ DebugOptions.safeFunc = function(func) {
 				HtmlServer.sendRequestWithCallback(request.toString());
 				if (DebugOptions.shouldNotifyErrors()) {
 					GuiElements.alert("ERROR: " + err.message);
-					DialogManager.showAlertDialog("ERROR", err.message + "\n" + err.stack, "OK", true, function () {
-					});
+					DialogManager.showAlertDialog("ERROR", err.message + "\n" + err.stack, "OK");
 				}
 			}
 		}
