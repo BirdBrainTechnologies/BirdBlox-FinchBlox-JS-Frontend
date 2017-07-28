@@ -149,6 +149,7 @@ Block.prototype.addPart = function(part){
 	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
 		this.slots.push(part);
 	}
+	part.setActive(this.active);
 };
 
 /**
@@ -837,7 +838,7 @@ Block.prototype.makeInactive = function(){
 	if(this.active){
 		this.active = false;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeInactive();
 		});
 	}
@@ -850,7 +851,7 @@ Block.prototype.makeActive = function(){
 	if(!this.active){
 		this.active = true;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeActive();
 		});
 	}

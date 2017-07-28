@@ -72,7 +72,7 @@ SettingsMenu.prototype.disableSnapping = function() {
  * Tells the backend to send the current debug log
  */
 SettingsMenu.prototype.optionSendDebugLog = function() {
-	const request = new HttpRequestBuilder("debug/shareDebug");
+	const request = new HttpRequestBuilder("debug/shareLog");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 

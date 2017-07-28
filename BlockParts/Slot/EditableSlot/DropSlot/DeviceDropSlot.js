@@ -198,3 +198,13 @@ DeviceDropSlot.prototype.selectionDataFromValue = function(value){
 DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
 };
+
+DeviceDropSlot.prototype.makeActive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeActive();
+};
+
+DeviceDropSlot.prototype.makeInactive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeInactive();
+};

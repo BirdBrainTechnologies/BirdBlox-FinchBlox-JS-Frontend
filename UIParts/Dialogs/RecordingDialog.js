@@ -28,11 +28,15 @@ RecordingDialog.setConstants = function() {
 	RecD.coverRectColor = Colors.black;
 	RecD.counterColor = Colors.white;
 	RecD.counterFont = Font.uiFont(60);
+	RecD.remainingFont = Font.uiFont(16);
+	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
 	RecD.recordColor = "#f00";
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
+	RecD.recordingLimit = 5 * 60 * 1000;   // The maximum number of ms in a recording
+	RecD.remainingThreshold = 5 * 60 * 1000;   // The remaining time is displayed when less than this many ms are left.
 };
 
 /**
@@ -280,6 +284,7 @@ RecordingDialog.prototype.drawCoverRect = function() {
  */
 RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
+
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
@@ -293,7 +298,14 @@ RecordingDialog.prototype.drawTimeCounter = function() {
 	y += this.y;
 	this.counterY = y;
 	GuiElements.move.text(textE, x, y);
-	return textE;
+	this.counter =  textE;
+
+	let remainingY = y + RD.remainingFont.charHeight + RD.remainingMargin;
+	let remainingWidth = GuiElements.measure.stringWidth("0:00 Remaining", RD.remainingFont);
+	let remainingX = this.x + (this.width - remainingWidth) / 2;
+	this.remainingY = remainingY;
+	this.remaingingText = GuiElements.draw.text(remainingX, remainingY, "", RD.remainingFont, RD.counterColor);
+	GuiElements.layers.overlayOverlay.appendChild(this.remaingingText);
 };
 
 /**
@@ -394,7 +406,7 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 			this.coverRect = this.drawCoverRect();
 		}
 		if (this.counter == null) {
-			this.counter = this.drawTimeCounter();
+			this.drawTimeCounter();
 		}
 	} else {
 		if (this.coverRect != null) {
@@ -404,6 +416,8 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 		if (this.counter != null) {
 			this.counter.remove();
 			this.counter = null;
+			this.remaingingText.remove();
+			this.remaingingText = null;
 		}
 	}
 };
@@ -412,7 +426,8 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
  * Sets the text of the counter according to the provided time.  Formats the time into hh:mm:ss or mm:ss
  * @param {number} time - elapsed time in ms
  */
-RecordingDialog.prototype.updateCounter = function(time) {
+
+RecordingDialog.prototype.timeToString = function(time) {
 	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
 	let seconds = totalSeconds % 60;
@@ -431,10 +446,24 @@ RecordingDialog.prototype.updateCounter = function(time) {
 		}
 		totalString = hours + ":" + minutesString + ":" + secondsString;
 	}
+	return totalString;
+};
+RecordingDialog.prototype.updateCounter = function(time) {
+	const RD = RecordingDialog;
+	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
+
+	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
+	if (remainingMs < RD.remainingThreshold) {
+		const remainingString = this.timeToString(remainingMs) + " remaining";
+		GuiElements.update.text(this.remaingingText, remainingString);
+		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
+		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
+		GuiElements.move.text(this.remaingingText, remainingX, this.remainingY);
+	}
 };
 
 /**

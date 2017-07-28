@@ -3293,6 +3293,7 @@ GuiElements.load.getOsVersion = function(callback) {
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		GuiElements.isAndroid = true;
 		callback();
 	}, function() {
 		GuiElements.osVersion = "";
@@ -4182,6 +4183,7 @@ BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
 	BlockGraphics.labelText.font = Font.uiFont(12).bold();
 	BlockGraphics.labelText.fill = "#ffffff";
+	BlockGraphics.labelText.disabledFill = "#e4e4e4";
 };
 
 /* Constants for text in Slots */
@@ -10751,7 +10753,7 @@ SettingsMenu.prototype.disableSnapping = function() {
  * Tells the backend to send the current debug log
  */
 SettingsMenu.prototype.optionSendDebugLog = function() {
-	const request = new HttpRequestBuilder("debug/shareDebug");
+	const request = new HttpRequestBuilder("debug/shareLog");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
@@ -14558,11 +14560,15 @@ RecordingDialog.setConstants = function() {
 	RecD.coverRectColor = Colors.black;
 	RecD.counterColor = Colors.white;
 	RecD.counterFont = Font.uiFont(60);
+	RecD.remainingFont = Font.uiFont(16);
+	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
 	RecD.recordColor = "#f00";
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
+	RecD.recordingLimit = 5 * 60 * 1000;   // The maximum number of ms in a recording
+	RecD.remainingThreshold = 5 * 60 * 1000;   // The remaining time is displayed when less than this many ms are left.
 };
 
 /**
@@ -14810,6 +14816,7 @@ RecordingDialog.prototype.drawCoverRect = function() {
  */
 RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
+
 	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
@@ -14823,7 +14830,14 @@ RecordingDialog.prototype.drawTimeCounter = function() {
 	y += this.y;
 	this.counterY = y;
 	GuiElements.move.text(textE, x, y);
-	return textE;
+	this.counter =  textE;
+
+	let remainingY = y + RD.remainingFont.charHeight + RD.remainingMargin;
+	let remainingWidth = GuiElements.measure.stringWidth("0:00 Remaining", RD.remainingFont);
+	let remainingX = this.x + (this.width - remainingWidth) / 2;
+	this.remainingY = remainingY;
+	this.remaingingText = GuiElements.draw.text(remainingX, remainingY, "", RD.remainingFont, RD.counterColor);
+	GuiElements.layers.overlayOverlay.appendChild(this.remaingingText);
 };
 
 /**
@@ -14924,7 +14938,7 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 			this.coverRect = this.drawCoverRect();
 		}
 		if (this.counter == null) {
-			this.counter = this.drawTimeCounter();
+			this.drawTimeCounter();
 		}
 	} else {
 		if (this.coverRect != null) {
@@ -14934,6 +14948,8 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 		if (this.counter != null) {
 			this.counter.remove();
 			this.counter = null;
+			this.remaingingText.remove();
+			this.remaingingText = null;
 		}
 	}
 };
@@ -14942,7 +14958,8 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
  * Sets the text of the counter according to the provided time.  Formats the time into hh:mm:ss or mm:ss
  * @param {number} time - elapsed time in ms
  */
-RecordingDialog.prototype.updateCounter = function(time) {
+
+RecordingDialog.prototype.timeToString = function(time) {
 	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
 	let seconds = totalSeconds % 60;
@@ -14961,10 +14978,24 @@ RecordingDialog.prototype.updateCounter = function(time) {
 		}
 		totalString = hours + ":" + minutesString + ":" + secondsString;
 	}
+	return totalString;
+};
+RecordingDialog.prototype.updateCounter = function(time) {
+	const RD = RecordingDialog;
+	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
+
+	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
+	if (remainingMs < RD.remainingThreshold) {
+		const remainingString = this.timeToString(remainingMs) + " remaining";
+		GuiElements.update.text(this.remaingingText, remainingString);
+		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
+		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
+		GuiElements.move.text(this.remaingingText, remainingX, this.remainingY);
+	}
 };
 
 /**
@@ -16350,7 +16381,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					callbackFn('g-13.46647535563');
+					callbackFn('Started');
 					//callbackFn('{"files":["hello","world"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 				}
@@ -17857,6 +17888,7 @@ Block.prototype.addPart = function(part){
 	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
 		this.slots.push(part);
 	}
+	part.setActive(this.active);
 };
 
 /**
@@ -18545,7 +18577,7 @@ Block.prototype.makeInactive = function(){
 	if(this.active){
 		this.active = false;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeInactive();
 		});
 	}
@@ -18558,7 +18590,7 @@ Block.prototype.makeActive = function(){
 	if(!this.active){
 		this.active = true;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeActive();
 		});
 	}
@@ -19635,6 +19667,31 @@ BlockPart.prototype.updateDim = function() {
 BlockPart.prototype.textSummary = function() {
 	DebugOptions.markAbstract();
 	return "";
+};
+
+/**
+ * Makes the part appear active
+ */
+BlockPart.prototype.makeActive = function() {
+
+};
+
+/**
+ * Makes the part appear inactive
+ */
+BlockPart.prototype.makeInactive = function() {
+
+};
+
+/**
+ * @param {boolean} active
+ */
+BlockPart.prototype.setActive = function(active) {
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
 };
 /**
  * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
@@ -21559,6 +21616,15 @@ DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
 };
 
+DeviceDropSlot.prototype.makeActive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeActive();
+};
+
+DeviceDropSlot.prototype.makeInactive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeInactive();
+};
 /**
  * SoundDropSlots select a sound or recording from a list. Uses the SoundInputPad instead of InputPad
  * @param {Block} parent
@@ -22265,6 +22331,14 @@ LabelText.prototype.hide = function() {
  */
 LabelText.prototype.remove = function() {
 	this.textE.remove();
+};
+
+LabelText.prototype.makeActive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.fill);
+};
+
+LabelText.prototype.makeInactive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
 };
 /**
  * Adds a colored icon that can be used as part of a Block. Used in the "when flag tapped" Block
