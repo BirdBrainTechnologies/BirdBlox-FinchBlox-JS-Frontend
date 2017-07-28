@@ -252,3 +252,16 @@ CallbackManager.echo = function(request){
 	 * to this function. */
 	HtmlServer.sendRequestWithCallback(request);
 };
+
+/**
+ * Receives the backend's response to a native call
+ * @param {string} id - The non percent encoded id of the request
+ * @param {string} status - The non percent encoded status code
+ * @param {string} body - The percent encoded response from the backend
+ */
+CallbackManager.httpResponse = function(id, status, body) {
+	if (body != null) {
+		body = HtmlServer.decodeHtml(body);
+	}
+	HtmlServer.responseFromIosCall(id, status, body);
+};

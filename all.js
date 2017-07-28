@@ -3489,8 +3489,6 @@ BlockList.catCount = function() {
  * @param {Category} category
  */
 BlockList.populateCat_tablet = function(category) {
-	category.addBlockByName("B_ThrowError");
-	category.addSpace();
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -16318,7 +16316,24 @@ SettingsManager.loadSettings = function(callbackFn) {
 function HtmlServer() {
 	HtmlServer.port = 22179;
 	HtmlServer.dialogVisible = false;
+	HtmlServer.iosRequests = {};
+	HtmlServer.iosHandler = HtmlServer.getIosHandler();
 }
+
+HtmlServer.getIosHandler = function() {
+	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
+		window.webkit.messageHandlers.serverSubstitute) {
+		return window.webkit.messageHandlers.serverSubstitute;
+	} else {
+		return null;
+	}
+};
+
+HtmlServer.createFakeIosHandler = function() {
+	return function (object) {
+		console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
+	}
+};
 
 /**
  * Removes percent encoding from a string
@@ -16399,6 +16414,10 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (isPost == null) {
 		isPost = false;
 	}
+	if (HtmlServer.iosHandler != null) {
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData);
+		return;
+	}
 	let requestType = "GET";
 	if (isPost) {
 		requestType = "POST";
@@ -16474,6 +16493,46 @@ HtmlServer.getUrlForRequest = function(request) {
  */
 HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData) {
+	let id = null;
+	while (id == null || HtmlServer.iosRequests[id] != null) {
+		id = "requestId" + Math.random();
+	}
+	const requestObject = {};
+	requestObject.request = request;
+	if (isPost) {
+		requestObject.body = postData;
+	} else {
+		requestObject.body = "";
+	}
+	requestObject.id = id;
+	HtmlServer.iosRequests[id] = {
+		callbackFn: callbackFn,
+		callbackErr: callbackErr
+	};
+	HtmlServer.iosHandler(requestObject);
+};
+
+HtmlServer.responseFromIosCall = function(id, status, body) {
+	const callbackObj = HtmlServer.iosRequests[id];
+	if (callbackObj == null) {
+		return;
+	}
+	if (200 <= status && status <= 299) {
+		if (callbackObj.callbackFn != null) {
+			callbackObj.callbackFn(body);
+		}
+	} else {
+		if (callbackObj.callbackErr != null) {
+			if (DebugOptions.shouldLogHttp()) {
+				// Show the error on the screen
+				GuiElements.alert("HTTP ERROR: " + status + ", RESP: " +body);
+			}
+			callbackObj.callbackErr(Number(status), body);
+		}
+	}
 };
 /**
  * Sends requests to show dialogs and keeps track of open dialogs
@@ -16914,6 +16973,19 @@ CallbackManager.echo = function(request){
 	 * to percent encode each parameter individually, and then percent encode the entire string again to pass it
 	 * to this function. */
 	HtmlServer.sendRequestWithCallback(request);
+};
+
+/**
+ * Receives the backend's response to a native call
+ * @param {string} id - The non percent encoded id of the request
+ * @param {string} status - The non percent encoded status code
+ * @param {string} body - The percent encoded response from the backend
+ */
+CallbackManager.httpResponse = function(id, status, body) {
+	if (body != null) {
+		body = HtmlServer.decodeHtml(body);
+	}
+	HtmlServer.responseFromIosCall(id, status, body);
 };
 /**
  * Static class that helps parse and write XML files
@@ -23987,7 +24059,7 @@ B_mathOfNumber.prototype.startAction = function() {
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
 
-
+/*
 function B_ThrowError(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
 	this.addPart(new LabelText(this, "Throw error!"));
@@ -23997,8 +24069,7 @@ B_ThrowError.prototype.constructor = B_ThrowError;
 B_ThrowError.prototype.startAction = function() {
 	DebugOptions.throw("Execution of B_ThrowError");
 };
-
-
+*/
 
 
 function B_DeviceShaken(x, y) {

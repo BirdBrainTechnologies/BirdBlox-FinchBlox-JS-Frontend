@@ -4,7 +4,24 @@
 function HtmlServer() {
 	HtmlServer.port = 22179;
 	HtmlServer.dialogVisible = false;
+	HtmlServer.iosRequests = {};
+	HtmlServer.iosHandler = HtmlServer.getIosHandler();
 }
+
+HtmlServer.getIosHandler = function() {
+	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
+		window.webkit.messageHandlers.serverSubstitute) {
+		return window.webkit.messageHandlers.serverSubstitute;
+	} else {
+		return null;
+	}
+};
+
+HtmlServer.createFakeIosHandler = function() {
+	return function (object) {
+		console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
+	}
+};
 
 /**
  * Removes percent encoding from a string
@@ -85,6 +102,10 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (isPost == null) {
 		isPost = false;
 	}
+	if (HtmlServer.iosHandler != null) {
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData);
+		return;
+	}
 	let requestType = "GET";
 	if (isPost) {
 		requestType = "POST";
@@ -160,4 +181,44 @@ HtmlServer.getUrlForRequest = function(request) {
  */
 HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData) {
+	let id = null;
+	while (id == null || HtmlServer.iosRequests[id] != null) {
+		id = "requestId" + Math.random();
+	}
+	const requestObject = {};
+	requestObject.request = request;
+	if (isPost) {
+		requestObject.body = postData;
+	} else {
+		requestObject.body = "";
+	}
+	requestObject.id = id;
+	HtmlServer.iosRequests[id] = {
+		callbackFn: callbackFn,
+		callbackErr: callbackErr
+	};
+	HtmlServer.iosHandler(requestObject);
+};
+
+HtmlServer.responseFromIosCall = function(id, status, body) {
+	const callbackObj = HtmlServer.iosRequests[id];
+	if (callbackObj == null) {
+		return;
+	}
+	if (200 <= status && status <= 299) {
+		if (callbackObj.callbackFn != null) {
+			callbackObj.callbackFn(body);
+		}
+	} else {
+		if (callbackObj.callbackErr != null) {
+			if (DebugOptions.shouldLogHttp()) {
+				// Show the error on the screen
+				GuiElements.alert("HTTP ERROR: " + status + ", RESP: " +body);
+			}
+			callbackObj.callbackErr(Number(status), body);
+		}
+	}
 };
