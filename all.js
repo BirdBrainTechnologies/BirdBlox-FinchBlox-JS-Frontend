@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -3293,7 +3293,6 @@ GuiElements.load.getOsVersion = function(callback) {
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
-		GuiElements.isAndroid = true;
 		callback();
 	}, function() {
 		GuiElements.osVersion = "";
