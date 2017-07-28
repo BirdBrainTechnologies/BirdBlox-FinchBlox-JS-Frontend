@@ -2329,7 +2329,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Redraws UI if screen dimensions change */
 window.onresize = function() {
-	GuiElements.updateZoom();
+	GuiElements.updateDims();
 };
 
 /** Sets constants relating to screen dimensions and the Operating System */
@@ -3572,7 +3572,8 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	const button = category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
 	category.addBlockByName("B_PlayRecordingUntilDone");
@@ -5903,7 +5904,12 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.height = 54;
 		TB.buttonMargin = Button.defaultMargin;
 	}
+	TB.width = GuiElements.width;
 	TB.buttonW = TB.height * 64 / 54;
+
+	const maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
 	TB.bg = Colors.black;
@@ -5914,10 +5920,11 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.buttonH = TB.height - 2 * TB.buttonMargin;
 	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+	const maxIconHeight = maxBnWidth * 0.7;
+	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
 
-	TB.width = GuiElements.width;
 };
 
 TitleBar.setGraphicsPart2 = function() {
@@ -6771,6 +6778,7 @@ Category.prototype.addSpace = function() {
  * @param {string} text - The text to place on the Button
  * @param {function} callback - Called when the Button is tapped
  * @param {boolean} onlyEnabledIfOpen - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @return {Button} - The created button
  */
 Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	DebugOptions.assert(!this.finalized);
@@ -6795,6 +6803,7 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	if (onlyEnabledIfOpen && !SaveManager.fileIsOpen()) {
 		button.disable();
 	}
+	return button;
 };
 
 /**
@@ -7461,6 +7470,7 @@ function Button(x, y, width, height, parent) {
 	this.toggles = false;   // Whether the button should stick in the pressed state until tapped again
 	this.unToggleFunction = null;   // The function to call when the button is tapped to make is stop being pressed
 	this.longTouchFunction = null;   // The function to call when the button is long pressed
+	this.disabledTapCallback = null;   // Called when the user taps a disabled function
 	this.toggled = false;   // Whether the button is currently stuck in the pressed state (only if it toggles)
 	this.partOfOverlay = null;   // The overlay the button is a part of (if any)
 	this.scrollable = false;   // Whether the button is part of something that scrolls and shouldn't prevent scrolling
@@ -7743,6 +7753,10 @@ Button.prototype.setLongTouchFunction = function(callback) {
 	this.longTouchFunction = callback;
 };
 
+Button.prototype.setDisabledTabFunction = function(callback) {
+	this.disabledTapCallback = callback;
+};
+
 /**
  * Disables the button so it cannot be interacted with
  */
@@ -7775,8 +7789,9 @@ Button.prototype.enable = function() {
  * Presses the button
  */
 Button.prototype.press = function() {
-	if (this.enabled && !this.pressed) {
+	if (!this.pressed) {
 		this.pressed = true;
+		if (!this.enabled) return;
 		this.setColor(true);
 		if (this.callback != null) {
 			this.callback();
@@ -7788,8 +7803,14 @@ Button.prototype.press = function() {
  * Releases the Button
  */
 Button.prototype.release = function() {
-	if (this.enabled && this.pressed) {
+	if (this.pressed) {
 		this.pressed = false;
+		if (!this.enabled) {
+			if (this.disabledTapCallback != null) {
+				this.disabledTapCallback();
+			}
+			return;
+		}
 		if (!this.toggles || this.toggled) {
 			this.setColor(false);
 		}
@@ -7811,8 +7832,9 @@ Button.prototype.release = function() {
  * Removes the Button's visual highlight without triggering any actions
  */
 Button.prototype.interrupt = function() {
-	if (this.enabled && this.pressed && !this.toggles) {
+	if (this.pressed && !this.toggles) {
 		this.pressed = false;
+		if (!this.enabled) return;
 		this.setColor(false);
 	}
 };
@@ -10779,7 +10801,6 @@ SettingsMenu.prototype.open = function(showAdvanced) {
  */
 SettingsMenu.prototype.reloadAdvanced = function() {
 	if (this.visible) {
-		GuiElements.alert("reload");
 		this.hide();
 		this.open(true);
 		if (this.button.toggled) {
@@ -15011,6 +15032,11 @@ RecordingDialog.updateCounter = function(time) {
 	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);
 	}
+};
+
+RecordingDialog.alertNotInProject = function() {
+	let message = "Please create a project by dragging a block to the canvas before recording";
+	DialogManager.showAlertDialog("No project open", message, "OK");
 };
 /**
  * Provides a list of Robots of a certain type to connect to in a BubbleOverlay.  Updates as new robots are found.

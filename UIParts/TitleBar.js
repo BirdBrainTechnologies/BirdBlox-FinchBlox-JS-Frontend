@@ -26,7 +26,12 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.height = 54;
 		TB.buttonMargin = Button.defaultMargin;
 	}
+	TB.width = GuiElements.width;
 	TB.buttonW = TB.height * 64 / 54;
+
+	const maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
 	TB.bg = Colors.black;
@@ -37,10 +42,11 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.buttonH = TB.height - 2 * TB.buttonMargin;
 	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+	const maxIconHeight = maxBnWidth * 0.7;
+	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
 
-	TB.width = GuiElements.width;
 };
 
 TitleBar.setGraphicsPart2 = function() {

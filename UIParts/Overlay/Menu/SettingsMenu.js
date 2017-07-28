@@ -93,7 +93,6 @@ SettingsMenu.prototype.open = function(showAdvanced) {
  */
 SettingsMenu.prototype.reloadAdvanced = function() {
 	if (this.visible) {
-		GuiElements.alert("reload");
 		this.hide();
 		this.open(true);
 		if (this.button.toggled) {

@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Redraws UI if screen dimensions change */
 window.onresize = function() {
-	GuiElements.updateZoom();
+	GuiElements.updateDims();
 };
 
 /** Sets constants relating to screen dimensions and the Operating System */

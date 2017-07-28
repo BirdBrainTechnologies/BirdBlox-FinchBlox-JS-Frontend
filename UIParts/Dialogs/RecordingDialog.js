@@ -475,3 +475,8 @@ RecordingDialog.updateCounter = function(time) {
 		this.currentDialog.updateCounter(time);
 	}
 };
+
+RecordingDialog.alertNotInProject = function() {
+	let message = "Please create a project by dragging a block to the canvas before recording";
+	DialogManager.showAlertDialog("No project open", message, "OK");
+};
