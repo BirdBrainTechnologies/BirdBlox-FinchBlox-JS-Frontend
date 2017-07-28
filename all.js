@@ -16315,7 +16315,7 @@ SettingsManager.loadSettings = function(callbackFn) {
  */
 function HtmlServer() {
 	HtmlServer.port = 22179;
-	HtmlServer.dialogVisible = false;
+	HtmlServer.requestTimeout = 5000;
 	HtmlServer.iosRequests = {};
 	HtmlServer.iosHandler = HtmlServer.getIosHandler();
 }
@@ -16513,10 +16513,14 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		callbackErr: callbackErr
 	};
 	HtmlServer.iosHandler(requestObject);
+	window.setTimeout(function() {
+		HtmlServer.responseFromIosCall(id, "0", "");
+	}, HtmlServer.requestTimeout);
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
 	const callbackObj = HtmlServer.iosRequests[id];
+	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
 		return;
 	}
