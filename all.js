@@ -5,11 +5,17 @@ const FrontendVersion = 393;
 /**
  * This static class provides functions for debugging.  It had contracts and a safeFunc higher order function which
  * wraps a function in a try/catch and shows an alert if there is an error.  When enabled is set to false, all these
- * features turn off.
+ * features turn off, except error logging, which happens silently in the background
  */
 function DebugOptions() {
 	const DO = DebugOptions;
 	DO.enabled = true;
+
+	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
+	 * DO is not enabled */
+	DO.logErrors = true;
+	// Whether a dialog should be presented with the content of the error
+	DO.notifyErrors = true;
 
 	DO.mouse = false;
 	// On launch, virtual devices can be added
@@ -19,7 +25,6 @@ function DebugOptions() {
 	DO.allowVirtualDevices = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
-	DO.logErrors = true;
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
@@ -77,12 +82,16 @@ DebugOptions.createVirtualDevice = function(deviceClass, id) {
 
 /* These functions all check if a certain type of debugging should be enabled and are called from other classes. */
 /** @return {boolean} */
-DebugOptions.shouldUseMouseMode = function() {
-	return DebugOptions.mouse && DebugOptions.enabled;
+DebugOptions.shouldLogErrors = function() {
+	return DebugOptions.logErrors;   // This is the one setting that still works if DO is not enabled.
 };
 /** @return {boolean} */
-DebugOptions.shouldLogErrors = function() {
-	return DebugOptions.logErrors && DebugOptions.enabled;
+DebugOptions.shouldNotifyErrors = function() {
+	return DebugOptions.notifyErrors && DebugOptions.enabled;
+};
+/** @return {boolean} */
+DebugOptions.shouldUseMouseMode = function() {
+	return DebugOptions.mouse && DebugOptions.enabled;
 };
 /** @return {boolean} */
 DebugOptions.shouldSkipInitSettings = function() {
@@ -143,8 +152,14 @@ DebugOptions.safeFunc = function(func) {
 				}
 			} catch (err) {
 				DebugOptions.errorLocked = true;
-				GuiElements.alert("ERROR: " + err.message);
-				DialogManager.showAlertDialog("ERROR", err.message + "\n" + err.stack, "OK", true, function() {});
+				const request = new HttpRequestBuilder("debug/log");
+				request.addParam("msg", err.message + "\n" + err.stack);
+				HtmlServer.sendRequestWithCallback(request.toString());
+				if (DebugOptions.shouldNotifyErrors()) {
+					GuiElements.alert("ERROR: " + err.message);
+					DialogManager.showAlertDialog("ERROR", err.message + "\n" + err.stack, "OK", true, function () {
+					});
+				}
 			}
 		}
 	} else {
