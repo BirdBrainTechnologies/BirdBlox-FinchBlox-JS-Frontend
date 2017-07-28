@@ -54,6 +54,8 @@ BlockList.catCount = function() {
  * @param {Category} category
  */
 BlockList.populateCat_tablet = function(category) {
+	category.addBlockByName("B_ThrowError");
+	category.addSpace();
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");

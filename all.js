@@ -3489,6 +3489,8 @@ BlockList.catCount = function() {
  * @param {Category} category
  */
 BlockList.populateCat_tablet = function(category) {
+	category.addBlockByName("B_ThrowError");
+	category.addSpace();
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -23983,6 +23985,19 @@ B_mathOfNumber.prototype.startAction = function() {
 };
 /* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
+
+
+
+function B_ThrowError(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Throw error!"));
+}
+B_ThrowError.prototype = Object.create(ReporterBlock.prototype);
+B_ThrowError.prototype.constructor = B_ThrowError;
+B_ThrowError.prototype.startAction = function() {
+	DebugOptions.throw("Execution of B_ThrowError");
+};
+
 
 
 

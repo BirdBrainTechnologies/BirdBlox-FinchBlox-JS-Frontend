@@ -3,6 +3,19 @@
 
 
 
+function B_ThrowError(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Throw error!"));
+}
+B_ThrowError.prototype = Object.create(ReporterBlock.prototype);
+B_ThrowError.prototype.constructor = B_ThrowError;
+B_ThrowError.prototype.startAction = function() {
+	DebugOptions.throw("Execution of B_ThrowError");
+};
+
+
+
+
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, "Device Shaken"));
