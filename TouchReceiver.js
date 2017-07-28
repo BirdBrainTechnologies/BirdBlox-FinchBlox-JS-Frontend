@@ -613,7 +613,6 @@ TouchReceiver.touchLong = function() {
 			new BlockContextMenu(TR.target, TR.startX, TR.startY);
 		}
 		if (TR.targetType === "button") {
-			TR.longTouch = true;
 			TR.target.longTouch();
 		}
 	}

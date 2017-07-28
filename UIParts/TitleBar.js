@@ -108,7 +108,9 @@ TitleBar.makeButtons = function() {
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
 	TB.viewMenu = new SettingsMenu(TB.viewBn);
 	TB.viewBn.setLongTouchFunction(function() {
-		DialogManager.showAlertDialog("Test", "Test", "Test");
+		//DialogManager.showAlertDialog("Test", "Test", "Test");
+		GuiElements.alert("Long touch");
+		TB.viewMenu.reloadAdvanced();
 	});
 
 	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);

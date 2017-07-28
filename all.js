@@ -5637,7 +5637,6 @@ TouchReceiver.touchLong = function() {
 			new BlockContextMenu(TR.target, TR.startX, TR.startY);
 		}
 		if (TR.targetType === "button") {
-			TR.longTouch = true;
 			TR.target.longTouch();
 		}
 	}
@@ -5970,7 +5969,9 @@ TitleBar.makeButtons = function() {
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
 	TB.viewMenu = new SettingsMenu(TB.viewBn);
 	TB.viewBn.setLongTouchFunction(function() {
-		DialogManager.showAlertDialog("Test", "Test", "Test");
+		//DialogManager.showAlertDialog("Test", "Test", "Test");
+		GuiElements.alert("Long touch");
+		TB.viewMenu.reloadAdvanced();
 	});
 
 	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -10437,16 +10438,24 @@ Menu.prototype.open = function() {
  */
 Menu.prototype.close = function() {
 	if (this.visible) {
-		this.group.remove();
-		this.menuBnList.hide();
-		this.visible = false;
-		Overlay.removeOverlay(this);
+		this.hide();
 		this.button.unToggle();
 		this.button.unmarkAsOverlayPart();
 	} else if (this.scheduleAlternate) {
 		this.scheduleAlternate = false;
 		this.alternateFn();
 	}
+};
+
+/**
+ * hides the Menu
+ * @inheritDoc
+ */
+Menu.prototype.hide = function() {
+	this.group.remove();
+	this.menuBnList.hide();
+	this.visible = false;
+	Overlay.removeOverlay(this);
 };
 
 /**
@@ -10678,6 +10687,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	if (this.showAdvanced) {
+		this.addOption("Send debug log", this.optionSendDebugLog, true)
+	}
 };
 
 /**
@@ -10719,6 +10731,40 @@ SettingsMenu.prototype.enableSnapping = function() {
  */
 SettingsMenu.prototype.disableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("false");
+};
+
+/**
+ * Tells the backend to send the current debug log
+ */
+SettingsMenu.prototype.optionSendDebugLog = function() {
+	const request = new HttpRequestBuilder("debug/shareDebug");
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+
+/**
+ * Shows the SettingsMenu and stores whether it should show with advanced options
+ * @param {boolean} [showAdvanced=false]
+ */
+SettingsMenu.prototype.open = function(showAdvanced) {
+	if (showAdvanced == null) {
+		showAdvanced = false;
+	}
+	this.showAdvanced = showAdvanced;
+	Menu.prototype.open.call(this);
+};
+
+/**
+ * Re-opens the menu (if it is open) with advanced options visible)
+ */
+SettingsMenu.prototype.reloadAdvanced = function() {
+	if (this.visible) {
+		GuiElements.alert("reload");
+		this.hide();
+		this.open(true);
+		if (this.button.toggled) {
+			this.button.pressed = false;
+		}
+	}
 };
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
