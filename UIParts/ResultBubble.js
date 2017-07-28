@@ -50,3 +50,23 @@ ResultBubble.setConstants = function() {
 ResultBubble.prototype.close = function() {
 	this.bubbleOverlay.hide();
 };
+
+/**
+ * Displays a ResultBubble below a block
+ * @param {string} value - The message to display
+ * @param {number} x - The x coord of the Block
+ * @param {number} y - The y coord of the Block
+ * @param {number} width - The width of the Block
+ * @param {number} height - The height of the Block
+ * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
+ */
+ResultBubble.displayValue = function(value, x, y, width, height, error) {
+	if (error == null) {
+		error = false;
+	}
+	const leftX = x;
+	const rightX = x + width;
+	const upperY = y;
+	const lowerY = y + height;
+	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
+};

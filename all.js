@@ -2528,32 +2528,43 @@ GuiElements.createLayers = function() {
 	layers.overlayOverlay = create.layer(i);
 	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
+
+
+
+
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
- * It may also be added to a group if included.
- */
-GuiElements.create = function() {};
-/* Makes a group, adds it to a parent group (if present), and returns it.
+ * It may also be added to a group if included. */
+GuiElements.create = {};
+/**
+ * Makes a group, adds it to a parent group (if present), and returns it.
  * @param {number} x - The x offset of the group.
  * @param {number} y - The y offset of the group.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG g} - The group which was created.
+ * @param {Element} [parent] - The parent group to add the group to.
+ * @return {Element} - The group which was created.
  */
 GuiElements.create.group = function(x, y, parent) {
 	DebugOptions.validateOptionalNums(x, y);
-	var group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+	const group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
 	group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")"); //Move the group to (x,y).
 	if (parent != null) { //If provided, add it to the parent.
 		parent.appendChild(group);
 	}
 	return group; //Return the group.
-}
-/* Creates a group, adds it to the main SVG, and returns it. */
+};
+/**
+ * Creates a layer object that can be treated much like a group but has show and hide functions. The layer actually
+ * includes two groups, with the inner group added/removed from the outer group during show/hide, ensuring the order
+ * of layers never changes.
+ * @param {number} depth - The index of the zoomGroup to add to
+ * @return {object} - A layer object
+ */
 GuiElements.create.layer = function(depth) {
 	DebugOptions.validateNumbers(depth);
 	let layerG = GuiElements.create.group(0, 0, GuiElements.zoomGroups[depth]);
 	let showHideLayer = GuiElements.create.group(0, 0, layerG);
 	let layer = {};
+	// We forward these group-like functions to the inner group
 	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
 	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
 	layer.hide = showHideLayer.remove.bind(showHideLayer);
@@ -2562,101 +2573,111 @@ GuiElements.create.layer = function(depth) {
 	};
 	return layer;
 };
-/* Creates a linear SVG gradient and adds it to the SVG defs.
- * @param {text} id - The id of the gradient (needed to reference it later).
+/**
+ * Creates a linear SVG gradient and adds it to the SVG defs.
+ * @param {string} id - The id of the gradient (needed to reference it later).
  * @param {string} color1 - color in form "#fff" of the top of the gradient.
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  */
 GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
 	DebugOptions.validateNonNull(color1, color2);
-	var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
 	gradient.setAttributeNS(null, "id", id); //Set attributes.
 	gradient.setAttributeNS(null, "x1", "0%");
 	gradient.setAttributeNS(null, "x2", "0%");
 	gradient.setAttributeNS(null, "y1", "0%");
 	gradient.setAttributeNS(null, "y2", "100%");
 	GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
-	var stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
+	const stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
 	stop1.setAttributeNS(null, "offset", "0%");
 	stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
 	gradient.appendChild(stop1);
-	var stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
+	const stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
 	stop2.setAttributeNS(null, "offset", "100%");
 	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
-}
-/* Creates an SVG path element and returns it.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG path} - The path which was created.
+};
+/**
+ * Creates an SVG path element and returns it.
+ * @param {Element} [group] - The parent group to add the element to.
+ * @return {Element} - The path which was created.
  */
 GuiElements.create.path = function(group) {
-	var path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(path);
 	}
 	return path; //Return the path.
-}
-/* Creates an SVG text element and returns it.
- * @return {SVG text} - The text which was created.
+};
+/**
+ * Creates an SVG text element and returns it.
+ * @return {Element} - The text which was created.
  */
 GuiElements.create.text = function() {
-	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
-	return textElement; //Return the text.
+	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 };
+/**
+ * Creates an SVG image element and returns it.
+ * @return {Element} - The text which was created.
+ */
 GuiElements.create.image = function() {
-	var imageElement = document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
-	return imageElement; //Return the text.
+	return document.createElementNS("http://www.w3.org/2000/svg", 'image');
 };
-GuiElements.create.foreignObject = function(group) {
-	var obj = document.createElementNS("http://www.w3.org/2000/svg", 'foreignObject');
-	if (group != null) {
-		group.appendChild(obj);
-	}
-	return obj;
-};
+/**
+ * Creates an SVG tag and adds it to the group
+ * @param {Element} [group]
+ * @return {Element}
+ */
 GuiElements.create.svg = function(group) {
-	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
 	if (group != null) {
 		group.appendChild(svg);
 	}
 	return svg;
 };
+/**
+ * Creates a div formatted to be scrollable and ads it to the group
+ * @param {Element} group
+ * @return {Element}
+ */
 GuiElements.create.scrollDiv = function(group) {
-	var div = document.createElement("div");
+	const div = document.createElement("div");
 	div.style.position = "absolute";
 	if (group != null) {
 		group.appendChild(div);
 	}
 	return div;
 };
-/* Creates an SVG rect element, adds it to a parent group (if present), and returns it.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG rect} - The rect which was created.
+/**
+ * Creates an SVG rect element, adds it to a parent group (if present), and returns it.
+ * @param {Element} group - (optional) The parent group to add the group to.
+ * @return {Element} - The rect which was created.
  */
 GuiElements.create.rect = function(group) {
-	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(rect);
 	}
 	return rect; //Return the rect.
-}
-/* GuiElements.create contains functions that create SVG elements and assign thier attributes
+};
+
+/* GuiElements.draw contains functions that create SVG elements and assign their attributes
  * so they are ready to be drawn on the screen. The element is then returned.
- * It may also be added to a group if included.
- */
-GuiElements.draw = function() {};
-/* Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
+ * It may also be added to a group if included. */
+GuiElements.draw = {};
+/**
+ * Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
  * @param {number} x - The rect's x coord.
  * @param {number} y - The rect's y coord.
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
  * @param {string} color - (optional) The rect's fill color in the form "#fff".
- * @return {SVG rect} - The rect which was created.
+ * @return {Element} - The rect which was created.
  */
 GuiElements.draw.rect = function(x, y, width, height, color) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	rect.setAttributeNS(null, "x", x); //Set its attributes.
 	rect.setAttributeNS(null, "y", y);
 	rect.setAttributeNS(null, "width", width);
@@ -2665,52 +2686,72 @@ GuiElements.draw.rect = function(x, y, width, height, color) {
 		rect.setAttributeNS(null, "fill", color);
 	}
 	return rect; //Return the rect.
-}
-/* Creates a filled, triangular SVG path element with specified dimensions and returns it.
+};
+/**
+ * Creates a filled, triangular SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles triangle)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
- * @return {SVG path} - The path which was created.
+ * @return {Element} - The path which was created.
  */
 GuiElements.draw.triangle = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangle(triangle, x, y, width, height); //Set its path description (points).
 	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
+/**
+ * Creates a triangle with its point at the indicated coords
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {string} color
+ * @return {Element}
+ */
 GuiElements.draw.triangleFromPoint = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangleFromPoint(triangle, x, y, width, height); //Set its path description (points).
 	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
-/* Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
+/**
+ * Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles trapezoid)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {number} slantW - The amount the trapezoid slopes in.
  * @param {string} color - The path's fill color in the form "#fff".
- * @return {SVG path} - The path which was created.
+ * @return {Element} - The path which was created.
  */
 GuiElements.draw.trapezoid = function(x, y, width, height, slantW, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	const trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.trapezoid(trapezoid, x, y, width, height, slantW); //Set its path description.
 	trapezoid.setAttributeNS(null, "fill", color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
-}
+};
+/**
+ * Draws a circle at the center point
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} radius
+ * @param {string} color
+ * @param {Element} [group]
+ * @return {Element}
+ */
 GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(cx, cy, radius);
-	var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+	const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 	circle.setAttributeNS(null, "cx", cx);
 	circle.setAttributeNS(null, "cy", cy);
 	circle.setAttributeNS(null, "r", radius);
@@ -2720,9 +2761,19 @@ GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 	}
 	return circle;
 };
+/**
+ * Creates an SVG image with the given dimensions and name
+ * @param {string} imageName - The name of the png image file
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {Element} [parent]
+ * @return {Element}
+ */
 GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var imageElement = GuiElements.create.image();
+	const imageElement = GuiElements.create.image();
 	imageElement.setAttributeNS(null, "x", x);
 	imageElement.setAttributeNS(null, "y", y);
 	imageElement.setAttributeNS(null, "width", width);
@@ -2748,7 +2799,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
-	var textElement = GuiElements.create.text();
+	const textElement = GuiElements.create.text();
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -2758,32 +2809,35 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
 	text += ""; //Make text into a string
 	text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	var textNode = document.createTextNode(text);
+	const textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
 };
+
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
- * They do not return anything.
- */
-GuiElements.update = function() {};
-/* Changes the fill color (or text color) of any SVG element.
- * @param {SVG element} element - The element to be recolored.
+ * They do not return anything. */
+GuiElements.update = {};
+/**
+ * Changes the fill color (or text color) of any SVG element.
+ * @param {Element} element - The element to be recolored.
  * @param {string} color - The element's new color in the form "#fff".
  */
 GuiElements.update.color = function(element, color) {
 	DebugOptions.validateNonNull(color);
 	element.setAttributeNS(null, "fill", color); //Recolors the element.
-}
-/* Changes the fill opacity of any SVG element.
- * @param {SVG element} element - The element to be modified.
- * @param {number} color - The element's new opacity (from 0 to 1).
+};
+/**
+ * Changes the fill opacity of any SVG element.
+ * @param {Element} element - The element to be modified.
+ * @param {number} opacity - The element's new opacity (from 0 to 1).
  */
 GuiElements.update.opacity = function(element, opacity) {
 	element.setAttributeNS(null, "fill-opacity", opacity); //Sets the opacity.
-}
-/* Sets an SVG element's stroke
- * @param {SVG element} element - The element to be modified.
+};
+/**
+ * Sets an SVG element's stroke
+ * @param {Element} element - The element to be modified.
  * @param {string} color - The element's new color in the form "#fff".
  * @param {number} strokeW - The width of the stroke
  */
@@ -2792,8 +2846,9 @@ GuiElements.update.stroke = function(element, color, strokeW) {
 	element.setAttributeNS(null, "stroke", color);
 	element.setAttributeNS(null, "stroke-width", strokeW);
 };
-/* Changes the text of an SVG text element.
- * @param {SVG text} textE - The text element to be modified.
+/**
+ * Changes the text of an SVG text element.
+ * @param {Element} textE - The text element to be modified.
  * @param {string} newText - The element's new text.
  */
 GuiElements.update.text = function(textE, newText) {
@@ -2802,25 +2857,26 @@ GuiElements.update.text = function(textE, newText) {
 	if (textE.textNode != null) {
 		textE.textNode.remove(); //Remove old text.
 	}
-	var textNode = document.createTextNode(newText); //Create new text.
+	const textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
-}
-/* Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
+};
+/**
+ * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
  * Adds "..." if characters are removed.
- * @param {SVG text} textE - The text element to be modified.
+ * @param {Element} textE - The text element to be modified.
  * @param {string} text - The element's new text.
  * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
  */
 GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
 	GuiElements.update.text(textE, text);
-	var currentWidth = GuiElements.measure.textWidth(textE);
+	let currentWidth = GuiElements.measure.textWidth(textE);
 	if (currentWidth < maxWidth || text == "") {
 		return;
 	}
-	var chars = 1;
-	var maxChars = text.length;
-	var currentText;
+	let chars = 1;
+	const maxChars = text.length;
+	let currentText;
 	while (chars <= maxChars) {
 		currentText = text.substring(0, chars);
 		GuiElements.update.text(textE, currentText + "...");
@@ -2834,8 +2890,9 @@ GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
 	currentText = text.substring(0, chars);
 	GuiElements.update.text(textE, currentText + "...");
 };
-/* Changes the path description of an SVG path object to make it a triangle.
- * @param {SVG path} pathE - The path element to be modified.
+/**
+ * Changes the path description of an SVG path object to make it a triangle.
+ * @param {Element} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles triangle)
@@ -2843,22 +2900,31 @@ GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
  */
 GuiElements.update.triangle = function(pathE, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var xshift = width / 2;
-	var path = "";
+	const xshift = width / 2;
+	let path = "";
 	path += "m " + x + "," + y; //Draws bottom-left point.
 	path += " " + xshift + "," + (0 - height); //Draws top-middle point.
 	path += " " + xshift + "," + (height); //Draws bottom-right point.
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
+/**
+ * Makes the path a triangle with point at the specified coords, possibly rotated 90 degrees
+ * @param {Element} pathE
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} vertical - Whether the triangle should be vertical or horizontal
+ */
 GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical) {
 	DebugOptions.validateNumbers(x, y, width, height);
 	if (vertical == null) {
 		vertical = 0;
 	}
 
-	var xshift = width / 2;
-	var path = "";
+	const xshift = width / 2;
+	let path = "";
 	path += "m " + x + "," + y; //Draws top-middle point.
 	if (vertical) {
 		path += " " + xshift + "," + (height);
@@ -2870,8 +2936,9 @@ GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vert
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-/* Changes the path description of an SVG path object to make it a trapezoid.
- * @param {SVG path} pathE - The path element to be modified.
+/**
+ * Changes the path description of an SVG path object to make it a trapezoid.
+ * @param {Element} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles trapezoid)
@@ -2880,17 +2947,18 @@ GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vert
  */
 GuiElements.update.trapezoid = function(pathE, x, y, width, height, slantW) {
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var shortW = width - 2 * slantW; //The width of the top of the trapezoid.
-	var path = "";
+	const shortW = width - 2 * slantW; //The width of the top of the trapezoid.
+	let path = "";
 	path += "m " + x + "," + (y + height); //Draws the points.
 	path += " " + slantW + "," + (0 - height);
 	path += " " + shortW + "," + 0;
 	path += " " + slantW + "," + height;
 	path += " z";
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
-}
-/* Moves and resizes an SVG rect element.
- * @param {SVG rect} rect - The rect element to be modified.
+};
+/**
+ * Moves and resizes an SVG rect element.
+ * @param {Element} rect - The rect element to be modified.
  * @param {number} x - The rect's new x coord.
  * @param {number} y - The rect's new y coord.
  * @param {number} width - The rect's new width.
@@ -2902,16 +2970,37 @@ GuiElements.update.rect = function(rect, x, y, width, height) {
 	rect.setAttributeNS(null, "y", y);
 	rect.setAttributeNS(null, "width", width);
 	rect.setAttributeNS(null, "height", height);
-}
-/* Used for zooming the main zoomGroup which holds the ui */
+};
+/**
+ * Used for zooming the main zoomGroup which holds the ui
+ * @param {Element} group
+ * @param {number} scale - The zoom amount
+ */
 GuiElements.update.zoom = function(group, scale) {
 	DebugOptions.validateNumbers(scale);
 	group.setAttributeNS(null, "transform", "scale(" + scale + ")");
 };
+/**
+ * Changes the image an image element points to
+ * @param {Element} imageE
+ * @param {string} newImageName - The name of the png image
+ */
 GuiElements.update.image = function(imageE, newImageName) {
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
 	imageE.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + newImageName + ".png");
 };
+/**
+ * Updates a div, svg and group in the SVG that form a smoothScrollSet according to new dimensions
+ * @param {Element} div - The div scrollable div containing a larger SVG
+ * @param {Element} svg - The svg in the div
+ * @param {Element} zoomG - The scaled group in the svg
+ * @param {number} x - Position of the set
+ * @param {number} y
+ * @param {number} width - Dimensions of outside of set
+ * @param {number} height
+ * @param {number} innerWidth - Dimensions inside the set
+ * @param {number} innerHeight
+ */
 GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
 	DebugOptions.validateNonNull(div, svg, zoomG);
 	DebugOptions.validateNumbers(x, y, width, height, innerWidth, innerHeight);
@@ -2920,8 +3009,8 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	var scrollY = innerHeight > height;
-	var scrollX = innerWidth > width;
+	const scrollY = innerHeight > height;
+	const scrollX = innerWidth > width;
 	div.classList.remove("noScroll");
 	div.classList.remove("smoothScrollXY");
 	div.classList.remove("smoothScrollX");
@@ -2936,7 +3025,7 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 		div.classList.add("noScroll");
 	}
 
-	var zoom = GuiElements.zoomFactor;
+	const zoom = GuiElements.zoomFactor;
 
 	div.style.top = y + "px";
 	div.style.left = x + "px";
@@ -2948,16 +3037,20 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
-
-GuiElements.makeClickThrough = function(svgE) {
+/**
+ * Makes an SVG element have touches pass through it
+ * @param {Element} svgE
+ */
+GuiElements.update.makeClickThrough = function(svgE) {
 	svgE.style.pointerEvents = "none";
 };
+
 /* GuiElements.move contains functions that move existing SVG elements.
- * They do not return anything.
- */
-GuiElements.move = function() {};
-/* Moves a group by changing its transform value.
- * @param {SVG g} group - The group to move.
+ * They do not return anything. */
+GuiElements.move = {};
+/**
+ * Moves a group by changing its transform value.
+ * @param {Element} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
  * @param {number} zoom - (Optional) The amount the group should be scaled.
@@ -2970,8 +3063,9 @@ GuiElements.move.group = function(group, x, y, zoom) {
 		group.setAttributeNS(null, "transform", "matrix(" + zoom + ",0,0," + zoom + "," + x + "," + y + ")");
 	}
 };
-/* Moves an SVG text element.
- * @param {SVG text} text - The text to move.
+/**
+ * Moves an SVG text element.
+ * @param {string} text - The text to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
@@ -2980,8 +3074,9 @@ GuiElements.move.text = function(text, x, y) {
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
-/* Moves an SVG element.
- * @param {SVG element} element - The element to move.
+/**
+ * Moves an SVG element.
+ * @param {Element} element - The element to move.
  * @param {number} x - The new x coord of the element.
  * @param {number} y - The new y coord of the element.
  */
@@ -2990,20 +3085,20 @@ GuiElements.move.element = function(element, x, y) {
 	element.setAttributeNS(null, "x", x);
 	element.setAttributeNS(null, "y", y);
 };
-/* Creates a clipping path (crops item) of the specified size and adds to the element if provided.
- * @param {string} id - The id to use for the clipping path.
+/**
+ * Creates a clipping path (crops item) of the specified size and adds to the element if provided.
  * @param {number} x - The x coord of the clipping path.
  * @param {number} y - The y coord of the clipping path.
  * @param {number} width - The width of the clipping path.
  * @param {number} height - The height of the clipping path.
- * @param {SVG element} element - (optional) The element the path should be added to.
- * @return {SVG clipPath} - The finished clipping path.
+ * @param {Element} [element] - (optional) The element the path should be added to.
+ * @return {Element} - The finished clipping path.
  */
 GuiElements.clip = function(x, y, width, height, element) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var id = Math.random() + "";
-	var clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
-	var clipRect = GuiElements.draw.rect(x, y, width, height);
+	const id = Math.random() + "";
+	const clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
+	const clipRect = GuiElements.draw.rect(x, y, width, height);
 	clipPath.appendChild(clipRect);
 	clipPath.setAttributeNS(null, "id", id);
 	GuiElements.defs.appendChild(clipPath);
@@ -3012,37 +3107,44 @@ GuiElements.clip = function(x, y, width, height, element) {
 	}
 	return clipPath;
 };
+
 /* GuiElements.measure contains functions that measure parts of the UI.
- * They return the measurement.
- */
-GuiElements.measure = function() {};
-/* Measures the width of an existing SVG text element.
- * @param {SVG text} textE - The text element to measure.
+ * They return the measurement. */
+GuiElements.measure = {};
+/**
+ * Measures the width of an existing SVG text element.
+ * @param {Element} textE - The text element to measure.
  * @return {number} - The width of the text element.
  */
 GuiElements.measure.textWidth = function(textE) { //Measures an existing text SVG element
 	return GuiElements.measure.textDim(textE, false);
 };
+/**
+ * Measures the height of the SVG text element
+ * @param {Element} textE
+ * @return {number}
+ */
 GuiElements.measure.textHeight = function(textE) { //Measures an existing text SVG element
 	return GuiElements.measure.textDim(textE, true);
 };
-/* Measures the width/height of an existing SVG text element.
- * @param {SVG text} textE - The text element to measure.
+/**
+ * Measures the width/height of an existing SVG text element.
+ * @param {Element} textE - The text element to measure.
  * @param {bool} height - true/false for width/height, respectively.
  * @return {number} - The width/height of the text element.
  */
 GuiElements.measure.textDim = function(textE, height) { //Measures an existing text SVG element
-	if (textE.textContent == "") { //If it has no text, the width is 0.
+	if (textE.textContent === "") { //If it has no text, the width is 0.
 		return 0;
 	}
 	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
-	var bbox = textE.getBBox();
-	var textD = bbox.width; //Gets the width of the bounding box.
+	let bbox = textE.getBBox();
+	let textD = bbox.width; //Gets the width of the bounding box.
 	if (height) {
 		textD = bbox.height; //Gets the height of the bounding box.
 	}
-	if (textD == 0) { //The text element probably is not visible on the screen.
-		var parent = textE.parentNode; //Store the text element's current (hidden) parent.
+	if (textD === 0) { //The text element probably is not visible on the screen.
+		const parent = textE.parentNode; //Store the text element's current (hidden) parent.
 		GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
 		bbox = textE.getBBox(); //Now get its bounding box.
 		textD = bbox.width;
@@ -3056,56 +3158,32 @@ GuiElements.measure.textDim = function(textE, height) { //Measures an existing t
 	}
 	return textD; //Return the width/height.
 };
-
-
 /**
  * Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
  * @param {Font} font - The font family of the text element.
- * @param {null} test
  * @return {number} - The width of the text element made using the string.
  */
 GuiElements.measure.stringWidth = function(text, font) {
-	var textElement = GuiElements.create.text(); //Make the text element.
+	const textElement = GuiElements.create.text(); //Make the text element.
 	textElement.setAttributeNS(null, "font-family", font.fontFamily); //Set the attributes.
 	textElement.setAttributeNS(null, "font-size", font.fontSize);
 	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
 	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
-	var textNode = document.createTextNode(text); //Add the text to the text element.
+	const textNode = document.createTextNode(text); //Add the text to the text element.
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
 };
-GuiElements.measure.position = function(element) {
-	var top = 0,
-		left = 0;
-	do {
-		top += element.offsetTop || 0;
-		left += element.offsetLeft || 0;
-		element = element.offsetParent;
-	} while (element);
 
-	return {
-		top: top,
-		left: left
-	};
-	/* https://stackoverflow.com/questions/1480133/how-can-i-get-an-objects-absolute-position-on-the-page-in-javascript */
-};
-/* Displays the result of a reporter or predicate Block in a speech bubble next to that block.
- * @param {string} value - The value to display
- * @fix This function has not been created yet.
+
+
+
+
+/**
+ * Loads the version number from version.js
+ * @param callback
  */
-GuiElements.displayValue = function(value, x, y, width, height, error) {
-	if (error == null) {
-		error = false;
-	}
-	var leftX = x;
-	var rightX = x + width;
-	var upperY = y;
-	var lowerY = y + height;
-	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
-};
-/* Loads the version number from version.js */
 GuiElements.getAppVersion = function(callback) {
 	GuiElements.appVersion = FrontendVersion;
 	callback();
@@ -9574,6 +9652,26 @@ ResultBubble.setConstants = function() {
 ResultBubble.prototype.close = function() {
 	this.bubbleOverlay.hide();
 };
+
+/**
+ * Displays a ResultBubble below a block
+ * @param {string} value - The message to display
+ * @param {number} x - The x coord of the Block
+ * @param {number} y - The y coord of the Block
+ * @param {number} width - The width of the Block
+ * @param {number} height - The height of the Block
+ * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
+ */
+ResultBubble.displayValue = function(value, x, y, width, height, error) {
+	if (error == null) {
+		error = false;
+	}
+	const leftX = x;
+	const rightX = x + width;
+	const upperY = y;
+	const lowerY = y + height;
+	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
+};
 /**
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
@@ -15131,7 +15229,7 @@ OverflowArrows.prototype.makeTriangle = function() {
 	const tri = GuiElements.create.path();
 	GuiElements.update.color(tri, Colors.white);
 	GuiElements.update.opacity(tri, OA.opacity);
-	GuiElements.makeClickThrough(tri);
+	GuiElements.update.makeClickThrough(tri);
 	return tri;
 };
 
@@ -18649,7 +18747,7 @@ Block.prototype.displayValue = function(message, error){
 	let width = this.relToAbsX(this.width) - x;
 	let height = this.relToAbsY(this.height) - y;
 	// Display a bubble at the location
-	GuiElements.displayValue(message, x, y, width, height, error);
+	ResultBubble.displayValue(message, x, y, width, height, error);
 };
 
 /**

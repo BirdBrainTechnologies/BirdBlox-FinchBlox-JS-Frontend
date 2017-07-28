@@ -29,7 +29,7 @@ OverflowArrows.prototype.makeTriangle = function() {
 	const tri = GuiElements.create.path();
 	GuiElements.update.color(tri, Colors.white);
 	GuiElements.update.opacity(tri, OA.opacity);
-	GuiElements.makeClickThrough(tri);
+	GuiElements.update.makeClickThrough(tri);
 	return tri;
 };
 

@@ -1191,7 +1191,7 @@ Block.prototype.displayValue = function(message, error){
 	let width = this.relToAbsX(this.width) - x;
 	let height = this.relToAbsY(this.height) - y;
 	// Display a bubble at the location
-	GuiElements.displayValue(message, x, y, width, height, error);
+	ResultBubble.displayValue(message, x, y, width, height, error);
 };
 
 /**
