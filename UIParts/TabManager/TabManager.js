@@ -4,7 +4,6 @@
  * We decided not to have tabs, so there's just one tab, which is generated and controlled by the TabManager.
  *
  * The TabManager's main job is passing messages to the active tab
- * @constructor
  */
 function TabManager() {
 	const TM = TabManager;

@@ -4,6 +4,7 @@
  * It contains functions to create and modify elements of the main SVG.
  * GuiElements is run once the browser has loaded all the js and html files.
  * It's one of the less organized classes and has quite a lot of functions in it.
+ * TODO: Refactor GuiElements moving the parts that deal with getting device properties to a different class
  */
 function GuiElements() {
 	// Clear the debug span
@@ -16,6 +17,7 @@ function GuiElements() {
 	GuiElements.defs = document.getElementById("SvgDefs");
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
+		// Build the UI
 		GuiElements.setConstants();
 		GuiElements.createLayers();
 		GuiElements.dialogBlock = null;
@@ -33,48 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Redraws UI if screen dimensions change */
 window.onresize = function() {
 	GuiElements.updateZoom();
-};
-
-
-GuiElements.loadInitialSettings = function(callback) {
-	DebugOptions();
-	Data.setConstants();
-	HtmlServer();
-	GuiElements.setGuiConstants();
-	SettingsManager();
-	GuiElements.load = {};
-	GuiElements.load.version = false;
-	GuiElements.load.zoom = false;
-	GuiElements.load.os = false;
-	GuiElements.load.lastFileName = true;
-	GuiElements.load.lastFileNamed = true;
-	if (!DebugOptions.shouldSkipInitSettings()) {
-		var count = 0;
-		var checkIfDone = function() {
-			count++;
-			GuiElements.alert("" + GuiElements.load.version + GuiElements.load.zoom + GuiElements.load.os + GuiElements.load.lastFileName + GuiElements.load.lastFileNamed);
-			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
-				callback();
-			}
-		};
-		GuiElements.getAppVersion(function() {
-			GuiElements.load.version = true;
-			checkIfDone();
-		});
-		GuiElements.configureZoom(function() {
-			GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
-			GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
-			GuiElements.load.zoom = true;
-			GuiElements.checkSmallMode();
-			checkIfDone();
-		});
-		GuiElements.getOsVersion(function() {
-			GuiElements.load.os = true;
-			checkIfDone();
-		});
-	} else {
-		callback();
-	}
 };
 
 /** Sets constants relating to screen dimensions and the Operating System */
@@ -105,9 +65,11 @@ GuiElements.setGuiConstants = function() {
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
 };
-/* Many classes have static functions which set constants such as font size, etc.
+/**
+ * Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
- * Some classes rely on constants from eachother, so the order they execute in is important. */
+ * Some classes rely on constants from each other, so the order they execute in is important.
+ */
 GuiElements.setConstants = function() {
 	/* If a class is static and does not build a part of the UI,
 	then its main function is used to initialize its constants. */
@@ -169,33 +131,14 @@ GuiElements.setConstants = function() {
 	SaveManager.setConstants();
 	UndoManager();
 };
-/* Debugging function which displays information on screen */
-GuiElements.alert = function(message) {
-	if (!DebugOptions.shouldAllowLogging()) return;
-	let result = message;
-	if (DeviceHummingbird.getManager().renewDiscoverFn) {
-		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn() ? "true" : "false");
-	} else {
-		result += " None";
-	}
-	debug.innerHTML = result; //The iPad app does not support alert dialogs
-};
-/* Alerts the user that an error has occurred. Should never be called.
- * @param {string} errMessage - The error's message passed by the function that threw the error.
- */
-GuiElements.throwError = function(errMessage) {
-	GuiElements.alert(errMessage); //Show the error in the debug area.
-}
-/* Once each class has its constants set, the UI can be built. UI-related classes are called. */
+/** Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI = function() {
 	document.body.style.backgroundColor = Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
-
 	TitleBar(); //Creates the title bar and the buttons contained within it.
-
 	TabManager(); //Creates the tab-switching interface below the title bar
 	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
 	/* Builds the SVG path element for the highlighter,
@@ -204,11 +147,12 @@ GuiElements.buildUI = function() {
 	SaveManager();
 	DebugOptions.applyActions();
 };
-/* Makes an SVG group element (<g>) for each layer of the interface.
+/**
+ * Makes an layer object for each layer of the interface.
  * Layers are accessible in the form GuiElements.layers.[layerName]
  */
 GuiElements.createLayers = function() {
-	var create = GuiElements.create; //shorthand
+	const create = GuiElements.create; //shorthand
 	GuiElements.zoomGroups = [];
 	GuiElements.svgs.forEach(function(svg) {
 		let zoomGroup = create.group(0, 0, svg);
@@ -218,7 +162,7 @@ GuiElements.createLayers = function() {
 
 	GuiElements.layers = {};
 	let i = 0;
-	var layers = GuiElements.layers;
+	const layers = GuiElements.layers;
 	layers.temp = create.layer(i);
 	layers.aTabBg = create.layer(i);
 	layers.activeTab = create.layer(i);
@@ -248,7 +192,20 @@ GuiElements.createLayers = function() {
 	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
 
-
+/**
+ * Debugging function which displays information on the screen
+ * @param {string} message
+ */
+GuiElements.alert = function(message) {
+	if (!DebugOptions.shouldAllowLogging()) return;
+	let result = message;
+	if (DeviceHummingbird.getManager().renewDiscoverFn) {
+		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn() ? "true" : "false");
+	} else {
+		result += " None";
+	}
+	debug.innerHTML = result; //The iPad app does not support alert dialogs
+};
 
 
 /* GuiElements.create contains functions for creating SVG elements.
@@ -391,7 +348,7 @@ GuiElements.draw = {};
  * @param {number} y - The rect's y coord.
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
- * @param {string} color - (optional) The rect's fill color in the form "#fff".
+ * @param {string} [color] - (optional) The rect's fill color in the form "#fff".
  * @return {Element} - The rect which was created.
  */
 GuiElements.draw.rect = function(x, y, width, height, color) {
@@ -895,54 +852,39 @@ GuiElements.measure.stringWidth = function(text, font) {
 	return GuiElements.measure.textWidth(textElement); //Measure it.
 };
 
-
-
-
-
 /**
- * Loads the version number from version.js
- * @param callback
+ * Creates a black rectangle to block interaction with the main screen.  Used for dialogs.
  */
-GuiElements.getAppVersion = function(callback) {
-	GuiElements.appVersion = FrontendVersion;
-	callback();
-};
-GuiElements.getOsVersion = function(callback) {
-	HtmlServer.sendRequestWithCallback("properties/os", function(resp) {
-		GuiElements.osVersion = resp;
-		var parts = resp.split(" ");
-		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
-		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
-		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
-		callback();
-	}, function() {
-		GuiElements.osVersion = "";
-		GuiElements.isKindle = false;
-		callback();
-	});
-};
-/* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
 GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
-		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
+		const rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
 		GuiElements.dialogBlock = rect;
 	}
 };
+/**
+ * Removes the black rectangle that blocks interaction
+ */
 GuiElements.unblockInteraction = function() {
 	if (GuiElements.dialogBlock != null) {
 		GuiElements.dialogBlock.remove();
 		GuiElements.dialogBlock = null;
 	}
 };
+/**
+ * Updates the dimensions of the blocker
+ */
 GuiElements.updateDialogBlockZoom = function() {
 	if (GuiElements.dialogBlock != null) {
 		GuiElements.update.rect(GuiElements.dialogBlock, 0, 0, GuiElements.width, GuiElements.height);
 	}
 };
-/* Tells UI parts that zoom has changed. */
+
+/**
+ * Sets the scale levels of the zoomGroups and then updates the UI
+ */
 GuiElements.updateZoom = function() {
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
 	GuiElements.zoomGroups.forEach(function(zoomGroup) {
@@ -950,16 +892,27 @@ GuiElements.updateZoom = function() {
 	});
 	GuiElements.updateDims();
 };
+/**
+ * Sets the width and height using dimensions from the backend, then tells the UI to update
+ * @param {number} newWidth
+ * @param {number} newHeight
+ */
 GuiElements.updateDimsPreview = function(newWidth, newHeight) {
 	GuiElements.width = newWidth / GuiElements.zoomFactor;
 	GuiElements.height = newHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
+/**
+ * Remeasures the width and height for GuiElements and then tells the UI to update
+ */
 GuiElements.updateDims = function() {
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
 	GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
+/**
+ * Tells parts of the UI to update their dimensions
+ */
 GuiElements.passUpdateZoom = function() {
 	Overlay.closeOverlaysExcept(TitleBar.viewMenu);
 	GuiElements.checkSmallMode();
@@ -971,7 +924,92 @@ GuiElements.passUpdateZoom = function() {
 	GuiElements.updateDialogBlockZoom();
 	RowDialog.updateZoom();
 };
-GuiElements.configureZoom = function(callback) {
+
+/* GuiElements.load loads important information from the backend before the UI even starts to be build (such as
+ * screen dimensions and OS).  All load functions are launched simultaneously and each calls a callback, which
+ * "checks it off the list" of things to load. */
+GuiElements.load = {};
+/**
+ * Called to load information from backend before building UI
+ * @param {function} callback - Called when all data is loaded
+ */
+GuiElements.loadInitialSettings = function(callback) {
+	// TODO: Refactor this function
+	DebugOptions();
+	Data.setConstants();
+	HtmlServer();
+	GuiElements.setGuiConstants();
+	SettingsManager();
+	// The checklist of thing to load
+	const loadProg = {};
+	loadProg.version = false;
+	loadProg.zoom = false;
+	loadProg.os = false;
+	loadProg.lastFileName = true;
+	loadProg.lastFileNamed = true;
+	const load = GuiElements.load;
+	if (!DebugOptions.shouldSkipInitSettings()) {
+		let count = 0;
+		// Function checks if all the pieces are done loading and calls the callback when they are
+		const checkIfDone = function() {
+			count++;
+			GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
+				loadProg.lastFileName + loadProg.lastFileNamed);
+			if (loadProg.version && loadProg.zoom && loadProg.os && loadProg.lastFileName && loadProg.lastFileNamed) {
+				callback();
+			}
+		};
+		// The three things to load are requested
+		load.getAppVersion(function() {
+			loadProg.version = true;
+			checkIfDone();
+		});
+		load.configureZoom(function() {
+			GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+			GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
+			loadProg.zoom = true;
+			GuiElements.checkSmallMode();
+			checkIfDone();
+		});
+		load.getOsVersion(function() {
+			loadProg.os = true;
+			checkIfDone();
+		});
+	} else {
+		callback();
+	}
+};
+/**
+ * Loads the version number from version.js
+ * @param {function} callback
+ */
+GuiElements.load.getAppVersion = function(callback) {
+	GuiElements.appVersion = FrontendVersion;
+	callback();
+};
+/**
+ * Loads the OS version
+ * @param {function} callback
+ */
+GuiElements.load.getOsVersion = function(callback) {
+	HtmlServer.sendRequestWithCallback("properties/os", function(resp) {
+		GuiElements.osVersion = resp;
+		const parts = resp.split(" ");
+		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
+		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
+		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		callback();
+	}, function() {
+		GuiElements.osVersion = "";
+		GuiElements.isKindle = false;
+		callback();
+	});
+};
+/**
+ * Loads dimension information and settings from the backend and uses it to compute the current zoom level
+ * @param {function} callback
+ */
+GuiElements.load.configureZoom = function(callback) {
 	const GE = GuiElements;
 	SettingsManager.loadSettings(function() {
 		const callbackFn = function() {
@@ -998,33 +1036,53 @@ GuiElements.configureZoom = function(callback) {
 		});
 	});
 };
-/* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
+/**
+ * Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
  */
 GuiElements.computeZoomFromDims = function(dims) {
 	//GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	//GuiElements.alert("received dims: " + dims);
-	var parts = dims.split(",");
-	if (parts.length == 2) {
-		var widthMm = parseFloat(parts[0]);
-		var heightMm = parseFloat(parts[1]);
-		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
-		var widthPx = window.innerWidth;
-		var heightPx = window.innerHeight;
-		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
+	const parts = dims.split(",");
+	if (parts.length === 2) {
+		const widthMm = parseFloat(parts[0]);
+		const heightMm = parseFloat(parts[1]);
+		const diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
+		const widthPx = window.innerWidth;
+		const heightPx = window.innerHeight;
+		const diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
+		const zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
 		//GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		return zoom * GuiElements.defaultZoomMultiple;
 	} else {
 		return 1;
 	}
 };
+
+/* Convert between coords relative to the screen and coords that incorporate the current zoom level
+ * Note that most relToAbs functions in other classes actually return coords that do not depend on the
+ * current zoom level.  The GuiElements relToAbs functions take these coords and convert them into true
+ * screen coords. */
+/**
+ * @param {number} x
+ * @return {number}
+ */
 GuiElements.relToAbsX = function(x) {
 	return x * GuiElements.zoomFactor;
 };
+/**
+ * @param {number} y
+ * @return {number}
+ */
 GuiElements.relToAbsY = function(y) {
 	return y * GuiElements.zoomFactor;
 };
+
+/**
+ * Hides the BlockPalette by hiding the layers it renders on
+ * @param {boolean} [skipUpdate=false] - Whether the TabManager should not be told to update arrows because the
+ *                                       TabManager has not been initialized yet
+ */
 GuiElements.hidePaletteLayers = function(skipUpdate) {
 	if (skipUpdate == null) {
 		skipUpdate = false;
@@ -1043,6 +1101,10 @@ GuiElements.hidePaletteLayers = function(skipUpdate) {
 		}
 	}
 };
+/**
+ * Shows the BlockPalette
+ * @param {boolean} [skipUpdate=false] - Whether updating the TabManager should be skipped
+ */
 GuiElements.showPaletteLayers = function(skipUpdate) {
 	let GE = GuiElements;
 	if (skipUpdate == null) {
@@ -1061,6 +1123,10 @@ GuiElements.showPaletteLayers = function(skipUpdate) {
 		}
 	}
 };
+
+/**
+ * Checks if the UI should enter/exit small mode based on the current width
+ */
 GuiElements.checkSmallMode = function() {
 	let GE = GuiElements;
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);

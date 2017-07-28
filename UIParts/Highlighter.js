@@ -1,7 +1,6 @@
 /**
  * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
  * white (or black if Blocks are running) path element which it moves around and reshapes
- * @constructor
  */
 function Highlighter() {
 	Highlighter.path = Highlighter.createPath();

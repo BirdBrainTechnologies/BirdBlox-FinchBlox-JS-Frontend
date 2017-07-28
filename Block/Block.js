@@ -554,7 +554,7 @@ Block.prototype.highlight = function(){
 		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
 	}
 	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
-		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen = false");
+		DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
 	}
 };
 

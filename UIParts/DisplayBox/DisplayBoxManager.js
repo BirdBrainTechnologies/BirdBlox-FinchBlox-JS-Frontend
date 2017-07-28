@@ -1,7 +1,6 @@
 /**
  * Manages three DisplayBoxes on the bottom of the screen.  DisplayBoxes are triggered by the display block and
  * which box is shown depends on the position parameter of the block
- * @constructor
  */
 function DisplayBoxManager(){
 	const DBM = DisplayBoxManager;

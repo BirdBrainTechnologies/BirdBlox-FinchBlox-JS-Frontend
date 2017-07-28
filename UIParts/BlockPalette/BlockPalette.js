@@ -4,7 +4,6 @@
  * The BlockPalette is the side panel on the left that holds all the Blocks.  BlockPalette is a static class, since
  * there is only one Palette.  The BlockPalette class creates and manages a set of Categories, each of which
  * controls the Blocks inside it and the CategoryBN that brings it into the foreground.
- * @constructor
  */
 function BlockPalette() {
 	BlockPalette.categories = [];   // List of categories
