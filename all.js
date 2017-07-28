@@ -5317,6 +5317,7 @@ TouchReceiver.touchStartBN = function(target, e) {
 	}
 	if (TR.touchstart(e, shouldPreventDefault)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
+		TR.setLongTouchTimer();
 		TR.targetType = "button";
 		TR.target = target;
 		target.press();   // Changes the button's appearance and may trigger an action.
@@ -5425,6 +5426,7 @@ TouchReceiver.touchmove = function(e) {
 	// We start dragging when the touch moves outside the threshold
 	if (TR.touchDown && (TR.hasMovedOutsideThreshold(e) || TR.dragging)) {
 		TR.dragging = true;
+		TR.stopLongTouchTimer();
 		if (TR.longTouch) {
 			Overlay.closeOverlays();
 			TR.longTouch = false;
@@ -5625,16 +5627,18 @@ TouchReceiver.touchLong = function() {
 		}
 		if (TR.targetType === "displayStack") {
 			// Show the menu for variables
-			if (!TR.blocksMoving && (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List")) {
+			if (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List") {
 				TR.longTouch = true;
 				new BlockContextMenu(TR.target, TR.startX, TR.startY);
 			}
 		}
 		if (TR.targetType === "block") {
-			if (!TR.blocksMoving) {
-				TR.longTouch = true;
-				new BlockContextMenu(TR.target, TR.startX, TR.startY);
-			}
+			TR.longTouch = true;
+			new BlockContextMenu(TR.target, TR.startX, TR.startY);
+		}
+		if (TR.targetType === "button") {
+			TR.longTouch = true;
+			TR.target.longTouch();
 		}
 	}
 };
@@ -5965,6 +5969,9 @@ TitleBar.makeButtons = function() {
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
 	TB.viewMenu = new SettingsMenu(TB.viewBn);
+	TB.viewBn.setLongTouchFunction(function() {
+		DialogManager.showAlertDialog("Test", "Test", "Test");
+	});
 
 	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
@@ -7431,6 +7438,7 @@ function Button(x, y, width, height, parent) {
 	this.delayedCallback = null;   // The function to call when the button is released
 	this.toggles = false;   // Whether the button should stick in the pressed state until tapped again
 	this.unToggleFunction = null;   // The function to call when the button is tapped to make is stop being pressed
+	this.longTouchFunction = null;   // The function to call when the button is long pressed
 	this.toggled = false;   // Whether the button is currently stuck in the pressed state (only if it toggles)
 	this.partOfOverlay = null;   // The overlay the button is a part of (if any)
 	this.scrollable = false;   // Whether the button is part of something that scrolls and shouldn't prevent scrolling
@@ -7706,6 +7714,14 @@ Button.prototype.setUnToggleFunction = function(callback) {
 };
 
 /**
+ * Sets a function to call when the button is long touched
+ * @param {function} callback
+ */
+Button.prototype.setLongTouchFunction = function(callback) {
+	this.longTouchFunction = callback;
+};
+
+/**
  * Disables the button so it cannot be interacted with
  */
 Button.prototype.disable = function() {
@@ -7788,6 +7804,18 @@ Button.prototype.unToggle = function() {
 	}
 	this.toggled = false;
 	this.pressed = false;
+};
+
+/**
+ * Runs the long touch function
+ * @return {boolean} - whether the long touch function is non-null
+ */
+Button.prototype.longTouch = function() {
+	if (this.longTouchFunction != null) {
+		this.longTouchFunction();
+		return true;
+	}
+	return false;
 };
 
 /**
@@ -16652,7 +16680,9 @@ CallbackManager.dialog = {};
  * @return {boolean}
  */
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	response = HtmlServer.decodeHtml(response);
+	if(response != null) {
+		response = HtmlServer.decodeHtml(response);
+	}
 	DialogManager.promptDialogResponded(cancelled, response);
 	return true;
 };

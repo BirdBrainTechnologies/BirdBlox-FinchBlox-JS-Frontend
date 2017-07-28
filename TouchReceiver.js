@@ -293,6 +293,7 @@ TouchReceiver.touchStartBN = function(target, e) {
 	}
 	if (TR.touchstart(e, shouldPreventDefault)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
+		TR.setLongTouchTimer();
 		TR.targetType = "button";
 		TR.target = target;
 		target.press();   // Changes the button's appearance and may trigger an action.
@@ -401,6 +402,7 @@ TouchReceiver.touchmove = function(e) {
 	// We start dragging when the touch moves outside the threshold
 	if (TR.touchDown && (TR.hasMovedOutsideThreshold(e) || TR.dragging)) {
 		TR.dragging = true;
+		TR.stopLongTouchTimer();
 		if (TR.longTouch) {
 			Overlay.closeOverlays();
 			TR.longTouch = false;
@@ -601,16 +603,18 @@ TouchReceiver.touchLong = function() {
 		}
 		if (TR.targetType === "displayStack") {
 			// Show the menu for variables
-			if (!TR.blocksMoving && (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List")) {
+			if (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List") {
 				TR.longTouch = true;
 				new BlockContextMenu(TR.target, TR.startX, TR.startY);
 			}
 		}
 		if (TR.targetType === "block") {
-			if (!TR.blocksMoving) {
-				TR.longTouch = true;
-				new BlockContextMenu(TR.target, TR.startX, TR.startY);
-			}
+			TR.longTouch = true;
+			new BlockContextMenu(TR.target, TR.startX, TR.startY);
+		}
+		if (TR.targetType === "button") {
+			TR.longTouch = true;
+			TR.target.longTouch();
 		}
 	}
 };

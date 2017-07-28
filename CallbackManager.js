@@ -115,7 +115,9 @@ CallbackManager.dialog = {};
  * @return {boolean}
  */
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	response = HtmlServer.decodeHtml(response);
+	if(response != null) {
+		response = HtmlServer.decodeHtml(response);
+	}
 	DialogManager.promptDialogResponded(cancelled, response);
 	return true;
 };
