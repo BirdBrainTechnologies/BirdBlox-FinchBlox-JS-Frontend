@@ -5935,11 +5935,16 @@ TitleBar.setGraphicsPart2 = function() {
 	}
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
-	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
+
+	let suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
+	if (TB.undoBnX < suggestedUndoBnX) {
+		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+	}
+	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
 };
 
 /**
