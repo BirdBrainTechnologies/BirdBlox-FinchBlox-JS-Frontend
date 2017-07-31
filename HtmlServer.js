@@ -5,7 +5,7 @@ function HtmlServer() {
 	HtmlServer.port = 22179;
 	HtmlServer.requestTimeout = 5000;
 	HtmlServer.iosRequests = {};
-	HtmlServer.iosHandler = HtmlServer.getIosHandler();
+	HtmlServer.iosHandler = HtmlServer.createFakeIosHandler();
 }
 
 HtmlServer.getIosHandler = function() {
@@ -20,6 +20,7 @@ HtmlServer.getIosHandler = function() {
 };
 
 HtmlServer.createFakeIosHandler = function() {
+	return "test";
 	return function (object) {
 		console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
 	}

@@ -15,7 +15,7 @@ function DebugOptions() {
 	// Whether a dialog should be presented with the content of the error
 	DO.notifyErrors = false;
 
-	DO.mouse = true;
+	DO.mouse = false;
 	// On launch, virtual devices can be added
 	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
