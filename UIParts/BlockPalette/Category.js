@@ -38,6 +38,7 @@ Category.prototype.prepareToFill = function() {
 	this.buttons = [];
 	this.labels = [];
 	this.collapsibleSets = [];
+	this.buttonsThatRequireFiles = [];
 
 	// Keep track of current position in category
 	this.currentBlockX = BlockPalette.mainHMargin;
@@ -203,8 +204,11 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	this.currentBlockY += BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud = false;
-	if (onlyEnabledIfOpen && !SaveManager.fileIsOpen()) {
-		button.disable();
+	if (onlyEnabledIfOpen) {
+		if(!SaveManager.fileIsOpen()) {
+			button.disable();
+		}
+		this.buttonsThatRequireFiles.push(button);
 	}
 	return button;
 };
@@ -308,6 +312,15 @@ Category.prototype.updateDimSet = function() {
 	currentH += BlockPalette.mainVMargin;
 	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+
+/**
+ * Indicates that a file is now open.
+ */
+Category.prototype.markOpen = function() {
+	this.buttonsThatRequireFiles.forEach(function(button) {
+		button.enable();
+	});
 };
 
 /* Convert coordinates relative to the Category to coords relative to the screen */

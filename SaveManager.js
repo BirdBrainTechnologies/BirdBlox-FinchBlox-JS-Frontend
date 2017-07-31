@@ -66,6 +66,7 @@ SaveManager.backendSetName = function(fileName, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
+	CodeManager.markOpen();
 };
 
 /**

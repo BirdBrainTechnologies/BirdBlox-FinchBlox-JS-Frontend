@@ -6348,6 +6348,13 @@ BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 };
 
 /**
+ * Recursively tells categories that a file is now open
+ */
+BlockPalette.markOpen = function() {
+	BlockPalette.passRecursively("markOpen");
+};
+
+/**
  * Recursively passes message to all children (Categories and their children) of the Palette
  * @param {string} message
  */
@@ -6669,6 +6676,7 @@ Category.prototype.prepareToFill = function() {
 	this.buttons = [];
 	this.labels = [];
 	this.collapsibleSets = [];
+	this.buttonsThatRequireFiles = [];
 
 	// Keep track of current position in category
 	this.currentBlockX = BlockPalette.mainHMargin;
@@ -6834,8 +6842,11 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	this.currentBlockY += BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud = false;
-	if (onlyEnabledIfOpen && !SaveManager.fileIsOpen()) {
-		button.disable();
+	if (onlyEnabledIfOpen) {
+		if(!SaveManager.fileIsOpen()) {
+			button.disable();
+		}
+		this.buttonsThatRequireFiles.push(button);
 	}
 	return button;
 };
@@ -6939,6 +6950,15 @@ Category.prototype.updateDimSet = function() {
 	currentH += BlockPalette.mainVMargin;
 	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+
+/**
+ * Indicates that a file is now open.
+ */
+Category.prototype.markOpen = function() {
+	this.buttonsThatRequireFiles.forEach(function(button) {
+		button.enable();
+	});
 };
 
 /* Convert coordinates relative to the Category to coords relative to the screen */
@@ -12091,6 +12111,14 @@ CodeManager.markLoading = function(message) {
 CodeManager.cancelLoading = function() {
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
+};
+
+/**
+ * Indicates that a file is now open.  Called from SaveManager.backendSetName
+ */
+CodeManager.markOpen = function() {
+	TouchReceiver.enableInteraction();
+	BlockPalette.markOpen();
 };
 
 
@@ -17398,6 +17426,7 @@ SaveManager.backendSetName = function(fileName, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
+	CodeManager.markOpen();
 };
 
 /**
