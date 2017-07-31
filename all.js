@@ -3730,7 +3730,7 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_finch = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("DB_FinchSetAll");
+	collapsibleItem.addBlockByName("B_FinchSetAll");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
