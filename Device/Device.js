@@ -233,6 +233,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
 	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
 		if (result === "2") {
 			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+			request.addParam("type", this.getDeviceTypeId());
 			HtmlServer.sendRequestWithCallback(request.toString());
 		}
 	});

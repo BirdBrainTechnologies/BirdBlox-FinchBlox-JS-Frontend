@@ -75,9 +75,10 @@ HtmlServer.encodeHtml = function(message) {
  * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
  * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
  * @param {string|null} [postData] - The post data to send in the body of the request
- * @param {boolean} [isUi=false] - Whether the command should go to the special UI queue on iOS devices
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ *                                             Used for sorting native calls on iOS
  */
-HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if (DebugOptions.shouldLogHttp()) {
@@ -107,7 +108,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		isPost = false;
 	}
 	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isUi);
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
 		return;
 	}
 	let requestType = "GET";
@@ -151,8 +152,9 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
  * Sends a request and changes fields of a status object to track its progress.  Used for executing blocks
  * @param {string} request - The request to send
  * @param {object} requestStatus - The status object
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendRequest = function(request, requestStatus) {
+HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
 	if (requestStatus != null) {
 		requestStatus.error = false;
 		const callbackFn = function(response) {
@@ -165,9 +167,9 @@ HtmlServer.sendRequest = function(request, requestStatus) {
 			requestStatus.code = code;
 			requestStatus.result = result;
 		};
-		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr);
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock);
 	} else {
-		HtmlServer.sendRequestWithCallback(request);
+		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock);
 	}
 };
 
@@ -194,12 +196,12 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
  * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
  * @param {string|null} [postData] - The post data to send in the body of the request
- * @param {boolean} [isUi=false] - Whether the command goes to the special UI queue
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
 	GuiElements.alert("Sending: " + request + " using native");
-	if(isUi == null) {
-		isUi = false;
+	if(isBluetoothBlock == null) {
+		isBluetoothBlock = false;
 	}
 
 	let id = null;
@@ -214,7 +216,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		requestObject.body = "";
 	}
 	requestObject.id = id;
-	requestObject.isUi = isUi;
+	requestObject.inBackground = isBluetoothBlock? "true" : "false";
 	HtmlServer.iosRequests[id] = {
 		callbackFn: callbackFn,
 		callbackErr: callbackErr

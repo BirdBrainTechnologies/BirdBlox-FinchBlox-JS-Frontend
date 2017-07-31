@@ -23,7 +23,7 @@ DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
 	request.addParam("id", this.id);
 	request.addParam("volume", volume);
 	request.addParam("frequency", frequency);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
