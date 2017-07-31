@@ -236,7 +236,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
 			request.addParam("type", this.getDeviceTypeId());
 			HtmlServer.sendRequestWithCallback(request.toString());
 		}
-	});
+	}.bind(this));
 };
 
 /**
