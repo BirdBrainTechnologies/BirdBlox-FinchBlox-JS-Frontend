@@ -153,11 +153,11 @@ DebugOptions.safeFunc = function(func) {
 			} catch (err) {
 				DebugOptions.errorLocked = true;
 				const request = new HttpRequestBuilder("debug/log");
-				request.addParam("msg", err.message + "\n" + err.stack);
-				HtmlServer.sendRequestWithCallback(request.toString());
+				const errorTrace = err.message + "\n" + err.stack;
+				HtmlServer.sendRequestWithCallback(request.toString(), null, null, true, errorTrace);
 				if (DebugOptions.shouldNotifyErrors()) {
 					GuiElements.alert("ERROR: " + err.message);
-					DialogManager.showAlertDialog("ERROR", err.message + "\n" + err.stack, "OK");
+					DialogManager.showAlertDialog("ERROR", errorTrace, "OK");
 				}
 			}
 		}
