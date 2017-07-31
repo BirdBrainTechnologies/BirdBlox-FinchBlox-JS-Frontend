@@ -2504,7 +2504,7 @@ GuiElements.alert = function(message) {
 	} else {
 		result += " None";
 	}
-	debug.innerHTML = result; //The iPad app does not support alert dialogs
+	debug.innerHTML = result;
 };
 
 
@@ -3253,8 +3253,8 @@ GuiElements.loadInitialSettings = function(callback) {
 		// Function checks if all the pieces are done loading and calls the callback when they are
 		const checkIfDone = function() {
 			count++;
-			//GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
-			//	loadProg.lastFileName + loadProg.lastFileNamed);
+			GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
+				loadProg.lastFileName + loadProg.lastFileNamed);
 			if (loadProg.version && loadProg.zoom && loadProg.os && loadProg.lastFileName && loadProg.lastFileNamed) {
 				callback();
 			}
@@ -16565,7 +16565,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	};
 	GuiElements.alert("Making request: " + request + " using native");
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
-	GuiElements.alert("Made request: " + request + " using native");
+	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
 	window.setTimeout(function() {
 		GuiElements.alert("timeout");
 		HtmlServer.responseFromIosCall(id, "0", "");

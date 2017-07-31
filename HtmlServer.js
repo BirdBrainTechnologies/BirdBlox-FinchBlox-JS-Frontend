@@ -223,7 +223,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	};
 	GuiElements.alert("Making request: " + request + " using native");
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
-	GuiElements.alert("Made request: " + request + " using native");
+	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
 	window.setTimeout(function() {
 		GuiElements.alert("timeout");
 		HtmlServer.responseFromIosCall(id, "0", "");
