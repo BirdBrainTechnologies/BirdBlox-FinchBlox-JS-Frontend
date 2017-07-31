@@ -119,7 +119,7 @@ B_Timer.prototype.startAction = function() {
 	const now = new Date().getTime();
 	const start = CodeManager.timerForSensingBlock;
 	/* Round to 1 decimal */
-	return new ExecutionStatusResult(new NumData(now - start));
+	return new ExecutionStatusResult(new NumData((now - start) / 1000));
 };
 Block.setDisplaySuffix(B_Timer, "s");
 

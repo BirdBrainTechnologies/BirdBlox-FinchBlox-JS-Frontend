@@ -210,7 +210,7 @@
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="525">
-              <caret line="121" column="63" lean-forward="true" selection-start-line="121" selection-start-column="63" selection-end-line="121" selection-end-column="63" />
+              <caret line="121" column="69" lean-forward="false" selection-start-line="121" selection-start-column="69" selection-end-line="121" selection-end-column="69" />
               <folding>
                 <element signature="e#141#207#0" expanded="false" />
                 <element signature="n#!!block;n#B_Ask#0" expanded="false" />
@@ -246,20 +246,20 @@
                 <element signature="e#4385#4429#0" expanded="false" />
                 <element signature="e#4560#4584#0" expanded="false" />
                 <element signature="n#!!block;n#B_CurrentTime#0" expanded="false" />
-                <element signature="e#5509#5560#0" expanded="false" />
-                <element signature="e#5610#6690#0" expanded="false" />
-                <element signature="e#5672#5735#0" expanded="false" />
-                <element signature="e#5790#5869#0" expanded="false" />
-                <element signature="e#5897#5977#0" expanded="false" />
-                <element signature="e#6004#6079#0" expanded="false" />
-                <element signature="e#6117#6195#0" expanded="false" />
-                <element signature="e#6222#6298#0" expanded="false" />
-                <element signature="e#6327#6405#0" expanded="false" />
-                <element signature="e#6434#6512#0" expanded="false" />
-                <element signature="e#6555#6630#0" expanded="false" />
+                <element signature="e#5518#5569#0" expanded="false" />
+                <element signature="e#5619#6699#0" expanded="false" />
+                <element signature="e#5681#5744#0" expanded="false" />
+                <element signature="e#5799#5878#0" expanded="false" />
+                <element signature="e#5906#5986#0" expanded="false" />
+                <element signature="e#6013#6088#0" expanded="false" />
+                <element signature="e#6126#6204#0" expanded="false" />
+                <element signature="e#6231#6307#0" expanded="false" />
+                <element signature="e#6336#6414#0" expanded="false" />
+                <element signature="e#6443#6521#0" expanded="false" />
+                <element signature="e#6564#6639#0" expanded="false" />
                 <element signature="n#!!block;n#B_Display#0" expanded="false" />
-                <element signature="e#7321#7359#0" expanded="false" />
-                <element signature="e#7405#7617#0" expanded="false" />
+                <element signature="e#7330#7368#0" expanded="false" />
+                <element signature="e#7414#7626#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -803,7 +803,7 @@
       <workItem from="1501162122394" duration="43608000" />
       <workItem from="1501455772232" duration="16000" />
       <workItem from="1501467393923" duration="1057000" />
-      <workItem from="1501507500753" duration="16680000" />
+      <workItem from="1501507500753" duration="16997000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -900,7 +900,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1613641000" />
+    <option name="totallyTimeSpent" value="1613958000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2020,7 +2020,7 @@
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_sensing.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
-          <caret line="121" column="63" lean-forward="true" selection-start-line="121" selection-start-column="63" selection-end-line="121" selection-end-column="63" />
+          <caret line="121" column="69" lean-forward="false" selection-start-line="121" selection-start-column="69" selection-end-line="121" selection-end-column="69" />
           <folding>
             <element signature="e#141#207#0" expanded="false" />
             <element signature="n#!!block;n#B_Ask#0" expanded="false" />
@@ -2056,20 +2056,20 @@
             <element signature="e#4385#4429#0" expanded="false" />
             <element signature="e#4560#4584#0" expanded="false" />
             <element signature="n#!!block;n#B_CurrentTime#0" expanded="false" />
-            <element signature="e#5509#5560#0" expanded="false" />
-            <element signature="e#5610#6690#0" expanded="false" />
-            <element signature="e#5672#5735#0" expanded="false" />
-            <element signature="e#5790#5869#0" expanded="false" />
-            <element signature="e#5897#5977#0" expanded="false" />
-            <element signature="e#6004#6079#0" expanded="false" />
-            <element signature="e#6117#6195#0" expanded="false" />
-            <element signature="e#6222#6298#0" expanded="false" />
-            <element signature="e#6327#6405#0" expanded="false" />
-            <element signature="e#6434#6512#0" expanded="false" />
-            <element signature="e#6555#6630#0" expanded="false" />
+            <element signature="e#5518#5569#0" expanded="false" />
+            <element signature="e#5619#6699#0" expanded="false" />
+            <element signature="e#5681#5744#0" expanded="false" />
+            <element signature="e#5799#5878#0" expanded="false" />
+            <element signature="e#5906#5986#0" expanded="false" />
+            <element signature="e#6013#6088#0" expanded="false" />
+            <element signature="e#6126#6204#0" expanded="false" />
+            <element signature="e#6231#6307#0" expanded="false" />
+            <element signature="e#6336#6414#0" expanded="false" />
+            <element signature="e#6443#6521#0" expanded="false" />
+            <element signature="e#6564#6639#0" expanded="false" />
             <element signature="n#!!block;n#B_Display#0" expanded="false" />
-            <element signature="e#7321#7359#0" expanded="false" />
-            <element signature="e#7405#7617#0" expanded="false" />
+            <element signature="e#7330#7368#0" expanded="false" />
+            <element signature="e#7414#7626#0" expanded="false" />
           </folding>
         </state>
       </provider>
