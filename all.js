@@ -3252,8 +3252,8 @@ GuiElements.loadInitialSettings = function(callback) {
 		// Function checks if all the pieces are done loading and calls the callback when they are
 		const checkIfDone = function() {
 			count++;
-			GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
-				loadProg.lastFileName + loadProg.lastFileNamed);
+			//GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
+			//	loadProg.lastFileName + loadProg.lastFileNamed);
 			if (loadProg.version && loadProg.zoom && loadProg.os && loadProg.lastFileName && loadProg.lastFileNamed) {
 				callback();
 			}
