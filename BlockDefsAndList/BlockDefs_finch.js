@@ -1,14 +1,14 @@
-// This is a block for debugging only.  It starts with DB_ so that it can never be loaded from a save file
-function DB_FinchSetAll(x, y) {
+// This is a block for debugging only.
+function B_FinchSetAll(x, y) {
 	CommandBlock.call(this, x, y, "finch");
 	this.addPart(new DeviceDropSlot(this,"DDS_1", DeviceFinch));
 	this.addPart(new LabelText(this,"Set All"));
-	this.addPart(new StringSlot(this, "StrS_data", ""));
+	this.addPart(new StringSlot(this, "StrS_data", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"));
 }
-DB_FinchSetAll.prototype = Object.create(CommandBlock.prototype);
-DB_FinchSetAll.prototype.constructor = DB_FinchSetAll;
+B_FinchSetAll.prototype = Object.create(CommandBlock.prototype);
+B_FinchSetAll.prototype.constructor = B_FinchSetAll;
 /* Sends request */
-DB_FinchSetAll.prototype.startAction = function() {
+B_FinchSetAll.prototype.startAction = function() {
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = DeviceFinch.getManager().getDevice(deviceIndex);
 	if (device == null) {
@@ -20,7 +20,7 @@ DB_FinchSetAll.prototype.startAction = function() {
 	return new ExecutionStatusRunning();
 };
 /* Waits for request to finish */
-DB_FinchSetAll.prototype.updateAction = function() {
+B_FinchSetAll.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
 			const status = this.runMem.requestStatus;
