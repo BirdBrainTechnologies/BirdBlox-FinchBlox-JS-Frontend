@@ -28,7 +28,7 @@ function DebugOptions() {
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
-	DO.logHttp = true;
+	DO.logHttp = false;
 	DO.skipInitSettings = false;
 	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
@@ -16352,8 +16352,10 @@ function HtmlServer() {
 HtmlServer.getIosHandler = function() {
 	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
 		window.webkit.messageHandlers.serverSubstitute) {
+		GuiElements.alert("Using native");
 		return window.webkit.messageHandlers.serverSubstitute;
 	} else {
+		GuiElements.alert("Using http");
 		return null;
 	}
 };

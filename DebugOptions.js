@@ -26,7 +26,7 @@ function DebugOptions() {
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
-	DO.logHttp = true;
+	DO.logHttp = false;
 	DO.skipInitSettings = false;
 	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
