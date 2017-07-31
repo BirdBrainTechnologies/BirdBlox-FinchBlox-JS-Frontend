@@ -71,9 +71,10 @@ HtmlServer.encodeHtml = function(message) {
  * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
  * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
  * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
- * @param {string} [postData] - The post data to send in the body of the request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isUi=false] - Whether the command should go to the special UI queue on iOS devices
  */
-HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData) {
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if (DebugOptions.shouldLogHttp()) {
@@ -103,7 +104,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		isPost = false;
 	}
 	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData);
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isUi);
 		return;
 	}
 	let requestType = "GET";
@@ -183,7 +184,20 @@ HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
 
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData) {
+/**
+ * Sends a command through the system iOS provides for allowing JS to call swift functions
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isUi=false] - Whether the command goes to the special UI queue
+ */
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
+	if(isUi == null) {
+		isUi = false;
+	}
+
 	let id = null;
 	while (id == null || HtmlServer.iosRequests[id] != null) {
 		id = "requestId" + Math.random();
@@ -196,6 +210,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		requestObject.body = "";
 	}
 	requestObject.id = id;
+	requestObject.isUi = isUi;
 	HtmlServer.iosRequests[id] = {
 		callbackFn: callbackFn,
 		callbackErr: callbackErr

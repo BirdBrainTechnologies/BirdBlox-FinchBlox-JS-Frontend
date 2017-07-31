@@ -522,8 +522,8 @@ NumData.prototype.getValueInR = function(min, max, positive, integer) {
 
 /**
  * Returns the value of the NumData, possibly non-negative or rounded to the nearest integer
- * @param {boolean} positive - Whether the number should be non-negative
- * @param {boolean} integer - Whether the number should be rounded to the nearest integer
+ * @param {boolean} [positive=false] - Whether the number should be non-negative
+ * @param {boolean} [integer=false] - Whether the number should be rounded to the nearest integer
  * @return {number}
  */
 NumData.prototype.getValueWithC = function(positive, integer) {
@@ -3028,7 +3028,7 @@ GuiElements.move = {};
  * @param {Element} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
- * @param {number} zoom - (Optional) The amount the group should be scaled.
+ * @param {number} [zoom] - (Optional) The amount the group should be scaled.
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
@@ -6349,7 +6349,7 @@ BlockPalette.refresh = function() {
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
  * is dragged, it is duplicated into a BlockStack.  Like BlockStacks, they require a Block to be created
  * @param {Block} firstBlock - The first Block in the DisplayStack
- * @param {Node} group - The group the DisplayStack should be inside
+ * @param {Element} group - The group the DisplayStack should be inside
  * @param {Category} category - The category the DisplayStack is a member of
  * @constructor
  */
@@ -6780,7 +6780,7 @@ Category.prototype.addSpace = function() {
  * Adds a Button with the specified callback function
  * @param {string} text - The text to place on the Button
  * @param {function} callback - Called when the Button is tapped
- * @param {boolean} onlyEnabledIfOpen - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @param {boolean} [onlyEnabledIfOpen=false] - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
  * @return {Button} - The created button
  */
 Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
@@ -16412,9 +16412,10 @@ HtmlServer.encodeHtml = function(message) {
  * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
  * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
  * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
- * @param {string} [postData] - The post data to send in the body of the request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isUi=false] - Whether the command should go to the special UI queue on iOS devices
  */
-HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData) {
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if (DebugOptions.shouldLogHttp()) {
@@ -16444,7 +16445,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		isPost = false;
 	}
 	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData);
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isUi);
 		return;
 	}
 	let requestType = "GET";
@@ -16524,7 +16525,20 @@ HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
 
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData) {
+/**
+ * Sends a command through the system iOS provides for allowing JS to call swift functions
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isUi=false] - Whether the command goes to the special UI queue
+ */
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
+	if(isUi == null) {
+		isUi = false;
+	}
+
 	let id = null;
 	while (id == null || HtmlServer.iosRequests[id] != null) {
 		id = "requestId" + Math.random();
@@ -16537,6 +16551,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		requestObject.body = "";
 	}
 	requestObject.id = id;
+	requestObject.isUi = isUi;
 	HtmlServer.iosRequests[id] = {
 		callbackFn: callbackFn,
 		callbackErr: callbackErr
@@ -20899,8 +20914,8 @@ RoundSlot.prototype.addLabelText = function(text) {
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor
@@ -21061,8 +21076,8 @@ DropSlot.prototype.sanitizeData = function(data) {
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor
@@ -21845,9 +21860,9 @@ NumSlot.prototype.constructor = NumSlot;
 /**
  * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
  * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
- * @param {number} [min]
- * @param {number} [max]
- * @param {string} [displayUnits] - The units/label to show before the min/max
+ * @param {number|null} [min] - The minimum value or null if no bound
+ * @param {number|null} [max] - The maximum value or null if no bound
+ * @param {string|null} [displayUnits] - The units/label to show before the min/max or null if none
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
 	this.minVal = min;
@@ -22076,11 +22091,10 @@ BlockSlot.prototype.changeStack = function(stack) {
 
 /**
  * Recursively tells children to update the stack dimensions
- * @param {BlockStack} stack
  */
-BlockSlot.prototype.updateStackDim = function(stack) {
+BlockSlot.prototype.updateStackDim = function() {
 	if (this.hasChild) {
-		this.child.updateStackDim(stack);
+		this.child.updateStackDim();
 	}
 };
 
@@ -23019,7 +23033,7 @@ B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_FlutterDistInch.prototype.updateAction = function() {
-	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
@@ -24381,7 +24395,7 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			var result = status.result.split(" ")[mem.axis];
+			const result = status.result.split(" ")[mem.axis];
 			return new ExecutionStatusResult(new NumData(Number(result), true));
 		} else {
 			if (status.result.length > 0) {

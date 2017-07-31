@@ -733,7 +733,7 @@ GuiElements.move = {};
  * @param {Element} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
- * @param {number} zoom - (Optional) The amount the group should be scaled.
+ * @param {number} [zoom] - (Optional) The amount the group should be scaled.
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);

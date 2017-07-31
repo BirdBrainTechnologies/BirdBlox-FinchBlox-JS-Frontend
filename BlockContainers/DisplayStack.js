@@ -3,7 +3,7 @@
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
  * is dragged, it is duplicated into a BlockStack.  Like BlockStacks, they require a Block to be created
  * @param {Block} firstBlock - The first Block in the DisplayStack
- * @param {Node} group - The group the DisplayStack should be inside
+ * @param {Element} group - The group the DisplayStack should be inside
  * @param {Category} category - The category the DisplayStack is a member of
  * @constructor
  */

@@ -180,7 +180,7 @@ Category.prototype.addSpace = function() {
  * Adds a Button with the specified callback function
  * @param {string} text - The text to place on the Button
  * @param {function} callback - Called when the Button is tapped
- * @param {boolean} onlyEnabledIfOpen - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @param {boolean} [onlyEnabledIfOpen=false] - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
  * @return {Button} - The created button
  */
 Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {

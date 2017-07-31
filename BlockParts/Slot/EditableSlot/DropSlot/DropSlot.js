@@ -3,8 +3,8 @@
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor

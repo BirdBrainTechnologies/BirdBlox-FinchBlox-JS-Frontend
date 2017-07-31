@@ -294,7 +294,7 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			var result = status.result.split(" ")[mem.axis];
+			const result = status.result.split(" ")[mem.axis];
 			return new ExecutionStatusResult(new NumData(Number(result), true));
 		} else {
 			if (status.result.length > 0) {
