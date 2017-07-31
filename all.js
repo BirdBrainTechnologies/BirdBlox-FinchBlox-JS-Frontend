@@ -17307,7 +17307,7 @@ function SaveManager() {
 	SaveManager.named = false;
 	// The file is auto saved any time it is edited and one every few seconds
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
-	SaveManager.autoSaveTimer.start();
+	//SaveManager.autoSaveTimer.start();
 	// Tries to avoid making multiple saves at once
 	SaveManager.saving = false;
 }
@@ -17316,7 +17316,7 @@ SaveManager.setConstants = function() {
 	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.autoSaveInterval = 1000 * 60 * 60;
+	SaveManager.autoSaveInterval = 1000 * 60;
 };
 
 /**
