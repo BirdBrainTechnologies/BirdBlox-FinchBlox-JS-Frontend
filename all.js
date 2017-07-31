@@ -16346,7 +16346,7 @@ function HtmlServer() {
 	HtmlServer.port = 22179;
 	HtmlServer.requestTimeout = 5000;
 	HtmlServer.iosRequests = {};
-	HtmlServer.iosHandler = HtmlServer.createFakeIosHandler();
+	HtmlServer.iosHandler = HtmlServer.getIosHandler();
 }
 
 HtmlServer.getIosHandler = function() {
@@ -16561,10 +16561,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		callbackErr: callbackErr
 	};
 	GuiElements.alert("Making request: " + request + " using native");
-	const tryfn = function(){
-		window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
-	};
-	(DebugOptions.safeFunc(tryfn))();
+	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
 	GuiElements.alert("Made request: " + request + " using native");
 	window.setTimeout(function() {
 		GuiElements.alert("timeout");

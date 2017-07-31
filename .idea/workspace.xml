@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="" />
+    <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
+    </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -122,29 +124,29 @@
       <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="463">
-              <caret line="224" column="6" lean-forward="true" selection-start-line="224" selection-start-column="6" selection-end-line="224" selection-end-column="6" />
+            <state relative-caret-position="105">
+              <caret line="7" column="52" lean-forward="false" selection-start-line="7" selection-start-column="52" selection-end-line="7" selection-end-column="52" />
               <folding>
                 <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
-                <element signature="e#824#970#0" expanded="false" />
-                <element signature="e#1013#1073#0" expanded="false" />
-                <element signature="e#1076#1218#0" expanded="false" />
-                <element signature="e#1261#2047#0" expanded="false" />
-                <element signature="e#1264#1345#0" expanded="false" />
-                <element signature="e#1383#1667#0" expanded="false" />
-                <element signature="e#1673#2005#0" expanded="false" />
-                <element signature="e#2050#2702#0" expanded="false" />
-                <element signature="e#4741#4957#0" expanded="false" />
-                <element signature="e#5016#5510#0" expanded="false" />
-                <element signature="e#5046#5451#0" expanded="false" />
-                <element signature="e#5119#5194#0" expanded="false" />
-                <element signature="e#5241#5375#0" expanded="false" />
-                <element signature="e#5457#5508#0" expanded="false" />
-                <element signature="e#5513#5672#0" expanded="false" />
-                <element signature="e#5721#5787#0" expanded="false" />
-                <element signature="e#5790#5859#0" expanded="false" />
-                <element signature="e#5911#5970#0" expanded="false" />
-                <element signature="e#5973#6615#0" expanded="false" />
+                <element signature="e#817#963#0" expanded="false" />
+                <element signature="e#1006#1066#0" expanded="false" />
+                <element signature="e#1069#1211#0" expanded="false" />
+                <element signature="e#1254#2040#0" expanded="false" />
+                <element signature="e#1257#1338#0" expanded="false" />
+                <element signature="e#1376#1660#0" expanded="false" />
+                <element signature="e#1666#1998#0" expanded="false" />
+                <element signature="e#2043#2695#0" expanded="false" />
+                <element signature="e#4734#4950#0" expanded="false" />
+                <element signature="e#5009#5503#0" expanded="false" />
+                <element signature="e#5039#5444#0" expanded="false" />
+                <element signature="e#5112#5187#0" expanded="false" />
+                <element signature="e#5234#5368#0" expanded="false" />
+                <element signature="e#5450#5501#0" expanded="false" />
+                <element signature="e#5506#5665#0" expanded="false" />
+                <element signature="e#5714#5780#0" expanded="false" />
+                <element signature="e#5783#5852#0" expanded="false" />
+                <element signature="e#5904#5963#0" expanded="false" />
+                <element signature="e#5966#6608#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -883,7 +885,7 @@
       <workItem from="1501162122394" duration="43608000" />
       <workItem from="1501455772232" duration="16000" />
       <workItem from="1501467393923" duration="1057000" />
-      <workItem from="1501507500753" duration="6013000" />
+      <workItem from="1501507500753" duration="6294000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -980,7 +982,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1602974000" />
+    <option name="totallyTimeSpent" value="1603255000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2064,29 +2066,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HtmlServer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="463">
-          <caret line="224" column="6" lean-forward="true" selection-start-line="224" selection-start-column="6" selection-end-line="224" selection-end-column="6" />
+        <state relative-caret-position="105">
+          <caret line="7" column="52" lean-forward="false" selection-start-line="7" selection-start-column="52" selection-end-line="7" selection-end-column="52" />
           <folding>
             <element signature="n#!!doc;n#HtmlServer#0" expanded="false" />
-            <element signature="e#824#970#0" expanded="false" />
-            <element signature="e#1013#1073#0" expanded="false" />
-            <element signature="e#1076#1218#0" expanded="false" />
-            <element signature="e#1261#2047#0" expanded="false" />
-            <element signature="e#1264#1345#0" expanded="false" />
-            <element signature="e#1383#1667#0" expanded="false" />
-            <element signature="e#1673#2005#0" expanded="false" />
-            <element signature="e#2050#2702#0" expanded="false" />
-            <element signature="e#4741#4957#0" expanded="false" />
-            <element signature="e#5016#5510#0" expanded="false" />
-            <element signature="e#5046#5451#0" expanded="false" />
-            <element signature="e#5119#5194#0" expanded="false" />
-            <element signature="e#5241#5375#0" expanded="false" />
-            <element signature="e#5457#5508#0" expanded="false" />
-            <element signature="e#5513#5672#0" expanded="false" />
-            <element signature="e#5721#5787#0" expanded="false" />
-            <element signature="e#5790#5859#0" expanded="false" />
-            <element signature="e#5911#5970#0" expanded="false" />
-            <element signature="e#5973#6615#0" expanded="false" />
+            <element signature="e#817#963#0" expanded="false" />
+            <element signature="e#1006#1066#0" expanded="false" />
+            <element signature="e#1069#1211#0" expanded="false" />
+            <element signature="e#1254#2040#0" expanded="false" />
+            <element signature="e#1257#1338#0" expanded="false" />
+            <element signature="e#1376#1660#0" expanded="false" />
+            <element signature="e#1666#1998#0" expanded="false" />
+            <element signature="e#2043#2695#0" expanded="false" />
+            <element signature="e#4734#4950#0" expanded="false" />
+            <element signature="e#5009#5503#0" expanded="false" />
+            <element signature="e#5039#5444#0" expanded="false" />
+            <element signature="e#5112#5187#0" expanded="false" />
+            <element signature="e#5234#5368#0" expanded="false" />
+            <element signature="e#5450#5501#0" expanded="false" />
+            <element signature="e#5506#5665#0" expanded="false" />
+            <element signature="e#5714#5780#0" expanded="false" />
+            <element signature="e#5783#5852#0" expanded="false" />
+            <element signature="e#5904#5963#0" expanded="false" />
+            <element signature="e#5966#6608#0" expanded="false" />
           </folding>
         </state>
       </provider>
