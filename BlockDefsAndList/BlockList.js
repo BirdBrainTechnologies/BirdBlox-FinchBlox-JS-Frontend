@@ -266,3 +266,12 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("DB_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};

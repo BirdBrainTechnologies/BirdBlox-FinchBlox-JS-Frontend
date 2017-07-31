@@ -231,7 +231,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
-	GuiElements.alert("got resp from native");
+	//GuiElements.alert("got resp from native");
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {

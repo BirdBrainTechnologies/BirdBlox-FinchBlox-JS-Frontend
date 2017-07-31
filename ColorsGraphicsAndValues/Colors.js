@@ -22,6 +22,7 @@ Colors.setCategory = function() {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
 		"flutter": "#FF9600",
+		"finch": "#FF9600",
 		"sound": "#EE00FF",
 		"tablet": "#019EFF",
 		"control": "#FFCC00",

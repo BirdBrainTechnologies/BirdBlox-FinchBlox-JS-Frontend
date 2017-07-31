@@ -28,7 +28,7 @@ function DebugOptions() {
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
-	DO.logHttp = false;
+	DO.logHttp = true;
 	DO.skipInitSettings = false;
 	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
@@ -1562,7 +1562,7 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
  * @return {Array}
  */
 Device.getTypeList = function() {
-	return [DeviceHummingbird, DeviceFlutter];
+	return [DeviceHummingbird, DeviceFlutter]; // , DeviceFinch];
 };
 
 /**
@@ -2215,6 +2215,26 @@ DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
  */
 DeviceFlutter.getConnectionInstructions = function() {
 	return "Press the \"find me\" button on your Flutter";
+};
+/**
+ * Manages communication with a Finch
+ * @param {string} name
+ * @param {string} id
+ * @constructor
+ */
+function DeviceFinch(name, id) {
+	DeviceWithPorts.call(this, name, id);
+}
+DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
+Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
+DeviceFinch.prototype.constructor = DeviceFinch;
+
+DeviceFinch.prototype.setAll = function(status, data) {
+	const request = new HttpRequestBuilder("robot/out/setAll");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("data", data);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
 /**
  * Static class keeps track of which sensors are available on the device
@@ -3706,6 +3726,15 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.finalize();
 };
 
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("DB_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
 /*
  * Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
  */
@@ -3729,6 +3758,7 @@ Colors.setCategory = function() {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
 		"flutter": "#FF9600",
+		"finch": "#FF9600",
 		"sound": "#EE00FF",
 		"tablet": "#019EFF",
 		"control": "#FFCC00",
@@ -16573,7 +16603,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
-	GuiElements.alert("got resp from native");
+	//GuiElements.alert("got resp from native");
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
@@ -23044,6 +23074,40 @@ B_FlutterDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_FlutterDistInch, "inches");
+// This is a block for debugging only.  It starts with DB_ so that it can never be loaded from a save file
+function DB_FinchSetAll(x, y) {
+	CommandBlock.call(this, x, y, "finch");
+	this.addPart(new DeviceDropSlot(this,"DDS_1", DeviceFinch));
+	this.addPart(new LabelText(this,"Set All"));
+	this.addPart(new StringSlot(this, "StrS_data", ""));
+}
+DB_FinchSetAll.prototype = Object.create(CommandBlock.prototype);
+DB_FinchSetAll.prototype.constructor = DB_FinchSetAll;
+/* Sends request */
+DB_FinchSetAll.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = DeviceFinch.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(DeviceFinch.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Finch was invalid, exit early
+	}
+	const status = this.runMem.requestStatus = {};
+	device.setAll(status, this.slots[1].getData().getValue());
+	return new ExecutionStatusRunning();
+};
+/* Waits for request to finish */
+DB_FinchSetAll.prototype.updateAction = function() {
+	if (this.runMem.requestStatus.finished) {
+		if (this.runMem.requestStatus.error) {
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+};
 /* This file contains the implementations for Blocks in the control category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
