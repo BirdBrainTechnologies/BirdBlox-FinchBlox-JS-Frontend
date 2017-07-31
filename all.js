@@ -16560,7 +16560,10 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		callbackErr: callbackErr
 	};
 	GuiElements.alert("Making request: " + request + " using native");
-	HtmlServer.iosHandler(requestObject);
+	const tryfn = function(){
+		window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
+	};
+	(DebugOptions.safeFunc(tryFn))();
 	GuiElements.alert("Made request: " + request + " using native");
 	window.setTimeout(function() {
 		GuiElements.alert("timeout");
