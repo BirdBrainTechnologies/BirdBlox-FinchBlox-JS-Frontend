@@ -16537,6 +16537,7 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @param {boolean} [isUi=false] - Whether the command goes to the special UI queue
  */
 HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isUi) {
+	GuiElements.alert("Sending: " + request + " using native");
 	if(isUi == null) {
 		isUi = false;
 	}
@@ -16560,11 +16561,13 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	};
 	HtmlServer.iosHandler(requestObject);
 	window.setTimeout(function() {
+		GuiElements.alert("timeout");
 		HtmlServer.responseFromIosCall(id, "0", "");
 	}, HtmlServer.requestTimeout);
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
+	GuiElements.alert("got resp from native");
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
