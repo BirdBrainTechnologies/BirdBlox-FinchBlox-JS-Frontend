@@ -17316,7 +17316,7 @@ SaveManager.setConstants = function() {
 	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.autoSaveInterval = 1000 * 15;
+	SaveManager.autoSaveInterval = 1000 * 60;
 };
 
 /**
