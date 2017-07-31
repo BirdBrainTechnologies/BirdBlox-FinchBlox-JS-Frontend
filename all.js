@@ -17397,9 +17397,6 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
-	if (SaveManager.fileName === fileName) {
-		return;
-	}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");
