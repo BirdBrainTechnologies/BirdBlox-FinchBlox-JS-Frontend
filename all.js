@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -2310,6 +2310,7 @@ function GuiElements() {
 	let svg0 = document.getElementById("backSvg");
 	GuiElements.svgs = [svg0, svg1, svg2];
 	GuiElements.defs = document.getElementById("SvgDefs");
+	GuiElements.loaded = false;
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
@@ -2318,6 +2319,7 @@ function GuiElements() {
 		GuiElements.dialogBlock = null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
+		GuiElements.loaded = true;
 	});
 }
 
@@ -2329,7 +2331,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Redraws UI if screen dimensions change */
 window.onresize = function() {
-	GuiElements.updateDims();
+	if (GuiElements.loaded && !GuiElements.isIos) {
+		GuiElements.updateDims();
+	}
 };
 
 /** Sets constants relating to screen dimensions and the Operating System */

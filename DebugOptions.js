@@ -7,7 +7,7 @@
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
