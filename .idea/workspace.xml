@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_finch.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Device/DeviceFinch.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BlockDefsAndList/BlockList.js" afterPath="$PROJECT_DIR$/BlockDefsAndList/BlockList.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" afterPath="$PROJECT_DIR$/ColorsGraphicsAndValues/Colors.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DebugOptions.js" afterPath="$PROJECT_DIR$/DebugOptions.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Device/Device.js" afterPath="$PROJECT_DIR$/Device/Device.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" afterPath="$PROJECT_DIR$/HummingbirdDragAndDrop2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MyCSS.css" afterPath="$PROJECT_DIR$/MyCSS.css" />
     </list>
     <ignored path="Git.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,7 +25,7 @@
         <entry file="file://$PROJECT_DIR$/Device/Device.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="625">
-              <caret line="287" column="65" lean-forward="true" selection-start-line="287" selection-start-column="65" selection-end-line="287" selection-end-column="65" />
+              <caret line="287" column="44" lean-forward="false" selection-start-line="287" selection-start-column="44" selection-end-line="287" selection-end-column="44" />
               <folding>
                 <element signature="n#!!doc;n#Device#0" expanded="false" />
                 <element signature="n#!!block;n#Device#0" expanded="false" />
@@ -101,24 +92,34 @@
                 <element signature="e#10025#10062#0" expanded="false" />
                 <element signature="e#10073#10090#0" expanded="false" />
                 <element signature="e#10144#10259#0" expanded="false" />
-                <element signature="e#10361#10459#0" expanded="false" />
-                <element signature="e#10488#10606#0" expanded="false" />
+                <element signature="e#10355#10453#0" expanded="false" />
+                <element signature="e#10482#10600#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BlockDefs_finch.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BlockDefs_finch.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_finch.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="8" column="39" lean-forward="true" selection-start-line="8" selection-start-column="39" selection-end-line="8" selection-end-column="39" />
+            <state relative-caret-position="105">
+              <caret line="5" column="52" lean-forward="true" selection-start-line="5" selection-start-column="52" selection-end-line="5" selection-end-column="52" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DeviceFinch.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Device/DeviceFinch.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="399">
+              <caret line="19" column="2" lean-forward="true" selection-start-line="19" selection-start-column="2" selection-end-line="19" selection-end-column="2" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HtmlServer.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HtmlServer.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="526">
@@ -165,7 +166,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>getAbs</find>
       <find>should</find>
       <find>stopLongTouchTimer</find>
       <find>Android</find>
@@ -195,6 +195,7 @@
       <find>new RectSlot</find>
       <find>new StringSlot</find>
       <find>blockdef</find>
+      <find>got</find>
     </findStrings>
     <replaceStrings>
       <replace>$1 $2 $3</replace>
@@ -286,9 +287,9 @@
         <option value="$PROJECT_DIR$/Device/DeviceFinch.js" />
         <option value="$PROJECT_DIR$/DebugOptions.js" />
         <option value="$PROJECT_DIR$/MyCSS.css" />
-        <option value="$PROJECT_DIR$/Device/Device.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_finch.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
+        <option value="$PROJECT_DIR$/Device/Device.js" />
       </list>
     </option>
   </component>
@@ -692,7 +693,7 @@
       <workItem from="1501162122394" duration="43608000" />
       <workItem from="1501455772232" duration="16000" />
       <workItem from="1501467393923" duration="1057000" />
-      <workItem from="1501507500753" duration="14544000" />
+      <workItem from="1501507500753" duration="15231000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -789,7 +790,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1611505000" />
+    <option name="totallyTimeSpent" value="1612192000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1766,14 +1767,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Device/DeviceFinch.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="6" column="32" lean-forward="true" selection-start-line="6" selection-start-column="32" selection-end-line="6" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HummingbirdDragAndDrop2.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1798,10 +1791,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="526">
+          <caret line="233" column="6" lean-forward="false" selection-start-line="233" selection-start-column="6" selection-end-line="233" selection-end-column="6" />
+          <folding>
+            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
+            <element signature="e#279#620#0" expanded="false" />
+            <element signature="e#448#558#0" expanded="false" />
+            <element signature="e#564#618#0" expanded="false" />
+            <element signature="e#668#814#0" expanded="false" />
+            <element signature="e#712#812#0" expanded="false" />
+            <element signature="e#817#963#0" expanded="false" />
+            <element signature="e#1006#1066#0" expanded="false" />
+            <element signature="e#1069#1211#0" expanded="false" />
+            <element signature="e#1254#2040#0" expanded="false" />
+            <element signature="e#1257#1338#0" expanded="false" />
+            <element signature="e#1376#1660#0" expanded="false" />
+            <element signature="e#1666#1998#0" expanded="false" />
+            <element signature="e#2043#2784#0" expanded="false" />
+            <element signature="e#5820#5979#0" expanded="false" />
+            <element signature="e#6028#6094#0" expanded="false" />
+            <element signature="e#6097#6166#0" expanded="false" />
+            <element signature="e#6218#6277#0" expanded="false" />
+            <element signature="e#6280#6947#0" expanded="false" />
+            <element signature="e#8253#8267#0" expanded="false" />
+            <element signature="e#8305#8386#0" expanded="false" />
+            <element signature="e#8345#8383#0" expanded="false" />
+            <element signature="e#8392#8638#0" expanded="false" />
+            <element signature="e#8433#8635#0" expanded="false" />
+            <element signature="e#8472#8581#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Device/Device.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="625">
-          <caret line="287" column="65" lean-forward="true" selection-start-line="287" selection-start-column="65" selection-end-line="287" selection-end-column="65" />
+          <caret line="287" column="44" lean-forward="false" selection-start-line="287" selection-start-column="44" selection-end-line="287" selection-end-column="44" />
           <folding>
             <element signature="n#!!doc;n#Device#0" expanded="false" />
             <element signature="n#!!block;n#Device#0" expanded="false" />
@@ -1868,51 +1895,25 @@
             <element signature="e#10025#10062#0" expanded="false" />
             <element signature="e#10073#10090#0" expanded="false" />
             <element signature="e#10144#10259#0" expanded="false" />
-            <element signature="e#10361#10459#0" expanded="false" />
-            <element signature="e#10488#10606#0" expanded="false" />
+            <element signature="e#10355#10453#0" expanded="false" />
+            <element signature="e#10482#10600#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Device/DeviceFinch.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="19" column="2" lean-forward="true" selection-start-line="19" selection-start-column="2" selection-end-line="19" selection-end-column="2" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/BlockDefsAndList/BlockDefs_finch.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" column="39" lean-forward="true" selection-start-line="8" selection-start-column="39" selection-end-line="8" selection-end-column="39" />
+        <state relative-caret-position="105">
+          <caret line="5" column="52" lean-forward="true" selection-start-line="5" selection-start-column="52" selection-end-line="5" selection-end-column="52" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HtmlServer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="233" column="6" lean-forward="false" selection-start-line="233" selection-start-column="6" selection-end-line="233" selection-end-column="6" />
-          <folding>
-            <element signature="n#!!block;n#HtmlServer#0" expanded="false" />
-            <element signature="e#279#620#0" expanded="false" />
-            <element signature="e#448#558#0" expanded="false" />
-            <element signature="e#564#618#0" expanded="false" />
-            <element signature="e#668#814#0" expanded="false" />
-            <element signature="e#712#812#0" expanded="false" />
-            <element signature="e#817#963#0" expanded="false" />
-            <element signature="e#1006#1066#0" expanded="false" />
-            <element signature="e#1069#1211#0" expanded="false" />
-            <element signature="e#1254#2040#0" expanded="false" />
-            <element signature="e#1257#1338#0" expanded="false" />
-            <element signature="e#1376#1660#0" expanded="false" />
-            <element signature="e#1666#1998#0" expanded="false" />
-            <element signature="e#2043#2784#0" expanded="false" />
-            <element signature="e#5820#5979#0" expanded="false" />
-            <element signature="e#6028#6094#0" expanded="false" />
-            <element signature="e#6097#6166#0" expanded="false" />
-            <element signature="e#6218#6277#0" expanded="false" />
-            <element signature="e#6280#6947#0" expanded="false" />
-            <element signature="e#8253#8267#0" expanded="false" />
-            <element signature="e#8305#8386#0" expanded="false" />
-            <element signature="e#8345#8383#0" expanded="false" />
-            <element signature="e#8392#8638#0" expanded="false" />
-            <element signature="e#8433#8635#0" expanded="false" />
-            <element signature="e#8472#8581#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
