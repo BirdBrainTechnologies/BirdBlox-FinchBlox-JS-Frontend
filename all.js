@@ -16351,9 +16351,9 @@ function HtmlServer() {
 
 HtmlServer.getIosHandler = function() {
 	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
-		window.webkit.messageHandlers.serverSubstitute) {
+		window.webkit.messageHandlers.serverSubstitute.postMessage) {
 		GuiElements.alert("Using native");
-		return window.webkit.messageHandlers.serverSubstitute;
+		return window.webkit.messageHandlers.serverSubstitute.postMessage;
 	} else {
 		GuiElements.alert("Using http");
 		return null;
