@@ -89,6 +89,17 @@ SaveManager.loadBlank = function() {
 };
 
 /**
+ * @param {function} nextAction
+ */
+SaveManager.userClose = function(nextAction) {
+	SaveManager.saveAndName("", function() {
+		SaveManager.loadBlank();
+		const request = new HttpRequestBuilder("data/close");
+		HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	});
+};
+
+/**
  * Prompts the user for a name for the new file, creates it, and opens it (when the backend says it's loaded)
  * @param {function} [nextAction]
  */

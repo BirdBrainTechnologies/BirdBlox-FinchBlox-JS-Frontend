@@ -275,8 +275,10 @@ OpenDialog.prototype.tabSelected = function(tab) {
  */
 OpenDialog.showDialog = function() {
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
-		var openDialog = new OpenDialog(new FileList(response));
-		openDialog.show();
+		SaveManager.userClose(function(){
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+		});
 	});
 };
 
