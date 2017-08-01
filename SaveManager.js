@@ -491,9 +491,6 @@ SaveManager.saveAsNew = function() {
  */
 SaveManager.markEdited = function() {
 	CodeManager.updateModified();
-	if (SaveManager.fileName == null) {
-		SaveManager.saveAsNew();
-	}
 	if (SaveManager.fileName != null) {
 		SaveManager.autoSave();
 	}

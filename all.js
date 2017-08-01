@@ -13931,7 +13931,7 @@ OpenDialog.prototype.createNewBn = function() {
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText("New");
 	button.setCallbackFunction(function() {
-		SaveManager.userNew(this.closeDialog().bind(this))
+		SaveManager.userNew(this.closeDialog.bind(this))
 	}.bind(this), true);
 	return button;
 };
@@ -17851,9 +17851,6 @@ SaveManager.saveAsNew = function() {
  */
 SaveManager.markEdited = function() {
 	CodeManager.updateModified();
-	if (SaveManager.fileName == null) {
-		SaveManager.saveAsNew();
-	}
 	if (SaveManager.fileName != null) {
 		SaveManager.autoSave();
 	}
