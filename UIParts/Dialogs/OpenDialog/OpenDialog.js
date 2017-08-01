@@ -15,7 +15,7 @@ function OpenDialog(fileList) {
 	} else {
 		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
@@ -206,8 +206,7 @@ OpenDialog.prototype.createNewBn = function() {
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText("New");
 	button.setCallbackFunction(function() {
-		this.closeDialog();
-		SaveManager.userNew();
+		SaveManager.userNew(this.closeDialog().bind(this))
 	}.bind(this), true);
 	return button;
 };
