@@ -125,8 +125,10 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog("New", message, defaultName, true, function(response) {
-		SaveManager.sanitizeNew(response.trim(), nextAction);
+	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			SaveManager.sanitizeNew(response.trim(), nextAction);
+		}
 	});
 };
 

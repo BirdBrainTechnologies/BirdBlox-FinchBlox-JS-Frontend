@@ -97,8 +97,9 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 				// Or with fake data
 				if (callbackFn != null) {
 					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
+					callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true}');
 				}
 			}
 		}, 20);

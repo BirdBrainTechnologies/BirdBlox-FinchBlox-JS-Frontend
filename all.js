@@ -16498,8 +16498,9 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 				// Or with fake data
 				if (callbackFn != null) {
 					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
+					callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true}');
 				}
 			}
 		}, 20);
@@ -17485,8 +17486,10 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog("New", message, defaultName, true, function(response) {
-		SaveManager.sanitizeNew(response.trim(), nextAction);
+	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			SaveManager.sanitizeNew(response.trim(), nextAction);
+		}
 	});
 };
 
