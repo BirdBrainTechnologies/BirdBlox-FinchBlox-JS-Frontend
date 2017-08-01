@@ -38,6 +38,7 @@ Category.prototype.prepareToFill = function() {
 	this.buttons = [];
 	this.labels = [];
 	this.collapsibleSets = [];
+	this.buttonsThatRequireFiles = [];
 
 	// Keep track of current position in category
 	this.currentBlockX = BlockPalette.mainHMargin;
@@ -180,7 +181,8 @@ Category.prototype.addSpace = function() {
  * Adds a Button with the specified callback function
  * @param {string} text - The text to place on the Button
  * @param {function} callback - Called when the Button is tapped
- * @param {boolean} onlyEnabledIfOpen - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @param {boolean} [onlyEnabledIfOpen=false] - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @return {Button} - The created button
  */
 Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	DebugOptions.assert(!this.finalized);
@@ -202,9 +204,13 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 	this.currentBlockY += BlockPalette.blockMargin;
 	this.buttons.push(button);
 	this.lastHadStud = false;
-	if (onlyEnabledIfOpen && !SaveManager.fileIsOpen()) {
-		button.disable();
+	if (onlyEnabledIfOpen) {
+		if(!SaveManager.fileIsOpen()) {
+			button.disable();
+		}
+		this.buttonsThatRequireFiles.push(button);
 	}
+	return button;
 };
 
 /**
@@ -306,6 +312,15 @@ Category.prototype.updateDimSet = function() {
 	currentH += BlockPalette.mainVMargin;
 	this.height = currentH;
 	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+
+/**
+ * Indicates that a file is now open.
+ */
+Category.prototype.markOpen = function() {
+	this.buttonsThatRequireFiles.forEach(function(button) {
+		button.enable();
+	});
 };
 
 /* Convert coordinates relative to the Category to coords relative to the screen */

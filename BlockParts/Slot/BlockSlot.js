@@ -111,11 +111,10 @@ BlockSlot.prototype.changeStack = function(stack) {
 
 /**
  * Recursively tells children to update the stack dimensions
- * @param {BlockStack} stack
  */
-BlockSlot.prototype.updateStackDim = function(stack) {
+BlockSlot.prototype.updateStackDim = function() {
 	if (this.hasChild) {
-		this.child.updateStackDim(stack);
+		this.child.updateStackDim();
 	}
 };
 

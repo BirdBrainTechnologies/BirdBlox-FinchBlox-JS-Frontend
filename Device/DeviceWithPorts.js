@@ -23,7 +23,7 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("sensor", sensorType);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -40,7 +40,7 @@ DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, 
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam(valueKey, value);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -59,5 +59,5 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
 	request.addParam("red", red);
 	request.addParam("green", green);
 	request.addParam("blue", blue);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };

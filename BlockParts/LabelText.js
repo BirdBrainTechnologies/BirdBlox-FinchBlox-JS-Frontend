@@ -98,3 +98,11 @@ LabelText.prototype.hide = function() {
 LabelText.prototype.remove = function() {
 	this.textE.remove();
 };
+
+LabelText.prototype.makeActive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.fill);
+};
+
+LabelText.prototype.makeInactive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+};

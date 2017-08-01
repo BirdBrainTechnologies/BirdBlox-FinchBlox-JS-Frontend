@@ -115,7 +115,9 @@ CallbackManager.dialog = {};
  * @return {boolean}
  */
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	response = HtmlServer.decodeHtml(response);
+	if(response != null) {
+		response = HtmlServer.decodeHtml(response);
+	}
 	DialogManager.promptDialogResponded(cancelled, response);
 	return true;
 };
@@ -249,4 +251,17 @@ CallbackManager.echo = function(request){
 	 * to percent encode each parameter individually, and then percent encode the entire string again to pass it
 	 * to this function. */
 	HtmlServer.sendRequestWithCallback(request);
+};
+
+/**
+ * Receives the backend's response to a native call
+ * @param {string} id - The non percent encoded id of the request
+ * @param {string} status - The non percent encoded status code
+ * @param {string} body - The percent encoded response from the backend
+ */
+CallbackManager.httpResponse = function(id, status, body) {
+	if (body != null) {
+		body = HtmlServer.decodeHtml(body);
+	}
+	HtmlServer.responseFromIosCall(id, status, body);
 };

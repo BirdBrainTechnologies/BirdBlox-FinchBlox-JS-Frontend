@@ -185,6 +185,13 @@ BlockPalette.setSuggestedCollapse = function(id, collapsed) {
 };
 
 /**
+ * Recursively tells categories that a file is now open
+ */
+BlockPalette.markOpen = function() {
+	BlockPalette.passRecursively("markOpen");
+};
+
+/**
  * Recursively passes message to all children (Categories and their children) of the Palette
  * @param {string} message
  */

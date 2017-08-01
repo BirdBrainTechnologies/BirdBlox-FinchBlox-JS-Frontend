@@ -86,8 +86,8 @@ NumData.prototype.getValueInR = function(min, max, positive, integer) {
 
 /**
  * Returns the value of the NumData, possibly non-negative or rounded to the nearest integer
- * @param {boolean} positive - Whether the number should be non-negative
- * @param {boolean} integer - Whether the number should be rounded to the nearest integer
+ * @param {boolean} [positive=false] - Whether the number should be non-negative
+ * @param {boolean} [integer=false] - Whether the number should be rounded to the nearest integer
  * @return {number}
  */
 NumData.prototype.getValueWithC = function(positive, integer) {

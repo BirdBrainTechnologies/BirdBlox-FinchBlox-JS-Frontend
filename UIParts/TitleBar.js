@@ -26,7 +26,12 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.height = 54;
 		TB.buttonMargin = Button.defaultMargin;
 	}
+	TB.width = GuiElements.width;
 	TB.buttonW = TB.height * 64 / 54;
+
+	const maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
 	TB.bg = Colors.black;
@@ -37,10 +42,11 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.buttonH = TB.height - 2 * TB.buttonMargin;
 	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+	const maxIconHeight = maxBnWidth * 0.7;
+	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
 
-	TB.width = GuiElements.width;
 };
 
 TitleBar.setGraphicsPart2 = function() {
@@ -58,11 +64,16 @@ TitleBar.setGraphicsPart2 = function() {
 	}
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
-	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
+
+	let suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
+	if (TB.undoBnX < suggestedUndoBnX) {
+		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+	}
+	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
 };
 
 /**
@@ -107,6 +118,11 @@ TitleBar.makeButtons = function() {
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
 	TB.viewMenu = new SettingsMenu(TB.viewBn);
+	TB.viewBn.setLongTouchFunction(function() {
+		//DialogManager.showAlertDialog("Test", "Test", "Test");
+		GuiElements.alert("Long touch");
+		TB.viewMenu.reloadAdvanced();
+	});
 
 	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);

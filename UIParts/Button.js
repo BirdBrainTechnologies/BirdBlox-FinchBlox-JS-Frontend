@@ -30,6 +30,8 @@ function Button(x, y, width, height, parent) {
 	this.delayedCallback = null;   // The function to call when the button is released
 	this.toggles = false;   // Whether the button should stick in the pressed state until tapped again
 	this.unToggleFunction = null;   // The function to call when the button is tapped to make is stop being pressed
+	this.longTouchFunction = null;   // The function to call when the button is long pressed
+	this.disabledTapCallback = null;   // Called when the user taps a disabled function
 	this.toggled = false;   // Whether the button is currently stuck in the pressed state (only if it toggles)
 	this.partOfOverlay = null;   // The overlay the button is a part of (if any)
 	this.scrollable = false;   // Whether the button is part of something that scrolls and shouldn't prevent scrolling
@@ -305,6 +307,18 @@ Button.prototype.setUnToggleFunction = function(callback) {
 };
 
 /**
+ * Sets a function to call when the button is long touched
+ * @param {function} callback
+ */
+Button.prototype.setLongTouchFunction = function(callback) {
+	this.longTouchFunction = callback;
+};
+
+Button.prototype.setDisabledTabFunction = function(callback) {
+	this.disabledTapCallback = callback;
+};
+
+/**
  * Disables the button so it cannot be interacted with
  */
 Button.prototype.disable = function() {
@@ -336,8 +350,9 @@ Button.prototype.enable = function() {
  * Presses the button
  */
 Button.prototype.press = function() {
-	if (this.enabled && !this.pressed) {
+	if (!this.pressed) {
 		this.pressed = true;
+		if (!this.enabled) return;
 		this.setColor(true);
 		if (this.callback != null) {
 			this.callback();
@@ -349,8 +364,14 @@ Button.prototype.press = function() {
  * Releases the Button
  */
 Button.prototype.release = function() {
-	if (this.enabled && this.pressed) {
+	if (this.pressed) {
 		this.pressed = false;
+		if (!this.enabled) {
+			if (this.disabledTapCallback != null) {
+				this.disabledTapCallback();
+			}
+			return;
+		}
 		if (!this.toggles || this.toggled) {
 			this.setColor(false);
 		}
@@ -372,8 +393,9 @@ Button.prototype.release = function() {
  * Removes the Button's visual highlight without triggering any actions
  */
 Button.prototype.interrupt = function() {
-	if (this.enabled && this.pressed && !this.toggles) {
+	if (this.pressed && !this.toggles) {
 		this.pressed = false;
+		if (!this.enabled) return;
 		this.setColor(false);
 	}
 };
@@ -387,6 +409,18 @@ Button.prototype.unToggle = function() {
 	}
 	this.toggled = false;
 	this.pressed = false;
+};
+
+/**
+ * Runs the long touch function
+ * @return {boolean} - whether the long touch function is non-null
+ */
+Button.prototype.longTouch = function() {
+	if (this.longTouchFunction != null) {
+		this.longTouchFunction();
+		return true;
+	}
+	return false;
 };
 
 /**

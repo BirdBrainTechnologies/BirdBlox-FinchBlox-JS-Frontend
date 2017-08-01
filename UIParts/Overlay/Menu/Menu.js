@@ -147,16 +147,24 @@ Menu.prototype.open = function() {
  */
 Menu.prototype.close = function() {
 	if (this.visible) {
-		this.group.remove();
-		this.menuBnList.hide();
-		this.visible = false;
-		Overlay.removeOverlay(this);
+		this.hide();
 		this.button.unToggle();
 		this.button.unmarkAsOverlayPart();
 	} else if (this.scheduleAlternate) {
 		this.scheduleAlternate = false;
 		this.alternateFn();
 	}
+};
+
+/**
+ * hides the Menu
+ * @inheritDoc
+ */
+Menu.prototype.hide = function() {
+	this.group.remove();
+	this.menuBnList.hide();
+	this.visible = false;
+	Overlay.removeOverlay(this);
 };
 
 /**

@@ -40,3 +40,28 @@ BlockPart.prototype.textSummary = function() {
 	DebugOptions.markAbstract();
 	return "";
 };
+
+/**
+ * Makes the part appear active
+ */
+BlockPart.prototype.makeActive = function() {
+
+};
+
+/**
+ * Makes the part appear inactive
+ */
+BlockPart.prototype.makeInactive = function() {
+
+};
+
+/**
+ * @param {boolean} active
+ */
+BlockPart.prototype.setActive = function(active) {
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
+};

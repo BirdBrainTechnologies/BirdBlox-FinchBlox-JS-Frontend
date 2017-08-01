@@ -15,6 +15,7 @@ function GuiElements() {
 	let svg0 = document.getElementById("backSvg");
 	GuiElements.svgs = [svg0, svg1, svg2];
 	GuiElements.defs = document.getElementById("SvgDefs");
+	GuiElements.loaded = false;
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
@@ -23,6 +24,7 @@ function GuiElements() {
 		GuiElements.dialogBlock = null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
+		GuiElements.loaded = true;
 	});
 }
 
@@ -34,7 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Redraws UI if screen dimensions change */
 window.onresize = function() {
-	GuiElements.updateZoom();
+	if (GuiElements.loaded && !GuiElements.isIos) {
+		GuiElements.updateDims();
+	}
 };
 
 /** Sets constants relating to screen dimensions and the Operating System */
@@ -204,7 +208,7 @@ GuiElements.alert = function(message) {
 	} else {
 		result += " None";
 	}
-	debug.innerHTML = result; //The iPad app does not support alert dialogs
+	debug.innerHTML = result;
 };
 
 
@@ -729,7 +733,7 @@ GuiElements.move = {};
  * @param {Element} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
- * @param {number} zoom - (Optional) The amount the group should be scaled.
+ * @param {number} [zoom] - (Optional) The amount the group should be scaled.
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);

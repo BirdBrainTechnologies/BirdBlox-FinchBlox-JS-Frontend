@@ -137,7 +137,8 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	const button = category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
 	category.addBlockByName("B_PlayRecordingUntilDone");
@@ -262,6 +263,15 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterKnob");
 	collapsibleItem.addBlockByName("B_FlutterSound");
 	collapsibleItem.addBlockByName("B_FlutterSoil");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };

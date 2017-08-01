@@ -739,6 +739,14 @@ CodeManager.cancelLoading = function() {
 	TouchReceiver.enableInteraction();
 };
 
+/**
+ * Indicates that a file is now open.  Called from SaveManager.backendSetName
+ */
+CodeManager.markOpen = function() {
+	TouchReceiver.enableInteraction();
+	BlockPalette.markOpen();
+};
+
 
 /* Convert between absolute and relative coords in the drag layer.  Used by moving BlockStacks to determine positions */
 /**

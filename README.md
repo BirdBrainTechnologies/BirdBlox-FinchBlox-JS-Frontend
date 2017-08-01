@@ -11,63 +11,111 @@ It is responsible for handling all the UI, block execution,
 etc. for the BirdBlox application.  It is designed to run
 inside of a containing application (iOS or Android apps, 
 for example).  Anything the js code can't do by itself 
-(issuing bluetooth commands, showing dialogs, etc.) is 
+(issuing bluetooth commands, showing dialogs, saving files) is 
 passed on to the containing application (backend) in the 
-form of get/post requests.
+form of get/post requests.  To ensure the backend always has
+an updated version of the frontend, clone the frontend's
+git repo into the backend and to a pull when changes are made.
+For debugging purposes, you can also set the frontend to be
+automatically downloaded fromm git on launch, but this is
+not used in the release version.
 
 The responsibilities of the backend are the following:
 * Display the HTML/JS frontend in some sort of webview
   that the user can interact with.
-* Download the frontend the first time the app is opened.
-* Cache the frontend locally, so the app can be used 
-  without an internet connection.
-* Download the file version.txt each time the frontend is
-  opened, and re-download all files if the number in the 
-  version.txt file has increased.
 * Connect to and communicate with bluetooth-enabled robots.
 * Provide sensor information (accelerometers, etc.) from the
   device to the frontend when requested.
 * Display dialogs when requested.
 * Play sounds when requested.
 * Save, open, and delete files to app storage.
+* Track which file is currently open.
+* Record sounds to the currently open file
 * Export/import files to/from other applications on the
   device.
 * Save/access key-value pairs used to store settings.
 
-Communication between the frontend and backend occurs primarily
-through get requests issued by the frontend.  Post requests
-are used for save files, and occasionally the backend directly
-calls JS functions in the frontend when communication in the 
-reverse direction is required.
+The frontend uses GET/POST requests to send messages to the backend.
+GET requests are normally used, but POST requests are used for saving files.
+HTTP response codes are used to signal errors.  Unless otherwise specified,
+any 200-type code can be used to signal success and any 400 or 500 code
+can signal an error.
 
-## Bluetooth pairing system
+The backend sends messages to the frontend by directly calling a frontend
+function in `CallbackManager.js`.  These functions return a boolean that is
+`true` if the request succeeded and `false` if the request is malformed.
+This is for debugging purposes only, so there is no need to check for and
+handle the `false` case.
 
-The backend and frontend communicate about specific Bluetooth devices 
-using the devices' names.  To ensure consistent naming, the backend
-should create a list of encountered Bluetooth device ids and their assigned names.
-When a device is discovered, the backend should add its unique id to 
-the list, along with its name.  If a device already has that name,
-the second device should have a "2" appended to it, etc. to ensure
-that all devices the backend has seen have a unique name.
+## Bluetooth scanning
 
-The backend and frontend will use the names on this list to refer to
-specific devices.  A device's name on the list should be changed only
-when the frontend issues a "rename hummingbird" request.  Anywhere
-`[HB name]` is used throughout this document, it is referring to the name
-on this list.
+The backend and frontend communicate about specific Bluetooth robots 
+using the robots' ids.  On Android, Mac Addresses are used as ids while
+iOS provides its own unique Bluetooth ids.  All requests mentioning a 
+specific robot will have an `id=[device_id]` parameter.
 
-The frontend will also initialize bluetooth scans using the `discover`
-request.  These scans should last for a reasonable amount of time as
-to not drain the battery.  The discover command also returns a list
-of unpaired BLE devices to the frontend.
+The frontend will initialize bluetooth scans using the `robot/startDiscover`
+request.  These scans last for a reasonable amount of time as
+to not drain the battery.  The backend then calls 
+`CallbackManager.robot.discovered` with the list of discovered devices every
+time a new device is found.  The frontend will call `robot/stopDiscover` to
+request that a scan be ended.  If the scan times out before `stopDiscover` is
+called, the backend calls `CallbackManager.robot.discoverTimeOut`, and
+the frontend might restart the scan.  In any other case that a scan stops (including
+when the frontend calls `robot/stopDiscover`), `CallbackManager.robot.stopDiscover`
+is called.
 
-The backend should also have a list of hummingbirds it is 
-attempting or has succeeded to connect to.  If one of these 
-devices disconnects unexpectedly, the device should continue
-to look for it for a few seconds before giving up (but keeping
-it on the list).  If it encounters this lost BLE device during a
-scan ("discovery") in the future, it should reconnect to it.
-The `names` request returns this list.
+### Bluetooth scanning requests
+
+    Request format:
+        http://localhost:22179/robot/startDiscover?type=[robotType]
+    Example request: 
+        http://localhost:22179/robot/startDiscover?type=hummingbird
+
+When received, the backend begins a scan of unpaired devices of the specified
+type.  If it is currently scanning for a different type of device, that scan
+is stopped and results are cleared.  If a scan of the specified type is already
+occurring, no action is taken.
+
+    Request format:
+        http://localhost:22179/robot/stopDiscover
+
+Stops the current scan if any.
+
+    Callback signature:
+        CallbackManager.robot.discovered(robotTypeId: string, robotList: string) -> boolean
+        robotList - A precent encoded JSON array of objects, each containing name and id fields
+    Example call:
+        CallbackManager.robot.discovered("flutter", encoded);
+        where encoded is '[{"id":"my_id","name":"my_name"}]' percent encoded
+
+Called any time a new device is discovered during a scan
+
+## Robot connection/disconnection
+
+The frontend will tell the backend when to connect to or disconnect from a robot using the
+`/robot/connect` and `robot/disconnect` requests. 
+The backend maintains a list of devices the frontend wants to connect to, and
+devices are instantaneously added or removed from that list as the frontend
+requests.  The frontend has a similar list (visible to the user in the ConnectMultipleDialog)
+and it is important that these lists on the frontend and backend are always in sync.
+One the backend adds a device to this list (which we'll call the **connection list**),
+it attempts to connect to the device itself (asynchronously).  The backend
+then calls `CallbackManager.robot.updateStatus` with `isConnected = true` when the
+device does connect and makes the same call with `isConnected = false` if the device
+ever unexpectedly disconnects.  However, no devices should be removed from the connection
+list without the frontend's knowledge.  If the frontend disconnects from a robot, it
+is removed from the connection list and treated as if it is disconnected while
+the actual disconnection occurs asynchronously.
+
+On connection to the robot, the backend checks the firmware version.  If the firmware is out
+of date but still compatible with the app it calls `CallbackManager.robot.updateFirmwareStatus`.
+If the firmware is incompatible, it calls `CallbackManager.robot.disconnectIncompatible` and
+immediately removes the robot from the connection list.  This is the only time where the
+backend removes something from the list without the frontend making a request.
+
+### Robot connection/disconnection requests
+
 
 The frontend will use connect/disconnect commands to
 request that BLE devices be added/removed from the connected 

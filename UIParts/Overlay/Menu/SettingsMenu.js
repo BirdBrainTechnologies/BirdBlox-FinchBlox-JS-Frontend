@@ -22,6 +22,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	if (this.showAdvanced) {
+		this.addOption("Send debug log", this.optionSendDebugLog, true)
+	}
 };
 
 /**
@@ -63,4 +66,37 @@ SettingsMenu.prototype.enableSnapping = function() {
  */
 SettingsMenu.prototype.disableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("false");
+};
+
+/**
+ * Tells the backend to send the current debug log
+ */
+SettingsMenu.prototype.optionSendDebugLog = function() {
+	const request = new HttpRequestBuilder("debug/shareLog");
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+
+/**
+ * Shows the SettingsMenu and stores whether it should show with advanced options
+ * @param {boolean} [showAdvanced=false]
+ */
+SettingsMenu.prototype.open = function(showAdvanced) {
+	if (showAdvanced == null) {
+		showAdvanced = false;
+	}
+	this.showAdvanced = showAdvanced;
+	Menu.prototype.open.call(this);
+};
+
+/**
+ * Re-opens the menu (if it is open) with advanced options visible)
+ */
+SettingsMenu.prototype.reloadAdvanced = function() {
+	if (this.visible) {
+		this.hide();
+		this.open(true);
+		if (this.button.toggled) {
+			this.button.pressed = false;
+		}
+	}
 };

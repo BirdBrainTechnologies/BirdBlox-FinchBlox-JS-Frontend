@@ -8,7 +8,7 @@ function SaveManager() {
 	SaveManager.named = false;
 	// The file is auto saved any time it is edited and one every few seconds
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
-	SaveManager.autoSaveTimer.start();
+	//SaveManager.autoSaveTimer.start();
 	// Tries to avoid making multiple saves at once
 	SaveManager.saving = false;
 }
@@ -17,7 +17,7 @@ SaveManager.setConstants = function() {
 	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.autoSaveInterval = 1000 * 15;
+	SaveManager.autoSaveInterval = 1000 * 60;
 };
 
 /**
@@ -66,6 +66,7 @@ SaveManager.backendSetName = function(fileName, named) {
 	SaveManager.named = named;
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
+	CodeManager.markOpen();
 };
 
 /**
@@ -121,9 +122,6 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
-	if (SaveManager.fileName === fileName) {
-		return;
-	}
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");

@@ -151,6 +151,7 @@ BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
 	BlockGraphics.labelText.font = Font.uiFont(12).bold();
 	BlockGraphics.labelText.fill = "#ffffff";
+	BlockGraphics.labelText.disabledFill = "#e4e4e4";
 };
 
 /* Constants for text in Slots */
