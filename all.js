@@ -16500,7 +16500,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('Started');
 					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
-					callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true}');
+					callbackFn('{"availableName":"test","alreadySanitized":false,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
 		}, 20);
@@ -17503,10 +17503,13 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
 		const message = "Name cannot be blank. Enter a file name.";
 		SaveManager.promptNewFile(message, nextAction);
 	} else {
+		GuiElements.alert("getting name");
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			GuiElements.alert("Got available name" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.newSoft(availableName, nextAction);
 			} else if (!alreadySanitized) {
+				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);

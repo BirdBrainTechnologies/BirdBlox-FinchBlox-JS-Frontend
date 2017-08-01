@@ -99,7 +99,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('Started');
 					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
-					callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true}');
+					callbackFn('{"availableName":"test","alreadySanitized":false,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
 		}, 20);
