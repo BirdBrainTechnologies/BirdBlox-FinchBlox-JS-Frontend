@@ -295,13 +295,13 @@ OpenDialog.showDialog = function() {
 OpenDialog.prototype.closeDialog = function() {
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
-	OpenDialog.opening = false;
 };
 
 /**
  * Closes the currently open dialog
  */
 OpenDialog.closeDialog = function() {
+	OpenDialog.opening = false;
 	if (OpenDialog.currentDialog != null) {
 		OpenDialog.currentDialog.closeDialog();
 	}

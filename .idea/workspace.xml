@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HtmlServer.js" afterPath="$PROJECT_DIR$/HtmlServer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SaveManager.js" afterPath="$PROJECT_DIR$/SaveManager.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" afterPath="$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js" />
     </list>
     <ignored path="Git.iws" />
@@ -450,8 +448,8 @@
       <file leaf-file-name="OpenDialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="442">
-              <caret line="297" column="31" lean-forward="false" selection-start-line="297" selection-start-column="31" selection-end-line="297" selection-end-column="31" />
+            <state relative-caret-position="547">
+              <caret line="303" column="31" lean-forward="false" selection-start-line="303" selection-start-column="31" selection-end-line="303" selection-end-column="31" />
               <folding>
                 <element signature="n#!!doc;n#OpenDialog#0" expanded="false" />
                 <element signature="e#490#657#0" expanded="false" />
@@ -502,9 +500,7 @@
                 <element signature="e#8659#8758#0" expanded="false" />
                 <element signature="e#8763#8873#0" expanded="false" />
                 <element signature="e#9327#9349#0" expanded="false" />
-                <element signature="e#9510#9553#0" expanded="false" />
-                <element signature="e#9590#9679#0" expanded="false" />
-                <element signature="e#9631#9677#0" expanded="false" />
+                <element signature="e#9481#9524#0" expanded="false" />
                 <element signature="e#9797#9942#0" expanded="false" />
                 <element signature="e#9893#9940#0" expanded="false" />
               </folding>
@@ -1161,7 +1157,7 @@
       <workItem from="1501467393923" duration="1057000" />
       <workItem from="1501507500753" duration="20805000" />
       <workItem from="1501552470436" duration="12000" />
-      <workItem from="1501615937225" duration="12739000" />
+      <workItem from="1501615937225" duration="13346000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1258,7 +1254,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1630517000" />
+    <option name="totallyTimeSpent" value="1631124000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -2308,8 +2304,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UIParts/Dialogs/OpenDialog/OpenDialog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="297" column="31" lean-forward="false" selection-start-line="297" selection-start-column="31" selection-end-line="297" selection-end-column="31" />
+        <state relative-caret-position="547">
+          <caret line="303" column="31" lean-forward="false" selection-start-line="303" selection-start-column="31" selection-end-line="303" selection-end-column="31" />
           <folding>
             <element signature="n#!!doc;n#OpenDialog#0" expanded="false" />
             <element signature="e#490#657#0" expanded="false" />
@@ -2360,9 +2356,7 @@
             <element signature="e#8659#8758#0" expanded="false" />
             <element signature="e#8763#8873#0" expanded="false" />
             <element signature="e#9327#9349#0" expanded="false" />
-            <element signature="e#9510#9553#0" expanded="false" />
-            <element signature="e#9590#9679#0" expanded="false" />
-            <element signature="e#9631#9677#0" expanded="false" />
+            <element signature="e#9481#9524#0" expanded="false" />
             <element signature="e#9797#9942#0" expanded="false" />
             <element signature="e#9893#9940#0" expanded="false" />
           </folding>
