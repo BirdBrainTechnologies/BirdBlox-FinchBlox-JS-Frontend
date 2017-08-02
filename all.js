@@ -2465,6 +2465,9 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
+
+	GuiElements.blockInteraction();
+	OpenDialog.showDialog();
 	DebugOptions.applyActions();
 };
 /**
@@ -17450,14 +17453,13 @@ SaveManager.loadBlank = function() {
 };
 
 /**
+ * Closes the open file and notifies the backend
  * @param {function} nextAction
  */
 SaveManager.userClose = function(nextAction) {
-	SaveManager.saveAndName("", function() {
-		SaveManager.loadBlank();
-		const request = new HttpRequestBuilder("data/close");
-		HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
-	});
+	SaveManager.loadBlank();
+	const request = new HttpRequestBuilder("data/close");
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 
 /**

@@ -89,14 +89,13 @@ SaveManager.loadBlank = function() {
 };
 
 /**
+ * Closes the open file and notifies the backend
  * @param {function} nextAction
  */
 SaveManager.userClose = function(nextAction) {
-	SaveManager.saveAndName("", function() {
-		SaveManager.loadBlank();
-		const request = new HttpRequestBuilder("data/close");
-		HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
-	});
+	SaveManager.loadBlank();
+	const request = new HttpRequestBuilder("data/close");
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 
 /**
