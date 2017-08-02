@@ -28,6 +28,7 @@ SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
 	OpenDialog.closeDialog();
+	GuiElements.unblockInteraction();
 };
 
 /**
