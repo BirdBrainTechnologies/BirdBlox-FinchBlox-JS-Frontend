@@ -166,7 +166,7 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.newSoft = function(filename, nextAction) {
-	const request = new HttpRequestBuilder("data/newWithName");
+	const request = new HttpRequestBuilder("data/new");
 	request.addParam("filename", filename);
 	SaveManager.loadBlank();
 	CodeManager.markLoading("Saving...");
