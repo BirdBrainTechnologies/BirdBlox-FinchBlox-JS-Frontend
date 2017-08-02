@@ -528,15 +528,6 @@ SaveManager.saveAndName = function(message, nextAction) {
 };
 
 /**
- * Called when the user taps the file button.  Saves the file and opens the OpenDialog.  Used to prompt the user to name
- * the file if they had not already
- */
-SaveManager.userOpenDialog = function() {
-	const message = "Please name this file";
-	SaveManager.saveAndName(message, OpenDialog.showDialog);
-};
-
-/**
  * Adds a type parameter to the request indicating whether the item is a file or recording
  * @param {HttpRequestBuilder} request - The request to modify
  * @param {boolean} isRecording - Whether the item is a recording instead of a file

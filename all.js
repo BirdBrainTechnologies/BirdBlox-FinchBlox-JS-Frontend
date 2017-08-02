@@ -6028,7 +6028,7 @@ TitleBar.makeButtons = function() {
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
-	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
+	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
 
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
@@ -14002,18 +14002,19 @@ OpenDialog.prototype.tabSelected = function(tab) {
  * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
  */
 OpenDialog.showDialog = function() {
-	OpenDialog.opening = true;
+	OpenDialog.opening = true; // Allows the action to be canceled if OpenDialog.closeDialog is called in the interval
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (!OpenDialog.opening) return;
-		SaveManager.userClose(function(){
-			if (!OpenDialog.opening) return;
-			const openDialog = new OpenDialog(new FileList(response));
-			openDialog.show();
-			OpenDialog.opening = false;
-		});
+		const openDialog = new OpenDialog(new FileList(response));
+		openDialog.show();
+		OpenDialog.opening = false;
 	}, function() {
 		OpenDialog.opening = false;
 	});
+};
+
+OpenDialog.closeFileAndShowDialog = function() {
+	SaveManager.userClose(OpenDialog.showDialog);
 };
 
 /**
@@ -17896,15 +17897,6 @@ SaveManager.saveAndName = function(message, nextAction) {
 		return;
 	}
 	SaveManager.autoSave(nextAction);
-};
-
-/**
- * Called when the user taps the file button.  Saves the file and opens the OpenDialog.  Used to prompt the user to name
- * the file if they had not already
- */
-SaveManager.userOpenDialog = function() {
-	const message = "Please name this file";
-	SaveManager.saveAndName(message, OpenDialog.showDialog);
 };
 
 /**

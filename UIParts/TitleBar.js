@@ -113,7 +113,7 @@ TitleBar.makeButtons = function() {
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
-	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
+	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
 
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
