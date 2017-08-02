@@ -274,11 +274,18 @@ OpenDialog.prototype.tabSelected = function(tab) {
  * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
  */
 OpenDialog.showDialog = function() {
+	if (OpenDialog.opening) return;
+	OpenDialog.opening = true;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (!OpenDialog.opening) return;
 		SaveManager.userClose(function(){
+			if (!OpenDialog.opening) return;
 			const openDialog = new OpenDialog(new FileList(response));
 			openDialog.show();
+			OpenDialog.opening = false;
 		});
+	}, function() {
+		OpenDialog.opening = false;
 	});
 };
 
@@ -288,6 +295,7 @@ OpenDialog.showDialog = function() {
 OpenDialog.prototype.closeDialog = function() {
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
+	OpenDialog.opening = false;
 };
 
 /**

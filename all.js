@@ -14002,11 +14002,18 @@ OpenDialog.prototype.tabSelected = function(tab) {
  * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
  */
 OpenDialog.showDialog = function() {
+	if (OpenDialog.opening) return;
+	OpenDialog.opening = true;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (!OpenDialog.opening) return;
 		SaveManager.userClose(function(){
+			if (!OpenDialog.opening) return;
 			const openDialog = new OpenDialog(new FileList(response));
 			openDialog.show();
+			OpenDialog.opening = false;
 		});
+	}, function() {
+		OpenDialog.opening = false;
 	});
 };
 
@@ -14016,6 +14023,7 @@ OpenDialog.showDialog = function() {
 OpenDialog.prototype.closeDialog = function() {
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
+	OpenDialog.opening = false;
 };
 
 /**
@@ -16503,7 +16511,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('Started');
 					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
-					callbackFn('{"availableName":"test","alreadySanitized":false,"alreadyAvailable":true,"files":["project1","project2"]}');
+					callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
 		}, 20);
@@ -17391,6 +17399,7 @@ SaveManager.setConstants = function() {
 SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
+	OpenDialog.closeDialog();
 };
 
 /**
