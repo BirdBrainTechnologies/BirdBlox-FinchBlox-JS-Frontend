@@ -14002,7 +14002,6 @@ OpenDialog.prototype.tabSelected = function(tab) {
  * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
  */
 OpenDialog.showDialog = function() {
-	if (OpenDialog.opening) return;
 	OpenDialog.opening = true;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (!OpenDialog.opening) return;
