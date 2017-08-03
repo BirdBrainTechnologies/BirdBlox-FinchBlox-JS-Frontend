@@ -130,7 +130,6 @@ InputPad.prototype.close = function() {
 InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
 	this.currentData = newData;
-	SaveManager.markEdited();
 };
 
 /**
@@ -140,5 +139,4 @@ InputPad.prototype.updateEdit = function(newData, text) {
 InputPad.prototype.finishEdit = function(newData) {
 	this.currentData = newData;
 	this.close();
-	SaveManager.markEdited();
 };

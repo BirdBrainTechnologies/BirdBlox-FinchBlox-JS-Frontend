@@ -8719,7 +8719,6 @@ InputPad.prototype.close = function() {
 InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
 	this.currentData = newData;
-	SaveManager.markEdited();
 };
 
 /**
@@ -8729,7 +8728,6 @@ InputPad.prototype.updateEdit = function(newData, text) {
 InputPad.prototype.finishEdit = function(newData) {
 	this.currentData = newData;
 	this.close();
-	SaveManager.markEdited();
 };
 /**
  * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
@@ -12096,6 +12094,7 @@ CodeManager.deleteAll = function() {
 	CM.stop();
 	TabManager.deleteAll();
 	UndoManager.clearUndos();
+
 	CodeManager();
 };
 
@@ -16508,8 +16507,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					callbackFn('Started');
-					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('Started');
+					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
@@ -20700,6 +20699,7 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
+	SaveManager.markEdited();
 };
 
 /**
@@ -20712,6 +20712,7 @@ EditableSlot.prototype.finishEdit = function(data) {
 		this.setData(data, true, true); //Sanitize data, updateDims
 		this.slotShape.deselect();
 		this.editing = false;
+		SaveManager.markEdited();
 	}
 };
 
