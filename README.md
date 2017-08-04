@@ -47,6 +47,12 @@ function in `CallbackManager.js`.  These functions return a boolean that is
 This is for debugging purposes only, so there is no need to check for and
 handle the `false` case.
 
+On iOS, we have switched to a more direct method of communication (instead of
+GET/POST), where the JS calls swift functions to send messages.  It directly calls
+the function `window.webkit.messageHandlers.serverSubstitute.postMessage`, passing
+a JSON object containing the data that would normally be transferred using HTTP.
+This enabled us to remove the server from the iOS backend.
+
 ## Bluetooth scanning
 
 The backend and frontend communicate about specific Bluetooth robots 
@@ -116,6 +122,26 @@ backend removes something from the list without the frontend making a request.
 
 ### Robot connection/disconnection requests
 
+    Request format:
+        http://localhost:22179/robot/connect?id=[robotId]&type=[robotType]
+    Example request: 
+        http://localhost:22179/robot/connect?id=SomeMacAddress&type=flutter
+
+Tells the backend to connect to a device.  If the device is on the devices found during the 
+last scan, the backend adds it to the connection list and tries to connect to it. Otherwise
+it returns a 404.
+
+    Request format:
+        http://localhost:22179/robot/disconnect?id=[robotId]&type=[robotType]
+    Example request: 
+        http://localhost:22179/robot/disconnect?id=SomeMacAddress&type=flutter
+
+Tells the backend to disconnect from a device.  If the device is on the connection list, it
+removes it from the list and tries to disconnect from it.  Otherwise, it returns a 404.
+
+
+
+################
 
 The frontend will use connect/disconnect commands to
 request that BLE devices be added/removed from the connected 
