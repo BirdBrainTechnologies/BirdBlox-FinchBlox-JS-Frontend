@@ -73,7 +73,7 @@ is called.
 
 ### Bluetooth scanning requests
 
-#### robot/StartDiscover
+#### /robot/startDiscover
 
     Request format:
         http://localhost:22179/robot/startDiscover?type=[robotType]
@@ -85,7 +85,7 @@ type.  If it is currently scanning for a different type of device, that scan
 is stopped and results are cleared.  If a scan of the specified type is already
 occurring, no action is taken.
 
-#### robot/stopDiscover
+#### /robot/stopDiscover
 
     Request format:
         http://localhost:22179/robot/stopDiscover
@@ -128,7 +128,7 @@ backend removes something from the list without the frontend making a request.
 
 ### Robot connection/disconnection requests
 
-#### robot/connect
+#### /robot/connect
 
     Request format:
         http://localhost:22179/robot/connect?id=[robotId]&type=[robotType]
@@ -139,7 +139,7 @@ Tells the backend to connect to a device.  If the device is on the devices found
 last scan, the backend adds it to the connection list and tries to connect to it. Otherwise
 it returns a 404.
 
-#### robot/disconnect
+#### /robot/disconnect
 
     Request format:
         http://localhost:22179/robot/disconnect?id=[robotId]&type=[robotType]
@@ -191,18 +191,108 @@ firmware was incompatible. The frontend will then remove the device from its own
 connection list and notify the user of the incompatible firmware, providing an option
 to view instructions to update the firmware.
 
-#### robot/showUpdateInstructions
+#### /robot/showUpdateInstructions
 
     Request format:
         http://localhost:22179/robot/showUpdateInstructions?type=[robotTypeId]
     Example request: 
-        http://localhost:22179/robot/showUpdateInstructions?type=[hummingbird]
+        http://localhost:22179/robot/showUpdateInstructions?type=hummingbird
 		
 When received, the backend redirects the user to a website containing instructions
 to update the firmware of their device. The website may depend on the type of robot.
+Currently this website is 
+[http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware]
+(http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware)
 
+#### /robot/showInfo
 
+    Request format:
+        http://localhost:22179/robot/showFirmwareInfo?type=[robotTypeId]&id=[robotId]
 
+If the firmware of the robot is up to date, this command presents an alert dialog with
+the text and a single option "Dismiss":
+
+	Hummingbird Peripheral
+	Name: [robot name from mac address]
+	Bluetooth Name: [actual gap name]
+	Hardware Version: [hardware version]
+	Firmware Version: [firmware version]
+	
+If the firmware isn't up to date, an additional line, `Firmware update available` is
+included with options "Dismiss" and "Update firmware", which links to the update page.
+
+## Robot blocks
+
+These commands are used for blocks that control the inputs/outputs of the robots.
+Some commands (like the tri-led command) are shared between different types of
+robots.  Since the BLE command may vary by robot type, a parameter `type` is
+provided for all commands.  A robot is is also provided.  The only exception is the
+`/robot/stopAll` command, since it affects all robots.
+
+On the backend, sensor values are regularly polled and cached so that the
+sensor requests can be immediately responded to with the cached values. For outputs,
+the has a state object which represents the state of all the outputs
+of a given robot.  When an output request is made, the state is modified. It is then
+regularly synced with the robot using a set all BLE command.  To prevent states from
+being missed (for example, if the user turns the LED on and off quickly), the backend
+actually tracks the current and pending states of the outputs, and only processes
+a command when the relevant output for that command has the same value in both states.
+Otherwise, the command waits in a queue.  More detail can be found in the backend code.
+
+#### /robot/stopAll
+
+    Request format:
+        http://localhost:22179/robot/stopAll
+
+Turns off all the robot's outputs (LEDs, motors, servos, etc). On backends using the
+direct call system, also empties the queue of unprocessed robot block requests.
+
+#### /robot/in
+
+    Request format:
+        http://localhost:22179/robot/in?sensor=[s]&type=[t]&id=[id]&port=[p]
+		type - ["sensor"|"temperature"|"distance"|"sound"|"light"|"soil"]
+	Example request: 
+        http://localhost:22179/robot/in?sensor=distance&type=flutter&id=robotid&port=2
+
+Returns the sensor value of the robot. Might be scaled differently depending on the
+type of sensor
+
+#### /robot/out/servo
+
+    Request format:
+        http://localhost:22179/robot/out/servo?angle=[a]&type=[t]&id=[id]&port=[p]
+		angle - int from 0 to 180
+
+#### /robot/out/motor
+
+    Request format:
+        http://localhost:22179/robot/out/motor?speed=[s]&type=[t]&id=[id]&port=[p]
+		angle - int from -100 to 100
+		
+#### /robot/out/vibration
+
+    Request format:
+        http://localhost:22179/robot/out/vibration?intensity=[i]&type=[t]&id=[id]&port=[p]
+		intensity - int from 0 to 100
+		
+#### /robot/out/triled
+
+    Request format:
+        http://localhost:22179/robot/out/triled?red=[r]&green=[g]&blue=[b]&type=[t]&id=[id]&port=[p]
+		red - int from 0 to 100
+		green - int from 0 to 100
+		blue - int from 0 to 100
+		
+#### /robot/out/buzzer
+
+    Request format:
+        http://localhost:22179/robot/out/triled?volume=[v]&frequency=[f]&type=[t]&id=[id]&port=[p]
+		volume - int from 0 to 100
+		frequency - int from 0 to 20000
+
+## Dialogs
+		
 ################
 
 The frontend will use connect/disconnect commands to
