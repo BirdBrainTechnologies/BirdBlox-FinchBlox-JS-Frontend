@@ -201,8 +201,7 @@ to view instructions to update the firmware.
 When received, the backend redirects the user to a website containing instructions
 to update the firmware of their device. The website may depend on the type of robot.
 Currently this website is 
-[http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware]
-(http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware)
+[http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware](http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware)
 
 #### /robot/showInfo
 
