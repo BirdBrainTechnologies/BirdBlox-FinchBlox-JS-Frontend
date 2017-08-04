@@ -103,6 +103,26 @@ Stops the current scan if any.
 
 Called any time a new device is discovered during a scan
 
+#### CallbackManager.robot.discoverTimeOut
+
+	Callback signature:
+        CallbackManager.robot.discoverTimeOut(robotTypeId: string) -> boolean
+    Example call:
+        CallbackManager.robot.discoverTimeOut("hummingbird");
+
+Tells the frontend that the discover timed out so the frontend has a chance to 
+start the discover again.
+
+#### CallbackManager.robot.stopDiscover
+
+	Callback signature:
+        CallbackManager.robot.stopDiscover(robotTypeId: string) -> boolean
+    Example call:
+        CallbackManager.robot.stopDiscover("hummingbird");
+
+Tells the frontend that the discover stopped so the frontend has a chance to 
+start the discover again.  Called any time a scan stops unless it timed out.
+
 ## Robot connection/disconnection
 
 The frontend will tell the backend when to connect to or disconnect from a robot using the
@@ -201,7 +221,7 @@ to view instructions to update the firmware.
 When received, the backend redirects the user to a website containing instructions
 to update the firmware of their device. The website may depend on the type of robot.
 Currently this website is 
-[http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware](http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware)
+http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware
 
 #### /robot/showInfo
 
@@ -291,6 +311,50 @@ type of sensor
 		frequency - int from 0 to 20000
 
 ## Dialogs
+
+There are three main types of dialogs: prompt, choice, alert. Prompt dialogs let the
+user enter text. Choice dialogs give the user two options to choose from. Alert dialog
+contain text and only one option.
+
+Dialogs are presented in response to http requests. When the user responds, a function in
+the CallbackManager should be called. Only one dialog will be requested at a time. Dialogs
+that are presented for a reason other than the commands below do not need to call
+CallbackManager functions.
+
+### Dialog requests
+
+#### /tablet/dialog
+
+    Request format:
+        http://localhost:22179/tablet/dialog?title=[t]&question=[q]&prefill=[pr]&placeholder=[pl]&selectAll=[sa]
+		title - The text to show in the top of the dialog
+		question - The text to show in the body of the dialog
+		prefill - (possibly "") The text that should already be in the dialog
+		placeholder - (possibly "") The text to show in gray when nothing has been entered yet
+		selectAll - ["true"|"false"], whether the prefill text should start out as selected
+
+Shows a dialog and calls `CallbackManager.dialog.promptResponded` when it is responded to.
+
+#### /tablet/choice
+
+	Request format:
+        http://localhost:22179/tablet/choice?title=[t]&question=[q]&button1=[bn1]&button2=[bn2]
+		title - The text to show in the top of the dialog
+		question - The text to show in the body of the dialog
+		button1 - The text to show on the first button
+		button2 - (optional) The text to show on the second button 
+		
+Shows a choice dialog, or an alert dialog (if only one button is provided). Calls 
+`CallbackManager.dialog.choiceResponded` when it is responded to.
+
+#### CallbackManager.dialog.promptResponded
+
+	Callback signature:
+        CallbackManager.dialog.promptResponded(canceled: boolean, response: string) -> boolean
+        canceled - Whether the dialog was closed without response
+		response - (optional) Percent encoded response to the dialog. Included i
+    Example call:
+        CallbackManager.dialog.promptResponded("myrobotid", "old");
 		
 ################
 
