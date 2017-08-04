@@ -376,24 +376,252 @@ Settings provide a way for the frontend to store and read from a key/value setti
 
 #### /settings/get
 
-    Get request format:
-    http://localhost:22179/settings/get?key=[key]
-    Example:
-    http://localhost:22179/settings/get?key=zoom
-    Example responses:
-    1.5999999999999999
+    Request format:
+		http://localhost:22179/settings/get?key=[key]
+    Example request: 
+		http://localhost:22179/settings/get?key=zoom
+    Example response:
+		1.5999999999999999
     
 A 404 response is generated if the key does not have an assigned value.
     
 #### /settings/set
 
-    Get request format:
-    http://localhost:22179/settings/set?key=[key]&value=[value]
-    Example:
-    http://localhost:22179/settings/set?key=zoom&value=1
+    Request format:
+		http://localhost:22179/settings/set?key=[key]&value=[value]
+    Example request: 
+		http://localhost:22179/settings/set?key=zoom&value=1
 
 ## File management
 
+These commands deal with creating/renaming/copying/deleting/listing locally stored files.
+The backend always keeps track of the currently open file, so it can be reopened
+if the app is closed in the background due to lack of memory.  Files are autosaved
+as the user edits them, and are created and managed through an open dialog on the screen.
+
+Some characters are not valid for file names.  They include `\\/:*?<>|.\n\r\0\"` and
+should be replaced with `_` on import. No files with illegal characters should be present
+locally.
+
+Some file management commands can also be used to manage recordings. These requests have
+a `type` parameter with a value of either `"file"` or `"recording"`. Recordings have
+the same restrictions for valid names.
+
+#### CallbackManager.data.open
+
+	Callback signature:
+        CallbackManager.data.open(fileName: string, data: string) -> boolean
+        fileName - percent encoded name to show in the title
+		data - percent encoded XML data of the file
+
+Tells the frontend to load up the data from a file.  Called during imports,
+on app startup (if the project was left open in the background), op when requested
+using `/data/open`.
+		
+#### CallbackManager.data.filesChanged
+
+	Callback signature:
+        CallbackManager.data.filesChanged() -> boolean
+		
+Tells the frontend that the list of locally stored files has changed.
+
+#### CallbackManager.data.markLoading
+
+	Callback signature:
+        CallbackManager.data.markLoading() -> boolean
+
+Tells the frontend to close the open dialog and show "Loading..." in the title
+bar.  Called when the frontend is in the process of opening a file.
+		
+#### /data/files
+
+	Request format:
+		http://localhost:22179/data/files
+    Example response:
+		{"files":["project1","project2"],"signedIn":true,"account":"email@something.something"}
+
+Returns a JSON object with an array of file names (key="file"). On Android, it
+also includes whether the user is signed in to cloud storage (key="signedIn")
+and if so, the account they are signed in to (key="account").  Note that the
+list of files includes only local files.  The cloud storage related data is needed
+for the tab at the top of the Open dialog.
+
+#### /data/open
+
+	Request format:
+		http://localhost:22179/data/open?filename=[fn]
+
+Tells the backend to open the specified file. The backend responds to this request
+quickly, with 200 if the file exists, or en error otherwise. It can then take as
+much time as it needs to get the project data, which it returns using
+`CallbackManager.data.open`.  Stores `filename` as the currently open file.
+
+#### /data/close
+
+	Request format:
+		http://localhost:22179/data/close
+
+Tells the backend that there is no longer any file open.  Triggered when the user
+opens the OpenDialog
+
+#### /data/new
+
+	Request format:
+		http://localhost:22179/data/new?filename=[fn]
+		
+Tells the backend to create a new file with the specified name. If the name is in use
+or invalid, the backend should respond with an error.
+
+#### /data/rename
+
+	Request format:
+		http://localhost:22179/data/rename?oldFilename=[of]&newFilename=[nf]&type=[t]
+		type - ["file"|"recording"]
+		
+Tells the backend to rename the file. If the file does not exist, an error should
+be returned.  If `oldFilename` equals `newFilename`, no action should be performed.
+If `newFilename` is in use or invalid, the backend should signal an error.
+Behavior is similar for recordings.
+
+#### /data/delete
+
+	Request format:
+		http://localhost:22179/data/delete?filename=[fn]&type=[t]
+		type - ["file"|"recording"]
+
+Tells the backend to delete the file/recording. Throws an error if the file does not
+exist.
+
+#### /data/duplicate
+
+	Request format:
+		http://localhost:22179/data/duplicate?filename=[fn]&newFilename[nf]
+		
+Creates a copy of the file with the specified name. Throws an error if `newFilename`
+is in use or invalid
+
+#### /data/export
+
+	Request format:
+		http://localhost:22179/data/delete?filename=[fn]&tlx=[#]&tly=[#]&brx=[#]&bry=[#]
+		type - ["file"|"recording"]
+		tlx - x coord of top left point where export sheet should appear
+		tly - y coord of top left point where export sheet should appear
+		brx - x coord of bottom right point where export sheet should appear
+		bry - y coord of bottom right point where export sheet should appear
+
+Exports the specified file. On iOS, coords are used to determine sheet location.
+
+#### /data/getAvailableName
+
+	Request format:
+		http://localhost:22179/data/getAvailableName?filename=[fn]&type=[t]
+		type - ["file"|"recording"]
+	Example response:
+		{"availableName":"my file (2)", "alreadySanitized":true, "alreadyAvailable":false
+		
+Checks if the provided file name would be valid for a new file/recording. Returns a JSON
+object with a close (or identical) name that is valid (key="availableName"), and
+booleans indicating if the initial name contained no illegal characters and was not in
+use already (keys "alreadySanitized" and "alreadyAvailable", respectively). Both booleans
+are true iff the available name equals the initial name.
+
+#### /data/autoSave
+
+	POST Request format:
+		http://localhost:22179/data/autoSave
+	POST request body includes XML data
+		
+Sends the data from the currently open file to the backend so it can be saved.  Called
+once every 15 seconds and whenever an edit is made.
+
+## Cloud storage
+	
+#########
+
+#### Save file
+
+    POST request format:
+    http://localhost:22179/data/save/[filename]
+    XML data included in POST request
+    Example:
+    http://localhost:22179/data/save/MyProject
+
+Filename: string that does not include an extension.  Is non-empty,
+has fewer than 30 characters, and unsafe characters have been removed.
+
+When this command is run, save the data to the device and overwrite
+any files with the same name.
+
+#### Open file
+
+    Get request format:
+    http://localhost:22179/data/load/[filename]
+    Example:
+    http://localhost:22179/data/load/MyProject
+    Response should contain project data
+
+Response should return project data or `File Not Found` if the file
+does not exist.
+
+#### Rename file
+
+    Get request format:
+    http://localhost:22179/data/rename/[filename]/[new filename]
+    Example:
+    http://localhost:22179/data/rename/MyProject/HBProject
+
+When this command is run, rename the specified file.  Overwrite the
+new file name, if it exists.  If the specified file does not exist,
+do nothing.  When renaming is complete, the original file should
+no longer exist under its original name.
+
+#### Delete file
+
+    Get request format:
+    http://localhost:22179/data/delete/[filename]
+    Example:
+    http://localhost:22179/data/delete/MyProject
+
+Delete the specified file, or do nothing if it does not exist.
+
+#### List files
+
+    Get request format:
+    http://localhost:22179/data/files
+    Example response:
+    file1
+    file2
+    file3
+
+Returns a list of files, separated by the `\n` character.
+An empty string is returned if there are no saved files.
+
+#### Export file
+
+    POST request format:
+    http://localhost:22179/data/export/[filename]
+    XML data included in POST request
+    Example:
+    http://localhost:22179/data/export/MyProject
+
+Optionally, the backend may overwrite the specified file
+with the data from the post request.  Then, the post data
+should be shared using the OS-specific share menu as a file
+with a .bbx extension.
+
+#### Import file
+
+When a file is imported from another app into the backend,
+the backend should call the JS function:
+
+    SaveManager.import(fileName, projectData);
+
+The frontend will then load and display the file.  Do not
+save the file, as the front end will take care of this
+if necessary.
+
+#########
 
 
 ################
