@@ -17,7 +17,7 @@ form of get/post requests.  To ensure the backend always has
 an updated version of the frontend, clone the frontend's
 git repo into the backend and to a pull when changes are made.
 For debugging purposes, you can also set the frontend to be
-automatically downloaded fromm git on launch, but this is
+automatically downloaded from git on launch, but this is
 not used in the release version.
 
 The responsibilities of the backend are the following:
@@ -47,6 +47,12 @@ function in `CallbackManager.js`.  These functions return a boolean that is
 This is for debugging purposes only, so there is no need to check for and
 handle the `false` case.
 
+On iOS, we have switched to a more direct method of communication (instead of
+GET/POST), where the JS calls swift functions to send messages.  It directly calls
+the function `window.webkit.messageHandlers.serverSubstitute.postMessage`, passing
+a JSON object containing the data that would normally be transferred using HTTP.
+This enabled us to remove the server from the iOS backend.
+
 ## Bluetooth scanning
 
 The backend and frontend communicate about specific Bluetooth robots 
@@ -67,6 +73,8 @@ is called.
 
 ### Bluetooth scanning requests
 
+#### robot/StartDiscover
+
     Request format:
         http://localhost:22179/robot/startDiscover?type=[robotType]
     Example request: 
@@ -77,14 +85,18 @@ type.  If it is currently scanning for a different type of device, that scan
 is stopped and results are cleared.  If a scan of the specified type is already
 occurring, no action is taken.
 
+#### robot/stopDiscover
+
     Request format:
         http://localhost:22179/robot/stopDiscover
 
 Stops the current scan if any.
 
+#### CallbackManager.robot.discovered
+
     Callback signature:
         CallbackManager.robot.discovered(robotTypeId: string, robotList: string) -> boolean
-        robotList - A precent encoded JSON array of objects, each containing name and id fields
+        robotList - A percent encoded JSON array of objects, each containing name and id fields
     Example call:
         CallbackManager.robot.discovered("flutter", encoded);
         where encoded is '[{"id":"my_id","name":"my_name"}]' percent encoded
@@ -116,6 +128,82 @@ backend removes something from the list without the frontend making a request.
 
 ### Robot connection/disconnection requests
 
+#### robot/connect
+
+    Request format:
+        http://localhost:22179/robot/connect?id=[robotId]&type=[robotType]
+    Example request: 
+        http://localhost:22179/robot/connect?id=SomeMacAddress&type=flutter
+
+Tells the backend to connect to a device.  If the device is on the devices found during the 
+last scan, the backend adds it to the connection list and tries to connect to it. Otherwise
+it returns a 404.
+
+#### robot/disconnect
+
+    Request format:
+        http://localhost:22179/robot/disconnect?id=[robotId]&type=[robotType]
+    Example request: 
+        http://localhost:22179/robot/disconnect?id=SomeMacAddress&type=flutter
+
+Tells the backend to disconnect from a device.  If the device is on the connection list, it
+removes it from the list and tries to disconnect from it.  Otherwise, it returns a 404.
+
+#### CallbackManager.robot.updateStatus
+
+    Callback signature:
+        CallbackManager.robot.updateStatus(robotId: string, isConnected: boolean) -> boolean
+        isConnected - Whether the backend is able to communicate with the robot
+    Example call:
+        CallbackManager.robot.updateStatus("myrobotid", true);
+
+Tells the frontend whether a given robot is in good communication with the backend.
+When the robot is first connected, the fronted assumes isConnected is false.
+This function should be called with `isConnected = true` as soon as the robot
+connects, and with `isConnected = false` if it subsequently unexpectedly disconnects.
+
+#### CallbackManager.robot.updateFirmwareStatus
+
+    Callback signature:
+        CallbackManager.robot.updateFirmwareStatus(robotId: string, status: string) -> boolean
+        status - ["upToDate"|"old"|"incompatible"]
+    Example call:
+        CallbackManager.robot.updateFirmwareStatus("myrobotid", "old");
+
+Tells the frontend the status of the robot's firmware. Frontend initially assumes
+firmware is up to date, so the function should be called with `status = "old"` if
+the backend discovers that the firmware is old but compatible.  If the backend finds
+the firmware to be incompatible, `CallbackManager.robot.disconnectIncompatible`
+should be used instead.
+
+#### CallbackManager.robot.disconnectIncompatible
+
+    Callback signature:
+        CallbackManager.robot.disconnectIncompatible(robotId: string, 
+			oldFirmware: string, minFirmware: string) -> boolean
+        oldFirmware - percent encoded version of firmware that was on the robot
+        minFirmware - percent encoded minimum version of firmware the backend requires
+    Example call:
+        CallbackManager.robot.disconnectIncompatible("myrobotid", "1.3", "2.0");
+
+Tells the frontend that a robot has been removed from the connection list because its
+firmware was incompatible. The frontend will then remove the device from its own
+connection list and notify the user of the incompatible firmware, providing an option
+to view instructions to update the firmware.
+
+#### robot/showUpdateInstructions
+
+    Request format:
+        http://localhost:22179/robot/showUpdateInstructions?type=[robotTypeId]
+    Example request: 
+        http://localhost:22179/robot/showUpdateInstructions?type=[hummingbird]
+		
+When received, the backend redirects the user to a website containing instructions
+to update the firmware of their device. The website may depend on the type of robot.
+
+
+
+################
 
 The frontend will use connect/disconnect commands to
 request that BLE devices be added/removed from the connected 

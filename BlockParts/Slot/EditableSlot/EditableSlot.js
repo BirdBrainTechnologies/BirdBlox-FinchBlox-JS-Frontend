@@ -79,6 +79,7 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
+	SaveManager.markEdited();
 };
 
 /**
@@ -91,6 +92,7 @@ EditableSlot.prototype.finishEdit = function(data) {
 		this.setData(data, true, true); //Sanitize data, updateDims
 		this.slotShape.deselect();
 		this.editing = false;
+		SaveManager.markEdited();
 	}
 };
 

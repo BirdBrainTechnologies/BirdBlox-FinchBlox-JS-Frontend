@@ -149,6 +149,9 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
+
+	GuiElements.blockInteraction();
+	OpenDialog.showDialog();
 	DebugOptions.applyActions();
 };
 /**

@@ -33,7 +33,7 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 	}
 
 	RD.call(this, false, "Open", count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText(hintText);
 
 	// Load the files from the backend

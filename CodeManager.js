@@ -719,6 +719,7 @@ CodeManager.deleteAll = function() {
 	CM.stop();
 	TabManager.deleteAll();
 	UndoManager.clearUndos();
+
 	CodeManager();
 };
 

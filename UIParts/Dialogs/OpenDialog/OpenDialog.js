@@ -15,7 +15,7 @@ function OpenDialog(fileList) {
 	} else {
 		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
@@ -206,8 +206,7 @@ OpenDialog.prototype.createNewBn = function() {
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText("New");
 	button.setCallbackFunction(function() {
-		this.closeDialog();
-		SaveManager.userNew();
+		SaveManager.userNew(this.closeDialog.bind(this))
 	}.bind(this), true);
 	return button;
 };
@@ -275,10 +274,19 @@ OpenDialog.prototype.tabSelected = function(tab) {
  * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
  */
 OpenDialog.showDialog = function() {
+	OpenDialog.opening = true; // Allows the action to be canceled if OpenDialog.closeDialog is called in the interval
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
-		var openDialog = new OpenDialog(new FileList(response));
+		if (!OpenDialog.opening) return;
+		const openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
+		OpenDialog.opening = false;
+	}, function() {
+		OpenDialog.opening = false;
 	});
+};
+
+OpenDialog.closeFileAndShowDialog = function() {
+	SaveManager.userClose(OpenDialog.showDialog);
 };
 
 /**
@@ -293,6 +301,7 @@ OpenDialog.prototype.closeDialog = function() {
  * Closes the currently open dialog
  */
 OpenDialog.closeDialog = function() {
+	OpenDialog.opening = false;
 	if (OpenDialog.currentDialog != null) {
 		OpenDialog.currentDialog.closeDialog();
 	}

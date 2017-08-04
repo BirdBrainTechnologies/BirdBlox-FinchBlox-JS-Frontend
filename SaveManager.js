@@ -4,13 +4,9 @@
 function SaveManager() {
 	// The name of the name, or null when the blank canvas is open
 	SaveManager.fileName = null;
-	// Whether the user has been asked to name the file. The file is called "New Program" until the user names it.
-	SaveManager.named = false;
 	// The file is auto saved any time it is edited and one every few seconds
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
-	//SaveManager.autoSaveTimer.start();
-	// Tries to avoid making multiple saves at once
-	SaveManager.saving = false;
+	SaveManager.autoSaveTimer.start();
 }
 
 SaveManager.setConstants = function() {
@@ -18,6 +14,8 @@ SaveManager.setConstants = function() {
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 60;
+	SaveManager.newProgName = "New program";
+	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
 
 /**
@@ -26,10 +24,11 @@ SaveManager.setConstants = function() {
  * @param {string} data - The content of the file
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
-SaveManager.backendOpen = function(fileName, data, named) {
-	SaveManager.named = named;
+SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
+	OpenDialog.closeDialog();
+	GuiElements.unblockInteraction();
 };
 
 /**
@@ -47,33 +46,32 @@ SaveManager.loadData = function(data) {
 		const project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
 			// There's no project tag.  The data is seriously corrupt, so we just open an empty file
-			SaveManager.loadData("<project><tabs></tabs></project>");
+			SaveManager.loadData(SaveManager.emptyProgData);
 		} else {
 			(DebugOptions.safeFunc(CodeManager.importXml))(project);
 		}
 	} else {
 		// There's no data at all, so open an empty file
-		SaveManager.loadData("<project><tabs></tabs></project>");
+		SaveManager.loadData(SaveManager.emptyProgData);
 	}
 };
 
 /**
  * Changes the name of the open file to match the provided name
  * @param {string} fileName
- * @param {boolean} named
  */
-SaveManager.backendSetName = function(fileName, named) {
-	SaveManager.named = named;
+SaveManager.backendSetName = function(fileName) {
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
 	CodeManager.markOpen();
 };
 
 /**
- * Closes the open file and shows a blank canvas
+ * Clears the canvas and shows an Open Dialog
  */
 SaveManager.backendClose = function() {
 	SaveManager.loadBlank();
+	OpenDialog.showDialog();
 };
 
 /**
@@ -89,18 +87,92 @@ SaveManager.backendMarkLoading = function() {
  */
 SaveManager.loadBlank = function() {
 	SaveManager.fileName = null;
-	SaveManager.named = false;
-	SaveManager.loadData("<project><tabs></tabs></project>");
+	SaveManager.loadData(SaveManager.emptyProgData);
 };
 
 /**
- * Tells the backend to close the existing file and opens a blank canvas
+ * Closes the open file and notifies the backend
+ * @param {function} nextAction
  */
-SaveManager.userNew = function() {
+SaveManager.userClose = function(nextAction) {
+	SaveManager.loadBlank();
 	const request = new HttpRequestBuilder("data/close");
-	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		SaveManager.loadBlank();
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+};
+
+/**
+ * Prompts the user for a name for the new file, creates it, and opens it (when the backend says it's loaded)
+ * @param {function} [nextAction]
+ */
+SaveManager.userNew = function(nextAction) {
+	SaveManager.promptNewFile("Enter file name", nextAction);
+};
+
+/**
+ * Prompts the user for the file to create. Finds a good default name and prefills the dialog with that.
+ * @param {string} message - The message to show in the body of the prompt
+ * @param {function} [nextAction]
+ */
+SaveManager.promptNewFile = function(message, nextAction) {
+	SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+		SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 	});
+};
+
+/**
+ * Prompts the user for the name of the file to create. Prefills the dialog with the default name
+ * @param {string} message - The message to show in the body of the prompt
+ * @param {string} defaultName - The name to prefill
+ * @param {function} [nextAction]
+ */
+SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
+	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			SaveManager.sanitizeNew(response.trim(), nextAction);
+		}
+	});
+};
+
+/**
+ * Verifies with the backend that the proposed name is valid for a new file and creates it. Prompts user otherwise
+ * @param {string} proposedName - The name to check
+ * @param {function} [nextAction]
+ */
+SaveManager.sanitizeNew = function(proposedName, nextAction) {
+	if (proposedName === "") {
+		const message = "Name cannot be blank. Enter a file name.";
+		SaveManager.promptNewFile(message, nextAction);
+	} else {
+		GuiElements.alert("getting name");
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			GuiElements.alert("Got available name" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+			if (alreadySanitized && alreadyAvailable) {
+				SaveManager.newSoft(availableName, nextAction);
+			} else if (!alreadySanitized) {
+				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+			} else if (!alreadyAvailable) {
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+			}
+		});
+	}
+};
+
+/**
+ * Creates a new file with the given name, clears the canvas, and shows "Saving..." until the document is opened.
+ * @param {string} filename - The already validated name to save the file as
+ * @param {function} [nextAction]
+ */
+SaveManager.newSoft = function(filename, nextAction) {
+	const request = new HttpRequestBuilder("data/new");
+	request.addParam("filename", filename);
+	SaveManager.loadBlank();
+	CodeManager.markLoading("Saving...");
+	// If the saving fails, we show the open dialog so the user can try again.
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
 };
 
 /**
@@ -192,8 +264,8 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 		const message = "Name cannot be blank. Enter a file name.";
 		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
 	} else if (proposedName === oldFilename) {
-		if (!isRecording && SaveManager.fileName === oldFilename && !SaveManager.named) {
-			const request = new HttpRequestBuilder("/data/markAsNamed");
+		if (!isRecording && SaveManager.fileName === oldFilename) {
+			const request = new HttpRequestBuilder("data/markAsNamed");
 			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 		} else {
 			if (nextAction != null) nextAction();
@@ -215,7 +287,7 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 };
 
 /**
- * Tries to rename the file, and gets a valid name if it fails
+ * Tries to rename the file, does nothing if it fails
  * @param {boolean} isRecording
  * @param {string} oldFilename
  * @param {string} title - The title of the dialog to use if the renaming fails
@@ -410,15 +482,13 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
  * when completed
  */
 SaveManager.saveAsNew = function() {
-	SaveManager.saving = true;
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	CodeManager.markLoading("Saving...");
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		SaveManager.saving = false;
+
 	}, function() {
 		CodeManager.cancelLoading();
-		SaveManager.saving = false;
 	}, true, xmlDocText);
 };
 
@@ -427,9 +497,6 @@ SaveManager.saveAsNew = function() {
  */
 SaveManager.markEdited = function() {
 	CodeManager.updateModified();
-	if (SaveManager.fileName == null && !SaveManager.saving) {
-		SaveManager.saveAsNew();
-	}
 	if (SaveManager.fileName != null) {
 		SaveManager.autoSave();
 	}
@@ -453,30 +520,11 @@ SaveManager.currentDoc = function() {
  * @param {function} [nextAction] - The function to call once the file is saved and named
  */
 SaveManager.saveAndName = function(message, nextAction) {
-	let title = "Enter name";
 	if (SaveManager.fileName == null) {
 		if (nextAction != null) nextAction();
 		return;
 	}
-	SaveManager.autoSave(function() {
-		if (SaveManager.named) {
-			if (nextAction != null) nextAction();
-		} else {
-			SaveManager.promptRename(false, SaveManager.fileName, title, message, function() {
-				SaveManager.named = true;
-				if (nextAction != null) nextAction();
-			});
-		}
-	});
-};
-
-/**
- * Called when the user taps the file button.  Saves the file and opens the OpenDialog.  Prompts the use to name the
- * file if they have not already
- */
-SaveManager.userOpenDialog = function() {
-	const message = "Please name this file";
-	SaveManager.saveAndName(message, OpenDialog.showDialog);
+	SaveManager.autoSave(nextAction);
 };
 
 /**
