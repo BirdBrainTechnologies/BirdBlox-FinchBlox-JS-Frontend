@@ -258,6 +258,9 @@ actually tracks the current and pending states of the outputs, and only processe
 a command when the relevant output for that command has the same value in both states.
 Otherwise, the command waits in a queue.  More detail can be found in the backend code.
 
+All robot commands should return an error response code if the specified device is
+not connected.
+
 #### /robot/stopAll
 
     Request format:
@@ -273,6 +276,8 @@ direct call system, also empties the queue of unprocessed robot block requests.
 		type - ["sensor"|"temperature"|"distance"|"sound"|"light"|"soil"]
 	Example request: 
         http://localhost:22179/robot/in?sensor=distance&type=flutter&id=robotid&port=2
+	Example response:
+		3.6
 
 Returns the sensor value of the robot. Might be scaled differently depending on the
 type of sensor
@@ -423,7 +428,8 @@ using `/data/open`.
 	Callback signature:
         CallbackManager.data.filesChanged() -> boolean
 		
-Tells the frontend that the list of locally stored files has changed.
+Tells the frontend that the list of locally stored files has changed. Refreshes the
+UI's list of files.
 
 #### CallbackManager.data.markLoading
 
@@ -536,92 +542,111 @@ Sends the data from the currently open file to the backend so it can be saved.  
 once every 15 seconds and whenever an edit is made.
 
 ## Cloud storage
-	
-#########
 
-#### Save file
+On iOS, cloud storage is handled using the system's UI, while on Android, the BirdBlox
+app provides its own UI for managing cloud storage.  The `cloud/showPicker` request is
+for iOS and shows this UI, while the other cloud requests are for Android.
 
-    POST request format:
-    http://localhost:22179/data/save/[filename]
-    XML data included in POST request
-    Example:
-    http://localhost:22179/data/save/MyProject
+#### /cloud/showPicker
 
-Filename: string that does not include an extension.  Is non-empty,
-has fewer than 30 characters, and unsafe characters have been removed.
+	Request format:
+		http://localhost:22179/cloud/showPicker
 
-When this command is run, save the data to the device and overwrite
-any files with the same name.
+Tells the backend to show the cloud picker UI. Called from the open dialog. When a file
+is selected from the UI, it should be opened with `/data/open`.
 
-#### Open file
+#### /cloud/signIn
 
-    Get request format:
-    http://localhost:22179/data/load/[filename]
-    Example:
-    http://localhost:22179/data/load/MyProject
-    Response should contain project data
+	Request format:
+		http://localhost:22179/cloud/signIn
+		
+Begins Dropbox authentication
 
-Response should return project data or `File Not Found` if the file
-does not exist.
+#### /cloud/signOut
 
-#### Rename file
+	Request format:
+		http://localhost:22179/cloud/signIn
+		
+Signs out of Dropbox account
 
-    Get request format:
-    http://localhost:22179/data/rename/[filename]/[new filename]
-    Example:
-    http://localhost:22179/data/rename/MyProject/HBProject
+#### /cloud/list
 
-When this command is run, rename the specified file.  Overwrite the
-new file name, if it exists.  If the specified file does not exist,
-do nothing.  When renaming is complete, the original file should
-no longer exist under its original name.
+	Request format:
+		http://localhost:22179/cloud/list
+	Example response:
+		{"files":["project1","project2"]}
+		
+Returns a JSON object with “files” = a JSON array of filenames on the user's cloud storage
 
-#### Delete file
+#### /cloud/download
 
-    Get request format:
-    http://localhost:22179/data/delete/[filename]
-    Example:
-    http://localhost:22179/data/delete/MyProject
+	Request format:
+		http://localhost:22179/cloud/download?filename=[fn]
 
-Delete the specified file, or do nothing if it does not exist.
+Attempts to download the given file.  If there is a name conflict, presents the user 
+with three options: cancel, rename, and overwrite.  If they choose rename and enter 
+a conflicting name, shows the same dialog again.  If the download is not canceled, 
+shows a dialog box with a cancel option and a loading bar. If an error occurs, change 
+the text of the dialog to notify the user of the error.  They will then have to 
+select “cancel” to continue.  If the file specified does not exist, or there is no 
+internet connection, presents a dialog indicating this.  This command 
+only returns a response when there is no cloud account connected.
 
-#### List files
+#### CallbackManager.cloud.downloadComplete
 
-    Get request format:
-    http://localhost:22179/data/files
-    Example response:
-    file1
-    file2
-    file3
+	Callback signature:
+        CallbackManager.data.open(filename: string) -> boolean
+        filename - percent encoded name of the file that downloaded
 
-Returns a list of files, separated by the `\n` character.
-An empty string is returned if there are no saved files.
+Tells the frontend that a file just finished downloading
+		
+#### CallbackManager.cloud.signIn
 
-#### Export file
+	Callback signature:
+        CallbackManager.data.signIn() -> boolean
 
-    POST request format:
-    http://localhost:22179/data/export/[filename]
-    XML data included in POST request
-    Example:
-    http://localhost:22179/data/export/MyProject
+Tells the frontend that the user added a Dropbox account.  Called only once the account
+name is known, so it can be requested and displayed.
+		
+#### CallbackManager.cloud.filesChanged
 
-Optionally, the backend may overwrite the specified file
-with the data from the post request.  Then, the post data
-should be shared using the OS-specific share menu as a file
-with a .bbx extension.
+	Callback signature:
+        CallbackManager.cloud.filesChanged(newList: string) -> boolean
+		newList - Percent encoded JSON object with list of new files
+	Example call:
+		CallbackManager.cloud.filesChanged(newList)
+		where newList is the percent encoded form of: {"files":["project1","project2"]}
 
-#### Import file
+Notifies the frontend that the files in the cloud list have changed 
+(when an upload completes, for example) and includes a JSON object with the new files	
+		
+#### /cloud/upload
 
-When a file is imported from another app into the backend,
-the backend should call the JS function:
+	Request format:
+		http://localhost:22179/cloud/upload?filename=[fn]
 
-    SaveManager.import(fileName, projectData);
+Uploads a file from the user’s device to the cloud.  Similarly to download, 
+it prompts for name conflicts and display a loading bar for upload, 
+providing the user with an option to cancel.  Calls 
+CallbackManager.cloud.filesChanged() when complete
 
-The frontend will then load and display the file.  Do not
-save the file, as the front end will take care of this
-if necessary.
+#### /cloud/rename
 
-#########
+	Request format:
+		http://localhost:22179/cloud/rename?filename=[fn]
+		
+Presents a dialog for the user to input a name.  Re-prompts the user if the name is 
+invalid or taken.  Calls CallbackManager.cloud.filesChanged() if the file is 
+ultimately renamed.
+
+#### /cloud/delete
+
+	Request format:
+		http://localhost:22179/cloud/delete?filename=[fn]
+
+Presents a dialog to confirm deletion, then deletes the file from cloud storage.  
+Calls CallbackManager.cloud.filesChanged() if the file is ultimately deleted
+
 
 
 ################
