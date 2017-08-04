@@ -315,6 +315,128 @@ type of sensor
 		volume - int from 0 to 100
 		frequency - int from 0 to 20000
 
+## Tablet sensors
+
+Different tablets have varying sensors that can be read using the sensor
+blocks.  The frontend is told the reading and availability of sensors using the below requests
+If the tablet doesn't have the necessary permissions or hardware for a request, it should
+return an error and in the response body include a description of the error that can be shown
+to the user.
+
+### Tablet sensor requests
+
+#### /tablet/availableSensors
+
+    Request format:
+        http://localhost:22179/tablet/availableSensors
+	Example response:
+		"accelerometer\nbarometer\nmicrophone\ngps"
+		
+Returns a `"\n"` separated list of sensors the device supports.  For technical reasons,
+iOS always returns `""` to this request and uses the callback functions to give this
+information instead.
+
+#### CallbackManager.device.availableSensors
+
+    Callback signature:
+        CallbackManager.robot.availableSensors(sensorList: string) -> boolean
+        sensorList - percent encoded, "\n" separated list of sensors the device supports
+    Example call:
+        CallbackManager.robot.availableSensors(sensorList);
+		where sensorList is the percent encoded form of "accelerometer\nbarometer\nmicrophone\ngps"
+
+#### CallbackManager.device.addSensor
+
+    Callback signature:
+        CallbackManager.robot.addSensor(sensor: string) -> boolean
+        sensor - ["accelerometer", "barometer", "microphone", "gps"]
+
+Tells the frontend to add the sensor to the list of supported sensors.
+
+#### CallbackManager.device.removeSensor
+
+    Callback signature:
+        CallbackManager.robot.removeSensor(sensor: string) -> boolean
+        sensor - ["accelerometer", "barometer", "microphone", "gps"]
+
+Tells the frontend to remove the sensor from the list of supported sensors.
+
+#### /tablet/shake
+
+    Request format:
+        http://localhost:22179/tablet/shake
+	Example responses:
+		true
+		false
+		
+Returns whether the tablet was shaken.  After returning true, it returns false on
+subsequent calls until the tablet is shaken again.
+
+#### /tablet/ssid
+
+    Request format:
+        http://localhost:22179/tablet/ssid
+	Example responses:
+		My WiFi
+		null
+		
+Returns the name of the WiFi the tablet is connected to or `null` if it is not connected
+to anything.
+
+#### /tablet/pressure
+
+    Request format:
+        http://localhost:22179/tablet/pressure
+	Example responses:
+		104.3
+		
+Returns the a pressure in kilopascals
+
+#### /tablet/altitude
+
+    Request format:
+        http://localhost:22179/tablet/altitude
+	Example responses:
+		-1.245
+		
+Returns the change in the device's altitude (in meters) since the app was opened. 
+This is determined using the device's barometer
+
+#### /tablet/orientation
+
+    Request format:
+        http://localhost:22179/tablet/altitude
+	Example responses:
+		Faceup
+		Landscape: home button on left
+		Landscape: home button on right
+		Portrait: home button on bottom
+		Portrait: home button on top
+		Facedown
+		In between
+		
+Returns a string indicating the device's orientation.
+
+#### /tablet/acceleration
+
+    Request format:
+        http://localhost:22179/tablet/acceleration
+	Example response:
+		7.432 4.295 -1.568
+		
+Returns the change in the device's acceleration in the x, y, and z directions, separated
+by spaces. This should be the total acceleration (including gravity)
+
+#### /tablet/location
+
+    Request format:
+        http://localhost:22179/tablet/location
+	Example response:
+		100.456 70.823
+		
+Returns the latitude and longitude separated by spaces. Prompts for location permission
+if not granted yet.
+
 ## Dialogs
 
 There are three main types of dialogs: prompt, choice, alert. Prompt dialogs let the
