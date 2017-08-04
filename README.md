@@ -352,10 +352,50 @@ Shows a choice dialog, or an alert dialog (if only one button is provided). Call
 	Callback signature:
         CallbackManager.dialog.promptResponded(canceled: boolean, response: string) -> boolean
         canceled - Whether the dialog was closed without response
-		response - (optional) Percent encoded response to the dialog. Included i
+		response - (optional) Percent encoded response to the dialog. Included iff !canceled
     Example call:
-        CallbackManager.dialog.promptResponded("myrobotid", "old");
+        CallbackManager.dialog.promptResponded(true, "Hello");
 		
+#### CallbackManager.dialog.choiceDialogResponded
+
+	Callback signature:
+        CallbackManager.dialog.choiceDialogResponded(canceled: boolean, firstSelected: boolean) -> boolean
+        canceled - Whether the dialog was closed without being answered
+		firstSelected - Whether the first option was selected
+    Example call:
+        CallbackManager.dialog.promptResponded(false, true);
+		
+If the dialog is an alert, the values of the booleans doesn't matter, but the most sensible
+selection is `canceled = false` and `firstSelected = true`
+
+## Settings
+
+Settings provide a way for the frontend to store and read from a key/value settings system
+
+### Settings requests
+
+#### /settings/get
+
+    Get request format:
+    http://localhost:22179/settings/get?key=[key]
+    Example:
+    http://localhost:22179/settings/get?key=zoom
+    Example responses:
+    1.5999999999999999
+    
+A 404 response is generated if the key does not have an assigned value.
+    
+#### /settings/set
+
+    Get request format:
+    http://localhost:22179/settings/set?key=[key]&value=[value]
+    Example:
+    http://localhost:22179/settings/set?key=zoom&value=1
+
+## File management
+
+
+
 ################
 
 The frontend will use connect/disconnect commands to
