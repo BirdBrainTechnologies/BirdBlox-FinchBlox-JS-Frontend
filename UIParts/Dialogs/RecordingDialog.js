@@ -15,7 +15,7 @@ function RecordingDialog(listOfRecordings) {
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
-	this.state = RecordingManager.recordingStates.stopped;
+	this.state = RecordingManager.state;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
@@ -450,6 +450,7 @@ RecordingDialog.prototype.timeToString = function(time) {
 };
 RecordingDialog.prototype.updateCounter = function(time) {
 	const RD = RecordingDialog;
+	if (this.counter == null) return;
 	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
@@ -475,6 +476,12 @@ RecordingDialog.updateCounter = function(time) {
 		this.currentDialog.updateCounter(time);
 	}
 };
+
+RecordingDialog.recordingsChanged = function() {
+	if (RecordingDialog.currentDialog != null) {
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+}
 
 RecordingDialog.alertNotInProject = function() {
 	let message = "Please create a project by dragging a block to the canvas before recording";

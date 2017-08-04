@@ -25,6 +25,10 @@ CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
 	return true;
 };
+CallbackManager.sounds.recordingsChanged = function(){
+	RecordingDialog.recordingsChanged();
+	return true;
+};
 
 CallbackManager.data = {};
 /**

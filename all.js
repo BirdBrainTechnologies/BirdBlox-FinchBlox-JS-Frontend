@@ -9747,7 +9747,6 @@ BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeig
 	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 };
-
 /**
  * Finds the best x coord for an object the specified width that would like to be centered at the specified center
  * but needs to fit in the specified range
@@ -14646,7 +14645,7 @@ function RecordingDialog(listOfRecordings) {
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
-	this.state = RecordingManager.recordingStates.stopped;
+	this.state = RecordingManager.state;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
@@ -15081,6 +15080,7 @@ RecordingDialog.prototype.timeToString = function(time) {
 };
 RecordingDialog.prototype.updateCounter = function(time) {
 	const RD = RecordingDialog;
+	if (this.counter == null) return;
 	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
@@ -15106,6 +15106,12 @@ RecordingDialog.updateCounter = function(time) {
 		this.currentDialog.updateCounter(time);
 	}
 };
+
+RecordingDialog.recordingsChanged = function() {
+	if (RecordingDialog.currentDialog != null) {
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+}
 
 RecordingDialog.alertNotInProject = function() {
 	let message = "Please create a project by dragging a block to the canvas before recording";
@@ -16507,8 +16513,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('Started');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
@@ -16873,6 +16879,10 @@ CallbackManager.sounds.recordingEnded = function(){
  */
 CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
+	return true;
+};
+CallbackManager.sounds.recordingsChanged = function(){
+	RecordingDialog.recordingsChanged();
 	return true;
 };
 
@@ -22902,7 +22912,7 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
 function B_HBLight(x, y) {
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Light");
+	B_HummingbirdSensorBase.call(this, x, y, "light", "Light");
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
