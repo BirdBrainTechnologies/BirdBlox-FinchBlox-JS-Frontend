@@ -30,6 +30,7 @@ CallbackManager.sounds.permissionGranted = function(){
  * @returns {boolean}
  */
 CallbackManager.sounds.recordingsChanged = function(){
+	Sound.loadSounds(true);
 	RecordingDialog.recordingsChanged();
 	return true;
 };
