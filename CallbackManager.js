@@ -25,6 +25,10 @@ CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
 	return true;
 };
+/**
+ * Called to notify the frontend that the list of recordings has changed
+ * @returns {boolean}
+ */
 CallbackManager.sounds.recordingsChanged = function(){
 	RecordingDialog.recordingsChanged();
 	return true;

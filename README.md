@@ -766,473 +766,130 @@ ultimately renamed.
 	Request format:
 		http://localhost:22179/cloud/delete?filename=[fn]
 
-Presents a dialog to confirm deletion, then deletes the file from cloud storage.  
+Presents a dialog to confirm deletion, then deletes the file from cloud storage.
 Calls CallbackManager.cloud.filesChanged() if the file is ultimately deleted
 
+## Sounds
 
+There are 3 main types of sounds: UI sounds (the snap noise when blocks connect), 
+sound effects (the built in sounds controlled by the sound block), and recordings
+(sounds created by the user).  These commands handle sound playback.
+File management for recordings is handled by /data commands, while recording
+creation uses /sound/recording commands.  UI sounds are stored in the frontend's
+`SoundsForUI` folder, while sound effects are stored in `SoundClips`.
 
-################
-
-The frontend will use connect/disconnect commands to
-request that BLE devices be added/removed from the connected 
-devices list.  The list modification should occur immediately,
-and then the Bluetooth connection/disconnection itself may
-be done by the backend later asynchronously.
-
-## List of requests
-1. [Bluetooth connections](#bluetooth-connections)
-2. [Hummingbird blocks](#hummingbird-blocks)
-3. [Device blocks](#device-blocks)
-4. [Dialogs](#dialogs)
-5. [Settings](#settings)
-6. [File management](#file-management)
-7. [Sound blocks](#sound-blocks)
-
-### Bluetooth connections
-
-#### Discover available devices
-
-    Get request format:
-    http://localhost:22179/hummingbird/discover
-    Example response:
-    MyHB1
-    Hummingbird 2
-    HB3
-
-When the backend receives this request, it should begin a scan of nearby,
-unpaired Bluetooth devices.  If a scan is underway, it should continue the
-scan and return the devices found so far, separated by the `\n` character.
-An empty string should be returned if no devices have been found.
-
-#### Connect to a device
-
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/connect
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/connect
-    
-This request should add a hummingbird to the connection (names) list.
-If the provided HB name does not appear on the master list of encountered 
-hummingbirds, and its Bluetooth id cannot be determined, simply ignore
-this get request.
-
-#### Disconnect from a device
+### Sound requests
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/disconnect
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/disconnect
-    
-This request should remove the hummingbird from the connection list and
-disconnect it.  It should remain, however, on the 
-list of encountered devices.  If the provided HB name has not been
-encountered before or is not connected, ignore the request.
-
-#### Rename a device
-
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/rename/[new name]
-    Example:
-    http://localhost:22179/hummingbird/BLE%20Thing/rename/My%20HB
-
-When this request is received, the backend should rename the 
-specified device.  If the device is not currently connected, 
-the request should be ignored.  The list of encountered devices
-should update to reflect the new name.
-
-#### Hummingbird status
-
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/status
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/status
-    Example responses:
-    0
-    1
+#### /sound/names
 
-If the specified device is on the connected devices list and is currently
-communicating properly, return 1.  Otherwise, return 0.  Note that this
-request is made continuously by the frontend, so it should return pretty
-quickly and not initiate any additional Bluetooth requests.
-
-#### Total Hummingbird status
-
-    Get request format:
-    http://localhost:22179/hummingbird/totalStatus
-    Example responses:
-    0
-    1
-    2
-
-Returns the cumulative status of all the connected hummingbirds.  It returns
-1 if all hummingbirds are responding properly, 0 if at least one is not, and 
-2 if there are no hummingbirds connected, so status is irrelevant.
+	Request format:
+		http://localhost:22179/sound/names?type=[t]
+		type - ["effect"|"recording"]
+	Example response:
+	    "alarm\nbell\nbark"
 
-### Hummingbird blocks
+Returns a list of sound effects or recodrings, separated by new lines (without
+file extensions)
 
-#### Hummingbird Servo
+#### /sound/stopAll
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/servo/[port]/[position]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/servo/3/170
+	Request format:
+		http://localhost:22179/sound/stopAll
 
-Port: \[1,4\] (positive integer)  
-Position: \[0,180\] (positive integer)
+Stops all currently running sounds of all types
 
-#### Hummingbird Motor
+#### /sound/duration
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/motor/[port]/[speed]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/motor/3/-90
+	Request format:
+		http://localhost:22179/sound/duration?filename=[fn]&type=[t]
+		type - ["effect"|"recording"]
+	Example response:
+	    6500
 
-Port: \[1,4\] (positive integer)  
-Speed: \[-100,100\] (integer)
+Gets the length of the sound in milliseconds
 
-#### Hummingbird Vibration
+#### /sound/play
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/vibration/[port]/[speed]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/vibration/3/90
+	Request format:
+		http://localhost:22179/sound/play?filename=[fn]&type=[t]
+		type - ["effect"|"recording"|"ui"]
 
-Port: \[1,4\] (positive integer)  
-Speed: \[0,100\] (positive integer)
+Plays the sound. Does not stop previous sounds.
 
-#### Hummingbird LED
+#### /sound/note
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/led/[port]/[intensity]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/led/3/90
+	Request format:
+		http://localhost:22179/sound/note?note=[n]&duration=[d]
+		note - int
+		duration - number (time in ms)
 
-Port: \[1,4\] (positive integer)  
-Intensity: \[0,100\] (positive integer)
+#### /sound/recording/start
 
-#### HB TRI-LED
+	Request format:
+		http://localhost:22179/sound/recording/start
+	Example responses:
+        Started
+        Permission denied
+        Requesting permission
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/triled/[port]/[r]/[g]/[b]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/triled/3/90/0/30
+Attempts to start recording in the current project. Returns a 200 response
+with either `Started`, `Requesting permission`, or `Permission denied`,
+and attempts to ask for recording permissions from the user, if required
 
-Port: \[1,4\] (positive integer)  
-R: \[0,100\] (positive integer)
-G: \[0,100\] (positive integer)
-B: \[0,100\] (positive integer)
+#### /sound/recording/stop
 
-#### HB Sensor
+	Request format:
+		http://localhost:22179/sound/recording/stop
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/in/sensor/[port]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/in/sensor/3
-    Example response:
-    90.543
+Stops and saves the current recording
 
-Port: \[1,4\] (positive integer)  
-\[Response\]: (float/integer)
+#### /sound/recording/pause
 
-#### HB Temperature
+	Request format:
+		http://localhost:22179/sound/recording/pause
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/in/temperature/[port]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/in/temperature/3
-    Example response:
-    -1.758
+Pauses recording so it can be resumed and saved
 
-Port: \[1,4\] (positive integer)  
-\[Response\]: Temperature in C (float/integer)
+#### /sound/recording/unpause
 
-#### HB Sound
+	Request format:
+		http://localhost:22179/sound/recording/unpause
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/in/sound/[port]
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/in/sound/3
-    Example response:
-    1.457
+Continues recording a paused recording
 
-Port: \[1,4\] (positive integer)  
-\[Response\]: Volume (float/integer)
+#### /sound/recording/discard
 
-#### Stop
+	Request format:
+		http://localhost:22179/sound/recording/discard
 
-    Get request format:
-    http://localhost:22179/hummingbird/[HB name]/out/stop
-    Example:
-    http://localhost:22179/hummingbird/My%20HB/out/stop
+Deletes the current recording. Does nothing if no recordings are being created
 
-Turns off all LEDs and motors but leaves servos in current positions.
+#### CallbackManager.sounds.recordingEnded
 
-### Device Blocks
+	Callback signature:
+        CallbackManager.sounds.recordingEnded() -> boolean
 
-#### Device Shaken
+Tells the frontend that recording has stopped unexpectedly. Called if the user
+navigates away from the app or receives a phone call while recording.
 
-    Get request format:
-    http://localhost:22179/tablet/shake
-    Example response:
-    1
+#### CallbackManager.sounds.recordingsChanged
 
-\[Response\]: 1 if shaken since last time `/tablet/shake` was called, 
-0 otherwise.
+	Callback signature:
+        CallbackManager.sounds.recordingsChanged() -> boolean
 
-#### Device Location
+Tells the frontend that the list of recordings has changed. This generally
+does not need to be called after `/sound/recording/stop` unless there is
+some delay before the recordings are saved
 
-    Get request format:
-    http://localhost:22179/tablet/location
-    Example response:
-    20.17589 -70.85694
+#### CallbackManager.sounds.permissionGranted
 
-\[Response\]: \[Device latitude\] \[Device Longitude\]
+	Callback signature:
+        CallbackManager.sounds.permissionGranted() -> boolean
 
-#### Device SSID
+Tells the frotnend that recording permissions have just been granted
 
-    Get request format:
-    http://localhost:22179/tablet/ssid
-    Example response:
-    MyWiFiNetworkName
+#############
 
-\[Response\]: \[SSID of connected WiFi\] or `null` if not connected.
-
-#### Device Pressure
-
-    Get request format:
-    http://localhost:22179/tablet/pressure
-    Example response:
-    94.81456
-
-\[Response\]: \[Air pressure in kilopascals\]
-
-#### Device Relative Altitude
-
-    Get request format:
-    http://localhost:22179/tablet/altitude
-    Example response:
-    -1.256
-
-\[Response\]: Returns the change in the device's altitude (in meters) 
-since the app was opened. This is determined using the device's 
-barometer
-
-#### Device Orientation
-
-    Get request format:
-    http://localhost:22179/tablet/orientation
-    Example responses:
-    Faceup
-    Landscape: home button on left
-    Landscape: home button on right
-    Portrait: home button on bottom
-    Portrait: home button on top
-    Facedown
-    In between
-
-\[Response\]: Returns a string indicating the device's orientation.
-
-### Dialogs
-
-When the frontend would like to show a dialog, it will use a get request
-to indicate what the dialog should say.  The response from this request
-contains no information and is ignored.  Then the frontend uses a 
-different get request to determine if the dialog has been closed,
-and if so, what the response was.
-For dialogs requesting a typed response:
-
-    Get request format:
-    http://localhost:22179/tablet/dialog?title=[title]&question=[question]&holder=[hint]
-    Example:
-    http://localhost:22179/tablet/dialog?title=Name&question=What%20is%20your%20name%3F&holder=name
-    
-Title: text displayed at the top of the dialog  
-Question: text displayed in the middle of the dialog  
-Hint: grayed-out text to be displayed in the text area the user types
-into
-
-Note that if any of these parts of the dialog cannot be displayed, 
-just ignore them.
-
-For dialogs with 2 choices (like yes/no):
-
-    Get request format:
-    http://localhost:22179/tablet/choice?title=[title]&question=[question]&button1=[option1]&button2=[option2]
-    Example:
-    http://localhost:22179/tablet/choice?title=Save&question=Save%20changes%3F&button1=Yes&button2=No
-
-Title: text displayed at the top of the dialog  
-Question: text displayed in the middle of the dialog  
-Option 1: displayed on the left button of the dialog  
-Option 2: displayed on the right button
-
-Once these calls are complete, the following get requests are used to check
-on their status.
-
-For typed dialogs:
-
-    Get request format:
-    http://localhost:22179/tablet/dialog_response
-    Example responses:
-    No Response
-    Cancelled
-    'hello'
-    ''
-    'you're welcome'
-    
-`No response` is shown while the dialog is open and `Cancelled` if the user
-closed the dialog without answering.  Otherwise, the user's response is
-returned within single quotes.  Special characters do not need to be 
-escaped, even single quotes.
-
-For choice dialogs:
-
-    Get request format:
-    http://localhost:22179/tablet/choice_response
-    Example responses:
-    0
-    1
-    2
-    
-`0` is returned while the dialog is open, `1` if the first option was selected
-and `2` for the second option.
-
-### Settings
-
-#### Read setting
-
-    Get request format:
-    http://localhost:22179/settings/get?key=[key]
-    Example:
-    http://localhost:22179/settings/get?key=zoom
-    Example responses:
-    1.5999999999999999
-    
-A 404 response is generated if the key does not have an assigned value.
-    
-#### Write setting
-
-    Get request format:
-    http://localhost:22179/settings/set?key=[key]&value=[value]
-    Example:
-    http://localhost:22179/settings/set?key=zoom&value=1
-
-### File Management
-
-#### Save file
-
-    POST request format:
-    http://localhost:22179/data/save/[filename]
-    XML data included in POST request
-    Example:
-    http://localhost:22179/data/save/MyProject
-
-Filename: string that does not include an extension.  Is non-empty,
-has fewer than 30 characters, and unsafe characters have been removed.
-
-When this command is run, save the data to the device and overwrite
-any files with the same name.
-
-#### Open file
-
-    Get request format:
-    http://localhost:22179/data/load/[filename]
-    Example:
-    http://localhost:22179/data/load/MyProject
-    Response should contain project data
-
-Response should return project data or `File Not Found` if the file
-does not exist.
-
-#### Rename file
-
-    Get request format:
-    http://localhost:22179/data/rename/[filename]/[new filename]
-    Example:
-    http://localhost:22179/data/rename/MyProject/HBProject
-
-When this command is run, rename the specified file.  Overwrite the
-new file name, if it exists.  If the specified file does not exist,
-do nothing.  When renaming is complete, the original file should
-no longer exist under its original name.
-
-#### Delete file
-
-    Get request format:
-    http://localhost:22179/data/delete/[filename]
-    Example:
-    http://localhost:22179/data/delete/MyProject
-
-Delete the specified file, or do nothing if it does not exist.
-
-#### List files
-
-    Get request format:
-    http://localhost:22179/data/files
-    Example response:
-    file1
-    file2
-    file3
-
-Returns a list of files, separated by the `\n` character.
-An empty string is returned if there are no saved files.
-
-#### Export file
-
-    POST request format:
-    http://localhost:22179/data/export/[filename]
-    XML data included in POST request
-    Example:
-    http://localhost:22179/data/export/MyProject
-
-Optionally, the backend may overwrite the specified file
-with the data from the post request.  Then, the post data
-should be shared using the OS-specific share menu as a file
-with a .bbx extension.
-
-#### Import file
-
-When a file is imported from another app into the backend,
-the backend should call the JS function:
-
-    SaveManager.import(fileName, projectData);
-
-The frontend will then load and display the file.  Do not
-save the file, as the front end will take care of this
-if necessary.
-
-### Sound blocks
-
-#### Play sound
-
-    Get request format:
-    http://localhost:22179/sound/play/[sound id]
-    Example:
-    http://localhost:22179/sound/play/bell_ring
-
-Plays a sound from the pre-determined sound library.  Sounds
-should be able to overlap with each other, if this request
-is made while another sound is playing.  Sound ids are lowercase
- and use underscores instead of spaces.  They are used internally,
- while friendly names are presented to the user.
-
-#### Stop sounds
-
-    Get request format:
-    http://localhost:22179/sound/stop
-
-Stops library sounds that are currently playing.  Does not stop
-note sounds.
-
-#### Play note
-
-    Get request format:
-    http://localhost:22179/sound/note/[note number]/[duration in ms]
-    Examples:
-    http://localhost:22179/sound/note/3/4000
-
-Plays a note for the specified duration in ms.  Notes are numbered
-the same way they are in Snap!.
 
 ## Overview (for frontend developers)
 1. [UI Overview](#ui-overview)
@@ -1254,6 +911,14 @@ of script tags linking to the .js files, and a single SVG tag, which
 the rest of the UI is housed within.  Using an SVG instead of a canvas
 or other html elements means that the interface is sharp on high-resolution
 screens and looks the same on all devices.
+
+For faster loading, there are two HTML files: `HummginbirdDragAndDrop2.html`
+is used for testing the frontend on a computer and loads all the .js files
+indiviually.  `HummingbirdDragAndDrop.html` only loads the `all.js` file,
+which is a concatenation of all the files referanced in
+`HummginbirdDragAndDrop2.html`, in order. `all.js` is generated by running
+`appender.py`, which should be run before each commit, as it is the only
+`.js` file the backend will see.
 
 The UI initializes starting from the file GuiElements.js.  A number
 of groups are created as layers for the UI, and then GuiElements
@@ -1310,79 +975,74 @@ finally returns `false`.
 Here's an example from the Wait Block (defined in BlockDefs_control.js)
 
 ```javascript
-function B_Wait(x,y){
-      //Derived from CommandBlock
-      //Category ("control") determines colors
-    CommandBlock.call(this,x,y,"control");
-      //Build Block out of things found in the BlockParts folder
-    this.addPart(new LabelText(this,"wait"));
-    this.addPart(new NumSlot(this,"TEMPKEY",1,true)); //Must be positive.
-    this.addPart(new LabelText(this,"secs"));
+function B_Wait(x, y) {
+    // Derived from CommandBlock
+    // Category ("control") determines colors
+	CommandBlock.call(this, x, y, "control");
+	// Build Block out of things found in the BlockParts folder
+	this.addPart(new LabelText(this, "wait"));
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
+	this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
-B_Wait.prototype.startAction=function(){
-      //Each Block has runMem to store information for that execution
-    var mem=this.runMem;
-    mem.startTime=new Date().getTime();
-      //Extract a positive value from first slot
-    mem.delayTime=this.slots[0].getData().getValueWithC(true)*1000;
-    return true; //Still running
+B_Wait.prototype.startAction = function() {
+    // Each Block has runMem to store information for that execution
+	const mem = this.runMem;
+	mem.startTime = new Date().getTime();
+	// Extract a positive value from first slot
+	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
-B_Wait.prototype.updateAction=function(){
-    var mem=this.runMem;
-    if(new Date().getTime()>=mem.startTime+mem.delayTime){
-        return false; //Done running
-    }
-    else{
-        return true; //Still running
-    }
+B_Wait.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
+		return new ExecutionStatusDone(); //Done running
+	} else {
+		return new ExecutionStatusRunning(); //Still running
+	}
 };
 ```
 Here's an example of a reporter with a DropSlot
 ```javascript
-function B_Split(x,y){
-      //Split is a ReporterBlock that returns a list
-    ReporterBlock.call(this,x,y,"operators",Block.returnTypes.list);
-      //Add parts with default values
-    this.addPart(new LabelText(this,"split"));
-    this.addPart(new StringSlot(this,"TEMPKEY","hello world"));
-    this.addPart(new LabelText(this,"by"));
-      //New DropSlot which numbers, strings, and bools can snap to
-    var dS=new DropSlot(this,"TEMPKEY",Slot.snapTypes.numStrBool);
-      //Add options to select from
-      //"enter_text" is a special option; tells InputPad to show prompt dialog
-    dS.addOption(new SelectionData("Enter text", "enter_text"));
-    dS.addOption(new SelectionData("letter", "letter"));
-    dS.addOption(new SelectionData("whitespace", "whitespace"));
-    dS.setSelectionData(new SelectionData("whitespace", "whitespace"));
-    this.addPart(dS);
+function B_Split(x, y) {
+    // Split is a ReporterBlock that returns a list
+	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
+	this.addPart(new LabelText(this, "split"));
+	// Add parts with default values
+	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
+	this.addPart(new LabelText(this, "by"));
+
+    // New DropSlot which numbers, strings, and bools can snap to
+	const inputType = EditableSlot.inputTypes.any;
+	const snapType = Slot.snapTypes.numStrBool;
+	const data = new SelectionData("whitespace", "whitespace");
+	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
+	// Add a special option that tells InputPad to show prompt dialog
+	dS.addEnterText("Edit text");
+	dS.addOption(new SelectionData("letter", "letter"));
+	dS.addOption(new SelectionData("whitespace", "whitespace"));
+	this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
 /* Returns a list made from splitting the string by the provided character. */
-B_Split.prototype.startAction=function(){
-    var string1=this.slots[0].getData().getValue();
-    var splitD=this.slots[1].getData();
-    var resultArray;
-      //...
-      // Code which sets resultArray
-      //...
-    var dataArray=new Array(resultArray.length);
-    for(var i=0;i<resultArray.length;i++){
-        dataArray[i]=new StringData(resultArray[i]);
-    }
-      //Return value specified in this.resultData
-    this.resultData=new ListData(dataArray);
-    return false; //Done running
+B_Split.prototype.startAction = function() {
+	const string1 = this.slots[0].getData().getValue();
+	const splitD = this.slots[1].getData();
+    //...
+    // Code which sets dataArray
+    //...
+    // Return result
+	return new ExecutionStatusResult(new ListData(dataArray));
 };
 ```
 
 In summary, `this.slots[i].getData()` is used to access data from Slots,
 `this.runMem` is temporary storage that persists during a Block's execution,
-and `this.resultData` is used to return a value.  
+and `ExecutionStatusResult` is used to return a value.
 
 Global variables (like `tempo` for sounds) are all stored in 
 CodeManager.js.

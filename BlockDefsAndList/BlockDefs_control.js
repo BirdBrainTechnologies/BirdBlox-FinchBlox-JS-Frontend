@@ -54,17 +54,22 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
+	// Derived from CommandBlock
+	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
+	// Build Block out of things found in the BlockParts folder
 	this.addPart(new LabelText(this, "wait"));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); //Must be positive.
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
 	this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
+	// Each Block has runMem to store information for that execution
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
+	// Extract a positive value from first slot
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
