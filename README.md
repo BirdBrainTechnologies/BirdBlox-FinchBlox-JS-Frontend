@@ -1,8 +1,7 @@
 # BirdBlox
 1. [Overview (for backend developers)](#overview-for-backend-developers)
-2. [Bluetooth pairing system](#bluetooth-pairing-system)
-3. [Request list](#request-list)
-4. [Overview (for frontend developers)](#overview-for-frontend-developers)
+2. [Request list](#request-list)
+3. [Overview (for frontend developers)](#overview-for-frontend-developers)
 
 ## Overview (for backend developers)
 
