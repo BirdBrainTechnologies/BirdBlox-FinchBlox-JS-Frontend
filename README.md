@@ -888,8 +888,42 @@ some delay before the recordings are saved
 
 Tells the frotnend that recording permissions have just been granted
 
-#############
+### Other commands
 
+#### /properties/os
+
+	Request format:
+		http://localhost:22179/properties/os
+	Example responses:
+	    Android 6.0
+	    Kindle 5.0
+	    iOS 7.0
+
+Returns the version of the OS, starting with "iOS" for iOS devices,
+"Kindle" for all kindles, and "Android" for all other Android devices.
+
+#### /properties/dims
+
+	Request format:
+		http://localhost:22179/properties/dims
+	Example response:
+	    10.5 6.5
+
+Returns the width and height of the screen in cm, separated by spaces
+
+#### CallbackManager.echo
+
+	Callback signature:
+        CallbackManager.sounds.echo(request: string) -> boolean
+        request - A percent encoded HTTP request
+    Example call:
+        CallbackManager.sounds.echo(request);
+        where request is a percent encoding of "prompt/?title=Some&question=Thing"
+
+Called when the backend needs to tell the frontend to make a request to the backend.
+Sometimes desirable, apparently.  The request parameter must be a percent encoded
+request, and that request must have its parameters further percent encoded.
+The request should contain everything that would normally follow `http://localhost:22179/`
 
 ## Overview (for frontend developers)
 1. [UI Overview](#ui-overview)
