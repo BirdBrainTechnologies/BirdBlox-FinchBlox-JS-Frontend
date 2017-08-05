@@ -909,6 +909,15 @@ Returns the version of the OS, starting with "iOS" for iOS devices,
 
 Returns the width and height of the screen in cm, separated by spaces
 
+#### /ui/contentLoaded
+
+	Request format:
+		http://localhost:22179/ui/contentLoaded
+
+Tells the backend that the frontend's UI has loaded, so it can do any additional
+setup.  No callbacks should be called until the content is laoded. This is a good
+time to call `CallbackManager.data.open`.
+
 #### CallbackManager.echo
 
 	Callback signature:
