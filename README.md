@@ -53,7 +53,9 @@ the function `window.webkit.messageHandlers.serverSubstitute.postMessage`, passi
 a JSON object containing the data that would normally be transferred using HTTP.
 This enabled us to remove the server from the iOS backend.
 
-## Bluetooth scanning
+## Request list
+
+### Bluetooth scanning
 
 The backend and frontend communicate about specific Bluetooth robots 
 using the robots' ids.  On Android, Mac Addresses are used as ids while
@@ -70,8 +72,6 @@ called, the backend calls `CallbackManager.robot.discoverTimeOut`, and
 the frontend might restart the scan.  In any other case that a scan stops (including
 when the frontend calls `robot/stopDiscover`), `CallbackManager.robot.stopDiscover`
 is called.
-
-### Bluetooth scanning requests
 
 #### /robot/startDiscover
 
@@ -123,7 +123,7 @@ start the discover again.
 Tells the frontend that the discover stopped so the frontend has a chance to 
 start the discover again.  Called any time a scan stops unless it timed out.
 
-## Robot connection/disconnection
+### Robot connection/disconnection
 
 The frontend will tell the backend when to connect to or disconnect from a robot using the
 `/robot/connect` and `robot/disconnect` requests. 
@@ -145,8 +145,6 @@ of date but still compatible with the app it calls `CallbackManager.robot.update
 If the firmware is incompatible, it calls `CallbackManager.robot.disconnectIncompatible` and
 immediately removes the robot from the connection list.  This is the only time where the
 backend removes something from the list without the frontend making a request.
-
-### Robot connection/disconnection requests
 
 #### /robot/connect
 
@@ -240,7 +238,7 @@ the text and a single option "Dismiss":
 If the firmware isn't up to date, an additional line, `Firmware update available` is
 included with options "Dismiss" and "Update firmware", which links to the update page.
 
-## Robot blocks
+### Robot blocks
 
 These commands are used for blocks that control the inputs/outputs of the robots.
 Some commands (like the tri-led command) are shared between different types of
@@ -315,15 +313,13 @@ type of sensor
 		volume - int from 0 to 100
 		frequency - int from 0 to 20000
 
-## Tablet sensors
+### Tablet sensors
 
 Different tablets have varying sensors that can be read using the sensor
 blocks.  The frontend is told the reading and availability of sensors using the below requests
 If the tablet doesn't have the necessary permissions or hardware for a request, it should
 return an error and in the response body include a description of the error that can be shown
 to the user.
-
-### Tablet sensor requests
 
 #### /tablet/availableSensors
 
@@ -437,7 +433,7 @@ by spaces. This should be the total acceleration (including gravity)
 Returns the latitude and longitude separated by spaces. Prompts for location permission
 if not granted yet.
 
-## Dialogs
+### Dialogs
 
 There are three main types of dialogs: prompt, choice, alert. Prompt dialogs let the
 user enter text. Choice dialogs give the user two options to choose from. Alert dialog
@@ -447,8 +443,6 @@ Dialogs are presented in response to http requests. When the user responds, a fu
 the CallbackManager should be called. Only one dialog will be requested at a time. Dialogs
 that are presented for a reason other than the commands below do not need to call
 CallbackManager functions.
-
-### Dialog requests
 
 #### /tablet/dialog
 
@@ -495,11 +489,9 @@ Shows a choice dialog, or an alert dialog (if only one button is provided). Call
 If the dialog is an alert, the values of the booleans doesn't matter, but the most sensible
 selection is `canceled = false` and `firstSelected = true`
 
-## Settings
+### Settings
 
 Settings provide a way for the frontend to store and read from a key/value settings system
-
-### Settings requests
 
 #### /settings/get
 
@@ -519,7 +511,7 @@ A 404 response is generated if the key does not have an assigned value.
     Example request: 
 		http://localhost:22179/settings/set?key=zoom&value=1
 
-## File management
+### File management
 
 These commands deal with creating/renaming/copying/deleting/listing locally stored files.
 The backend always keeps track of the currently open file, so it can be reopened
@@ -663,7 +655,7 @@ are true iff the available name equals the initial name.
 Sends the data from the currently open file to the backend so it can be saved.  Called
 once every 15 seconds and whenever an edit is made.
 
-## Cloud storage
+### Cloud storage
 
 On iOS, cloud storage is handled using the system's UI, while on Android, the BirdBlox
 app provides its own UI for managing cloud storage.  The `cloud/showPicker` request is
@@ -769,7 +761,7 @@ ultimately renamed.
 Presents a dialog to confirm deletion, then deletes the file from cloud storage.
 Calls CallbackManager.cloud.filesChanged() if the file is ultimately deleted
 
-## Sounds
+### Sounds
 
 There are 3 main types of sounds: UI sounds (the snap noise when blocks connect), 
 sound effects (the built in sounds controlled by the sound block), and recordings
@@ -777,8 +769,6 @@ sound effects (the built in sounds controlled by the sound block), and recording
 File management for recordings is handled by /data commands, while recording
 creation uses /sound/recording commands.  UI sounds are stored in the frontend's
 `SoundsForUI` folder, while sound effects are stored in `SoundClips`.
-
-### Sound requests
 
 #### /sound/names
 

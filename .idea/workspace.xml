@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d73812b-84da-40bb-9027-c39703191c67" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
     </list>
     <ignored path="Git.iws" />
@@ -26,8 +25,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="549">
-                <caret line="355" column="27" lean-forward="false" selection-start-line="355" selection-start-column="27" selection-end-line="355" selection-end-column="27" />
+              <first_editor relative-caret-position="442">
+                <caret line="911" column="0" lean-forward="true" selection-start-line="911" selection-start-column="0" selection-end-line="911" selection-end-column="0" />
                 <folding />
               </first_editor>
               <second_editor>
@@ -40,8 +39,8 @@
       <file leaf-file-name="CallbackManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CallbackManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="530">
-              <caret line="226" column="22" lean-forward="false" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="22" />
+            <state relative-caret-position="411">
+              <caret line="231" column="20" lean-forward="true" selection-start-line="231" selection-start-column="20" selection-end-line="231" selection-end-column="20" />
               <folding>
                 <element signature="n#!!doc;n#CallbackManager#0" expanded="false" />
                 <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
@@ -554,8 +553,8 @@
         <option value="$PROJECT_DIR$/CodeManager.js" />
         <option value="$PROJECT_DIR$/HtmlServer.js" />
         <option value="$PROJECT_DIR$/BlockParts/Slot/EditableSlot/EditableSlot.js" />
-        <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/BlockDefsAndList/BlockDefs_control.js" />
+        <option value="$PROJECT_DIR$/CallbackManager.js" />
         <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
@@ -968,7 +967,7 @@
       <workItem from="1501615937225" duration="13991000" />
       <workItem from="1501710398745" duration="3723000" />
       <workItem from="1501890882995" duration="524000" />
-      <workItem from="1501893659114" duration="5119000" />
+      <workItem from="1501893659114" duration="5302000" />
     </task>
     <task id="LOCAL-00001" summary="Added a custom dropslot for sound blocks">
       <created>1484926042522</created>
@@ -1065,7 +1064,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1641135000" />
+    <option name="totallyTimeSpent" value="1641318000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1771,8 +1770,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CallbackManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="530">
-          <caret line="226" column="22" lean-forward="false" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="22" />
+        <state relative-caret-position="411">
+          <caret line="231" column="20" lean-forward="true" selection-start-line="231" selection-start-column="20" selection-end-line="231" selection-end-column="20" />
           <folding>
             <element signature="n#!!doc;n#CallbackManager#0" expanded="false" />
             <element signature="n#!!block;n#CallbackManager#0" expanded="false" />
@@ -1834,8 +1833,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="549">
-            <caret line="355" column="27" lean-forward="false" selection-start-line="355" selection-start-column="27" selection-end-line="355" selection-end-column="27" />
+          <first_editor relative-caret-position="442">
+            <caret line="911" column="0" lean-forward="true" selection-start-line="911" selection-start-column="0" selection-end-line="911" selection-end-column="0" />
             <folding />
           </first_editor>
           <second_editor>
