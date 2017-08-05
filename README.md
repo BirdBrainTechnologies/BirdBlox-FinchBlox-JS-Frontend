@@ -336,7 +336,7 @@ Returns a `"\n"` separated list of sensors the device supports.  For technical r
 iOS always returns `""` to this request and uses the callback functions to give this
 information instead.
 
-#### CallbackManager.device.availableSensors
+#### CallbackManager.tablet.availableSensors
 
     Callback signature:
         CallbackManager.robot.availableSensors(sensorList: string) -> boolean
@@ -345,7 +345,7 @@ information instead.
         CallbackManager.robot.availableSensors(sensorList);
 		where sensorList is the percent encoded form of "accelerometer\nbarometer\nmicrophone\ngps"
 
-#### CallbackManager.device.addSensor
+#### CallbackManager.tablet.addSensor
 
     Callback signature:
         CallbackManager.robot.addSensor(sensor: string) -> boolean
@@ -353,7 +353,7 @@ information instead.
 
 Tells the frontend to add the sensor to the list of supported sensors.
 
-#### CallbackManager.device.removeSensor
+#### CallbackManager.tablet.removeSensor
 
     Callback signature:
         CallbackManager.robot.removeSensor(sensor: string) -> boolean
@@ -483,14 +483,14 @@ Shows a choice dialog, or an alert dialog (if only one button is provided). Call
     Example call:
         CallbackManager.dialog.promptResponded(true, "Hello");
 		
-#### CallbackManager.dialog.choiceDialogResponded
+#### CallbackManager.dialog.choiceResponded
 
 	Callback signature:
-        CallbackManager.dialog.choiceDialogResponded(canceled: boolean, firstSelected: boolean) -> boolean
+        CallbackManager.dialog.choiceResponded(canceled: boolean, firstSelected: boolean) -> boolean
         canceled - Whether the dialog was closed without being answered
 		firstSelected - Whether the first option was selected
     Example call:
-        CallbackManager.dialog.promptResponded(false, true);
+        CallbackManager.dialog.choiceResponded(false, true);
 		
 If the dialog is an alert, the values of the booleans doesn't matter, but the most sensible
 selection is `canceled = false` and `firstSelected = true`
@@ -888,7 +888,7 @@ some delay before the recordings are saved
 
 Tells the frotnend that recording permissions have just been granted
 
-### Other commands
+### Miscellaneous
 
 #### /properties/os
 
