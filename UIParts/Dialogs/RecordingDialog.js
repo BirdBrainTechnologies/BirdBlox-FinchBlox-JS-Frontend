@@ -484,6 +484,6 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
-	let message = "Please create a project by dragging a block to the canvas before recording";
+	let message = "Please open a project before recording";
 	DialogManager.showAlertDialog("No project open", message, "OK");
 };
