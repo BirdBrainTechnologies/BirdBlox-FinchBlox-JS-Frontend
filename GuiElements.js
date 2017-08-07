@@ -211,6 +211,7 @@ GuiElements.alert = function(message) {
 	} else {
 		result += " None";
 	}
+	result += " " + HtmlServer.unansweredCount;
 	debug.innerHTML = result;
 };
 

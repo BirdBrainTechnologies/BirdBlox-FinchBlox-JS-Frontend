@@ -277,6 +277,14 @@ CodeManager.startUpdateTimer = function() {
 	}
 };
 
+/**
+ * Prevents too many Http commands from building up.
+ * @return {boolean} - Whether a broadcast Block should run now or wait
+ */
+CodeManager.checkBroadcastDelay = function() {
+	return HtmlServer.unansweredCount < HtmlServer.unansweredCap;
+};
+
 
 /**
  * Adds the Variable to CodeManager's list of variables
