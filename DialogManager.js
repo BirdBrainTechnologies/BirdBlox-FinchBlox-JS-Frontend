@@ -165,6 +165,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 DialogManager.promptDialogResponded = function(cancelled, response) {
 	const DM = DialogManager;
 	DM.dialogVisible = false;
+	DM.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
 	if (DM.promptCallback != null) {
 		DM.promptCallback(cancelled, response);
 	}
