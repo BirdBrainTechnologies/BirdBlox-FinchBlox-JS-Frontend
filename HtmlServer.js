@@ -107,7 +107,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
-		}, 500);
+		}, 20);
 		HtmlServer.unansweredCount++;
 		return;
 	}

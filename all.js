@@ -16533,7 +16533,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
-		}, 500);
+		}, 20);
 		HtmlServer.unansweredCount++;
 		return;
 	}
@@ -18085,6 +18085,7 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
 	}
+	this.boundRect = null;
 }
 
 /**
@@ -18548,10 +18549,19 @@ Block.prototype.findBestFit = function() {
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
 		let snapBHeight = snap.top + height + snap.bottom;
+		
+		
+		if (this.boundRect != null) {
+			this.boundRect.remove();
+		}
+		this.boundRect = GuiElements.draw.rect(this.absToRelX(x), this.absToRelY(y + height), 10, 10, "#f00");
+		GuiElements.update.opacity(this.boundRect, 0.2);
+		this.group.append(this.boundRect);
+		
 		//Check if point falls in a rectangular range.
 		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
-			let yDist = move.topY - (y + this.height);
+			let yDist = move.topY - (y + height);
 			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
