@@ -241,12 +241,12 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
 	//GuiElements.alert("got resp from native");
-	HtmlServer.unansweredCount--;
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
 		return;
 	}
+	HtmlServer.unansweredCount--;
 	if (200 <= status && status <= 299) {
 		if (callbackObj.callbackFn != null) {
 			callbackObj.callbackFn(body);
