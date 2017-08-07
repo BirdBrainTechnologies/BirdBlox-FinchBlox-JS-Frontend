@@ -25,9 +25,13 @@ function B_FlutterBuzzer(x, y) {
 	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this, "NumS_vol", 20, true, true)); //Positive integer.
+	const numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
+	numSlot.addLimits(0, 100);
+	this.addPart(numSlot);
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this, "NumS_freq", 10000, true, true)); //Positive integer.
+	const numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
+	numSlot2.addLimits(0, 20000);
+	this.addPart(numSlot2);
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
