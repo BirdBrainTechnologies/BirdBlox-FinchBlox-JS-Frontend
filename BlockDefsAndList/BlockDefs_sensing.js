@@ -35,7 +35,6 @@ B_Ask.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			DialogManager.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running

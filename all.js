@@ -106,7 +106,7 @@ DebugOptions.shouldSkipHtmlRequests = function() {
 /** @return {boolean} */
 DebugOptions.shouldUseJSDialogs = function() {
 	const DO = DebugOptions;
-	return DO.enabled && (DO.mouse);
+	return DO.enabled && (DO.mouse) && false;
 };
 /** @return {boolean} */
 DebugOptions.shouldLogHttp = function() {
@@ -16835,6 +16835,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 DialogManager.promptDialogResponded = function(cancelled, response) {
 	const DM = DialogManager;
 	DM.dialogVisible = false;
+	DM.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
 	if (DM.promptCallback != null) {
 		DM.promptCallback(cancelled, response);
 	}
@@ -23606,7 +23607,6 @@ B_Ask.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			DialogManager.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running
