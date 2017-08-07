@@ -15,7 +15,7 @@ function DebugOptions() {
 	 * DO is not enabled */
 	DO.logErrors = true;
 	// Whether a dialog should be presented with the content of the error
-	DO.notifyErrors = false;
+	DO.notifyErrors = true;
 
 	DO.mouse = false;
 	// On launch, virtual devices can be added
@@ -144,7 +144,7 @@ DebugOptions.enableLogging = function() {
  */
 DebugOptions.safeFunc = function(func) {
 	if (func == null) return null;
-	if (DebugOptions.shouldLogErrors()) {
+	if (DebugOptions.shouldLogErrors() || DebugOptions.shouldNotifyErrors()) {
 		return function() {
 			try {
 				if (!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
@@ -16513,8 +16513,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					callbackFn('Started');
-					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('Started');
+					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
@@ -23037,9 +23037,13 @@ function B_FlutterBuzzer(x, y) {
 	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this, "NumS_vol", 20, true, true)); //Positive integer.
+	const numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
+	numSlot.addLimits(0, 100);
+	this.addPart(numSlot);
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this, "NumS_freq", 10000, true, true)); //Positive integer.
+	const numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
+	numSlot2.addLimits(0, 20000);
+	this.addPart(numSlot2);
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;

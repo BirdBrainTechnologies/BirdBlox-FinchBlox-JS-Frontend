@@ -114,7 +114,7 @@ Called any time a new device is discovered during a scan
 
 #### CallbackManager.robot.discoverTimeOut
 
-	Callback signature:
+    Callback signature:
         CallbackManager.robot.discoverTimeOut(robotTypeId: string) -> boolean
     Example call:
         CallbackManager.robot.discoverTimeOut("hummingbird");
@@ -124,7 +124,7 @@ start the discover again.
 
 #### CallbackManager.robot.stopDiscover
 
-	Callback signature:
+    Callback signature:
         CallbackManager.robot.stopDiscover(robotTypeId: string) -> boolean
     Example call:
         CallbackManager.robot.stopDiscover("hummingbird");
@@ -207,7 +207,7 @@ should be used instead.
 
     Callback signature:
         CallbackManager.robot.disconnectIncompatible(robotId: string, 
-			oldFirmware: string, minFirmware: string) -> boolean
+            oldFirmware: string, minFirmware: string) -> boolean
         oldFirmware - percent encoded version of firmware that was on the robot
         minFirmware - percent encoded minimum version of firmware the backend requires
     Example call:
@@ -224,7 +224,7 @@ to view instructions to update the firmware.
         http://localhost:22179/robot/showUpdateInstructions?type=[robotTypeId]
     Example request: 
         http://localhost:22179/robot/showUpdateInstructions?type=hummingbird
-		
+        
 When received, the backend redirects the user to a website containing instructions
 to update the firmware of their device. The website may depend on the type of robot.
 Currently this website is 
@@ -238,12 +238,12 @@ http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware
 If the firmware of the robot is up to date, this command presents an alert dialog with
 the text and a single option "Dismiss":
 
-	Hummingbird Peripheral
-	Name: [robot name from mac address]
-	Bluetooth Name: [actual gap name]
-	Hardware Version: [hardware version]
-	Firmware Version: [firmware version]
-	
+    Hummingbird Peripheral
+    Name: [robot name from mac address]
+    Bluetooth Name: [actual gap name]
+    Hardware Version: [hardware version]
+    Firmware Version: [firmware version]
+    
 If the firmware isn't up to date, an additional line, `Firmware update available` is
 included with options "Dismiss" and "Update firmware", which links to the update page.
 
@@ -280,11 +280,11 @@ direct call system, also empties the queue of unprocessed robot block requests.
 
     Request format:
         http://localhost:22179/robot/in?sensor=[s]&type=[t]&id=[id]&port=[p]
-		type - ["sensor"|"temperature"|"distance"|"sound"|"light"|"soil"]
-	Example request: 
+        type - ["sensor"|"temperature"|"distance"|"sound"|"light"|"soil"]
+    Example request: 
         http://localhost:22179/robot/in?sensor=distance&type=flutter&id=robotid&port=2
-	Example response:
-		3.6
+    Example response:
+        3.6
 
 Returns the sensor value of the robot. Might be scaled differently depending on the
 type of sensor
@@ -293,40 +293,40 @@ type of sensor
 
     Request format:
         http://localhost:22179/robot/out/servo?angle=[a]&type=[t]&id=[id]&port=[p]
-		angle - int from 0 to 180
+        angle - int from 0 to 180
 
 #### /robot/out/motor
 
     Request format:
         http://localhost:22179/robot/out/motor?speed=[s]&type=[t]&id=[id]&port=[p]
-		angle - int from -100 to 100
-		
+        angle - int from -100 to 100
+        
 #### /robot/out/vibration
 
     Request format:
         http://localhost:22179/robot/out/vibration?intensity=[i]&type=[t]&id=[id]&port=[p]
-		intensity - int from 0 to 100
-		
+        intensity - int from 0 to 100
+        
 #### /robot/out/led
 
     Request format:
         http://localhost:22179/robot/out/led?intensity=[i]&type=[t]&id=[id]&port=[p]
-		intensity - int from 0 to 100
-		
+        intensity - int from 0 to 100
+        
 #### /robot/out/triled
 
     Request format:
         http://localhost:22179/robot/out/triled?red=[r]&green=[g]&blue=[b]&type=[t]&id=[id]&port=[p]
-		red - int from 0 to 100
-		green - int from 0 to 100
-		blue - int from 0 to 100
-		
+        red - int from 0 to 100
+        green - int from 0 to 100
+        blue - int from 0 to 100
+        
 #### /robot/out/buzzer
 
     Request format:
         http://localhost:22179/robot/out/triled?volume=[v]&frequency=[f]&type=[t]&id=[id]&port=[p]
-		volume - int from 0 to 100
-		frequency - int from 0 to 20000
+        volume - int from 0 to 100
+        frequency - int from 0 to 20000
 
 ### Tablet sensors
 
@@ -340,9 +340,9 @@ to the user.
 
     Request format:
         http://localhost:22179/tablet/availableSensors
-	Example response:
-		"accelerometer\nbarometer\nmicrophone\ngps"
-		
+    Example response:
+        "accelerometer\nbarometer\nmicrophone\ngps"
+        
 Returns a `"\n"` separated list of sensors the device supports.  For technical reasons,
 iOS always returns `""` to this request and uses the callback functions to give this
 information instead.
@@ -354,7 +354,7 @@ information instead.
         sensorList - percent encoded, "\n" separated list of sensors the device supports
     Example call:
         CallbackManager.robot.availableSensors(sensorList);
-		where sensorList is the percent encoded form of "accelerometer\nbarometer\nmicrophone\ngps"
+        where sensorList is the percent encoded form of "accelerometer\nbarometer\nmicrophone\ngps"
 
 #### CallbackManager.tablet.addSensor
 
@@ -376,10 +376,10 @@ Tells the frontend to remove the sensor from the list of supported sensors.
 
     Request format:
         http://localhost:22179/tablet/shake
-	Example responses:
-		true
-		false
-		
+    Example responses:
+        true
+        false
+        
 Returns whether the tablet was shaken.  After returning true, it returns false on
 subsequent calls until the tablet is shaken again.
 
@@ -387,10 +387,10 @@ subsequent calls until the tablet is shaken again.
 
     Request format:
         http://localhost:22179/tablet/ssid
-	Example responses:
-		My WiFi
-		null
-		
+    Example responses:
+        My WiFi
+        null
+        
 Returns the name of the WiFi the tablet is connected to or `null` if it is not connected
 to anything.
 
@@ -398,18 +398,18 @@ to anything.
 
     Request format:
         http://localhost:22179/tablet/pressure
-	Example responses:
-		104.3
-		
+    Example responses:
+        104.3
+        
 Returns the a pressure in kilopascals
 
 #### /tablet/altitude
 
     Request format:
         http://localhost:22179/tablet/altitude
-	Example responses:
-		-1.245
-		
+    Example responses:
+        -1.245
+        
 Returns the change in the device's altitude (in meters) since the app was opened. 
 This is determined using the device's barometer
 
@@ -417,24 +417,24 @@ This is determined using the device's barometer
 
     Request format:
         http://localhost:22179/tablet/altitude
-	Example responses:
-		Faceup
-		Landscape: home button on left
-		Landscape: home button on right
-		Portrait: home button on bottom
-		Portrait: home button on top
-		Facedown
-		In between
-		
+    Example responses:
+        Faceup
+        Landscape: home button on left
+        Landscape: home button on right
+        Portrait: home button on bottom
+        Portrait: home button on top
+        Facedown
+        In between
+        
 Returns a string indicating the device's orientation.
 
 #### /tablet/acceleration
 
     Request format:
         http://localhost:22179/tablet/acceleration
-	Example response:
-		7.432 4.295 -1.568
-		
+    Example response:
+        7.432 4.295 -1.568
+        
 Returns the change in the device's acceleration in the x, y, and z directions, separated
 by spaces. This should be the total acceleration (including gravity)
 
@@ -442,9 +442,9 @@ by spaces. This should be the total acceleration (including gravity)
 
     Request format:
         http://localhost:22179/tablet/location
-	Example response:
-		100.456 70.823
-		
+    Example response:
+        100.456 70.823
+        
 Returns the latitude and longitude separated by spaces. Prompts for location permission
 if not granted yet.
 
@@ -463,44 +463,44 @@ CallbackManager functions.
 
     Request format:
         http://localhost:22179/tablet/dialog?title=[t]&question=[q]&prefill=[pr]&placeholder=[pl]&selectAll=[sa]
-		title - The text to show in the top of the dialog
-		question - The text to show in the body of the dialog
-		prefill - (possibly "") The text that should already be in the dialog
-		placeholder - (possibly "") The text to show in gray when nothing has been entered yet
-		selectAll - ["true"|"false"], whether the prefill text should start out as selected
+        title - The text to show in the top of the dialog
+        question - The text to show in the body of the dialog
+        prefill - (possibly "") The text that should already be in the dialog
+        placeholder - (possibly "") The text to show in gray when nothing has been entered yet
+        selectAll - ["true"|"false"], whether the prefill text should start out as selected
 
 Shows a dialog and calls `CallbackManager.dialog.promptResponded` when it is responded to.
 
 #### /tablet/choice
 
-	Request format:
+    Request format:
         http://localhost:22179/tablet/choice?title=[t]&question=[q]&button1=[bn1]&button2=[bn2]
-		title - The text to show in the top of the dialog
-		question - The text to show in the body of the dialog
-		button1 - The text to show on the first button
-		button2 - (optional) The text to show on the second button 
-		
+        title - The text to show in the top of the dialog
+        question - The text to show in the body of the dialog
+        button1 - The text to show on the first button
+        button2 - (optional) The text to show on the second button 
+        
 Shows a choice dialog, or an alert dialog (if only one button is provided). Calls 
 `CallbackManager.dialog.choiceResponded` when it is responded to.
 
 #### CallbackManager.dialog.promptResponded
 
-	Callback signature:
+    Callback signature:
         CallbackManager.dialog.promptResponded(canceled: boolean, response: string) -> boolean
         canceled - Whether the dialog was closed without response
-		response - (optional) Percent encoded response to the dialog. Included iff !canceled
+        response - (optional) Percent encoded response to the dialog. Included iff !canceled
     Example call:
         CallbackManager.dialog.promptResponded(true, "Hello");
-		
+        
 #### CallbackManager.dialog.choiceResponded
 
-	Callback signature:
+    Callback signature:
         CallbackManager.dialog.choiceResponded(canceled: boolean, firstSelected: boolean) -> boolean
         canceled - Whether the dialog was closed without being answered
-		firstSelected - Whether the first option was selected
+        firstSelected - Whether the first option was selected
     Example call:
         CallbackManager.dialog.choiceResponded(false, true);
-		
+        
 If the dialog is an alert, the values of the booleans doesn't matter, but the most sensible
 selection is `canceled = false` and `firstSelected = true`
 
@@ -511,20 +511,20 @@ Settings provide a way for the frontend to store and read from a key/value setti
 #### /settings/get
 
     Request format:
-		http://localhost:22179/settings/get?key=[key]
+        http://localhost:22179/settings/get?key=[key]
     Example request: 
-		http://localhost:22179/settings/get?key=zoom
+        http://localhost:22179/settings/get?key=zoom
     Example response:
-		1.5999999999999999
+        1.5999999999999999
     
 A 404 response is generated if the key does not have an assigned value.
     
 #### /settings/set
 
     Request format:
-		http://localhost:22179/settings/set?key=[key]&value=[value]
+        http://localhost:22179/settings/set?key=[key]&value=[value]
     Example request: 
-		http://localhost:22179/settings/set?key=zoom&value=1
+        http://localhost:22179/settings/set?key=zoom&value=1
 
 ### File management
 
@@ -543,37 +543,37 @@ the same restrictions for valid names.
 
 #### CallbackManager.data.open
 
-	Callback signature:
+    Callback signature:
         CallbackManager.data.open(fileName: string, data: string) -> boolean
         fileName - percent encoded name to show in the title
-		data - percent encoded XML data of the file
+        data - percent encoded XML data of the file
 
 Tells the frontend to load up the data from a file.  Called during imports,
 on app startup (if the project was left open in the background), op when requested
 using `/data/open`.
-		
+        
 #### CallbackManager.data.filesChanged
 
-	Callback signature:
+    Callback signature:
         CallbackManager.data.filesChanged() -> boolean
-		
+        
 Tells the frontend that the list of locally stored files has changed. Refreshes the
 UI's list of files.
 
 #### CallbackManager.data.markLoading
 
-	Callback signature:
+    Callback signature:
         CallbackManager.data.markLoading() -> boolean
 
 Tells the frontend to close the open dialog and show "Loading..." in the title
 bar.  Called when the frontend is in the process of opening a file.
-		
+        
 #### /data/files
 
-	Request format:
-		http://localhost:22179/data/files
+    Request format:
+        http://localhost:22179/data/files
     Example response:
-		{"files":["project1","project2"],"signedIn":true,"account":"email@something.something"}
+        {"files":["project1","project2"],"signedIn":true,"account":"email@something.something"}
 
 Returns a JSON object with an array of file names (key="file"). On Android, it
 also includes whether the user is signed in to cloud storage (key="signedIn")
@@ -583,8 +583,8 @@ for the tab at the top of the Open dialog.
 
 #### /data/open
 
-	Request format:
-		http://localhost:22179/data/open?filename=[fn]
+    Request format:
+        http://localhost:22179/data/open?filename=[fn]
 
 Tells the backend to open the specified file. The backend responds to this request
 quickly, with 200 if the file exists, or en error otherwise. It can then take as
@@ -593,26 +593,26 @@ much time as it needs to get the project data, which it returns using
 
 #### /data/close
 
-	Request format:
-		http://localhost:22179/data/close
+    Request format:
+        http://localhost:22179/data/close
 
 Tells the backend that there is no longer any file open.  Triggered when the user
 opens the OpenDialog
 
 #### /data/new
 
-	Request format:
-		http://localhost:22179/data/new?filename=[fn]
-		
+    Request format:
+        http://localhost:22179/data/new?filename=[fn]
+        
 Tells the backend to create a new file with the specified name. If the name is in use
 or invalid, the backend should respond with an error.
 
 #### /data/rename
 
-	Request format:
-		http://localhost:22179/data/rename?oldFilename=[of]&newFilename=[nf]&type=[t]
-		type - ["file"|"recording"]
-		
+    Request format:
+        http://localhost:22179/data/rename?oldFilename=[of]&newFilename=[nf]&type=[t]
+        type - ["file"|"recording"]
+        
 Tells the backend to rename the file. If the file does not exist, an error should
 be returned.  If `oldFilename` equals `newFilename`, no action should be performed.
 If `newFilename` is in use or invalid, the backend should signal an error.
@@ -620,41 +620,41 @@ Behavior is similar for recordings.
 
 #### /data/delete
 
-	Request format:
-		http://localhost:22179/data/delete?filename=[fn]&type=[t]
-		type - ["file"|"recording"]
+    Request format:
+        http://localhost:22179/data/delete?filename=[fn]&type=[t]
+        type - ["file"|"recording"]
 
 Tells the backend to delete the file/recording. Throws an error if the file does not
 exist.
 
 #### /data/duplicate
 
-	Request format:
-		http://localhost:22179/data/duplicate?filename=[fn]&newFilename[nf]
-		
+    Request format:
+        http://localhost:22179/data/duplicate?filename=[fn]&newFilename[nf]
+        
 Creates a copy of the file with the specified name. Throws an error if `newFilename`
 is in use or invalid
 
 #### /data/export
 
-	Request format:
-		http://localhost:22179/data/delete?filename=[fn]&tlx=[#]&tly=[#]&brx=[#]&bry=[#]
-		type - ["file"|"recording"]
-		tlx - x coord of top left point where export sheet should appear
-		tly - y coord of top left point where export sheet should appear
-		brx - x coord of bottom right point where export sheet should appear
-		bry - y coord of bottom right point where export sheet should appear
+    Request format:
+        http://localhost:22179/data/delete?filename=[fn]&tlx=[#]&tly=[#]&brx=[#]&bry=[#]
+        type - ["file"|"recording"]
+        tlx - x coord of top left point where export sheet should appear
+        tly - y coord of top left point where export sheet should appear
+        brx - x coord of bottom right point where export sheet should appear
+        bry - y coord of bottom right point where export sheet should appear
 
 Exports the specified file. On iOS, coords are used to determine sheet location.
 
 #### /data/getAvailableName
 
-	Request format:
-		http://localhost:22179/data/getAvailableName?filename=[fn]&type=[t]
-		type - ["file"|"recording"]
-	Example response:
-		{"availableName":"my file (2)", "alreadySanitized":true, "alreadyAvailable":false
-		
+    Request format:
+        http://localhost:22179/data/getAvailableName?filename=[fn]&type=[t]
+        type - ["file"|"recording"]
+    Example response:
+        {"availableName":"my file (2)", "alreadySanitized":true, "alreadyAvailable":false
+        
 Checks if the provided file name would be valid for a new file/recording. Returns a JSON
 object with a close (or identical) name that is valid (key="availableName"), and
 booleans indicating if the initial name contained no illegal characters and was not in
@@ -663,10 +663,10 @@ are true iff the available name equals the initial name.
 
 #### /data/autoSave
 
-	POST Request format:
-		http://localhost:22179/data/autoSave
-	POST request body includes XML data
-		
+    POST Request format:
+        http://localhost:22179/data/autoSave
+    POST request body includes XML data
+        
 Sends the data from the currently open file to the backend so it can be saved.  Called
 once every 15 seconds and whenever an edit is made.
 
@@ -678,39 +678,39 @@ for iOS and shows this UI, while the other cloud requests are for Android.
 
 #### /cloud/showPicker
 
-	Request format:
-		http://localhost:22179/cloud/showPicker
+    Request format:
+        http://localhost:22179/cloud/showPicker
 
 Tells the backend to show the cloud picker UI. Called from the open dialog. When a file
 is selected from the UI, it should be opened with `/data/open`.
 
 #### /cloud/signIn
 
-	Request format:
-		http://localhost:22179/cloud/signIn
-		
+    Request format:
+        http://localhost:22179/cloud/signIn
+        
 Begins Dropbox authentication
 
 #### /cloud/signOut
 
-	Request format:
-		http://localhost:22179/cloud/signIn
-		
+    Request format:
+        http://localhost:22179/cloud/signIn
+        
 Signs out of Dropbox account
 
 #### /cloud/list
 
-	Request format:
-		http://localhost:22179/cloud/list
-	Example response:
-		{"files":["project1","project2"]}
-		
+    Request format:
+        http://localhost:22179/cloud/list
+    Example response:
+        {"files":["project1","project2"]}
+        
 Returns a JSON object with “files” = a JSON array of filenames on the user's cloud storage
 
 #### /cloud/download
 
-	Request format:
-		http://localhost:22179/cloud/download?filename=[fn]
+    Request format:
+        http://localhost:22179/cloud/download?filename=[fn]
 
 Attempts to download the given file.  If there is a name conflict, presents the user 
 with three options: cancel, rename, and overwrite.  If they choose rename and enter 
@@ -723,36 +723,36 @@ only returns a response when there is no cloud account connected.
 
 #### CallbackManager.cloud.downloadComplete
 
-	Callback signature:
+    Callback signature:
         CallbackManager.data.open(filename: string) -> boolean
         filename - percent encoded name of the file that downloaded
 
 Tells the frontend that a file just finished downloading
-		
+        
 #### CallbackManager.cloud.signIn
 
-	Callback signature:
+    Callback signature:
         CallbackManager.data.signIn() -> boolean
 
 Tells the frontend that the user added a Dropbox account.  Called only once the account
 name is known, so it can be requested and displayed.
-		
+        
 #### CallbackManager.cloud.filesChanged
 
-	Callback signature:
+    Callback signature:
         CallbackManager.cloud.filesChanged(newList: string) -> boolean
-		newList - Percent encoded JSON object with list of new files
-	Example call:
-		CallbackManager.cloud.filesChanged(newList)
-		where newList is the percent encoded form of: {"files":["project1","project2"]}
+        newList - Percent encoded JSON object with list of new files
+    Example call:
+        CallbackManager.cloud.filesChanged(newList)
+        where newList is the percent encoded form of: {"files":["project1","project2"]}
 
 Notifies the frontend that the files in the cloud list have changed 
-(when an upload completes, for example) and includes a JSON object with the new files	
-		
+(when an upload completes, for example) and includes a JSON object with the new files    
+        
 #### /cloud/upload
 
-	Request format:
-		http://localhost:22179/cloud/upload?filename=[fn]
+    Request format:
+        http://localhost:22179/cloud/upload?filename=[fn]
 
 Uploads a file from the user’s device to the cloud.  Similarly to download, 
 it prompts for name conflicts and display a loading bar for upload, 
@@ -761,17 +761,17 @@ CallbackManager.cloud.filesChanged() when complete
 
 #### /cloud/rename
 
-	Request format:
-		http://localhost:22179/cloud/rename?filename=[fn]
-		
+    Request format:
+        http://localhost:22179/cloud/rename?filename=[fn]
+        
 Presents a dialog for the user to input a name.  Re-prompts the user if the name is 
 invalid or taken.  Calls CallbackManager.cloud.filesChanged() if the file is 
 ultimately renamed.
 
 #### /cloud/delete
 
-	Request format:
-		http://localhost:22179/cloud/delete?filename=[fn]
+    Request format:
+        http://localhost:22179/cloud/delete?filename=[fn]
 
 Presents a dialog to confirm deletion, then deletes the file from cloud storage.
 Calls CallbackManager.cloud.filesChanged() if the file is ultimately deleted
@@ -787,52 +787,52 @@ creation uses /sound/recording commands.  UI sounds are stored in the frontend's
 
 #### /sound/names
 
-	Request format:
-		http://localhost:22179/sound/names?type=[t]
-		type - ["effect"|"recording"]
-	Example response:
-	    "alarm\nbell\nbark"
+    Request format:
+        http://localhost:22179/sound/names?type=[t]
+        type - ["effect"|"recording"]
+    Example response:
+        "alarm\nbell\nbark"
 
 Returns a list of sound effects or recordings, separated by new lines (without
 file extensions)
 
 #### /sound/stopAll
 
-	Request format:
-		http://localhost:22179/sound/stopAll
+    Request format:
+        http://localhost:22179/sound/stopAll
 
 Stops all currently running sounds of all types
 
 #### /sound/duration
 
-	Request format:
-		http://localhost:22179/sound/duration?filename=[fn]&type=[t]
-		type - ["effect"|"recording"]
-	Example response:
-	    6500
+    Request format:
+        http://localhost:22179/sound/duration?filename=[fn]&type=[t]
+        type - ["effect"|"recording"]
+    Example response:
+        6500
 
 Gets the length of the sound in milliseconds
 
 #### /sound/play
 
-	Request format:
-		http://localhost:22179/sound/play?filename=[fn]&type=[t]
-		type - ["effect"|"recording"|"ui"]
+    Request format:
+        http://localhost:22179/sound/play?filename=[fn]&type=[t]
+        type - ["effect"|"recording"|"ui"]
 
 Plays the sound. Does not stop previous sounds.
 
 #### /sound/note
 
-	Request format:
-		http://localhost:22179/sound/note?note=[n]&duration=[d]
-		note - int
-		duration - number (time in ms)
+    Request format:
+        http://localhost:22179/sound/note?note=[n]&duration=[d]
+        note - int
+        duration - number (time in ms)
 
 #### /sound/recording/start
 
-	Request format:
-		http://localhost:22179/sound/recording/start
-	Example responses:
+    Request format:
+        http://localhost:22179/sound/recording/start
+    Example responses:
         Started
         Permission denied
         Requesting permission
@@ -843,35 +843,35 @@ and attempts to ask for recording permissions from the user, if required
 
 #### /sound/recording/stop
 
-	Request format:
-		http://localhost:22179/sound/recording/stop
+    Request format:
+        http://localhost:22179/sound/recording/stop
 
 Stops and saves the current recording
 
 #### /sound/recording/pause
 
-	Request format:
-		http://localhost:22179/sound/recording/pause
+    Request format:
+        http://localhost:22179/sound/recording/pause
 
 Pauses recording so it can be resumed and saved
 
 #### /sound/recording/unpause
 
-	Request format:
-		http://localhost:22179/sound/recording/unpause
+    Request format:
+        http://localhost:22179/sound/recording/unpause
 
 Continues recording a paused recording
 
 #### /sound/recording/discard
 
-	Request format:
-		http://localhost:22179/sound/recording/discard
+    Request format:
+        http://localhost:22179/sound/recording/discard
 
 Deletes the current recording. Does nothing if no recordings are being created
 
 #### CallbackManager.sounds.recordingEnded
 
-	Callback signature:
+    Callback signature:
         CallbackManager.sounds.recordingEnded() -> boolean
 
 Tells the frontend that recording has stopped unexpectedly. Called if the user
@@ -879,7 +879,7 @@ navigates away from the app or receives a phone call while recording.
 
 #### CallbackManager.sounds.recordingsChanged
 
-	Callback signature:
+    Callback signature:
         CallbackManager.sounds.recordingsChanged() -> boolean
 
 Tells the frontend that the list of recordings has changed. This generally
@@ -888,7 +888,7 @@ some delay before the recordings are saved
 
 #### CallbackManager.sounds.permissionGranted
 
-	Callback signature:
+    Callback signature:
         CallbackManager.sounds.permissionGranted() -> boolean
 
 Tells the frontend that recording permissions have just been granted
@@ -901,9 +901,9 @@ The user can send these logs to use by long pressing the settings icon and selec
 
 #### /debug/log
 
-	POST Request format:
-		http://localhost:22179/debug/log
-		POST Body: error information
+    POST Request format:
+        http://localhost:22179/debug/log
+        POST Body: error information
 
 Called when the frontend encounters an error.  The POST body includes a stack trace
 of the error.  When called, the backend appends the information to a log file, with
@@ -913,8 +913,8 @@ file.
 
 #### /debug/shareLog
 
-	Request format:
-		http://localhost:22179/sound/debug/shareLog
+    Request format:
+        http://localhost:22179/sound/debug/shareLog
 
 When called, the frontend shows a share sheet for the error log file. If there
 is no log file yet, it creates a new one with the first line `BEGIN ERRROR LOG`.
@@ -923,29 +923,29 @@ is no log file yet, it creates a new one with the first line `BEGIN ERRROR LOG`.
 
 #### /properties/os
 
-	Request format:
-		http://localhost:22179/properties/os
-	Example responses:
-	    Android 6.0
-	    Kindle 5.0
-	    iOS 7.0
+    Request format:
+        http://localhost:22179/properties/os
+    Example responses:
+        Android 6.0
+        Kindle 5.0
+        iOS 7.0
 
 Returns the version of the OS, starting with "iOS" for iOS devices,
 "Kindle" for all kindles, and "Android" for all other Android devices.
 
 #### /properties/dims
 
-	Request format:
-		http://localhost:22179/properties/dims
-	Example response:
-	    10.5 6.5
+    Request format:
+        http://localhost:22179/properties/dims
+    Example response:
+        10.5 6.5
 
 Returns the width and height of the screen in cm, separated by spaces
 
 #### /ui/contentLoaded
 
-	Request format:
-		http://localhost:22179/ui/contentLoaded
+    Request format:
+        http://localhost:22179/ui/contentLoaded
 
 Tells the backend that the frontend's UI has loaded, so it can do any additional
 setup.  No callbacks should be called until the content is laoded. This is a good
@@ -953,7 +953,7 @@ time to call `CallbackManager.data.open`.
 
 #### CallbackManager.echo
 
-	Callback signature:
+    Callback signature:
         CallbackManager.sounds.echo(request: string) -> boolean
         request - A percent encoded HTTP request
     Example call:
@@ -1052,65 +1052,65 @@ Here's an example from the Wait Block (defined in BlockDefs_control.js)
 function B_Wait(x, y) {
     // Derived from CommandBlock
     // Category ("control") determines colors
-	CommandBlock.call(this, x, y, "control");
-	// Build Block out of things found in the BlockParts folder
-	this.addPart(new LabelText(this, "wait"));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.addPart(new LabelText(this, "secs"));
+    CommandBlock.call(this, x, y, "control");
+    // Build Block out of things found in the BlockParts folder
+    this.addPart(new LabelText(this, "wait"));
+    this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
+    this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
     // Each Block has runMem to store information for that execution
-	const mem = this.runMem;
-	mem.startTime = new Date().getTime();
-	// Extract a positive value from first slot
-	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
-	return new ExecutionStatusRunning(); //Still running
+    const mem = this.runMem;
+    mem.startTime = new Date().getTime();
+    // Extract a positive value from first slot
+    mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+    return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
 B_Wait.prototype.updateAction = function() {
-	const mem = this.runMem;
-	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
-		return new ExecutionStatusDone(); //Done running
-	} else {
-		return new ExecutionStatusRunning(); //Still running
-	}
+    const mem = this.runMem;
+    if (new Date().getTime() >= mem.startTime + mem.delayTime) {
+        return new ExecutionStatusDone(); //Done running
+    } else {
+        return new ExecutionStatusRunning(); //Still running
+    }
 };
 ```
 Here's an example of a reporter with a DropSlot
 ```javascript
 function B_Split(x, y) {
     // Split is a ReporterBlock that returns a list
-	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
-	this.addPart(new LabelText(this, "split"));
-	// Add parts with default values
-	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
-	this.addPart(new LabelText(this, "by"));
+    ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
+    this.addPart(new LabelText(this, "split"));
+    // Add parts with default values
+    this.addPart(new StringSlot(this, "StrS_1", "hello world"));
+    this.addPart(new LabelText(this, "by"));
 
     // New DropSlot which numbers, strings, and bools can snap to
-	const inputType = EditableSlot.inputTypes.any;
-	const snapType = Slot.snapTypes.numStrBool;
-	const data = new SelectionData("whitespace", "whitespace");
-	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-	// Add a special option that tells InputPad to show prompt dialog
-	dS.addEnterText("Edit text");
-	dS.addOption(new SelectionData("letter", "letter"));
-	dS.addOption(new SelectionData("whitespace", "whitespace"));
-	this.addPart(dS);
+    const inputType = EditableSlot.inputTypes.any;
+    const snapType = Slot.snapTypes.numStrBool;
+    const data = new SelectionData("whitespace", "whitespace");
+    const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
+    // Add a special option that tells InputPad to show prompt dialog
+    dS.addEnterText("Edit text");
+    dS.addOption(new SelectionData("letter", "letter"));
+    dS.addOption(new SelectionData("whitespace", "whitespace"));
+    this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
 /* Returns a list made from splitting the string by the provided character. */
 B_Split.prototype.startAction = function() {
-	const string1 = this.slots[0].getData().getValue();
-	const splitD = this.slots[1].getData();
+    const string1 = this.slots[0].getData().getValue();
+    const splitD = this.slots[1].getData();
     //...
     // Code which sets dataArray
     //...
     // Return result
-	return new ExecutionStatusResult(new ListData(dataArray));
+    return new ExecutionStatusResult(new ListData(dataArray));
 };
 ```
 

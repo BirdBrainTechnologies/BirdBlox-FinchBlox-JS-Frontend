@@ -13,7 +13,7 @@ function DebugOptions() {
 	 * DO is not enabled */
 	DO.logErrors = true;
 	// Whether a dialog should be presented with the content of the error
-	DO.notifyErrors = false;
+	DO.notifyErrors = true;
 
 	DO.mouse = true;
 	// On launch, virtual devices can be added
@@ -142,7 +142,7 @@ DebugOptions.enableLogging = function() {
  */
 DebugOptions.safeFunc = function(func) {
 	if (func == null) return null;
-	if (DebugOptions.shouldLogErrors()) {
+	if (DebugOptions.shouldLogErrors() || DebugOptions.shouldNotifyErrors()) {
 		return function() {
 			try {
 				if (!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
