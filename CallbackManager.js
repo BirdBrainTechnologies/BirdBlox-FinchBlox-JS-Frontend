@@ -25,30 +25,37 @@ CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
 	return true;
 };
+/**
+ * Called to notify the frontend that the list of recordings has changed
+ * @returns {boolean}
+ */
+CallbackManager.sounds.recordingsChanged = function(){
+	Sound.loadSounds(true);
+	RecordingDialog.recordingsChanged();
+	return true;
+};
 
 CallbackManager.data = {};
 /**
  * Tells the frontend to open a file with the specified name and data
  * @param {string} fileName - The percent encoded name of the file
  * @param {string} data - The percent encoded content of the file
- * @param {boolean} named - Whether the file should be considered "named" (see SaveManager)
  * @return {boolean}
  */
-CallbackManager.data.open = function(fileName, data, named) {
+CallbackManager.data.open = function(fileName, data) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named);
+	SaveManager.backendOpen(fileName, data);
 	return true;
 };
 /**
  * Sets the name of the currently open file (when there is a rename request, for example)
  * @param {string} fileName - The percent encoded new name of the file
- * @param {boolean} named - Whether the file is named
  * @return {boolean}
  */
-CallbackManager.data.setName = function(fileName, named){
+CallbackManager.data.setName = function(fileName){
 	fileName = HtmlServer.decodeHtml(fileName);
-	SaveManager.backendSetName(fileName, named);
+	SaveManager.backendSetName(fileName);
 	return true;
 };
 /**

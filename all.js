@@ -9747,7 +9747,6 @@ BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeig
 	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 };
-
 /**
  * Finds the best x coord for an object the specified width that would like to be centered at the specified center
  * but needs to fit in the specified range
@@ -14646,7 +14645,7 @@ function RecordingDialog(listOfRecordings) {
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
-	this.state = RecordingManager.recordingStates.stopped;
+	this.state = RecordingManager.state;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
@@ -15081,6 +15080,7 @@ RecordingDialog.prototype.timeToString = function(time) {
 };
 RecordingDialog.prototype.updateCounter = function(time) {
 	const RD = RecordingDialog;
+	if (this.counter == null) return;
 	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
@@ -15106,6 +15106,12 @@ RecordingDialog.updateCounter = function(time) {
 		this.currentDialog.updateCounter(time);
 	}
 };
+
+RecordingDialog.recordingsChanged = function() {
+	if (RecordingDialog.currentDialog != null) {
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+}
 
 RecordingDialog.alertNotInProject = function() {
 	let message = "Please create a project by dragging a block to the canvas before recording";
@@ -16507,8 +16513,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 			} else {
 				// Or with fake data
 				if (callbackFn != null) {
-					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('Started');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
@@ -16875,30 +16881,37 @@ CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
 	return true;
 };
+/**
+ * Called to notify the frontend that the list of recordings has changed
+ * @returns {boolean}
+ */
+CallbackManager.sounds.recordingsChanged = function(){
+	Sound.loadSounds(true);
+	RecordingDialog.recordingsChanged();
+	return true;
+};
 
 CallbackManager.data = {};
 /**
  * Tells the frontend to open a file with the specified name and data
  * @param {string} fileName - The percent encoded name of the file
  * @param {string} data - The percent encoded content of the file
- * @param {boolean} named - Whether the file should be considered "named" (see SaveManager)
  * @return {boolean}
  */
-CallbackManager.data.open = function(fileName, data, named) {
+CallbackManager.data.open = function(fileName, data) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named);
+	SaveManager.backendOpen(fileName, data);
 	return true;
 };
 /**
  * Sets the name of the currently open file (when there is a rename request, for example)
  * @param {string} fileName - The percent encoded new name of the file
- * @param {boolean} named - Whether the file is named
  * @return {boolean}
  */
-CallbackManager.data.setName = function(fileName, named){
+CallbackManager.data.setName = function(fileName){
 	fileName = HtmlServer.decodeHtml(fileName);
-	SaveManager.backendSetName(fileName, named);
+	SaveManager.backendSetName(fileName);
 	return true;
 };
 /**
@@ -22902,7 +22915,7 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
 function B_HBLight(x, y) {
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Light");
+	B_HummingbirdSensorBase.call(this, x, y, "light", "Light");
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
@@ -23254,17 +23267,22 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
+	// Derived from CommandBlock
+	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
+	// Build Block out of things found in the BlockParts folder
 	this.addPart(new LabelText(this, "wait"));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); //Must be positive.
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
 	this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
+	// Each Block has runMem to store information for that execution
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
+	// Extract a positive value from first slot
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
