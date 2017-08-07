@@ -22,6 +22,9 @@ function DialogManager() {
 DialogManager.checkDialogDelay = function() {
 	let DM = DialogManager;
 	let now = new Date().getTime();
+	if (DM.dialogVisible) {
+		return false;
+	}
 	return DM.lastDialogDisplayTime == null || now - DM.repeatDialogDelay >= DM.lastDialogDisplayTime;
 };
 
