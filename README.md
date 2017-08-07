@@ -61,6 +61,7 @@ This enabled us to remove the server from the iOS backend.
 * [File management](#file-management)
 * [Cloud storage](#cloud-storage)
 * [Sounds](#sounds)
+* [Error logging](#error-logging)
 * [Miscellaneous](#miscellaneous)
 
 ### Bluetooth scanning
@@ -304,6 +305,12 @@ type of sensor
 
     Request format:
         http://localhost:22179/robot/out/vibration?intensity=[i]&type=[t]&id=[id]&port=[p]
+		intensity - int from 0 to 100
+		
+#### /robot/out/led
+
+    Request format:
+        http://localhost:22179/robot/out/led?intensity=[i]&type=[t]&id=[id]&port=[p]
 		intensity - int from 0 to 100
 		
 #### /robot/out/triled
@@ -885,6 +892,32 @@ some delay before the recordings are saved
         CallbackManager.sounds.permissionGranted() -> boolean
 
 Tells the frontend that recording permissions have just been granted
+
+### Error logging
+
+When the JS encounters an error, it uses these commands to log it in the backend.
+The user can send these logs to use by long pressing the settings icon and selecting
+"Send error logs".
+
+#### /debug/log
+
+	POST Request format:
+		http://localhost:22179/debug/log
+		POST Body: error information
+
+Called when the frontend encounters an error.  The POST body includes a stack trace
+of the error.  When called, the backend appends the information to a log file, with
+a newline above and below the log.
+If the size of the file exceeds 40 kb, the backend deletes the first half of the
+file.
+
+#### /debug/shareLog
+
+	Request format:
+		http://localhost:22179/sound/debug/shareLog
+
+When called, the frontend shows a share sheet for the error log file. If there
+is no log file yet, it creates a new one with the first line `BEGIN ERRROR LOG`.
 
 ### Miscellaneous
 
