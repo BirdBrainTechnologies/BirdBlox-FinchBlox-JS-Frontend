@@ -57,7 +57,6 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
 	}
-	this.boundRect = null;
 }
 
 /**
@@ -520,16 +519,7 @@ Block.prototype.findBestFit = function() {
 		let snapBLeft = x - snap.left;
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
-		let snapBHeight = snap.top + height + snap.bottom;
-		
-		
-		if (this.boundRect != null) {
-			this.boundRect.remove();
-		}
-		this.boundRect = GuiElements.draw.rect(this.absToRelX(x), this.absToRelY(y + height), 10, 10, "#f00");
-		GuiElements.update.opacity(this.boundRect, 0.2);
-		this.group.append(this.boundRect);
-		
+		let snapBHeight = snap.top + height + snap.bottom;		
 		//Check if point falls in a rectangular range.
 		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
