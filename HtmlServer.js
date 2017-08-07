@@ -6,6 +6,10 @@ function HtmlServer() {
 	HtmlServer.requestTimeout = 5000;
 	HtmlServer.iosRequests = {};
 	HtmlServer.iosHandler = HtmlServer.getIosHandler();
+	HtmlServer.unansweredCount = 0; // Tracks pending requests
+	/* Maximum safe number of unanswered requests. After this number is hit, some Blocks
+	 * might choose to throttle requests (like Broadcast Blocks) */
+	HtmlServer.unansweredCap = 10;
 }
 
 HtmlServer.getIosHandler = function() {
@@ -88,6 +92,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (DebugOptions.shouldSkipHtmlRequests()) {
 		// If we're testing on a device without a backend, we reply with a fake response
 		setTimeout(function() {
+			HtmlServer.unansweredCount--;
 			if (false) {
 				// We can respond with a fake error
 				if (callbackErr != null) {
@@ -102,7 +107,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
-		}, 20);
+		}, 500);
+		HtmlServer.unansweredCount++;
 		return;
 	}
 	if (isPost == null) {
@@ -120,6 +126,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		const xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 			if (xhttp.readyState === 4) {
+				HtmlServer.unansweredCount--;
 				if (200 <= xhttp.status && xhttp.status <= 299) {
 					if (callbackFn != null) {
 						callbackFn(xhttp.responseText);
@@ -142,6 +149,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		} else {
 			xhttp.send();
 		}
+		HtmlServer.unansweredCount++;
 	} catch (err) {
 		if (callbackErr != null) {
 			callbackErr(0, "Sending request failed");
@@ -223,6 +231,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		callbackErr: callbackErr
 	};
 	GuiElements.alert("Making request: " + request + " using native");
+	HtmlServer.unansweredCount++;
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
 	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
 	window.setTimeout(function() {
@@ -232,6 +241,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
 	//GuiElements.alert("got resp from native");
+	HtmlServer.unansweredCount--;
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {

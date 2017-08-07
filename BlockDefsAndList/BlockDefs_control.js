@@ -268,16 +268,31 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	const message = this.slots[0].getData().asString().getValue();
-	if (message !== "") {
+	this.runMem.finished = false;
+	const message = this.runMem.message = this.slots[0].getData().asString().getValue();
+	if (message === "") {
+		return new ExecutionStatusDone();
+	}
+	// Broadcasts are throttled if too many unanswered commands are present
+	if (CodeManager.checkBroadcastDelay()) {
 		CodeManager.message = new StringData(message);
 		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
 	}
 	return new ExecutionStatusRunning();
 };
-/* Does nothing */
+/* Broadcasts if the briadcast hasn't been sent yet */
 B_Broadcast.prototype.updateAction = function() {
-	return new ExecutionStatusDone();
+	if (this.runMem.finished) {
+		return new ExecutionStatusDone();
+	}
+	const message = this.runMem.message;
+	if (CodeManager.checkBroadcastDelay()) {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
+	}
+	return new ExecutionStatusRunning();
 };
 
 

@@ -106,7 +106,7 @@ DebugOptions.shouldSkipHtmlRequests = function() {
 /** @return {boolean} */
 DebugOptions.shouldUseJSDialogs = function() {
 	const DO = DebugOptions;
-	return DO.enabled && (DO.mouse) && false;
+	return DO.enabled && (DO.mouse);
 };
 /** @return {boolean} */
 DebugOptions.shouldLogHttp = function() {
@@ -2527,6 +2527,7 @@ GuiElements.alert = function(message) {
 	} else {
 		result += " None";
 	}
+	result += " " + HtmlServer.unansweredCount;
 	debug.innerHTML = result;
 };
 
@@ -11651,6 +11652,14 @@ CodeManager.startUpdateTimer = function() {
 	}
 };
 
+/**
+ * Prevents too many Http commands from building up.
+ * @return {boolean} - Whether a broadcast Block should run now or wait
+ */
+CodeManager.checkBroadcastDelay = function() {
+	return HtmlServer.unansweredCount < HtmlServer.unansweredCap;
+};
+
 
 /**
  * Adds the Variable to CodeManager's list of variables
@@ -16423,6 +16432,10 @@ function HtmlServer() {
 	HtmlServer.requestTimeout = 5000;
 	HtmlServer.iosRequests = {};
 	HtmlServer.iosHandler = HtmlServer.getIosHandler();
+	HtmlServer.unansweredCount = 0; // Tracks pending requests
+	/* Maximum safe number of unanswered requests. After this number is hit, some Blocks
+	 * might choose to throttle requests (like Broadcast Blocks) */
+	HtmlServer.unansweredCap = 10;
 }
 
 HtmlServer.getIosHandler = function() {
@@ -16505,6 +16518,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (DebugOptions.shouldSkipHtmlRequests()) {
 		// If we're testing on a device without a backend, we reply with a fake response
 		setTimeout(function() {
+			HtmlServer.unansweredCount--;
 			if (false) {
 				// We can respond with a fake error
 				if (callbackErr != null) {
@@ -16519,7 +16533,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
 			}
-		}, 20);
+		}, 500);
+		HtmlServer.unansweredCount++;
 		return;
 	}
 	if (isPost == null) {
@@ -16537,6 +16552,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		const xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 			if (xhttp.readyState === 4) {
+				HtmlServer.unansweredCount--;
 				if (200 <= xhttp.status && xhttp.status <= 299) {
 					if (callbackFn != null) {
 						callbackFn(xhttp.responseText);
@@ -16559,6 +16575,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		} else {
 			xhttp.send();
 		}
+		HtmlServer.unansweredCount++;
 	} catch (err) {
 		if (callbackErr != null) {
 			callbackErr(0, "Sending request failed");
@@ -16640,6 +16657,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		callbackErr: callbackErr
 	};
 	GuiElements.alert("Making request: " + request + " using native");
+	HtmlServer.unansweredCount++;
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
 	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
 	window.setTimeout(function() {
@@ -16649,6 +16667,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
 	//GuiElements.alert("got resp from native");
+	HtmlServer.unansweredCount--;
 	const callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
@@ -23489,16 +23508,31 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	const message = this.slots[0].getData().asString().getValue();
-	if (message !== "") {
+	this.runMem.finished = false;
+	const message = this.runMem.message = this.slots[0].getData().asString().getValue();
+	if (message === "") {
+		return new ExecutionStatusDone();
+	}
+	// Broadcasts are throttled if too many unanswered commands are present
+	if (CodeManager.checkBroadcastDelay()) {
 		CodeManager.message = new StringData(message);
 		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
 	}
 	return new ExecutionStatusRunning();
 };
-/* Does nothing */
+/* Broadcasts if the briadcast hasn't been sent yet */
 B_Broadcast.prototype.updateAction = function() {
-	return new ExecutionStatusDone();
+	if (this.runMem.finished) {
+		return new ExecutionStatusDone();
+	}
+	const message = this.runMem.message;
+	if (CodeManager.checkBroadcastDelay()) {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
+	}
+	return new ExecutionStatusRunning();
 };
 
 
