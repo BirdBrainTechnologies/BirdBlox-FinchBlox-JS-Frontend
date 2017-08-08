@@ -232,7 +232,7 @@ DeviceManager.prototype.devicesChanged = function() {
 
 /**
  * Start scanning if not scanning already
- * @param {function} renewDiscoverFn - type () -> boolean, called to determine if a scan should be restarted.
+ * @param {function} [renewDiscoverFn] - type () -> boolean, called to determine if a scan should be restarted.
  */
 DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	this.renewDiscoverFn = renewDiscoverFn;
@@ -359,7 +359,8 @@ DeviceManager.prototype.createVirtualDeviceList = function() {
 };
 
 /**
- * Looks for the specified device and sets whether it is connected (if found)
+ * Looks for the specified device and sets whether it is connected (if found).
+ * If the device has lost connection, a scan is started to find it.
  * @param {string} deviceId
  * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
  */
@@ -370,7 +371,11 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 		robot = this.connectedDevices[index];
 	}
 	if (robot != null) {
+		const wasConnected = robot.getConnected();
 		robot.setConnected(isConnected);
+		if (wasConnected && !isConnected && !this.scanning) {
+			this.startDiscover();
+		}
 	}
 };
 
