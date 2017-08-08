@@ -153,6 +153,13 @@ Device.prototype.setConnected = function(isConnected) {
 };
 
 /**
+ * @return {boolean}
+ */
+Device.prototype.getConnected = function() {
+	return this.connected;
+}
+
+/**
  * Marks the status of the robot's firmware.  Called by the backend through the CallbackManager.
  * Updates status lights and UI
  * @param {Device.firmwareStatuses} status
