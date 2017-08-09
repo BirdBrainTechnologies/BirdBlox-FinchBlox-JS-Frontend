@@ -24,7 +24,7 @@ B_Variable.prototype.startAction = function() {
 };
 /**
  * @inheritDoc
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The node for this Block
  */
 B_Variable.prototype.createXml = function(xmlDoc) {
@@ -69,7 +69,7 @@ B_Variable.prototype.renameVariable = function(variable) {
 B_Variable.prototype.deleteVariable = function(variable) {
 	if (variable === this.variable) {
 		// Delete occurrences of this Block
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**
@@ -172,7 +172,7 @@ B_List.prototype.startAction = function() {
 };
 /**
  * Writes the Block to Xml
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The Block node
  */
 B_List.prototype.createXml = function(xmlDoc) {
@@ -226,7 +226,7 @@ B_List.prototype.renameList = function(list) {
  */
 B_List.prototype.deleteList = function(list) {
 	if (list === this.list) {
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**

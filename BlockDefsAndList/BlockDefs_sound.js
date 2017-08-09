@@ -41,6 +41,10 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 	let status = mem.playStatus;
 	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
 	if (done) {
+		if (status.error) {
+			this.displayError("Sound not found");
+			return new ExecutionStatusError();
+		}
 		return new ExecutionStatusDone(); // Done running
 	} else {
 		return new ExecutionStatusRunning(); // Still running

@@ -1,20 +1,17 @@
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a block with an error
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a block with an error
- * @class
- * @augments ExecutionStatus
- */
-function ExecutionStatusError(){
+function ExecutionStatusError() {
 
 }
 ExecutionStatusError.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusError.constructor = ExecutionStatusError;
+
 /**
  * @inheritDoc
+ * @return {boolean}
  */
-ExecutionStatusError.prototype.hasError = function(){
+ExecutionStatusError.prototype.hasError = function() {
 	return true;
 };

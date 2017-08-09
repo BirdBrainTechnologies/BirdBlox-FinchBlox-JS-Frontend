@@ -34,9 +34,9 @@ NumSlot.prototype.constructor = NumSlot;
 /**
  * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
  * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
- * @param {number} [min]
- * @param {number} [max]
- * @param {string} [displayUnits] - The units/label to show before the min/max
+ * @param {number|null} [min] - The minimum value or null if no bound
+ * @param {number|null} [max] - The maximum value or null if no bound
+ * @param {string|null} [displayUnits] - The units/label to show before the min/max or null if none
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
 	this.minVal = min;

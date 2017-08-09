@@ -1,33 +1,32 @@
 /**
- * Created by Tom on 6/2/2017.
- */
-
-/**
+ * An abstract class for executing Blocks/Stacks/Slots/BlockSlots to convey their execution status.
  * @constructor
- * @classdesc An abstract class for executing Blocks/Stacks/Slots/BlockSlots to convey their execution status.
- * @abstract
  */
-function ExecutionStatus(){
+function ExecutionStatus() {
 	DebugOptions.markAbstract();
 }
+
 /**
  * Is the block/stack/slot currently running?
- * @returns {boolean}
+ * @return {boolean}
  */
-ExecutionStatus.prototype.isRunning = function(){
+ExecutionStatus.prototype.isRunning = function() {
 	return false;
 };
+
 /**
  * Has the block/stack/slot encountered an error?
- * @returns {boolean}
+ * @return {boolean}
  */
-ExecutionStatus.prototype.hasError = function(){
+
+ExecutionStatus.prototype.hasError = function() {
 	return false;
 };
+
 /**
  * What is the result of execution.
- * @returns {Data}
+ * @return {Data}
  */
-ExecutionStatus.prototype.getResult = function(){
+ExecutionStatus.prototype.getResult = function() {
 	return null;
 };

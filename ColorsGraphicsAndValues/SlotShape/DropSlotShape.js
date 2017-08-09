@@ -1,12 +1,15 @@
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the DropDown graphic for a DropSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function DropSlotShape(slot, initialText){
+function DropSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, DropSlotShape);
 }
 DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 DropSlotShape.prototype.constructor = DropSlotShape;
-DropSlotShape.setConstants = function(){
+DropSlotShape.setConstants = function() {
 	const DSS = DropSlotShape;
 	const bG = BlockGraphics.dropSlot;
 	DSS.bgColor = bG.bg;
@@ -28,50 +31,87 @@ DropSlotShape.setConstants = function(){
 	DSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
 	DSS.valueText.selectedFill = bG.textFill;
 };
-DropSlotShape.prototype.buildSlot = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-DropSlotShape.prototype.buildBackground = function(){
-	this.bgE=this.generateBg();
-	this.triE=this.generateTri();
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildBackground = function() {
+	this.bgE = this.generateBg();
+	this.triE = this.generateTri();
 };
-DropSlotShape.prototype.generateBg=function(){
+
+/**
+ * Creates the dark, semi-transparent background of the Slot
+ * @return {Node} - The rectangle for the background
+ */
+DropSlotShape.prototype.generateBg = function() {
 	const DSS = DropSlotShape;
-	const bgE=GuiElements.create.rect(this.group);
-	GuiElements.update.color(bgE,DSS.bgColor);
-	GuiElements.update.opacity(bgE,DSS.bgOpacity);
-	TouchReceiver.addListenersSlot(bgE,this.slot);
+	const bgE = GuiElements.create.rect(this.group);
+	GuiElements.update.color(bgE, DSS.bgColor);
+	GuiElements.update.opacity(bgE, DSS.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE, this.slot);
 	return bgE;
 };
-DropSlotShape.prototype.generateTri=function(){
+
+/**
+ * Creates the triangle for the side of the DropSlotShape
+ * @return {Node} - an SVG path object
+ */
+DropSlotShape.prototype.generateTri = function() {
 	const DSS = DropSlotShape;
-	const triE=GuiElements.create.path(this.group);
-	GuiElements.update.color(triE,DSS.triColor);
-	TouchReceiver.addListenersSlot(triE,this.slot);
+	const triE = GuiElements.create.path(this.group);
+	GuiElements.update.color(triE, DSS.triColor);
+	TouchReceiver.addListenersSlot(triE, this.slot);
 	return triE;
 };
-DropSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-DropSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateAlign = function() {
 	const DSS = DropSlotShape;
+	// Align the text and hit box of the Slot
 	EditableSlotShape.prototype.updateAlign.call(this);
 
-	const triX=this.width - DSS.slotRMargin + DSS.textMargin;
-	const triY=this.height/2 - DSS.triH/2;
-	GuiElements.update.triangle(this.triE,triX,triY,DSS.triW,0-DSS.triH);
+	// Compute the location of the triangle
+	const triX = this.width - DSS.slotRMargin + DSS.textMargin;
+	const triY = this.height / 2 - DSS.triH / 2;
+	GuiElements.update.triangle(this.triE, triX, triY, DSS.triW, 0 - DSS.triH);
 
-	GuiElements.update.rect(this.bgE,0,0,this.width,this.height);
+	// Align the background
+	GuiElements.update.rect(this.bgE, 0, 0, this.width, this.height);
 };
-DropSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.select = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.selectedBgOpacity);
-	GuiElements.update.color(this.triE,DSS.selectedTriColor);
+	GuiElements.update.opacity(this.bgE, DSS.selectedBgOpacity);
+	GuiElements.update.color(this.triE, DSS.selectedTriColor);
 };
-DropSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.deselect = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.bgOpacity);
-	GuiElements.update.color(this.triE,DSS.triColor);
+	GuiElements.update.opacity(this.bgE, DSS.bgOpacity);
+	GuiElements.update.color(this.triE, DSS.triColor);
 };

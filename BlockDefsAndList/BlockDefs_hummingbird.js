@@ -50,7 +50,7 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
 function B_HBLight(x, y) {
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Light");
+	B_HummingbirdSensorBase.call(this, x, y, "light", "Light");
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
