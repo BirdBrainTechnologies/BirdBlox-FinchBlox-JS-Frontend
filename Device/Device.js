@@ -292,7 +292,7 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
  * @return {Array}
  */
 Device.getTypeList = function() {
-	return [DeviceHummingbird]; //, DeviceFlutter, DeviceFinch];
+	return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
 };
 
 /**
