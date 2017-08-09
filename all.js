@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -1569,7 +1569,7 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
  * @return {Array}
  */
 Device.getTypeList = function() {
-	return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
+	return [DeviceHummingbird]; //, DeviceFlutter, DeviceFinch];
 };
 
 /**
@@ -1692,6 +1692,9 @@ DeviceManager.setStatics = function() {
 
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
+	
+	/* The maximum number of devices that can be connected at one time */
+	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
@@ -2534,12 +2537,6 @@ GuiElements.createLayers = function() {
 GuiElements.alert = function(message) {
 	if (!DebugOptions.shouldAllowLogging()) return;
 	let result = message;
-	if (DeviceHummingbird.getManager().renewDiscoverFn) {
-		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn() ? "true" : "false");
-	} else {
-		result += " None";
-	}
-	result += " " + HtmlServer.unansweredCount;
 	debug.innerHTML = result;
 };
 
@@ -10798,7 +10795,8 @@ SettingsMenu.prototype.loadOptions = function() {
 		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
-		this.addOption("Send debug log", this.optionSendDebugLog, true)
+		this.addOption("Send debug log", this.optionSendDebugLog, true);
+		this.addOption("Show debug menu", TitleBar.enableDebug, true);
 	}
 };
 
@@ -14577,6 +14575,10 @@ ConnectMultipleDialog.prototype.createConnectBn = function() {
 		// Shows a list of devices to connect
 		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
 	}.bind(this), true);
+	const manager = this.deviceClass.getManager();
+	if (manager.getDeviceCount() >= manager.maxDevices) {
+		button.disable();
+	}
 	return button;
 };
 

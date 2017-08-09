@@ -23,7 +23,8 @@ SettingsMenu.prototype.loadOptions = function() {
 		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
-		this.addOption("Send debug log", this.optionSendDebugLog, true)
+		this.addOption("Send debug log", this.optionSendDebugLog, true);
+		this.addOption("Show debug menu", TitleBar.enableDebug, true);
 	}
 };
 
