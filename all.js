@@ -10679,8 +10679,8 @@ DebugMenu.prototype.loadOptions = function() {
 };
 
 DebugMenu.prototype.disableDebug = function() {
-	DebugOptions.enabled = false;
 	GuiElements.alert("");
+	DebugOptions.enabled = false;
 	TitleBar.hideDebug();
 }
 
