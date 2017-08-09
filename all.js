@@ -17755,7 +17755,14 @@ SaveManager.delete = function(isRecording, filename, nextAction) {
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	let callback = nextAction;
+	if (isRecording) {
+		callback = function() {
+			CodeManager.deleteRecording(filename);
+			if (nextAction != null) nextAction();
+		}
+	}
+	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 
 /**
