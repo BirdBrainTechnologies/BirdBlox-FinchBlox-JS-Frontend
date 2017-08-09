@@ -191,6 +191,10 @@ ConnectMultipleDialog.prototype.createConnectBn = function() {
 		// Shows a list of devices to connect
 		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
 	}.bind(this), true);
+	const manager = this.deviceClass.getManager();
+	if (manager.getDeviceCount() >= manager.maxDevices) {
+		button.disable();
+	}
 	return button;
 };
 

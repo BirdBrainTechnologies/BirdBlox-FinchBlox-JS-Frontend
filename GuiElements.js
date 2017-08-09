@@ -206,12 +206,6 @@ GuiElements.createLayers = function() {
 GuiElements.alert = function(message) {
 	if (!DebugOptions.shouldAllowLogging()) return;
 	let result = message;
-	if (DeviceHummingbird.getManager().renewDiscoverFn) {
-		result += " " + (DeviceHummingbird.getManager().renewDiscoverFn() ? "true" : "false");
-	} else {
-		result += " None";
-	}
-	result += " " + HtmlServer.unansweredCount;
 	debug.innerHTML = result;
 };
 

@@ -48,6 +48,9 @@ DeviceManager.setStatics = function() {
 
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
+	
+	/* The maximum number of devices that can be connected at one time */
+	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
