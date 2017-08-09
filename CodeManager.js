@@ -493,6 +493,7 @@ CodeManager.checkListUsed = function(list) {
  */
 CodeManager.renameRecording = function(oldName, newName) {
 	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+	SaveManager.markEdited();
 };
 
 /**
@@ -501,6 +502,7 @@ CodeManager.renameRecording = function(oldName, newName) {
  */
 CodeManager.deleteRecording = function(recording) {
 	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+	SaveManager.markEdited();
 };
 
 
