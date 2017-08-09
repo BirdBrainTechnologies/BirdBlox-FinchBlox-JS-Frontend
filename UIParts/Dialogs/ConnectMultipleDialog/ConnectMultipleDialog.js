@@ -192,7 +192,7 @@ ConnectMultipleDialog.prototype.createConnectBn = function() {
 		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
 	}.bind(this), true);
 	const manager = this.deviceClass.getManager();
-	if (manager.getDeviceCount() >= manager.maxDevices) {
+	if (manager.getDeviceCount() >= DeviceManager.maxDevices) {
 		button.disable();
 	}
 	return button;

@@ -42,6 +42,7 @@ DebugMenu.prototype.loadOptions = function() {
 
 DebugMenu.prototype.disableDebug = function() {
 	DebugOptions.enabled = false;
+	GuiElements.alert("");
 	TitleBar.hideDebug();
 }
 
