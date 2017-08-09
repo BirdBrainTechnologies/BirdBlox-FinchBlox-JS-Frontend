@@ -10661,7 +10661,7 @@ DebugMenu.prototype.loadOptions = function() {
 	// Shows the XML for the current file in a new tab
 	this.addOption("Download file", this.downloadFile);
 	// Hides the debug menu
-	this.addOption("Hide Debug", TitleBar.hideDebug);
+	this.addOption("Hide Debug", this.disableDebug);
 	// Displays the version of the frontend, as set in version.js
 	this.addOption("Version", this.optionVersion);
 	// Sends the specified request to the backend
@@ -10677,6 +10677,11 @@ DebugMenu.prototype.loadOptions = function() {
 	// Prevents the JS from shutting off when there is an error
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
+
+DebugMenu.prototype.disableDebug = function() {
+	DebugOptions.enabled = false;
+	TitleBar.hideDebug();
+}
 
 /**
  * Provides a dialog to paste XML into so is can be loaded as a file
@@ -10796,7 +10801,7 @@ SettingsMenu.prototype.loadOptions = function() {
 	}
 	if (this.showAdvanced) {
 		this.addOption("Send debug log", this.optionSendDebugLog, true);
-		this.addOption("Show debug menu", TitleBar.enableDebug, true);
+		this.addOption("Show debug menu", this.enableDebug, true);
 	}
 };
 
@@ -10873,6 +10878,11 @@ SettingsMenu.prototype.reloadAdvanced = function() {
 		}
 	}
 };
+
+SettingsMenu.prototype.enableDebug = function() {
+	DebugOptions.enabled = true;
+	TitleBar.enableDebug();
+}
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
  * devices

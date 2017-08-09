@@ -24,7 +24,7 @@ SettingsMenu.prototype.loadOptions = function() {
 	}
 	if (this.showAdvanced) {
 		this.addOption("Send debug log", this.optionSendDebugLog, true);
-		this.addOption("Show debug menu", TitleBar.enableDebug, true);
+		this.addOption("Show debug menu", this.enableDebug, true);
 	}
 };
 
@@ -101,3 +101,8 @@ SettingsMenu.prototype.reloadAdvanced = function() {
 		}
 	}
 };
+
+SettingsMenu.prototype.enableDebug = function() {
+	DebugOptions.enabled = true;
+	TitleBar.enableDebug();
+}
