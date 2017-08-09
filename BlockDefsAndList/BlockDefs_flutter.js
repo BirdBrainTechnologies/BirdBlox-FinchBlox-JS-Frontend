@@ -25,9 +25,13 @@ function B_FlutterBuzzer(x, y) {
 	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this, "NumS_vol", 20, true, true)); //Positive integer.
+	const numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
+	numSlot.addLimits(0, 100);
+	this.addPart(numSlot);
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this, "NumS_freq", 10000, true, true)); //Positive integer.
+	const numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
+	numSlot2.addLimits(0, 20000);
+	this.addPart(numSlot2);
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
@@ -49,7 +53,8 @@ B_FlutterBuzzer.prototype.startAction = function() {
 B_FlutterBuzzer.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			this.displayError(DeviceFlutter.getNotConnectedMessage());
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -150,7 +155,7 @@ B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_FlutterDistInch.prototype.updateAction = function() {
-	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {

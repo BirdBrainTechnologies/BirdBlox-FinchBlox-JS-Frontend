@@ -18,39 +18,23 @@ B_Ask.prototype.startAction = function() {
 	const mem = this.runMem;
 	mem.question = this.slots[0].getData().getValue();
 	mem.questionDisplayed = false;
-	// If there is already a dialog, we will wait until it is closed.
-	if (HtmlServer.dialogVisible) { 
-		mem.waitingForDialog = true;
-	} else {
-		mem.waitingForDialog = false;
-		// There is a delay between repeated dialogs to give the user time to stop the program.
-		// Check if we can show the dialog or should delay.
-		if (CodeManager.checkDialogDelay()) { 
-			this.showQuestion();
-		}
+	// There is a delay between repeated dialogs to give the user time to stop the program.
+	// Check if we can show the dialog or should delay.
+	if (DialogManager.checkDialogDelay()) {
+		this.showQuestion();
 	}
 	return new ExecutionStatusRunning();
 };
 /* Waits until the dialog has been displayed and completed. */
 B_Ask.prototype.updateAction = function() {
 	const mem = this.runMem;
-	if (mem.waitingForDialog) {   // If we are waiting for a dialog to close...
-		if (!HtmlServer.dialogVisible) {   //...And the dialog is closed...
-			mem.waitingForDialog = false;   //...Then we can stop waiting.
-		}
-		return new ExecutionStatusRunning();   // Still running.
-	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
-		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
-			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
-				mem.waitingForDialog = true;
-			} else {
-				this.showQuestion();   // Display the question.
-			}
+	if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
+		if (DialogManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+			this.showQuestion();   // Display the question.
 		}
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running
@@ -67,15 +51,13 @@ B_Ask.prototype.showQuestion = function() {
 		} else {
 			CodeManager.answer = new StringData(response, true);   // Store the user's answer in the CodeManager.
 		}
-		callbackFn.mem.finished = true;   // Done waiting.
+		mem.finished = true;   // Done waiting.
 	};
-	callbackFn.mem = mem;
 	const callbackErr = function() {   // If an error occurs...
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
-		callbackErr.mem.finished = true;   // Done waiting.
+		mem.finished = true;   // Done waiting.
 	};
-	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
@@ -119,7 +101,7 @@ B_Timer.prototype.startAction = function() {
 	const now = new Date().getTime();
 	const start = CodeManager.timerForSensingBlock;
 	/* Round to 1 decimal */
-	return new ExecutionStatusResult(new NumData(Math.round((now - start) / 100) / 10));
+	return new ExecutionStatusResult(new NumData((now - start) / 1000));
 };
 Block.setDisplaySuffix(B_Timer, "s");
 

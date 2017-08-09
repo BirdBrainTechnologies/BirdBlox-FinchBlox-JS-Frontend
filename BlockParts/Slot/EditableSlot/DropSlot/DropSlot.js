@@ -3,8 +3,8 @@
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor
@@ -103,14 +103,14 @@ DropSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * Creates an InputPad with a SelectPad with this Slot's options
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);

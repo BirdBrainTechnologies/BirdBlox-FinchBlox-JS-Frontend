@@ -1,19 +1,54 @@
-/* HtmlServer is a static class that will manage HTTP requests.
- * This class is not nearly finished.
+/**
+ * HtmlServer is a static class sends messages to the backend
  */
-function HtmlServer(){
-	HtmlServer.port=22179;
-	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
+function HtmlServer() {
+	HtmlServer.port = 22179;
+	HtmlServer.requestTimeout = 5000;
+	HtmlServer.iosRequests = {};
+	HtmlServer.iosHandler = HtmlServer.getIosHandler();
+	HtmlServer.unansweredCount = 0; // Tracks pending requests
+	/* Maximum safe number of unanswered requests. After this number is hit, some Blocks
+	 * might choose to throttle requests (like Broadcast Blocks) */
+	HtmlServer.unansweredCap = 10;
 }
-HtmlServer.decodeHtml = function(message){
+
+HtmlServer.getIosHandler = function() {
+	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
+		window.webkit.messageHandlers.serverSubstitute.postMessage) {
+		GuiElements.alert("Using native");
+		return window.webkit.messageHandlers.serverSubstitute.postMessage;
+	} else {
+		GuiElements.alert("Using http");
+		return null;
+	}
+};
+
+HtmlServer.createFakeIosHandler = function() {
+	return "test";
+	return function (object) {
+		console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
+	}
+};
+
+/**
+ * Removes percent encoding from a string
+ * @param {string} message - The percent encoded string
+ * @return {string} - The decoded string
+ */
+HtmlServer.decodeHtml = function(message) {
 	return decodeURIComponent(message.replace(/\+/g, " "));
 };
-HtmlServer.encodeHtml=function(message){
+
+/**
+ * Applies percent encoding to a string
+ * @param {string} message - The input string
+ * @return {string} - The percent encoded string
+ */
+HtmlServer.encodeHtml = function(message) {
 	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
 	}*/
-	var eVal;
+	let eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
 		eVal = eVal.replace(/@/g, "%40");
@@ -36,276 +71,193 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 };
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+
+/**
+ * Sends a request to the backend and calls a callback function with the results
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ *                                             Used for sorting native calls on iOS
+ */
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
-	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+	if (DebugOptions.shouldLogHttp()) {
+		// Requests are logged for debugging
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
-	if(DebugOptions.shouldSkipHtmlRequests()) {
-		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('43');
+	if (DebugOptions.shouldSkipHtmlRequests()) {
+		// If we're testing on a device without a backend, we reply with a fake response
+		setTimeout(function() {
+			HtmlServer.unansweredCount--;
+			if (false) {
+				// We can respond with a fake error
+				if (callbackErr != null) {
+					callbackErr(418, "I'm a teapot");
+				}
+			} else {
+				// Or with fake data
+				if (callbackFn != null) {
+					//callbackFn('Started');
+					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('[{"name":"hi","id":"there"}]');
+					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
+				}
 			}
 		}, 20);
+		HtmlServer.unansweredCount++;
 		return;
 	}
-	if(isPost == null) {
-		isPost=false;
+	if (isPost == null) {
+		isPost = false;
 	}
-	var requestType="GET";
-	if(isPost){
-		requestType="POST";
+	if (HtmlServer.iosHandler != null) {
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
+		return;
+	}
+	let requestType = "GET";
+	if (isPost) {
+		requestType = "POST";
 	}
 	try {
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4) {
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState === 4) {
+				HtmlServer.unansweredCount--;
 				if (200 <= xhttp.status && xhttp.status <= 299) {
-					if(callbackFn!=null){
+					if (callbackFn != null) {
 						callbackFn(xhttp.responseText);
 					}
-				}
-				else {
-					if(callbackErr!=null){
-						if(HtmlServer.logHttp){
-							GuiElements.alert("HTTP ERROR: " + xhttp.status);
+				} else {
+					if (callbackErr != null) {
+						if (DebugOptions.shouldLogHttp()) {
+							// Show the error on the screen
+							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);
 					}
-					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
 			}
 		};
-		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
-		if(isPost){
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true);
+		if (isPost) {
 			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
 			xhttp.send(postData);
-		}
-		else{
-			xhttp.send(); //Make the request
-		}
-	}
-	catch(err){
-		if(callbackErr!=null){
-			callbackErr();
-		}
-	}
-};
-HtmlServer.sendRequest=function(request,requestStatus){
-	/*
-	 setTimeout(function(){
-		requestStatus.error = false;
-		requestStatus.finished = true;
-		requestStatus.result = "7";
-	}, 300);
-	return;
-	*/
-	if(requestStatus!=null){
-		requestStatus.error=false;
-		var callbackFn=function(response){
-			callbackFn.requestStatus.finished=true;
-			callbackFn.requestStatus.result=response;
-		};
-		callbackFn.requestStatus=requestStatus;
-		var callbackErr=function(code, result){
-			callbackErr.requestStatus.finished=true;
-			callbackErr.requestStatus.error=true;
-			callbackErr.requestStatus.code = code;
-			callbackErr.requestStatus.result = result;
-		};
-		callbackErr.requestStatus=requestStatus;
-		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
-	}
-	else{
-		HtmlServer.sendRequestWithCallback(request);
-	}
-}
-HtmlServer.getHBRequest=function(hBIndex,request,params){
-	DebugOptions.validateNonNull(params);
-	var res = "hummingbird/";
-	res += request;
-	res += "?id=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
-	res += params;
-	return res;
-};
-HtmlServer.getUrlForRequest=function(request){
-	return "http://localhost:"+HtmlServer.port+"/"+request;
-}
-HtmlServer.showDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	//GuiElements.alert("Showing...");
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var newText=prompt(question);
-		HtmlServer.dialogVisible=false;
-		callbackFn(newText==null,newText);
-	}
-	else{
-		var HS=HtmlServer;
-		var request = "tablet/dialog";
-		request+="?title=" + HS.encodeHtml(title);
-		request+="&question="+HS.encodeHtml(question);
-		if(shouldPrefill) {
-			request += "&prefill=" + HS.encodeHtml(prefill);
 		} else {
-			request += "&placeholder=" + HS.encodeHtml(prefill);
+			xhttp.send();
 		}
-		request+="&selectAll=true";
-		var onDialogPresented=function(result){
-			//GuiElements.alert("dialog presented...");
-			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
-		}
-		onDialogPresented.callbackFn=callbackFn;
-		onDialogPresented.callbackErr=callbackErr;
-		var onDialogFail=function(){
-			//GuiElements.alert("dialog failed...");
-			HtmlServer.dialogVisible=false;
-			if(onDialogFail.callbackErr!=null) {
-				onDialogFail.callbackErr();
-			}
-		}
-		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
-	}
-}
-HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/dialog_response";
-	var onResponseReceived=function(response){
-		if(response=="No Response"){
-			HS.sendRequestWithCallback(request,onResponseReceived,function(){
-				//GuiElements.alert("Error2");
-				HtmlServer.dialogVisible=false;
-				callbackErr();
-			});
-			//GuiElements.alert("No resp");
-		}
-		else if(response=="Cancelled"){
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(true);
-			//GuiElements.alert("Cancelled");
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			var trimmed=response.substring(1,response.length-1);
-			onResponseReceived.callbackFn(false,trimmed);
-			//GuiElements.alert("Done");
-		}
-	}
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HtmlServer.dialogVisible=false;
-		if(callbackErr != null) {
-			callbackErr();
-		}
-	});
-}
-HtmlServer.getFileName=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var onResponseReceived=function(response){
-		if(response=="File has no name."){
-			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
-};
-HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=confirm(question);
-		HtmlServer.dialogVisible=false;
-		if(swapIfMouse){
-			result=!result;
-		}
-		if(result){
-			callbackFn("1");
-		}
-		else{
-			callbackFn("2");
-		}
-	}
-	else {
-		var HS = HtmlServer;
-		var request = "tablet/choice";
-		request += "?title=" + HS.encodeHtml(title);
-		request += "&question=" + HS.encodeHtml(question);
-		request += "&button1=" + HS.encodeHtml(option1);
-		request += "&button2=" + HS.encodeHtml(option2);
-		var onDialogPresented = function (result) {
-			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
-		};
-		onDialogPresented.callbackFn = callbackFn;
-		onDialogPresented.callbackErr = callbackErr;
-		var onDialogFail = function () {
-			HtmlServer.dialogVisible = false;
-			if (onDialogFail.callbackErr != null) {
-				onDialogFail.callbackErr();
-			}
-		};
-		onDialogFail.callbackErr = callbackErr;
-		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
-	}
-};
-HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/choice_response";
-	var onResponseReceived=function(response){
-		if(response=="0"){
-			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HS.dialogVisible = false;
+		HtmlServer.unansweredCount++;
+	} catch (err) {
 		if (callbackErr != null) {
-			callbackErr();
+			callbackErr(0, "Sending request failed");
 		}
-	});
-};
-HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=alert(message);
-		HtmlServer.dialogVisible=false;
-	}
-	else {
-		var HS = HtmlServer;
-		var request = new HttpRequestBuilder("tablet/dialog/alert");
-		request.addParam("title", HS.encodeHtml(title));
-		request.addParam("message", HS.encodeHtml(message));
-		request.addParam("button", HS.encodeHtml(button));
-		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 	}
 };
 
-HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+/**
+ * Sends a request and changes fields of a status object to track its progress.  Used for executing blocks
+ * @param {string} request - The request to send
+ * @param {object} requestStatus - The status object
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ */
+HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
+	if (requestStatus != null) {
+		requestStatus.error = false;
+		const callbackFn = function(response) {
+			requestStatus.finished = true;
+			requestStatus.result = response;
+		};
+		const callbackErr = function(code, result) {
+			requestStatus.finished = true;
+			requestStatus.error = true;
+			requestStatus.code = code;
+			requestStatus.result = result;
+		};
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock);
+	} else {
+		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock);
+	}
 };
-HtmlServer.setSetting=function(key,value){
-	var request = "settings/set";
-	request += "?key=" + HtmlServer.encodeHtml(key);
-	request += "&value=" + HtmlServer.encodeHtml(value);
-	HtmlServer.sendRequestWithCallback(request);
+
+/**
+ * Prepends localhost and the port number to the request
+ * @param {string} request - The request to modify
+ * @return {string} - The completed request
+ */
+HtmlServer.getUrlForRequest = function(request) {
+	return "http://localhost:" + HtmlServer.port + "/" + request;
 };
-HtmlServer.sendFinishedLoadingRequest = function(){
+
+/**
+ * Tells the backend that the frontend is done loading the UI
+ */
+HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+};
+
+/**
+ * Sends a command through the system iOS provides for allowing JS to call swift functions
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ */
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+	GuiElements.alert("Sending: " + request + " using native");
+	if(isBluetoothBlock == null) {
+		isBluetoothBlock = false;
+	}
+
+	let id = null;
+	while (id == null || HtmlServer.iosRequests[id] != null) {
+		id = "requestId" + Math.random();
+	}
+	const requestObject = {};
+	requestObject.request = request;
+	if (isPost) {
+		requestObject.body = postData;
+	} else {
+		requestObject.body = "";
+	}
+	requestObject.id = id;
+	requestObject.inBackground = isBluetoothBlock? "true" : "false";
+	HtmlServer.iosRequests[id] = {
+		callbackFn: callbackFn,
+		callbackErr: callbackErr
+	};
+	GuiElements.alert("Making request: " + request + " using native");
+	HtmlServer.unansweredCount++;
+	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
+	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
+	window.setTimeout(function() {
+		HtmlServer.responseFromIosCall(id, "0", "");
+	}, HtmlServer.requestTimeout);
+};
+
+HtmlServer.responseFromIosCall = function(id, status, body) {
+	//GuiElements.alert("got resp from native");
+	const callbackObj = HtmlServer.iosRequests[id];
+	HtmlServer.iosRequests[id] = undefined;
+	if (callbackObj == null) {
+		return;
+	}
+	HtmlServer.unansweredCount--;
+	if (200 <= status && status <= 299) {
+		if (callbackObj.callbackFn != null) {
+			callbackObj.callbackFn(body);
+		}
+	} else {
+		if (callbackObj.callbackErr != null) {
+			if (DebugOptions.shouldLogHttp()) {
+				// Show the error on the screen
+				GuiElements.alert("HTTP ERROR: " + status + ", RESP: " +body);
+			}
+			callbackObj.callbackErr(Number(status), body);
+		}
+	}
 };

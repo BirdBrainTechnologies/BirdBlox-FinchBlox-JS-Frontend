@@ -2,6 +2,18 @@
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
 
+/*
+function B_ThrowError(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Throw error!"));
+}
+B_ThrowError.prototype = Object.create(ReporterBlock.prototype);
+B_ThrowError.prototype.constructor = B_ThrowError;
+B_ThrowError.prototype.startAction = function() {
+	DebugOptions.throw("Execution of B_ThrowError");
+};
+*/
+
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
@@ -282,7 +294,7 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			var result = status.result.split(" ")[mem.axis];
+			const result = status.result.split(" ")[mem.axis];
 			return new ExecutionStatusResult(new NumData(Number(result), true));
 		} else {
 			if (status.result.length > 0) {

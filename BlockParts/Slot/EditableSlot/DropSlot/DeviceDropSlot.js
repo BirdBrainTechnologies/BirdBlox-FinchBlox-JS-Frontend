@@ -80,7 +80,8 @@ DeviceDropSlot.prototype.updateConnectionStatus = function(){
  * @param {InputWidget.SelectPad} selectPad - the pad to populate
  */
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
-	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	let deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	deviceCount = Math.max(1, deviceCount);
 	for (let i = 0; i < deviceCount; i++) {
 		// We'll store a 0-indexed value but display it +1.
 		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
@@ -169,7 +170,7 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		const myVal = this.getDataNotFromChild().getValue();
 		return myVal + 1;
 	} else {
-		return 1;
+		return 0;
 	}
 };
 
@@ -196,4 +197,14 @@ DeviceDropSlot.prototype.selectionDataFromValue = function(value){
  */
 DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
+};
+
+DeviceDropSlot.prototype.makeActive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeActive();
+};
+
+DeviceDropSlot.prototype.makeInactive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeInactive();
 };

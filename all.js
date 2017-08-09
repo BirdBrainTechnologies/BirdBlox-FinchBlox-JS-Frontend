@@ -2,1230 +2,2278 @@
 const FrontendVersion = 393;
 
 
-function DebugOptions(){
-	var DO = DebugOptions;
+/**
+ * This static class provides functions for debugging.  It had contracts and a safeFunc higher order function which
+ * wraps a function in a try/catch and shows an alert if there is an error.  When enabled is set to false, all these
+ * features turn off, except error logging, which happens silently in the background
+ */
+function DebugOptions() {
+	const DO = DebugOptions;
 	DO.enabled = false;
 
+	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
+	 * DO is not enabled */
+	DO.logErrors = true;
+	// Whether a dialog should be presented with the content of the error
+	DO.notifyErrors = true;
+
 	DO.mouse = false;
+	// On launch, virtual devices can be added
 	DO.addVirtualHB = true;
 	DO.addVirtualFlutter = false;
+	// When scanning, virtual devices can be added to the lists
+	DO.allowVirtualDevices = false;
 	DO.showVersion = false;
 	DO.showDebugMenu = true;
-	DO.logErrors = true;
+	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
 	DO.logHttp = true;
 	DO.skipInitSettings = false;
-	DO.blockLogging = false;
+	DO.allowLogging = true;
 	DO.skipHtmlRequests = false;
-	if(DO.enabled){
+	if (DO.enabled) {
 		DO.applyConstants();
 	}
 }
-DebugOptions.applyConstants = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
+
+/**
+ * Runs before other classes setConstants functions.  Provides an opportunity to do some setup
+ */
+DebugOptions.applyConstants = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
+	// Currently nothing happens here.
 };
 
-DebugOptions.applyActions = function(){
-	var DO = DebugOptions;
-	if(!DO.enabled) return;
-	if(DO.addVirtualHB){
-		let virHB = new DeviceHummingbird("Virtual HB","idOfVirtualHb");
-		DeviceHummingbird.getManager().setOneDevice(virHB);
+/**
+ * Runs after the UI is loaded
+ */
+DebugOptions.applyActions = function() {
+	const DO = DebugOptions;
+	if (!DO.enabled) return;
+	if (DO.addVirtualHB) {
+		let virHB = DO.createVirtualDevice(DeviceHummingbird, "");
+		DeviceHummingbird.getManager().appendDevice(virHB);
 	}
-	if(DO.addVirtualFlutter){
-		let virtual = new DeviceFlutter("Virtual F","idOfVirtualF");
-		DeviceFlutter.getManager().setOneDevice(virtual);
+	if (DO.addVirtualFlutter) {
+		let virHB = DO.createVirtualDevice(DeviceFlutter, "");
+		DeviceFlutter.getManager().appendDevice(virHB);
 	}
-	if(DO.showVersion){
-		GuiElements.alert("Version: "+GuiElements.appVersion);
+	if (DO.showVersion) {
+		GuiElements.alert("Version: " + GuiElements.appVersion);
 	}
-	if(DO.showDebugMenu){
+	if (DO.showDebugMenu) {
 		TitleBar.enableDebug();
 	}
 };
-DebugOptions.shouldLogErrors=function(){
-	return DebugOptions.logErrors && DebugOptions.enabled;
+
+/**
+ * Creates a virtual device with the specified type and id
+ * @param deviceClass - Subclass of Device
+ * @param {string} id - Used for name and id of device, with "Virtual" prepended to it
+ * @return {Device}
+ */
+DebugOptions.createVirtualDevice = function(deviceClass, id) {
+	const typeName = deviceClass.getDeviceTypeName(true);
+	const name = "Virtual" + typeName + id;
+	return new deviceClass(name, name);
 };
-DebugOptions.shouldSkipInitSettings=function(){
-	var DO = DebugOptions;
+
+/* These functions all check if a certain type of debugging should be enabled and are called from other classes. */
+/** @return {boolean} */
+DebugOptions.shouldLogErrors = function() {
+	return DebugOptions.logErrors;   // This is the one setting that still works if DO is not enabled.
+};
+/** @return {boolean} */
+DebugOptions.shouldNotifyErrors = function() {
+	return DebugOptions.notifyErrors && DebugOptions.enabled;
+};
+/** @return {boolean} */
+DebugOptions.shouldUseMouseMode = function() {
+	return DebugOptions.mouse && DebugOptions.enabled;
+};
+/** @return {boolean} */
+DebugOptions.shouldSkipInitSettings = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
-DebugOptions.shouldSkipHtmlRequests = function(){
-	var DO = DebugOptions;
+/** @return {boolean} */
+DebugOptions.shouldSkipHtmlRequests = function() {
+	const DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
-DebugOptions.shouldLogHttp=function(){
-	var DO = DebugOptions;
+/** @return {boolean} */
+DebugOptions.shouldUseJSDialogs = function() {
+	const DO = DebugOptions;
+	return DO.enabled && (DO.mouse);
+};
+/** @return {boolean} */
+DebugOptions.shouldLogHttp = function() {
+	const DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
 };
-DebugOptions.safeFunc = function(func){
-	if(func == null) return null;
-	if(DebugOptions.shouldLogErrors()){
-		return function(){
+/** @return {boolean} */
+DebugOptions.shouldAllowVirtualDevices = function() {
+	const DO = DebugOptions;
+	return DO.allowVirtualDevices && DO.enabled;
+};
+/** @return {boolean} */
+DebugOptions.shouldAllowLogging = function() {
+	const DO = DebugOptions;
+	return DO.allowLogging && DO.enabled;
+};
+
+/* These functions configure DO */
+DebugOptions.enableVirtualDevices = function() {
+	const DO = DebugOptions;
+	DO.allowVirtualDevices = true;
+};
+DebugOptions.stopErrorLocking = function() {
+	DebugOptions.lockErrors = false;
+};
+DebugOptions.enableLogging = function() {
+	DebugOptions.allowLogging = true;
+};
+
+/**
+ * This function takes in a function and returns a function wrapped in a try/catch that shows a dialog with a stack
+ * trace on error.  If DO isn't enabled, it just returns the original function.
+ * @param {function} func
+ * @return {function}
+ */
+DebugOptions.safeFunc = function(func) {
+	if (func == null) return null;
+	if (DebugOptions.shouldLogErrors() || DebugOptions.shouldNotifyErrors()) {
+		return function() {
 			try {
-				if(!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
+				if (!DebugOptions.errorLocked || !DebugOptions.lockErrors) {
 					func.apply(this, arguments);
 				}
-			}
-			catch(err) {
+			} catch (err) {
 				DebugOptions.errorLocked = true;
-				GuiElements.alert("ERROR: " + err.message);
-				HtmlServer.showChoiceDialog("ERROR",err.message + "\n" + err.stack ,"OK","OK",true, function(){});
+				const request = new HttpRequestBuilder("debug/log");
+				const errorTrace = err.message + "\n" + err.stack;
+				HtmlServer.sendRequestWithCallback(request.toString(), null, null, true, errorTrace);
+				if (DebugOptions.shouldNotifyErrors()) {
+					GuiElements.alert("ERROR: " + err.message);
+					DialogManager.showAlertDialog("ERROR", errorTrace, "OK");
+				}
 			}
 		}
-	}
-	else{
+	} else {
 		return func;
 	}
 };
-DebugOptions.validateNumbers = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(isNaN(arguments[i]) || !isFinite(arguments[i])){
+
+/* Contracts test a certain condition and throw an error if it isn't met */
+
+/**
+ * Verifies that all parameters are numbers that are finite and not NaN
+ */
+DebugOptions.validateNumbers = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
 			throw new UserException("Invalid Number");
 		}
 	}
 };
-DebugOptions.validateNonNull = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] == null){
+/**
+ * Verifies that all parameters are not null or undefined
+ */
+DebugOptions.validateNonNull = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] == null) {
 			throw new UserException("Null parameter");
 		}
 	}
 };
-DebugOptions.validateOptionalNums = function(){
-	if(!DebugOptions.shouldLogErrors()) return;
-	for(let i = 0; i < arguments.length; i++){
-		if(arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))){
+/**
+ * Verifies that all parameters are either numbers or null
+ */
+DebugOptions.validateOptionalNums = function() {
+	if (!DebugOptions.shouldLogErrors()) return;
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))) {
 			throw new UserException("Invalid optional number");
 		}
 	}
 };
-DebugOptions.assert = function(bool){
-	if(!bool && DebugOptions.shouldLogErrors()){
+/**
+ * Verifies that the boolean is true
+ * @param {boolean} bool
+ */
+DebugOptions.assert = function(bool) {
+	if (!bool && DebugOptions.shouldLogErrors()) {
 		throw new UserException("Assertion Failure");
 	}
 };
-DebugOptions.stopErrorLocking = function(){
-	DebugOptions.lockErrors = false;
-};
-DebugOptions.enableLogging = function(){
-	DebugOptions.blockLogging = false;
-};
-DebugOptions.throw = function(message){
-	if(!DebugOptions.shouldLogErrors()) return;
+/**
+ * Throws a custom message
+ * @param {string} message
+ */
+DebugOptions.throw = function(message) {
+	if (!DebugOptions.shouldLogErrors()) return;
 	throw new UserException(message);
 };
-DebugOptions.markAbstract = function(){
-	DebugOptions.throw("Abstract class may not be constructed");
+/**
+ * Marks that a function is abstract and must be overrided before it is run. If run it throws an error.
+ */
+DebugOptions.markAbstract = function() {
+	DebugOptions.throw("Abstract function may not be called");
 };
 
+/**
+ * A class for custom exceptions
+ * @param {string} message
+ * @constructor
+ */
 function UserException(message) {
 	this.message = message;
 	this.name = 'UserException';
-	this.stack = (new Error()).stack;
+	this.stack = (new Error()).stack;   // Get the call stack
 }
-function Data(type,value,isValid){
-	this.type=type;
-	this.value=value;
-	this.isValid=isValid;
-	if(isValid==null){
-		this.isValid=true;
+/**
+ * Data is used hold type information about values passed between executing Blocks.  It creates a sort of type system
+ * for the values obtained during Block execution.  For example, when an addition Block is run, it accepts two
+ * receives two NumData instances and returns a new NumData instance.  Since Blocks of the wrong type can often be
+ * snapped together (for example, the joinStrings Block can be put into a multiplication Block), all types of Data
+ * can be converted into any other type of Data (using asNum(), asString(), etc.).  However, whether the data is "valid"
+ * is also tracked, with nonsensical conversions always flagging the data as invalid.  Blocks can choose how to respond
+ * when the data they receive is invalid.  Data can also be saved to XML, which is used to save the contents of
+ * EditableSlots and values of variables to file.
+ *
+ * The types of data are invisible to the user, and those Data is always automatically converted to the most reasonable
+ * type automatically without the user's knowledge.
+ *
+ * All Data is treated as immutable
+ *
+ * Note that the Data class is abstract
+ *
+ * @param {number} type - [num, bool, string, list, selection]
+ * @param {*} value - The value being stored in the Data, should correspond to the type of Data
+ * @param {boolean} [isValid=true] - Whether the Data has not gone through any illegal conversions (equivalent of NaN)
+ * @constructor
+ */
+function Data(type, value, isValid) {
+	this.type = type;
+	this.value = value;
+	this.isValid = isValid;
+	if (isValid == null) {
+		this.isValid = true;
 	}
 }
-Data.setConstants=function(){
-	Data.types=function(){};
-	Data.types.num=0;
-	Data.types.bool=1;
-	Data.types.string=2;
-	Data.types.list=3;
-	Data.types.selection=4;//A selection from a block's drop down.  Could be a sound, variable, string, etc.
+
+Data.setConstants = function() {
+	Data.types = {};
+	Data.types.num = 0;
+	Data.types.bool = 1;
+	Data.types.string = 2;
+	Data.types.list = 3;
+	Data.types.selection = 4; //A selection from a block's drop down.  Could be a sound, variable, string, etc.
 };
-Data.prototype.asNum=function(){
-	return new NumData(0,false);
+
+/* These functions manage the conversion of one type of data into another.  By default, they produce invalid Data
+ * initialized to default values.  Subclasses provide better conversion functions where applicable
+ */
+
+Data.prototype.asNum = function() {
+	return new NumData(0, false);
 };
-Data.prototype.asBool=function(){
-	return new BoolData(false,false);
+Data.prototype.asBool = function() {
+	return new BoolData(false, false);
 };
-Data.prototype.asString=function(){
-	return new StringData("",false);
+Data.prototype.asString = function() {
+	return new StringData("", false);
 };
-Data.prototype.asList=function(){
-	return new ListData(null,false);
+Data.prototype.asList = function() {
+	return new ListData(null, false);
 };
-Data.prototype.asSelection = function(){
+Data.prototype.asSelection = function() {
 	return SelectionData.empty(false);
 };
-Data.prototype.getValue=function(){ //might remove
+
+/**
+ * Extracts the value from the data
+ * @return {*}
+ */
+Data.prototype.getValue = function() {
 	return this.value;
 };
-Data.prototype.isSelection = function(){
+
+/**
+ * Determines whether the Data is SelectionData
+ * @return {boolean}
+ */
+Data.prototype.isSelection = function() {
 	return this.type === Data.types.selection;
 };
-Data.prototype.isNumber = function(){
+
+/**
+ * Determines whether the Data will produce a valid number when asNum() is called.  For example,
+ * StringData("3").asNum() is valid with value 3.
+ * @return {boolean}
+ */
+Data.prototype.isNumber = function() {
 	return false;
 };
-Data.checkEquality=function(data1,data2){
-	var val1=data1.getValue();
-	var val2=data2.getValue();
-	var string1=data1.asString().getValue();
-	var string2=data2.asString().getValue();
-	var numD1=data1.asNum();
-	var numD2=data2.asNum();
-	var types=Data.types;
-	var isValid=data1.isValid&&data2.isValid;
-	if(data1.type==data2.type){ //If the types match, just compare directly.
-		return isValid&&val1==val2; //Invalid data is never equal.
-	}
-	else if(data1.type==types.string||data2.type==types.string){ //If one is a string...
-		if(string1==string2) { //If both strings match, result is true.
+
+/**
+ * Determines if two Data should be considered equal by the equality Block.
+ * @param {Data} data1
+ * @param {Data} data2
+ * @return {boolean}
+ */
+Data.checkEquality = function(data1, data2) {
+	const val1 = data1.getValue();
+	const val2 = data2.getValue();
+	const string1 = data1.asString().getValue();
+	const string2 = data2.asString().getValue();
+	const numD1 = data1.asNum();
+	const numD2 = data2.asNum();
+	const types = Data.types;
+	const isValid = data1.isValid && data2.isValid;
+	if (data1.type === data2.type) { //If the types match, just compare directly.
+		return isValid && val1 === val2; //Invalid data is never equal.
+	} else if (data1.type === types.string || data2.type === types.string) { //If one is a string...
+		if (string1 === string2) { //If both strings match, result is true.
 			return true;
-		}
-		else if(data1.type==types.num||data2.type==types.num){ //Still the numbers could match like "3.0"=3.
-			if(numD1.isValid&&numD2.isValid){ //If both are valid numbers...
-				return numD1.getValue()==numD2.getValue(); //Compare numerical values.
-			}
-			else{
+		} else if (data1.type === types.num || data2.type === types.num) { //Still the numbers could match like "3.0"=3.
+			if (numD1.isValid && numD2.isValid) { //If both are valid numbers...
+				return numD1.getValue() === numD2.getValue(); //Compare numerical values.
+			} else {
 				return false; //A string and unequal/invalid number are not equal.
 			}
-		}
-		else{
+		} else {
 			return false; //Two unequal, nonnumerical strings are unequal.
 		}
-	}
-	else{
+	} else {
 		return false; //If the types don't match and neither is a string, they are unequal.
 	}
 };
-Data.prototype.createXml=function(xmlDoc){
-	var data=XmlWriter.createElement(xmlDoc,"data");
-	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
-	XmlWriter.setAttribute(data,"isValid",this.isValid);
-	var value=XmlWriter.createElement(xmlDoc,"value");
-	var valueString=this.getValue()+"";
-	if(this.getValue().constructor.name=="Variable"){
-		valueString=this.getValue().name;
+
+/**
+ * Converts the Data to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node}
+ */
+Data.prototype.createXml = function(xmlDoc) {
+	// We store the type of Data, whether it is valid, and what its value is
+
+	const data = XmlWriter.createElement(xmlDoc, "data");
+	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
+	XmlWriter.setAttribute(data, "isValid", this.isValid);
+
+	// The value is converted to a string by appending "".  For Variables and Lists, the name is used.
+	const value = XmlWriter.createElement(xmlDoc, "value");
+	let valueString = this.getValue() + "";
+	if (this.getValue().constructor.name === "Variable") {
+		valueString = this.getValue().name;
+	} else if (this.getValue().constructor.name === "List") {
+		valueString = this.getValue().name;
 	}
-	else if(this.getValue().constructor.name=="List"){
-		valueString=this.getValue().name;
-	}
-	var valueText=XmlWriter.createTextNode(xmlDoc,valueString);
+	const valueText = XmlWriter.createTextNode(xmlDoc, valueString);
 	value.appendChild(valueText);
 	data.appendChild(value);
 	return data;
 };
-Data.importXml=function(dataNode){
-	var typeName=XmlWriter.getAttribute(dataNode,"type");
-	var type=Data.getDataTypeFromName(typeName);
-	if(type==null){
+
+/**
+ * Reads data from XML.  Returns null if Data is corrupt
+ * @param {Node} dataNode
+ * @return {Data|null}
+ */
+Data.importXml = function(dataNode) {
+	const typeName = XmlWriter.getAttribute(dataNode, "type");
+	const type = Data.getDataTypeFromName(typeName);
+	if (type == null) {
 		return null;
 	}
 	return type.importXml(dataNode);
 };
-Data.prototype.getDataTypeName=function(){
-	if(this.type==Data.types.num){
+
+/**
+ * Gets the string representation of this Data's type
+ * @return {string}
+ */
+Data.prototype.getDataTypeName = function() {
+	if (this.type === Data.types.num) {
 		return "num";
-	}
-	else if(this.type==Data.types.bool){
+	} else if (this.type === Data.types.bool) {
 		return "bool";
-	}
-	else if(this.type==Data.types.string){
+	} else if (this.type === Data.types.string) {
 		return "string";
-	}
-	else if(this.type==Data.types.list){
+	} else if (this.type === Data.types.list) {
 		return "list";
-	}
-	else if(this.type==Data.types.selection){
+	} else if (this.type === Data.types.selection) {
 		return "selection";
-	}
-	else{
-		return null;
+	} else {
+		DebugOptions.throw("Data is not a valid type");
 	}
 };
-Data.getDataTypeFromName=function(typeName){
-	if(typeName=="num"){
+
+/**
+ * Gets the class of Data from a string representing its type or null of the type is invalid
+ * @param {string} typeName
+ * @return {*|null} - A subclass of Data corresponding to the type, or null if no such subclass exists
+ */
+Data.getDataTypeFromName = function(typeName) {
+	if (typeName === "num") {
 		return NumData;
-	}
-	else if(typeName=="bool"){
+	} else if (typeName === "bool") {
 		return BoolData;
-	}
-	else if(typeName=="string"){
+	} else if (typeName === "string") {
 		return StringData;
-	}
-	else if(typeName=="list"){
+	} else if (typeName === "list") {
 		return ListData;
-	}
-	else if(typeName=="selection"){
+	} else if (typeName === "selection") {
 		return SelectionData;
-	}
-	else{
-		return null;
-	}
-};
-function NumData(value,isValid){
-	if(isNaN(value)||!isFinite(value)){
-		value=0;
-		isValid=false;
-	}
-	Data.call(this,Data.types.num,value,isValid);
-}
-NumData.prototype = Object.create(Data.prototype);
-NumData.prototype.constructor = NumData;
-NumData.prototype.asNum=function(){
-	return this;
-};
-NumData.prototype.asBool=function(){
-	if(this.getValue()==1){
-		return new BoolData(true,this.isValid);
-	}
-	else if(this.getValue()==0){
-		return new BoolData(false,this.isValid);
-	}
-	else{
-		return new BoolData(false,false);
-	}
-};
-NumData.prototype.asString=function(){
-	if(this.isValid){
-		var num=this.getValue();
-		num=+num.toFixed(10);
-		return new StringData(num+"",true);
-	}
-	else{
-		return new StringData("not a valid number");
-	}
-};
-NumData.prototype.asPositiveString=function(){ //Converts to a string but avoids scientific notation
-	var num=Math.abs(this.getValue());
-	num=+num.toFixed(10);
-	return new StringData(num+"",true);
-};
-NumData.prototype.getValueInR=function(min,max,positive,integer){
-	var val=this.getValue();
-	if(positive==true&&val<0){
-		val=0;
-	}
-	if(integer==true){
-		val=Math.round(val);
-	}
-	if(min != null && val<min){
-		val=min;
-	}
-	if(max != null && val>max){
-		val=max;
-	}
-	return val;
-};
-NumData.prototype.getValueWithC=function(positive,integer){
-	var val=this.getValue();
-	if(positive==true&&val<0){
-		val=0;
-	}
-	if(integer==true){
-		val=Math.round(val);
-	}
-	return val;
-};
-NumData.importXml=function(dataNode){
-	const value=XmlWriter.getTextNode(dataNode,"value",null,true);
-	if(value == null) return null;
-	const stringData = new StringData(value);
-	const numData = stringData.asNum();
-	if(numData.isValid){
-		return numData;
 	} else {
 		return null;
 	}
 };
-function BoolData(value,isValid){
-	Data.call(this,Data.types.bool,value,isValid);
+/**
+ * Data that contains a number value
+ * @param value
+ * @param isValid
+ * @constructor
+ */
+function NumData(value, isValid) {
+	if (isNaN(value) || !isFinite(value)) {
+		value = 0;
+		isValid = false;
+	}
+	Data.call(this, Data.types.num, value, isValid);
+}
+NumData.prototype = Object.create(Data.prototype);
+NumData.prototype.constructor = NumData;
+
+/**
+ * @return {NumData}
+ */
+NumData.prototype.asNum = function() {
+	return this;
+};
+
+/**
+ * 0 becomes false and 1 becomes true.  Anything else is invalid
+ * @return {BoolData}
+ */
+NumData.prototype.asBool = function() {
+	if (this.getValue() === 1) {
+		return new BoolData(true, this.isValid);
+	} else if (this.getValue() === 0) {
+		return new BoolData(false, this.isValid);
+	} else {
+		return new BoolData(false, false);
+	}
+};
+
+/**
+ * Rounds number and displays it
+ * @return {StringData}
+ */
+NumData.prototype.asString = function() {
+	if (this.isValid) {
+		let num = this.getValue();
+		num = +num.toFixed(10);
+		return new StringData(num + "", true);
+	} else {
+		return new StringData("not a valid number");
+	}
+};
+
+/**
+ * Converts to a string but avoids scientific notation
+ * @return {StringData}
+ */
+NumData.prototype.asPositiveString = function() {
+	let num = Math.abs(this.getValue());
+	num = +num.toFixed(10);
+	return new StringData(num + "", true);
+};
+
+/**
+ * Gets the NumData's value within a range.
+ * @param {number} [min] - The lower bound
+ * @param {number} [max] - The upper bound
+ * @param {boolean} positive - Whether the number should be non-negative
+ * @param {boolean} integer - Whether the number should be rounded to the nearest integer
+ * @return {number}
+ */
+NumData.prototype.getValueInR = function(min, max, positive, integer) {
+	let val = this.getValue();
+	if (positive === true && val < 0) {
+		val = 0;
+	}
+	if (integer === true) {
+		val = Math.round(val);
+	}
+	if (min != null && val < min) {
+		val = min;
+	}
+	if (max != null && val > max) {
+		val = max;
+	}
+	return val;
+};
+
+/**
+ * Returns the value of the NumData, possibly non-negative or rounded to the nearest integer
+ * @param {boolean} [positive=false] - Whether the number should be non-negative
+ * @param {boolean} [integer=false] - Whether the number should be rounded to the nearest integer
+ * @return {number}
+ */
+NumData.prototype.getValueWithC = function(positive, integer) {
+	let val = this.getValue();
+	if (positive === true && val < 0) {
+		val = 0;
+	}
+	if (integer === true) {
+		val = Math.round(val);
+	}
+	return val;
+};
+
+/**
+ * Imports the NumData from XML
+ * @param {Node} dataNode
+ * @return {NumData|null}
+ */
+NumData.importXml = function(dataNode) {
+	const value = XmlWriter.getTextNode(dataNode, "value", null, true);
+	if (value == null) return null;
+	// We use StringData to help with the conversion
+	const stringData = new StringData(value);
+	const numData = stringData.asNum();
+	if (numData.isValid) {
+		return numData;
+	} else {
+		// It's not a number.  Treat it as corrupt.
+		return null;
+	}
+};
+/**
+ * Data that contains a boolean value
+ * @param {boolean} value
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function BoolData(value, isValid) {
+	Data.call(this, Data.types.bool, value, isValid);
 }
 BoolData.prototype = Object.create(Data.prototype);
 BoolData.prototype.constructor = BoolData;
-BoolData.prototype.asNum=function(){
-	if(this.getValue()){
-		return new NumData(1,this.isValid);
+
+/**
+ * Converts true to 1 and false to 0
+ * @return {NumData}
+ */
+BoolData.prototype.asNum = function() {
+	if (this.getValue()) {
+		return new NumData(1, this.isValid);
+	} else {
+		return new NumData(0, this.isValid);
 	}
-	else{
-		return new NumData(0,this.isValid);
-	}
-}
-BoolData.prototype.asBool=function(){
-	return this;
-}
-BoolData.prototype.asString=function(){
-	if(this.getValue()){
-		return new StringData("true",true);
-	}
-	else{
-		return new StringData("false",true);
-	}
-}
-BoolData.importXml=function(dataNode){
-	let value = XmlWriter.getTextNode(dataNode, "value");
-	if(value == null) return null;
-	return new BoolData(value == "true");
 };
-function StringData(value,isValid){
-	Data.call(this,Data.types.string,value,isValid);
+
+/**
+ * @return {BoolData}
+ */
+BoolData.prototype.asBool = function() {
+	return this;
+};
+
+/**
+ * @return {StringData}
+ */
+BoolData.prototype.asString = function() {
+	if (this.getValue()) {
+		return new StringData("true", true);
+	} else {
+		return new StringData("false", true);
+	}
+};
+
+/**
+ * @param {Document} dataNode
+ * @return {BoolData|null}
+ */
+BoolData.importXml = function(dataNode) {
+	let value = XmlWriter.getTextNode(dataNode, "value");
+	if (value == null) return null;
+	return new BoolData(value === "true");
+};
+/**
+ * Data that contains a string.
+ * @param {string} value
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function StringData(value, isValid) {
+	Data.call(this, Data.types.string, value, isValid);
 }
 StringData.prototype = Object.create(Data.prototype);
 StringData.prototype.constructor = StringData;
-StringData.prototype.asNum=function(){
-	if(this.isNumber()){
-		return new NumData(parseFloat(this.getValue()),this.isValid);
+
+/**
+ * If the value could represent a number, it is converted to valid NumData.  Otherwise, invalid NumData(0) is returned
+ * @return {NumData}
+ */
+StringData.prototype.asNum = function() {
+	if (this.isNumber()) {
+		return new NumData(parseFloat(this.getValue()), this.isValid);
+	} else {
+		return new NumData(0, false);
 	}
-	else{
-		return new NumData(0,false);
+};
+
+/**
+ * The string is a valid boolean if it is "true" or "false" (any casing)
+ * @return {BoolData}
+ */
+StringData.prototype.asBool = function() {
+	if (this.getValue().toUpperCase() === "TRUE") {
+		return new BoolData(true, this.isValid);
+	} else if (this.getValue().toUpperCase() === "FALSE") {
+		return new BoolData(false, this.isValid);
 	}
-}
-StringData.prototype.asBool=function(){
-	if(this.getValue().toUpperCase()=="TRUE"){
-		return new BoolData(true,this.isValid);
-	}
-	else if(this.getValue().toUpperCase()=="FALSE"){
-		return new BoolData(false,this.isValid);
-	}
-	return new BoolData(false,false);
-}
-StringData.prototype.asString=function(){
+	return new BoolData(false, false);
+};
+
+/**
+ * @return {StringData}
+ */
+StringData.prototype.asString = function() {
 	return this;
-}
-StringData.prototype.isNumber=function(){ //Checks to see if the number can be converted to a valid number
-	var numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/  //from https://en.wikipedia.org/wiki/Regular_expression
+};
+
+/**
+ * Checks to see if the number can be converted to a valid number
+ * @return {boolean}
+ */
+StringData.prototype.isNumber = function() {
+	//from https://en.wikipedia.org/wiki/Regular_expression
+	const numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
 	return numberRE.test(this.getValue());
-}
-StringData.importXml=function(dataNode){
-	var value=XmlWriter.getTextNode(dataNode,"value");
-	if(value == null) return null;
+};
+
+/**
+ * Imports StringData from XML
+ * @param {Node} dataNode
+ * @return {StringData|null}
+ */
+StringData.importXml = function(dataNode) {
+	const value = XmlWriter.getTextNode(dataNode, "value");
+	if (value == null) return null;
 	return new StringData(value);
 };
-//Not implemented
-function ListData(value,isValid){
-	if(value==null){
-		value=new Array();
+/**
+ * ListData holds an array of Data objects as its value.  So to access a string in index 2 of a ListData, you'd do:
+ * myListData.getValue()[2].asString().getValue()
+ * @param {Array} [value=[]]
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function ListData(value, isValid) {
+	if (value == null) {
+		value = [];
 	}
-	Data.call(this,Data.types.list,value,isValid);
+	Data.call(this, Data.types.list, value, isValid);
 }
 ListData.prototype = Object.create(Data.prototype);
 ListData.prototype.constructor = ListData;
-ListData.prototype.duplicate=function(){
-	var arrayCopy=new Array();
-	for(var i=0;i<this.value.length;i++){
+
+/**
+ * Creates a copy of the ListData
+ * @return {ListData}
+ */
+ListData.prototype.duplicate = function() {
+	const arrayCopy = [];
+	for (let i = 0; i < this.value.length; i++) {
 		arrayCopy.push(this.value[i]);
 	}
-	return new ListData(arrayCopy,this.isValid);
+	return new ListData(arrayCopy, this.isValid);
 };
-ListData.prototype.asNum=function(){
-	if(this.value.length==1){
+
+/**
+ * Is a num if it only has one item and that item is a num
+ * @return {NumData}
+ */
+ListData.prototype.asNum = function() {
+	if (this.value.length === 1) {
 		return this.value[0].asNum();
-	}
-	else{
-		return new NumData(0,false);
+	} else {
+		return new NumData(0, false);
 	}
 };
-ListData.prototype.asString=function(){
-	var resultStr="";
-	for(var i=0;i<this.value.length;i++){
-		resultStr+=this.value[i].asString().getValue();
-		if(i<this.value.length-1){
-			resultStr+=", ";
+
+/**
+ * Prints all elements, comma separated, to a string
+ * @return {StringData}
+ */
+ListData.prototype.asString = function() {
+	let resultStr = "";
+	for (let i = 0; i < this.value.length; i++) {
+		resultStr += this.value[i].asString().getValue();
+		if (i < this.value.length - 1) {
+			resultStr += ", ";
 		}
 	}
-	return new StringData(resultStr,true);
+	return new StringData(resultStr, true);
 };
-ListData.prototype.asBool=function(){
-	if(this.value.length==1){
+
+/**
+ * Is a Bool if it only has one value and that value is a bool
+ * @return {BoolData}
+ */
+ListData.prototype.asBool = function() {
+	if (this.value.length === 1) {
 		return this.value[0].asBool();
-	}
-	else{
-		return new BoolData(false,false);
+	} else {
+		return new BoolData(false, false);
 	}
 };
-ListData.prototype.asList=function(){
+
+/**
+ * @return {ListData}
+ */
+ListData.prototype.asList = function() {
 	return this;
 };
-ListData.prototype.getIndex=function(indexData){
-	var array=this.getValue();
-	if(array.length==0){
-		return null;
+
+/**
+ * Converts NumData/SelectionData referring to an index into a number that refers to an index in the ListData, or null
+ * @param {Data|null} indexData
+ * @return {number|null}
+ */
+ListData.prototype.getIndex = function(indexData) {
+	const array = this.getValue();
+	if (array.length === 0) {
+		return null; // There are no valid indices to return
 	}
-	if(indexData==null){
-		return null;
+	if (indexData == null) {
+		return null; // The index data is already invalid
 	}
-	var indexV=indexData.getValue();
-	var min=1;
-	var max=array.length;
-	if(indexData.type==Data.types.selection){
-		if(indexV=="last"){
-			return array.length-1;
-		}
-		else if(indexV=="random"){
+	const indexV = indexData.getValue();
+	const min = 1;
+	const max = array.length;
+	if (indexData.type === Data.types.selection) {
+		if (indexV === "last") {
+			// Return the index of the last item
+			return array.length - 1;
+		} else if (indexV === "random") {
+			// Return an index of a random item
 			return Math.floor(Math.random() * array.length);
-		}
-		else{
+		} else {
+			// The data is not valid.  Return null.
 			return null;
 		}
-	}
-	else if(indexData.type==Data.types.num){
-		if(!indexData.isValid){
+	} else {
+		// If it isn't selectionData, the index should be NumData
+		indexData = indexData.asNum();
+		if (!indexData.isValid) {
+			// The data is not valid.  Return null.
 			return null;
 		}
-		return indexData.getValueInR(min,max,true,true)-1;
-	}
-	else{
-		return null;
+		// Clamps the index to the bounds of the array
+		return indexData.getValueInR(min, max, true, true) - 1;
 	}
 };
-ListData.prototype.createXml=function(xmlDoc){
-	var data=XmlWriter.createElement(xmlDoc,"data");
-	XmlWriter.setAttribute(data,"type",this.getDataTypeName());
-	XmlWriter.setAttribute(data,"isValid",this.isValid);
-	var value=xmlDoc.createElement("value");
-	for(var i=0;i<this.value.length;i++){
+
+/**
+ * @inheritDoc
+ * @param {Document} xmlDoc
+ * @return {Node}
+ */
+ListData.prototype.createXml = function(xmlDoc) {
+	const data = XmlWriter.createElement(xmlDoc, "data");
+	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
+	XmlWriter.setAttribute(data, "isValid", this.isValid);
+
+	// The value is a list of Data objects
+	const value = xmlDoc.createElement("value");
+	for (let i = 0; i < this.value.length; i++) {
 		value.appendChild(this.value[i].createXml(xmlDoc));
 	}
 	data.appendChild(value);
 	return data;
 };
-ListData.importXml=function(dataNode){
-	var valueNode=XmlWriter.findSubElement(dataNode,"value");
-	var dataNodes=XmlWriter.findSubElements(valueNode,"data");
-	var valueArray=[];
-	for(var i=0;i<dataNodes.length;i++){
-		var dataEntry=Data.importXml(dataNodes[i]);
-		if(dataEntry!=null){
+
+/**
+ * Creates a ListData from XML
+ * @param {Node} dataNode
+ * @return {ListData}
+ */
+ListData.importXml = function(dataNode) {
+	const valueNode = XmlWriter.findSubElement(dataNode, "value");
+	const dataNodes = XmlWriter.findSubElements(valueNode, "data");
+	const valueArray = [];
+	for (let i = 0; i < dataNodes.length; i++) {
+		// Add every valid data node
+		const dataEntry = Data.importXml(dataNodes[i]);
+		if (dataEntry != null) {
 			valueArray.push(dataEntry);
 		}
 	}
 	return new ListData(valueArray);
 };
-function SelectionData(displayText, value, isValid){
+/**
+ * Effectively the "enum" datatype.  Used for selections from DropSlots.  Has both displayText (what the user sees
+ * the option listed as) and a value (used internally) that could be anything (number, string).  Selecting a Variable
+ * or List from a DropSlot results in SelectionData with a value that's a reference to a Variable or List.  However,
+ * when SelectionData is written to XML, the value is first turned into a string.  The Block using the SelectionData
+ * reconstructs the correct value from the string.
+ *
+ * SelectionData uses "" as the value for "Empty SelectionData" (essentially null) when nothing it selected.
+ *
+ * @param {string} displayText - The text shown to the user on the DropSlot with this data
+ * @param {*} value - Used internally, type depends on context
+ * @param {boolean} [isValid=true]
+ * @constructor
+ */
+function SelectionData(displayText, value, isValid) {
+	// Only the empty SelectionData can have "" as the value.  So value === "" implies displayText === ""
+	DebugOptions.assert(value !== "" || displayText === "");
+
 	DebugOptions.validateNonNull(displayText, value);
-	Data.call(this,Data.types.selection, value, isValid);
+	Data.call(this, Data.types.selection, value, isValid);
 	this.displayText = displayText;
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
-SelectionData.prototype.asString = function(){
+
+/**
+ * When converted to a string, the display text is used
+ * @return {StringData}
+ */
+SelectionData.prototype.asString = function() {
 	return new StringData(this.displayText, true);
 };
-SelectionData.prototype.asSelection = function(){
+
+/**
+ * @return {SelectionData}
+ */
+SelectionData.prototype.asSelection = function() {
 	return this;
 };
-SelectionData.prototype.isEmpty = function(){
+
+/**
+ * Returns whether this SelectionData is the empty (null) SelectionData.
+ * @return {boolean}
+ */
+SelectionData.prototype.isEmpty = function() {
 	return this.value === "";
 };
-SelectionData.importXml=function(dataNode){
+
+/**
+ * Generates SelectionData from XML.  When imported, displayText = "" and value is a string.  All DropSlots/RoundSlots
+ * sanitize the data and reconstruct the original displayText and value.  This prevents the user from editing their
+ * save file to put arbitrary, invalid displayText in the SelectionData.  It also allows us to change the displayed
+ * text of an option without breaking save files
+ * @param {Node} dataNode
+ * @return {SelectionData|null}
+ */
+SelectionData.importXml = function(dataNode) {
 	const value = XmlWriter.getTextNode(dataNode, "value");
-	if(value == null) return null;
+	if (value == null) return null;
 	return new SelectionData("", value);
 };
-SelectionData.empty = function(isValid){
+
+/**
+ * Returns new empty SelectionData
+ * TODO: perhaps remove isValid parameter
+ * @param {boolean} [isValid=true]
+ * @return {SelectionData}
+ */
+SelectionData.empty = function(isValid) {
 	return new SelectionData("", "", isValid);
 };
-
-
 /**
- * Created by Tom on 6/2/2017.
- */
-
-/**
+ * An abstract class for executing Blocks/Stacks/Slots/BlockSlots to convey their execution status.
  * @constructor
- * @classdesc An abstract class for executing Blocks/Stacks/Slots/BlockSlots to convey their execution status.
- * @abstract
  */
-function ExecutionStatus(){
+function ExecutionStatus() {
 	DebugOptions.markAbstract();
 }
+
 /**
  * Is the block/stack/slot currently running?
- * @returns {boolean}
+ * @return {boolean}
  */
-ExecutionStatus.prototype.isRunning = function(){
+ExecutionStatus.prototype.isRunning = function() {
 	return false;
 };
+
 /**
  * Has the block/stack/slot encountered an error?
- * @returns {boolean}
+ * @return {boolean}
  */
-ExecutionStatus.prototype.hasError = function(){
+
+ExecutionStatus.prototype.hasError = function() {
 	return false;
 };
+
 /**
  * What is the result of execution.
- * @returns {Data}
+ * @return {Data}
  */
-ExecutionStatus.prototype.getResult = function(){
+ExecutionStatus.prototype.getResult = function() {
 	return null;
 };
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a completed block that returns a value
+ * @param {Data} result - The data from execution
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a completed block
- * @class
- * @augments ExecutionStatus
- * @param {Data!} result - The error that occurred
- */
-function ExecutionStatusResult(result){
-	/** @type {Data!} */
+function ExecutionStatusResult(result) {
 	this.result = result;
 }
 ExecutionStatusResult.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusResult.constructor = ExecutionStatusResult;
+
 /**
  * @inheritDoc
+ * @return {Data}
  */
-ExecutionStatusResult.prototype.getResult = function(){
+ExecutionStatusResult.prototype.getResult = function() {
 	return this.result;
 };
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a block with an error
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a block with an error
- * @class
- * @augments ExecutionStatus
- */
-function ExecutionStatusError(){
+function ExecutionStatusError() {
 
 }
 ExecutionStatusError.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusError.constructor = ExecutionStatusError;
+
 /**
  * @inheritDoc
+ * @return {boolean}
  */
-ExecutionStatusError.prototype.hasError = function(){
+ExecutionStatusError.prototype.hasError = function() {
 	return true;
 };
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a block that is done but does not return a value
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a block that is done but does not return a value
- * @class
- * @augments ExecutionStatus
- */
-function ExecutionStatusDone(){
+function ExecutionStatusDone() {
 
 }
 ExecutionStatusDone.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusDone.constructor = ExecutionStatusDone;
 /**
- * Created by Tom on 6/2/2017.
+ * Execution status of a running block
+ * @constructor
  */
-
-/**
- * @classdesc Execution status of a running block
- * @class
- * @augments ExecutionStatus
- */
-function ExecutionStatusRunning(){
+function ExecutionStatusRunning() {
 
 }
 ExecutionStatusRunning.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusRunning.constructor = ExecutionStatus;
+
 /**
  * @inheritDoc
+ * @return {boolean}
  */
-ExecutionStatusRunning.prototype.isRunning = function(){
+ExecutionStatusRunning.prototype.isRunning = function() {
 	return true;
 };
 /**
- * Created by Tom on 6/23/2017.
+ * Represents a timer that fires a function regularly.  The timer doesn't start until start() is called.
+ * @param {number} interval - Time between tics in milliseconds
+ * @param {function} callbackFn - The function to call each tick
+ * @constructor
  */
 function Timer(interval, callbackFn){
 	this.interval = interval;
 	this.callbackFn = callbackFn;
 	this.updateTimer = null;
 }
+
+/**
+ * Starts the timer
+ */
 Timer.prototype.start = function(){
 	if(this.updateTimer == null) {
 		this.updateTimer = self.setInterval(this.tick.bind(this), this.interval);
 	}
 };
+
+/**
+ * Stops the timer
+ */
 Timer.prototype.stop = function(){
 	if(this.updateTimer != null){
 		this.updateTimer = window.clearInterval(this.updateTimer);
 		this.updateTimer = null;
 	}
 };
+
+/**
+ * Called each tick
+ */
 Timer.prototype.tick = function(){
 	if(this.callbackFn != null) this.callbackFn();
 };
+
+/**
+ * Returns whether the timer is running
+ * @return {boolean}
+ */
 Timer.prototype.isRunning = function(){
 	return this.updateTimer != null;
 };
-function Variable(name, data){
-	this.name=name;
-	this.data=data;
-	if(this.data==null){
-		this.data=new NumData(0);
+/**
+ * Represents a user-created Variable that is part of the current project.  A variable can hold NumData, StringData,
+ * and BoolData, but not ListData or SelectionData.
+ * @param {string} name - The name of the variable
+ * @param {Data} [data] - The initial data in the variable
+ * @constructor
+ */
+function Variable(name, data) {
+	this.name = name;
+	this.data = data;
+	if (this.data == null) {
+		this.data = new NumData(0);
 	}
 	CodeManager.addVariable(this);
 }
-Variable.prototype.getName=function(){
+
+/**
+ * Gets the name of the Variable
+ * @return {string}
+ */
+Variable.prototype.getName = function() {
 	return this.name;
 };
-Variable.prototype.getSelectionData = function(){
+
+/**
+ * Returns SelectionData for the Variable to be selected from a DropSlot
+ * @return {SelectionData}
+ */
+Variable.prototype.getSelectionData = function() {
 	return new SelectionData(this.name, this);
 };
-Variable.prototype.getData=function(){
+
+/**
+ * Gets the data stored in the Variable
+ * @return {Data}
+ */
+Variable.prototype.getData = function() {
 	return this.data;
 };
-Variable.prototype.setData=function(data){
-	this.data=data;
+
+/**
+ * Sets the data in the Variable
+ * @param data
+ */
+Variable.prototype.setData = function(data) {
+	this.data = data;
 };
-Variable.prototype.remove=function(){
-	this.data=null;
+
+/**
+ * Removes the Variable from the CodeManager
+ */
+Variable.prototype.remove = function() {
+	this.data = null;
 	CodeManager.removeVariable(this);
 };
-Variable.prototype.createXml=function(xmlDoc) {
-	var variable = XmlWriter.createElement(xmlDoc, "variable");
+
+/**
+ * Exports information about the Variable to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The node for the Variable
+ */
+Variable.prototype.createXml = function(xmlDoc) {
+	const variable = XmlWriter.createElement(xmlDoc, "variable");
 	XmlWriter.setAttribute(variable, "name", this.name);
 	variable.appendChild(this.data.createXml(xmlDoc));
 	return variable;
 };
-Variable.importXml=function(variableNode){
-	var name=XmlWriter.getAttribute(variableNode,"name");
-	if(name!=null){
-		var dataNode=XmlWriter.findSubElement(variableNode,"data");
-		var data=new NumData(0);
-		if(dataNode!=null){
-			var newData=Data.importXml(dataNode);
-			if(newData!=null){
-				data=newData;
+
+/**
+ * Creates a Variable from XML
+ * @param {Node} variableNode
+ * @return {Variable|null}
+ */
+Variable.importXml = function(variableNode) {
+	const name = XmlWriter.getAttribute(variableNode, "name");
+	if (name != null) {
+		const dataNode = XmlWriter.findSubElement(variableNode, "data");
+		let data = new NumData(0);
+		if (dataNode != null) {
+			const newData = Data.importXml(dataNode);
+			if (newData != null) {
+				data = newData;
 			}
 		}
-		return new Variable(name,data);
+		return new Variable(name, data);
 	}
+	return null
 };
-Variable.prototype.rename=function(){
-	var callbackFn=function(cancelled,response){
-		if(!cancelled&&CodeManager.checkVarName(response)){
-			callbackFn.variable.name=response;
+
+/**
+ * Prompts the user to rename the variable
+ */
+Variable.prototype.rename = function() {
+	const callbackFn = function(cancelled, response) {
+		if (!cancelled && CodeManager.checkVarName(response)) {
+			callbackFn.variable.name = response;
 			CodeManager.renameVariable(callbackFn.variable);
 		}
 	};
-	callbackFn.variable=this;
-	HtmlServer.showDialog("Rename variable","Enter variable name",this.name,true,callbackFn);
+	callbackFn.variable = this;
+	DialogManager.showPromptDialog("Rename variable", "Enter variable name", this.name, true, callbackFn);
 };
-Variable.prototype.delete=function(){
-	if(CodeManager.checkVariableUsed(this)) {
-		var callbackFn = function (response) {
-			if (response == "2") {
+
+/**
+ * Prompts the user to delete the Variable
+ */
+Variable.prototype.delete = function() {
+	if (CodeManager.checkVariableUsed(this)) {
+		const callbackFn = function(response) {
+			if (response === "2") {
 				callbackFn.variable.remove();
 				CodeManager.deleteVariable(callbackFn.variable);
 			}
 		};
 		callbackFn.variable = this;
-		var question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
+		let question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
-		HtmlServer.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
-	}
-	else{
+		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);
 	}
 };
-function List(name,data){
-	this.name=name;
-	if(data!=null){
-		this.data=data;
-	}
-	else{
-		this.data=new ListData();
+/**
+ * Represents a user-created List that is part of the current project.  A list holds ListData, which in turn contains
+ * an array.  Lists can be edited, while the ListData they pass should not be butated while another object is using it.
+ * Two Lists can't point to the same ListData, so there should never be aliasing.
+ * @param {string} name - The name of the list.  Must be unique among Lists
+ * @param {ListData} data - The data to initialize this list with
+ * @constructor
+ */
+function List(name, data) {
+	this.name = name;
+	if (data != null) {
+		this.data = data;
+	} else {
+		this.data = new ListData();
 	}
 	CodeManager.addList(this);
 }
-List.prototype.getName=function(){
+
+/**
+ * Retrieves the name of the list
+ * @return {string}
+ */
+List.prototype.getName = function() {
 	return this.name;
 };
-List.prototype.getSelectionData = function(){
+
+/**
+ * Creates SelectionData for choosing the List from a DropSlot
+ * @return {SelectionData}
+ */
+List.prototype.getSelectionData = function() {
 	return new SelectionData(this.name, this);
 };
-List.prototype.changeName=function(newName){
-	if(this.name!=this.newName){
-		this.name=newName;
-	}
-};
-List.prototype.getData=function(){
+
+/**
+ * Retrieves the ListData from the List
+ * @return {ListData}
+ */
+List.prototype.getData = function() {
 	return this.data;
 };
-List.prototype.setData=function(data){
-	this.data=data;
+
+/**
+ * Sets the List's ListData
+ * @param {ListData} data
+ */
+List.prototype.setData = function(data) {
+	this.data = data;
 };
-List.prototype.remove=function(){
-	this.data=null;
+
+/**
+ * Removes the list from the CodeManager, effectively deleting it
+ */
+List.prototype.remove = function() {
+	this.data = null;
 	CodeManager.removeList(this);
 };
-List.prototype.createXml=function(xmlDoc) {
-	var list = XmlWriter.createElement(xmlDoc, "list");
+
+/**
+ * Saves information about the List to XML
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The XML Node for the List
+ */
+List.prototype.createXml = function(xmlDoc) {
+	const list = XmlWriter.createElement(xmlDoc, "list");
 	XmlWriter.setAttribute(list, "name", this.name);
 	list.appendChild(this.data.createXml(xmlDoc));
 	return list;
 };
-List.importXml=function(listNode){
-	var name=XmlWriter.getAttribute(listNode,"name");
-	if(name!=null){
-		var dataNode=XmlWriter.findSubElement(listNode,"data");
-		var data=new ListData();
-		if(dataNode!=null){
-			var newData=Data.importXml(dataNode);
-			if(newData!=null){
-				data=newData;
+
+/**
+ * Creates a List from XML
+ * @param {Element} listNode - The XML Node with information about the List
+ * @return {List}
+ */
+List.importXml = function(listNode) {
+	const name = XmlWriter.getAttribute(listNode, "name");
+	if (name != null) {
+		const dataNode = XmlWriter.findSubElement(listNode, "data");
+		let data = new ListData();
+		if (dataNode != null) {
+			const newData = Data.importXml(dataNode);
+			if (newData != null) {
+				data = newData;
 			}
 		}
-		return new List(name,data);
+		return new List(name, data);
 	}
 };
-List.prototype.rename=function(){
-	var callbackFn=function(cancelled,response){
-		if(!cancelled&&CodeManager.checkListName(response)){
-			callbackFn.list.name=response;
-			CodeManager.renameList(callbackFn.list);
+
+/**
+ * Prompts the user to rename the list
+ */
+List.prototype.rename = function() {
+	const callbackFn = function(cancelled, response) {
+		if (!cancelled && CodeManager.checkListName(response)) {
+			this.name = response;
+			CodeManager.renameList(this);
 		}
-	};
-	callbackFn.list=this;
-	HtmlServer.showDialog("Rename list","Enter list name",this.name,true,callbackFn);
+	}.bind(this);
+	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
 };
-List.prototype.delete=function(){
-	if(CodeManager.checkListUsed(this)) {
-		var callbackFn = function (response) {
-			if (response == "2") {
-				callbackFn.list.remove();
-				CodeManager.deleteList(callbackFn.list);
+
+/**
+ * Prompts the user to delete the list, or just deletes it if it is never used
+ */
+List.prototype.delete = function() {
+	if (CodeManager.checkListUsed(this)) {
+		const callbackFn = function(response) {
+			if (response === "2") {
+				this.remove();
+				CodeManager.deleteList(this);
 			}
-		};
+		}.bind(this);
 		callbackFn.list = this;
-		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
+		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
-		HtmlServer.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
-	}
-	else{
+		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+	} else {
 		this.remove();
 		CodeManager.deleteList(this);
 	}
 };
-/*
-List.prototype.getIndex=function(indexData){
-	var listData=this.data;
-	var array=listData.getValue();
-	if(array.length==0){
-		return null;
-	}
-	if(indexData==null){
-		return null;
-	}
-	var indexV=indexData.getValue();
-	var min=1;
-	var max=array.length;
-	if(indexData.type==Data.types.selection){
-		if(indexV=="last"){
-			return array.length-1;
-		}
-		else if(indexV=="random"){
-			return Math.floor(Math.random() * array.length);
-		}
-		else{
-			return null;
-		}
-	}
-	else if(indexData.type==Data.types.num){
-		if(!indexData.isValid){
-			return null;
-		}
-		return indexData.getValueInR(min,max,true,true)-1;
-	}
-	else{
-		return null;
-	}
-};*/
 /**
- * Created by Tom on 6/14/2017.
+ * Device is an abstract class.  Each subclass (DeviceHummingbird, DeviceFlutter) represents a specific type of
+ * robot.  Instances of the Device class have functions to to issue Bluetooth commands for connecting, disconnecting,
+ * and reading/writing inputs/outputs.  The name field is what is shown to the user while the id field is used when
+ * communicating with the backend.  Frequently, functions/constructors accept subclasses rather than instances of the
+ * device class when they need information about a specific type of robot.  Each device subclass has its own
+ * DeviceManager instance which manages connections to that type of robot
+ *
+ * @param {string} name - The display name of the device
+ * @param {string} id - The string used to refer to the device when communicating with the backend
+ * @constructor
  */
-function Device(name, id){
+function Device(name, id) {
 	this.name = name;
 	this.id = id;
-	this.status = DeviceManager.statuses.disconnected;
+
+	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
+	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
+	 * the user is trying to connect to, but with a red status light. */
+	this.connected = false;
+	/** @type {Device.firmwareStatuses} */
+	this.firmwareStatus = Device.firmwareStatuses.upToDate;
+
+	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
+	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
+	this.firmwareStatusListener = null;
 }
-Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName){
-	deviceClass.getDeviceTypeName = function(shorten, maxChars){
-		if(shorten || typeName.length > maxChars){
+
+Device.setStatics = function() {
+	/** @enum {string} */
+	Device.firmwareStatuses = {
+		upToDate: "upToDate",
+		old: "old",
+		incompatible: "incompatible"
+	};
+};
+Device.setStatics();
+
+/**
+ * Each concrete subclass of the Device class must call this function on itself to add a set of static methods to
+ * that class (since in JS they aren't inherited).  This function also creates a DeviceManager for the subclass,
+ * which can be accessed through the getManager() function
+ * @param deviceClass - Concrete subclass of Device
+ * @param {string} typeId - The lowercase string used internally to refer to the type. Ex: "hummingbird"
+ * @param {string} typeName - The capitalized string the user sees. Ex: "Hummingbird"
+ * @param {string} shortTypeName - The abbreviated name for the type. Ex: "HB". USed where the typeName doesn't fit.
+ */
+Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName) {
+
+	/**
+	 * Retrieves the typeName from the deviceClass
+	 * @param {boolean} shorten - Whether the shortTypeName should be returned
+	 * @param {number} [maxChars] - The maximum number of characters before the short name is used, even if !shorten
+	 * @return {string} - The name or short name of the deviceClass.
+	 */
+	deviceClass.getDeviceTypeName = function(shorten, maxChars) {
+		if (shorten || (maxChars != null && typeName.length > maxChars)) {
 			return shortTypeName;
 		} else {
 			return typeName;
 		}
 	};
-	deviceClass.getDeviceTypeId = function(){
+
+	/**
+	 * Returns the id of the deviceClass
+	 * @return {string}
+	 */
+	deviceClass.getDeviceTypeId = function() {
 		return typeId;
 	};
-	deviceClass.getNotConnectedMessage = function(){
-		return typeName + " not connected";
+
+	/**
+	 * Returns a string to show the user when a block is run that tries to control a robot that is not connected
+	 * @param {number} [errorCode] - The status code from the request to communicate with the robot
+	 * @param {string} [errorResult] - The message returned from the backend
+	 * @return {string}
+	 */
+	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
+		if (errorResult == null || true) {
+			return typeName + " not connected";
+		} else {
+			return errorResult;
+		}
 	};
-	var manager = new DeviceManager(deviceClass);
-	deviceClass.getManager = function(){
+
+	const manager = new DeviceManager(deviceClass);
+	/** @return {DeviceManager} */
+	deviceClass.getManager = function() {
 		return manager;
 	};
-	deviceClass.getConnectionInstructions = function(){
+
+	/**
+	 * Gets the string to show at the top of the connection dialog when no devices have been found
+	 * @return {string}
+	 */
+	deviceClass.getConnectionInstructions = function() {
 		return "Scanning for devices...";
 	};
 };
-Device.prototype.getDeviceTypeName = function(shorten, maxChars){
+
+/**
+ * Calls getDeviceTypeName on the class of this instance
+ * @param {boolean} shorten
+ * @param {number} maxChars
+ * @return {string}
+ */
+Device.prototype.getDeviceTypeName = function(shorten, maxChars) {
 	return this.constructor.getDeviceTypeName(shorten, maxChars);
 };
-Device.prototype.getDeviceTypeId = function(){
+
+/**
+ * Calls getDeviceTypeId on the class of this instance
+ * @return {string}
+ */
+Device.prototype.getDeviceTypeId = function() {
 	return this.constructor.getDeviceTypeId();
 };
-Device.prototype.disconnect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/disconnect");
+
+/**
+ * Issues a request to disconnect from this robot, causing the backend to instantly remove the robot from the
+ * list of robots it is trying to connect to.
+ */
+Device.prototype.disconnect = function() {
+	const request = new HttpRequestBuilder("robot/disconnect");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-Device.prototype.connect = function(){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/connect");
+
+/**
+ * Issues a request to connect to this robot, causing the backend to instantly add the robot to the
+ * list of robots it is trying to connect to.
+ */
+Device.prototype.connect = function() {
+	const request = new HttpRequestBuilder("robot/connect");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-Device.prototype.setStatus = function(status){
-	this.status = status;
-	if(this.statusListener != null) this.statusListener.updateStatus(this.status);
+
+/**
+ * Marks the robot as being in good/poor communication with the backend.  This function is called by the backend
+ * through the CallbackManager whenever the communication status with a device changes.  Note it is independent of
+ * whether the device is on the list of devices the backend is trying to connect to, as determined by the
+ * connect and disconnect functions above.
+ * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
+ */
+Device.prototype.setConnected = function(isConnected) {
+	this.connected = isConnected;
+	if (this.statusListener != null) this.statusListener(this.getStatus());
 	DeviceManager.updateStatus();
 };
-Device.prototype.getStatus = function(){
-	return this.status;
+
+/**
+ * @return {boolean}
+ */
+Device.prototype.getConnected = function() {
+	return this.connected;
+}
+
+/**
+ * Marks the status of the robot's firmware.  Called by the backend through the CallbackManager.
+ * Updates status lights and UI
+ * @param {Device.firmwareStatuses} status
+ */
+Device.prototype.setFirmwareStatus = function(status) {
+	this.firmwareStatus = status;
+	if (this.statusListener != null) this.statusListener(this.getStatus());
+	if (this.firmwareStatusListener != null) this.firmwareStatusListener(this.getFirmwareStatus());
+
+	// Update the status of the total status light and DeviceManagers
+	DeviceManager.updateStatus();
 };
-Device.prototype.setStatusListener = function(object){
-	this.statusListener = object;
+
+/**
+ * Combines information from this.firmwareStatus and this.connected to determine the overall "status" of this robot,
+ * used by the DeviceManager when computing its status
+ * @return {DeviceManager.statuses}
+ */
+Device.prototype.getStatus = function() {
+	const statuses = DeviceManager.statuses;
+	const firmwareStatuses = Device.firmwareStatuses;
+	if (!this.connected) {
+		return statuses.disconnected;
+	} else {
+		if (this.firmwareStatus === firmwareStatuses.incompatible) {
+			return statuses.incompatibleFirmware;
+		} else if (this.firmwareStatus === firmwareStatuses.old) {
+			return statuses.oldFirmware;
+		} else {
+			return statuses.connected;
+		}
+	}
 };
-Device.fromJson = function(deviceClass, json){
+
+/**
+ * Retrieves the firmware status of the robot
+ * @return {Device.firmwareStatuses}
+ */
+Device.prototype.getFirmwareStatus = function() {
+	return this.firmwareStatus;
+};
+
+/**
+ * @param {function} callbackFn
+ */
+Device.prototype.setStatusListener = function(callbackFn) {
+	this.statusListener = callbackFn;
+};
+
+/**
+ * @param {function} callbackFn
+ */
+Device.prototype.setFirmwareStatusListener = function(callbackFn) {
+	this.firmwareStatusListener = callbackFn;
+};
+
+/**
+ * Sends a request to show a dialog with information about the specified robot's firmware.
+ * The dialog is an alert dialog if the firmware is up to date.  Otherwise it is a two choice dialog
+ * with choices "Close" and "Update Firmware".
+ */
+Device.prototype.showFirmwareInfo = function() {
+	const request = new HttpRequestBuilder("robot/showInfo");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
+
+/**
+ * Alerts the user that the device has incompatible firmware and provides a link to update instructions
+ * @param {string} oldFirmware
+ * @param {string} minFirmware
+ */
+Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
+	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
+	msg += "\nDevice firmware version: " + oldFirmware;
+	msg += "\nRequired firmware version: " + minFirmware;
+	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+		if (result === "2") {
+			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+			request.addParam("type", this.getDeviceTypeId());
+			HtmlServer.sendRequestWithCallback(request.toString());
+		}
+	}.bind(this));
+};
+
+/**
+ * Constructs a Device instance from a JSON object with fields for name and id
+ * @param deviceClass - Subclass of device, the type of device to construct
+ * @param {object} json
+ * @return {Device}
+ */
+Device.fromJson = function(deviceClass, json) {
 	return new deviceClass(json.name, json.id);
 };
-Device.fromJsonArray = function(deviceClass, json){
+
+/**
+ * Constructs an array of Devices from an array of JSON objects, each with fields for name and id
+ * @param deviceClass - Subclass of device, the type of devices to construct
+ * @param {Array} json - Array of JSON objects
+ * @return {Array}
+ */
+Device.fromJsonArray = function(deviceClass, json) {
 	let res = [];
-	for(let i = 0; i < json.length; i++){
+	for (let i = 0; i < json.length; i++) {
 		res.push(Device.fromJson(deviceClass, json[i]));
 	}
 	return res;
 };
-Device.fromJsonArrayString = function(deviceClass, deviceList){
+
+/**
+ * Constructs an array of Devices from a string representing a JSON array
+ * @param deviceClass - Subclass of device, the type of devices to construct
+ * @param {string|null} deviceList - String representation of json array
+ * @return {Array}
+ */
+Device.fromJsonArrayString = function(deviceClass, deviceList) {
+	if (deviceList == null) return [];
 	let json = [];
-	try{
+	try {
 		json = JSON.parse(deviceList);
-	} catch(e) {
+	} catch (e) {
 		json = [];
 	}
-	let list = Device.fromJsonArray(deviceClass, json);
-	if(DiscoverDialog.allowVirtualDevices){
-		let rand = Math.random() * 20 + 20;
-		for(let i = 0; i < rand; i++) {
-			let name = "Virtual " + deviceClass.getDeviceTypeName(true);
-			list.push(new deviceClass(name + i, "virtualDevice" + i));
-		}
-	}
-	return list;
+	return Device.fromJsonArray(deviceClass, json);
 };
-Device.getTypeList = function(){
-	return [DeviceHummingbird, DeviceFlutter];
+
+/**
+ * Returns an array of concrete subclasses of Device, each representing a type of robot.
+ * @return {Array}
+ */
+Device.getTypeList = function() {
+	return [DeviceHummingbird]; //, DeviceFlutter, DeviceFinch];
 };
-Device.stopAll = function(){
-	var request = new HttpRequestBuilder("devices/stop");
+
+/**
+ * Sends a request to the backend to turn off all motors, servos, LEDs, etc. on all robots
+ */
+Device.stopAll = function() {
+	const request = new HttpRequestBuilder("robot/stopAll");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 /**
- * Created by Tom on 6/14/2017.
+ * Represents a Device that has ports for its inputs and outputs.
+ * @param {string} name
+ * @param {string} id
+ * @constructor
  */
-function DeviceWithPorts(name, id){
+function DeviceWithPorts(name, id) {
 	Device.call(this, name, id);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
-DeviceWithPorts.prototype.readSensor = function(status, sensorType, port){
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/in");
+
+/**
+ * Issues a request to read the sensor at the specified port.  Stored the result in the status object, so the
+ * executing Block can access it
+ * @param {object} status - An object provided by the caller to store the result in
+ * @param {string} sensorType - Added as a parameter to the request so the backend knows how to read the sensor
+ * @param {number} port - Added to the request to indicate the port.
+ */
+DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
+	const request = new HttpRequestBuilder("robot/in");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("sensor", sensorType);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
-DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey){
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/" + outputType);
+
+/**
+ * Issues a request to assign the value of an output at the specified port.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {string} outputType - Added to the request so the backend knows how to assign the value
+ * @param {number} port
+ * @param {number} value - The value to assign
+ * @param {string} valueKey - The key to use when adding the value as a parameter to the request
+ */
+DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey) {
+	const request = new HttpRequestBuilder("robot/out/" + outputType);
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam(valueKey, value);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
-DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue){
-	const request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/triled");
+
+/**
+ * Issues a request to set the TriLed at a certain port.
+ * @param {object} status
+ * @param {number} port
+ * @param {number} red
+ * @param {number} green
+ * @param {number} blue
+ */
+DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
+	const request = new HttpRequestBuilder("robot/out/triled");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
 	request.addParam("red", red);
 	request.addParam("green", green);
 	request.addParam("blue", blue);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
 /**
- * Created by Tom on 6/14/2017.
+ * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
+ * all the connected devices in an array, which can be accessed through the getDevice function, which is how
+ * robot Blocks get an instance of Device to send their request.  The DeviceManger is also used by the
+ * ConnectMultipleDialog and the CallbackManger to lookup information.  THe DeviceManager notifies CodeManger when
+ * the connected devices change, so Blocks on the canvas can update their appearance.
+ *
+ * @param deviceClass - subclass of Device
+ * @constructor
  */
-function DeviceManager(deviceClass){
+function DeviceManager(deviceClass) {
 	this.deviceClass = deviceClass;
 	this.connectedDevices = [];
+	/** @type {DeviceManager.statuses} */
 	this.connectionStatus = DeviceManager.statuses.noDevices;
-	// 0 - At least 1 disconnected
-	// 1 - Every device is OK
-	// 2 - Nothing connected
+
+	/* The number of devices listed in each DeviceDropSlot to select from.  Determined when updateSelectableDevices
+	 * is called. */
 	this.selectableDevices = 0;
+
+	/* Whether a scan is currently running */
+	this.scanning = false;
+
+	/** @type {function|null} - A function to call when new devices are discovered */
+	this.deviceDiscoverCallback = null;
+	/** @type {function|null} - A function to call to determine if a new scan should be run when the scan stops
+	 * Often checks if a dialog for that device type is currently open */
+	this.renewDiscoverFn = null;
+	/** @type {string|null} - A cache of the scan results, updated through callbacks from the backend */
+	this.discoverCache = null;
 }
-DeviceManager.setStatics = function(){
+
+DeviceManager.setStatics = function() {
 	const DM = DeviceManager;
-	const statuses = DeviceManager.statuses = {};
-	statuses.disconnected = 0;
-	statuses.connected = 1;
-	statuses.noDevices = 2;
+
+	/** @enum {number} */
+	const statuses = DeviceManager.statuses = {
+		// Ordered such that the total status is just Math.min of the individual statuses
+		disconnected: 0,
+		incompatibleFirmware: 1,
+		oldFirmware: 2,
+		connected: 3,
+		noDevices: 4
+	};
+
+	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
+
+	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
+	
+	/* The maximum number of devices that can be connected at one time */
+	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
+
+/**
+ * Retrieves the number of devices in this.connectedDevices
+ * @return {number}
+ */
 DeviceManager.prototype.getDeviceCount = function() {
 	return this.connectedDevices.length;
 };
-DeviceManager.prototype.getDevice = function(index){
-	if(index >= this.getDeviceCount()) return null;
+
+/**
+ * Gets a device from this.connectedDevices or returns null if the index is out of bounds
+ * @param {number} index
+ * @return {Device|null}
+ */
+DeviceManager.prototype.getDevice = function(index) {
+	if (index >= this.getDeviceCount()) return null;
 	return this.connectedDevices[index];
 };
-DeviceManager.prototype.setDevice = function(index, newDevice){
+
+/**
+ * Attempts to find the index of the robot with the specified id. Returns -1 if the robot is not found
+ * @param {string} id
+ * @return {number}
+ */
+DeviceManager.prototype.lookupRobotIndexById = function(id) {
+	for (let i = 0; i < this.connectedDevices.length; i++) {
+		if (this.connectedDevices[i].id === id) {
+			return i;
+		}
+	}
+	return -1;
+};
+
+/**
+ * Called to replace a device as the current index with a different device. Issues a Bluetooth connection request
+ * to the new device and a disconnection request to the old device.
+ * TODO: make switching places of two connected devices easier
+ * @param {number} index - Index of device to replace. Must be in bounds.
+ * @param {Device} newDevice
+ */
+DeviceManager.prototype.setDevice = function(index, newDevice) {
 	DebugOptions.assert(index < this.getDeviceCount());
 	this.connectedDevices[index].disconnect();
 	newDevice.connect();
 	this.connectedDevices[index] = newDevice;
 	this.devicesChanged();
 };
-DeviceManager.prototype.removeDevice = function(index){
+
+/**
+ * Issues a disconnect request to the device at the index and removes it from the list
+ * @param {number} index
+ */
+DeviceManager.prototype.removeDevice = function(index) {
+	DebugOptions.assert(index < this.getDeviceCount());
 	this.connectedDevices[index].disconnect();
 	this.connectedDevices.splice(index, 1);
 	this.devicesChanged();
 };
-DeviceManager.prototype.appendDevice = function(newDevice){
+
+/**
+ * Issues a connect request to the Device and add it to the end of the list
+ * @param {Device} newDevice
+ */
+DeviceManager.prototype.appendDevice = function(newDevice) {
 	newDevice.connect();
 	this.connectedDevices.push(newDevice);
 	this.devicesChanged();
 };
-DeviceManager.prototype.setOneDevice = function(newDevice){
-	for(let i = 0; i<this.connectedDevices.length; i++){
+
+/**
+ * Disconnects all devices and connects to the newDevice, making it the only Device on the list
+ * @param {Device} newDevice
+ */
+DeviceManager.prototype.setOneDevice = function(newDevice) {
+	for (let i = 0; i < this.connectedDevices.length; i++) {
 		this.connectedDevices[i].disconnect();
 	}
 	newDevice.connect();
 	this.connectedDevices = [newDevice];
 	this.devicesChanged();
 };
-DeviceManager.prototype.removeAllDevices = function(){
-	this.connectedDevices.forEach(function(device){
+
+/**
+ * Swaps the the devices at the specified indices of the connectedDevices list. Requires that both devices are already
+ * connected.
+ * @param {number} index1
+ * @param {number} index2
+ */
+DeviceManager.prototype.swapDevices = function(index1, index2) {
+	const device1 = this.connectedDevices[index1];
+	const device2 = this.connectedDevices[index2];
+	this.connectedDevices[index1] = device2;
+	this.connectedDevices[index2] = device1;
+	this.devicesChanged();
+};
+
+/**
+ * If newDevice is not already connected, connects to it and replaces the device at the specified index
+ * If the newDevice is already connected, swaps the positions of it and the device at the specified index
+ * @param index
+ * @param newDevice
+ */
+DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
+	const newIndex = this.lookupRobotIndexById(newDevice.id);
+	if (newIndex > -1) {
+		this.swapDevices(index, newIndex);
+	} else {
+		this.setDevice(index, newDevice);
+	}
+};
+
+/**
+ * Disconnects from all the devices, making the list empty
+ */
+DeviceManager.prototype.removeAllDevices = function() {
+	this.connectedDevices.forEach(function(device) {
 		device.disconnect();
 	});
 	this.connectedDevices = [];
 	this.devicesChanged();
 };
-DeviceManager.prototype.updateTotalStatus = function(){
-	if(this.getDeviceCount() == 0){
-		this.connectionStatus = 2;
-		return;
-	}
-	var request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/totalStatus");
-	var me = this;
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		me.connectionStatus = parseInt(result);
-		if (isNaN(me.connectionStatus)) {
-			me.connectionStatus = 0;
-		}
-	});
-};
-DeviceManager.prototype.getTotalStatus = function(){
-	return this.connectionStatus;
-};
-DeviceManager.prototype.deviceIsConnected = function(index){
-	if(index >= this.getDeviceCount()) {
+
+/**
+ * Determines whether the device at the specified exists and is in good communication with the backend
+ * @param {number} index
+ * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
+ */
+DeviceManager.prototype.deviceIsConnected = function(index) {
+	if (index >= this.getDeviceCount()) {
 		return false;
-	}
-	else {
-		return this.connectedDevices[index].getStatus() === DeviceManager.statuses.connected;
+	} else {
+		const deviceStatus = this.connectedDevices[index].getStatus();
+		const statuses = DeviceManager.statuses;
+		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
 };
-DeviceManager.prototype.updateSelectableDevices = function(){
-	var oldCount=this.selectableDevices;
-	var inUse=CodeManager.countDevicesInUse(this.deviceClass);
-	var newCount=Math.max(this.getDeviceCount(), inUse);
-	this.selectableDevices=newCount;
-	if(newCount<=1&&oldCount>1){
+
+/**
+ * Counts the number of devices that should be able to be selected from a DeviceDropSlot and updates the UI to reflect
+ * this.  Also collapses/expands parts of the Palette accordingly.  The number of selectable devices is the Math.max
+ * of the number of devices currently in use (the maximum selected robot on any existing DeviceDropSlot) and
+ * the number of devices currently connected.  This ensures the user can access all the devices currently connected
+ * as well as modify existing programs that may use more devices than the currently connected number.
+ */
+DeviceManager.prototype.updateSelectableDevices = function() {
+	const oldCount = this.selectableDevices;
+	const inUse = CodeManager.countDevicesInUse(this.deviceClass);
+	const numConnected = this.getDeviceCount();
+	const newCount = Math.max(numConnected, inUse);
+	this.selectableDevices = newCount;
+
+	if (newCount <= 1 && oldCount > 1) {
 		CodeManager.hideDeviceDropDowns(this.deviceClass);
-	}
-	else if(newCount>1&&oldCount<=1){
+	} else if (newCount > 1 && oldCount <= 1) {
 		CodeManager.showDeviceDropDowns(this.deviceClass);
 	}
-	BlockPalette.getCategory("robots").refreshGroup();
+
+	// Sections of the palette are expanded if the count > 0
+	const suggestedCollapse = newCount === 0;
+	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
-DeviceManager.prototype.getSelectableDeviceCount=function(){
+
+/**
+ * Retrieves the number of devices that should be listed in each DeviceDropSlot
+ * @return {number}
+ */
+DeviceManager.prototype.getSelectableDeviceCount = function() {
 	return this.selectableDevices;
 };
-DeviceManager.prototype.devicesChanged = function(){
+
+/**
+ * Called from other DeviceManager functions to alert the UI that the connected devices have changed
+ */
+DeviceManager.prototype.devicesChanged = function() {
 	ConnectMultipleDialog.reloadDialog();
 	this.updateSelectableDevices();
 	DeviceManager.updateStatus();
+	CodeManager.updateConnectionStatus();
 };
-DeviceManager.prototype.lookupRobotIndexById = function(id){
-	for(let i = 0; i < this.connectedDevices.length; i++){
-		if(this.connectedDevices[i].id === id){
-			return i;
+
+/**
+ * Start scanning if not scanning already
+ * @param {function} [renewDiscoverFn] - type () -> boolean, called to determine if a scan should be restarted.
+ */
+DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
+	this.renewDiscoverFn = renewDiscoverFn;
+	if(!this.scanning) {
+		this.scanning = true;
+		this.discoverCache = null;
+
+		let request = new HttpRequestBuilder("robot/startDiscover");
+		request.addParam("type", this.deviceClass.getDeviceTypeId());
+		HtmlServer.sendRequestWithCallback(request.toString());
+	}
+};
+
+/**
+ * Adds a function to the DeviceManager which is called with a list of devices whenever devices are discovered
+ * @param {function} callbackFn - type: string -> (), function provided by UI part
+ */
+DeviceManager.prototype.registerDiscoverCallback = function(callbackFn) {
+	this.deviceDiscoverCallback = callbackFn;
+};
+
+/**
+ * Retrieves the list of devices that was discovered during the current scan, or null if no scan results are available
+ * used for the ConnectMultipleDialog when the used opens a RobotConnectionList
+ * @return {null|string} - A JSON Array as a string or null
+ */
+DeviceManager.prototype.getDiscoverCache = function() {
+	return this.discoverCache;
+};
+
+/**
+ * Checks if a connection dialog is open by calling the renewDiscoverFn and starts a new scan if it is.
+ * Clears all data from the previous scan
+ * @param {string} robotTypeId - id of the affected DeviceManager
+ */
+DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
+	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
+		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
+			this.scanning = false;
+			this.discoverCache = null;
+			this.startDiscover(this.renewDiscoverFn);
+		} else {
+			this.markStoppedDiscover();
 		}
 	}
-	return -1;
 };
-DeviceManager.prototype.discover = function(callbackFn, callbackErr, includeConnected, excludeId){
-	if(includeConnected == null){
-		includeConnected = false;
-	}
-	if(excludeId == null){
-		excludeId = null;
-	}
-	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/discover");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
-		if(callbackFn == null) return;
-		let robotList = Device.fromJsonArrayString(this.deviceClass, response);
-		let disconnectedRobotsList = [];
-		robotList.forEach(function(robot){
-			let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
-			if(connectedRobotIndex === -1 && (excludeId == null || excludeId !== robot.id))
-				disconnectedRobotsList.push(robot);
-		}.bind(this));
-		let newList = disconnectedRobotsList;
-		if(includeConnected){
-			newList = this.connectedDevices.concat(robotList);
+
+/**
+ * Retrieves an array of Devices
+ * @param robotListString
+ * @param includeConnected
+ * @param excludeIndex
+ * @return {Array}
+ */
+DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeIndex) {
+	// Get the devices from the request
+	let robotList = Device.fromJsonArrayString(this.deviceClass, robotListString);
+	// Accumulate devices that are not currently connected
+	let disconnectedRobotsList = [];
+	robotList.forEach(function(robot) {
+		// Try to find the device
+		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+		// Only include the device if we didn't find it and it isn't the excludeId robot
+		if (connectedRobotIndex === -1) {
+			// Include the device in the list
+			disconnectedRobotsList.push(robot);
 		}
-		callbackFn(newList);
-	}.bind(this), callbackErr);
+	}.bind(this));
+
+	// If we're including connected devices, add them at the top
+	let newList = disconnectedRobotsList;
+	if (includeConnected) {
+		newList = this.connectedDevices.concat(robotList);
+		if (excludeIndex != null) {
+			newList.splice(excludeIndex, 1);
+		}
+	}
+	if (DebugOptions.shouldAllowVirtualDevices()) {
+		newList = newList.concat(this.createVirtualDeviceList());
+	}
+	return newList;
 };
-DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr){
-	let request = new HttpRequestBuilder(this.deviceClass.getDeviceTypeId() + "/stopDiscover");
+
+DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
+	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
+		this.discoverCache = robotList;
+		if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
+	}
+};
+
+/**
+ * Issues a request to tell the backend to stop scanning for devices. Called when a discover dialog is closed
+ * TODO: change backend to this doesn't need to be called when switching between Flutter/Hummingbird tabs
+ * @param {function} [callbackFn]
+ * @param {function} [callbackErr]
+ */
+DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
+	let request = new HttpRequestBuilder("robot/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
+	this.markStoppedDiscover();
 };
-DeviceManager.prototype.getVirtualRobotList = function(){
-	let prefix = "Virtual " + this.deviceClass.getDeviceTypeName(true) + " ";
-	const robot1 = new this.deviceClass(prefix + "1", "virtualDevice1");
-	const robot2 = new this.deviceClass(prefix + "2", "virtualDevice2");
-	return [robot1, robot2];
+
+/**
+ * Clears the cache and other fields to reflect that a scan is no longer running
+ */
+DeviceManager.prototype.markStoppedDiscover = function() {
+	this.deviceDiscoverCallback = null;
+	this.discoverCache = null;
+	this.renewDiscoverFn = null;
+	this.scanning = false;
 };
-DeviceManager.prototype.updateConnectionStatus = function(deviceId, status){
+
+/**
+ * Returns a list of 20 - 40 virtual robots.  Virtual robots are used for debugging.
+ * @return {Array<Device>}
+ */
+DeviceManager.prototype.createVirtualDeviceList = function() {
+	let list = [];
+	let rand = Math.random() * 20 + 20;
+	for (let i = 0; i < rand; i++) {
+		list.push(DebugOptions.createVirtualDevice(this.deviceClass, i + ""));
+	}
+	return list;
+};
+
+/**
+ * Looks for the specified device and sets whether it is connected (if found).
+ * If the device has lost connection, a scan is started to find it.
+ * @param {string} deviceId
+ * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
+ */
+DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected) {
 	const index = this.lookupRobotIndexById(deviceId);
 	let robot = null;
-	if(index >= 0) {
+	if (index >= 0) {
 		robot = this.connectedDevices[index];
 	}
-	if(robot != null){
-		const statuses = DeviceManager.statuses;
-		robot.setStatus(status? statuses.connected : statuses.disconnected);
+	if (robot != null) {
+		const wasConnected = robot.getConnected();
+		robot.setConnected(isConnected);
+		if (wasConnected && !isConnected && !this.scanning) {
+			this.startDiscover();
+		}
 	}
 };
-DeviceManager.prototype.getStatus = function(){
-	const statuses = DeviceManager.statuses;
-	let disconnected = false;
-	let hasDevice = this.connectedDevices.length > 0;
-	this.connectedDevices.forEach(function(device){
-		disconnected = disconnected || device.getStatus() === DeviceManager.statuses.disconnected;
-	});
-	if(!hasDevice){
-		this.connectionStatus = statuses.noDevices;
-	} else if(disconnected) {
-		this.connectionStatus = statuses.disconnected;
-	} else {
-		this.connectionStatus = statuses.connected;
+
+/**
+ * Looks for the specified device and sets its firmware status (if found)
+ * @param {string} deviceId
+ * @param {Device.firmwareStatuses} status
+ */
+DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
+	const index = this.lookupRobotIndexById(deviceId);
+	let robot = null;
+	if (index >= 0) {
+		robot = this.connectedDevices[index];
 	}
+	if (robot != null) {
+		robot.setFirmwareStatus(status);
+	}
+};
+
+DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		const robot = this.connectedDevices[index];
+		this.connectedDevices.splice(index, 1);
+		this.devicesChanged();
+		robot.notifyIncompatible(oldFirmware, minFirmware);
+	}
+};
+
+/**
+ * Computes, stores, and returns this DeviceManager's connectionStatus
+ * @return {DeviceManager.statuses}
+ */
+DeviceManager.prototype.getStatus = function() {
+	const statuses = DeviceManager.statuses;
+	let status = statuses.noDevices;
+	this.connectedDevices.forEach(function(device) {
+		status = Math.min(status, device.getStatus());
+	});
+	this.connectionStatus = status;
 	return this.connectionStatus;
 };
-DeviceManager.updateSelectableDevices = function(){
-	DeviceManager.forEach(function(manager){
+
+/**
+ * Allows for easy iteration of DeviceManagers by calling callbackFn on every Device subclass's manager
+ * @param {function} callbackFn - type DeviceManager -> (), to be called on every DeviceManager
+ */
+DeviceManager.forEach = function(callbackFn) {
+	Device.getTypeList().forEach(function(deviceType) {
+		callbackFn(deviceType.getManager());
+	});
+};
+
+/**
+ * Tells all managers to update their selectable devices
+ */
+DeviceManager.updateSelectableDevices = function() {
+	DeviceManager.forEach(function(manager) {
 		manager.updateSelectableDevices();
 	});
 };
-DeviceManager.updateConnectionStatus = function(deviceId, status){
-	DeviceManager.forEach(function(manager){
-		manager.updateConnectionStatus(deviceId, status);
+
+/**
+ * Finds the robot with the given deviceId and sets its connected status, then updates the UI to reflect any changes
+ * @param {string} deviceId
+ * @param {boolean} isConnected - Whether the robot is in good communication with the backend
+ */
+DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
+	DeviceManager.forEach(function(manager) {
+		manager.updateConnectionStatus(deviceId, isConnected);
 	});
+	CodeManager.updateConnectionStatus();
 };
-DeviceManager.updateStatus = function(){
+
+/**
+ * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes
+ * @param {string} deviceId
+ * @param {Device.firmwareStatuses} status
+ */
+DeviceManager.updateFirmwareStatus = function(deviceId, status) {
+	DeviceManager.forEach(function(manager) {
+		manager.updateFirmwareStatus(deviceId, status);
+	});
+	CodeManager.updateConnectionStatus();
+};
+
+/**
+ * Computes the total status of all DeviceManagers and updates the statusListener
+ */
+DeviceManager.updateStatus = function() {
 	const DM = DeviceManager;
 	let totalStatus = DM.getStatus();
-	if(DM.statusListener != null) DM.statusListener.updateStatus(totalStatus);
+	if (DM.statusListener != null) DM.statusListener(totalStatus);
 	return totalStatus;
 };
-DeviceManager.getStatus = function(){
+
+/**
+ * Computes the total status of all DeviceManagers and returns the result
+ * @return {DeviceManager.statuses}
+ */
+DeviceManager.getStatus = function() {
 	let DM = DeviceManager;
 	let minStatus = DM.statuses.noDevices;
-	DM.forEach(function(manager){
+	DM.forEach(function(manager) {
 		minStatus = DM.minStatus(manager.getStatus(), minStatus);
 	});
 	DM.totalStatus = minStatus;
 	return minStatus;
 };
+
+/**
+ * Given two statuses, combines them into one status
+ * @param {DeviceManager.statuses} status1
+ * @param {DeviceManager.statuses} status2
+ * @return {DeviceManager.statuses}
+ */
 DeviceManager.minStatus = function(status1, status2) {
+	/* The values in DeviceManager.statuses have been ordered such that they can be combined with Math.min */
 	return Math.min(status1, status2);
 };
-DeviceManager.forEach = function(callbackFn){
-	Device.getTypeList().forEach(function(deviceType){
-		callbackFn(deviceType.getManager());
+
+/**
+ * Assigns the statusListener that listens for changes in total status.  Used for the total status light
+ * @param {function} callbackFn - Called with the new status whenever the status changes
+ */
+DeviceManager.setStatusListener = function(callbackFn) {
+	DeviceManager.statusListener = callbackFn;
+};
+
+/**
+ * Notifies all DeviceManagers that robots have been discovered
+ * @param {string} robotTypeId - The ID of the type of robot being scanned for
+ * @param {string} robotList - A JSON Array as a string representing the discovered devices
+ */
+DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
+	DeviceManager.forEach(function(manager) {
+		manager.backendDiscovered(robotTypeId, robotList);
 	});
 };
-DeviceManager.setStatusListener = function(object){
-	DeviceManager.statusListener = object;
+
+/**
+ * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * @param {string} robotId - The id of the robot to disconnect
+ * @param {string} oldFirmware - The firmware on the robot
+ * @param {string} minFirmware - The minimum firmware required to be compatible
+ */
+DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	DeviceManager.forEach(function(manager) {
+		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+	});
+};
+
+/**
+ * Notifies all DeviceManagers that a scan has just ended, so they can possibly start a new scan
+ * @param {string} robotTypeId - The ID of the type of robot that was being scanned for
+ */
+DeviceManager.possiblyRescan = function(robotTypeId) {
+	DeviceManager.forEach(function(manager) {
+		manager.possiblyRescan(robotTypeId);
+	});
 };
 /**
- * Created by Tom on 6/14/2017.
+ * Manages communication with a Hummingbird
+ * @param {string} name
+ * @param {string} id
+ * @constructor
  */
-function DeviceHummingbird(name, id){
+function DeviceHummingbird(name, id) {
 	DeviceWithPorts.call(this, name, id);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
 Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
-
 /**
- * Created by Tom on 6/14/2017.
+ * Manages communication with a Flutter
+ * @param {string} name
+ * @param {string} id
+ * @constructor
  */
-function DeviceFlutter(name, id){
+function DeviceFlutter(name, id) {
 	DeviceWithPorts.call(this, name, id);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
 DeviceFlutter.prototype.constructor = DeviceFlutter;
-DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency){
-	var request = new HttpRequestBuilder(this.getDeviceTypeId() + "/out/buzzer");
+
+/**
+ * Sends a request to set the value of the Buzzer
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {number} volume - How loud the buzzer is
+ * @param {number} frequency - The frequency of the sound the buzzer produces
+ */
+DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
+	const request = new HttpRequestBuilder("robot/out/buzzer");
+	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("volume", volume);
 	request.addParam("frequency", frequency);
-	HtmlServer.sendRequest(request.toString(), status);
+	HtmlServer.sendRequest(request.toString(), status, true);
 };
-DeviceFlutter.getConnectionInstructions = function(){
+
+/**
+ * @inheritDoc
+ * @return {string}
+ */
+DeviceFlutter.getConnectionInstructions = function() {
 	return "Press the \"find me\" button on your Flutter";
 };
 /**
- * Created by Tom on 7/6/2017.
+ * Manages communication with a Finch
+ * @param {string} name
+ * @param {string} id
+ * @constructor
+ */
+function DeviceFinch(name, id) {
+	DeviceWithPorts.call(this, name, id);
+}
+DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
+Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
+DeviceFinch.prototype.constructor = DeviceFinch;
+
+DeviceFinch.prototype.setAll = function(status, data) {
+	const request = new HttpRequestBuilder("robot/out/setAll");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("data", data);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+/**
+ * Static class keeps track of which sensors are available on the device
  */
 function TabletSensors(){
 	const TS = TabletSensors;
 	TabletSensors.clear();
 	TabletSensors.requestAvailable();
 }
+
+/**
+ * Requests backend for a list of available sensors
+ */
 TabletSensors.requestAvailable = function(){
 	const request = new HttpRequestBuilder("tablet/availableSensors");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		TabletSensors.updateAvailable(response);
 	});
 };
+
+/**
+ * Updates sensors to match those on list
+ * @param {string} sensorList - A newline separated list of available sensors
+ */
 TabletSensors.updateAvailable = function(sensorList){
 	TabletSensors.clear();
 	const sensors = TabletSensors.sensors;
@@ -1240,6 +2288,12 @@ TabletSensors.updateAvailable = function(sensorList){
 	});
 	CodeManager.updateAvailableSensors();
 };
+
+/**
+ * Marks a sensor as available
+ * @param {string} sensor
+ * @return {boolean}
+ */
 TabletSensors.addSensor = function(sensor){
 	const TS = TabletSensors;
 	if(TS.sensors[sensor] != null) {
@@ -1249,6 +2303,12 @@ TabletSensors.addSensor = function(sensor){
 	}
 	return false;
 };
+
+/**
+ * Marks a sensor as unavailable
+ * @param {string} sensor
+ * @return {boolean}
+ */
 TabletSensors.removeSensor = function(sensor){
 	const TS = TabletSensors;
 	if(TS.sensors[sensor] != null) {
@@ -1258,6 +2318,10 @@ TabletSensors.removeSensor = function(sensor){
 	}
 	return false;
 };
+
+/**
+ * Marks all sensors as unavailable.
+ */
 TabletSensors.clear = function(){
 	const sensors = TabletSensors.sensors = {};
 	sensors.accelerometer = false;
@@ -1270,81 +2334,51 @@ TabletSensors.clear = function(){
 /* GuiElements is a static class that builds the UI and initializes the other classes.
  * It contains functions to create and modify elements of the main SVG.
  * GuiElements is run once the browser has loaded all the js and html files.
+ * It's one of the less organized classes and has quite a lot of functions in it.
+ * TODO: Refactor GuiElements moving the parts that deal with getting device properties to a different class
  */
-function GuiElements(){
-	debug.innerHTML = "";
-	let svg2=document.getElementById("frontSvg");
-	let svg1=document.getElementById("middleSvg");
-	let svg0=document.getElementById("backSvg");
+function GuiElements() {
+	// Clear the debug span
+	document.getElementById("debug").innerHTML = "";
+	// Find parts of the html and store them
+	let svg2 = document.getElementById("frontSvg");
+	let svg1 = document.getElementById("middleSvg");
+	let svg0 = document.getElementById("backSvg");
 	GuiElements.svgs = [svg0, svg1, svg2];
-
-	GuiElements.defs=document.getElementById("SvgDefs");
-	GuiElements.loadInitialSettings(function(){
+	GuiElements.defs = document.getElementById("SvgDefs");
+	GuiElements.loaded = false;
+	// Load settings from backend
+	GuiElements.loadInitialSettings(function() {
+		// Build the UI
 		GuiElements.setConstants();
 		GuiElements.createLayers();
-		GuiElements.dialogBlock=null;
+		GuiElements.dialogBlock = null;
 		GuiElements.buildUI();
 		HtmlServer.sendFinishedLoadingRequest();
+		GuiElements.loaded = true;
 	});
 }
+
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
 	GuiElements.alert("Loading");
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
-GuiElements.loadInitialSettings=function(callback){
-	DebugOptions();
-	Data.setConstants();
-	HtmlServer();
-	SettingsManager();
-	GuiElements.setGuiConstants();
-	GuiElements.load = {};
-	GuiElements.load.version = false;
-	GuiElements.load.zoom = false;
-	GuiElements.load.os = false;
-	GuiElements.load.lastFileName = true;
-	GuiElements.load.lastFileNamed = true;
-	if(!DebugOptions.shouldSkipInitSettings()) {
-		var count = 0;
-		var checkIfDone = function () {
-			count++;
-			GuiElements.alert(""+GuiElements.load.version + GuiElements.load.zoom + GuiElements.load.os + GuiElements.load.lastFileName + GuiElements.load.lastFileNamed);
-			if (GuiElements.load.version && GuiElements.load.zoom && GuiElements.load.os && GuiElements.load.lastFileName && GuiElements.load.lastFileNamed) {
-				callback();
-			}
-		};
-		GuiElements.getAppVersion(function () {
-			GuiElements.load.version = true;
-			checkIfDone();
-		});
-		GuiElements.configureZoom(function () {
-			GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-			GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
-			GuiElements.load.zoom = true;
-			checkIfDone();
-		});
-		GuiElements.getOsVersion(function(){
-			GuiElements.load.os = true;
-			checkIfDone();
-		});
-		/*SaveManager.getCurrentDocName(function(){
-			GuiElements.load.lastFileName = true;
-			checkIfDone();
-		}, function(){
-			GuiElements.load.lastFileNamed = true;
-			checkIfDone();
-		});*/
-	}
-	else{
-		callback();
+
+/* Redraws UI if screen dimensions change */
+window.onresize = function() {
+	if (GuiElements.loaded && !GuiElements.isIos) {
+		GuiElements.updateDims();
 	}
 };
-GuiElements.setGuiConstants=function(){
-	GuiElements.minZoom=0.25;
-	GuiElements.maxZoom=4;
-	GuiElements.minZoomMult=0.5;
-	GuiElements.maxZoomMult=2;
-	GuiElements.zoomAmount=0.1;
+
+/** Sets constants relating to screen dimensions and the Operating System */
+GuiElements.setGuiConstants = function() {
+	GuiElements.minZoom = 0.25;
+	GuiElements.maxZoom = 4;
+	GuiElements.minZoomMult = 0.5;
+	GuiElements.maxZoomMult = 2;
+	GuiElements.zoomAmount = 0.1;
 	GuiElements.defaultZoomMm = 246.38;
 	GuiElements.defaultZoomPx = 1280;
 	GuiElements.defaultZoomMultiple = 1;
@@ -1354,30 +2388,34 @@ GuiElements.setGuiConstants=function(){
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+	GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 
-	GuiElements.blockerOpacity=0.5;
+	GuiElements.blockerOpacity = 0.5;
 
 	GuiElements.isKindle = false;
 	GuiElements.isIos = false;
+	GuiElements.isAndroid = false;
 
 	GuiElements.paletteLayersVisible = true;
 	GuiElements.smallMode = false;
-	GuiElements.checkSmallMode();
 };
-/* Many classes have static functions which set constants such as font size, etc.
+/**
+ * Many classes have static functions which set constants such as font size, etc.
  * GuiElements.setConstants runs these functions in sequence, thereby initializing them.
- * Some classes rely on constants from eachother, so the order they execute in is important. */
-GuiElements.setConstants=function(){
+ * Some classes rely on constants from each other, so the order they execute in is important.
+ */
+GuiElements.setConstants = function() {
 	/* If a class is static and does not build a part of the UI,
 	then its main function is used to initialize its constants. */
 	VectorPaths();
 	ImageLists();
+	DialogManager();
 	Sound.setConstants();
 	BlockList();
 	Colors();
 	Button.setGraphics();
+	CloseButton.setGraphics();
 	//If the constants are only related to the way the UI looks, the method is called setGraphics().
 	DeviceStatusLight.setConstants();
 	TitleBar.setGraphicsPart1();
@@ -1394,10 +2432,12 @@ GuiElements.setConstants=function(){
 
 	Block.setConstants();
 	BlockPalette.setGraphics();
+	CollapsibleSet.setConstants();
+	CollapsibleItem.setConstants();
+
 	TitleBar.setGraphicsPart2();
 	TabManager.setGraphics();
 	CategoryBN.setGraphics();
-	MenuBnList.setGraphics();
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
@@ -1406,13 +2446,12 @@ GuiElements.setConstants=function(){
 	BubbleOverlay.setGraphics();
 	ResultBubble.setConstants();
 	BlockContextMenu.setGraphics();
-	DiscoverDialog.setConstants();
 	RecordingManager();
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
 
-	NewInputPad.setConstants();
+	InputPad.setConstants();
 	SoundInputPad.setConstants();
 	InputWidget.NumPad.setConstants();
 	InputWidget.Label.setConstants();
@@ -1421,468 +2460,557 @@ GuiElements.setConstants=function(){
 	RobotConnectionList.setConstants();
 	TabRow.setConstants();
 	RecordingDialog.setConstants();
-	NewDisplayBox.setGraphics();
+	DisplayBox.setGraphics();
 	OverflowArrows.setConstants();
 	CodeManager();
 	SaveManager.setConstants();
+	UndoManager();
 };
-/* Debugging function which displays information on screen */
-GuiElements.alert=function(message){
-	//debug.innerHTML = message; //The iPad app does not support alert dialogs
-};
-/* Alerts the user that an error has occurred. Should never be called.
- * @param {string} errMessage - The error's message passed by the function that threw the error.
- */
-GuiElements.throwError=function(errMessage){
-	GuiElements.alert(errMessage); //Show the error in the debug area.
-}
-/* Once each class has its constants set, the UI can be built. UI-related classes are called. */
-GuiElements.buildUI=function(){
-	document.body.style.backgroundColor=Colors.lightGray; //Sets the background color of the webpage
+/** Once each class has its constants set, the UI can be built. UI-related classes are called. */
+GuiElements.buildUI = function() {
+	document.body.style.backgroundColor = Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
-	TitleBar(); //Creates the title bar and the buttons contained within it.
-
-	TabManager(); //Creates the tab-switching interface below the title bar
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
+	TitleBar(); //Creates the title bar and the buttons contained within it.
+	TabManager(); //Creates the tab-switching interface below the title bar
 	DisplayBoxManager(); //Builds the display box for the display block to show messages in.
-	/* Builds the SVG path element for the highlighter, 
+	/* Builds the SVG path element for the highlighter,
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
+
+	GuiElements.blockInteraction();
+	OpenDialog.showDialog();
 	DebugOptions.applyActions();
 };
-/* Makes an SVG group element (<g>) for each layer of the interface.
+/**
+ * Makes an layer object for each layer of the interface.
  * Layers are accessible in the form GuiElements.layers.[layerName]
  */
-GuiElements.createLayers=function(){
-	var create=GuiElements.create;//shorthand
+GuiElements.createLayers = function() {
+	const create = GuiElements.create; //shorthand
 	GuiElements.zoomGroups = [];
-	GuiElements.svgs.forEach(function(svg){
-		let zoomGroup = create.group(0,0,svg);
+	GuiElements.svgs.forEach(function(svg) {
+		let zoomGroup = create.group(0, 0, svg);
 		GuiElements.zoomGroups.push(zoomGroup);
-		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+		GuiElements.update.zoom(zoomGroup, GuiElements.zoomFactor);
 	});
 
-	GuiElements.layers={};
+	GuiElements.layers = {};
 	let i = 0;
-	var layers=GuiElements.layers;
-	layers.temp=create.layer(i);
-	layers.aTabBg=create.layer(i);
-	layers.activeTab=create.layer(i);
-	layers.TabsBg=create.layer(i);
-	layers.paletteBG=create.layer(i);
+	const layers = GuiElements.layers;
+	layers.temp = create.layer(i);
+	layers.aTabBg = create.layer(i);
+	layers.activeTab = create.layer(i);
+	layers.TabsBg = create.layer(i);
+	layers.paletteBG = create.layer(i);
 	layers.paletteScroll = document.getElementById("paletteScrollDiv");
 	i++;
-	layers.trash=create.layer(i);
-	layers.catBg=create.layer(i);
-	layers.categories=create.layer(i);
-	layers.titleBg=create.layer(i);
-	layers.titlebar=create.layer(i);
+	layers.trash = create.layer(i);
+	layers.catBg = create.layer(i);
+	layers.categories = create.layer(i);
+	layers.titleBg = create.layer(i);
+	layers.titlebar = create.layer(i);
 	layers.overflowArr = create.layer(i);
-	layers.stage=create.layer(i);
-	layers.display=create.layer(i);
-	layers.drag=create.layer(i);
-	layers.highlight=create.layer(i);
-	layers.resultBubble=create.layer(i);
-	layers.inputPad=create.layer(i);
-	layers.tabMenu=create.layer(i);
-	layers.dialogBlock=create.layer(i);
-	layers.dialog=create.layer(i);
-	layers.overlay=create.layer(i);
+	layers.stage = create.layer(i);
+	layers.display = create.layer(i);
+	layers.drag = create.layer(i);
+	layers.highlight = create.layer(i);
+	layers.resultBubble = create.layer(i);
+	layers.inputPad = create.layer(i);
+	layers.tabMenu = create.layer(i);
+	layers.dialogBlock = create.layer(i);
+	layers.dialog = create.layer(i);
+	layers.overlay = create.layer(i);
 	layers.frontScroll = document.getElementById("frontScrollDiv");
 	i++;
-	layers.overlayOverlay=create.layer(i);
+	layers.overlayOverlay = create.layer(i);
 	layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
 };
+
+/**
+ * Debugging function which displays information on the screen
+ * @param {string} message
+ */
+GuiElements.alert = function(message) {
+	if (!DebugOptions.shouldAllowLogging()) return;
+	let result = message;
+	debug.innerHTML = result;
+};
+
+
 /* GuiElements.create contains functions for creating SVG elements.
  * The element is built with minimal attributes and returned.
- * It may also be added to a group if included.
- */
-GuiElements.create=function(){};
-/* Makes a group, adds it to a parent group (if present), and returns it.
+ * It may also be added to a group if included. */
+GuiElements.create = {};
+/**
+ * Makes a group, adds it to a parent group (if present), and returns it.
  * @param {number} x - The x offset of the group.
  * @param {number} y - The y offset of the group.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG g} - The group which was created.
+ * @param {Element} [parent] - The parent group to add the group to.
+ * @return {Element} - The group which was created.
  */
-GuiElements.create.group=function(x,y,parent){
+GuiElements.create.group = function(x, y, parent) {
 	DebugOptions.validateOptionalNums(x, y);
-	var group=document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
-	group.setAttributeNS(null,"transform","translate("+x+","+y+")"); //Move the group to (x,y).
-	if(parent!=null){ //If provided, add it to the parent.
+	const group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+	group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")"); //Move the group to (x,y).
+	if (parent != null) { //If provided, add it to the parent.
 		parent.appendChild(group);
 	}
 	return group; //Return the group.
-}
-/* Creates a group, adds it to the main SVG, and returns it. */
-GuiElements.create.layer=function(depth){
+};
+/**
+ * Creates a layer object that can be treated much like a group but has show and hide functions. The layer actually
+ * includes two groups, with the inner group added/removed from the outer group during show/hide, ensuring the order
+ * of layers never changes.
+ * @param {number} depth - The index of the zoomGroup to add to
+ * @return {object} - A layer object
+ */
+GuiElements.create.layer = function(depth) {
 	DebugOptions.validateNumbers(depth);
-	let layerG = GuiElements.create.group(0,0,GuiElements.zoomGroups[depth]);
+	let layerG = GuiElements.create.group(0, 0, GuiElements.zoomGroups[depth]);
 	let showHideLayer = GuiElements.create.group(0, 0, layerG);
 	let layer = {};
+	// We forward these group-like functions to the inner group
 	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
 	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
 	layer.hide = showHideLayer.remove.bind(showHideLayer);
-	layer.show = function(){
+	layer.show = function() {
 		layerG.appendChild(showHideLayer);
 	};
 	return layer;
 };
-/* Creates a linear SVG gradient and adds it to the SVG defs.
- * @param {text} id - The id of the gradient (needed to reference it later).
+/**
+ * Creates a linear SVG gradient and adds it to the SVG defs.
+ * @param {string} id - The id of the gradient (needed to reference it later).
  * @param {string} color1 - color in form "#fff" of the top of the gradient.
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  */
-GuiElements.create.gradient=function(id,color1,color2){ //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
 	DebugOptions.validateNonNull(color1, color2);
-	var gradient=document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
-	gradient.setAttributeNS(null,"id",id); //Set attributes.
-	gradient.setAttributeNS(null,"x1","0%");
-	gradient.setAttributeNS(null,"x2","0%");
-	gradient.setAttributeNS(null,"y1","0%");
-	gradient.setAttributeNS(null,"y2","100%");
+	const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	gradient.setAttributeNS(null, "id", id); //Set attributes.
+	gradient.setAttributeNS(null, "x1", "0%");
+	gradient.setAttributeNS(null, "x2", "0%");
+	gradient.setAttributeNS(null, "y1", "0%");
+	gradient.setAttributeNS(null, "y2", "100%");
 	GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
-	var stop1=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
-	stop1.setAttributeNS(null,"offset","0%");
-	stop1.setAttributeNS(null,"style","stop-color:"+color1+";stop-opacity:1");
+	const stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
+	stop1.setAttributeNS(null, "offset", "0%");
+	stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
 	gradient.appendChild(stop1);
-	var stop2=document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
-	stop2.setAttributeNS(null,"offset","100%");
-	stop2.setAttributeNS(null,"style","stop-color:"+color2+";stop-opacity:1");
+	const stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
+	stop2.setAttributeNS(null, "offset", "100%");
+	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
-}
-/* Creates an SVG path element and returns it.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG path} - The path which was created.
+};
+/**
+ * Creates an SVG path element and returns it.
+ * @param {Element} [group] - The parent group to add the element to.
+ * @return {Element} - The path which was created.
  */
-GuiElements.create.path=function(group){
-	var path=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	if(group!=null){ //Add it to the parent group if present.
+GuiElements.create.path = function(group) {
+	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(path);
 	}
 	return path; //Return the path.
-}
-/* Creates an SVG text element and returns it.
- * @return {SVG text} - The text which was created.
+};
+/**
+ * Creates an SVG text element and returns it.
+ * @return {Element} - The text which was created.
  */
-GuiElements.create.text=function(){
-	var textElement=document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
-	return textElement; //Return the text.
+GuiElements.create.text = function() {
+	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
 };
-GuiElements.create.image=function(){
-	var imageElement=document.createElementNS("http://www.w3.org/2000/svg", 'image'); //Create text.
-	return imageElement; //Return the text.
+/**
+ * Creates an SVG image element and returns it.
+ * @return {Element} - The text which was created.
+ */
+GuiElements.create.image = function() {
+	return document.createElementNS("http://www.w3.org/2000/svg", 'image');
 };
-GuiElements.create.foreignObject = function(group){
-	var obj = document.createElementNS("http://www.w3.org/2000/svg", 'foreignObject');
-	if(group != null){
-		group.appendChild(obj);
-	}
-	return obj;
-};
-GuiElements.create.svg = function(group){
-	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+/**
+ * Creates an SVG tag and adds it to the group
+ * @param {Element} [group]
+ * @return {Element}
+ */
+GuiElements.create.svg = function(group) {
+	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-	if(group != null){
+	if (group != null) {
 		group.appendChild(svg);
 	}
 	return svg;
 };
-GuiElements.create.scrollDiv = function(group){
-	var div = document.createElement("div");
+/**
+ * Creates a div formatted to be scrollable and ads it to the group
+ * @param {Element} group
+ * @return {Element}
+ */
+GuiElements.create.scrollDiv = function(group) {
+	const div = document.createElement("div");
 	div.style.position = "absolute";
-	if(group != null){
+	if (group != null) {
 		group.appendChild(div);
 	}
 	return div;
 };
-/* Creates an SVG rect element, adds it to a parent group (if present), and returns it.
- * @param {SVG g} title - (optional) The parent group to add the group to.
- * @return {SVG rect} - The rect which was created.
+/**
+ * Creates an SVG rect element, adds it to a parent group (if present), and returns it.
+ * @param {Element} group - (optional) The parent group to add the group to.
+ * @return {Element} - The rect which was created.
  */
-GuiElements.create.rect=function(group){
-	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
-	if(group!=null){ //Add it to the parent group if present.
+GuiElements.create.rect = function(group) {
+	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(rect);
 	}
 	return rect; //Return the rect.
-}
-/* GuiElements.create contains functions that create SVG elements and assign thier attributes
- * so they are ready to be drawn on the screen. The element is then returned. 
- * It may also be added to a group if included.
- */
-GuiElements.draw=function(){};
-/* Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
+};
+
+/* GuiElements.draw contains functions that create SVG elements and assign their attributes
+ * so they are ready to be drawn on the screen. The element is then returned.
+ * It may also be added to a group if included. */
+GuiElements.draw = {};
+/**
+ * Creates a filled SVG rect element at a certain location with specified dimensions and returns it.
  * @param {number} x - The rect's x coord.
  * @param {number} y - The rect's y coord.
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
- * @param {string} color - (optional) The rect's fill color in the form "#fff".
- * @return {SVG rect} - The rect which was created.
+ * @param {string} [color] - (optional) The rect's fill color in the form "#fff".
+ * @return {Element} - The rect which was created.
  */
-GuiElements.draw.rect=function(x,y,width,height,color){
+GuiElements.draw.rect = function(x, y, width, height, color) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var rect=document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
-	rect.setAttributeNS(null,"x",x); //Set its attributes.
-	rect.setAttributeNS(null,"y",y);
-	rect.setAttributeNS(null,"width",width);
-	rect.setAttributeNS(null,"height",height);
-	if(color!=null) {
+	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	rect.setAttributeNS(null, "x", x); //Set its attributes.
+	rect.setAttributeNS(null, "y", y);
+	rect.setAttributeNS(null, "width", width);
+	rect.setAttributeNS(null, "height", height);
+	if (color != null) {
 		rect.setAttributeNS(null, "fill", color);
 	}
 	return rect; //Return the rect.
-}
-/* Creates a filled, triangular SVG path element with specified dimensions and returns it.
+};
+/**
+ * Creates a filled, triangular SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles triangle)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
- * @return {SVG path} - The path which was created.
+ * @return {Element} - The path which was created.
  */
-GuiElements.draw.triangle=function(x,y,width,height,color){
+GuiElements.draw.triangle = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.triangle(triangle,x,y,width,height); //Set its path description (points).
-	triangle.setAttributeNS(null,"fill",color); //Set the fill.
+	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.triangle(triangle, x, y, width, height); //Set its path description (points).
+	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
-GuiElements.draw.triangleFromPoint = function(x, y, width, height, color){
+/**
+ * Creates a triangle with its point at the indicated coords
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {string} color
+ * @return {Element}
+ */
+GuiElements.draw.triangleFromPoint = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var triangle=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.triangleFromPoint(triangle,x,y,width,height); //Set its path description (points).
-	triangle.setAttributeNS(null,"fill",color); //Set the fill.
+	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.triangleFromPoint(triangle, x, y, width, height); //Set its path description (points).
+	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
 };
-/* Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
+/**
+ * Creates a filled, trapezoid-shaped SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles trapezoid)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {number} slantW - The amount the trapezoid slopes in.
  * @param {string} color - The path's fill color in the form "#fff".
- * @return {SVG path} - The path which was created.
+ * @return {Element} - The path which was created.
  */
-GuiElements.draw.trapezoid=function(x,y,width,height,slantW,color){
+GuiElements.draw.trapezoid = function(x, y, width, height, slantW, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var trapezoid=document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.trapezoid(trapezoid,x,y,width,height,slantW); //Set its path description.
-	trapezoid.setAttributeNS(null,"fill",color); //Set the fill.
+	const trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.trapezoid(trapezoid, x, y, width, height, slantW); //Set its path description.
+	trapezoid.setAttributeNS(null, "fill", color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
-}
-GuiElements.draw.circle=function(cx,cy,radius,color,group){
+};
+/**
+ * Draws a circle at the center point
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} radius
+ * @param {string} color
+ * @param {Element} [group]
+ * @return {Element}
+ */
+GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(cx, cy, radius);
-	var circle=document.createElementNS("http://www.w3.org/2000/svg",'circle');
-	circle.setAttributeNS(null,"cx",cx);
-	circle.setAttributeNS(null,"cy",cy);
-	circle.setAttributeNS(null,"r",radius);
-	circle.setAttributeNS(null,"fill",color);
-	if(group!=null){
+	const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+	circle.setAttributeNS(null, "cx", cx);
+	circle.setAttributeNS(null, "cy", cy);
+	circle.setAttributeNS(null, "r", radius);
+	circle.setAttributeNS(null, "fill", color);
+	if (group != null) {
 		group.appendChild(circle);
 	}
 	return circle;
 };
-GuiElements.draw.image=function(imageName,x,y,width,height,parent){
+/**
+ * Creates an SVG image with the given dimensions and name
+ * @param {string} imageName - The name of the png image file
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {Element} [parent]
+ * @return {Element}
+ */
+GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var imageElement=GuiElements.create.image();
-	imageElement.setAttributeNS(null,"x",x);
-	imageElement.setAttributeNS(null,"y",y);
-	imageElement.setAttributeNS(null,"width",width);
-	imageElement.setAttributeNS(null,"height",height);
+	const imageElement = GuiElements.create.image();
+	imageElement.setAttributeNS(null, "x", x);
+	imageElement.setAttributeNS(null, "y", y);
+	imageElement.setAttributeNS(null, "width", width);
+	imageElement.setAttributeNS(null, "height", height);
 	//imageElement.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+imageName+".png");
-	imageElement.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+imageName+".png" );
+	imageElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + imageName + ".png");
 	imageElement.setAttributeNS(null, 'visibility', 'visible');
-	if(parent!=null) {
+	if (parent != null) {
 		parent.appendChild(imageElement);
 	}
 	return imageElement;
 };
-/* Creates a SVG text element with text in it with specified formatting and returns it.
+/**
+ * Creates a SVG text element with text in it with specified formatting and returns it.
  * @param {number} x - The text element's x coord.
  * @param {number} y - The text element's y coord.
  * @param {string} text - The text contained within the element.
- * @param {number} fontSize - The font size of the text.
+ * @param {Font} font - The font of the text.
  * @param {string} color - The text's color in the form "#fff".
- * @param {string} font - the font family of the text.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text.
- * @return {SVG text} - The text element which was created.
+ * @param {null} [test]
  */
-GuiElements.draw.text=function(x,y,text,fontSize,color,font,weight){
+GuiElements.draw.text = function(x, y, text, font, color, test) {
+	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"x",x);
-	textElement.setAttributeNS(null,"y",y);
-	textElement.setAttributeNS(null,"font-family",font);
-	textElement.setAttributeNS(null,"font-size",fontSize);
-	if(weight!=null){
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
-	textElement.setAttributeNS(null,"fill",color);
-	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
-	text+=""; //Make text into a string
-	text=text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	var textNode = document.createTextNode(text);
-	textElement.textNode=textNode;
+	const textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "x", x);
+	textElement.setAttributeNS(null, "y", y);
+	textElement.setAttributeNS(null, "font-family", font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
+	textElement.setAttributeNS(null, "fill", color);
+	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+	text += ""; //Make text into a string
+	text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
+	const textNode = document.createTextNode(text);
+	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
-}
+};
+
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
- * They do not return anything.
- */
-GuiElements.update=function(){};
-/* Changes the fill color (or text color) of any SVG element.
- * @param {SVG element} element - The element to be recolored.
+ * They do not return anything. */
+GuiElements.update = {};
+/**
+ * Changes the fill color (or text color) of any SVG element.
+ * @param {Element} element - The element to be recolored.
  * @param {string} color - The element's new color in the form "#fff".
  */
-GuiElements.update.color=function(element,color){
+GuiElements.update.color = function(element, color) {
 	DebugOptions.validateNonNull(color);
-	element.setAttributeNS(null,"fill",color); //Recolors the element.
-}
-/* Changes the fill opacity of any SVG element.
- * @param {SVG element} element - The element to be modified.
- * @param {number} color - The element's new opacity (from 0 to 1).
+	element.setAttributeNS(null, "fill", color); //Recolors the element.
+};
+/**
+ * Changes the fill opacity of any SVG element.
+ * @param {Element} element - The element to be modified.
+ * @param {number} opacity - The element's new opacity (from 0 to 1).
  */
-GuiElements.update.opacity=function(element,opacity){
-	element.setAttributeNS(null,"fill-opacity",opacity); //Sets the opacity.
-}
-/* Sets an SVG element's stroke
- * @param {SVG element} element - The element to be modified.
+GuiElements.update.opacity = function(element, opacity) {
+	element.setAttributeNS(null, "fill-opacity", opacity); //Sets the opacity.
+};
+/**
+ * Sets an SVG element's stroke
+ * @param {Element} element - The element to be modified.
  * @param {string} color - The element's new color in the form "#fff".
  * @param {number} strokeW - The width of the stroke
  */
-GuiElements.update.stroke=function(element,color,strokeW){
+GuiElements.update.stroke = function(element, color, strokeW) {
 	DebugOptions.validateNonNull(color);
-	element.setAttributeNS(null,"stroke",color);
-	element.setAttributeNS(null,"stroke-width",strokeW);
+	element.setAttributeNS(null, "stroke", color);
+	element.setAttributeNS(null, "stroke-width", strokeW);
 };
-/* Changes the text of an SVG text element.
- * @param {SVG text} textE - The text element to be modified.
+/**
+ * Changes the text of an SVG text element.
+ * @param {Element} textE - The text element to be modified.
  * @param {string} newText - The element's new text.
  */
-GuiElements.update.text=function(textE,newText){
-	newText+=""; //Make newText into a string
-	newText=newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	if(textE.textNode!=null) {
+GuiElements.update.text = function(textE, newText) {
+	newText += ""; //Make newText into a string
+	newText = newText.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
+	if (textE.textNode != null) {
 		textE.textNode.remove(); //Remove old text.
 	}
-	var textNode = document.createTextNode(newText); //Create new text.
-	textE.textNode=textNode; //Adds a reference for easy removal.
+	const textNode = document.createTextNode(newText); //Create new text.
+	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
-}
-/* Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
+};
+/**
+ * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
  * Adds "..." if characters are removed.
- * @param {SVG text} textE - The text element to be modified.
+ * @param {Element} textE - The text element to be modified.
  * @param {string} text - The element's new text.
  * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
  */
-GuiElements.update.textLimitWidth=function(textE,text,maxWidth){
-	GuiElements.update.text(textE,text);
-	var currentWidth=GuiElements.measure.textWidth(textE);
-	if(currentWidth<maxWidth||text==""){
+GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
+	GuiElements.update.text(textE, text);
+	let currentWidth = GuiElements.measure.textWidth(textE);
+	if (currentWidth < maxWidth || text == "") {
 		return;
 	}
-	var chars=1;
-	var maxChars=text.length;
-	var currentText;
-	while(chars<=maxChars){
-		currentText=text.substring(0,chars);
-		GuiElements.update.text(textE,currentText+"...");
-		currentWidth=GuiElements.measure.textWidth(textE);
-		if(currentWidth>maxWidth){
+	let chars = 1;
+	const maxChars = text.length;
+	let currentText;
+	while (chars <= maxChars) {
+		currentText = text.substring(0, chars);
+		GuiElements.update.text(textE, currentText + "...");
+		currentWidth = GuiElements.measure.textWidth(textE);
+		if (currentWidth > maxWidth) {
 			chars--;
 			break;
 		}
 		chars++;
 	}
-	currentText=text.substring(0,chars);
-	GuiElements.update.text(textE,currentText+"...");
+	currentText = text.substring(0, chars);
+	GuiElements.update.text(textE, currentText + "...");
 };
-/* Changes the path description of an SVG path object to make it a triangle.
- * @param {SVG path} pathE - The path element to be modified.
+/**
+ * Changes the path description of an SVG path object to make it a triangle.
+ * @param {Element} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
  */
-GuiElements.update.triangle=function(pathE,x,y,width,height){
+GuiElements.update.triangle = function(pathE, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	var xshift=width/2;
-	var path="";
-	path+="m "+x+","+y; //Draws bottom-left point.
-	path+=" "+xshift+","+(0-height); //Draws top-middle point.
-	path+=" "+xshift+","+(height); //Draws bottom-right point.
-	path+=" z"; //Closes path.
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
+	const xshift = width / 2;
+	let path = "";
+	path += "m " + x + "," + y; //Draws bottom-left point.
+	path += " " + xshift + "," + (0 - height); //Draws top-middle point.
+	path += " " + xshift + "," + (height); //Draws bottom-right point.
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical){
+/**
+ * Makes the path a triangle with point at the specified coords, possibly rotated 90 degrees
+ * @param {Element} pathE
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} vertical - Whether the triangle should be vertical or horizontal
+ */
+GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vertical) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	if(vertical == null){
+	if (vertical == null) {
 		vertical = 0;
 	}
 
-	var xshift=width/2;
-	var path="";
-	path+="m "+x+","+y; //Draws top-middle point.
-	if(vertical) {
+	const xshift = width / 2;
+	let path = "";
+	path += "m " + x + "," + y; //Draws top-middle point.
+	if (vertical) {
 		path += " " + xshift + "," + (height);
 		path += " " + (0 - width) + ",0";
-	} else{
+	} else {
 		path += " " + (height) + "," + xshift;
 		path += " 0," + (0 - width);
 	}
-	path+=" z"; //Closes path.
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-/* Changes the path description of an SVG path object to make it a trapezoid.
- * @param {SVG path} pathE - The path element to be modified.
+/**
+ * Changes the path description of an SVG path object to make it a trapezoid.
+ * @param {Element} pathE - The path element to be modified.
  * @param {number} x - The path's new x coord.
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles trapezoid)
  * @param {number} height - The path's new height. (negative will make it point down)
  * @param {number} slantW - The amount the trapezoid slopes in.
  */
-GuiElements.update.trapezoid=function(pathE,x,y,width,height,slantW){
+GuiElements.update.trapezoid = function(pathE, x, y, width, height, slantW) {
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	var shortW=width-2*slantW; //The width of the top of the trapezoid.
-	var path="";
-	path+="m "+x+","+(y+height); //Draws the points.
-	path+=" "+slantW+","+(0-height);
-	path+=" "+shortW+","+0;
-	path+=" "+slantW+","+height;
-	path+=" z";
-	pathE.setAttributeNS(null,"d",path); //Sets path description.
-}
-/* Moves and resizes an SVG rect element.
- * @param {SVG rect} rect - The rect element to be modified.
+	const shortW = width - 2 * slantW; //The width of the top of the trapezoid.
+	let path = "";
+	path += "m " + x + "," + (y + height); //Draws the points.
+	path += " " + slantW + "," + (0 - height);
+	path += " " + shortW + "," + 0;
+	path += " " + slantW + "," + height;
+	path += " z";
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
+};
+/**
+ * Moves and resizes an SVG rect element.
+ * @param {Element} rect - The rect element to be modified.
  * @param {number} x - The rect's new x coord.
  * @param {number} y - The rect's new y coord.
  * @param {number} width - The rect's new width.
  * @param {number} height - The rect's new height.
  */
-GuiElements.update.rect=function(rect,x,y,width,height){
+GuiElements.update.rect = function(rect, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	rect.setAttributeNS(null,"x",x);
-	rect.setAttributeNS(null,"y",y);
-	rect.setAttributeNS(null,"width",width);
-	rect.setAttributeNS(null,"height",height);
-}
-/* Used for zooming the main zoomGroup which holds the ui */
-GuiElements.update.zoom=function(group,scale){
+	rect.setAttributeNS(null, "x", x);
+	rect.setAttributeNS(null, "y", y);
+	rect.setAttributeNS(null, "width", width);
+	rect.setAttributeNS(null, "height", height);
+};
+/**
+ * Used for zooming the main zoomGroup which holds the ui
+ * @param {Element} group
+ * @param {number} scale - The zoom amount
+ */
+GuiElements.update.zoom = function(group, scale) {
 	DebugOptions.validateNumbers(scale);
-	group.setAttributeNS(null,"transform","scale("+scale+")");
+	group.setAttributeNS(null, "transform", "scale(" + scale + ")");
 };
-GuiElements.update.image=function(imageE,newImageName){
+/**
+ * Changes the image an image element points to
+ * @param {Element} imageE
+ * @param {string} newImageName - The name of the png image
+ */
+GuiElements.update.image = function(imageE, newImageName) {
 	//imageE.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+newImageName+".png");
-	imageE.setAttributeNS( "http://www.w3.org/1999/xlink", "href", "Images/"+newImageName+".png" );
+	imageE.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + newImageName + ".png");
 };
-GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
+/**
+ * Updates a div, svg and group in the SVG that form a smoothScrollSet according to new dimensions
+ * @param {Element} div - The div scrollable div containing a larger SVG
+ * @param {Element} svg - The svg in the div
+ * @param {Element} zoomG - The scaled group in the svg
+ * @param {number} x - Position of the set
+ * @param {number} y
+ * @param {number} width - Dimensions of outside of set
+ * @param {number} height
+ * @param {number} innerWidth - Dimensions inside the set
+ * @param {number} innerHeight
+ */
+GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, height, innerWidth, innerHeight) {
 	DebugOptions.validateNonNull(div, svg, zoomG);
 	DebugOptions.validateNumbers(x, y, width, height, innerWidth, innerHeight);
 	/*foreignObj.setAttributeNS(null,"x",x);
@@ -1890,23 +3018,23 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	var scrollY = innerHeight > height;
-	var scrollX = innerWidth > width;
+	const scrollY = innerHeight > height;
+	const scrollX = innerWidth > width;
 	div.classList.remove("noScroll");
 	div.classList.remove("smoothScrollXY");
 	div.classList.remove("smoothScrollX");
 	div.classList.remove("smoothScrollY");
-	if(scrollX && scrollY) {
-		div.classList.add("smoothScrollXY");
-	} else if(scrollX) {
-		div.classList.add("smoothScrollX");
-	} else if(scrollY) {
+	if (scrollX && scrollY) {
+		div.classList.add("smoothScrollY");
+	} else if (scrollX) {
+		div.classList.add("noScroll");
+	} else if (scrollY) {
 		div.classList.add("smoothScrollY");
 	} else {
 		div.classList.add("noScroll");
 	}
 
-	var zoom = GuiElements.zoomFactor;
+	const zoom = GuiElements.zoomFactor;
 
 	div.style.top = y + "px";
 	div.style.left = x + "px";
@@ -1918,224 +3046,207 @@ GuiElements.update.smoothScrollSet=function(div, svg, zoomG, x, y, width, height
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
-
-GuiElements.makeClickThrough = function(svgE){
+/**
+ * Makes an SVG element have touches pass through it
+ * @param {Element} svgE
+ */
+GuiElements.update.makeClickThrough = function(svgE) {
 	svgE.style.pointerEvents = "none";
 };
+
 /* GuiElements.move contains functions that move existing SVG elements.
- * They do not return anything.
- */
-GuiElements.move=function(){};
-/* Moves a group by changing its transform value.
- * @param {SVG g} group - The group to move.
+ * They do not return anything. */
+GuiElements.move = {};
+/**
+ * Moves a group by changing its transform value.
+ * @param {Element} group - The group to move.
  * @param {number} x - The new x offset of the group.
  * @param {number} y - The new y offset of the group.
- * @param {number} zoom - (Optional) The amount the group should be scaled.
+ * @param {number} [zoom] - (Optional) The amount the group should be scaled.
  */
-GuiElements.move.group=function(group,x,y,zoom){
-	DebugOptions.validateNumbers(x,y);
-	if(zoom == null) {
+GuiElements.move.group = function(group, x, y, zoom) {
+	DebugOptions.validateNumbers(x, y);
+	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
-	}
-	else{
+	} else {
 		group.setAttributeNS(null, "transform", "matrix(" + zoom + ",0,0," + zoom + "," + x + "," + y + ")");
 	}
 };
-/* Moves an SVG text element.
- * @param {SVG text} text - The text to move.
+/**
+ * Moves an SVG text element.
+ * @param {string} text - The text to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
-GuiElements.move.text=function(text,x,y){
-	DebugOptions.validateNumbers(x,y);
-	text.setAttributeNS(null,"x",x);
-	text.setAttributeNS(null,"y",y);
+GuiElements.move.text = function(text, x, y) {
+	DebugOptions.validateNumbers(x, y);
+	text.setAttributeNS(null, "x", x);
+	text.setAttributeNS(null, "y", y);
 };
-/* Moves an SVG element.
- * @param {SVG element} element - The element to move.
+/**
+ * Moves an SVG element.
+ * @param {Element} element - The element to move.
  * @param {number} x - The new x coord of the element.
  * @param {number} y - The new y coord of the element.
  */
-GuiElements.move.element=function(element,x,y){
-	DebugOptions.validateNumbers(x,y);
-	element.setAttributeNS(null,"x",x);
-	element.setAttributeNS(null,"y",y);
+GuiElements.move.element = function(element, x, y) {
+	DebugOptions.validateNumbers(x, y);
+	element.setAttributeNS(null, "x", x);
+	element.setAttributeNS(null, "y", y);
 };
-/* Creates a clipping path (crops item) of the specified size and adds to the element if provided.
- * @param {string} id - The id to use for the clipping path.
+/**
+ * Creates a clipping path (crops item) of the specified size and adds to the element if provided.
  * @param {number} x - The x coord of the clipping path.
  * @param {number} y - The y coord of the clipping path.
  * @param {number} width - The width of the clipping path.
  * @param {number} height - The height of the clipping path.
- * @param {SVG element} element - (optional) The element the path should be added to.
- * @return {SVG clipPath} - The finished clipping path.
+ * @param {Element} [element] - (optional) The element the path should be added to.
+ * @return {Element} - The finished clipping path.
  */
-GuiElements.clip=function(x,y,width,height,element){
-	DebugOptions.validateNumbers(x,y,width,height);
-	var id=Math.random()+"";
-	var clipPath=document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
-	var clipRect=GuiElements.draw.rect(x,y,width,height);
+GuiElements.clip = function(x, y, width, height, element) {
+	DebugOptions.validateNumbers(x, y, width, height);
+	const id = Math.random() + "";
+	const clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
+	const clipRect = GuiElements.draw.rect(x, y, width, height);
 	clipPath.appendChild(clipRect);
-	clipPath.setAttributeNS(null,"id",id);
+	clipPath.setAttributeNS(null, "id", id);
 	GuiElements.defs.appendChild(clipPath);
-	if(element!=null){
-		element.setAttributeNS(null,"clip-path","url(#"+id+")");
+	if (element != null) {
+		element.setAttributeNS(null, "clip-path", "url(#" + id + ")");
 	}
 	return clipPath;
 };
+
 /* GuiElements.measure contains functions that measure parts of the UI.
- * They return the measurement.
- */
-GuiElements.measure=function(){};
-/* Measures the width of an existing SVG text element.
- * @param {SVG text} textE - The text element to measure.
+ * They return the measurement. */
+GuiElements.measure = {};
+/**
+ * Measures the width of an existing SVG text element.
+ * @param {Element} textE - The text element to measure.
  * @return {number} - The width of the text element.
  */
-GuiElements.measure.textWidth=function(textE){ //Measures an existing text SVG element
-	return GuiElements.measure.textDim(textE,false);
+GuiElements.measure.textWidth = function(textE) { //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE, false);
 };
-GuiElements.measure.textHeight=function(textE){ //Measures an existing text SVG element
-	return GuiElements.measure.textDim(textE,true);
+/**
+ * Measures the height of the SVG text element
+ * @param {Element} textE
+ * @return {number}
+ */
+GuiElements.measure.textHeight = function(textE) { //Measures an existing text SVG element
+	return GuiElements.measure.textDim(textE, true);
 };
-/* Measures the width/height of an existing SVG text element.
- * @param {SVG text} textE - The text element to measure.
+/**
+ * Measures the width/height of an existing SVG text element.
+ * @param {Element} textE - The text element to measure.
  * @param {bool} height - true/false for width/height, respectively.
  * @return {number} - The width/height of the text element.
  */
-GuiElements.measure.textDim=function(textE, height){ //Measures an existing text SVG element
-	if(textE.textContent==""){ //If it has no text, the width is 0.
+GuiElements.measure.textDim = function(textE, height) { //Measures an existing text SVG element
+	if (textE.textContent === "") { //If it has no text, the width is 0.
 		return 0;
 	}
 	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
-	var bbox=textE.getBBox();
-	var textD=bbox.width; //Gets the width of the bounding box.
-	if(height){
-		textD=bbox.height; //Gets the height of the bounding box.
+	let bbox = textE.getBBox();
+	let textD = bbox.width; //Gets the width of the bounding box.
+	if (height) {
+		textD = bbox.height; //Gets the height of the bounding box.
 	}
-	if(textD==0){ //The text element probably is not visible on the screen.
-		var parent=textE.parentNode; //Store the text element's current (hidden) parent.
+	if (textD === 0) { //The text element probably is not visible on the screen.
+		const parent = textE.parentNode; //Store the text element's current (hidden) parent.
 		GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
-		bbox=textE.getBBox(); //Now get its bounding box.
-		textD=bbox.width;
-		if(height){
-			textD=bbox.height;
+		bbox = textE.getBBox(); //Now get its bounding box.
+		textD = bbox.width;
+		if (height) {
+			textD = bbox.height;
 		}
 		textE.remove(); //Remove it from the temp layer.
-		if(parent!=null){
+		if (parent != null) {
 			parent.appendChild(textE); //Add it back to its old parent.
 		}
 	}
 	return textD; //Return the width/height.
 };
-
-
-/* Measures the width of a string if it were used to create a text element with certain formatting.
+/**
+ * Measures the width of a string if it were used to create a text element with certain formatting.
  * @param {string} text - The string to measure.
- * @param {string} font - The font family of the text element.
- * @param {string} font - The font size of the text element.
- * @param {string} weight - (optional) the weight ("bold","normal",etc.) of the text element.
+ * @param {Font} font - The font family of the text element.
  * @return {number} - The width of the text element made using the string.
  */
-GuiElements.measure.stringWidth=function(text,font,size,weight){
-	var textElement=GuiElements.create.text(); //Make the text element.
-	textElement.setAttributeNS(null,"font-family",font); //Set the attributes.
-	textElement.setAttributeNS(null,"font-size",size);
-	if(weight!=null){ //Set weight if specified.
-		textElement.setAttributeNS(null,"font-weight",weight);
-	}
-	textElement.setAttributeNS(null,"class","noselect"); //Make sure it can't be selected.
-	var textNode = document.createTextNode(text); //Add the text to the text element.
-	textElement.textNode=textNode;
+GuiElements.measure.stringWidth = function(text, font) {
+	const textElement = GuiElements.create.text(); //Make the text element.
+	textElement.setAttributeNS(null, "font-family", font.fontFamily); //Set the attributes.
+	textElement.setAttributeNS(null, "font-size", font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
+	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+	const textNode = document.createTextNode(text); //Add the text to the text element.
+	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
 };
-GuiElements.measure.position = function(element) {
-	var top = 0, left = 0;
-	do {
-		top += element.offsetTop  || 0;
-		left += element.offsetLeft || 0;
-		element = element.offsetParent;
-	} while(element);
 
-	return {
-		top: top,
-		left: left
-	};
-	/* https://stackoverflow.com/questions/1480133/how-can-i-get-an-objects-absolute-position-on-the-page-in-javascript */
-};
-/* Displays the result of a reporter or predicate Block in a speech bubble next to that block.
- * @param {string} value - The value to display
- * @fix This function has not been created yet.
+/**
+ * Creates a black rectangle to block interaction with the main screen.  Used for dialogs.
  */
-GuiElements.displayValue=function(value,x,y,width,height, error){
-	if(error == null){
-		error = false;
-	}
-	var leftX = x;
-	var rightX = x + width;
-	var upperY=y;
-	var lowerY=y+height;
-	new ResultBubble(leftX, rightX,upperY,lowerY,value, error);
-};
-/* Loads the version number from version.js */
-GuiElements.getAppVersion=function(callback){
-	GuiElements.appVersion = FrontendVersion;
-	callback();
-};
-GuiElements.getOsVersion=function(callback){
-	HtmlServer.sendRequestWithCallback("properties/os", function(resp){
-		GuiElements.osVersion = resp;
-		var parts = resp.split(" ");
-		GuiElements.isKindle = (parts.length >= 1 && parts[0] == "Kindle");
-		GuiElements.isIos = (parts.length >= 1 && parts[0] == "iOS");
-		callback();
-	}, function(){
-		GuiElements.osVersion="";
-		GuiElements.isKindle = false;
-		callback();
-	});
-};
-/* Creates a black rectangle to block interaction with the main screen.  Used for dialogs. */
-GuiElements.blockInteraction=function(){
-	if(GuiElements.dialogBlock==null) {
-		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
-		GuiElements.update.opacity(rect,GuiElements.blockerOpacity);
+GuiElements.blockInteraction = function() {
+	if (GuiElements.dialogBlock == null) {
+		const rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
+		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
-		GuiElements.dialogBlock=rect;
+		GuiElements.dialogBlock = rect;
 	}
 };
-GuiElements.unblockInteraction=function() {
-	if(GuiElements.dialogBlock!=null) {
+/**
+ * Removes the black rectangle that blocks interaction
+ */
+GuiElements.unblockInteraction = function() {
+	if (GuiElements.dialogBlock != null) {
 		GuiElements.dialogBlock.remove();
-		GuiElements.dialogBlock=null;
+		GuiElements.dialogBlock = null;
 	}
 };
-GuiElements.updateDialogBlockZoom = function(){
-	if(GuiElements.dialogBlock!=null) {
+/**
+ * Updates the dimensions of the blocker
+ */
+GuiElements.updateDialogBlockZoom = function() {
+	if (GuiElements.dialogBlock != null) {
 		GuiElements.update.rect(GuiElements.dialogBlock, 0, 0, GuiElements.width, GuiElements.height);
 	}
 };
-/* Tells UI parts that zoom has changed. */
-GuiElements.updateZoom=function(){
+
+/**
+ * Sets the scale levels of the zoomGroups and then updates the UI
+ */
+GuiElements.updateZoom = function() {
 	GuiElements.zoomFactor = GuiElements.zoomMultiple * GuiElements.computedZoom;
-	GuiElements.zoomGroups.forEach(function(zoomGroup){
-		GuiElements.update.zoom(zoomGroup,GuiElements.zoomFactor);
+	GuiElements.zoomGroups.forEach(function(zoomGroup) {
+		GuiElements.update.zoom(zoomGroup, GuiElements.zoomFactor);
 	});
-	HtmlServer.setSetting("zoom",GuiElements.zoomMultiple);
 	GuiElements.updateDims();
 };
-GuiElements.updateDimsPreview = function(newWidth, newHeight){
-	GuiElements.width=newWidth/GuiElements.zoomFactor;
-	GuiElements.height=newHeight/GuiElements.zoomFactor;
+/**
+ * Sets the width and height using dimensions from the backend, then tells the UI to update
+ * @param {number} newWidth
+ * @param {number} newHeight
+ */
+GuiElements.updateDimsPreview = function(newWidth, newHeight) {
+	GuiElements.width = newWidth / GuiElements.zoomFactor;
+	GuiElements.height = newHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
-GuiElements.updateDims = function(){
-	GuiElements.width=window.innerWidth/GuiElements.zoomFactor;
-	GuiElements.height=window.innerHeight/GuiElements.zoomFactor;
+/**
+ * Remeasures the width and height for GuiElements and then tells the UI to update
+ */
+GuiElements.updateDims = function() {
+	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+	GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
 	GuiElements.passUpdateZoom();
 };
-GuiElements.passUpdateZoom = function(){
+/**
+ * Tells parts of the UI to update their dimensions
+ */
+GuiElements.passUpdateZoom = function() {
 	Overlay.closeOverlaysExcept(TitleBar.viewMenu);
 	GuiElements.checkSmallMode();
 	DisplayBoxManager.updateZoom();
@@ -2146,18 +3257,103 @@ GuiElements.passUpdateZoom = function(){
 	GuiElements.updateDialogBlockZoom();
 	RowDialog.updateZoom();
 };
-GuiElements.configureZoom = function(callback){
+
+/* GuiElements.load loads important information from the backend before the UI even starts to be build (such as
+ * screen dimensions and OS).  All load functions are launched simultaneously and each calls a callback, which
+ * "checks it off the list" of things to load. */
+GuiElements.load = {};
+/**
+ * Called to load information from backend before building UI
+ * @param {function} callback - Called when all data is loaded
+ */
+GuiElements.loadInitialSettings = function(callback) {
+	// TODO: Refactor this function
+	DebugOptions();
+	Data.setConstants();
+	HtmlServer();
+	GuiElements.setGuiConstants();
+	SettingsManager();
+	// The checklist of thing to load
+	const loadProg = {};
+	loadProg.version = false;
+	loadProg.zoom = false;
+	loadProg.os = false;
+	loadProg.lastFileName = true;
+	loadProg.lastFileNamed = true;
+	const load = GuiElements.load;
+	if (!DebugOptions.shouldSkipInitSettings()) {
+		let count = 0;
+		// Function checks if all the pieces are done loading and calls the callback when they are
+		const checkIfDone = function() {
+			count++;
+			GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
+				loadProg.lastFileName + loadProg.lastFileNamed);
+			if (loadProg.version && loadProg.zoom && loadProg.os && loadProg.lastFileName && loadProg.lastFileNamed) {
+				callback();
+			}
+		};
+		// The three things to load are requested
+		load.getAppVersion(function() {
+			loadProg.version = true;
+			checkIfDone();
+		});
+		load.configureZoom(function() {
+			GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
+			GuiElements.height = window.innerHeight / GuiElements.zoomFactor;
+			loadProg.zoom = true;
+			GuiElements.checkSmallMode();
+			checkIfDone();
+		});
+		load.getOsVersion(function() {
+			loadProg.os = true;
+			checkIfDone();
+		});
+	} else {
+		callback();
+	}
+};
+/**
+ * Loads the version number from version.js
+ * @param {function} callback
+ */
+GuiElements.load.getAppVersion = function(callback) {
+	GuiElements.appVersion = FrontendVersion;
+	callback();
+};
+/**
+ * Loads the OS version
+ * @param {function} callback
+ */
+GuiElements.load.getOsVersion = function(callback) {
+	HtmlServer.sendRequestWithCallback("properties/os", function(resp) {
+		GuiElements.osVersion = resp;
+		const parts = resp.split(" ");
+		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
+		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
+		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
+		callback();
+	}, function() {
+		GuiElements.osVersion = "";
+		GuiElements.isKindle = false;
+		callback();
+	});
+};
+/**
+ * Loads dimension information and settings from the backend and uses it to compute the current zoom level
+ * @param {function} callback
+ */
+GuiElements.load.configureZoom = function(callback) {
 	const GE = GuiElements;
-	SettingsManager.loadSettings(function(){
-		const callbackFn = function(){
+	SettingsManager.loadSettings(function() {
+		const callbackFn = function() {
 			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
-			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;
 				SettingsManager.zoom.writeValue(1);
 				GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			}
-			if(GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)){
+			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;
 				GE.computedZoom = GE.defaultZoomMultiple;
 				SettingsManager.zoom.writeValue(1);
@@ -2165,257 +3361,171 @@ GuiElements.configureZoom = function(callback){
 			}
 			callback();
 		};
-		HtmlServer.sendRequestWithCallback("properties/dims",function(response){
+		HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
 			GE.computedZoom = GE.computeZoomFromDims(response);
 			callbackFn();
-		}, function(){
+		}, function() {
 			callbackFn();
 		});
 	});
 };
-/* Takes a response from the properties/dims request and computes and sets the appropriate zoom level
+/**
+ * Takes a response from the properties/dims request and computes and sets the appropriate zoom level
  * @param {string} dims - The response from properties/dims
  */
-GuiElements.computeZoomFromDims=function(dims){
+GuiElements.computeZoomFromDims = function(dims) {
 	//GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	//GuiElements.alert("received dims: " + dims);
-	var parts = dims.split(",");
-	if(parts.length==2) {
-		var widthMm = parseFloat(parts[0]);
-		var heightMm = parseFloat(parts[1]);
-		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
-		var widthPx = window.innerWidth;
-		var heightPx = window.innerHeight;
-		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
+	const parts = dims.split(",");
+	if (parts.length === 2) {
+		const widthMm = parseFloat(parts[0]);
+		const heightMm = parseFloat(parts[1]);
+		const diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
+		const widthPx = window.innerWidth;
+		const heightPx = window.innerHeight;
+		const diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
+		const zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
 		//GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		return zoom * GuiElements.defaultZoomMultiple;
-	}
-	else{
+	} else {
 		return 1;
 	}
 };
-GuiElements.relToAbsX = function(x){
+
+/* Convert between coords relative to the screen and coords that incorporate the current zoom level
+ * Note that most relToAbs functions in other classes actually return coords that do not depend on the
+ * current zoom level.  The GuiElements relToAbs functions take these coords and convert them into true
+ * screen coords. */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+GuiElements.relToAbsX = function(x) {
 	return x * GuiElements.zoomFactor;
 };
-GuiElements.relToAbsY = function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+GuiElements.relToAbsY = function(y) {
 	return y * GuiElements.zoomFactor;
 };
-GuiElements.hidePaletteLayers = function(skipUpdate){
-	if(skipUpdate == null){
+
+/**
+ * Hides the BlockPalette by hiding the layers it renders on
+ * @param {boolean} [skipUpdate=false] - Whether the TabManager should not be told to update arrows because the
+ *                                       TabManager has not been initialized yet
+ */
+GuiElements.hidePaletteLayers = function(skipUpdate) {
+	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
 	let GE = GuiElements;
-	if(GuiElements.paletteLayersVisible){
+	if (GuiElements.paletteLayersVisible) {
 		GuiElements.paletteLayersVisible = false;
+		SettingsManager.sideBarVisible.writeValue("false");
 		GE.layers.paletteBG.hide();
 		GE.layers.paletteScroll.style.visibility = "hidden";
 		GE.layers.trash.hide();
 		GE.layers.catBg.hide();
 		GE.layers.categories.hide();
-		if(!skipUpdate) {
+		if (!skipUpdate) {
 			TabManager.updateZoom();
 		}
 	}
 };
-GuiElements.showPaletteLayers = function(skipUpdate){
+/**
+ * Shows the BlockPalette
+ * @param {boolean} [skipUpdate=false] - Whether updating the TabManager should be skipped
+ */
+GuiElements.showPaletteLayers = function(skipUpdate) {
 	let GE = GuiElements;
-	if(skipUpdate == null){
+	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
-	if(!GuiElements.paletteLayersVisible){
+	if (!GuiElements.paletteLayersVisible) {
 		GuiElements.paletteLayersVisible = true;
+		SettingsManager.sideBarVisible.writeValue("true");
 		GE.layers.paletteBG.show();
 		GE.layers.paletteScroll.style.visibility = "visible";
 		GE.layers.trash.show();
 		GE.layers.catBg.show();
 		GE.layers.categories.show();
-		if(!skipUpdate) {
+		if (!skipUpdate) {
 			TabManager.updateZoom();
 		}
 	}
 };
-GuiElements.checkSmallMode = function(){
+
+/**
+ * Checks if the UI should enter/exit small mode based on the current width
+ */
+GuiElements.checkSmallMode = function() {
 	let GE = GuiElements;
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
-	if(!GE.smallMode && !GE.paletteLayersVisible) {
+	if (!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
+	}
+	if (!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
+		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
-/* Populates the list of category names. Run by GuiElements. */
-function BlockList(){
-	BlockList.categories=new Array();
-	//List only includes categories that will appear in the BlockPalette. "Lists" category is excluded.
-	var cat=BlockList.categories;
-	// Catetory names should be capitalized in the way they should be displayed on screen.
+/**
+ * Populates the list of category names. Run by GuiElements.
+ */
+function BlockList() {
+	const cat = BlockList.categories = [];
+
+	// List only includes categories that will appear in the BlockPalette in order.
+	// Category names should be capitalized in the way they should be displayed on screen.
 	cat.push("Robots");
 	cat.push("Operators");
 	cat.push("Sound");
 	cat.push("Tablet");
-	//cat.push("Motion");
-	//cat.push("Looks");
-	//cat.push("Pen");
-
 	cat.push("Control");
-	//cat.push("Sensing");
-
 	cat.push("Variables");
 }
-/* Returns the id for a category given its index in the category list. Ids are lowercase.
+
+/**
+ * Returns the id for a category given its index in the category list. Ids are lowercase.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's id (its name in lowercase).
  */
-BlockList.getCatId=function(index){
+BlockList.getCatId = function(index) {
 	return BlockList.categories[index].toLowerCase();
 };
-/* Returns the category's name given its index in the category list.
+
+/**
+ * Returns the category's name given its index in the category list.
  * @param {number} index - The category's index in the category name list.
  * @return {string} - The category's name.
  */
-BlockList.getCatName=function(index){
+BlockList.getCatName = function(index) {
 	return BlockList.categories[index];
 };
-/* Returns the length of the category list.
+
+/**
+ * Returns the length of the category list.
  * @return {number} - The length of the category list.
  */
-BlockList.catCount=function(){
+BlockList.catCount = function() {
 	return BlockList.categories.length;
 };
 
-/* The following functions populate a Category for the BlockPalette.
- * @param {Category} category - the Category object to populate.
+/*
+ * The following functions populate a Category for the BlockPalette.
  * Each function has the same structure.
  * Blocks are added with category.addBlockByName(blockNameAsString) and spaces between groups with category.addSpace().
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
-BlockList.populateCat_robots = function(category) {
-	let anyConnected = false;
-	Device.getTypeList().forEach(function(deviceClass){
-		if(deviceClass.getManager().getDeviceCount() > 0) {
-			anyConnected = true;
-			category.addLabel(deviceClass.getDeviceTypeName());
-			category.addSpace();
-			BlockList["populateCat_" + deviceClass.getDeviceTypeId()](category);
-			category.addSpace();
-		}
-	});
-	if(!anyConnected) {
-		category.addLabel("Connect a robot first...");
-		category.addSpace();
-	}
-	category.trimBottom();
-	category.finalize();
-};
-BlockList.populateCat_hummingbird=function(category){
-	category.addBlockByName("B_HBServo");
-	category.addBlockByName("B_HBMotor");
-	category.addBlockByName("B_HBVibration");
-	category.addSpace();
-	category.addBlockByName("B_HBLed");
-	category.addBlockByName("B_HBTriLed");
-	category.addSpace();
-	category.addBlockByName("B_HBLight");
-	category.addBlockByName("B_HBTempC");
-	category.addBlockByName("B_HBTempF");
-	category.addBlockByName("B_HBDistCM");
-	category.addBlockByName("B_HBDistInch");
-	category.addBlockByName("B_HBKnob");
-	category.addBlockByName("B_HBSound");
-	category.trimBottom();
-	category.finalize();
 
-};
-BlockList.populateCat_flutter=function(category){
-	category.addBlockByName("B_FlutterServo");
-	category.addBlockByName("B_FlutterTriLed");
-	category.addBlockByName("B_FlutterBuzzer");
-	category.addSpace();
-	category.addBlockByName("B_FlutterLight");
-	category.addBlockByName("B_FlutterTempC");
-	category.addBlockByName("B_FlutterTempF");
-	category.addBlockByName("B_FlutterDistCM");
-	category.addBlockByName("B_FlutterDistInch");
-	category.addBlockByName("B_FlutterKnob");
-	category.addBlockByName("B_FlutterSound");
-	category.addBlockByName("B_FlutterSoil");
-	category.trimBottom();
-	category.finalize();
-
-};
-BlockList.populateCat_motion=function(category){
-	category.addBlockByName("B_Move");
-	category.addBlockByName("B_TurnRight");
-	category.addBlockByName("B_TurnLeft");
-	category.addSpace();
-	category.addBlockByName("B_PointInDirection");
-	category.addBlockByName("B_PointTowards");
-	category.addSpace();
-	category.addBlockByName("B_GoToXY");
-	category.addBlockByName("B_GoTo");
-	category.addBlockByName("B_GlideToXY");
-	category.addSpace();
-	category.addBlockByName("B_ChangeXBy");
-	category.addBlockByName("B_SetXTo");
-	category.addBlockByName("B_ChangeYBy");
-	category.addBlockByName("B_SetYTo");
-	category.addSpace();
-	category.addBlockByName("B_IfOnEdgeBounce");
-	category.addSpace();
-	category.addBlockByName("B_XPosition");
-	category.addBlockByName("B_YPosition");
-	category.addBlockByName("B_Direction");
-	category.trimBottom();
-	category.finalize();
-
-}
-BlockList.populateCat_looks=function(category){
-	category.addBlockByName("B_alert");
-	category.addBlockByName("B_SetTitleBarColor");
-	category.addSpace();
-	category.addBlockByName("B_SayForSecs");
-	category.addBlockByName("B_Say");
-	category.addBlockByName("B_ThinkForSecs");
-	category.addBlockByName("B_Think");
-	category.addSpace();
-	category.addBlockByName("B_ChangeSizeBy");
-	category.addBlockByName("B_SetSizeTo");
-	category.addBlockByName("B_Size");
-	category.addSpace();
-	category.addBlockByName("B_Show");
-	category.addBlockByName("B_Hide");
-	category.addSpace();
-	category.addBlockByName("B_GoToFront");
-	category.addBlockByName("B_GoBackLayers");
-	category.trimBottom();
-	category.finalize();
-
-}
-BlockList.populateCat_sound=function(category){
-	category.addButton("Record sounds",RecordingDialog.showDialog,true);
-	category.addSpace();
-	category.addBlockByName("B_PlayRecording");
-	category.addBlockByName("B_PlayRecordingUntilDone");
-	category.addBlockByName("B_PlaySound");
-	category.addBlockByName("B_PlaySoundUntilDone");
-	category.addBlockByName("B_StopAllSounds");
-	category.addSpace();
-	category.addBlockByName("B_RestForBeats");
-	category.addBlockByName("B_PlayNoteForBeats");
-	category.addSpace();
-	category.addBlockByName("B_ChangeTempoBy");
-	category.addBlockByName("B_SetTempoTo");
-	category.addBlockByName("B_Tempo");
-	category.trimBottom();
-	category.finalize();
-
-};
-BlockList.populateCat_pen=function(category){
-	
-}
-BlockList.populateCat_tablet=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_tablet = function(category) {
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -2434,37 +3544,12 @@ BlockList.populateCat_tablet=function(category){
 	category.addSpace();
 	category.addBlockByName("B_CurrentTime");
 	category.trimBottom();
-	category.finalize();
-
 };
-BlockList.populateCat_control=function(category){
-	category.addBlockByName("B_WhenFlagTapped");
-	//category.addBlockByName("B_WhenIAmTapped");
-	category.addBlockByName("B_WhenIReceive");
-	category.addSpace();
-	category.addBlockByName("B_Broadcast");
-	category.addBlockByName("B_BroadcastAndWait");
-	category.addBlockByName("B_Message");
-	category.addSpace();
-	category.addBlockByName("B_Wait");
-	category.addBlockByName("B_WaitUntil");
-	category.addSpace();
-	category.addBlockByName("B_Forever");
-	category.addBlockByName("B_Repeat");
-	category.addBlockByName("B_RepeatUntil");
-	category.addSpace();
-	category.addBlockByName("B_If");
-	category.addBlockByName("B_IfElse");
-	category.addSpace();
-	category.addBlockByName("B_Stop");
-	category.trimBottom();
-	category.finalize();
 
-}
-BlockList.populateCat_sensing=function(category){
-
-}
-BlockList.populateCat_operators=function(category){
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_operators = function(category) {
 	category.addBlockByName("B_Add");
 	category.addBlockByName("B_Subtract");
 	category.addBlockByName("B_Multiply");
@@ -2493,37 +3578,84 @@ BlockList.populateCat_operators=function(category){
 	category.addSpace();
 	category.addBlockByName("B_IsAType");
 	category.trimBottom();
-	category.finalize();
+};
 
-
-}
-// @fix Write Documentation.
-BlockList.populateCat_variables=function(category){
-	var callbackFn=function(){
-		CodeManager.newVariable();
-	};
-	category.addButton("Create variable",callbackFn);
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_control = function(category) {
+	category.addBlockByName("B_WhenFlagTapped");
+	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
-	var variables=CodeManager.variableList;
-	if(variables.length>0){
-		for(var i=0;i<variables.length;i++){
-			category.addVariableBlock(variables[i]);
-		}
+	category.addBlockByName("B_Broadcast");
+	category.addBlockByName("B_BroadcastAndWait");
+	category.addBlockByName("B_Message");
+	category.addSpace();
+	category.addBlockByName("B_Wait");
+	category.addBlockByName("B_WaitUntil");
+	category.addSpace();
+	category.addBlockByName("B_Forever");
+	category.addBlockByName("B_Repeat");
+	category.addBlockByName("B_RepeatUntil");
+	category.addSpace();
+	category.addBlockByName("B_If");
+	category.addBlockByName("B_IfElse");
+	category.addSpace();
+	category.addBlockByName("B_Stop");
+	category.trimBottom();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_sound = function(category) {
+	const button = category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
+	category.addSpace();
+	category.addBlockByName("B_PlayRecording");
+	category.addBlockByName("B_PlayRecordingUntilDone");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlaySoundUntilDone");
+	category.addBlockByName("B_StopAllSounds");
+	category.addSpace();
+	category.addBlockByName("B_RestForBeats");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.addSpace();
+	category.addBlockByName("B_ChangeTempoBy");
+	category.addBlockByName("B_SetTempoTo");
+	category.addBlockByName("B_Tempo");
+	category.trimBottom();
+};
+
+/**
+ * @param {Category} category
+ */
+BlockList.populateCat_variables = function(category) {
+	category.addButton("Create variable", CodeManager.newVariable);
+	category.addSpace();
+
+	const variables = CodeManager.variableList;
+	if (variables.length > 0) {
+		// We show a variable Block for every variable
+		variables.forEach(function(variable) {
+			category.addVariableBlock(variable);
+		});
 		category.addSpace();
+
+		// These Blocks let the variable be selected from a DropSlot, so we only need one of each of them
 		category.addBlockByName("B_SetTo");
 		category.addBlockByName("B_ChangeBy");
 	}
-	callbackFn=function(){
-		CodeManager.newList();
-	};
+
 	category.addSpace();
-	category.addButton("Create list",callbackFn);
+	category.addButton("Create list", CodeManager.newList);
 	category.addSpace();
-	var lists=CodeManager.listList;
-	if(lists.length>0){
-		for(var i=0;i<lists.length;i++){
-			category.addListBlock(lists[i]);
-		}
+
+	const lists = CodeManager.listList;
+	if (lists.length > 0) {
+		lists.forEach(function(list) {
+			category.addListBlock(list);
+		});
 		category.addSpace();
 		category.addBlockByName("B_AddToList");
 		category.addBlockByName("B_DeleteItemOfList");
@@ -2531,85 +3663,271 @@ BlockList.populateCat_variables=function(category){
 		category.addBlockByName("B_ReplaceItemOfListWith");
 		category.addBlockByName("B_CopyListToList");
 	}
+
+	// These list functions can take input from the Split block, so we show them even if there are no Lists
 	category.addBlockByName("B_ItemOfList");
 	category.addBlockByName("B_LengthOfList");
 	category.addBlockByName("B_ListContainsItem");
 	category.trimBottom();
-	category.finalize();
-
 };
 
-//Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
+/**
+ * Robot Blocks are stored in collapsible sets for each type of Robot.  This function creates the groupings
+ * and BlockList.populateItem_[deviceClassId] fills a given group
+ * @param {Category} category
+ */
+BlockList.populateCat_robots = function(category) {
+	// A list of names and ids to give the Collapsible Set constructor
+	let nameIdList = [];
+	let typeList = Device.getTypeList();
+	typeList.forEach(function(deviceClass) {
+		let entry = {};
+		entry.name = deviceClass.getDeviceTypeName();
+		entry.id = deviceClass.getDeviceTypeId();
+		nameIdList.push(entry);
+	});
+	// Create the set and add it to the category
+	const set = category.addCollapsibleSet(nameIdList);
 
-function Colors(){
+	for (let i = 0; i < typeList.length; i++) {
+		// Populate each item in the set
+		const item = set.getItem(i);
+		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
+	}
+	category.trimBottom();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_hummingbird = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_HBServo");
+	collapsibleItem.addBlockByName("B_HBMotor");
+	collapsibleItem.addBlockByName("B_HBVibration");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLed");
+	collapsibleItem.addBlockByName("B_HBTriLed");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HBLight");
+	collapsibleItem.addBlockByName("B_HBTempC");
+	collapsibleItem.addBlockByName("B_HBTempF");
+	collapsibleItem.addBlockByName("B_HBDistCM");
+	collapsibleItem.addBlockByName("B_HBDistInch");
+	collapsibleItem.addBlockByName("B_HBKnob");
+	collapsibleItem.addBlockByName("B_HBSound");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_flutter = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FlutterServo");
+	collapsibleItem.addBlockByName("B_FlutterTriLed");
+	collapsibleItem.addBlockByName("B_FlutterBuzzer");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FlutterLight");
+	collapsibleItem.addBlockByName("B_FlutterTempC");
+	collapsibleItem.addBlockByName("B_FlutterTempF");
+	collapsibleItem.addBlockByName("B_FlutterDistCM");
+	collapsibleItem.addBlockByName("B_FlutterDistInch");
+	collapsibleItem.addBlockByName("B_FlutterKnob");
+	collapsibleItem.addBlockByName("B_FlutterSound");
+	collapsibleItem.addBlockByName("B_FlutterSoil");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/*
+ * Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
+ */
+
+function Colors() {
 	Colors.setCommon();
 	Colors.setCategory();
 	Colors.setMultipliers();
 }
-Colors.setCommon=function(){
-	Colors.white="#fff";
-	Colors.lightGray="#3d3d3d";
-	Colors.darkGray="#262626";
-	Colors.black="#000";
+
+Colors.setCommon = function() {
+	Colors.white = "#fff";
+	Colors.lightGray = "#3D3D3D";
+	Colors.darkGray = "#282828";
+	Colors.darkDarkGray = "#151515";
+	Colors.black = "#000";
 };
-Colors.setCategory=function(){
+
+Colors.setCategory = function() {
 	Colors.categoryColors = {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
 		"flutter": "#FF9600",
-		"motion": "#0000FF",
-		"looks": "#8800FF",
-		"sound": "#EE00FF", //FF0088
-		"pen": "#00CC99",
-		"tablet": "#019EFF", //7F7F7F
+		"finch": "#FF9600",
+		"sound": "#EE00FF",
+		"tablet": "#019EFF",
 		"control": "#FFCC00",
-		"sensing": "#019EFF",
 		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
 		"inactive": "#a3a3a3"
 	};
 };
-Colors.setMultipliers=function(){
-	Colors.gradStart=1;
-	Colors.gradEnd=0.5;
-	Colors.gradDarkStart=0.25;
-	Colors.gradDarkEnd=0.5;
+
+Colors.setMultipliers = function() {
+	// Used for gradients
+	Colors.gradStart = 1;
+	Colors.gradEnd = 0.5;
+	Colors.gradDarkStart = 0.25;
+	Colors.gradDarkEnd = 0.5;
 };
-Colors.createGradients=function(){
-	Colors.createGradientSet("gradient_",Colors.gradStart,Colors.gradEnd);
-	Colors.createGradientSet("gradient_dark_",Colors.gradDarkStart,Colors.gradDarkEnd);
+
+/**
+ * Creates normal and dark gradients for all categories
+ */
+Colors.createGradients = function() {
+	Colors.createGradientSet("gradient_", Colors.gradStart, Colors.gradEnd);
+	Colors.createGradientSet("gradient_dark_", Colors.gradDarkStart, Colors.gradDarkEnd);
 };
-Colors.createGradientSet=function(name,multStart,multEnd){
+
+/**
+ * Creates gradients for all categories
+ * @param {string} name
+ * @param {number} multStart
+ * @param {number} multEnd
+ */
+Colors.createGradientSet = function(name, multStart, multEnd) {
 	Object.keys(Colors.categoryColors).map(function(category) {
 		let color = Colors.categoryColors[category];
-		Colors.createGradientFromColorAndMults(name,category,color,multStart,multEnd);
+		Colors.createGradientFromColorAndMults(name, category, color, multStart, multEnd);
 	});
 };
-Colors.createGradientFromColorAndMults=function(name,catId,color,multStart,multEnd){
-	var darken=Colors.darkenColor;
-	var color1=darken(color,multStart);
-	var color2=darken(color,multEnd);
-	GuiElements.create.gradient(name+catId,color1,color2);
+
+/**
+ * Creates a gradient in the SVG going from one darkness to another
+ * @param {string} name - Used to identify the type of gradient ("gradient_" or "gradient_dark_")
+ * @param {string} catId - Used to get the specific gradient
+ * @param {string} color - color in hex
+ * @param {number} multStart - number from 0 to 1 to determine the darkness of the start color
+ * @param {number} multEnd - number from 0 to 1 for end color darkness
+ */
+Colors.createGradientFromColorAndMults = function(name, catId, color, multStart, multEnd) {
+	const darken = Colors.darkenColor;
+	const color1 = darken(color, multStart);
+	const color2 = darken(color, multEnd);
+	GuiElements.create.gradient(name + catId, color1, color2);
 };
-Colors.darkenColor=function(color,amt){
+
+/**
+ * Multiplies the rgb values by amt to make them darker
+ * @param {string} color - color in hex
+ * @param {number} amt - number from 0 to 1
+ * @return {string} - color in hex
+ */
+Colors.darkenColor = function(color, amt) {
 	// Source:
 	// stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-	var col = parseInt(color.slice(1),16);
-    var result = (((col & 0x0000FF) * amt) | ((((col>> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
-	while(result.length<6){
-		result="0"+result;
+	const col = parseInt(color.slice(1), 16);
+	let result = (((col & 0x0000FF) * amt) | ((((col >> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
+	while (result.length < 6) {
+		result = "0" + result;
 	}
-	return "#"+result;
+	return "#" + result;
 };
-Colors.getColor=function(category){
+
+/**
+ * Gets the color for a category
+ * @param {string} category
+ * @return {string} - color in hex
+ */
+Colors.getColor = function(category) {
 	return Colors.categoryColors[category];
 };
-Colors.getGradient=function(category){
-	return "url(#gradient_"+category+")";
+
+/**
+ * Gets the gradient specified
+ * @param {string} category - Should start with "gradient_" or "gradient_dark_"
+ * @return {string} - Url to gradient
+ */
+Colors.getGradient = function(category) {
+	return "url(#gradient_" + category + ")";
 };
+/**
+ * Contains data about a font.  Immutable and typically generated using the Font.uiFont(size) function.
+ * Properties are accessed directly to be read, but should not be assigned.  charHeight is a computed property that
+ * indicates how tall the text will be when it appears on the screen and is used for centring text vertically.
+ * @param {string} fontFamily - The font to use.  So far, everything is Arial
+ * @param {number} fontSize
+ * @param {string} fontWeight - ["bold", "normal"]
+ * @constructor
+ */
+function Font(fontFamily, fontSize, fontWeight) {
+	this.fontFamily = fontFamily;
+	this.fontSize = fontSize;
+	this.charHeight = this.lookupCharH(fontSize);
+	this.fontWeight = fontWeight;
+}
+
+/**
+ * Computes the charHeight of the font, given its size.  May need to be adjusted if more fonts are being used
+ * @param {number} fontSize
+ * @return {number}
+ */
+Font.prototype.lookupCharH = function(fontSize){
+	return 0.6639 * fontSize + 1.644;
+};
+
+/**
+ * Returns a Font that is identical to this font but bold
+ * @return {Font}
+ */
+Font.prototype.bold = function(){
+	return new Font(this.fontFamily, this.fontSize, "bold");
+};
+
+/**
+ * Returns a Font that is identical to this font but not bold
+ * @return {Font}
+ */
+Font.prototype.unBold = function(){
+	return new Font(this.fontFamily, this.fontSize, "normal");
+};
+
+/**
+ * Returns the default font of a given size.
+ * @param {number} fontSize
+ * @return {Font}
+ */
+Font.uiFont = function(fontSize){
+	return new Font("Arial", fontSize, "normal");
+};
+/**
+ * This static class hold objects which encode path information for icons.  Each entry contains information about
+ * the width, height and path of the icon.  To add a new icon:
+ * 1) Go to https://material.io/icons/ and search for the icon
+ * 2) Download an SVG of the icon (or make one yourself in Inkscape)
+ * 3) Select all objects and use Path > Object to Path to turn them into paths
+ * 4) Merge all paths into one with Path > Union
+ * 5) Go to File > Document Properties > Resize page to drawing or selection
+ * 6) Save the file as an SVG
+ * 7) Use the dimensions as the width/height
+ * 8) Open the file in a text editor, and copy out the string for the path
+ * 9) Create an entry in VectorPaths with the width/height/path information
+ * 10) You may notice that the icon is off-center when you try to use it.  That means the starting point of the path is
+ *     wrong.  Try changing the path to start with "m 0,0", or "m x,y" where x and y are the locations of the initial
+ *     point in the Inkscape file
+ * @static
+ */
 function VectorPaths(){
-	var VP=VectorPaths;
+	const VP=VectorPaths;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -2651,7 +3969,7 @@ function VectorPaths(){
 	VP.view.width=759.309;
 	VP.view.height=511.321;
 	VP.trash = {};
-	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z"
+	VP.trash.path="m 133.622,0 c -10.303,0 -18.6582,8.35325 -18.6582,18.65625 0,0.0257 0.004,0.0505 0.004,0.0762 l -105.80665,0 c -3.80276,0 -6.89257,6.97823 -6.89257,15.58593 0,8.6077 3.0898,15.58399 6.89257,15.58399 l 297.32422,0 c 3.822,0 6.89453,-6.96699 6.89454,-15.58399 0,-8.5983 -3.07254,-15.58593 -6.89454,-15.58593 l -105.80468,0 c 10e-5,-0.0257 0.004,-0.0505 0.004,-0.0762 0,-10.303 -8.3362,-18.65625 -18.6582,-18.65625 l -48.4043,0 z m -115.46875,66.23829 32.14453,297.77343 215.07032,0 32.12695,-297.77343 -61.72266,0 -16.55273,261.05859 -16.47461,0 16.56836,-261.05859 -53.24805,0 0,261.05859 -16.48437,0 0,-261.05859 -53.22852,0 16.56836,261.05859 -16.47266,0 -16.55273,-261.05859 -61.74219,0 z";
 	VP.trash.width = 311.111;
 	VP.trash.height = 364.012;
 	VP.square = {};
@@ -2718,19 +4036,59 @@ function VectorPaths(){
 	VP.settings.width = 24;
 	VP.settings.height = 24;
 	VP.settings.path = "M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z";
+	VP.cloud = {};
+	VP.cloud.width = 24;
+	VP.cloud.height = 16;
+	VP.cloud.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z";
+	VP.cloudDownload = {};
+	VP.cloudDownload.width = 24;
+	VP.cloudDownload.height = 16;
+	VP.cloudDownload.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z m -2.35,2.96 -5,5 -5,-5 3,0 0,-4 4,0 0,4 3,0 z";
+	VP.letterX = {};
+	VP.letterX.width = 4.430;
+	VP.letterX.height = 4.430;
+	VP.letterX.path = "m 0,0.69785501 0.69785501,-0.69785501 1.51201679,1.522593 1.5225833,-1.522593 0.6978509,0.69785501 -1.5225889,1.51201679 1.5225889,1.5225833 -0.6978509,0.6978509 -1.5225833,-1.5225889 -1.51201679,1.5225889 -0.69785501,-0.6978509 1.522593,-1.5225833 z";
+	VP.cloudUpload = {};
+	VP.cloudUpload.width = 24;
+	VP.cloudUpload.height = 16;
+	VP.cloudUpload.path = "m 19.35,6.04 c -0.68,-3.45 -3.71,-6.04 -7.35,-6.04 -2.89,0 -5.4,1.64 -6.65,4.04 -3.01,0.32 -5.35,2.87 -5.35,5.96 0,3.31 2.69,6 6,6 l 13,0 c 2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96 z m -5.35,2.96 0,4 -4,0 0,-4 -3,0 5,-5 5,5 -3,0 z";
+	VP.warning = {};
+	VP.warning.width = 22;
+	VP.warning.height = 19;
+	VP.warning.path = "m 0,19 22,0 -11,-19 -11,19 z m 12,-3 -2,0 0,-2 2,0 0,2 z m 0,-4 -2,0 0,-4 2,0 0,4 z";
+	VP.info = {};
+	VP.info.width = 20;
+	VP.info.height = 20;
+	VP.info.path = "m 10,0 c -5.52,0 -10,4.48 -10,10 0,5.52 4.48,10 10,10 5.52,0 10,-4.48 10,-10 0,-5.52 -4.48,-10 -10,-10 z m 1,15 -2,0 0,-6 2,0 0,6 z m 0,-8 -2,0 0,-2 2,0 0,2 z";
+	VP.undoDelete = {};
+	VP.undoDelete.width = 87.924;
+	VP.undoDelete.height = 113.045;
+	VP.undoDelete.path = "m 28.262,0 -6.28125,6.2793 -21.98047,0 0,12.56054 87.92383,0 0,-12.56054 -21.98047,0 -6.28125,-6.2793 -31.40039,0 z m -21.98242,25.12109 0,75.36329 c 0,6.90831 5.65224,12.56054 12.56055,12.56054 l 50.24218,0 c 6.90832,0 12.56055,-5.65223 12.56055,-12.56054 l 0,-75.36329 -75.36328,0 z m 35.52344,12.25586 0,13.23243 c 32.63892,-0.75632 39.13249,32.15793 17.60156,42.08984 8.4063,-6.82329 9.65417,-28.23254 -17.60156,-27.66406 l 0,13.51953 -25.80078,-21.14063 25.80078,-20.03711 z";
 }
-function ImageLists(){
-	var IL=ImageLists;
-	IL.hBIcon=function(){};
-	IL.hBIcon.lightName="hBIconWhite";
-	IL.hBIcon.darkName="hBIconDarkGray";
-	IL.hBIcon.width=526;
-	IL.hBIcon.height=334;
+/**
+ * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
+ * are better and don't take time to load.  Each record is an object and can be passed to UI-related functions
+ * that need a reference to an image
+ */
+function ImageLists() {
+	const IL = ImageLists;
+	IL.hBIcon = {};
+	IL.hBIcon.lightName = "hBIconWhite";
+	IL.hBIcon.darkName = "hBIconDarkGray";
+	IL.hBIcon.width = 526;
+	IL.hBIcon.height = 334;
 }
+/*
+ * Static class holds all constants and functions required for Block rendering.
+ * Note that some of the constants are repeated for each type of Block, so be sure to edit all of them if you're
+ * editing one.
+ */
 
-//Static.  Makes block shapes for the SVG.
-
-function BlockGraphics(){
+/**
+ * Initializes the static class by setting all constants
+ */
+function BlockGraphics() {
+	// Set constants for blocks
 	BlockGraphics.SetBlock();
 	BlockGraphics.SetCommand();
 	BlockGraphics.SetReporter();
@@ -2738,192 +4096,250 @@ function BlockGraphics(){
 	BlockGraphics.SetString();
 	BlockGraphics.SetHat();
 	BlockGraphics.SetLoop();
+
+	// Set constants for block parts
 	BlockGraphics.SetLabelText();
 	BlockGraphics.SetValueText();
+
+	// Set constants for Slots
 	BlockGraphics.SetDropSlot();
 	BlockGraphics.SetHighlight();
 	BlockGraphics.SetHitBox();
 	BlockGraphics.SetGlow();
+
+	// Pre-compute some strings useful for rendering blocks
 	BlockGraphics.CalcCommand();
 	BlockGraphics.CalcPaths();
 }
-BlockGraphics.SetBlock=function(){
-	BlockGraphics.block=function(){};
-	BlockGraphics.block.pMargin=7; //Margin between parts
-};
-BlockGraphics.SetCommand=function(){
-	BlockGraphics.command=function(){};
-	BlockGraphics.command.height=34; //27
-	BlockGraphics.command.width=40;
-	BlockGraphics.command.vMargin=5;
-	BlockGraphics.command.hMargin=7;
-	//BlockGraphics.command.pMargin=5; //Margin between parts
-	BlockGraphics.command.bumpOffset=7;
-	BlockGraphics.command.bumpDepth=4;
-	BlockGraphics.command.bumpTopWidth=15;
-	BlockGraphics.command.bumpBottomWidth=7;
-	BlockGraphics.command.cornerRadius=3;
-	BlockGraphics.command.snap=function(){};
-	BlockGraphics.command.snap.left=20;
-	BlockGraphics.command.snap.right=20;
-	BlockGraphics.command.snap.top=20;
-	BlockGraphics.command.snap.bottom=20;
-	BlockGraphics.command.shiftX=20;
-	BlockGraphics.command.shiftY=20;
-}
-BlockGraphics.SetReporter=function(){
-	BlockGraphics.reporter=function(){};
-	BlockGraphics.reporter.height=30;//22
-	BlockGraphics.reporter.width=30;//22
-	BlockGraphics.reporter.vMargin=6;
-	BlockGraphics.reporter.hMargin=10;//5
-	//BlockGraphics.reporter.pMargin=5; //Margin between parts
-	BlockGraphics.reporter.slotHeight=22;//18
-	BlockGraphics.reporter.slotWidth=22;//18
-	BlockGraphics.reporter.slotHMargin=10;//5 //Margin at side of slot
-	//BlockGraphics.reporter.slotStrokeC="none";
-	//BlockGraphics.reporter.slotStrokeW=1;
-	BlockGraphics.reporter.strokeW=1;
-	BlockGraphics.reporter.slotFill="#fff";
-	BlockGraphics.reporter.slotSelectedFill="#000";
-}
-BlockGraphics.SetPredicate=function(){
-	BlockGraphics.predicate=function(){};
-	BlockGraphics.predicate.height=30;//16
-	BlockGraphics.predicate.width=27;
-	BlockGraphics.predicate.vMargin=6;
-	BlockGraphics.predicate.hMargin=10;
-	//BlockGraphics.predicate.pMargin=5; //Margin between parts
-	BlockGraphics.predicate.hexEndL=10;
-	BlockGraphics.predicate.slotHeight=18;
-	BlockGraphics.predicate.slotWidth=25;
-	BlockGraphics.predicate.slotHMargin=5;
-	BlockGraphics.predicate.slotHexEndL=7;
-}
-BlockGraphics.SetString=function(){
-	BlockGraphics.string=function(){};
-	BlockGraphics.string.slotHeight=22;//14
-	BlockGraphics.string.slotWidth=22;//5
-	BlockGraphics.string.slotHMargin=4;//2
-	//BlockGraphics.string.slotHMargin=5;
-}
-BlockGraphics.SetHat=function(){
-	BlockGraphics.hat=function(){};
-	BlockGraphics.hat.hRadius=60;
-	BlockGraphics.hat.vRadius=40;
-	BlockGraphics.hat.topW=80;
-	BlockGraphics.hat.width=90;
-	BlockGraphics.hat.hatHEstimate=10;
-	//BlockGraphics.hat.height=20;
-}
-BlockGraphics.SetLoop=function(){
-	BlockGraphics.loop=function(){};
-	//BlockGraphics.loop.height=40;
-	BlockGraphics.loop.width=40;
-	BlockGraphics.loop.bottomH=7;
-	BlockGraphics.loop.side=7;
-}
-BlockGraphics.SetLabelText=function(){
-	BlockGraphics.labelText=function(){};
-	BlockGraphics.labelText.font="Arial";
-	BlockGraphics.labelText.fontSize=12;
-	BlockGraphics.labelText.fontWeight="bold";
-	BlockGraphics.labelText.fill="#ffffff";
-	BlockGraphics.labelText.charHeight=10;
-	/*BlockGraphics.labelText.charWidth=3;*/
-}
-BlockGraphics.SetValueText=function(){
-	BlockGraphics.valueText=function(){};
-	BlockGraphics.valueText.font="Arial";
-	BlockGraphics.valueText.fontSize=12;
-	BlockGraphics.valueText.fontWeight="normal";
-	BlockGraphics.valueText.fill="#000000";
-	BlockGraphics.valueText.charHeight=10;
-	BlockGraphics.valueText.selectedFill="#fff";
-	BlockGraphics.valueText.grayedFill="#aaa";
-	/*BlockGraphics.valueText.charWidth=3;*/
-}
-BlockGraphics.SetDropSlot=function(){
-	BlockGraphics.dropSlot=function(){};
-	BlockGraphics.dropSlot.slotHeight=22;
-	BlockGraphics.dropSlot.slotWidth=25;
-	BlockGraphics.dropSlot.slotHMargin=5;
-	BlockGraphics.dropSlot.triH=6;
-	BlockGraphics.dropSlot.triW=8;
-	//BlockGraphics.dropSlot.menuWidth=100;
-	BlockGraphics.dropSlot.bg="#000";
-	BlockGraphics.dropSlot.bgOpacity=0.25;
-	BlockGraphics.dropSlot.selectedBg="#000";
-	BlockGraphics.dropSlot.selectedBgOpacity=1;
-	BlockGraphics.dropSlot.triColor="#000";
-	BlockGraphics.dropSlot.textFill="#fff";
-	BlockGraphics.dropSlot.selectedTriColor="#fff";
-}
-BlockGraphics.SetHighlight=function(){
-	BlockGraphics.highlight=function(){};
-	BlockGraphics.highlight.margin=5;
-	BlockGraphics.highlight.hexEndL=15;
-	BlockGraphics.highlight.slotHexEndL=10;
-	BlockGraphics.highlight.strokeC="#fff";
-	BlockGraphics.highlight.strokeDarkC="#000";
-	BlockGraphics.highlight.strokeW=3;
-	BlockGraphics.highlight.commandL=10;
-}
-BlockGraphics.SetHitBox=function(){
-	BlockGraphics.hitBox=function(){};
-	BlockGraphics.hitBox.hMargin=BlockGraphics.block.pMargin/2;
-	BlockGraphics.hitBox.vMargin=3;
-};
-BlockGraphics.SetGlow=function(){
-	BlockGraphics.glow=function(){};
-	BlockGraphics.glow.color="#fff";
-	BlockGraphics.glow.strokeW=2;
+
+/* Constants for all Blocks */
+BlockGraphics.SetBlock = function() {
+	BlockGraphics.block = {};
+	BlockGraphics.block.pMargin = 7; // Margin between parts
 };
 
-BlockGraphics.CalcCommand=function(){
-	var com=BlockGraphics.command;
-	com.extraHeight=2*com.cornerRadius;
-	com.extraWidth=2*com.cornerRadius+com.bumpTopWidth+com.bumpOffset;
-	com.bumpSlantWidth=(com.bumpTopWidth-com.bumpBottomWidth)/2;
-}
-BlockGraphics.CalcPaths=function(){
-	var com=BlockGraphics.command;
-	var path1="";
-	//path1+="m "+com.x+","+com.y;
-	path1+=" "+com.bumpOffset+",0";
-	path1+=" "+com.bumpSlantWidth+","+com.bumpDepth;
-	path1+=" "+com.bumpBottomWidth+",0";
-	path1+=" "+com.bumpSlantWidth+","+(0-com.bumpDepth);
-	path1+=" ";
-	var path2=",0";
-	path2+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+com.cornerRadius+" "+com.cornerRadius;
-	path2+=" l 0,";
-	var path3="";
-	path3+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+com.cornerRadius;
-	path3+=" l ";
-	var path4=",0";
-	path4+=" "+(0-com.bumpSlantWidth)+","+com.bumpDepth;
-	path4+=" "+(0-com.bumpBottomWidth)+",0";
-	path4+=" "+(0-com.bumpSlantWidth)+","+(0-com.bumpDepth);
-	path4+=" "+(0-com.bumpOffset)+",0";
-	path4+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
-	path4+=" ";
-	var path4NoBump=",0";
-	path4NoBump+=" "+(0-com.bumpSlantWidth-com.bumpBottomWidth-com.bumpSlantWidth-com.bumpOffset)+",0";
-	path4NoBump+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+(0-com.cornerRadius)+" "+(0-com.cornerRadius);
-	path4NoBump+=" ";
-	var path5="";
-	path5+=" a "+com.cornerRadius+" "+com.cornerRadius+" 0 0 1 "+com.cornerRadius+" "+(0-com.cornerRadius);
-	path5+=" z";
-	com.path1=path1;
-	com.path2=path2;
-	com.path3=path3;
-	com.path4=path4;
-	com.path4NoBump=path4NoBump;
-	com.path5=path5;
+/* Used by CommandBlocks, LoopBlocks, and HatBlocks */
+BlockGraphics.SetCommand = function() {
+	BlockGraphics.command = {};
+
+	// Minimum dimensions
+	BlockGraphics.command.height = 34;
+	BlockGraphics.command.width = 40;
+
+	BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
+	BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
+
+	BlockGraphics.command.bumpOffset = 7;
+	BlockGraphics.command.bumpDepth = 4;
+	BlockGraphics.command.bumpTopWidth = 15;
+	BlockGraphics.command.bumpBottomWidth = 7;
+	BlockGraphics.command.cornerRadius = 3;
+
+	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
+	BlockGraphics.command.snap = {};
+	BlockGraphics.command.snap.left = 20;
+	BlockGraphics.command.snap.right = 20;
+	BlockGraphics.command.snap.top = 20;
+	BlockGraphics.command.snap.bottom = 20;
+
+	// How much Blocks are shifted down and to the right when they are bumped out of position by another Block
+	BlockGraphics.command.shiftX = 20;
+	BlockGraphics.command.shiftY = 20;
 };
-BlockGraphics.getType=function(type){
-	switch(type){
+
+/* Used by RoundSlots and ReporterBlocks */
+BlockGraphics.SetReporter = function() {
+	BlockGraphics.reporter = {};
+
+	// Minimum dimensions
+	BlockGraphics.reporter.height = 30;
+	BlockGraphics.reporter.width = 30;
+
+	BlockGraphics.reporter.vMargin = 6;
+	BlockGraphics.reporter.hMargin = 10;
+
+	// Slot constants
+	BlockGraphics.reporter.slotHeight = 22;
+	BlockGraphics.reporter.slotWidth = 22;
+	BlockGraphics.reporter.slotHMargin = 10; // Space to sides of content
+
+	BlockGraphics.reporter.strokeW = 1;
+	BlockGraphics.reporter.slotFill = "#fff";
+	BlockGraphics.reporter.slotSelectedFill = "#000";
+};
+
+/* Used by HexSlots and HexBlocks */
+BlockGraphics.SetPredicate = function() {
+	BlockGraphics.predicate = {};
+
+	// Minimum dimensions
+	BlockGraphics.predicate.height = 30;
+	BlockGraphics.predicate.width = 27;
+
+	BlockGraphics.predicate.vMargin = 6;
+	BlockGraphics.predicate.hMargin = 10;
+
+	// Width of pointy part of hexagons
+	BlockGraphics.predicate.hexEndL = 10;
+
+	// Slot constants
+	BlockGraphics.predicate.slotHeight = 18;
+	BlockGraphics.predicate.slotWidth = 25;
+	BlockGraphics.predicate.slotHMargin = 5;
+	BlockGraphics.predicate.slotHexEndL = 7;
+};
+
+/* Used be RectSlots */
+BlockGraphics.SetString = function() {
+	BlockGraphics.string = {};
+	BlockGraphics.string.slotHeight = 22;
+	BlockGraphics.string.slotWidth = 22;
+	BlockGraphics.string.slotHMargin = 4;
+};
+
+/* Additional constants for HatBlocks */
+BlockGraphics.SetHat = function() {
+	BlockGraphics.hat = {};
+
+	// Radius of ellipse at top of Block
+	BlockGraphics.hat.hRadius = 60;
+	BlockGraphics.hat.vRadius = 40;
+
+	// Width of ellipse
+	BlockGraphics.hat.topW = 80;
+
+	// Minimum width is larger than CommandBlocks to leave room for ellipse
+	BlockGraphics.hat.width = 90;
+
+	// Additional height added by ellipse.  Used for spacing Blocks in the Palette
+	BlockGraphics.hat.hatHEstimate = 10;
+};
+
+/* Additional constants for LoopBlocks */
+BlockGraphics.SetLoop = function() {
+	BlockGraphics.loop = {};
+
+	// Minimum width of loop blocks
+	BlockGraphics.loop.width = 40;
+	
+	BlockGraphics.loop.bottomH = 7;
+	BlockGraphics.loop.side = 7;
+};
+
+/* LabelText constants */
+BlockGraphics.SetLabelText = function() {
+	BlockGraphics.labelText = {};
+	BlockGraphics.labelText.font = Font.uiFont(12).bold();
+	BlockGraphics.labelText.fill = "#ffffff";
+	BlockGraphics.labelText.disabledFill = "#e4e4e4";
+};
+
+/* Constants for text in Slots */
+BlockGraphics.SetValueText = function() {
+	BlockGraphics.valueText = {};
+	BlockGraphics.valueText.font = Font.uiFont(12);
+	BlockGraphics.valueText.fill = "#000000";
+	BlockGraphics.valueText.selectedFill = "#fff";
+	BlockGraphics.valueText.grayedFill = "#aaa";
+};
+
+/* Constants for DropSlots */
+BlockGraphics.SetDropSlot = function() {
+	BlockGraphics.dropSlot = {};
+	BlockGraphics.dropSlot.slotHeight = 22;
+	BlockGraphics.dropSlot.slotWidth = 25;
+	BlockGraphics.dropSlot.slotHMargin = 5;
+	BlockGraphics.dropSlot.triH = 6;
+	BlockGraphics.dropSlot.triW = 8;
+	BlockGraphics.dropSlot.bg = "#000";
+	BlockGraphics.dropSlot.bgOpacity = 0.25;
+	BlockGraphics.dropSlot.selectedBg = "#000";
+	BlockGraphics.dropSlot.selectedBgOpacity = 1;
+	BlockGraphics.dropSlot.triColor = "#000";
+	BlockGraphics.dropSlot.textFill = "#fff";
+	BlockGraphics.dropSlot.selectedTriColor = "#fff";
+};
+
+/* Constants for indicator that shows where Blocks will be snapped */
+BlockGraphics.SetHighlight = function() {
+	BlockGraphics.highlight = {};
+	BlockGraphics.highlight.margin = 5;
+	BlockGraphics.highlight.hexEndL = 15;
+	BlockGraphics.highlight.slotHexEndL = 10;
+	BlockGraphics.highlight.strokeC = "#fff";
+	BlockGraphics.highlight.strokeDarkC = "#000";
+	BlockGraphics.highlight.strokeW = 3;
+	BlockGraphics.highlight.commandL = 10;
+};
+
+/* Constants for Slot hit box */
+BlockGraphics.SetHitBox = function() {
+	BlockGraphics.hitBox = {};
+	BlockGraphics.hitBox.hMargin = BlockGraphics.block.pMargin / 2;
+	BlockGraphics.hitBox.vMargin = 3;
+};
+
+/* Constants for outline on running Blocks */
+BlockGraphics.SetGlow = function() {
+	BlockGraphics.glow = function() {};
+	BlockGraphics.glow.color = "#fff";
+	BlockGraphics.glow.strokeW = 2;
+};
+
+/* Computes intermediate values from constants */
+BlockGraphics.CalcCommand = function() {
+	const com = BlockGraphics.command;
+	com.extraHeight = 2 * com.cornerRadius;
+	com.extraWidth = 2 * com.cornerRadius + com.bumpTopWidth + com.bumpOffset;
+	com.bumpSlantWidth = (com.bumpTopWidth - com.bumpBottomWidth) / 2;
+};
+
+/* Generates pre-made parts of paths. Final paths are generated by inserting numbers between pre-made strings */
+BlockGraphics.CalcPaths = function() {
+	const com = BlockGraphics.command;
+	let path1 = "";
+	//path1+="m "+com.x+","+com.y;
+	path1 += " " + com.bumpOffset + ",0";
+	path1 += " " + com.bumpSlantWidth + "," + com.bumpDepth;
+	path1 += " " + com.bumpBottomWidth + ",0";
+	path1 += " " + com.bumpSlantWidth + "," + (0 - com.bumpDepth);
+	path1 += " ";
+	let path2 = ",0";
+	path2 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + com.cornerRadius;
+	path2 += " l 0,";
+	let path3 = "";
+	path3 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + com.cornerRadius;
+	path3 += " l ";
+	let path4 = ",0";
+	path4 += " " + (0 - com.bumpSlantWidth) + "," + com.bumpDepth;
+	path4 += " " + (0 - com.bumpBottomWidth) + ",0";
+	path4 += " " + (0 - com.bumpSlantWidth) + "," + (0 - com.bumpDepth);
+	path4 += " " + (0 - com.bumpOffset) + ",0";
+	path4 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+	path4 += " ";
+	let path4NoBump = ",0";
+	path4NoBump += " " + (0 - com.bumpSlantWidth - com.bumpBottomWidth - com.bumpSlantWidth - com.bumpOffset) + ",0";
+	path4NoBump += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+	path4NoBump += " ";
+	let path5 = "";
+	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
+	path5 += " z";
+	com.path1 = path1;
+	com.path2 = path2;
+	com.path3 = path3;
+	com.path4 = path4;
+	com.path4NoBump = path4NoBump;
+	com.path5 = path5;
+};
+
+/* Types of blocks are referred to by numbers, as indicated by this function */
+
+/**
+ * @param {number} type
+ * @return {object}
+ */
+BlockGraphics.getType = function(type) {
+	switch (type) {
 		case 0:
 			return BlockGraphics.command;
 		case 1:
@@ -2939,360 +4355,539 @@ BlockGraphics.getType=function(type){
 		case 6:
 			return BlockGraphics.loop;
 	}
-}
+};
 
-BlockGraphics.buildPath=function(){}
-BlockGraphics.buildPath.command=function(x,y,width,height){
-	var path="";
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
+/* Group of functions that generate strings for SVG paths */
+BlockGraphics.buildPath = {};
 
-	path+=width-BlockGraphics.command.extraWidth;
-	path+=BlockGraphics.command.path2;
-	path+=height-BlockGraphics.command.extraHeight;
-	path+=BlockGraphics.command.path3;
-	path+=BlockGraphics.command.extraWidth-width;
-	path+=BlockGraphics.command.path4+"l 0,";
-	path+=BlockGraphics.command.extraHeight-height;
-	path+=BlockGraphics.command.path5;
+/**
+ * Creates the path of a CommandBlock
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.command = function(x, y, width, height) {
+	let path = "";
+	path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y;
+	path += BlockGraphics.command.path1;
+
+	path += width - BlockGraphics.command.extraWidth;
+	path += BlockGraphics.command.path2;
+	path += height - BlockGraphics.command.extraHeight;
+	path += BlockGraphics.command.path3;
+	path += BlockGraphics.command.extraWidth - width;
+	path += BlockGraphics.command.path4 + "l 0,";
+	path += BlockGraphics.command.extraHeight - height;
+	path += BlockGraphics.command.path5;
 	return path;
-}
-BlockGraphics.buildPath.highlightCommand=function(x,y){
-	var path="";
-	path+="m "+x+","+y;
-	path+="l "+BlockGraphics.command.cornerRadius+",0";
-	path+=BlockGraphics.command.path1;
-	path+=BlockGraphics.highlight.commandL+",0";
+};
+
+/**
+ * Creates the path of a highlight between two CommandBlocks
+ * @param {number} x
+ * @param {number} y
+ * @return {string}
+ */
+BlockGraphics.buildPath.highlightCommand = function(x, y) {
+	let path = "";
+	path += "m " + x + "," + y;
+	path += "l " + BlockGraphics.command.cornerRadius + ",0";
+	path += BlockGraphics.command.path1;
+	path += BlockGraphics.highlight.commandL + ",0";
 	return path;
-}
-BlockGraphics.buildPath.reporter=function(x,y,width,height){
-	var radius=height/2;
-	var flatWidth=width-height;
-	var path="";
-	path+="m "+(x+radius)+","+(y+height);
-	path+=" a "+radius+" "+radius+" 0 0 1 0 "+(0-height);
-	path+=" l "+flatWidth+",0";
-	path+=" a "+radius+" "+radius+" 0 0 1 0 "+height;
-	path+=" z";
+};
+
+/**
+ * Creates round path of a reporter Block/Slot
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.reporter = function(x, y, width, height) {
+	const radius = height / 2;
+	const flatWidth = width - height;
+	let path = "";
+	path += "m " + (x + radius) + "," + (y + height);
+	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
+	path += " l " + flatWidth + ",0";
+	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.predicate=function(x,y,width,height,isSlot,isHighlight){
-	var hexEndL;
-	var halfHeight=height/2;
-	var bG;
-	if(isHighlight){
-		bG=BlockGraphics.highlight;
-	} else{
-		bG=BlockGraphics.predicate;
+};
+
+/**
+ * Creates the hexagonal path of a Slot/Block/highlight
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} isSlot
+ * @param {boolean} isHighlight
+ * @return {string}
+ */
+BlockGraphics.buildPath.predicate = function(x, y, width, height, isSlot, isHighlight) {
+	let hexEndL;
+	let halfHeight = height / 2;
+	let bG;
+	if (isHighlight) {
+		bG = BlockGraphics.highlight;
+	} else {
+		bG = BlockGraphics.predicate;
 	}
-	if(isSlot){
-		hexEndL=bG.slotHexEndL;
-	} else{
-		hexEndL=bG.hexEndL;
+	if (isSlot) {
+		hexEndL = bG.slotHexEndL;
+	} else {
+		hexEndL = bG.hexEndL;
 	}
-	var flatWidth=width-2*hexEndL;
-	var path="";
-	path+="m "+x+","+(y+halfHeight);
-	path+=" "+hexEndL+","+(0-halfHeight);
-	path+=" "+flatWidth+",0";
-	path+=" "+hexEndL+","+halfHeight;
-	path+=" "+(0-hexEndL)+","+halfHeight;
-	path+=" "+(0-flatWidth)+",0";
-	path+=" "+(0-hexEndL)+","+(0-halfHeight);
-	path+=" z";
+	let flatWidth = width - 2 * hexEndL;
+	let path = "";
+	path += "m " + x + "," + (y + halfHeight);
+	path += " " + hexEndL + "," + (0 - halfHeight);
+	path += " " + flatWidth + ",0";
+	path += " " + hexEndL + "," + halfHeight;
+	path += " " + (0 - hexEndL) + "," + halfHeight;
+	path += " " + (0 - flatWidth) + ",0";
+	path += " " + (0 - hexEndL) + "," + (0 - halfHeight);
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.string=function(x,y,width,height){
-	var path="";
-	path+="m "+x+","+y;
-	path+=" "+width+",0";
-	path+=" 0,"+height;
-	path+=" "+(0-width)+",0";
-	path+=" z";
+};
+
+/* Creates the rectangular path of a RectSlot */
+BlockGraphics.buildPath.string = function(x, y, width, height) {
+	let path = "";
+	path += "m " + x + "," + y;
+	path += " " + width + ",0";
+	path += " 0," + height;
+	path += " " + (0 - width) + ",0";
+	path += " z";
 	return path;
-}
-BlockGraphics.buildPath.hat=function(x,y,width,height){
-	var path="";
-	var hat=BlockGraphics.hat;
-	var flatWidth=width-hat.topW-BlockGraphics.command.cornerRadius;
-	var flatHeight=height-BlockGraphics.command.cornerRadius*2;
-	path+="m "+x+","+y;
-	path+=" a "+hat.hRadius+" "+hat.vRadius+" 0 0 1 "+hat.topW+" 0";
-	path+=" l "+flatWidth;	
-	path+=BlockGraphics.command.path2;
-	path+=flatHeight;
-	path+=BlockGraphics.command.path3;
-	path+=BlockGraphics.command.extraWidth-width;
-	path+=BlockGraphics.command.path4;
-	path+="z";
+};
+
+/* Creates the path of a HatBlock */
+BlockGraphics.buildPath.hat = function(x, y, width, height) {
+	let path = "";
+	let hat = BlockGraphics.hat;
+	let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
+	let flatHeight = height - BlockGraphics.command.cornerRadius * 2;
+	path += "m " + x + "," + y;
+	path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
+	path += " l " + flatWidth;
+	path += BlockGraphics.command.path2;
+	path += flatHeight;
+	path += BlockGraphics.command.path3;
+	path += BlockGraphics.command.extraWidth - width;
+	path += BlockGraphics.command.path4;
+	path += "z";
 	return path;
-}
-BlockGraphics.buildPath.loop=function(x,y,width,height,innerHeight,bottomOpen){
-	if(bottomOpen==null){
-		bottomOpen=true;
+};
+
+/**
+ * Creates the path of a LoopBlock
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} innerHeight - The height of the space in the middle of the loop
+ * @param {boolean} [bottomOpen=true] - Whether a bump should be placed on the bottom of the path
+ * @return {string}
+ */
+BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottomOpen) {
+	if (bottomOpen == null) {
+		bottomOpen = true;
 	}
-	var path="";
-	var loop=BlockGraphics.loop;
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
-	path+=width-BlockGraphics.command.extraWidth;
-	path+=BlockGraphics.command.path2;
-	path+=height-innerHeight-2*BlockGraphics.command.cornerRadius-loop.bottomH;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width+loop.side)+",0";
-	path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+BlockGraphics.command.bumpDepth;
-	path+=" "+(0-BlockGraphics.command.bumpBottomWidth)+",0";
-	path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+(0-BlockGraphics.command.bumpDepth);
-	path+=" "+(0-BlockGraphics.command.bumpOffset)+",0";
-	path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+(0-BlockGraphics.command.cornerRadius)+" "+BlockGraphics.command.cornerRadius;
-	path+=" l 0,"+(innerHeight-2*BlockGraphics.command.cornerRadius);
-	path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius;
-	path+=" l "+(width-2*BlockGraphics.command.cornerRadius-loop.side);
-	path+=BlockGraphics.command.path2;
-	path+=loop.bottomH-2*BlockGraphics.command.cornerRadius;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width);
-	if(bottomOpen){
-		path+=BlockGraphics.command.path4+"l 0,";
+	let path = "";
+	const loop = BlockGraphics.loop;
+	const comm = BlockGraphics.command;
+	path += "m " + (x + comm.cornerRadius) + "," + y;
+	path += comm.path1;
+	path += width - comm.extraWidth;
+	path += comm.path2;
+	path += height - innerHeight - 2 * comm.cornerRadius - loop.bottomH;
+	path += comm.path3;
+	path += (comm.extraWidth - width + loop.side) + ",0";
+	path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+	path += " " + (0 - comm.bumpBottomWidth) + ",0";
+	path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+	path += " " + (0 - comm.bumpOffset) + ",0";
+	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+	path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
+	path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+	path += comm.path2;
+	path += loop.bottomH - 2 * comm.cornerRadius;
+	path += comm.path3;
+	path += (comm.extraWidth - width);
+	if (bottomOpen) {
+		path += comm.path4 + "l 0,";
+	} else {
+		path += comm.path4NoBump + "l 0,";
 	}
-	else{
-		path+=BlockGraphics.command.path4NoBump+"l 0,";
-	}
-	path+=(0-height+2*BlockGraphics.command.cornerRadius);
-	path+=BlockGraphics.command.path5;
+	path += (0 - height + 2 * comm.cornerRadius);
+	path += comm.path5;
 	return path;
-}
-BlockGraphics.buildPath.doubleLoop=function(x,y,width,height,innerHeight1,innerHeight2,midHeight){
-	var path="";
-	var loop=BlockGraphics.loop;
-	path+="m "+(x+BlockGraphics.command.cornerRadius)+","+y;
-	path+=BlockGraphics.command.path1;
-	path+=width-BlockGraphics.command.extraWidth;
-	var innerHeight=innerHeight1;
-	var currentH=height-midHeight-innerHeight1-innerHeight2-2*BlockGraphics.command.cornerRadius-loop.bottomH;
-	for(var i=0;i<2;i++){
-		path+=BlockGraphics.command.path2;
-		path+=currentH;
-		path+=BlockGraphics.command.path3;
-		path+=(BlockGraphics.command.extraWidth-width+loop.side)+",0";
-		path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+BlockGraphics.command.bumpDepth;
-		path+=" "+(0-BlockGraphics.command.bumpBottomWidth)+",0";
-		path+=" "+(0-BlockGraphics.command.bumpSlantWidth)+","+(0-BlockGraphics.command.bumpDepth);
-		path+=" "+(0-BlockGraphics.command.bumpOffset)+",0";
-		path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+(0-BlockGraphics.command.cornerRadius)+" "+BlockGraphics.command.cornerRadius;
-		path+=" l 0,"+(innerHeight-2*BlockGraphics.command.cornerRadius);
-		path+=" a "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius+" 0 0 0 "+BlockGraphics.command.cornerRadius+" "+BlockGraphics.command.cornerRadius;
-		path+=" l "+(width-2*BlockGraphics.command.cornerRadius-loop.side);
-		innerHeight=innerHeight2;
-		var currentH=midHeight-2*BlockGraphics.command.cornerRadius;
+};
+
+/**
+ * Creates the path of a DoubleLoopBlock (used for if/else Block)
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} innerHeight1 - The height of the first space
+ * @param {number} innerHeight2 - The height of the second space
+ * @param {number} midHeight - The height of the part of the Block between the spaces
+ * @return {string}
+ */
+BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1, innerHeight2, midHeight) {
+	let path = "";
+	const loop = BlockGraphics.loop;
+	const comm = BlockGraphics.command;
+	path += "m " + (x + comm.cornerRadius) + "," + y;
+	path += comm.path1;
+	path += width - comm.extraWidth;
+	let innerHeight = innerHeight1;
+	let currentH = height - midHeight - innerHeight1 - innerHeight2 - 2 * comm.cornerRadius - loop.bottomH;
+	for (let i = 0; i < 2; i++) {
+		path += comm.path2;
+		path += currentH;
+		path += comm.path3;
+		path += (comm.extraWidth - width + loop.side) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+		path += " " + (0 - comm.bumpBottomWidth) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+		path += " " + (0 - comm.bumpOffset) + ",0";
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
+		path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+		innerHeight = innerHeight2;
+		currentH = midHeight - 2 * comm.cornerRadius;
 	}
-	path+=BlockGraphics.command.path2;
-	path+=loop.bottomH-2*BlockGraphics.command.cornerRadius;
-	path+=BlockGraphics.command.path3;
-	path+=(BlockGraphics.command.extraWidth-width);
-	path+=BlockGraphics.command.path4+"l 0,";
-	path+=(0-height+2*BlockGraphics.command.cornerRadius);
-	path+=BlockGraphics.command.path5;
+	path += comm.path2;
+	path += loop.bottomH - 2 * comm.cornerRadius;
+	path += comm.path3;
+	path += (comm.extraWidth - width);
+	path += comm.path4 + "l 0,";
+	path += (0 - height + 2 * comm.cornerRadius);
+	path += comm.path5;
 	return path;
-}
-BlockGraphics.create=function(){}
-BlockGraphics.create.block=function(category,group,returnsValue,active){
-	if(!active) category = "inactive";
-	var path=GuiElements.create.path(group);
-	var fill=Colors.getGradient(category);
-	path.setAttributeNS(null,"fill",fill);
-	BlockGraphics.update.stroke(path,category,returnsValue,active);
+};
+
+/* Group of functions that create the SVG elements for Blocks/Slots */
+BlockGraphics.create = {};
+
+/**
+ * Creates the path element for the Block
+ * @param {string} category - indicates which category's gradient to use
+ * @param {Element} group - SVG group, Path will automatically be added to this group
+ * @param {boolean} returnsValue - Whether the block returns a value and should be given an outline
+ * @param {boolean} active - Whether the block is currently runnable or should be grayed out
+ * @return {Element} - SVG path element for the background of the Block
+ */
+BlockGraphics.create.block = function(category, group, returnsValue, active) {
+	if (!active) category = "inactive";
+	const path = GuiElements.create.path(group);
+	const fill = Colors.getGradient(category);
+	path.setAttributeNS(null, "fill", fill);
+	BlockGraphics.update.stroke(path, category, returnsValue, active);
 	return path;
-}
-BlockGraphics.create.slot=function(group,type,category,active){
-	if(!active) category = "inactive";
-	var bG=BlockGraphics.reporter;
-	var path=GuiElements.create.path(group);
-	if(type==2){
-		path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
-	}
-	else{
-		path.setAttributeNS(null,"stroke",bG.slotStrokeC);
-		path.setAttributeNS(null,"stroke-width",bG.slotStrokeW);
-		path.setAttributeNS(null,"fill",bG.slotFill);
+};
+
+/**
+ * Creates the SVG path element for a Slot
+ * @param {Element} group - SVG group, Path will automatically be added to this group
+ * @param {number} type - number representing the type/shape of slot
+ * @param {string} category - indicates which category's gradient to use
+ * @param {boolean} active - Whether the Slot is currently active or should be grayed out
+ */
+BlockGraphics.create.slot = function(group, type, category, active) {
+	if (!active) category = "inactive";
+	const bG = BlockGraphics.reporter;
+	const path = GuiElements.create.path(group);
+	if (type === 2) {
+		path.setAttributeNS(null, "fill", "url(#gradient_dark_" + category + ")");
+	} else {
+		path.setAttributeNS(null, "fill", bG.slotFill);
 	}
 	return path;
 };
-BlockGraphics.create.slotHitBox=function(group){
-	var rectE=GuiElements.create.rect(group);
-	rectE.setAttributeNS(null,"fill","#000");
-	GuiElements.update.opacity(rectE,0);
+
+/**
+ * Creates the hit box for a slot.  Does not worry about position or size
+ * @param {Element} group
+ */
+BlockGraphics.create.slotHitBox = function(group) {
+	const rectE = GuiElements.create.rect(group);
+	rectE.setAttributeNS(null, "fill", "#000");
+	GuiElements.update.opacity(rectE, 0);
 	return rectE;
-}
-BlockGraphics.create.labelText=function(text,group){
-	var bG=BlockGraphics.labelText;
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"font-family",bG.font);
-	textElement.setAttributeNS(null,"font-size",bG.fontSize);
-	textElement.setAttributeNS(null,"font-weight",bG.fontWeight);
-	textElement.setAttributeNS(null,"fill",bG.fill);
-	textElement.setAttributeNS(null,"class","noselect");
-	var textNode = document.createTextNode(text);
+};
+
+/**
+ * Creates text for LabelText
+ * @param {string} text
+ * @param {Element} group
+ */
+BlockGraphics.create.labelText = function(text, group) {
+	const bG = BlockGraphics.labelText;
+	const textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
+	textElement.setAttributeNS(null, "fill", bG.fill);
+	textElement.setAttributeNS(null, "class", "noselect");
+	const textNode = document.createTextNode(text);
 	textElement.appendChild(textNode);
 	group.appendChild(textElement);
 	return textElement;
-}
-BlockGraphics.create.valueText=function(text,group){
-	var bG=BlockGraphics.valueText;
-	var textElement=GuiElements.create.text();
-	textElement.setAttributeNS(null,"font-family",bG.font);
-	textElement.setAttributeNS(null,"font-size",bG.fontSize);
-	textElement.setAttributeNS(null,"font-weight",bG.fontWeight);
-	textElement.setAttributeNS(null,"fill",bG.fill);
-	textElement.setAttributeNS(null,"class","noselect");
-	GuiElements.update.text(textElement,text);
+};
+
+/**
+ * Creates text for inside Slot
+ * @param {string} text
+ * @param {Element} group
+ */
+BlockGraphics.create.valueText = function(text, group) {
+	const bG = BlockGraphics.valueText;
+	const textElement = GuiElements.create.text();
+	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
+	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
+	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
+	textElement.setAttributeNS(null, "fill", bG.fill);
+	textElement.setAttributeNS(null, "class", "noselect");
+	GuiElements.update.text(textElement, text);
 	group.appendChild(textElement);
 	return textElement;
-}
+};
 
-BlockGraphics.update=function(){}
-BlockGraphics.update.path=function(path,x,y,width,height,type,isSlot,innerHeight1,innerHeight2,midHeight,bottomOpen){
-	var pathD;
-	switch(type){
+/* Group of functions used for modifying existing SVG elements */
+BlockGraphics.update = {};
+
+/**
+ * Updates a path's shape, size and location.  Necessary parameters depend on type.
+ * @param {Element} path
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} [type]
+ * @param {boolean} [isSlot]
+ * @param {number} [innerHeight1]
+ * @param {number} [innerHeight2]
+ * @param {number} [midHeight]
+ * @param {boolean} [bottomOpen]
+ * @return {*}
+ */
+BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, innerHeight1, innerHeight2, midHeight, bottomOpen) {
+	let pathD;
+	switch (type) {
 		case 0:
-			pathD=BlockGraphics.buildPath.command(x,y,width,height);
+			pathD = BlockGraphics.buildPath.command(x, y, width, height);
 			break;
 		case 1:
-			pathD=BlockGraphics.buildPath.reporter(x,y,width,height);
+			pathD = BlockGraphics.buildPath.reporter(x, y, width, height);
 			break;
 		case 2:
-			pathD=BlockGraphics.buildPath.predicate(x,y,width,height,isSlot,false);
+			pathD = BlockGraphics.buildPath.predicate(x, y, width, height, isSlot, false);
 			break;
 		case 3:
-			pathD=BlockGraphics.buildPath.string(x,y,width,height);
+			pathD = BlockGraphics.buildPath.string(x, y, width, height);
 			break;
 		case 4:
-			pathD=BlockGraphics.buildPath.hat(x,y,width,height);
+			pathD = BlockGraphics.buildPath.hat(x, y, width, height);
 			break;
 		case 5:
-			pathD=BlockGraphics.buildPath.loop(x,y,width,height,innerHeight1,bottomOpen);
+			pathD = BlockGraphics.buildPath.loop(x, y, width, height, innerHeight1, bottomOpen);
 			break;
 		case 6:
-			pathD=BlockGraphics.buildPath.doubleLoop(x,y,width,height,innerHeight1,innerHeight2,midHeight);
+			pathD = BlockGraphics.buildPath.doubleLoop(x, y, width, height, innerHeight1, innerHeight2, midHeight);
 			break;
 	}
-	path.setAttributeNS(null,"d",pathD);
+	path.setAttributeNS(null, "d", pathD);
 	return path;
 };
-BlockGraphics.update.text=function(text,x,y){
-	text.setAttributeNS(null,"x",x);
-	text.setAttributeNS(null,"y",y);
-}
-BlockGraphics.update.glow=function(path){
-	var glow=BlockGraphics.glow;
-	path.setAttributeNS(null,"stroke",glow.color);
-	path.setAttributeNS(null,"stroke-width",glow.strokeW);
+
+/**
+ * Moves text to location
+ * @param {Element} text
+ * @param {number} x
+ * @param {number} y
+ */
+BlockGraphics.update.text = function(text, x, y) {
+	text.setAttributeNS(null, "x", x);
+	text.setAttributeNS(null, "y", y);
 };
-BlockGraphics.update.stroke=function(path,category,returnsValue,active){
-	if(!active) category = "inactive";
-	if(returnsValue){
-		var outline=Colors.getColor(category);
-		path.setAttributeNS(null,"stroke",outline);
-		path.setAttributeNS(null,"stroke-width",BlockGraphics.reporter.strokeW);
+
+/**
+ * Makes a path start glowing (adds a white outline)
+ * @param {Element} path
+ */
+BlockGraphics.update.glow = function(path) {
+	const glow = BlockGraphics.glow;
+	path.setAttributeNS(null, "stroke", glow.color);
+	path.setAttributeNS(null, "stroke-width", glow.strokeW);
+};
+
+/**
+ * Updates the outline of a path
+ * @param {Element} path
+ * @param {string} category
+ * @param {boolean} returnsValue
+ * @param {boolean} active
+ */
+BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
+	if (!active) category = "inactive";
+	if (returnsValue) {
+		const outline = Colors.getColor(category);
+		path.setAttributeNS(null, "stroke", outline);
+		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
+	} else {
+		path.setAttributeNS(null, "stroke-width", 0);
 	}
-	else{
-		path.setAttributeNS(null,"stroke-width",0);
-	}
 };
-BlockGraphics.update.hexSlotGradient = function(path, category, active){
-	if(!active) category = "inactive";
-	path.setAttributeNS(null,"fill","url(#gradient_dark_"+category+")");
+
+/**
+ * Updates a HexSlot's fill
+ * @param {Element} path
+ * @param {string} category
+ * @param {boolean} active
+ */
+BlockGraphics.update.hexSlotGradient = function(path, category, active) {
+	if (!active) category = "inactive";
+	path.setAttributeNS(null, "fill", "url(#gradient_dark_" + category + ")");
 };
-BlockGraphics.update.blockActive = function(path,category,returnsValue,active,gowing){
-	if(!active) category = "inactive";
-	const fill=Colors.getGradient(category);
-	path.setAttributeNS(null,"fill",fill);
-	if(!gowing) {
+
+/**
+ * Change whether the Block appears active or inactive
+ * @param {string} path
+ * @param {string} category
+ * @param {boolean} returnsValue
+ * @param {boolean} active
+ * @param {boolean} glowing
+ */
+BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
+	if (!active) category = "inactive";
+	const fill = Colors.getGradient(category);
+	path.setAttributeNS(null, "fill", fill);
+	if (!glowing) {
 		BlockGraphics.update.stroke(path, category, returnsValue, active);
 	}
 };
-BlockGraphics.buildPath.highlight=function(x,y,width,height,type,isSlot){
-	var bG=BlockGraphics.highlight;
-	var pathD;
-	var hX=x-bG.margin;
-	var hY=y-bG.margin;
-	var hWidth=width+2*bG.margin;
-	var hHeight=height+2*bG.margin;
-	switch(type){
+
+/**
+ * Creates the string for the path of the highlight indicator
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} type
+ * @param {boolean} isSlot
+ * @return {string}
+ */
+BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) {
+	const bG = BlockGraphics.highlight;
+	let pathD;
+	const hX = x - bG.margin;
+	const hY = y - bG.margin;
+	const hWidth = width + 2 * bG.margin;
+	const hHeight = height + 2 * bG.margin;
+	switch (type) {
 		case 0:
-			pathD=BlockGraphics.buildPath.highlightCommand(x,y);
+			pathD = BlockGraphics.buildPath.highlightCommand(x, y);
 			break;
 		case 1:
-			pathD=BlockGraphics.buildPath.reporter(hX,hY,hWidth,hHeight);
+			pathD = BlockGraphics.buildPath.reporter(hX, hY, hWidth, hHeight);
 			break;
 		case 2:
-			pathD=BlockGraphics.buildPath.predicate(hX,hY,hWidth,hHeight,isSlot,true);
+			pathD = BlockGraphics.buildPath.predicate(hX, hY, hWidth, hHeight, isSlot, true);
 			break;
 		case 3:
-			pathD=BlockGraphics.buildPath.string(hX,hY,hWidth,hHeight);
+			pathD = BlockGraphics.buildPath.string(hX, hY, hWidth, hHeight);
 			break;
 	}
 	return pathD;
-}
-//Move?:
-BlockGraphics.bringToFront=function(obj,layer){
-	obj.remove();
-	layer.appendChild(obj);
-}
-
-
-/*BlockGraphics.create.command=function(x,y,width,height,category){
-	var pathD=BlockGraphics.buildPath.command(x,y,width,height);
-	var commandPath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	commandPath.setAttributeNS(null,"d",pathD);
-	commandPath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return commandPath;
-}
-BlockGraphics.create.reporter=function(x,y,width,height,category){
-	var pathD=BlockGraphics.buildPath.reporter(x,y,width,height);
-	var reporterPath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	reporterPath.setAttributeNS(null,"d",pathD);
-	reporterPath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return reporterPath;
-}
-BlockGraphics.create.predicate=function(x,y,width,height,category,isSlot){
-	var pathD=BlockGraphics.buildPath.predicate(x,y,width,height,isSlot);
-	var predicatePath=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	predicatePath.setAttributeNS(null,"d",pathD);
-	predicatePath.setAttributeNS(null,"fill","url(#gradient_"+category+")");
-	return predicatePath;
-}*/
-
-
+};
 
 /**
- * Created by Tom on 6/18/2017.
+ * Moves an element to the top of a group by removing it an re-adding it
+ * @param {Element} obj
+ * @param {Element} layer
  */
-function Sound(id, isRecording, name){
+BlockGraphics.bringToFront = function(obj, layer) {
+	obj.remove();
+	layer.appendChild(obj);
+};
+/* Recordings and sound effects are cached by static properties in the Sound class.  An instance of the sound class
+ * represents a single sound or recording.  Sound playback is handled by static functions.  Note that sound recording
+ * is handled by the RecordingManager, not in the Sound class
+ */
+
+/* The frontend should never deal with file extensions.  All information about sounds/recordings should have the
+ * file extension removed before the frontend sees it
+ */
+
+/**
+ * Information about a sound
+ * @param {string} id - Used in communication between the frontend/backend
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @constructor
+ */
+function Sound(id, isRecording){
+	// Ids are used in save files while names are shown in the UI.
+	// If we decide to change display names for built-in sounds, we will keep ids the same.
 	this.id = id;
-	if(name == null){
-		name = Sound.nameFromId(id, isRecording);
-	}
-	this.name = name;
+	this.name = Sound.nameFromId(id, isRecording);
 	this.isRecording = isRecording;
 }
+
 Sound.setConstants = function(){
+	// Cached lists
 	Sound.soundList = [];
 	Sound.recordingList = [];
+
+	// List of data about currently playing sounds
 	Sound.playingSoundStatuses = [];
+
+	// Enum for types of sounds
 	Sound.type = {};
-	Sound.type.effect = "effect";
-	Sound.type.ui = "ui";
-	Sound.type.recording = "recording";
+	Sound.type.effect = "effect"; // Sounds built in to app
+	Sound.type.ui = "ui"; // Sounds used in UI, not sound blocks (snap sound, for example)
+	Sound.type.recording = "recording"; // Sounds local to project, recorded by user
+
+	// Load into cache
 	Sound.loadSounds(true);
 	Sound.loadSounds(false);
+
+	// Sound when Blocks are snapped together
 	Sound.click = "click2";
 };
+
+/**
+ * Stops all playing sounds and plays the specified sound
+ * @param {string} id - The sound to play
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @param {function} sentCallback - Called when command to play sound is received by backend successfully
+ * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
+ * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
+ */
 Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	Sound.stopAllSounds(null, function(){
 		Sound.playWithCallback(id, isRecording, sentCallback, errorCallback, donePlayingCallback);
 	});
 };
+
+/**
+ * Plays the specified sound
+ * @param {string} id - The sound to play
+ * @param {boolean} isRecording - Whether the sound is a recording
+ * @param {function} sentCallback - Called when command to play sound is received by backend successfully
+ * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
+ * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
+ */
 Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
 	let status = {};
 	status.donePlayingCallback = donePlayingCallback;
@@ -3325,6 +4920,13 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
 		}, errorFn);
 	}, errorFn);
 };
+
+/**
+ * Plays the specified sound and tracks progress with a status object
+ * @param {string} id
+ * @param {boolean} isRecording
+ * @param {object} status
+ */
 Sound.play = function(id, isRecording, status){
 	if(status == null){
 		Sound.playWithCallback(id, isRecording);
@@ -3332,15 +4934,27 @@ Sound.play = function(id, isRecording, status){
 	else{
 		status.donePlaying = false;
 		status.requestSent = false;
-		const endPlaying = function(){
-			status.donePlaying = true;
-			status.requestSent = true;
-		};
+		status.error = false;
 		Sound.playWithCallback(id, isRecording, function(){
 			status.requestSent = true;
-		}, endPlaying, endPlaying);
+		}, function(){
+			status.donePlaying = false;
+			status.requestSent = false;
+			status.error = true;
+		}, function(){
+			status.donePlaying = true;
+			status.requestSent = true;
+		});
 	}
 };
+
+/**
+ * Looks up the duration of the sound
+ * @param {number} id
+ * @param {boolean} isRecording
+ * @param {function} callbackFn - called with the duration as a number
+ * @param {function} callbackError
+ */
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 	let request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
@@ -3354,10 +4968,19 @@ Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
 		}
 	}, callbackError);
 };
+
+/**
+ * Tells the Sound class that the file has changed.  Prompts cache of recordings to be reloaded
+ */
 Sound.changeFile = function(){
 	Sound.recordingList = [];
 	Sound.loadSounds(true);
 };
+
+/**
+ * @param {boolean} isRecording
+ * @param {function} [callbackFn] - Called with a list of Sounds when that are loaded
+ */
 Sound.loadSounds = function(isRecording, callbackFn){
 	let request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
@@ -3375,6 +4998,13 @@ Sound.loadSounds = function(isRecording, callbackFn){
 		if(callbackFn != null) callbackFn(resultList);
 	});
 };
+
+/**
+ * Determine's a Sound's name from its id.  idRecording implies id == name.
+ * @param {string} id
+ * @param {boolean} isRecording
+ * @return {string}
+ */
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
 	let name = id;
@@ -3387,6 +5017,12 @@ Sound.nameFromId = function(id, isRecording){
 	});
 	return name;
 };
+
+/**
+ * Stops all running sounds and calls the donePlaying callbacks of the sounds
+ * @param {object} [status] - A status object for the request
+ * @param {function} [callbackFn] - Called when the request completes (even if there is an error)
+ */
 Sound.stopAllSounds=function(status, callbackFn){
 	if(status == null) status = {};
 	let request = new HttpRequestBuilder("sound/stopAll");
@@ -3400,12 +5036,24 @@ Sound.stopAllSounds=function(status, callbackFn){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), callback, callback);
 };
+
+/**
+ * Reads from the cached list of sounds
+ * @param {boolean} isRecording
+ * @return {Array}
+ */
 Sound.getSoundList = function(isRecording){
 	if(isRecording) {
 		return Sound.recordingList;
 	}
 	return Sound.soundList;
 };
+
+/**
+ * Retrieves the string to put as the type parameter for the request
+ * @param {boolean} isRecording
+ * @return {string}
+ */
 Sound.boolToType = function(isRecording){
 	if(isRecording){
 		return Sound.type.recording;
@@ -3413,6 +5061,12 @@ Sound.boolToType = function(isRecording){
 		return Sound.type.effect;
 	}
 };
+
+/**
+ * Returns the name of the sound effect with the provided id, or null if no such sound exists.
+ * @param {string} id (of sound effect, not recording)
+ * @return {string|null}
+ */
 Sound.lookupById = function(id){
 	let result = null;
 	Sound.soundList.forEach(function(sound){
@@ -3422,6 +5076,10 @@ Sound.lookupById = function(id){
 	});
 	return result;
 };
+
+/**
+ * Plays the snap sound effect if it is enabled
+ */
 Sound.playSnap = function(){
 	if(SettingsManager.enableSnapNoise.getValue() === "true") {
 		let snapSoundRequest = new HttpRequestBuilder("sound/play");
@@ -3432,154 +5090,203 @@ Sound.playSnap = function(){
 };
 
 
-/* TouchReceiver is a static class that handles all touch events.
+/**
+ * TouchReceiver is a static class that handles all touch events.
  * It adds touch event handlers and keeps track of what types of objects are being touched/dragged.
  */
-function TouchReceiver(){
-	var TR=TouchReceiver; //shorthand
-	//Toggle to determine of mouse or touchscreen events should be used.
-	TR.mouse = false || (DebugOptions.mouse && DebugOptions.enabled); //Use true when debugging on a desktop.
-	TR.longTouchInterval=700; //The number of ms before a touch is considered a long touch.
-	TR.fixScrollingInterval = 100;
-	TR.blocksMoving=false; //No BlockStacks are currently moving.
-	TR.targetType="none"; //Stores the type of object being interacted with.
-	TR.touchDown=false; //Is a finger currently on the screen?
-	TR.longTouch=false; //Has the event already been handled by a long touch event?
-	TR.target=null; //The object being interacted with.
-	TR.startX=0; //The x coord of the initial touch.
-	TR.startY=0; //The y coord of the initial touch.
-	TR.startX2=0; //The x coord of the second touch.
-	TR.startY2=0; //The y coord of the second touch.
-	TR.longTouchTimer=null; //Triggers long touch events.
-	TR.timerRunning=false; //Indicates if the long touch timer is running.
-	TR.zooming = false; //There are not two touches on the screen.
-	TR.dragging = false;
-	TR.moveThreshold = 10;
-	TR.interactionEnabeled = true;
+function TouchReceiver() {
+	const TR = TouchReceiver;   // shorthand
+	TR.mouse = DebugOptions.shouldUseMouseMode();   // Use true when debugging on a desktop.
+	TR.longTouchInterval = 700;   // The number of ms before a touch is considered a long touch.
+	TR.fixScrollingInterval = 100;   // Duration between firing fix scroll timer
+	TR.blocksMoving = false;   // No BlockStacks are currently moving.
+	TR.targetType = "none";   // Stores the type of object being interacted with.
+	TR.touchDown = false;   // Is a finger currently on the screen?
+	TR.longTouch = false;   // Has the event already been handled by a long touch event?
+	TR.target = null;   // The object being interacted with.
+	TR.startX = 0;   // The x coord of the initial touch.
+	TR.startY = 0;   // The y coord of the initial touch.
+	TR.startX2 = 0;   // The x coord of the second touch.
+	TR.startY2 = 0;   // The y coord of the second touch.
+	TR.longTouchTimer = null;   // Triggers long touch events.
+	TR.timerRunning = false;   // Indicates if the long touch timer is running.
+	TR.zooming = false;   // There are not two touches on the screen.
+	TR.dragging = false;   // Whether the user is dragging their finger
+	TR.moveThreshold = 10;   // The minimum threshold before we consider the user to be dragging the screen
+	TR.interactionEnabeled = true;   // Whether touches should be responded to
 	TR.interactionTimeOut = null;
-	var handlerMove="touchmove"; //Handlers are different for touchscreens and mice.
-	var handlerUp="touchend";
-	var handlerDown="touchstart";
-	if(TR.mouse){
-		handlerMove="mousemove";
-		handlerUp="mouseup";   
-		handlerDown="mousedown";
+	let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
+	let handlerUp = "touchend";
+	let handlerDown = "touchstart";
+	if (TR.mouse) {
+		handlerMove = "mousemove";
+		handlerUp = "mouseup";
+		handlerDown = "mousedown";
 	}
-	TR.handlerMove=handlerMove;
-	TR.handlerUp=handlerUp;
-	TR.handlerDown=handlerDown;
-	 //Add event handlers for handlerMove and handlerUp events to the whole document.
+	TR.handlerMove = handlerMove;
+	TR.handlerUp = handlerUp;
+	TR.handlerDown = handlerDown;
+	// Add event handlers for handlerMove and handlerUp events to the whole document.
 	TR.addListeners();
-	//TR.test=true;
+	// TR.test=true;
 }
-/* Adds event handlers for handlerMove and handlerUp events to the whole document.
+/** 
+ * Adds event handlers for handlerMove and handlerUp events to the whole document.
  */
-TouchReceiver.addListeners=function(){
-	var TR=TouchReceiver;
-	TR.addEventListenerSafe(document.body, TR.handlerMove,TouchReceiver.handleMove,false);
-	TR.addEventListenerSafe(document.body, TR.handlerUp,TouchReceiver.handleUp,false);
-	TR.addEventListenerSafe(document.body, TR.handlerDown,TouchReceiver.handleDocumentDown,false);
+TouchReceiver.addListeners = function() {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(document.body, TR.handlerMove, TouchReceiver.handleMove, false);
+	TR.addEventListenerSafe(document.body, TR.handlerUp, TouchReceiver.handleUp, false);
+	TR.addEventListenerSafe(document.body, TR.handlerDown, TouchReceiver.handleDocumentDown, false);
 };
-/* Handles movement events and prevents drag gestures from scrolling document.
+
+/** 
+ * Handles movement events and prevents drag gestures from scrolling document.
  * @param {event} event - passed event arguments.
- * @fix combine with TouchReceiver.touchmove.
  */
-TouchReceiver.handleMove=function(event){
-	TouchReceiver.touchmove(event); //Deal with movement.
+TouchReceiver.handleMove = function(event) {
+	TouchReceiver.touchmove(event);   // Deal with movement.
 };
-/* Handles new touch events.
+
+/** 
+ * Handles end of touch events
  * @param {event} event - passed event arguments.
- * @fix combine with TouchReceiver.touchstart.
  */
-TouchReceiver.handleUp=function(event){
+TouchReceiver.handleUp = function(event) {
 	TouchReceiver.touchend(event);
-	//GuiElements.alert("");
 };
-TouchReceiver.handleDocumentDown=function(event){
-	if(TouchReceiver.touchstart(event)){
-		Overlay.closeOverlays(); //Close any visible overlays.
+
+/**
+ * Handles new touch events
+ * @param {event} event
+ */
+TouchReceiver.handleDocumentDown = function(event) {
+	if (TouchReceiver.touchstart(event)) {
+		Overlay.closeOverlays();   // Close any visible overlays.
 	}
 };
-TouchReceiver.disableInteraction = function(timeOut){
+
+/**
+ * Ignores interaction from the user until enableInteraction is called or the timeout expires
+ * @param {number} timeOut
+ */
+TouchReceiver.disableInteraction = function(timeOut) {
 	const TR = TouchReceiver;
 	TR.interactionEnabeled = false;
-	TR.interactionTimeOut = window.setTimeout(function(){
+	TR.interactionTimeOut = window.setTimeout(function() {
 		TouchReceiver.enableInteraction();
 	}, timeOut);
 };
-TouchReceiver.enableInteraction = function(){
+
+/**
+ * Re-enables interaction
+ */
+TouchReceiver.enableInteraction = function() {
 	const TR = TouchReceiver;
 	TR.interactionEnabeled = true;
-	if(TR.interactionTimeOut != null){
+	if (TR.interactionTimeOut != null) {
 		window.clearTimeout(TR.interactionTimeOut);
 		TR.interactionTimeOut = null;
 	}
 };
-/* Returns the touch x coord from the event arguments
- * @param {event} event - passed event arguments.
+
+/**
+ * Returns the touch x coord from the event arguments
+ * @param {event} e - passed event arguments.
  * @return {number} - x coord.
  */
-TouchReceiver.getX=function(e){
-	if(TouchReceiver.mouse){ //Depends on if a desktop or touchscreen is being used.
-		return e.clientX/GuiElements.zoomFactor;
+TouchReceiver.getX = function(e) {
+	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+		return e.clientX / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX/GuiElements.zoomFactor;
+	return e.touches[0].pageX / GuiElements.zoomFactor;
 };
-/* Returns the touch y coord from the event arguments
- * @param {event} event - passed event arguments.
+
+/**
+ * Returns the touch y coord from the event arguments
+ * @param {event} e - passed event arguments.
  * @return {number} - y coord.
  */
-TouchReceiver.getY=function(e){
-	if(TouchReceiver.mouse){ //Depends on if a desktop or touchscreen is being used.
-		return e.clientY/GuiElements.zoomFactor;
+TouchReceiver.getY = function(e) {
+	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+		return e.clientY / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageY/GuiElements.zoomFactor;
+	return e.touches[0].pageY / GuiElements.zoomFactor;
 };
-TouchReceiver.getTouchX=function(e, i){
-	return e.touches[i].pageX/GuiElements.zoomFactor;
+
+/**
+ * Returns the touch x coord at the specified index
+ * @param {event} e
+ * @param {number} i
+ * @return {number}
+ */
+TouchReceiver.getTouchX = function(e, i) {
+	return e.touches[i].pageX / GuiElements.zoomFactor;
 };
-TouchReceiver.getTouchY=function(e, i){
-	return e.touches[i].pageY/GuiElements.zoomFactor;
+
+/**
+ * Returns the touch y coord at the specified index
+ * @param {event} e
+ * @param {number} i
+ * @return {number}
+ */
+TouchReceiver.getTouchY = function(e, i) {
+	return e.touches[i].pageY / GuiElements.zoomFactor;
 };
-/* Handles new touch events.  Does not know which element was touched.
+
+/**
+ * Handles new touch events.  Does not know which element was touched, the information is filled in by the calling
+ * function.  Returns whether the touch is started
  * @param {event} e - passed event arguments.
+ * @param {boolean=true} [preventD] - Whether preventDefault should be called. Should not be called on scrollable items
  * @return {boolean} - returns true iff !TR.touchDown
  */
-TouchReceiver.touchstart=function(e, preventD){
+TouchReceiver.touchstart = function(e, preventD) {
 	const TR = TouchReceiver;
-	if(!TR.interactionEnabeled) {
+	if (!TR.interactionEnabeled) {
 		e.preventDefault();
 		return false;
 	}
-	if(preventD == null){
+	if (preventD == null) {
 		preventD = true;
 	}
-	if(preventD) {
-		//GuiElements.alert("Prevented 1");
-		e.preventDefault(); //Stops 300 ms delay events
+	if (preventD) {
+		// GuiElements.alert("Prevented 1");
+		e.preventDefault();   // Stops 300 ms delay events
 	}
 	// e.stopPropagation();
-	var startTouch=!TR.touchDown;
-	if(startTouch){ //prevents multitouch issues.
+	const startTouch = !TR.touchDown;
+	if (startTouch) {   // prevents multitouch issues.
 		TR.stopLongTouchTimer();
 		TR.dragging = false;
-		TR.touchDown=true;
-		TR.targetType="none"; //Does not know the target of the touch.
-		TR.target=null;
-		TR.longTouch=false;
-		TR.startX=TR.getX(e);
-		TR.startY=TR.getY(e);
+		TR.touchDown = true;
+		TR.targetType = "none";   // Does not know the target of the touch.
+		TR.target = null;
+		TR.longTouch = false;
+		TR.startX = TR.getX(e);
+		TR.startY = TR.getY(e);
 	}
 	return startTouch;
 };
-TouchReceiver.checkStartZoom=function(e){
-	var TR=TouchReceiver; //shorthand
-	if(!TR.zooming && !TR.mouse && e.touches.length >= 2){
-		if((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling){
+
+/**
+ * Checks if the application should start zooming.  Only called in response to a new touch on the canvas
+ * @param {event} e
+ */
+TouchReceiver.checkStartZoom = function(e) {
+	const TR = TouchReceiver;   // shorthand
+	if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
+		// There must be 2 touches in touch mode and not already be zooming
+		// We know the current touch is on the canvas
+		if ((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling) {
+			// If the previous touch started on the canvas and we aren't dragging, we start to zoom.
+			// If the tab is scrolling and a new touch is on the canvas, we start scrolling.
 			TR.dragging = true;
-			if(TabManager.scrolling){
+			if (TabManager.scrolling) {
 				TabManager.endScroll();
+				// First we stop dragging the canvas
 			}
+			// Now we get the data to start zooming
 			TR.zooming = true;
 			TR.startX = TR.getTouchX(e, 0);
 			TR.startY = TR.getTouchY(e, 0);
@@ -3589,559 +5296,642 @@ TouchReceiver.checkStartZoom=function(e){
 		}
 	}
 };
-TouchReceiver.targetIsInTabSpace=function(){
-	var TR=TouchReceiver; //shorthand
-	if(TR.targetType == "tabSpace"){
+
+/**
+ * Returns whether the current touch is in the canvas
+ * @return {boolean}
+ */
+TouchReceiver.targetIsInTabSpace = function() {
+	const TR = TouchReceiver;
+	if (TR.targetType === "tabSpace") {
 		return true;
-	}
-	else if(TR.targetType == "block"){
+	} else if (TR.targetType === "block") {
 		return true;
-	}
-	else if(TR.targetType == "slot"){
+	} else if (TR.targetType === "slot") {
+		// Have to make sure it isn't a slot on the BlockPalette
 		return !TR.target.parent.stack.isDisplayStack;
 	}
 	return false;
 };
-/* Handles new touch events for Blocks.  Stores the target Block.
- * @param {Blocks} target - The Block that was touched.
+
+/**
+ * Handles new touch events for Blocks.  Stores the target Block.
+ * @param {Block} target - The Block that was touched.
  * @param {event} e - passed event arguments.
  * @fix rename to touchStartBlock.
  */
-TouchReceiver.touchStartBlock=function(target,e){
-	var TR=TouchReceiver; //shorthand
-	if(!target.stack.isDisplayStack) {
+TouchReceiver.touchStartBlock = function(target, e) {
+	const TR = TouchReceiver;
+	if (!target.stack.isDisplayStack) {
 		TR.checkStartZoom(e);
 	}
-	if(TR.touchstart(e)){ //prevent multitouch issues.
-		Overlay.closeOverlays(); //Close any visible overlays.
-		if(target.stack.isDisplayStack){ //Determine what type of stack the Block is a member of.
-			TR.targetType="displayStack";
+	if (TR.touchstart(e)) {
+		Overlay.closeOverlays();   // Close any visible overlays.
+		if (target.stack.isDisplayStack) {   // Determine what type of stack the Block is a member of.
+			TR.targetType = "displayStack";
+			TR.setLongTouchTimer();
+		} else {
+			TR.targetType = "block";
 			TR.setLongTouchTimer();
 		}
-		else{
-			TR.targetType="block";
-			TR.setLongTouchTimer();
-		}
-		TouchReceiver.target=target; //Store target Block.
+		TouchReceiver.target = target;   // Store target Block.
 	}
 };
-/* Handles new touch events for Slots.  Stores the target Slot.
+/**
+ * Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchStartSlot=function(slot,e){
-	var TR=TouchReceiver;
-	if(!slot.parent.stack.isDisplayStack) {
+TouchReceiver.touchStartSlot = function(slot, e) {
+	const TR = TouchReceiver;
+	if (!slot.parent.stack.isDisplayStack) {
 		TR.checkStartZoom(e);
 	}
-	if(TR.touchstart(e)){
-		if(slot.selected!=true){
-			Overlay.closeOverlays(); //Close any visible overlays.
+	if (TR.touchstart(e)) {
+		if (!slot.isEditable() || slot.isEditing() !== true) {
+			Overlay.closeOverlays();   // Close any visible overlays.
 		}
-		TR.targetType="slot";
-		TouchReceiver.target=slot; //Store target Slot.
+		TR.targetType = "slot";
+		TouchReceiver.target = slot;   // Store target Slot.
 		TR.setLongTouchTimer();
 	}
 };
-/* Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
+/**
+ * Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
  * @param {Category} target - The Category of the CategoryBN that was touched.
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchStartCatBN=function(target,e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
-		Overlay.closeOverlays(); //Close any visible overlays.
-		TR.targetType="category";
-		target.select(); //Makes the button light up and the category become visible.
-		Overlay.closeOverlays(); //Close any visible overlays.
+TouchReceiver.touchStartCatBN = function(target, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e)) {
+		Overlay.closeOverlays();   // Close any visible overlays.
+		TR.targetType = "category";
+		target.select();   // Makes the button light up and the category become visible.
+		Overlay.closeOverlays();   // Close any visible overlays.
 	}
 };
-/* Handles new touch events for Buttons.  Stores the target Button.
+/**
+ * Handles new touch events for Buttons.  Stores the target Button.
  * @param {Button} target - The Button that was touched.
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchStartBN=function(target,e){
-	var TR=TouchReceiver;
-	var shouldPreventDefault = !target.scrollable && target.menuBnList == null;
-	if(!shouldPreventDefault){
-		e.stopPropagation();
+TouchReceiver.touchStartBN = function(target, e) {
+	const TR = TouchReceiver;
+	const shouldPreventDefault = !target.scrollable && target.menuBnList == null;
+	if (!shouldPreventDefault) {
+		e.stopPropagation();   // Prevent other calls from preventing default
 	}
-	if(TR.touchstart(e, shouldPreventDefault)){
+	if (TR.touchstart(e, shouldPreventDefault)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
-		TR.targetType="button";
-		TR.target=target;
-		target.press(); //Changes the button's appearance and may trigger an action.
+		TR.setLongTouchTimer();
+		TR.targetType = "button";
+		TR.target = target;
+		target.press();   // Changes the button's appearance and may trigger an action.
 	}
 };
-/* Handles new touch events for the background of the palette.
+/**
+ * @param {SmoothScrollBox} target
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchStartScrollBox=function(target, e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e, false)){
+TouchReceiver.touchStartScrollBox = function(target, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
-		TR.targetType="scrollBox";
-		TR.target=target; //The type is all that is important. There is only one palette.
+		TR.targetType = "scrollBox";
+		TR.target = target;
 		e.stopPropagation();
 	}
 };
-/* @fix Write documentation. */
-TouchReceiver.touchStartTabSpace=function(e){
-	var TR=TouchReceiver;
+/**
+ * @param {event} e
+ */
+TouchReceiver.touchStartTabSpace = function(e) {
+	const TR = TouchReceiver;
 	TR.checkStartZoom(e);
-	if(TR.touchstart(e)){
-		Overlay.closeOverlays(); //Close any visible overlays.
-		TR.targetType="tabSpace";
-		TR.target=null;
+	if (TR.touchstart(e)) {
+		Overlay.closeOverlays();   // Close any visible overlays.
+		TR.targetType = "tabSpace";
+		TR.target = null;
 	}
 };
-/* @fix Write documentation. */
-TouchReceiver.touchStartDisplayBox=function(e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
-		Overlay.closeOverlays(); //Close any visible overlays.
-		TR.targetType="displayBox";
-		TR.target=null;
-		DisplayBoxManager.hide();
+/**
+ * @param {event} e
+ */
+TouchReceiver.touchStartDisplayBox = function(e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e)) {
+		Overlay.closeOverlays();   // Close any visible overlays.
+		TR.targetType = "displayBox";
+		TR.target = null;
+		DisplayBoxManager.hide();   // Close all overlays
+		// Avoids a bug where the touchEnd handler is never called if the object the user touched is removed
 		TR.touchDown = false;
 		e.stopPropagation();
 	}
 };
-/* @fix Write documentation. */
-TouchReceiver.touchStartOverlayPart=function(e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
+/**
+ * @param {event} e
+ */
+TouchReceiver.touchStartOverlayPart = function(e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e)) {
 
 	}
 };
-TouchReceiver.touchStartMenuBnListScrollRect=function(target,e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e)) {
+/**
+ * @param {SmoothMenuBnList} target
+ * @param e
+ */
+TouchReceiver.touchStartSmoothMenuBnList = function(target, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
-		TR.targetType="menuBnList";
-		TouchReceiver.target=target; //Store target Slot.
-	}
-};
-TouchReceiver.touchStartSmoothMenuBnList=function(target,e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e, false)) {
-		Overlay.closeOverlaysExcept(target.partOfOverlay);
-		TR.targetType="smoothMenuBnList";
-		TouchReceiver.target=target; //Store target.
+		TR.targetType = "smoothMenuBnList";
+		TouchReceiver.target = target;   // Store target.
 		e.stopPropagation();
 	}
 };
-TouchReceiver.touchStartTabRow=function(tabRow, index, e){
-	var TR=TouchReceiver;
-	if(TR.touchstart(e)){
+/**
+ * @param {TabRow} tabRow
+ * @param {number} index - The index of the tab that was tapped
+ * @param e
+ */
+TouchReceiver.touchStartTabRow = function(tabRow, index, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e)) {
 		Overlay.closeOverlaysExcept(tabRow.partOfOverlay);
-		TR.targetType="tabrow";
+		TR.targetType = "tabrow";
 		tabRow.selectTab(index);
 	}
 };
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ * @param e
+ */
+TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e, false)) {
+		Overlay.closeOverlays();
+		TR.targetType = "collapsibleItem";
+		TR.target = collapsibleItem;
+		e.stopPropagation();
+	}
+};
 
-/* Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
+/**
+ * Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  */
-TouchReceiver.touchmove=function(e){
-	var TR=TouchReceiver;
-	var shouldPreventDefault = true;
-	if(!TR.interactionEnabeled) {
+TouchReceiver.touchmove = function(e) {
+	const TR = TouchReceiver;
+	let shouldPreventDefault = true;   // Don't prevent default if the target scrolls
+	if (!TR.interactionEnabeled) {
 		e.preventDefault();
 		return;
 	}
-	if(TR.touchDown&&(TR.hasMovedOutsideThreshold(e) || TR.dragging)){
+	// We start dragging when the touch moves outside the threshold
+	if (TR.touchDown && (TR.hasMovedOutsideThreshold(e) || TR.dragging)) {
 		TR.dragging = true;
-		if(TR.longTouch) {
+		TR.stopLongTouchTimer();
+		if (TR.longTouch) {
 			Overlay.closeOverlays();
 			TR.longTouch = false;
 		}
-		if(TR.zooming){
-			//If we are currently zooming, we update the zoom.
-			if(e.touches.length < 2){
+		if (TR.zooming) {
+			// If we are currently zooming, we update the zoom.
+			if (e.touches.length < 2) {
 				TR.touchend(e);
-			}
-			else{
-				var x1 = TR.getTouchX(e, 0);
-				var y1 = TR.getTouchY(e, 0);
-				var x2 = TR.getTouchX(e, 1);
-				var y2 = TR.getTouchY(e, 1);
+			} else {
+				const x1 = TR.getTouchX(e, 0);
+				const y1 = TR.getTouchY(e, 0);
+				const x2 = TR.getTouchX(e, 1);
+				const y2 = TR.getTouchY(e, 1);
 				TabManager.updateZooming(x1, y1, x2, y2);
 			}
-		}
-		else {
-			//If the user drags a Slot, the block they are dragging should become the target.
-			if (TR.targetType == "slot") {
-				TR.target = TR.target.parent; //Now the user is dragging a block.
+		} else {
+			// If the user drags a Slot, the block they are dragging should become the target.
+			if (TR.targetType === "slot") {
+				TR.target = TR.target.parent;   // Now the user is dragging a block.
 				if (TR.target.stack.isDisplayStack) {
 					TR.targetType = "displayStack";
-				}
-				else {
+				} else {
 					TR.targetType = "block";
 				}
 			}
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
-			if (TR.targetType == "displayStack") {
-				var x = TR.target.stack.getAbsX();
-				var y = TR.target.stack.getAbsY();
-				//The first block of the duplicated BlockStack is the new target.
+			if (TR.targetType === "displayStack") {
+				const x = TR.target.stack.getAbsX();
+				const y = TR.target.stack.getAbsY();
+				// The first block of the duplicated BlockStack is the new target.
 				TR.target = TR.target.stack.duplicate(x, y).firstBlock;
 				TR.targetType = "block";
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
 			 then the BlockStack should move. */
-			if (TR.targetType == "block") {
-				//If the CodeManager has not started the movement, this must be done first.
+			if (TR.targetType === "block") {
+				// If the CodeManager has not started the movement, this must be done first.
 				let x = TR.getX(e);
 				let y = TR.getY(e);
 				if (TR.blocksMoving) {
-					//The CodeManager handles moving BlockStacks.
+					// The CodeManager handles moving BlockStacks.
 					CodeManager.move.update(x, y);
-				}
-				else {
+				} else {
 					CodeManager.move.start(TR.target, x, y);
 					TR.blocksMoving = true;
 				}
 			}
-			//If the user drags the palette, it should scroll.
-			if (TR.targetType == "scrollBox") {
+			// If the user drags the palette, it should scroll.
+			if (TR.targetType === "scrollBox") {
 				shouldPreventDefault = false;
 			}
-			//If the user drags the tab space, it should scroll.
-			if (TR.targetType == "tabSpace") {
+			// If the user drags the tab space, it should scroll.
+			if (TR.targetType === "tabSpace") {
 				if (!TabManager.scrolling) {
 					TabManager.startScroll(TR.getX(e), TR.getY(e));
-				}
-				else {
+				} else {
 					TabManager.updateScroll(TR.getX(e), TR.getY(e));
 				}
 			}
-			//If the user drags a button and it has a menuBnList, it should scroll it.
-			if (TR.targetType == "button") {
+			// If the user drags a button and it has a menuBnList, it should scroll it.
+			if (TR.targetType === "button") {
 				TR.target.interrupt();
-				if ((TR.target.menuBnList != null && TR.target.menuBnList.scrollable)) {
-					TR.targetType = "menuBnList";
-					TR.target = TR.target.menuBnList;
-				} else if (TR.target.scrollable) {
+				if (TR.target.scrollable) {
 					TR.targetType = "smoothMenuBnList";
 					TR.target.interrupt();
 					TR.target = null;
 				}
 			}
-			//If the user drags a menuBnList, it should scroll.
-			if (TR.targetType == "menuBnList") {
-				if (!TR.target.scrolling && TR.target.scrollable) {
-					TR.target.startScroll(TR.getY(e));
-				}
-				else {
-					TR.target.updateScroll(TR.getY(e));
-				}
-			}
-
-			if (TR.targetType == "smoothMenuBnList") {
+			// If the user drags a smoothMenuBnList, it should scroll.
+			if (TR.targetType === "smoothMenuBnList") {
 				shouldPreventDefault = false;
+			}
+			// If the user drags a collapsibleItem, it should scroll
+			if (TR.targetType === "collapsibleItem") {
+				shouldPreventDefault = false;
+				TR.targetType = "scrollBox";
+				TR.target = null;
 			}
 		}
 	}
-	shouldPreventDefault &= TR.targetType != "smoothMenuBnList";
-	shouldPreventDefault &= TR.targetType != "button" || !TR.target.scrollable;
-	shouldPreventDefault &= TR.targetType != "scrollBox";
-	if(shouldPreventDefault){
-		//GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
+	shouldPreventDefault &= TR.targetType !== "smoothMenuBnList";
+	shouldPreventDefault &= TR.targetType !== "button" || !TR.target.scrollable;
+	shouldPreventDefault &= TR.targetType !== "scrollBox";
+	shouldPreventDefault &= TR.targetType !== "collapsibleItem";
+	if (shouldPreventDefault) {
+		// GuiElements.alert("Prevented 2 t:" + TR.targetType + "!");
 		e.preventDefault();
 	}
 };
-TouchReceiver.hasMovedOutsideThreshold=function(e){
-	var TR = TouchReceiver;
-	if(!TR.touchDown) return false;
-	var distX = TR.startX-TR.getX(e);
-	var distY = TR.startY-TR.getY(e);
+
+/**
+ * Returns whether the touch has moved outside the threshold and should be considered a drag
+ * @param {event} e
+ * @return {boolean}
+ */
+TouchReceiver.hasMovedOutsideThreshold = function(e) {
+	const TR = TouchReceiver;
+	if (!TR.touchDown) return false;
+	const distX = TR.startX - TR.getX(e);
+	const distY = TR.startY - TR.getY(e);
 	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
 };
-/* Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
+
+/**
+ * Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
  * @fix DateTime is no longer necessary to prevent repeat events.
  */
-TouchReceiver.touchend=function(e){
-	var TR=TouchReceiver;
-	var shouldPreventDefault = true;
-	if(TR.zooming){
-		if(e.touches.length == 0){
+TouchReceiver.touchend = function(e) {
+	const TR = TouchReceiver;
+	let shouldPreventDefault = true;
+	if (TR.zooming) {
+		if (e.touches.length === 0) {
 			TabManager.endZooming();
 			TR.zooming = false;
-			TR.touchDown=false;
-		}
-		else if(e.touches.length == 1){
-			//Switch from zooming to panning
+			TR.touchDown = false;
+		} else if (e.touches.length === 1) {
+			// Switch from zooming to panning
 			TabManager.endZooming();
 			TR.zooming = false;
 			TR.targetType = "tabSpace";
-			TR.target=null;
-			TabManager.startScroll(TR.getX(e),TR.getY(e));
+			TR.target = null;
+			TabManager.startScroll(TR.getX(e), TR.getY(e));
+		} else if (e.touches.length > 1) {
+			// No action necessary
 		}
-		else if(e.touches.length > 1){
-			//No action necessary
-		}
-	}
-	else if(TR.touchDown&&!TR.longTouch){ //Prevents multitouch problems.
-		TR.touchDown=false;
+	} else if (TR.touchDown && !TR.longTouch) {   // Prevents multitouch problems.
+		TR.touchDown = false;
 		TR.dragging = false;
-		if(TR.targetType=="block"){
-			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
+		if (TR.targetType === "block") {
+			if (TR.blocksMoving) {   // If a stack is moving, tell the CodeManager to end the movement.
 				CodeManager.move.end();
-				TR.blocksMoving=false;
-			}
-			else{ //The stack was tapped, so it should run.
+				TR.blocksMoving = false;
+			} else {   // The stack was tapped, so it should run.
 				TR.target.stack.startRun();
 			}
-		}
-		else if(TR.targetType=="button"){
-			TR.target.release(); //Pass message on to button.
-		}
-		else if(TR.targetType=="slot"){
-			//If a Slot is pressed and released without dragging, it is time to edit its value.
-			TR.target.edit();
-		}
-		else if(TR.targetType=="scrollBox"){
+		} else if (TR.targetType === "button") {
+			TR.target.release();   // Pass message on to button.
+		} else if (TR.targetType === "slot") {
+			// If a Slot is pressed and released without dragging, it is time to edit its value.
+			TR.target.onTap();
+		} else if (TR.targetType === "scrollBox") {
 			shouldPreventDefault = false;
-		}
-		else if(TR.targetType=="tabSpace"){
+		} else if (TR.targetType === "tabSpace") {
 			TabManager.endScroll();
-		}
-		else if(TR.targetType=="menuBnList"){
-			TR.target.endScroll();
-		}
-		else if(TR.targetType=="smoothMenuBnList"){
+		} else if (TR.targetType === "smoothMenuBnList") {
 			shouldPreventDefault = false;
+		} else if (TR.targetType === "collapsibleItem") {
+			TR.target.toggle();
 		}
-	}
-	else{
+	} else {
 		TR.touchDown = false;
 	}
-	if(shouldPreventDefault) {
-		//GuiElements.alert("Prevented 3");
+	if (shouldPreventDefault) {
+		// GuiElements.alert("Prevented 3");
 		e.preventDefault();
 	}
 };
-/* Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
+
+/**
+ * Called when a user's interaction with the screen should be interrupted due to a dialog, etc.
  * Blocks that are moving should stop moving, but actions should not be triggered.
  */
-TouchReceiver.touchInterrupt=function(){
-	var TR=TouchReceiver;
-	var touchWasDown=TR.touchDown;
-	TR.touchDown=false;
-	if(touchWasDown&&!TR.longTouch){ //Only interrupt if there is a finger on the screen.
-		TR.touchDown=false;
-		if(TR.targetType=="block"){
-			if(TR.blocksMoving){ //If a stack is moving, tell the CodeManager to end the movement.
+TouchReceiver.touchInterrupt = function() {
+	const TR = TouchReceiver;
+	const touchWasDown = TR.touchDown;
+	TR.touchDown = false;
+	if (touchWasDown && !TR.longTouch) {   // Only interrupt if there is a finger on the screen.
+		TR.touchDown = false;
+		if (TR.targetType === "block") {
+			if (TR.blocksMoving) {   // If a stack is moving, tell the CodeManager to end the movement.
 				CodeManager.move.interrupt();
-				TR.blocksMoving=false;
+				TR.blocksMoving = false;
 			}
-		}
-		else if(TR.targetType=="button"){
-			TR.target.interrupt(); //Remove the highlight without triggering the action.
-		}
-		else if(TR.targetType=="scrollBox"){
-
-		}
-		else if(TR.targetType=="tabSpace"){
+		} else if (TR.targetType === "button") {
+			TR.target.interrupt();   // Remove the highlight without triggering the action.
+		} else if (TR.targetType === "tabSpace") {
 			TabManager.endScroll();
 		}
 	}
 };
-/* @fix Write documentation. */
-TouchReceiver.touchLong=function(){
-	var TR = TouchReceiver;
+
+/**
+ * Triggered when the longTouchTimer tics.  Potentially shows a context menu
+ */
+TouchReceiver.touchLong = function() {
+	const TR = TouchReceiver;
 	TR.stopLongTouchTimer();
-	if(TR.touchDown && !TR.zooming){
-		if(TR.targetType=="slot"){
-			TR.target=TR.target.parent; //Now the user is holding a block.
-			if(TR.target.stack.isDisplayStack){
-				TR.targetType="displayStack";
-			}
-			else{
-				TR.targetType="block";
-			}
-		}
-		if(TR.targetType=="displayStack"){
-			if(!TR.blocksMoving&&(TR.target.blockTypeName=="B_Variable"||TR.target.blockTypeName=="B_List")){
-				TR.longTouch=true;
-				new BlockContextMenu(TR.target,TR.startX,TR.startY);
+	if (TR.touchDown && !TR.zooming) {
+		if (TR.targetType === "slot") {
+			TR.target = TR.target.parent;   // Now the user is holding a block.
+			if (TR.target.stack.isDisplayStack) {
+				TR.targetType = "displayStack";
+			} else {
+				TR.targetType = "block";
 			}
 		}
-		if(TR.targetType=="block"){
-			if(!TR.blocksMoving){
-				TR.longTouch=true;
-				new BlockContextMenu(TR.target,TR.startX,TR.startY);
+		if (TR.targetType === "displayStack") {
+			// Show the menu for variables
+			if (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List") {
+				TR.longTouch = true;
+				new BlockContextMenu(TR.target, TR.startX, TR.startY);
 			}
+		}
+		if (TR.targetType === "block") {
+			TR.longTouch = true;
+			new BlockContextMenu(TR.target, TR.startX, TR.startY);
+		}
+		if (TR.targetType === "button") {
+			TR.target.longTouch();
 		}
 	}
 };
-TouchReceiver.setLongTouchTimer=function() {
-	var TR = TouchReceiver;
+
+/**
+ * Starts the longTouchTimer
+ */
+TouchReceiver.setLongTouchTimer = function() {
+	const TR = TouchReceiver;
 	TR.stopLongTouchTimer();
-	TR.longTouchTimer = self.setInterval(function () {
+	TR.longTouchTimer = self.setInterval(function() {
 		TouchReceiver.touchLong();
 	}, TR.longTouchInterval);
-	TR.timerRunning=true;
+	TR.timerRunning = true;
 };
-TouchReceiver.stopLongTouchTimer=function(){
-	var TR = TouchReceiver;
-	if(TR.timerRunning){
+
+/**
+ * Stops the longTouchTimer
+ */
+TouchReceiver.stopLongTouchTimer = function() {
+	const TR = TouchReceiver;
+	if (TR.timerRunning) {
 		TR.longTouchTimer = window.clearInterval(this.longTouchTimer);
-		TR.timerRunning=false;
+		TR.timerRunning = false;
 	}
 };
-/* Adds handlerDown listeners to the parts of a CategoryBN.
- * @param {SVG element} element - The part of the CategoryBN the listeners are being applied to.
+
+/**
+ * Adds handlerDown listeners to the parts of a CategoryBN.
+ * @param {Element} element - The part of the CategoryBN the listeners are being applied to.
  * @param {Category} category - The category of the CategoryBN.
- * @fix maybe rename this function.
  */
-TouchReceiver.addListenersCat=function(element,category){
-	var TR=TouchReceiver;
-	element.category=category; //Teaches the SVG element to know what Category it belongs to.
+TouchReceiver.addListenersCat = function(element, category) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver its Category.
-		TouchReceiver.touchStartCatBN(this.category,e);
+		// When it is touched, the SVG element will tell the TouchReceiver its Category.
+		TouchReceiver.touchStartCatBN(category, e);
 	}, false);
 };
-/* Adds handlerDown listeners to the parts of a Block.
- * @param {SVG element} element - The part of the Block the listeners are being applied to.
+/**
+ * Adds handlerDown listeners to the parts of a Block.
+ * @param {Element} element - The part of the Block the listeners are being applied to.
  * @param {Block} parent - The Block the SVG element belongs to.
- * @fix maybe rename this function
- * @fix maybe use this.block rather than this.parent.
  */
-TouchReceiver.addListenersChild=function(element,parent){
-	var TR=TouchReceiver;
+TouchReceiver.addListenersChild = function(element, parent) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver its Block.
-		TouchReceiver.touchStartBlock(parent,e);
+		// When it is touched, the SVG element will tell the TouchReceiver its Block.
+		TouchReceiver.touchStartBlock(parent, e);
 	}, false);
 };
-/* Adds handlerDown listeners to the parts of a Slot.
- * @param {SVG element} element - The part of the Slot the listeners are being applied to.
+/**
+ * Adds handlerDown listeners to the parts of a Slot.
+ * @param {Element} element - The part of the Slot the listeners are being applied to.
  * @param {Slot} slot - The Slot the SVG element belongs to.
  */
-TouchReceiver.addListenersSlot=function(element,slot){
-	var TR=TouchReceiver;
+TouchReceiver.addListenersSlot = function(element, slot) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver its Slot.
-		TouchReceiver.touchStartSlot(slot,e);
+		// When it is touched, the SVG element will tell the TouchReceiver its Slot.
+		TouchReceiver.touchStartSlot(slot, e);
 	}, false);
 };
-/* Adds handlerDown listeners to the parts of a Button.
- * @param {SVG element} element - The part of the Button the listeners are being applied to.
+/**
+ * Adds handlerDown listeners to the parts of a Button.
+ * @param {Element} element - The part of the Button the listeners are being applied to.
  * @param {Button} parent - The Button the SVG element belongs to.
- * @fix maybe use this.button rather than this.parent.
  */
-TouchReceiver.addListenersBN=function(element,parent){
-	var TR=TouchReceiver;
-	element.parent=parent; //Teaches the SVG element to know what Button it belongs to.
+TouchReceiver.addListenersBN = function(element, parent) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver its Button.
-		TouchReceiver.touchStartBN(this.parent,e);
+		// When it is touched, the SVG element will tell the TouchReceiver its Button.
+		TouchReceiver.touchStartBN(parent, e);
 	}, false);
 };
-/* Adds handlerDown listeners to the background of the Palette. Used for scrolling.
+/**
+ * @param {Element} element
+ * @param {SmoothScrollBox} parent
  */
-TouchReceiver.addListenersScrollBox=function(element, parent){
-	var TR=TouchReceiver;
-	element.parent = parent;
+TouchReceiver.addListenersScrollBox = function(element, parent) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver.
-		TouchReceiver.touchStartScrollBox(this.parent, e);
+		// When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartScrollBox(parent, e);
 	}, false);
 };
-/* Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
+/**
+ * Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
+ * @param {Element} element
  */
-TouchReceiver.addListenersTabSpace=function(element){
-	var TR=TouchReceiver;
+TouchReceiver.addListenersTabSpace = function(element) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TabManager.
+		// When it is touched, the SVG element will tell the TabManager.
 		TouchReceiver.touchStartTabSpace(e);
 	}, false);
 };
-/* Adds handlerDown listeners to the parts of the displayBox.
- * @param {SVG element} element - The part of the displayBox the listeners are being applied to.
+/**
+ * Adds handlerDown listeners to the parts of the displayBox.
+ * @param {Element} element - The part of the displayBox the listeners are being applied to.
  */
-TouchReceiver.addListenersDisplayBox=function(element){
-	var TR=TouchReceiver;
+TouchReceiver.addListenersDisplayBox = function(element) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		//When it is touched, the SVG element will tell the TouchReceiver.
+		// When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartDisplayBox(e);
 	}, false);
 };
-TouchReceiver.addListenersTabRow=function(element,tabRow,index){
-	var TR=TouchReceiver;
+/**
+ * @param {Element} element
+ * @param {TabRow} tabRow
+ * @param {number} index
+ */
+TouchReceiver.addListenersTabRow = function(element, tabRow, index) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartTabRow(tabRow, index, e);
 		TR.touchDown = false;
 		e.stopPropagation();
 	}, false);
 };
-
-/* Adds handlerDown listeners to the parts of any overlay that do not already have handlers.
- * @param {SVG element} element - The part the listeners are being applied to.
+/**
+ * Adds handlerDown listeners to the parts of any overlay that do not already have handlers.
+ * @param {Element} element - The part the listeners are being applied to.
  */
-TouchReceiver.addListenersOverlayPart=function(element){
-	var TR=TouchReceiver;
+TouchReceiver.addListenersOverlayPart = function(element) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartOverlayPart(e);
 	}, false);
 };
-TouchReceiver.addListenersMenuBnListScrollRect=function(element,parent){
-	var TR=TouchReceiver;
-	element.parent=parent;
+/**
+ * @param {Element} element
+ * @param {SmoothMenuBnList} parent
+ */
+TouchReceiver.addListenersSmoothMenuBnListScrollRect = function(element, parent) {
+	const TR = TouchReceiver;
+	element.parent = parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		TouchReceiver.touchStartMenuBnListScrollRect(this.parent,e);
+		TouchReceiver.touchStartSmoothMenuBnList(this.parent, e);
 	}, false);
 };
-TouchReceiver.addListenersSmoothMenuBnListScrollRect=function(element,parent){
-	var TR=TouchReceiver;
-	element.parent=parent;
+/**
+ * @param {Element} element
+ * @param {CollapsibleItem} item
+ */
+TouchReceiver.addListenersCollapsibleItem = function(element, item) {
+	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
-		TouchReceiver.touchStartSmoothMenuBnList(this.parent,e);
+		TouchReceiver.touchStartCollapsibleItem(item, e);
 	}, false);
 };
-TouchReceiver.addEventListenerSafe=function(element,type, func){
+
+/**
+ * Makes the element call the function when the right type of listener is triggered.  The function is made safe by
+ * DebugOptions so errors can be caught
+ * @param {Element} element - The element to add the listeners to
+ * @param {string} type - The listener to add
+ * @param {function} func - The function to call when the listener is triggered
+ */
+TouchReceiver.addEventListenerSafe = function(element, type, func) {
 	element.addEventListener(type, DebugOptions.safeFunc(func), false);
 };
-TouchReceiver.createScrollFixTimer = function(div, statusObj){
-	if(!GuiElements.isIos && statusObj == null) return;
-	var mem = {};
+
+/**
+ * Creates a timer that deals with a bug in iOS that occurs if the user tries to scroll an object that is already
+ * at its maximum or minimum position.  The timer regularly checks the scroll and moves it 1 pixel if it is at either
+ * extreme
+ * @param {Element} div - The div to fix
+ * @param {object|null} [statusObj] - An object with boolean field .still which is updates to indicate whether
+ *                                    the div has stopped scrolling
+ * @return {number|null} - The id of the timer or null
+ */
+TouchReceiver.createScrollFixTimer = function(div, statusObj) {
+	// If the timer isn't necessary and there is no status object, there is no reason to make the timer
+	if (!GuiElements.isIos && statusObj == null) return null;
+	const mem = {};
+	// Used to detect scrolling
 	mem.lastY = null;
 	mem.lastX = null;
-	var fixScroll = function() {
-		var stillY = mem.lastY == null || mem.lastY == div.scrollTop;
-		var stillX = mem.lastX == null || mem.lastX == div.scrollLeft;
-		var still = stillX && stillY;
+	const fixScroll = function() {
+		const stillY = mem.lastY == null || mem.lastY === div.scrollTop;
+		const stillX = mem.lastX == null || mem.lastX === div.scrollLeft;
+		const still = stillX && stillY;
 
-		statusObj.still = still;
-		if(!GuiElements.isIos) return;
+		// Update status object
+		if (statusObj != null) statusObj.still = still;
+		// Do no more if we don't have to
+		if (!GuiElements.isIos) return;
 
 		mem.lastY = div.scrollTop;
 		mem.lastX = div.scrollLeft;
 
-		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
-		if(TouchReceiver.touchDown || !still) return;
+		const height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
+		// Don't do the fix until the div stops moving
+		if (TouchReceiver.touchDown || !still) return;
+		// The div can't move so it doesn't matter
+		if (div.scrollHeight === height) return;
 		if (div.scrollTop <= 0) {
+			// The div is at the top; move it down
 			div.scrollTop = 1;
-		}
-		else if (div.scrollHeight - height - 1 <= div.scrollTop) {
+		} else if (div.scrollHeight - height - 1 <= div.scrollTop && div.scrollTop > 2) {
+			// The div is at the bottom and is tall enough that moving up won't move it to the top.  Move it up.
 			div.scrollTop = div.scrollHeight - height - 2;
 		}
 	};
 	TouchReceiver.setInitialScrollFix(div);
 	return self.setInterval(fixScroll, TouchReceiver.fixScrollingInterval);
 };
+
+/**
+ * Gives the div an initial bump away from the top. If called when the div is created, prevents the div from jumping
+ * visually
+ * @param {Element} div
+ */
 TouchReceiver.setInitialScrollFix = function(div) {
+	if (!GuiElements.isIos) return;
 	if (div.scrollTop <= 0) {
 		div.scrollTop = 1;
 	}
 };
-function TitleBar(){
-	let TB=TitleBar;
+/**
+ * The bar at the top of the screen.  The TitleBar is a static class which builds the title bar when TitleBar() is
+ * called by GuiElements.  It changes its appearance on small screens, becoming shorter and adding a show/hide button
+ * to show/hide the BlockPalette.  Its title shows the name of the current project.
+ */
+function TitleBar() {
+	let TB = TitleBar;
 	TB.titleTextVisble = true;
 	TB.titleText = "";
 	TB.debugEnabled = false;
@@ -4149,366 +5939,470 @@ function TitleBar(){
 	TitleBar.makeButtons();
 	TitleBar.makeTitleText();
 }
-TitleBar.setGraphicsPart1=function(){
-	var TB=TitleBar;
-	if(GuiElements.smallMode) {
-		TB.height = 44;
-		TB.buttonMargin=Button.defaultMargin / 2;
+
+/**
+ * The TitleBar must set certain graphics before the BlockPalette, but others after.  Thus it has two setGraphics
+ * functions.
+ */
+TitleBar.setGraphicsPart1 = function() {
+	const TB = TitleBar;
+	if (GuiElements.smallMode) {
+		TB.height = 35;
+		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
 		TB.height = 54;
-		TB.buttonMargin=Button.defaultMargin;
+		TB.buttonMargin = Button.defaultMargin;
 	}
+	TB.width = GuiElements.width;
 	TB.buttonW = TB.height * 64 / 54;
-	TB.longButtonW=85;
-	TB.bnIconMargin=3;
-	TB.bg=Colors.black;
-	TB.flagFill="#0f0";
-	TB.stopFill="#f00";
-	TB.titleColor=Colors.white;
-	TB.font="Arial";
-	TB.fontWeight="Bold";
-	TB.fontSize=16;
-	TB.fontCharHeight=12;
-	
-	TB.buttonH=TB.height-2*TB.buttonMargin;
-	TB.bnIconH=TB.buttonH-2*TB.bnIconMargin;
+
+	const maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+
+	TB.longButtonW = 85;
+	TB.bnIconMargin = 3;
+	TB.bg = Colors.black;
+	TB.flagFill = "#0f0";
+	TB.stopFill = "#f00";
+	TB.titleColor = Colors.white;
+	TB.font = Font.uiFont(16).bold();
+
+	TB.buttonH = TB.height - 2 * TB.buttonMargin;
+	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+	const maxIconHeight = maxBnWidth * 0.7;
+	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
 
-	TB.width=GuiElements.width;
 };
-TitleBar.setGraphicsPart2 = function(){
-	var TB=TitleBar;
-	TB.stopBnX=GuiElements.width-TB.buttonW-TB.buttonMargin;
-	TB.flagBnX=TB.stopBnX-TB.buttonW-2*TB.buttonMargin;
-	TB.debugX=TB.flagBnX-TB.longButtonW-2*TB.buttonMargin;
 
-	TB.fileBnX=TB.buttonMargin;
-	if(GuiElements.smallMode) {
+TitleBar.setGraphicsPart2 = function() {
+	/* Compute the locations of all the buttons */
+	const TB = TitleBar;
+	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
+	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
+
+	TB.fileBnX = TB.buttonMargin;
+	if (GuiElements.smallMode) {
 		TB.showBnX = TB.buttonMargin;
-		TB.fileBnX=TB.showBnX + TB.buttonMargin + TB.shortButtonW;
+		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
-	TB.viewBnX=TB.fileBnX+TB.buttonMargin+TB.buttonW;
-	TB.hummingbirdBnX=BlockPalette.width-Button.defaultMargin-TB.buttonW;
-	TB.statusX=TB.hummingbirdBnX-TB.buttonMargin-DeviceStatusLight.radius*2;
+	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
+	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
 	TB.titleLeftX = BlockPalette.width;
-	TB.titleRightX = TB.flagBnX - TB.buttonMargin;
+	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
+
+	let suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
+	if (TB.undoBnX < suggestedUndoBnX) {
+		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+	}
+	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
 };
-TitleBar.createBar=function(){
-	var TB=TitleBar;
-	TB.bgRect=GuiElements.draw.rect(0,0,TB.width,TB.height,TB.bg);
+
+/**
+ * Creates the rectangle for the TitleBar
+ */
+TitleBar.createBar = function() {
+	const TB = TitleBar;
+	TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
 };
-TitleBar.makeButtons=function(){
-	var TB=TitleBar;
-	var TBLayer=GuiElements.layers.titlebar;
-	TB.flagBn=new Button(TB.flagBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.flagBn.addColorIcon(VectorPaths.flag,TB.bnIconH,TB.flagFill);
-	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked,false);
-	TB.stopBn=new Button(TB.stopBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.stopBn.addColorIcon(VectorPaths.stop,TB.bnIconH,TB.stopFill);
-	TB.stopBn.setCallbackFunction(CodeManager.stop,false);
 
-	TB.deviceStatusLight=new DeviceStatusLight(TB.statusX,TB.height/2,TBLayer,DeviceManager);
-	TB.hummingbirdBn=new Button(TB.hummingbirdBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect,TB.bnIconH);
-	TB.hummingbirdMenu=new DeviceMenu(TB.hummingbirdBn);
+/**
+ * Creates all the buttons and menus
+ */
+TitleBar.makeButtons = function() {
+	const TB = TitleBar;
+	const TBLayer = GuiElements.layers.titlebar;
+	TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
+	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
+	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
+	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-	if(GuiElements.smallMode) {
-		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer,TB.bnIconH);
+	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
+	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
+	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+
+	if (GuiElements.smallMode) {
+		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
 		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
 		TB.showHideBn.build(GuiElements.paletteLayersVisible);
 	} else {
 		TB.showHideBn = null;
 	}
 
-	TB.fileBn=new Button(TB.fileBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.fileBn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.fileBn.setCallbackFunction(SaveManager.userOpenDialog, true);
-	//TB.fileMenu=new FileMenu(TB.fileBn);
-	TB.viewBn=new Button(TB.viewBnX,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.viewBn.addIcon(VectorPaths.settings,TB.bnIconH);
-	TB.viewMenu=new SettingsMenu(TB.viewBn);
-	TB.debugBn=null;
-	if(TB.debugEnabled) {
+	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
+	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+
+	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
+	TB.viewMenu = new SettingsMenu(TB.viewBn);
+	TB.viewBn.setLongTouchFunction(function() {
+		//DialogManager.showAlertDialog("Test", "Test", "Test");
+		GuiElements.alert("Long touch");
+		TB.viewMenu.reloadAdvanced();
+	});
+
+	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+	UndoManager.setUndoButton(TB.undoButton);
+
+	TB.debugBn = null;
+	if (TB.debugEnabled) {
 		TB.enableDebug();
 	}
-	/*
-	TB.test1Bn=new Button(TB.flagBnX-TB.buttonW-2*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.test1Bn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.test1Bn.setCallbackFunction(SaveManager.reloadTest,true);
-	TB.test2Bn=new Button(TB.flagBnX-2*TB.buttonW-4*TB.buttonMargin,TB.buttonMargin,TB.buttonW,TB.buttonH,TBLayer);
-	TB.test2Bn.addIcon(VectorPaths.file,TB.bnIconH);
-	TB.test2Bn.setCallbackFunction(SaveManager.listTest,true);
-	*/
 };
-TitleBar.removeButtons = function(){
-	let TB=TitleBar;
+
+/**
+ * Removes all the buttons so they can be redrawn
+ */
+TitleBar.removeButtons = function() {
+	let TB = TitleBar;
 	TB.flagBn.remove();
 	TB.stopBn.remove();
 	TB.fileBn.remove();
 	TB.viewBn.remove();
+	TB.undoButton.remove();
 	TB.hummingbirdBn.remove();
-	if(TB.debugBn != null) TB.debugBn.remove();
-	if(TB.showHideBn != null) TB.showHideBn.remove();
+	if (TB.debugBn != null) TB.debugBn.remove();
+	if (TB.showHideBn != null) TB.showHideBn.remove();
 	TB.deviceStatusLight.remove();
 };
-TitleBar.makeTitleText=function(){
-	var TB=TitleBar;
-	TB.titleLabel=GuiElements.draw.text(0,0,"",TB.fontSize,TB.titleColor,TB.font,TB.fontWeight);
+
+/**
+ * Makes the text element for the TitleBar
+ */
+TitleBar.makeTitleText = function() {
+	const TB = TitleBar;
+	TB.titleLabel = GuiElements.draw.text(0, 0, "", TB.font, TB.titleColor);
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
-TitleBar.setText=function(text){
+
+/**
+ * Sets the text of the TitleBar
+ * @param {string|null} text - The text to display or null if there is no text
+ */
+TitleBar.setText = function(text) {
 	const TB = TitleBar;
-	if(text == null) text = "";
+	if (text == null) text = "";
 	TB.titleText = text;
 	TitleBar.updateText();
 };
-TitleBar.updateText = function(){
-	let TB=TitleBar;
-	if(GuiElements.width < BlockPalette.width * 2) {
-		if(TB.titleTextVisble) {
+
+/**
+ * Moves the text to the correct position
+ */
+TitleBar.updateText = function() {
+	let TB = TitleBar;
+	if (GuiElements.width < BlockPalette.width * 2) {
+		if (TB.titleTextVisble) {
+			// The text doesn't fit.  Hide it.
 			TB.titleLabel.remove();
 			TB.titleTextVisble = false;
 		}
 	} else {
-		if(!TB.titleTextVisble) {
+		if (!TB.titleTextVisble) {
+			// The text fits but is hidden. Show it.
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
 		}
 		let maxWidth = TB.titleWidth;
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
-		let width=GuiElements.measure.textWidth(TB.titleLabel);
-		let x=GuiElements.width/2-width/2;
-		let y=TB.height/2+TB.fontCharHeight/2;
-		if(x < TB.titleLeftX) {
+		let width = GuiElements.measure.textWidth(TB.titleLabel);
+		let x = GuiElements.width / 2 - width / 2;
+		let y = TB.height / 2 + TB.font.charHeight / 2;
+		if (x < TB.titleLeftX) {
 			x = TB.titleLeftX;
-		} else if(x + width > TB.titleRightX) {
+		} else if (x + width > TB.titleRightX) {
 			x = TB.titleRightX - width;
 		}
-		GuiElements.move.text(TB.titleLabel,x,y);
+		GuiElements.move.text(TB.titleLabel, x, y);
 	}
 };
-TitleBar.enableDebug=function(){
-	var TB=TitleBar;
+
+/**
+ * Builds the debug Button
+ */
+TitleBar.enableDebug = function() {
+	const TB = TitleBar;
 	TB.debugEnabled = true;
-	var TBLayer=GuiElements.layers.titlebar;
-	if(TB.debugBn==null) {
+	const TBLayer = GuiElements.layers.titlebar;
+	if (TB.debugBn == null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
 		TB.debugBn.addText("Debug");
 		TB.debugMenu = new DebugMenu(TB.debugBn);
 	}
 };
-TitleBar.hideDebug = function(){
+
+/**
+ * Hides the debug button
+ */
+TitleBar.hideDebug = function() {
 	TitleBar.debugEnabled = false;
 	TitleBar.debugBn.remove();
 	TitleBar.debugBn = null;
 };
-TitleBar.updateZoomPart1 = function(){
+
+/**
+ * Like setGraphics, there are two updateZoom functions
+ */
+TitleBar.updateZoomPart1 = function() {
 	TitleBar.setGraphicsPart1();
 };
-TitleBar.updateZoomPart2=function(){
-	let TB=TitleBar;
+
+/**
+ * Redraws the buttons
+ */
+TitleBar.updateZoomPart2 = function() {
+	let TB = TitleBar;
 	let viewShowing = TB.viewBn.toggled;
 	TB.setGraphicsPart2();
 	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
 	TitleBar.removeButtons();
 	TitleBar.makeButtons();
-	if(viewShowing){
+	if (viewShowing) {
+		// This menu must stay open even while resizing
 		TB.viewBn.press();
 		TB.viewBn.release();
+		// Pressing the button shows the menu.
 	}
 	TB.updateText();
 };
 
 
-function BlockPalette(){
-	BlockPalette.categories = [];
-	BlockPalette.selectedCat=null;
-	BlockPalette.createCatBg();
-	BlockPalette.createPalBg();
-	BlockPalette.createScrollSvg();
+/**
+ * The BlockPalette is the side panel on the left that holds all the Blocks.  BlockPalette is a static class, since
+ * there is only one Palette.  The BlockPalette class creates and manages a set of Categories, each of which
+ * controls the Blocks inside it and the CategoryBN that brings it into the foreground.
+ */
+function BlockPalette() {
+	BlockPalette.categories = [];   // List of categories
+	BlockPalette.selectedCat = null;   // category in the foreground
+	BlockPalette.createCatBg();   // Black bar along left side of screen
+	BlockPalette.createPalBg();   // Dark gray rectangle behind the CategoryBNs
 	BlockPalette.createCategories();
 	BlockPalette.selectFirstCat();
-	BlockPalette.scrolling=false;
 	BlockPalette.visible = true;
-}
-BlockPalette.setGraphics=function(){
-	BlockPalette.mainVMargin=10;
-	BlockPalette.mainHMargin=Button.defaultMargin;
-	BlockPalette.blockMargin=5;
-	BlockPalette.sectionMargin=10;
-	BlockPalette.insideBnH = 38; // Dimensions for buttons within a category
-	BlockPalette.insideBnW = 150;
-
-	BlockPalette.width=253;
-	BlockPalette.catVMargin=Button.defaultMargin;
-	BlockPalette.catHMargin=Button.defaultMargin;
-	BlockPalette.catH=30*3 + BlockPalette.catVMargin*4; //132
-	BlockPalette.height=GuiElements.height-TitleBar.height-BlockPalette.catH;
-	BlockPalette.catY=TitleBar.height;
-	BlockPalette.y=BlockPalette.catY+BlockPalette.catH;
-	BlockPalette.bg=Colors.black;
-	BlockPalette.catBg=Colors.darkGray;
-
-	BlockPalette.bnDefaultFont="Arial";
-	BlockPalette.bnDefaultFontSize=16;
-	BlockPalette.bnDefaultFontCharHeight=12;
-
-	BlockPalette.labelFont="Arial";
-	BlockPalette.labelFontSize=13;
-	BlockPalette.labelFontCharHeight=12;
-	BlockPalette.labelColor=Colors.white;
-
+	// Stores a group featuring a trash icon that appears when Blocks are dragged over it
 	BlockPalette.trash = null;
+	if (GuiElements.paletteLayersVisible && SettingsManager.sideBarVisible.getValue() !== "true") {
+		// Hide the Palette if it should be hidden but isn't
+		GuiElements.hidePaletteLayers(true);
+	}
+}
+BlockPalette.setGraphics = function() {
+
+	// Dimensions used within a category
+	BlockPalette.mainVMargin = 10;   // The space before the first Block in a Category
+	BlockPalette.mainHMargin = Button.defaultMargin;   // The space between the Blocks and the left side of the screen
+	BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
+	BlockPalette.sectionMargin = 10;   // The additional space added between sections
+	BlockPalette.insideBnH = 38;   // Height of buttons within a category (such as Create Variable button)
+	BlockPalette.insideBnW = 150;   // Width of buttons within a category
+
+	// Dimensions for the region with CategoryBNs
+	BlockPalette.width = 253;
+	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
+	BlockPalette.catHMargin = Button.defaultMargin;
+	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
+	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
+	BlockPalette.catY = TitleBar.height;
+	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
+	BlockPalette.bg = Colors.darkDarkGray;
+	BlockPalette.catBg = Colors.darkDarkGray;
+
+	BlockPalette.labelFont = Font.uiFont(13);
+	BlockPalette.labelColor = Colors.white;
+
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.white;
 };
-BlockPalette.updateZoom=function(){
-	let BP=BlockPalette;
+
+/**
+ * Called when the zoom level changes or the screen is resized to recompute dimensions
+ */
+BlockPalette.updateZoom = function() {
+	let BP = BlockPalette;
 	BP.setGraphics();
-	GuiElements.update.rect(BP.palRect,0,BP.y,BP.width,BP.height);
-	GuiElements.update.rect(BP.catRect,0,BP.catY,BP.width,BP.catH);
-	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
-	for(let i = 0; i < BlockPalette.categories.length; i++){
+	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
+	GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
+	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+	for (let i = 0; i < BlockPalette.categories.length; i++) {
 		BlockPalette.categories[i].updateZoom();
 	}
 };
-BlockPalette.createCatBg=function(){
-	let BP=BlockPalette;
-	BP.catRect=GuiElements.draw.rect(0,BP.catY,BP.width,BP.catH,BP.catBg);
+
+/**
+ * Creates the gray rectangle below the CategoryBNs
+ */
+BlockPalette.createCatBg = function() {
+	let BP = BlockPalette;
+	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
-	GuiElements.move.group(GuiElements.layers.categories,0,TitleBar.height);
+	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
 };
-BlockPalette.createPalBg=function(){
-	let BP=BlockPalette;
-	BP.palRect=GuiElements.draw.rect(0,BP.y,BP.width,BP.height,BP.bg);
+
+/**
+ * Creates the long black rectangle on the left of the screen
+ */
+BlockPalette.createPalBg = function() {
+	let BP = BlockPalette;
+	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
-	//TouchReceiver.addListenersPalette(BP.palRect);
 };
-BlockPalette.createScrollSvg = function(){
-	BlockPalette.catScrollSvg = GuiElements.create.svg(GuiElements.layers.categoriesScroll);
-};
-BlockPalette.createCategories=function(){
-	var catCount=BlockList.catCount();
-	var firstColumn=true;
-	var numberOfRows=Math.ceil(catCount/2);
-	var col1X=BlockPalette.catHMargin;
-	var col2X=BlockPalette.catHMargin+CategoryBN.hMargin+CategoryBN.width;
-	var currentY=BlockPalette.catVMargin;
-	var currentX=col1X;
-	var usedRows=0;
-	for(var i=0;i<catCount;i++){
-		if(firstColumn&&usedRows>=numberOfRows){
-			currentX=col2X;
-			firstColumn=false;
-			currentY=BlockPalette.catVMargin;
+
+/**
+ * Creates the categories listed in the BlockList
+ */
+BlockPalette.createCategories = function() {
+	const catCount = BlockList.catCount();
+	const numberOfRows = Math.ceil(catCount / 2);
+
+	// Automatically alternates between two columns while adding categories
+	const col1X = BlockPalette.catHMargin;
+	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+
+	let firstColumn = true;
+	let currentY = BlockPalette.catVMargin;
+	let currentX = col1X;
+	let usedRows = 0;
+	for (let i = 0; i < catCount; i++) {
+		if (firstColumn && usedRows >= numberOfRows) {
+			currentX = col2X;
+			firstColumn = false;
+			currentY = BlockPalette.catVMargin;
 		}
-		var currentCat=new Category(currentX,currentY,i);
+		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
-		currentY+=CategoryBN.height+CategoryBN.vMargin;
+		currentY += CategoryBN.height + CategoryBN.vMargin;
 	}
-	
-}
-BlockPalette.getCategory=function(id){
-	var i=0;
-	while(BlockPalette.categories[i].id!=id){
+};
+
+/**
+ * Retrieves the category with the given id.  Called when a specific category needs to be refreshed
+ * @param {string} id
+ * @return {Category}
+ */
+BlockPalette.getCategory = function(id) {
+	let i = 0;
+	while (BlockPalette.categories[i].id !== id) {
 		i++;
 	}
 	return BlockPalette.categories[i];
-}
-BlockPalette.selectFirstCat=function(){
-	BlockPalette.categories[0].select();
-}
-/*BlockPalette.getAbsX=function(){
-	return 0;
-}
-BlockPalette.getAbsY=function(){
-	return TitleBar.height+BlockPalette.catH;
-}*/
-BlockPalette.isStackOverPalette=function(x,y){
-	if(!GuiElements.paletteLayersVisible) return false;
-	return CodeManager.move.pInRange(x,y,0,BlockPalette.catY,BlockPalette.width,GuiElements.height-TitleBar.height);
 };
-BlockPalette.ShowTrash=function() {
+
+/**
+ * Selects the first category, making it visible on the screen
+ */
+BlockPalette.selectFirstCat = function() {
+	BlockPalette.categories[0].select();
+};
+
+/**
+ * Determines whether the specified point is over the Palette.  Used for determining if Blocks should be deleted
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
+ */
+BlockPalette.isStackOverPalette = function(x, y) {
+	const BP = BlockPalette;
+	if (!GuiElements.paletteLayersVisible) return false;
+	return CodeManager.move.pInRange(x, y, 0, BP.catY, BP.width, GuiElements.height - TitleBar.height);
+};
+
+/**
+ * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
+ */
+BlockPalette.showTrash = function() {
 	let BP = BlockPalette;
+	// If the trash is not visible
 	if (!BP.trash) {
-		BP.trash = GuiElements.create.group(0,0);
+		BP.trash = GuiElements.create.group(0, 0);
 		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 		GuiElements.update.opacity(trashBg, BP.trashOpacity);
 		BP.trash.appendChild(trashBg);
 
 		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
-		let imgX = BP.width/2 - trashWidth/2;  // Center X
-		let imgY = BP.y + BP.height/2 - BP.trashHeight/2;  // Center Y
+		let imgX = BP.width / 2 - trashWidth / 2; // Center X
+		let imgY = BP.y + BP.height / 2 - BP.trashHeight / 2; // Center Y
 		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
 		GuiElements.layers.trash.appendChild(BP.trash);
 	}
 };
-BlockPalette.HideTrash=function() {
+
+/**
+ * Removes the trash icon
+ */
+BlockPalette.hideTrash = function() {
 	let BP = BlockPalette;
 	if (BP.trash) {
 		BP.trash.remove();
 		BP.trash = null;
 	}
 };
-BlockPalette.startScroll=function(x,y){
-	var BP=BlockPalette;
-	if(!BP.scrolling){
-		BP.scrolling=true;
-		BP.selectedCat.startScroll(x,y);
-	}
+
+/**
+ * Recursively tells a specific section of a category to expand/collapse
+ * @param {string} id - The id of the section
+ * @param {boolean} collapsed - Whether the section should expand or collapse
+ */
+BlockPalette.setSuggestedCollapse = function(id, collapsed) {
+	BlockPalette.passRecursively("setSuggestedCollapse", id, collapsed);
 };
-BlockPalette.updateScroll=function (x,y){
-	var BP=BlockPalette;
-	if(BP.scrolling){
-		BP.selectedCat.updateScroll(x,y);
-	}
+
+/**
+ * Recursively tells categories that a file is now open
+ */
+BlockPalette.markOpen = function() {
+	BlockPalette.passRecursively("markOpen");
 };
-BlockPalette.endScroll=function(){
-	var BP=BlockPalette;
-	if(BP.scrolling){
-		BP.scrolling=false;
-		BP.selectedCat.endScroll();
-	}
-};
-BlockPalette.showDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("showDeviceDropDowns", deviceClass);
-};
-BlockPalette.hideDeviceDropDowns=function(deviceClass){
-	BlockPalette.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-BlockPalette.updateAvailableSensors = function(){
-	BlockPalette.passRecursively("updateAvailableSensors");
-};
-BlockPalette.passRecursivelyDown = function(message){
+
+/**
+ * Recursively passes message to all children (Categories and their children) of the Palette
+ * @param {string} message
+ */
+BlockPalette.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	BlockPalette.passRecursively.apply(BlockPalette, arguments);
 };
-BlockPalette.passRecursively = function(functionName){
+
+/**
+ * Recursively passes a message to all categories
+ * @param {string} functionName - The function to call on each category
+ */
+BlockPalette.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
-	BlockPalette.categories.forEach(function(category){
-		category[functionName].apply(category,args);
+	BlockPalette.categories.forEach(function(category) {
+		category[functionName].apply(category, args);
 	});
 };
-BlockPalette.fileClosed = function(){
-	BlockPalette.passRecursively("fileClosed");
-};
-BlockPalette.fileOpened = function(){
-	BlockPalette.passRecursively("fileOpened");
+
+/**
+ * Reloads all categories.  Called when a new file is opened.
+ */
+BlockPalette.refresh = function() {
+	BlockPalette.categories.forEach(function(category) {
+		category.refreshGroup();
+	})
 };
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
  * is dragged, it is duplicated into a BlockStack.  Like BlockStacks, they require a Block to be created
  * @param {Block} firstBlock - The first Block in the DisplayStack
- * @param {Node} group - The group the DisplayStack should be inside
+ * @param {Element} group - The group the DisplayStack should be inside
  * @param {Category} category - The category the DisplayStack is a member of
  * @constructor
  */
@@ -4639,7 +6533,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
 /**
  * Removes the DisplayStack
  */
-DisplayStack.prototype.delete = function() {
+DisplayStack.prototype.remove = function() {
 	this.group.remove();
 };
 
@@ -4647,7 +6541,6 @@ DisplayStack.prototype.delete = function() {
  * @param deviceClass
  */
 DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -4655,20 +6548,25 @@ DisplayStack.prototype.hideDeviceDropDowns = function(deviceClass) {
  * @param deviceClass
  */
 DisplayStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
-};
-
-DisplayStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**
  * @param {string} message
  */
 DisplayStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -4678,558 +6576,1317 @@ DisplayStack.prototype.passRecursively = function(functionName) {
 	let args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock, args);
 };
-function CategoryBN(x,y,category){
-	this.x=x;
-	this.y=y;
-	this.category=category;
-	this.loadCatData();
+/**
+ * A button shown in the BlockPalette and used to activate a Category
+ * @param {number} x
+ * @param {number} y
+ * @param {Category} category
+ * @constructor
+ */
+function CategoryBN(x, y, category) {
+	this.x = x;
+	this.y = y;
+	this.category = category;
+	this.text = this.category.name;
+	this.catId = this.category.id;
+	this.fill = Colors.getGradient(this.catId);
 	this.buildGraphics();
 }
-CategoryBN.setGraphics=function(){
-	var BP=BlockPalette;
-	CategoryBN.bg=Colors.black;
-	CategoryBN.fontSize=15;
-	CategoryBN.font="Arial";
-	CategoryBN.forground="#fff";
-	CategoryBN.height=30;
-	CategoryBN.colorW=8;
-	CategoryBN.labelLMargin=6;
-	CategoryBN.charHeight=10;
-	
-	CategoryBN.hMargin=BP.catHMargin;
-	CategoryBN.width=(BP.width-2*BP.catHMargin-CategoryBN.hMargin)/2;
-	var numberOfRows=Math.ceil(BlockList.catCount()/2);
-	CategoryBN.vMargin=(BP.catH-2*BP.catVMargin-numberOfRows*CategoryBN.height)/(numberOfRows-1);
-	CategoryBN.labelX=CategoryBN.colorW+CategoryBN.labelLMargin;
-	CategoryBN.labelY=(CategoryBN.height+CategoryBN.charHeight)/2;
-}
-CategoryBN.prototype.loadCatData=function(){
-	this.text=this.category.name;
-	this.catId=this.category.id;
-	this.fill=Colors.getGradient(this.catId);
-}
 
-CategoryBN.prototype.buildGraphics=function(){
-	var CBN=CategoryBN;
-	this.group=GuiElements.create.group(this.x,this.y,GuiElements.layers.categories);
-	this.bgRect=GuiElements.draw.rect(0,0,CBN.width,CBN.height,CBN.bg);
-	this.colorRect=GuiElements.draw.rect(0,0,CBN.colorW,CBN.height,this.fill);
-	this.label=GuiElements.draw.text(CBN.labelX,CBN.labelY,this.text,CBN.fontSize,CBN.forground,CBN.font);
+CategoryBN.setGraphics = function() {
+	const BP = BlockPalette;
+	const CBN = CategoryBN;
+	CBN.bg = Colors.darkDarkGray;
+	CBN.font = Font.uiFont(15);
+	CBN.foreground = "#fff";
+	CBN.height = 30;
+	CBN.colorW = 8;   // The width of the band of color on the left
+	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
+
+	CBN.hMargin = BP.catHMargin;
+	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
+	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
+	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+	CBN.labelX = CBN.colorW + CBN.labelLMargin;
+	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+};
+
+/**
+ * Renders the visuals of the CategoryBN
+ */
+CategoryBN.prototype.buildGraphics = function() {
+	const CBN = CategoryBN;
+	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
+	this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
+	this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
+	this.label = GuiElements.draw.text(CBN.labelX, CBN.labelY, this.text, CBN.font, CBN.foreground);
 	this.group.appendChild(this.bgRect);
 	this.group.appendChild(this.colorRect);
 	this.group.appendChild(this.label);
 	GuiElements.layers.categories.appendChild(this.group);
 	this.addListeners();
-}
-CategoryBN.prototype.select=function(){
-	this.bgRect.setAttributeNS(null,"fill",this.fill);
-}
-CategoryBN.prototype.deselect=function(){
-	this.bgRect.setAttributeNS(null,"fill",CategoryBN.bg);
-}
-CategoryBN.prototype.addListeners=function(){
-	var TR=TouchReceiver;
-	var cat=this.category;
-	TouchReceiver.addListenersCat(this.bgRect,cat);
-	TouchReceiver.addListenersCat(this.colorRect,cat);
-	TouchReceiver.addListenersCat(this.label,cat);
-}
+};
 
-/* outline
-tell blockpalette to select cat
-cat index
-highlight
-register touch event
+/**
+ * Makes the button appear selected
+ */
+CategoryBN.prototype.select = function() {
+	this.bgRect.setAttributeNS(null, "fill", this.fill);
+};
 
+/**
+ * Makes the button appear deselected
+ */
+CategoryBN.prototype.deselect = function() {
+	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
+};
 
+/**
+ * Adds event listeners to the parts of the button
+ */
+CategoryBN.prototype.addListeners = function() {
+	const TR = TouchReceiver;
+	const cat = this.category;
+	TouchReceiver.addListenersCat(this.bgRect, cat);
+	TouchReceiver.addListenersCat(this.colorRect, cat);
+	TouchReceiver.addListenersCat(this.label, cat);
+};
+/**
+ * Represents a selection of Blocks available in the BlockPalette.  Each Category has a button which, when pressed,
+ * brings it to the foreground.
+ * The contents of a category is determined by the BlockList static class. Each category has a dedicated function in
+ * BlockList that populates its contents.
+ *
+ * @param {number} buttonX - The x coord of the CategoryBN's location
+ * @param {number} buttonY - The y coord of the CategoryBN
+ * @param {string} name - The display name of the category to show on the button
+ * @param {string} id - The id used to refer to the category
+ * @constructor
+ */
+function Category(buttonX, buttonY, name, id) {
+	this.buttonX = buttonX;
+	this.buttonY = buttonY;
+	this.id = id;
+	this.name = name;
 
-*/
-function Category(buttonX,buttonY,index){
-	this.index=index;
-	this.buttonX=buttonX;
-	this.buttonY=buttonY;
-	this.x=0;
-	this.y=TitleBar.height+BlockPalette.catH;
-	/* this.maxX=this.x;
-	this.maxY=this.y; */
-	this.group = GuiElements.create.group(0,0);
+	this.x = 0;
+	this.y = TitleBar.height + BlockPalette.catH;
+
+	this.group = GuiElements.create.group(0, 0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
 		BlockPalette.width, BlockPalette.height, 0, 0);
-	/*
-	TouchReceiver.createScrollFixTimer(this.scrollDiv);
-	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
-	this.contentGroup = GuiElements.create.group(0,BlockPalette.y, this.contentSvg);
-	*/
-	this.id=BlockList.getCatId(index);
-	this.name=BlockList.getCatName(index);
-	this.currentBlockX=BlockPalette.mainHMargin;
-	this.currentBlockY=BlockPalette.mainVMargin;
-	this.lastHadStud=false;
-	this.button=this.createButton();
-	this.blocks=new Array();
-	this.displayStacks=new Array();
-	this.buttons=new Array();
-	this.buttonsThatRequireFile = [];
-	this.labels=new Array();
+	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
+
+	this.prepareToFill();
+	this.fillGroup();
+}
+
+/**
+ * Prepares this Category to be filled with Block/Buttons/etc.
+ */
+Category.prototype.prepareToFill = function() {
+	// Initialize arrays to track contents
+	this.blocks = [];
+	this.displayStacks = [];
+	this.buttons = [];
+	this.labels = [];
+	this.collapsibleSets = [];
+	this.buttonsThatRequireFiles = [];
+
+	// Keep track of current position in category
+	this.currentBlockX = BlockPalette.mainHMargin;
+	this.currentBlockY = BlockPalette.mainVMargin;
+	this.lastHadStud = false;
+
+	// Used to determine when filling the category is done
 	this.finalized = false;
-	this.fillGroup();
-	this.scrolling=false;
-	this.scrollXOffset=0;
-	this.scrollYOffset=0;
-}
-Category.prototype.createButton=function(){
-	return new CategoryBN(this.buttonX,this.buttonY,this);
-}
-Category.prototype.fillGroup=function(){
-	BlockList["populateCat_"+this.id](this);
-}
-Category.prototype.clearGroup=function(){
-	for(var i=0;i<this.displayStacks.length;i++){
-		this.displayStacks[i].delete();
-	}
-	this.blocks=new Array();
-	this.displayStacks=new Array();
-	for(var i=0;i<this.buttons.length;i++){
-		this.buttons[i].remove();
-	}
-	this.buttons=new Array();
-	for(var i=0;i<this.labels.length;i++){
-		this.group.removeChild(this.labels[i]);
-	}
-	this.labels=new Array();
-	this.currentBlockX=BlockPalette.mainHMargin;
-	this.currentBlockY=BlockPalette.mainVMargin;
-	this.lastHadStud=false;
 };
-Category.prototype.refreshGroup=function(){
+
+/**
+ * Uses a function in BlockList to fill this Category, and marks the Category as finalized once filled.
+ */
+Category.prototype.fillGroup = function() {
+	DebugOptions.assert(!this.finalized);
+	BlockList["populateCat_" + this.id](this);
+	this.finalize();
+};
+
+/**
+ * Removes all contents of the category so it can be rebuilt
+ */
+Category.prototype.clearGroup = function() {
+	this.displayStacks.forEach(function(stack) {
+		stack.remove();
+	});
+	this.buttons.forEach(function(button) {
+		button.remove();
+	});
+	this.labels.forEach(function(label) {
+		label.remove();
+	});
+	this.collapsibleSets.forEach(function(set) {
+		set.remove();
+	});
+};
+
+/**
+ * Removes all contents and rebuilds the category.  Called when available blocks should change
+ */
+Category.prototype.refreshGroup = function() {
 	this.clearGroup();
+	this.prepareToFill();
 	this.fillGroup();
 };
-Category.prototype.addBlockByName=function(blockName){
-	var block=new window[blockName](this.currentBlockX,this.currentBlockY);
+
+/**
+ * Marks this category as no longer being filled
+ */
+Category.prototype.finalize = function() {
+	DebugOptions.assert(!this.finalized);
+	this.finalized = true;
+	this.height = this.currentBlockY;
+	this.updateWidth();
+};
+
+/**
+ * Add a Block with the specified name
+ * @param {string} blockName
+ */
+Category.prototype.addBlockByName = function(blockName) {
+	DebugOptions.assert(!this.finalized);
+	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
 	this.addBlock(block);
 };
-Category.prototype.addVariableBlock=function(variable){
-	var block=new B_Variable(this.currentBlockX,this.currentBlockY,variable);
+
+/**
+ * Add a Variable Block for the specified variable
+ * @param {Variable} variable
+ */
+Category.prototype.addVariableBlock = function(variable) {
+	DebugOptions.assert(!this.finalized);
+	const block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
 	this.addBlock(block);
 };
-Category.prototype.addListBlock=function(list){
-	var block=new B_List(this.currentBlockX,this.currentBlockY,list);
+
+/**
+ * Add a List Block for the specified List
+ * @param {List} list
+ */
+Category.prototype.addListBlock = function(list) {
+	DebugOptions.assert(!this.finalized);
+	const block = new B_List(this.currentBlockX, this.currentBlockY, list);
 	this.addBlock(block);
 };
-Category.prototype.addBlock=function(block){
+
+/**
+ * Add a Block that has already been created
+ * @param {Block} block
+ */
+Category.prototype.addBlock = function(block) {
+	DebugOptions.assert(!this.finalized);
 	this.blocks.push(block);
-	if(this.lastHadStud&&!block.topOpen){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
-		block.move(this.currentBlockX,this.currentBlockY);
+	// If the last Block had a stud and the top of this Block is flat, we shift this Block down a bit
+	if (this.lastHadStud && !block.topOpen) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	if(block.hasHat){
-		this.currentBlockY+=BlockGraphics.hat.hatHEstimate;
-		block.move(this.currentBlockX,this.currentBlockY);
+	// If this Block is a hat block, we make room for the hat
+	if (block.hasHat) {
+		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
+		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	var displayStack=new DisplayStack(block,this.group,this);
+	// We put the Block in a DisplayStack
+	const displayStack = new DisplayStack(block, this.group, this);
 	this.displayStacks.push(displayStack);
-	var height=displayStack.firstBlock.height;
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
-	this.lastHadStud=false;
-	if(block.bottomOpen){
-		this.lastHadStud=true;
-	}
-}
-
-Category.prototype.fileOpened = function(){
-	this.buttonsThatRequireFile.forEach(function(button){
-		button.enable();
-	});
-};
-Category.prototype.fileClosed = function(){
-	this.buttonsThatRequireFile.forEach(function(button){
-		button.disable();
-	});
+	// Update the coords for the next Block
+	this.currentBlockY += displayStack.firstBlock.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud = block.bottomOpen;
 };
 
-Category.prototype.addSpace=function(){
-	this.currentBlockY+=BlockPalette.sectionMargin;
-}
-Category.prototype.addButton=function(text,callback,onlyActiveIfOpen){
-	if(onlyActiveIfOpen == null) {
-		onlyActiveIfOpen = false;
+/**
+ * Creates and adds a CollapsibleSet with a CollapsibleItem for each entry in the nameIdList.
+ * Used in the Robots category
+ * @param {Array<object>} nameIdList - An array or objects, each with fields for name and id
+ * @return {CollapsibleSet}
+ */
+Category.prototype.addCollapsibleSet = function(nameIdList) {
+	DebugOptions.assert(!this.finalized);
+	const x = this.currentBlockX;
+	const y = this.currentBlockY;
+	const set = new CollapsibleSet(y, nameIdList, this, this.group);
+	this.collapsibleSets.push(set);
+	this.lastHadStud = false;
+	this.currentBlockY += set.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	return set;
+};
+
+/**
+ * Adds space between Blocks to denote sections
+ */
+Category.prototype.addSpace = function() {
+	DebugOptions.assert(!this.finalized);
+	this.currentBlockY += BlockPalette.sectionMargin;
+};
+
+/**
+ * Adds a Button with the specified callback function
+ * @param {string} text - The text to place on the Button
+ * @param {function} callback - Called when the Button is tapped
+ * @param {boolean} [onlyEnabledIfOpen=false] - Whether the Button should only be enabled if a file is open (Ex: the Record Bn)
+ * @return {Button} - The created button
+ */
+Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
+	DebugOptions.assert(!this.finalized);
+	if (onlyEnabledIfOpen == null) {
+		onlyEnabledIfOpen = false;
 	}
 
-	var width = BlockPalette.insideBnW;
-	var height = BlockPalette.insideBnH;
-	if(this.lastHadStud){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
+	const width = BlockPalette.insideBnW;
+	const height = BlockPalette.insideBnH;
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
 	}
-	var button=new Button(this.currentBlockX,this.currentBlockY,width,height,this.group);
-	var BP=BlockPalette;
-	button.addText(text,BP.bnDefaultFont,BP.bnDefaultFontSize,"normal",BP.bnDefaultFontCharHeight);
-	button.setCallbackFunction(callback,true);
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
+
+	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
+	const BP = BlockPalette;
+	button.addText(text);
+	button.setCallbackFunction(callback, true);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
 	this.buttons.push(button);
-	this.lastHadStud=false;
-	if(onlyActiveIfOpen && !SaveManager.fileIsOpen()){
-		button.disable();
-		this.buttonsThatRequireFile.push(button);
+	this.lastHadStud = false;
+	if (onlyEnabledIfOpen) {
+		if(!SaveManager.fileIsOpen()) {
+			button.disable();
+		}
+		this.buttonsThatRequireFiles.push(button);
 	}
+	return button;
 };
-Category.prototype.addLabel=function(text){
-	var BP=BlockPalette;
-	var x=this.currentBlockX;
-	var y=this.currentBlockY;
-	var labelE = GuiElements.draw.text(x,y,text,BP.labelFontSize,BP.labelColor,BP.labelFont);
+
+/**
+ * Adds a text label
+ * @param {string} text - The text to display
+ */
+Category.prototype.addLabel = function(text) {
+	DebugOptions.assert(!this.finalized);
+	const BP = BlockPalette;
+	const x = this.currentBlockX;
+	const y = this.currentBlockY;
+	const labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
 	this.group.appendChild(labelE);
 	this.labels.push(labelE);
-	var height=GuiElements.measure.textHeight(labelE);
-	GuiElements.move.element(labelE,x,y+height);
-	this.currentBlockY+=height;
-	this.currentBlockY+=BlockPalette.blockMargin;
-	this.lastHadStud=false;
-};
-Category.prototype.trimBottom=function(){
-	if(this.lastHadStud){
-		this.currentBlockY+=BlockGraphics.command.bumpDepth;
-	}
-	this.currentBlockY-=BlockPalette.blockMargin;
-	this.currentBlockY+=BlockPalette.mainVMargin;
-};
-Category.prototype.finalize = function(){
-	this.finalized = true;
-	this.height=this.currentBlockY;
-	this.updateWidth();
-	//this.updateSmoothScrollSet();
+	const height = GuiElements.measure.textHeight(labelE);
+	GuiElements.move.element(labelE, x, y + height);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud = false;
 };
 
-Category.prototype.select=function(){
-	if(BlockPalette.selectedCat==this){
+/**
+ * Removes some of the space at the bottom so the height measurement is correct
+ */
+Category.prototype.trimBottom = function() {
+	DebugOptions.assert(!this.finalized);
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+	this.currentBlockY -= BlockPalette.blockMargin;
+	this.currentBlockY += BlockPalette.mainVMargin;
+};
+
+/**
+ * Brings the category to the foreground and marks it as selected in the BlockPalette
+ */
+Category.prototype.select = function() {
+	if (BlockPalette.selectedCat === this) {
 		return;
 	}
-	if(BlockPalette.selectedCat!=null){
+	if (BlockPalette.selectedCat != null) {
 		BlockPalette.selectedCat.deselect();
 	}
-	BlockPalette.selectedCat=this;
+	BlockPalette.selectedCat = this;
 	this.button.select();
 	this.smoothScrollBox.show();
-}
-Category.prototype.deselect=function(){
-	BlockPalette.selectedCat=null;
+};
+
+/**
+ * Removes the category from the foreground
+ */
+Category.prototype.deselect = function() {
+	BlockPalette.selectedCat = null;
 	this.smoothScrollBox.hide();
 	this.button.deselect();
-}
-Category.prototype.computeWidth = function(){
-	var currentWidth=0;
-	for(var i=0;i<this.blocks.length;i++){
-		var blockW=this.blocks[i].width;
-		if(blockW>currentWidth){
-			currentWidth=blockW;
+};
+
+/**
+ * Computes the width of the Category and stores it in this.width
+ */
+Category.prototype.computeWidth = function() {
+	let currentWidth = 0;
+	// The width is the maximum width across DisplayStacks and CollapsibleSets
+	for (let i = 0; i < this.blocks.length; i++) {
+		const blockW = this.blocks[i].width;
+		if (blockW > currentWidth) {
+			currentWidth = blockW;
 		}
 	}
-	this.width=Math.max(currentWidth+2*BlockPalette.mainHMargin, BlockPalette.width);
+	this.collapsibleSets.forEach(function(set) {
+		const width = set.width;
+		currentWidth = Math.max(width, currentWidth);
+	});
+	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
 };
-Category.prototype.updateWidth=function(){
-	if(!this.finalized) return;
+
+/**
+ * Recomputes the width of the Category and updates the smoothScrollBox to match it
+ */
+Category.prototype.updateWidth = function() {
+	if (!this.finalized) return;
 	this.computeWidth();
 	this.smoothScrollBox.setContentDims(this.width, this.height);
 };
-Category.prototype.relToAbsX=function(x){
-	if(!this.finalized) return x;
+
+/**
+ * Updates the dimensions of a Category that contains a CollapsibleSet.  Called by the CollapsibleSet after
+ * expand/collapse
+ */
+Category.prototype.updateDimSet = function() {
+	if (!this.finalized) return;
+	this.computeWidth();
+	let currentH = BlockPalette.mainVMargin;
+	this.collapsibleSets.forEach(function(set) {
+		currentH += set.height;
+		currentH += BlockPalette.blockMargin;
+	});
+	currentH -= BlockPalette.blockMargin;
+	currentH += BlockPalette.mainVMargin;
+	this.height = currentH;
+	this.smoothScrollBox.setContentDims(this.width, this.height);
+};
+
+/**
+ * Indicates that a file is now open.
+ */
+Category.prototype.markOpen = function() {
+	this.buttonsThatRequireFiles.forEach(function(button) {
+		button.enable();
+	});
+};
+
+/* Convert coordinates relative to the Category to coords relative to the screen */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Category.prototype.relToAbsX = function(x) {
+	if (!this.finalized) return x;
 	return this.smoothScrollBox.relToAbsX(x);
 };
-Category.prototype.relToAbsY=function(y){
-	if(!this.finalized) return y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Category.prototype.relToAbsY = function(y) {
+	if (!this.finalized) return y;
 	return this.smoothScrollBox.relToAbsY(y);
 };
-Category.prototype.absToRelX=function(x){
-	if(!this.finalized) return x;
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Category.prototype.absToRelX = function(x) {
+	if (!this.finalized) return x;
 	return this.smoothScrollBox.absToRelX(x);
 };
-Category.prototype.absToRelY=function(y){
-	if(!this.finalized) return y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Category.prototype.absToRelY = function(y) {
+	if (!this.finalized) return y;
 	return this.smoothScrollBox.absToRelY(y);
 };
-Category.prototype.getAbsX=function(){
+/**
+ * @return {number}
+ */
+Category.prototype.getAbsX = function() {
 	return this.relToAbsX(0);
 };
-Category.prototype.getAbsY=function(){
+/**
+ * @return {number}
+ */
+Category.prototype.getAbsY = function() {
 	return this.relToAbsY(0);
 };
-Category.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-Category.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Category.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
-Category.prototype.passRecursivelyDown = function(message){
+
+/**
+ * Passes a message to Slots/Blocks/CollapsibleSets within this Category
+ * @param {string} message
+ */
+Category.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
-Category.prototype.passRecursively = function(functionName){
+/**
+ * @param {string} functionName
+ */
+Category.prototype.passRecursively = function(functionName) {
 	const args = Array.prototype.slice.call(arguments, 1);
-	this.displayStacks.forEach(function(stack){
-		stack[functionName].apply(stack,args);
+	this.displayStacks.forEach(function(stack) {
+		stack[functionName].apply(stack, args);
+	});
+	this.collapsibleSets.forEach(function(set) {
+		set[functionName].apply(set, args);
 	});
 };
-Category.prototype.updateZoom = function(){
-	if(!this.finalized) return;
+
+/**
+ * Updates the dimensions of the category in response to a screen resize
+ */
+Category.prototype.updateZoom = function() {
+	if (!this.finalized) return;
 	this.smoothScrollBox.move(0, BlockPalette.y);
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
-function Button(x,y,width,height,parent){
-	DebugOptions.validateNumbers(x, y, width, height);
-	this.x=x;
-	this.y=y;
-	this.width=width;
-	this.height=height;
-	this.parentGroup = parent;
-	this.group=GuiElements.create.group(x,y,parent);
-	this.buildBg();
-	this.pressed=false;
-	this.enabled=true;
-	this.hasText=false;
-	this.hasIcon=false;
-	this.hasImage=false;
-	this.foregroundInverts=false;
-	this.callback=null;
-	this.delayedCallback=null;
-	this.toggles=false;
-	this.toggleFunction=null;
-	this.toggled=false;
-	this.partOfOverlay=null;
-	this.scrollable = false;
-}
-Button.setGraphics=function(){
-	Button.bg=Colors.darkGray;
-	Button.foreground=Colors.white;
-	Button.highlightBg=Colors.white;
-	Button.highlightFore=Colors.darkGray;
-	Button.disabledBg=Colors.darkGray;
-	Button.disabledFore=Colors.black;
 
+/**
+ * Passes a suggested collapse/expand message to any collapsible sets within this category
+ * @param {string} id
+ * @param {boolean} collapsed
+ */
+Category.prototype.setSuggestedCollapse = function(id, collapsed) {
+	this.collapsibleSets.forEach(function(set) {
+		set.setSuggestedCollapse(id, collapsed);
+	});
+};
+/**
+ * Represents a set of items that can be collapsed/expanded and each contain Blocks.  Meant for use in the BlockPalette
+ * @param {number} y - The y coordinate the set should appear at
+ * @param {Array<object>} nameIdList - An array of entries, each containing a field for name and id
+ * @param {Category} category - The Category this set is a part of
+ * @param {Element} group - The SVG group element this set should be added to
+ * @constructor
+ */
+function CollapsibleSet(y, nameIdList, category, group) {
+	this.y = y;
+	this.category = category;
+	this.group = group;
+	// Create a collapsibleItem for each entry of the nameIdList
+	this.collapsibleItems = [];
+	nameIdList.forEach(function(entry){
+		this.collapsibleItems.push(new CollapsibleItem(entry.name, entry.id, this, group));
+	}.bind(this));
+	// Stack the collapsibleItems appropriately
+	this.updateDimAlign();
+}
+
+CollapsibleSet.setConstants = function(){
+	const CS = CollapsibleSet;
+	CS.itemMargin = 0;
+};
+
+/**
+ * Retrieves the CollapsibleItem at the specified index
+ * @param {number} index
+ * @return {CollapsibleItem}
+ */
+CollapsibleSet.prototype.getItem = function(index) {
+	return this.collapsibleItems[index];
+};
+
+/**
+ * Finds the index of a CollapsibleItem by id.  Throws an error if the item is not found
+ * @param {string} id
+ * @return {number}
+ */
+CollapsibleSet.prototype.findItem = function(id) {
+	const items = this.collapsibleItems;
+	for(let i = 0; i < items.length; i++) {
+		if(items[i].id === id) {
+			return i;
+		}
+	}
+	DebugOptions.throw("Collapsible item not found.");
+};
+
+/**
+ * Expands the collapsible item at the specified index, then updates the dimensions
+ * @param {number} index
+ */
+CollapsibleSet.prototype.expand = function(index) {
+	this.collapsibleItems[index].expand();
+	this.updateDimAlign();
+};
+
+/**
+ * Collapses the collapsible item at the specified index, then updates the dimensions
+ * @param {number} index
+ */
+CollapsibleSet.prototype.collapse = function(index) {
+	this.collapsibleItems[index].collapse();
+	this.updateDimAlign();
+};
+
+/**
+ * Updates the dimensions and alignment of the CollapsibleSet and notifies its Category to update dimensions
+ */
+CollapsibleSet.prototype.updateDimAlign = function() {
+	const CS = CollapsibleSet;
+	let currentY = this.y;
+	let width = 0;
+	this.collapsibleItems.forEach(function(item) {
+		currentY += item.updateDimAlign(currentY);
+		currentY += CS.itemMargin;
+		width = Math.max(width, item.getWidth());
+	});
+	currentY -= CS.itemMargin;
+	this.height = currentY;
+	this.width = width;
+	this.category.updateDimSet();
+};
+
+/**
+ * Computes and stores the width of the CollapsibleSet and alerts its Category that the width may have changed
+ * Triggered when a block inside changes width
+ */
+CollapsibleSet.prototype.updateWidth = function() {
+	let width = 0;
+	this.collapsibleItems.forEach(function(item) {
+		width = Math.max(width, item.getWidth());
+	});
+	this.width = width;
+	this.category.updateWidth();
+};
+
+/**
+ * Removes the CollapsibleSet from the SVG
+ */
+CollapsibleSet.prototype.remove = function() {
+	this.collapsibleItems.forEach(function(item){
+		item.remove();
+	});
+};
+
+/**
+ * Passes a suggested expand/collapse message to all CollapsibleItems
+ * @param {string} id
+ * @param {boolean} collapsed
+ */
+CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
+	this.passRecursively("setSuggestedCollapse", id, collapsed);
+};
+
+CollapsibleSet.prototype.passRecursivelyDown = function(message){
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+CollapsibleSet.prototype.passRecursively = function(functionName){
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.collapsibleItems.forEach(function(item){
+		item[functionName].apply(item,args);
+	});
+};
+/**
+ * A set of DisplayStacks under a header in the BlockPalette that can expand or collapse when selected
+ * @param {string} name - THe name to show in the header
+ * @param {string} id - The id of this item
+ * @param {CollapsibleSet} collapsibleSet - The set this item is a member of
+ * @param {Element} group - The group this item should add itself to
+ * @constructor
+ */
+function CollapsibleItem(name, id, collapsibleSet, group) {
+	const CI = CollapsibleItem;
+	this.x = 0;
+	this.name = name;
+	this.id = id;
+	this.set = collapsibleSet;
+	this.group = GuiElements.create.group(0, 0, group);
+	// This group is where the Blocks are added.  It is right below the header and is added/removed to expand/collapse
+	this.innerGroup = GuiElements.create.group(0, CI.hitboxHeight);
+	this.collapsed = true;
+	this.suggestedCollapse = true;
+	this.createLabel();
+
+	this.prepareToFill();
+}
+
+CollapsibleItem.setConstants = function() {
+	const CI = CollapsibleItem;
+	CI.hitboxHeight = 30;
+	CI.hitboxWidth = BlockPalette.width;
+
+	CI.labelFont = BlockPalette.labelFont;
+	CI.labelColor = BlockPalette.labelColor;
+
+	CI.triBoxWidth = CI.hitboxHeight;
+	CI.triangleWidth = 10;
+	CI.triangleHeight = 5;
+};
+
+/**
+ * Creates the header above the blocks, which includes a triangle, a label, and a hit box around both
+ */
+CollapsibleItem.prototype.createLabel = function() {
+	const CI = CollapsibleItem;
+
+	this.triE = GuiElements.create.path();
+	GuiElements.update.color(this.triE, CI.labelColor);
+	this.updateTriangle();
+
+	const labelY = (CI.hitboxHeight + CI.labelFont.charHeight) / 2;
+	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFont, CI.labelColor);
+	this.hitboxE = GuiElements.draw.rect(0, 0, CI.hitboxWidth, CI.hitboxHeight, CI.labelColor);
+	GuiElements.update.opacity(this.hitboxE, 0);
+	this.group.appendChild(this.label);
+	this.group.appendChild(this.triE);
+	this.group.appendChild(this.hitboxE);
+
+	TouchReceiver.addListenersCollapsibleItem(this.hitboxE, this);
+};
+
+/**
+ * Changes the path of the triangle to be horizontal/vertical depending on the state of the item
+ */
+CollapsibleItem.prototype.updateTriangle = function() {
+	let vertical = !this.collapsed;
+	const CI = CollapsibleItem;
+	let pointX;
+	let pointY;
+	if (!vertical) {
+		pointX = (CI.triBoxWidth + CI.triangleHeight) / 2;
+		pointY = CI.hitboxHeight / 2;
+	} else {
+		pointX = CI.triBoxWidth / 2;
+		pointY = (CI.hitboxHeight + CI.triangleHeight) / 2;
+	}
+	return GuiElements.update.triangleFromPoint(this.triE, pointX, pointY, CI.triangleWidth, -CI.triangleHeight, vertical);
+};
+
+/**
+ * prepares the item to be filled with Blocks
+ */
+CollapsibleItem.prototype.prepareToFill = function() {
+	this.currentBlockX = BlockPalette.mainHMargin;
+	this.currentBlockY = BlockPalette.mainVMargin;
+	this.blocks = [];
+	this.displayStacks = [];
+	this.lastHadStud = false;
+	this.finalized = false;
+};
+
+/**
+ * Marks this category as no longer being filled
+ */
+CollapsibleItem.prototype.finalize = function() {
+	DebugOptions.assert(!this.finalized);
+	this.finalized = true;
+	this.innerHeight = this.currentBlockY;
+	this.updateWidth();
+};
+
+/**
+ * Add a Block with the specified name
+ * @param {string} blockName
+ */
+CollapsibleItem.prototype.addBlockByName = function(blockName) {
+	DebugOptions.assert(!this.finalized);
+	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
+	this.addBlock(block);
+};
+
+/**
+ * Add a Block that has already been created
+ * @param {Block} block
+ */
+CollapsibleItem.prototype.addBlock = function(block) {
+	DebugOptions.assert(!this.finalized);
+	this.blocks.push(block);
+	if (this.lastHadStud && !block.topOpen) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+		block.move(this.currentBlockX, this.currentBlockY);
+	}
+	if (block.hasHat) {
+		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
+		block.move(this.currentBlockX, this.currentBlockY);
+	}
+	const displayStack = new DisplayStack(block, this.innerGroup, this);
+	this.displayStacks.push(displayStack);
+	this.currentBlockY += displayStack.firstBlock.height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.lastHadStud = block.bottomOpen;
+};
+
+/**
+ * Adds space between Blocks to denote sections
+ */
+CollapsibleItem.prototype.addSpace = function() {
+	DebugOptions.assert(!this.finalized);
+	this.currentBlockY += BlockPalette.sectionMargin;
+};
+
+/**
+ * Removes some of the space at the bottom so the height measurement is correct
+ */
+CollapsibleItem.prototype.trimBottom = function() {
+	DebugOptions.assert(!this.finalized);
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+	this.currentBlockY -= BlockPalette.blockMargin;
+	this.currentBlockY += BlockPalette.mainVMargin;
+};
+
+/**
+ * Updates the dimensions and alignment of the CollapsibleItem
+ * @param {number} newY - The y coord the item should have when done
+ * @return {number} - The height of the item, so the next item knows where to go
+ */
+CollapsibleItem.prototype.updateDimAlign = function(newY) {
+	this.y = newY;
+	GuiElements.move.group(this.group, this.x, this.y);
+	return this.getHeight();
+};
+
+/**
+ * Retrieves the width of the item, given its current collapsed/expanded state
+ * @return {number}
+ */
+CollapsibleItem.prototype.getWidth = function() {
+	if (this.collapsed) {
+		return 0;
+	} else {
+		return this.innerWidth;
+	}
+};
+
+/**
+ * Retrieves the height of the item, given its current collapsed/expanded state
+ * @return {number}
+ */
+CollapsibleItem.prototype.getHeight = function() {
+	const CI = CollapsibleItem;
+	if (this.collapsed) {
+		return CI.hitboxHeight;
+	} else {
+		return CI.hitboxHeight + this.innerHeight;
+	}
+};
+
+/**
+ * Computes and stores the width of the item
+ */
+CollapsibleItem.prototype.computeWidth = function() {
+	let currentWidth = 0;
+	for (let i = 0; i < this.blocks.length; i++) {
+		const blockW = this.blocks[i].width;
+		if (blockW > currentWidth) {
+			currentWidth = blockW;
+		}
+	}
+	this.innerWidth = currentWidth;
+};
+
+/**
+ * Hides the Blocks below the header and tells the set to update its dimensions
+ */
+CollapsibleItem.prototype.collapse = function() {
+	if (!this.collapsed) {
+		this.collapsed = true;
+		this.innerGroup.remove();
+		this.updateTriangle();
+		this.set.updateDimAlign();
+	}
+};
+
+/**
+ * Shows the Blocks below the header and tells the set to update its dimensions
+ */
+CollapsibleItem.prototype.expand = function() {
+	if (this.collapsed) {
+		this.collapsed = false;
+		this.group.appendChild(this.innerGroup);
+		this.updateTriangle();
+		this.set.updateDimAlign();
+	}
+};
+
+/**
+ * Computes and stores the width of the item and tells the set to update its width
+ */
+CollapsibleItem.prototype.updateWidth = function() {
+	this.computeWidth();
+	this.set.updateWidth();
+};
+
+/* Converts between coordinates relative to the item and coordinates relative to the screen */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CollapsibleItem.prototype.relToAbsX = function(x) {
+	const CI = CollapsibleItem;
+	return this.set.category.relToAbsX(x + this.x);
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CollapsibleItem.prototype.relToAbsY = function(y) {
+	const CI = CollapsibleItem;
+	return this.set.category.relToAbsY(y + this.y + CI.hitboxHeight);
+};
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CollapsibleItem.prototype.absToRelX = function(x) {
+	const CI = CollapsibleItem;
+	return this.set.category.absToRelX(x) - this.x;
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CollapsibleItem.prototype.absToRelY = function(y) {
+	const CI = CollapsibleItem;
+	return this.set.category.absToRelY(y) - this.y - CI.hitboxHeight;
+};
+
+/**
+ * Removes the item from the SVG
+ */
+CollapsibleItem.prototype.remove = function() {
+	this.group.remove();
+};
+
+/**
+ * Toggles the item's expand/collapse state
+ */
+CollapsibleItem.prototype.toggle = function() {
+	if (this.collapsed) {
+		this.expand();
+	} else {
+		this.collapse();
+	}
+};
+
+/**
+ * Prompts the item to set its expand/collapse state if it matches the id and the user has not overridden the suggested
+ * state
+ * @param {string} id - The id of the relevant item
+ * @param {boolean} collapsed - Whether the suggested state is collapsed or expanded
+ */
+CollapsibleItem.prototype.setSuggestedCollapse = function(id, collapsed) {
+	if (id !== this.id) return;
+	/* We only change the state if the current state matches the previous suggested state.  That way if the user,
+	 * for example, manually collapses the item, then connects 3 devices, it won't expand each time.
+	 */
+	if (collapsed !== this.suggestedCollapse) {
+		this.suggestedCollapse = collapsed;
+		if (collapsed) {
+			this.collapse();
+		} else {
+			this.expand();
+		}
+	}
+};
+
+/* Passes messages to DisplayStacks */
+CollapsibleItem.prototype.passRecursivelyDown = function(message) {
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	this.passRecursively.apply(this, arguments);
+};
+CollapsibleItem.prototype.passRecursively = function(functionName) {
+	const args = Array.prototype.slice.call(arguments, 1);
+	this.displayStacks.forEach(function(stack) {
+		stack[functionName].apply(stack, args);
+	});
+};
+/**
+ * A key UI element that creates a button.  Buttons can trigger a function when they are pressed/released and
+ * can contain an icon, image, text, or combination.  They are drawn as soon as the constructor is called, and
+ * can ten have text and callbacks added on.
+ * 
+ * @param {number} x - The x coord the button should appear at
+ * @param {number} y - The y coord the button should appear at
+ * @param {number} width - The width of the button
+ * @param {number} height - The height of the button
+ * @param {Element} [parent] - The group the button should append itself to
+ * @constructor
+ */
+function Button(x, y, width, height, parent) {
+	DebugOptions.validateNumbers(x, y, width, height);
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.parentGroup = parent;
+	this.group = GuiElements.create.group(x, y, parent);
+	this.buildBg();
+	this.pressed = false;
+	this.enabled = true;
+	this.hasText = false;
+	this.hasIcon = false;
+	this.hasImage = false;
+	this.textInverts = false;   // Whether the text inverts color when the button is pressed
+	this.iconInverts = false;   // Whether the icon inverts color when the button is pressed
+	this.callback = null;   // The function to call when the button is pressed
+	this.delayedCallback = null;   // The function to call when the button is released
+	this.toggles = false;   // Whether the button should stick in the pressed state until tapped again
+	this.unToggleFunction = null;   // The function to call when the button is tapped to make is stop being pressed
+	this.longTouchFunction = null;   // The function to call when the button is long pressed
+	this.disabledTapCallback = null;   // Called when the user taps a disabled function
+	this.toggled = false;   // Whether the button is currently stuck in the pressed state (only if it toggles)
+	this.partOfOverlay = null;   // The overlay the button is a part of (if any)
+	this.scrollable = false;   // Whether the button is part of something that scrolls and shouldn't prevent scrolling
+}
+
+Button.setGraphics = function() {
+	Button.bg = Colors.darkGray;
+	Button.foreground = Colors.white;
+	// "highlight" = color when pressed
+	Button.highlightBg = Colors.white;
+	Button.highlightFore = Colors.darkGray;
+	Button.disabledBg = Colors.darkGray;
+	Button.disabledFore = Colors.black;
+
+	// The suggested margin between adjacent margins
 	Button.defaultMargin = 5;
 
-	Button.defaultFontSize=16;
-	Button.defaultFont="Arial";
-	Button.defaultFontWeight="normal";
-	Button.defaultCharHeight=12;
+	// The suggested font for the forground of buttons
+	Button.defaultFont = Font.uiFont(16);
 
 	Button.defaultIconH = 15;
 	Button.defaultSideMargin = 10;
 };
-Button.prototype.buildBg=function(){
-	this.bgRect=GuiElements.draw.rect(0,0,this.width,this.height,Button.bg);
+
+/**
+ * Creates the rectangle that is the background of the button
+ */
+Button.prototype.buildBg = function() {
+	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, Button.bg);
 	this.group.appendChild(this.bgRect);
-	TouchReceiver.addListenersBN(this.bgRect,this);
-}
-Button.prototype.addText=function(text,font,size,weight,height){
+	TouchReceiver.addListenersBN(this.bgRect, this);
+};
+
+/**
+ * Adds text to the button
+ * @param {string} text - The text to add
+ * @param {Font} [font] - The font to use (defaultFont if unspecified)
+ */
+Button.prototype.addText = function(text, font) {
 	DebugOptions.validateNonNull(text);
 	this.removeContent();
-	if(font==null){
-		font=Button.defaultFont;
+	if (font == null) {
+		font = Button.defaultFont;
 	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(height==null){
-		height=Button.defaultCharHeight;
-	}
-	DebugOptions.validateNumbers(size, height);
-	this.foregroundInverts = true;
-	
-	this.textE=GuiElements.draw.text(0,0,"",size,Button.foreground,font,weight);
-	GuiElements.update.textLimitWidth(this.textE,text,this.width);
+	this.textInverts = true;
+
+	this.textE = GuiElements.draw.text(0, 0, "", font, Button.foreground);
+	GuiElements.update.textLimitWidth(this.textE, text, this.width);
 	this.group.appendChild(this.textE);
-	var textW=GuiElements.measure.textWidth(this.textE);
-	var textX=(this.width-textW)/2;
-	var textY=(this.height+height)/2;
-	GuiElements.move.text(this.textE,textX,textY);
-	this.hasText=true;
-	TouchReceiver.addListenersBN(this.textE,this);
-}
-Button.prototype.addIcon=function(pathId,height){
-	this.removeContent();
-	this.hasIcon=true;
-	this.foregroundInverts=true;
-	var iconW=VectorIcon.computeWidth(pathId,height);
-	var iconX=(this.width-iconW)/2;
-	var iconY=(this.height-height)/2;
-	this.icon=new VectorIcon(iconX,iconY,pathId,Button.foreground,height,this.group);
-	TouchReceiver.addListenersBN(this.icon.pathE,this);
+	
+	// Text is centered
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = (this.width - textW) / 2;
+	const textY = (this.height + font.charHeight) / 2;
+	GuiElements.move.text(this.textE, textX, textY);
+	this.hasText = true;
+	TouchReceiver.addListenersBN(this.textE, this);
 };
-Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, size, weight, charH, color){
+
+/**
+ * Adds an icon to the button
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number} height - The height the icon should have in the button
+ */
+Button.prototype.addIcon = function(pathId, height) {
+	if (height == null) {
+		height = Button.defaultIconH;
+	}
 	this.removeContent();
-	if(color == null){
+	this.hasIcon = true;
+	this.iconInverts = true;
+	// Icon is centered vertiacally and horizontally.
+	const iconW = VectorIcon.computeWidth(pathId, height);
+	const iconX = (this.width - iconW) / 2;
+	const iconY = (this.height - height) / 2;
+	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+};
+
+/**
+ * Adds an icon and text to the button, with the icon to the left of the text separated by the specified sideMargin,
+ * in the center of the button
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number|null} [iconHeight] - The height the icon should have in the button
+ * @param {number|null} [sideMargin] - The space between the icon and the text
+ * @param {string} text - The text to show
+ * @param {Font|null} [font] - The font to use
+ * @param {string|null} [color=null] - Color in hex, or null if text inverts and uses foreground color
+ */
+Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargin, text, font, color) {
+	this.removeContent();
+	if (color == null) {
 		color = Button.foreground;
-		this.foregroundInverts = true;
+		this.textInverts = true;
+		this.iconInverts = true;
 	}
-	if(font==null){
-		font=Button.defaultFont;
+	if (font == null) {
+		font = Button.defaultFont;
 	}
-	if(size==null){
-		size=Button.defaultFontSize;
-	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
-	}
-	if(iconHeight == null){
+	if (iconHeight == null) {
 		iconHeight = Button.defaultIconH;
 	}
-	if(sideMargin == null){
+	if (sideMargin == null) {
 		sideMargin = Button.defaultSideMargin;
 	}
 	this.hasIcon = true;
 	this.hasText = true;
-	
-	var iconW=VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
-	GuiElements.update.textLimitWidth(this.textE,text,this.width - iconW - sideMargin);
+
+	const iconW = VectorIcon.computeWidth(pathId, iconHeight);
+	this.textE = GuiElements.draw.text(0, 0, "", font, color);
+	GuiElements.update.textLimitWidth(this.textE, text, this.width - iconW - sideMargin);
 	this.group.appendChild(this.textE);
-	var textW=GuiElements.measure.textWidth(this.textE);
-	var totalW = textW + iconW + sideMargin;
-	var iconX = (this.width - totalW) / 2;
-	var iconY = (this.height-iconHeight)/2;
-	var textX = iconX + iconW + sideMargin;
-	var textY = (this.height+charH)/2;
-	GuiElements.move.text(this.textE,textX,textY);
-	TouchReceiver.addListenersBN(this.textE,this);
-	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
-	TouchReceiver.addListenersBN(this.icon.pathE,this);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const totalW = textW + iconW + sideMargin;
+	const iconX = (this.width - totalW) / 2;
+	const iconY = (this.height - iconHeight) / 2;
+	const textX = iconX + iconW + sideMargin;
+	const textY = (this.height + font.charHeight) / 2;
+	GuiElements.move.text(this.textE, textX, textY);
+	TouchReceiver.addListenersBN(this.textE, this);
+	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
-Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, size, weight, charH, color){
+
+/**
+ * Adds an icon and text to the button, with the icon aligned to the left/right and the text centered.
+ *
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number|null} [iconHeight] - The height the icon should have in the button
+ * @param {string} text - The text to show
+ * @param {Font|null} [font] - The font to use
+ * @param {string|null} [color=null] - Color in hex, or null if text inverts and uses foreground color
+ * @param {string|null} [iconColor=null] - Color in hex, or null if icon inverts and uses foreground color
+ * @param {boolean} leftSide - Whether the icon should be aligned to the left or right of the button
+ * @param {boolean} shiftCenter - Whether the text should be aligned to the center of the remaining space or
+ *                                the center of the entire button
+ */
+Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, color, iconColor, leftSide, shiftCenter) {
 	this.removeContent();
-	if(color == null){
+	if (color == null) {
 		color = this.currentForeground();
-		this.foregroundInverts = true;
+		this.textInverts = true;
 	}
-	if(font==null){
-		font=Button.defaultFont;
+	if (iconColor == null) {
+		iconColor = this.currentForeground();
+		this.iconInverts = true;
 	}
-	if(size==null){
-		size=Button.defaultFontSize;
+	if (font == null) {
+		font = Button.defaultFont;
 	}
-	if(weight==null){
-		weight=Button.defaultFontWeight;
-	}
-	if(charH==null){
-		charH=Button.defaultCharHeight;
-	}
-	if(iconHeight == null){
+	if (iconHeight == null) {
 		iconHeight = Button.defaultIconH;
+	}
+	if (leftSide == null) {
+		leftSide = true;
+	}
+	if (shiftCenter == null) {
+		shiftCenter = true;
 	}
 	this.hasIcon = true;
 	this.hasText = true;
 
+	/* Margin between icon and side of button is equal to vertical margin */
 	const sideMargin = (this.height - iconHeight) / 2;
-	const iconW = VectorIcon.computeWidth(pathId,iconHeight);
-	this.textE=GuiElements.draw.text(0,0,"",size,color,font,weight);
-	const textMaxW = this.width - iconW - sideMargin;
-	GuiElements.update.textLimitWidth(this.textE,text,textMaxW);
+	const iconW = VectorIcon.computeWidth(pathId, iconHeight);
+	this.textE = GuiElements.draw.text(0, 0, "", font, color);
+	/* Text must leave space for icon, margin between icon and text, and margins for both sides */
+	const textMaxW = this.width - iconW - sideMargin * 3;
+	GuiElements.update.textLimitWidth(this.textE, text, textMaxW);
 	this.group.appendChild(this.textE);
-	const textW=GuiElements.measure.textWidth(this.textE);
-	const iconX = sideMargin;
-	const iconY = (this.height-iconHeight)/2;
-	var textX = (iconX + iconW + this.width - textW) / 2;
-	//textX = Math.max(iconW + sideMargin * 2, textX);
-	var textY = (this.height+charH)/2;
-	GuiElements.move.text(this.textE,textX,textY);
-	TouchReceiver.addListenersBN(this.textE,this);
-	this.icon=new VectorIcon(iconX,iconY,pathId,color,iconHeight,this.group);
-	TouchReceiver.addListenersBN(this.icon.pathE,this);
+	const textW = GuiElements.measure.textWidth(this.textE);
+
+	let iconX;
+	if (leftSide) {
+		iconX = sideMargin;
+	} else {
+		iconX = this.width - iconW - sideMargin;
+	}
+	const iconY = (this.height - iconHeight) / 2;
+
+	let textX;
+	if (!shiftCenter) {
+		textX = (this.width - textW) / 2;
+	} else if (leftSide) {
+		textX = (iconX + iconW + this.width - textW) / 2;
+	} else {
+		textX = (this.width - textW - iconW - sideMargin) / 2;
+	}
+
+	if (leftSide) {
+		textX = Math.max(textX, iconX + iconW + sideMargin);
+	} else {
+		textX = Math.min(textX, iconX - textW - sideMargin);
+	}
+
+	const textY = (this.height + font.charHeight) / 2;
+	GuiElements.move.text(this.textE, textX, textY);
+	TouchReceiver.addListenersBN(this.textE, this);
+	this.icon = new VectorIcon(iconX, iconY, pathId, iconColor, iconHeight, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
-Button.prototype.addImage=function(imageData,height){
+
+/**
+ * Adds an image to the button.  Use of images is discouraged since they can take time to load.  No images are used
+ * as of right now.
+ * @param {object} imageData - has entries for width, height, lightName, darkName.
+ * @param {number} height - The height the image should have
+ */
+Button.prototype.addImage = function(imageData, height) {
 	this.removeContent();
-	var imageW=imageData.width/imageData.height*height;
-	var imageX=(this.width-imageW)/2;
-	var imageY=(this.height-height)/2;
-	this.imageE=GuiElements.draw.image(imageData.lightName,imageX,imageY,imageW,height,this.group);
-	this.imageData=imageData;
-	this.hasImage=true;
-	TouchReceiver.addListenersBN(this.imageE,this);
+	const imageW = imageData.width / imageData.height * height;
+	const imageX = (this.width - imageW) / 2;
+	const imageY = (this.height - height) / 2;
+	this.imageE = GuiElements.draw.image(imageData.lightName, imageX, imageY, imageW, height, this.group);
+	this.imageData = imageData;
+	this.hasImage = true;
+	TouchReceiver.addListenersBN(this.imageE, this);
 };
-Button.prototype.addColorIcon=function(pathId,height,color){
+
+/**
+ * Adds a colored icon to the button that does not invert when the icon is tapped
+ * TODO: combine with addIcon using a nullable parameter for color
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number} height - The height of the icon
+ * @param {string} color - Color in hex
+ */
+Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.removeContent();
-	this.hasIcon=true;
-	this.foregroundInverts=false;
-	var iconW=VectorIcon.computeWidth(pathId,height);
-	var iconX=(this.width-iconW)/2;
-	var iconY=(this.height-height)/2;
-	this.icon=new VectorIcon(iconX,iconY,pathId,color,height,this.group);
-	TouchReceiver.addListenersBN(this.icon.pathE,this);
-}
-Button.prototype.removeContent = function(){
-	if(this.hasIcon){
+	this.hasIcon = true;
+	this.iconInverts = false;
+	const iconW = VectorIcon.computeWidth(pathId, height);
+	const iconX = (this.width - iconW) / 2;
+	const iconY = (this.height - height) / 2;
+	this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+};
+
+/**
+ * Removes all icons/images/text in the button so it can be replaced
+ */
+Button.prototype.removeContent = function() {
+	if (this.hasIcon) {
 		this.icon.remove();
 	}
-	if(this.hasImage){
+	if (this.hasImage) {
 		this.imageE.remove();
 	}
-	if(this.hasText){
+	if (this.hasText) {
 		this.textE.remove();
 	}
 };
-Button.prototype.setCallbackFunction=function(callback,delay){
-	if(delay){
-		this.delayedCallback=callback;
-	}
-	else{
-		this.callback=callback;
+
+/**
+ * Sets a function to call when the button is interacted with
+ * @param {function} callback
+ * @param {boolean} delay - Whether the function should be called when the Button is released vs tapped
+ */
+Button.prototype.setCallbackFunction = function(callback, delay) {
+	if (delay) {
+		this.delayedCallback = callback;
+	} else {
+		this.callback = callback;
 	}
 };
-Button.prototype.setToggleFunction=function(callback){
-	this.toggleFunction=callback;
-	this.toggles=true;
+
+/**
+ * Sets the function to call when the button is untoggled and enables toggling
+ * @param {function} callback
+ */
+Button.prototype.setUnToggleFunction = function(callback) {
+	this.unToggleFunction = callback;
+	this.toggles = true;
 };
-Button.prototype.disable=function(){
-	if(this.enabled){
-		this.enabled=false;
-		this.pressed=false;
-		this.bgRect.setAttributeNS(null,"fill",Button.disabledBg);
-		if(this.hasText&&this.foregroundInverts){
-			this.textE.setAttributeNS(null,"fill",Button.disabledFore);
+
+/**
+ * Sets a function to call when the button is long touched
+ * @param {function} callback
+ */
+Button.prototype.setLongTouchFunction = function(callback) {
+	this.longTouchFunction = callback;
+};
+
+Button.prototype.setDisabledTabFunction = function(callback) {
+	this.disabledTapCallback = callback;
+};
+
+/**
+ * Disables the button so it cannot be interacted with
+ */
+Button.prototype.disable = function() {
+	if (this.enabled) {
+		this.enabled = false;
+		this.pressed = false;
+		this.bgRect.setAttributeNS(null, "fill", Button.disabledBg);
+		if (this.hasText && this.textInverts) {
+			this.textE.setAttributeNS(null, "fill", Button.disabledFore);
 		}
-		if(this.hasIcon&&this.foregroundInverts){
+		if (this.hasIcon && this.iconInverts) {
 			this.icon.setColor(Button.disabledFore);
 		}
 	}
 };
-Button.prototype.enable=function(){
-	if(!this.enabled){
-		this.enabled=true;
-		this.pressed=false;
+
+/**
+ * Enables the button so it is interactive again
+ */
+Button.prototype.enable = function() {
+	if (!this.enabled) {
+		this.enabled = true;
+		this.pressed = false;
 		this.setColor(false);
 	}
 };
-Button.prototype.press=function(){
-	if(this.enabled&&!this.pressed){
-		this.pressed=true;
+
+/**
+ * Presses the button
+ */
+Button.prototype.press = function() {
+	if (!this.pressed) {
+		this.pressed = true;
+		if (!this.enabled) return;
 		this.setColor(true);
-		if(this.callback!=null){
+		if (this.callback != null) {
 			this.callback();
 		}
 	}
 };
-Button.prototype.release=function(){
-	if(this.enabled&&this.pressed){
-		this.pressed=false;
-		if(!this.toggles||this.toggled) {
+
+/**
+ * Releases the Button
+ */
+Button.prototype.release = function() {
+	if (this.pressed) {
+		this.pressed = false;
+		if (!this.enabled) {
+			if (this.disabledTapCallback != null) {
+				this.disabledTapCallback();
+			}
+			return;
+		}
+		if (!this.toggles || this.toggled) {
 			this.setColor(false);
 		}
-		if(this.toggles&&this.toggled){
-			this.toggled=false;
-			this.toggleFunction();
-		}
-		else {
+		if (this.toggles && this.toggled) {
+			this.toggled = false;
+			this.unToggleFunction();
+		} else {
 			if (this.delayedCallback != null) {
 				this.delayedCallback();
 			}
@@ -5239,222 +7896,362 @@ Button.prototype.release=function(){
 		}
 	}
 };
-/* Removes the Button's visual highlight without triggering any actions */
-Button.prototype.interrupt=function(){
-	if(this.enabled&&this.pressed&&!this.toggles){
-		this.pressed=false;
+
+/**
+ * Removes the Button's visual highlight without triggering any actions
+ */
+Button.prototype.interrupt = function() {
+	if (this.pressed && !this.toggles) {
+		this.pressed = false;
+		if (!this.enabled) return;
 		this.setColor(false);
 	}
 };
-Button.prototype.unToggle=function(){
-	if(this.enabled&&this.toggled){
+
+/**
+ * Tells the button to exit the toggled state
+ */
+Button.prototype.unToggle = function() {
+	if (this.enabled && this.toggled) {
 		this.setColor(false);
 	}
-	this.toggled=false;
-	this.pressed=false;
+	this.toggled = false;
+	this.pressed = false;
 };
-Button.prototype.remove=function(){
+
+/**
+ * Runs the long touch function
+ * @return {boolean} - whether the long touch function is non-null
+ */
+Button.prototype.longTouch = function() {
+	if (this.longTouchFunction != null) {
+		this.longTouchFunction();
+		return true;
+	}
+	return false;
+};
+
+/**
+ * Removes the Button (supposed to be permanent)
+ */
+Button.prototype.remove = function() {
 	this.group.remove();
 };
-Button.prototype.hide = function(){
+
+/**
+ * Hides the button temporarily
+ */
+Button.prototype.hide = function() {
 	this.group.remove();
 };
-Button.prototype.show = function(){
+
+/**
+ * Makes the Button visible again
+ */
+Button.prototype.show = function() {
 	this.parentGroup.appendChild(this.group);
 };
-Button.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	GuiElements.move.group(this.group,this.x,this.y);
+
+/**
+ * Moves the Button to the specified location
+ * @param {number} x
+ * @param {number} y
+ */
+Button.prototype.move = function(x, y) {
+	this.x = x;
+	this.y = y;
+	GuiElements.move.group(this.group, this.x, this.y);
 };
-Button.prototype.setColor=function(isPressed){
-	if(isPressed) {
-		this.bgRect.setAttributeNS(null,"fill",Button.highlightBg);
-		if(this.hasText&&this.foregroundInverts){
-			this.textE.setAttributeNS(null,"fill",Button.highlightFore);
+
+/**
+ * Sets the color of the button and foreground to match the pressed/released state
+ * @param {boolean} isPressed - Whether the button is pressed
+ */
+Button.prototype.setColor = function(isPressed) {
+	if (isPressed) {
+		this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
+		if (this.hasText && this.textInverts) {
+			this.textE.setAttributeNS(null, "fill", Button.highlightFore);
 		}
-		if(this.hasIcon&&this.foregroundInverts){
+		if (this.hasIcon && this.iconInverts) {
 			this.icon.setColor(Button.highlightFore);
 		}
-		if(this.hasImage){
-			GuiElements.update.image(this.imageE,this.imageData.darkName);
+		if (this.hasImage) {
+			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
-	}
-	else{
+	} else {
 		this.bgRect.setAttributeNS(null, "fill", Button.bg);
-		if (this.hasText && this.foregroundInverts) {
+		if (this.hasText && this.textInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
-		if (this.hasIcon && this.foregroundInverts) {
+		if (this.hasIcon && this.iconInverts) {
 			this.icon.setColor(Button.foreground);
 		}
-		if(this.hasImage){
-			GuiElements.update.image(this.imageE,this.imageData.lightName);
+		if (this.hasImage) {
+			GuiElements.update.image(this.imageE, this.imageData.lightName);
 		}
 	}
 };
-Button.prototype.makeScrollable = function(){
+
+/**
+ * Marks that the Button is part of something that scrolls so it doesn't stop scrolling when it is tapped
+ * (using preventDefault in TouchReceiver)
+ */
+Button.prototype.makeScrollable = function() {
 	this.scrollable = true;
 };
-Button.prototype.currentForeground = function(){
-	if(!this.enabled){
+
+/**
+ * Retrieves the current foreground color to use, based on the Button's state
+ * @return {*}
+ */
+Button.prototype.currentForeground = function() {
+	if (!this.enabled) {
 		return Button.disabledFore;
-	} else if(this.pressed) {
+	} else if (this.pressed) {
 		return Button.highlightFore;
 	} else {
 		return Button.foreground;
 	}
 };
-Button.prototype.markAsOverlayPart = function(overlay){
+
+/**
+ * Marks that the Button is part of the specified overlay so it doesn't close it when tapped
+ * @param {Overlay} overlay
+ */
+Button.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
-Button.prototype.unmarkAsOverlayPart = function(){
+
+/**
+ * Removes the marking that the Button is part of an overlay
+ */
+Button.prototype.unmarkAsOverlayPart = function() {
 	this.partOfOverlay = null;
 };
 /**
- * Created by Tom on 6/23/2017.
+ * A button with an arrow that shows/hides something.  Currently, this is just used for showing/hiding the palette on
+ * small screens.  The button is not created until build() is called
+ * @param {number} x - The x coord where the button should show up
+ * @param {number} y - The y coord where the button should show up
+ * @param {number} width - The width the button should have
+ * @param {number} height - The height the button should have
+ * @param {Element} parent - The group the button should be added to
+ * @param {number} iconH - The height the icon should have
+ * @constructor
  */
-function ShowHideButton(x, y, width, height, parent, iconH){
+function ShowHideButton(x, y, width, height, parent, iconH) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
 	this.height = height;
 	this.parent = parent;
-	this.iconH = iconH * 0.75;
+	this.iconH = iconH * 0.75; // The arrow icon should actually be smaller than most other icons
 	this.showFn = null;
 	this.hideFn = null;
 }
-ShowHideButton.prototype.build = function(isShowing){
+
+/**
+ * The show/hide button is actually two buttons that change when one is tapped.  This function creates both of them
+ * @param {boolean} isShowing - Whether the button should start in the "showing" state
+ */
+ShowHideButton.prototype.build = function(isShowing) {
 	this.showBn = new Button(this.x, this.y, this.width, this.height, this.parent);
 	this.showBn.addIcon(VectorPaths.show, this.iconH);
 	this.hideBn = new Button(this.x, this.y, this.width, this.height, this.parent);
 	this.hideBn.addIcon(VectorPaths.hide, this.iconH);
 
+	// The callback functions are called when the buttons are pressed, but the button changes icon when released
 	this.showBn.setCallbackFunction(this.showFn, false);
 	this.hideBn.setCallbackFunction(this.hideFn, false);
 
-	let toggle1 = function(){
+	// Function to switch to the "hidden" mode
+	let toggle1 = function() {
 		this.showBn.hide();
 		this.hideBn.show();
 	}.bind(this);
 	this.showBn.setCallbackFunction(toggle1, true);
-	this.showBn.interrupt=function(){
-		if(this.enabled&&this.pressed){
-			this.pressed=false;
+	this.showBn.interrupt = function() {
+		if (this.enabled && this.pressed) {
+			this.pressed = false;
 			this.setColor(false);
 			toggle1();
 		}
 	};
-	let toggle2 = function(){
+
+	// Function to switch to the "showing" mode
+	let toggle2 = function() {
 		this.showBn.show();
 		this.hideBn.hide();
 	}.bind(this);
 	this.hideBn.setCallbackFunction(toggle2, true);
-	this.hideBn.interrupt=function(){
-		if(this.enabled&&this.pressed){
-			this.pressed=false;
+	this.hideBn.interrupt = function() {
+		if (this.enabled && this.pressed) {
+			this.pressed = false;
 			this.setColor(false);
 			toggle2();
 		}
 	};
 
-	if(isShowing){
+	if (isShowing) {
 		this.showBn.hide();
-	} else{
+	} else {
 		this.hideBn.hide();
 	}
 };
-ShowHideButton.prototype.setCallbackFunctions = function(showFn, hideFn){
+
+/**
+ * Sets the functions to call to show/hide the associated item
+ * @param {function} showFn
+ * @param {function} hideFn
+ */
+ShowHideButton.prototype.setCallbackFunctions = function(showFn, hideFn) {
 	this.showFn = showFn;
 	this.hideFn = hideFn;
 };
-ShowHideButton.prototype.remove = function(){
+
+/**
+ * Removes the show/hide button
+ */
+ShowHideButton.prototype.remove = function() {
 	this.showBn.remove();
 	this.hideBn.remove();
 };
 
 
-function DeviceStatusLight(x,centerY,parent,statusProvider){
-	const DSL=DeviceStatusLight;
-	this.cx=x+DSL.radius;
-	this.cy=centerY;
-	this.parentGroup=parent;
-	this.circleE=this.generateCircle();
+/**
+ * A small colored circle that indicates the status of a robot or group of robots according to a statusProvider
+ * which must have setStatusListener and getStatus functions
+ * @param {number} x - The x coord of the light
+ * @param {number} centerY - The y coord of the center of the light
+ * @param {Element} parent - The group this light should add itself to
+ * @param {*} statusProvider - Any object with the functions setStatusListener and getStatus
+ * @constructor
+ */
+function DeviceStatusLight(x, centerY, parent, statusProvider) {
+	const DSL = DeviceStatusLight;
+	this.cx = x + DSL.radius;
+	this.cy = centerY;
+	this.parentGroup = parent;
+	this.circleE = this.generateCircle();
 	this.statusProvider = statusProvider;
-	this.statusProvider.setStatusListener(this);
+	// Tells the statusProvider to call updateStatus any time its status changes
+	this.statusProvider.setStatusListener(this.updateStatus.bind(this));
+	// Updates this light to match the current status of the provider
 	this.updateStatus(statusProvider.getStatus());
 }
-DeviceStatusLight.setConstants=function(){
-	var DSL=DeviceStatusLight;
-	DSL.greenColor="#0f0";
-	DSL.redColor="#f00";
-	DSL.startColor=Colors.black;
-	DSL.offColor=Colors.darkGray;
-	DSL.radius=6;
-	DSL.updateInterval=300;
+
+DeviceStatusLight.setConstants = function() {
+	const DSL = DeviceStatusLight;
+	DSL.greenColor = "#0f0";
+	DSL.redColor = "#f00";
+	DSL.yellowColor = "#ff0";
+	DSL.startColor = Colors.black;
+	DSL.offColor = Colors.darkGray;
+	DSL.radius = 6;
+	DSL.updateInterval = 300;
 };
-DeviceStatusLight.prototype.generateCircle=function(){
-	let DSL=DeviceStatusLight;
-	return GuiElements.draw.circle(this.cx,this.cy,DSL.radius,DSL.startColor,this.parentGroup);
+
+/**
+ * Draws the circle for the light
+ */
+DeviceStatusLight.prototype.generateCircle = function() {
+	let DSL = DeviceStatusLight;
+	return GuiElements.draw.circle(this.cx, this.cy, DSL.radius, DSL.startColor, this.parentGroup);
 };
-DeviceStatusLight.prototype.updateStatus=function(status){
+
+/**
+ * Updates the color of the circle to correspond with the provided status
+ * @param {DeviceManager.statuses} status
+ */
+DeviceStatusLight.prototype.updateStatus = function(status) {
 	const DSL = DeviceStatusLight;
 	let color = null;
 	const statuses = DeviceManager.statuses;
 	if (status === statuses.connected) {
 		color = DSL.greenColor;
-	} else if (status === statuses.disconnected) {
+	} else if (status === statuses.oldFirmware) {
+		color = DSL.yellowColor;
+	} else if (status === statuses.incompatibleFirmware || status === statuses.disconnected) {
 		color = DSL.redColor;
 	} else {
 		color = DSL.offColor;
 	}
-	GuiElements.update.color(this.circleE,color);
+	GuiElements.update.color(this.circleE, color);
 };
-DeviceStatusLight.prototype.remove=function(){
-	this.circleE.remove();
-	this.updateTimer=window.clearInterval(this.updateTimer);
-};
+
 /**
- * Created by Tom on 6/26/2017.
+ * Removes the light
  */
+DeviceStatusLight.prototype.remove = function() {
+	this.circleE.remove();
+};
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
  * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
 function Overlay(type){
 	this.type = type;
 }
-/* All overlays have a close function */
-Overlay.prototype.close = function() {
-	DebugOptions.markAbstract();
-};
-Overlay.prototype.addOverlayAndCloseOthers = function(){
-	Overlay.closeOverlaysOfType(this.type);
-	Overlay.addOverlay(this);
-};
+
 /* Initializes the static elements of the class */
 Overlay.setStatics = function(){
 	/* Keeps track of open overlays */
 	Overlay.openOverlays = new Set();
-	Overlay.types = {};
-	Overlay.types.inputPad = 1;
-	Overlay.types.resultBubble = 2;
-	Overlay.types.menu = 3;
-	Overlay.types.connectionList = 4;
+	/** @enum {number} */
+	Overlay.types = {
+		inputPad: 1,
+		resultBubble: 2,
+		menu: 3,
+		connectionList: 4
+	};
 };
+
+/**
+ * All overlays have a close function, called when an overlay of the same type is opened for the user taps outside the
+ * overlay
+ */
+Overlay.prototype.close = function() {
+	DebugOptions.markAbstract();
+};
+
+/**
+ * Adds the overlay to the list of open overlays and closes other overlay of the same type
+ */
+Overlay.prototype.addOverlayAndCloseOthers = function(){
+	Overlay.closeOverlaysOfType(this.type);
+	Overlay.addOverlay(this);
+};
+
+/**
+ * @param {Overlay} overlay - Adds an overlay to the set of open overlays
+ */
 Overlay.addOverlay = function(overlay){
 	if(!Overlay.openOverlays.has(overlay)) {
 		Overlay.openOverlays.add(overlay);
 	}
 };
+
+/**
+ * @param {Overlay} overlay - Removes an overlay from the set of open overlays
+ */
 Overlay.removeOverlay = function(overlay){
 	if(Overlay.openOverlays.has(overlay)) {
 		Overlay.openOverlays.delete(overlay);
 	}
 };
+
+/**
+ * Closes all open overlays
+ */
 Overlay.closeOverlays = function(){
 	Overlay.openOverlays.forEach(function(overlay){
 		overlay.close();
 	});
 };
+
+/**
+ * Closes all open overlays except the provided overlay
+ * @param {Overlay} overlay
+ */
 Overlay.closeOverlaysExcept = function(overlay){
 	Overlay.openOverlays.forEach(function(currentOverlay){
 		if(currentOverlay !== overlay) {
@@ -5462,6 +8259,11 @@ Overlay.closeOverlaysExcept = function(overlay){
 		}
 	});
 };
+
+/**
+ * Closes all overlays except those of the specified type
+ * @param {Overlay.types} type
+ */
 Overlay.closeOverlaysOfType = function(type){
 	Overlay.openOverlays.forEach(function(currentOverlay){
 		if(currentOverlay.type === type) {
@@ -5470,10 +8272,19 @@ Overlay.closeOverlaysOfType = function(type){
 	});
 };
 /**
- * Created by Tom on 6/18/2017.
+ * Completely unrelated to the TabManager and Tab classes.  The TabRow provides UI for a row of tabs, which when
+ * when selected call a callback function.  They are used in the ConnectMultipleDialog and OpenDialog.  A TabRow
+ * is created through the constructor and Tabs are added with addTab.  show() causes the tabs to be built
+ * @param {number} x - The x coord of where the TabRow should be drawn
+ * @param {number} y - The y coord of where the TabRow should be drawn
+ * @param {number} width - The width of the space available to the TabRow
+ * @param {number} height - The height of the space available to the TabRow
+ * @param {Element} parent - The group the RabRow should add itself to
+ * @param {number|null} [initialTab] - The index of the tab to select first.  If null, no tab will appear selected
+ * @constructor
  */
-function TabRow(x, y, width, height, parent, initialTab){
-	if(initialTab == null){
+function TabRow(x, y, width, height, parent, initialTab) {
+	if (initialTab == null) {
 		initialTab = null;
 	}
 	this.tabList = [];
@@ -5483,84 +8294,255 @@ function TabRow(x, y, width, height, parent, initialTab){
 	this.width = width;
 	this.height = height;
 	this.callbackFn = null;
-	this.initalTab = initialTab;
 	this.selectedTab = initialTab;
 	this.partOfOverlay = null;
 }
-TabRow.setConstants = function(){
+
+TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
 	TR.deselectedColor = Colors.darkGray;
 	TR.selectedColor = Colors.black;
 	TR.foregroundColor = Colors.white;
 
-	TR.fontSize=16;
-	TR.font="Arial";
-	TR.fontWeight="bold";
-	TR.charHeight=12;
+	TR.font = Font.uiFont(16).bold();
+
+	TR.closeHeight = 30;
+	TR.closeMargin = 9;
 };
-TabRow.prototype.show = function(){
+
+/**
+ * Builds the tabs and shows the UI
+ */
+TabRow.prototype.show = function() {
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
 	this.createTabs();
-	if(this.selectedTab != null) {
+	if (this.selectedTab != null) {
 		this.visuallySelectTab(this.selectedTab);
 	}
 };
-TabRow.prototype.addTab = function(text, id){
+
+/**
+ * Adds a tab to the list of tabs to be built
+ * @param {string} text - The label to put on the tab
+ * @param {*} id - The id of the tab.  Sent to the callback function when a tab is selected
+ * @param {function|null} [closeFn] - The function to call when this tab is closed.  If provided, a close button will
+ *                                    be drawn on the Tab
+ */
+TabRow.prototype.addTab = function(text, id, closeFn) {
 	let entry = {};
 	entry.text = text;
 	entry.id = id;
+	entry.closeFn = closeFn;
 	this.tabList.push(entry);
 };
-TabRow.prototype.createTabs = function(){
+
+/**
+ * Renders the tabs and close buttons according to the labList
+ */
+TabRow.prototype.createTabs = function() {
 	let tabCount = this.tabList.length;
 	let tabWidth = this.width / tabCount;
 	this.tabEList = [];
-	this.tabList.forEach(function(entry, index){
-		this.tabEList.push(this.createTab(index, entry.text, tabWidth, index * tabWidth));
+	this.tabList.forEach(function(entry, index) {
+		const tabX = index * tabWidth;
+		const hasClose = entry.closeFn != null;
+		this.tabEList.push(this.createTab(index, entry.text, tabWidth, tabX, hasClose));
+		if (hasClose) {
+			this.createClose(tabWidth, tabX, entry.closeFn);
+		}
 	}.bind(this));
 };
-TabRow.prototype.createTab = function(index, text, width, x){
-	let TR = TabRow;
+
+/**
+ * Creates a tab with the specified label and width
+ * @param {number} index - The index of the tab, used to add the correct listeners to the tab
+ * @param {string} text - The text to place on the top of the tab
+ * @param {number} width - The width of the tab
+ * @param {number} x - The x coord of the tab
+ * @param {boolean} hasClose - Whether space should be reserved for a close button
+ */
+TabRow.prototype.createTab = function(index, text, width, x, hasClose) {
+	const TR = TabRow;
+
+	let textMaxWidth = width - 2 * TR.slantW;
+	const closeSpace = 2 * TR.closeMargin + TR.closeHeight;
+	if (hasClose) {
+		textMaxWidth = width - closeSpace - TR.slantW;
+	}
 	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
-	let textE = GuiElements.draw.text(0, 0, "", TR.fontSize, TR.foregroundColor, TR.font, TR.fontWeight);
-	GuiElements.update.textLimitWidth(textE, text, width);
+	let textE = GuiElements.draw.text(0, 0, "", TR.font, TR.foregroundColor);
+	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
+
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (width - textW) / 2;
-	let textY = (this.height + TR.charHeight) / 2;
+	if (hasClose) {
+		textX = Math.min(textX, x + width - textW - closeSpace);
+	}
+	let textY = (this.height + TR.font.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
+
 	TouchReceiver.addListenersTabRow(textE, this, index);
 	TouchReceiver.addListenersTabRow(tabE, this, index);
 	this.group.appendChild(textE);
 	return tabE;
 };
-TabRow.prototype.selectTab = function(index){
-	if(index !== this.selectTab) {
-		this.selectTab = index;
-		this.visuallySelectTab(index);
+
+/**
+ * Creates a button to close the tab
+ * @param {number} tabX - The x coord of the tab
+ * @param {number} tabW - The width of the tab
+ * @param {function} closeFn - The function to call when the close button is tapped
+ */
+TabRow.prototype.createClose = function(tabX, tabW, closeFn) {
+	const TR = TabRow;
+	const cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
+	const cy = this.height / 2;
+	const closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
+};
+
+/**
+ * Makes the tab appear selected and calls the callbackFn with the id of the selected tab.
+ * @param index
+ */
+TabRow.prototype.selectTab = function(index) {
+	if (index !== this.selectTab) {
+		this.selectedTab = index;
+		this.visuallySelectTab(index);   // TODO: make this also deselect the selected tab
 		if (this.callbackFn != null) this.callbackFn(this.tabList[index].id);
 	}
 };
-TabRow.prototype.visuallySelectTab = function(index){
+
+/**
+ * Makes a tab appear selected
+ * @param {number} index - The tab to select
+ */
+TabRow.prototype.visuallySelectTab = function(index) {
 	let TR = TabRow;
 	let tabE = this.tabEList[index];
 	GuiElements.update.color(tabE, TR.selectedColor);
 };
-TabRow.prototype.setCallbackFunction = function(callback){
+
+/**
+ * Registers a callback function for when tabs are selected.  The function will be called with the id of the selected
+ * tab
+ * @param {function} callback - type (type of id) -> ()
+ */
+TabRow.prototype.setCallbackFunction = function(callback) {
 	this.callbackFn = callback;
 };
-TabRow.prototype.markAsOverlayPart = function(overlay){
+
+/**
+ * Notes that the TabRow is a member of the provided overlay and shouldn't close it.
+ * @param {Overlay} overlay
+ */
+TabRow.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
 /**
- * Created by Tom on 7/3/2017.
+ * A round button with an x that calls the specified function when tapped
+ * @param {number} cx - The x coord of the center of the button
+ * @param {number} cy - The y coord of the center of the button
+ * @param {number} height - The height of the button (diameter)
+ * @param {function} callbackFn - The function to call when the button is tapped
+ * @param {Element} group - The SVG group to add the button to
+ * @constructor
+ */
+function CloseButton(cx, cy, height, callbackFn, group){
+	const CB = CloseButton;
+	this.pressed = false;
+	this.group = group;
+	this.circleE = GuiElements.draw.circle(cx, cy, height / 2, CB.bg, this.group);
+	const iconH = height * CB.iconHMult;
+	this.icon = new VectorIcon(cx - iconH / 2, cy - iconH / 2, VectorPaths.letterX, CB.foreground, iconH, this.group);
+	TouchReceiver.addListenersBN(this.icon.pathE,this);
+	TouchReceiver.addListenersBN(this.circleE,this);
+	this.callbackFn = callbackFn;
+}
+
+CloseButton.setGraphics=function(){
+	const CB = CloseButton;
+	CB.bg = Button.bg;
+	CB.foreground = Button.foreground;
+	CB.highlightBg = Button.highlightBg;
+	CB.highlightFore = Button.highlightFore;
+	CB.iconHMult = 0.5;
+};
+
+/**
+ * Makes the button appear to be pressed
+ */
+CloseButton.prototype.press=function(){
+	if(!this.pressed){
+		this.pressed=true;
+		this.setColor(true);
+	}
+};
+
+/**
+ * Makes the button appear to be released and calls the callback
+ */
+CloseButton.prototype.release=function(){
+	if(this.pressed){
+		this.pressed = false;
+		this.setColor(false);
+		this.callbackFn();
+	}
+};
+
+/**
+ * Makes the function appear to be released without triggering the callback (for when a dialog is shown)
+ */
+CloseButton.prototype.interrupt=function(){
+	if(this.pressed){
+		this.pressed = false;
+		this.setColor(false);
+	}
+};
+
+/**
+ * Marks this button as a member of the specified overlay so it doesn't close it
+ * @param {Overlay} overlay
+ */
+CloseButton.prototype.markAsOverlayPart = function(overlay){
+	this.partOfOverlay = overlay;
+};
+
+/**
+ * Sets the color of the button to match its pressed/not pressed state
+ * @param {boolean} isPressed - Whether the button is pressed
+ */
+CloseButton.prototype.setColor = function(isPressed) {
+	const CB = CloseButton;
+	if (isPressed) {
+		this.icon.setColor(CB.highlightFore);
+		GuiElements.update.color(this.circleE, CB.highlightBg);
+	} else {
+		this.icon.setColor(CB.foreground);
+		GuiElements.update.color(this.circleE, CB.bg);
+	}
+};
+/**
+ * An abstract class representing a way of inputting data into an EditableSlot.  Each EditableSlot can make an
+ * InputSystem when it is told to edit(), which it provides with its slotShape, initial data, and functions to
+ * call when editing is complete.
+ * Some InputSystems require additional information, which is provided through the subclass of the constructor
+ * @constructor
  */
 function InputSystem(){
-	this.visible = false;
-	this.closed = false;
-	this.cancelled = false; //TODO: remove this?
+	this.visible = false;   // Whether the system is showing
+	this.closed = false;   // Once closed, the system cannot be opened again (only shown once)
+	this.cancelled = false;   // Whether the system set a value or was cancelled (for dialogs)
 }
+
+/**
+ * Shows the InputSystem when the Slot is edited
+ * @param {EditableSlotShape} slotShape - The slotShape of the Slot
+ * @param {function} updateFn - type (Data, string) -> (), called with Data and displayText to change how the Slot looks
+ * @param {function} finishFn - type (Data) -> (), called to finish editing and sets the value to Data
+ * @param {Data} data - The initial Data in the Slot
+ */
 InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	DebugOptions.assert(!this.visible);
 	DebugOptions.assert(!this.closed);
@@ -5570,6 +8552,10 @@ InputSystem.prototype.show = function(slotShape, updateFn, finishFn, data){
 	this.finishFn = finishFn;
 	this.currentData = data;
 };
+
+/**
+ * Closes the InputSystem and calls the finishFn to end the editing
+ */
 InputSystem.prototype.close = function(){
 	if(this.closed) return;
 	this.closed = true;
@@ -5577,31 +8563,57 @@ InputSystem.prototype.close = function(){
 	this.finishFn(this.currentData, this.cancelled);
 };
 /**
- * Created by Tom on 7/3/2017.
+ * A dialog used to edit the value of the Slot
+ * @param {string} textSummary - The textSummary of the Slot
+ * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
+ * @constructor
  */
-function InputDialog(textSummary, acceptsEmptyString){
+function InputDialog(textSummary, acceptsEmptyString) {
 	InputSystem.call(this);
 	this.textSummary = textSummary;
 	this.acceptsEmptyString = acceptsEmptyString;
 }
-InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data){
+
+/**
+ * Shows a dialog and sets the value of the Slot to whatever the user enters
+ * @inheritDoc
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const oldVal = data.asString().getValue();
+	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
 	const shouldPrefill = data.type === Data.types.string;
-	HtmlServer.showDialog("Edit text",this.textSummary,oldVal,shouldPrefill,function(cancelled,response){
-		if(!cancelled && (response !== "" || this.acceptsEmptyString)){
+	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
+		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
+			// Set the data
 			this.currentData = new StringData(response);
 			this.cancelled = false;
 		} else {
+			// Mark as cancelled
 			this.cancelled = true;
 		}
 		InputSystem.prototype.close.call(this);
 	}.bind(this));
 };
 /**
- * Created by Tom on 7/3/2017.
+ * An InputSystem for editing NumSlots and DropSlots, provides a set of controls (InputWidgets) in an OverlayBubble
+ * which edit the Data in the Slot.
+ * The InputPad is flexible as it holds a stack of varying "widgets" as determined by the Slot that constructs it.
+ * Widgets are added before the InputPad is shown using addWidget.  Right now, SelectPadWidgets and NumPadWidgets
+ * are the main entry mechanisms, but more widgets could be added in the future (for example, a sliders or knobs)
+ *
+ * The coordinates of the bubble are provided as parameters
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @constructor
  */
-function NewInputPad(x1, x2, y1, y2){
+function InputPad(x1, x2, y1, y2) {
 	InputSystem.call(this);
 	this.widgets = [];
 	const coords = this.coords = {};
@@ -5610,34 +8622,55 @@ function NewInputPad(x1, x2, y1, y2){
 	coords.y1 = y1;
 	coords.y2 = y2;
 }
-NewInputPad.prototype = Object.create(InputSystem.prototype);
-NewInputPad.prototype.constructor = NewInputPad;
-NewInputPad.setConstants = function(){
-	const IP = NewInputPad;
+InputPad.prototype = Object.create(InputSystem.prototype);
+InputPad.prototype.constructor = InputPad;
+
+InputPad.setConstants = function() {
+	const IP = InputPad;
 	IP.background = Colors.black;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
 };
-NewInputPad.prototype.addWidget = function(widget){
+
+/**
+ * Adds a Widget to the InputPad.  The Widget and pad will be constructed when show() is called
+ * @param {InputWidget} widget - The Widget to add to the InputPad
+ */
+InputPad.prototype.addWidget = function(widget) {
 	this.widgets.push(widget);
 };
-NewInputPad.prototype.show = function(slotShape, updateFn, finishFn, data){
+
+/**
+ * Builds the InputPad and Widgets
+ * @inheritDoc
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
-	const IP = NewInputPad;
+	const IP = InputPad;
 	this.group = GuiElements.create.group(0, 0);
 	this.updateDim();
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
-	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, IP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };
-NewInputPad.prototype.updateDim = function(){
-	const IP = NewInputPad;
+
+/**
+ * Computes the dimensions of the InputPad and its widgets, storing them in this.width and this.height
+ */
+InputPad.prototype.updateDim = function() {
+	const IP = InputPad;
 	let height = 0;
-	this.widgets.forEach(function(widget){
-		if(widget.fixedHeight()){
+	this.widgets.forEach(function(widget) {
+		// Some widgets have adjustable heights (like SelectPads)
+		if (widget.fixedHeight()) {
+			// Fixed-height widgets have their height computed and stored
 			widget.updateDim();
 			height += widget.height;
 		}
@@ -5646,49 +8679,90 @@ NewInputPad.prototype.updateDim = function(){
 	height -= IP.margin;
 	height = Math.max(height, 0);
 	const maxHeight = GuiElements.height - 2 * IP.margin;
+	// The remaining available screen space is computed and allocated to adjustable-height widgets
+	// TODO: currently this code only works if there is at most one adjustable-height widget
 	let allocH = (maxHeight - height);
-	this.widgets.forEach(function(widget){
-		if(!widget.fixedHeight()){
+	this.widgets.forEach(function(widget) {
+		if (!widget.fixedHeight()) {
+			// Gives all the remaining space to this widget
 			widget.setMaxHeight(allocH);
 			widget.updateDim();
+			// The widget might not use all the space, and only the space it does use is added
 			height += widget.height;
 		}
 	});
+	// Store the final results
 	this.height = height;
 	this.width = IP.width;
 };
-NewInputPad.prototype.showWidgets = function(overlay){
-	const IP = NewInputPad;
+
+/**
+ * Builds the widgets at the correct locations, assuming updateDim was already called.
+ * @param {BubbleOverlay} overlay
+ */
+InputPad.prototype.showWidgets = function(overlay) {
+	const IP = InputPad;
 	let y = 0;
-	for(let i = 0; i < this.widgets.length; i++) {
-		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.currentData);
+	for (let i = 0; i < this.widgets.length; i++) {
+		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this),
+			this.finishEdit.bind(this), this.currentData);
 		y += this.widgets[i].height + IP.margin;
 	}
 };
-NewInputPad.prototype.close = function(){
-	if(this.closed) return;
+
+/**
+ * Closes the pad and all its widgets
+ * @inheritDoc
+ */
+InputPad.prototype.close = function() {
+	if (this.closed) return;
 	InputSystem.prototype.close.call(this);
-	this.widgets.forEach(function(widget){
+	this.widgets.forEach(function(widget) {
 		widget.close();
 	});
 	this.bubbleOverlay.close();
 };
-NewInputPad.prototype.updateEdit = function(newData, text){
+
+/**
+ * Function called by Widgets to update Slot
+ * @param {Data} newData - The Data to store in the Slot
+ * @param {string} text - The text to display in the Slot
+ */
+InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
 	this.currentData = newData;
-	SaveManager.markEdited();
 };
-NewInputPad.prototype.finishEdit = function(newData){
+
+/**
+ * Function called by widgets to finish editing Slot
+ * @param {Data} newData - The Data to save to the Slot
+ */
+InputPad.prototype.finishEdit = function(newData) {
 	this.currentData = newData;
 	this.close();
 };
 /**
- * Created by Tom on 7/3/2017.
+ * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
+ * is responsible for drawing its own graphics and controlling the data in the Slot being edited.  The Widget is only
+ * built when show() is called.
+ * @constructor
  */
-function InputWidget(){
+function InputWidget() {
 	DebugOptions.markAbstract();
 }
-InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+
+/**
+ * Builds and displays the InputWidget, providing functions to call to update the Slot being edited
+ * @param {number} x - The x coord where the InputWidget should appear
+ * @param {number} y - The y coord where the InputWidget should appear
+ * @param {Element} parentGroup - The SVG group the elements of the widget should be added to
+ * @param {BubbleOverlay} overlay - The overlay of the InputPad containing the widget. Used for getting relToAbs coords
+ * @param {EditableSlotShape} slotShape - The SlotShape of the Slot being edited
+ * @param {function} updateFn - type (Data, string) -> (), to call to update the Data of the InputPad
+ * @param {function} finishFn - type (Data) -> (), to call to finish editing the Slot
+ * @param {Data} data - The initial Data stored in the Slot
+ */
+InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	this.x = x;
 	this.y = y;
 	this.slotShape = slotShape;
@@ -5696,338 +8770,539 @@ InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, upd
 	this.finishFn = finishFn;
 	this.overlay = overlay;
 };
-InputWidget.prototype.updateDim = function(){
+
+/**
+ * Called by the InputPad to compute the size of the Widget.  Results stored in this.width and this.height
+ */
+InputWidget.prototype.updateDim = function() {
 	DebugOptions.markAbstract();
 };
-InputWidget.prototype.close = function(){
+
+/**
+ * Hides the InputWidget and performs and cleanup needed
+ */
+InputWidget.prototype.close = function() {
 
 };
-InputWidget.prototype.fixedHeight = function(){
+
+/**
+ * Returns whether this InputWidget is a fixed height (rather than adjusting based on content and available space)
+ * @return {boolean}
+ */
+InputWidget.prototype.fixedHeight = function() {
 	return true;
 };
-InputWidget.prototype.setMaxHeight = function(height){
+
+/**
+ * Used to assign a maximum height to an adjustable-height widget
+ * @param {number} height
+ */
+InputWidget.prototype.setMaxHeight = function(height) {
 
 };
 /**
- * Created by Tom on 7/3/2017.
+ * Displays centered text in an InputPad
+ * @param {string} text - The text to display
+ * @constructor
  */
-InputWidget.Label = function(text){
+InputWidget.Label = function(text) {
 	this.text = text;
 };
 InputWidget.Label.prototype = Object.create(InputWidget.prototype);
 InputWidget.Label.prototype.constructor = InputWidget.Label;
-InputWidget.Label.setConstants = function(){
+
+InputWidget.Label.setConstants = function() {
 	const L = InputWidget.Label;
-	L.fontSize=16; //TODO: Get rid of font redundancy
-	L.font="Arial";
-	L.fontWeight="bold";
-	L.charHeight=12;
+	L.font = Font.uiFont(16).bold();
+	L.margin = 2;
 	L.color = Colors.white;
 };
-InputWidget.Label.prototype.show = function(x, y, parentGroup){
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ */
+InputWidget.Label.prototype.show = function(x, y, parentGroup) {
 	const L = InputWidget.Label;
-	this.textE = GuiElements.draw.text(x, y, "", L.fontSize, L.color, L.font, L.fontWeight);
-	GuiElements.update.textLimitWidth(this.textE, this.text, NewInputPad.width);
+	this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
+	GuiElements.update.textLimitWidth(this.textE, this.text, InputPad.width);
 	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = NewInputPad.width / 2 - textW / 2;
-	GuiElements.move.text(this.textE, textX, y + L.charHeight);
+	const textX = InputPad.width / 2 - textW / 2;
+	const textY = y + L.font.charHeight + L.margin;
+	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
-InputWidget.Label.prototype.updateDim = function(){
+
+/**
+ * Computes the height of the label
+ */
+InputWidget.Label.prototype.updateDim = function() {
 	const L = InputWidget.Label;
-	this.height = L.charHeight;
+	this.height = L.font.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
 /**
- * Created by Tom on 7/3/2017.
+ * Used for entering numbers into Slots.  Utilizes a DisplayNum to determine how the number changes as keys are pressed
+ * @param {boolean} positive - Whether the +/- key should be disabled
+ * @param {boolean} integer - Whether the decimal point key should be disabled
+ * @constructor
  */
-InputWidget.NumPad = function(positive, integer){
+InputWidget.NumPad = function(positive, integer) {
 	this.positive = positive;
 	this.integer = integer;
 };
 InputWidget.NumPad.prototype = Object.create(InputWidget.prototype);
 InputWidget.NumPad.prototype.constructor = InputWidget.NumPad;
-InputWidget.NumPad.setConstants = function(){
+
+InputWidget.NumPad.setConstants = function() {
 	const NP = InputWidget.NumPad;
-	NP.bnMargin = NewInputPad.margin;
-	NP.bnWidth = (NewInputPad.width - NP.bnMargin * 2) / 3;
+	NP.bnMargin = InputPad.margin;
+	NP.bnWidth = (InputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
-	NP.longBnW = (NewInputPad.width - NP.bnMargin) / 2;
-	NP.fontSize=34;
-	NP.font="Arial";
-	NP.fontWeight="bold";
-	NP.charHeight=25;
-	NP.plusMinusH=22;
-	NP.bsIconH=25;
-	NP.okIconH=NP.bsIconH;
+	NP.longBnW = (InputPad.width - NP.bnMargin) / 2;
+	NP.font = Font.uiFont(34).bold();
+	NP.plusMinusH = 22;
+	NP.bsIconH = 25;
+	NP.okIconH = NP.bsIconH;
 };
-InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ * @param {BubbleOverlay} overlay
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	this.displayNum = new DisplayNum(data);
 	this.makeBns();
+	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
+	 * grayed since there's nothing to delete. */
 	this.grayOutUnlessZero();
 };
-InputWidget.NumPad.prototype.updateDim = function(x, y){
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ */
+InputWidget.NumPad.prototype.updateDim = function(x, y) {
 	const NP = InputWidget.NumPad;
-	this.height = NP.bnHeight*5 + NP.bnMargin*4;
-	this.width = NewInputPad.width;
+	this.height = NP.bnHeight * 5 + NP.bnMargin * 4;
+	this.width = InputPad.width;
 };
 
-InputWidget.NumPad.prototype.grayOutUnlessZero = function(){
+/**
+ * Grays out the Slot to indicate that it will be deleted on modification, unless it is 0, in which case there is
+ * nothing to modify
+ */
+InputWidget.NumPad.prototype.grayOutUnlessZero = function() {
 	const data = this.displayNum.getData();
-	if(this.displayNum.isNum || data.getValue() !== 0) {
+	if (this.displayNum.isNum || data.getValue() !== 0) {
 		this.slotShape.grayOutValue();
 	}
 };
-InputWidget.NumPad.prototype.makeBns = function(){
+
+/**
+ * Generates the buttons for the NumPad
+ */
+InputWidget.NumPad.prototype.makeBns = function() {
 	const NP = InputWidget.NumPad;
 	let currentNum;
-	let xPos=0;
-	let yPos=0;
-	for(let i=0;i<3;i++){
-		xPos=0;
-		for(let j=0;j<3;j++){
-			currentNum=7-i*3+j;
-			this.makeNumBn(xPos,yPos,currentNum);
-			xPos+=NP.bnMargin;
-			xPos+=NP.bnWidth;
+	let xPos = 0;
+	let yPos = 0;
+	for (let i = 0; i < 3; i++) {
+		xPos = 0;
+		for (let j = 0; j < 3; j++) {
+			currentNum = 7 - i * 3 + j;
+			this.makeNumBn(xPos, yPos, currentNum);
+			xPos += NP.bnMargin;
+			xPos += NP.bnWidth;
 		}
-		yPos+=NP.bnMargin;
-		yPos+=NP.bnHeight;
+		yPos += NP.bnMargin;
+		yPos += NP.bnHeight;
 	}
-	this.makeNumBn(NP.bnMargin+NP.bnWidth,NP.bnMargin*3+NP.bnHeight*3,0);
-	this.makePlusMinusBn(0,NP.bnMargin*3+NP.bnHeight*3);
-	this.makeDecimalBn(NP.bnMargin*2+NP.bnWidth*2,NP.bnMargin*3+NP.bnHeight*3);
-	this.bsButton = this.makeBsBn(0,NP.bnMargin*4+NP.bnHeight*4);
-	this.okButton = this.makeOkBn(NP.bnMargin+NP.longBnW,NP.bnMargin*4+NP.bnHeight*4);
+	this.makeNumBn(NP.bnMargin + NP.bnWidth, NP.bnMargin * 3 + NP.bnHeight * 3, 0);
+	this.makePlusMinusBn(0, NP.bnMargin * 3 + NP.bnHeight * 3);
+	this.makeDecimalBn(NP.bnMargin * 2 + NP.bnWidth * 2, NP.bnMargin * 3 + NP.bnHeight * 3);
+	this.bsButton = this.makeBsBn(0, NP.bnMargin * 4 + NP.bnHeight * 4);
+	this.okButton = this.makeOkBn(NP.bnMargin + NP.longBnW, NP.bnMargin * 4 + NP.bnHeight * 4);
 };
-InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn){
+
+/**
+ * Generates a button that contains text (like a number, +/- button, or decimal point)
+ * @param {number} x - The x coord of the button
+ * @param {number} y - The y coord of the button
+ * @param {string} text - The string to show on the button
+ * @param {function} callbackFn - The function to call as the button is pressed
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
 	const NP = InputWidget.NumPad;
-	let button=new Button(x,y,NP.bnWidth,NP.bnHeight,this.group);
-	button.addText(text,NP.font,NP.fontSize,NP.fontWeight,NP.charHeight);
-	button.setCallbackFunction(callbackFn,false);
+	let button = new Button(x, y, NP.bnWidth, NP.bnHeight, this.group);
+	button.addText(text, NP.font);
+	button.setCallbackFunction(callbackFn, false);
 	button.markAsOverlayPart(this.overlay);
 	return button;
 };
-InputWidget.NumPad.prototype.makeNumBn=function(x,y,num){
-	return this.makeTextButton(x, y, num + "", function(){this.numPressed(num)}.bind(this));
+
+/**
+ * Generates a button for a number
+ * @param {number} x - The y coord of the button
+ * @param {number} y - The x coord of the Button
+ * @param {number} num - The number the button will display and append to the DisplayNum
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makeNumBn = function(x, y, num) {
+	return this.makeTextButton(x, y, num + "", function() {
+		this.numPressed(num)
+	}.bind(this));
 };
-InputWidget.NumPad.prototype.makePlusMinusBn=function(x,y){
+
+/**
+ * Generates the +/- button that switches the sign of the DisplayNum
+ * @param {number} x - The x coord of the button
+ * @param {number} y - The y coord of the button
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makePlusMinusBn = function(x, y) {
 	let button = this.makeTextButton(x, y, String.fromCharCode(177), this.plusMinusPressed.bind(this));
-	if(this.positive) button.disable();
+	if (this.positive) button.disable();
 	return button;
 };
-InputWidget.NumPad.prototype.makeDecimalBn=function(x,y){
+
+/**
+ * Generates the decimal point button
+ * @param {number} x - The x coord of the button
+ * @param {number} y - The y coord of the button
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makeDecimalBn = function(x, y) {
 	let button = this.makeTextButton(x, y, ".", this.decimalPressed.bind(this));
-	if(this.integer) button.disable();
+	if (this.integer) button.disable();
 	return button;
 };
-InputWidget.NumPad.prototype.makeBsBn=function(x,y){
+
+/**
+ * Generates the Undo/Backspace button
+ * @param {number} x - The x coord of the button
+ * @param {number} y - The y coord of the button
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
 	const NP = InputWidget.NumPad;
-	let button=new Button(x,y,NP.longBnW,NP.bnHeight,this.group);
-	button.addIcon(VectorPaths.backspace,NP.bsIconH);
-	button.setCallbackFunction(this.bsPressed.bind(this),false);
-	button.setCallbackFunction(this.bsReleased.bind(this),true);
+	let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
+	button.addIcon(VectorPaths.backspace, NP.bsIconH);
+	button.setCallbackFunction(this.bsPressed.bind(this), false);
+	button.setCallbackFunction(this.bsReleased.bind(this), true);
 	button.markAsOverlayPart(this.overlay);
 	return button;
 };
-InputWidget.NumPad.prototype.makeOkBn=function(x,y){
+
+/**
+ * Generates the check mark button that finishes the edit
+ * @param {number} x - The x coord of the button
+ * @param {number} y - The y coord of the button
+ * @return {Button}
+ */
+InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
 	const NP = InputWidget.NumPad;
-	let button=new Button(x,y,NP.longBnW,NP.bnHeight,this.group);
-	button.addIcon(VectorPaths.checkmark,NP.okIconH);
-	button.setCallbackFunction(this.okPressed.bind(this),true);
+	let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
+	button.addIcon(VectorPaths.checkmark, NP.okIconH);
+	button.setCallbackFunction(this.okPressed.bind(this), true);
 	button.markAsOverlayPart(this.overlay);
 	return button;
 };
 
-
-
-InputWidget.NumPad.prototype.numPressed=function(num){
+/**
+ * Adds the number to the end of the DisplayNum, or deletes the current data if it is gray
+ * @param {number} num - The number 0-9 to append
+ */
+InputWidget.NumPad.prototype.numPressed = function(num) {
 	this.removeUndo();
 	this.deleteIfGray();
-	this.displayNum.addDigit(num+"");
+	this.displayNum.addDigit(num + "");
 	this.sendUpdate();
 };
-InputWidget.NumPad.prototype.plusMinusPressed=function(){
+
+/**
+ * Changes the sign of the DisplayNum, or deletes the current Data if it is gray
+ */
+InputWidget.NumPad.prototype.plusMinusPressed = function() {
 	this.removeUndo();
 	this.deleteIfGray();
 	this.displayNum.switchSign();
 	this.sendUpdate();
 };
-InputWidget.NumPad.prototype.decimalPressed=function(){
+
+/**
+ * Appends a decimal point to the DisplayNum, or deletes the current data if it is gray
+ */
+InputWidget.NumPad.prototype.decimalPressed = function() {
 	this.removeUndo();
 	this.deleteIfGray();
 	this.displayNum.addDecimalPoint();
 	this.sendUpdate();
 };
-InputWidget.NumPad.prototype.deleteIfGray=function(){
-	if(this.slotShape.isGray){
+
+/**
+ * If the current data is gray, deletes the current Data and replaces the backspace button with an undo button
+ */
+InputWidget.NumPad.prototype.deleteIfGray = function() {
+	if (this.slotShape.isGray) {
 		this.showUndo();
-		this.displayNum=new DisplayNum(new NumData(0));
+		this.displayNum = new DisplayNum(new NumData(0));
 		this.slotShape.unGrayOutValue();
 		this.sendUpdate();
 	}
 };
-InputWidget.NumPad.prototype.showUndo=function(){
-	if(!this.undoAvailable) {
+
+/**
+ * Changes the backspace button to an undo button and saves the current data so it can be restored on undo
+ */
+InputWidget.NumPad.prototype.showUndo = function() {
+	if (!this.undoAvailable) {
 		this.undoAvailable = true;
 		this.undoData = this.displayNum.getData();
 		this.updateBsIcon();
 	}
 };
-InputWidget.NumPad.prototype.removeUndo=function(){
+
+/**
+ * Changes the undo button to a backspace icon
+ */
+InputWidget.NumPad.prototype.removeUndo = function() {
 	this.removeUndoDelayed();
 	this.updateBsIcon();
 };
-InputWidget.NumPad.prototype.removeUndoDelayed=function(){
-	if(this.undoAvailable) {
+
+/**
+ * Clears undo data and sets undo to unavailable
+ */
+InputWidget.NumPad.prototype.removeUndoDelayed = function() {
+	if (this.undoAvailable) {
 		this.undoAvailable = false;
 		this.undoData = null;
 	}
 };
-InputWidget.NumPad.prototype.updateBsIcon=function(){
+
+/**
+ * Changes the icon of the backspace button to match its current state (backspace/undo)
+ */
+InputWidget.NumPad.prototype.updateBsIcon = function() {
 	const NP = InputWidget.NumPad;
-	if(this.undoAvailable !== this.undoVisible) {
-		if(this.undoAvailable){
+	if (this.undoAvailable !== this.undoVisible) {
+		if (this.undoAvailable) {
 			this.bsButton.addIcon(VectorPaths.undo, NP.bsIconH);
 			this.undoVisible = true;
-		}
-		else{
+		} else {
 			this.bsButton.addIcon(VectorPaths.backspace, NP.bsIconH);
 			this.undoVisible = false;
 		}
 	}
 };
-InputWidget.NumPad.prototype.undo=function(){
+
+/**
+ * Restores the stored undo data and replaces the undo button with a backspace button
+ */
+InputWidget.NumPad.prototype.undo = function() {
 	const NP = InputWidget.NumPad;
-	if(this.undoAvailable) {
+	if (this.undoAvailable) {
 		this.displayNum = new DisplayNum(this.undoData);
 		this.removeUndoDelayed();
 		this.slotShape.grayOutValue();
 		this.sendUpdate();
 	}
 };
-InputWidget.NumPad.prototype.bsReleased=function(){
+
+/**
+ * The backspace button's icon is only changed when it is released, not when it is pressed
+ */
+InputWidget.NumPad.prototype.bsReleased = function() {
 	this.updateBsIcon();
 };
-InputWidget.NumPad.prototype.bsPressed=function(){
-	if(this.undoAvailable){
+
+/**
+ * Triggers a backspace or undo action depending on the current state
+ */
+InputWidget.NumPad.prototype.bsPressed = function() {
+	if (this.undoAvailable) {
 		this.undo();
-	}
-	else {
+	} else {
 		this.removeUndoDelayed();
 		this.slotShape.unGrayOutValue();
-		if(!this.displayNum.isNum) {
+		if (!this.displayNum.isNum) {
 			this.displayNum = new DisplayNum(new NumData(0));
 		}
 		this.displayNum.backspace();
 		this.sendUpdate();
 	}
 };
-InputWidget.NumPad.prototype.okPressed=function(){
+
+/**
+ * Saves the data to the slot
+ */
+InputWidget.NumPad.prototype.okPressed = function() {
 	this.finishFn(this.displayNum.getData());
 };
-InputWidget.NumPad.prototype.sendUpdate = function(){
+
+/**
+ * Updates the Slot's appearance to reflect the current edits
+ */
+InputWidget.NumPad.prototype.sendUpdate = function() {
 	this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 };
-// handles displaying numbers entered using the inputpad
-function DisplayNum(initialData){
+/**
+ * Handles displaying numbers entered using the NumPadWidget.  Properties of the number are divided into a number of
+ * fields to make modification easier and, avoid rounding errors, and allow for trailing 0s.  They are recombined into
+ * Data when getData() is called, and getString() gets the text to display while editing.
+ * @param {Data|NumData} initialData - The Data to initially store. If anything other than NumData, the Data will be
+ *                                     cleared when any modification occurs.
+ * @constructor
+ */
+function DisplayNum(initialData) {
+	// Whether the the Data is currently NumData. If not, it will be replaced on modification.
 	this.isNum = initialData.type === Data.types.num;
-	if(!this.isNum){
+	if (!this.isNum) {
+		// If the Data is not NumData it is simply stored as is.
 		this.data = initialData;
 		return;
 	}
-	this.isNegative=(initialData.getValue()<0);
-	var asStringData=initialData.asPositiveString();
-	var parts=asStringData.getValue().split(".");
-	this.integerPart=parts[0];
-	if(this.integerPart==""){
-		this.integerPart="0";
+	// NumData is broken across multiple fields.
+	// A boolean tracks if the number is negative
+	this.isNegative = (initialData.getValue() < 0);
+	// A positive string representation of the number, without scientific notation
+	const asStringData = initialData.asPositiveString();
+	const parts = asStringData.getValue().split(".");
+	// The integer part is everything before the decimal point, stored as a string
+	this.integerPart = parts[0];
+	if (this.integerPart === "") {
+		this.integerPart = "0";
 	}
-	this.decimalPart="";
-	this.hasDecimalPoint=(parts.length>1);
-	if(this.hasDecimalPoint){
-		this.decimalPart=parts[1];
-	}
-}
-DisplayNum.prototype.backspace=function(){
-	if(!this.isNum) return;
-	if(this.hasDecimalPoint&&this.decimalPart!=""){
-		var newL=this.decimalPart.length-1;
-		this.decimalPart=this.decimalPart.substring(0,newL);
-	}
-	else if(this.hasDecimalPoint){
-		this.hasDecimalPoint=false;
-	}
-	else if(this.integerPart.length>1){
-		var newL=this.integerPart.length-1;
-		this.integerPart=this.integerPart.substring(0,newL);
-	}
-	else if(this.integerPart!="0"){
-		this.integerPart="0";
-	}
-	else if(this.isNegative){
-		this.isNegative=false;
+	// The decimal part is everything after the decimal point, also as a string (which allows for trailing 0s
+	// Storing data as a string prevents loss of precision while editing
+	this.decimalPart = "";
+	/* Stores whether there is a decimal point following the integerPart.  Always true if the length of the
+	 * decimalPart is greater than 0. */
+	this.hasDecimalPoint = (parts.length > 1);
+	if (this.hasDecimalPoint) {
+		this.decimalPart = parts[1];
 	}
 }
-DisplayNum.prototype.switchSign=function(){
-	if(!this.isNum) return;
-	this.isNegative=!this.isNegative;
-}
-DisplayNum.prototype.addDecimalPoint=function(){
-	if(!this.isNum) return;
-	if(!this.hasDecimalPoint){
-		this.hasDecimalPoint=true;
-		this.decimalPart="";
+
+/**
+ * Removes the last digit of NumData
+ */
+DisplayNum.prototype.backspace = function() {
+	// Non-NumData is not modified
+	if (!this.isNum) return;
+	if (this.hasDecimalPoint && this.decimalPart !== "") {
+		// If there is a decimal part, cut off the last digit
+		const newL = this.decimalPart.length - 1;
+		this.decimalPart = this.decimalPart.substring(0, newL);
+	} else if (this.hasDecimalPoint) {
+		// If there's a decimal point but no decimalPart, remove the point
+		this.hasDecimalPoint = false;
+	} else if (this.integerPart.length > 1) {
+		// If there's an integer part that's longer than 1 digit, cut off the last digit
+		const newL = this.integerPart.length - 1;
+		this.integerPart = this.integerPart.substring(0, newL);
+	} else if (this.integerPart !== "0") {
+		// If there's just one digit and it isn't 0, make the number 0.
+		this.integerPart = "0";
+	} else if (this.isNegative) {
+		// If only a "-0" is left, change it to just "0".
+		this.isNegative = false;
 	}
-}
-DisplayNum.prototype.addDigit=function(digit){ //Digit is a string
-	if(!this.isNum) return;
-	if(this.hasDecimalPoint){
-		if(this.decimalPart.length<5){
-			this.decimalPart+=digit;
+};
+
+/**
+ * Inverts the sign of the number
+ */
+DisplayNum.prototype.switchSign = function() {
+	if (!this.isNum) return;
+	this.isNegative = !this.isNegative;
+};
+
+/**
+ * Adds a decimal point, if possible
+ */
+DisplayNum.prototype.addDecimalPoint = function() {
+	if (!this.isNum) return;
+	if (!this.hasDecimalPoint) {
+		this.hasDecimalPoint = true;
+		this.decimalPart = "";
+	}
+};
+
+/**
+ * Adds the provided digit to the end of number
+ * @param {string} digit - ["0","1"..."9"], a length-1 string representing a digit
+ */
+DisplayNum.prototype.addDigit = function(digit) { //Digit is a string
+	if (!this.isNum) return;
+	if (this.hasDecimalPoint) {
+		// Only up to 5 decimal places can be added to avoid floating-point weirdness
+		if (this.decimalPart.length < 5) {
+			this.decimalPart += digit;
 		}
-	}
-	else if(this.integerPart!="0"){
-		if(this.integerPart.length<10){
-			this.integerPart+=digit;
+	} else if (this.integerPart !== "0") {
+		// Only up to 10 digits can be added to the integerPart
+		if (this.integerPart.length < 10) {
+			this.integerPart += digit;
 		}
+	} else if (digit !== "0") {
+		this.integerPart = digit;
 	}
-	else if(digit!="0"){
-		this.integerPart=digit;
-	}
-}
-DisplayNum.prototype.getString=function(){
-	if(!this.isNum){
+};
+
+/**
+ * Converts the DisplayNum into a string to display
+ * @return {string|null} - The string or null if the default string for the Data should be used
+ */
+DisplayNum.prototype.getString = function() {
+	if (!this.isNum) {
 		return null;
 	}
-	var rVal="";
-	if(this.isNegative){
-		rVal+="-";
+	let rVal = "";
+	if (this.isNegative) {
+		rVal += "-";
 	}
-	rVal+=this.integerPart;
-	if(this.hasDecimalPoint){
-		rVal+=".";
-		rVal+=this.decimalPart;
+	rVal += this.integerPart;
+	if (this.hasDecimalPoint) {
+		rVal += ".";
+		rVal += this.decimalPart;
 	}
 	return rVal;
-}
-DisplayNum.prototype.getData=function(){
-	if(!this.isNum){
+};
+
+/**
+ * Converts the DisplayNum into Data to be saved into the Slot
+ * @return {Data}
+ */
+DisplayNum.prototype.getData = function() {
+	if (!this.isNum) {
 		return this.data;
 	}
-	var rVal=parseInt(this.integerPart, 10);
-	if(this.hasDecimalPoint&&this.decimalPart.length>0){
-		var decPart=parseInt(this.decimalPart, 10);
-		decPart/=Math.pow(10,this.decimalPart.length);
-		rVal+=decPart;
+	let rVal = parseInt(this.integerPart, 10);
+	if (this.hasDecimalPoint && this.decimalPart.length > 0) {
+		let decPart = parseInt(this.decimalPart, 10);
+		decPart /= Math.pow(10, this.decimalPart.length);
+		rVal += decPart;
 	}
-	if(this.isNegative){
-		rVal=0-rVal;
+	if (this.isNegative) {
+		rVal = 0 - rVal;
 	}
 	return new NumData(rVal);
-}
+};
 /**
  * Created by Tom on 7/3/2017.
  */
@@ -6040,7 +9315,7 @@ InputWidget.SelectPad.constructor = InputWidget.SelectPad;
 InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	const layer = GuiElements.layers.frontScroll;
-	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, NewInputPad.width, layer);
+	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, InputPad.width, layer);
 	this.optionsList.forEach(function(option){
 		this.menuBnList.addOption(option.text, option.callbackFn);
 	}.bind(this));
@@ -6052,7 +9327,7 @@ InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slot
 InputWidget.SelectPad.prototype.updateDim = function(){
 	DebugOptions.assert(this.maxHeight !== null);
 	this.height = SmoothMenuBnList.previewHeight(this.optionsList.length, this.maxHeight);
-	this.width = NewInputPad.innerWidth;
+	this.width = InputPad.innerWidth;
 };
 InputWidget.SelectPad.prototype.fixedHeight = function(){
 	return false;
@@ -6108,11 +9383,16 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
 	return this.relToAbsY(0);
 };
 /**
- * Created by Tom on 7/6/2017.
+ * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @param {boolean} isRecording - Whether recordings rather than effects should be selected from
+ * @constructor
  */
-function SoundInputPad(x1, x2, y1, y2, isRecording){
+function SoundInputPad(x1, x2, y1, y2, isRecording) {
 	InputSystem.call(this);
-	this.widgets = [];
 	const coords = this.coords = {};
 	coords.x1 = x1;
 	coords.x2 = x2;
@@ -6122,9 +9402,10 @@ function SoundInputPad(x1, x2, y1, y2, isRecording){
 }
 SoundInputPad.prototype = Object.create(InputSystem.prototype);
 SoundInputPad.prototype.constructor = InputSystem;
-SoundInputPad.setConstants = function(){
+
+SoundInputPad.setConstants = function() {
 	const SIP = SoundInputPad;
-	SIP.margin = NewInputPad.margin;
+	SIP.margin = InputPad.margin;
 	SIP.rowHeight = SmoothMenuBnList.bnHeight;
 	SIP.width = 300;
 	SIP.playBnWidth = RowDialog.smallBnWidth;
@@ -6132,30 +9413,56 @@ SoundInputPad.setConstants = function(){
 	SIP.iconH = RowDialog.iconH;
 	SIP.background = Colors.black;
 };
+
+/**
+ * @inheritDoc
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
 SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const SIP = SoundInputPad;
+
+	// Make a group for everything
 	this.group = GuiElements.create.group(0, 0);
+
+	// Compute dimensions
 	this.updateDim();
+
+	// Create the BubbleOverlay for this pad
 	const bubbleGroup = GuiElements.create.group(0, 0);
 	const type = Overlay.types.inputPad;
 	const layer = GuiElements.layers.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, SIP.margin, layer);
+	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, layer);
 	const coords = this.coords;
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
+
+	// Get the coords of the pad
 	const absX = this.bubbleOverlay.relToAbsX(0);
 	const absY = this.bubbleOverlay.relToAbsY(0);
+
+	// Generate content
 	this.createRows();
+
+	// Put it all in a scrollBox
 	const scrollLayer = GuiElements.layers.frontScroll;
-	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width, this.innerHeight, this.bubbleOverlay);
+	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width,
+		this.innerHeight, this.bubbleOverlay);
 	this.smoothScrollBox.show();
 };
-SoundInputPad.prototype.updateDim = function(){
+
+/**
+ * Computes the dimensions of the pad, incorporating the screen height and number of entries
+ */
+SoundInputPad.prototype.updateDim = function() {
 	const SIP = SoundInputPad;
 	const maxHeight = GuiElements.height - SIP.margin * 2;
+	// The number of recordings is retrieved from a cache
 	const soundCount = Sound.getSoundList(this.isRecording).length;
 	let desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
-	if(this.isRecording){
+	if (this.isRecording) {
 		desiredHeight += SIP.margin + SIP.rowHeight;
 	}
 	desiredHeight = Math.max(0, desiredHeight);
@@ -6163,57 +9470,92 @@ SoundInputPad.prototype.updateDim = function(){
 	this.innerHeight = desiredHeight;
 	this.width = SIP.width;
 };
-SoundInputPad.prototype.createRows = function(){
+
+/**
+ * Creates the content of the SoundInputPad
+ */
+SoundInputPad.prototype.createRows = function() {
 	const SIP = SoundInputPad;
 	let y = 0;
-	Sound.getSoundList(this.isRecording).forEach(function(sound){
+	Sound.getSoundList(this.isRecording).forEach(function(sound) {
 		this.createRow(sound, y);
 		y += SIP.margin + SIP.rowHeight;
 	}.bind(this));
-	if(this.isRecording) {
+	if (this.isRecording) {
 		this.createRecordBn(0, y, SIP.width);
 	}
 };
-SoundInputPad.prototype.createRow = function(sound, y){
+
+/**
+ * Creates the row for the provided Sound
+ * @param {Sound} sound
+ * @param {number} y
+ */
+SoundInputPad.prototype.createRow = function(sound, y) {
 	const SIP = SoundInputPad;
 	this.createMainBn(sound, 0, y, SIP.mainBnWidth, SIP.rowHeight, this.group);
 	this.createPlayBn(sound, SIP.margin + SIP.mainBnWidth, y, SIP.playBnWidth);
 };
-SoundInputPad.prototype.createRecordBn = function(x, y, width){
+
+/**
+ * Creates a "Record sounds" option included at the end of recording SoundInputPads
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
+SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText("Record sounds");
 	button.markAsOverlayPart(this.bubbleOverlay);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
 		this.close();
 	}.bind(this), true);
 	button.makeScrollable();
 };
+
+/**
+ * Creates the main button for the Sound, which selects the sound from the list
+ * @param {Sound} sound
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
 SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText(sound.name);
 	button.markAsOverlayPart(this.bubbleOverlay);
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		this.currentData = new SelectionData(sound.name, sound.id);
 		this.close();
 	}.bind(this), true);
 	button.makeScrollable();
 };
+
+/**
+ * Creates a play/stop button for previewing a sound
+ * @param {Sound} sound
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ */
 SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	// Store the state of the Button
 	const mem = {};
 	mem.playing = false;
 	button.addIcon(VectorPaths.play, SIP.iconH);
 	button.markAsOverlayPart(this.bubbleOverlay);
-	const stoppedPlaying = function(){
+	const stoppedPlaying = function() {
 		mem.playing = false;
 		button.addIcon(VectorPaths.play, SIP.iconH);
 	};
-	button.setCallbackFunction(function(){
-		if(mem.playing) {
+	button.setCallbackFunction(function() {
+		// When tapped, the state of the button determines is sounds should be stopped or played
+		if (mem.playing) {
 			stoppedPlaying();
 			Sound.stopAllSounds();
 		} else {
@@ -6224,211 +9566,345 @@ SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
 	}.bind(this), true);
 	button.makeScrollable();
 };
-SoundInputPad.prototype.close = function(){
-	if(this.closed) return;
+
+/**
+ * Closes the SoundInputPad.
+ * @inheritDoc
+ */
+SoundInputPad.prototype.close = function() {
+	if (this.closed) return;
 	InputSystem.prototype.close.call(this);
 	this.smoothScrollBox.hide();
 	this.bubbleOverlay.close();
 	Sound.stopAllSounds();
 };
-function BubbleOverlay(overlayType, color, margin, innerGroup, parent, hMargin, layer){
-	if(hMargin==null){
-		hMargin=0;
-	}
-	if(layer == null){
+/**
+ * A BubbleOverlay is a type of Overlay that places its content in a speech bubble shaped background that always
+ * is on screen.  The bubble appears above, below, left, or right of a rectangular region specified in the display()
+ * function.  The InputPad for editing Slots uses a BubbleOverlay.
+ *
+ * @param {Overlay.types} overlayType - The type of overlay (to prevent two overlays of the same type)
+ * @param {string} color - Color of the bubble in hex
+ * @param {number} margin - The size of the margin around the content
+ * @param {Element} innerGroup - The group with content to put in the overlay
+ * @param {*} parent - The object owning the BubbleOverlay. Must implement a close() function
+ * @param {Element} [layer] - The layer from GuiElements to insert the overlay into. layers.overlay is default
+ * @constructor
+ */
+function BubbleOverlay(overlayType, color, margin, innerGroup, parent, layer) {
+	if (layer == null) {
 		layer = GuiElements.layers.overlay;
 	}
 	Overlay.call(this, overlayType);
 	this.x = 0;
 	this.y = 0;
-	this.bgColor=color;
-	this.margin=margin;
-	this.hMargin=hMargin; //TODO: remove this
-	this.innerGroup=innerGroup;
-	this.parent=parent;
+	this.bgColor = color;
+	this.margin = margin;
+	this.innerGroup = innerGroup;
+	this.parent = parent;
 	this.layerG = layer;
-	this.visible=false;
+	this.visible = false;
 	this.buildBubble();
 }
 BubbleOverlay.prototype = Object.create(Overlay.prototype);
 BubbleOverlay.prototype.constructor = BubbleOverlay;
-BubbleOverlay.setGraphics=function(){
-	BubbleOverlay.triangleW=15;
-	BubbleOverlay.triangleH=7;
-	BubbleOverlay.minW=25;
-	BubbleOverlay.overlap=1;
+
+BubbleOverlay.setGraphics = function() {
+	BubbleOverlay.triangleW = 15;
+	BubbleOverlay.triangleH = 7;
+	BubbleOverlay.minW = 25;
+	BubbleOverlay.overlap = 1;
 };
-BubbleOverlay.prototype.buildBubble=function(){
+
+/**
+ * Creates the groups and graphics for the bubble
+ */
+BubbleOverlay.prototype.buildBubble = function() {
 	this.buildGroups();
 	this.makeBg();
 };
-BubbleOverlay.prototype.buildGroups=function(){
-	this.group=GuiElements.create.group(0,0);
+
+/**
+ * Creates a group for the bubble, a group for the background, and places the innerGroup in the bubble's group
+ */
+BubbleOverlay.prototype.buildGroups = function() {
+	this.group = GuiElements.create.group(0, 0);
 	TouchReceiver.addListenersOverlayPart(this.group);
-	this.bgGroup=GuiElements.create.group(0,0,this.group);
+	this.bgGroup = GuiElements.create.group(0, 0, this.group);
 	this.group.appendChild(this.innerGroup);
-	GuiElements.move.group(this.innerGroup,this.margin,this.margin);
+	GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 };
-BubbleOverlay.prototype.makeBg=function(){
-	this.bgRect=GuiElements.create.rect(this.bgGroup);
-	GuiElements.update.color(this.bgRect,this.bgColor);
-	this.triangle=GuiElements.create.path(this.bgGroup);
-	GuiElements.update.color(this.triangle,this.bgColor);
+
+/**
+ * Makes a rectangle and triangle for the background.  Position is not important yet.
+ */
+BubbleOverlay.prototype.makeBg = function() {
+	this.bgRect = GuiElements.create.rect(this.bgGroup);
+	GuiElements.update.color(this.bgRect, this.bgColor);
+	this.triangle = GuiElements.create.path(this.bgGroup);
+	GuiElements.update.color(this.triangle, this.bgColor);
 };
-BubbleOverlay.prototype.show=function(){
-	if(!this.visible) {
+
+/**
+ * Makes the bubble visible, assuming it was already displayed.
+ */
+BubbleOverlay.prototype.show = function() {
+	if (!this.visible) {
 		this.layerG.appendChild(this.group);
-		this.visible=true;
+		this.visible = true;
 		this.addOverlayAndCloseOthers();
 	}
 };
-BubbleOverlay.prototype.hide=function(){
-	if(this.visible) {
+
+/**
+ * Makes the bubble invisible.
+ */
+BubbleOverlay.prototype.hide = function() {
+	if (this.visible) {
 		this.group.remove();
-		this.visible=false;
+		this.visible = false;
 		Overlay.removeOverlay(this);
 	}
 };
-BubbleOverlay.prototype.close=function(){
+
+/**
+ * Closes the bubble and tells its parent to close
+ */
+BubbleOverlay.prototype.close = function() {
 	this.hide();
 	this.parent.close();
 };
-BubbleOverlay.prototype.display=function(x1,x2,y1,y2,innerWidth,innerHeight){
-	DebugOptions.validateNumbers(x1,x2,y1,y2,innerWidth,innerHeight);
-	var BO=BubbleOverlay;
+
+/**
+ * Builds the bubble and makes it visible with its point on the boundry of the specified rectangle
+ * @param {number} x1 - x coord of top left point of rectangle
+ * @param {number} x2 - x coord of bottom right point of rectangle
+ * @param {number} y1 - y coord of top left point of rectangle
+ * @param {number} y2 - y coord of bottom right point of rectangle
+ * @param {number} innerWidth - The width of the content of the bubble
+ * @param {number} innerHeight - The height of the content of the bubble
+ */
+BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeight) {
+	DebugOptions.validateNumbers(x1, x2, y1, y2, innerWidth, innerHeight);
+	const BO = BubbleOverlay;
+
 	/* Compute dimensions of the bubble */
-	var width=innerWidth+2*this.margin;
-	if(width<BO.minW){
-		width=BO.minW;
+	let width = innerWidth + 2 * this.margin;
+	if (width < BO.minW) {
+		width = BO.minW;
 	}
-	var height=innerHeight+2*this.margin;
+	const height = innerHeight + 2 * this.margin;
+
 	/* Center the content in the bubble */
-	GuiElements.move.group(this.innerGroup,(width-innerWidth)/2,(height-innerHeight)/2);
+	GuiElements.move.group(this.innerGroup, (width - innerWidth) / 2, (height - innerHeight) / 2);
 
 	/* Compute dimension depending on orientation */
-	var longW = width + BO.triangleH;
-	var longH = height + BO.triangleH;
+	const longW = width + BO.triangleH;
+	const longH = height + BO.triangleH;
 
-	var attemptB = Math.max(0, y2 + longH - GuiElements.height);
-	var attemptT = Math.max(0, longH - y1);
-	var attemptR = Math.max(0, x2 + longW - GuiElements.width);
-	var attemptL = Math.max(0, longW - x1);
-	var min = Math.min(attemptT, attemptB, attemptL, attemptR);
-	var vertical = attemptT <= min || attemptB <= min;
+	/* Determine how much content is cut off if the bubble goes in each direction */
+	const attemptB = Math.max(0, y2 + longH - GuiElements.height);
+	const attemptT = Math.max(0, longH - y1);
+	const attemptR = Math.max(0, x2 + longW - GuiElements.width);
+	const attemptL = Math.max(0, longW - x1);
 
-	var topLeftX = NaN;
-	var topLeftY = NaN;
-	var x = NaN;
-	var y = NaN;
-	var triangleDir = 1;
-	if(vertical){
+	/* Find the amount of content cut off using the best attempt */
+	const min = Math.min(attemptT, attemptB, attemptL, attemptR);
+
+	/* The vertical direction is used if the top or bottom attempts were the best */
+	const vertical = attemptT <= min || attemptB <= min;
+
+	/* To be determined */
+	let topLeftX = NaN;   // The x coord of the background rect
+	let topLeftY = NaN;   // The y coord of the background rect
+	let x = NaN;   // The x coord of the point of the triangle
+	let y = NaN;   // The y coord of the point of the triangle
+	let triangleDir = 1;   // 1 or -1
+	if (vertical) {
 		x = (x1 + x2) / 2;
+		// Find the best x for the background rect
 		topLeftX = this.fitLocationToRange(x, width, GuiElements.width);
-		if(attemptB <= min){
+		if (attemptB <= min) {
 			topLeftY = y2 + BO.triangleH;
 			y = y2;
-		}
-		else{
+		} else {
 			topLeftY = y1 - longH;
 			y = y1;
 			triangleDir = -1;
 		}
-	}
-	else{
+	} else {
 		y = (y1 + y2) / 2;
+		// Find the best y for the background rect
 		topLeftY = this.fitLocationToRange(y, height, GuiElements.height);
-		if(attemptL <= min){
+		if (attemptL <= min) {
 			topLeftX = x1 - longW;
 			x = x1;
 			triangleDir = -1;
-		}
-		else{
+		} else {
 			topLeftX = x2 + BO.triangleH;
 			x = x2;
 		}
 	}
-	var triX = x - topLeftX;
-	var triY = y - topLeftY;
-	var triH = (BO.triangleH+BO.overlap)*triangleDir;
+
+	// Convert the triangle's coords from abs to rel coords
+	const triX = x - topLeftX;
+	const triY = y - topLeftY;
+	const triH = (BO.triangleH + BO.overlap) * triangleDir;
 	this.x = topLeftX;
 	this.y = topLeftY;
-	GuiElements.move.group(this.group,topLeftX,topLeftY);
-	GuiElements.update.triangleFromPoint(this.triangle,triX,triY,BO.triangleW,triH, vertical);
-	GuiElements.update.rect(this.bgRect,0,0,width,height);
+	GuiElements.move.group(this.group, topLeftX, topLeftY);
+
+	// Move the elements using the results
+	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, vertical);
+	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 };
-BubbleOverlay.prototype.fitLocationToRange = function(center, width, range){
-	var res = center - width / 2;
-	if(width > range){
+/**
+ * Finds the best x coord for an object the specified width that would like to be centered at the specified center
+ * but needs to fit in the specified range
+ * By symmetry, also works for y coords with height
+ * @param {number} center - The x coord the object would like to be centered at
+ * @param {number} width - The width of the object
+ * @param {number} range - The width of the space the object needs to fit within
+ * @return {number} - The x coord the object should have
+ */
+BubbleOverlay.prototype.fitLocationToRange = function(center, width, range) {
+	let res = center - width / 2;   // The object would like this x coord
+	if (width > range) {
+		// The object is bigger than the range, so we make it extend beyond both sides equally
+		// result:   --[----]--
 		res = (range - width) / 2;
-	}
-	else if(res < 0){
+	} else if (res < 0) {
+		// The object would like to be to the left of the range, so we align it to the left
+		// object wants:   --[--      ]
+		// result:    [----    ]
 		res = 0;
-	}
-	else if(res + width > range){
+	} else if (res + width > range) {
+		// The object would like to be to the right of the range, so we align it to the right
+		// object wants:   [      --]--
+		// result:    [    ----]
 		res = range - width;
 	}
 	return res;
 };
-BubbleOverlay.prototype.getVPadding=function() {
-	return this.margin*2+BubbleOverlay.triangleH;
-};
-BubbleOverlay.prototype.relToAbsX = function(x){
+
+/* Convert between rel and abs coords */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+BubbleOverlay.prototype.relToAbsX = function(x) {
 	return x + this.x + this.margin;
 };
-BubbleOverlay.prototype.relToAbsY = function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
-function ResultBubble(leftX,rightX,upperY,lowerY,text, error){
-	var RB = ResultBubble;
-	if(error == null){
+/**
+ * A bubble-shaped element that holds text containing the result of executing a block that was tapped.
+ * Becomes visible as soon as it is constructed.
+ * @param {number} leftX - left boundary of the Block
+ * @param {number} rightX - right boundary of the Block
+ * @param {number} upperY - top boundary of the Block
+ * @param {number} lowerY - bottom boundary of the Block
+ * @param {string} text - The text to show in the bubble
+ * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
+ * @constructor
+ */
+function ResultBubble(leftX, rightX, upperY, lowerY, text, error) {
+	const RB = ResultBubble;
+	if (error == null) {
 		error = false;
 	}
-	var fontColor = RB.fontColor;
-	var bgColor = RB.bgColor;
-	if(error){
+	let fontColor = RB.fontColor;
+	let bgColor = RB.bgColor;
+	if (error) {
 		fontColor = RB.errorFontColor;
 		bgColor = RB.errorBgColor;
 	}
-	var height=RB.charHeight;
-	var textE=GuiElements.draw.text(0,height,text,RB.fontSize,fontColor,RB.font,RB.fontWeight);
-	GuiElements.update.textLimitWidth(textE,text,GuiElements.width-RB.hMargin*2);
-	var width=GuiElements.measure.textWidth(textE);
-	var group=GuiElements.create.group(0,0);
+	const height = RB.font.charHeight;
+	const textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
+	GuiElements.update.textLimitWidth(textE, text, GuiElements.width - RB.hMargin * 2);
+	const width = GuiElements.measure.textWidth(textE);
+	const group = GuiElements.create.group(0, 0);
 	group.appendChild(textE);
 	let layer = GuiElements.layers.resultBubble;
 	let overlayType = Overlay.types.resultBubble;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, bgColor,RB.margin,group,this,RB.hMargin,layer);
-	this.bubbleOverlay.display(leftX,rightX,upperY,lowerY,width,height);
-	/*this.vanishTimer = self.setInterval(function () { Overlay.closeOverlays() }, RB.lifetime);*/
+	this.bubbleOverlay = new BubbleOverlay(overlayType, bgColor, RB.margin, group, this, layer);
+	this.bubbleOverlay.display(leftX, rightX, upperY, lowerY, width, height);
 }
-ResultBubble.setConstants=function(){
-	var RB=ResultBubble;
-	RB.fontColor=Colors.black;
+
+ResultBubble.setConstants = function() {
+	const RB = ResultBubble;
+	RB.fontColor = Colors.black;
 	RB.errorFontColor = Colors.white;
-	RB.bgColor=Colors.white;
+	RB.bgColor = Colors.white;
 	RB.errorBgColor = "#c00000";
-	RB.fontSize=16;
-	RB.font="Arial";
-	RB.fontWeight="normal";
-	RB.charHeight=12;
-	RB.margin=4;
+	RB.font = Font.uiFont(16);
+	RB.margin = 4;
 	/*RB.lifetime=3000;*/
-	RB.hMargin=20;
+	RB.hMargin = 20;
 };
-ResultBubble.prototype.close=function(){
-	this.bubbleOverlay.hide();
-	/*this.vanishTimer = window.clearInterval(this.vanishTimer);*/
-};
+
 /**
- * Created by Tom on 6/13/2017.
+ * Hides the result
  */
+ResultBubble.prototype.close = function() {
+	this.bubbleOverlay.hide();
+};
+
+/**
+ * Displays a ResultBubble below a block
+ * @param {string} value - The message to display
+ * @param {number} x - The x coord of the Block
+ * @param {number} y - The y coord of the Block
+ * @param {number} width - The width of the Block
+ * @param {number} height - The height of the Block
+ * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
+ */
+ResultBubble.displayValue = function(value, x, y, width, height, error) {
+	if (error == null) {
+		error = false;
+	}
+	const leftX = x;
+	const rightX = x + width;
+	const upperY = y;
+	const lowerY = y + height;
+	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
+};
 /**
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
+ * The scrollbox is one of the few components to use regular HTML (in this case a scrollable div).  This allows for
+ * smoother scrolling
+ *
+ * Unfortunately, iOS tries to scroll the entire website if the SmoothScrollBox is at the minimum/maximum scrolling
+ * position vertically.  To prevent the entire webapp from scrolling, the body is set to position:fixed, but the
+ * iPad still tries to scroll it, which has no visual affect but locks the focus on the body until the user stops
+ * touching the screen for 2 secs or so (preventing them from scrolling the actual SmoothScrollBox).  To stop this,
+ * a timer regularly checks if the box is scrolled to an extreme position and moves it 1 pixel to compensate.  This
+ * behaviour is registered with TouchReceiver.createScrollFixTimer()
+ *
+ * The smoothScrollBox must use actual screen coordinates. Unlike other parts of the SVG it can't ignore the present
+ * zoom level (as most relToAbs functions do), and thus uses GuiElements.relToAbs to account for the zoom and get
+ * real absolute coords, rather than the fake abs coords provided in the constructor (which ignore the zoom level)
+ *
+ * @param {Element} group - The group the scrollBox should put inside the svg inside the div
+ * @param {Element} layer - The layer the (outer div) the scrollDiv should be added to
+ * @param {number} absX - The x screen coord the scrollDiv should appear at
+ * @param {number} absY - The y screen coord the scrollDiv should appear at
+ * @param {number} width - The width the div containing the content should have
+ * @param {number} height - The height the div containing the content should have
+ * @param {number} innerWidth - The width of the content within the div.  If larger, the div will scroll
+ * @param {number} innerHeight - The height of the content within the div.  If larger, the div will scroll
+ * @param {Overlay|null} [partOfOverlay=null] - The Overlay this SmoothScrollBox is a part of, or null if N/A
+ * @constructor
  */
-function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay){
-	if(partOfOverlay == null){
+function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay) {
+	if (partOfOverlay == null) {
 		partOfOverlay = null;
 	}
 	DebugOptions.validateNonNull(group, layer);
@@ -6451,8 +9927,12 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
 	this.currentZoom = GuiElements.zoomFactor;
 	this.partOfOverlay = partOfOverlay;
 }
-SmoothScrollBox.prototype.updateScrollSet = function(){
-	if(this.visible) {
+
+/**
+ * Recomputes the sizes and positions of the SmoothScrollBox
+ */
+SmoothScrollBox.prototype.updateScrollSet = function() {
+	if (this.visible) {
 		let realX = GuiElements.relToAbsX(this.x);
 		let realY = GuiElements.relToAbsY(this.y);
 
@@ -6460,31 +9940,57 @@ SmoothScrollBox.prototype.updateScrollSet = function(){
 			this.height, this.innerWidth, this.innerHeight);
 	}
 };
-SmoothScrollBox.prototype.updateZoom = function(){
-	var currentScrollX = this.getScrollX();
-	var currentScrollY = this.getScrollY();
+
+/**
+ * Captures the scroll position, calls updateScrollSet, and restores the scroll position
+ */
+SmoothScrollBox.prototype.updateZoom = function() {
+	const currentScrollX = this.getScrollX();
+	const currentScrollY = this.getScrollY();
 	this.currentZoom = GuiElements.zoomFactor;
 	this.updateScrollSet();
 	this.setScrollX(currentScrollX);
 	this.setScrollY(currentScrollY);
 };
-SmoothScrollBox.prototype.setContentDims = function(innerWidth, innerHeight){
+
+/**
+ * Changes the dimensions of the content inside the SmoothScrollBox
+ * @param {number} innerWidth - The new width of the content
+ * @param {number} innerHeight - The new height of the content
+ */
+SmoothScrollBox.prototype.setContentDims = function(innerWidth, innerHeight) {
 	this.innerHeight = innerHeight;
 	this.innerWidth = innerWidth;
 	this.updateScrollSet();
 };
-SmoothScrollBox.prototype.setDims = function(width, height){
+
+/**
+ * Changes the dimensions of the outside of the SmoothScrollBox
+ * @param {number} width
+ * @param {number} height
+ */
+SmoothScrollBox.prototype.setDims = function(width, height) {
 	this.width = width;
 	this.height = height;
 	this.updateScrollSet();
 };
-SmoothScrollBox.prototype.move = function(absX, absY){
+
+/**
+ * Changes the position of the SmoothScrollBox
+ * @param {number} absX
+ * @param {number} absY
+ */
+SmoothScrollBox.prototype.move = function(absX, absY) {
 	this.x = absX;
 	this.y = absY;
 	this.updateScrollSet();
 };
-SmoothScrollBox.prototype.show = function(){
-	if(!this.visible){
+
+/**
+ * Makes the SmoothScrollBox visible
+ */
+SmoothScrollBox.prototype.show = function() {
+	if (!this.visible) {
 		this.visible = true;
 		this.layer.appendChild(this.scrollDiv);
 		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
@@ -6492,376 +9998,256 @@ SmoothScrollBox.prototype.show = function(){
 		TouchReceiver.setInitialScrollFix(this.scrollDiv);
 	}
 };
-SmoothScrollBox.prototype.hide = function(){
-	if(this.visible){
+
+/**
+ * Hides the SmoothScrollBox
+ */
+SmoothScrollBox.prototype.hide = function() {
+	if (this.visible) {
 		this.visible = false;
 		this.layer.removeChild(this.scrollDiv);
-		if(this.fixScrollTimer != null) {
+		if (this.fixScrollTimer != null) {
 			window.clearInterval(this.fixScrollTimer);
 		}
 	}
 };
-SmoothScrollBox.prototype.relToAbsX=function(x){
+
+/* Convert between coords inside the group in the SmoothScrollBox and screen coords */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+SmoothScrollBox.prototype.relToAbsX = function(x) {
 	return x - this.scrollDiv.scrollLeft / this.currentZoom + this.x;
 };
-SmoothScrollBox.prototype.relToAbsY=function(y){
-	return y - this.scrollDiv.scrollTop  / this.currentZoom + this.y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+SmoothScrollBox.prototype.relToAbsY = function(y) {
+	return y - this.scrollDiv.scrollTop / this.currentZoom + this.y;
 };
-SmoothScrollBox.prototype.absToRelX=function(x){
+/**
+ * @param {number} x
+ * @return {number}
+ */
+SmoothScrollBox.prototype.absToRelX = function(x) {
 	return x + this.scrollDiv.scrollLeft * this.currentZoom - this.x;
 };
-SmoothScrollBox.prototype.absToRelY=function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+SmoothScrollBox.prototype.absToRelY = function(y) {
 	return y + this.scrollDiv.scrollTop * this.currentZoom - this.y;
 };
-SmoothScrollBox.prototype.getScrollY = function(){
-	if(!this.visible) return 0;
+
+/* Get/set the scroll amount in various directions */
+/**
+ * @return {number}
+ */
+SmoothScrollBox.prototype.getScrollY = function() {
+	if (!this.visible) return 0;
 	return this.scrollDiv.scrollTop / this.currentZoom;
 };
-SmoothScrollBox.prototype.getScrollX = function(){
-	if(!this.visible) return 0;
+/**
+ * @return {number}
+ */
+SmoothScrollBox.prototype.getScrollX = function() {
+	if (!this.visible) return 0;
 	return this.scrollDiv.scrollLeft / this.currentZoom;
 };
-SmoothScrollBox.prototype.setScrollX = function(x){
+/**
+ * @param {number} x
+ */
+SmoothScrollBox.prototype.setScrollX = function(x) {
 	this.scrollDiv.scrollLeft = x * this.currentZoom;
 	TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
-SmoothScrollBox.prototype.setScrollY = function(y){
+/**
+ * @param {number} y
+ */
+SmoothScrollBox.prototype.setScrollY = function(y) {
 	this.scrollDiv.scrollTop = y * this.currentZoom;
 	TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
-SmoothScrollBox.prototype.isMoving = function(){
-	return !this.scrollStatus.still;
-};
-function MenuBnList(parentGroup,x,y,bnMargin,width,columns){
-	this.x=x;
-	this.y=y;
-	this.width=width;
-	if(width==null){
-		this.width=null;
-	}
-	this.height=0;
-	this.bnHeight=MenuBnList.bnHeight;
-	this.bnMargin=bnMargin;
-	this.bnsGenerated=false;
-	this.bnTextList=new Array();
-	this.bnFunctionsList=new Array();
-	this.bns=null;
-	this.group=GuiElements.create.group(x,y);
-	this.parentGroup=parentGroup;
-	this.visible=false;
-	if(columns==null){
-		columns=1;
-	}
-	this.columns=columns;
-	this.partOfOverlay=false;
-	this.internalHeight=0;
-	this.scrolling=false;
-	this.scrollYOffset=0;
-	this.scrollY=0;
-	this.scrollable=false;
-	this.maxHeight=null;
-}
-MenuBnList.setGraphics=function(){
-	var MBL=MenuBnList;
-	MBL.bnHeight=34; //25
-	MBL.bnHMargin=10; //only used when width not specified.
-	MBL.minWidth=40;
-}
-MenuBnList.prototype.setMaxHeight=function(maxHeight){
-	this.maxHeight=maxHeight;
-	this.clippingPath=GuiElements.clip(0,0,GuiElements.width,maxHeight,this.group);
-	this.clipRect=this.clippingPath.childNodes[0];
-	this.scrollRect=this.makeScrollRect();
-};
-MenuBnList.prototype.addOption=function(text,func){
-	this.bnsGenerated=false;
-	this.bnTextList.push(text);
-	if(func==null){
-		this.bnFunctionsList.push(null);
-	}
-	else{
-		this.bnFunctionsList.push(func);
-	}
-}
-MenuBnList.prototype.show=function(){
-	this.generateBns();
-	if(!this.visible){
-		this.visible=true;
-		this.parentGroup.appendChild(this.group);
-	}
-}
-MenuBnList.prototype.hide=function(){
-	if(this.visible){
-		this.visible=false;
-		this.group.remove();
-		if(this.maxHeight!=null) {
-			this.clippingPath.remove();
-		}
-	}
-}
-MenuBnList.prototype.generateBns=function(){
-	var columns=this.columns;
-	this.computeWidth(columns);
-	if(!this.bnsGenerated){
-		this.clearBnsArray();
-		var currentY=0;
-		var currentX=0;
-		var column=0;
-		var count=this.bnTextList.length;
-		var bnWidth=0;
-		for(var i=0;i<count;i++){
-			if(column==columns){
-				column=0;
-				currentX=0;
-				currentY+=this.bnHeight+this.bnMargin;
-			}
-			if(column==0) {
-				bnWidth = (this.width + this.bnMargin) / columns - this.bnMargin;
-				var remainingBns=count-i;
-				if(remainingBns<columns){
-					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
-				}
-			}
-			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.bnTextList[i],this.bnFunctionsList[i]));
-			currentX+=bnWidth+this.bnMargin;
-			column++;
-		}
-		currentY+=this.bnHeight;
-		this.internalHeight=currentY;
-		if(count==0){
-			this.internalHeight=0;
-		}
-		this.height=this.internalHeight;
-		if(this.maxHeight!=null){
-			this.height=Math.min(this.internalHeight,this.maxHeight);
-		}
-		this.scrollable=this.height!=this.internalHeight;
-		this.updateScrollRect();
-		this.bnsGenerated=true;
-	}
-};
-MenuBnList.prototype.clearBnsArray=function(){
-	if(this.bns!=null){
-		for(var i=0;i<this.bns.length;i++){
-			this.bns[i].remove();
-		}
-	}
-	this.bns=new Array();
-}
-MenuBnList.prototype.generateBn=function(x,y,width,text,func){
-	var MBL=MenuBnList;
-	var bn=new Button(x,y,width,this.bnHeight,this.group);
-	bn.addText(text);
-	bn.setCallbackFunction(func,true);
-	bn.markAsOverlayPart(this.partOfOverlay);
-	bn.menuBnList=this;
-	return bn;
-}
-MenuBnList.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	GuiElements.move.group(this.group,x,y+this.scrollY);
-	if(this.maxHeight!=null){
-		GuiElements.move.element(this.clipRect,0,(0-this.scrollY));
-	}
-};
-MenuBnList.prototype.computeWidth=function(){
-	if(this.width==null) {
-		var columns = this.columns;
-		var MBL = MenuBnList;
-		var longestW = 0;
-		for (var i = 0; i < this.bnTextList.length; i++) {
-			var currentW = GuiElements.measure.stringWidth(this.bnTextList[i], Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
-			if (currentW > longestW) {
-				longestW = currentW;
-			}
-		}
-		this.width = columns * longestW + columns * 2 * MBL.bnHMargin + (columns - 1) * this.bnMargin;
-		if (this.width < MBL.minWidth) {
-			this.width = MBL.minWidth;
-		}
-	}
-}
-MenuBnList.prototype.makeScrollRect=function(){
-	var rectE=GuiElements.create.rect(this.group);
-	rectE.setAttributeNS(null,"fill","#000");
-	GuiElements.update.opacity(rectE,0);
-	TouchReceiver.addListenersMenuBnListScrollRect(rectE,this);
-	return rectE;
-};
-MenuBnList.prototype.updateScrollRect=function(){
-	if(this.maxHeight!=null) {
-		GuiElements.update.rect(this.scrollRect, 0, 0, this.width, this.internalHeight);
-	}
-};
-MenuBnList.prototype.isEmpty=function(){
-	return this.bnTextList.length==0;
-};
-MenuBnList.prototype.startScroll=function(y){
-	if(!this.scrolling){
-		this.scrollYOffset = this.scrollY - y;
-		this.scrolling=true;
-	}
-};
-MenuBnList.prototype.updateScroll=function(y){
-	if(this.scrolling){
-		this.scroll(this.scrollYOffset + y);
-		this.scrolling=true;
-	}
-};
-MenuBnList.prototype.endScroll=function(){
-	if(this.scrolling){
-		this.scrolling=false;
-	}
-};
-MenuBnList.prototype.scroll=function(scrollY){
-	this.scrollY=scrollY;
-	this.scrollY=Math.min(0,this.scrollY);
-	this.scrollY=Math.max(this.height-this.internalHeight,this.scrollY);
-	this.move(this.x,this.y);
-};
-MenuBnList.prototype.markAsOverlayPart = function(overlay){
-	this.partOfOverlay = overlay;
-};
 
 /**
- * Created by Tom on 6/5/2017.
+ * Determines whether the scrollBox is currently being scrolled
+ * @return {boolean}
  */
-
-function SmoothMenuBnList(parent, parentGroup,x,y,width,layer){
-	if(layer == null){
+SmoothScrollBox.prototype.isMoving = function() {
+	return !this.scrollStatus.still;
+};
+/**
+ * A stack of buttons which become scrollable if thee isn't enough screen space.  Is not build until show() is called.
+ * Options should be added through addOption before show() is called.  setMaxHeight can also be called to cause the
+ * list to scroll if the maximum height is exceeded.
+ * TODO: use SmoothScrollBox instead of manually implementing scrolling
+ *
+ * @param parent - Some UI object that implements relToAbsX and relToAbsY
+ * TODO: remove parentGroup as it is not used
+ * @param {Element} parentGroup - The group the SmoothMenuBnList should add itself to
+ * @param {number} x - The rel x coord the list should appear at
+ * @param {number} y - The rel y coord the list should appear at
+ * @param {number} [width] - The width the list should have.  If null, computed on the fly to match longest entry
+ * @param {Element} [layer] - The layer the list should place the scrollDiv on. frontScroll used by default
+ * @constructor
+ */
+function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
+	if (layer == null) {
 		layer = GuiElements.layers.frontScroll;
 	}
-	this.x=x;
-	this.y=y;
-	this.width=width;
-	if(width==null){
-		this.width=null;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	if (width == null) {
+		this.width = null;
 	}
-	this.height=0;
-	this.bnHeight=SmoothMenuBnList.bnHeight;
-	this.bnMargin=Button.defaultMargin;
-	this.bnsGenerated=false;
+	// computed later
+	this.height = 0;
+	// Store constants TODO: not really necessary
+	this.bnHeight = SmoothMenuBnList.bnHeight;
+	this.bnMargin = Button.defaultMargin;
+	this.bnsGenerated = false;
+	// Prepare list to store options.
+	/** @type {Array<object>} - An array of objects with properties like text, func, and addTextFn */
 	this.options = [];
-	this.bns=null;
+	/** @type {null|Array<object>} */
+	this.bns = null;
 
+	// Build the scroll box but not the buttons
 	this.build();
-	this.parentGroup=parentGroup;
+	this.parentGroup = parentGroup;
 	this.parent = parent;
 	this.layer = layer;
 
-	this.visible=false;
-	this.partOfOverlay=null;
-	this.internalHeight=0;
-
-	this.maxHeight=null;
-
-	this.scrolling=false;
-	this.scrollYOffset=0;
-	this.scrollY=0;
-	this.scrollable=false;
-
+	this.visible = false;
+	// May be set later with markAsOverlayPart
+	this.partOfOverlay = null;
+	this.internalHeight = 0;
+	// optionally set with setMaxHeight()
+	this.maxHeight = null;
+	// Tracks whether the list is scrolling
 	this.scrollStatus = {};
+	this.scrollable = false;
 }
-SmoothMenuBnList.setGraphics=function(){
-	var SMBL=SmoothMenuBnList;
-	SMBL.bnHeight=34; //25
-	SMBL.bnHMargin=10; //only used when width not specified.
-	SMBL.minWidth=40;
+
+SmoothMenuBnList.setGraphics = function() {
+	const SMBL = SmoothMenuBnList;
+	SMBL.bnHeight = 34;
+	SMBL.bnHMargin = 10; //only used when width not specified.
+	SMBL.minWidth = 40;
 };
-SmoothMenuBnList.prototype.build = function(){
-	//this.foreignObject = GuiElements.create.foreignObject();
+
+/**
+ * Build the parts necessary to make a scrollable list, but not the buttons
+ */
+SmoothMenuBnList.prototype.build = function() {
 	this.scrollDiv = GuiElements.create.scrollDiv();
 	TouchReceiver.addListenersSmoothMenuBnListScrollRect(this.scrollDiv, this);
 	this.svg = GuiElements.create.svg(this.scrollDiv);
 	this.zoomG = GuiElements.create.group(0, 0, this.svg);
 };
-SmoothMenuBnList.prototype.setMaxHeight=function(maxHeight){
-	this.maxHeight=maxHeight;
+
+/**
+ * Configures the SmoothMenuBnList to scroll if a certain height is exceeded
+ * @param {number} maxHeight
+ */
+SmoothMenuBnList.prototype.setMaxHeight = function(maxHeight) {
+	this.maxHeight = maxHeight;
 };
-SmoothMenuBnList.prototype.addOption=function(text,func,icon){
-	if(func == null){
+
+/**
+ * Adds an option to the SmoothMenuBnList
+ * @param {string} text - The text to display on the Button.  Not used if addTextFn is defined
+ * @param {function|null} func - type () -> (), the function to call when the option is selected
+ * @param {function|null} [addTextFn] - type (Button) -> (), formats the button for this option
+ */
+SmoothMenuBnList.prototype.addOption = function(text, func, addTextFn) {
+	if (func == null) {
 		func = null;
 	}
-	if(icon == null){
-		icon = null;
+	if (addTextFn == null) {
+		addTextFn = null;
 	}
 
-	this.bnsGenerated=false;
+	this.bnsGenerated = false;
 	const option = {};
 	option.func = func;
 	option.text = text;
-	option.icon = icon;
+	option.addTextFn = addTextFn;
 	this.options.push(option);
 };
-SmoothMenuBnList.prototype.show=function(){
+
+/**
+ * Builds the buttons and shows the list on the screen
+ */
+SmoothMenuBnList.prototype.show = function() {
 	this.generateBns();
-	if(!this.visible){
-		this.visible=true;
+	if (!this.visible) {
+		this.visible = true;
 		this.layer.appendChild(this.scrollDiv);
 		this.updatePosition();
+		// See SmoothScrollBox for an explaination of why this is necessary
 		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
 		TouchReceiver.setInitialScrollFix(this.scrollDiv);
 	}
 };
-SmoothMenuBnList.prototype.hide=function(){
-	if(this.visible){
-		this.visible=false;
+
+/**
+ * Hides the list so it can be shown again
+ */
+SmoothMenuBnList.prototype.hide = function() {
+	if (this.visible) {
+		this.visible = false;
 		this.layer.removeChild(this.scrollDiv);
-		if(this.fixScrollTimer != null) {
+		if (this.fixScrollTimer != null) {
 			window.clearInterval(this.fixScrollTimer);
 		}
 	}
 };
-SmoothMenuBnList.prototype.generateBns=function(){
-	var columns=1;
+
+/**
+ * Creates the buttons for the list
+ */
+SmoothMenuBnList.prototype.generateBns = function() {
+	// The width is computed and stored in this.width
 	this.computeWidth();
-	if(!this.bnsGenerated){
+	if (!this.bnsGenerated) {
 		this.clearBnsArray();
-		var currentY=0;
-		var currentX=0;
-		var column=0;
-		var count=this.options.length;
-		var bnWidth=0;
-		for(var i=0;i<count;i++){
-			if(column==columns){
-				column=0;
-				currentX=0;
-				currentY+=this.bnHeight+this.bnMargin;
-			}
-			if(column==0) {
-				bnWidth = (this.width + this.bnMargin) / columns - this.bnMargin;
-				var remainingBns=count-i;
-				if(remainingBns<columns){
-					bnWidth=(this.width+this.bnMargin)/remainingBns-this.bnMargin;
-				}
-			}
-			this.bns.push(this.generateBn(currentX,currentY,bnWidth,this.options[i]));
-			currentX+=bnWidth+this.bnMargin;
-			column++;
+		let currentY = 0;
+		let count = this.options.length;
+		for (let i = 0; i < count; i++) {
+			this.bns.push(this.generateBn(0, currentY, this.width, this.options[i]));
+			currentY += this.bnHeight + this.bnMargin;
 		}
-		currentY+=this.bnHeight;
-		this.internalHeight=currentY;
-		if(count==0){
-			this.internalHeight=0;
+		currentY -= this.bnMargin;
+		this.internalHeight = currentY;
+		if (count === 0) {
+			this.internalHeight = 0;
 		}
-		this.height=this.internalHeight;
-		if(this.maxHeight!=null){
-			this.height=Math.min(this.internalHeight,this.maxHeight);
+		this.height = this.internalHeight;
+		if (this.maxHeight != null) {
+			this.height = Math.min(this.internalHeight, this.maxHeight);
 		}
-		this.scrollable=this.height!=this.internalHeight;
-		this.bnsGenerated=true;
+		this.scrollable = this.height !== this.internalHeight;
+		this.bnsGenerated = true;
 		this.updatePosition();
 	}
 };
-SmoothMenuBnList.prototype.computeWidth=function(){
-	if(this.width==null) {
-		var columns = 1;
-		var MBL = MenuBnList;
-		var longestW = 0;
+
+/**
+ * If the width is not set yet, computes the width of the longest button and stores it in this.width
+ */
+SmoothMenuBnList.prototype.computeWidth = function() {
+	if (this.width == null) {
+		const columns = 1;
+		const MBL = SmoothMenuBnList;
+		let longestW = 0;
 		for (let i = 0; i < this.options.length; i++) {
 			const string = this.options[i].text;
-			var currentW = GuiElements.measure.stringWidth(string, Button.defaultFont, Button.defaultFontSize, Button.defaultFontWeight);
+			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -6872,33 +10258,57 @@ SmoothMenuBnList.prototype.computeWidth=function(){
 		}
 	}
 };
-SmoothMenuBnList.prototype.isEmpty=function(){
+
+/**
+ * Returns whether the list is empty
+ * @return {boolean}
+ */
+SmoothMenuBnList.prototype.isEmpty = function() {
 	return this.options.length === 0;
 };
-SmoothMenuBnList.prototype.clearBnsArray=function(){
-	if(this.bns!=null){
-		for(let i=0;i<this.bns.length;i++){
+
+/**
+ * Removes all the buttons currently in the list
+ */
+SmoothMenuBnList.prototype.clearBnsArray = function() {
+	if (this.bns != null) {
+		for (let i = 0; i < this.bns.length; i++) {
 			this.bns[i].remove();
 		}
 	}
-	this.bns=[];
+	this.bns = [];
 };
-SmoothMenuBnList.prototype.generateBn=function(x,y,width,option){
-	const bn = new Button(x,y,width,this.bnHeight,this.zoomG);
-	bn.addText(option.text);
-	bn.setCallbackFunction(option.func,true);
-	if(option.icon != null){
-		bn.addSideTextAndIcon(option.icon, null, option.text);
+
+/**
+ * Creates a button for the provided option
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {object} option - Object with fields for func, text, and/or addTextFn
+ * @return {Button}
+ */
+SmoothMenuBnList.prototype.generateBn = function(x, y, width, option) {
+	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
+	bn.setCallbackFunction(option.func, true);
+	if (option.addTextFn != null) {
+		// Provides flexibility to format the button
+		option.addTextFn(bn);
+	} else {
+		bn.addText(option.text);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
 	return bn;
 };
-SmoothMenuBnList.prototype.updatePosition = function(){
-	if(this.visible) {
-		//Compensates for a WebKit bug which prevents transformations from moving foreign objects
-		var realX = this.parent.relToAbsX(this.x);
-		var realY = this.parent.relToAbsY(this.y);
+
+/**
+ * Recomputes the location of the list and moves it
+ */
+SmoothMenuBnList.prototype.updatePosition = function() {
+	if (this.visible) {
+		let realX = this.parent.relToAbsX(this.x);
+		let realY = this.parent.relToAbsY(this.y);
+		// SmoothMenuBnLists need real absolute coords that account for the zoom level
 		realX = GuiElements.relToAbsX(realX);
 		realY = GuiElements.relToAbsY(realY);
 
@@ -6906,130 +10316,215 @@ SmoothMenuBnList.prototype.updatePosition = function(){
 			this.height, this.width, this.internalHeight);
 	}
 };
-SmoothMenuBnList.prototype.updateZoom = function(){
+
+/**
+ * Recomputes location
+ */
+SmoothMenuBnList.prototype.updateZoom = function() {
 	this.updatePosition();
 };
-SmoothMenuBnList.prototype.getScroll = function(){
-	if(!this.visible) return 0;
+
+/**
+ * Returns the current scroll position in the menu
+ * @return {number}
+ */
+SmoothMenuBnList.prototype.getScroll = function() {
+	if (!this.visible) return 0;
 	return this.scrollDiv.scrollTop;
 };
-SmoothMenuBnList.prototype.setScroll = function(scrollTop){
-	if(!this.visible) return;
+
+/**
+ * Sets the current scroll position in the menu
+ * @param {number} scrollTop
+ */
+SmoothMenuBnList.prototype.setScroll = function(scrollTop) {
+	if (!this.visible) return;
 	scrollTop = Math.max(0, scrollTop);
-	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
+	const height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
 };
-SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay){
+
+/**
+ * Tells this list it is part of an overlay, so its buttons don't close that overlay
+ * @param {Overlay} overlay - The overlay this list is a part of
+ */
+SmoothMenuBnList.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
-SmoothMenuBnList.prototype.isScrolling = function(){
-	if(!this.visible) return false;
+
+/**
+ * Determines whether the list is currently being scrolled
+ * @return {boolean}
+ */
+SmoothMenuBnList.prototype.isScrolling = function() {
+	if (!this.visible) return false;
 	return !this.scrollStatus.still;
 };
-SmoothMenuBnList.prototype.previewHeight = function(){
+
+/**
+ * Determines the height the list will have when built
+ * @return {number}
+ */
+SmoothMenuBnList.prototype.previewHeight = function() {
 	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
 	height = Math.max(height, 0);
-	if(this.maxHeight!=null){
+	if (this.maxHeight != null) {
 		height = Math.min(height, this.maxHeight);
 	}
 	return height;
 };
-SmoothMenuBnList.previewHeight = function(count, maxHeight){
+
+/**
+ * Determines the width the list will have and stores it, then returns it
+ * @return {number}
+ */
+SmoothMenuBnList.prototype.previewWidth = function() {
+	this.computeWidth();
+	return this.width;
+};
+
+/**
+ * Determines the height of a list with the specified number of items
+ * @param {number} count
+ * @param {number} [maxHeight]
+ * @return {number}
+ */
+SmoothMenuBnList.previewHeight = function(count, maxHeight) {
 	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
 	height = Math.max(height, 0);
-	if(maxHeight != null){
+	if (maxHeight != null) {
 		height = Math.min(height, maxHeight);
 	}
 	return height;
 };
-function Menu(button,width){
-	if(width==null){
-		width=Menu.defaultWidth;
+/**
+ * Abstract class that represents a menu displayed when a Button in the TitleBar is tapped.  The Menu requires a button
+ * to attach to, which it automatically configures the callbacks for.  Subclasses override the loadOptions function
+ * which is called every time the Menu is open and should call addOption() to determine which options to show. If the
+ * width of the menu is unspecified, it will be set to default
+ *
+ * @param {Button} button - The Button the Menu should attach to
+ * @param {number} [width] - The width of the Menu
+ * @constructor
+ */
+function Menu(button, width) {
+	if (width == null) {
+		width = Menu.defaultWidth;
 	}
+	// Menus are a type of Overlay
 	Overlay.call(this, Overlay.types.menu);
 	DebugOptions.validateNumbers(width);
-	this.width=width;
-	this.x=button.x;
-	this.y=button.y+button.height;
-	this.group=GuiElements.create.group(this.x,this.y);
+	this.width = width;
+	// The position of the menu is determined by the button
+	this.x = button.x;
+	this.y = button.y + button.height;
+	this.group = GuiElements.create.group(this.x, this.y);
 	TouchReceiver.addListenersOverlayPart(this.group);
-	this.bgRect=GuiElements.create.rect(this.group);
-	GuiElements.update.color(this.bgRect,Menu.bgColor);
-	this.menuBnList=null;
-	this.visible=false;
-	var callbackFn=function(){
-		callbackFn.menu.open();
-	};
-	callbackFn.menu=this;
-	button.setCallbackFunction(callbackFn,false);
-	callbackFn=function(){
-		callbackFn.menu.close();
-	};
-	callbackFn.menu=this;
-	button.setToggleFunction(callbackFn);
-	this.button=button;
-	this.alternateFn=null;
-	this.scheduleAlternate=false;
+	this.bgRect = GuiElements.create.rect(this.group);
+	GuiElements.update.color(this.bgRect, Menu.bgColor);
+	this.menuBnList = null;
+	this.visible = false;
+
+	// Configure callbacks
+	button.setCallbackFunction(this.open.bind(this), false);
+	button.setUnToggleFunction(this.close.bind(this));
+
+	this.button = button;
+
+	/* The alternateFn is specified using addAlternateFn() and is called if previewOpen returns false */
+	this.alternateFn = null;
+	this.scheduleAlternate = false;
 }
 Menu.prototype = Object.create(Overlay.prototype);
 Menu.prototype.constructor = Menu;
-Menu.setGraphics=function(){
-	Menu.defaultWidth=170;
-	Menu.bnMargin=Button.defaultMargin;
-	Menu.bgColor=Colors.black;
+
+Menu.setGraphics = function() {
+	Menu.defaultWidth = 170;
+	Menu.bnMargin = Button.defaultMargin;
+	Menu.bgColor = Colors.black;
 };
-Menu.prototype.move=function(){
-	this.x=this.button.x;
-	this.y=this.button.y+this.button.height;
-	GuiElements.move.group(this.group,this.x,this.y);
-	if(this.menuBnList != null) {
+
+/**
+ * Recomputes the Menu's location based on the location of the Button
+ */
+Menu.prototype.move = function() {
+	this.x = this.button.x;
+	this.y = this.button.y + this.button.height;
+	GuiElements.move.group(this.group, this.x, this.y);
+	if (this.menuBnList != null) {
 		this.menuBnList.updatePosition();
 	}
 };
-Menu.prototype.createMenuBnList=function(){
-	if(this.menuBnList!=null){
+
+/**
+ * Generates the SmoothMenuBnList for the Menu
+ */
+Menu.prototype.createMenuBnList = function() {
+	if (this.menuBnList != null) {
 		this.menuBnList.hide();
 	}
-	var bnM=Menu.bnMargin;
-	//this.menuBnList=new MenuBnList(this.group,bnM,bnM,bnM,this.width);
-	this.menuBnList=new SmoothMenuBnList(this, this.group,bnM,bnM,this.width);
+	const bnM = Menu.bnMargin;
+	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
 	this.menuBnList.markAsOverlayPart(this);
-	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
-Menu.prototype.addOption=function(text,func,close,icon){
-	icon = null;
-	if(close==null){
-		close=true;
+
+/**
+ * Adds an option to the menu.  Should be called within the loadOptions function
+ * @param {string} text - The text to display the option
+ * @param {function} func - type () -> (), the function to call when the option is tapped
+ * @param {boolean} [close=true] - Whether the Menu should close or remain open when the option is selected
+ * @param {function} [addTextFn] - type (Button) -> (), the function to call on the button to add the text.
+ *                                 If provided, no text will be added to the button; rather the function is expected
+ *                                 to do all formatting.
+ */
+Menu.prototype.addOption = function(text, func, close, addTextFn) {
+	if (addTextFn == null) {
+		addTextFn = null;
 	}
-	var callbackFn=function(){
-		if(callbackFn.close) {
-			callbackFn.menu.close();
+	if (close == null) {
+		close = true;
+	}
+	this.menuBnList.addOption(text, function() {
+		if (close) {
+			this.close();
 		}
-		if(callbackFn.func != null) {
-			callbackFn.func.call(callbackFn.menu);
+		if (func != null) {
+			func.call(this);
 		}
-	};
-	callbackFn.menu=this;
-	callbackFn.func=func;
-	callbackFn.close=close;
-	this.menuBnList.addOption(text,callbackFn,icon);
+	}.bind(this), addTextFn);
 };
-Menu.prototype.buildMenu=function(){
-	var mBL=this.menuBnList;
+
+/**
+ * Creates the buttons and background of the menu
+ */
+Menu.prototype.buildMenu = function() {
+	const mBL = this.menuBnList;
 	mBL.generateBns();
-	GuiElements.update.rect(this.bgRect,0,0,mBL.width+2*Menu.bnMargin,mBL.height+2*Menu.bnMargin);
+	GuiElements.update.rect(this.bgRect, 0, 0, mBL.width + 2 * Menu.bnMargin, mBL.height + 2 * Menu.bnMargin);
 };
-Menu.prototype.previewOpen=function(){
+
+/**
+ * Determines whether the Menu should open or the alternate function should be run.  The alternate function is run after
+ * the user releases the button, so it must be scheduled, not run immediately.
+ * @return {boolean}
+ */
+Menu.prototype.previewOpen = function() {
+	// By default, the Menu always opens.  But subclasses like the DeviceMenu override this method
 	return true;
 };
-Menu.prototype.loadOptions=function(){
 
+/**
+ * Abstract function that is called when the Menu opens to populate the options.  Calls addOption for each option
+ */
+Menu.prototype.loadOptions = function() {
+	DebugOptions.markAbstract();
 };
-Menu.prototype.open=function(){
-	if(!this.visible) {
-		if(this.previewOpen()) {
+Menu.prototype.open = function() {
+	if (!this.visible) {
+		if (this.previewOpen()) {
 			this.createMenuBnList();
 			this.loadOptions();
 			this.buildMenu();
@@ -7038,50 +10533,83 @@ Menu.prototype.open=function(){
 			this.visible = true;
 			this.addOverlayAndCloseOthers();
 			this.button.markAsOverlayPart(this);
-			this.scheduleAlternate=false;
-		}
-		else{
-			this.button.toggled=true;
-			this.scheduleAlternate=true;
+			this.scheduleAlternate = false;
+		} else {
+			this.button.toggled = true;
+			this.scheduleAlternate = true;
 		}
 	}
 };
-Menu.prototype.close=function(onlyOnDrag){
-	if(onlyOnDrag) return;
-	if(this.visible){
-		this.group.remove();
-		this.menuBnList.hide();
-		this.visible=false;
-		Overlay.removeOverlay(this);
+
+/**
+ * closes the Menu
+ * @inheritDoc
+ */
+Menu.prototype.close = function() {
+	if (this.visible) {
+		this.hide();
 		this.button.unToggle();
 		this.button.unmarkAsOverlayPart();
-	}
-	else if(this.scheduleAlternate){
-		this.scheduleAlternate=false;
+	} else if (this.scheduleAlternate) {
+		this.scheduleAlternate = false;
 		this.alternateFn();
 	}
 };
-Menu.prototype.addAlternateFn=function(alternateFn){
-	this.alternateFn=alternateFn;
+
+/**
+ * hides the Menu
+ * @inheritDoc
+ */
+Menu.prototype.hide = function() {
+	this.group.remove();
+	this.menuBnList.hide();
+	this.visible = false;
+	Overlay.removeOverlay(this);
 };
-Menu.prototype.relToAbsX = function(x){
+
+/**
+ * Sets a function which is called when previewOpen returns false
+ * @param {function} alternateFn - type () -> ()
+ */
+Menu.prototype.addAlternateFn = function(alternateFn) {
+	this.alternateFn = alternateFn;
+};
+
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Menu.prototype.relToAbsX = function(x) {
 	return x + this.x;
 };
-Menu.prototype.relToAbsY = function(y){
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Menu.prototype.relToAbsY = function(y) {
 	return y + this.y;
 };
-Menu.prototype.updateZoom = function(){
-	if(this.menuBnList != null){
+
+/**
+ * Resizes and repositions the menu
+ */
+Menu.prototype.updateZoom = function() {
+	if (this.menuBnList != null) {
 		this.menuBnList.updateZoom();
 	}
 };
-function FileMenu(button){
-	Menu.call(this,button);
+/**
+ * Deprecated class that used to be used as a file menu
+ * @param {Button} button
+ * @constructor
+ */
+function FileMenu(button) {
+	Menu.call(this, button);
 }
 FileMenu.prototype = Object.create(Menu.prototype);
 FileMenu.prototype.constructor = FileMenu;
-FileMenu.prototype.loadOptions = function(){
-	this.addOption("New", function(){
+FileMenu.prototype.loadOptions = function() {
+	this.addOption("New", function() {
 		let request = new HttpRequestBuilder("data/createNewFile");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
@@ -7090,425 +10618,650 @@ FileMenu.prototype.loadOptions = function(){
 	this.addOption("Rename", SaveManager.userRename);
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Share", SaveManager.userExport);
-	this.addOption("OpenFromCloud", function(){
+	this.addOption("OpenFromCloud", function() {
 		let request = new HttpRequestBuilder("data/showCloudPicker");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 	//this.addOption("Debug", this.optionEnableDebug);
-	if(GuiElements.isKindle) {
+	if (GuiElements.isKindle) {
 		this.addOption("Exit", this.optionExit);
 	}
 };
-FileMenu.prototype.optionNew=function(){
+FileMenu.prototype.optionNew = function() {
 	SaveManager.new();
 };
-FileMenu.prototype.optionEnableDebug=function(){
+FileMenu.prototype.optionEnableDebug = function() {
 	TitleBar.enableDebug();
 };
-FileMenu.prototype.optionExit=function(){
+FileMenu.prototype.optionExit = function() {
 	SaveManager.checkPromptSave(function() {
 		HtmlServer.sendRequest("tablet/exit");
 	});
 };
-
-function DebugMenu(button){
-	Menu.call(this,button,130);
+/**
+ * A menu which is only enabled when testing (as determined by DebugOptions) which provides options for debugging
+ * @param {Button} button
+ * @constructor
+ */
+function DebugMenu(button) {
+	Menu.call(this, button, 130);
+	// Used for storing the last request issued using the debug menu so it can be prefilled
 	this.lastRequest = "";
 	this.lastResponse = "";
 }
 DebugMenu.prototype = Object.create(Menu.prototype);
 DebugMenu.prototype.constructor = DebugMenu;
+
+/**
+ * @inheritDoc
+ */
 DebugMenu.prototype.loadOptions = function() {
+	// Turns on logging (printing to the debug span) if disabled
 	this.addOption("Enable logging", DebugOptions.enableLogging);
+	// Provides a dialog to load a file by pasting in XML
 	this.addOption("Load file", this.loadFile);
+	// Shows the XML for the current file in a new tab
 	this.addOption("Download file", this.downloadFile);
-	this.addOption("Hide Debug", TitleBar.hideDebug);
+	// Hides the debug menu
+	this.addOption("Hide Debug", this.disableDebug);
+	// Displays the version of the frontend, as set in version.js
 	this.addOption("Version", this.optionVersion);
-	this.addOption("click.wav", function(){
-		Sound.click = "click";
-	});
-	this.addOption("click2.wav", function(){
-		Sound.click = "click2";
-	});
-	this.addOption("Set JS Url", this.optionSetJsUrl);
-	this.addOption("Reset JS Url", this.optionResetJsUrl);
+	// Sends the specified request to the backend
 	this.addOption("Send request", this.optionSendRequest);
-	this.addOption("Log HTTP", this.optionLogHttp);
-	this.addOption("HB names", this.optionHBs);
-	this.addOption("Allow virtual Robots", this.optionVirtualHBs);
+	// Creates fake robots in the connection menus for testing
+	this.addOption("Allow virtual Robots", DebugOptions.enableVirtualDevices);
+	// Clears the debug span
 	this.addOption("Clear log", this.optionClearLog);
-	this.addOption("Connect Multiple", function(){
-		ConnectMultipleDialog.showDialog();
+	// Tests throwing an error in the JS
+	this.addOption("Throw error", function() {
+		throw new UserException("test error");
 	});
-	//this.addOption("HB Debug info", HummingbirdManager.displayDebugInfo);
-	//this.addOption("Recount HBs", HummingbirdManager.recountAndDisplayHBs);
-	//this.addOption("iOS HBs", HummingbirdManager.displayiOSHBNames);
-	this.addOption("Throw error", function(){throw new UserException("test error");});
+	// Prevents the JS from shutting off when there is an error
 	this.addOption("Stop error locking", DebugOptions.stopErrorLocking);
 };
-DebugMenu.prototype.loadFile=function(){
-	HtmlServer.showDialog("Load File", "Paste file contents", "", true, function(cancelled, resp){
-		if(!cancelled){
+
+DebugMenu.prototype.disableDebug = function() {
+	GuiElements.alert("");
+	DebugOptions.enabled = false;
+	TitleBar.hideDebug();
+}
+
+/**
+ * Provides a dialog to paste XML into so is can be loaded as a file
+ */
+DebugMenu.prototype.loadFile = function() {
+	DialogManager.showPromptDialog("Load File", "Paste file contents", "", true, function(cancelled, resp) {
+		if (!cancelled) {
 			SaveManager.backendOpen("Pasted file", resp, true);
 		}
 	});
 };
-DebugMenu.prototype.downloadFile = function(){
-	var xml = XmlWriter.docToText(CodeManager.createXml());
-	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+
+/**
+ * Opens the XML for the current file in a new tab
+ */
+DebugMenu.prototype.downloadFile = function() {
+	const xml = XmlWriter.docToText(CodeManager.createXml());
+	const url = "data:text/plain," + HtmlServer.encodeHtml(xml);
 	window.open(url, '_blank');
 };
-DebugMenu.prototype.optionNew=function(){
-	SaveManager.new();
+
+/**
+ * Prints the version of the frontend as stored in Version.js
+ */
+DebugMenu.prototype.optionVersion = function() {
+	GuiElements.alert("Version: " + GuiElements.appVersion);
 };
-DebugMenu.prototype.optionVersion=function(){
-	GuiElements.alert("Version: "+GuiElements.appVersion);
-};
-DebugMenu.prototype.optionScreenSize=function(){
-	HtmlServer.sendRequestWithCallback("tablet/screenSize",function(response){
-		GuiElements.alert("Size: "+response);
-	});
-};
-DebugMenu.prototype.optionPixelSize=function(){
-	GuiElements.alert(GuiElements.height+" "+GuiElements.width);
-};
-DebugMenu.prototype.optionZoom=function(){
-	HtmlServer.getSetting("zoom",function(response){
-		GuiElements.alert("Zoom: "+(response));
-	});
-};
-DebugMenu.prototype.optionHBs=function(){
-	HtmlServer.sendRequestWithCallback("hummingbird/names",function(response){
-		GuiElements.alert("Names: "+response.split("\n").join(","));
-	});
-};
-DebugMenu.prototype.optionLogHttp=function(){
-	HtmlServer.logHttp=true;
-};
-DebugMenu.prototype.optionVirtualHBs=function(){
-	DiscoverDialog.allowVirtualDevices=true;
-};
-DebugMenu.prototype.optionClearLog=function(){
+
+/**
+ * Clears the debug log
+ */
+DebugMenu.prototype.optionClearLog = function() {
 	GuiElements.alert("");
 };
-DebugMenu.prototype.optionSetJsUrl=function(){
-	HtmlServer.showDialog("Set JS URL", "https://www.example.com/", this.lastRequest, true, function(cancel, url) {
-		if(!cancel && url != ""){
-			var request = "setjsurl/" + HtmlServer.encodeHtml(url);
-			HtmlServer.sendRequestWithCallback(request);
-		}
-	}, function(){});
-};
-DebugMenu.prototype.optionResetJsUrl=function(){
-	var request = "resetjsurl";
-	HtmlServer.sendRequestWithCallback(request);
-};
-DebugMenu.prototype.optionSendRequest=function(){
-	var message = this.lastResponse;
-	if(this.lastResponse == ""){
+
+/**
+ * Provides a dialog for sending requests to the backend
+ */
+DebugMenu.prototype.optionSendRequest = function() {
+	let message = this.lastResponse;
+	if (this.lastResponse === "") {
 		message = "Request: http://localhost:22179/[...]"
 	}
-	var me = this;
-	HtmlServer.showDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
-		if(!cancel && (request != "" || me.lastRequest != "")){
-			if(request == ""){
+	const me = this;
+	DialogManager.showPromptDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
+		if (!cancel && (request !== "" || me.lastRequest !== "")) {
+			if (request === "") {
 				request = me.lastRequest;
 			}
 			me.lastRequest = request;
-			HtmlServer.sendRequestWithCallback(request, function(resp){
+			HtmlServer.sendRequestWithCallback(request, function(resp) {
 				me.lastResponse = "Response: \"" + resp + "\"";
 				me.optionSendRequest();
-			}, function(){
+			}, function() {
 				me.lastResponse = "Error sending request";
 				me.optionSendRequest();
 			});
-		}
-		else{
+		} else {
 			me.lastResponse = "";
 		}
-	}, function(){
+	}, function() {
 		me.lastResponse = "";
 	});
 };
-function ViewMenu(button){
-	Menu.call(this,button);
+/**
+ * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * @param {Button} button
+ * @constructor
+ */
+function ViewMenu(button) {
+	Menu.call(this, button);
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
 ViewMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false);
-	this.addOption("Zoom out", this.optionZoomOut,false);
-	this.addOption("Reset zoom", this.optionResetZoom,true);
+	this.addOption("Zoom in", this.optionZoomIn, false);
+	this.addOption("Zoom out", this.optionZoomOut, false);
+	this.addOption("Reset zoom", this.optionResetZoom, true);
 };
-ViewMenu.prototype.optionZoomIn=function(){
-	GuiElements.zoomMultiple+=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.min(GuiElements.zoomMultiple,GuiElements.maxZoomMult);
+ViewMenu.prototype.optionZoomIn = function() {
+	GuiElements.zoomMultiple += GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.min(GuiElements.zoomMultiple, GuiElements.maxZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionZoomOut=function(){
-	GuiElements.zoomMultiple-=GuiElements.zoomAmount;
-	GuiElements.zoomMultiple=Math.max(GuiElements.zoomMultiple,GuiElements.minZoomMult);
+ViewMenu.prototype.optionZoomOut = function() {
+	GuiElements.zoomMultiple -= GuiElements.zoomAmount;
+	GuiElements.zoomMultiple = Math.max(GuiElements.zoomMultiple, GuiElements.minZoomMult);
 	GuiElements.updateZoom();
 };
-ViewMenu.prototype.optionResetZoom=function(){
-	GuiElements.zoomMultiple=1;
+ViewMenu.prototype.optionResetZoom = function() {
+	GuiElements.zoomMultiple = 1;
 	GuiElements.updateZoom();
 };
-function SettingsMenu(button){
-	Menu.call(this,button);
+/**
+ * Provides a menu for adjusting the zoom and other settings
+ * @param {Button} button
+ * @constructor
+ */
+function SettingsMenu(button) {
+	Menu.call(this, button);
 }
 SettingsMenu.prototype = Object.create(Menu.prototype);
 SettingsMenu.prototype.constructor = SettingsMenu;
+
+/**
+ * @inheritDoc
+ */
 SettingsMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn,false, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut,false, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom,true, VectorPaths.resetZoom);
-	if(SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption("Disable snap noise", this.disableSnapping, true, VectorPaths.volumeMute);
+	// Used to have icons, but they didn't work two well and have been disabled
+	this.addOption("Zoom in", this.optionZoomIn, false); //, VectorPaths.zoomIn);
+	this.addOption("Zoom out", this.optionZoomOut, false); //, VectorPaths.zoomOut);
+	this.addOption("Reset zoom", this.optionResetZoom, true); //, VectorPaths.resetZoom);
+	if (SettingsManager.enableSnapNoise.getValue() === "true") {
+		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption("Enable snap noise", this.enableSnapping, true, VectorPaths.volumeUp);
+		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
+	}
+	if (this.showAdvanced) {
+		this.addOption("Send debug log", this.optionSendDebugLog, true);
+		this.addOption("Show debug menu", this.enableDebug, true);
 	}
 };
-SettingsMenu.prototype.optionZoomIn=function(){
+
+/**
+ * Increases the zoom level and updates the UI
+ */
+SettingsMenu.prototype.optionZoomIn = function() {
 	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple + GuiElements.zoomAmount);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.optionZoomOut=function(){
+
+/**
+ * Decreases the zoom level and updates the UI
+ */
+SettingsMenu.prototype.optionZoomOut = function() {
 	SettingsManager.zoom.writeValue(GuiElements.zoomMultiple - GuiElements.zoomAmount);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.optionResetZoom=function(){
+
+/**
+ * Sets the zoom level back to default
+ */
+SettingsMenu.prototype.optionResetZoom = function() {
 	SettingsManager.zoom.writeValue(1);
 	GuiElements.zoomMultiple = SettingsManager.zoom.getValue();
 	GuiElements.updateZoom();
 };
-SettingsMenu.prototype.enableSnapping = function(){
+
+/**
+ * Enables the sound on Block snap
+ */
+SettingsMenu.prototype.enableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("true");
 };
-SettingsMenu.prototype.disableSnapping = function(){
+
+/**
+ * Disables the sound on Block snap
+ */
+SettingsMenu.prototype.disableSnapping = function() {
 	SettingsManager.enableSnapNoise.writeValue("false");
 };
 
+/**
+ * Tells the backend to send the current debug log
+ */
+SettingsMenu.prototype.optionSendDebugLog = function() {
+	const request = new HttpRequestBuilder("debug/shareLog");
+	HtmlServer.sendRequestWithCallback(request.toString());
+};
 
-function DeviceMenu(button){
-	Menu.call(this,button,DeviceMenu.width);
-	this.addAlternateFn(function(){
+/**
+ * Shows the SettingsMenu and stores whether it should show with advanced options
+ * @param {boolean} [showAdvanced=false]
+ */
+SettingsMenu.prototype.open = function(showAdvanced) {
+	if (showAdvanced == null) {
+		showAdvanced = false;
+	}
+	this.showAdvanced = showAdvanced;
+	Menu.prototype.open.call(this);
+};
+
+/**
+ * Re-opens the menu (if it is open) with advanced options visible)
+ */
+SettingsMenu.prototype.reloadAdvanced = function() {
+	if (this.visible) {
+		this.hide();
+		this.open(true);
+		if (this.button.toggled) {
+			this.button.pressed = false;
+		}
+	}
+};
+
+SettingsMenu.prototype.enableDebug = function() {
+	DebugOptions.enabled = true;
+	TitleBar.enableDebug();
+}
+/**
+ * A menu which displays information about the connected device and provides options to connect to/disconnect from
+ * devices
+ * @param {Button} button
+ * @constructor
+ */
+function DeviceMenu(button) {
+	Menu.call(this, button, DeviceMenu.width);
+	this.addAlternateFn(function() {
+		// If more than one device is connected, the connect multiple dialog is used instead
 		ConnectMultipleDialog.showDialog();
 	});
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
 DeviceMenu.prototype.constructor = ViewMenu;
-DeviceMenu.setGraphics=function(){
-	DeviceMenu.width=150;
+
+DeviceMenu.setGraphics = function() {
+	DeviceMenu.width = 150;
 	DeviceMenu.maxDeviceNameChars = 8;
 };
-DeviceMenu.prototype.loadOptions=function(){
+
+/**
+ * @inheritDoc
+ */
+DeviceMenu.prototype.loadOptions = function() {
 	let connectedClass = null;
-	Device.getTypeList().forEach(function(deviceClass){
-		if(deviceClass.getManager().getDeviceCount() > 0){
+	Device.getTypeList().forEach(function(deviceClass) {
+		/* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
+		 * is it the connectedClass */
+		if (deviceClass.getManager().getDeviceCount() > 0) {
 			connectedClass = deviceClass;
 		}
 	});
-	if(connectedClass != null){
-		var currentDevice = connectedClass.getManager().getDevice(0);
-		this.addOption(currentDevice.name,function(){},false);
-		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+	if (connectedClass != null) {
+		// If there is a device connected, we add an option to display firmware info about the device
+		this.addDeviceOption(connectedClass);
+		// And we add an option to disconnect from it.
+		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-		Device.getTypeList().forEach(function(deviceClass){
-			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function(){
+		// If no devices are connected, we add an option to connect to each type of device
+		Device.getTypeList().forEach(function(deviceClass) {
+			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
 				(new DiscoverDialog(deviceClass)).show();
 			});
 		}, this);
 	}
+	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
 };
-DeviceMenu.prototype.previewOpen=function(){
+
+/**
+ * Adds an option for getting firmware info about the currently connected device.  The option includes a yellow/red
+ * warning icon if firmware is out of date
+ * @param connectedClass - Subclass of Device
+ */
+DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
+	const device = connectedClass.getManager().getDevice(0);
+	const status = device.getFirmwareStatus();
+	const statuses = Device.firmwareStatuses;
+	let icon = null;
+	let color = null;
+	if (status === statuses.old) {
+		// If the firmware is old but usable, a yellow icon is used
+		icon = VectorPaths.warning;
+		color = DeviceStatusLight.yellowColor;
+	} else if (status === statuses.incompatible) {
+		// If the firmware is not usable, a red icon is used
+		icon = VectorPaths.warning;
+		color = DeviceStatusLight.redColor;
+	}
+	this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+};
+
+/**
+ * Determines whether multiple devices are connected, in which case the connect multiple dialog should be opened
+ * @inheritDoc
+ * @return {boolean}
+ */
+DeviceMenu.prototype.previewOpen = function() {
 	let connectionCount = 0;
-	Device.getTypeList().forEach(function(deviceClass){
+	Device.getTypeList().forEach(function(deviceClass) {
 		connectionCount += deviceClass.getManager().getDeviceCount();
 	});
-	return (connectionCount<=1);
+	return (connectionCount <= 1);
 };
-function BlockContextMenu(block,x,y){
-	this.block=block;
-	this.x=x;
-	this.y=y;
-	this.showMenu();
-}
-BlockContextMenu.setGraphics=function(){
-	var BCM=BlockContextMenu;
-	BCM.bnMargin=Button.defaultMargin;
-	BCM.bgColor=Colors.black;
-	BCM.blockShift=20;
-};
-BlockContextMenu.prototype.showMenu=function(){
-	var BCM=BlockContextMenu;
-	this.group=GuiElements.create.group(0,0);
-	this.menuBnList=new MenuBnList(this.group,0,0,BCM.bnMargin);
-	let layer = GuiElements.layers.inputPad;
-	let overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, BCM.bgColor,BCM.bnMargin,this.group,this,null,layer);
-	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
-	this.addOptions();
-	this.menuBnList.show();
-	this.bubbleOverlay.display(this.x,this.x,this.y,this.y,this.menuBnList.width,this.menuBnList.height);
-};
-BlockContextMenu.prototype.addOptions=function(){
-	if(this.block.stack.isDisplayStack){
-		if(this.block.blockTypeName=="B_Variable"){
-			var funcRen=function(){
-				funcRen.block.renameVar();
-				funcRen.BCM.close();
-			};
-			funcRen.block=this.block;
-			funcRen.BCM=this;
-			this.menuBnList.addOption("Rename", funcRen);
-			var funcDel=function(){
-				funcDel.block.deleteVar();
-				funcDel.BCM.close();
-			};
-			funcDel.block=this.block;
-			funcDel.BCM=this;
-			this.menuBnList.addOption("Delete", funcDel);
-		}
-		if(this.block.blockTypeName=="B_List"){
-			var funcRen=function(){
-				funcRen.block.renameLi();
-				funcRen.BCM.close();
-			};
-			funcRen.block=this.block;
-			funcRen.BCM=this;
-			this.menuBnList.addOption("Rename", funcRen);
-			var funcDel=function(){
-				funcDel.block.deleteLi();
-				funcDel.BCM.close();
-			};
-			funcDel.block=this.block;
-			funcDel.BCM=this;
-			this.menuBnList.addOption("Delete", funcDel);
+
+/**
+ * Creates a function to format a button based on the provided options
+ * @param {string} [pathId] - Object from VectorPaths to use as an icon on the side of the button
+ * @param {string} text - Test to place on the button
+ * @param {string} [color] - The color of the icon in hex (not needed if no icon will be added)
+ * @return {function} - type (Button) -> (), a function to format the provided button with the specified icon and text
+ */
+DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
+	if (pathId == null) {
+		return function(bn) {
+			bn.addText(text);
 		}
 	}
-	else {
-		var BCM = this;
-		var funcDup = function () {
-			funcDup.BCM.duplicate();
-		};
-		funcDup.BCM = this;
-		this.menuBnList.addOption("Duplicate", funcDup);
-		this.menuBnList.addOption("Delete",function(){
-			BCM.block.unsnap().delete();
-			BCM.close();
-		})
-	}
-};
-BlockContextMenu.prototype.duplicate=function(){
-	var BCM=BlockContextMenu;
-	var newX=this.block.getAbsX()+BCM.blockShift;
-	var newY=this.block.getAbsY()+BCM.blockShift;
-	var blockCopy=this.block.duplicate(newX,newY);
-	var tab=this.block.stack.tab;
-	var copyStack=new BlockStack(blockCopy,tab);
-	//copyStack.updateDim();
-	this.close();
-};
-BlockContextMenu.prototype.close=function(){
-	this.block=null;
-	this.bubbleOverlay.hide();
-};
-function VectorIcon(x,y,pathId,color,height,parent){
-	this.x=x;
-	this.y=y;
-	this.color=color;
-	this.height=height;
-	this.pathId=pathId;
-	this.parent=parent;
-	this.pathE=null;
-	this.draw();
-}
-VectorIcon.computeWidth=function(pathId,height){
-	var scale=height/pathId.height;
-	return scale*pathId.width;
-}
-VectorIcon.prototype.draw=function(){
-	this.scale=this.height/this.pathId.height;
-	this.width=this.scale*this.pathId.width;
-	this.group=GuiElements.create.group(this.x,this.y,this.parent);
-	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
-	this.pathE=GuiElements.create.path(this.group);
-	this.pathE.setAttributeNS(null,"d",this.pathId.path);
-	this.pathE.setAttributeNS(null,"fill",this.color);
-	this.group.appendChild(this.pathE);
-}
-VectorIcon.prototype.setColor=function(color){
-	this.color=color;
-	this.pathE.setAttributeNS(null,"fill",this.color);
-}
-VectorIcon.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	this.group.setAttributeNS(null,"transform","translate("+this.x+","+this.y+") scale("+this.scale+")");
-};
-/* Deletes the icon and removes the path from its parent group. */
-VectorIcon.prototype.remove=function(){
-	this.pathE.remove();
-};
-//Highlights where the current block will go
-function Highlighter(){
-	Highlighter.path=Highlighter.createPath();
-	Highlighter.visible=false;
-}
-Highlighter.createPath=function(){
-	var bG=BlockGraphics.highlight;
-	var path=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-	path.setAttributeNS(null,"stroke",bG.strokeC);
-	path.setAttributeNS(null,"stroke-width",bG.strokeW);
-	path.setAttributeNS(null,"fill","none");
-	return path;
-}
-Highlighter.highlight=function(x,y,width,height,type,isSlot,isGlowing){
-	var myX = CodeManager.dragAbsToRelX(x);
-	var myY = CodeManager.dragAbsToRelX(y);
-	var pathD=BlockGraphics.buildPath.highlight(myX, myY, width,height,type,isSlot);
-	Highlighter.path.setAttributeNS(null,"d",pathD);
-	if(!Highlighter.visible){
-		GuiElements.layers.highlight.appendChild(Highlighter.path);
-		Highlighter.visible=true;
-	}
-	var bG=BlockGraphics.highlight;
-	if(isGlowing!=null&&isGlowing){
-		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeDarkC);
-	}
-	else{
-		Highlighter.path.setAttributeNS(null,"stroke",bG.strokeC);
-	}
-};
-Highlighter.hide=function(){
-	if(Highlighter.visible){
-		Highlighter.path.remove();
-		Highlighter.visible=false;
+	return function(bn) {
+		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
 	}
 };
 /**
- * Created by Tom on 7/8/2017.
+ * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
+ * Also used to give a rename option to variables and lists
+ *
+ * @param {Block} block
+ * @param {number} x - The x coord the menu should appear at
+ * @param {number} y - The y coord the menu should appear at
+ * @constructor
+ */
+function BlockContextMenu(block, x, y) {
+	this.block = block;
+	this.x = x;
+	this.y = y;
+	this.showMenu();
+}
+
+BlockContextMenu.setGraphics = function() {
+	const BCM = BlockContextMenu;
+	BCM.bnMargin = Button.defaultMargin;
+	BCM.bgColor = Colors.black;
+	BCM.blockShift = 20;
+};
+
+/**
+ * Renders the menu
+ */
+BlockContextMenu.prototype.showMenu = function() {
+	const BCM = BlockContextMenu;
+	this.group = GuiElements.create.group(0, 0);
+
+	let layer = GuiElements.layers.inputPad;
+	let overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay = new BubbleOverlay(overlayType, BCM.bgColor, BCM.bnMargin, this.group, this, layer);
+	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.addOptions();
+	const height = this.menuBnList.previewHeight();
+	const width = this.menuBnList.previewWidth();
+	this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
+	this.menuBnList.show();
+};
+
+/**
+ * Adds options to the menu based on the stack the menu is for.
+ */
+BlockContextMenu.prototype.addOptions = function() {
+	// TODO: This information should probably be passed in by the constructor, not figured out by the ContextMenu
+	if (this.block.stack.isDisplayStack) {
+		if (this.block.constructor === B_Variable) {
+
+			this.menuBnList.addOption("Rename", function() {
+				this.block.renameVar();
+				this.close();
+			}.bind(this));
+
+			this.menuBnList.addOption("Delete", function() {
+				this.block.deleteVar();
+				this.close();
+			}.bind(this));
+
+		}
+		if (this.block.constructor === B_List) {
+
+			this.menuBnList.addOption("Rename", function() {
+				this.block.renameLi();
+				this.close();
+			}.bind(this));
+
+			this.menuBnList.addOption("Delete", function() {
+				this.block.deleteLi();
+				this.close();
+			}.bind(this));
+
+		}
+	} else {
+
+		this.menuBnList.addOption("Duplicate", function() {
+			this.duplicate();
+		}.bind(this));
+
+		this.menuBnList.addOption("Delete", function() {
+			// Delete the stack and add it to the UndoManager
+			UndoManager.deleteStack(this.block.unsnap());
+			this.close();
+		}.bind(this));
+
+	}
+};
+
+/**
+ * Duplicates this menu's Block and all blocks below it.
+ */
+BlockContextMenu.prototype.duplicate = function() {
+	const BCM = BlockContextMenu;
+	const newX = this.block.getAbsX() + BCM.blockShift;
+	const newY = this.block.getAbsY() + BCM.blockShift;
+	const blockCopy = this.block.duplicate(newX, newY);
+	const tab = this.block.stack.tab;
+	const copyStack = new BlockStack(blockCopy, tab);
+	//copyStack.updateDim();
+	this.close();
+};
+
+/**
+ * Closes the menu
+ */
+BlockContextMenu.prototype.close = function() {
+	this.block = null;
+	this.bubbleOverlay.hide();
+	this.menuBnList.hide();
+};
+/**
+ * A VectorIcon controls an SVG path element. It draws the information for the path from VectorPaths.js and rescales
+ * the path appropriately.
+ * @param {number} x - The x coord of the path
+ * @param {number} y - The y coord of the path
+ * @param {object} pathId - The object from VectorPaths containing the information about the path to draw
+ * @param {string} color - Color in hex
+ * @param {number} height - The height the path should be.  Width is computed from this
+ * @param {Element} parent - An SVG group element the path should go inside
+ * @constructor
+ */
+function VectorIcon(x, y, pathId, color, height, parent) {
+	this.x = x;
+	this.y = y;
+	this.color = color;
+	this.height = height;
+	this.pathId = pathId;
+	this.parent = parent;
+	this.pathE = null;
+	this.draw();
+}
+
+/**
+ * Static function used to preview the width of a VectorIcon before it is drawn
+ * @param {object} pathId - An object from VectorPaths
+ * @param {number} height - The height to use for the previewed path
+ * @return {number} - The width the icon would have, if created
+ */
+VectorIcon.computeWidth = function(pathId, height) {
+	const scale = height / pathId.height;
+	return scale * pathId.width;
+};
+
+/**
+ * Creates the SVG pathE and the group to contain it
+ */
+VectorIcon.prototype.draw = function() {
+	this.scale = this.height / this.pathId.height;
+	this.width = this.scale * this.pathId.width;
+	this.group = GuiElements.create.group(this.x, this.y, this.parent);
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.pathE = GuiElements.create.path(this.group);
+	this.pathE.setAttributeNS(null, "d", this.pathId.path);
+	this.pathE.setAttributeNS(null, "fill", this.color);
+	this.group.appendChild(this.pathE);
+};
+
+/**
+ * Changes the color of the icon
+ * @param {string} color - color in hex
+ */
+VectorIcon.prototype.setColor = function(color) {
+	this.color = color;
+	this.pathE.setAttributeNS(null, "fill", this.color);
+};
+
+/**
+ * Moves the icon to the specified coordinates
+ * @param {number} x
+ * @param{number} y
+ */
+VectorIcon.prototype.move = function(x, y) {
+	this.x = x;
+	this.y = y;
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+};
+
+/* Deletes the icon and removes the path from its parent group. */
+VectorIcon.prototype.remove = function() {
+	this.pathE.remove();
+};
+/**
+ * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
+ * white (or black if Blocks are running) path element which it moves around and reshapes
+ */
+function Highlighter() {
+	Highlighter.path = Highlighter.createPath();
+	Highlighter.visible = false;
+}
+
+/**
+ * Creates a path object for the highlighter
+ * @return {Element}
+ */
+Highlighter.createPath = function() {
+	const bG = BlockGraphics.highlight;
+	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+	path.setAttributeNS(null, "stroke", bG.strokeC);
+	path.setAttributeNS(null, "stroke-width", bG.strokeW);
+	path.setAttributeNS(null, "fill", "none");
+	return path;
+};
+
+/**
+ * Highlights a Block/Slot based on the provided information
+ * @param {number} x - The x coord the highlighter should appear at
+ * @param {number} y - The y coord the highlighter should appear at
+ * @param {number} width - The width the highlighter should have (for slots)
+ * @param {number} height - The height the highlighter should have (for slots)
+ * @param {number} type - The type of path according to the BlockGraphics type system
+ * @param {boolean} isSlot - Whether the thing being highlighted is a Slot
+ * @param {boolean} isGlowing - Whether the thing being highlighted already has a white outline (since it is running)
+ *                              and should therefore by highlighted in black
+ */
+Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
+	const myX = CodeManager.dragAbsToRelX(x);
+	const myY = CodeManager.dragAbsToRelX(y);
+	const pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
+	Highlighter.path.setAttributeNS(null, "d", pathD);
+	if (!Highlighter.visible) {
+		GuiElements.layers.highlight.appendChild(Highlighter.path);
+		Highlighter.visible = true;
+	}
+	const bG = BlockGraphics.highlight;
+	if (isGlowing != null && isGlowing) {
+		Highlighter.path.setAttributeNS(null, "stroke", bG.strokeDarkC);
+	} else {
+		Highlighter.path.setAttributeNS(null, "stroke", bG.strokeC);
+	}
+};
+
+/**
+ * Removes the highlighter from view
+ */
+Highlighter.hide = function() {
+	if (Highlighter.visible) {
+		Highlighter.path.remove();
+		Highlighter.visible = false;
+	}
+};
+/**
+ * Manages three DisplayBoxes on the bottom of the screen.  DisplayBoxes are triggered by the display block and
+ * which box is shown depends on the position parameter of the block
  */
 function DisplayBoxManager(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes = [];
+	// Create 3 boxes
 	for(let i = 0; i < 3; i++) {
-		DBM.boxes[i] = new NewDisplayBox(i);
+		DBM.boxes[i] = new DisplayBox(i);
 	}
+	// Build each box
 	DBM.build();
 }
+
+/**
+ * Builds all the Manager's boxes
+ */
 DisplayBoxManager.build = function(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.build();
 	});
 };
+
+/**
+ * Makes the specified DisplayBox display the message
+ * @param {string} message - The message to display
+ * @param {string} positionString - "position#", The position of the box, as a string
+ */
 DisplayBoxManager.displayText = function(message, positionString) {
 	const DBM = DisplayBoxManager;
 	if(positionString === "position1") {
@@ -7518,273 +11271,326 @@ DisplayBoxManager.displayText = function(message, positionString) {
 	} else if(positionString === "position3") {
 		DBM.boxes[2].displayText(message);
 	} else {
+		// Invalid data stored in slot
 		DebugOptions.assert(false);
 	}
 };
+
+/**
+ * Hides all DisplayBoxes (when one is tapped)
+ */
 DisplayBoxManager.hide = function(){
 	const DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.hide();
 	});
 };
+
+/**
+ * Resizes all DisplayBoxes
+ */
 DisplayBoxManager.updateZoom = function(){
-	NewDisplayBox.updateZoom();
+	DisplayBox.updateZoom();
 	DisplayBoxManager.boxes.forEach(function(box){
 		box.updateZoom();
 	})
 };
 /**
- * Created by Tom on 7/8/2017.
+ * Displays text in a large, white box at the bottom of the screen.  Triggered by display Block.  No SVG elements
+ * are created until build() is called.
+ * @param {number} position - A 0-indexed number indicating the position of the DisplayBox on the screen
+ * @constructor
  */
-function NewDisplayBox(position) {
+function DisplayBox(position) {
 	this.position = position;
 	this.visible = false;
 	this.layer = GuiElements.layers.display;
 }
-NewDisplayBox.setGraphics=function(){
-	const DB = NewDisplayBox;
-	DB.bgColor=Colors.white;
-	DB.fontColor=Colors.black;
-	DB.fontSize=35;
-	DB.font="Arial";
-	DB.fontWeight="normal";
-	DB.charHeight=25;
-	DB.screenMargin=60;
-	DB.rectH=50;
+
+DisplayBox.setGraphics = function() {
+	const DB = DisplayBox;
+	DB.bgColor = Colors.white;
+	DB.fontColor = Colors.black;
+	DB.font = Font.uiFont(35);
+	DB.screenMargin = 60;
+	DB.rectH = 50;
 	DB.margin = 10;
-	DB.rectX=DB.screenMargin;
-	DB.rectW=GuiElements.width-2*DB.screenMargin;
+	DB.rectX = DB.screenMargin;
+	DB.rectW = GuiElements.width - 2 * DB.screenMargin;
 };
-NewDisplayBox.prototype.build=function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Builds the elements of the box
+ */
+DisplayBox.prototype.build = function() {
+	const DB = DisplayBox;
 	this.rectY = this.getRectY();
-	this.rectE=GuiElements.draw.rect(DB.rectX,this.rectY,DB.rectW,DB.rectH,DB.bgColor);
-	this.textE=GuiElements.draw.text(0,0,"",DB.fontSize,DB.fontColor,DB.font,DB.fontWeight);
+	this.rectE = GuiElements.draw.rect(DB.rectX, this.rectY, DB.rectW, DB.rectH, DB.bgColor);
+	this.textE = GuiElements.draw.text(0, 0, "", DB.font, DB.fontColor);
 	TouchReceiver.addListenersDisplayBox(this.rectE);
 	TouchReceiver.addListenersDisplayBox(this.textE);
 };
-NewDisplayBox.prototype.getRectY = function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Computes the y-cord of the box based on the position and constants
+ * @return {number}
+ */
+DisplayBox.prototype.getRectY = function() {
+	const DB = DisplayBox;
 	const fromBottom = 2 - this.position;
 	return GuiElements.height - (DB.rectH + DB.margin) * fromBottom - DB.rectH - DB.screenMargin;
 };
-NewDisplayBox.updateZoom = function(){
-	NewDisplayBox.setGraphics();
+
+/**
+ * Resets the graphics
+ */
+DisplayBox.updateZoom = function() {
+	DisplayBox.setGraphics();
 };
-NewDisplayBox.prototype.updateZoom = function(){
-	const DB=NewDisplayBox;
+
+/**
+ * Resizes the box
+ */
+DisplayBox.prototype.updateZoom = function() {
+	const DB = DisplayBox;
 	this.rectY = this.getRectY();
-	const textW=GuiElements.measure.textWidth(this.textE);
-	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
-	GuiElements.move.text(this.textE,textX,textY);
-	GuiElements.update.rect(this.rectE,DB.rectX,this.rectY,DB.rectW,DB.rectH);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	GuiElements.move.text(this.textE, textX, textY);
+	GuiElements.update.rect(this.rectE, DB.rectX, this.rectY, DB.rectW, DB.rectH);
 };
-NewDisplayBox.prototype.displayText=function(text){
-	const DB=NewDisplayBox;
-	GuiElements.update.textLimitWidth(this.textE,text,DB.rectW);
-	const textW=GuiElements.measure.textWidth(this.textE);
-	const textX=DB.rectX+DB.rectW/2-textW/2;
-	const textY=this.rectY+DB.rectH/2+DB.charHeight/2;
-	GuiElements.move.text(this.textE,textX,textY);
+
+/**
+ * Sets the text of the box
+ * @param {string} text - The text to show
+ */
+DisplayBox.prototype.displayText = function(text) {
+	const DB = DisplayBox;
+	GuiElements.update.textLimitWidth(this.textE, text, DB.rectW);
+	const textW = GuiElements.measure.textWidth(this.textE);
+	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	GuiElements.move.text(this.textE, textX, textY);
 	this.show();
 };
-NewDisplayBox.prototype.show=function(){
-	if(!this.visible){
+
+/**
+ * Make the DisplayBox visible
+ */
+DisplayBox.prototype.show = function() {
+	if (!this.visible) {
 		this.layer.appendChild(this.rectE);
 		this.layer.appendChild(this.textE);
-		this.visible=true;
+		this.visible = true;
 	}
 };
-NewDisplayBox.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Hides the DisplayBox
+ */
+DisplayBox.prototype.hide = function() {
+	if (this.visible) {
 		this.textE.remove();
 		this.rectE.remove();
-		this.visible=false;
+		this.visible = false;
 	}
 };
 
 
-
-/* CodeManager is a static class that controls block execution.
- * It also moves the BlockStack that the user is dragging.
+/**
+ * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
+ * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
  */
-function CodeManager(){
-	var move=CodeManager.move; //shorthand
-	move.moving=false; //Is there a BlockStack that is currently moving?
-	move.stack=null; //Reference to BlockStack that is currently moving.
-	move.offsetX=0; //The difference between the BlockStack's x and the touch x.
-	move.offsetY=0; //The difference between the BlockStack's y and the touch y.
-	move.touchX=0; //The x coord of the user's finger.
-	move.touchY=0; //The y coord of the user's finger.
-	move.topX=0; //The top-left corner's x coord of the BlockStack being moved.
-	move.topY=0; //The top-left corner's y-coord of the BlockStack being moved.
-	move.bottomX=0; //The bottom-right corner
-	move.bottomY=0;
-	move.showTrash = false; //The trash can only shows if the blocks originated from the tabSpace
-	//The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
-	move.returnType;
+function CodeManager() {
+	const move = CodeManager.move;   // shorthand
+	move.moving = false;   // Is there a BlockStack that is currently moving?
+	move.stack = null;   // Reference to BlockStack that is currently moving.
+	move.offsetX = 0;   // The difference between the BlockStack's x and the touch x.
+	move.offsetY = 0;   // The difference between the BlockStack's y and the touch y.
+	move.touchX = 0;   // The x coord of the user's finger.
+	move.touchY = 0;   // The y coord of the user's finger.
+	move.topX = 0;   // The top-left corner's x coord of the BlockStack being moved.
+	move.topY = 0;   // The top-left corner's y-coord of the BlockStack being moved.
+	move.bottomX = 0;   // The bottom-right corner
+	move.bottomY = 0;
+	move.startedFromPalette = false;   // Whether the block being dragged originated from the BLockPalette
+	// The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
+	move.returnType = null;
+	// Stores information used when determine which slot is closest to the moving stack.
+	CodeManager.fit = {};
 
-	CodeManager.variableList=new Array();
-	CodeManager.listList=new Array();
-	CodeManager.broadcastList=new Array(); //A list of broadcast messages in use.
-	CodeManager.isRunning=false; //Are at least some Blocks currently executing?
-	//Stores information used when determine which slot is closest to the moving stack.
-	CodeManager.fit=function(){};
-	CodeManager.updateTimer=null; //A timer which tells executing Blocks to update.
-	CodeManager.updateInterval=10; //How quickly does the update timer fire (in ms)?
-	//Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
-	CodeManager.answer=new StringData("");
-	CodeManager.message=new StringData(""); //Stores the broadcast message.
-	CodeManager.sound=function(){};
-	CodeManager.sound.tempo=60; //Default tempo is 60 bpm for sound blocks.
-	CodeManager.sound.volume=50; //Default volume if 50%.
-	//Successive prompt dialogs have a time delay to give time for the user to stop the program.
-	CodeManager.repeatDialogDelay=500;
-	CodeManager.lastDialogDisplayTime=null;
-	CodeManager.repeatHBOutDelay=67;
-	CodeManager.reservedStackHBoutput=null;
-	CodeManager.lastHBOutputSendTime=null;
-	CodeManager.timerForSensingBlock=new Date().getTime(); //Initialize the timer to the current time.
+	CodeManager.variableList = [];   // A list of all the variables the user has created
+	CodeManager.listList = [];   // A list of all the lists the user has created
+	CodeManager.broadcastList = [];   // A list of broadcast messages in use.
+
+	CodeManager.isRunning = false;   // Are at least some Blocks currently executing?
+
+	CodeManager.updateTimer = null;   // A timer which tells executing Blocks to update.
+	CodeManager.updateInterval = 10;   // How quickly does the update timer fire (in ms)?
+
+	// Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
+	CodeManager.answer = new StringData("");
+	CodeManager.message = new StringData("");   // Stores the broadcast message.
+
+	CodeManager.sound = {};   // Store data for sound playback
+	CodeManager.sound.tempo = 60;   // Default tempo is 60 bpm for sound blocks.
+	CodeManager.sound.volume = 50;   // Default volume if 50%.
+
+	CodeManager.timerForSensingBlock = new Date().getTime();   // Initialize the timer to the current time.
+
+	// Track creation and modified times for the current file
+	// TODO: move this into SaveManager
 	CodeManager.modifiedTime = new Date().getTime();
 	CodeManager.createdTime = new Date().getTime();
 }
+
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
- * These functions are called by the TouchReciever class when the user drags a BlockStack.
- */
-CodeManager.move=function(){};
-/* Picks up a Block so that it can be moved.  Stores necessary information in CodeManager.move.
+ * These functions are called by the TouchReceiver class when the user drags a BlockStack. */
+CodeManager.move = {};
+
+/**
+ * Picks up a Block so that it can be moved.  Stores necessary information in CodeManager.move.
  * Transfers the BlockStack into the drag layer above other blocks.
  * @param {Block} block - The block the user dragged.
  * @param {number} x - The x coord of the user's finger.
  * @param {number} y - The y coord of the user's finger.
  */
-CodeManager.move.start=function(block,x,y){
-	var move=CodeManager.move; //shorthand
-	if(!move.moving){ //Only start moving the Block if no other Blocks are moving.
-		Overlay.closeOverlays(); //Close any visible overlays.
-		move.moving=true; //Record that a Block is now moving.
+CodeManager.move.start = function(block, x, y) {
+	const move = CodeManager.move;   // shorthand
+	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
+		Overlay.closeOverlays();   // Close any visible overlays.
+		move.moving = true;   // Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
-		var stack=block.unsnap();
-		stack.fly(); //Make the new BlockStack fly (moves it into the drag layer).
-		move.bottomX=stack.relToAbsX(stack.dim.rx); //Store the BlockStack's dimensions.
-		move.bottomY=stack.relToAbsY(stack.dim.rh);
-		move.returnType=stack.returnType; //Store the BlockStack's return type.
-		move.showTrash = !BlockPalette.isStackOverPalette(x, y);
-		
-		//Store other information about how the BlockStack can connect to other Blocks.
-		move.bottomOpen=stack.getLastBlock().bottomOpen;
-		move.topOpen=stack.firstBlock.topOpen;
-		move.returnsValue=stack.firstBlock.returnsValue;
-		//move.hasBlockSlot1=stack.firstBlock.hasBlockSlot1;
-		//move.hasBlockSlot2=stack.firstBlock.hasBlockSlot2;
+		const stack = block.unsnap();
+		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
+		move.bottomX = stack.relToAbsX(stack.dim.rw);   // Store the BlockStack's dimensions.
+		move.bottomY = stack.relToAbsY(stack.dim.rh);
+		move.returnType = stack.returnType;   // Store the BlockStack's return type.
+		move.startedFromPalette = BlockPalette.isStackOverPalette(x, y);
 
-		move.touchX=x; //Store coords
-		move.touchY=y;
-		move.offsetX=stack.getAbsX()-x; //Store offset.
-		move.offsetY=stack.getAbsY()-y;
-		move.stack=stack; //Store stack.
+		// Store other information about how the BlockStack can connect to other Blocks.
+		move.bottomOpen = stack.getLastBlock().bottomOpen;
+		move.topOpen = stack.firstBlock.topOpen;
+		move.returnsValue = stack.firstBlock.returnsValue;
+
+		move.touchX = x;   // Store coords
+		move.touchY = y;
+		move.offsetX = stack.getAbsX() - x;   // Store offset.
+		move.offsetY = stack.getAbsY() - y;
+		move.stack = stack;   // Store stack.
 	}
-}
-/* Updates the position of the currently moving BlockStack.  
+};
+
+/**
+ * Updates the position of the currently moving BlockStack.
  * Also highlights the slot that fits it best (if any).
  * @param {number} x - The x coord of the user's finger.
  * @param {number} y - The y coord of the user's finger.
  */
-CodeManager.move.update=function(x,y){
-	var move=CodeManager.move; //shorthand
-	if(move.moving){ //Only update if a BlockStack is currently moving.
+CodeManager.move.update = function(x, y) {
+	const move = CodeManager.move;   // shorthand
+	if (move.moving) {   // Only update if a BlockStack is currently moving.
 		move.touchX = x;
 		move.touchY = y;
-		move.topX = move.offsetX+x;
-		move.topY = move.offsetY+y;
-		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
-		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
-		move.stack.move(CodeManager.dragAbsToRelX(move.topX),CodeManager.dragAbsToRelY(move.topY)); //Move the BlockStack to the correct location.
-		//If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
+		move.topX = move.offsetX + x;
+		move.topY = move.offsetY + y;
+		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+		// Move the BlockStack to the correct location.
+		move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
+		// If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
 		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
-			Highlighter.hide(); //Hide any existing highlight.
-			if(move.showTrash) {
-				BlockPalette.ShowTrash();
+			Highlighter.hide();   // Hide any existing highlight.
+			if (!move.startedFromPalette) {
+				BlockPalette.showTrash();
 			}
 		} else {
-			BlockPalette.HideTrash();
-			//The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+			BlockPalette.hideTrash();
+			// The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
-			if(CodeManager.fit.found){
-				CodeManager.fit.bestFit.highlight(); //If such a slot exists, highlight it.
-			}
-			else{
-				Highlighter.hide(); //If not, hide any existing highlight.
+			if (CodeManager.fit.found) {
+				CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+			} else {
+				Highlighter.hide();   // If not, hide any existing highlight.
 			}
 		}
 	}
 };
-/* Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
+
+/**
+ * Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
  */
-CodeManager.move.end=function(){
-	var move=CodeManager.move; //shorthand
-	var fit=CodeManager.fit; //shorthand
-	if(move.moving){ //Only run if a BlockStack is currently moving.
-		move.topX = move.offsetX+move.touchX;
-		move.topY = move.offsetY+move.touchY;
-		move.bottomX=move.stack.relToAbsX(move.stack.dim.rw);
-		move.bottomY=move.stack.relToAbsY(move.stack.dim.rh);
-		//If the BlockStack overlaps with the BlockPalette, delete it.
-		if(BlockPalette.isStackOverPalette(move.touchX, move.touchY)){
-			move.stack.delete();
-			if(move.showTrash) {
+CodeManager.move.end = function() {
+	const move = CodeManager.move;   // shorthand
+	const fit = CodeManager.fit;   // shorthand
+	if (move.moving) {   // Only run if a BlockStack is currently moving.
+		move.topX = move.offsetX + move.touchX;
+		move.topY = move.offsetY + move.touchY;
+		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+		// If the BlockStack overlaps with the BlockPalette, delete it.
+		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+			if (move.startedFromPalette) {
+				move.stack.remove();
+			} else {
+				UndoManager.deleteStack(move.stack);
 				SaveManager.markEdited();
 			}
 		} else {
-			//The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+			// The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
-			if(fit.found){
-				//Snap is onto the Block/Slot that fits it best.
+			if (fit.found) {
+				// Snap is onto the Block/Slot that fits it best.
 				fit.bestFit.snap(move.stack.firstBlock);
 				Sound.playSnap();
-			}
-			else{
-				//If it is not going to be snapped or deleted, simply drop it onto the current tab.
+			} else {
+				// If it is not going to be snapped or deleted, simply drop it onto the current tab.
 				move.stack.land();
-				move.stack.updateDim(); //Fix! this line of code might not be needed.
+				move.stack.updateDim();   // Fix! this line of code might not be needed.
 			}
 			SaveManager.markEdited();
 		}
-		Highlighter.hide(); //Hide any existing highlight.
-		move.moving=false; //There are now no moving BlockStacks.
-		BlockPalette.HideTrash();
+		Highlighter.hide();   // Hide any existing highlight.
+		move.moving = false;   // There are now no moving BlockStacks.
+		BlockPalette.hideTrash();
 	}
 };
-/* Drops the BlockStack where it is without attaching it to anything or deleting it.
+
+/**
+ * Drops the BlockStack where it is without attaching it to anything or deleting it.
  */
-CodeManager.move.interrupt=function(){
-	var move=CodeManager.move; //shorthand
-	if(move.moving) { //Only run if a BlockStack is currently moving.
+CodeManager.move.interrupt = function() {
+	const move = CodeManager.move;   // shorthand
+	if (move.moving) {   // Only run if a BlockStack is currently moving.
 		move.topX = move.offsetX + move.touchX;
 		move.topY = move.offsetY + move.touchY;
 		move.stack.land();
-		move.stack.updateDim(); //Fix! this line of code might not be needed.
-		Highlighter.hide(); //Hide any existing highlight.
-		move.moving = false; //There are now no moving BlockStacks.
+		move.stack.updateDim();   // Fix! this line of code might not be needed.
+		Highlighter.hide();   // Hide any existing highlight.
+		move.moving = false;   // There are now no moving BlockStacks.
 	}
-}
-/* Returns a boolean indicating if a point falls within a rectangular region. 
+};
+
+/**
+ * Returns a boolean indicating if a point falls within a rectangular region.
  * Useful for determining which Blocks a moving BlockStack can connect to.
  * @param {number} x1 - The x coord of the point.
  * @param {number} y1 - The y coord of the point.
- * @param {number} yR - The x coord of the top-left corner of the region.
- * @param {number} yY - The y coord of the top-left corner of the region.
+ * @param {number} xR - The x coord of the top-left corner of the region.
+ * @param {number} yR - The y coord of the top-left corner of the region.
  * @param {number} width - The width of the region.
  * @param {number} height - The height of the region.
  * @return {boolean} - Is the point within the region?
  */
-CodeManager.move.pInRange=function(x1,y1,xR,yR,width,height){
-	//Checks to see if the point is on the correct side of all four sides of the rectangular region.
-	return (x1>=xR && x1<=xR+width && y1>=yR && y1<=yR+height);
-}
-/* Returns a boolean indicating if two rectangular regions overlap.
+CodeManager.move.pInRange = function(x1, y1, xR, yR, width, height) {
+	// Checks to see if the point is on the correct side of all four sides of the rectangular region.
+	return (x1 >= xR && x1 <= xR + width && y1 >= yR && y1 <= yR + height);
+};
+
+/**
+ * Returns a boolean indicating if two rectangular regions overlap.
  * Useful for determining which Slots a moving BlockStack can connect to.
  * @param {number} x1 - The x coord of the top-left corner of the first region.
  * @param {number} y1 - The y coord of the top-left corner of the first region.
@@ -7796,148 +11602,135 @@ CodeManager.move.pInRange=function(x1,y1,xR,yR,width,height){
  * @param {number} height2 - The height of the second region.
  * @return {boolean} - Do the rectangular regions overlap?
  */
-CodeManager.move.rInRange=function(x1,y1,width1,height1,x2,y2,width2,height2){
-	//These conditions check that there are no vertical or horizontal gaps between the regions.
-	//Is the right side of region 1 to the right of the left side of region 2?
-	var xBigEnough = x1+width1>=x2;
-	//Is the bottom side of region 1 below the top side of region 2?
-	var yBigEnough = y1+height1>=y2;
-	//Is the left side of region 1 to the left of the right side of region 2?
-	var xSmallEnough = x1<=x2+width2;
-	//Is the top side of region 1 above the bottom side of region 2?
-	var ySmallEnough = y1<=y2+height2;
-	//If it passes all 4 checks, the regions overlap.
-	return xBigEnough&&yBigEnough&&xSmallEnough&&ySmallEnough;
-}
-/* Recursively searches for the Block/Slot that best fits the moving BlockStack.
+CodeManager.move.rInRange = function(x1, y1, width1, height1, x2, y2, width2, height2) {
+	// These conditions check that there are no vertical or horizontal gaps between the regions.
+	// Is the right side of region 1 to the right of the left side of region 2?
+	const xBigEnough = x1 + width1 >= x2;
+	// Is the bottom side of region 1 below the top side of region 2?
+	const yBigEnough = y1 + height1 >= y2;
+	// Is the left side of region 1 to the left of the right side of region 2?
+	const xSmallEnough = x1 <= x2 + width2;
+	// Is the top side of region 1 above the bottom side of region 2?
+	const ySmallEnough = y1 <= y2 + height2;
+	// If it passes all 4 checks, the regions overlap.
+	return xBigEnough && yBigEnough && xSmallEnough && ySmallEnough;
+};
+
+/**
+ * Recursively searches for the Block/Slot that best fits the moving BlockStack.
  * All results are stored in CodeManager.fit.  Nothing is returned.
  */
-CodeManager.findBestFit=function(){
-	var fit=CodeManager.fit; //shorthand
-	fit.found=false; //Have any matching slot/block been found?
-	fit.bestFit=null; //Slot/Block that is closest to the item?
-	fit.dist=0; //How far is the best candidate from the ideal location?
-	TabManager.activeTab.findBestFit(); //Begins the recursive calls.
-}
-/* Recursively updates any Blocks that are currently executing.
+CodeManager.findBestFit = function() {
+	const fit = CodeManager.fit;   // shorthand
+	fit.found = false;   // Have any matching slot/block been found?
+	fit.bestFit = null;   // Slot/Block that is closest to the item?
+	fit.dist = 0;   // How far is the best candidate from the ideal location?
+	TabManager.activeTab.findBestFit();   // Begins the recursive calls.
+};
+
+
+/**
+ * Recursively updates any Blocks that are currently executing.
  * Stops the update timer if all Blocks are finished.
  */
-CodeManager.updateRun=function(){
-	var CM=CodeManager;
-	var startingReservation=CM.reservedStackHBoutput;
-	if(!TabManager.updateRun().isRunning()){ //A recursive call.  Returns true if any Blocks are running.
-		CM.stopUpdateTimer(); //If no Blocks are running, stop the update timer.
-	}
-	var now=new Date().getTime();
-	var timeExpired=now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime;
-	if(CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput==startingReservation&&timeExpired) {
-		CM.reservedStackHBoutput = null;
+CodeManager.updateRun = function() {
+	const CM = CodeManager;
+	if (!TabManager.updateRun().isRunning()) {   // A recursive call.  Returns true if any Blocks are running.
+		CM.stopUpdateTimer();   // If no Blocks are running, stop the update timer.
 	}
 };
-/* Recursively stops all Block execution.
+
+/**
+ * Recursively stops all Block execution.
  */
-CodeManager.stop=function(){
-	Device.stopAll(); //Stop any motors and LEDs on the devices
-	TabManager.stop(); //Recursive call.
-	CodeManager.stopUpdateTimer(); //Stop the update timer.
-	DisplayBoxManager.hide(); //Hide any messages being displayed.
+CodeManager.stop = function() {
+	Device.stopAll();   // Stop any motors and LEDs on the devices
+	TabManager.stop();   // Recursive call.
+	CodeManager.stopUpdateTimer();   // Stop the update timer.
+	DisplayBoxManager.hide();   // Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
-	                       // Note: Tones are not allowed to be async, so they 
-	                       // must be stopped manually
-}
-/* Stops the update timer.
+	// Note: Tones are not allowed to be async, so they 
+	// must be stopped manually
+};
+
+/**
+ * Stops the update timer for block execution
  */
-CodeManager.stopUpdateTimer=function(){
-	if(CodeManager.isRunning){ //If the timer is currently running...
+CodeManager.stopUpdateTimer = function() {
+	if (CodeManager.isRunning) {   // If the timer is currently running...
 		//...Stop the timer.
 		CodeManager.updateTimer = window.clearInterval(CodeManager.updateTimer);
-		CodeManager.isRunning=false;
+		CodeManager.isRunning = false;
 	}
-}
-/* Starts the update timer.  When it fires, the timer will call the CodeManager.updateRun function.
+};
+
+/**
+ * Starts the update timer.  When it fires, the timer will call the CodeManager.updateRun function.
  */
-CodeManager.startUpdateTimer=function(){
-	if(!CodeManager.isRunning){ //If the timer is not running...
+CodeManager.startUpdateTimer = function() {
+	if (!CodeManager.isRunning) {   // If the timer is not running...
 		//...Start the timer.
 		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
-		CodeManager.isRunning=true;
+		CodeManager.isRunning = true;
 	}
-}
-/* Recursively passes on the message that the flag button was tapped.
- * @fix method name.
+};
+
+/**
+ * Prevents too many Http commands from building up.
+ * @return {boolean} - Whether a broadcast Block should run now or wait
  */
-CodeManager.eventFlagClicked=function(){
-	TabManager.eventFlagClicked();
-}
-/**/
-CodeManager.checkDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	if(CM.lastDialogDisplayTime==null||now-CM.repeatDialogDelay>=CM.lastDialogDisplayTime){
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-CodeManager.updateDialogDelay=function(){
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	CM.lastDialogDisplayTime=now;
+CodeManager.checkBroadcastDelay = function() {
+	return HtmlServer.unansweredCount < HtmlServer.unansweredCap;
 };
-CodeManager.checkHBOutputDelay=function(stack){
-	return true;
-	var CM=CodeManager;
-	var now=new Date().getTime();
-	var stackReserved=CM.reservedStackHBoutput!=null&&CM.reservedStackHBoutput!=stack;
-	if(CM.lastHBOutputSendTime==null||(now-CM.repeatHBOutDelay>=CM.lastHBOutputSendTime&&!stackReserved)){
-		if(CM.reservedStackHBoutput==stack){
-			CM.reservedStackHBoutput=null;
-		}
-		return true;
-	}
-	else{
-		if(CM.reservedStackHBoutput==null){
-			CM.reservedStackHBoutput=stack;
-		}
-		return false;
-	}
-};
-CodeManager.updateHBOutputDelay=function(){
-	CodeManager.lastHBOutputSendTime=new Date().getTime();
-};
-/* @fix Write documentation.
+
+
+/**
+ * Adds the Variable to CodeManager's list of variables
+ * @param {Variable} variable
  */
-CodeManager.addVariable=function(variable){
+CodeManager.addVariable = function(variable) {
 	CodeManager.variableList.push(variable);
 };
-/* @fix Write documentation.
+
+/**
+ * Removes the Variable from CodeManager's list of variables
+ * @param {Variable} variable
  */
-CodeManager.removeVariable=function(variable){
-	var index=CodeManager.variableList.indexOf(variable);
-	CodeManager.variableList.splice(index,1);
+CodeManager.removeVariable = function(variable) {
+	const index = CodeManager.variableList.indexOf(variable);
+	CodeManager.variableList.splice(index, 1);
 };
-/* @fix Write documentation.
+
+/**
+ * Requests the user to name a variable and then creates it
+ * @param {function} [callbackCreate] - type (Variable) -> (), called if the user completes variable creation
+ * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
-CodeManager.newVariable=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create variable","Enter variable name","",true,function(cancelled,result) {
-		if(!cancelled&&CodeManager.checkVarName(result)) {
-			result=result.trim();
+CodeManager.newVariable = function(callbackCreate, callbackCancel) {
+	DialogManager.showPromptDialog("Create variable", "Enter variable name", "", true, function(cancelled, result) {
+		if (!cancelled && CodeManager.checkVarName(result)) {
+			result = result.trim();
 			const variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
-			if(callbackCreate != null) callbackCreate(variable);
+			if (callbackCreate != null) callbackCreate(variable);
 		} else {
-			if(callbackCancel != null) callbackCancel();
+			if (callbackCancel != null) callbackCancel();
 		}
 	});
 };
-CodeManager.checkVarName=function(name){
-	name=name.trim();
-	if(name.length>0){
-		var variables=CodeManager.variableList;
-		for(var i=0;i<variables.length;i++){
-			if(variables[i].getName()==name){
+
+/**
+ * Checks if the name is a valid name for a new variable
+ * @param {string} name
+ * @return {boolean} - false if the name is empty or already in use
+ */
+CodeManager.checkVarName = function(name) {
+	name = name.trim();
+	if (name.length > 0) {
+		const variables = CodeManager.variableList;
+		for (let i = 0; i < variables.length; i++) {
+			if (variables[i].getName() === name) {
 				return false;
 			}
 		}
@@ -7945,49 +11738,69 @@ CodeManager.checkVarName=function(name){
 	}
 	return false;
 };
-CodeManager.findVar=function(name){
-	var variables=CodeManager.variableList;
-	for(var i=0;i<variables.length;i++){
-		if(variables[i].getName()==name){
+
+/**
+ * Finds a variable by name
+ * @param {string} name - The name of the variable to find
+ * @return {Variable|null} - The variable or null if it can't be found
+ */
+CodeManager.findVar = function(name) {
+	const variables = CodeManager.variableList;
+	for (let i = 0; i < variables.length; i++) {
+		if (variables[i].getName() === name) {
 			return variables[i];
 		}
 	}
 	return null;
 };
-/* @fix Write documentation.
+
+/**
+ * Adds the List to the list of Lists
+ * @param {List} list
  */
-CodeManager.addList=function(list){
+CodeManager.addList = function(list) {
 	CodeManager.listList.push(list);
 };
-/* @fix Write documentation.
+
+/**
+ * Removes the list from the list of Lists
+ * @param {List} list
  */
-CodeManager.removeList=function(list){
-	var index=CodeManager.listList.indexOf(list);
-	CodeManager.listList.splice(index,1);
+CodeManager.removeList = function(list) {
+	const index = CodeManager.listList.indexOf(list);
+	CodeManager.listList.splice(index, 1);
 };
-/* @fix Write documentation.
+
+/**
+ * Prompts the user to create a new list
+ * @param {function} callbackCreate - type (List) -> (), called if the user completes list creation
+ * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
-CodeManager.newList=function(callbackCreate, callbackCancel){
-	HtmlServer.showDialog("Create list","Enter list name","",true,function(cancelled,result) {
-		if(!cancelled&&CodeManager.checkListName(result)) {
-			result=result.trim();
+CodeManager.newList = function(callbackCreate, callbackCancel) {
+	DialogManager.showPromptDialog("Create list", "Enter list name", "", true, function(cancelled, result) {
+		if (!cancelled && CodeManager.checkListName(result)) {
+			result = result.trim();
 			const list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
-			if(callbackCreate != null) callbackCreate(list);
-		} else{
-			if(callbackCancel != null) callbackCancel();
+			if (callbackCreate != null) callbackCreate(list);
+		} else {
+			if (callbackCancel != null) callbackCancel();
 		}
 	});
 };
-/* @fix Write documentation.
+
+/**
+ * Checks if a name is valid for a new List
+ * @param {string} name
+ * @return {boolean} - false if the name is empty or in use
  */
-CodeManager.checkListName=function(name){
-	name=name.trim();
-	if(name.length>0){
-		var lists=CodeManager.listList;
-		for(var i=0;i<lists.length;i++){
-			if(lists[i].getName()==name){
+CodeManager.checkListName = function(name) {
+	name = name.trim();
+	if (name.length > 0) {
+		const lists = CodeManager.listList;
+		for (let i = 0; i < lists.length; i++) {
+			if (lists[i].getName() === name) {
 				return false;
 			}
 		}
@@ -7995,822 +11808,1287 @@ CodeManager.checkListName=function(name){
 	}
 	return false;
 };
-CodeManager.findList=function(name){
-	var lists=CodeManager.listList;
-	for(var i=0;i<lists.length;i++){
-		if(lists[i].getName()==name){
+
+/**
+ * Finds a List by name
+ * @param {string} name
+ * @return {List|null} - The List or null if it can't be found
+ */
+CodeManager.findList = function(name) {
+	const lists = CodeManager.listList;
+	for (let i = 0; i < lists.length; i++) {
+		if (lists[i].getName() === name) {
 			return lists[i];
 		}
 	}
 	return null;
 };
-/* @fix Write documentation.
+
+/**
+ * Tells Blocks that a variable's name has changed
+ * @param {Variable} variable
  */
-CodeManager.newBroadcastMessage=function(slot){
-	slot.deselect();
-	var callbackFn=function(cancelled,result) {
-		if(!cancelled&&result.length>0){
-			result=result.trim();
-			CodeManager.addBroadcastMessage(result);
-			slot.setSelectionData('"'+result+'"',new StringData(result));
-		}
-	};
-	HtmlServer.showDialog("Create broadcast message","Enter message name","",true,callbackFn);
+CodeManager.renameVariable = function(variable) {
+	TabManager.renameVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
 };
-/* @fix Write documentation.
+
+/**
+ * Tells Blocks that a variable has been deleted
+ * @param {Variable} variable
  */
-CodeManager.checkBroadcastMessage=function(message){
-	var messages=CodeManager.broadcastList;
-	for(var i=0;i<messages.length;i++){
-		if(messages[i]==message){
+CodeManager.deleteVariable = function(variable) {
+	TabManager.deleteVariable(variable);
+	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
+};
+
+/**
+ * Tells Blocks that a List has been renamed
+ * @param {List} list
+ */
+CodeManager.renameList = function(list) {
+	TabManager.renameList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
+};
+
+/**
+ * Tells Blocks that a List has been deleted
+ * @param {List} list
+ */
+CodeManager.deleteList = function(list) {
+	TabManager.deleteList(list);
+	BlockPalette.getCategory("variables").refreshGroup();
+	SaveManager.markEdited();
+};
+
+/**
+ * Recursively checks if a variable is ever used. Determines whether a prompt will be shown if the user tries
+ * to delete it.
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+CodeManager.checkVariableUsed = function(variable) {
+	return TabManager.checkVariableUsed(variable);
+};
+
+/**
+ * Recursively checks if a list is ever used.
+ * @param {List} list
+ * @return {boolean}
+ */
+CodeManager.checkListUsed = function(list) {
+	return TabManager.checkListUsed(list);
+};
+
+
+/**
+ * Recursively tells Blocks that a recording's name has changed
+ * @param {string} oldName
+ * @param {string} newName
+ */
+CodeManager.renameRecording = function(oldName, newName) {
+	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+	SaveManager.markEdited();
+};
+
+/**
+ * Recursively tells Blocks that a recording has been deleted
+ * @param {string} recording
+ */
+CodeManager.deleteRecording = function(recording) {
+	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+	SaveManager.markEdited();
+};
+
+
+/**
+ * Checks if the message is original
+ * @param {string} message - The message to test
+ * @return {boolean} - false if that message is already a message in CodeManager.broadcastList
+ * TODO: Just use a set instead of a list for CodeManager.broadcastList
+ */
+CodeManager.checkBroadcastMessage = function(message) {
+	const messages = CodeManager.broadcastList;
+	for (let i = 0; i < messages.length; i++) {
+		if (messages[i] === message) {
 			return false;
 		}
 	}
 	return true;
 };
-/* @fix Write documentation.
+
+/**
+ * Adds a message to the list of messages if it has not already been added
+ * @param {string} message
  */
-CodeManager.addBroadcastMessage=function(message){
-	if(CodeManager.checkBroadcastMessage(message)){
+CodeManager.addBroadcastMessage = function(message) {
+	if (CodeManager.checkBroadcastMessage(message)) {
 		CodeManager.broadcastList.push(message);
 	}
 };
-/* @fix Write documentation.
+
+/**
+ * Recursively tells children to populate the broadcastList
  */
-CodeManager.updateAvailableMessages=function(){
+CodeManager.updateAvailableMessages = function() {
 	CodeManager.broadcastList = [];
 	TabManager.updateAvailableMessages();
 };
-/* @fix Write documentation.
+
+/**
+ * Recursively tells Blocks that a certain message has been broadcast
+ * @param {string} message
  */
-CodeManager.eventBroadcast=function(message){
+CodeManager.eventBroadcast = function(message) {
 	TabManager.eventBroadcast(message);
 };
-CodeManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.hideDeviceDropDowns(deviceClass);
-	BlockPalette.hideDeviceDropDowns(deviceClass);
-};
-CodeManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.showDeviceDropDowns(deviceClass);
-	BlockPalette.showDeviceDropDowns(deviceClass);
-};
-CodeManager.countDevicesInUse=function(deviceClass){
-	return TabManager.countDevicesInUse(deviceClass);
-};
-/* @fix Write documentation.
+
+/**
+ * Recursively checks if a certain broadcast message is still running.
+ * @param {string} message
+ * @return {boolean}
  */
-CodeManager.checkBroadcastRunning=function(message){
+CodeManager.checkBroadcastRunning = function(message) {
 	return TabManager.checkBroadcastRunning(message);
 };
-CodeManager.updateAvailableSensors = function(){
-	TabManager.updateAvailableSensors();
-	BlockPalette.updateAvailableSensors();
+
+/**
+ * Recursively passes on the message that the flag button was tapped.
+ */
+CodeManager.eventFlagClicked = function() {
+	TabManager.eventFlagClicked();
 };
-CodeManager.updateConnectionStatus = function(){
+
+
+/**
+ * Tells DeviceDropSlots or a certain type to hide their drop downs and just use labels
+ * @param deviceClass - subclass of Device, type of slots affected
+ */
+CodeManager.hideDeviceDropDowns = function(deviceClass) {
+	CodeManager.passRecursivelyDown("hideDeviceDropDowns", true, deviceClass);
+};
+
+/**
+ * Tells DeviceDropSlots or a certain type to show their drop downs
+ * @param deviceClass - subclass of Device, type of slots affected
+ */
+CodeManager.showDeviceDropDowns = function(deviceClass) {
+	CodeManager.passRecursivelyDown("showDeviceDropDowns", true, deviceClass);
+};
+
+/**
+ * Recursively funds the largest selected value of any DeviceDropSlot of a certain type
+ * @param deviceClass - subclass of Device, type of slots affected
+ * @return {number}
+ */
+CodeManager.countDevicesInUse = function(deviceClass) {
+	return TabManager.countDevicesInUse(deviceClass);
+};
+
+
+/**
+ * Recursively tells Blocks to become active/inactive based on the sensors that are available
+ */
+CodeManager.updateAvailableSensors = function() {
+	TabManager.passRecursivelyDown("updateAvailableSensors");
+	BlockPalette.passRecursivelyDown("updateAvailableSensors");
+};
+
+/**
+ * Recursively tells Blocks to become active/inactive based on the devices that are connected
+ */
+CodeManager.updateConnectionStatus = function() {
 	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
 };
+
+
+/**
+ * Converts beats to milliseconds using the current tempo
+ * @param {number} beats
+ * @return {number}
+ */
+CodeManager.beatsToMs = function(beats) {
+	const tempo = CodeManager.sound.tempo;
+	const res = beats / tempo * 60 * 1000;
+	if (isNaN(res) || !isFinite(res)) {
+		return 0;
+	}
+	return res;
+};
+
+/**
+ * Sets the tempo, if it is valid.
+ * @param {number} newTempo
+ */
+CodeManager.setSoundTempo = function(newTempo) {
+	if (isFinite(newTempo) && !isNaN(newTempo)) {
+		if (newTempo >= 500) {
+			CodeManager.sound.tempo = 500;
+		} else if (newTempo <= 20) {
+			CodeManager.sound.tempo = 20;
+		} else {
+			CodeManager.sound.tempo = newTempo;
+		}
+	}
+};
+
+
+/**
+ * Tells children to keep passing message down to Slots/Blocks
+ * @param {string} message
+ * @param {boolean} includePalette - Whether Blocks in the palette should also get the message
+ */
 CodeManager.passRecursivelyDown = function(message, includePalette) {
 	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
 	TabManager.passRecursivelyDown.apply(TabManager, args);
-	if(includePalette) {
+	if (includePalette) {
 		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
 	}
 };
-CodeManager.createXml=function(){
-	var CM=CodeManager;
-	var xmlDoc = XmlWriter.newDoc("project");
-	var project=xmlDoc.getElementsByTagName("project")[0];
-	var fileName="project";
-	if(SaveManager.named){
-		fileName=SaveManager.fileName;
+
+
+/**
+ * Exports the project to XML
+ * @return {Document} - The completed XML document
+ */
+CodeManager.createXml = function() {
+	const CM = CodeManager;
+	const xmlDoc = XmlWriter.newDoc("project");
+	const project = xmlDoc.getElementsByTagName("project")[0];
+	let fileName = "project";
+	if (SaveManager.fileName != null) {
+		fileName = SaveManager.fileName;
 	}
-	XmlWriter.setAttribute(project,"name",fileName);
-	XmlWriter.setAttribute(project,"appVersion",GuiElements.appVersion);
-	XmlWriter.setAttribute(project,"created",CodeManager.createdTime);
-	XmlWriter.setAttribute(project,"modified",CodeManager.modifiedTime);
-	var variables=XmlWriter.createElement(xmlDoc,"variables");
-	for(var i=0;i<CM.variableList.length;i++){
+	XmlWriter.setAttribute(project, "name", fileName);
+	XmlWriter.setAttribute(project, "appVersion", GuiElements.appVersion);
+	XmlWriter.setAttribute(project, "created", CodeManager.createdTime);
+	XmlWriter.setAttribute(project, "modified", CodeManager.modifiedTime);
+	const variables = XmlWriter.createElement(xmlDoc, "variables");
+	for (let i = 0; i < CM.variableList.length; i++) {
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
 	}
 	project.appendChild(variables);
-	var lists=XmlWriter.createElement(xmlDoc,"lists");
-	for(i=0;i<CM.listList.length;i++){
+	const lists = XmlWriter.createElement(xmlDoc, "lists");
+	for (let i = 0; i < CM.listList.length; i++) {
 		lists.appendChild(CM.listList[i].createXml(xmlDoc));
 	}
 	project.appendChild(lists);
 	project.appendChild(TabManager.createXml(xmlDoc));
 	return xmlDoc;
 };
-CodeManager.importXml=function(projectNode){
+
+/**
+ * Loads the project from XML
+ * @param projectNode
+ */
+CodeManager.importXml = function(projectNode) {
 	CodeManager.deleteAll();
 	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
-	var variablesNode=XmlWriter.findSubElement(projectNode,"variables");
-	if(variablesNode!=null) {
-		var variableNodes=XmlWriter.findSubElements(variablesNode,"variable");
-		for (var i = 0; i < variableNodes.length; i++) {
+	const variablesNode = XmlWriter.findSubElement(projectNode, "variables");
+	if (variablesNode != null) {
+		const variableNodes = XmlWriter.findSubElements(variablesNode, "variable");
+		for (let i = 0; i < variableNodes.length; i++) {
 			Variable.importXml(variableNodes[i]);
 		}
 	}
-	var listsNode=XmlWriter.findSubElement(projectNode,"lists");
-	if(listsNode!=null) {
-		var listNodes = XmlWriter.findSubElements(listsNode, "list");
-		for (i = 0; i < listNodes.length; i++) {
+	const listsNode = XmlWriter.findSubElement(projectNode, "lists");
+	if (listsNode != null) {
+		const listNodes = XmlWriter.findSubElements(listsNode, "list");
+		for (let i = 0; i < listNodes.length; i++) {
 			List.importXml(listNodes[i]);
 		}
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
-	var tabsNode=XmlWriter.findSubElement(projectNode,"tabs");
+	const tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
 	TabManager.importXml(tabsNode);
+	BlockPalette.refresh();
 	DeviceManager.updateSelectableDevices();
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };
-CodeManager.updateModified = function(){
+
+/**
+ * Updates the modified time of the document
+ */
+CodeManager.updateModified = function() {
 	CodeManager.modifiedTime = new Date().getTime();
 };
-CodeManager.deleteAll=function(){
-	var CM=CodeManager;
+
+/**
+ * Deletes all tabs, stacks, and Blocks so a new project can be loaded
+ */
+CodeManager.deleteAll = function() {
+	const CM = CodeManager;
 	CM.stop();
 	TabManager.deleteAll();
+	UndoManager.clearUndos();
+
 	CodeManager();
 };
-CodeManager.renameVariable=function(variable){
-	TabManager.renameVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-CodeManager.deleteVariable=function(variable){
-	TabManager.deleteVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-CodeManager.renameList=function(list){
-	TabManager.renameList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-CodeManager.deleteList=function(list){
-	TabManager.deleteList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-};
-CodeManager.checkVariableUsed=function(variable){
-	return TabManager.checkVariableUsed(variable);
-};
-CodeManager.checkListUsed=function(list){
-	return TabManager.checkListUsed(list);
-};
-CodeManager.beatsToMs=function(beats){
-	var tempo=CodeManager.sound.tempo;
-	var res=beats/tempo*60*1000;
-	if(isNaN(res)||!isFinite(res)){
-		return 0;
-	}
-	return res;
-};
-CodeManager.setSoundTempo=function(newTempo){
-	if(isFinite(newTempo)&&!isNaN(newTempo)){
-		if(newTempo>=500){
-			CodeManager.sound.tempo=500;
-		}
-		else if(newTempo<=20){
-			CodeManager.sound.tempo=20;
-		}
-		else{
-			CodeManager.sound.tempo=newTempo;
-		}
-	}
-};
-CodeManager.dragAbsToRelX=function(x){
-	return x / TabManager.getActiveZoom();
-};
-CodeManager.dragAbsToRelY=function(y){
-	return y / TabManager.getActiveZoom();
-};
-CodeManager.dragRelToAbsX=function(x){
-	return x * TabManager.getActiveZoom();
-};
-CodeManager.dragRelToAbsY=function(y){
-	return y * TabManager.getActiveZoom();
-};
-CodeManager.renameRecording = function(oldName, newName){
-	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
-};
-CodeManager.deleteRecording = function(recording){
-	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
-};
-CodeManager.markLoading = function(message){
+
+/**
+ * Shows "Loading..." in the TitleBar and blocks interaction for 1 sec or until the file loads
+ * @param message
+ */
+CodeManager.markLoading = function(message) {
 	TitleBar.setText(message);
 	TouchReceiver.disableInteraction(1000);
 };
-CodeManager.fileClosed = function(){
-	BlockPalette.fileClosed();
-};
-CodeManager.fileOpened = function(){
-	BlockPalette.fileOpened();
-};
-CodeManager.cancelLoading = function(){
+
+/**
+ * Undoes markLoading, by restoring the filename and enabling interaction
+ */
+CodeManager.cancelLoading = function() {
 	TitleBar.setText(SaveManager.fileName);
 	TouchReceiver.enableInteraction();
 };
-function TabManager(){
-	var TM=TabManager;
-	TM.tabList=new Array();
-	TM.activeTab=null;
+
+/**
+ * Indicates that a file is now open.  Called from SaveManager.backendSetName
+ */
+CodeManager.markOpen = function() {
+	TouchReceiver.enableInteraction();
+	BlockPalette.markOpen();
+};
+
+
+/* Convert between absolute and relative coords in the drag layer.  Used by moving BlockStacks to determine positions */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CodeManager.dragAbsToRelX = function(x) {
+	return x / TabManager.getActiveZoom();
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CodeManager.dragAbsToRelY = function(y) {
+	return y / TabManager.getActiveZoom();
+};
+/**
+ * @param {number} x
+ * @return {number}
+ */
+CodeManager.dragRelToAbsX = function(x) {
+	return x * TabManager.getActiveZoom();
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+CodeManager.dragRelToAbsY = function(y) {
+	return y * TabManager.getActiveZoom();
+};
+/**
+ * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
+ * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
+ * We decided not to have tabs, so there's just one tab, which is generated and controlled by the TabManager.
+ *
+ * The TabManager's main job is passing messages to the active tab
+ */
+function TabManager() {
+	const TM = TabManager;
+	TM.tabList = [];
+	TM.activeTab = null;
 	TM.createInitialTab();
 	TabManager.createTabSpaceBg();
-	TM.isRunning=false;
-	TM.scrolling=false;
+	TM.isRunning = false;
+	TM.scrolling = false;
 	TM.zooming = false;
 }
-TabManager.setGraphics=function(){
-	var TM=TabManager;
-	TM.bg=Colors.black;
+
+TabManager.setGraphics = function() {
+	const TM = TabManager;
+	TM.bg = Colors.black;
 
 	TM.minZoom = 0.35;
 	TM.maxZoom = 3;
 
-	TM.tabAreaX=BlockPalette.width;
-	if(GuiElements.smallMode){
-		TM.tabAreaX=0;
+	TM.tabAreaX = BlockPalette.width;
+	if (GuiElements.smallMode) {
+		TM.tabAreaX = 0;
 	}
-	TM.tabAreaY=TitleBar.height;
-	TM.tabAreaWidth=GuiElements.width-TM.tabAreaXh;
+	TM.tabAreaY = TitleBar.height;
+	TM.tabAreaWidth = GuiElements.width - TM.tabAreaXh;
 
 	/* No longer different from tabArea since tab bar was removed */
-	TM.tabSpaceX=TM.tabAreaX;
-	TM.tabSpaceY=TitleBar.height;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
-	TM.spaceScrollMargin=50;
+	TM.tabSpaceX = TM.tabAreaX;
+	TM.tabSpaceY = TitleBar.height;
+	TM.tabSpaceWidth = GuiElements.width - TM.tabSpaceX;
+	TM.tabSpaceHeight = GuiElements.height - TM.tabSpaceY;
+	TM.spaceScrollMargin = 50;
+	TM.undoDeleteMarginBase = 40;
+	TM.undoDeleteMarginRand = 40;
 };
-TabManager.createTabSpaceBg=function(){
-	var TM=TabManager;
-	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
+
+/**
+ * Creates the rectangle for the canvas
+ */
+TabManager.createTabSpaceBg = function() {
+	const TM = TabManager;
+	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, Colors.lightGray);
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
-TabManager.updatePositions=function(){
-	/* This might not be needed now that tabs aren't visible */
-};
-TabManager.addTab=function(tab){
+
+/**
+ * Adds a Tab to the list (called in Tab constructor)
+ * @param {Tab} tab
+ */
+TabManager.addTab = function(tab) {
 	TabManager.tabList.push(tab);
 };
-TabManager.removeTab=function(tab){
-	var index=TabManager.tabList.indexOf(tab);
-	TabManager.stackList.splice(index,1);
-};
-TabManager.createInitialTab=function(){
-	var TM=TabManager;
-	var t=new Tab();
-	TM.activateTab(TM.tabList[0]);
-	TM.updatePositions();
-};
-TabManager.activateTab=function(tab){
-	if(TabManager.activeTab!=null){
-		TabManager.activeTab.deactivate();
-	}
-	tab.activate();
-	TabManager.activeTab=tab;
-};
-TabManager.eventFlagClicked=function(){
-	TabManager.passRecursively("eventFlagClicked");
-};
-TabManager.eventBroadcast=function(message){
-	TabManager.passRecursively("eventBroadcast",message);
-};
-TabManager.checkBroadcastRunning=function(message){
-	if(this.isRunning){
-		for(var i=0;i<TabManager.tabList.length;i++){
-			if(TabManager.tabList[i].checkBroadcastRunning(message)){
-				return true;
-			}
-		}
-	}
-	return false;
-};
-TabManager.updateAvailableMessages=function(){
-	TabManager.passRecursively("updateAvailableMessages");
-};
+
 /**
- * @returns {ExecutionStatus}
+ * Removes a tab from the list
+ * @param {Tab} tab
  */
-TabManager.updateRun=function(){	
-	if(!this.isRunning){
-		return false;
+TabManager.removeTab = function(tab) {
+	const index = TabManager.tabList.indexOf(tab);
+	TabManager.stackList.splice(index, 1);
+};
+
+/**
+ * Creates a tab to be the initial Tab
+ */
+TabManager.createInitialTab = function() {
+	const TM = TabManager;
+	const t = new Tab();
+	TM.activateTab(TM.tabList[0]);
+};
+
+/**
+ * Sets a tab as the active Tab
+ * @param {Tab} tab
+ */
+TabManager.activateTab = function(tab) {
+	tab.activate();
+	TabManager.activeTab = tab;
+};
+
+/**
+ * Tells each Tab to update execution
+ * @return {ExecutionStatus} - Whether the tab is currently running
+ */
+TabManager.updateRun = function() {
+	if (!this.isRunning) {
+		return new ExecutionStatusDone();
 	}
-	var rVal=false;
-	for(var i=0;i<TabManager.tabList.length;i++){
+	let rVal = false;
+	for (let i = 0; i < TabManager.tabList.length; i++) {
 		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
 	}
-	this.isRunning=rVal;
-	if(this.isRunning){
+	this.isRunning = rVal;
+	if (this.isRunning) {
 		return new ExecutionStatusRunning();
 	} else {
 		return new ExecutionStatusDone();
 	}
 };
-TabManager.stop=function(){
+
+/**
+ * Stops execution in the tab
+ */
+TabManager.stop = function() {
 	TabManager.passRecursively("stop");
-	this.isRunning=false;
-}
-TabManager.stopAllButStack=function(stack){
-	TabManager.passRecursively("stopAllButStack",stack);
+	this.isRunning = false;
 };
-TabManager.startRun=function(){
-	TabManager.isRunning=true;
+
+/**
+ * Tells the tab to stop execution everywhere except one stack
+ * @param {BlockStack} stack
+ */
+TabManager.stopAllButStack = function(stack) {
+	TabManager.passRecursively("stopAllButStack", stack);
+};
+
+/**
+ * Passes message up from Tab to start execution
+ */
+TabManager.startRun = function() {
+	TabManager.isRunning = true;
 	CodeManager.startUpdateTimer();
-}
-TabManager.startScroll=function(x,y){
-	var TM=TabManager;
-	if(!TM.scrolling){
-		TM.scrolling=true;
-		TM.activeTab.startScroll(x,y);
+};
+
+/* The TabManager tracks information about scrolling before passing messages to the tab.  This way the TouchReceiver
+ * can send messages straight to the TabManager instead of trying to find the active Tab */
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ */
+TabManager.startScroll = function(x, y) {
+	const TM = TabManager;
+	if (!TM.scrolling) {
+		TM.scrolling = true;
+		TM.activeTab.startScroll(x, y);
 	}
 };
-TabManager.updateScroll=function (x,y){
-	var TM=TabManager;
-	if(TM.scrolling){
-		TM.activeTab.updateScroll(x,y);
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ */
+TabManager.updateScroll = function(x, y) {
+	const TM = TabManager;
+	if (TM.scrolling) {
+		TM.activeTab.updateScroll(x, y);
 	}
 };
-TabManager.endScroll=function(){
-	var TM=TabManager;
-	if(TM.scrolling){
-		TM.scrolling=false;
+/**
+ * Passes message to Tab
+ */
+TabManager.endScroll = function() {
+	const TM = TabManager;
+	if (TM.scrolling) {
+		TM.scrolling = false;
 		TM.activeTab.endScroll();
 	}
 };
-TabManager.startZooming = function(x1, y1, x2, y2){
-	var TM=TabManager;
-	if(!TM.zooming){
+/**
+ * Passes message to Tab
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ */
+TabManager.startZooming = function(x1, y1, x2, y2) {
+	const TM = TabManager;
+	if (!TM.zooming) {
 		TM.zooming = true;
 		TM.activeTab.startZooming(x1, y1, x2, y2);
 	}
 };
-TabManager.updateZooming = function(x1, y1, x2, y2){
-	var TM=TabManager;
-	if(TM.zooming){
+/**
+ * Passes message to Tab
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ */
+TabManager.updateZooming = function(x1, y1, x2, y2) {
+	const TM = TabManager;
+	if (TM.zooming) {
 		TM.activeTab.updateZooming(x1, y1, x2, y2);
 	}
 };
-TabManager.endZooming = function(){
-	var TM=TabManager;
-	if(TM.zooming){
+/**
+ * Passes message to Tab
+ */
+TabManager.endZooming = function() {
+	const TM = TabManager;
+	if (TM.zooming) {
 		TM.zooming = false;
 		TM.activeTab.endZooming();
 	}
 };
-TabManager.createXml=function(xmlDoc){
-	var TM=TabManager;
-	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
-	//XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
-	for(var i=0;i<TM.tabList.length;i++){
+
+/**
+ * Tells tab to restore a deleted stack from XML data
+ * @param {Node} stackNode - The node to get the data from
+ * @return {boolean} - Whether the data was valid
+ */
+TabManager.undoDelete = function(stackNode) {
+	return TabManager.activeTab.undoDelete(stackNode);
+};
+
+/**
+ * Generates XML for the all the Tabs
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The XML node containing the data
+ */
+TabManager.createXml = function(xmlDoc) {
+	const TM = TabManager;
+	const tabs = XmlWriter.createElement(xmlDoc, "tabs");
+	for (let i = 0; i < TM.tabList.length; i++) {
 		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
 	}
 	return tabs;
 };
-TabManager.importXml=function(tabsNode){
-	var TM=TabManager;
-	if(tabsNode!=null) {
-		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
-		//var active = XmlWriter.getAttribute(tabsNode, "active");
-		for (var i = 0; i < tabNodes.length; i++) {
+
+/**
+ * Imports the Tab data from the XML
+ * @param {Node} tabsNode - The XML node containing information about the Tabs
+ */
+TabManager.importXml = function(tabsNode) {
+	const TM = TabManager;
+	if (tabsNode != null) {
+		const tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		for (let i = 0; i < tabNodes.length; i++) {
 			Tab.importXml(tabNodes[i]);
 		}
 	}
-	TM.updatePositions();
-	if(TM.tabList.length==0){
+	if (TM.tabList.length === 0) {
 		TM.createInitialTab();
-	}
-	else{
+	} else {
 		TM.activateTab(TM.tabList[0]);
 	}
 };
-TabManager.deleteAll=function(){
-	var TM=TabManager;
-	for(var i=0;i<TM.tabList.length;i++){
+
+/**
+ * Clears and removes all tabs
+ */
+TabManager.deleteAll = function() {
+	const TM = TabManager;
+	for (let i = 0; i < TM.tabList.length; i++) {
 		TM.tabList[i].delete();
 	}
-	TM.tabList=new Array();
-	TM.activeTab=null;
-	TM.isRunning=false;
-	TM.scrolling=false;
+	TM.tabList = [];
+	TM.activeTab = null;
+	TM.isRunning = false;
+	TM.scrolling = false;
 };
-TabManager.renameVariable=function(variable){
-	TabManager.passRecursively("renameVariable",variable);
+
+/* Messages passed directly to tabs */
+TabManager.eventFlagClicked = function() {
+	TabManager.passRecursively("eventFlagClicked");
 };
-TabManager.deleteVariable=function(variable){
-	TabManager.passRecursively("deleteVariable",variable);
+/**
+ * @param {string} message
+ */
+TabManager.eventBroadcast = function(message) {
+	TabManager.passRecursively("eventBroadcast", message);
 };
-TabManager.renameList=function(list){
-	TabManager.passRecursively("renameList",list);
+TabManager.updateAvailableMessages = function() {
+	TabManager.passRecursively("updateAvailableMessages");
 };
-TabManager.deleteList=function(list){
-	TabManager.passRecursively("deleteList",list);
+/**
+ * @param {Variable} variable
+ */
+TabManager.renameVariable = function(variable) {
+	TabManager.passRecursively("renameVariable", variable);
 };
-TabManager.checkVariableUsed=function(variable){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkVariableUsed(variable)){
-			return true;
-		}
-	}
-	return false;
+/**
+ * @param {Variable} variable
+ */
+TabManager.deleteVariable = function(variable) {
+	TabManager.passRecursively("deleteVariable", variable);
 };
-TabManager.checkListUsed=function(list){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkListUsed(list)){
-			return true;
-		}
-	}
-	return false;
+/**
+ * @param {List} list
+ */
+TabManager.renameList = function(list) {
+	TabManager.passRecursively("renameList", list);
 };
-TabManager.hideDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("hideDeviceDropDowns", deviceClass);
+/**
+ * @param {List} list
+ */
+TabManager.deleteList = function(list) {
+	TabManager.passRecursively("deleteList", list);
 };
-TabManager.showDeviceDropDowns=function(deviceClass){
-	TabManager.passRecursively("showDeviceDropDowns", deviceClass);
-};
-TabManager.countDevicesInUse=function(deviceClass){
-	var largest=1;
-	for(var i=0;i<TabManager.tabList.length;i++){
-		largest=Math.max(largest,TabManager.tabList[i].countDevicesInUse(deviceClass));
-	}
-	return largest;
-};
-TabManager.passRecursivelyDown = function(message){
-	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
-	TabManager.passRecursively.apply(TabManager, arguments);
-};
-TabManager.passRecursively=function(functionName){
-	var args = Array.prototype.slice.call(arguments, 1);
-	for(var i=0;i<TabManager.tabList.length;i++){
-		var currentList=TabManager.tabList[i];
-		currentList[functionName].apply(currentList,args);
-	}
-};
-TabManager.updateZoom=function(){
-	var TM=TabManager;
-	TM.setGraphics();
-	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
-	TabManager.passRecursively("updateZoom");
-};
-TabManager.getActiveZoom = function(){
-	if(TabManager.activateTab == null){
-		return 1;
-	}
-	return TabManager.activeTab.getZoom();
-};
-TabManager.updateAvailableSensors = function(){
-	TabManager.passRecursively("updateAvailableSensors");
-};
-function Tab(){
-	this.mainG=GuiElements.create.group(0,0);
-	this.scrollX=0;
-	this.scrollY=0;
-	this.zoomFactor = 1;
-	this.visible=false;
-	TabManager.addTab(this);
-	this.stackList=new Array();
-	this.isRunning=false;
-	this.scrolling=false;
-	this.zooming = false;
-	this.scrollXOffset=50;
-	this.scrollYOffset=100;
-	this.zoomStartDist=null;
-	this.startZoom = null;
-	this.updateTransform();
-	this.overFlowArr = new OverflowArrows();
-	this.dim={};
-	this.dim.x1=0;
-	this.dim.y1=0;
-	this.dim.x2=0;
-	this.dim.y2=0;
-}
-Tab.prototype.activate=function(){
-	GuiElements.layers.activeTab.appendChild(this.mainG);
-	this.overFlowArr.show();
-};
-Tab.prototype.addStack=function(stack){
-	this.stackList.push(stack);
-};
-Tab.prototype.removeStack=function(stack){
-	var index=this.stackList.indexOf(stack);
-	this.stackList.splice(index,1);
-};
-Tab.prototype.relToAbsX=function(x){
-	return x * this.zoomFactor + this.scrollX;
-};
-Tab.prototype.relToAbsY=function(y){
-	return y * this.zoomFactor + this.scrollY;
-};
-Tab.prototype.absToRelX=function(x){
-	return (x - this.scrollX) / this.zoomFactor;
-};
-Tab.prototype.absToRelY=function(y){
-	return (y - this.scrollY) / this.zoomFactor;
-};
-Tab.prototype.getAbsX=function(){
-	return this.relToAbsX(0);
-};
-Tab.prototype.getAbsY=function(){
-	return this.relToAbsY(0);
-};
-Tab.prototype.findBestFit=function(){
-	this.passRecursively("findBestFit");
-};
-Tab.prototype.eventFlagClicked=function(){
-	this.passRecursively("eventFlagClicked");
-};
-Tab.prototype.eventBroadcast=function(message){
-	this.passRecursively("eventBroadcast",message);
-};
-Tab.prototype.checkBroadcastRunning=function(message){
-	if(this.isRunning){
-		var stacks=this.stackList;
-		for(var i=0;i<stacks.length;i++){
-			if(stacks[i].checkBroadcastRunning(message)){
+
+/* Recursive functions that return true if any tab returns true */
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+TabManager.checkBroadcastRunning = function(message) {
+	if (this.isRunning) {
+		for (let i = 0; i < TabManager.tabList.length; i++) {
+			if (TabManager.tabList[i].checkBroadcastRunning(message)) {
 				return true;
 			}
 		}
 	}
 	return false;
 };
-Tab.prototype.updateAvailableMessages=function(){
-	this.passRecursively("updateAvailableMessages");
+/**
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+TabManager.checkVariableUsed = function(variable) {
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		if (TabManager.tabList[i].checkVariableUsed(variable)) {
+			return true;
+		}
+	}
+	return false;
 };
 /**
- * @returns {ExecutionStatus}
+ * @param {List} list
+ * @return {boolean}
  */
-Tab.prototype.updateRun=function(){
-	if(!this.isRunning){
-		return false;
+TabManager.checkListUsed = function(list) {
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		if (TabManager.tabList[i].checkListUsed(list)) {
+			return true;
+		}
 	}
-	var stacks=this.stackList;
-	var rVal=false;
-	for(var i=0;i<stacks.length;i++){
+	return false;
+};
+
+/**
+ * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device
+ * @param deviceClass - Subclass of device
+ * @return {number}
+ */
+TabManager.countDevicesInUse = function(deviceClass) {
+	let largest = 0;
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		largest = Math.max(largest, TabManager.tabList[i].countDevicesInUse(deviceClass));
+	}
+	return largest;
+};
+
+/**
+ * Passes a message down to the Blocks/Slots in the TabManager
+ * @param {string} message - The message to send.  Probably a function in the target object
+ */
+TabManager.passRecursivelyDown = function(message) {
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	TabManager.passRecursively.apply(TabManager, arguments);
+};
+
+/**
+ * Calls the function on all Tabs in this TabManager
+ * @param {function} functionName - The name of the function to call
+ */
+TabManager.passRecursively = function(functionName) {
+	const args = Array.prototype.slice.call(arguments, 1);
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		const currentList = TabManager.tabList[i];
+		currentList[functionName].apply(currentList, args);
+	}
+};
+
+/**
+ * Updates the background rectangle and tells children to update dimensions
+ */
+TabManager.updateZoom = function() {
+	const TM = TabManager;
+	TM.setGraphics();
+	GuiElements.update.rect(TM.bgRect, TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
+};
+
+/**
+ * Gets the zoom level of the active tab
+ * @return {number}
+ */
+TabManager.getActiveZoom = function() {
+	if (TabManager.activeTab == null) {
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
+};
+/**
+ * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
+ * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
+ * We decided not to have tabs, so there's just one tab, which is generated by the TabManager when it is created.
+ * Tabs pass messages to Blocks and manage the canvas.  They control scrolling/zooming of the canvas and the arrows
+ * that indicate off-screen Blocks.
+ * @constructor
+ */
+function Tab() {
+	// group for the canvas
+	this.mainG = GuiElements.create.group(0, 0);
+	// The amount the canvas has been scrolled in each direction
+	this.scrollX = 0;
+	this.scrollY = 0;
+	// The amount the canvas is zoomed
+	this.zoomFactor = 1;
+	// Whether the tab is visible (always true for the current tab)
+	this.visible = false;
+	TabManager.addTab(this);
+	// List of stacks to pass messages to
+	this.stackList = [];
+	this.isRunning = false;
+	this.scrolling = false;
+	this.zooming = false;
+	// Used while dragging.  Stores difference between the touch coords and scrollX/scrollY
+	this.scrollXOffset = 0;
+	this.scrollYOffset = 0;
+	// Used while pinch zooming.  Stores the distance between the two fingers initially
+	this.zoomStartDist = null;
+	// Stores the initial zoomFactor while pinch zooming
+	this.startZoom = null;
+	// Updates the transformation on the group to reflect the zoom factor and scroll position
+	this.updateTransform();
+	// Arrows to show off-screen blocks
+	this.overFlowArr = new OverflowArrows();
+	// Dimension information
+	this.dim = {};
+	this.dim.x1 = 0;
+	this.dim.y1 = 0;
+	this.dim.x2 = 0;
+	this.dim.y2 = 0;
+}
+
+/**
+ * Brings the tab to the foreground.  Called by TabManager.
+ */
+Tab.prototype.activate = function() {
+	GuiElements.layers.activeTab.appendChild(this.mainG);
+	this.overFlowArr.show();
+};
+
+/**
+ * Adds a stack to the list.  Called by stack constructor.
+ * @param {BlockStack} stack
+ */
+Tab.prototype.addStack = function(stack) {
+	this.stackList.push(stack);
+};
+
+/**
+ * Removes a stack from the list. Called from BlockSTack.prototype.remove
+ * @param {BlockStack} stack
+ */
+Tab.prototype.removeStack = function(stack) {
+	const index = this.stackList.indexOf(stack);
+	this.stackList.splice(index, 1);
+};
+
+/* Convert between screen coords and coords within the Tab */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Tab.prototype.relToAbsX = function(x) {
+	return x * this.zoomFactor + this.scrollX;
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Tab.prototype.relToAbsY = function(y) {
+	return y * this.zoomFactor + this.scrollY;
+};
+/**
+ * @param {number} x
+ * @return {number}
+ */
+Tab.prototype.absToRelX = function(x) {
+	return (x - this.scrollX) / this.zoomFactor;
+};
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Tab.prototype.absToRelY = function(y) {
+	return (y - this.scrollY) / this.zoomFactor;
+};
+/**
+ * @return {number}
+ */
+Tab.prototype.getAbsX = function() {
+	return this.relToAbsX(0);
+};
+/**
+ * @return {number}
+ */
+Tab.prototype.getAbsY = function() {
+	return this.relToAbsY(0);
+};
+
+/* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
+Tab.prototype.findBestFit = function() {
+	this.passRecursively("findBestFit");
+};
+Tab.prototype.eventFlagClicked = function() {
+	this.passRecursively("eventFlagClicked");
+};
+Tab.prototype.eventBroadcast = function(message) {
+	this.passRecursively("eventBroadcast", message);
+};
+Tab.prototype.updateAvailableMessages = function() {
+	this.passRecursively("updateAvailableMessages");
+};
+Tab.prototype.renameVariable = function(variable) {
+	this.passRecursively("renameVariable", variable);
+};
+Tab.prototype.deleteVariable = function(variable) {
+	this.passRecursively("deleteVariable", variable);
+};
+Tab.prototype.renameList = function(list) {
+	this.passRecursively("renameList", list);
+};
+Tab.prototype.deleteList = function(list) {
+	this.passRecursively("deleteList", list);
+};
+
+/* Recursive functions that return booleans.  These functions call a function on each stack and return true if any
+ * stack returns true. */
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+Tab.prototype.checkBroadcastRunning = function(message) {
+	if (this.isRunning) {
+		const stacks = this.stackList;
+		for (let i = 0; i < stacks.length; i++) {
+			if (stacks[i].checkBroadcastRunning(message)) {
+				return true;
+			}
+		}
+	}
+	return false;
+};
+/**
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+Tab.prototype.checkVariableUsed = function(variable) {
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		if (stacks[i].checkVariableUsed(variable)) {
+			return true;
+		}
+	}
+	return false;
+};
+/**
+ * @param {List} list
+ * @return {boolean}
+ */
+Tab.prototype.checkListUsed = function(list) {
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		if (stacks[i].checkListUsed(list)) {
+			return true;
+		}
+	}
+	return false;
+};
+
+/**
+ * Updates execution of Blocks.  This function performs one execution step on every stack.
+ * @returns {ExecutionStatus} - Whether the tab is still running
+ */
+Tab.prototype.updateRun = function() {
+	if (!this.isRunning) {
+		return new ExecutionStatusDone();
+	}
+	const stacks = this.stackList;
+	let rVal = false;
+	for (let i = 0; i < stacks.length; i++) {
 		rVal = stacks[i].updateRun().isRunning() || rVal;
 	}
-	this.isRunning=rVal;
-	if(this.isRunning){
+	this.isRunning = rVal;
+	if (this.isRunning) {
 		return new ExecutionStatusRunning();
-	} else{
+	} else {
 		return new ExecutionStatusDone();
 	}
 };
-Tab.prototype.stop=function(){
+
+/**
+ * Stops execution of all stacks
+ */
+Tab.prototype.stop = function() {
 	this.passRecursively("stop");
-	this.isRunning=false;
-}
-Tab.prototype.stopAllButStack=function(stack){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i]!=stack) {
+	this.isRunning = false;
+};
+
+/**
+ * Stops execution of all stacks except the specified stack
+ * @param stack
+ */
+Tab.prototype.stopAllButStack = function(stack) {
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		if (stacks[i] !== stack) {
 			stacks[i].stop();
 		}
 	}
 };
-Tab.prototype.startRun=function(){
-	this.isRunning=true;
+
+/**
+ * Passes up the message to start running to the TabManager.  Called by a stack when it is tapped.
+ */
+Tab.prototype.startRun = function() {
+	this.isRunning = true;
 	TabManager.startRun();
-}
-Tab.prototype.startScroll=function(x,y){
-	if(!this.scrolling) {
+};
+
+/**
+ * Stores information necessary to begin scrolling when the user drags their finger on the canvas
+ * @param {number} x - The x coord of the touch
+ * @param {number} y - The y coord of the touch
+ */
+Tab.prototype.startScroll = function(x, y) {
+	if (!this.scrolling) {
 		this.scrolling = true;
 		this.scrollXOffset = this.scrollX - x;
 		this.scrollYOffset = this.scrollY - y;
 		this.updateTabDim();
 	}
 };
-Tab.prototype.updateScroll=function(x,y){
-	if(this.scrolling) {
-		this.scrollX=this.scrollXOffset + x;
-		this.scrollY=this.scrollYOffset + y;
-		GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+
+/**
+ * Moves the canvas to the correct location, given that the user dragged to the provided coordinate
+ * @param {number} x - The x coord of the touch
+ * @param {number} y - The y coord of the touch
+ */
+Tab.prototype.updateScroll = function(x, y) {
+	if (this.scrolling) {
+		this.scrollX = this.scrollXOffset + x;
+		this.scrollY = this.scrollYOffset + y;
+		GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
 		this.updateArrowsShift();
-		/*this.scroll(this.scrollXOffset + x, this.scrollYOffset + y);*/
 	}
 };
-Tab.prototype.scroll=function(x,y) {
-	/*
-	this.scrollX=x;
-	this.scrollY=y;
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
-	var dim=this.dim;
-	var x1=x+dim.xDiff;
-	var y1=y+dim.yDiff;
 
-	var newObjX=this.scrollOneVal(dim.xDiff+this.scrollX,dim.width,x1,TabManager.tabSpaceX,TabManager.tabSpaceWidth);
-	var newObjY=this.scrollOneVal(dim.yDiff+this.scrollY,dim.height,y1,TabManager.tabSpaceY,TabManager.tabSpaceHeight);
-	this.scrollX=newObjX-dim.xDiff;
-	this.scrollY=newObjY-dim.yDiff;
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY);
-	*/
-};
-Tab.prototype.endScroll=function(){
+/**
+ * Notes that the canvas is done scrolling
+ */
+Tab.prototype.endScroll = function() {
 	this.scrolling = false;
 };
-Tab.prototype.scrollOneVal=function(objectX,objectW,targetX,containerX,containerW){
-	// var minX;
-	// var maxX;
-	// if(objectW<containerW){
-	// 	if(objectX>=containerX&&objectX+objectW<=containerX+containerW){
-	// 		return objectX;
-	// 	}
-	// 	minX=Math.min(containerX,objectX);
-	// 	maxX=Math.max(containerX+containerW-objectW,objectX);
-	// }
-	// else{
-	// 	minX=Math.min(containerX+containerW-objectW,objectX);
-	// 	maxX=Math.max(containerX,objectX);
-	// }
-	// var rVal=targetX;
-	// rVal=Math.min(rVal,maxX);
-	// rVal=Math.max(rVal,minX);
-	// return rVal;
-};
-Tab.prototype.startZooming = function(x1, y1, x2, y2){
-	if(!this.zooming) {
+
+/**
+ * Stores data necessary to start zooming when the user has two fingers on the screen
+ * @param {number} x1 - The x coord of the first touch
+ * @param {number} y1 - The y coord of the first touch
+ * @param {number} x2 - The x coord of the second touch
+ * @param {number} y2 - The y coord of the second touch
+ */
+Tab.prototype.startZooming = function(x1, y1, x2, y2) {
+	if (!this.zooming) {
 		this.zooming = true;
-		var x = (x1 + x2) / 2;
-		var y = (y1 + y2) / 2;
+		const x = (x1 + x2) / 2;
+		const y = (y1 + y2) / 2;
 		this.scrollXOffset = this.scrollX - x;
 		this.scrollYOffset = this.scrollY - y;
-		var deltaX = x2 - x1;
-		var deltaY = y2 - y1;
+		const deltaX = x2 - x1;
+		const deltaY = y2 - y1;
 		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.startZoom = this.zoomFactor;
 		this.updateTabDim();
 	}
 };
-Tab.prototype.updateZooming = function(x1, y1, x2, y2){
-	if(this.zooming){
-		var x = (x1 + x2) / 2;
-		var y = (y1 + y2) / 2;
-		var deltaX = x2 - x1;
-		var deltaY = y2 - y1;
-		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+/**
+ * Moves and zooms the canvas given the positions of the two touches
+ * @param {number} x1 - The x coord of the first touch
+ * @param {number} y1 - The y coord of the first touch
+ * @param {number} x2 - The x coord of the second touch
+ * @param {number} y2 - The y coord of the second touch
+ */
+Tab.prototype.updateZooming = function(x1, y1, x2, y2) {
+	if (this.zooming) {
+		const x = (x1 + x2) / 2;
+		const y = (y1 + y2) / 2;
+		const deltaX = x2 - x1;
+		const deltaY = y2 - y1;
+		const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
 		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
-		var zoomRatio = this.zoomFactor / this.startZoom;
-		this.scrollX=this.scrollXOffset * zoomRatio + x;
-		this.scrollY=this.scrollYOffset * zoomRatio + y;
+		const zoomRatio = this.zoomFactor / this.startZoom;
+		this.scrollX = this.scrollXOffset * zoomRatio + x;
+		this.scrollY = this.scrollYOffset * zoomRatio + y;
 		this.updateTransform();
 		this.updateArrowsShift();
 	}
 };
-Tab.prototype.updateTransform=function(){
-	GuiElements.move.group(this.mainG,this.scrollX,this.scrollY, this.zoomFactor);
+
+/**
+ * Notes that the canvas is done zooming
+ */
+Tab.prototype.endZooming = function() {
+	this.zooming = false;
+};
+
+/**
+ * Updates the transformation on the group according to the scroll position and zoom.
+ */
+Tab.prototype.updateTransform = function() {
+	GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
 	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
 	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
 };
-Tab.prototype.endZooming = function(){
-	this.zooming = false;
-};
-Tab.prototype.updateTabDim=function(){
-	var dim=this.dim;
-	dim.width=0;
-	dim.height=0;
-	dim.x1=null;
-	dim.y1=null;
-	dim.x2=null;
-	dim.y2=null;
+
+/**
+ * Recursively computes the dimensions of the Tab by allowing all stacks to update the bounding box
+ */
+Tab.prototype.updateTabDim = function() {
+	const dim = this.dim;
+	dim.width = 0;
+	dim.height = 0;
+	dim.x1 = null;
+	dim.y1 = null;
+	dim.x2 = null;
+	dim.y2 = null;
 	this.passRecursively("updateTabDim");
-	if(dim.x1==null){
-		dim.x1=0;
-		dim.y1=0;
-		dim.x2=0;
-		dim.y2=0;
+	if (dim.x1 == null) {
+		dim.x1 = 0;
+		dim.y1 = 0;
+		dim.x2 = 0;
+		dim.y2 = 0;
 	}
 };
-Tab.prototype.createXml=function(xmlDoc){
-	var tab=XmlWriter.createElement(xmlDoc,"tab");
+
+/**
+ * Writes the contents of the Tab to xml
+ * @param {Document} xmlDoc - The XML document to write to
+ * @return {Node} - The XML Node for this Tab
+ */
+Tab.prototype.createXml = function(xmlDoc) {
+	const tab = XmlWriter.createElement(xmlDoc, "tab");
 	//XmlWriter.setAttribute(tab,"name",this.name);
-	XmlWriter.setAttribute(tab,"x",this.scrollX);
-	XmlWriter.setAttribute(tab,"y",this.scrollY);
-	XmlWriter.setAttribute(tab,"zoom",this.zoomFactor);
-	var stacks=XmlWriter.createElement(xmlDoc,"stacks");
-	for(var i=0;i<this.stackList.length;i++){
+	XmlWriter.setAttribute(tab, "x", this.scrollX);
+	XmlWriter.setAttribute(tab, "y", this.scrollY);
+	XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
+	const stacks = XmlWriter.createElement(xmlDoc, "stacks");
+	for (let i = 0; i < this.stackList.length; i++) {
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
 	}
 	tab.appendChild(stacks);
 	return tab;
 };
-Tab.importXml=function(tabNode){
-	var x=XmlWriter.getAttribute(tabNode,"x",0,true);
-	var y=XmlWriter.getAttribute(tabNode,"y",0,true);
-	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
-	var tab=new Tab();
-	tab.scrollX=x;
-	tab.scrollY=y;
+
+/**
+ * Imports the stacks from the provided node into this tab
+ * @param {Node} tabNode - The tab node to import from
+ * @return {Tab}
+ */
+Tab.importXml = function(tabNode) {
+	const x = XmlWriter.getAttribute(tabNode, "x", 0, true);
+	const y = XmlWriter.getAttribute(tabNode, "y", 0, true);
+	const zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	const tab = new Tab();
+	tab.scrollX = x;
+	tab.scrollY = y;
 	tab.zoomFactor = zoom;
 	tab.updateTransform();
-	var stacksNode=XmlWriter.findSubElement(tabNode,"stacks");
-	if(stacksNode!=null){
-		var stackNodes=XmlWriter.findSubElements(stacksNode,"stack");
-		for(var i=0;i<stackNodes.length;i++){
-			BlockStack.importXml(stackNodes[i],tab);
+	const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
+	if (stacksNode != null) {
+		const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+		for (let i = 0; i < stackNodes.length; i++) {
+			BlockStack.importXml(stackNodes[i], tab);
 		}
 	}
 	tab.updateArrows();
 	return tab;
 };
-Tab.prototype.delete=function(){
-	this.passRecursively("delete");
+
+/**
+ * Removes the tab
+ */
+Tab.prototype.delete = function() {
+	this.passRecursively("remove");
 	this.mainG.remove();
 };
-Tab.prototype.renameVariable=function(variable){
-	this.passRecursively("renameVariable",variable);
-};
-Tab.prototype.deleteVariable=function(variable){
-	this.passRecursively("deleteVariable",variable);
-};
-Tab.prototype.renameList=function(list){
-	this.passRecursively("renameList",list);
-};
-Tab.prototype.deleteList=function(list){
-	this.passRecursively("deleteList",list);
-};
-Tab.prototype.checkVariableUsed=function(variable){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i].checkVariableUsed(variable)){
-			return true;
-		}
+
+/**
+ * Creates a stack based on the stackNode provided by the UndoManager in the top left corner
+ * @param {Node} stackNode - The XML node for the stack
+ * @return {boolean} - Whether the stack was created (false if the XML is invalid)
+ */
+Tab.prototype.undoDelete = function(stackNode) {
+	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
+	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+
+	const x = this.absToRelX(xMargin + BlockPalette.width);
+	const y = this.absToRelY(yMargin + TitleBar.height);
+	const stack = BlockStack.importXml(stackNode, this);
+	if (stack == null) {
+		return false;
 	}
-	return false;
+	stack.move(x, y);
+	this.updateArrows();
+	return true;
 };
-Tab.prototype.checkListUsed=function(list){
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		if(stacks[i].checkListUsed(list)){
-			return true;
-		}
-	}
-	return false;
-};
-Tab.prototype.hideDeviceDropDowns=function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-Tab.prototype.showDeviceDropDowns=function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-Tab.prototype.countDevicesInUse=function(deviceClass){
-	var largest=1;
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		largest=Math.max(largest,stacks[i].countDevicesInUse(deviceClass));
+
+/**
+ * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device
+ * @param deviceClass - Subclass of device
+ * @return {number}
+ */
+Tab.prototype.countDevicesInUse = function(deviceClass) {
+	let largest = 0;
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		largest = Math.max(largest, stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
 };
-Tab.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
-};
-Tab.prototype.passRecursivelyDown = function(message){
+
+/**
+ * Passes a message down to the Blocks/Slots in the tab
+ * @param {string} message - The message to send.  Probably a function in the target object
+ */
+Tab.prototype.passRecursivelyDown = function(message) {
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
 };
-Tab.prototype.passRecursively=function(functionName){
-	var args = Array.prototype.slice.call(arguments, 1);
-	var stacks=this.stackList;
-	for(var i=0;i<stacks.length;i++){
-		var currentStack=stacks[i];
-		var currentL=stacks.length;
-		currentStack[functionName].apply(currentStack,args);
-		if(currentL!=stacks.length){
+
+/**
+ * Calls the function on all Stacks in this tab
+ * @param {function} functionName - The name of the function to call
+ */
+Tab.prototype.passRecursively = function(functionName) {
+	const args = Array.prototype.slice.call(arguments, 1);
+	const stacks = this.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		const currentStack = stacks[i];
+		const currentL = stacks.length;
+		currentStack[functionName].apply(currentStack, args);
+		if (currentL !== stacks.length) {
 			i--;
 		}
 	}
 };
-Tab.prototype.getZoom=function(){
+
+/**
+ * Retrieves the zoom from the tab
+ * @return {number}
+ */
+Tab.prototype.getZoom = function() {
 	return this.zoomFactor;
 };
-Tab.prototype.updateZoom=function(){
+
+/**
+ * Updates the UI for the new zoom level
+ */
+Tab.prototype.updateZoom = function() {
 	this.overFlowArr.updateZoom();
 	this.updateArrows();
 };
-Tab.prototype.updateArrows=function(){
+
+/**
+ * Makes the arrows appear/disappear depending on the size/position of the canvas
+ */
+Tab.prototype.updateArrows = function() {
 	this.updateTabDim();
-	var x1 = this.relToAbsX(this.dim.x1);
-	var y1 = this.relToAbsY(this.dim.y1);
-	var x2 = this.relToAbsX(this.dim.x2);
-	var y2 = this.relToAbsY(this.dim.y2);
+	const x1 = this.relToAbsX(this.dim.x1);
+	const y1 = this.relToAbsY(this.dim.y1);
+	const x2 = this.relToAbsX(this.dim.x2);
+	const y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
-Tab.prototype.updateArrowsShift=function(){
-	var x1 = this.relToAbsX(this.dim.x1)
-	var y1 = this.relToAbsY(this.dim.y1)
-	var x2 = this.relToAbsX(this.dim.x2)
-	var y2 = this.relToAbsY(this.dim.y2)
+
+/**
+ * Like updateArrows but avoids recomputing the size of the Tab, since it assumes that the canvas has only been zoomed
+ * and the Blocks have not changed
+ */
+Tab.prototype.updateArrowsShift = function() {
+	const x1 = this.relToAbsX(this.dim.x1);
+	const y1 = this.relToAbsY(this.dim.y1);
+	const x2 = this.relToAbsX(this.dim.x2);
+	const y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 /**
- * Created by Tom on 6/17/2017.
+ * A static class that manages making recordings
  */
-function RecordingManager(){
+function RecordingManager() {
 	let RM = RecordingManager;
-	RM.recordingStates = {};
-	RM.recordingStates.stopped = 0;
-	RM.recordingStates.recording = 1;
-	RM.recordingStates.paused = 2;
+
+	/** @enum {number} */
+	RM.recordingStates = {
+		stopped: 0,
+		recording: 1,
+		paused: 2
+	};
 	RM.state = RM.recordingStates.stopped;
 	RM.updateTimer = null;
 	RM.updateInterval = 200;
@@ -8818,28 +13096,49 @@ function RecordingManager(){
 	RM.pausedTime = 0;
 	RM.awaitingPermission = false;
 }
-RecordingManager.userRenameFile = function(oldFilename, nextAction){
+
+/**
+ * Provides UI/Dialogs to rename a recording
+ * @param {string} oldFilename - The name of the recording to rename
+ * @param {function} nextAction - The function to run if the recording is renamed
+ */
+RecordingManager.userRenameFile = function(oldFilename, nextAction) {
 	SaveManager.userRenameFile(true, oldFilename, nextAction);
 };
-RecordingManager.userDeleteFile=function(filename, nextAction){
+
+/**
+ * Provides UI/dialogs to delete a recording
+ * @param {string} filename - The name of the recording to delete
+ * @param {function} nextAction - The function to run if the recording if deleted
+ */
+RecordingManager.userDeleteFile = function(filename, nextAction) {
 	SaveManager.userDeleteFile(true, filename, nextAction);
 };
-RecordingManager.startRecording=function(){
+
+/**
+ * Tries to start recording
+ */
+RecordingManager.startRecording = function() {
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/start");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		if(result == "Started"){
+	HtmlServer.sendRequestWithCallback(request.toString(), function(result) {
+		if (result === "Started") {
+			// Successfully started recording. Change state
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
-		} else if(result == "Permission denied"){
+		} else if (result === "Permission denied") {
 			let message = "Please grant recording permissions to the BirdBlox app in settings";
-			HtmlServer.showAlertDialog("Permission denied", message,"Dismiss");
-		} else if(result == "Requesting permission") {
+			DialogManager.showAlertDialog("Permission denied", message, "Dismiss");
+		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
 	});
 };
-RecordingManager.stopRecording=function(){
+
+/**
+ * Tell the backend to stop recording
+ */
+RecordingManager.stopRecording = function() {
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/stop");
 	let stopRec = function() {
@@ -8848,154 +13147,220 @@ RecordingManager.stopRecording=function(){
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 };
-RecordingManager.interruptRecording = function(){
+
+/**
+ * Called from backend when there is an unexpected interruption.
+ */
+RecordingManager.interruptRecording = function() {
 	let RM = RecordingManager;
 	RM.setState(RM.recordingStates.stopped);
 	RecordingDialog.stoppedRecording();
 };
-RecordingManager.pauseRecording=function(){
+
+/**
+ * Tells the backend to pause recording
+ */
+RecordingManager.pauseRecording = function() {
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/pause");
 	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let pauseRec = function(){
+	let pauseRec = function() {
 		RM.setState(RM.recordingStates.paused);
 		RecordingDialog.pausedRecording();
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), pauseRec, stopRec);
 };
-RecordingManager.discardRecording = function(){
+
+/**
+ * Prompts the user to discard the current recording
+ */
+RecordingManager.discardRecording = function() {
 	let RM = RecordingManager;
 	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
 	let message = "Are you sure you would like to delete the current recording?";
-	HtmlServer.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result){
-		if(result == "2") {
+	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result) {
+		if (result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 		}
 	}, stopRec);
 };
-RecordingManager.resumeRecording = function(){
+
+/**
+ * Tells the backend to resume recording
+ */
+RecordingManager.resumeRecording = function() {
 	let RM = RecordingManager;
 	let request = new HttpRequestBuilder("sound/recording/unpause");
 	let stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let resumeRec = function(){
+	let resumeRec = function() {
 		RM.setState(RM.recordingStates.recording);
 		RecordingDialog.startedRecording();
 	};
 	HtmlServer.sendRequestWithCallback(request.toString(), resumeRec, stopRec);
 };
-RecordingManager.listRecordings = function(callbackFn){
+
+/**
+ * Requests a list of recordings from the backend
+ * @param {function} callbackFn - type (Array<Sound>) -> (), called with the list of recordings
+ */
+RecordingManager.listRecordings = function(callbackFn) {
 	Sound.loadSounds(true, callbackFn);
 };
-RecordingManager.setState = function(state){
+
+/**
+ * Changes the state of the RecordingManager and notifies any open Recording Dialogs to update their UI
+ * @param state
+ */
+RecordingManager.setState = function(state) {
 	let RM = RecordingManager;
 	let prevState = RM.state;
 	RM.state = state;
 	let states = RM.recordingStates;
-
-
-
-	if(state === states.recording){
-		if(RM.updateTimer == null){
-			if(prevState === states.stopped) RM.pausedTime = 0;
+	if (state === states.recording) {
+		if (RM.updateTimer == null) {
+			if (prevState === states.stopped) RM.pausedTime = 0;
 			RM.startTime = new Date().getTime();
 			RM.updateTimer = self.setInterval(RM.updateCounter, RM.updateInterval);
 		}
-	}
-	else if(state === states.paused) {
+	} else if (state === states.paused) {
 		if (RM.updateTimer != null) {
 			RM.updateTimer = window.clearInterval(RM.updateTimer);
 			RM.updateTimer = null;
 			RM.pausedTime = RM.getElapsedTime();
 		}
-	}
-	else {
+	} else {
 		if (RM.updateTimer != null) {
 			RM.updateTimer = window.clearInterval(RM.updateTimer);
 			RM.updateTimer = null;
 		}
 	}
 };
-RecordingManager.updateCounter = function(){
+
+/**
+ * Updates the elapsed time counters on any open dialogs
+ */
+RecordingManager.updateCounter = function() {
 	let RM = RecordingManager;
 	RecordingDialog.updateCounter(RM.getElapsedTime());
 };
-RecordingManager.getElapsedTime = function(){
+
+/**
+ * Computes the elapsed time
+ * @return {number} - Recording time in milliseconds
+ */
+RecordingManager.getElapsedTime = function() {
 	let RM = RecordingManager;
 	return new Date().getTime() - RM.startTime + RM.pausedTime;
 };
-RecordingManager.permissionGranted = function(){
+
+/**
+ * Starts recording if permission is granted and the app was waiting for permission
+ */
+RecordingManager.permissionGranted = function() {
 	let RM = RecordingManager;
-	if(RM.awaitingPermission){
+	if (RM.awaitingPermission) {
 		RM.awaitingPermission = false;
-		if(RecordingDialog.currentDialog != null){
+		if (RecordingDialog.currentDialog != null) {
 			RM.startRecording();
 		}
 	}
 };
 /**
- * Created by Tom on 6/13/2017.
+ * Abstract class that controls a dialog with a scrollable region containing a number of rows. Each row normally
+ * contains buttons but can also have other types of content. Only one dialog can be visible at any time.
+ * The constructor does not draw anything, rather show() must be called.  Calling hide() then show() is used to reload
+ * the dialog.  When show() is called, createRow is automatically called to generate each row, which must be implemented
+ * by the subclass
+ * @param {boolean} autoHeight - Whether the dialog should get taller as number of row increase. Discouraged for
+ *                               dialogs that reload frequently
+ * @param {string} title - The test to display in the title bar
+ * @param {number} rowCount - The number of row to load. Determines how many times createRow is called
+ * @param {number} extraTop - The amount of additional space to put between the title bar and the rows (for extra ui)
+ * @param {number} extraBottom - The amount of extra space to put below the rows
+ * @param {number} [extendTitleBar=0] - The amount the title bar's background should be extended
+ * @constructor
  */
-
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar){
-	if(extendTitleBar == null){
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
+	if (extendTitleBar == null) {
 		extendTitleBar = 0;
 	}
 	this.autoHeight = autoHeight;
 	this.title = title;
 	this.rowCount = rowCount;
-	this.centeredButtons = [];
 	this.extraTopSpace = extraTop;
 	this.extraBottomSpace = extraBottom;
 	this.extendTitleBar = extendTitleBar;
-	this.visible = false;
+	/* The close/cancel/dismiss buttons at the bottom of the dialog are centeredButtons.  They should be added with
+	 * addCenteredButton before show() is called */
+	/** @type {Array<object>} - An array of entries including text and callbackFn for each button */
+	this.centeredButtons = [];
+	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
 	this.hintText = "";
+	this.visible = false;
 }
-RowDialog.setConstants=function(){
-	RowDialog.currentDialog=null;
 
-	RowDialog.titleBarColor=Colors.lightGray;
-	RowDialog.titleBarFontC=Colors.white;
-	RowDialog.bgColor=Colors.black;
-	RowDialog.titleBarH=30;
-	RowDialog.centeredBnWidth=100;
-	RowDialog.bnHeight=MenuBnList.bnHeight;
-	RowDialog.bnMargin=5;
+RowDialog.setConstants = function() {
+	//TODO: This really should be in a separate "setStatics" function, since it isn't a constant
+	RowDialog.currentDialog = null;
+
+	RowDialog.titleBarColor = Colors.lightGray;
+	RowDialog.titleBarFontC = Colors.white;
+	RowDialog.bgColor = Colors.black;
+	RowDialog.centeredBnWidth = 100;
+	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+	RowDialog.bnMargin = 5;
+	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+
+	// The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
+	RowDialog.widthRatio = 0.7;
+	RowDialog.heightRatio = 0.75;
+
+	// But if that is too small, it uses the min dimensions
 	RowDialog.minWidth = 400;
-	RowDialog.minHeight = 200;
-	RowDialog.hintMargin = 5;
+	RowDialog.minHeight = 400;
 
-	RowDialog.fontSize=16;
-	RowDialog.font="Arial";
-	RowDialog.titleFontWeight="bold";
-	RowDialog.centeredfontWeight="bold";
-	RowDialog.charHeight=12;
+	RowDialog.hintMargin = 5;
+	RowDialog.titleBarFont = Font.uiFont(16).bold();
+	RowDialog.hintTextFont = Font.uiFont(16);
+	RowDialog.centeredfontWeight = "bold";
 	RowDialog.smallBnWidth = 45;
 	RowDialog.iconH = 15;
 };
-RowDialog.prototype.addCenteredButton = function(text, callbackFn){
+
+/**
+ * Adds information for a centered button to the centeredButtons array. The buttons are built when "show" is called
+ * They show up at the bottom of the dialog
+ * @param {string} text - The text to show on the button
+ * @param {function} callbackFn - The function to call when the button is tapped
+ */
+RowDialog.prototype.addCenteredButton = function(text, callbackFn) {
 	let entry = {};
 	entry.text = text;
 	entry.callbackFn = callbackFn;
 	this.centeredButtons.push(entry);
 };
 
-RowDialog.prototype.show = function(){
-	if(!this.visible) {
+/**
+ * Builds all the visuals of the dialog and sets the dialog as currentDialog.  Closes any existing dialogs.
+ */
+RowDialog.prototype.show = function() {
+	if (!this.visible) {
 		this.visible = true;
-		if(RowDialog.currentDialog != null && RowDialog.currentDialog !== this){
+		// Close existing dialog if any
+		if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
 			RowDialog.currentDialog.closeDialog();
 		}
-		RowDialog.currentDialog=this;
+		RowDialog.currentDialog = this;
 		this.calcHeights();
 		this.calcWidths();
 		this.x = GuiElements.width / 2 - this.width / 2;
@@ -9006,6 +13371,7 @@ RowDialog.prototype.show = function(){
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
+		// All the rows go in this group, which is scrollable
 		this.rowGroup = this.createContent();
 		this.createCenteredBns();
 		this.scrollBox = this.createScrollBox(); // could be null
@@ -9018,15 +13384,20 @@ RowDialog.prototype.show = function(){
 		GuiElements.blockInteraction();
 	}
 };
-RowDialog.prototype.calcHeights = function(){
-	var RD = RowDialog;
+
+/**
+ * Computes the height of the dialog and its content.
+ */
+RowDialog.prototype.calcHeights = function() {
+	const RD = RowDialog;
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	let minHeight = Math.max(GuiElements.height / 2, RD.minHeight);
+	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
 	let totalHeight = nonScrollHeight + ScrollHeight;
-	if(!this.autoHeight) totalHeight = 0;
+	if (!this.autoHeight) totalHeight = 0;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
@@ -9035,326 +13406,1005 @@ RowDialog.prototype.calcHeights = function(){
 	this.extraTopY = RD.titleBarH;
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
-RowDialog.prototype.calcWidths=function(){
-	var RD = RowDialog;
-	let thirdWidth = GuiElements.width / 3;
-	this.width = Math.min(GuiElements.width, Math.max(thirdWidth, RD.minWidth));
+
+/**
+ * Computes the width of the dialog and its content.
+ */
+RowDialog.prototype.calcWidths = function() {
+	const RD = RowDialog;
+	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	this.width = Math.min(GuiElements.width, Math.max(shorterDim * RD.widthRatio, RD.minWidth));
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;
 	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
 	this.contentWidth = this.width - RD.bnMargin * 2;
 };
-RowDialog.prototype.drawBackground = function(){
+
+/**
+ * Draws the gray background rectangle of the dialog
+ * @return {Element} - The SVG rect element
+ */
+RowDialog.prototype.drawBackground = function() {
 	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
 	this.group.appendChild(rect);
 	return rect;
 };
-RowDialog.prototype.createTitleRect=function(){
-	var RD=RowDialog;
-	var rect=GuiElements.draw.rect(0,0,this.width,RD.titleBarH + this.extendTitleBar,RD.titleBarColor);
+
+/**
+ * Draws the black rect behind the title bar
+ * @return {Element} - The SVG rect element
+ */
+RowDialog.prototype.createTitleRect = function() {
+	const RD = RowDialog;
+	const rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
 	this.group.appendChild(rect);
 	return rect;
 };
-RowDialog.prototype.createTitleLabel=function(title){
-	var RD=RowDialog;
-	var textE=GuiElements.draw.text(0,0,title,RD.fontSize,RD.titleBarFontC,RD.font,RD.titleFontWeight);
-	var x=this.width/2-GuiElements.measure.textWidth(textE)/2;
-	var y=RD.titleBarH/2+RD.charHeight/2;
-	GuiElements.move.text(textE,x,y);
+
+/**
+ * Draws the title text
+ * @param {string} title - The text for the title
+ * @return {Element} - The SVG text element
+ */
+RowDialog.prototype.createTitleLabel = function(title) {
+	var RD = RowDialog;
+	var textE = GuiElements.draw.text(0, 0, title, RD.titleBarFont, RD.titleBarFontC);
+	var x = this.width / 2 - GuiElements.measure.textWidth(textE) / 2;
+	var y = RD.titleBarH / 2 + RD.titleBarFont.charHeight / 2;
+	GuiElements.move.text(textE, x, y);
 	this.group.appendChild(textE);
 	return textE;
 };
-RowDialog.prototype.createContent = function(){
-	var RD = RowDialog;
+
+/**
+ * Creates the rows of the rowDialog and returns the group containing them
+ * @return {Element} the SVG group element containing the rows
+ */
+RowDialog.prototype.createContent = function() {
+	const RD = RowDialog;
 	let y = 0;
-	var rowGroup = GuiElements.create.group(0, 0);
-	if(this.rowCount > 0) {
+	const rowGroup = GuiElements.create.group(0, 0);
+	if (this.rowCount > 0) {
 		for (let i = 0; i < this.rowCount; i++) {
+			// Determined by subclass
 			this.createRow(i, y, this.contentWidth, rowGroup);
 			y += RD.bnHeight + RD.bnMargin;
 		}
-	}
-	else if(this.hintText != "") {
+	} else if (this.hintText !== "") {
 		this.createHintText();
 	}
 	return rowGroup;
 };
-RowDialog.prototype.createRow = function(index, y, width, contentGroup){
-	
+
+/**
+ * Creates the content for the row at this index and adds it to the contentGroup
+ * @param {number} index
+ * @param {number} y - The y coord relative to the contentGroup
+ * @param {number} width - The width the row should be
+ * @param {Element} contentGroup - The SVG group element the content should be added to
+ */
+RowDialog.prototype.createRow = function(index, y, width, contentGroup) {
+	DebugOptions.markAbstract();
 };
-RowDialog.prototype.createCenteredBns = function(){
-	var RD = RowDialog;
+
+/**
+ * Generates the centered buttons and adds them to the group
+ */
+RowDialog.prototype.createCenteredBns = function() {
+	const RD = RowDialog;
 	let y = this.centeredButtonY;
 	this.centeredButtonEs = [];
-	for(let i = 0; i < this.centeredButtons.length; i++){
+	for (let i = 0; i < this.centeredButtons.length; i++) {
 		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
 		this.centeredButtonEs.push(bn);
 		y += RD.bnHeight + RD.bnMargin;
 	}
 };
-RowDialog.prototype.createCenteredBn = function(y, entry){
-	var RD = RowDialog;
-	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
+
+/**
+ * Creates a centered button for the given entry
+ * @param {number} y - Where the button should be placed vertically
+ * @param {object} entry - The information for the button with fields for text and callbackFn
+ * @return {Button}
+ */
+RowDialog.prototype.createCenteredBn = function(y, entry) {
+	const RD = RowDialog;
+	const button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
 	button.addText(entry.text, null, null, RD.centeredfontWeight);
 	button.setCallbackFunction(entry.callbackFn, true);
 	return button;
 };
-RowDialog.prototype.createScrollBox = function(){
-	if(this.rowCount === 0) return null;
+
+/**
+ * Creates the SmoothScrollBox for the dialog
+ * @return {SmoothScrollBox}
+ */
+RowDialog.prototype.createScrollBox = function() {
+	if (this.rowCount === 0) return null;
 	let x = this.x + this.scrollBoxX;
 	let y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
 		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
 };
-RowDialog.prototype.createHintText = function(){
-	var RD = RowDialog;
-	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.fontSize, RD.titleBarFontC, RD.font, RD.fontWeight);
+
+/**
+ * Creates the text below the title bar.  Should only be called if hinText !== "" and there are no rows
+ */
+RowDialog.prototype.createHintText = function() {
+	const RD = RowDialog;
+	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
 	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
 	let x = this.width / 2 - textWidth / 2;
-	let y = this.scrollBoxY + RD.charHeight + RD.hintMargin;
+	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };
-RowDialog.prototype.closeDialog = function(){
-	if(this.visible) {
-		RowDialog.currentDialog = null;
+
+/**
+ * Removes the dialog from view and unblocks the ui behind it.  Subclasses to cleanup here.
+ */
+RowDialog.prototype.closeDialog = function() {
+	if (this.visible) {
 		this.hide();
 		GuiElements.unblockInteraction();
 	}
 };
-RowDialog.prototype.getScroll = function(){
-	if(this.scrollBox == null) return 0;
+
+/**
+ * Gets the amount the user has scrolled the contentGroup
+ * @return {number}
+ */
+RowDialog.prototype.getScroll = function() {
+	if (this.scrollBox == null) return 0;
 	return this.scrollBox.getScrollY();
 };
-RowDialog.prototype.setScroll = function(y){
-	if(this.scrollBox == null) return;
+
+/**
+ * Sets scroll to a certain amount.  Used when content is reloaded
+ * @param y
+ */
+RowDialog.prototype.setScroll = function(y) {
+	if (this.scrollBox == null) return;
 	this.scrollBox.setScrollY(y);
 };
-RowDialog.prototype.updateZoom = function(){
-	if(this.visible) {
+
+/**
+ * Reloads the dialog if the zoom level changes
+ */
+RowDialog.prototype.updateZoom = function() {
+	if (this.visible) {
 		let scroll = this.getScroll();
 		this.closeDialog();
 		this.show();
 		this.setScroll(scroll);
 	}
 };
-RowDialog.updateZoom = function(){
-	if(RowDialog.currentDialog != null){
+
+/**
+ * Notifies the open dialog that the zoom level has changed
+ */
+RowDialog.updateZoom = function() {
+	if (RowDialog.currentDialog != null) {
 		RowDialog.currentDialog.updateZoom();
 	}
 };
-RowDialog.prototype.hide = function(){
-	if(this.visible) {
+
+/**
+ * Removes the content of the dialog from view, but does not unblock the UI or preform cleanup
+ */
+RowDialog.prototype.hide = function() {
+	if (this.visible) {
 		this.visible = false;
 		this.group.remove();
 		if (this.scrollBox != null) {
 			this.scrollBox.hide();
 		}
 		this.scrollBox = null;
+		if (RowDialog.currentDialog === this) {
+			RowDialog.currentDialog = null;
+		}
 	}
 };
-RowDialog.prototype.reloadRows = function(rowCount){
+
+/**
+ * Rebuild the dialog.  Called when the content of the rows change
+ * @param {number} rowCount - The new number of rows
+ */
+RowDialog.prototype.reloadRows = function(rowCount) {
 	this.rowCount = rowCount;
-	if(this.visible) {
+	if (this.visible) {
 		let scroll = this.getScroll();
 		this.hide();
 		this.show();
 		this.setScroll(scroll);
 	}
 };
-RowDialog.prototype.isScrolling = function(){
-	if(this.scrollBox != null){
+
+/**
+ * Determines whether the rowDialog is currently scrolling, so subclasses can avoid reloading it while it is moving
+ * @return {boolean}
+ */
+RowDialog.prototype.isScrolling = function() {
+	if (this.scrollBox != null) {
 		return this.scrollBox.isMoving();
 	}
 	return false;
 };
-RowDialog.prototype.addHintText = function(hintText){
+
+/**
+ * Stores the hint text to display when there is no content.  Should be called before show()
+ * @param {string} hintText
+ */
+RowDialog.prototype.addHintText = function(hintText) {
 	this.hintText = hintText;
 };
-RowDialog.prototype.getExtraTopY = function(){
+
+/**
+ * Called by subclasses to retrieve extraTopY
+ * @return {number} - The amount of space above the content
+ */
+RowDialog.prototype.getExtraTopY = function() {
 	return this.extraTopY;
 };
-RowDialog.prototype.getExtraBottomY = function(){
+
+/**
+ * Called by subclasses to retrieve extraBottomY
+ * @return {number} - The amount of space below the content
+ */
+RowDialog.prototype.getExtraBottomY = function() {
 	return this.extraBottomY;
 };
-RowDialog.prototype.getContentWidth = function(){
+
+/**
+ * Called by subclasses to retrieve the width of the dialog
+ * @return {number}
+ */
+RowDialog.prototype.getContentWidth = function() {
 	return this.contentWidth;
 };
-RowDialog.prototype.getCenteredButton = function(i){
+
+/**
+ * Called by subclasses to retrieve the generated center button
+ * @return {Button}
+ */
+RowDialog.prototype.getCenteredButton = function(i) {
 	return this.centeredButtonEs[i];
 };
-RowDialog.prototype.contentRelToAbsX = function(x){
-	if(!this.visible) return x;
+
+/* Convert between relative and abs coords for items in the contentGroup */
+/**
+ * @param {number} x
+ * @return {number}
+ */
+RowDialog.prototype.contentRelToAbsX = function(x) {
+	if (!this.visible) return x;
 	return this.scrollBox.relToAbsX(x);
 };
-RowDialog.prototype.contentRelToAbsY = function(y){
-	if(!this.visible) return y;
+/**
+ * @param {number} y
+ * @return {number}
+ */
+RowDialog.prototype.contentRelToAbsY = function(y) {
+	if (!this.visible) return y;
 	return this.scrollBox.relToAbsY(y);
 };
-RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn){
-	var RD = RowDialog;
-	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
-	if(callbackFn != null) {
+
+/**
+ * Used by subclasses to create a large button for the row that calls a certain function when tapped
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
+ */
+RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
+	const RD = RowDialog;
+	const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
 	button.makeScrollable();
-	return button;
-};
-RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn){
-	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
-	button.addText(text);
-	return button;
-};
-RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn){
-	var RD = RowDialog;
-	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
-	if(callbackFn != null) {
-		button.setCallbackFunction(callbackFn, true);
-	}
-	button.makeScrollable();
-	return button;
-};
-RowDialog.createSmallBnWithIcon = function(iconId, x, y, contentGroup, callbackFn){
-	let RD = RowDialog;
-	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
-	button.addIcon(iconId, RD.iconH);
 	return button;
 };
 
 /**
- * Created by Tom on 6/13/2017.
+ * Used by subclasses to create a button with text that calls a function
+ * @param {string} text
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} [callbackFn]
+ * @return {Button}
  */
+RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn) {
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	button.addText(text);
+	return button;
+};
 
-function OpenDialog(listOfFiles){
-	this.files=listOfFiles.split("\n");
-	if(listOfFiles === ""){
-		this.files = [];
+/**
+ * Used by subclasses to create a small button that calls a function when tapped
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
+RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
+	const RD = RowDialog;
+	const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	if (callbackFn != null) {
+		button.setCallbackFunction(callbackFn, true);
 	}
-	RowDialog.call(this, true, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	button.makeScrollable();
+	return button;
+};
+
+/**
+ * Used by subclasses to create a small button with an icon
+ * @param {object} pathId - entry of VectorPaths
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @param {function} callbackFn
+ * @return {Button}
+ */
+RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackFn) {
+	let RD = RowDialog;
+	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+	button.addIcon(pathId, RD.iconH);
+	return button;
+};
+/**
+ * A dialog for opening and managing local files.  On iOS, a cloud button is included for opening cloud files, and
+ * on Android an additional tab opens an OpenCloudDialog for managing cloud files.
+ * @param {FileList} fileList - A list of files and account information retrieved from the backend
+ * @constructor
+ */
+function OpenDialog(fileList) {
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	this.fileList = fileList;
+	this.files = fileList.localFiles;
+	if (GuiElements.isAndroid) {
+		// On Android, space is needed for the row of tabs
+		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+	} else {
+		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
+	}
+	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText("No saved programs");
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
-OpenDialog.constructor = OpenDialog;
-OpenDialog.setConstants = function(){
+OpenDialog.prototype.constructor = OpenDialog;
+
+OpenDialog.setConstants = function() {
 	OpenDialog.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
-	OpenDialog.currentDialog = null;
+	OpenDialog.currentDialog = null; // The currently open dialog, can also be an OpenCloudDialog
+	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
+	OpenDialog.tabRowHeight = RowDialog.titleBarH;
 };
-OpenDialog.prototype.show = function(){
+
+/**
+ * @inheritDoc
+ */
+OpenDialog.prototype.show = function() {
 	RowDialog.prototype.show.call(this);
 	OpenDialog.currentDialog = this;
 	this.createNewBn();
+	if (GuiElements.isIos) {
+		this.createCloudBn();
+	}
+	if (GuiElements.isAndroid) {
+		this.createTabRow();
+	}
 };
-OpenDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+/**
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	const cols = 3;
 	const RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
 	const file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
-	/*
-	let currentX = largeBnWidth + RD.bnMargin;
-	this.createExportBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDuplicateBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createRenameBn(file, currentX, y, contentGroup);
-	currentX += RD.bnMargin + RD.smallBnWidth;
-	this.createDeleteBn(file, currentX, y, contentGroup);
-	*/
-
 	let currentX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	//this.createDuplicateBn(file, currentX, y, contentGroup);
-	this.createExportBn(file, currentX, y, contentGroup);
+	if (this.fileList.signedIn) {
+		// If signed in, the export button is replaced with an upload button (the export button goes in the more menu)
+		this.createUploadBn(file, currentX, y, contentGroup);
+	} else {
+		this.createExportBn(file, currentX, y, contentGroup);
+	}
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	this.createMoreBn(file, currentX, y, contentGroup);
 };
-OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup){
-	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function(){
+
+/**
+ * Creates the button which shows the file name and opens the file when tapped
+ * @param {string} file - The name of the file
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
+	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
 		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
-OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
-	var me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
-		SaveManager.userDeleteFile(false, file, function(){
-			me.reloadDialog();
-		});
-	});
-};
-OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
-	var me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
-		SaveManager.userRenameFile(false, file, function(){
-			me.reloadDialog();
-		});
-	});
-};
-OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup){
+
+/**
+ * Creates the button for deleting files.  This button has been moved into the more menu, so this function is not used
+ * anymore.
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function(){
-		SaveManager.userDuplicateFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+		SaveManager.userDeleteFile(false, file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup){
+
+/**
+ * Creates the button for renaming files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function(){
-		SaveManager.userExportFile(file);
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		SaveManager.userRenameFile(false, file, function() {
+			me.reloadDialog();
+		});
 	});
 };
-OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup){
-	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function(){
+
+/**
+ * Creates a button for duplicating files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function() {
+		SaveManager.userDuplicateFile(file, function() {
+			me.reloadDialog();
+		});
+	});
+};
+
+/**
+ * Creates a button for exporting files
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function() {
+		let x1 = this.contentRelToAbsX(x);
+		let x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		let y1 = this.contentRelToAbsY(y);
+		let y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		x1 = GuiElements.relToAbsX(x1);
+		x2 = GuiElements.relToAbsX(x2);
+		y1 = GuiElements.relToAbsX(y1);
+		y2 = GuiElements.relToAbsX(y2);
+		SaveManager.userExportFile(file, x1, x2, y1, y2);
+	}.bind(this));
+};
+
+/**
+ * Creates a button for uploading files.  Only available on Android
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function() {
+		const request = new HttpRequestBuilder("cloud/upload");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	});
+};
+
+/**
+ * Creates a button for more actions, which are listed in a dropdown
+ * @param {string} file - The name of the file to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
 		const x1 = this.contentRelToAbsX(x);
 		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
 		const y1 = this.contentRelToAbsY(y);
 		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		new FileContextMenu(this, file, x1, x2, y1, y2);
+		let type = FileContextMenu.types.localSignedOut;
+		if (this.fileList.signedIn) {
+			type = FileContextMenu.types.localSignedIn;
+		}
+		new FileContextMenu(this, file, type, x1, x2, y1, y2);
 	}.bind(this));
 };
-OpenDialog.prototype.createNewBn = function(){
+
+/**
+ * Creates a button at the bottom of the dialog for opening a blank, new file.
+ * @return {Button}
+ */
+OpenDialog.prototype.createNewBn = function() {
 	let RD = RowDialog;
 	let OD = OpenDialog;
 	let x = RD.bnMargin;
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText("New");
-	button.setCallbackFunction(function(){
-		this.closeDialog();
-		SaveManager.userNew();
+	button.setCallbackFunction(function() {
+		SaveManager.userNew(this.closeDialog.bind(this))
 	}.bind(this), true);
 	return button;
 };
-OpenDialog.prototype.reloadDialog = function(){
+
+/**
+ * Re-retrieves the list of open files from the backend and reloads the dialog
+ */
+OpenDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
-	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		me.closeDialog();
-		var openDialog = new OpenDialog(response);
-		openDialog.show();
-		openDialog.setScroll(thisScroll);
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+			openDialog.setScroll(thisScroll);
+		}
 	});
 };
-OpenDialog.showDialog = function(){
-	HtmlServer.sendRequestWithCallback("data/files",function(response){
-		var openDialog = new OpenDialog(response);
+
+/**
+ * Creates a button in the top-right corner of the dialog for opening from cloud storage (iOS only)
+ */
+OpenDialog.prototype.createCloudBn = function() {
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	const x = this.width - RD.bnMargin - OD.cloudBnWidth;
+	let button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
+	button.addIcon(VectorPaths.cloud);
+	button.setCallbackFunction(function() {
+		HtmlServer.sendRequestWithCallback("cloud/showPicker");
+	}, true);
+};
+
+/**
+ * Creates tabs for opening the the OpenCloudDialog (Android only)
+ * @return {TabRow}
+ */
+OpenDialog.prototype.createTabRow = function() {
+	const OD = OpenDialog;
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
+
+	tabRow.addTab("On Device", "device");
+	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
+
+	tabRow.setCallbackFunction(this.tabSelected.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+
+/**
+ * Switches to the OpenCloudDialog if its tab is selected
+ * @param {string} tab - The id of the selected tab
+ */
+OpenDialog.prototype.tabSelected = function(tab) {
+	if (tab === "cloud") {
+		const cloudDialog = new OpenCloudDialog(this.fileList);
+		this.hide();
+		cloudDialog.show();
+	}
+};
+
+/**
+ * Retrieves a list of local files and cloud account information (on Android) and shows an Open dialog
+ */
+OpenDialog.showDialog = function() {
+	OpenDialog.opening = true; // Allows the action to be canceled if OpenDialog.closeDialog is called in the interval
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (!OpenDialog.opening) return;
+		const openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
+		OpenDialog.opening = false;
+	}, function() {
+		OpenDialog.opening = false;
 	});
 };
-OpenDialog.prototype.closeDialog = function(){
+
+OpenDialog.closeFileAndShowDialog = function() {
+	SaveManager.userClose(OpenDialog.showDialog);
+};
+
+/**
+ * @inheritDoc
+ */
+OpenDialog.prototype.closeDialog = function() {
 	OpenDialog.currentDialog = null;
 	RowDialog.prototype.closeDialog.call(this);
 };
+
 /**
- * Created by Tom on 6/18/2017.
+ * Closes the currently open dialog
  */
-function ConnectMultipleDialog(deviceClass){
+OpenDialog.closeDialog = function() {
+	OpenDialog.opening = false;
+	if (OpenDialog.currentDialog != null) {
+		OpenDialog.currentDialog.closeDialog();
+	}
+};
+
+/**
+ * Reloads the currently open dialog, if that dialog is an OpenDialog
+ */
+OpenDialog.filesChanged = function() {
+	if (OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenDialog) {
+		OpenDialog.currentDialog.reloadDialog();
+	}
+};
+/**
+ * A dialog for managing cloud files on Android.  Contains a tab for returning to the OpenDialog
+ * @param {FileList} fileList - Used to obtain account information
+ * @param {Array<string>} [cloudFileList] - An array of files on the cloud, or null if they haven't been loaded yet
+ * @param {string} [error] - The error that occurred while loading files (if present)
+ * @constructor
+ */
+function OpenCloudDialog(fileList, cloudFileList, error) {
+	const OD = OpenDialog;
+	const RD = RowDialog;
+	this.fileList = fileList;
+	// We need to load the files if the user is signed in and the files aren't loaded and there isn't an error
+	this.loading = cloudFileList == null && this.fileList.signedIn && error == null;
+	// There's only one row for the sign in button if there are no files
+	let count = 1;
+	// There isn't any hint text unless we are signed in
+	let hintText = "";
+
+	if (this.fileList.signedIn) {
+		if (error != null) {
+			// An error occurred, display the error
+			hintText = error;
+		} else if (this.loading) {
+			hintText = "Loading...";
+		} else {
+			hintText = "No saved programs"
+		}
+		this.files = cloudFileList;
+		if (this.files == null) {
+			this.files = [];
+		}
+		count = this.files.length;
+	}
+
+	RD.call(this, false, "Open", count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
+	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addHintText(hintText);
+
+	// Load the files from the backend
+	if (this.loading) {
+		this.loadFiles();
+	}
+}
+OpenCloudDialog.prototype = Object.create(RowDialog.prototype);
+OpenCloudDialog.prototype.constructor = OpenCloudDialog;
+
+/**
+ * @inheritDoc
+ */
+OpenCloudDialog.prototype.show = function() {
+	RowDialog.prototype.show.call(this);
+	OpenDialog.currentDialog = this;
+	this.createTabRow();
+};
+
+/**
+ * Creates a row for managing the files, or just a sign in button if we aren't signed in
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup) {
+	const RD = RowDialog;
+	if (this.fileList.signedIn) {
+		const cols = 2;
+		const file = this.files[index];
+
+		const largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+		this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+
+		let currentX = largeBnWidth + RD.bnMargin;
+		this.createRenameBn(file, currentX, y, contentGroup);
+		currentX += RD.bnMargin + RD.smallBnWidth;
+		this.createMoreBn(file, currentX, y, contentGroup);
+
+	} else {
+		this.createSignInBn(width, 0, y, contentGroup);
+	}
+};
+
+/**
+ * Creates a button for downloading a file
+ * @param {string} file - The name of the file
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+		const request = new HttpRequestBuilder("cloud/download");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	}.bind(this));
+	button.addSideTextAndIcon(VectorPaths.cloudDownload, null, file);
+};
+
+/**
+ * Creates a sign in button
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup) {
+	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+		HtmlServer.sendRequestWithCallback("cloud/signIn");
+	}.bind(this));
+	button.addText("Sign in");
+};
+
+/**
+ * Creates a button for renaming a file
+ * @param {string} file - The name of the file
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
+	const me = this;
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		const request = new HttpRequestBuilder("cloud/rename");
+		request.addParam("filename", file);
+		HtmlServer.sendRequestWithCallback(request.toString());
+	});
+};
+
+/**
+ * Creates a button for displaying additional options
+ * @param {string} file - The name of the file
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
+	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
+		// Get the coords to show the menu at
+		const x1 = this.contentRelToAbsX(x);
+		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		const y1 = this.contentRelToAbsY(y);
+		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		// Show the more options menu
+		new FileContextMenu(this, file, FileContextMenu.types.cloud, x1, x2, y1, y2);
+	}.bind(this));
+};
+
+/**
+ * Creates a tab to return to the OpenDialog
+ * @return {TabRow}
+ */
+OpenCloudDialog.prototype.createTabRow = function() {
+	const OD = OpenDialog;
+	let y = this.getExtraTopY();
+	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
+
+	tabRow.addTab("On Device", "device");
+	let signOutFn = null;
+	// If signed in, an X appears in the tab which signs the user out
+	if (this.fileList.signedIn) {
+		signOutFn = this.userSignOut.bind(this);
+	}
+	tabRow.addTab(this.fileList.getCloudTitle(), "cloud", signOutFn);
+
+	tabRow.setCallbackFunction(this.tabSelected.bind(this));
+	tabRow.show();
+	return tabRow;
+};
+
+/**
+ * Switches back to the OpenDialog if the user selects that tab
+ * @param {string} tab - The id of the selected tab
+ */
+OpenCloudDialog.prototype.tabSelected = function(tab) {
+	if (tab === "device") {
+		const openDialog = new OpenDialog(this.fileList);
+		this.hide();
+		openDialog.show();
+		openDialog.reloadDialog();
+	}
+};
+
+/**
+ * @inheritDoc
+ */
+OpenCloudDialog.prototype.closeDialog = function() {
+	OpenDialog.currentDialog = null;
+	RowDialog.prototype.closeDialog.call(this);
+};
+
+/**
+ * Re-retrieves the local files and shows an OpenDialog
+ */
+OpenCloudDialog.prototype.reloadToOpen = function() {
+	const me = this;
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenDialog(new FileList(response));
+			openDialog.show();
+		}
+	});
+};
+
+/**
+ * Reloads the OpenCloudDialog with the specified cloud files.  Re-retrieves local files and account info
+ * @param {Array<string>} [cloudFileList] - The list of cloud files.  If  undefined, redownloads
+ */
+OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
+	if (cloudFileList == null) {
+		cloudFileList = null;
+	}
+
+	let thisScroll = this.getScroll();
+	let me = this;
+	HtmlServer.sendRequestWithCallback("data/files", function(response) {
+		if (OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
+			openDialog.show();
+			openDialog.setScroll(thisScroll);
+		}
+	});
+};
+
+/**
+ * Confirms the user's intent to sign out and then signs out
+ */
+OpenCloudDialog.prototype.userSignOut = function() {
+	DebugOptions.assert(this.fileList.account != null);
+	let message = "Disconnect account " + this.fileList.account + "?\n";
+	message += "Downloaded files will remain on this device.";
+	const me = this;
+	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result) {
+		if (result === "2") {
+			me.signOut();
+		}
+	});
+};
+
+/**
+ * Issues a signOut request and reloads the dialog
+ */
+OpenCloudDialog.prototype.signOut = function() {
+	const me = this;
+	HtmlServer.sendRequestWithCallback("cloud/signOut", function() {
+		me.reloadDialog();
+	});
+};
+
+/**
+ * Requests the list of cloud files and creates a new OpenCloudDialog with them, or shows an error
+ */
+OpenCloudDialog.prototype.loadFiles = function() {
+	const me = this;
+	HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
+		if (OpenDialog.currentDialog === me) {
+			const object = JSON.parse(response);
+			let files = object.files;
+			if (files != null) {
+				me.closeDialog();
+				const cloudDialog = new OpenCloudDialog(me.fileList, files);
+				cloudDialog.show();
+			}
+		}
+	}, function(status, error) {
+		if (OpenDialog.currentDialog === me) {
+			me.closeDialog();
+			const cloudDialog = new OpenCloudDialog(me.fileList, null, error);
+			cloudDialog.show();
+		}
+	});
+};
+
+/**
+ * Parses the list of cloud files and reloads the OpenCloudDialog with them
+ * @param {string} [jsonString] - List of new cloud files as a JSON array of strings encoded as a string
+ */
+OpenCloudDialog.filesChanged = function(jsonString) {
+	if (OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenCloudDialog) {
+		if (jsonString != null) {
+			jsonString = JSON.parse(jsonString).files;
+		}
+		OpenDialog.currentDialog.reloadDialog(jsonString);
+	}
+};
+/**
+ * Holds all the data necessary to show an OpenDialog, which includes a list of local files and the cloud account the
+ * user is signed into (if any}.  A list of cloud files is downloaded later.
+ * @param {string} jsonString - String representation of object containing the above information
+ * @constructor
+ */
+function FileList(jsonString) {
+	const object = JSON.parse(jsonString);
+	this.localFiles = object.files;
+	if (this.localFiles == null) {
+		this.localFiles = []
+	}
+	this.signedIn = object.signedIn === true;
+	if (!GuiElements.isAndroid) {
+		// We only show this information on Android
+		this.signedIn = false;
+	}
+	this.account = object.account;
+	if (this.account == null || !this.signedIn) {
+		this.account = null;
+	}
+}
+
+/**
+ * Gets the string to show in the Cloud tab.  Only relevant on Android.
+ * @return {string}
+ */
+FileList.prototype.getCloudTitle = function(){
+	if (this.account != null) {
+		return this.account;
+	}
+	return "Cloud";
+};
+/**
+ * A tabbed dialog for connecting multiple devices.  Each type of device has a tab in which devices can be reordered,
+ * added, and removed.  A status light for each device indicates if it is connected and an info button shows
+ * whether the firmware is up to date
+ * @param deviceClass - A subclass of Device, the tab that should be open to start
+ * @constructor
+ */
+function ConnectMultipleDialog(deviceClass) {
 	let CMD = ConnectMultipleDialog;
+	// Store the open tab so it can be reopened by default next time
 	CMD.lastClass = deviceClass;
 	let title = "Connect Multiple";
 	this.deviceClass = deviceClass;
@@ -9365,105 +14415,214 @@ function ConnectMultipleDialog(deviceClass){
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
-ConnectMultipleDialog.setConstants = function(){
+
+ConnectMultipleDialog.setConstants = function() {
 	let CMD = ConnectMultipleDialog;
 	CMD.currentDialog = null;
 
 	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	CMD.tabRowHeight = RowDialog.titleBarH;
 	CMD.numberWidth = 35;
-	CMD.plusFontSize=26;
-	CMD.plusCharHeight=18;
+	CMD.plusFont = Font.uiFont(26);
 
-	CMD.numberFontSize=16;
-	CMD.numberFont="Arial";
-	CMD.numberFontWeight="normal";
-	CMD.numberCharHeight=12;
+	CMD.numberFont = Font.uiFont(16);
 	CMD.numberColor = Colors.white;
 };
-ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+/**
+ * Creates the status light, main button, info button, and remove button
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let CMD = ConnectMultipleDialog;
 	let statusX = 0;
 	let numberX = statusX + DeviceStatusLight.radius * 2;
 	let mainBnX = numberX + CMD.numberWidth;
-	let removeBnX = width - RowDialog.smallBnWidth;
-	let mainBnWidth = removeBnX - mainBnX - RowDialog.bnMargin;
+	let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+	let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+	let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
 
 	let robot = this.deviceClass.getManager().getDevice(index);
 	this.createStatusLight(robot, statusX, y, contentGroup);
 	this.createNumberText(index, numberX, y, contentGroup);
 	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+	this.createInfoBn(robot, index, infoBnX, y, contentGroup);
 	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
 };
-ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup){
-	return new DeviceStatusLight(x,y+RowDialog.bnHeight/2,contentGroup,robot);
+
+/**
+ * Creates a light to indicate the status of the provided robot
+ * @param {Device} robot
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {DeviceStatusLight}
+ */
+ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup) {
+	return new DeviceStatusLight(x, y + RowDialog.bnHeight / 2, contentGroup, robot);
 };
-ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup){
+
+/**
+ * Creates a number for the row.  Since the blocks control a Device with a certain number, is is important for the
+ * user to know when device is, say, Hummingbird 3
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup) {
 	let CMD = ConnectMultipleDialog;
-	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFontSize, CMD.numberColor, CMD.numberFont, CMD.numberFontWeight);
+	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
 	let textW = GuiElements.measure.textWidth(textE);
 	let textX = x + (CMD.numberWidth - textW) / 2;
-	let textY = y + (RowDialog.bnHeight + CMD.numberCharHeight) / 2;
+	let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 	contentGroup.appendChild(textE);
 	return textE;
 };
-ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup){
+
+/**
+ * Creates a button which shows which robot is connected in that position of the list. Tapping the button allows the
+ * robot to be replaced with a different robot
+ *
+ * @param {Device} robot - The robot currently in this location
+ * @param {number} index
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
 	let connectionX = this.x + this.width / 2;
-	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function(){
+	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
 		let upperY = this.contentRelToAbsY(y);
 		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		// When tapped, a list of robots to connect from appears
 		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
 	}.bind(this));
 };
-ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup){
+
+/**
+ * Creates the button for removing a robot from the list
+ * @param {Device} robot
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup) {
 	let button = RowDialog.createSmallBn(x, y, contentGroup);
 	button.addText("X");
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
 		this.deviceClass.getManager().removeDevice(index);
 	}.bind(this), true);
 	return button;
 };
-ConnectMultipleDialog.prototype.show = function(){
+
+/**
+ * Creates a button which shows info about the device's firmware
+ * @param {Device} robot
+ * @param {number} index
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup) {
+	let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+
+	// The appearance of the button changes depending on the firmwareStatus
+	const statuses = Device.firmwareStatuses;
+	function updateStatus(firmwareStatus) {
+		if (firmwareStatus === statuses.old) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
+		} else if (firmwareStatus === statuses.incompatible) {
+			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
+		} else {
+			button.addIcon(VectorPaths.info, RowDialog.iconH);
+		}
+	}
+	updateStatus(robot.getFirmwareStatus());
+	robot.setFirmwareStatusListener(updateStatus);
+
+	return button;
+};
+
+/**
+ * Creates the dialog and starts a scan for the current device type
+ * @inheritDoc
+ */
+ConnectMultipleDialog.prototype.show = function() {
 	let CMD = ConnectMultipleDialog;
-	CMD.currentDialog = this;
 	RowDialog.prototype.show.call(this);
+	CMD.currentDialog = this;
 	this.createConnectBn();
 	this.createTabRow();
-	this.deviceClass.getManager().discover();
+	this.deviceClass.getManager().startDiscover(function() {
+		return this.visible;
+	}.bind(this));
 };
-ConnectMultipleDialog.prototype.createConnectBn = function(){
+
+/**
+ * Creates a "+" button for connecting to another robot
+ * @return {Button}
+ */
+ConnectMultipleDialog.prototype.createConnectBn = function() {
 	let CMD = ConnectMultipleDialog;
 	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
 	let x = (this.width - bnWidth) / 2;
+	// Gets the location to add the button
 	let y = this.getExtraBottomY();
-	let button=new Button(x,y,bnWidth,RowDialog.bnHeight, this.group);
-	button.addText("+", null, CMD.plusFontSize, null, CMD.plusCharHeight);
+	let button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
+	button.addText("+", CMD.plusFont);
 	let upperY = y + this.y;
 	let lowerY = upperY + RowDialog.bnHeight;
 	let connectionX = this.x + this.width / 2;
-	button.setCallbackFunction(function(){
+	button.setCallbackFunction(function() {
+		// Shows a list of devices to connect
 		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
 	}.bind(this), true);
+	const manager = this.deviceClass.getManager();
+	if (manager.getDeviceCount() >= DeviceManager.maxDevices) {
+		button.disable();
+	}
 	return button;
 };
-ConnectMultipleDialog.prototype.createTabRow = function(){
+
+/**
+ * Creates a row of tabs for each device type, which when selected, reload the dialog for that tab
+ * @return {TabRow}
+ */
+ConnectMultipleDialog.prototype.createTabRow = function() {
 	let CMD = ConnectMultipleDialog;
 	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
-	Device.getTypeList().forEach(function(deviceClass){
+	Device.getTypeList().forEach(function(deviceClass) {
 		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
 	});
+	// When a tab is selected, reloadDialog will be called with the class of the device type
 	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
 	tabRow.show();
 	return tabRow;
 };
-ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
-	if(deviceClass == null){
+
+/**
+ * Reloads the dialog with the provided device type's tab open, or the last selected type if none is provided
+ * @param [deviceClass] - subclass of Device
+ */
+ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
+	if (deviceClass == null) {
 		deviceClass = this.deviceClass;
 	}
-	if(deviceClass !== this.deviceClass){
+	if (deviceClass !== this.deviceClass) {
+		// Stop discovery before switching tabs
 		this.deviceClass.getManager().stopDiscover();
 	}
 	let thisScroll = this.getScroll();
@@ -9471,64 +14630,91 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass){
 	me.hide();
 	let dialog = new ConnectMultipleDialog(deviceClass);
 	dialog.show();
-	ConnectMultipleDialog.currentDialog = this;
-	if(deviceClass === this.deviceClass) {
+	if (deviceClass === this.deviceClass) {
 		dialog.setScroll(thisScroll);
 	}
 };
-ConnectMultipleDialog.prototype.closeDialog = function(){
+
+/**
+ * Closes the dialog and stops discovery
+ * @inheritDoc
+ */
+ConnectMultipleDialog.prototype.closeDialog = function() {
 	let CMD = ConnectMultipleDialog;
 	RowDialog.prototype.closeDialog.call(this);
 	CMD.currentDialog = null;
 	this.deviceClass.getManager().stopDiscover();
 };
-ConnectMultipleDialog.reloadDialog = function(){
+
+/**
+ * Reloads the currently open dialog
+ */
+ConnectMultipleDialog.reloadDialog = function() {
 	let CMD = ConnectMultipleDialog;
-	if(CMD.currentDialog != null){
+	if (CMD.currentDialog != null) {
 		CMD.currentDialog.reloadDialog();
 	}
 };
-ConnectMultipleDialog.showDialog = function(){
+
+/**
+ * Creates and shows a ConnectMultipleDialog with the default tab open
+ */
+ConnectMultipleDialog.showDialog = function() {
 	let CMD = ConnectMultipleDialog;
-	if(CMD.lastClass == null) {
+	if (CMD.lastClass == null) {
 		CMD.lastClass = Device.getTypeList()[0];
 	}
 	(new ConnectMultipleDialog(CMD.lastClass)).show();
 };
 /**
- * Created by Tom on 6/16/2017.
+ * A dialog for creating and managing recordings.  RecordingDialogs interact with the RecordingManager for making
+ * recordings, the Sound class for playing recordings, and SaveManager for renaming and deleting recordings
+ * @param {Array<Sound>} listOfRecordings - The list of recordings for the open file
+ * @constructor
  */
-function RecordingDialog(listOfRecordings){
-	let RecD = RecordingDialog;
-	this.recordings=listOfRecordings.map(function(x){
+function RecordingDialog(listOfRecordings) {
+	const RecD = RecordingDialog;
+	// Create an array of ids
+	this.recordings = listOfRecordings.map(function(x) {
 		return x.id;
 	});
+	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton("Done", this.closeDialog.bind(this));
 	this.addHintText("Tap record to start");
-	this.state = RecordingManager.recordingStates.stopped;
+	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
+	this.state = RecordingManager.state;
 }
 RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
-RecordingDialog.setConstants = function(){
+
+RecordingDialog.setConstants = function() {
 	let RecD = RecordingDialog;
 	RecD.currentDialog = null;
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	RecD.coverRectOpacity = 0.8;
 	RecD.coverRectColor = Colors.black;
-	RecD.counterFont = "Arial";
 	RecD.counterColor = Colors.white;
-	RecD.counterFontSize = 60;
-	RecD.counterFontWeight = "normal";
+	RecD.counterFont = Font.uiFont(60);
+	RecD.remainingFont = Font.uiFont(16);
+	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
 	RecD.recordColor = "#f00";
-	RecD.recordTextSize = 25;
-	RecD.recordTextCharH = 18;
-	RecD.recordIconH = RecD.recordTextCharH;
+	RecD.recordFont = Font.uiFont(25);
+	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
-
+	RecD.recordingLimit = 5 * 60 * 1000;   // The maximum number of ms in a recording
+	RecD.remainingThreshold = 5 * 60 * 1000;   // The remaining time is displayed when less than this many ms are left.
 };
-RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
+
+/**
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	let RD = RowDialog;
 	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
 	let recording = this.recordings[index];
@@ -9538,83 +14724,144 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup){
 	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
-RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup){
+
+/**
+ * Creates the button for each recording that plays the recording when tapped
+ * @param {Sound} recording
+ * @param {number} bnWidth
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
 	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
-	let state = {};
+	// Track whether the button is currently playing the recording
+	const state = {};
 	state.playing = false;
 	let me = this;
-	let showPlay = function(){
+	let showPlay = function() {
 		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
 	};
-	let showStop = function(){
+	let showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
-	button.setCallbackFunction(function(){
-		if(state.playing){
+	// When the button is tapped...
+	button.setCallbackFunction(function() {
+		// Check the state...
+		if (state.playing) {
+			// Stop the sound
 			Sound.stopAllSounds();
 		} else {
-			Sound.playAndStopPrev(recording, true, function(){
+			// Start the sound
+			Sound.playAndStopPrev(recording, true, function() {
 				state.playing = true;
 				showStop();
-			}, null, function(){
-				if(me.visible) {
+			}, null, function() {
+				// When the sound stops, change the icon and state
+				if (me.visible) {
 					state.playing = false;
 					showPlay();
 				}
 			});
 		}
 	}, true);
+	// Start with the play icon
 	showPlay();
 };
-RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup){
+
+/**
+ * Create the button for deleting recordings
+ * @param {string} file - The name of the recording to delete
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function(){
-		RecordingManager.userDeleteFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+		RecordingManager.userDeleteFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup){
+
+/**
+ * Create te button for renaming recordings
+ * @param {string} file - The name of the recording to rename
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} contentGroup
+ */
+RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 	let me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function(){
-		RecordingManager.userRenameFile(file, function(){
+	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+		RecordingManager.userRenameFile(file, function() {
 			me.reloadDialog();
 		});
 	});
 };
-RecordingDialog.prototype.show = function(){
+
+/**
+ * @inheritDoc
+ */
+RecordingDialog.prototype.show = function() {
+	// Create the rows, title bar, etc.
 	RowDialog.prototype.show.call(this);
 	RecordingDialog.currentDialog = this;
+	// Create the controls at the bottom.  These buttons are all hidden when created.
 	this.recordButton = this.createRecordButton();
 	this.discardButton = this.createDiscardButton();
 	this.saveButton = this.createSaveButton();
 	this.pauseButton = this.createPauseButton();
 	this.resumeRecordingBn = this.createResumeRecordingBn();
+	// Show the controls that correspond to the current state
 	this.goToState(this.state);
 };
-RecordingDialog.prototype.hide = function(){
+
+/**
+ * @inheritDoc
+ */
+RecordingDialog.prototype.hide = function() {
 	RowDialog.prototype.hide.call(this);
 	this.setCounterVisibility(false);
 };
-RecordingDialog.prototype.closeDialog = function(){
+
+/**
+ * @inheritDoc
+ */
+RecordingDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	RecordingDialog.currentDialog = null;
 	Sound.stopAllSounds();
 };
-RecordingDialog.prototype.createRecordButton = function(){
+
+/**
+ * Create the control for recording sounds
+ * @return {Button}
+ */
+RecordingDialog.prototype.createRecordButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
 	let x = RD.bnMargin;
+	// gets the location of additional content
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", null, RecD.recordTextSize, null, RecD.recordTextCharH, RecD.recordColor);
-	button.setCallbackFunction(function(){
+		"Record", RecD.recordFont, RecD.recordColor);
+	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
 	return button;
 };
-RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn){
+
+/**
+ * Create a control that is 1/3 the width of the record button
+ * @param {number} buttonPosition - [0, 1, 2], whether the button is in the first, second, or third position
+ * @param {function} callbackFn - Called on tap
+ * @return {Button}
+ */
+RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
 	let RD = RowDialog;
 	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
 	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
@@ -9623,46 +14870,71 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
-RecordingDialog.prototype.createDiscardButton = function(){
+
+/**
+ * Creates the button for discarding the current recording
+ * @return {Button}
+ */
+RecordingDialog.prototype.createDiscardButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(0, function(){
+	let button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
 	return button;
 };
-RecordingDialog.prototype.createSaveButton = function(){
+
+/**
+ * Creates the button for saving (stopping) the current recording
+ * @return {Button}
+ */
+RecordingDialog.prototype.createSaveButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(1, function(){
+	let button = this.createOneThirdBn(1, function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
 	return button;
 };
-RecordingDialog.prototype.createPauseButton = function(){
+
+/**
+ * Creates the button for pausing the current recording
+ * @return {Button}
+ */
+RecordingDialog.prototype.createPauseButton = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
 	return button;
 };
-RecordingDialog.prototype.createResumeRecordingBn = function(){
+
+/**
+ * Creates the button to unpause recording
+ * @return {Button}
+ */
+RecordingDialog.prototype.createResumeRecordingBn = function() {
 	let RD = RowDialog;
 	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function(){
+	let button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
 	return button;
 };
-RecordingDialog.prototype.drawCoverRect = function(){
+
+/**
+ * Draws the dark rectangle to cover the dialog while recording
+ * @return {Element}
+ */
+RecordingDialog.prototype.drawCoverRect = function() {
 	let halfStep = RowDialog.bnMargin / 2;
 	let x = this.x + halfStep;
 	let y = this.y + this.getExtraTopY() + halfStep;
@@ -9673,34 +14945,56 @@ RecordingDialog.prototype.drawCoverRect = function(){
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
 };
-RecordingDialog.prototype.drawTimeCounter = function(){
+
+/**
+ * Draws the recording elapsed timer counter with "0:00" as the string
+ * @return {Element} - An SVG text element
+ */
+RecordingDialog.prototype.drawTimeCounter = function() {
 	let RD = RecordingDialog;
-	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFontSize, RD.counterColor, RD.counterFont, RD.counterFontWeight);
+
+	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
 	let width = GuiElements.measure.textWidth(textE);
 	let height = GuiElements.measure.textHeight(textE);
 	let x = this.x + this.width / 2 - width / 2;
 	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
 	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
-	if(span < 2 * RecordingDialog.counterBottomMargin){
+	if (span < 2 * RecordingDialog.counterBottomMargin) {
 		y = this.getExtraBottomY() - span / 2;
 	}
 	y += this.y;
 	this.counterY = y;
 	GuiElements.move.text(textE, x, y);
-	return textE;
+	this.counter =  textE;
+
+	let remainingY = y + RD.remainingFont.charHeight + RD.remainingMargin;
+	let remainingWidth = GuiElements.measure.stringWidth("0:00 Remaining", RD.remainingFont);
+	let remainingX = this.x + (this.width - remainingWidth) / 2;
+	this.remainingY = remainingY;
+	this.remaingingText = GuiElements.draw.text(remainingX, remainingY, "", RD.remainingFont, RD.counterColor);
+	GuiElements.layers.overlayOverlay.appendChild(this.remaingingText);
 };
-RecordingDialog.showDialog = function(){
-	RecordingManager.listRecordings(function(result){
+
+/**
+ * Creates and shows a RecordingDialog after retrieving a list of recordings from the frontend
+ */
+RecordingDialog.showDialog = function() {
+	RecordingManager.listRecordings(function(result) {
 		let recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
-RecordingDialog.prototype.goToState = function(state){
+
+/**
+ * shows/hides parts of the dialog according to the recording state provided.
+ * @param {RecordingManager.recordingStates} state - The state this RecordingDialog should enter
+ */
+RecordingDialog.prototype.goToState = function(state) {
 	let RecD = RecordingDialog;
 	this.state = state;
 	let states = RecordingManager.recordingStates;
-	if(state === states.stopped){
+	if (state === states.stopped) {
 		this.recordButton.show();
 		this.discardButton.hide();
 		this.saveButton.hide();
@@ -9708,8 +15002,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(false);
 		this.getCenteredButton(0).enable();
-	}
-	else if(state === states.recording){
+	} else if (state === states.recording) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -9717,8 +15010,7 @@ RecordingDialog.prototype.goToState = function(state){
 		this.resumeRecordingBn.hide();
 		this.setCounterVisibility(true);
 		this.getCenteredButton(0).disable();
-	}
-	else if(state === states.paused){
+	} else if (state === states.paused) {
 		this.recordButton.hide();
 		this.discardButton.show();
 		this.saveButton.show();
@@ -9728,39 +15020,61 @@ RecordingDialog.prototype.goToState = function(state){
 		this.getCenteredButton(0).disable();
 	}
 };
-RecordingDialog.startedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has started
+ */
+RecordingDialog.startedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.recording);
 	}
 };
-RecordingDialog.stoppedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has stopped
+ */
+RecordingDialog.stoppedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.stopped);
 		RecordingDialog.currentDialog.reloadDialog();
 	}
 };
-RecordingDialog.pausedRecording = function(){
-	if(RecordingDialog.currentDialog != null){
+
+/**
+ * Notifies the current RecordingDialog (if any) that recording has paused
+ */
+RecordingDialog.pausedRecording = function() {
+	if (RecordingDialog.currentDialog != null) {
 		RecordingDialog.currentDialog.goToState(RecordingManager.recordingStates.paused);
 	}
 };
-RecordingDialog.prototype.reloadDialog = function(){
+
+/**
+ * Re-retrieves the list of names from the backend and reloads the dialog with it
+ * @inheritDoc
+ */
+RecordingDialog.prototype.reloadDialog = function() {
 	let thisScroll = this.getScroll();
 	let me = this;
-	RecordingManager.listRecordings(function(response){
+	RecordingManager.listRecordings(function(response) {
 		me.closeDialog();
 		let dialog = new RecordingDialog(response);
 		dialog.show();
 		dialog.setScroll(thisScroll);
 	});
 };
-RecordingDialog.prototype.setCounterVisibility = function(visible){
-	if(visible){
+
+/**
+ * Shows/hides the counter and coverRect
+ * @param {boolean} visible - Whether the counter and background behind it should be visible
+ */
+RecordingDialog.prototype.setCounterVisibility = function(visible) {
+	if (visible) {
 		if (this.coverRect == null) {
 			this.coverRect = this.drawCoverRect();
 		}
 		if (this.counter == null) {
-			this.counter = this.drawTimeCounter();
+			this.drawTimeCounter();
 		}
 	} else {
 		if (this.coverRect != null) {
@@ -9770,43 +15084,91 @@ RecordingDialog.prototype.setCounterVisibility = function(visible){
 		if (this.counter != null) {
 			this.counter.remove();
 			this.counter = null;
+			this.remaingingText.remove();
+			this.remaingingText = null;
 		}
 	}
 };
-RecordingDialog.prototype.updateCounter = function(time){
-	if(this.counter == null) return;
+
+/**
+ * Sets the text of the counter according to the provided time.  Formats the time into hh:mm:ss or mm:ss
+ * @param {number} time - elapsed time in ms
+ */
+
+RecordingDialog.prototype.timeToString = function(time) {
+	if (this.counter == null) return;
 	let totalSeconds = Math.floor(time / 1000);
 	let seconds = totalSeconds % 60;
 	let totalMinutes = Math.floor(totalSeconds / 60);
 	let minutes = totalMinutes % 60;
 	let hours = Math.floor(totalMinutes / 60);
 	let secondsString = seconds + "";
-	if(secondsString.length < 2){
+	if (secondsString.length < 2) {
 		secondsString = "0" + secondsString;
 	}
 	let minutesString = minutes + "";
 	let totalString = minutesString + ":" + secondsString;
-	if(hours > 0) {
-		if(minutesString.length < 2) {
+	if (hours > 0) {
+		if (minutesString.length < 2) {
 			minutesString = "0" + minutesString;
 		}
 		totalString = hours + ":" + minutesString + ":" + secondsString;
 	}
+	return totalString;
+};
+RecordingDialog.prototype.updateCounter = function(time) {
+	const RD = RecordingDialog;
+	if (this.counter == null) return;
+	const totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
 	let width = GuiElements.measure.textWidth(this.counter);
 	let counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
+
+	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
+	if (remainingMs < RD.remainingThreshold) {
+		const remainingString = this.timeToString(remainingMs) + " remaining";
+		GuiElements.update.text(this.remaingingText, remainingString);
+		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
+		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
+		GuiElements.move.text(this.remaingingText, remainingX, this.remainingY);
+	}
 };
-RecordingDialog.updateCounter = function(time){
-	if(this.currentDialog != null){
+
+/**
+ * Updates the counter of the current RecordingDialog.  Called by the RecordingManager
+ * @param time
+ */
+RecordingDialog.updateCounter = function(time) {
+	if (this.currentDialog != null) {
 		this.currentDialog.updateCounter(time);
 	}
 };
+
+RecordingDialog.recordingsChanged = function() {
+	if (RecordingDialog.currentDialog != null) {
+		RecordingDialog.currentDialog.reloadDialog();
+	}
+}
+
+RecordingDialog.alertNotInProject = function() {
+	let message = "Please open a project before recording";
+	DialogManager.showAlertDialog("No project open", message, "OK");
+};
 /**
- * Created by Tom on 6/19/2017.
+ * Provides a list of Robots of a certain type to connect to in a BubbleOverlay.  Updates as new robots are found.
+ * The list might be associated with a specific slot of the ConnectMultipleDialog, in which case it will not list
+ * the robot that is currently in that slot and will allow robots in different slots to be selected to swap places
+ * with them.
+ * @param {number} x - The x coord of the point of the bubble
+ * @param {number} upperY - The y coord if the bubble points up
+ * @param {number} lowerY - The y coord if the bubble points down
+ * @param {number|null} [index] - The index of slot this list is associated with, or null if N/A
+ * @param deviceClass - Subclass of Device to scan for
+ * @constructor
  */
-function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
-	if(index == null){
+function RobotConnectionList(x, upperY, lowerY, index, deviceClass) {
+	if (index == null) {
 		index = null;
 	}
 	this.x = x;
@@ -9815,217 +15177,361 @@ function RobotConnectionList(x,upperY,lowerY,index,deviceClass){
 	this.index = index;
 	this.deviceClass = deviceClass;
 	this.visible = false;
-	this.robotId = null;
-	if(index != null){
-		this.robotId = this.deviceClass.getManager().getDevice(index);
-	}
+
+	/* Sometimes the list is told to update its entries but can't since it is currently being scrolled.  In that case,
+	 * marks a pending update and starts a timer which keeps trying to update until it succeeds */
+	this.updatePending = false;
+	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
-RobotConnectionList.setConstants = function(){
-	let RCL=RobotConnectionList;
+
+RobotConnectionList.setConstants = function() {
+	let RCL = RobotConnectionList;
 	RCL.bnMargin = 5;
-	RCL.bgColor=Colors.lightGray; //"#171717";
-	RCL.updateInterval=DiscoverDialog.updateInterval;
-	RCL.height=150;
-	RCL.width=200;
+	RCL.bgColor = Colors.lightGray;
+	RCL.updateInterval = DiscoverDialog.updateInterval;
+	RCL.height = 150;
+	RCL.width = 200;
 };
-RobotConnectionList.prototype.show = function(){
-	this.deviceClass.getManager().discover(this.showWithList.bind(this), function(){
-		this.showWithList("");
-	}.bind(this));
+
+/**
+ * Makes the list visible with whatever devices have been detected so far (according to the cache in DeviceManager)
+ */
+RobotConnectionList.prototype.show = function() {
+	this.showWithList(this.deviceClass.getManager().getDiscoverCache());
 };
-RobotConnectionList.prototype.showWithList = function(list){
+
+/**
+ * Shows the RobotConnectionList with entries for the robots on the provided JSON-encoded list
+ * @param {string} list - A JSON-encoded list of robots as a string
+ */
+RobotConnectionList.prototype.showWithList = function(list) {
 	let RCL = RobotConnectionList;
 	this.visible = true;
-	this.group=GuiElements.create.group(0,0);
+	this.group = GuiElements.create.group(0, 0);
 	this.menuBnList = null;
 	let layer = GuiElements.layers.overlayOverlay;
 	let overlayType = Overlay.types.connectionList;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, RCL.bgColor,RCL.bnMargin,this.group,this,null,layer);
-	this.bubbleOverlay.display(this.x,this.x,this.upperY,this.lowerY,RCL.width,RCL.height);
-	this.updateTimer = self.setInterval(this.discoverRobots.bind(this), RCL.updateInterval);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, RCL.bgColor, RCL.bnMargin, this.group, this, layer);
+	this.bubbleOverlay.display(this.x, this.x, this.upperY, this.lowerY, RCL.width, RCL.height);
+	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
 	this.updateRobotList(list);
 };
-RobotConnectionList.prototype.discoverRobots=function(){
-	let me = this;
-	this.deviceClass.getManager().discover(function(response){
-		me.updateRobotList(response);
-	},function(){
-		if(DiscoverDialog.allowVirtualDevices){
-			me.updateRobotList(me.deviceClass.getManager().getVirtualRobotList());
-		}
-	});
+
+/**
+ * Checks if the list needs to be updated and tries if it does
+ */
+RobotConnectionList.prototype.checkPendingUpdate = function() {
+	if (this.updatePending) {
+		this.updateRobotList(this.deviceClass.getManager().getDiscoverCache());
+	}
 };
-RobotConnectionList.prototype.updateRobotList=function(robotArray){
+
+/**
+ * Updates the RobotConnectionList to contain the robots in the provided list
+ * @param {string} jsonArray - A JSON-encoded array of robots as a string
+ */
+RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	const RCL = RobotConnectionList;
 	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
-	if(TouchReceiver.touchDown || !this.visible || isScrolling){
+	if (TouchReceiver.touchDown || !this.visible || isScrolling) {
+		// Can't update, mark update pending and return
+		this.updatePending = true;
+		this.updateTimer.start();
 		return;
 	}
-	let oldScroll=null;
-	if(this.menuBnList!=null){
-		oldScroll=this.menuBnList.getScroll();
+	// We're updating, so the pending update is cleared
+	this.updatePending = false;
+	this.updateTimer.stop();
+	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
+	 * Robots to swap places. */
+	const includeConnected = this.index !== null;
+	const robotArray = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+
+	// We perform the update and try to keep the scrolling the same
+	let oldScroll = null;
+	if (this.menuBnList != null) {
+		oldScroll = this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
 	let layer = GuiElements.layers.overlayOverlayScroll;
-	this.menuBnList=new SmoothMenuBnList(this,this.group,0,0,RCL.width,layer);
+	this.menuBnList = new SmoothMenuBnList(this, this.group, 0, 0, RCL.width, layer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(RCL.height);
-	for(let i=0; i < robotArray.length;i++) {
+	for (let i = 0; i < robotArray.length; i++) {
 		this.addBnListOption(robotArray[i]);
 	}
 	this.menuBnList.show();
-	if(oldScroll != null) {
+	if (oldScroll != null) {
 		this.menuBnList.setScroll(oldScroll);
 	}
 };
-RobotConnectionList.prototype.addBnListOption=function(robot){
+
+/**
+ * Adds an option to the menuBnList for the provided robot
+ * @param {Device} robot
+ */
+RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
-	this.menuBnList.addOption(robot.name,function(){
+	this.menuBnList.addOption(robot.name, function() {
 		me.close();
-		if(me.index == null){
+		if (me.index == null) {
 			me.deviceClass.getManager().appendDevice(robot);
 		} else {
-			me.deviceClass.getManager().setDevice(me.index, robot);
+			me.deviceClass.getManager().setOrSwapDevice(me.index, robot);
 		}
 	});
 };
-RobotConnectionList.prototype.close=function(){
-	this.updateTimer=window.clearInterval(this.updateTimer);
+
+/**
+ * Closes the list
+ */
+RobotConnectionList.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.visible = false;
-	if(this.menuBnList != null) this.menuBnList.hide();
+	this.updateTimer.stop();
+	if (this.menuBnList != null) this.menuBnList.hide();
 };
-RobotConnectionList.prototype.relToAbsX = function(x){
-	if(!this.visible) return x;
+
+/* Convert between relative and absolute coordinates */
+RobotConnectionList.prototype.relToAbsX = function(x) {
+	if (!this.visible) return x;
 	return this.bubbleOverlay.relToAbsX(x);
 };
-RobotConnectionList.prototype.relToAbsY = function(y){
-	if(!this.visible) return y;
+RobotConnectionList.prototype.relToAbsY = function(y) {
+	if (!this.visible) return y;
 	return this.bubbleOverlay.relToAbsY(y);
 };
+
+
 /**
- * Created by Tom on 6/14/2017.
+ * A dialog for discovering and connecting to a certain type of robot
+ * @param deviceClass - subclass of Device, type of robot to scan for
+ * @constructor
  */
-
-
-
-function DiscoverDialog(deviceClass){
+function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
 	let title = "Connect " + deviceClass.getDeviceTypeName(false);
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
-	this.discoveredDevices = [];
-	this.updateTimer = new Timer(DD.updateInterval, this.discoverDevices.bind(this));
 	this.addHintText(deviceClass.getConnectionInstructions());
+
+	/** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
+	this.discoveredDevices = [];
+
+	/* If an update happens at an inconvenient time (like while scrolling), the dialog is not reloaded; rather
+	 * updatePending is set to true, the timer is started, and the reload occurs at a better time */
+	this.updatePending = false;
+	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
 DiscoverDialog.prototype = Object.create(RowDialog.prototype);
 DiscoverDialog.prototype.constructor = DiscoverDialog;
-DiscoverDialog.setConstants = function(){
-	DiscoverDialog.updateInterval = 500;
-	DiscoverDialog.allowVirtualDevices = false;
-};
-DiscoverDialog.prototype.show = function(){
-	var DD = DiscoverDialog;
+
+/**
+ * Shows the dialog and starts the scan for devices
+ * @inheritDoc
+ */
+DiscoverDialog.prototype.show = function() {
+	const DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
-	if(!this.updateTimer.isRunning()) {
-		this.updateTimer.start();
-		this.discoverDevices();
-	}
+	this.discoverDevices();
 };
+
+/**
+ * Starts the scan for devices and registers the dialog to receive updates when devices are detected
+ */
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	this.deviceClass.getManager().discover(this.updateDeviceList.bind(this), function(){
-		if(DiscoverDialog.allowVirtualDevices) {
-			me.updateDeviceList(me.deviceClass.getManager().getVirtualRobotList());
-		}
-	});
+	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
+	this.deviceClass.getManager().startDiscover(function() {
+		// Tell the device manager that it should scan again if the dialog is still open
+		return this.visible;
+	}.bind(this));
+	// When a device is detected, update the dialog
+	this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
-DiscoverDialog.prototype.updateDeviceList = function(deviceList){
-	if(TouchReceiver.touchDown || !this.visible || this.isScrolling()){
+
+/**
+ * Checks if there is a pending update and updates the dialog if there is
+ */
+DiscoverDialog.prototype.checkPendingUpdate = function() {
+	if (this.updatePending) {
+		this.updateDeviceList(this.deviceClass.getManager().getDiscoverCache());
+	}
+};
+
+/**
+ * Reloads the dialog with the information from the new device list, or sets a pending update if the user is scrolling
+ * or is touching the screen
+ * @param {string} deviceList - A string representing a JSON array of devices
+ */
+DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
+	if (!this.visible) {
+		return;
+	} else if (TouchReceiver.touchDown || this.isScrolling()) {
+		this.updatePending = true;
+		this.updateTimer.start();
 		return;
 	}
-	this.discoveredDevices = deviceList;
+	this.updatePending = false;
+	this.updateTimer.stop();
+	// Read the JSON
+	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
 	this.reloadRows(this.discoveredDevices.length);
-
 };
-DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup){
-	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
+
+/**
+ * Creates the connection button for each discovered device
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
+	// TODO: use RowDialog.createMainBnWithText instead
+	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
 	button.addText(this.discoveredDevices[index].name);
-	var me = this;
-	button.setCallbackFunction(function(){
+	const me = this;
+	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
 	}, true);
 	button.makeScrollable();
 };
-DiscoverDialog.prototype.selectDevice = function(device){
+
+/**
+ * Connects to a device and closes the dialog
+ * @param device
+ */
+DiscoverDialog.prototype.selectDevice = function(device) {
 	this.deviceClass.getManager().setOneDevice(device);
 	this.closeDialog();
 };
-DiscoverDialog.prototype.closeDialog = function(){
+
+/**
+ * Stops the update timer and discover
+ */
+DiscoverDialog.prototype.closeDialog = function() {
 	RowDialog.prototype.closeDialog.call(this);
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
 /**
- * Created by Tom on 7/10/2017.
+ * Displays a list of buttons for file manipulation.  Accessed by tapping the dots next to a file in an open dialog
+ * @param {RowDialog} dialog - The dialog to reload when the files are changed
+ * @param {string} file - The name of the file this option is for
+ * @param {FileContextMenu.types} type - The type of context menu to show. Determines what options are available
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @constructor
  */
-function FileContextMenu(dialog, file, x1, x2, y1, y2){
-	this.file=file;
+function FileContextMenu(dialog, file, type, x1, x2, y1, y2) {
+	this.file = file;
 	this.dialog = dialog;
-	this.x1=x1;
-	this.y1=y1;
-	this.x2=x2;
-	this.y2=y2;
+	this.x1 = x1;
+	this.y1 = y1;
+	this.x2 = x2;
+	this.y2 = y2;
+	this.type = type;
 	this.showMenu();
 }
-FileContextMenu.setGraphics=function(){
-	const FCM=FileContextMenu;
-	FCM.bnMargin=Button.defaultMargin;
-	FCM.bgColor=Colors.lightGray;
-	FCM.blockShift=20;
-	FCM.width = 110;
+
+FileContextMenu.setGraphics = function() {
+	const FCM = FileContextMenu;
+
+	/** @enum {number} */
+	FCM.types = {
+		localSignedIn: 1,   // For when the user is looking at an open file and is signed into cloud storage
+		localSignedOut: 2,   // For when the user is looking at an open file and is signed out of cloud storage
+		cloud: 3   // For when the user if looking at a cloud file
+	};
+
+	FCM.bnMargin = Button.defaultMargin;
+	FCM.bgColor = Colors.lightGray;
+	FCM.blockShift = 20;
+	FCM.width = 115;
 };
-FileContextMenu.prototype.showMenu=function(){
-	const FCM=FileContextMenu;
-	this.group=GuiElements.create.group(0,0);
+
+/**
+ * Generates and presents the menu
+ */
+FileContextMenu.prototype.showMenu = function() {
+	const FCM = FileContextMenu;
+	this.group = GuiElements.create.group(0, 0);
 	const layer = GuiElements.layers.overlayOverlay;
 	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
 	const overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay=new BubbleOverlay(overlayType, FCM.bgColor,FCM.bnMargin,this.group,this,null,layer);
+	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
 	const height = this.menuBnList.previewHeight();
-	this.bubbleOverlay.display(this.x1,this.x2,this.y1,this.y2,FCM.width,height);
+	this.bubbleOverlay.display(this.x1, this.x2, this.y1, this.y2, FCM.width, height);
 	this.menuBnList.show();
 };
-FileContextMenu.prototype.addOptions=function(){
-	this.menuBnList.addOption("Duplicate", function(){
-		const dialog = this.dialog;
-		SaveManager.userDuplicateFile(this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
-	}.bind(this), VectorPaths.copy);
-	/*this.menuBnList.addOption("Share", function(){
-		SaveManager.userExportFile(this.file);
-		this.close();
-	}.bind(this), VectorPaths.share);*/
-	this.menuBnList.addOption("Delete", function(){
-		const dialog = this.dialog;
-		SaveManager.userDeleteFile(false, this.file, function(){
-			dialog.reloadDialog();
-		});
-		this.close();
-	}.bind(this), VectorPaths.trash);
+
+/**
+ * Adds options and their behaviors to the menu
+ */
+FileContextMenu.prototype.addOptions = function() {
+	const FCM = FileContextMenu;
+	if (this.type === FCM.types.localSignedIn) {
+		this.menuBnList.addOption("", function() {
+			SaveManager.userExportFile(this.file);
+			this.close();
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
+	}
+	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
+		this.menuBnList.addOption("", function() {
+			const dialog = this.dialog;
+			SaveManager.userDuplicateFile(this.file, function() {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
+	}
+	this.menuBnList.addOption("", function() {
+		if (this.type === FCM.types.cloud) {
+			const request = new HttpRequestBuilder("cloud/delete");
+			request.addParam("filename", this.file);
+			HtmlServer.sendRequestWithCallback(request.toString());
+			this.close();
+		} else {
+			const dialog = this.dialog;
+			SaveManager.userDeleteFile(false, this.file, function() {
+				dialog.reloadDialog();
+			});
+			this.close();
+		}
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
 };
-FileContextMenu.prototype.close=function(){
+
+/**
+ * Creates the function to add the icon to the button
+ * @param {object} pathId - Object from VectorPaths
+ * @param {string} text - Text to display on the button
+ * @return {function} - type: Button -> ()
+ */
+FileContextMenu.prototype.createAddIconToBnFn = function(pathId, text) {
+	return function(bn) {
+		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, null, true, false);
+	}
+};
+
+/**
+ * Closes the menu
+ */
+FileContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide()
 };
-function OverflowArrows(){
-	var OA = OverflowArrows;
+/**
+ * A set of four arrows around the edges of the canvas that show off screen Blocks
+ * @constructor
+ */
+function OverflowArrows() {
 	this.group = GuiElements.create.group(0, 0);
 	this.triTop = this.makeTriangle();
 	this.triLeft = this.makeTriangle();
@@ -10034,77 +15540,119 @@ function OverflowArrows(){
 	this.setArrowPos();
 	this.visible = false;
 }
-OverflowArrows.prototype.makeTriangle=function(){
-	var OA = OverflowArrows;
-	var tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.white);
-	GuiElements.update.opacity(tri, OA.opacity);
-	GuiElements.makeClickThrough(tri);
-	return tri;
-};
-OverflowArrows.setConstants=function(){
-	var OA = OverflowArrows;
+
+OverflowArrows.setConstants = function() {
+	const OA = OverflowArrows;
 	OA.triangleW = 25;
 	OA.triangleH = 15;
 	OA.margin = 15;
 	OA.opacity = 0.5;
 };
-OverflowArrows.prototype.setArrows=function(left, right, top, bottom){
-	if(left == right) {
+
+/**
+ * Creates an SVG path element of the correct color.  The actual path information will be added later.
+ * @return {Element} - The SVG path element
+ */
+OverflowArrows.prototype.makeTriangle = function() {
+	const OA = OverflowArrows;
+	const tri = GuiElements.create.path();
+	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.opacity(tri, OA.opacity);
+	GuiElements.update.makeClickThrough(tri);
+	return tri;
+};
+
+/**
+ * Updates the visibility of the arrows given the active region of the canvas. If the canvas extends beyond an arrow
+ * in one direction, then that arrow becomes visible to indicate off screen blocks
+ * @param {number} left - The left boundary of the canvas
+ * @param {number} right - The right boundary of the canvas
+ * @param {number} top - The top boundary of the canvas
+ * @param {number} bottom - The bottom boundary of the canvas
+ */
+OverflowArrows.prototype.setArrows = function(left, right, top, bottom) {
+	if (left === right) {
+		// If the width of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triLeft, false);
 		this.showIfTrue(this.triRight, false);
-	}
-	else{
+	} else {
 		this.showIfTrue(this.triLeft, left < this.left);
 		this.showIfTrue(this.triRight, right > this.right);
 	}
-	if(top == bottom){
+	if (top === bottom) {
+		// If the height of the canvas is 0, there are no Blocks, so the arrows should be hidden.
 		this.showIfTrue(this.triTop, false);
 		this.showIfTrue(this.triBottom, false);
-	}
-	else {
+	} else {
 		this.showIfTrue(this.triTop, top < this.top);
 		this.showIfTrue(this.triBottom, bottom > this.bottom);
 	}
 };
-OverflowArrows.prototype.showIfTrue=function(tri,shouldShow){
-	if(shouldShow){
+
+/**
+ * Sets the visibility of the triangle according to the boolean parameter
+ * @param {Element} tri - The path to set the visibility of
+ * @param {boolean} shouldShow - Whether the path should be visible of not.
+ */
+OverflowArrows.prototype.showIfTrue = function(tri, shouldShow) {
+	if (shouldShow) {
 		this.group.appendChild(tri);
-	} else{
+	} else {
 		tri.remove();
 	}
 };
-OverflowArrows.prototype.show=function(){
-	if(!this.visible) {
+
+/**
+ * Makes all overflow arrows visible
+ */
+OverflowArrows.prototype.show = function() {
+	if (!this.visible) {
 		this.visible = true;
 		GuiElements.layers.overflowArr.appendChild(this.group);
 	}
 };
-OverflowArrows.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Makes all overflow arrows hidden
+ */
+OverflowArrows.prototype.hide = function() {
+	if (this.visible) {
 		this.visible = false;
 		this.group.remove();
 	}
 };
-OverflowArrows.prototype.updateZoom=function(){
+
+/**
+ * Recomputes the positions of the overflow arrows
+ */
+OverflowArrows.prototype.updateZoom = function() {
 	this.setArrowPos();
 };
-OverflowArrows.prototype.setArrowPos=function(){
-	var OA = OverflowArrows;
+
+/**
+ * Moves overflowArrows to the correct positions and stores the boundary of the portion of the screen for the canvas
+ */
+OverflowArrows.prototype.setArrowPos = function() {
+	const OA = OverflowArrows;
 	this.left = BlockPalette.width;
-	if(!GuiElements.paletteLayersVisible) {
+	if (!GuiElements.paletteLayersVisible) {
 		this.left = 0;
 	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
-	this.midX = (this.left + this.right) / 2;
-	this.midY = (this.top + this.bottom) / 2;
 
-	GuiElements.update.triangleFromPoint(this.triTop, this.midX, this.top + OA.margin, OA.triangleW, OA.triangleH, true);
-	GuiElements.update.triangleFromPoint(this.triLeft, this.left + OA.margin, this.midY, OA.triangleW, OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triRight, this.right - OA.margin, this.midY, OA.triangleW, -OA.triangleH, false);
-	GuiElements.update.triangleFromPoint(this.triBottom, this.midX, this.bottom - OA.margin, OA.triangleW, -OA.triangleH, true);
+	const midX = (this.left + this.right) / 2;
+	const midY = (this.top + this.bottom) / 2;
+	const topY = this.top + OA.margin;
+	const bottomY = this.bottom - OA.margin;
+	const leftX = this.left + OA.margin;
+	const rightX = this.right - OA.margin;
+
+	GuiElements.update.triangleFromPoint(this.triTop, midX, topY, OA.triangleW, OA.triangleH, true);
+	GuiElements.update.triangleFromPoint(this.triLeft, leftX, midY, OA.triangleW, OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triRight, rightX, midY, OA.triangleW, -OA.triangleH, false);
+	GuiElements.update.triangleFromPoint(this.triBottom, midX, bottomY, OA.triangleW, -OA.triangleH, true);
 };
 /**
  * BlockStack is a class that holds a stack of Blocks.
@@ -10522,19 +16070,12 @@ BlockStack.prototype.land = function() {
 };
 
 /**
- * Removes the stack from the Tab's list.
- */
-BlockStack.prototype.remove = function() {
-	this.tab.removeStack(this);
-};
-
-/**
  * Stops execution and removes the BlockStack digitally and visually.
  */
-BlockStack.prototype.delete = function() {
+BlockStack.prototype.remove = function() {
 	this.stop();
 	this.group.remove();
-	this.remove();   // Remove from Tab's list.
+	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
 
@@ -10609,7 +16150,7 @@ BlockStack.prototype.updateTabDim = function() {
 
 /**
  * Writes the BlockStack to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {
@@ -10627,6 +16168,7 @@ BlockStack.prototype.createXml = function(xmlDoc) {
  * Creates a BlockStack from XML
  * @param {Node} stackNode - The tag to import from
  * @param {Tab} tab - The Tab to import into
+ * @return {BlockStack|null} stack - The imported stack
  */
 BlockStack.importXml = function(stackNode, tab) {
 	const x = XmlWriter.getAttribute(stackNode, "x", 0, true);
@@ -10644,7 +16186,7 @@ BlockStack.importXml = function(stackNode, tab) {
 	}
 	if (firstBlock == null) {
 		// All Blocks could not import.  Exit.
-		return;
+		return null;
 	}
 	const stack = new BlockStack(firstBlock, tab);
 	stack.move(x, y);
@@ -10659,6 +16201,7 @@ BlockStack.importXml = function(stackNode, tab) {
 		i++;
 	}
 	stack.updateDim();
+	return stack;
 };
 
 /**
@@ -10710,18 +16253,18 @@ BlockStack.prototype.checkListUsed = function(list) {
 };
 
 /**
+ * Updates dimensions after device dropdowns become visible
  * @param deviceClass
  */
 BlockStack.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
 /**
+ * Updates dimensions after device dropdowns become hidden
  * @param deviceClass
  */
 BlockStack.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
 	this.updateDim();
 };
 
@@ -10733,16 +16276,22 @@ BlockStack.prototype.countDevicesInUse = function(deviceClass) {
 	return this.firstBlock.countDevicesInUse(deviceClass);
 };
 
-BlockStack.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
-};
-
 /**
  * @param {string} message
  */
 BlockStack.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
+	let funArgs = Array.prototype.slice.call(arguments, 1);
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -10770,10 +16319,6 @@ BlockStack.prototype.getHeight = function() {
 	return this.dim.rh;
 };
 /**
- * Created by Tom on 6/12/2017.
- */
-
-/**
  * Represents a request to be used with HtmlServer
  * @param url {String} - The beginning of the request
  * @constructor
@@ -10783,10 +16328,11 @@ function HttpRequestBuilder(url){
 	this.request = url;
 	this.hasFirstParam = false;
 }
+
 /**
  * Adds a get parameter with the given key and value
  * @param key {String}
- * @param value {String} - The value will be escaped with
+ * @param value {String} - The value, which will be percent encoded before it is sent
  */
 HttpRequestBuilder.prototype.addParam = function(key, value){
 	if(!this.hasFirstParam){
@@ -10799,6 +16345,7 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	this.request += "=";
 	this.request += HtmlServer.encodeHtml(value);
 };
+
 /**
  * Returns the request to give to HtmlServer
  * @returns {String}
@@ -10808,6 +16355,15 @@ HttpRequestBuilder.prototype.toString = function(){
 };
 
 
+/**
+ * Represents a setting stored on the backend.  Automatically edits and caches the backend value
+ * @param {string} key - The key of the setting (on the backend)
+ * @param {string|number} defaultVal - The default value of the setting
+ * @param {boolean} [number=false] - Whether the setting is a number
+ * @param {boolean} [integer=false] - Whether the setting only accepts integer values
+ * @param {number|null} [min] - The minimum value the setting can take (null for no minimum)
+ * @param {number|null} [max] - The maximum value the setting can take (null for no minimum)
+ */
 function Setting(key, defaultVal, number, integer, min, max) {
 	if(number == null) {
 		number = false;
@@ -10823,21 +16379,25 @@ function Setting(key, defaultVal, number, integer, min, max) {
 	}
 
 	this.key = key;
-	this.defaultVal = defaultVal;
 	this.number = number;
 	this.integer = integer;
 	this.min = min;
 	this.max = max;
 	this.value = defaultVal;
 }
+
+/**
+ * Gets the cached value of the setting
+ * @return {number|string}
+ */
 Setting.prototype.getValue = function(){
 	return this.value;
 };
-/*
-Setting.prototype.setValue = function(value){
-	this.value = value;
-};
-*/
+
+/**
+ * Sends a request to change the setting and updates the cached value. Validates the value to ensure it is in range
+ * @param {number|string} value - The value to store
+ */
 Setting.prototype.writeValue = function(value){
 	this.value = value;
 	if(this.number) {
@@ -10845,9 +16405,14 @@ Setting.prototype.writeValue = function(value){
 	}
 	const request = new HttpRequestBuilder("settings/set");
 	request.addParam("key", this.key);
-	request.addParam("value", HtmlServer.encodeHtml(value));
+	request.addParam("value", HtmlServer.encodeHtml(this.value + ""));
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+
+/**
+ * Sends a request to get the value of the setting from the backend.  Keeps the current value if it gets no response.
+ * @param {function} callbackFn - type (string|number) -> () called with value once read, or with current value if error
+ */
 Setting.prototype.readValue = function(callbackFn){
 	const request = new HttpRequestBuilder("settings/get");
 	request.addParam("key", this.key);
@@ -10866,34 +16431,79 @@ Setting.prototype.readValue = function(callbackFn){
 		if(callbackFn != null) callbackFn(this.value);
 	}.bind(this));
 };
-function SettingsManager(){
+/**
+ * Static class stores Settings and makes them accessible to other classes
+ */
+function SettingsManager() {
 	const SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
 	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");
+	SM.sideBarVisible = new Setting("sideBarVisible", "true");
 }
-SettingsManager.loadSettings = function(callbackFn){
-	const SM = SettingsManager;
 
-	SM.enableSnapNoise.readValue(function(){
-		SM.zoom.readValue(callbackFn);
-	})
-};
-/* HtmlServer is a static class that will manage HTTP requests.
- * This class is not nearly finished.
+/**
+ * Loads settings from the backend and calls callbackFn when finished
+ * @param {function} callbackFn - Called when done loading/tying to load settings
  */
-function HtmlServer(){
-	HtmlServer.port=22179;
-	HtmlServer.dialogVisible=false;
-	HtmlServer.logHttp = false || DebugOptions.shouldLogHttp();
+SettingsManager.loadSettings = function(callbackFn) {
+	const SM = SettingsManager;
+	SM.sideBarVisible.readValue(function() {
+		SM.enableSnapNoise.readValue(function() {
+			SM.zoom.readValue(callbackFn);
+		});
+	});
+};
+/**
+ * HtmlServer is a static class sends messages to the backend
+ */
+function HtmlServer() {
+	HtmlServer.port = 22179;
+	HtmlServer.requestTimeout = 5000;
+	HtmlServer.iosRequests = {};
+	HtmlServer.iosHandler = HtmlServer.getIosHandler();
+	HtmlServer.unansweredCount = 0; // Tracks pending requests
+	/* Maximum safe number of unanswered requests. After this number is hit, some Blocks
+	 * might choose to throttle requests (like Broadcast Blocks) */
+	HtmlServer.unansweredCap = 10;
 }
-HtmlServer.decodeHtml = function(message){
+
+HtmlServer.getIosHandler = function() {
+	if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
+		window.webkit.messageHandlers.serverSubstitute.postMessage) {
+		GuiElements.alert("Using native");
+		return window.webkit.messageHandlers.serverSubstitute.postMessage;
+	} else {
+		GuiElements.alert("Using http");
+		return null;
+	}
+};
+
+HtmlServer.createFakeIosHandler = function() {
+	return "test";
+	return function (object) {
+		console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
+	}
+};
+
+/**
+ * Removes percent encoding from a string
+ * @param {string} message - The percent encoded string
+ * @return {string} - The decoded string
+ */
+HtmlServer.decodeHtml = function(message) {
 	return decodeURIComponent(message.replace(/\+/g, " "));
 };
-HtmlServer.encodeHtml=function(message){
+
+/**
+ * Applies percent encoding to a string
+ * @param {string} message - The input string
+ * @return {string} - The percent encoded string
+ */
+HtmlServer.encodeHtml = function(message) {
 	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
 	}*/
-	var eVal;
+	let eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
 		eVal = eVal.replace(/@/g, "%40");
@@ -10916,392 +16526,738 @@ HtmlServer.encodeHtml=function(message){
 	}
 	return eVal; //.replace(/\%20/g, "+");
 };
-HtmlServer.sendRequestWithCallback=function(request,callbackFn,callbackErr,isPost,postData){
+
+/**
+ * Sends a request to the backend and calls a callback function with the results
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ *                                             Used for sorting native calls on iOS
+ */
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
-	if(HtmlServer.logHttp&&request.indexOf("totalStatus")<0&&
-		request.indexOf("discover_")<0&&request.indexOf("status")<0&&request.indexOf("response")<0) {
+	if (DebugOptions.shouldLogHttp()) {
+		// Requests are logged for debugging
 		GuiElements.alert(HtmlServer.getUrlForRequest(request));
 	}
-	if(DebugOptions.shouldSkipHtmlRequests()) {
-		setTimeout(function () {
-			/*if(callbackErr != null) {
-				callbackErr(418, "I'm a teapot");
-			}*/
-			if(callbackFn != null) {
-				//callbackFn('[{"name":"hi","id":"there"}]');
-				callbackFn('43');
+	if (DebugOptions.shouldSkipHtmlRequests()) {
+		// If we're testing on a device without a backend, we reply with a fake response
+		setTimeout(function() {
+			HtmlServer.unansweredCount--;
+			if (false) {
+				// We can respond with a fake error
+				if (callbackErr != null) {
+					callbackErr(418, "I'm a teapot");
+				}
+			} else {
+				// Or with fake data
+				if (callbackFn != null) {
+					//callbackFn('Started');
+					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('[{"name":"hi","id":"there"}]');
+					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
+				}
 			}
 		}, 20);
+		HtmlServer.unansweredCount++;
 		return;
 	}
-	if(isPost == null) {
-		isPost=false;
+	if (isPost == null) {
+		isPost = false;
 	}
-	var requestType="GET";
-	if(isPost){
-		requestType="POST";
+	if (HtmlServer.iosHandler != null) {
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
+		return;
+	}
+	let requestType = "GET";
+	if (isPost) {
+		requestType = "POST";
 	}
 	try {
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function () {
-			if (xhttp.readyState == 4) {
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState === 4) {
+				HtmlServer.unansweredCount--;
 				if (200 <= xhttp.status && xhttp.status <= 299) {
-					if(callbackFn!=null){
+					if (callbackFn != null) {
 						callbackFn(xhttp.responseText);
 					}
-				}
-				else {
-					if(callbackErr!=null){
-						if(HtmlServer.logHttp){
-							GuiElements.alert("HTTP ERROR: " + xhttp.status);
+				} else {
+					if (callbackErr != null) {
+						if (DebugOptions.shouldLogHttp()) {
+							// Show the error on the screen
+							GuiElements.alert("HTTP ERROR: " + xhttp.status + ", RESP: " + xhttp.responseText);
 						}
 						callbackErr(xhttp.status, xhttp.responseText);
 					}
-					//GuiElements.alert("HTML error: "+xhttp.status+" \""+xhttp.responseText+"\"");
 				}
 			}
 		};
-		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true); //Get the names
-		if(isPost){
+		xhttp.open(requestType, HtmlServer.getUrlForRequest(request), true);
+		if (isPost) {
 			xhttp.setRequestHeader("Content-type", "text/plain; charset=utf-8");
 			xhttp.send(postData);
-		}
-		else{
-			xhttp.send(); //Make the request
-		}
-	}
-	catch(err){
-		if(callbackErr!=null){
-			callbackErr();
-		}
-	}
-};
-HtmlServer.sendRequest=function(request,requestStatus){
-	/*
-	 setTimeout(function(){
-		requestStatus.error = false;
-		requestStatus.finished = true;
-		requestStatus.result = "7";
-	}, 300);
-	return;
-	*/
-	if(requestStatus!=null){
-		requestStatus.error=false;
-		var callbackFn=function(response){
-			callbackFn.requestStatus.finished=true;
-			callbackFn.requestStatus.result=response;
-		};
-		callbackFn.requestStatus=requestStatus;
-		var callbackErr=function(code, result){
-			callbackErr.requestStatus.finished=true;
-			callbackErr.requestStatus.error=true;
-			callbackErr.requestStatus.code = code;
-			callbackErr.requestStatus.result = result;
-		};
-		callbackErr.requestStatus=requestStatus;
-		HtmlServer.sendRequestWithCallback(request,callbackFn,callbackErr);
-	}
-	else{
-		HtmlServer.sendRequestWithCallback(request);
-	}
-}
-HtmlServer.getHBRequest=function(hBIndex,request,params){
-	DebugOptions.validateNonNull(params);
-	var res = "hummingbird/";
-	res += request;
-	res += "?id=" + HtmlServer.encodeHtml(HummingbirdManager.connectedHBs[hBIndex].id);
-	res += params;
-	return res;
-};
-HtmlServer.getUrlForRequest=function(request){
-	return "http://localhost:"+HtmlServer.port+"/"+request;
-}
-HtmlServer.showDialog=function(title,question,prefill,shouldPrefill,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	//GuiElements.alert("Showing...");
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var newText=prompt(question);
-		HtmlServer.dialogVisible=false;
-		callbackFn(newText==null,newText);
-	}
-	else{
-		var HS=HtmlServer;
-		var request = "tablet/dialog";
-		request+="?title=" + HS.encodeHtml(title);
-		request+="&question="+HS.encodeHtml(question);
-		if(shouldPrefill) {
-			request += "&prefill=" + HS.encodeHtml(prefill);
 		} else {
-			request += "&placeholder=" + HS.encodeHtml(prefill);
+			xhttp.send();
 		}
-		request+="&selectAll=true";
-		var onDialogPresented=function(result){
-			//GuiElements.alert("dialog presented...");
-			HS.getDialogResponse(onDialogPresented.callbackFn,onDialogPresented.callbackErr);
-		}
-		onDialogPresented.callbackFn=callbackFn;
-		onDialogPresented.callbackErr=callbackErr;
-		var onDialogFail=function(){
-			//GuiElements.alert("dialog failed...");
-			HtmlServer.dialogVisible=false;
-			if(onDialogFail.callbackErr!=null) {
-				onDialogFail.callbackErr();
-			}
-		}
-		onDialogFail.callbackErr=callbackErr;
-		HS.sendRequestWithCallback(request,onDialogPresented,onDialogPresented);
-	}
-}
-HtmlServer.getDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/dialog_response";
-	var onResponseReceived=function(response){
-		if(response=="No Response"){
-			HS.sendRequestWithCallback(request,onResponseReceived,function(){
-				//GuiElements.alert("Error2");
-				HtmlServer.dialogVisible=false;
-				callbackErr();
-			});
-			//GuiElements.alert("No resp");
-		}
-		else if(response=="Cancelled"){
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(true);
-			//GuiElements.alert("Cancelled");
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			var trimmed=response.substring(1,response.length-1);
-			onResponseReceived.callbackFn(false,trimmed);
-			//GuiElements.alert("Done");
-		}
-	}
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HtmlServer.dialogVisible=false;
-		if(callbackErr != null) {
-			callbackErr();
-		}
-	});
-}
-HtmlServer.getFileName=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var onResponseReceived=function(response){
-		if(response=="File has no name."){
-			HtmlServer.getFileName(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback("filename",onResponseReceived,callbackErr);
-};
-HtmlServer.showChoiceDialog=function(title,question,option1,option2,swapIfMouse,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=confirm(question);
-		HtmlServer.dialogVisible=false;
-		if(swapIfMouse){
-			result=!result;
-		}
-		if(result){
-			callbackFn("1");
-		}
-		else{
-			callbackFn("2");
-		}
-	}
-	else {
-		var HS = HtmlServer;
-		var request = "tablet/choice";
-		request += "?title=" + HS.encodeHtml(title);
-		request += "&question=" + HS.encodeHtml(question);
-		request += "&button1=" + HS.encodeHtml(option1);
-		request += "&button2=" + HS.encodeHtml(option2);
-		var onDialogPresented = function (result) {
-			HS.getChoiceDialogResponse(onDialogPresented.callbackFn, onDialogPresented.callbackErr);
-		};
-		onDialogPresented.callbackFn = callbackFn;
-		onDialogPresented.callbackErr = callbackErr;
-		var onDialogFail = function () {
-			HtmlServer.dialogVisible = false;
-			if (onDialogFail.callbackErr != null) {
-				onDialogFail.callbackErr();
-			}
-		};
-		onDialogFail.callbackErr = callbackErr;
-		HS.sendRequestWithCallback(request, onDialogPresented, onDialogFail);
-	}
-};
-HtmlServer.getChoiceDialogResponse=function(callbackFn,callbackErr){
-	var HS=HtmlServer;
-	var request = "tablet/choice_response";
-	var onResponseReceived=function(response){
-		if(response=="0"){
-			HtmlServer.getChoiceDialogResponse(onResponseReceived.callbackFn,onResponseReceived.callbackErr);
-		}
-		else{
-			HtmlServer.dialogVisible=false;
-			onResponseReceived.callbackFn(response);
-		}
-	};
-	onResponseReceived.callbackFn=callbackFn;
-	onResponseReceived.callbackErr=callbackErr;
-	HS.sendRequestWithCallback(request,onResponseReceived,function(){
-		HS.dialogVisible = false;
+		HtmlServer.unansweredCount++;
+	} catch (err) {
 		if (callbackErr != null) {
-			callbackErr();
+			callbackErr(0, "Sending request failed");
 		}
-	});
-};
-HtmlServer.showAlertDialog=function(title,message,button,callbackFn,callbackErr){
-	TouchReceiver.touchInterrupt();
-	HtmlServer.dialogVisible=true;
-	if(TouchReceiver.mouse){ //Kept for debugging on a PC
-		var result=alert(message);
-		HtmlServer.dialogVisible=false;
-	}
-	else {
-		var HS = HtmlServer;
-		var request = new HttpRequestBuilder("tablet/dialog/alert");
-		request.addParam("title", HS.encodeHtml(title));
-		request.addParam("message", HS.encodeHtml(message));
-		request.addParam("button", HS.encodeHtml(button));
-		HS.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 	}
 };
 
-HtmlServer.getSetting=function(key,callbackFn,callbackErr){
-	HtmlServer.sendRequestWithCallback("settings/get?key="+HtmlServer.encodeHtml(key),callbackFn,callbackErr);
+/**
+ * Sends a request and changes fields of a status object to track its progress.  Used for executing blocks
+ * @param {string} request - The request to send
+ * @param {object} requestStatus - The status object
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ */
+HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
+	if (requestStatus != null) {
+		requestStatus.error = false;
+		const callbackFn = function(response) {
+			requestStatus.finished = true;
+			requestStatus.result = response;
+		};
+		const callbackErr = function(code, result) {
+			requestStatus.finished = true;
+			requestStatus.error = true;
+			requestStatus.code = code;
+			requestStatus.result = result;
+		};
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock);
+	} else {
+		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock);
+	}
 };
-HtmlServer.setSetting=function(key,value){
-	var request = "settings/set";
-	request += "?key=" + HtmlServer.encodeHtml(key);
-	request += "&value=" + HtmlServer.encodeHtml(value);
-	HtmlServer.sendRequestWithCallback(request);
+
+/**
+ * Prepends localhost and the port number to the request
+ * @param {string} request - The request to modify
+ * @return {string} - The completed request
+ */
+HtmlServer.getUrlForRequest = function(request) {
+	return "http://localhost:" + HtmlServer.port + "/" + request;
 };
-HtmlServer.sendFinishedLoadingRequest = function(){
+
+/**
+ * Tells the backend that the frontend is done loading the UI
+ */
+HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
 };
+
 /**
- * Created by Tom on 6/17/2017.
+ * Sends a command through the system iOS provides for allowing JS to call swift functions
+ * @param {string} request - The request to send
+ * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
+ * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
+ * @param {boolean} [isPost=false] - Whether a post request should be used instead of a get request
+ * @param {string|null} [postData] - The post data to send in the body of the request
+ * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
+ */
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+	GuiElements.alert("Sending: " + request + " using native");
+	if(isBluetoothBlock == null) {
+		isBluetoothBlock = false;
+	}
+
+	let id = null;
+	while (id == null || HtmlServer.iosRequests[id] != null) {
+		id = "requestId" + Math.random();
+	}
+	const requestObject = {};
+	requestObject.request = request;
+	if (isPost) {
+		requestObject.body = postData;
+	} else {
+		requestObject.body = "";
+	}
+	requestObject.id = id;
+	requestObject.inBackground = isBluetoothBlock? "true" : "false";
+	HtmlServer.iosRequests[id] = {
+		callbackFn: callbackFn,
+		callbackErr: callbackErr
+	};
+	GuiElements.alert("Making request: " + request + " using native");
+	HtmlServer.unansweredCount++;
+	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
+	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
+	window.setTimeout(function() {
+		HtmlServer.responseFromIosCall(id, "0", "");
+	}, HtmlServer.requestTimeout);
+};
+
+HtmlServer.responseFromIosCall = function(id, status, body) {
+	//GuiElements.alert("got resp from native");
+	const callbackObj = HtmlServer.iosRequests[id];
+	HtmlServer.iosRequests[id] = undefined;
+	if (callbackObj == null) {
+		return;
+	}
+	HtmlServer.unansweredCount--;
+	if (200 <= status && status <= 299) {
+		if (callbackObj.callbackFn != null) {
+			callbackObj.callbackFn(body);
+		}
+	} else {
+		if (callbackObj.callbackErr != null) {
+			if (DebugOptions.shouldLogHttp()) {
+				// Show the error on the screen
+				GuiElements.alert("HTTP ERROR: " + status + ", RESP: " +body);
+			}
+			callbackObj.callbackErr(Number(status), body);
+		}
+	}
+};
+/**
+ * Sends requests to show dialogs and keeps track of open dialogs
+ */
+function DialogManager() {
+	let DM = DialogManager;
+	/* A dialog generated through Block execution must wait this amount before showing another dialog to give
+	 * the user a chance to stop the program */
+	DM.repeatDialogDelay = 500;
+	DM.lastDialogDisplayTime = null;
+
+	DM.dialogVisible = false;
+	// The functions to call when a dialog finished
+	DM.choiceCallback = null;
+	DM.promptCallback = null;
+}
+
+/**
+ * Checks if enough time has passed since the last dialog was closed to show another dialog.  Only affects dialogs
+ * generated using Blocks
+ * @return {boolean}
+ */
+DialogManager.checkDialogDelay = function() {
+	let DM = DialogManager;
+	let now = new Date().getTime();
+	if (DM.dialogVisible) {
+		return false;
+	}
+	return DM.lastDialogDisplayTime == null || now - DM.repeatDialogDelay >= DM.lastDialogDisplayTime;
+};
+
+/**
+ * Sets the time a dialog was last closed to now
+ */
+DialogManager.updateDialogDelay = function() {
+	let DM = DialogManager;
+	DM.lastDialogDisplayTime = new Date().getTime();
+};
+
+/**
+ * Shows a dialog with two options
+ * @param {string} title - The text at the top of the dialog
+ * @param {string} question - The text in the body of the dialog
+ * @param {string} option1 - The text on the first button
+ * @param {string|null} [option2] - The text on the second button. There will be only one button if left null
+ * @param swapIfMouse - Whether the result should be inverted when using the js prompt function for debugging
+ * @param callbackFn - type (boolean, string) -> (), the function to call with the result of "1", "2", or "cancelled"
+ * @param callbackErr - type () -> (), the function to call if showing the dialog fails
+ */
+DialogManager.showChoiceDialog = function(title, question, option1, option2, swapIfMouse, callbackFn, callbackErr) {
+	const DM = DialogManager;
+	if (DM.dialogVisible) {
+		// If there's already a dialog, call the fail function
+		if (callbackErr != null) callbackErr();
+		return;
+	}
+	TouchReceiver.touchInterrupt();
+	DM.dialogVisible = true;
+	if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
+		let result = confirm(question);
+		DM.dialogVisible = false;
+		if (swapIfMouse) {
+			result = !result;
+		}
+		if (result) {
+			callbackFn("1");
+		} else {
+			callbackFn("2");
+		}
+	} else {
+		const HS = HtmlServer;
+		const request = new HttpRequestBuilder("tablet/choice");
+		request.addParam("title", title);
+		request.addParam("question", question);
+		request.addParam("button1", option1);
+		if (option2 != null) {
+			request.addParam("button2", option2);
+		}
+		const onDialogPresented = function() {
+			DM.choiceCallback = callbackFn;
+		};
+		const onDialogFail = function() {
+			DM.dialogVisible = false;
+			if (callbackErr != null) {
+				callbackErr();
+			}
+		};
+		HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);
+	}
+};
+
+/**
+ * Calls the callback with the result
+ * @param {boolean} [cancelled] - Whether the user closed the dialog without answering
+ * @param {boolean} [firstSelected] - Whether the user selected the first option
+ */
+DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
+	const DM = DialogManager;
+	DM.dialogVisible = false;
+	if (DM.choiceCallback != null) {
+		let resp;
+		if (cancelled) {
+			resp = "cancelled";
+		} else if (firstSelected) {
+			resp = "1";
+		} else {
+			resp = "2";
+		}
+		DM.choiceCallback(resp);
+	}
+	DM.choiceCallback = null;
+};
+
+/**
+ * Shows a prompt dialog that the user can enter text into
+ * @param {string} title - The text to show in the top of the dialog
+ * @param {string} question - The text to show in the body of the dialog
+ * @param {string} prefill - (possibly "") The text that should already be in the dialog
+ * @param {boolean} shouldPrefill - Whether the prefill text should be gray, uneditable hint text, or prefilled,
+ *                                  selected text
+ * @param {function} [callbackFn] - type (boolean, string) -> (), Called with the user's response
+ * @param {function} [callbackErr] - type () -> (), Called if showing the dialog causes an error
+ */
+DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefill, callbackFn, callbackErr) {
+	const DM = DialogManager;
+	if (DM.dialogVisible) {
+		// Dialog is already visible so we throw an error.
+		if (callbackErr != null) callbackErr();
+		return;
+	}
+	TouchReceiver.touchInterrupt();
+	DM.dialogVisible = true;
+	if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
+		const newText = prompt(question);
+		DM.dialogVisible = false;
+		callbackFn(newText == null, newText);
+	} else {
+		const HS = HtmlServer;
+		const request = new HttpRequestBuilder("tablet/dialog");
+		request.addParam("title", title);
+		request.addParam("question", question);
+		if (shouldPrefill) {
+			request.addParam("prefill", prefill);
+		} else {
+			request.addParam("placeholder", prefill);
+		}
+		request.addParam("selectAll", "true");
+		const onDialogPresented = function(result) {
+			DM.promptCallback = callbackFn;
+		};
+		const onDialogFail = function() {
+			DM.dialogVisible = false;
+			if (callbackErr != null) {
+				callbackErr();
+			}
+		};
+		HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogPresented);
+	}
+};
+
+/**
+ * Calls the callback for prompt dialogs with the result
+ * @param {boolean} cancelled - Whether the closed the dialog without responding
+ * @param {string} [response] - The user's response to the prompt
+ */
+DialogManager.promptDialogResponded = function(cancelled, response) {
+	const DM = DialogManager;
+	DM.dialogVisible = false;
+	DM.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
+	if (DM.promptCallback != null) {
+		DM.promptCallback(cancelled, response);
+	}
+	DM.promptCallback = null;
+};
+
+/**
+ * Shows a dialog with a single button to alert the user of something
+ * @param {string} title - The text at the top of the dialog
+ * @param {string} message - The text in the body of the dialog
+ * @param {string} button - The text on the dismiss button
+ * @param {function} [callbackFn] - type () -> (), called when the dialog is dismissed
+ * @param {function} [callbackErr] - type () -> (), called if displaying the dialog fails
+ */
+DialogManager.showAlertDialog = function(title, message, button, callbackFn, callbackErr) {
+	if (DebugOptions.shouldUseJSDialogs()) {
+		alert(message);
+		if (callbackFn != null) callbackFn();
+		return;
+	}
+	DialogManager.showChoiceDialog(title, message, button, null, true, callbackFn, callbackErr);
+};
+/**
+ * The CallBackManager is a static classes that allows the backend to initiate JS actions.  All string parameters
+ * sent through callbacks must be percent encoded for safely, as the backend run these methods using string
+ * concatenation.  They all return a boolean indicating if the callback ran without error.  A result of true means
+ * everything worked, while false indicates the request was bad, unimplemented, or encountered an error.
  */
 function CallbackManager(){
 
 }
+
 CallbackManager.sounds = {};
+/**
+ * Called when recording stops unexpectedly
+ * @return {boolean}
+ */
 CallbackManager.sounds.recordingEnded = function(){
 	RecordingManager.interruptRecording();
-	return false;
+	return true;
 };
+/**
+ * Called when permission to record is granted by the user
+ * @return {boolean}
+ */
 CallbackManager.sounds.permissionGranted = function(){
 	RecordingManager.permissionGranted();
 	return true;
 };
+/**
+ * Called to notify the frontend that the list of recordings has changed
+ * @returns {boolean}
+ */
+CallbackManager.sounds.recordingsChanged = function(){
+	Sound.loadSounds(true);
+	RecordingDialog.recordingsChanged();
+	return true;
+};
+
 CallbackManager.data = {};
-CallbackManager.data.open = function(fileName, data, named) {
+/**
+ * Tells the frontend to open a file with the specified name and data
+ * @param {string} fileName - The percent encoded name of the file
+ * @param {string} data - The percent encoded content of the file
+ * @return {boolean}
+ */
+CallbackManager.data.open = function(fileName, data) {
 	fileName = HtmlServer.decodeHtml(fileName);
 	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data, named);
+	SaveManager.backendOpen(fileName, data);
 	return true;
 };
-CallbackManager.data.open = DebugOptions.safeFunc(CallbackManager.data.open);
-CallbackManager.data.setName = function(fileName, named){
+/**
+ * Sets the name of the currently open file (when there is a rename request, for example)
+ * @param {string} fileName - The percent encoded new name of the file
+ * @return {boolean}
+ */
+CallbackManager.data.setName = function(fileName){
 	fileName = HtmlServer.decodeHtml(fileName);
-	SaveManager.backendSetName(fileName, named);
+	SaveManager.backendSetName(fileName);
 	return true;
 };
+/**
+ * Closes the current file and opens the blank file
+ * @return {boolean}
+ */
 CallbackManager.data.close = function(){
 	SaveManager.backendClose();
 	return true;
 };
+/**
+ * Tells the frontend to lock the UI and show Loading... until the file loads (or 1 sec passes)
+ * @return {boolean}
+ */
+CallbackManager.data.markLoading = function(){
+	SaveManager.backendMarkLoading();
+	return true;
+};
+/**
+ * Tells the frontend to reload the OpenDialog if it is open because the local files have changed
+ * @return {boolean}
+ */
 CallbackManager.data.filesChanged = function(){
-	if(OpenDialog.currentDialog != null){
-		OpenDialog.currentDialog.reloadDialog();
-	}
-};
-/* CallbackManager.data.import = function(fileName){
-	SaveManager.import(fileName);
+	OpenDialog.filesChanged();
 	return true;
 };
-CallbackManager.data.openData = function(fileName, data){
-	SaveManager.openData(fileName, data);
+
+CallbackManager.cloud = {};
+/**
+ * Tells the frontend to reload the OpenCloudDialog if it is open because the cloud files have changed
+ * @param {string} newFiles - A percent encoded JSON object containing the new list of files
+ * @return {boolean}
+ */
+CallbackManager.cloud.filesChanged = function(newFiles){
+	newFiles = HtmlServer.decodeHtml(newFiles);
+	OpenCloudDialog.filesChanged(newFiles);
 	return true;
-}; */
+};
+/**
+ * Tells the frontend that a cloud file have finished downloading
+ * @param filename - The percent encoded file that has finished downloading
+ * @return {boolean}
+ */
+CallbackManager.cloud.downloadComplete = function(filename) {
+	filename = HtmlServer.decodeHtml(filename);
+	OpenDialog.filesChanged();
+	return true;
+};
+/**
+ * Tells the frontend that the user has just signed in, so the OpenDialog needs to be reloaded if open
+ * @return {boolean}
+ */
+CallbackManager.cloud.signIn = function(){
+	OpenDialog.filesChanged();
+	OpenCloudDialog.filesChanged();
+	return true;
+};
+
 CallbackManager.dialog = {};
+/**
+ * Tells the frontend that the user has just closed a prompt dialog
+ * @param {boolean} cancelled - Whether the dialog was cancelled or closed without being answered
+ * @param {string} [response] - The percent encoded string containing the user's response (or null/undefined if N/A)
+ * @return {boolean}
+ */
 CallbackManager.dialog.promptResponded = function(cancelled, response){
-	return false;
+	if(response != null) {
+		response = HtmlServer.decodeHtml(response);
+	}
+	DialogManager.promptDialogResponded(cancelled, response);
+	return true;
 };
+/**
+ * Tells the frontend that the user has just closed a choice dialog or alert dialog
+ * @param {boolean} cancelled - Whether the dialog was closed without being answered
+ * @param {boolean} firstSelected - Whether the first option was selected
+ * @return {boolean}
+ */
 CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	return false;
+	DialogManager.choiceDialogResponded(cancelled, firstSelected);
+	return true;
 };
-CallbackManager.dialog.alertResponded = function(){
-	return false;
-};
+
 CallbackManager.robot = {};
+/**
+ * Tells the frontend whether the specified robot is in good communication with the backend over bluetooth
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {boolean} isConnected - Whether the backend is able to communicate with the robot
+ * @return {boolean}
+ */
 CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	robotId = HtmlServer.decodeHtml(robotId);
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
-	CodeManager.updateConnectionStatus();
 	return true;
 };
-CallbackManager.robot.discovered = function(robotList){
+/**
+ * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {string} oldFirmware - The percent encoded version of firmware that was on the robot
+ * @param {string} minFirmware - The percent encoded minimum version of firmware the backend requires
+ */
+CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
+	minFirmware = HtmlServer.decodeHtml(minFirmware);
+	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+};
+/**
+ * Tells the frontend that the status of a robot's firmware
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {string} status - The percent encoded string "upToDate", "old", or "incompatible"
+ * @return {boolean}
+ */
+CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
+	robotId = HtmlServer.decodeHtml(robotId);
+	status = HtmlServer.decodeHtml(status);
+	const statuses = Device.firmwareStatuses;
+	let firmwareStatus;
+	if(status === "upToDate") {
+		firmwareStatus = statuses.upToDate;
+	} else if(status === "old") {
+		firmwareStatus = statuses.old;
+	} else if(status === "incompatible") {
+		firmwareStatus = statuses.incompatible;
+	} else {
+		return false;
+	}
+	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
 	return true;
 };
+/**
+ * Tells the frontend that a device has just been discovered
+ * @param {string} robotTypeId - The percent encoded type of robot being scanned for
+ * @param {string} robotList - A percent encoded JSON array of discovered devices
+ * @return {boolean}
+ */
+CallbackManager.robot.discovered = function(robotTypeId, robotList){
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	robotList = HtmlServer.decodeHtml(robotList);
+	DeviceManager.backendDiscovered(robotTypeId, robotList);
+	return true;
+};
+/**
+ * Tells the frontend that the discover timed out so the frontend has a chance to start the discover again.
+ * @param {string} robotTypeId - The percent encoded type of robot being scanned for
+ * @return {boolean}
+ */
+CallbackManager.robot.discoverTimeOut = function(robotTypeId) {
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	DeviceManager.possiblyRescan(robotTypeId);
+	return true;
+};
+/**
+ * Tells the frontend that the backend has stopped scanning for devices. The frontend might start the scan again.
+ * @param {string} robotTypeId - The percent encoded type of robot being scanned for
+ * @return {boolean}
+ */
+CallbackManager.robot.stopDiscover = function(robotTypeId) {
+	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+	DeviceManager.possiblyRescan(robotTypeId);
+	return true;
+};
+
 CallbackManager.tablet = {};
+/**
+ * Tells the frontend which sensors the backend supports
+ * @param {string} sensorList - A non percent encoded, return separated list of supported sensors
+ * @return {boolean}
+ */
 CallbackManager.tablet.availableSensors = function(sensorList){
 	TabletSensors.updateAvailable(sensorList);
+	return true;
 };
+/**
+ * Tells the frontend that the backend supports a specific sensor
+ * @param {string} sensor - A non percent encoded string representing the supported sensor
+ * @return {boolean} - Whether the sensor string was valid
+ */
 CallbackManager.tablet.addSensor = function(sensor){
 	return TabletSensors.addSensor(sensor);
 };
+/**
+ * Tells the frontend that the backend does not support a specific sensor
+ * @param {string} sensor - A non percent encoded string representing the unsupported sensor
+ * @return {boolean} - Whether the sensor string was valid
+ */
 CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };
+
+/**
+ * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
+ * each other easily.  This wasn't my idea and I will take no responsibility for this function's existence.
+ * @param {string} request - The percent encoded string representing request the backend wants the frontend to make
+ */
 CallbackManager.echo = function(request){
+	// decode the request
+	request = HtmlServer.decodeHtml(request);
+	/* Send it back.  Hopefully it has all its parameters percent encoded already.  That means the backend needs
+	 * to percent encode each parameter individually, and then percent encode the entire string again to pass it
+	 * to this function. */
 	HtmlServer.sendRequestWithCallback(request);
 };
-function XmlWriter(){
+
+/**
+ * Receives the backend's response to a native call
+ * @param {string} id - The non percent encoded id of the request
+ * @param {string} status - The non percent encoded status code
+ * @param {string} body - The percent encoded response from the backend
+ */
+CallbackManager.httpResponse = function(id, status, body) {
+	if (body != null) {
+		body = HtmlServer.decodeHtml(body);
+	}
+	HtmlServer.responseFromIosCall(id, status, body);
+};
+/**
+ * Static class that helps parse and write XML files
+ */
+function XmlWriter() {
 
 }
-XmlWriter.setAttribute=function(element,name,value){
-	name=XmlWriter.escape(name);
-	value=XmlWriter.escape(value);
-	element.setAttribute(name,value);
-};
-XmlWriter.createElement=function(xmlDoc,tagName){
-	tagName=XmlWriter.escape(tagName);
-	return xmlDoc.createElement(tagName);
-};
-XmlWriter.createTextNode=function(xmlDoc,data){
-	data=XmlWriter.escape(data);
-	return xmlDoc.createTextNode(data);
-};
-XmlWriter.newDoc=function(tagName){
-	tagName=XmlWriter.escape(tagName);
-	var xmlString = "<"+tagName+"></"+tagName+">";
-	var parser = new DOMParser();
+
+/**
+ * Creates ax XML document with the the specified tag
+ * @param {string} tagName - The root tag
+ * @return {Document} - An XML document to write to
+ */
+XmlWriter.newDoc = function(tagName) {
+	tagName = XmlWriter.escape(tagName);
+	const xmlString = "<" + tagName + "></" + tagName + ">";
+	const parser = new DOMParser();
 	return parser.parseFromString(xmlString, "text/xml");
 };
-XmlWriter.escape=function(string){
-	string=string+"";
-	string=string.replace(/&/g, '&amp;');
-	string=string.replace(/</g, '&lt;');
-	string=string.replace(/>/g, '&gt;');
-	string=string.replace(/"/g, '&quot;');
-	string=string.replace(/'/g, '&apos;');
-	string=string.replace(/ /g, '&#32;');
+
+/**
+ * Creates a tag in the XML document.  It doesn't have a parent yet.  appendChild is used to do that.
+ * @param {Document} xmlDoc - The document to create the tag in
+ * @param {string} tagName - The name of the tag to create
+ * @return {Element} - The resulting element
+ */
+XmlWriter.createElement = function(xmlDoc, tagName) {
+	tagName = XmlWriter.escape(tagName);
+	return xmlDoc.createElement(tagName);
+};
+
+/**
+ * Sets an attribute of an element to a value.  Automatically escapes the value before doing so.
+ * @param {Element} element
+ * @param {string} name - The name of the attribute
+ * @param {string} value - The value to set
+ */
+XmlWriter.setAttribute = function(element, name, value) {
+	name = XmlWriter.escape(name);
+	value = XmlWriter.escape(value);
+	element.setAttribute(name, value);
+};
+
+/**
+ * Creates a text node that contains data and can be added as a child of another tag
+ * @param {Document} xmlDoc - The document to create the nod in
+ * @param {string} data - The text to store; will be escaped
+ * @return {Text}
+ */
+XmlWriter.createTextNode = function(xmlDoc, data) {
+	data = XmlWriter.escape(data);
+	return xmlDoc.createTextNode(data);
+};
+
+/**
+ * Escapes text to be stored in text nodes and attributes.  Some automatic escaping is applied by the browser, but
+ * this is just to be safe.  You may notice that some of these characters end up double escaped in the file.
+ * @param {string} string - The string to escape
+ * @return {string}
+ */
+XmlWriter.escape = function(string) {
+	string = string + "";
+	string = string.replace(/&/g, '&amp;');
+	string = string.replace(/</g, '&lt;');
+	string = string.replace(/>/g, '&gt;');
+	string = string.replace(/"/g, '&quot;');
+	string = string.replace(/'/g, '&apos;');
+	string = string.replace(/ /g, '&#32;');
 	return string;
 };
-XmlWriter.unEscape=function(string) {
+
+/**
+ * Unescapes the text in the XML file
+ * @param {string} string
+ * @return {string}
+ */
+XmlWriter.unEscape = function(string) {
 	string = string + "";
-	string=string.replace(/&#32;/g, ' ');
+	string = string.replace(/&#32;/g, ' ');
 	string = string.replace(/&apos;/g, "'");
 	string = string.replace(/&quot;/g, '"');
 	string = string.replace(/&gt;/g, '>');
@@ -11309,389 +17265,808 @@ XmlWriter.unEscape=function(string) {
 	string = string.replace(/&amp;/g, '&');
 	return string;
 };
-XmlWriter.downloadDoc=function(xmlDoc,name){
-  window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
-	//var blob = new Blob([XmlWriter.docToText(xmlDoc)], {type: "text/plain;charset=utf-8"});
-	//saveAs(blob, name+".xml");
-};
-XmlWriter.openDocInTab=function(xmlDoc){
+
+/**
+ * Opens the contents of an XML file in a new window.  Used for debugging
+ * @param {Document} xmlDoc - The document to open
+ */
+XmlWriter.downloadDoc = function(xmlDoc) {
 	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
 };
-XmlWriter.openDoc=function(xmlString){
-	var parser = new DOMParser();
+
+/**
+ * Creates a Document from an XML string
+ * @param {string} xmlString
+ * @return {Document}
+ */
+XmlWriter.openDoc = function(xmlString) {
+	const parser = new DOMParser();
 	return parser.parseFromString(xmlString, "text/xml");
 };
-XmlWriter.findElement=function(xmlDoc,tagName){
-	tagName=XmlWriter.escape(tagName);
-	var results=xmlDoc.getElementsByTagName(tagName);
-	if(results.length==0){
+
+/**
+ * Finds a tag in the document with the specified name
+ * @param {Document} xmlDoc - The document to search
+ * @param {string} tagName - The name of the tag to search for
+ * @return {null|Node} - The node or null if no tag has that name
+ */
+XmlWriter.findElement = function(xmlDoc, tagName) {
+	tagName = XmlWriter.escape(tagName);
+	const results = xmlDoc.getElementsByTagName(tagName);
+	if (results.length === 0) {
 		return null;
 	}
 	return results[0];
 };
-XmlWriter.findSubElements=function(node,tagName){
-	if(node==null){
+
+/**
+ * Finds children of the provided node with the specified name.
+ * @param {Node} node
+ * @param {string} tagName - The tag to look for
+ * @return {Array<Node>} - All children with a matching name
+ */
+XmlWriter.findSubElements = function(node, tagName) {
+	if (node == null) {
 		return [];
 	}
-	var children=node.childNodes;
-	var results=[];
-	for(var i=0;i<children.length;i++){
-		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+	const children = node.childNodes;
+	const results = [];
+	for (let i = 0; i < children.length; i++) {
+		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
 			results.push(children[i]);
 		}
 	}
 	return results;
 };
-XmlWriter.findSubElement=function(node,tagName){
-	if(node==null){
+
+/**
+ * Finds any child of the provided tag with the specified name
+ * @param {Node} node - The node to examine
+ * @param {string} tagName - The name to find
+ * @return {Node|null}
+ */
+XmlWriter.findSubElement = function(node, tagName) {
+	if (node == null) {
 		return null;
 	}
-	var children=node.childNodes;
-	for(var i=0;i<children.length;i++){
-		if(children[i].nodeType==1&&children[i].nodeName==tagName){
+	const children = node.childNodes;
+	for (let i = 0; i < children.length; i++) {
+		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
 			return children[i];
 		}
 	}
 	return null;
 };
-XmlWriter.getAttribute=function(element,name,defaultVal,isNum){
-	if(isNum==null){
-		isNum=false;
+
+/**
+ * Reads an attribute of a node
+ * @param {Node} element
+ * @param {string} name - The name of the attribute
+ * @param {*} [defaultVal] - The value to return if the attribute isn't found
+ * @param {boolean} [isNum=false] - Whether the result should be converted to a number
+ * @return {*}
+ */
+XmlWriter.getAttribute = function(element, name, defaultVal, isNum) {
+	if (isNum == null) {
+		isNum = false;
 	}
-	if(defaultVal==null){
-		defaultVal=null;
+	if (defaultVal == null) {
+		defaultVal = null;
 	}
-	var val=element.getAttribute(XmlWriter.escape(name));
-	if(val==null){
+	let val = element.getAttribute(XmlWriter.escape(name));
+	if (val == null) {
 		return defaultVal;
 	}
-	val=XmlWriter.unEscape(val);
-	if(isNum){
-		var numData=(new StringData(val)).asNum();
-		if(numData.isValid){
+	val = XmlWriter.unEscape(val);
+	if (isNum) {
+		const numData = (new StringData(val)).asNum();
+		if (numData.isValid) {
 			return numData.getValue();
 		}
 		return defaultVal;
 	}
 	return val;
 };
-XmlWriter.getTextNode=function(element,name,defaultVal,isNum){
-	if(isNum==null){
-		isNum=false;
+
+/**
+ * Read a text node from a element
+ * @param {Node} element
+ * @param {string} name - The name of the text node
+ * @param {string|null|number} [defaultVal=null] - The value to return if there is no text node
+ * @param {boolean} isNum - Whether the result should be converted to a number
+ * @return {string|null|number}
+ */
+XmlWriter.getTextNode = function(element, name, defaultVal, isNum) {
+	if (isNum == null) {
+		isNum = false;
 	}
-	if(defaultVal==null){
-		defaultVal=null;
+	if (defaultVal == null) {
+		defaultVal = null;
 	}
-	var innerNode=XmlWriter.findSubElement(element,name);
-	if(innerNode==null){
+	const innerNode = XmlWriter.findSubElement(element, name);
+	if (innerNode == null) {
 		return defaultVal;
 	}
-	var childNodes=innerNode.childNodes;
-	if(childNodes.length>=1&&childNodes[0].nodeType==3){
-		var val = childNodes[0].nodeValue;
-		if(val==null){
+	const childNodes = innerNode.childNodes;
+	if (childNodes.length >= 1 && childNodes[0].nodeType === 3) {
+		let val = childNodes[0].nodeValue;
+		if (val == null) {
 			return defaultVal;
 		}
-		val=XmlWriter.unEscape(val);
-		if(isNum){
-			var numData=(new StringData(val)).asNum();
-			if(numData.isValid){
+		val = XmlWriter.unEscape(val);
+		if (isNum) {
+			const numData = (new StringData(val)).asNum();
+			if (numData.isValid) {
 				return numData.getValue();
 			}
 			return defaultVal;
 		}
 		return val;
-	}
-	else if(childNodes.length === 0){
+	} else if (childNodes.length === 0) {
 		return "";
 	}
 	return defaultVal;
 };
-XmlWriter.docToText=function(xmlDoc){
-	var serializer = new XMLSerializer();
+
+/**
+ * Convert an XML document into text
+ * @param {Document} xmlDoc
+ * @return {string}
+ */
+XmlWriter.docToText = function(xmlDoc) {
+	const serializer = new XMLSerializer();
 	return serializer.serializeToString(xmlDoc);
 };
-XmlWriter.findNodeByKey = function(nodes, key){
-	for(var i = 0; i < nodes.length; i++){
-		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
-		if(nodeKey == key){
+
+/**
+ * Finds a Node from a list of nodes that has an attribute "key" that matches the provided key.  Used for finding
+ * Slot nodes with certain keys
+ * @param {Array<Node>} nodes
+ * @param {string} key
+ * @return {null|Node}
+ */
+XmlWriter.findNodeByKey = function(nodes, key) {
+	for (let i = 0; i < nodes.length; i++) {
+		const nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+		if (nodeKey === key) {
 			return nodes[i];
 		}
 	}
 	return null;
 };
-function SaveManager(){
+/**
+ * Static class for file management.  Tracks the currently open file and deals with saving/opening files.
+ */
+function SaveManager() {
+	// The name of the name, or null when the blank canvas is open
 	SaveManager.fileName = null;
-	SaveManager.named = false;
+	// The file is auto saved any time it is edited and one every few seconds
 	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
 	SaveManager.autoSaveTimer.start();
-	SaveManager.saving = false;
 }
-SaveManager.setConstants = function(){
+
+SaveManager.setConstants = function() {
 	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.autoSaveInterval = 1000 * 15;
+	SaveManager.autoSaveInterval = 1000 * 60;
+	SaveManager.newProgName = "New program";
+	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
-SaveManager.backendOpen = function(fileName, data, named) {
-	SaveManager.named = named;
+
+/**
+ * Called when the backend would like to open a file
+ * @param {string} fileName - The name of the file
+ * @param {string} data - The content of the file
+ * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
+ */
+SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
-	CodeManager.fileOpened();
+	OpenDialog.closeDialog();
+	GuiElements.unblockInteraction();
 };
+
+/**
+ * Reads the file contents from the XML
+ * @param {string} data - A string of XML data
+ * TODO: Provide a way for loading to fail if critical tags are missing rather than opening a blank document
+ */
 SaveManager.loadData = function(data) {
 	if (data.length > 0) {
 		if (data.charAt(0) === "%") {
+			// The data haas an extra layer of encoding that needs to be removed
 			data = decodeURIComponent(data);
 		}
 		const xmlDoc = XmlWriter.openDoc(data);
 		const project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
-			SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
+			// There's no project tag.  The data is seriously corrupt, so we just open an empty file
+			SaveManager.loadData(SaveManager.emptyProgData);
 		} else {
 			(DebugOptions.safeFunc(CodeManager.importXml))(project);
 		}
-	} else{
-		SaveManager.loadData("<project><tabs></tabs></project>"); //TODO: change this line
-		//TODO: fail file open
+	} else {
+		// There's no data at all, so open an empty file
+		SaveManager.loadData(SaveManager.emptyProgData);
 	}
 };
-SaveManager.backendSetName = function(fileName, named){
-	SaveManager.named = named;
+
+/**
+ * Changes the name of the open file to match the provided name
+ * @param {string} fileName
+ */
+SaveManager.backendSetName = function(fileName) {
 	SaveManager.fileName = fileName;
 	TitleBar.setText(fileName);
-	CodeManager.fileOpened();
-};
-SaveManager.backendClose = function(){
-	SaveManager.loadBlank();
+	CodeManager.markOpen();
 };
 
-SaveManager.loadBlank = function(){
-	SaveManager.fileName = null;
-	SaveManager.named = false;
-	SaveManager.loadData("<project><tabs></tabs></project>");
-	CodeManager.fileClosed();
+/**
+ * Clears the canvas and shows an Open Dialog
+ */
+SaveManager.backendClose = function() {
+	SaveManager.loadBlank();
+	OpenDialog.showDialog();
 };
-SaveManager.userNew = function(){
-	SaveManager.autoSave(function(){
-		const request = new HttpRequestBuilder("data/close");
-		HtmlServer.sendRequestWithCallback(request.toString(), function(){
-			SaveManager.loadBlank();
-		});
+
+/**
+ * Shows that a file is loading
+ */
+SaveManager.backendMarkLoading = function() {
+	OpenDialog.closeDialog();
+	CodeManager.markLoading("Loading...");
+};
+
+/**
+ * Loads a blank canvas
+ */
+SaveManager.loadBlank = function() {
+	SaveManager.fileName = null;
+	SaveManager.loadData(SaveManager.emptyProgData);
+};
+
+/**
+ * Closes the open file and notifies the backend
+ * @param {function} nextAction
+ */
+SaveManager.userClose = function(nextAction) {
+	SaveManager.loadBlank();
+	const request = new HttpRequestBuilder("data/close");
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+};
+
+/**
+ * Prompts the user for a name for the new file, creates it, and opens it (when the backend says it's loaded)
+ * @param {function} [nextAction]
+ */
+SaveManager.userNew = function(nextAction) {
+	SaveManager.promptNewFile("Enter file name", nextAction);
+};
+
+/**
+ * Prompts the user for the file to create. Finds a good default name and prefills the dialog with that.
+ * @param {string} message - The message to show in the body of the prompt
+ * @param {function} [nextAction]
+ */
+SaveManager.promptNewFile = function(message, nextAction) {
+	SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+		SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 	});
 };
-SaveManager.autoSave = function(nextAction){
-	if(SaveManager.fileName == null){
+
+/**
+ * Prompts the user for the name of the file to create. Prefills the dialog with the default name
+ * @param {string} message - The message to show in the body of the prompt
+ * @param {string} defaultName - The name to prefill
+ * @param {function} [nextAction]
+ */
+SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
+	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			SaveManager.sanitizeNew(response.trim(), nextAction);
+		}
+	});
+};
+
+/**
+ * Verifies with the backend that the proposed name is valid for a new file and creates it. Prompts user otherwise
+ * @param {string} proposedName - The name to check
+ * @param {function} [nextAction]
+ */
+SaveManager.sanitizeNew = function(proposedName, nextAction) {
+	if (proposedName === "") {
+		const message = "Name cannot be blank. Enter a file name.";
+		SaveManager.promptNewFile(message, nextAction);
+	} else {
+		GuiElements.alert("getting name");
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			GuiElements.alert("Got available name" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+			if (alreadySanitized && alreadyAvailable) {
+				SaveManager.newSoft(availableName, nextAction);
+			} else if (!alreadySanitized) {
+				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+				let message = "The following characters cannot be included in file names: \n";
+				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+			} else if (!alreadyAvailable) {
+				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+			}
+		});
+	}
+};
+
+/**
+ * Creates a new file with the given name, clears the canvas, and shows "Saving..." until the document is opened.
+ * @param {string} filename - The already validated name to save the file as
+ * @param {function} [nextAction]
+ */
+SaveManager.newSoft = function(filename, nextAction) {
+	const request = new HttpRequestBuilder("data/new");
+	request.addParam("filename", filename);
+	SaveManager.loadBlank();
+	CodeManager.markLoading("Saving...");
+	// If the saving fails, we show the open dialog so the user can try again.
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
+};
+
+/**
+ * Sends the current file's data to the backend to save
+ * @param {function} [nextAction] - The function to call once the data is successfully sent
+ */
+SaveManager.autoSave = function(nextAction) {
+	if (SaveManager.fileName == null) {
 		if (nextAction != null) nextAction();
 		return;
 	}
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	const request = new HttpRequestBuilder("data/autoSave");
-	HtmlServer.sendRequestWithCallback(request.toString(),nextAction, null,true,xmlDocText);
+	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
 };
-SaveManager.userOpenFile = function(fileName){
-	if(SaveManager.fileName === fileName) {return;}
+
+/**
+ * Tells the backend to open the specified file.  The backend will call CallbackManager.data.open with the data.
+ * @param {string} fileName - The file to open
+ */
+SaveManager.userOpenFile = function(fileName) {
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");
-	HtmlServer.sendRequestWithCallback(request.toString(),function(){
+	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
-	}, function(){
+	}, function() {
 		CodeManager.cancelLoading();
 	});
 };
-SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction){
+
+/**
+ * Prompts the user for a name for the file
+ * @param {boolean} isRecording - Whether the file is actually a recording (this reduces redundancy since the dialogs
+ *                                are the same
+ * @param {string} oldFilename - The name of the file to rename
+ * @param {function} nextAction - The function to call after the rename is done and succeeds
+ */
+SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
+	// We use the default message with the title "Name"
 	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
 };
-SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction){
+
+/**
+ * Prompts the user to rename a file, with the specified title and message for the dialog
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title - The title of the prompt dialog
+ * @param {string|null} [message] - The message for the dialog
+ * @param {function} nextAction
+ */
+SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction) {
+	// We prefill the old filename
 	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
 };
-SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction){
-	if(message == null){
+
+/**
+ * Prompts the user to rename a file, with the specified suggested name prefilled.
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title
+ * @param {string|null} [message="Enter a file name"]
+ * @param {string} defaultName - The name to prefill into the dialog
+ * @param {function} nextAction
+ */
+SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
+	if (message == null) {
 		message = "Enter a file name";
 	}
-	HtmlServer.showDialog(title,message,defaultName,true,function(cancelled,response){
-		if(!cancelled){
+	// We ask for a new name
+	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
+			// We see if that name is ok
 			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
 		}
 	});
 };
-// Checks if a name is legitimate and renames the current file to that name if it is.
-SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction){
-	if(proposedName === ""){
-		SaveManager.promptRename(isRecording, oldFilename, title, "Name cannot be blank. Enter a file name.", nextAction);
-	} else if(proposedName === oldFilename) {
-		if(nextAction != null) nextAction();
+
+/**
+ * Checks if a name is legitimate and renames the current file to that name if it is.
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title
+ * @param {string} proposedName - The name to check
+ * @param {function} nextAction
+ */
+SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
+	if (proposedName === "") {
+		const message = "Name cannot be blank. Enter a file name.";
+		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
+	} else if (proposedName === oldFilename) {
+		if (!isRecording && SaveManager.fileName === oldFilename) {
+			const request = new HttpRequestBuilder("data/markAsNamed");
+			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+		} else {
+			if (nextAction != null) nextAction();
+		}
 	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
-			if(alreadySanitized && alreadyAvailable){
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
-			} else if(!alreadySanitized){
+			} else if (!alreadySanitized) {
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
-			} else if(!alreadyAvailable){
+			} else if (!alreadyAvailable) {
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
 	}
 };
-SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction){
+
+/**
+ * Tries to rename the file, does nothing if it fails
+ * @param {boolean} isRecording
+ * @param {string} oldFilename
+ * @param {string} title - The title of the dialog to use if the renaming fails
+ * @param {string} newName
+ * @param {function} nextAction
+ */
+SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
 	const request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
 	let callback = nextAction;
-	if(isRecording){
-		callback = function(){
+	if (isRecording) {
+		callback = function() {
 			CodeManager.renameRecording(oldFilename, newName);
-			if(nextAction != null) nextAction();
+			if (nextAction != null) nextAction();
 		}
 	}
 	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
-SaveManager.userDeleteFile=function(isRecording, filename, nextAction){
+
+/**
+ * Prompts the user to delete a file
+ * @param {boolean} isRecording - Whether the file is actually a recording (to reduce redundant code)
+ * @param {string} filename - The name of the file to delete
+ * @param {function} nextAction - The action to perform if the file is deleted successfully
+ */
+SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	HtmlServer.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function (response) {
-		if(response === "2") {
+	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
+		if (response === "2") {
 			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);
 };
-SaveManager.delete = function(isRecording, filename, nextAction){
+
+/**
+ * Tells the backend to delete a file
+ * @param {boolean} isRecording
+ * @param {string} filename
+ * @param {function} nextAction
+ */
+SaveManager.delete = function(isRecording, filename, nextAction) {
 	const request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+	let callback = nextAction;
+	if (isRecording) {
+		callback = function() {
+			CodeManager.deleteRecording(filename);
+			if (nextAction != null) nextAction();
+		}
+	}
+	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
-SaveManager.getAvailableName = function(filename, callbackFn, isRecording){
-	if(isRecording == null){
+
+/**
+ * Checks if a name is a valid name for a file (meaning it is unused and has no illegal characters)
+ * @param {string} filename - The name to check
+ * @param {function} callbackFn - type (string, boolean, boolean), a function to call with the results
+ * @param {boolean} [isRecording=false] - Whether the name should be compared to recordings instead of files
+ */
+SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
+	if (isRecording == null) {
 		isRecording = false;
 	}
 	DebugOptions.validateNonNull(callbackFn);
+	// Ask the backend if the name is ok
 	const request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
+	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
 		let json = {};
 		try {
+			// Response is a JSON object
 			json = JSON.parse(response);
-		} catch(e){
+		} catch (e) {
 
 		}
-		if(json.availableName != null){
-			callbackFn(json.availableName, json.alreadySanitized == true, json.alreadyAvailable == true);
+		if (json.availableName != null) {
+			/* 3 fields of response:
+			 * json.availableName - A name that is close to the filename and is valid (is the filename if filename is ok
+			 * json.alreadySanitized - boolean indicating if filename was already sanitized (had no illegal characters)
+			 * json.alreadyAvailable - boolean indicating if filename is a unique name
+			 * the availableName == filename iff alreadySanitized and alreadyAvailable */
+			callbackFn(json.availableName, json.alreadySanitized === true, json.alreadyAvailable === true);
 		}
 	});
 };
-SaveManager.userDuplicateFile = function(filename, nextAction){
+
+/**
+ * Prompts the user for a name to duplicate a file
+ * @param {string} filename - The name of the file to duplicate
+ * @param {function} nextAction - The name of the function to call after successful duplication
+ */
+SaveManager.userDuplicateFile = function(filename, nextAction) {
 	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
 };
-SaveManager.promptDuplicate = function(message, filename, nextAction){
-	SaveManager.getAvailableName(filename, function(availableName){
+
+/**
+ * Prompts the user to duplicate a file, using the specified message in the dialog
+ * @param {string} message - The messsage in the duplicate dialog
+ * @param {string} filename
+ * @param {function} [nextAction]
+ */
+SaveManager.promptDuplicate = function(message, filename, nextAction) {
+	SaveManager.getAvailableName(filename, function(availableName) {
 		SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 	});
 };
-SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction){
-	HtmlServer.showDialog("Duplicate", message, defaultName, true, function(cancelled, response){
-		if(!cancelled){
+
+/**
+ * Prompts the user to duplicate a file with the specified name prefilled
+ * @param {string} message
+ * @param {string} filename
+ * @param {string} defaultName - The name to prefill
+ * @param {function} [nextAction]
+ */
+SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
+	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response) {
+		if (!cancelled) {
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
 	});
 };
-SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction){
-	if(proposedName === ""){
+
+/**
+ * Checks if the provided name is valid and duplicates if it is. Otherwise, prompts for a valid name
+ * @param {string} proposedName - The name to check
+ * @param {string} filename
+ * @param {function} [nextAction]
+ */
+SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
+	if (proposedName === "") {
 		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
 	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable){
-			if(alreadySanitized && alreadyAvailable){
+		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
-			} else if(!alreadySanitized){
+			} else if (!alreadySanitized) {
 				let message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
-			} else if(!alreadyAvailable){
+			} else if (!alreadyAvailable) {
 				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
 	}
 };
-SaveManager.duplicate = function(filename, newName, nextAction){
+
+/**
+ * Duplicates the file with the specified name
+ * @param {string} filename
+ * @param {string} newName
+ * @param {function} [nextAction]
+ */
+SaveManager.duplicate = function(filename, newName, nextAction) {
 	const request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
 	request.addParam("newFilename", newName);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
-SaveManager.userExportFile = function(filename){
-	SaveManager.exportFile(filename);
+
+/**
+ * Handles a request from the user to export a file
+ * @param {string} filename - The name of the file to export
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ */
+SaveManager.userExportFile = function(filename, x1, x2, y1, y2) {
+	SaveManager.exportFile(filename, x1, x2, y1, y2);
 };
-SaveManager.exportFile = function(filename){
+
+/**
+ * Tells the backend to show an export prompt for the file at the specified location
+ * @param {string} filename - The name of the file to export
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ */
+SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
 	const request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
+	if (x1 != null && x2 != null && y1 != null && y2 != null) {
+		request.addParam("tlx", x1);
+		request.addParam("tly", y1);
+		request.addParam("brx", x2);
+		request.addParam("bry", y2);
+	}
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
-SaveManager.saveAsNew = function(){
-	SaveManager.saving = true;
+
+/**
+ * Tells the backend to save the provided data as a new document.  The backend calls CallbackManager.data.setName
+ * when completed
+ */
+SaveManager.saveAsNew = function() {
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	CodeManager.markLoading("Saving...");
-	HtmlServer.sendRequestWithCallback(request.toString(), function(){
-		SaveManager.saving = false;
-	}, function(){
+	HtmlServer.sendRequestWithCallback(request.toString(), function() {
+
+	}, function() {
 		CodeManager.cancelLoading();
-		SaveManager.saving = false;
 	}, true, xmlDocText);
 };
-SaveManager.markEdited=function(){
+
+/**
+ * Called any time the document is edited.  Saves changes and creates a new document if no file is open
+ */
+SaveManager.markEdited = function() {
 	CodeManager.updateModified();
-	if(SaveManager.fileName == null && !SaveManager.saving){
-		SaveManager.saveAsNew();
-	}
-	if(SaveManager.fileName != null){
+	if (SaveManager.fileName != null) {
 		SaveManager.autoSave();
 	}
 };
-SaveManager.currentDoc = function(){ //Autosaves
-	if(SaveManager.fileName == null) return null;
-	var result = {};
+
+/**
+ * Deprecated function called by the backend to get the contents of the open document
+ * @return {object} - With fields for data and filename
+ */
+SaveManager.currentDoc = function() {
+	if (SaveManager.fileName == null) return null;
+	const result = {};
 	result.data = XmlWriter.docToText(CodeManager.createXml());
 	result.filename = SaveManager.fileName;
 	return result;
 };
-SaveManager.saveAndName = function(message, nextAction){
-	let title = "Enter name";
-	if(SaveManager.fileName == null){
+
+/**
+ * Saves the current file and prompts the user to name it if it isn't named
+ * @param {string} message - The message to use when prompting to name
+ * @param {function} [nextAction] - The function to call once the file is saved and named
+ */
+SaveManager.saveAndName = function(message, nextAction) {
+	if (SaveManager.fileName == null) {
 		if (nextAction != null) nextAction();
 		return;
 	}
-	SaveManager.autoSave(function () {
-		if (SaveManager.named) {
-			if (nextAction != null) nextAction();
-		}
-		else {
-			SaveManager.promptRename(false, SaveManager.fileName, title, message, function () {
-				SaveManager.named = true;
-				if (nextAction != null) nextAction();
-			});
-		}
-	});
+	SaveManager.autoSave(nextAction);
 };
-SaveManager.userOpenDialog = function(){
-	const message = "Please name this file";
-	SaveManager.saveAndName(message, OpenDialog.showDialog, OpenDialog.showDialog);
-};
-SaveManager.addTypeToRequest = function(request, isRecording){
+
+/**
+ * Adds a type parameter to the request indicating whether the item is a file or recording
+ * @param {HttpRequestBuilder} request - The request to modify
+ * @param {boolean} isRecording - Whether the item is a recording instead of a file
+ */
+SaveManager.addTypeToRequest = function(request, isRecording) {
 	request.addParam("type", isRecording ? "recording" : "file");
 };
-SaveManager.fileIsOpen = function(){
+
+/**
+ * Returns whether a file is open
+ * @return {boolean}
+ */
+SaveManager.fileIsOpen = function() {
 	return SaveManager.fileName != null;
+};
+/**
+ * The UndoManager is a static class that keeps a stack (as in the data structure) or recently deleted BlockStacks
+ * so they can be undeleted.  It can be assigned an undo button, which it will then enable/disable as necessary.
+ * The UndoManager stores the deleted BlockStacks as XML nodes.
+ */
+function UndoManager() {
+	const UM = UndoManager;
+	UM.undoButton = null;
+	UM.undoStack = [];
+	UM.undoLimit = 20;
+}
+
+/**
+ * Assigns a button to the UndoManager, which automatically enables/disables the button and adds the appropriate
+ * callback functions
+ * @param {Button} button
+ */
+UndoManager.setUndoButton = function(button) {
+	const UM = UndoManager;
+	UM.undoButton = button;
+	UM.undoButton.setCallbackFunction(UndoManager.undoDelete, true);
+	UM.updateButtonEnabled();
+};
+
+/**
+ * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger than the limit, the last item it removed.
+ * @param stack
+ */
+UndoManager.deleteStack = function(stack) {
+	const UM = UndoManager;
+	const doc = XmlWriter.newDoc("undoData");
+	const stackData = stack.createXml(doc);
+	stack.remove();
+	UM.undoStack.push(stackData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+};
+
+/**
+ * Pops an item from the stack and rebuilds it, placing it in the corner of the canvas
+ */
+UndoManager.undoDelete = function(){
+	const UM = UndoManager;
+	if(UM.undoStack.length === 0) return;
+	let success = false;
+	while (!success) {
+		const stackData = UM.undoStack.pop();
+		success = success || TabManager.undoDelete(stackData);
+	}
+	UM.updateButtonEnabled();
+	SaveManager.markEdited();
+};
+
+/**
+ * Updates the enabled/disabled state of the undo button based in if the stack is empty
+ */
+UndoManager.updateButtonEnabled = function(){
+	const UM = UndoManager;
+	if(UM.undoButton == null) return;
+	if(UM.undoStack.length > 0) {
+		UM.undoButton.enable();
+	} else {
+		UM.undoButton.disable();
+	}
+};
+
+/**
+ * Deletes the undo stack (for when a program is closed/opened)
+ */
+UndoManager.clearUndos = function() {
+	const UM = UndoManager;
+	UM.undoStack = [];
+	UM.updateButtonEnabled();
 };
 
 /**
  * Block is an abstract class that represents an executable block.
  * Blocks are nearly always contained within BlockStacks or DisplayStacks.
- * Blocks are initially created outside a BlockStacks, but are immediately moved into one.  
+ * Blocks are initially created outside a BlockStacks, but are immediately moved into one.
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * TODO: remove the type parameter and use blockShape and instead.
@@ -11701,21 +18076,21 @@ SaveManager.fileIsOpen = function(){
  * @param {number} y - The y coord of the Block.
  * @param {string} category - The Block's category in string form.
  */
-function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
+function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
 
 	this.x = x; //Store coords
 	this.y = y;
 	this.type = type; //Fix! remove this property
-	this.bottomOpen=(type===0 || type === 4 || type === 5 || type === 6); //Can Blocks be attached to the bottom of this Block?
-	this.topOpen=(type===0 || type === 5 || type === 6); //Can Blocks be attached to the top of this Block?
-	this.returnsValue=(returnType!==Block.returnTypes.none); //Does this Block attack to Slots and return a value?
+	this.bottomOpen = (type === 0 || type === 4 || type === 5 || type === 6); //Can Blocks be attached to the bottom of this Block?
+	this.topOpen = (type === 0 || type === 5 || type === 6); //Can Blocks be attached to the top of this Block?
+	this.returnsValue = (returnType !== Block.returnTypes.none); //Does this Block attack to Slots and return a value?
 	this.returnType = returnType; //What type of value does this Block return?
-	this.hasBlockSlot1=(type === 5 || type === 6); //Is this Block like an if block that has a special BlockSlot?
-	this.hasBlockSlot2=(type === 6); //Does it have two BlockSlots?
-	this.hasHat=(type === 4); //Is it a HatBlock?
+	this.hasBlockSlot1 = (type === 5 || type === 6); //Is this Block like an if block that has a special BlockSlot?
+	this.hasBlockSlot2 = (type === 6); //Does it have two BlockSlots?
+	this.hasHat = (type === 4); //Is it a HatBlock?
 
-	this.group = GuiElements.create.group(x,y); //Make a group to contain the part of this Block.
+	this.group = GuiElements.create.group(x, y); //Make a group to contain the part of this Block.
 	this.parent = null; //A Block's parent is the Block/Slot/BlockSlot that it is attached to.  Currently, it has none.
 	this.parts = []; //The parts of a Block include its LabelText, BlockIcons, and Slots.
 	/** @type {Slot[]} */
@@ -11729,21 +18104,21 @@ function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter,
 	this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
 	this.height = 0; //Will be set later when the Block's dimensions are updated.
 	this.width = 0;
-	this.runMem = function(){}; //serves as a place for the block to store info while running
-	if(this.bottomOpen){
+	this.runMem = function() {}; //serves as a place for the block to store info while running
+	if (this.bottomOpen) {
 		this.nextBlock = null; //Reference to the Block below this one.
 	}
-	if(this.returnsValue){
+	if (this.returnsValue) {
 		this.resultData = null; //Stores the Data to be passed on to the Slot containing this Block.
 	}
-	if(this.hasBlockSlot1){
+	if (this.hasBlockSlot1) {
 		this.topHeight = 0; //The height of just the top of the Block (where the LabelText and Slots are)
 		this.blockSlot1 = new BlockSlot(this);
 	}
-	if(this.hasBlockSlot2){
+	if (this.hasBlockSlot2) {
 		//The height of the middle part of a DoubleLoopBlock (where the LabelText "else" is on the if/else Block)
 		this.midHeight = 0;
-		this.midLabel = new LabelText(this,this.midLabelText); //The text to appear in the middle section (i.e. "else");
+		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
 	}
 }
@@ -11751,8 +18126,8 @@ function Block(type,returnType,x,y,category){ //Type: 0 = Command, 1 = Reporter,
 /**
  * Sets the possible values for Block.returnTypes.
  */
-Block.setConstants = function(){
-	Block.returnTypes = function(){};
+Block.setConstants = function() {
+	Block.returnTypes = function() {};
 	Block.returnTypes.none = 0; //A command Block always is Block.returnTypes.none.
 	Block.returnTypes.num = 1;
 	Block.returnTypes.string = 2;
@@ -11765,8 +18140,8 @@ Block.setConstants = function(){
  * @param {number} x
  * @returns {number}
  */
-Block.prototype.relToAbsX = function(x){
-	if(this.stack != null) {
+Block.prototype.relToAbsX = function(x) {
+	if (this.stack != null) {
 		return this.stack.relToAbsX(x + this.x);
 	}
 	return x + this.x;
@@ -11776,8 +18151,8 @@ Block.prototype.relToAbsX = function(x){
  * @param {number} y
  * @returns {number}
  */
-Block.prototype.relToAbsY = function(y){
-	if(this.stack != null) {
+Block.prototype.relToAbsY = function(y) {
+	if (this.stack != null) {
 		return this.stack.relToAbsY(y + this.y);
 	}
 	return y + this.y;
@@ -11787,8 +18162,8 @@ Block.prototype.relToAbsY = function(y){
  * @param x
  * @returns {number}
  */
-Block.prototype.absToRelX = function(x){
-	if(this.stack != null) {
+Block.prototype.absToRelX = function(x) {
+	if (this.stack != null) {
 		return this.stack.absToRelX(x) - this.x;
 	}
 	return x - this.x;
@@ -11798,8 +18173,8 @@ Block.prototype.absToRelX = function(x){
  * @param y
  * @returns {number}
  */
-Block.prototype.absToRelY = function(y){
-	if(this.stack != null) {
+Block.prototype.absToRelY = function(y) {
+	if (this.stack != null) {
 		return this.stack.absToRelY(y) - this.y;
 	}
 	return y - this.y;
@@ -11808,24 +18183,24 @@ Block.prototype.absToRelY = function(y){
  * Returns the x coord of the Block relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Block relative to the screen.
  */
-Block.prototype.getAbsX = function(){
+Block.prototype.getAbsX = function() {
 	return this.relToAbsX(0);
 };
 /**
  * Returns the y coord of the Block relative to the screen.
  * @return {number} - The y coord of the Block relative to the screen.
  */
-Block.prototype.getAbsY = function(){
+Block.prototype.getAbsY = function() {
 	return this.relToAbsY(0);
 };
 
 /**
  * Creates and returns the main SVG path element for the Block.
- * @return {object} - The main SVG path element for the Block.
+ * @return {Node} - The main SVG path element for the Block.
  */
-Block.prototype.generatePath = function(){
+Block.prototype.generatePath = function() {
 	const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
-	TouchReceiver.addListenersChild(pathE,this);
+	TouchReceiver.addListenersChild(pathE, this);
 	return pathE;
 };
 
@@ -11833,11 +18208,12 @@ Block.prototype.generatePath = function(){
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
  * @param {LabelText|BlockIcon|Slot} part - part to add.
  */
-Block.prototype.addPart = function(part){
+Block.prototype.addPart = function(part) {
 	this.parts.push(part);
-	if(part.isSlot){ //Slots are kept track of separately for recursive calls.
+	if (part.isSlot) { //Slots are kept track of separately for recursive calls.
 		this.slots.push(part);
 	}
+	part.setActive(this.active);
 };
 
 /**
@@ -11845,7 +18221,7 @@ Block.prototype.addPart = function(part){
  * @param {number} x - New x coord.
  * @param {number} y - New y coord.
  */
-Block.prototype.move = function(x,y){
+Block.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
 	//All parts of the Block are contained within its group to allow for easy movement.
@@ -11855,19 +18231,19 @@ Block.prototype.move = function(x,y){
 /**
  * Recursively stops the Block, its Slots, and any subsequent Blocks.
  */
-Block.prototype.stop = function(){
+Block.prototype.stop = function() {
 	this.running = 0; //Stop this Block.
 	this.runMem = {}; //Clear memory
-	for(let i = 0;i < this.slots.length;i++){
+	for (let i = 0; i < this.slots.length; i++) {
 		this.slots[i].stop(); //Stop this Block's Slots.
 	}
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.stop(); //Stop the BlockSlots.
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.stop();
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
+	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.stop(); //Stop the next Block.
 	}
 };
@@ -11876,24 +18252,24 @@ Block.prototype.stop = function(){
  * Updates this currently executing Block and returns if the Block is still running
  * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
  */
-Block.prototype.updateRun = function(){
+Block.prototype.updateRun = function() {
 	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
-	if(this.running === 0 || this.running === 3){
-		for(let i = 0;i < this.slots.length;i++){ //...Reset all Slots to prepare for execution
+	if (this.running === 0 || this.running === 3) {
+		for (let i = 0; i < this.slots.length; i++) { //...Reset all Slots to prepare for execution
 			this.slots[i].stop();
 		}
 		this.running = 1; //Now the Block is ready to run its Slots.
 	}
 	let myExecStatus; //The value to return.
-	if(this.running === 1){ //If the Block is currently waiting on its Slots...
-		for(let i = 0;i < this.slots.length;i++){
+	if (this.running === 1) { //If the Block is currently waiting on its Slots...
+		for (let i = 0; i < this.slots.length; i++) {
 			//Check to see if each Slot is done and update the first Slot that isn't done.
 			let slotExecStatus = this.slots[i].updateRun();
 			//If the slot is still running...
-			if(slotExecStatus.isRunning()){
+			if (slotExecStatus.isRunning()) {
 				//The Block is still running and will execute again next time
 				return new ExecutionStatusRunning();
-			} else if(slotExecStatus.hasError()) {
+			} else if (slotExecStatus.hasError()) {
 				//If the slot through an error, the Block is done running, and will pass the error up the call stack.
 				this.running = 3;
 				return slotExecStatus;
@@ -11903,13 +18279,12 @@ Block.prototype.updateRun = function(){
 		//This function is overridden by the class of the particular Block.
 		//It sets the Block up for execution, and if it is a simple Block, may even complete execution.
 		myExecStatus = this.startAction();
-	}
-	else if(this.running === 2){ //If the Block is currently running, update it.
+	} else if (this.running === 2) { //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
 		myExecStatus = this.updateAction();
 	}
-	if(!myExecStatus.isRunning()){ //If the block is done running...
-		if(this.running !== 0) {
+	if (!myExecStatus.isRunning()) { //If the block is done running...
+		if (this.running !== 0) {
 			this.running = 3; //Record that the Block is done, provided that it was started
 		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
@@ -11921,7 +18296,7 @@ Block.prototype.updateRun = function(){
  * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
  * @return {ExecutionStatus} - indicating if it has finished.
  */
-Block.prototype.startAction = function(){
+Block.prototype.startAction = function() {
 	return new ExecutionStatusRunning(); //Still running
 };
 
@@ -11929,7 +18304,7 @@ Block.prototype.startAction = function(){
  * Will be overridden. Is triggered repeatedly until the Block is done running. Contains the Block's actual behavior.
  * @return {ExecutionStatus} - The next Block to run or a boolean indicating if it has finished.
  */
-Block.prototype.updateAction = function(){
+Block.prototype.updateAction = function() {
 	return new ExecutionStatusRunning(); //Still running //Fix! by default this should be false.
 };
 
@@ -11939,9 +18314,9 @@ Block.prototype.updateAction = function(){
  * Once the Block returns its value, it is done and can reset its state.
  * @return {Data} - The result of the Block's execution.
  */
-Block.prototype.getResultData = function(){
+Block.prototype.getResultData = function() {
 	DebugOptions.assert(this.returnsValue);
-	if(this.running === 3){ //Only return data if the Block is done running.
+	if (this.running === 3) { //Only return data if the Block is done running.
 		this.running = 0; //Reset the Block's state. Prevents same data from ever being re-returned
 		return this.resultData; //Access stored result data and return it.
 	}
@@ -11952,20 +18327,20 @@ Block.prototype.getResultData = function(){
  * Recursively moves the Block, its Slots, and subsequent Blocks to another stack.
  * @param {BlockStack} stack - The stack the Blocks will be moved to.
  */
-Block.prototype.changeStack = function(stack){
+Block.prototype.changeStack = function(stack) {
 	this.stack = stack; //Move this Block to the stack
 	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
 	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
-	for(let i = 0;i < this.slots.length;i++){
+	for (let i = 0; i < this.slots.length; i++) {
 		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
 	}
-	if(this.nextBlock != null){
+	if (this.nextBlock != null) {
 		this.nextBlock.changeStack(stack); //Tell the next block to move.
 	}
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.changeStack(stack); //If this block is a loop/if tell its contents to move.
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
 	}
 };
@@ -11975,16 +18350,16 @@ Block.prototype.changeStack = function(stack){
  * Each Block checks to see if it is outside the proposed bounding rectangle and if so adjusts it.
  * This function just handles the recursive part. The actual checks and adjustment are handled by updateStackDimO
  */
-Block.prototype.updateStackDim = function(){
+Block.prototype.updateStackDim = function() {
 	//Slots are updated separately by updateStackDimRI.
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.updateStackDim(); //If this block is a loop/if tell its contents to update.
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.updateStackDim(); //If it has a second BlockSlot, update it too.
 	}
 	this.updateStackDimRI(); //Update the stack dimensions using information from this Block.
-	if(this.nextBlock != null){
+	if (this.nextBlock != null) {
 		this.nextBlock.updateStackDim(); //Tell the next block to update.
 	}
 };
@@ -11995,8 +18370,8 @@ Block.prototype.updateStackDim = function(){
  * This allows other functions to avoid unnecessary updates when full recursion is not needed.
  * updateStackDimO handled the actual updates.
  */
-Block.prototype.updateStackDimRI = function(){
-	for(let i = 0;i < this.slots.length;i++){
+Block.prototype.updateStackDimRI = function() {
+	for (let i = 0; i < this.slots.length; i++) {
 		this.slots[i].updateStackDim(); //Pass message on to Slots.
 	}
 	this.updateStackDimO(); //Update this Block.
@@ -12012,24 +18387,24 @@ Block.prototype.updateStackDimRI = function(){
  * The point of stack bounding boxes is that when looking for potential Blocks to snap only those inside a matching
  * stack have to be investigated.
  */
-Block.prototype.updateStackDimO = function(){
+Block.prototype.updateStackDimO = function() {
 	let sDim = this.stack.dim; //Loads the stack's dimension data.
 	let snap = BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
-	if(this.bottomOpen || this.topOpen){ //Only update the c box if this is a command block //Fix! use !this.returnsValue
+	if (this.bottomOpen || this.topOpen) { //Only update the c box if this is a command block //Fix! use !this.returnsValue
 		let cx1 = this.x - snap.left; //Create bounding rectangle for this particular command Block
 		let cy1 = this.y - snap.top;
 		let cx2 = this.x + snap.right;
 		let cy2 = this.y + this.height + snap.bottom;
-		if(cx1 < sDim.cx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+		if (cx1 < sDim.cx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1 = cx1;
 		}
-		if(cy1 < sDim.cy1){
+		if (cy1 < sDim.cy1) {
 			sDim.cy1 = cy1;
 		}
-		if(cx2>sDim.cx2){
+		if (cx2 > sDim.cx2) {
 			sDim.cx2 = cx2;
 		}
-		if(cy2>sDim.cy2){
+		if (cy2 > sDim.cy2) {
 			sDim.cy2 = cy2;
 		}
 	}
@@ -12037,16 +18412,16 @@ Block.prototype.updateStackDimO = function(){
 	let ry1 = this.y;
 	let rx2 = this.x + this.width;
 	let ry2 = this.y + this.height;
-	if(rx1 < sDim.rx1){ //If the edge of the Block is outside the stack, adjust the stack's dims.
+	if (rx1 < sDim.rx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 		sDim.rx1 = rx1;
 	}
-	if(ry1 < sDim.ry1){
+	if (ry1 < sDim.ry1) {
 		sDim.ry1 = ry1;
 	}
-	if(rx2>sDim.rx2){
+	if (rx2 > sDim.rx2) {
 		sDim.rx2 = rx2;
 	}
-	if(ry2>sDim.ry2){
+	if (ry2 > sDim.ry2) {
 		sDim.ry2 = ry2;
 	}
 	//The Stacks dimensions now include the Block.
@@ -12057,40 +18432,40 @@ Block.prototype.updateStackDimO = function(){
  * Recursively adjusts the sizes of all the parts of the Block (Slots, children, labels, etc.)
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
  */
-Block.prototype.updateDim = function(){
+Block.prototype.updateDim = function() {
 	let bG = BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
-	if(this.topOpen || this.bottomOpen){ //If this is a command block, then use the BlockGraphics for command blocks.
+	if (this.topOpen || this.bottomOpen) { //If this is a command block, then use the BlockGraphics for command blocks.
 		bG = BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
 	let width = 0;
 	width += bG.hMargin; //The left margin of the Block.
 	let height = 0;
-	for(let i = 0;i < this.parts.length;i++){
+	for (let i = 0; i < this.parts.length; i++) {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
 		width += this.parts[i].width; //Fill the width of the middle of the Block
-		if(this.parts[i].height>height){ //The height of the Block is the height of the tallest member.
+		if (this.parts[i].height > height) { //The height of the Block is the height of the tallest member.
 			height = this.parts[i].height;
 		}
-		if(i < this.parts.length - 1){
+		if (i < this.parts.length - 1) {
 			width += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 	}
 	width += bG.hMargin; //Add the right margin of the Block.
-	height += 2*bG.vMargin; //Add the bottom and top margins of the Block.
-	if(height < bG.height){ //If the height is less than the min height, fix it.
+	height += 2 * bG.vMargin; //Add the bottom and top margins of the Block.
+	if (height < bG.height) { //If the height is less than the min height, fix it.
 		height = bG.height;
 	}
-	if(this.hasBlockSlot1){ //If it has a BlockSlot update that.
+	if (this.hasBlockSlot1) { //If it has a BlockSlot update that.
 		this.topHeight = height; //The topHeight is the height of everything avove the BlockSlot.
 		this.blockSlot1.updateDim(); //Update the BlockSlot.
 		height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
 		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
 	}
-	if(this.hasBlockSlot2){ //If the Block has a second BlockSlot...
+	if (this.hasBlockSlot2) { //If the Block has a second BlockSlot...
 		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
 		this.midHeight = this.midLabel.height; //Add the Label's height to the total.
-		this.midHeight += 2*bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
-		if(this.midHeight < bG.height){ //If it's less than the minimum, adjust it.
+		this.midHeight += 2 * bG.vMargin; //The height between the BlockSlots also includes the margin of that area.
+		if (this.midHeight < bG.height) { //If it's less than the minimum, adjust it.
 			this.midHeight = bG.height;
 		}
 		height += this.midHeight; //Add the midHeight to the total.
@@ -12099,11 +18474,11 @@ Block.prototype.updateDim = function(){
 	}
 	//If the Block was a loop or DoubleLoop now we are dealing with its actual properties (not those of command)
 	bG = BlockGraphics.getType(this.type);
-	if(width < bG.width){ //If it is less than the minimum width, adjust it.
+	if (width < bG.width) { //If it is less than the minimum width, adjust it.
 		width = bG.width;
 	}
-	this.resize(width,height); //Resize this Block to the new widths.
-	if(this.nextBlock != null){
+	this.resize(width, height); //Resize this Block to the new widths.
+	if (this.nextBlock != null) {
 		this.nextBlock.updateDim(); //Pass the message to the next Block.
 	}
 };
@@ -12116,18 +18491,18 @@ Block.prototype.updateDim = function(){
  * @return {number} - The width of the current block, indicating how much the x should shift over.
  * y is measured from the top for all Blocks, x is measured from the left.
  */
-Block.prototype.updateAlign = function(x,y){
+Block.prototype.updateAlign = function(x, y) {
 	let bG = BlockGraphics;
-	this.updateAlignRI(x,y); //Update recursively within the block.
-	if(this.hasBlockSlot1){ //Then tell all susequent blocks to align.
-		this.blockSlot1.updateAlign(this.x + bG.loop.side,this.y + this.topHeight);
+	this.updateAlignRI(x, y); //Update recursively within the block.
+	if (this.hasBlockSlot1) { //Then tell all susequent blocks to align.
+		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
 	}
-	if(this.hasBlockSlot2){
-		this.blockSlot2.updateAlign(this.x + bG.loop.side,this.y + this.topHeight + this.blockSlot1.height + this.midHeight);
-		this.midLabel.updateAlign(bG.loop.side,this.topHeight + this.blockSlot1.height + this.midHeight/2);
+	if (this.hasBlockSlot2) {
+		this.blockSlot2.updateAlign(this.x + bG.loop.side, this.y + this.topHeight + this.blockSlot1.height + this.midHeight);
+		this.midLabel.updateAlign(bG.loop.side, this.topHeight + this.blockSlot1.height + this.midHeight / 2);
 	}
-	if(this.nextBlock != null){
-		this.nextBlock.updateAlign(this.x,this.y + this.height);
+	if (this.nextBlock != null) {
+		this.nextBlock.updateAlign(this.x, this.y + this.height);
 	}
 	return this.width;
 };
@@ -12138,21 +18513,21 @@ Block.prototype.updateAlign = function(x,y){
  * @param {number} y - The y coord the block should have.
  * y is measured from the top for all Blocks, x is measured from the left.
  */
-Block.prototype.updateAlignRI = function(x,y){
-	this.move(x,y); //Move to the desired location
+Block.prototype.updateAlignRI = function(x, y) {
+	this.move(x, y); //Move to the desired location
 	let bG = BlockGraphics.getType(this.type);
-	let yCoord = this.height/2; //Compute coords for internal parts.
+	let yCoord = this.height / 2; //Compute coords for internal parts.
 	let xCoord = 0;
-	if(this.hasBlockSlot1){
-		yCoord = this.topHeight/2; //Internal parts measure their y coords from the center of the block.
+	if (this.hasBlockSlot1) {
+		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
 	}
-	if(this.bottomOpen || this.topOpen){
+	if (this.bottomOpen || this.topOpen) {
 		bG = BlockGraphics.command;
 	}
 	xCoord += bG.hMargin;
-	for(let i = 0;i < this.parts.length;i++){
-		xCoord += this.parts[i].updateAlign(xCoord,yCoord); //As each element is adjusted, shift over by the space used.
-		if(i < this.parts.length - 1){
+	for (let i = 0; i < this.parts.length; i++) {
+		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
+		if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}
 	}
@@ -12163,7 +18538,7 @@ Block.prototype.updateAlignRI = function(x,y){
  * @param {number} width - The desired width of the Block.
  * @param {number} height - The desired height of the Block.
  */
-Block.prototype.resize = function(width,height){
+Block.prototype.resize = function(width, height) {
 	let BG = BlockGraphics;
 	//First set width and height properties.
 	this.width = width;
@@ -12172,15 +18547,15 @@ Block.prototype.resize = function(width,height){
 	let innerHeight1 = 0;
 	let innerHeight2 = 0;
 	let midHeight = 0;
-	if(this.hasBlockSlot1){
+	if (this.hasBlockSlot1) {
 		innerHeight1 = this.blockSlot1.height;
 	}
-	if(this.hasBlockSlot2){
+	if (this.hasBlockSlot2) {
 		innerHeight2 = this.blockSlot2.height;
 		midHeight = this.midHeight;
 	}
 	//Tell BlockGraphics to change the path description to match the new properties.
-	BG.update.path(this.path,0,0,width,height,this.type,false,innerHeight1,innerHeight2,midHeight,this.bottomOpen);
+	BG.update.path(this.path, 0, 0, width, height, this.type, false, innerHeight1, innerHeight2, midHeight, this.bottomOpen);
 };
 
 /**
@@ -12189,7 +18564,7 @@ Block.prototype.resize = function(width,height){
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.
  */
-Block.prototype.findBestFit = function(){
+Block.prototype.findBestFit = function() {
 	let move = CodeManager.move;
 	let fit = CodeManager.fit;
 	let x = this.getAbsX(); //Get coords to compare.
@@ -12197,23 +18572,22 @@ Block.prototype.findBestFit = function(){
 	let height = this.relToAbsY(this.height) - y;
 	let hasMatch = false;
 
-	if(move.returnsValue) { //If a connection between the stack and block are possible...
-		for(let i = 0;i < this.slots.length;i++){
+	if (move.returnsValue) { //If a connection between the stack and block are possible...
+		for (let i = 0; i < this.slots.length; i++) {
 			let slotHasMatch = this.slots[i].findBestFit();
 			hasMatch = slotHasMatch || hasMatch;
 		}
-	}
-	else if(move.topOpen&&this.bottomOpen) { //If a connection between the stack and block are possible...
+	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
 		let snap = BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
 		let snapBLeft = x - snap.left;
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
-		let snapBHeight = snap.top + height + snap.bottom;
+		let snapBHeight = snap.top + height + snap.bottom;		
 		//Check if point falls in a rectangular range.
-		if(move.pInRange(move.topX,move.topY,snapBLeft,snapBTop,snapBWidth,snapBHeight)) {
+		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
-			let yDist = move.topY - (y + this.height);
+			let yDist = move.topY - (y + height);
 			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
@@ -12222,13 +18596,13 @@ Block.prototype.findBestFit = function(){
 			}
 		}
 	}
-	if(this.hasBlockSlot1){ //Pass the message on recursively.
+	if (this.hasBlockSlot1) { //Pass the message on recursively.
 		this.blockSlot1.findBestFit();
 	}
-	if(this.hasBlockSlot2){
+	if (this.hasBlockSlot2) {
 		this.blockSlot2.findBestFit();
 	}
-	if(this.nextBlock != null){
+	if (this.nextBlock != null) {
 		this.nextBlock.findBestFit();
 	}
 	return hasMatch;
@@ -12238,12 +18612,11 @@ Block.prototype.findBestFit = function(){
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
  */
-Block.prototype.highlight = function(){
-	if(this.bottomOpen){
-		Highlighter.highlight(this.getAbsX(),this.relToAbsY(this.height),this.width,this.height,0,false,this.isGlowing);
-	}
-	else{ //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
-		GuiElements.throwError("Error: attempt to highlight block that has bottomOpen = false");
+Block.prototype.highlight = function() {
+	if (this.bottomOpen) {
+		Highlighter.highlight(this.getAbsX(), this.relToAbsY(this.height), this.width, this.height, 0, false, this.isGlowing);
+	} else { //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
+		DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
 	}
 };
 
@@ -12251,27 +18624,27 @@ Block.prototype.highlight = function(){
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
  * @param {Block} block - The first Block in the stack to attach to this Block.
  */
-Block.prototype.snap = function(block){
+Block.prototype.snap = function(block) {
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
 	//Get the bottom Block in the stack to be inserted.
 	let bottomStackBlock = block.getLastBlock();
 	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
-	if(!bottomStackBlock.bottomOpen&&this.nextBlock != null){
+	if (!bottomStackBlock.bottomOpen && this.nextBlock != null) {
 		let bG = BlockGraphics.command;
 		//Disconnect the blocks after this Block and shift them over to make room.
-		this.nextBlock.unsnap().shiftOver(bG.shiftX,block.stack.getHeight()+bG.shiftY);
+		this.nextBlock.unsnap().shiftOver(bG.shiftX, block.stack.getHeight() + bG.shiftY);
 	}
 	let stack = this.stack;
 	//If the Block we are inserting is part of a stack...
-	if(block.stack != null) {
+	if (block.stack != null) {
 		block.stack.stop();
-		if(stack.isRunning) {
+		if (stack.isRunning) {
 			// Make it glow if this stack is running
 			block.glow();
 		}
 	}
 	let upperBlock = this; //The Block which will go above the inserted stack.
-	let lowerBlock = this.nextBlock;//The Block which will go below the inserted stack. Might be null.
+	let lowerBlock = this.nextBlock; //The Block which will go below the inserted stack. Might be null.
 	let topStackBlock = block; //The top Block in the stack to be inserted.
 
 	//The top of where the stack is inserted note which Blocks are above/below them.
@@ -12279,21 +18652,21 @@ Block.prototype.snap = function(block){
 	topStackBlock.parent = upperBlock;
 	//The bottom of where the stack is inserted does the same.
 	bottomStackBlock.nextBlock = lowerBlock;
-	if(lowerBlock != null){ //There might not be a Block below the inserted stack.
+	if (lowerBlock != null) { //There might not be a Block below the inserted stack.
 		lowerBlock.parent = bottomStackBlock;
 	}
 	let oldG = null;
-	if(block.stack != null) {
+	if (block.stack != null) {
 		oldG = block.stack.group; //Get a handle to the old stack's group
 		block.stack.remove(); //Remove the old stack.
 	}
-	if(this.stack != null) {
+	if (this.stack != null) {
 		block.changeStack(this.stack); //Move the block over into this stack
 	}
-	if(oldG != null) {
+	if (oldG != null) {
 		oldG.remove(); //Remove the old stack's group.
 	}
-	if(this.stack != null) {
+	if (this.stack != null) {
 		//Update the dimensions now that the movement is complete.
 		this.stack.updateDim();
 		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
@@ -12305,20 +18678,19 @@ Block.prototype.snap = function(block){
  * Disconnects this Block from the Blocks above it and returns the newly-created BlockStack. Calls updateDim on parent.
  * @return {BlockStack} - A BlockStack containing this Block and all subsequent Blocks.
  */
-Block.prototype.unsnap = function(){
+Block.prototype.unsnap = function() {
 	//If this has a parent, then it needs to disconnect and make a new stack.  Otherwise, it returns its current stack.
-	if(this.parent != null){
-		if(this.parent.isSlot || this.parent.isBlockSlot){ //Checks if it is attached to a Slot not another Block.
+	if (this.parent != null) {
+		if (this.parent.isSlot || this.parent.isBlockSlot) { //Checks if it is attached to a Slot not another Block.
 			this.parent.removeChild(); //Leave the Slot.
 			this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
-		}
-		else{ //This Block is connected to another Block.
+		} else { //This Block is connected to another Block.
 			this.parent.nextBlock = null; //Disconnect from parent Block.
 			this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
 		}
 		this.parent = null; //Delete reference to parent Block/Slot/BlockSlot.
 		//Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
-		return new BlockStack(this,this.stack.getTab());
+		return new BlockStack(this, this.stack.getTab());
 	}
 	//If the Block already had no parent, just return this Block's stack.
 	return this.stack;
@@ -12328,11 +18700,10 @@ Block.prototype.unsnap = function(){
  * Recursively finds and returns the last Block in this BlockStack.
  * @return {Block} - The last Block in this BlockStack.
  */
-Block.prototype.getLastBlock = function(){
-	if(this.nextBlock == null){
+Block.prototype.getLastBlock = function() {
+	if (this.nextBlock == null) {
 		return this; //This Block is the last one.
-	}
-	else{
+	} else {
 		return this.nextBlock.getLastBlock(); //Try the next Block.
 	}
 };
@@ -12341,11 +18712,10 @@ Block.prototype.getLastBlock = function(){
  * Recursively returns the height of this Block and all subsequent Blocks. Used by BlockSlots to determine height.
  * @return {number} - The height of this Block and all subsequent Blocks.
  */
-Block.prototype.addHeights = function(){
-	if(this.nextBlock != null){
+Block.prototype.addHeights = function() {
+	if (this.nextBlock != null) {
 		return this.height + this.nextBlock.addHeights(); //Return this Block's height plus those below it.
-	}
-	else{
+	} else {
 		return this.height; //This is the last Block. Return its height.
 	}
 };
@@ -12357,17 +18727,15 @@ Block.prototype.addHeights = function(){
  * @param {number} y - The new Block's y coord.
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicate = function(x, y){
+Block.prototype.duplicate = function(x, y) {
 	let myCopy = null;
 	// First we use this Block's constructor to create a new block of the same type
 	// If this Block is a list or variable Block, we must pass that data to the constructor
-	if(this.variable != null){
+	if (this.variable != null) {
 		myCopy = new this.constructor(x, y, this.variable);
-	}
-	else if(this.list != null){
+	} else if (this.list != null) {
 		myCopy = new this.constructor(x, y, this.list);
-	}
-	else {
+	} else {
 		myCopy = new this.constructor(x, y);
 	}
 	// Then we tell the new block to copy its data from this Block
@@ -12380,19 +18748,19 @@ Block.prototype.duplicate = function(x, y){
  * Mutually recursive with duplicate.
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
  */
-Block.prototype.copyFrom = function(block){
+Block.prototype.copyFrom = function(block) {
 	DebugOptions.assert(block.blockTypeName === this.blockTypeName);
-	for(let i = 0; i < this.slots.length; i++){ //Copy block's slots to this Block.
+	for (let i = 0; i < this.slots.length; i++) { //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);
 	}
-	if(this.blockSlot1 != null){ //Copy the contents of its BlockSlots.
+	if (this.blockSlot1 != null) { //Copy the contents of its BlockSlots.
 		this.blockSlot1.copyFrom(block.blockSlot1);
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.copyFrom(block.blockSlot2);
 	}
-	if(block.nextBlock != null){ //Copy subsequent Blocks.
-		this.nextBlock = block.nextBlock.duplicate(0,0);
+	if (block.nextBlock != null) { //Copy subsequent Blocks.
+		this.nextBlock = block.nextBlock.duplicate(0, 0);
 		this.nextBlock.parent = this;
 	}
 };
@@ -12403,17 +18771,16 @@ Block.prototype.copyFrom = function(block){
  * @param {Slot} slotToExclude - (optional) The Slot to replace with "___".
  * @return {string} - The finished text summary.
  */
-Block.prototype.textSummary = function(slotToExclude){
+Block.prototype.textSummary = function(slotToExclude) {
 	let summary = "";
-	for(let i = 0; i < this.parts.length; i++){
-		if(this.parts[i] === slotToExclude){
+	for (let i = 0; i < this.parts.length; i++) {
+		if (this.parts[i] === slotToExclude) {
 			//Replace slot with underscores.
 			summary += "___";
-		}
-		else{
+		} else {
 			summary += this.parts[i].textSummary(); //Recursively build text summary from text summary of contents.
 		}
-		if(i < this.parts.length - 1){ //Add space between part descriptions.
+		if (i < this.parts.length - 1) { //Add space between part descriptions.
 			summary += " ";
 		}
 	}
@@ -12423,14 +18790,14 @@ Block.prototype.textSummary = function(slotToExclude){
 /**
  * Overridden by subclasses. Alerts Block that the flag was clicked. Most Blocks won't respond to this directly.
  */
-Block.prototype.eventFlagClicked = function(){
+Block.prototype.eventFlagClicked = function() {
 
 };
 
 /**
  * Overridden by subclasses. Passes broadcast message to Block.
  */
-Block.prototype.eventBroadcast = function(message){
+Block.prototype.eventBroadcast = function(message) {
 
 };
 
@@ -12438,24 +18805,24 @@ Block.prototype.eventBroadcast = function(message){
  * Overridden by subclasses. Checks if a broadcast with the given message is currently running on this block.
  * Used to tell Broadcast and wait blocks if they can stop waiting.
  */
-Block.prototype.checkBroadcastRunning = function(message){
+Block.prototype.checkBroadcastRunning = function(message) {
 	return false;
 };
 
 /**
  * Recursively updates the available broadcast messages.
  */
-Block.prototype.updateAvailableMessages = function(){
-	for(let i = 0;i < this.slots.length;i++){
+Block.prototype.updateAvailableMessages = function() {
+	for (let i = 0; i < this.slots.length; i++) {
 		this.slots[i].updateAvailableMessages();
 	}
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.updateAvailableMessages();
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.updateAvailableMessages();
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
+	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.updateAvailableMessages();
 	}
 };
@@ -12464,10 +18831,10 @@ Block.prototype.updateAvailableMessages = function(){
  * Deletes the Block's running memory (memory reserved for computations related to execution)
  * Also deletes the runMem of the Block's slots, but not runMem of Blocks in those Slots
  */
-Block.prototype.clearMem = function(){
+Block.prototype.clearMem = function() {
 	//Delete all runMem.
-	this.runMem = new function(){};
-	for(let i = 0;i < this.slots.length;i++){
+	this.runMem = new function() {};
+	for (let i = 0; i < this.slots.length; i++) {
 		this.slots[i].clearMem(); //Removes resultData and resets running state to 0 (NOT recursive).
 	}
 };
@@ -12476,7 +18843,7 @@ Block.prototype.clearMem = function(){
  * Returns the result of the Block's execution.
  * The data is then removed to prevent the result from being returned again.
  */
-Block.prototype.getResultData = function(){
+Block.prototype.getResultData = function() {
 	DebugOptions.assert(this.resultData != null);
 	let result = this.resultData;
 	this.resultData = null;
@@ -12486,16 +18853,16 @@ Block.prototype.getResultData = function(){
 /**
  * Recursively adds a white outline to indicate that the BlockStack is running.
  */
-Block.prototype.glow = function(){
+Block.prototype.glow = function() {
 	BlockGraphics.update.glow(this.path);
 	this.isGlowing = true; //Used by other classes to determine things like highlight color.
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.glow();
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.glow();
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
+	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.glow();
 	}
 };
@@ -12503,16 +18870,16 @@ Block.prototype.glow = function(){
 /**
  * Recursively removes the outline.
  */
-Block.prototype.stopGlow = function(){
-	BlockGraphics.update.stroke(this.path,this.category,this.returnsValue,this.active);
+Block.prototype.stopGlow = function() {
+	BlockGraphics.update.stroke(this.path, this.category, this.returnsValue, this.active);
 	this.isGlowing = false;
-	if(this.blockSlot1 != null){
+	if (this.blockSlot1 != null) {
 		this.blockSlot1.stopGlow();
 	}
-	if(this.blockSlot2 != null){
+	if (this.blockSlot2 != null) {
 		this.blockSlot2.stopGlow();
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
+	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.stopGlow();
 	}
 };
@@ -12522,11 +18889,11 @@ Block.prototype.stopGlow = function(){
  * is inactive and cannot be run.  Used by sensors that a device does not support and robot blocks for
  * robots that are not connected
  */
-Block.prototype.makeInactive = function(){
-	if(this.active){
+Block.prototype.makeInactive = function() {
+	if (this.active) {
 		this.active = false;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeInactive();
 		});
 	}
@@ -12535,11 +18902,11 @@ Block.prototype.makeInactive = function(){
 /**
  * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
  */
-Block.prototype.makeActive = function(){
-	if(!this.active){
+Block.prototype.makeActive = function() {
+	if (!this.active) {
 		this.active = true;
 		BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
-		this.slots.forEach(function(slot) {
+		this.parts.forEach(function(slot) {
 			slot.makeActive();
 		});
 	}
@@ -12548,8 +18915,8 @@ Block.prototype.makeActive = function(){
 /**
  * @param {boolean} active
  */
-Block.prototype.setActive = function(active){
-	if(active){
+Block.prototype.setActive = function(active) {
+	if (active) {
 		this.makeActive();
 	} else {
 		this.makeInactive();
@@ -12560,7 +18927,7 @@ Block.prototype.setActive = function(active){
  * Returns a value indicating if this block is active.  Overrided by subclasses.
  * @return {boolean}
  */
-Block.prototype.checkActive = function(){
+Block.prototype.checkActive = function() {
 	// Most Blocks are always active
 	return true;
 };
@@ -12568,42 +18935,42 @@ Block.prototype.checkActive = function(){
 /**
  * Uses checkActive and setActive to update the Blocks appearance
  */
-Block.prototype.updateActive = function(){
+Block.prototype.updateActive = function() {
 	this.setActive(this.checkActive());
 };
 
 /**
  * Recursively writes this Block and those below it to XML
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @param {Node} xmlBlocks - The <Blocks> tag in the document
  */
-Block.prototype.writeToXml = function(xmlDoc,xmlBlocks){
+Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
 	xmlBlocks.appendChild(this.createXml(xmlDoc));
-	if(this.bottomOpen&&this.nextBlock != null){
-		this.nextBlock.writeToXml(xmlDoc,xmlBlocks);
+	if (this.bottomOpen && this.nextBlock != null) {
+		this.nextBlock.writeToXml(xmlDoc, xmlBlocks);
 	}
 };
 
 /**
  * Writes this Block to XML (non recursive)
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node}
  */
-Block.prototype.createXml = function(xmlDoc){
-	let block = XmlWriter.createElement(xmlDoc,"block");
-	XmlWriter.setAttribute(block,"type",this.blockTypeName);
-	let slots = XmlWriter.createElement(xmlDoc,"slots");
+Block.prototype.createXml = function(xmlDoc) {
+	let block = XmlWriter.createElement(xmlDoc, "block");
+	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+	let slots = XmlWriter.createElement(xmlDoc, "slots");
 	// Indicates that we are using the new saving system, which uses keys assigned to each Slot to identify
 	// which data goes to which Slot.  The old system uses the order of appearance in the XML to match data to Slots
-	XmlWriter.setAttribute(slots,"keyVal","true");
-	for(let i = 0;i < this.slots.length;i++){
+	XmlWriter.setAttribute(slots, "keyVal", "true");
+	for (let i = 0; i < this.slots.length; i++) {
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
 	}
 	block.appendChild(slots);
-	if(this.blockSlot1 != null){
-		let blockSlots = XmlWriter.createElement(xmlDoc,"blockSlots");
+	if (this.blockSlot1 != null) {
+		let blockSlots = XmlWriter.createElement(xmlDoc, "blockSlots");
 		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
-		if(this.blockSlot2 != null){
+		if (this.blockSlot2 != null) {
 			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
 		}
 		block.appendChild(blockSlots);
@@ -12616,32 +18983,29 @@ Block.prototype.createXml = function(xmlDoc){
  * @param blockNode {Node} - Block node of th XML file being read
  * @return {Block|null} - The imported Block, or null if the data is corrupt
  */
-Block.importXml = function(blockNode){
+Block.importXml = function(blockNode) {
 	// Get the correct class of the Block
-	let type = XmlWriter.getAttribute(blockNode,"type");
+	let type = XmlWriter.getAttribute(blockNode, "type");
 	let block;
 	try {
 		// All classes start with "B_"
 		if (type.substring(0, 2) === "B_") {
 			// Find the constructor's import function
-			if(window[type].importXml != null){
+			if (window[type].importXml != null) {
 				// If the Block has a special import function, use that
 				return window[type].importXml(blockNode);
-			}
-			else {
+			} else {
 				// Otherwise, use the Block's constructor
 				block = new window[type](0, 0);
 				// Copy the data into the Block
 				block.copyFromXml(blockNode);
 				return block;
 			}
-		}
-		else{
+		} else {
 			// The data is corrupt
 			return null;
 		}
-	}
-	catch(e) {
+	} catch (e) {
 		// The data is corrupt
 		return null;
 	}
@@ -12651,17 +19015,17 @@ Block.importXml = function(blockNode){
  * Copies the data from the Block tag into the Block
  * @param {Node} blockNode - The node to copy the data from
  */
-Block.prototype.copyFromXml = function(blockNode){
-	let slotsNode = XmlWriter.findSubElement(blockNode,"slots");
+Block.prototype.copyFromXml = function(blockNode) {
+	let slotsNode = XmlWriter.findSubElement(blockNode, "slots");
 	// Copy the data about the Slots into the Block.
 	this.importSlotXml(slotsNode);
-	let blockSlotsNode = XmlWriter.findSubElement(blockNode,"blockSlots");
-	let blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode,"blockSlot");
+	let blockSlotsNode = XmlWriter.findSubElement(blockNode, "blockSlots");
+	let blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode, "blockSlot");
 	// Copy data about BlockSlots
-	if(this.blockSlot1 != null&&blockSlotNodes.length >= 1){
+	if (this.blockSlot1 != null && blockSlotNodes.length >= 1) {
 		this.blockSlot1.importXml(blockSlotNodes[0]);
 	}
-	if(this.blockSlot2 != null&&blockSlotNodes.length >= 2){
+	if (this.blockSlot2 != null && blockSlotNodes.length >= 2) {
 		this.blockSlot2.importXml(blockSlotNodes[1]);
 	}
 };
@@ -12670,24 +19034,23 @@ Block.prototype.copyFromXml = function(blockNode){
  * Imports the data about the Slots into the Block.
  * @param {Node} slotsNode - The node to copy the data from
  */
-Block.prototype.importSlotXml = function(slotsNode){
+Block.prototype.importSlotXml = function(slotsNode) {
 	// Determine if we are using the key/value system or legacy, order dependant system.
 	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") === "true";
-	let slotNodes = XmlWriter.findSubElements(slotsNode,"slot");
-	if(keyVal){
+	let slotNodes = XmlWriter.findSubElements(slotsNode, "slot");
+	if (keyVal) {
 		// Import data for each slot
-		this.slots.forEach(function(slot){
+		this.slots.forEach(function(slot) {
 			let key = slot.getKey();
 			let slotNode = XmlWriter.findNodeByKey(slotNodes, key);
 			// Import data if that key exists.  Otherwise, leave the Slot at default values
-			if(slot != null) {
+			if (slot != null) {
 				slot.importXml(slotNode);
 			}
 		});
-	}
-	else{
+	} else {
 		// Import the data for each Slot in order
-		for(let i = 0;i < slotNodes.length&&i < this.slots.length;i++){
+		for (let i = 0; i < slotNodes.length && i < this.slots.length; i++) {
 			this.slots[i].importXml(slotNodes[i]);
 		}
 	}
@@ -12697,7 +19060,7 @@ Block.prototype.importSlotXml = function(slotsNode){
  * Recursively notifies the Block that a variable has changed names
  * @param {Variable} variable - The variable that was renamed
  */
-Block.prototype.renameVariable = function(variable){
+Block.prototype.renameVariable = function(variable) {
 	this.passRecursively("renameVariable", variable);
 };
 
@@ -12705,7 +19068,7 @@ Block.prototype.renameVariable = function(variable){
  * Recursively notifies the Block that a variable has been deleted
  * @param {Variable} variable - The variable that was deleted
  */
-Block.prototype.deleteVariable = function(variable){
+Block.prototype.deleteVariable = function(variable) {
 	this.passRecursively("deleteVariable", variable);
 };
 
@@ -12713,7 +19076,7 @@ Block.prototype.deleteVariable = function(variable){
  * Recursively notifies the Block that a list has changed names
  * @param {List} list - The list that was renamed
  */
-Block.prototype.renameList = function(list){
+Block.prototype.renameList = function(list) {
 	this.passRecursively("renameList", list);
 };
 
@@ -12721,7 +19084,7 @@ Block.prototype.renameList = function(list){
  * Recursively notifies the Block that a list has been deleted
  * @param {List} list - The list that was deleted
  */
-Block.prototype.deleteList = function(list){
+Block.prototype.deleteList = function(list) {
 	this.passRecursively("deleteList", list);
 };
 
@@ -12730,24 +19093,24 @@ Block.prototype.deleteList = function(list){
  * @param {Variable} variable - The variable to check
  * @return {boolean} - true iff the variable is used in at least one Block
  */
-Block.prototype.checkVariableUsed = function(variable){
-	for(let i = 0;i < this.slots.length;i++){
-		if(this.slots[i].checkVariableUsed(variable)){
+Block.prototype.checkVariableUsed = function(variable) {
+	for (let i = 0; i < this.slots.length; i++) {
+		if (this.slots[i].checkVariableUsed(variable)) {
 			return true;
 		}
 	}
-	if(this.blockSlot1 != null){
-		if(this.blockSlot1.checkVariableUsed(variable)){
+	if (this.blockSlot1 != null) {
+		if (this.blockSlot1.checkVariableUsed(variable)) {
 			return true;
 		}
 	}
-	if(this.blockSlot2 != null){
-		if(this.blockSlot2.checkVariableUsed(variable)){
+	if (this.blockSlot2 != null) {
+		if (this.blockSlot2.checkVariableUsed(variable)) {
 			return true;
 		}
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
-		if(this.nextBlock.checkVariableUsed(variable)){
+	if (this.bottomOpen && this.nextBlock != null) {
+		if (this.nextBlock.checkVariableUsed(variable)) {
 			return true;
 		}
 	}
@@ -12759,24 +19122,24 @@ Block.prototype.checkVariableUsed = function(variable){
  * @param {List} list - The list to check
  * @return {boolean} - true iff the list is used in at least one Block
  */
-Block.prototype.checkListUsed = function(list){
-	for(let i = 0;i < this.slots.length;i++){
-		if(this.slots[i].checkListUsed(list)){
+Block.prototype.checkListUsed = function(list) {
+	for (let i = 0; i < this.slots.length; i++) {
+		if (this.slots[i].checkListUsed(list)) {
 			return true;
 		}
 	}
-	if(this.blockSlot1 != null){
-		if(this.blockSlot1.checkListUsed(list)){
+	if (this.blockSlot1 != null) {
+		if (this.blockSlot1.checkListUsed(list)) {
 			return true;
 		}
 	}
-	if(this.blockSlot2 != null){
-		if(this.blockSlot2.checkListUsed(list)){
+	if (this.blockSlot2 != null) {
+		if (this.blockSlot2.checkListUsed(list)) {
 			return true;
 		}
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
-		if(this.nextBlock.checkListUsed(list)){
+	if (this.bottomOpen && this.nextBlock != null) {
+		if (this.nextBlock.checkListUsed(list)) {
 			return true;
 		}
 	}
@@ -12784,41 +19147,25 @@ Block.prototype.checkListUsed = function(list){
 };
 
 /**
- * Recursively tells the device DropDown menus to switch to label mode, as multiple devices are no longer connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively tells the device DropDown menus to switch to DropDown mode, as multiple devices are now connected
- * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
- */
-Block.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts the maximum selected DropDown value for a DeviceDropDown of the specified deviceClass
  * @param deviceClass - A subclass of Device.  Only DropDowns for this device are affected
  * @return {number} - The maximum value + 1 (since selections are 0-indexed)
  */
-Block.prototype.countDevicesInUse = function(deviceClass){
+Block.prototype.countDevicesInUse = function(deviceClass) {
 	// At least 1 option is available on all DropDowns
-	let largest = 1;
+	let largest = 0;
 	// Find the largest result of all calls
-	for(let i = 0;i < this.slots.length;i++){
-		largest = Math.max(largest,this.slots[i].countDevicesInUse(deviceClass));
+	for (let i = 0; i < this.slots.length; i++) {
+		largest = Math.max(largest, this.slots[i].countDevicesInUse(deviceClass));
 	}
-	if(this.blockSlot1 != null){
-		largest = Math.max(largest,this.blockSlot1.countDevicesInUse(deviceClass));
+	if (this.blockSlot1 != null) {
+		largest = Math.max(largest, this.blockSlot1.countDevicesInUse(deviceClass));
 	}
-	if(this.blockSlot2 != null){
-		largest = Math.max(largest,this.blockSlot2.countDevicesInUse(deviceClass));
+	if (this.blockSlot2 != null) {
+		largest = Math.max(largest, this.blockSlot2.countDevicesInUse(deviceClass));
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
-		largest = Math.max(largest,this.nextBlock.countDevicesInUse(deviceClass));
+	if (this.bottomOpen && this.nextBlock != null) {
+		largest = Math.max(largest, this.nextBlock.countDevicesInUse(deviceClass));
 	}
 	return largest;
 };
@@ -12826,16 +19173,8 @@ Block.prototype.countDevicesInUse = function(deviceClass){
 /**
  * Called when the available sensors changes. Each Block checks if it is still enabled and then passes the message.
  */
-Block.prototype.updateAvailableSensors = function(){
+Block.prototype.updateAvailableSensors = function() {
 	this.updateActive();
-	this.passRecursively("updateAvailableSensors");
-};
-
-/**
- * Called when a Robot's status changes.  Overrided by subclasses.
- */
-Block.prototype.updateConnectionStatus = function(){
-
 };
 
 /**
@@ -12843,20 +19182,20 @@ Block.prototype.updateConnectionStatus = function(){
  * as arguments
  * @param functionName - The name of the function to call on each child
  */
-Block.prototype.passRecursively = function(functionName){
+Block.prototype.passRecursively = function(functionName) {
 	let args = Array.prototype.slice.call(arguments, 1);
-	for(let i = 0;i < this.slots.length;i++){
+	for (let i = 0; i < this.slots.length; i++) {
 		let currentSlot = this.slots[i];
-		currentSlot[functionName].apply(currentSlot,args);
+		currentSlot[functionName].apply(currentSlot, args);
 	}
-	if(this.blockSlot1 != null){
-		this.blockSlot1[functionName].apply(this.blockSlot1,args);
+	if (this.blockSlot1 != null) {
+		this.blockSlot1[functionName].apply(this.blockSlot1, args);
 	}
-	if(this.blockSlot2 != null){
-		this.blockSlot2[functionName].apply(this.blockSlot2,args);
+	if (this.blockSlot2 != null) {
+		this.blockSlot2[functionName].apply(this.blockSlot2, args);
 	}
-	if(this.bottomOpen&&this.nextBlock != null){
-		this.nextBlock[functionName].apply(this.nextBlock,args);
+	if (this.bottomOpen && this.nextBlock != null) {
+		this.nextBlock[functionName].apply(this.nextBlock, args);
 	}
 };
 
@@ -12865,13 +19204,16 @@ Block.prototype.passRecursively = function(functionName){
  * it reaches an object of the correct type.  Subsequent arguments are passed as well.
  * @param {string} message - Possibly the name of the function to call to send the message
  */
-Block.prototype.passRecursivelyDown = function(message){
+Block.prototype.passRecursivelyDown = function(message) {
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	// If the message is intended for Blocks...
-	if(message === "updateConnectionStatus") {
-		// Call the message and pass in the arguments
-		this.updateConnectionStatus.apply(this, funArgs);
+	// If the message implemented by this Block...
+
+	if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
+		// Implemented by all Blocks, used by Tablet Blocks
+		this.updateAvailableSensors.apply(this, funArgs);
 	}
+
 	// Add "passRecursivelyDown" as the first argument
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	// Call passRecursivelyDown on all children
@@ -12882,7 +19224,7 @@ Block.prototype.passRecursivelyDown = function(message){
  * Instructs the Block to display its result of execution
  * @param {Data} data - The result to display
  */
-Block.prototype.displayResult = function(data){
+Block.prototype.displayResult = function(data) {
 	// Get the string representation of the data
 	let value = data.asString().getValue();
 	// Display it, not as an error
@@ -12894,21 +19236,21 @@ Block.prototype.displayResult = function(data){
  * @param {string} message - The message to show
  * @param {boolean} error - Indicates if the bubble should be formatted like an error
  */
-Block.prototype.displayValue = function(message, error){
+Block.prototype.displayValue = function(message, error) {
 	// Get the coords where to show the bubble
 	let x = this.getAbsX();
 	let y = this.getAbsY();
 	let width = this.relToAbsX(this.width) - x;
 	let height = this.relToAbsY(this.height) - y;
 	// Display a bubble at the location
-	GuiElements.displayValue(message, x, y, width, height, error);
+	ResultBubble.displayValue(message, x, y, width, height, error);
 };
 
 /**
  * Show a bubble with the error
  * @param {string} message - The error to show
  */
-Block.prototype.displayError = function(message){
+Block.prototype.displayError = function(message) {
 	this.displayValue(message, true);
 };
 
@@ -12917,9 +19259,9 @@ Block.prototype.displayError = function(message){
  * @param Class - The subclass of Block to modify
  * @param {string} suffix - The string to append to the normal display response
  */
-Block.setDisplaySuffix = function(Class, suffix){
+Block.setDisplaySuffix = function(Class, suffix) {
 	// Use setDeviceSuffixFn with a function that just returns the suffix
-	Block.setDeviceSuffixFn(Class, function(){
+	Block.setDeviceSuffixFn(Class, function() {
 		return suffix;
 	});
 };
@@ -12929,14 +19271,13 @@ Block.setDisplaySuffix = function(Class, suffix){
  * @param Class - The subclass of Block to modify
  * @param {function} suffixFn - function () -> string that returns the desired suffix
  */
-Block.setDeviceSuffixFn = function(Class, suffixFn){
-	Class.prototype.displayResult = function(data){
+Block.setDeviceSuffixFn = function(Class, suffixFn) {
+	Class.prototype.displayResult = function(data) {
 		// Only valid data is followed by a suffix
-		if(data.isValid) {
+		if (data.isValid) {
 			let value = data.asString().getValue();
 			this.displayValue(value + " " + suffixFn(), false);
-		}
-		else{
+		} else {
 			this.displayValue(data.asString().getValue(), false);
 		}
 	};
@@ -13028,150 +19369,257 @@ function DoubleLoopBlock(x, y, category, midLabelText) {
 DoubleLoopBlock.prototype = Object.create(Block.prototype);
 DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the visual aspects of a Slot.
+ * Abstract class, subclasses correspond to different types of Slots.
+ * @param {Slot} slot - The Slot this SlotShape is a part of.  Used for retrieving category information, etc.
+ * @constructor
  */
-function SlotShape(slot){
+function SlotShape(slot) {
 	this.slot = slot;
+
+	// SlotShapes are only shown when no Blocks are connected to the Slot
 	this.visible = false;
+
+	// The graphics for the shape are created when show() or buildSlot() is called
 	this.built = false;
+
+	// Some slots appear different if the Block that are attached to is inactive (gray)
 	this.active = true;
 }
-SlotShape.setConstants = function(){
+
+/**
+ * SlotShape has no constants yet
+ */
+SlotShape.setConstants = function() {
 
 };
-SlotShape.prototype.show = function(){
-	if(this.visible) return;
+
+/**
+ * Builds the slot and makes it visible
+ */
+SlotShape.prototype.show = function() {
+	if (this.visible) return;
 	this.visible = true;
-	if(!this.built) this.buildSlot();
+	if (!this.built) this.buildSlot();
 	this.slot.parent.group.appendChild(this.group);
 	this.updateDim();
 	this.updateAlign();
 };
-SlotShape.prototype.hide = function(){
-	if(!this.visible) return;
+
+/**
+ * Hides the slot
+ */
+SlotShape.prototype.hide = function() {
+	if (!this.visible) return;
 	this.visible = false;
 	this.group.remove();
 };
-SlotShape.prototype.buildSlot = function(){
-	if(this.built) return;
+
+/**
+ * Creates the Slot's graphics
+ */
+SlotShape.prototype.buildSlot = function() {
+	if (this.built) return;
 	this.built = true;
 	this.group = GuiElements.create.group(0, 0);
+	// Overridden by subclasses
 };
-SlotShape.prototype.move = function(x, y){
+
+/**
+ * Moves the SlotShape to the coords (relative to the Block)
+ * @param {number} x
+ * @param {number} y
+ */
+SlotShape.prototype.move = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
 	GuiElements.move.group(this.group, x, y);
 };
-SlotShape.prototype.updateDim = function(){
+
+/**
+ * Computes the SlotShape's width and height properties
+ */
+SlotShape.prototype.updateDim = function() {
 	DebugOptions.markAbstract();
 };
-SlotShape.prototype.updateAlign = function(){
+
+/**
+ * Moves the SlotShapes sub-parts to line up properly
+ */
+SlotShape.prototype.updateAlign = function() {
 	DebugOptions.markAbstract();
 };
-SlotShape.prototype.makeActive = function(){
-	if(!this.active) {
+
+/**
+ * Makes the SlotShape appear active
+ */
+SlotShape.prototype.makeActive = function() {
+	if (!this.active) {
 		this.active = true;
 	}
+	// Subclasses may change appearance
 };
-SlotShape.prototype.makeInactive = function(){
-	if(this.active){
+
+/**
+ * Makes the SlotShape appear inactive
+ */
+SlotShape.prototype.makeInactive = function() {
+	if (this.active) {
 		this.active = false;
 	}
+	// Subclasses may change appearance
 };
-SlotShape.prototype.setActive = function(active){
-	if(active){
+
+/**
+ * Sets the SlotShape to appear active/inactive
+ * @param {boolean} active
+ */
+SlotShape.prototype.setActive = function(active) {
+	if (active) {
 		this.makeActive();
 	} else {
 		this.makeInactive();
 	}
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Abstract subclass of SlotShape for Slots that allow values (strings/numbers) to be directly entered into the Slot
+ * EditableSlotShape can be controlled by an InputSystem
+ * EditableSlots have text to display the entered value and a rectangular hit box that is slightly larger than
+ * the visual elements of the SlotShape
+ * @param {Slot} slot
+ * @param {string} initialText - The initial value to display
+ * @param {object} dimConstants - An object provided by the subclass with constants for colors/margins
+ * @constructor
  */
-function EditableSlotShape(slot, initialText, dimConstants){
+function EditableSlotShape(slot, initialText, dimConstants) {
 	SlotShape.call(this, slot);
 	this.text = initialText;
 	this.dimConstants = dimConstants;
+
+	// Text can be in one of three color states: selected, deselected, and grayed
 	this.isGray = false;
 }
 EditableSlotShape.prototype = Object.create(SlotShape.prototype);
 EditableSlotShape.prototype.constructor = EditableSlotShape;
-EditableSlotShape.setConstants = function(){
+
+EditableSlotShape.setConstants = function() {
 	const ESS = EditableSlotShape;
-	ESS.charHeight = BlockGraphics.valueText.charHeight;
+	ESS.charHeight = BlockGraphics.valueText.font.charHeight;
 	ESS.hitBox = {};
 	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
 	ESS.hitBox.vMargin = BlockGraphics.hitBox.vMargin;
 };
-EditableSlotShape.prototype.buildSlot = function(){
+
+/**
+ * Create the visual elements of the Slot, but no need to position them correctly
+ */
+EditableSlotShape.prototype.buildSlot = function() {
 	SlotShape.prototype.buildSlot.call(this);
 	this.buildBackground();
 
-	this.textE=BlockGraphics.create.valueText(this.text,this.group);
+	this.textE = BlockGraphics.create.valueText(this.text, this.group);
 	GuiElements.update.color(this.textE, this.dimConstants.valueText.fill);
 	this.hitBoxE = BlockGraphics.create.slotHitBox(this.group);
 
+	// When the SlotShape is touched, tell TR the Slot was touched
 	TouchReceiver.addListenersSlot(this.textE, this.slot);
-	TouchReceiver.addListenersSlot(this.hitBoxE,this.slot);
+	TouchReceiver.addListenersSlot(this.hitBoxE, this.slot);
 };
-EditableSlotShape.prototype.buildBackground = function(){
+
+/**
+ * Create the element representing the background
+ */
+EditableSlotShape.prototype.buildBackground = function() {
 	GuiElements.markAbstract();
 };
 
-EditableSlotShape.prototype.changeText=function(text){
-	this.text=text; //Store value
-	GuiElements.update.text(this.textE,text); //Update text.
+/**
+ * Set the text of the SlotShape
+ * @param {string} text
+ */
+EditableSlotShape.prototype.changeText = function(text) {
+	this.text = text; //Store value
+	GuiElements.update.text(this.textE, text); //Update text.
 	this.updateDim();
 	this.updateAlign();
 };
-EditableSlotShape.prototype.select=function(){
+
+/**
+ * Make the SlotShape appear selected
+ */
+EditableSlotShape.prototype.select = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 };
-EditableSlotShape.prototype.deselect=function(){
+
+/**
+ * Make the SlotShape appear deselected
+ */
+EditableSlotShape.prototype.deselect = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.fill);
+	GuiElements.update.color(this.textE, dC.valueText.fill);
 };
-EditableSlotShape.prototype.grayOutValue=function(){
+
+/**
+ * Make the SlotShape's text grayed out
+ */
+EditableSlotShape.prototype.grayOutValue = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.grayedFill);
+	GuiElements.update.color(this.textE, dC.valueText.grayedFill);
 	this.isGray = true;
 };
-EditableSlotShape.prototype.unGrayOutValue=function(){
+
+/**
+ * Stop the SlotShape's text from being grayed out
+ */
+EditableSlotShape.prototype.unGrayOutValue = function() {
 	const dC = this.dimConstants;
-	GuiElements.update.color(this.textE,dC.valueText.selectedFill);
+	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 	this.isGray = false;
 };
-EditableSlotShape.prototype.updateDim = function(){
+
+/**
+ * Compute the width and height of the SlotShape.  Called agin when text changes
+ */
+EditableSlotShape.prototype.updateDim = function() {
 	const dC = this.dimConstants;
 	this.textW = GuiElements.measure.textWidth(this.textE); //Measure text element.
 	let width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
 	let height = dC.slotHeight; //Has no child, so is just the default height.
-	if(width < dC.slotWidth){ //Check if width is less than the minimum.
+	if (width < dC.slotWidth) { //Check if width is less than the minimum.
 		width = dC.slotWidth;
 	}
 	this.width = width; //Save computations.
 	this.height = height;
 };
-EditableSlotShape.prototype.updateAlign = function(){
+
+/**
+ * Move all the parts of the SlotShape to the correct location
+ */
+EditableSlotShape.prototype.updateAlign = function() {
 	const dC = this.dimConstants;
-	const textX=(this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW/2; //Centers the text horizontally.
-	const textY=EditableSlotShape.charHeight/2+this.height/2; //Centers the text vertically
-	BlockGraphics.update.text(this.textE,textX,textY); //Move the text.
-	const bGHB=BlockGraphics.hitBox; //Get data about the size of the hit box.
-	const hitX=bGHB.hMargin; //Compute its x and y coords.
-	const hitY=bGHB.vMargin;
-	const hitW=this.width+bGHB.hMargin*2; //Compute its width and height.
-	const hitH=this.height+bGHB.vMargin*2;
-	GuiElements.update.rect(this.hitBoxE,hitX,hitY,hitW,hitH); //Move/resize its rectangle.
+	const textX = (this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW / 2; //Centers the text horizontally.
+	const textY = EditableSlotShape.charHeight / 2 + this.height / 2; //Centers the text vertically
+	BlockGraphics.update.text(this.textE, textX, textY); //Move the text.
+	const bGHB = BlockGraphics.hitBox; //Get data about the size of the hit box.
+	const hitX = bGHB.hMargin; //Compute its x and y coords.
+	const hitY = bGHB.vMargin;
+	const hitW = this.width + bGHB.hMargin * 2; //Compute its width and height.
+	const hitH = this.height + bGHB.vMargin * 2;
+	GuiElements.update.rect(this.hitBoxE, hitX, hitY, hitW, hitH); //Move/resize its rectangle.
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics for a RectSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function RectSlotShape(slot, initialText){
+function RectSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, RectSlotShape);
 }
 RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RectSlotShape.prototype.constructor = RectSlotShape;
-RectSlotShape.setConstants = function(){
+
+RectSlotShape.setConstants = function() {
 	const RSS = RectSlotShape;
 	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
 	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
@@ -13185,79 +19633,130 @@ RectSlotShape.setConstants = function(){
 	RSS.slotSelectedFill = BlockGraphics.reporter.slotSelectedFill;
 	RSS.slotFill = BlockGraphics.reporter.slotFill;
 };
-RectSlotShape.prototype.buildSlot=function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-RectSlotShape.prototype.buildBackground = function(){
-	this.slotE = BlockGraphics.create.slot(this.group,3);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.buildBackground = function() {
+	this.slotE = BlockGraphics.create.slot(this.group, 3);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot);
 };
-RectSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-RectSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,3,true);//Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 3, true); //Fix! BG
 };
-RectSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.select = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
-RectSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+RectSlotShape.prototype.deselect = function() {
 	const RSS = RectSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotFill);
+	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics of a HexSlot
+ * @param {Slot} slot
+ * @constructor
  */
-function HexSlotShape(slot){
+function HexSlotShape(slot) {
 	SlotShape.call(this, slot);
 }
 HexSlotShape.prototype = Object.create(SlotShape.prototype);
 HexSlotShape.prototype.constructor = HexSlotShape;
-HexSlotShape.setConstants = function(){
+
+HexSlotShape.setConstants = function() {
 	const HSS = HexSlotShape;
-	const bG=BlockGraphics.predicate;
+	const bG = BlockGraphics.predicate;
 	HSS.slotWidth = bG.slotWidth;
 	HSS.slotHeight = bG.slotHeight;
 };
-HexSlotShape.prototype.buildSlot = function(){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.buildSlot = function() {
 	const HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
-	this.slotE = BlockGraphics.create.slot(this.group,2,this.slot.parent.category,this.active);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot); //Adds event listeners.
+	this.slotE = BlockGraphics.create.slot(this.group, 2, this.slot.parent.category, this.active);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot); //Adds event listeners.
 };
-HexSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.updateDim = function() {
 	const HSS = HexSlotShape;
-	this.width=HSS.slotWidth;
-	this.height=HSS.slotHeight;
+	this.width = HSS.slotWidth;
+	this.height = HSS.slotHeight;
 };
-HexSlotShape.prototype.updateAlign = function(){
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,2,true);
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.updateAlign = function() {
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 2, true);
 };
-HexSlotShape.prototype.makeActive = function(){
-	if(!this.active) {
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.makeActive = function() {
+	if (!this.active) {
 		this.active = true;
 		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
 	}
 };
-HexSlotShape.prototype.makeInactive = function(){
-	if(this.active){
+
+/**
+ * @inheritDoc
+ */
+HexSlotShape.prototype.makeInactive = function() {
+	if (this.active) {
 		this.active = false;
 		BlockGraphics.update.hexSlotGradient(this.slotE, this.slot.parent.category, this.active);
 	}
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the graphics for a RoundSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function RoundSlotShape(slot, initialText){
+function RoundSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, RoundSlotShape);
 }
 RoundSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RoundSlotShape.prototype.constructor = RoundSlotShape;
-RoundSlotShape.setConstants = function(){
+
+RoundSlotShape.setConstants = function() {
 	const RSS = RoundSlotShape;
 	const bG = BlockGraphics.reporter;
 	RSS.slotLMargin = bG.slotHMargin;
@@ -13273,39 +19772,66 @@ RoundSlotShape.setConstants = function(){
 	RSS.slotSelectedFill = bG.slotSelectedFill;
 	RSS.slotFill = bG.slotFill;
 };
-RoundSlotShape.prototype.buildSlot=function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-RoundSlotShape.prototype.buildBackground = function(){
-	this.slotE = BlockGraphics.create.slot(this.group,1);
-	TouchReceiver.addListenersSlot(this.slotE,this.slot);
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.buildBackground = function() {
+	this.slotE = BlockGraphics.create.slot(this.group, 1);
+	TouchReceiver.addListenersSlot(this.slotE, this.slot);
 };
-RoundSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-RoundSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE,0,0,this.width,this.height,1,true);//Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
 };
-RoundSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.select = function() {
 	const RSS = RoundSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotSelectedFill);
+	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
-RoundSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+RoundSlotShape.prototype.deselect = function() {
 	const RSS = RoundSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.color(this.slotE,RSS.slotFill);
+	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
 /**
- * Created by Tom on 6/29/2017.
+ * Controls the DropDown graphic for a DropSlot
+ * @param {Slot} slot
+ * @param {string} initialText
+ * @constructor
  */
-function DropSlotShape(slot, initialText){
+function DropSlotShape(slot, initialText) {
 	EditableSlotShape.call(this, slot, initialText, DropSlotShape);
 }
 DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 DropSlotShape.prototype.constructor = DropSlotShape;
-DropSlotShape.setConstants = function(){
+DropSlotShape.setConstants = function() {
 	const DSS = DropSlotShape;
 	const bG = BlockGraphics.dropSlot;
 	DSS.bgColor = bG.bg;
@@ -13327,52 +19853,156 @@ DropSlotShape.setConstants = function(){
 	DSS.valueText.grayedFill = BlockGraphics.valueText.grayedFill;
 	DSS.valueText.selectedFill = bG.textFill;
 };
-DropSlotShape.prototype.buildSlot = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildSlot = function() {
 	EditableSlotShape.prototype.buildSlot.call(this);
 };
-DropSlotShape.prototype.buildBackground = function(){
-	this.bgE=this.generateBg();
-	this.triE=this.generateTri();
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.buildBackground = function() {
+	this.bgE = this.generateBg();
+	this.triE = this.generateTri();
 };
-DropSlotShape.prototype.generateBg=function(){
+
+/**
+ * Creates the dark, semi-transparent background of the Slot
+ * @return {Node} - The rectangle for the background
+ */
+DropSlotShape.prototype.generateBg = function() {
 	const DSS = DropSlotShape;
-	const bgE=GuiElements.create.rect(this.group);
-	GuiElements.update.color(bgE,DSS.bgColor);
-	GuiElements.update.opacity(bgE,DSS.bgOpacity);
-	TouchReceiver.addListenersSlot(bgE,this.slot);
+	const bgE = GuiElements.create.rect(this.group);
+	GuiElements.update.color(bgE, DSS.bgColor);
+	GuiElements.update.opacity(bgE, DSS.bgOpacity);
+	TouchReceiver.addListenersSlot(bgE, this.slot);
 	return bgE;
 };
-DropSlotShape.prototype.generateTri=function(){
+
+/**
+ * Creates the triangle for the side of the DropSlotShape
+ * @return {Node} - an SVG path object
+ */
+DropSlotShape.prototype.generateTri = function() {
 	const DSS = DropSlotShape;
-	const triE=GuiElements.create.path(this.group);
-	GuiElements.update.color(triE,DSS.triColor);
-	TouchReceiver.addListenersSlot(triE,this.slot);
+	const triE = GuiElements.create.path(this.group);
+	GuiElements.update.color(triE, DSS.triColor);
+	TouchReceiver.addListenersSlot(triE, this.slot);
 	return triE;
 };
-DropSlotShape.prototype.updateDim = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateDim = function() {
 	EditableSlotShape.prototype.updateDim.call(this);
 };
-DropSlotShape.prototype.updateAlign = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.updateAlign = function() {
 	const DSS = DropSlotShape;
+	// Align the text and hit box of the Slot
 	EditableSlotShape.prototype.updateAlign.call(this);
 
-	const triX=this.width - DSS.slotRMargin + DSS.textMargin;
-	const triY=this.height/2 - DSS.triH/2;
-	GuiElements.update.triangle(this.triE,triX,triY,DSS.triW,0-DSS.triH);
+	// Compute the location of the triangle
+	const triX = this.width - DSS.slotRMargin + DSS.textMargin;
+	const triY = this.height / 2 - DSS.triH / 2;
+	GuiElements.update.triangle(this.triE, triX, triY, DSS.triW, 0 - DSS.triH);
 
-	GuiElements.update.rect(this.bgE,0,0,this.width,this.height);
+	// Align the background
+	GuiElements.update.rect(this.bgE, 0, 0, this.width, this.height);
 };
-DropSlotShape.prototype.select = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.select = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.select.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.selectedBgOpacity);
-	GuiElements.update.color(this.triE,DSS.selectedTriColor);
+	GuiElements.update.opacity(this.bgE, DSS.selectedBgOpacity);
+	GuiElements.update.color(this.triE, DSS.selectedTriColor);
 };
-DropSlotShape.prototype.deselect = function(){
+
+/**
+ * @inheritDoc
+ */
+DropSlotShape.prototype.deselect = function() {
 	const DSS = DropSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
-	GuiElements.update.opacity(this.bgE,DSS.bgOpacity);
-	GuiElements.update.color(this.triE,DSS.triColor);
+	GuiElements.update.opacity(this.bgE, DSS.bgOpacity);
+	GuiElements.update.color(this.triE, DSS.triColor);
+};
+/**
+ * An interface for parts of a Block such as LabelText, BlockIcons, and Slots.
+ * @param {Block} parent - The Block this part is a member of
+ * @constructor
+ */
+function BlockPart(parent){
+	DebugOptions.markAbstract();
+	this.parent = parent;
+	this.isSlot = false;
+	this.width = NaN;
+	this.height = NaN;
+}
+
+/**
+ * Move the part to the specified location and returns where the next part should be.
+ * Called by the Block any time it has changed size/shape
+ * @param {number} x - The x coord the part should have relative to the Block it is in
+ * @param {number} y - The y coord ths part should have measured from the center of the part
+ * @return {number} - The width of the part, indicating how much the next item in the Block should be shifted over.
+ */
+BlockPart.prototype.updateAlign = function(x, y) {
+	DebugOptions.markAbstract();
+	return this.width;
+};
+
+/**
+ * Makes this part recalculate its dimensions, which it stores in this.width and this.height for the Block to retrieve.
+ */
+BlockPart.prototype.updateDim = function() {
+	DebugOptions.markAbstract();
+	this.width = NaN;
+	this.height = NaN;
+};
+
+/**
+ * Creates a text representation of the part
+ * @return {string}
+ */
+BlockPart.prototype.textSummary = function() {
+	DebugOptions.markAbstract();
+	return "";
+};
+
+/**
+ * Makes the part appear active
+ */
+BlockPart.prototype.makeActive = function() {
+
+};
+
+/**
+ * Makes the part appear inactive
+ */
+BlockPart.prototype.makeInactive = function() {
+
+};
+
+/**
+ * @param {boolean} active
+ */
+BlockPart.prototype.setActive = function(active) {
+	if(active){
+		this.makeActive();
+	} else {
+		this.makeInactive();
+	}
 };
 /**
  * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
@@ -13414,6 +20044,9 @@ function Slot(parent, key, snapType, outputType){
 	/** @type {SlotShape} */
 	this.slotShape = undefined;
 }
+Slot.prototype = Object.create(BlockPart.prototype);
+Slot.prototype.constructor = Slot;
+
 Slot.setConstants = function(){
 	//The type of Blocks which can be attached to the Slot.
 	Slot.snapTypes = {};
@@ -13831,22 +20464,6 @@ Slot.prototype.deleteList = function(list){
 };
 
 /**
- * Recursively hides device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.hideDeviceDropDowns = function(deviceClass){
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * Recursively shows device dropdowns
- * @param deviceClass - A subclass of the Device class
- */
-Slot.prototype.showDeviceDropDowns = function(deviceClass){
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
  * Recursively counts devices in use of a certain device type
  * @param deviceClass - A subclass of the Device class
  * @returns {number}
@@ -13858,27 +20475,38 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
 	return 0;
 };
 
-Slot.prototype.updateAvailableSensors = function(){
-	this.passRecursively("updateAvailableSensors");
-};
-
-Slot.prototype.updateConnectionStatus = function(){
-
-};
-
+/**
+ * Calls the given function on its children, children's children, etc.
+ * Intercepts messages intended for this object and calls them
+ * @param {string} message - The message to send
+ */
 Slot.prototype.passRecursivelyDown = function(message){
+	const myMessage = message;
 	let funArgs = Array.prototype.slice.call(arguments, 1);
-	if(message === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+	if(myMessage === "updateConnectionStatus" && this.updateConnectionStatus != null) {
+		// Implemented by DeviceDropSlots
 		this.updateConnectionStatus.apply(this, funArgs);
 	}
-	if(message === "renameRecording" && this.renameRecording != null) {
+	if(myMessage === "renameRecording" && this.renameRecording != null) {
+		// Implemented by SoundDropSlots
 		this.renameRecording.apply(this, funArgs);
 	}
-	if(message === "deleteRecording" && this.deleteRecording != null) {
+	if(myMessage === "deleteRecording" && this.deleteRecording != null) {
+		// Implemented by SoundDropSlots
 		this.deleteRecording.apply(this, funArgs);
 	}
+
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
+
+	if(myMessage === "showDeviceDropDowns" && this.showDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.showDeviceDropDowns.apply(this, funArgs);
+	}
+	if(myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
+		// Implemented by DeviceDropSlots
+		this.hideDeviceDropDowns.apply(this, funArgs);
+	}
 };
 
 /**
@@ -13918,7 +20546,7 @@ Slot.prototype.checkListUsed = function(list){
 
 /**
  * Appends information about this Slot to the document
- * @param {DOMParser} xmlDoc - The document to append to
+ * @param {Document} xmlDoc - The document to append to
  * @return {Node} - The XML node of the Slot
  */
 Slot.prototype.createXml = function(xmlDoc){
@@ -13976,19 +20604,45 @@ Slot.prototype.textSummary = function(){
 	DebugOptions.markAbstract();
 };
 
+/**
+ * Makes the Slot appear active
+ */
 Slot.prototype.makeActive = function(){
 	this.slotShape.makeActive();
 };
 
+/**
+ * Makes the Slot appear inactive
+ */
 Slot.prototype.makeInactive = function(){
 	this.slotShape.makeInactive();
 };
+
+/**
+ * Makes the slot appear active/inactive
+ * @param {boolean} active - Whether the Slot should appear active
+ */
 Slot.prototype.setActive = function(active){
 	if(active){
 		this.makeActive();
 	} else {
 		this.makeInactive();
 	}
+};
+
+/**
+ * Called when the SlotShape is tapped
+ */
+Slot.prototype.onTap = function() {
+
+};
+
+/**
+ * Returns whether this Slot is an EditableSlot
+ * @return {boolean}
+ */
+Slot.prototype.isEditable = function() {
+	return false;
 };
 /**
  * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
@@ -14092,6 +20746,13 @@ EditableSlot.prototype.edit = function() {
 };
 
 /**
+ * @inheritDoc
+ */
+EditableSlot.prototype.onTap = function() {
+	this.edit();
+};
+
+/**
  * Generates and displays an interface to modify the Slot's value
  */
 EditableSlot.prototype.createInputSystem = function() {
@@ -14110,6 +20771,7 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
 	}
 	this.enteredData = data;
 	this.changeText(visibleText, true);
+	SaveManager.markEdited();
 };
 
 /**
@@ -14122,7 +20784,16 @@ EditableSlot.prototype.finishEdit = function(data) {
 		this.setData(data, true, true); //Sanitize data, updateDims
 		this.slotShape.deselect();
 		this.editing = false;
+		SaveManager.markEdited();
 	}
+};
+
+/**
+ * Returns whether the Slot is being edited
+ * @return {boolean}
+ */
+EditableSlot.prototype.isEditing = function() {
+	return this.editing;
 };
 
 /**
@@ -14205,7 +20876,7 @@ EditableSlot.prototype.getDataNotFromChild = function() {
 /**
  * Converts the Slot and its children into XML, storing the value in the enteredData as well
  * @inheritDoc
- * @param {DOMParser} xmlDoc
+ * @param {Document} xmlDoc
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {
@@ -14241,6 +20912,14 @@ EditableSlot.prototype.importXml = function(slotNode) {
 EditableSlot.prototype.copyFrom = function(slot) {
 	Slot.prototype.copyFrom.call(this, slot);
 	this.setData(slot.enteredData, false, false);
+};
+
+/**
+ * @inheritDoc
+ * @return {boolean}
+ */
+EditableSlot.prototype.isEditable = function() {
+	return true;
 };
 /**
  * RectSlots generally hold strings and are edited through a prompt dialog
@@ -14355,14 +21034,14 @@ RoundSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * @inheritDoc
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 RoundSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	// Add label to the top of the pad
 	if (this.labelText !== "") {
@@ -14424,8 +21103,8 @@ RoundSlot.prototype.addLabelText = function(text) {
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor
@@ -14524,14 +21203,14 @@ DropSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * Creates an InputPad with a SelectPad with this Slot's options
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
@@ -14586,8 +21265,8 @@ DropSlot.prototype.sanitizeData = function(data) {
  * TODO: reduce redundancy with RoundSlot
  * @param {Block} parent
  * @param {string} key
- * @param {number} [inputType=select]
- * @param {number} [snapType=none]
+ * @param {number|null} [inputType=select]
+ * @param {number|null} [snapType=none]
  * @param {Data} [data=SelectionData.empty()] - The initial Data
  * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
  * @constructor
@@ -14686,14 +21365,14 @@ DropSlot.prototype.populatePad = function(selectPad) {
 
 /**
  * Creates an InputPad with a SelectPad with this Slot's options
- * @return {NewInputPad}
+ * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
 	const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
 	const x2 = this.relToAbsX(this.width);
 	const y2 = this.relToAbsY(this.height);
-	const inputPad = new NewInputPad(x1, x2, y1, y2);
+	const inputPad = new InputPad(x1, x2, y1, y2);
 
 	const selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
@@ -15131,7 +21810,8 @@ DeviceDropSlot.prototype.updateConnectionStatus = function(){
  * @param {InputWidget.SelectPad} selectPad - the pad to populate
  */
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
-	const deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	let deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	deviceCount = Math.max(1, deviceCount);
 	for (let i = 0; i < deviceCount; i++) {
 		// We'll store a 0-indexed value but display it +1.
 		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
@@ -15220,7 +21900,7 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 		const myVal = this.getDataNotFromChild().getValue();
 		return myVal + 1;
 	} else {
-		return 1;
+		return 0;
 	}
 };
 
@@ -15249,6 +21929,15 @@ DeviceDropSlot.prototype.sanitizeNonSelectionData = function(data){
 	return null;
 };
 
+DeviceDropSlot.prototype.makeActive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeActive();
+};
+
+DeviceDropSlot.prototype.makeInactive = function() {
+	DropSlot.prototype.makeActive.call(this);
+	this.labelText.makeInactive();
+};
 /**
  * SoundDropSlots select a sound or recording from a list. Uses the SoundInputPad instead of InputPad
  * @param {Block} parent
@@ -15360,9 +22049,9 @@ NumSlot.prototype.constructor = NumSlot;
 /**
  * Configures the Slot to bound its input to the provided min and max. Used by sanitizeData, and shown on
  * the InputPad with the provided displayUnits in the form "DisplayUnits (min - max)"
- * @param {number} [min]
- * @param {number} [max]
- * @param {string} [displayUnits] - The units/label to show before the min/max
+ * @param {number|null} [min] - The minimum value or null if no bound
+ * @param {number|null} [max] - The maximum value or null if no bound
+ * @param {string|null} [displayUnits] - The units/label to show before the min/max or null if none
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
 	this.minVal = min;
@@ -15591,11 +22280,10 @@ BlockSlot.prototype.changeStack = function(stack) {
 
 /**
  * Recursively tells children to update the stack dimensions
- * @param {BlockStack} stack
  */
-BlockSlot.prototype.updateStackDim = function(stack) {
+BlockSlot.prototype.updateStackDim = function() {
 	if (this.hasChild) {
-		this.child.updateStackDim(stack);
+		this.child.updateStackDim();
 	}
 };
 
@@ -15735,7 +22423,7 @@ BlockSlot.prototype.updateAvailableMessages = function() {
 
 /**
  * Creates XML for this BlockSlot
- * @param {DOMParser} xmlDoc - The document to modify
+ * @param {Document} xmlDoc - The document to modify
  * @return {Node} - The XML representing this BlockSlot
  */
 BlockSlot.prototype.createXml = function(xmlDoc) {
@@ -15832,29 +22520,11 @@ BlockSlot.prototype.checkListUsed = function(list) {
 /**
  * @param deviceClass - a subclass of Device
  */
-BlockSlot.prototype.hideDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("hideDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
-BlockSlot.prototype.showDeviceDropDowns = function(deviceClass) {
-	this.passRecursively("showDeviceDropDowns", deviceClass);
-};
-
-/**
- * @param deviceClass - a subclass of Device
- */
 BlockSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.hasChild) {
 		return this.child.countDevicesInUse(deviceClass);
 	}
 	return 0;
-};
-
-BlockSlot.prototype.updateAvailableSensors = function() {
-	this.passRecursively("updateAvailableSensors");
 };
 
 /**
@@ -15874,94 +22544,178 @@ BlockSlot.prototype.passRecursively = function(functionName) {
 		this.child[functionName].apply(this.child, args);
 	}
 };
-//Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
-
-function LabelText(parent,text){
+/**
+ * Displays text on a block.  For example, the say for secs block has 3 LabelText objects: "say", "for", "secs".
+ * @param {Block} parent - The Block this LabelText is a member of
+ * @param {string} text - The text to display
+ * @constructor
+ */
+function LabelText(parent, text) {
 	DebugOptions.validateNonNull(parent, text);
-	this.text=text;
-	this.width=0;
-	this.height=BlockGraphics.labelText.charHeight;
-	this.x=0;
-	this.y=0;
-	this.parent=parent;
-	this.textE=this.generateText(text);
-	this.isSlot=false;
-	this.visible=true;
+	this.text = text;
+	this.width = 0;   // Computed later with updateDim
+	this.height = BlockGraphics.labelText.font.charHeight;
+	this.x = 0;
+	this.y = 0;
+	this.parent = parent;
+	this.textE = this.generateText(text);
+	this.isSlot = false;   // All BlockParts have this property
+	this.visible = true;
 }
-LabelText.prototype.updateAlign=function(x,y){
-	this.move(x,y+this.height/2);
+LabelText.prototype = Object.create(BlockPart.prototype);
+LabelText.prototype.constructor = LabelText;
+
+/**
+ * @param {number} x - The x coord the text should have relative to the Block it is in
+ * @param {number} y - The y coord ths text should have measured from the center of the text
+ * @return {number} - The width of the text, indicating how much the next item should be shifted over.
+ */
+LabelText.prototype.updateAlign = function(x, y) {
+	this.move(x, y + this.height / 2);
 	return this.width;
 };
-LabelText.prototype.updateDim=function(){
-	if(this.width==0){
+
+/**
+ * Computes the dimensions of the text and stores them in this.height and this.width
+ */
+LabelText.prototype.updateDim = function() {
+	// Dimensions are only computed once, since text can't change
+	if (this.width === 0) {
 		GuiElements.layers.temp.appendChild(this.textE);
-		this.width=GuiElements.measure.textWidth(this.textE);
+		this.width = GuiElements.measure.textWidth(this.textE);
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}
 };
-LabelText.prototype.generateText=function(text){
-	var obj=BlockGraphics.create.labelText(text,this.parent.group);
-	TouchReceiver.addListenersChild(obj,this.parent);
+
+/**
+ * Creates text in the SVG from the specified string
+ * @param {string} text - The text to create
+ * @return {Node} - The SVG text element
+ */
+LabelText.prototype.generateText = function(text) {
+	const obj = BlockGraphics.create.labelText(text, this.parent.group);
+	TouchReceiver.addListenersChild(obj, this.parent);
 	return obj;
 };
-LabelText.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	BlockGraphics.update.text(this.textE,x,y);
+
+/**
+ * Moves text to coords and stores them in this.x and this.y
+ * @param {number} x
+ * @param {number} y
+ */
+LabelText.prototype.move = function(x, y) {
+	this.x = x;
+	this.y = y;
+	BlockGraphics.update.text(this.textE, x, y);
 };
-LabelText.prototype.duplicate=function(parentCopy){
-	return new LabelText(parentCopy,this.text);
-};
-LabelText.prototype.textSummary=function(){
+
+/**
+ * Creates a string representation of the label
+ * @return {string}
+ */
+LabelText.prototype.textSummary = function() {
 	return this.text;
 };
-LabelText.prototype.show=function(){
-	if(!this.visible){
+
+/**
+ * Unhides the label
+ */
+LabelText.prototype.show = function() {
+	if (!this.visible) {
 		this.parent.group.appendChild(this.textE);
-		this.visible=true;
+		this.visible = true;
 	}
 };
-LabelText.prototype.hide=function(){
-	if(this.visible){
+
+/**
+ * Removes the label from the SVG
+ */
+LabelText.prototype.hide = function() {
+	if (this.visible) {
 		this.textE.remove();
-		this.visible=false;
+		this.visible = false;
 	}
 };
-LabelText.prototype.remove=function(){
+
+/**
+ * Intended to permanently remove label from SVG
+ */
+LabelText.prototype.remove = function() {
 	this.textE.remove();
 };
-function BlockIcon(parent,pathId,color,altText,height){
-	this.pathId=pathId;
-	this.color=color;
-	this.altText=altText;
-	this.width=VectorIcon.computeWidth(pathId,height);
-	this.height=height;
-	this.x=0;
-	this.y=0;
-	this.parent=parent;
-	this.icon=new VectorIcon(0,0,pathId,color,height,this.parent.group);
-	TouchReceiver.addListenersChild(this.icon.pathE,this.parent);
-	this.isSlot=false;
+
+LabelText.prototype.makeActive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.fill);
+};
+
+LabelText.prototype.makeInactive = function() {
+	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+};
+/**
+ * Adds a colored icon that can be used as part of a Block. Used in the "when flag tapped" Block
+ * @param {Block} parent - The Block this icon is a part of
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ * @param {string} color - Hex representation of the color to use
+ * @param {string} altText - Text representation of icon is used for creating text summary
+ * @param {number} height - Height of the icon. Icon will automatically center vertically
+ * @constructor
+ */
+function BlockIcon(parent, pathId, color, altText, height) {
+	DebugOptions.validateNonNull(parent, pathId, color, altText);
+	DebugOptions.validateNumbers(height);
+	this.pathId = pathId;
+	this.color = color;
+	this.altText = altText;
+	this.width = VectorIcon.computeWidth(pathId, height);
+	this.height = height;
+	this.x = 0;
+	this.y = 0;
+	this.parent = parent;
+	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
+	this.isSlot = false;
 }
-BlockIcon.prototype.updateAlign=function(x,y){
-	this.move(x,y-this.height/2);
+BlockIcon.prototype = Object.create(BlockPart.prototype);
+BlockIcon.prototype.constructor = BlockIcon;
+
+/**
+ * @param {number} x - The x coord the icon should have relative to the Block it is in
+ * @param {number} y - The y coord ths icon should have measured from the center of the icon
+ * @return {number} - The width of the icon, indicating how much the next item should be shifted over.
+ */
+BlockIcon.prototype.updateAlign = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.move(x, y - this.height / 2);
 	return this.width;
-}
-BlockIcon.prototype.updateDim=function(){
-	
-}
-BlockIcon.prototype.move=function(x,y){
-	this.x=x;
-	this.y=y;
-	this.icon.move(x,y);
-}
-BlockIcon.prototype.duplicate=function(parentCopy){
-	return new BlockIcon(parentCopy,this.pathId,this.color,this.altText,this.height);
-}
-BlockIcon.prototype.textSummary=function(){
+};
+
+/**
+ * BlockIcons are of constant size, so updateDim does nothing
+ */
+BlockIcon.prototype.updateDim = function() {
+
+};
+
+/**
+ * Moves the icon and sets this.x and this.y to the specified coordinates
+ * @param {number} x
+ * @param {number} y
+ */
+BlockIcon.prototype.move = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.x = x;
+	this.y = y;
+	this.icon.move(x, y);
+};
+
+/**
+ * Creates a text representation of the BlockIcon
+ * @return {string}
+ */
+BlockIcon.prototype.textSummary = function() {
 	return this.altText;
-}
+};
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
  * of the defined Blocks are just subclasses of the Blocks here.
  */
@@ -16015,11 +22769,13 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 	const status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			return new ExecutionStatusResult(result.asNum());
+			const num = result.asNum().getValue();
+			const rounded = Math.round(num * 100) / 100;
+			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
 	return new ExecutionStatusRunning(); // Still running
@@ -16088,7 +22844,8 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -16155,7 +22912,8 @@ B_DeviceWithPortsTriLed.prototype.startAction = function() {
 B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage());
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -16216,7 +22974,7 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
 function B_HBLight(x, y) {
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Light");
+	B_HummingbirdSensorBase.call(this, x, y, "light", "Light");
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
@@ -16338,9 +23096,13 @@ function B_FlutterBuzzer(x, y) {
 	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	this.addPart(new NumSlot(this, "NumS_vol", 20, true, true)); //Positive integer.
+	const numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
+	numSlot.addLimits(0, 100);
+	this.addPart(numSlot);
 	this.addPart(new LabelText(this, "Frequency"));
-	this.addPart(new NumSlot(this, "NumS_freq", 10000, true, true)); //Positive integer.
+	const numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
+	numSlot2.addLimits(0, 20000);
+	this.addPart(numSlot2);
 }
 B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
@@ -16362,7 +23124,8 @@ B_FlutterBuzzer.prototype.startAction = function() {
 B_FlutterBuzzer.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			this.displayError(DeviceFlutter.getNotConnectedMessage());
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
 		return new ExecutionStatusDone();
@@ -16463,7 +23226,7 @@ B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_FlutterDistInch.prototype.updateAction = function() {
-	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
@@ -16477,6 +23240,40 @@ B_FlutterDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_FlutterDistInch, "inches");
+// This is a block for debugging only.
+function B_FinchSetAll(x, y) {
+	CommandBlock.call(this, x, y, "finch");
+	this.addPart(new DeviceDropSlot(this,"DDS_1", DeviceFinch));
+	this.addPart(new LabelText(this,"Set All"));
+	this.addPart(new StringSlot(this, "StrS_data", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"));
+}
+B_FinchSetAll.prototype = Object.create(CommandBlock.prototype);
+B_FinchSetAll.prototype.constructor = B_FinchSetAll;
+/* Sends request */
+B_FinchSetAll.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = DeviceFinch.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(DeviceFinch.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Finch was invalid, exit early
+	}
+	const status = this.runMem.requestStatus = {};
+	device.setAll(status, this.slots[1].getData().getValue());
+	return new ExecutionStatusRunning();
+};
+/* Waits for request to finish */
+B_FinchSetAll.prototype.updateAction = function() {
+	if (this.runMem.requestStatus.finished) {
+		if (this.runMem.requestStatus.error) {
+			const status = this.runMem.requestStatus;
+			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+};
 /* This file contains the implementations for Blocks in the control category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
@@ -16533,17 +23330,22 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
+	// Derived from CommandBlock
+	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
+	// Build Block out of things found in the BlockParts folder
 	this.addPart(new LabelText(this, "wait"));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); //Must be positive.
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
 	this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
+	// Each Block has runMem to store information for that execution
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
+	// Extract a positive value from first slot
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
@@ -16742,16 +23544,31 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	const message = this.slots[0].getData().asString().getValue();
-	if (message !== "") {
+	this.runMem.finished = false;
+	const message = this.runMem.message = this.slots[0].getData().asString().getValue();
+	if (message === "") {
+		return new ExecutionStatusDone();
+	}
+	// Broadcasts are throttled if too many unanswered commands are present
+	if (CodeManager.checkBroadcastDelay()) {
 		CodeManager.message = new StringData(message);
 		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
 	}
 	return new ExecutionStatusRunning();
 };
-/* Does nothing */
+/* Broadcasts if the briadcast hasn't been sent yet */
 B_Broadcast.prototype.updateAction = function() {
-	return new ExecutionStatusDone();
+	if (this.runMem.finished) {
+		return new ExecutionStatusDone();
+	}
+	const message = this.runMem.message;
+	if (CodeManager.checkBroadcastDelay()) {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
+	}
+	return new ExecutionStatusRunning();
 };
 
 
@@ -16843,39 +23660,23 @@ B_Ask.prototype.startAction = function() {
 	const mem = this.runMem;
 	mem.question = this.slots[0].getData().getValue();
 	mem.questionDisplayed = false;
-	// If there is already a dialog, we will wait until it is closed.
-	if (HtmlServer.dialogVisible) { 
-		mem.waitingForDialog = true;
-	} else {
-		mem.waitingForDialog = false;
-		// There is a delay between repeated dialogs to give the user time to stop the program.
-		// Check if we can show the dialog or should delay.
-		if (CodeManager.checkDialogDelay()) { 
-			this.showQuestion();
-		}
+	// There is a delay between repeated dialogs to give the user time to stop the program.
+	// Check if we can show the dialog or should delay.
+	if (DialogManager.checkDialogDelay()) {
+		this.showQuestion();
 	}
 	return new ExecutionStatusRunning();
 };
 /* Waits until the dialog has been displayed and completed. */
 B_Ask.prototype.updateAction = function() {
 	const mem = this.runMem;
-	if (mem.waitingForDialog) {   // If we are waiting for a dialog to close...
-		if (!HtmlServer.dialogVisible) {   //...And the dialog is closed...
-			mem.waitingForDialog = false;   //...Then we can stop waiting.
-		}
-		return new ExecutionStatusRunning();   // Still running.
-	} else if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
-		if (CodeManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
-			if (HtmlServer.dialogVisible) {   // Make sure there still isn't a dialog visible.
-				mem.waitingForDialog = true;
-			} else {
-				this.showQuestion();   // Display the question.
-			}
+	if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
+		if (DialogManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
+			this.showQuestion();   // Display the question.
 		}
 		return new ExecutionStatusRunning();   // Still running.
 	} else {
 		if (mem.finished === true) {   // Question has been answered.
-			CodeManager.updateDialogDelay();   // Tell CodeManager to reset the dialog delay clock.
 			return new ExecutionStatusDone();   // Done running
 		} else {   // Waiting on answer from user.
 			return new ExecutionStatusRunning();   // Still running
@@ -16892,15 +23693,13 @@ B_Ask.prototype.showQuestion = function() {
 		} else {
 			CodeManager.answer = new StringData(response, true);   // Store the user's answer in the CodeManager.
 		}
-		callbackFn.mem.finished = true;   // Done waiting.
+		mem.finished = true;   // Done waiting.
 	};
-	callbackFn.mem = mem;
 	const callbackErr = function() {   // If an error occurs...
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
-		callbackErr.mem.finished = true;   // Done waiting.
+		mem.finished = true;   // Done waiting.
 	};
-	callbackErr.mem = mem;
-	HtmlServer.showDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
@@ -16944,7 +23743,7 @@ B_Timer.prototype.startAction = function() {
 	const now = new Date().getTime();
 	const start = CodeManager.timerForSensingBlock;
 	/* Round to 1 decimal */
-	return new ExecutionStatusResult(new NumData(Math.round((now - start) / 100) / 10));
+	return new ExecutionStatusResult(new NumData((now - start) / 1000));
 };
 Block.setDisplaySuffix(B_Timer, "s");
 
@@ -17533,6 +24332,18 @@ B_mathOfNumber.prototype.startAction = function() {
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
 
+/*
+function B_ThrowError(x, y) {
+	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	this.addPart(new LabelText(this, "Throw error!"));
+}
+B_ThrowError.prototype = Object.create(ReporterBlock.prototype);
+B_ThrowError.prototype.constructor = B_ThrowError;
+B_ThrowError.prototype.startAction = function() {
+	DebugOptions.throw("Execution of B_ThrowError");
+};
+*/
+
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
@@ -17813,7 +24624,7 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			var result = status.result.split(" ")[mem.axis];
+			const result = status.result.split(" ")[mem.axis];
 			return new ExecutionStatusResult(new NumData(Number(result), true));
 		} else {
 			if (status.result.length > 0) {
@@ -17873,6 +24684,10 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 	let status = mem.playStatus;
 	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
 	if (done) {
+		if (status.error) {
+			this.displayError("Sound not found");
+			return new ExecutionStatusError();
+		}
 		return new ExecutionStatusDone(); // Done running
 	} else {
 		return new ExecutionStatusRunning(); // Still running
@@ -18085,7 +24900,7 @@ B_Variable.prototype.startAction = function() {
 };
 /**
  * @inheritDoc
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The node for this Block
  */
 B_Variable.prototype.createXml = function(xmlDoc) {
@@ -18130,7 +24945,7 @@ B_Variable.prototype.renameVariable = function(variable) {
 B_Variable.prototype.deleteVariable = function(variable) {
 	if (variable === this.variable) {
 		// Delete occurrences of this Block
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**
@@ -18233,7 +25048,7 @@ B_List.prototype.startAction = function() {
 };
 /**
  * Writes the Block to Xml
- * @param {DOMParser} xmlDoc - The document to write to
+ * @param {Document} xmlDoc - The document to write to
  * @return {Node} - The Block node
  */
 B_List.prototype.createXml = function(xmlDoc) {
@@ -18287,7 +25102,7 @@ B_List.prototype.renameList = function(list) {
  */
 B_List.prototype.deleteList = function(list) {
 	if (list === this.list) {
-		this.unsnap().delete();
+		this.unsnap().remove();
 	}
 };
 /**
@@ -18604,53 +25419,3 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
 	}
 	return new BoolData(false, true);
 };
-function Test(){
-	var stack1;
-	stack1=new BlockStack(new b_whenFlagTapped(20,45));
-	stack1=new BlockStack(new b_Repeat(20,105));
-	stack1=new BlockStack(new b_IfElse(20,165));
-	stack1=new BlockStack(new b_HummingbirdLed(20,225));
-	stack1=new BlockStack(new b_HummingbirdTriLed(20,285));
-	stack1=new BlockStack(new b_SayThis(20,345));
-	stack1=new BlockStack(new b_Wait(20,405));
-	stack1=new BlockStack(new b_WaitUntil(20,465));
-	stack1=new BlockStack(new b_HummingbirdLight(20,525));
-	stack1=new BlockStack(new b_HBTempC(20,585));
-	
-	stack1=new BlockStack(new b_SayForSecs(320,45));
-	stack1=new BlockStack(new b_Say(320,75));
-	stack1=new BlockStack(new b_ThinkForSecs(320,105));
-	stack1=new BlockStack(new b_Think(320,135));
-	stack1=new BlockStack(new b_ChangeSizeBy(320,165));
-	stack1=new BlockStack(new b_SetSizeTo(320,195));
-	stack1=new BlockStack(new b_Size(320,230));
-	stack1=new BlockStack(new b_Show(320,255));
-	stack1=new BlockStack(new b_Hide(320,285));
-	stack1=new BlockStack(new b_GoToFront(320,315));
-	stack1=new BlockStack(new b_GoBackLayers(320,345));
-	stack1=new BlockStack(new b_HummingbirdLed(320,385));
-	stack1=new BlockStack(new b_HummingbirdMotor(320,500));
-	
-	
-	stack1=new BlockStack(new b_DeviceOrientation(620,45));
-	stack1=new BlockStack(new b_Add(620,105));
-	stack1=new BlockStack(new b_Subtract(620,165));
-	stack1=new BlockStack(new b_Multiply(620,225));
-	stack1=new BlockStack(new b_Divide(620,285));
-	stack1=new BlockStack(new b_Round(620,345));
-	stack1=new BlockStack(new b_PickRandom(620,405));
-	stack1=new BlockStack(new b_LessThan(620,465));
-	stack1=new BlockStack(new b_EqualTo(620,525));
-	stack1=new BlockStack(new b_GreaterThan(620,585));
-	
-	stack1=new BlockStack(new b_And(920,45));
-	stack1=new BlockStack(new b_Or(920,105));
-	stack1=new BlockStack(new b_Not(920,165));
-	stack1=new BlockStack(new b_True(920,225));
-	stack1=new BlockStack(new b_False(920,285));
-	stack1=new BlockStack(new b_LetterOf(920,345));
-	stack1=new BlockStack(new b_LengthOf(920,405));
-	stack1=new BlockStack(new b_LessThan(920,465));
-	stack1=new BlockStack(new b_EqualTo(920,525));
-	stack1=new BlockStack(new b_GreaterThan(920,585));
-}

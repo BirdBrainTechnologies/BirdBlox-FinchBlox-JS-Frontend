@@ -54,17 +54,22 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
+	// Derived from CommandBlock
+	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
+	// Build Block out of things found in the BlockParts folder
 	this.addPart(new LabelText(this, "wait"));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); //Must be positive.
+	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
 	this.addPart(new LabelText(this, "secs"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
+	// Each Block has runMem to store information for that execution
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
+	// Extract a positive value from first slot
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
 	return new ExecutionStatusRunning(); //Still running
 };
@@ -263,16 +268,31 @@ B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
-	const message = this.slots[0].getData().asString().getValue();
-	if (message !== "") {
+	this.runMem.finished = false;
+	const message = this.runMem.message = this.slots[0].getData().asString().getValue();
+	if (message === "") {
+		return new ExecutionStatusDone();
+	}
+	// Broadcasts are throttled if too many unanswered commands are present
+	if (CodeManager.checkBroadcastDelay()) {
 		CodeManager.message = new StringData(message);
 		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
 	}
 	return new ExecutionStatusRunning();
 };
-/* Does nothing */
+/* Broadcasts if the briadcast hasn't been sent yet */
 B_Broadcast.prototype.updateAction = function() {
-	return new ExecutionStatusDone();
+	if (this.runMem.finished) {
+		return new ExecutionStatusDone();
+	}
+	const message = this.runMem.message;
+	if (CodeManager.checkBroadcastDelay()) {
+		CodeManager.message = new StringData(message);
+		CodeManager.eventBroadcast(message);
+		this.runMem.finished = true;
+	}
+	return new ExecutionStatusRunning();
 };
 
 
