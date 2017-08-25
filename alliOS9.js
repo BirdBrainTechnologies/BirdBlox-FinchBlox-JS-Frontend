@@ -14895,7 +14895,7 @@ RecordingDialog.prototype.createSaveButton = function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Stop");
 	return button;
 };
 
@@ -22773,7 +22773,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 		} else {
 			var result = new StringData(status.result);
 			var num = result.asNum().getValue();
-			var rounded = Math.round(num * 100) / 100;
+			var rounded = Math.round(num);
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -23060,7 +23060,7 @@ B_HBDistInch.prototype.updateAction = function() {
 	} else {
 		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			var result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -23231,7 +23231,7 @@ B_FlutterDistInch.prototype.updateAction = function() {
 	} else {
 		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			var result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;

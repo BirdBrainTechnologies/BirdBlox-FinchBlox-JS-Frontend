@@ -8,7 +8,7 @@ import re
 import os
 
 my_path = os.path.dirname(os.path.realpath(__file__))
-path_prefix = my_path + "\\"
+path_prefix = my_path + "/"
 
 def get_path_from_line(line):
     line = line.strip()
