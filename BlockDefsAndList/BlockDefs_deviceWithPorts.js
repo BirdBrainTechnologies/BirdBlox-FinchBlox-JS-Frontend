@@ -56,7 +56,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 		} else {
 			const result = new StringData(status.result);
 			const num = result.asNum().getValue();
-			const rounded = Math.round(num * 100) / 100;
+			const rounded = Math.round(num);
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
