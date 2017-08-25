@@ -137,7 +137,7 @@ B_HBDistInch.prototype.updateAction = function() {
 	} else {
 		let resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			let result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
+			let result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;

@@ -1,3 +1,4 @@
+"use strict";
 var FrontendVersion = 393;
 
 
@@ -3524,7 +3525,7 @@ BlockList.catCount = function() {
 /**
  * @param {Category} category
  */
-BlockList.populateCat_tablet = function(category) {
+BlockList.populateCat_tabvar = function(category) {
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -14895,7 +14896,7 @@ RecordingDialog.prototype.createSaveButton = function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Save");
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Stop");
 	return button;
 };
 
@@ -17126,7 +17127,7 @@ CallbackManager.robot.stopDiscover = function(robotTypeId) {
 	return true;
 };
 
-CallbackManager.tablet = {};
+CallbackManager.tabvar = {};
 /**
  * Tells the frontend which sensors the backend supports
  * @param {string} sensorList - A non percent encoded, return separated list of supported sensors
@@ -19209,7 +19210,7 @@ Block.prototype.passRecursivelyDown = function(message) {
 	// If the message implemented by this Block...
 
 	if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
-		// Implemented by all Blocks, used by Tablet Blocks
+		// Implemented by all Blocks, used by Tabvar Blocks
 		this.updateAvailableSensors.apply(this, funArgs);
 	}
 
@@ -22773,7 +22774,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
 		} else {
 			var result = new StringData(status.result);
 			var num = result.asNum().getValue();
-			var rounded = Math.round(num * 100) / 100;
+			var rounded = Math.round(num);
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -23060,7 +23061,7 @@ B_HBDistInch.prototype.updateAction = function() {
 	} else {
 		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			var result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -23231,7 +23232,7 @@ B_FlutterDistInch.prototype.updateAction = function() {
 	} else {
 		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			var result = new NumData((resultMm.getValue() / 2.54).toFixed(1) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -23639,7 +23640,7 @@ B_Stop.prototype.startAction = function() {
 	}
 	return new ExecutionStatusDone();
 };
-/* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
+/* This file contains the implementations for sensing Blocks, which have been moved to the tabvar category
  * TODO: merge with tablet
  */
 
@@ -24327,7 +24328,7 @@ B_mathOfNumber.prototype.startAction = function() {
 	}
 	return new ExecutionStatusResult(new NumData(value, isValid));
 };
-/* This file contains the implementations for Blocks in the tablet category. */
+/* This file contains the implementations for Blocks in the tabvar category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
 
