@@ -1,4 +1,3 @@
-"use strict";
 var FrontendVersion = 393;
 
 
@@ -3525,7 +3524,7 @@ BlockList.catCount = function() {
 /**
  * @param {Category} category
  */
-BlockList.populateCat_tabvar = function(category) {
+BlockList.populateCat_tablet = function(category) {
 	category.addBlockByName("B_DeviceShaken");
 	category.addBlockByName("B_DeviceLocation");
 	category.addBlockByName("B_DeviceSSID");
@@ -17127,7 +17126,7 @@ CallbackManager.robot.stopDiscover = function(robotTypeId) {
 	return true;
 };
 
-CallbackManager.tabvar = {};
+CallbackManager.tablet = {};
 /**
  * Tells the frontend which sensors the backend supports
  * @param {string} sensorList - A non percent encoded, return separated list of supported sensors
@@ -19210,7 +19209,7 @@ Block.prototype.passRecursivelyDown = function(message) {
 	// If the message implemented by this Block...
 
 	if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
-		// Implemented by all Blocks, used by Tabvar Blocks
+		// Implemented by all Blocks, used by Tablet Blocks
 		this.updateAvailableSensors.apply(this, funArgs);
 	}
 
@@ -23640,7 +23639,7 @@ B_Stop.prototype.startAction = function() {
 	}
 	return new ExecutionStatusDone();
 };
-/* This file contains the implementations for sensing Blocks, which have been moved to the tabvar category
+/* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
  */
 
@@ -24328,7 +24327,7 @@ B_mathOfNumber.prototype.startAction = function() {
 	}
 	return new ExecutionStatusResult(new NumData(value, isValid));
 };
-/* This file contains the implementations for Blocks in the tabvar category. */
+/* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
 
