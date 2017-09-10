@@ -167,7 +167,7 @@ TitleBar.makeTitleText = function() {
 TitleBar.setText = function(text) {
 	const TB = TitleBar;
 	if (text == null) text = TB.prevTitleText;
-  else TB.prevTitleText = text;
+	else TB.prevTitleText = text;
 	TB.titleText = text;
 	TitleBar.updateText();
 };
