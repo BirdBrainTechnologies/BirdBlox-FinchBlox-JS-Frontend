@@ -5933,6 +5933,7 @@ function TitleBar() {
 	var TB = TitleBar;
 	TB.titleTextVisble = true;
 	TB.titleText = "";
+	TB.prevTitleText = "";
 	TB.debugEnabled = false;
 	TitleBar.createBar();
 	TitleBar.makeButtons();
@@ -6091,7 +6092,8 @@ TitleBar.makeTitleText = function() {
  */
 TitleBar.setText = function(text) {
 	var TB = TitleBar;
-	if (text == null) text = "";
+	if (text == null) text = TB.prevTitleText;
+	else TB.prevTitleText = text;
 	TB.titleText = text;
 	TitleBar.updateText();
 };
