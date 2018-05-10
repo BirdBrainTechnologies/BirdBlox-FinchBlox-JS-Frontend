@@ -250,6 +250,26 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 /**
  * @param {CollapsibleItem} collapsibleItem
  */
+BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_HMTriLed");
+	collapsibleItem.addBlockByName("B_HMLed")
+	collapsibleItem.addBlockByName("B_HMServo");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_microbit = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ *//*
 BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterServo");
 	collapsibleItem.addBlockByName("B_FlutterTriLed");
@@ -265,7 +285,7 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterSoil");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
-};
+};*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
