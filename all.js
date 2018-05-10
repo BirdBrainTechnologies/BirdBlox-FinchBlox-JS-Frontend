@@ -2199,7 +2199,7 @@ DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
 Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
 /**
- * Manages communication with a Hummingbird
+ * Manages communication with a Hummingbird Bit
  * @param {string} name
  * @param {string} id
  * @constructor
@@ -3754,6 +3754,8 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HMTriLed");
 	collapsibleItem.addBlockByName("B_HMLed")
 	collapsibleItem.addBlockByName("B_HMServo");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HMKnob");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -3819,6 +3821,8 @@ Colors.setCategory = function() {
 	Colors.categoryColors = {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
+		"hummingbirdbit": "#FF9600",
+		"microbit": "#FF9600",
 		"flutter": "#FF9600",
 		"finch": "#FF9600",
 		"sound": "#EE00FF",
@@ -3909,6 +3913,7 @@ Colors.getColor = function(category) {
 Colors.getGradient = function(category) {
 	return "url(#gradient_" + category + ")";
 };
+
 /**
  * Contains data about a font.  Immutable and typically generated using the Font.uiFont(size) function.
  * Properties are accessed directly to be read, but should not be assigned.  charHeight is a computed property that
@@ -23144,6 +23149,19 @@ function B_HMTriLed(x, y) {
 }
 B_HMTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_HMTriLed.prototype.constructor = B_HMTriLed;
+
+
+function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
+}
+B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
+
+function B_HMKnob(x, y) {
+	B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
+}
+B_HMKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
+B_HMKnob.prototype.constructor = B_HMKnob;
 
 
 

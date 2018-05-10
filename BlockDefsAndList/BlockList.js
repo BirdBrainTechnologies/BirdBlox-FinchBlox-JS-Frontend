@@ -254,6 +254,8 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HMTriLed");
 	collapsibleItem.addBlockByName("B_HMLed")
 	collapsibleItem.addBlockByName("B_HMServo");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_HMKnob");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };

@@ -24,3 +24,16 @@ function B_HMTriLed(x, y) {
 }
 B_HMTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_HMTriLed.prototype.constructor = B_HMTriLed;
+
+
+function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
+}
+B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
+
+function B_HMKnob(x, y) {
+	B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
+}
+B_HMKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
+B_HMKnob.prototype.constructor = B_HMKnob;

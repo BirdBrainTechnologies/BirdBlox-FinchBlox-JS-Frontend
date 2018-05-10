@@ -21,6 +21,8 @@ Colors.setCategory = function() {
 	Colors.categoryColors = {
 		"robots": "#FF9600",
 		"hummingbird": "#FF9600",
+		"hummingbirdbit": "#FF9600",
+		"microbit": "#FF9600",
 		"flutter": "#FF9600",
 		"finch": "#FF9600",
 		"sound": "#EE00FF",

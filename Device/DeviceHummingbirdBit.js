@@ -1,5 +1,5 @@
 /**
- * Manages communication with a Hummingbird
+ * Manages communication with a Hummingbird Bit
  * @param {string} name
  * @param {string} id
  * @constructor
