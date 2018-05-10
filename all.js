@@ -1569,7 +1569,8 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
  * @return {Array}
  */
 Device.getTypeList = function() {
-	return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
+	//return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
+	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
 };
 
 /**
@@ -1579,6 +1580,7 @@ Device.stopAll = function() {
 	const request = new HttpRequestBuilder("robot/stopAll");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
+
 /**
  * Represents a Device that has ports for its inputs and outputs.
  * @param {string} name
@@ -2196,6 +2198,32 @@ function DeviceHummingbird(name, id) {
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
 Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
+/**
+ * Manages communication with a Hummingbird
+ * @param {string} name
+ * @param {string} id
+ * @constructor
+ */
+function DeviceHummingbirdBit(name, id) {
+	DeviceWithPorts.call(this, name, id);
+}
+DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
+DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
+Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit", "HM");
+
+/**
+ * Manages communication with a Hummingbird
+ * @param {string} name
+ * @param {string} id
+ * @constructor
+ */
+function DeviceMicroBit(name, id) {
+	DeviceWithPorts.call(this, name, id);
+}
+DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
+DeviceMicroBit.prototype.constructor = DeviceMicroBit;
+Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
+
 /**
  * Manages communication with a Flutter
  * @param {string} name
@@ -3722,6 +3750,26 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 /**
  * @param {CollapsibleItem} collapsibleItem
  */
+BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_HMTriLed");
+	collapsibleItem.addBlockByName("B_HMLed")
+	collapsibleItem.addBlockByName("B_HMServo");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
+BlockList.populateItem_microbit = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ *//*
 BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterServo");
 	collapsibleItem.addBlockByName("B_FlutterTriLed");
@@ -3737,7 +3785,7 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterSoil");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
-};
+};*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
@@ -3747,6 +3795,7 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
+
 
 /*
  * Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
@@ -23069,6 +23118,33 @@ B_HBDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");
+/* This file contains the implementations of hummingbird bit blocks
+ */
+function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
+		minVal, maxVal, displayUnits);
+}
+B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+
+function B_HMServo(x, y) {
+	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
+}
+B_HMServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_HMServo.prototype.constructor = B_HMServo;
+
+function B_HMLed(x, y) {
+	B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
+}
+B_HMLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_HMLed.prototype.constructor = B_HMLed;
+
+function B_HMTriLed(x, y) {
+	B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbirdBit, 2);
+}
+B_HMTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
+B_HMTriLed.prototype.constructor = B_HMTriLed;
+
 
 
 /* This file contains implementations of flutter Blocks */
