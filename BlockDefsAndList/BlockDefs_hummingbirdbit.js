@@ -7,11 +7,21 @@ function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
-function B_HMServo(x, y) {
-	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
+function B_HMPositionServo(x, y) {
+	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Position Servo", 4, "angle", 0, 180, "Angle");
+
+  this.addPart(new LabelText(this,'\xBA'));
 }
-B_HMServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
-B_HMServo.prototype.constructor = B_HMServo;
+B_HMPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_HMPositionServo.prototype.constructor = B_HMPositionServo;
+
+function B_HMRotationServo(x, y) {
+	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Rotation Servo", 4, "percent", -100, 100, "Percent");
+
+  this.addPart(new LabelText(this,"%"));
+}
+B_HMRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_HMRotationServo.prototype.constructor = B_HMRotationServo;
 
 function B_HMLed(x, y) {
 	B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
@@ -86,18 +96,4 @@ B_HummingbirdBitSensors.prototype.startAction=function(){
 	}
 };
 /* Returns the result of the request */
-B_HummingbirdBitSensors.prototype.updateAction=function(){
-	const status = this.runMem.requestStatus;
-	if (status.finished) {
-		if(status.error){
-			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-			return new ExecutionStatusError();
-		} else {
-			const result = new StringData(status.result);
-			const num = result.asNum().getValue();
-			const rounded = Math.round(num);
-			return new ExecutionStatusResult(new NumData(rounded));
-		}
-	}
-	return new ExecutionStatusRunning(); // Still running
-};
+B_HummingbirdBitSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;

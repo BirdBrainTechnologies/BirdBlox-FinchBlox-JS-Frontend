@@ -253,7 +253,8 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HMTriLed");
 	collapsibleItem.addBlockByName("B_HMLed")
-	collapsibleItem.addBlockByName("B_HMServo");
+	collapsibleItem.addBlockByName("B_HMPositionServo");
+	collapsibleItem.addBlockByName("B_HMRotationServo");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_HummingbirdBitSensors");
 	collapsibleItem.trimBottom();
