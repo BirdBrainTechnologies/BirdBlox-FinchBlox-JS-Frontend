@@ -37,3 +37,67 @@ function B_HMKnob(x, y) {
 }
 B_HMKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
 B_HMKnob.prototype.constructor = B_HMKnob;
+
+
+
+
+function B_HummingbirdBitSensors(x, y){
+	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = ""; //TODO: perhapse remove this
+	this.numberOfPorts = 3;
+
+  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
+  dS.addOption(new SelectionData("Distance (cm)", "distance"));
+  dS.addOption(new SelectionData("Dial", "sensor"));
+  dS.addOption(new SelectionData("Light", "light"));
+  dS.addOption(new SelectionData("Sound", "sound"));
+  dS.addOption(new SelectionData("Other (V)", "other"));
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+  this.addPart(dS);
+	this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
+}
+B_HummingbirdBitSensors.prototype = Object.create(ReporterBlock.prototype);
+B_HummingbirdBitSensors.prototype.constructor = B_HummingbirdBitSensors;
+/* Sends the request for the sensor data. */
+B_HummingbirdBitSensors.prototype.startAction=function(){
+	let deviceIndex = this.slots[0].getData().getValue();
+  let sensorSelection = this.slots[1].getData().getValue();
+  console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = this.slots[2].getData().getValue();
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, sensorSelection, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+/* Returns the result of the request */
+B_HummingbirdBitSensors.prototype.updateAction=function(){
+	const status = this.runMem.requestStatus;
+	if (status.finished) {
+		if(status.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		} else {
+			const result = new StringData(status.result);
+			const num = result.asNum().getValue();
+			const rounded = Math.round(num);
+			return new ExecutionStatusResult(new NumData(rounded));
+		}
+	}
+	return new ExecutionStatusRunning(); // Still running
+};
