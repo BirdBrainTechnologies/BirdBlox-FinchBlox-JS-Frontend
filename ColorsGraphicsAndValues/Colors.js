@@ -15,6 +15,7 @@ Colors.setCommon = function() {
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
+	Colors.red = "#FF0000";
 };
 
 Colors.setCategory = function() {

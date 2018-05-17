@@ -61,3 +61,31 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
 	request.addParam("blue", blue);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
+
+/**
+ * Issues a request to set the buzzer.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {number} note - The note number to play (0-127)
+ * @param {number} beats - The duration of the note
+ */
+DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
+	const request = new HttpRequestBuilder("robot/out/buzzer");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("note", note);
+	request.addParam("duration", duration);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+/**
+ * Issues a request to set the led array.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {String} ledStatusString - the on/off status to set for each led in the array represented as a string of 0's and 1's
+ */
+DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
+	const request = new HttpRequestBuilder("robot/out/ledArray");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("ledArrayStatus", ledStatusString);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};

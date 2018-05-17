@@ -39,6 +39,7 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 	this.stack = null; //It has no Stack yet.
 	this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
 	this.height = 0; //Will be set later when the Block's dimensions are updated.
+	this.lineHeight = []; //For blocks that have parts that wrap to multiple lines.
 	this.width = 0;
 	this.runMem = function() {}; //serves as a place for the block to store info while running
 	if (this.bottomOpen) {
@@ -375,18 +376,37 @@ Block.prototype.updateDim = function() {
 	}
 	let width = 0;
 	width += bG.hMargin; //The left margin of the Block.
+	let lineWidth = width;
 	let height = 0;
+	let currentLine = 0;
+	let lineHeight = [];
+	lineHeight[currentLine] = 0;
 	for (let i = 0; i < this.parts.length; i++) {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
-		width += this.parts[i].width; //Fill the width of the middle of the Block
-		if (this.parts[i].height > height) { //The height of the Block is the height of the tallest member.
-			height = this.parts[i].height;
+		lineWidth += this.parts[i].width; //Fill the width of the middle of the Block
+		if (this.parts[i].height > lineHeight[currentLine]) { //The height of the Block is the height of the tallest member.
+			lineHeight[currentLine] = this.parts[i].height;
 		}
-		if (i < this.parts.length - 1) {
-			width += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		if (i < this.parts.length - 1 && !this.parts[i].isEndOfLine) {
+			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		}
+		if (lineWidth > width) { //The block width is the width of the longest line of parts
+			width = lineWidth
+		}
+		if (this.parts[i].isEndOfLine){
+			//get ready to start a new line with the next block
+			if ( (lineHeight[currentLine] + 2 * bG.vMargin) < bG.height){//If the height is less than the min height, fix it.
+				lineHeight[currentLine] = bG.height - 2 * bG.vMargin;
+			}
+			height += lineHeight[currentLine] + bG.vMargin;
+			currentLine += 1;
+			lineHeight[currentLine] = 0;
+			lineWidth = bG.hMargin;
 		}
 	}
+	this.lineHeight = lineHeight; //Save the line heights for aligning parts
 	width += bG.hMargin; //Add the right margin of the Block.
+	height += lineHeight[currentLine] //Add the height of the last line of blocks
 	height += 2 * bG.vMargin; //Add the bottom and top margins of the Block.
 	if (height < bG.height) { //If the height is less than the min height, fix it.
 		height = bG.height;
@@ -452,18 +472,24 @@ Block.prototype.updateAlign = function(x, y) {
 Block.prototype.updateAlignRI = function(x, y) {
 	this.move(x, y); //Move to the desired location
 	let bG = BlockGraphics.getType(this.type);
-	let yCoord = this.height / 2; //Compute coords for internal parts.
+	if (this.bottomOpen || this.topOpen) {
+		bG = BlockGraphics.command;
+	}
+	let currentLine = 0;
+	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
 		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
 	}
-	if (this.bottomOpen || this.topOpen) {
-		bG = BlockGraphics.command;
-	}
 	xCoord += bG.hMargin;
 	for (let i = 0; i < this.parts.length; i++) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
-		if (i < this.parts.length - 1) {
+		if (this.parts[i].isEndOfLine){
+			xCoord = bG.hMargin;
+			currentLine += 1;
+			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
+			yCoord += bG.vMargin;
+		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}
 	}
@@ -519,7 +545,7 @@ Block.prototype.findBestFit = function() {
 		let snapBLeft = x - snap.left;
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
-		let snapBHeight = snap.top + height + snap.bottom;		
+		let snapBHeight = snap.top + height + snap.bottom;
 		//Check if point falls in a rectangular range.
 		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.

@@ -1570,7 +1570,7 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
  */
 Device.getTypeList = function() {
 	//return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
+	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit];
 };
 
 /**
@@ -1642,6 +1642,34 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
 	request.addParam("red", red);
 	request.addParam("green", green);
 	request.addParam("blue", blue);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+/**
+ * Issues a request to set the buzzer.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {number} note - The note number to play (0-127)
+ * @param {number} beats - The duration of the note
+ */
+DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
+	const request = new HttpRequestBuilder("robot/out/buzzer");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("note", note);
+	request.addParam("duration", duration);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+/**
+ * Issues a request to set the led array.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {String} ledStatusString - the on/off status to set for each led in the array represented as a string of 0's and 1's
+ */
+DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
+	const request = new HttpRequestBuilder("robot/out/ledArray");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("ledArrayStatus", ledStatusString);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
@@ -2210,7 +2238,7 @@ function DeviceHummingbirdBit(name, id) {
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
-Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit", "HM");
+Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit", "BB");
 
 /**
  * Manages communication with a Hummingbird
@@ -3752,12 +3780,15 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_HMTriLed");
-	collapsibleItem.addBlockByName("B_HMLed")
-	collapsibleItem.addBlockByName("B_HMPositionServo");
-	collapsibleItem.addBlockByName("B_HMRotationServo");
+	collapsibleItem.addBlockByName("B_BBTriLed");
+	collapsibleItem.addBlockByName("B_BBLed")
+	collapsibleItem.addBlockByName("B_BBPositionServo");
+	collapsibleItem.addBlockByName("B_BBRotationServo");
+	collapsibleItem.addBlockByName("B_BBBuzzer");
+	collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addSpace();
-	collapsibleItem.addBlockByName("B_HummingbirdBitSensors");
+	collapsibleItem.addBlockByName("B_BBSensors");
+	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -3766,10 +3797,21 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_microbit = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.addBlockByName("B_MBLedArray");
+	collapsibleItem.addSpace();
+	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ *//*
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
@@ -3791,15 +3833,6 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.finalize();
 };*/
 
-/**
- * @param {CollapsibleItem} collapsibleItem
- */
-BlockList.populateItem_finch = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_FinchSetAll");
-	collapsibleItem.trimBottom();
-	collapsibleItem.finalize();
-};
-
 
 /*
  * Static.  Holds constant values for colors used throughout the UI (lightGray, darkGray, black, white)
@@ -3817,6 +3850,7 @@ Colors.setCommon = function() {
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
+	Colors.red = "#FF0000";
 };
 
 Colors.setCategory = function() {
@@ -18159,6 +18193,7 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 	this.stack = null; //It has no Stack yet.
 	this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
 	this.height = 0; //Will be set later when the Block's dimensions are updated.
+	this.lineHeight = []; //For blocks that have parts that wrap to multiple lines.
 	this.width = 0;
 	this.runMem = function() {}; //serves as a place for the block to store info while running
 	if (this.bottomOpen) {
@@ -18495,18 +18530,37 @@ Block.prototype.updateDim = function() {
 	}
 	let width = 0;
 	width += bG.hMargin; //The left margin of the Block.
+	let lineWidth = width;
 	let height = 0;
+	let currentLine = 0;
+	let lineHeight = [];
+	lineHeight[currentLine] = 0;
 	for (let i = 0; i < this.parts.length; i++) {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
-		width += this.parts[i].width; //Fill the width of the middle of the Block
-		if (this.parts[i].height > height) { //The height of the Block is the height of the tallest member.
-			height = this.parts[i].height;
+		lineWidth += this.parts[i].width; //Fill the width of the middle of the Block
+		if (this.parts[i].height > lineHeight[currentLine]) { //The height of the Block is the height of the tallest member.
+			lineHeight[currentLine] = this.parts[i].height;
 		}
-		if (i < this.parts.length - 1) {
-			width += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		if (i < this.parts.length - 1 && !this.parts[i].isEndOfLine) {
+			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
+		}
+		if (lineWidth > width) { //The block width is the width of the longest line of parts
+			width = lineWidth
+		}
+		if (this.parts[i].isEndOfLine){
+			//get ready to start a new line with the next block
+			if ( (lineHeight[currentLine] + 2 * bG.vMargin) < bG.height){//If the height is less than the min height, fix it.
+				lineHeight[currentLine] = bG.height - 2 * bG.vMargin;
+			}
+			height += lineHeight[currentLine] + bG.vMargin;
+			currentLine += 1;
+			lineHeight[currentLine] = 0;
+			lineWidth = bG.hMargin;
 		}
 	}
+	this.lineHeight = lineHeight; //Save the line heights for aligning parts
 	width += bG.hMargin; //Add the right margin of the Block.
+	height += lineHeight[currentLine] //Add the height of the last line of blocks
 	height += 2 * bG.vMargin; //Add the bottom and top margins of the Block.
 	if (height < bG.height) { //If the height is less than the min height, fix it.
 		height = bG.height;
@@ -18572,18 +18626,24 @@ Block.prototype.updateAlign = function(x, y) {
 Block.prototype.updateAlignRI = function(x, y) {
 	this.move(x, y); //Move to the desired location
 	let bG = BlockGraphics.getType(this.type);
-	let yCoord = this.height / 2; //Compute coords for internal parts.
+	if (this.bottomOpen || this.topOpen) {
+		bG = BlockGraphics.command;
+	}
+	let currentLine = 0;
+	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
 		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
 	}
-	if (this.bottomOpen || this.topOpen) {
-		bG = BlockGraphics.command;
-	}
 	xCoord += bG.hMargin;
 	for (let i = 0; i < this.parts.length; i++) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
-		if (i < this.parts.length - 1) {
+		if (this.parts[i].isEndOfLine){
+			xCoord = bG.hMargin;
+			currentLine += 1;
+			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
+			yCoord += bG.vMargin;
+		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}
 	}
@@ -18639,7 +18699,7 @@ Block.prototype.findBestFit = function() {
 		let snapBLeft = x - snap.left;
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
-		let snapBHeight = snap.top + height + snap.bottom;		
+		let snapBHeight = snap.top + height + snap.bottom;
 		//Check if point falls in a rectangular range.
 		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
@@ -19338,6 +19398,7 @@ Block.setDeviceSuffixFn = function(Class, suffixFn) {
 		}
 	};
 };
+
 /**
  * Child of Block. The CommandBlock is for Blocks that return no value but have no BlockSlots.
  * @constructor
@@ -20004,6 +20065,7 @@ function BlockPart(parent){
 	this.isSlot = false;
 	this.width = NaN;
 	this.height = NaN;
+	this.isEndOfLine = false; //Set to true if the next block part should rap to next line
 }
 
 /**
@@ -20060,6 +20122,7 @@ BlockPart.prototype.setActive = function(active) {
 		this.makeInactive();
 	}
 };
+
 /**
  * Slot is an abstract class that represents a space on a Block where data can be entered and other Blocks can be
  * attached.
@@ -22224,6 +22287,36 @@ IndexSlot.prototype.sanitizeData = function(data) {
 	return data;
 };
 /**
+ * ToggleSlot is a subclass of BoolSlot. Though not a subclass of EditableSlot,
+ * it is editable in that you can toggle the boolean value.
+ *
+ * @constructor
+ * @param {Block} parent
+ * @param {string} key
+ */
+ function ToggleSlot(parent,key){
+ 	//Make BoolSlot.
+ 	BoolSlot.call(this,parent,key);
+
+  this.isTrue = false
+ }
+ ToggleSlot.prototype = Object.create(BoolSlot.prototype);
+ ToggleSlot.prototype.constructor = ToggleSlot;
+
+ ToggleSlot.prototype.onTap = function() {
+   this.isTrue = !this.isTrue
+   if (this.isTrue) {
+     this.slotShape.slotE.setAttributeNS(null, "fill", Colors.red);
+   } else {
+     BlockGraphics.update.hexSlotGradient(this.slotShape.slotE, this.parent.category, this.slotShape.active);
+   }
+ }
+
+ ToggleSlot.prototype.getDataNotFromChild = function() {
+ 	return new BoolData(this.isTrue, true); //The Slot is empty. Return stored value
+ };
+
+/**
  * BlockSlots are included in Blocks like if/else and loops to hold a stack of Blocks inside the slot. They are very
  * different from Slots, and are not a subclass of Slot. They do pass messages recursively to their children, and
  * compute the height of the stack of children they contain.
@@ -23126,8 +23219,81 @@ B_HBDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");
+/* This file contains the implementations of MicroBit blocks
+ */
+
+//MARK: outputs
+function B_MicroBitLedArray(x, y, deviceClass) {
+  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+	this.displayName = "LED Array";
+
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  const label = new LabelText(this,this.displayName);
+  label.isEndOfLine = true;
+	this.addPart(label);
+
+  for (let i = 0; i < 5; i++ ){
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    const lastLed = new ToggleSlot(this, "Toggle_led");
+    lastLed.isEndOfLine = true;
+    this.addPart(lastLed);
+  }
+
+
+}
+B_MicroBitLedArray.prototype = Object.create(CommandBlock.prototype);
+B_MicroBitLedArray.prototype.constructor = B_MicroBitLedArray;
+/* Sends the request */
+B_MicroBitLedArray.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+
+  let ledStatusString = "";
+  for (let i = 0; i < 25; i++){
+    if (this.slots[i + 1].getData().getValue()){
+      ledStatusString += "1";
+    } else {
+      ledStatusString += "0";
+    }
+  }
+
+	let mem = this.runMem;
+  mem.requestStatus = {};
+	mem.requestStatus.finished = false;
+	mem.requestStatus.error = false;
+	mem.requestStatus.result = null;
+
+	device.setLedArray(mem.requestStatus, ledStatusString);
+	return new ExecutionStatusRunning();
+}
+/* Waits until the request completes */
+B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
+
+function B_MBLedArray(x,y){
+  B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
+}
+B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_MBLedArray.prototype.constructor = B_MBLedArray;
+
+//MARK: inputs
+function B_MBButton(x, y) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
+}
+B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
 /* This file contains the implementations of hummingbird bit blocks
  */
+
+ //MARK: hummingbird bit outputs
 function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
 	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
 		minVal, maxVal, displayUnits);
@@ -23135,51 +23301,107 @@ function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
-function B_HMPositionServo(x, y) {
+function B_BBPositionServo(x, y) {
 	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Position Servo", 4, "angle", 0, 180, "Angle");
 
   this.addPart(new LabelText(this,'\xBA'));
 }
-B_HMPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
-B_HMPositionServo.prototype.constructor = B_HMPositionServo;
+B_BBPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
-function B_HMRotationServo(x, y) {
+function B_BBRotationServo(x, y) {
 	B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Rotation Servo", 4, "percent", -100, 100, "Percent");
 
   this.addPart(new LabelText(this,"%"));
 }
-B_HMRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
-B_HMRotationServo.prototype.constructor = B_HMRotationServo;
+B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
-function B_HMLed(x, y) {
+function B_BBLed(x, y) {
 	B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
-}
-B_HMLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
-B_HMLed.prototype.constructor = B_HMLed;
 
-function B_HMTriLed(x, y) {
+  this.addPart(new LabelText(this,"%"));
+}
+B_BBLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
+B_BBLed.prototype.constructor = B_BBLed;
+
+function B_BBTriLed(x, y) {
 	B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbirdBit, 2);
 }
-B_HMTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
-B_HMTriLed.prototype.constructor = B_HMTriLed;
+B_BBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
+B_BBTriLed.prototype.constructor = B_BBTriLed;
 
 
+
+function B_BBBuzzer(x, y){
+	CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = "Play note";
+  this.minNote = 0
+  this.maxNote = 127
+  this.minBeat = 0
+  this.maxBeat = 16
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+	const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+	noteSlot.addLimits(this.minNote, this.maxNote, "Note");
+	this.addPart(noteSlot);
+  this.addPart(new LabelText(this,"for"));
+  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
+  this.addPart(beatsSlot);
+  this.addPart(new LabelText(this,"Beats"));
+}
+B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_BBBuzzer.prototype.constructor = B_BBBuzzer;
+/* Sends the request */
+B_BBBuzzer.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+	let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+  let soundDuration = CodeManager.beatsToMs(beats);
+
+	mem.requestStatus = {};
+	mem.requestStatus.finished = false;
+	mem.requestStatus.error = false;
+	mem.requestStatus.result = null;
+
+	device.setBuzzer(mem.requestStatus, note, soundDuration);
+	return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
+
+//MARK: microbit outputs
+function B_BBLedArray(x,y){
+  B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_BBLedArray.prototype.constructor = B_BBLedArray;
+
+
+
+//MARK: hummingbird bit sensors
 function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
 	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
 }
 B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
 
-function B_HMKnob(x, y) {
+function B_BBKnob(x, y) {
 	B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
 }
-B_HMKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
-B_HMKnob.prototype.constructor = B_HMKnob;
+B_BBKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
+B_BBKnob.prototype.constructor = B_BBKnob;
 
-
-
-
-function B_HummingbirdBitSensors(x, y){
+function B_BBSensors(x, y){
 	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
 	this.displayName = ""; //TODO: perhapse remove this
@@ -23197,10 +23419,10 @@ function B_HummingbirdBitSensors(x, y){
   this.addPart(dS);
 	this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
-B_HummingbirdBitSensors.prototype = Object.create(ReporterBlock.prototype);
-B_HummingbirdBitSensors.prototype.constructor = B_HummingbirdBitSensors;
+B_BBSensors.prototype = Object.create(ReporterBlock.prototype);
+B_BBSensors.prototype.constructor = B_BBSensors;
 /* Sends the request for the sensor data. */
-B_HummingbirdBitSensors.prototype.startAction=function(){
+B_BBSensors.prototype.startAction=function(){
 	let deviceIndex = this.slots[0].getData().getValue();
   let sensorSelection = this.slots[1].getData().getValue();
   console.log(sensorSelection)
@@ -23224,7 +23446,14 @@ B_HummingbirdBitSensors.prototype.startAction=function(){
 	}
 };
 /* Returns the result of the request */
-B_HummingbirdBitSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+//MARK: microbit sensor
+function B_BBButton(x, y) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, "button", "Button", 2);
+}
+B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_BBButton.prototype.constructor = B_BBButton;
 
 
 

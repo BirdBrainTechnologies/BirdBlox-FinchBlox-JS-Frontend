@@ -9,6 +9,7 @@ function BlockPart(parent){
 	this.isSlot = false;
 	this.width = NaN;
 	this.height = NaN;
+	this.isEndOfLine = false; //Set to true if the next block part should rap to next line
 }
 
 /**

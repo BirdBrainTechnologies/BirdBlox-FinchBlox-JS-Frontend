@@ -251,12 +251,15 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_HMTriLed");
-	collapsibleItem.addBlockByName("B_HMLed")
-	collapsibleItem.addBlockByName("B_HMPositionServo");
-	collapsibleItem.addBlockByName("B_HMRotationServo");
+	collapsibleItem.addBlockByName("B_BBTriLed");
+	collapsibleItem.addBlockByName("B_BBLed")
+	collapsibleItem.addBlockByName("B_BBPositionServo");
+	collapsibleItem.addBlockByName("B_BBRotationServo");
+	collapsibleItem.addBlockByName("B_BBBuzzer");
+	collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addSpace();
-	collapsibleItem.addBlockByName("B_HummingbirdBitSensors");
+	collapsibleItem.addBlockByName("B_BBSensors");
+	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -265,10 +268,21 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_microbit = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.addBlockByName("B_MBLedArray");
+	collapsibleItem.addSpace();
+	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ *//*
+BlockList.populateItem_finch = function(collapsibleItem) {
+	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.trimBottom();
+	collapsibleItem.finalize();
+};*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
@@ -289,12 +303,3 @@ BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };*/
-
-/**
- * @param {CollapsibleItem} collapsibleItem
- */
-BlockList.populateItem_finch = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_FinchSetAll");
-	collapsibleItem.trimBottom();
-	collapsibleItem.finalize();
-};
