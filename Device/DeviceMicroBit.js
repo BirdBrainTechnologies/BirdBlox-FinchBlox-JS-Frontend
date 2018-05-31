@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceMicroBit(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceMicroBit(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;

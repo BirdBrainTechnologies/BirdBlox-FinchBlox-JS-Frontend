@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id) {
-	Device.call(this, name, id);
+function DeviceWithPorts(name, id, RSSI) {
+	Device.call(this, name, id, RSSI);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;

@@ -1287,9 +1287,11 @@ List.prototype.delete = function() {
  * @param {string} id - The string used to refer to the device when communicating with the backend
  * @constructor
  */
-function Device(name, id) {
+function Device(name, id, RSSI) {
 	this.name = name;
 	this.id = id;
+	// Added this line
+	this.RSSI = RSSI;
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -1587,8 +1589,8 @@ Device.stopAll = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id) {
-	Device.call(this, name, id);
+function DeviceWithPorts(name, id, RSSI) {
+	Device.call(this, name, id, RSSI);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -2221,8 +2223,8 @@ DeviceManager.possiblyRescan = function(robotTypeId) {
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbird(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceHummingbird(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
@@ -2233,8 +2235,8 @@ Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbirdBit(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceHummingbirdBit(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
@@ -2246,8 +2248,8 @@ Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit
  * @param {string} id
  * @constructor
  */
-function DeviceMicroBit(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceMicroBit(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
@@ -2259,8 +2261,8 @@ Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
  * @param {string} id
  * @constructor
  */
-function DeviceFlutter(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceFlutter(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
@@ -2294,8 +2296,8 @@ DeviceFlutter.getConnectionInstructions = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceFinch(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceFinch(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -15467,7 +15469,14 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-	this.reloadRows(this.discoveredDevices.length);
+	
+	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
+		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+	});
+	
+	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	
+	//this.reloadRows(this.discoveredDevices.length);
 };
 
 /**

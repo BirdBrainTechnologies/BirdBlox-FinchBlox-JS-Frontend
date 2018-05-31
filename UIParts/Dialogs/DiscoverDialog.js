@@ -74,7 +74,14 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-	this.reloadRows(this.discoveredDevices.length);
+	
+	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
+		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+	});
+	
+	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	
+	//this.reloadRows(this.discoveredDevices.length);
 };
 
 /**

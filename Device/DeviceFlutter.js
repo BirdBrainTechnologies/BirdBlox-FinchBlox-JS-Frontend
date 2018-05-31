@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceFlutter(name, id) {
-	DeviceWithPorts.call(this, name, id);
+function DeviceFlutter(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
