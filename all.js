@@ -15471,12 +15471,12 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
 	
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
-	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	//this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	
-	//this.reloadRows(this.discoveredDevices.length);
+	this.reloadRows(this.discoveredDevices.length);
 };
 
 /**
