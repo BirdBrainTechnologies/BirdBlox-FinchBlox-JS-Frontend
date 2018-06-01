@@ -74,9 +74,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-	
+
+	// Sort the devices by signal strength
+
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
@@ -95,7 +97,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	button.addText(this.discoveredDevices[index].name);
+
+	button.addText(this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);

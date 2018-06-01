@@ -1285,13 +1285,15 @@ List.prototype.delete = function() {
  *
  * @param {string} name - The display name of the device
  * @param {string} id - The string used to refer to the device when communicating with the backend
+ * @param {string} RSSI - The strength of the bluetooth signal
  * @constructor
  */
-function Device(name, id, RSSI) {
+function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
 	// Added this line
 	this.RSSI = RSSI;
+	this.device = device;
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -1532,7 +1534,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
  * @return {Device}
  */
 Device.fromJson = function(deviceClass, json) {
-	return new deviceClass(json.name, json.id);
+	return new deviceClass(json.name, json.id, json.RSSI, json.device);
 };
 
 /**
@@ -1589,8 +1591,8 @@ Device.stopAll = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id, RSSI) {
-	Device.call(this, name, id, RSSI);
+function DeviceWithPorts(name, id, RSSI, device) {
+	Device.call(this, name, id, RSSI, device);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -2223,8 +2225,8 @@ DeviceManager.possiblyRescan = function(robotTypeId) {
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbird(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceHummingbird(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
@@ -2235,8 +2237,8 @@ Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbirdBit(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceHummingbirdBit(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
@@ -2248,8 +2250,8 @@ Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit
  * @param {string} id
  * @constructor
  */
-function DeviceMicroBit(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceMicroBit(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
@@ -2261,8 +2263,8 @@ Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
  * @param {string} id
  * @constructor
  */
-function DeviceFlutter(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceFlutter(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
@@ -2296,8 +2298,8 @@ DeviceFlutter.getConnectionInstructions = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceFinch(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceFinch(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -15469,9 +15471,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-	
+
+	// Sort the devices by signal strength
+
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
@@ -15490,7 +15494,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	button.addText(this.discoveredDevices[index].name);
+
+	button.addText(this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);

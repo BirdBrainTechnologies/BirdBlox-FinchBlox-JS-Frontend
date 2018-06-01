@@ -8,13 +8,15 @@
  *
  * @param {string} name - The display name of the device
  * @param {string} id - The string used to refer to the device when communicating with the backend
+ * @param {string} RSSI - The strength of the bluetooth signal
  * @constructor
  */
-function Device(name, id, RSSI) {
+function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
 	// Added this line
 	this.RSSI = RSSI;
+	this.device = device;
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -255,7 +257,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
  * @return {Device}
  */
 Device.fromJson = function(deviceClass, json) {
-	return new deviceClass(json.name, json.id);
+	return new deviceClass(json.name, json.id, json.RSSI, json.device);
 };
 
 /**

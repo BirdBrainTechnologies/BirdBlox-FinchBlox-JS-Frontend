@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbirdBit(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceHummingbirdBit(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
