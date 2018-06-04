@@ -15478,9 +15478,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
-	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	//this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	
-	//this.reloadRows(this.discoveredDevices.length);
+	this.reloadRows(this.discoveredDevices.length);
 };
 
 /**
