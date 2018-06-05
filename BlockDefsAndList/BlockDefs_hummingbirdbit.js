@@ -88,12 +88,14 @@ B_BBBuzzer.prototype.startAction = function() {
 B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 //MARK: microbit outputs
+
+
+
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
 }
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
-
 
 
 //MARK: hummingbird bit sensors

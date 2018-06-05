@@ -256,7 +256,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBPositionServo");
 	collapsibleItem.addBlockByName("B_BBRotationServo");
 	collapsibleItem.addBlockByName("B_BBBuzzer");
-	collapsibleItem.addBlockByName("B_BBLedArray");
+	//collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
 	//collapsibleItem.addBlockByName("B_BBButton");
@@ -269,6 +269,8 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
  */
 BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
+	collapsibleItem.addSpace();
+	//collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();

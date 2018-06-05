@@ -1,6 +1,17 @@
 /* This file contains the implementations of MicroBit blocks
  */
 
+//MARK: micro:bit outputs in case they're needed later.
+
+function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
+		minVal, maxVal, displayUnits);
+}
+B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+
+
+
 //MARK: outputs
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -56,6 +67,57 @@ B_MicroBitLedArray.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
+
+//Code that I added
+// ASK WHAT SHOULD THE 2nd field of NumOrStringSlot be??
+
+
+function B_MBPrint(x, y, deviceClass, numberOfPorts) {
+	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+    this.dislayName = "Print Block"
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
+	this.addPart(new LabelText(this, "Print (Hi or 90)"));
+	// Default message that is displayed
+	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+}
+
+B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
+B_MBPrint.prototype.constructor = B_MBPrint;
+
+// Sends the request
+B_MBPrint.prototype.startAction = function() {
+
+    const mem = this.runMem;
+    mem.request = "tablet/pressure";
+    mem.requestStatus = function() {};
+    HtmlServer.sendRequest(mem.request, mem.requestStatus);
+    return new ExecutionStatusRunning(); // Still running
+
+};
+
+
+//Waits for the request to finish.
+
+B_MBPrint.prototype.updateAction = function() {
+if(this.runMem.requestStatus.finished){
+		if(this.runMem.requestStatus.error){
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	}
+	else{
+		return new ExecutionStatusRunning();
+	}
+};
+
+
+
+
+//end of code that I added
+
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
 }
@@ -68,3 +130,21 @@ function B_MBButton(x, y) {
 }
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
+
+function B_MBButton(x, y) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
+}
+B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
+
+// This is the micro:bit print block. Need to figure out how to enter both text and numbers.
+// outputType is 2, because we want it to be a string.
+
+/*
+function B_MBPrint(x, y) {
+	B_MicroBitOutputBase.call(this, x, y, 2, "Print", 0, "text", 0, 100, "Intensity");
+}
+B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
+B_MBPrint.prototype.constructor = B_MBPrint;
+*/

@@ -40,11 +40,29 @@ DeviceMenu.prototype.loadOptions = function() {
 		});
 	} else {
 		// If no devices are connected, we add an option to connect to each type of device
+        /*
+        this.addOption("Connect Device", function() {
+            (new DiscoverDialog(deviceClass)).show();
+        });
+
+
 		Device.getTypeList().forEach(function(deviceClass) {
-			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
-				(new DiscoverDialog(deviceClass)).show();
-			});
+		    let deviceTypeName = deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars);
+		    if ((deviceTypeName) === "HB"){
+			    this.addOption("Connect Device", function() {
+				    (new DiscoverDialog(DeviceWithPorts)).show();
+			    });
+			}
 		}, this);
+        */
+
+        Device.getTypeList().forEach(function(deviceClass) {
+        	this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
+        		(new DiscoverDialog(deviceClass)).show();
+        	});
+        }, this);
+
+
 	}
 	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);

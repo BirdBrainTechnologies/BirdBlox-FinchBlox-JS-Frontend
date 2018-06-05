@@ -1285,13 +1285,16 @@ List.prototype.delete = function() {
  *
  * @param {string} name - The display name of the device
  * @param {string} id - The string used to refer to the device when communicating with the backend
+ * @param {string} RSSI - The strength of the bluetooth signal
+ * @param {string} device - The type of device (Finch, Duo, etc.)
  * @constructor
  */
-function Device(name, id, RSSI) {
+function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
 	// Added this line
 	this.RSSI = RSSI;
+	this.device = device;
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -1532,7 +1535,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
  * @return {Device}
  */
 Device.fromJson = function(deviceClass, json) {
-	return new deviceClass(json.name, json.id);
+	return new deviceClass(json.name, json.id, json.RSSI, json.device);
 };
 
 /**
@@ -1589,8 +1592,8 @@ Device.stopAll = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id, RSSI) {
-	Device.call(this, name, id, RSSI);
+function DeviceWithPorts(name, id, RSSI, device) {
+	Device.call(this, name, id, RSSI, device);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -1674,6 +1677,7 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
 	request.addParam("ledArrayStatus", ledStatusString);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
+
 
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
@@ -2223,8 +2227,8 @@ DeviceManager.possiblyRescan = function(robotTypeId) {
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbird(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceHummingbird(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
@@ -2235,8 +2239,8 @@ Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbirdBit(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceHummingbirdBit(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
@@ -2248,8 +2252,8 @@ Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit
  * @param {string} id
  * @constructor
  */
-function DeviceMicroBit(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceMicroBit(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
@@ -2261,8 +2265,8 @@ Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
  * @param {string} id
  * @constructor
  */
-function DeviceFlutter(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceFlutter(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
@@ -2296,8 +2300,8 @@ DeviceFlutter.getConnectionInstructions = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceFinch(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceFinch(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -3787,7 +3791,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBPositionServo");
 	collapsibleItem.addBlockByName("B_BBRotationServo");
 	collapsibleItem.addBlockByName("B_BBBuzzer");
-	collapsibleItem.addBlockByName("B_BBLedArray");
+	//collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
 	//collapsibleItem.addBlockByName("B_BBButton");
@@ -3800,6 +3804,8 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
  */
 BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
+	collapsibleItem.addSpace();
+	//collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
@@ -11020,11 +11026,29 @@ DeviceMenu.prototype.loadOptions = function() {
 		});
 	} else {
 		// If no devices are connected, we add an option to connect to each type of device
+        /*
+        this.addOption("Connect Device", function() {
+            (new DiscoverDialog(deviceClass)).show();
+        });
+
+
 		Device.getTypeList().forEach(function(deviceClass) {
-			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
-				(new DiscoverDialog(deviceClass)).show();
-			});
+		    let deviceTypeName = deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars);
+		    if ((deviceTypeName) === "HB"){
+			    this.addOption("Connect Device", function() {
+				    (new DiscoverDialog(DeviceWithPorts)).show();
+			    });
+			}
 		}, this);
+        */
+
+        Device.getTypeList().forEach(function(deviceClass) {
+        	this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
+        		(new DiscoverDialog(deviceClass)).show();
+        	});
+        }, this);
+
+
 	}
 	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
@@ -15469,9 +15493,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-	
+
+	// Sort the devices by signal strength
+
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
@@ -15490,7 +15516,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	button.addText(this.discoveredDevices[index].name);
+
+	button.addText(this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
@@ -23231,6 +23258,17 @@ Block.setDisplaySuffix(B_HBDistInch, "inches");
 /* This file contains the implementations of MicroBit blocks
  */
 
+//MARK: micro:bit outputs in case they're needed later.
+
+function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
+		minVal, maxVal, displayUnits);
+}
+B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
+B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+
+
+
 //MARK: outputs
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -23286,6 +23324,57 @@ B_MicroBitLedArray.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
+
+//Code that I added
+// ASK WHAT SHOULD THE 2nd field of NumOrStringSlot be??
+
+
+function B_MBPrint(x, y, deviceClass, numberOfPorts) {
+	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+	this.deviceClass = deviceClass;
+    this.dislayName = "Print Block"
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
+	this.addPart(new LabelText(this, "Print (Hi or 90)"));
+	// Default message that is displayed
+	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+}
+
+B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
+B_MBPrint.prototype.constructor = B_MBPrint;
+
+// Sends the request
+B_MBPrint.prototype.startAction = function() {
+
+    const mem = this.runMem;
+    mem.request = "tablet/pressure";
+    mem.requestStatus = function() {};
+    HtmlServer.sendRequest(mem.request, mem.requestStatus);
+    return new ExecutionStatusRunning(); // Still running
+
+};
+
+
+//Waits for the request to finish.
+
+B_MBPrint.prototype.updateAction = function() {
+if(this.runMem.requestStatus.finished){
+		if(this.runMem.requestStatus.error){
+			let status = this.runMem.requestStatus;
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		}
+		return new ExecutionStatusDone();
+	}
+	else{
+		return new ExecutionStatusRunning();
+	}
+};
+
+
+
+
+//end of code that I added
+
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
 }
@@ -23299,6 +23388,23 @@ function B_MBButton(x, y) {
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
+function B_MBButton(x, y) {
+	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
+}
+B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
+
+// This is the micro:bit print block. Need to figure out how to enter both text and numbers.
+// outputType is 2, because we want it to be a string.
+
+/*
+function B_MBPrint(x, y) {
+	B_MicroBitOutputBase.call(this, x, y, 2, "Print", 0, "text", 0, 100, "Intensity");
+}
+B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
+B_MBPrint.prototype.constructor = B_MBPrint;
+*/
 /* This file contains the implementations of hummingbird bit blocks
  */
 
@@ -23389,12 +23495,14 @@ B_BBBuzzer.prototype.startAction = function() {
 B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 //MARK: microbit outputs
+
+
+
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
 }
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
-
 
 
 //MARK: hummingbird bit sensors
