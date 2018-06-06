@@ -22358,14 +22358,14 @@ IndexSlot.prototype.sanitizeData = function(data) {
   * @inheritDoc
   * @param {Document} xmlDoc
   * @return {Node}
-  */
+  *//*
  ToggleSlot.prototype.createXml = function(xmlDoc) {
  	let slot = Slot.prototype.createXml.call(this, xmlDoc);
  	let isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
  	isTrue.appendChild(this.isTrue.createXml(xmlDoc));
  	slot.appendChild(isTrue);
  	return slot;
- };
+};*/
 
 /**
  * BlockSlots are included in Blocks like if/else and loops to hold a stack of Blocks inside the slot. They are very
