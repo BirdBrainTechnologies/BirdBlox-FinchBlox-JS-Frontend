@@ -23267,7 +23267,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 
 
 
@@ -23449,6 +23449,7 @@ function B_MBPrint(x, y) {
 B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
 B_MBPrint.prototype.constructor = B_MBPrint;
 */
+
 /* This file contains the implementations of hummingbird bit blocks
  */
 

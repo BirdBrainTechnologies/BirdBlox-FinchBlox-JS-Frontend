@@ -8,7 +8,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 
 
 
