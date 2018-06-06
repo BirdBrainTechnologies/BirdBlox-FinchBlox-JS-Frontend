@@ -8,7 +8,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
+B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 
 
@@ -24,11 +24,11 @@ function B_MicroBitLedArray(x, y, deviceClass) {
 	this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led1" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led2" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led3" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led4" + i));
-    const lastLed = new ToggleSlot(this, "Toggle_led5" + i);
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    this.addPart(new ToggleSlot(this, "Toggle_led"));
+    const lastLed = new ToggleSlot(this, "Toggle_led");
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -66,10 +66,6 @@ B_MicroBitLedArray.prototype.startAction = function() {
 }
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
-
-
-
-
 
 
 
@@ -156,30 +152,7 @@ function B_MBAccelerometerMagnetometer(x, y){
 B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
 B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
 
-/*
-B_MBAccelerometerMagnetometer.prototype.startAction=function(){
 
-    let deviceIndex = this.slots[0].getData().getValue();
-    let blockSelection = this.slots[1].getData().getValue();
-
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let axis = this.slots[2].getData().getValue();
-
-	mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
-	//device.readSensor(mem.requestStatus, blockSelection, axis);
-
-	return new ExecutionStatusRunning();
-
-};
-*/
 
 B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;

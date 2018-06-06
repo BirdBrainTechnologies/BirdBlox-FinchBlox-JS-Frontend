@@ -150,11 +150,9 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
-	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, false)); //true for short text label
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
 	this.addPart(new LabelText(this, "TRI-LED"));
-	const portSlot = new PortSlot(this,"PortS_1", numberOfPorts); //Positive integer.
-	portSlot.isEndOfLine = true;
-	this.addPart(portSlot);
+	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, "R"));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
