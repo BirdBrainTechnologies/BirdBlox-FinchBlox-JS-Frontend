@@ -1285,16 +1285,13 @@ List.prototype.delete = function() {
  *
  * @param {string} name - The display name of the device
  * @param {string} id - The string used to refer to the device when communicating with the backend
- * @param {string} RSSI - The strength of the bluetooth signal
- * @param {string} device - The type of device (Finch, Duo, etc.)
  * @constructor
  */
-function Device(name, id, RSSI, device) {
+function Device(name, id, RSSI) {
 	this.name = name;
 	this.id = id;
 	// Added this line
 	this.RSSI = RSSI;
-	this.device = device;
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -1535,7 +1532,7 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
  * @return {Device}
  */
 Device.fromJson = function(deviceClass, json) {
-	return new deviceClass(json.name, json.id, json.RSSI, json.device);
+	return new deviceClass(json.name, json.id);
 };
 
 /**
@@ -1592,8 +1589,8 @@ Device.stopAll = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id, RSSI, device) {
-	Device.call(this, name, id, RSSI, device);
+function DeviceWithPorts(name, id, RSSI) {
+	Device.call(this, name, id, RSSI);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -1677,7 +1674,6 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
 	request.addParam("ledArrayStatus", ledStatusString);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
-
 
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
@@ -2227,8 +2223,8 @@ DeviceManager.possiblyRescan = function(robotTypeId) {
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbird(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+function DeviceHummingbird(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
@@ -2239,8 +2235,8 @@ Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
  * @param {string} id
  * @constructor
  */
-function DeviceHummingbirdBit(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+function DeviceHummingbirdBit(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
@@ -2252,8 +2248,8 @@ Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit
  * @param {string} id
  * @constructor
  */
-function DeviceMicroBit(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+function DeviceMicroBit(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
@@ -2265,8 +2261,8 @@ Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
  * @param {string} id
  * @constructor
  */
-function DeviceFlutter(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+function DeviceFlutter(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
@@ -2300,8 +2296,8 @@ DeviceFlutter.getConnectionInstructions = function() {
  * @param {string} id
  * @constructor
  */
-function DeviceFinch(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+function DeviceFinch(name, id, RSSI) {
+	DeviceWithPorts.call(this, name, id, RSSI);
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -3791,10 +3787,9 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBPositionServo");
 	collapsibleItem.addBlockByName("B_BBRotationServo");
 	collapsibleItem.addBlockByName("B_BBBuzzer");
+	collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
-	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
-	collapsibleItem.addBlockByName("B_BBMagnetometer");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -3806,9 +3801,6 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
-	collapsibleItem.addBlockByName("B_MBPrint");
-	collapsibleItem.addSpace();
-	collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -11028,29 +11020,11 @@ DeviceMenu.prototype.loadOptions = function() {
 		});
 	} else {
 		// If no devices are connected, we add an option to connect to each type of device
-        /*
-        this.addOption("Connect Device", function() {
-            (new DiscoverDialog(deviceClass)).show();
-        });
-
-
 		Device.getTypeList().forEach(function(deviceClass) {
-		    let deviceTypeName = deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars);
-		    if ((deviceTypeName) === "HB"){
-			    this.addOption("Connect Device", function() {
-				    (new DiscoverDialog(DeviceWithPorts)).show();
-			    });
-			}
+			this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
+				(new DiscoverDialog(deviceClass)).show();
+			});
 		}, this);
-        */
-
-        Device.getTypeList().forEach(function(deviceClass) {
-        	this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
-        		(new DiscoverDialog(deviceClass)).show();
-        	});
-        }, this);
-
-
 	}
 	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
@@ -15495,11 +15469,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.updateTimer.stop();
 	// Read the JSON
 	this.discoveredDevices = this.deviceClass.getManager().fromJsonArrayString(deviceList);
-
-	// Sort the devices by signal strength
-
+	
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
+		return parseFloat(b.RSSI) - parseFloart(a.RSSI);
 	});
 	
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
@@ -15518,8 +15490,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-
-	button.addText(this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
+	button.addText(this.discoveredDevices[index].name);
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
@@ -23260,17 +23231,6 @@ Block.setDisplaySuffix(B_HBDistInch, "inches");
 /* This file contains the implementations of MicroBit blocks
  */
 
-//MARK: micro:bit outputs in case they're needed later.
-
-function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
-		minVal, maxVal, displayUnits);
-}
-B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
-
-
-
 //MARK: outputs
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
@@ -23326,99 +23286,6 @@ B_MicroBitLedArray.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
-
-
-
-
-// Try #3 at micro:bit blocks
-
-
-
-
-
-function B_MBPrint(x, y){
-	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Print (Hi or 90)";
-
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
-	// StrS_1 refers to the first string slot.
-	this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-
-}
-
-B_MBPrint.prototype = Object.create(CommandBlock.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-
-/* Sends the request */
-B_MBPrint.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-
-	let mem = this.runMem;
-	let note = this.slots[1].getData();
-
-	mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
-
-	return new ExecutionStatusRunning();
-};
-
-/* Waits until the request completes */
-B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
-
-
-
-// End of Try #3 at micro:bit blocks.
-
-
-
-// Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
-function B_MBAccelerometerMagnetometer(x, y){
-	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "";
-
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
-
-
-
-B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
-
-
-// End of Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
 }
@@ -23432,23 +23299,6 @@ function B_MBButton(x, y) {
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
-function B_MBButton(x, y) {
-	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
-}
-B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-
-// This is the micro:bit print block. Need to figure out how to enter both text and numbers.
-// outputType is 2, because we want it to be a string.
-
-/*
-function B_MBPrint(x, y) {
-	B_MicroBitOutputBase.call(this, x, y, 2, "Print", 0, "text", 0, 100, "Intensity");
-}
-B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-*/
 /* This file contains the implementations of hummingbird bit blocks
  */
 
@@ -23539,14 +23389,12 @@ B_BBBuzzer.prototype.startAction = function() {
 B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 //MARK: microbit outputs
-
-
-
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
 }
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
+
 
 
 //MARK: hummingbird bit sensors
@@ -23568,11 +23416,9 @@ function B_BBSensors(x, y){
 	this.displayName = ""; //TODO: perhapse remove this
 	this.numberOfPorts = 3;
 
-  // Default option for sensor is Light.
-  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("Light", "light"));
-  //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
+  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
   dS.addOption(new SelectionData("Distance (cm)", "distance"));
-  dS.addOption(new SelectionData("Dial", "dial"));
+  dS.addOption(new SelectionData("Dial", "sensor"));
   dS.addOption(new SelectionData("Light", "light"));
   dS.addOption(new SelectionData("Sound", "sound"));
   dS.addOption(new SelectionData("Other (V)", "other"));
@@ -23617,133 +23463,6 @@ function B_BBButton(x, y) {
 }
 B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
-
-
-
-// Try #2
-
-// Beginning of Try #2
-
-
-function B_BBMagnetometer(x, y){
-	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = ""; //TODO: perhaps remove this
-	this.numberOfPorts = 1;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
-
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
-}
-B_BBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
-B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
-/* Sends the request for the sensor data. */
-B_BBMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    console.log(sensorSelection)
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = 1;
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readSensor(mem.requestStatus, sensorSelection, port);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
-};
-
-
-
-B_BBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
-
-// End of Try #2
-
-
-
-
-
-
-
-
-
-
-function B_BBAccelerometerMagnetometer(x, y){
-	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "";
-
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_BBAccelerometerMagnetometer.prototype.startAction=function(){
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = this.slots[1].getData().getValue();
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readSensor(mem.requestStatus, this.sensorType, port);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
-};
-
-B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
-
-B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
 
 
 

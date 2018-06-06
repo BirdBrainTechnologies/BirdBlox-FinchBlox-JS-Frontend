@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceWithPorts(name, id, RSSI) {
-	Device.call(this, name, id, RSSI);
+function DeviceWithPorts(name, id, RSSI, device) {
+	Device.call(this, name, id, RSSI, device);
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -89,3 +89,4 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
 	request.addParam("ledArrayStatus", ledStatusString);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
+

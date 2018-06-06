@@ -88,12 +88,14 @@ B_BBBuzzer.prototype.startAction = function() {
 B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 //MARK: microbit outputs
+
+
+
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
 }
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
-
 
 
 //MARK: hummingbird bit sensors
@@ -115,9 +117,11 @@ function B_BBSensors(x, y){
 	this.displayName = ""; //TODO: perhapse remove this
 	this.numberOfPorts = 3;
 
-  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
+  // Default option for sensor is Light.
+  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("Light", "light"));
+  //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
   dS.addOption(new SelectionData("Distance (cm)", "distance"));
-  dS.addOption(new SelectionData("Dial", "sensor"));
+  dS.addOption(new SelectionData("Dial", "dial"));
   dS.addOption(new SelectionData("Light", "light"));
   dS.addOption(new SelectionData("Sound", "sound"));
   dS.addOption(new SelectionData("Other (V)", "other"));
@@ -162,3 +166,130 @@ function B_BBButton(x, y) {
 }
 B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
+
+
+
+// Try #2
+
+// Beginning of Try #2
+
+
+function B_BBMagnetometer(x, y){
+	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = ""; //TODO: perhaps remove this
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
+    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
+    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
+    this.addPart(pickBlock);
+
+    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("Y", "y"));
+    pickAxis.addOption(new SelectionData("Z", "z"));
+    this.addPart(pickAxis);
+
+	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
+}
+B_BBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
+B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
+/* Sends the request for the sensor data. */
+B_BBMagnetometer.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, sensorSelection, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_BBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+
+
+// End of Try #2
+
+
+
+
+
+
+
+
+
+
+function B_BBAccelerometerMagnetometer(x, y){
+	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = "";
+
+    this.addPart(new LabelText(this, this.displayName));
+    // Device menu
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+    //There are no ports for the accelerometer/magnetometer.
+
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
+    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
+    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
+    this.addPart(pickBlock);
+
+    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("Y", "y"));
+    pickAxis.addOption(new SelectionData("Z", "z"));
+    this.addPart(pickAxis);
+
+};
+
+
+B_BBAccelerometerMagnetometer.prototype.startAction=function(){
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = this.slots[1].getData().getValue();
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, this.sensorType, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
+B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
+
+B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
