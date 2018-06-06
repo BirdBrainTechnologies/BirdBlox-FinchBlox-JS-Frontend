@@ -23282,7 +23282,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 
 
 
@@ -23298,11 +23298,11 @@ function B_MicroBitLedArray(x, y, deviceClass) {
 	this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    const lastLed = new ToggleSlot(this, "Toggle_led");
+    this.addPart(new ToggleSlot(this, "Toggle_led1" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led2" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led3" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led4" + i));
+    const lastLed = new ToggleSlot(this, "Toggle_led5" + i);
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -23422,6 +23422,7 @@ function B_MBPrint(x, y) {
 B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
 B_MBPrint.prototype.constructor = B_MBPrint;
 */
+
 /* This file contains the implementations of hummingbird bit blocks
  */
 
