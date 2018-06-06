@@ -4,8 +4,8 @@
  * @param {string} id
  * @constructor
  */
-function DeviceFinch(name, id, RSSI) {
-	DeviceWithPorts.call(this, name, id, RSSI);
+function DeviceFinch(name, id, RSSI, device) {
+	DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
