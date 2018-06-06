@@ -22330,6 +22330,7 @@ IndexSlot.prototype.sanitizeData = function(data) {
  * @param {Block} parent
  * @param {string} key
  */
+ //TODO: make this a subclass of EditableSlot?
  function ToggleSlot(parent,key){
  	//Make BoolSlot.
  	BoolSlot.call(this,parent,key);
@@ -22350,6 +22351,20 @@ IndexSlot.prototype.sanitizeData = function(data) {
 
  ToggleSlot.prototype.getDataNotFromChild = function() {
  	return new BoolData(this.isTrue, true); //The Slot is empty. Return stored value
+ };
+
+ /**
+  * Converts the Slot and its children into XML, storing the value in the isTrue as well
+  * @inheritDoc
+  * @param {Document} xmlDoc
+  * @return {Node}
+  */
+ ToggleSlot.prototype.createXml = function(xmlDoc) {
+ 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
+ 	let isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
+ 	isTrue.appendChild(this.isTrue.createXml(xmlDoc));
+ 	slot.appendChild(isTrue);
+ 	return slot;
  };
 
 /**
@@ -23053,9 +23068,11 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
-	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, false)); //true for short text label
 	this.addPart(new LabelText(this, "TRI-LED"));
-	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
+	const portSlot = new PortSlot(this,"PortS_1", numberOfPorts); //Positive integer.
+	portSlot.isEndOfLine = true;
+	this.addPart(portSlot);
 	this.addPart(new LabelText(this, "R"));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
