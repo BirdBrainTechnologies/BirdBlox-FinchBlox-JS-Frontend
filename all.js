@@ -3795,6 +3795,10 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBSensors");
 	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
 	collapsibleItem.addBlockByName("B_BBMagnetometer");
+	//collapsibleItem.addBlockByName("B_BBLedArray");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_BBSensors");
+	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -3809,6 +3813,8 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
+	//collapsibleItem.addBlockByName("B_MBPrint");
+	collapsibleItem.addSpace();
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -15502,9 +15508,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
-	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	//this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	
-	//this.reloadRows(this.discoveredDevices.length);
+	this.reloadRows(this.discoveredDevices.length);
 };
 
 /**
@@ -22332,6 +22338,7 @@ IndexSlot.prototype.sanitizeData = function(data) {
  * @param {Block} parent
  * @param {string} key
  */
+ //TODO: make this a subclass of EditableSlot?
  function ToggleSlot(parent,key){
  	//Make BoolSlot.
  	BoolSlot.call(this,parent,key);
@@ -22353,6 +22360,20 @@ IndexSlot.prototype.sanitizeData = function(data) {
  ToggleSlot.prototype.getDataNotFromChild = function() {
  	return new BoolData(this.isTrue, true); //The Slot is empty. Return stored value
  };
+
+ /**
+  * Converts the Slot and its children into XML, storing the value in the isTrue as well
+  * @inheritDoc
+  * @param {Document} xmlDoc
+  * @return {Node}
+  *//*
+ ToggleSlot.prototype.createXml = function(xmlDoc) {
+ 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
+ 	let isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
+ 	isTrue.appendChild(this.isTrue.createXml(xmlDoc));
+ 	slot.appendChild(isTrue);
+ 	return slot;
+};*/
 
 /**
  * BlockSlots are included in Blocks like if/else and loops to hold a stack of Blocks inside the slot. They are very
@@ -23055,9 +23076,11 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
-	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
+	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, false)); //true for short text label
 	this.addPart(new LabelText(this, "TRI-LED"));
-	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
+	const portSlot = new PortSlot(this,"PortS_1", numberOfPorts); //Positive integer.
+	portSlot.isEndOfLine = true;
+	this.addPart(portSlot);
 	this.addPart(new LabelText(this, "R"));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
@@ -23267,7 +23290,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
+B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 
 
 
@@ -23283,11 +23306,11 @@ function B_MicroBitLedArray(x, y, deviceClass) {
 	this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    this.addPart(new ToggleSlot(this, "Toggle_led"));
-    const lastLed = new ToggleSlot(this, "Toggle_led");
+    this.addPart(new ToggleSlot(this, "Toggle_led1" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led2" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led3" + i));
+    this.addPart(new ToggleSlot(this, "Toggle_led4" + i));
+    const lastLed = new ToggleSlot(this, "Toggle_led5" + i);
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -23417,7 +23440,10 @@ B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBa
 B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
 
 
+<<<<<<< HEAD
 // End of Try #1 of creating the micro:bit accelerometer and magnetometer blocks
+=======
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -23449,6 +23475,7 @@ function B_MBPrint(x, y) {
 B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
 B_MBPrint.prototype.constructor = B_MBPrint;
 */
+
 /* This file contains the implementations of hummingbird bit blocks
  */
 
