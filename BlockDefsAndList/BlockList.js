@@ -261,6 +261,9 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
 	collapsibleItem.addBlockByName("B_BBMagnetometer");
 	collapsibleItem.addBlockByName("B_BBLedArray");
+	collapsibleItem.addBlockByName("B_BBPrint");
+	collapsibleItem.addBlockByName("B_BBButton");
+	collapsibleItem.addBlockByName("B_BBOrientation");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();

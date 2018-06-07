@@ -322,3 +322,247 @@ function B_BBLedArray(x,y){
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
 
+
+
+// Hummingbird print block
+
+
+
+
+
+function B_BBPrint(x, y){
+	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = "Print (Hi or 90)";
+
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+	// StrS_1 refers to the first string slot.
+	this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+
+}
+
+B_BBPrint.prototype = Object.create(CommandBlock.prototype);
+B_BBPrint.prototype.constructor = B_BBPrint;
+
+/* Sends the request */
+B_BBPrint.prototype.startAction = function() {
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+
+	let mem = this.runMem;
+	let printString = this.slots[1].getData();
+
+	mem.requestStatus = {};
+	mem.requestStatus.finished = false;
+	mem.requestStatus.error = false;
+	mem.requestStatus.result = null;
+	device.readPrintBlock(mem.requestStatus, printString);
+
+	return new ExecutionStatusRunning();
+};
+
+/* Waits until the request completes */
+B_BBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+
+
+
+// Here is the block for B_BBButton.
+
+function B_BBButton(x, y){
+	
+	PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = "Button"; 
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "a"));
+    choice.addOption(new SelectionData("B", "b"));
+    choice.addOption(new SelectionData("A", "a"));
+    this.addPart(choice);
+
+};
+
+
+
+B_BBButton.prototype = Object.create(PredicateBlock.prototype);
+B_BBButton.prototype.constructor = B_BBButton;
+
+
+
+B_BBButton.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readButtonSensor(mem.requestStatus, sensorSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+
+B_BBButton.prototype.updateAction = function() {
+
+
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+		} else {
+			if (status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+			}
+		}
+	} else {
+		return new ExecutionStatusRunning(); // Still running
+	}
+
+};
+
+
+/*
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+function B_BBOrientation(x, y){
+	PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = ""; 
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
+    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
+    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
+    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
+    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
+    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
+    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
+    orientation.addOption(new SelectionData("Shake", "shake"));
+    this.addPart(orientation);
+
+};
+
+
+//B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
+B_BBOrientation.prototype = Object.create(PredicateBlock.prototype);
+B_BBOrientation.prototype.constructor = B_BBOrientation;
+
+
+
+
+B_BBOrientation.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readButtonSensor(mem.requestStatus, sensorSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+//B_MBOrientation.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+
+B_BBOrientation.prototype.updateAction = function() {
+
+	const mem = this.runMem;
+	const status = mem.requestStatus;
+	if (status.finished === true) {
+		if (status.error === false) {
+			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+		} else {
+			if (status.result.length > 0) {
+				this.displayError(status.result);
+				return new ExecutionStatusError();
+			} else {
+				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+			}
+		}
+	} else {
+		return new ExecutionStatusRunning(); // Still running
+	}
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

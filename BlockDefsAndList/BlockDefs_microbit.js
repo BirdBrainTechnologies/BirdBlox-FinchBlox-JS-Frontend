@@ -346,46 +346,7 @@ B_MBButton.prototype.updateAction = function() {
 
 /*
 
-function B_DeviceShaken(x, y) {
-	PredicateBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Shaken"));
-}
-B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
-B_DeviceShaken.prototype.constructor = B_DeviceShaken;
-*/
-/* Make the request. */
-/*
-B_DeviceShaken.prototype.startAction = function() {
-	const mem = this.runMem;
-	mem.request = "tablet/shake";
-	mem.requestStatus = function() {};
-	HtmlServer.sendRequest(mem.request, mem.requestStatus);
-	return new ExecutionStatusRunning(); // Still running
-};
-*/
-/* Wait for the request to finish. */
-/*
-B_DeviceShaken.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
-	if (status.finished === true) {
-		if (status.error === false) {
-			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-		} else {
-			if (status.result.length > 0) {
-				this.displayError(status.result);
-				return new ExecutionStatusError();
-			} else {
-				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-			}
-		}
-	} else {
-		return new ExecutionStatusRunning(); // Still running
-	}
-};
-B_DeviceShaken.prototype.checkActive = function() {
-	return TabletSensors.sensors.accelerometer;
-};
+
 
 */
 
