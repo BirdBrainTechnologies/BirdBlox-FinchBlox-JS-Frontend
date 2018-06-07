@@ -166,6 +166,7 @@ function B_MBLedArray(x,y){
 B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_MBLedArray.prototype.constructor = B_MBLedArray;
 
+/*
 //MARK: inputs
 function B_MBButton(x, y) {
 	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
@@ -179,7 +180,7 @@ function B_MBButton(x, y) {
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
-
+*/
 
 
 function B_MBMagnetometer(x, y){
@@ -238,28 +239,29 @@ B_MBMagnetometer.prototype.startAction=function(){
 B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 
+// Here is the block for B_MBButton.
+
+function B_MBButton(x, y){
+	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+	this.deviceClass = DeviceMicroBit;
+	this.displayName = "Button"; 
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
 
 
+    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "a"));
+    choice.addOption(new SelectionData("B", "b"));
+    this.addPart(choice);
 
+    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("Y", "y"));
+    pickAxis.addOption(new SelectionData("Z", "z"));
+    this.addPart(pickAxis);
 
-
-
-
-
-
-
-
-// This is the micro:bit print block. Need to figure out how to enter both text and numbers.
-// outputType is 2, because we want it to be a string.
-
-
-
-
-
-/*
-function B_MBPrint(x, y) {
-	B_MicroBitOutputBase.call(this, x, y, 2, "Print", 0, "text", 0, 100, "Intensity");
+	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
-B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-*/
+
+

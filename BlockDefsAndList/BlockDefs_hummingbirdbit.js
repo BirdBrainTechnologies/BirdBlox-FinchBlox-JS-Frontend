@@ -226,8 +226,24 @@ B_BBMagnetometer.prototype.startAction=function(){
 };
 
 
+B_BBMagnetometer.prototype.updateAction = function(){
 
-B_BBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+	const status = this.runMem.requestStatus;
+    	if (status.finished) {
+    		if(status.error){
+    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+    			return new ExecutionStatusError();
+    		} else {
+    			const result = new StringData(status.result);
+    			const num = result.asNum().getValue();
+    			const rounded = Math.round(num);
+    			return new ExecutionStatusResult(new NumData(rounded));
+    		}
+    	}
+    	return new ExecutionStatusRunning(); // Still running
+
+}
+
 
 
 
