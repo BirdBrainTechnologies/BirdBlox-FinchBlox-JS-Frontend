@@ -257,12 +257,16 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBRotationServo");
 	collapsibleItem.addBlockByName("B_BBBuzzer");
 <<<<<<< HEAD
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_BBSensors");
+	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
+	collapsibleItem.addBlockByName("B_BBMagnetometer");
 =======
 	//collapsibleItem.addBlockByName("B_BBLedArray");
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
 	collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -274,14 +278,14 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
-<<<<<<< HEAD
 	collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
+<<<<<<< HEAD
 =======
 	//collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();

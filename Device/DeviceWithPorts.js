@@ -26,6 +26,27 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
+
+/**
+ * Issues a request to read an accelerometer/ magnetometer sensor.
+ * Stores the result in the status object, so the executing Block can access it
+ * @param {object} status - An object provided by the caller to store the result in
+ * @param {string} sensorType - Added as a parameter to the request so the backend knows how to read the sensor
+ * @param {number} axisType - Added to the request to indicate the port.
+ */
+DeviceWithPorts.prototype.readMagnetometerSensor = function(status, sensorType, axisType) {
+	const request = new HttpRequestBuilder("robot/in");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("axis", axisType);
+	request.addParam("sensor", sensorType);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+
+
+
+
 /**
  * Issues a request to assign the value of an output at the specified port.  Uses a status object to store the result.
  * @param {object} status - An object provided by the caller to track the progress of the request

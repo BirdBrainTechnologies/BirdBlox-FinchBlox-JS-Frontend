@@ -180,8 +180,81 @@ B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
 
+
+
+function B_MBMagnetometer(x, y){
+	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+	this.deviceClass = DeviceMicroBit;
+	this.displayName = ""; 
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
+    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
+    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
+    this.addPart(pickBlock);
+
+    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("Y", "y"));
+    pickAxis.addOption(new SelectionData("Z", "z"));
+    this.addPart(pickAxis);
+
+	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
+}
+B_MBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
+B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
+/* Sends the request for the sensor data. */
+B_MBMagnetometer.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    let axisSelection = this.slots[2].getData().getValue();
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+
+
+
+
+
+
+
+
+
+
+
+
 // This is the micro:bit print block. Need to figure out how to enter both text and numbers.
 // outputType is 2, because we want it to be a string.
+
+
+
+
 
 /*
 function B_MBPrint(x, y) {

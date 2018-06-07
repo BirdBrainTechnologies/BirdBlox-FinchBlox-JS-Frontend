@@ -3792,12 +3792,16 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBRotationServo");
 	collapsibleItem.addBlockByName("B_BBBuzzer");
 <<<<<<< HEAD
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_BBSensors");
+	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
+	collapsibleItem.addBlockByName("B_BBMagnetometer");
 =======
 	//collapsibleItem.addBlockByName("B_BBLedArray");
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
 	collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -3809,14 +3813,14 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
-<<<<<<< HEAD
 	collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
+<<<<<<< HEAD
 =======
 	//collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -23296,7 +23300,7 @@ B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.proto
 B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 =======
 B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 
 
 
@@ -23356,143 +23360,13 @@ B_MicroBitLedArray.prototype.startAction = function() {
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 
+
+
+
 <<<<<<< HEAD
-/*Code that I added
 =======
-//Code that I added
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
-// ASK WHAT SHOULD THE 2nd field of NumOrStringSlot be??
 
-
-function B_MBPrint(x, y, deviceClass, numberOfPorts) {
-	CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
-	this.deviceClass = deviceClass;
-    this.dislayName = "Print Block"
-	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, "Print (Hi or 90)"));
-	// Default message that is displayed
-	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
-}
-
-B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-
-// Sends the request
-B_MBPrint.prototype.startAction = function() {
-
-    const mem = this.runMem;
-    mem.request = "tablet/pressure";
-    mem.requestStatus = function() {};
-    HtmlServer.sendRequest(mem.request, mem.requestStatus);
-    return new ExecutionStatusRunning(); // Still running
-
-};
-
-
-//Waits for the request to finish.
-
-B_MBPrint.prototype.updateAction = function() {
-if(this.runMem.requestStatus.finished){
-		if(this.runMem.requestStatus.error){
-			let status = this.runMem.requestStatus;
-			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-			return new ExecutionStatusError();
-		}
-		return new ExecutionStatusDone();
-	}
-	else{
-		return new ExecutionStatusRunning();
-	}
-};
-
-
-
-
-<<<<<<< HEAD
-//end of code that I added */
-
-
-/* Try #2 at the micro:bit print block
-
-function B_MBPrintOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey){
-
-	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-	this.deviceClass = deviceClass;
-	this.outputType = outputType;
-	this.displayName = displayName;
-	this.numberOfPorts = numberOfPorts;
-
-	this.valueKey = valueKey;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
-	this.addPart(new LabelText(this,displayName));
-
-    // NOTE: The second field has to be equal to the KEY. Also see: StringSlot implementation.
-	this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-}
-
-B_MBPrintOutputBase.prototype = Object.create(CommandBlock.prototype);
-B_MBPrintOutputBase.prototype.constructor = B_MBPrintOutputBase;
-
-
-// Sends the request
-B_MBPrintOutputBase.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-
-	// Port is always set to 1 in the case of the micro:bit. Ask?
-	let port = 1;
-
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.setOutput(mem.requestStatus, this.outputType, port, value, this.valueKey);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
-};
-
-// Waits until the request completes
-B_MBPrintOutputBase.prototype.updateAction = function() {
-	if(this.runMem.requestStatus.finished){
-		if(this.runMem.requestStatus.error){
-			let status = this.runMem.requestStatus;
-			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-			return new ExecutionStatusError();
-		}
-		return new ExecutionStatusDone();
-	}
-	else{
-		return new ExecutionStatusRunning();
-	}
-};
-
-
-
-function B_MBPrint(x, y) {
-	B_MBPrintOutputBase.call(this, x, y, 2, "Print", 1, "Text");
-}
-B_MBPrint.prototype = Object.create(B_MBPrintOutputBase.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-
-
-
-
-
-
-
-// End of Try #2 at micro:bit block */
-
-
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 // Try #3 at micro:bit blocks
 
 
@@ -23574,39 +23448,16 @@ function B_MBAccelerometerMagnetometer(x, y){
 B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
 B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
 
-/*
-B_MBAccelerometerMagnetometer.prototype.startAction=function(){
 
-    let deviceIndex = this.slots[0].getData().getValue();
-    let blockSelection = this.slots[1].getData().getValue();
-
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let axis = this.slots[2].getData().getValue();
-
-	mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
-	//device.readSensor(mem.requestStatus, blockSelection, axis);
-
-	return new ExecutionStatusRunning();
-
-};
-*/
 
 B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
 
 
+<<<<<<< HEAD
 // End of Try #1 of creating the micro:bit accelerometer and magnetometer blocks
 =======
-//end of code that I added
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -23641,7 +23492,7 @@ B_MBPrint.prototype.constructor = B_MBPrint;
 <<<<<<< HEAD
 =======
 
->>>>>>> 4a497dd4bb1d206bec66147198ea8b2f33fe75e1
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 /* This file contains the implementations of hummingbird bit blocks
  */
 
@@ -23813,6 +23664,81 @@ B_BBButton.prototype.constructor = B_BBButton;
 
 
 
+<<<<<<< HEAD
+// Try #2
+
+// Beginning of Try #2
+
+
+function B_BBMagnetometer(x, y){
+	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = ""; //TODO: perhaps remove this
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
+    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
+    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
+    this.addPart(pickBlock);
+
+    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("X", "x"));
+    pickAxis.addOption(new SelectionData("Y", "y"));
+    pickAxis.addOption(new SelectionData("Z", "z"));
+    this.addPart(pickAxis);
+
+	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
+}
+B_BBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
+B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
+/* Sends the request for the sensor data. */
+B_BBMagnetometer.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, sensorSelection, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_BBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+
+
+// End of Try #2
+
+
+
+
+
+
+
+
+
+
+=======
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 function B_BBAccelerometerMagnetometer(x, y){
 	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
@@ -23838,6 +23764,31 @@ function B_BBAccelerometerMagnetometer(x, y){
 };
 
 
+<<<<<<< HEAD
+B_BBAccelerometerMagnetometer.prototype.startAction=function(){
+	let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = this.slots[1].getData().getValue();
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readSensor(mem.requestStatus, this.sensorType, port);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+=======
+>>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
 B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
 
