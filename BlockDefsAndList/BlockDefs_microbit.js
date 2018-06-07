@@ -253,15 +253,44 @@ function B_MBButton(x, y){
 
     const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "a"));
     choice.addOption(new SelectionData("B", "b"));
+    choice.addOption(new SelectionData("A", "a"));
     this.addPart(choice);
 
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
+
+
+B_MBButton.prototype = Object.create(ReporterBlock.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
+
+
+B_MBButton.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readButtonSensor(mem.requestStatus, sensorSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_MBButton.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 

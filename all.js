@@ -3845,6 +3845,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBPrint");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
+	collapsibleItem.addBlockByName("B_MBButton");
 	//collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
@@ -23549,16 +23550,45 @@ function B_MBButton(x, y){
 
     const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "a"));
     choice.addOption(new SelectionData("B", "b"));
+    choice.addOption(new SelectionData("A", "a"));
     this.addPart(choice);
 
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
+
+
+B_MBButton.prototype = Object.create(ReporterBlock.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
+
+
+B_MBButton.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readButtonSensor(mem.requestStatus, sensorSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_MBButton.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 
 
@@ -23725,12 +23755,13 @@ B_BBSensors.prototype.startAction=function(){
 B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 //MARK: microbit sensor
+/*
 function B_BBButton(x, y) {
 	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, "button", "Button", 2);
 }
 B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
-
+*/
 
 
 // Try #2
@@ -23874,6 +23905,11 @@ B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetome
 
 B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
+
+
+
+
+
 
 
 

@@ -161,12 +161,13 @@ B_BBSensors.prototype.startAction=function(){
 B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 //MARK: microbit sensor
+/*
 function B_BBButton(x, y) {
 	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, "button", "Button", 2);
 }
 B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
-
+*/
 
 
 // Try #2
@@ -310,3 +311,8 @@ B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetome
 
 B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
+
+
+
+
+
