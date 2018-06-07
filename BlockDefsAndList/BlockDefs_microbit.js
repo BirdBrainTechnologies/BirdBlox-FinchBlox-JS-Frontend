@@ -236,7 +236,32 @@ B_MBMagnetometer.prototype.startAction=function(){
 
 
 
-B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+//B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+
+
+B_MBMagnetometer.prototype.updateAction = function(){
+
+	const status = this.runMem.requestStatus;
+    	if (status.finished) {
+    		if(status.error){
+    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+    			return new ExecutionStatusError();
+    		} else {
+    			const result = new StringData(status.result);
+    			const num = result.asNum().getValue();
+    			const rounded = Math.round(num);
+    			return new ExecutionStatusResult(new NumData(rounded));
+    		}
+    	}
+    	return new ExecutionStatusRunning(); // Still running
+
+};
+
+
+
+
+
+
 
 
 // Here is the block for B_MBButton.
@@ -256,7 +281,7 @@ function B_MBButton(x, y){
     choice.addOption(new SelectionData("A", "a"));
     this.addPart(choice);
 
-}
+};
 
 
 B_MBButton.prototype = Object.create(ReporterBlock.prototype);
@@ -317,7 +342,7 @@ function B_MBOrientation(x, y){
     orientation.addOption(new SelectionData("Shake", "shake"));
     this.addPart(orientation);
 
-}
+};
 
 
 B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
