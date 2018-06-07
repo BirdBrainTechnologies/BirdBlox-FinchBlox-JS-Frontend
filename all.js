@@ -3843,6 +3843,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBSensors");
 	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
 	collapsibleItem.addBlockByName("B_BBMagnetometer");
+	collapsibleItem.addBlockByName("B_BBLedArray");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -24114,7 +24115,13 @@ B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBas
 
 
 
+// micro:bit LED block that has been added to the HummingbirdBit menu
 
+function B_BBLedArray(x,y){
+	B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 
 

@@ -314,5 +314,11 @@ B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBas
 
 
 
+// micro:bit LED block that has been added to the HummingbirdBit menu
 
+function B_BBLedArray(x,y){
+	B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_BBLedArray.prototype.constructor = B_BBLedArray;
 
