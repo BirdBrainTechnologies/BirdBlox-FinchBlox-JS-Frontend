@@ -3846,6 +3846,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
 	collapsibleItem.addBlockByName("B_MBButton");
+	collapsibleItem.addBlockByName("B_MBOrientation");
 	//collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
@@ -23591,6 +23592,66 @@ B_MBButton.prototype.startAction=function(){
 B_MBButton.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 
+
+
+
+function B_MBOrientation(x, y){
+	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+	this.deviceClass = DeviceMicroBit;
+	this.displayName = ""; 
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
+    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
+    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
+    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
+    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
+    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
+    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
+    orientation.addOption(new SelectionData("Shake", "shake"));
+    this.addPart(orientation);
+
+}
+
+
+B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
+B_MBOrientation.prototype.constructor = B_MBOrientation;
+
+
+
+
+B_MBOrientation.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let sensorSelection = this.slots[1].getData().getValue();
+    
+    console.log(sensorSelection)
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readButtonSensor(mem.requestStatus, sensorSelection);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_MBOrientation.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
 /* This file contains the implementations of hummingbird bit blocks
  */
