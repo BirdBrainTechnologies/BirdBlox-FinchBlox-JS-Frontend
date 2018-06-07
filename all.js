@@ -1649,6 +1649,18 @@ DeviceWithPorts.prototype.readButtonSensor = function(status, sensorType) {
 };
 
 
+/**
+ * Issues a request to assign the value of the output of the micro:bit led Array.
+ * @param {string} printString - The string that the led array is supposed to flash.
+ */
+DeviceWithPorts.prototype.readPrintBlock = function(status, printString) {
+	const request = new HttpRequestBuilder("robot/out/printblock");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	request.addParam("printstring", printString);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
 
 /**
  * Issues a request to assign the value of an output at the specified port.  Uses a status object to store the result.
@@ -23401,12 +23413,13 @@ B_MBPrint.prototype.startAction = function() {
 	}
 
 	let mem = this.runMem;
-	let note = this.slots[1].getData();
+	let printString = this.slots[1].getData();
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
 	mem.requestStatus.error = false;
 	mem.requestStatus.result = null;
+	device.readPrintBlock(mem.requestStatus, printString);
 
 	return new ExecutionStatusRunning();
 };

@@ -103,12 +103,13 @@ B_MBPrint.prototype.startAction = function() {
 	}
 
 	let mem = this.runMem;
-	let note = this.slots[1].getData();
+	let printString = this.slots[1].getData();
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
 	mem.requestStatus.error = false;
 	mem.requestStatus.result = null;
+	device.readPrintBlock(mem.requestStatus, printString);
 
 	return new ExecutionStatusRunning();
 };
