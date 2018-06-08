@@ -23417,7 +23417,7 @@ B_MBPrint.prototype.startAction = function() {
 	}
 
 	let mem = this.runMem;
-	let printString = this.slots[1].getData();
+	let printString = this.slots[1].getData().getValue();
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
@@ -24121,7 +24121,7 @@ B_BBPrint.prototype.startAction = function() {
 	}
 
 	let mem = this.runMem;
-	let printString = this.slots[1].getData();
+	let printString = this.slots[1].getData().getValue();
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
