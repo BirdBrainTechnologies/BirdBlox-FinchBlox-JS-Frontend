@@ -250,8 +250,8 @@ B_MBMagnetometer.prototype.updateAction = function(){
     		} else {
     			const result = new StringData(status.result);
     			const num = result.asNum().getValue();
-    			const rounded = Math.round(num);
-    			return new ExecutionStatusResult(new NumData(rounded));
+    			
+    			return new ExecutionStatusResult(new NumData(num));
     		}
     	}
     	return new ExecutionStatusRunning(); // Still running
