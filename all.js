@@ -23394,7 +23394,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Print (Hi or 90)";
+	this.displayName = "";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23809,7 +23809,7 @@ B_BBTriLed.prototype.constructor = B_BBTriLed;
 function B_BBBuzzer(x, y){
 	CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "Play note";
+	this.displayName = "Play Note";
   this.minNote = 0
   this.maxNote = 127
   this.minBeat = 0
@@ -24098,7 +24098,7 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 function B_BBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "Print (Hi or 90)";
+	this.displayName = "";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

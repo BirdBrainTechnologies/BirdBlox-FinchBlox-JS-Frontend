@@ -80,7 +80,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Print (Hi or 90)";
+	this.displayName = "";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
