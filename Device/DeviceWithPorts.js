@@ -66,10 +66,10 @@ DeviceWithPorts.prototype.readButtonSensor = function(status, sensorType) {
  * @param {string} printString - The string that the led array is supposed to flash.
  */
 DeviceWithPorts.prototype.readPrintBlock = function(status, printString) {
-	const request = new HttpRequestBuilder("robot/out/printblock");
+	const request = new HttpRequestBuilder("robot/out/printBlock");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("printstring", printString);
+	request.addParam("printString", printString);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
