@@ -15538,7 +15538,11 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
  * or is touching the screen
  * @param {string} deviceList - A string representing a JSON array of devices
  */
+ 
+var updateDeviceListCounter = 0;
+
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
+	updateDeviceListCounter += 1;
 	if (!this.visible) {
 		return;
 	} else if (TouchReceiver.touchDown || this.isScrolling()) {
@@ -15557,7 +15561,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
-	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	if ((updateDeviceListCounter % 40) == 0){
+		this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	};
 	
 	//this.reloadRows(this.discoveredDevices.length);
 };
