@@ -1711,6 +1711,10 @@ DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
 	request.addParam("note", note);
 	request.addParam("duration", duration);
 	HtmlServer.sendRequest(request.toString(), status, true);
+	var start = Date.now();
+	while (((Date.now() - start)/1000) < 1 ){
+	};
+
 };
 
 /**
