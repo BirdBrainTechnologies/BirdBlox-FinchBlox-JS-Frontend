@@ -24137,7 +24137,7 @@ B_BBPrint.prototype.startAction = function() {
 	}
 
 	let mem = this.runMem;
-	let printString = this.slots[1].getData().getValue();
+	let printString = this.slots[1].getData().getValue().substring(0,18);
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
