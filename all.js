@@ -23207,7 +23207,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 function B_HBLed(x, y) {
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 3, "intensity", 0, 100, "Intensity");
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -23799,7 +23799,7 @@ B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype
 B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
-	B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 3, "intensity", 0, 100, "Intensity");
 
   this.addPart(new LabelText(this,"%"));
 }
