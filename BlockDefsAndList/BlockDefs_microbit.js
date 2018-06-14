@@ -196,7 +196,8 @@ function B_MBMagnetometer(x, y){
 
     const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
+    
+    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
     pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
     this.addPart(pickBlock);
