@@ -1711,9 +1711,7 @@ DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
 	request.addParam("note", note);
 	request.addParam("duration", duration);
 	HtmlServer.sendRequest(request.toString(), status, true);
-	var start = Date.now();
-	while ((Date.now() - start) < duration){
-	};
+
 
 };
 
@@ -23909,10 +23907,17 @@ B_BBBuzzer.prototype.startAction = function() {
 		this.displayError(this.deviceClass.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
-	let mem = this.runMem;
-	let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-	let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-  let soundDuration = CodeManager.beatsToMs(beats);
+	//let mem = this.runMem;
+	//let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+	//let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+  	//let soundDuration = CodeManager.beatsToMs(beats);
+  	
+  	const mem = this.runMem;
+    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    mem.soundDuration = CodeManager.beatsToMs(beats);
+    let soundDuration = CodeManager.beatsToMs(beats);
+    mem.timerStarted = false;
 
 	mem.requestStatus = {};
 	mem.requestStatus.finished = false;
@@ -23923,7 +23928,29 @@ B_BBBuzzer.prototype.startAction = function() {
 	return new ExecutionStatusRunning();
 };
 /* Waits until the request completes */
-B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
+//B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
+
+B_BBBuzzer.prototype.updateAction = function() {
+	const mem = this.runMem;
+	if (!mem.timerStarted) {
+		const status = mem.requestStatus;
+		if (status.finished === true) {
+			mem.startTime = new Date().getTime();
+			mem.timerStarted = true;
+		} else {
+			return new ExecutionStatusRunning(); // Still running
+		}
+	}
+	if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
+		return new ExecutionStatusDone(); // Done running
+	} else {
+		return new ExecutionStatusRunning(); // Still running
+	}
+};
+
+
+
+
 
 //MARK: microbit outputs
 
