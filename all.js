@@ -22397,26 +22397,88 @@ IndexSlot.prototype.sanitizeData = function(data) {
  * @param {Block} parent
  * @param {string} key
  */
- function ToggleSlot(parent,key){
+ function ToggleSlot(parent,key,data){
  	//Make BoolSlot.
  	BoolSlot.call(this,parent,key);
 
-  this.isTrue = false
+  this.isTrue = new BoolData(data);
+  if (this.isTrue.getValue()){
+    this.slotShape.slotE.setAttributeNS(null, "fill", Colors.red);
+  }
  }
  ToggleSlot.prototype = Object.create(BoolSlot.prototype);
  ToggleSlot.prototype.constructor = ToggleSlot;
 
- ToggleSlot.prototype.onTap = function() {
-   this.isTrue = !this.isTrue
-   if (this.isTrue) {
+ ToggleSlot.prototype.setVal = function(valToSet) {
+   this.isTrue = new BoolData(valToSet);
+   if (this.isTrue.getValue()) {
      this.slotShape.slotE.setAttributeNS(null, "fill", Colors.red);
    } else {
      BlockGraphics.update.hexSlotGradient(this.slotShape.slotE, this.parent.category, this.slotShape.active);
    }
  }
 
+ ToggleSlot.prototype.onTap = function() {
+   this.setVal(!this.isTrue.getValue())
+ }
+
  ToggleSlot.prototype.getDataNotFromChild = function() {
- 	return new BoolData(this.isTrue, true); //The Slot is empty. Return stored value
+ 	//return new BoolData(this.isTrue, true); //The Slot is empty. Return stored value
+  return this.isTrue;
+ };
+
+ ToggleSlot.prototype.makeActive = function() {
+   Slot.prototype.makeActive.call(this);
+   if (this.isTrue.getValue()){
+     this.slotShape.slotE.setAttributeNS(null, "fill", Colors.red);
+   }
+ }
+
+ ToggleSlot.prototype.makeInactive = function() {
+   Slot.prototype.makeInactive.call(this);
+   if (this.isTrue.getValue()){
+     this.slotShape.slotE.setAttributeNS(null, "fill", Colors.red);
+   }
+ }
+ /**
+  * Converts the Slot and its children into XML, storing the value in the isTrue as well
+  * @inheritDoc
+  * @param {Document} xmlDoc
+  * @return {Node}
+  */
+ ToggleSlot.prototype.createXml = function(xmlDoc) {
+ 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
+ 	let isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
+ 	isTrue.appendChild(this.isTrue.createXml(xmlDoc));
+ 	slot.appendChild(isTrue);
+ 	return slot;
+ };
+
+ /**
+  * @inheritDoc
+  * @param {Node} slotNode
+  * @return {ToggleSlot}
+  */
+ ToggleSlot.prototype.importXml = function(slotNode) {
+ 	Slot.prototype.importXml.call(this, slotNode);
+ 	const isTrueNode = XmlWriter.findSubElement(slotNode, "isTrue");
+ 	const dataNode = XmlWriter.findSubElement(isTrueNode, "data");
+ 	if (dataNode != null) {
+ 		const data = Data.importXml(dataNode);
+ 		if (data != null) {
+ 			this.setVal(data.getValue());
+ 		}
+ 	}
+ 	return this;
+ };
+
+ /**
+  * @inheritDoc
+  * @param {ToggleSlot} slot
+  */
+ ToggleSlot.prototype.copyFrom = function(slot) {
+ 	Slot.prototype.copyFrom.call(this, slot);
+ 	this.setVal(slot.isTrue.getValue());
  };
 
 /**
@@ -23348,11 +23410,11 @@ function B_MicroBitLedArray(x, y, deviceClass) {
 	this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led1" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led2" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led3" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led4" + i));
-    const lastLed = new ToggleSlot(this, "Toggle_led5" + i);
+    this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led4" + i, false));
+    const lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -23511,7 +23573,7 @@ B_MBButton.prototype.constructor = B_MBButton;
 function B_MBMagnetometer(x, y){
 	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = ""; 
+	this.displayName = "";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23520,7 +23582,7 @@ function B_MBMagnetometer(x, y){
 
     const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
-    
+
     pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
     pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
@@ -23577,7 +23639,7 @@ B_MBMagnetometer.prototype.updateAction = function(){
     		} else {
     			const result = new StringData(status.result);
     			const num = result.asNum().getValue();
-    			
+
     			return new ExecutionStatusResult(new NumData(num));
     		}
     	}
@@ -23598,7 +23660,7 @@ function B_MBButton(x, y){
 	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Button"; 
+	this.displayName = "Button";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23622,7 +23684,7 @@ B_MBButton.prototype.constructor = B_MBButton;
 B_MBButton.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
-    
+
     console.log(sensorSelection)
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
@@ -23693,7 +23755,7 @@ function B_MBOrientation(x, y){
 	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = ""; 
+	this.displayName = "";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23723,7 +23785,7 @@ B_MBOrientation.prototype.constructor = B_MBOrientation;
 B_MBOrientation.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
-    
+
     console.log(sensorSelection)
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
@@ -23773,8 +23835,6 @@ B_MBOrientation.prototype.updateAction = function() {
 
 
 };
-
-
 
 /* This file contains the implementations of hummingbird bit blocks
  */

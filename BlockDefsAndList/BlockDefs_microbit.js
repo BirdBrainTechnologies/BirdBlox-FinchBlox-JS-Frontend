@@ -24,11 +24,11 @@ function B_MicroBitLedArray(x, y, deviceClass) {
 	this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led1" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led2" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led3" + i));
-    this.addPart(new ToggleSlot(this, "Toggle_led4" + i));
-    const lastLed = new ToggleSlot(this, "Toggle_led5" + i);
+    this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led4" + i, false));
+    const lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -187,7 +187,7 @@ B_MBButton.prototype.constructor = B_MBButton;
 function B_MBMagnetometer(x, y){
 	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = ""; 
+	this.displayName = "";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -196,7 +196,7 @@ function B_MBMagnetometer(x, y){
 
     const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
-    
+
     pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
     pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
@@ -253,7 +253,7 @@ B_MBMagnetometer.prototype.updateAction = function(){
     		} else {
     			const result = new StringData(status.result);
     			const num = result.asNum().getValue();
-    			
+
     			return new ExecutionStatusResult(new NumData(num));
     		}
     	}
@@ -274,7 +274,7 @@ function B_MBButton(x, y){
 	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Button"; 
+	this.displayName = "Button";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -298,7 +298,7 @@ B_MBButton.prototype.constructor = B_MBButton;
 B_MBButton.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
-    
+
     console.log(sensorSelection)
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
@@ -369,7 +369,7 @@ function B_MBOrientation(x, y){
 	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
 	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = ""; 
+	this.displayName = "";
 	this.numberOfPorts = 1;
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -399,7 +399,7 @@ B_MBOrientation.prototype.constructor = B_MBOrientation;
 B_MBOrientation.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
-    
+
     console.log(sensorSelection)
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
@@ -449,5 +449,3 @@ B_MBOrientation.prototype.updateAction = function() {
 
 
 };
-
-
