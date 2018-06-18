@@ -3714,6 +3714,8 @@ BlockList.populateCat_control = function(category) {
 	category.addBlockByName("B_WhenFlagTapped");
 	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
+	category.addBlockByName("B_When");
+	category.addSpace();
 	category.addBlockByName("B_Broadcast");
 	category.addBlockByName("B_BroadcastAndWait");
 	category.addBlockByName("B_Message");
@@ -25167,6 +25169,32 @@ B_Stop.prototype.startAction = function() {
 	}
 	return new ExecutionStatusDone();
 };
+
+
+
+
+
+
+
+function B_When(x, y) {
+	HatBlock.call(this, x, y, "control");
+	this.addPart(new LabelText(this, "when"));
+	this.addPart(new BoolSlot(this, "BoolS_cond"));
+}
+B_When.prototype = Object.create(HatBlock.prototype);
+B_When.prototype.constructor = B_When;
+/* Checks condition. If true, stops running; if false, resets Block to check again. */
+B_When.prototype.startAction = function() {
+	const stopWaiting = this.slots[0].getData().getValue();
+	if (stopWaiting) {
+		return new ExecutionStatusDone(); //Done running
+	} else {
+		this.running = 0; //startAction will be run next time, giving Slots ability to recalculate.
+		this.clearMem(); //runMem and previous values of Slots will be removed.
+		return new ExecutionStatusRunning(); //Still running
+	}
+};
+
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
  */
