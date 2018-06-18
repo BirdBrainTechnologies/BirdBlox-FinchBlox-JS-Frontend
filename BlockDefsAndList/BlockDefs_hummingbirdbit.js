@@ -368,7 +368,7 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 function B_BBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "";
+	this.displayName = "Print";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

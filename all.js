@@ -2307,7 +2307,7 @@ function DeviceMicroBit(name, id, RSSI, device) {
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
-Device.setDeviceTypeName(DeviceMicroBit, "microbit", "MicroBit", "MB");
+Device.setDeviceTypeName(DeviceMicroBit, "microbit", "micro:bit", "MB");
 
 /**
  * Manages communication with a Flutter
@@ -21845,7 +21845,7 @@ function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
 	for (let portNum = 1; portNum <= this.maxPorts; portNum++) {
-		this.addOption(new NumData(portNum), "port " + portNum.toString());
+		this.addOption(new NumData(portNum), "Port " + portNum.toString());
 	}
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
@@ -23464,7 +23464,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
-	this.displayName = "";
+	this.displayName = "Print";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24204,7 +24204,7 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 function B_BBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
 	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "";
+	this.displayName = "Print";
 
 
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
