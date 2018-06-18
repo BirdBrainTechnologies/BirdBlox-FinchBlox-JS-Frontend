@@ -1729,6 +1729,20 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
 };
 
 
+
+/**
+ * Issues a request to read the compass.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ */
+DeviceWithPorts.prototype.readCompass = function(status) {
+	const request = new HttpRequestBuilder("robot/out/compass");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+
+
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
  * all the connected devices in an array, which can be accessed through the getDevice function, which is how
@@ -3849,6 +3863,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBPrint");
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
+	collapsibleItem.addBlockByName("B_BBCompass");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -3865,6 +3880,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
+	collapsibleItem.addBlockByName("B_MBCompass");
 	//collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
@@ -23837,6 +23853,80 @@ B_MBOrientation.prototype.updateAction = function() {
 
 };
 
+
+
+
+
+// Block for the compass
+
+
+function B_MBCompass(x, y){
+	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+	this.deviceClass = DeviceMicroBit;
+	this.displayName = "Compass";
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+}
+B_MBCompass.prototype = Object.create(ReporterBlock.prototype);
+B_MBCompass.prototype.constructor = B_MBCompass;
+
+
+
+B_MBCompass.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readCompass(mem.requestStatus);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_MBCompass.prototype.updateAction = function(){
+
+	const status = this.runMem.requestStatus;
+    	if (status.finished) {
+    		if(status.error){
+    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+    			return new ExecutionStatusError();
+    		} else {
+    			const result = new StringData(status.result);
+    			const num = result.asNum().getValue();
+
+    			return new ExecutionStatusResult(new NumData(num));
+    		}
+    	}
+    	return new ExecutionStatusRunning(); // Still running
+
+};
+
+
+
+
+
+
+
+
+
+
+
 /* This file contains the implementations of hummingbird bit blocks
  */
 
@@ -24423,6 +24513,71 @@ B_BBOrientation.prototype.updateAction = function() {
 
 
 
+
+};
+
+
+
+
+
+
+// Block for the compass
+
+
+function B_BBCompass(x, y){
+	ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+	this.deviceClass = DeviceHummingbirdBit;
+	this.displayName = "Compass";
+	this.numberOfPorts = 1;
+
+	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.addPart(new LabelText(this,this.displayName));
+
+}
+B_BBCompass.prototype = Object.create(ReporterBlock.prototype);
+B_BBCompass.prototype.constructor = B_BBCompass;
+
+
+
+B_BBCompass.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	if (device == null) {
+		this.displayError(this.deviceClass.getNotConnectedMessage());
+		return new ExecutionStatusError(); // Flutter was invalid, exit early
+	}
+	let mem = this.runMem;
+	let port = 1;
+	if (port != null && port > 0 && port <= this.numberOfPorts) {
+		mem.requestStatus = {};
+		mem.requestStatus.finished = false;
+		mem.requestStatus.error = false;
+		mem.requestStatus.result = null;
+		device.readCompass(mem.requestStatus);
+		return new ExecutionStatusRunning();
+	} else {
+		this.displayError("Invalid port number");
+		return new ExecutionStatusError(); // Invalid port, exit early
+	}
+};
+
+
+
+B_BBCompass.prototype.updateAction = function(){
+
+	const status = this.runMem.requestStatus;
+    	if (status.finished) {
+    		if(status.error){
+    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+    			return new ExecutionStatusError();
+    		} else {
+    			const result = new StringData(status.result);
+    			const num = result.asNum().getValue();
+
+    			return new ExecutionStatusResult(new NumData(num));
+    		}
+    	}
+    	return new ExecutionStatusRunning(); // Still running
 
 };
 

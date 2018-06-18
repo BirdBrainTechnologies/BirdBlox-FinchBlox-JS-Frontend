@@ -140,3 +140,17 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
+
+
+/**
+ * Issues a request to read the compass.  Uses a status object to store the result.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ */
+DeviceWithPorts.prototype.readCompass = function(status) {
+	const request = new HttpRequestBuilder("robot/out/compass");
+	request.addParam("type", this.getDeviceTypeId());
+	request.addParam("id", this.id);
+	HtmlServer.sendRequest(request.toString(), status, true);
+};
+
+

@@ -264,6 +264,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBPrint");
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
+	collapsibleItem.addBlockByName("B_BBCompass");
 	//collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
@@ -280,6 +281,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
+	collapsibleItem.addBlockByName("B_MBCompass");
 	//collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
 	//collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.trimBottom();
