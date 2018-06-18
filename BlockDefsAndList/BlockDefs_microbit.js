@@ -282,8 +282,8 @@ function B_MBButton(x, y){
 
 
     const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
-    choice.addOption(new SelectionData("B", "buttonB"));
     choice.addOption(new SelectionData("A", "buttonA"));
+    choice.addOption(new SelectionData("B", "buttonB"));
     this.addPart(choice);
 
 };
