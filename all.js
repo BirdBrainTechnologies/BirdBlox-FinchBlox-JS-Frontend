@@ -23421,7 +23421,7 @@ B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
-	this.displayName = "LED Array";
+	this.displayName = "Display";
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   const label = new LabelText(this,this.displayName);
