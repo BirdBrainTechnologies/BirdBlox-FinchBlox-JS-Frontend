@@ -1,4 +1,5 @@
 "use strict";
+
 /**
  * Block is an abstract class that represents an executable block.
  * Blocks are nearly always contained within BlockStacks or DisplayStacks.
