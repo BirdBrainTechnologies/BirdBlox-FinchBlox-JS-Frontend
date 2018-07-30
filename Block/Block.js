@@ -217,7 +217,6 @@ Block.prototype.updateRun = function() {
 		myExecStatus = this.startAction();
 	} else if (this.running === 2) { //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
-
 		myExecStatus = this.updateAction();
 	}
 	if (!myExecStatus.isRunning()) { //If the block is done running...
