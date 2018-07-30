@@ -167,7 +167,9 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
     let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
-    DialogManager.showAlertDialog("Connection Failure", msg, "Close", null, null);
+    DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
+    		return;
+    	}.bind(this));
 }
 /**
  * Tells the frontend that the status of a robot's firmware
