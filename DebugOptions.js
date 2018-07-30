@@ -17,7 +17,7 @@ function DebugOptions() {
 
 	DO.mouse = true;
 	// On launch, virtual devices can be added
-	DO.addVirtualHB = true;
+	DO.addVirtualHB = false;
 	DO.addVirtualFlutter = false;
 	// When scanning, virtual devices can be added to the lists
 	DO.allowVirtualDevices = false;

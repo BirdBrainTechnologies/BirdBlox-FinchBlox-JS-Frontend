@@ -32,6 +32,7 @@ function Device(name, id, RSSI, device) {
 	this.firmwareStatusListener = null;
 }
 
+
 Device.setStatics = function() {
 	/** @enum {string} */
 	Device.firmwareStatuses = {
@@ -52,7 +53,6 @@ Device.setStatics();
  * @param {string} shortTypeName - The abbreviated name for the type. Ex: "HB". USed where the typeName doesn't fit.
  */
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName) {
-
 	/**
 	 * Retrieves the typeName from the deviceClass
 	 * @param {boolean} shorten - Whether the shortTypeName should be returned
@@ -257,8 +257,14 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
  * @param {object} json
  * @return {Device}
  */
-Device.fromJson = function(deviceClass, json) {
-	return new deviceClass(json.name, json.id, json.RSSI, json.device);
+Device.fromJson = function(json) {
+    if (json.device === "micro:bit") {
+        return new DeviceMicroBit(json.name, json.id, json.RSSI, json.device);
+    } else if (json.device === "Bit") {
+        return new DeviceHummingbirdBit(json.name, json.id, json.RSSI, json.device);
+    } else if (json.device === "Duo") {
+        return new DeviceHummingbird(json.name, json.id, json.RSSI, json.device);
+    }
 };
 
 /**
@@ -267,10 +273,10 @@ Device.fromJson = function(deviceClass, json) {
  * @param {Array} json - Array of JSON objects
  * @return {Array}
  */
-Device.fromJsonArray = function(deviceClass, json) {
+Device.fromJsonArray = function(json) {
 	let res = [];
 	for (let i = 0; i < json.length; i++) {
-		res.push(Device.fromJson(deviceClass, json[i]));
+		res.push(Device.fromJson(json[i]));
 	}
 	return res;
 };
@@ -281,7 +287,7 @@ Device.fromJsonArray = function(deviceClass, json) {
  * @param {string|null} deviceList - String representation of json array
  * @return {Array}
  */
-Device.fromJsonArrayString = function(deviceClass, deviceList) {
+Device.fromJsonArrayString = function(deviceList) {
 	if (deviceList == null) return [];
 	let json = [];
 	try {
@@ -289,7 +295,7 @@ Device.fromJsonArrayString = function(deviceClass, deviceList) {
 	} catch (e) {
 		json = [];
 	}
-	return Device.fromJsonArray(deviceClass, json);
+	return Device.fromJsonArray(json);
 };
 
 /**

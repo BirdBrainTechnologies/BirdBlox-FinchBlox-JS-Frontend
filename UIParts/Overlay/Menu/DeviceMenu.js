@@ -27,7 +27,9 @@ DeviceMenu.prototype.loadOptions = function() {
 	Device.getTypeList().forEach(function(deviceClass) {
 		/* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
 		 * is it the connectedClass */
-		if (deviceClass.getManager().getDeviceCount() > 0) {
+		let deviceManager = deviceClass.getManager();
+		const statuses = DeviceManager.statuses;
+		if (deviceManager.getDeviceCount() > 0 && deviceManager.getStatus() == statuses.connected) {
 			connectedClass = deviceClass;
 		}
 	});
@@ -35,34 +37,13 @@ DeviceMenu.prototype.loadOptions = function() {
 		// If there is a device connected, we add an option to display firmware info about the device
 		this.addDeviceOption(connectedClass);
 		// And we add an option to disconnect from it.
-		this.addOption("Disconnect " + connectedClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
+		this.addOption("Disconnect Device", function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-		// If no devices are connected, we add an option to connect to each type of device
-        /*
         this.addOption("Connect Device", function() {
-            (new DiscoverDialog(deviceClass)).show();
+            (new DiscoverDialog(DeviceHummingbirdBit)).show();
         });
-
-
-		Device.getTypeList().forEach(function(deviceClass) {
-		    let deviceTypeName = deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars);
-		    if ((deviceTypeName) === "HB"){
-			    this.addOption("Connect Device", function() {
-				    (new DiscoverDialog(DeviceWithPorts)).show();
-			    });
-			}
-		}, this);
-        */
-
-        Device.getTypeList().forEach(function(deviceClass) {
-        	this.addOption("Connect " + deviceClass.getDeviceTypeName(false, DeviceMenu.maxDeviceNameChars), function() {
-        		(new DiscoverDialog(deviceClass)).show();
-        	});
-        }, this);
-
-
 	}
 	// Regardless, we provide an option to connect to every type of device
 	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);

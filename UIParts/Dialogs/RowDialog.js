@@ -188,16 +188,25 @@ RowDialog.prototype.createContent = function() {
 	let y = 0;
 	const rowGroup = GuiElements.create.group(0, 0);
 	if (this.rowCount > 0) {
-		for (let i = 0; i < this.rowCount; i++) {
-			// Determined by subclass
-			this.createRow(i, y, this.contentWidth, rowGroup);
-			y += RD.bnHeight + RD.bnMargin;
-		}
-	} else if (this.hintText !== "") {
+	    if (this.title === "Connect Multiple") {
+                this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
+	    } else {
+            for (let i = 0; i < this.rowCount; i++) {
+                // Determined by subclass
+                this.createRow(i, y, this.contentWidth, rowGroup);
+                y += RD.bnHeight + RD.bnMargin;
+            }
+        }
+    } else if (this.hintText !== "") {
 		this.createHintText();
 	}
 	return rowGroup;
 };
+
+RowDialog.prototype.createMultipleDialogRow = function(y, width, contentGroup) {
+	DebugOptions.markAbstract();
+};
+
 
 /**
  * Creates the content for the row at this index and adds it to the contentGroup
@@ -253,13 +262,19 @@ RowDialog.prototype.createScrollBox = function() {
 /**
  * Creates the text below the title bar.  Should only be called if hinText !== "" and there are no rows
  */
-RowDialog.prototype.createHintText = function() {
+RowDialog.prototype.createHintText = function(offsetX,offsetY) {
+    if (offsetX == null) {
+        offsetX = 0;
+    }
+    if (offsetY == null) {
+        offsetY = 0;
+    }
 	const RD = RowDialog;
 	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
 	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
-	let x = this.width / 2 - textWidth / 2;
-	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin;
+	let x = this.width / 2 - textWidth / 2 + offsetX;
+	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin + offsetY;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };

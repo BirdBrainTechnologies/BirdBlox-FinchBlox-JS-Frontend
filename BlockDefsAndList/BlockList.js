@@ -260,14 +260,14 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBBuzzer");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_BBSensors");
-	//collapsibleItem.addBlockByName("B_BBAccelerometerMagnetometer");
 	collapsibleItem.addBlockByName("B_BBMagnetometer");
 	collapsibleItem.addBlockByName("B_BBLedArray");
 	collapsibleItem.addBlockByName("B_BBPrint");
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
-	//collapsibleItem.addBlockByName("B_BBButton");
+	collapsibleItem.addBlockByName("B_BBCompassCalibrate");
+
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -284,8 +284,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
-	//collapsibleItem.addBlockByName("B_MBAccelerometerMagnetometer");
-	//collapsibleItem.addBlockByName("B_MBButton");
+	collapsibleItem.addBlockByName("B_MBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };

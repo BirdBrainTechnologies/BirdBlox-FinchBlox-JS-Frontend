@@ -1,5 +1,4 @@
 "use strict";
-
 /**
  * Block is an abstract class that represents an executable block.
  * Blocks are nearly always contained within BlockStacks or DisplayStacks.
@@ -7,7 +6,7 @@
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * TODO: remove the type parameter and use blockShape and instead.
- * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop.
+ * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop, 7 = Calibrate.
  * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.
@@ -15,7 +14,6 @@
  */
 function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
-
 	this.x = x; //Store coords
 	this.y = y;
 	this.type = type; //Fix! remove this property
@@ -219,6 +217,7 @@ Block.prototype.updateRun = function() {
 		myExecStatus = this.startAction();
 	} else if (this.running === 2) { //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
+
 		myExecStatus = this.updateAction();
 	}
 	if (!myExecStatus.isRunning()) { //If the block is done running...

@@ -40,7 +40,7 @@ function TouchReceiver() {
 	TR.addListeners();
 	// TR.test=true;
 }
-/** 
+/**
  * Adds event handlers for handlerMove and handlerUp events to the whole document.
  */
 TouchReceiver.addListeners = function() {
@@ -50,7 +50,7 @@ TouchReceiver.addListeners = function() {
 	TR.addEventListenerSafe(document.body, TR.handlerDown, TouchReceiver.handleDocumentDown, false);
 };
 
-/** 
+/**
  * Handles movement events and prevents drag gestures from scrolling document.
  * @param {event} event - passed event arguments.
  */
@@ -58,7 +58,7 @@ TouchReceiver.handleMove = function(event) {
 	TouchReceiver.touchmove(event);   // Deal with movement.
 };
 
-/** 
+/**
  * Handles end of touch events
  * @param {event} event - passed event arguments.
  */
@@ -431,11 +431,14 @@ TouchReceiver.touchmove = function(e) {
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType === "displayStack") {
-				const x = TR.target.stack.getAbsX();
-				const y = TR.target.stack.getAbsY();
-				// The first block of the duplicated BlockStack is the new target.
-				TR.target = TR.target.stack.duplicate(x, y).firstBlock;
-				TR.targetType = "block";
+			    if (typeof TR.target.draggable == "undefined" || TR.target.draggable) {
+			        const x = TR.target.stack.getAbsX();
+                    const y = TR.target.stack.getAbsY();
+                    // The first block of the duplicated BlockStack is the new target.
+                    TR.target = TR.target.stack.duplicate(x, y).firstBlock;
+                    TR.targetType = "block";
+			    }
+
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
 			 then the BlockStack should move. */
@@ -553,6 +556,20 @@ TouchReceiver.touchend = function(e) {
 			shouldPreventDefault = false;
 		} else if (TR.targetType === "collapsibleItem") {
 			TR.target.toggle();
+		} else if (TR.targetType == "displayStack") {
+		    // tapping a block in the display stack runs the block once
+		    const x = TR.target.stack.getAbsX();
+            const y = TR.target.stack.getAbsY();
+            TR.targetType = "block";
+            TR.target.updateRun();
+            // start the execution of a block
+            TR.target.startAction();
+            setTimeout(function(){
+                // wait for the response before trying to fetch the response and display the result
+                TR.target.displayResult(TR.target.updateAction().getResult());
+            }, 100);
+            // set the block to inactive state after running it.
+            TR.target.running = 0;
 		}
 	} else {
 		TR.touchDown = false;

@@ -4,8 +4,8 @@
 //MARK: micro:bit outputs in case they're needed later.
 
 function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
-		minVal, maxVal, displayUnits);
+    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
+        minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
@@ -15,13 +15,13 @@ B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 //MARK: outputs
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-	this.deviceClass = deviceClass;
-	this.displayName = "Display";
-
+  this.deviceClass = deviceClass;
+  this.displayName = "Display";
+  this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   const label = new LabelText(this,this.displayName);
   label.isEndOfLine = true;
-	this.addPart(label);
+  this.addPart(label);
 
   for (let i = 0; i < 5; i++ ){
     this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
@@ -39,12 +39,12 @@ B_MicroBitLedArray.prototype = Object.create(CommandBlock.prototype);
 B_MicroBitLedArray.prototype.constructor = B_MicroBitLedArray;
 /* Sends the request */
 B_MicroBitLedArray.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
 
   let ledStatusString = "";
   for (let i = 0; i < 25; i++){
@@ -55,14 +55,14 @@ B_MicroBitLedArray.prototype.startAction = function() {
     }
   }
 
-	let mem = this.runMem;
+    let mem = this.runMem;
   mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
 
-	device.setLedArray(mem.requestStatus, ledStatusString);
-	return new ExecutionStatusRunning();
+    device.setLedArray(mem.requestStatus, ledStatusString);
+    return new ExecutionStatusRunning();
 }
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
@@ -78,15 +78,15 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 
 
 function B_MBPrint(x, y){
-	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Print";
+    CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "Print";
+    this.draggable = true;
 
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
-	// StrS_1 refers to the first string slot.
-	this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
+    // StrS_1 refers to the first string slot.
+    this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
 
 }
 
@@ -95,23 +95,23 @@ B_MBPrint.prototype.constructor = B_MBPrint;
 
 /* Sends the request */
 B_MBPrint.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
 
-	let mem = this.runMem;
-	let printString = this.slots[1].getData().getValue();
+    let mem = this.runMem;
+    let printString = this.slots[1].getData().getValue();
 
-	mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
-	device.readPrintBlock(mem.requestStatus, printString);
+    mem.requestStatus = {};
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
+    device.readPrintBlock(mem.requestStatus, printString);
 
-	return new ExecutionStatusRunning();
+    return new ExecutionStatusRunning();
 };
 
 /* Waits until the request completes */
@@ -126,10 +126,10 @@ B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateA
 // Try #1 of creating the micro:bit accelerometer and magnetometer blocks
 
 function B_MBAccelerometerMagnetometer(x, y){
-	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "";
-
+    CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "";
+    this.draggable = true;
     this.addPart(new LabelText(this, this.displayName));
     // Device menu
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -170,13 +170,13 @@ B_MBLedArray.prototype.constructor = B_MBLedArray;
 /*
 //MARK: inputs
 function B_MBButton(x, y) {
-	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
+    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
 }
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
 function B_MBButton(x, y) {
-	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
+    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
 }
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
@@ -185,13 +185,13 @@ B_MBButton.prototype.constructor = B_MBButton;
 
 
 function B_MBMagnetometer(x, y){
-	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "";
-	this.numberOfPorts = 1;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
+    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "";
+    this.numberOfPorts = 1;
+    this.draggable = true;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
 
 
     const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
@@ -208,7 +208,7 @@ function B_MBMagnetometer(x, y){
     pickAxis.addOption(new SelectionData("Z", "z"));
     this.addPart(pickAxis);
 
-	//this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
+    //this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
 B_MBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
 B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
@@ -217,25 +217,24 @@ B_MBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
     let axisSelection = this.slots[2].getData().getValue();
-    console.log(sensorSelection)
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = 1;
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+    let port = 1;
+    if (port != null && port > 0 && port <= this.numberOfPorts) {
+        mem.requestStatus = {};
+        mem.requestStatus.finished = false;
+        mem.requestStatus.error = false;
+        mem.requestStatus.result = null;
+        device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
+        return new ExecutionStatusRunning();
+    } else {
+        this.displayError("Invalid port number");
+        return new ExecutionStatusError(); // Invalid port, exit early
+    }
 };
 
 
@@ -245,19 +244,19 @@ B_MBMagnetometer.prototype.startAction=function(){
 
 B_MBMagnetometer.prototype.updateAction = function(){
 
-	const status = this.runMem.requestStatus;
-    	if (status.finished) {
-    		if(status.error){
-    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-    			return new ExecutionStatusError();
-    		} else {
-    			const result = new StringData(status.result);
-    			const num = result.asNum().getValue();
+    const status = this.runMem.requestStatus;
+        if (status.finished) {
+            if(status.error){
+                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+                return new ExecutionStatusError();
+            } else {
+                const result = new StringData(status.result);
+                const num = result.asNum().getValue();
 
-    			return new ExecutionStatusResult(new NumData(num));
-    		}
-    	}
-    	return new ExecutionStatusRunning(); // Still running
+                return new ExecutionStatusResult(new NumData(num));
+            }
+        }
+        return new ExecutionStatusRunning(); // Still running
 
 };
 
@@ -271,14 +270,14 @@ B_MBMagnetometer.prototype.updateAction = function(){
 // Here is the block for B_MBButton.
 
 function B_MBButton(x, y){
-	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Button";
-	this.numberOfPorts = 1;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
+    //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "Button";
+    this.numberOfPorts = 1;
+    this.draggable = true;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
 
 
     const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
@@ -299,25 +298,24 @@ B_MBButton.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
 
-    console.log(sensorSelection)
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = 1;
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readButtonSensor(mem.requestStatus, sensorSelection);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+    let port = 1;
+    if (port != null && port > 0 && port <= this.numberOfPorts) {
+        mem.requestStatus = {};
+        mem.requestStatus.finished = false;
+        mem.requestStatus.error = false;
+        mem.requestStatus.result = null;
+        device.readButtonSensor(mem.requestStatus, sensorSelection);
+        return new ExecutionStatusRunning();
+    } else {
+        this.displayError("Invalid port number");
+        return new ExecutionStatusError(); // Invalid port, exit early
+    }
 };
 
 
@@ -327,22 +325,22 @@ B_MBButton.prototype.startAction=function(){
 B_MBButton.prototype.updateAction = function() {
 
 
-	const mem = this.runMem;
-	const status = mem.requestStatus;
-	if (status.finished === true) {
-		if (status.error === false) {
-			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-		} else {
-			if (status.result.length > 0) {
-				this.displayError(status.result);
-				return new ExecutionStatusError();
-			} else {
-				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-			}
-		}
-	} else {
-		return new ExecutionStatusRunning(); // Still running
-	}
+    const mem = this.runMem;
+    const status = mem.requestStatus;
+    if (status.finished === true) {
+        if (status.error === false) {
+            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+        } else {
+            if (status.result.length > 0) {
+                this.displayError(status.result);
+                return new ExecutionStatusError();
+            } else {
+                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+            }
+        }
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
 
 };
 
@@ -366,14 +364,14 @@ B_MBButton.prototype.updateAction = function() {
 
 
 function B_MBOrientation(x, y){
-	//ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-	PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "";
-	this.numberOfPorts = 1;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
+    //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "";
+    this.numberOfPorts = 1;
+    this.draggable = true;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
 
 
     const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
@@ -400,25 +398,24 @@ B_MBOrientation.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
 
-    console.log(sensorSelection)
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = 1;
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readButtonSensor(mem.requestStatus, sensorSelection);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+    let port = 1;
+    if (port != null && port > 0 && port <= this.numberOfPorts) {
+        mem.requestStatus = {};
+        mem.requestStatus.finished = false;
+        mem.requestStatus.error = false;
+        mem.requestStatus.result = null;
+        device.readButtonSensor(mem.requestStatus, sensorSelection);
+        return new ExecutionStatusRunning();
+    } else {
+        this.displayError("Invalid port number");
+        return new ExecutionStatusError(); // Invalid port, exit early
+    }
 };
 
 
@@ -428,22 +425,22 @@ B_MBOrientation.prototype.startAction=function(){
 
 B_MBOrientation.prototype.updateAction = function() {
 
-	const mem = this.runMem;
-	const status = mem.requestStatus;
-	if (status.finished === true) {
-		if (status.error === false) {
-			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-		} else {
-			if (status.result.length > 0) {
-				this.displayError(status.result);
-				return new ExecutionStatusError();
-			} else {
-				return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-			}
-		}
-	} else {
-		return new ExecutionStatusRunning(); // Still running
-	}
+    const mem = this.runMem;
+    const status = mem.requestStatus;
+    if (status.finished === true) {
+        if (status.error === false) {
+            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+        } else {
+            if (status.result.length > 0) {
+                this.displayError(status.result);
+                return new ExecutionStatusError();
+            } else {
+                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+            }
+        }
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
 
 
 
@@ -458,13 +455,13 @@ B_MBOrientation.prototype.updateAction = function() {
 
 
 function B_MBCompass(x, y){
-	ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-	this.deviceClass = DeviceMicroBit;
-	this.displayName = "Compass";
-	this.numberOfPorts = 1;
-
-	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.addPart(new LabelText(this,this.displayName));
+    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "Compass";
+    this.numberOfPorts = 1;
+    this.draggable = true;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
 
 }
 B_MBCompass.prototype = Object.create(ReporterBlock.prototype);
@@ -474,48 +471,98 @@ B_MBCompass.prototype.constructor = B_MBCompass;
 
 B_MBCompass.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let port = 1;
-	if (port != null && port > 0 && port <= this.numberOfPorts) {
-		mem.requestStatus = {};
-		mem.requestStatus.finished = false;
-		mem.requestStatus.error = false;
-		mem.requestStatus.result = null;
-		device.readCompass(mem.requestStatus);
-		return new ExecutionStatusRunning();
-	} else {
-		this.displayError("Invalid port number");
-		return new ExecutionStatusError(); // Invalid port, exit early
-	}
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+    let port = 1;
+    if (port != null && port > 0 && port <= this.numberOfPorts) {
+        mem.requestStatus = {};
+        mem.requestStatus.finished = false;
+        mem.requestStatus.error = false;
+        mem.requestStatus.result = null;
+        device.readCompass(mem.requestStatus);
+        return new ExecutionStatusRunning();
+    } else {
+        this.displayError("Invalid port number");
+        return new ExecutionStatusError(); // Invalid port, exit early
+    }
 };
 
 
 
 B_MBCompass.prototype.updateAction = function(){
 
-	const status = this.runMem.requestStatus;
-    	if (status.finished) {
-    		if(status.error){
-    			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-    			return new ExecutionStatusError();
-    		} else {
-    			const result = new StringData(status.result);
-    			const num = result.asNum().getValue();
+    const status = this.runMem.requestStatus;
+        if (status.finished) {
+            if(status.error){
+                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+                return new ExecutionStatusError();
+            } else {
+                const result = new StringData(status.result);
+                const num = result.asNum().getValue();
 
-    			return new ExecutionStatusResult(new NumData(num));
-    		}
-    	}
-    	return new ExecutionStatusRunning(); // Still running
+                return new ExecutionStatusResult(new NumData(num));
+            }
+        }
+        return new ExecutionStatusRunning(); // Still running
 
+};
+
+function B_MBCompassCalibrate(x, y){
+    CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = "CompassCalibrate";
+    this.numberOfPorts = 1;
+    this.draggable = false;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
+
+}
+B_MBCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
+B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
+
+B_MBCompassCalibrate.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+    let port = 1;
+    if (port != null && port > 0 && port <= this.numberOfPorts) {
+        mem.requestStatus = {};
+        mem.requestStatus.finished = false;
+        mem.requestStatus.error = false;
+        mem.requestStatus.result = null;
+        device.calibrateCompass(mem.requestStatus);
+        return new ExecutionStatusRunning();
+    } else {
+        this.displayError("Invalid port number");
+        return new ExecutionStatusError(); // Invalid port, exit early
+    }
 };
 
 
 
+B_MBCompassCalibrate.prototype.updateAction = function(){
+    const status = this.runMem.requestStatus;
+    if (status.finished) {
+        if(status.error){
+            this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+            return new ExecutionStatusError();
+        } else {
+            const result = new StringData(status.result);
+            const num = result.asNum().getValue();
+            return new ExecutionStatusResult(new NumData(num));
+        }
+    }
+    return new ExecutionStatusRunning(); // Still running
+
+};
 
 
 

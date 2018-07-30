@@ -6,30 +6,32 @@
  * @constructor
  */
 function ConnectMultipleDialog(deviceClass) {
-	let CMD = ConnectMultipleDialog;
-	// Store the open tab so it can be reopened by default next time
-	CMD.lastClass = deviceClass;
-	let title = "Connect Multiple";
-	this.deviceClass = deviceClass;
-	let count = deviceClass.getManager().getDeviceCount();
-	RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
-	this.addCenteredButton("Done", this.closeDialog.bind(this));
-	this.addHintText("Tap \"+\" to connect");
+    let CMD = ConnectMultipleDialog;
+    // Store the open tab so it can be reopened by default next time
+    let title = "Connect Multiple";
+    this.deviceClass = deviceClass;
+    let count = 0;
+    Device.getTypeList().forEach(function(dvcClass) {
+        count += dvcClass.getManager().getDeviceCount();
+    });
+    RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
+    this.addCenteredButton("Done", this.closeDialog.bind(this));
+    this.addHintText("Tap \"+\" to connect");
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
 
 ConnectMultipleDialog.setConstants = function() {
-	let CMD = ConnectMultipleDialog;
-	CMD.currentDialog = null;
+    let CMD = ConnectMultipleDialog;
+    CMD.currentDialog = null;
+    CMD.deviceLimit = 3;
+    CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
+    CMD.tabRowHeight = 0;
+    CMD.numberWidth = 35;
+    CMD.plusFont = Font.uiFont(26);
 
-	CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
-	CMD.tabRowHeight = RowDialog.titleBarH;
-	CMD.numberWidth = 35;
-	CMD.plusFont = Font.uiFont(26);
-
-	CMD.numberFont = Font.uiFont(16);
-	CMD.numberColor = Colors.white;
+    CMD.numberFont = Font.uiFont(16);
+    CMD.numberColor = Colors.white;
 };
 
 /**
@@ -40,21 +42,31 @@ ConnectMultipleDialog.setConstants = function() {
  * @param {number} width
  * @param {Element} contentGroup
  */
-ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	let CMD = ConnectMultipleDialog;
-	let statusX = 0;
-	let numberX = statusX + DeviceStatusLight.radius * 2;
-	let mainBnX = numberX + CMD.numberWidth;
-	let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
-	let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
-	let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, contentGroup) {
+    let CMD = ConnectMultipleDialog;
+    let statusX = 0;
+    let index = 0;
+    let numberX = statusX + DeviceStatusLight.radius * 2;
+    let mainBnX = numberX + CMD.numberWidth;
+    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+    let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+    let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    Device.getTypeList().forEach(function(dvcClass) {
+        let curDeviceCnt = dvcClass.getManager().getDeviceCount();
+        for (let i = 0; i < curDeviceCnt; i++) {
+             let robot = dvcClass.getManager().getDevice(i);
+             CMD.currentDialog.createStatusLight(robot, statusX, y, contentGroup);
+             CMD.currentDialog.createNumberText(index, numberX, y, contentGroup);
+             CMD.currentDialog.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
+             CMD.currentDialog.createInfoBn(robot, index, infoBnX, y, contentGroup);
+             CMD.currentDialog.createRemoveBn(robot, index, removeBnX, y, contentGroup);
+             y += RowDialog.bnHeight + RowDialog.bnMargin;
+             index = index + 1;
+        }
+    });
 
-	let robot = this.deviceClass.getManager().getDevice(index);
-	this.createStatusLight(robot, statusX, y, contentGroup);
-	this.createNumberText(index, numberX, y, contentGroup);
-	this.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
-	this.createInfoBn(robot, index, infoBnX, y, contentGroup);
-	this.createRemoveBn(robot, index, removeBnX, y, contentGroup);
+
+
 };
 
 /**
@@ -66,7 +78,7 @@ ConnectMultipleDialog.prototype.createRow = function(index, y, width, contentGro
  * @return {DeviceStatusLight}
  */
 ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, contentGroup) {
-	return new DeviceStatusLight(x, y + RowDialog.bnHeight / 2, contentGroup, robot);
+    return new DeviceStatusLight(x, y + RowDialog.bnHeight / 2, contentGroup, robot);
 };
 
 /**
@@ -78,14 +90,14 @@ ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, conten
  * @param {Element} contentGroup
  */
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup) {
-	let CMD = ConnectMultipleDialog;
-	let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
-	let textW = GuiElements.measure.textWidth(textE);
-	let textX = x + (CMD.numberWidth - textW) / 2;
-	let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
-	GuiElements.move.text(textE, textX, textY);
-	contentGroup.appendChild(textE);
-	return textE;
+    let CMD = ConnectMultipleDialog;
+    let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
+    let textW = GuiElements.measure.textWidth(textE);
+    let textX = x + (CMD.numberWidth - textW) / 2;
+    let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
+    GuiElements.move.text(textE, textX, textY);
+    contentGroup.appendChild(textE);
+    return textE;
 };
 
 /**
@@ -101,13 +113,13 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
-	let connectionX = this.x + this.width / 2;
-	return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
-		let upperY = this.contentRelToAbsY(y);
-		let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		// When tapped, a list of robots to connect from appears
-		(new RobotConnectionList(connectionX, upperY, lowerY, index, this.deviceClass)).show();
-	}.bind(this));
+    let connectionX = this.x + this.width / 2;
+    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
+        let upperY = this.contentRelToAbsY(y);
+        let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+        // When tapped, a list of robots to connect from appears
+        (new RobotConnectionList(connectionX, upperY, lowerY, index)).show();
+    }.bind(this));
 };
 
 /**
@@ -120,12 +132,12 @@ ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup) {
-	let button = RowDialog.createSmallBn(x, y, contentGroup);
-	button.addText("X");
-	button.setCallbackFunction(function() {
-		this.deviceClass.getManager().removeDevice(index);
-	}.bind(this), true);
-	return button;
+    let button = RowDialog.createSmallBn(x, y, contentGroup);
+    button.addText("X");
+    button.setCallbackFunction(function() {
+        DeviceManager.getDeviceClass(robot).getManager().removeDevice(robot.name);
+    }.bind(this), true);
+    return button;
 };
 
 /**
@@ -138,23 +150,23 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup) {
-	let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 
-	// The appearance of the button changes depending on the firmwareStatus
-	const statuses = Device.firmwareStatuses;
-	function updateStatus(firmwareStatus) {
-		if (firmwareStatus === statuses.old) {
-			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
-		} else if (firmwareStatus === statuses.incompatible) {
-			button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
-		} else {
-			button.addIcon(VectorPaths.info, RowDialog.iconH);
-		}
-	}
-	updateStatus(robot.getFirmwareStatus());
-	robot.setFirmwareStatusListener(updateStatus);
+    // The appearance of the button changes depending on the firmwareStatus
+    const statuses = Device.firmwareStatuses;
+    function updateStatus(firmwareStatus) {
+        if (firmwareStatus === statuses.old) {
+            button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
+        } else if (firmwareStatus === statuses.incompatible) {
+            button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.redColor);
+        } else {
+            button.addIcon(VectorPaths.info, RowDialog.iconH);
+        }
+    }
+    updateStatus(robot.getFirmwareStatus());
+    robot.setFirmwareStatusListener(updateStatus);
 
-	return button;
+    return button;
 };
 
 /**
@@ -162,14 +174,21 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
  * @inheritDoc
  */
 ConnectMultipleDialog.prototype.show = function() {
-	let CMD = ConnectMultipleDialog;
-	RowDialog.prototype.show.call(this);
-	CMD.currentDialog = this;
-	this.createConnectBn();
-	this.createTabRow();
-	this.deviceClass.getManager().startDiscover(function() {
-		return this.visible;
-	}.bind(this));
+
+    RowDialog.prototype.show.call(this);
+    let count = 0
+    Device.getTypeList().forEach(function(dvcClass) {
+            count += dvcClass.getManager().getDeviceCount();
+        });
+    if (count < ConnectMultipleDialog.deviceLimit) {
+        this.createConnectBn();
+    } else {
+        this.addHintText("Device limit reached");
+        this.createHintText(0,280);
+    }
+    DeviceHummingbirdBit.getManager().startDiscover(function() {
+        return this.visible;
+    }.bind(this));
 };
 
 /**
@@ -177,43 +196,29 @@ ConnectMultipleDialog.prototype.show = function() {
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createConnectBn = function() {
-	let CMD = ConnectMultipleDialog;
-	let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
-	let x = (this.width - bnWidth) / 2;
-	// Gets the location to add the button
-	let y = this.getExtraBottomY();
-	let button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
-	button.addText("+", CMD.plusFont);
-	let upperY = y + this.y;
-	let lowerY = upperY + RowDialog.bnHeight;
-	let connectionX = this.x + this.width / 2;
-	button.setCallbackFunction(function() {
-		// Shows a list of devices to connect
-		(new RobotConnectionList(connectionX, upperY, lowerY, null, this.deviceClass)).show();
-	}.bind(this), true);
-	const manager = this.deviceClass.getManager();
-	if (manager.getDeviceCount() >= DeviceManager.maxDevices) {
-		button.disable();
-	}
-	return button;
-};
+    let CMD = ConnectMultipleDialog;
+    let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
+    let x = (this.width - bnWidth) / 2;
+    // Gets the location to add the button
+    let y = this.getExtraBottomY();
+    let button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
+    button.addText("+", CMD.plusFont);
+    let upperY = y + this.y;
+    let lowerY = upperY + RowDialog.bnHeight;
+    let connectionX = this.x + this.width / 2;
+    let curDeviceCnt = 0;
+    button.setCallbackFunction(function() {
+        // Shows a list of devices to connect
+        (new RobotConnectionList(connectionX, upperY, lowerY, null)).show();
+    }.bind(this), true);
+    Device.getTypeList().forEach(function(dvcClass) {
+            curDeviceCnt += dvcClass.getManager().getDeviceCount();
+    });
 
-/**
- * Creates a row of tabs for each device type, which when selected, reload the dialog for that tab
- * @return {TabRow}
- */
-ConnectMultipleDialog.prototype.createTabRow = function() {
-	let CMD = ConnectMultipleDialog;
-	let selectedIndex = Device.getTypeList().indexOf(this.deviceClass);
-	let y = this.getExtraTopY();
-	let tabRow = new TabRow(0, y, this.width, CMD.tabRowHeight, this.group, selectedIndex);
-	Device.getTypeList().forEach(function(deviceClass) {
-		tabRow.addTab(deviceClass.getDeviceTypeName(false), deviceClass);
-	});
-	// When a tab is selected, reloadDialog will be called with the class of the device type
-	tabRow.setCallbackFunction(this.reloadDialog.bind(this));
-	tabRow.show();
-	return tabRow;
+    if (curDeviceCnt >= DeviceManager.maxDevices) {
+        button.disable();
+    }
+    return button;
 };
 
 /**
@@ -221,21 +226,24 @@ ConnectMultipleDialog.prototype.createTabRow = function() {
  * @param [deviceClass] - subclass of Device
  */
 ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
-	if (deviceClass == null) {
-		deviceClass = this.deviceClass;
-	}
-	if (deviceClass !== this.deviceClass) {
-		// Stop discovery before switching tabs
-		this.deviceClass.getManager().stopDiscover();
-	}
-	let thisScroll = this.getScroll();
-	let me = this;
-	me.hide();
-	let dialog = new ConnectMultipleDialog(deviceClass);
-	dialog.show();
-	if (deviceClass === this.deviceClass) {
-		dialog.setScroll(thisScroll);
-	}
+    if (this.deviceClass == null) {
+        this.deviceClass = deviceClass;
+    }
+    if (deviceClass !== this.deviceClass) {
+        // Stop discovery before switching tabs
+        this.deviceClass.getManager().stopDiscover();
+    }
+    let thisScroll = this.getScroll();
+    this.hide();
+    let dialog = new ConnectMultipleDialog(deviceClass);
+    ConnectMultipleDialog.currentDialog = dialog;
+    if (ConnectMultipleDialog.currentDialog.deviceClass === null) {
+        ConnectMultipleDialog.currentDialog.deviceClass = deviceClass;
+    }
+    dialog.show();
+
+    dialog.setScroll(thisScroll);
+
 };
 
 /**
@@ -243,29 +251,29 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
  * @inheritDoc
  */
 ConnectMultipleDialog.prototype.closeDialog = function() {
-	let CMD = ConnectMultipleDialog;
-	RowDialog.prototype.closeDialog.call(this);
-	CMD.currentDialog = null;
-	this.deviceClass.getManager().stopDiscover();
+    let CMD = ConnectMultipleDialog;
+    RowDialog.prototype.closeDialog.call(this);
+    CMD.currentDialog = null;
+    DeviceHummingbirdBit.getManager().stopDiscover();
 };
 
 /**
  * Reloads the currently open dialog
  */
-ConnectMultipleDialog.reloadDialog = function() {
-	let CMD = ConnectMultipleDialog;
-	if (CMD.currentDialog != null) {
-		CMD.currentDialog.reloadDialog();
-	}
+ConnectMultipleDialog.reloadDialog = function(deviceClass) {
+    let curDialog = ConnectMultipleDialog.currentDialog;
+    curDialog.reloadDialog(deviceClass);
 };
 
 /**
  * Creates and shows a ConnectMultipleDialog with the default tab open
  */
 ConnectMultipleDialog.showDialog = function() {
-	let CMD = ConnectMultipleDialog;
-	if (CMD.lastClass == null) {
-		CMD.lastClass = Device.getTypeList()[0];
-	}
-	(new ConnectMultipleDialog(CMD.lastClass)).show();
+    let CMD = ConnectMultipleDialog;
+    if (CMD.currentDialog === null) {
+        CMD.currentDialog = new ConnectMultipleDialog(null);
+        CMD.currentDialog.show();
+    } else {
+        CMD.currentDialog.show();
+    }
 };

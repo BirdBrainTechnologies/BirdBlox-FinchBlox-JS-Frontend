@@ -10,7 +10,7 @@
  * @param deviceClass - Subclass of Device to scan for
  * @constructor
  */
-function RobotConnectionList(x, upperY, lowerY, index, deviceClass) {
+function RobotConnectionList(x, upperY, lowerY, index) {
 	if (index == null) {
 		index = null;
 	}
@@ -18,7 +18,7 @@ function RobotConnectionList(x, upperY, lowerY, index, deviceClass) {
 	this.upperY = upperY;
 	this.lowerY = lowerY;
 	this.index = index;
-	this.deviceClass = deviceClass;
+	this.deviceClass = DeviceHummingbirdBit;
 	this.visible = false;
 
 	/* Sometimes the list is told to update its entries but can't since it is currently being scrolled.  In that case,
@@ -118,6 +118,8 @@ RobotConnectionList.prototype.addBnListOption = function(robot) {
 	this.menuBnList.addOption(robot.name, function() {
 		me.close();
 		if (me.index == null) {
+		    me.deviceClass = DeviceManager.getDeviceClass(robot);
+
 			me.deviceClass.getManager().appendDevice(robot);
 		} else {
 			me.deviceClass.getManager().setOrSwapDevice(me.index, robot);

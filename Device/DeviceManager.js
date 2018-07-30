@@ -98,18 +98,46 @@ DeviceManager.prototype.setDevice = function(index, newDevice) {
 	this.connectedDevices[index].disconnect();
 	newDevice.connect();
 	this.connectedDevices[index] = newDevice;
-	this.devicesChanged();
+	this.devicesChanged(this.getDeviceClass(newDevice), true);
 };
+
+DeviceManager.prototype.getDeviceClass = function(robot) {
+   if (robot.device === "micro:bit") {
+       return DeviceMicroBit;
+   } else if (robot.device === "Bit") {
+       return DeviceHummingbirdBit;
+   } else if (robot.device === "Duo") {
+       return DeviceHummingbird;
+   }
+};
+
+DeviceManager.getDeviceClass = function(robot) {
+    if (robot.device === "micro:bit") {
+        return DeviceMicroBit;
+    } else if (robot.device === "Bit") {
+        return DeviceHummingbirdBit;
+    } else if (robot.device === "Duo") {
+        return DeviceHummingbird;
+    }
+}
 
 /**
  * Issues a disconnect request to the device at the index and removes it from the list
  * @param {number} index
  */
-DeviceManager.prototype.removeDevice = function(index) {
-	DebugOptions.assert(index < this.getDeviceCount());
-	this.connectedDevices[index].disconnect();
-	this.connectedDevices.splice(index, 1);
-	this.devicesChanged();
+DeviceManager.prototype.removeDevice = function(robotName) {
+    let removedIndex = -1;
+	for (let index = 0; index < this.getDeviceCount(); index++) {
+	    if (this.connectedDevices[index].name === robotName) {
+	        this.connectedDevices[index].disconnect();
+	        removedIndex = index;
+	        break;
+	    }
+	}
+	if (removedIndex !== -1) {
+        this.connectedDevices.splice(removedIndex, 1);
+        this.devicesChanged(null, true);
+    }
 };
 
 /**
@@ -119,7 +147,7 @@ DeviceManager.prototype.removeDevice = function(index) {
 DeviceManager.prototype.appendDevice = function(newDevice) {
 	newDevice.connect();
 	this.connectedDevices.push(newDevice);
-	this.devicesChanged();
+	this.devicesChanged(this.getDeviceClass(newDevice), true);
 };
 
 /**
@@ -132,7 +160,7 @@ DeviceManager.prototype.setOneDevice = function(newDevice) {
 	}
 	newDevice.connect();
 	this.connectedDevices = [newDevice];
-	this.devicesChanged();
+	this.devicesChanged(null, false);
 };
 
 /**
@@ -146,7 +174,7 @@ DeviceManager.prototype.swapDevices = function(index1, index2) {
 	const device2 = this.connectedDevices[index2];
 	this.connectedDevices[index1] = device2;
 	this.connectedDevices[index2] = device1;
-	this.devicesChanged();
+	this.devicesChanged(null, false);
 };
 
 /**
@@ -172,7 +200,7 @@ DeviceManager.prototype.removeAllDevices = function() {
 		device.disconnect();
 	});
 	this.connectedDevices = [];
-	this.devicesChanged();
+	this.devicesChanged(null, false);
 };
 
 /**
@@ -181,10 +209,12 @@ DeviceManager.prototype.removeAllDevices = function() {
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
 DeviceManager.prototype.deviceIsConnected = function(index) {
+
 	if (index >= this.getDeviceCount()) {
 		return false;
 	} else {
 		const deviceStatus = this.connectedDevices[index].getStatus();
+
 		const statuses = DeviceManager.statuses;
 		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
@@ -226,8 +256,14 @@ DeviceManager.prototype.getSelectableDeviceCount = function() {
 /**
  * Called from other DeviceManager functions to alert the UI that the connected devices have changed
  */
-DeviceManager.prototype.devicesChanged = function() {
-	ConnectMultipleDialog.reloadDialog();
+DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
+    if (multiple) {
+        if (deviceClass != null) {
+            ConnectMultipleDialog.reloadDialog(deviceClass);
+        } else {
+            ConnectMultipleDialog.reloadDialog();
+        }
+    }
 	this.updateSelectableDevices();
 	DeviceManager.updateStatus();
 	CodeManager.updateConnectionStatus();
@@ -244,7 +280,6 @@ DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 		this.discoverCache = null;
 
 		let request = new HttpRequestBuilder("robot/startDiscover");
-		request.addParam("type", this.deviceClass.getDeviceTypeId());
 		HtmlServer.sendRequestWithCallback(request.toString());
 	}
 };
@@ -271,16 +306,14 @@ DeviceManager.prototype.getDiscoverCache = function() {
  * Clears all data from the previous scan
  * @param {string} robotTypeId - id of the affected DeviceManager
  */
-DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
-	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
-		if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
-			this.scanning = false;
-			this.discoverCache = null;
-			this.startDiscover(this.renewDiscoverFn);
-		} else {
-			this.markStoppedDiscover();
-		}
-	}
+DeviceManager.prototype.possiblyRescan = function() {
+    if (this.renewDiscoverFn != null && this.renewDiscoverFn()) {
+        this.scanning = false;
+        this.discoverCache = null;
+        this.startDiscover(this.renewDiscoverFn);
+    } else {
+        this.markStoppedDiscover();
+    }
 };
 
 /**
@@ -292,7 +325,7 @@ DeviceManager.prototype.possiblyRescan = function(robotTypeId) {
  */
 DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeIndex) {
 	// Get the devices from the request
-	let robotList = Device.fromJsonArrayString(this.deviceClass, robotListString);
+	let robotList = Device.fromJsonArrayString(robotListString);
 	// Accumulate devices that are not currently connected
 	let disconnectedRobotsList = [];
 	robotList.forEach(function(robot) {
@@ -319,11 +352,9 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 	return newList;
 };
 
-DeviceManager.prototype.backendDiscovered = function(robotTypeId, robotList) {
-	if (robotTypeId === this.deviceClass.getDeviceTypeId()) {
-		this.discoverCache = robotList;
-		if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
-	}
+DeviceManager.prototype.backendDiscovered = function(robotList) {
+    this.discoverCache = robotList;
+    if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
 };
 
 /**
@@ -403,7 +434,7 @@ DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, 
 	if (index >= 0) {
 		const robot = this.connectedDevices[index];
 		this.connectedDevices.splice(index, 1);
-		this.devicesChanged();
+		this.devicesChanged(null, false);
 		robot.notifyIncompatible(oldFirmware, minFirmware);
 	}
 };
@@ -513,9 +544,9 @@ DeviceManager.setStatusListener = function(callbackFn) {
  * @param {string} robotTypeId - The ID of the type of robot being scanned for
  * @param {string} robotList - A JSON Array as a string representing the discovered devices
  */
-DeviceManager.backendDiscovered = function(robotTypeId, robotList) {
+DeviceManager.backendDiscovered = function(robotList) {
 	DeviceManager.forEach(function(manager) {
-		manager.backendDiscovered(robotTypeId, robotList);
+		manager.backendDiscovered(robotList);
 	});
 };
 
@@ -535,8 +566,8 @@ DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmwar
  * Notifies all DeviceManagers that a scan has just ended, so they can possibly start a new scan
  * @param {string} robotTypeId - The ID of the type of robot that was being scanned for
  */
-DeviceManager.possiblyRescan = function(robotTypeId) {
+DeviceManager.possiblyRescan = function() {
 	DeviceManager.forEach(function(manager) {
-		manager.possiblyRescan(robotTypeId);
+		manager.possiblyRescan();
 	});
 };

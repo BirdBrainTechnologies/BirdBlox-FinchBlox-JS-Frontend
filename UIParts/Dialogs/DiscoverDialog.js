@@ -7,7 +7,7 @@
  */
 function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
-	let title = "Connect " + deviceClass.getDeviceTypeName(false);
+	let title = "Connect Device";
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
@@ -85,11 +85,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	
-	if ((updateDeviceListCounter % 40) == 0){
-		this.reloadRows(this.discoveredDevicesRSSISorted.length);
-	};
+	//if ((updateDeviceListCounter % 40) == 0){
+	this.reloadRows(this.discoveredDevicesRSSISorted.length);
+	//};
 	
-	//this.reloadRows(this.discoveredDevices.length);
+//	this.reloadRows(this.discoveredDevices.length);
 };
 
 /**
@@ -117,6 +117,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
+    this.deviceClass = DeviceManager.getDeviceClass(device);
 	this.deviceClass.getManager().setOneDevice(device);
 	this.closeDialog();
 };

@@ -163,6 +163,12 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 	minFirmware = HtmlServer.decodeHtml(minFirmware);
 	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
 };
+
+CallbackManager.robot.connectionFailure = function(robotId) {
+    robotId = HtmlServer.decodeHtml(robotId);
+    let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
+    DialogManager.showAlertDialog("Connection Failure", msg, "Close", null, null);
+}
 /**
  * Tells the frontend that the status of a robot's firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -192,10 +198,9 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
  * @param {string} robotList - A percent encoded JSON array of discovered devices
  * @return {boolean}
  */
-CallbackManager.robot.discovered = function(robotTypeId, robotList){
-	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
+CallbackManager.robot.discovered = function(robotList){
 	robotList = HtmlServer.decodeHtml(robotList);
-	DeviceManager.backendDiscovered(robotTypeId, robotList);
+	DeviceManager.backendDiscovered(robotList);
 	return true;
 };
 /**
@@ -203,9 +208,8 @@ CallbackManager.robot.discovered = function(robotTypeId, robotList){
  * @param {string} robotTypeId - The percent encoded type of robot being scanned for
  * @return {boolean}
  */
-CallbackManager.robot.discoverTimeOut = function(robotTypeId) {
-	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
-	DeviceManager.possiblyRescan(robotTypeId);
+CallbackManager.robot.discoverTimeOut = function() {
+	DeviceManager.possiblyRescan();
 	return true;
 };
 /**
@@ -213,9 +217,8 @@ CallbackManager.robot.discoverTimeOut = function(robotTypeId) {
  * @param {string} robotTypeId - The percent encoded type of robot being scanned for
  * @return {boolean}
  */
-CallbackManager.robot.stopDiscover = function(robotTypeId) {
-	robotTypeId = HtmlServer.decodeHtml(robotTypeId);
-	DeviceManager.possiblyRescan(robotTypeId);
+CallbackManager.robot.stopDiscover = function() {
+	DeviceManager.possiblyRescan();
 	return true;
 };
 
