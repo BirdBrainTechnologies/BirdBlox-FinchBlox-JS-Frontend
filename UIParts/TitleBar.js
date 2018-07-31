@@ -60,10 +60,13 @@ TitleBar.setGraphicsPart2 = function() {
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
+	
+	/*
 	if (GuiElements.smallMode) {
 		TB.showBnX = TB.buttonMargin;
 		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
+	*/
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
@@ -104,7 +107,7 @@ TitleBar.makeButtons = function() {
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-
+	/*
 	if (GuiElements.smallMode) {
 		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
 		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
@@ -112,6 +115,7 @@ TitleBar.makeButtons = function() {
 	} else {
 		TB.showHideBn = null;
 	}
+	*/
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);

@@ -86,7 +86,7 @@ BlockGraphics.SetReporter = function() {
 
 	BlockGraphics.reporter.strokeW = 1;
 	BlockGraphics.reporter.slotFill = "#fff";
-	BlockGraphics.reporter.slotSelectedFill = "#000";
+	BlockGraphics.reporter.slotSelectedFill = Colors.lightGray;
 };
 
 /* Used by HexSlots and HexBlocks */
@@ -184,7 +184,7 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.slotHMargin = 5;
 	BlockGraphics.dropSlot.triH = 6;
 	BlockGraphics.dropSlot.triW = 8;
-	BlockGraphics.dropSlot.bg = "#000";
+	BlockGraphics.dropSlot.bg = Colors.lightGray;
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
 	BlockGraphics.dropSlot.selectedBg = "#fff";
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;

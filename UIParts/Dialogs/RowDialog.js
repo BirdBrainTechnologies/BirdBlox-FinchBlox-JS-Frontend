@@ -38,7 +38,7 @@ RowDialog.setConstants = function() {
 
 	RowDialog.titleBarColor = Colors.lightGray;
 	RowDialog.titleBarFontC = Colors.white;
-	RowDialog.bgColor = Colors.black;
+	RowDialog.bgColor = Colors.lightLightGray;
 	RowDialog.centeredBnWidth = 100;
 	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
 	RowDialog.bnMargin = 5;

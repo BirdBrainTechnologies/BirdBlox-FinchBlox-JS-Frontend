@@ -4392,7 +4392,7 @@ BlockGraphics.SetReporter = function() {
 
 	BlockGraphics.reporter.strokeW = 1;
 	BlockGraphics.reporter.slotFill = "#fff";
-	BlockGraphics.reporter.slotSelectedFill = "#000";
+	BlockGraphics.reporter.slotSelectedFill = Colors.lightGray;
 };
 
 /* Used by HexSlots and HexBlocks */
@@ -4490,7 +4490,7 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.slotHMargin = 5;
 	BlockGraphics.dropSlot.triH = 6;
 	BlockGraphics.dropSlot.triW = 8;
-	BlockGraphics.dropSlot.bg = "#000";
+	BlockGraphics.dropSlot.bg = Colors.lightGray;
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
 	BlockGraphics.dropSlot.selectedBg = "#fff";
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
@@ -6271,10 +6271,13 @@ TitleBar.setGraphicsPart2 = function() {
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
+	
+	/*
 	if (GuiElements.smallMode) {
 		TB.showBnX = TB.buttonMargin;
 		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
 	}
+	*/
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
@@ -6315,7 +6318,7 @@ TitleBar.makeButtons = function() {
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-
+	/*
 	if (GuiElements.smallMode) {
 		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
 		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
@@ -6323,6 +6326,7 @@ TitleBar.makeButtons = function() {
 	} else {
 		TB.showHideBn = null;
 	}
+	*/
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
@@ -8916,7 +8920,7 @@ InputPad.prototype.constructor = InputPad;
 
 InputPad.setConstants = function() {
 	const IP = InputPad;
-	IP.background = Colors.black;
+	IP.background = Colors.lightGray;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
 };
@@ -9700,7 +9704,7 @@ SoundInputPad.setConstants = function() {
 	SIP.playBnWidth = RowDialog.smallBnWidth;
 	SIP.mainBnWidth = SIP.width - SIP.playBnWidth - SIP.margin;
 	SIP.iconH = RowDialog.iconH;
-	SIP.background = Colors.black;
+	SIP.background = Colors.lightGray;
 };
 
 /**
@@ -10731,7 +10735,7 @@ Menu.prototype.constructor = Menu;
 Menu.setGraphics = function() {
 	Menu.defaultWidth = 170;
 	Menu.bnMargin = Button.defaultMargin;
-	Menu.bgColor = Colors.black;
+	Menu.bgColor = Colors.lightGray;
 };
 
 /**
@@ -11298,7 +11302,7 @@ function BlockContextMenu(block, x, y) {
 BlockContextMenu.setGraphics = function() {
 	const BCM = BlockContextMenu;
 	BCM.bnMargin = Button.defaultMargin;
-	BCM.bgColor = Colors.black;
+	BCM.bgColor = Colors.lightGray;
 	BCM.blockShift = 20;
 };
 
@@ -13605,7 +13609,7 @@ RowDialog.setConstants = function() {
 
 	RowDialog.titleBarColor = Colors.lightGray;
 	RowDialog.titleBarFontC = Colors.white;
-	RowDialog.bgColor = Colors.black;
+	RowDialog.bgColor = Colors.lightLightGray;
 	RowDialog.centeredBnWidth = 100;
 	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
 	RowDialog.bnMargin = 5;
