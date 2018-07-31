@@ -38,15 +38,15 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.darkDarkGray;
-	BlockPalette.catBg = Colors.darkDarkGray;
+	BlockPalette.bg = Colors.white;
+	BlockPalette.catBg = Colors.white;
 
 	BlockPalette.labelFont = Font.uiFont(13);
-	BlockPalette.labelColor = Colors.white;
+	BlockPalette.labelColor = Colors.black;
 
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
-	BlockPalette.trashColor = Colors.white;
+	BlockPalette.trashColor = Colors.black;
 };
 
 /**

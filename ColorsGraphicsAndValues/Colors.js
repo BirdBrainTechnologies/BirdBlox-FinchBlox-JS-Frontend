@@ -11,7 +11,9 @@ function Colors() {
 
 Colors.setCommon = function() {
 	Colors.white = "#fff";
-	Colors.lightGray = "#3D3D3D";
+	Colors.lightGray = "#7B7B7B";
+	Colors.lightLightGray = "#CDCDCD";
+	Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
@@ -20,16 +22,21 @@ Colors.setCommon = function() {
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		"robots": "#FF9600",
-		"hummingbird": "#FF9600",
-		"hummingbirdbit": "#FF9600",
-		"microbit": "#FF9600",
-		"flutter": "#FF9600",
-		"finch": "#FF9600",
+		/*
+		
+		*/
+		
+		"robots": "#209BA9",
+		"hummingbird": "#209BA9",
+        "hummingbirdbit": "#209BA9",
+        "microbit": "#209BA9",
+        "flutter": "#209BA9",
+        "finch": "#209BA9",
+		
+		"tablet": "#FAA525",
+		"operators": "#8EC449",
 		"sound": "#EE00FF",
-		"tablet": "#019EFF",
 		"control": "#FFCC00",
-		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
 		"inactive": "#a3a3a3"
@@ -39,7 +46,7 @@ Colors.setCategory = function() {
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 0.5;
+	Colors.gradEnd = 1;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };

@@ -35,7 +35,8 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
-	TB.bg = Colors.black;
+	//TB.bg = Colors.black;
+	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
 	TB.stopFill = "#f00";
 	TB.titleColor = Colors.white;

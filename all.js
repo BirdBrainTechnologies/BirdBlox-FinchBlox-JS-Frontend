@@ -3975,7 +3975,9 @@ function Colors() {
 
 Colors.setCommon = function() {
 	Colors.white = "#fff";
-	Colors.lightGray = "#3D3D3D";
+	Colors.lightGray = "#7B7B7B";
+	Colors.lightLightGray = "#CDCDCD";
+	Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
@@ -3984,16 +3986,21 @@ Colors.setCommon = function() {
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		"robots": "#FF9600",
-		"hummingbird": "#FF9600",
-		"hummingbirdbit": "#FF9600",
-		"microbit": "#FF9600",
-		"flutter": "#FF9600",
-		"finch": "#FF9600",
+		/*
+		
+		*/
+		
+		"robots": "#209BA9",
+		"hummingbird": "#209BA9",
+        "hummingbirdbit": "#209BA9",
+        "microbit": "#209BA9",
+        "flutter": "#209BA9",
+        "finch": "#209BA9",
+		
+		"tablet": "#FAA525",
+		"operators": "#8EC449",
 		"sound": "#EE00FF",
-		"tablet": "#019EFF",
 		"control": "#FFCC00",
-		"operators": "#44FF00",
 		"variables": "#FF5B00",
 		"lists": "#FF0000",
 		"inactive": "#a3a3a3"
@@ -4003,7 +4010,7 @@ Colors.setCategory = function() {
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 0.5;
+	Colors.gradEnd = 1;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };
@@ -4485,9 +4492,9 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.triW = 8;
 	BlockGraphics.dropSlot.bg = "#000";
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
-	BlockGraphics.dropSlot.selectedBg = "#000";
+	BlockGraphics.dropSlot.selectedBg = "#fff";
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
-	BlockGraphics.dropSlot.triColor = "#000";
+	BlockGraphics.dropSlot.triColor = "#fff";
 	BlockGraphics.dropSlot.textFill = "#fff";
 	BlockGraphics.dropSlot.selectedTriColor = "#fff";
 };
@@ -6239,7 +6246,8 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
-	TB.bg = Colors.black;
+	//TB.bg = Colors.black;
+	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
 	TB.stopFill = "#f00";
 	TB.titleColor = Colors.white;
@@ -6495,15 +6503,15 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
 	BlockPalette.catY = TitleBar.height;
 	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.darkDarkGray;
-	BlockPalette.catBg = Colors.darkDarkGray;
+	BlockPalette.bg = Colors.white;
+	BlockPalette.catBg = Colors.white;
 
 	BlockPalette.labelFont = Font.uiFont(13);
-	BlockPalette.labelColor = Colors.white;
+	BlockPalette.labelColor = Colors.black;
 
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
-	BlockPalette.trashColor = Colors.white;
+	BlockPalette.trashColor = Colors.black;
 };
 
 /**
@@ -6875,9 +6883,9 @@ function CategoryBN(x, y, category) {
 CategoryBN.setGraphics = function() {
 	const BP = BlockPalette;
 	const CBN = CategoryBN;
-	CBN.bg = Colors.darkDarkGray;
+	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
-	CBN.foreground = "#fff";
+	CBN.foreground = "#000";
 	CBN.height = 30;
 	CBN.colorW = 8;   // The width of the band of color on the left
 	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
@@ -6911,6 +6919,7 @@ CategoryBN.prototype.buildGraphics = function() {
  */
 CategoryBN.prototype.select = function() {
 	this.bgRect.setAttributeNS(null, "fill", this.fill);
+	this.label.setAttributeNS(null, "fill", "#fff");
 };
 
 /**
@@ -6918,6 +6927,7 @@ CategoryBN.prototype.select = function() {
  */
 CategoryBN.prototype.deselect = function() {
 	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
+	this.label.setAttributeNS(null, "fill", "#000");
 };
 
 /**
@@ -7825,11 +7835,11 @@ function Button(x, y, width, height, parent) {
 }
 
 Button.setGraphics = function() {
-	Button.bg = Colors.darkGray;
+	Button.bg = "#209BA9";
 	Button.foreground = Colors.white;
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
-	Button.highlightFore = Colors.darkGray;
+	Button.highlightFore = "#209BA9";
 	Button.disabledBg = Colors.darkGray;
 	Button.disabledFore = Colors.black;
 
@@ -12511,7 +12521,9 @@ TabManager.setGraphics = function() {
  */
 TabManager.createTabSpaceBg = function() {
 	const TM = TabManager;
-	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, Colors.lightGray);
+	//TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, Colors.lightGray);
+	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
+
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
@@ -17395,7 +17407,9 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
     let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
-    DialogManager.showAlertDialog("Connection Failure", msg, "Close", null, null);
+    DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
+    		return;
+    	}.bind(this));
 }
 /**
  * Tells the frontend that the status of a robot's firmware
@@ -18604,7 +18618,6 @@ Block.prototype.updateRun = function() {
 		myExecStatus = this.startAction();
 	} else if (this.running === 2) { //If the Block is currently running, update it.
 		//This function is also overridden and is called repeatedly until the Block is done running.
-
 		myExecStatus = this.updateAction();
 	}
 	if (!myExecStatus.isRunning()) { //If the block is done running...

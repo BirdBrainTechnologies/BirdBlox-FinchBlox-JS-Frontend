@@ -186,9 +186,9 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.triW = 8;
 	BlockGraphics.dropSlot.bg = "#000";
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
-	BlockGraphics.dropSlot.selectedBg = "#000";
+	BlockGraphics.dropSlot.selectedBg = "#fff";
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
-	BlockGraphics.dropSlot.triColor = "#000";
+	BlockGraphics.dropSlot.triColor = "#fff";
 	BlockGraphics.dropSlot.textFill = "#fff";
 	BlockGraphics.dropSlot.selectedTriColor = "#fff";
 };
