@@ -28,8 +28,8 @@ function TabRow(x, y, width, height, parent, initialTab) {
 TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
-	TR.deselectedColor = Colors.darkGray;
-	TR.selectedColor = Colors.black;
+	TR.deselectedColor = "#999";
+	TR.selectedColor = Colors.lightLightGray;
 	TR.foregroundColor = Colors.white;
 
 	TR.font = Font.uiFont(16).bold();
