@@ -120,7 +120,7 @@ RobotConnectionList.prototype.addBnListOption = function(robot) {
         for (var i = 0; i < words.length; i++) {
             newName += words[i][0];
         };
-	this.menuBnList.addOption(newName + " - " + robot.name, function() {
+	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
 		me.close();
 		if (me.index == null) {
 		    me.deviceClass = DeviceManager.getDeviceClass(robot);
