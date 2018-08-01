@@ -638,7 +638,7 @@ B_BBCompass.prototype.updateAction = function(){
 function B_BBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "CompassCalibrate";
+    this.displayName = "Compass Calibrate";
     this.draggable = false;
     this.numberOfPorts = 1;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
