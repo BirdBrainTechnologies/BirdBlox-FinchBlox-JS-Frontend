@@ -12,13 +12,8 @@ function Colors() {
 Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#7B7B7B";
-<<<<<<< HEAD
     Colors.lightLightGray = "#CDCDCD";
     Colors.windowColor = "#CCC";
-=======
-	Colors.lightLightGray = "#CDCDCD";
-	Colors.windowColor = "#CCC";
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";

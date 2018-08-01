@@ -4493,13 +4493,8 @@ function Colors() {
 Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#7B7B7B";
-<<<<<<< HEAD
     Colors.lightLightGray = "#CDCDCD";
     Colors.windowColor = "#CCC";
-=======
-	Colors.lightLightGray = "#CDCDCD";
-	Colors.windowColor = "#CCC";
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
@@ -4508,29 +4503,14 @@ Colors.setCommon = function() {
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-<<<<<<< HEAD
 		"robots": "#209BA9",
         "hummingbird": "#209BA9",
-=======
-		/*
-		
-		*/
-		
-		"robots": "#209BA9",
-		"hummingbird": "#209BA9",
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
         "hummingbirdbit": "#209BA9",
         "microbit": "#209BA9",
         "flutter": "#209BA9",
         "finch": "#209BA9",
-<<<<<<< HEAD
         "tablet": "#FAA525",
         "operators": "#8EC449",
-=======
-		
-		"tablet": "#FAA525",
-		"operators": "#8EC449",
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 		"sound": "#EE00FF",
 		"control": "#FFCC00",
 		"variables": "#FF5B00",
@@ -6778,10 +6758,7 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
-<<<<<<< HEAD
-=======
-	//TB.bg = Colors.black;
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
+
 	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
 	TB.stopFill = "#f00";
@@ -6806,16 +6783,6 @@ TitleBar.setGraphicsPart2 = function() {
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
-<<<<<<< HEAD
-=======
-	
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
-	/*
-	if (GuiElements.smallMode) {
-		TB.showBnX = TB.buttonMargin;
-		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
-	}
-	*/
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
@@ -6856,24 +6823,7 @@ TitleBar.makeButtons = function() {
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-<<<<<<< HEAD
-    /*
-=======
-	/*
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
-	if (GuiElements.smallMode) {
-		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
-		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
-		TB.showHideBn.build(GuiElements.paletteLayersVisible);
-	} else {
-		TB.showHideBn = null;
-	}
-<<<<<<< HEAD
-    */
-=======
-	*/
 
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
 	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
@@ -13071,13 +13021,7 @@ TabManager.setGraphics = function() {
  */
 TabManager.createTabSpaceBg = function() {
 	const TM = TabManager;
-<<<<<<< HEAD
 	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
-=======
-	//TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, Colors.lightGray);
-	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
-
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
@@ -16140,17 +16084,10 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
 	var words = robot.name.split(" ");
-<<<<<<< HEAD
     var newName = "";
     for (var i = 0; i < words.length; i++) {
         newName += words[i][0];
     };
-=======
-    	var newName = "";
-        for (var i = 0; i < words.length; i++) {
-            newName += words[i][0];
-        };
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
 		me.close();
 		if (me.index == null) {
@@ -16287,19 +16224,10 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-<<<<<<< HEAD
     var deviceName = this.discoveredDevices[index].name;
     var words = deviceName.split(" ");
     var newName = "";
     for (var i = 0; i < words.length; i++) {
-=======
-	
-	
-	var deviceName = this.discoveredDevices[index].name;
-	var words = deviceName.split(" ");
-	var newName = "";
-	for (var i = 0; i < words.length; i++) {
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
         newName += words[i][0];
     };
 
@@ -24031,11 +23959,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-<<<<<<< HEAD
 	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, "Intensity");
-=======
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -25200,11 +25124,7 @@ B_BBCompass.prototype.updateAction = function(){
 function B_BBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-<<<<<<< HEAD
     this.displayName = Language.getStr("CompassCalibrate");
-=======
-    this.displayName = "Compass Calibrate";
->>>>>>> a1db31dab69e5579a061f6f233c1a8fa16a4bc66
     this.draggable = false;
     this.numberOfPorts = 1;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
