@@ -8,11 +8,7 @@ function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valu
 		minVal, maxVal, displayUnits);
 }
 B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-<<<<<<< HEAD
-B_MicroBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
-=======
 B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 
 
 
@@ -71,23 +67,7 @@ B_MicroBitLedArray.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
 // Try #3 at micro:bit blocks
-
-
-
-
-
 function B_MBPrint(x, y){
 	CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
 	this.deviceClass = DeviceMicroBit;
@@ -163,35 +143,6 @@ function B_MBAccelerometerMagnetometer(x, y){
 B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
 B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
 
-<<<<<<< HEAD
-
-=======
-/*
-B_MBAccelerometerMagnetometer.prototype.startAction=function(){
-
-    let deviceIndex = this.slots[0].getData().getValue();
-    let blockSelection = this.slots[1].getData().getValue();
-
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
-	if (device == null) {
-		this.displayError(this.deviceClass.getNotConnectedMessage());
-		return new ExecutionStatusError(); // Flutter was invalid, exit early
-	}
-	let mem = this.runMem;
-	let axis = this.slots[2].getData().getValue();
-
-	mem.requestStatus = {};
-	mem.requestStatus.finished = false;
-	mem.requestStatus.error = false;
-	mem.requestStatus.result = null;
-	//device.readSensor(mem.requestStatus, blockSelection, axis);
-
-	return new ExecutionStatusRunning();
-
-};
-*/
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
-
 B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
 
@@ -217,18 +168,3 @@ function B_MBButton(x, y) {
 B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
 
-
-// This is the micro:bit print block. Need to figure out how to enter both text and numbers.
-// outputType is 2, because we want it to be a string.
-
-/*
-function B_MBPrint(x, y) {
-	B_MicroBitOutputBase.call(this, x, y, 2, "Print", 0, "text", 0, 100, "Intensity");
-}
-B_MBPrint.prototype = Object.create(B_MicroBitOutputBase.prototype);
-B_MBPrint.prototype.constructor = B_MBPrint;
-<<<<<<< HEAD
-*/
-=======
-*/
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
