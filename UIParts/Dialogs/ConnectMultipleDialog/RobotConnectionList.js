@@ -115,7 +115,12 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
-	this.menuBnList.addOption(robot.name, function() {
+	var words = robot.name.split(" ");
+    var newName = "";
+    for (var i = 0; i < words.length; i++) {
+        newName += words[i][0];
+    };
+	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
 		me.close();
 		if (me.index == null) {
 		    me.deviceClass = DeviceManager.getDeviceClass(robot);

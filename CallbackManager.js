@@ -252,6 +252,17 @@ CallbackManager.tablet.removeSensor = function(sensor){
 };
 
 /**
+ * Tells the frontend that the language of the system
+ * @param {string} sensor - A non percent encoded string representing the unsupported sensor
+ * @return {boolean} - Whether the sensor string was valid
+ */
+
+CallbackManager.tablet.getLanguage = function(lang){
+    Language.setLanguage(lang);
+};
+
+
+/**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
  * each other easily.  This wasn't my idea and I will take no responsibility for this function's existence.
  * @param {string} request - The percent encoded string representing request the backend wants the frontend to make

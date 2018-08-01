@@ -17,7 +17,7 @@ function BlockContextMenu(block, x, y) {
 BlockContextMenu.setGraphics = function() {
 	const BCM = BlockContextMenu;
 	BCM.bnMargin = Button.defaultMargin;
-	BCM.bgColor = Colors.black;
+	BCM.bgColor = Colors.lightGray;
 	BCM.blockShift = 20;
 };
 

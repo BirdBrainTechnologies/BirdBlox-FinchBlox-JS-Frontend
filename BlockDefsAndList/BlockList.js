@@ -139,7 +139,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -161,7 +161,7 @@ BlockList.populateCat_sound = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_variables = function(category) {
-	category.addButton("Create variable", CodeManager.newVariable);
+	category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
 	category.addSpace();
 
 	const variables = CodeManager.variableList;
@@ -178,7 +178,7 @@ BlockList.populateCat_variables = function(category) {
 	}
 
 	category.addSpace();
-	category.addButton("Create list", CodeManager.newList);
+	category.addButton(Language.getStr("Create_List"), CodeManager.newList);
 	category.addSpace();
 
 	const lists = CodeManager.listList;

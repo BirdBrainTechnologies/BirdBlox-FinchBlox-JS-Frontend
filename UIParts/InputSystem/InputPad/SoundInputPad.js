@@ -27,7 +27,7 @@ SoundInputPad.setConstants = function() {
 	SIP.playBnWidth = RowDialog.smallBnWidth;
 	SIP.mainBnWidth = SIP.width - SIP.playBnWidth - SIP.margin;
 	SIP.iconH = RowDialog.iconH;
-	SIP.background = Colors.black;
+	SIP.background = Colors.lightGray;
 };
 
 /**

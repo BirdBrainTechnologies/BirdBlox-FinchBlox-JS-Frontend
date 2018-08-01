@@ -86,7 +86,7 @@ BlockGraphics.SetReporter = function() {
 
 	BlockGraphics.reporter.strokeW = 1;
 	BlockGraphics.reporter.slotFill = "#fff";
-	BlockGraphics.reporter.slotSelectedFill = "#000";
+	BlockGraphics.reporter.slotSelectedFill = Colors.lightGray;
 };
 
 /* Used by HexSlots and HexBlocks */
@@ -184,11 +184,11 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.slotHMargin = 5;
 	BlockGraphics.dropSlot.triH = 6;
 	BlockGraphics.dropSlot.triW = 8;
-	BlockGraphics.dropSlot.bg = "#000";
+	BlockGraphics.dropSlot.bg = Colors.lightGray;
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
-	BlockGraphics.dropSlot.selectedBg = "#000";
+	BlockGraphics.dropSlot.selectedBg = "#fff";
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
-	BlockGraphics.dropSlot.triColor = "#000";
+	BlockGraphics.dropSlot.triColor = "#fff";
 	BlockGraphics.dropSlot.textFill = "#fff";
 	BlockGraphics.dropSlot.selectedTriColor = "#fff";
 };
@@ -346,7 +346,7 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
 	const radius = height / 2;
 	const flatWidth = width - height;
 	let path = "";
-	path += "m " + (x + radius) + "," + (y + height);
+	path += "m " + (x + radius) + "," + (y + height - 2);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;

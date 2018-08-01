@@ -26,7 +26,7 @@ InputPad.prototype.constructor = InputPad;
 
 InputPad.setConstants = function() {
 	const IP = InputPad;
-	IP.background = Colors.black;
+	IP.background = Colors.lightGray;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
 };

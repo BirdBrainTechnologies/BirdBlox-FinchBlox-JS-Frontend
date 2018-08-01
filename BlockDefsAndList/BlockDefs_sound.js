@@ -54,7 +54,7 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 
 
 function B_PlaySound(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play sound", false, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound"), false, false);
 }
 B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySound.prototype.constructor = B_PlaySound;
@@ -62,7 +62,7 @@ B_PlaySound.prototype.constructor = B_PlaySound;
 
 
 function B_PlaySoundUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play sound until done", false, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound_until_done"), false, true);
 }
 B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
@@ -70,7 +70,7 @@ B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 
 
 function B_PlayRecording(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play recording", true, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording"), true, false);
 }
 B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecording.prototype.constructor = B_PlayRecording;
@@ -78,7 +78,7 @@ B_PlayRecording.prototype.constructor = B_PlayRecording;
 
 
 function B_PlayRecordingUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play recording until done", true, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording_until_done"), true, true);
 }
 B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
@@ -87,7 +87,7 @@ B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
 
 function B_StopAllSounds(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "stop all sounds"));
+	this.addPart(new LabelText(this, Language.getStr("stop_all_sounds")));
 }
 B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
@@ -111,9 +111,9 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "rest for"));
+	this.addPart(new LabelText(this, Language.getStr("rest_for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
-	this.addPart(new LabelText(this, "beats"));
+	this.addPart(new LabelText(this, Language.getStr("Beats")));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
@@ -139,11 +139,11 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "play note"));
+	this.addPart(new LabelText(this, Language.getStr("play_note")));
 	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new LabelText(this, "for"));
+	this.addPart(new LabelText(this, Language.getStr("for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
-	this.addPart(new LabelText(this, "beats"));
+	this.addPart(new LabelText(this, Language.getStr("Beats")));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
@@ -182,7 +182,7 @@ B_PlayNoteForBeats.prototype.updateAction = function() {
 
 function B_ChangeTempoBy(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "change tempo by"));
+	this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
 	this.addPart(new NumSlot(this, "NumS_amt", 20));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
@@ -201,7 +201,7 @@ B_ChangeTempoBy.prototype.startAction = function() {
 
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "set tempo to"));
+	this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
 	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
@@ -223,7 +223,7 @@ B_SetTempoTo.prototype.startAction = function() {
 
 function B_Tempo(x, y) {
 	ReporterBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "tempo"));
+	this.addPart(new LabelText(this, Language.getStr("tempo")));
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;

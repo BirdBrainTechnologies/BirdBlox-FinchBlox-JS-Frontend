@@ -42,7 +42,7 @@ Menu.prototype.constructor = Menu;
 Menu.setGraphics = function() {
 	Menu.defaultWidth = 170;
 	Menu.bnMargin = Button.defaultMargin;
-	Menu.bgColor = Colors.black;
+	Menu.bgColor = Colors.lightGray;
 };
 
 /**
