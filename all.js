@@ -1819,7 +1819,7 @@ function Device(name, id, RSSI, device) {
 	this.connected = false;
 	/** @type {Device.firmwareStatuses} */
 	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-
+    this.batteryState = "3";
 	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
@@ -1950,7 +1950,13 @@ Device.prototype.setConnected = function(isConnected) {
 	if (this.statusListener != null) this.statusListener(this.getStatus());
 	DeviceManager.updateStatus();
 };
+Device.prototype.setBatteryStatus = function(batteryStatus) {
+    this.batteryState = batteryStatus;
+}
 
+Device.prototype.getBatteryStatus = function() {
+    return this.batteryState;
+}
 /**
  * @return {boolean}
  */
@@ -2321,15 +2327,43 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-
+    DM.batteryCheckInterval = 5000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
-	
+	DM.batteryChecker = self.setInterval(function() {
+    		DeviceManager.checkBattery();
+    }, DM.batteryCheckInterval);
 	/* The maximum number of devices that can be connected at one time */
 	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
+
+DeviceManager.checkBattery = function() {
+    var worstBatteryStatus = "3";
+    var curBatteryStatus = "";
+    DeviceManager.forEach(function(manager) {
+        for (var i = 0; i < manager.connectedDevices.length; i++) {
+            let robot = manager.connectedDevices[i];
+            curBatteryStatus = robot.getBatteryStatus();
+            if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
+                console.log("trying setting status" + worstBatteryStatus);
+                worstBatteryStatus = curBatteryStatus;
+            }
+        }
+    });
+    console.log("trying getting status" + worstBatteryStatus);
+    if (worstBatteryStatus === "2") {
+        TitleBar.batteryFill = "#0f0";
+    } else if (worstBatteryStatus === "1") {
+        TitleBar.batteryFill = "#ff0";
+    } else if (worstBatteryStatus === "0"){
+        TitleBar.batteryFill = "#f00";
+    } else {
+        TitleBar.batteryFill = Colors.lightGray;
+    }
+    TitleBar.addBatteryBtn();
+}
 /**
  * Retrieves the number of devices in this.connectedDevices
  * @return {number}
@@ -2485,7 +2519,6 @@ DeviceManager.prototype.removeAllDevices = function() {
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
 DeviceManager.prototype.deviceIsConnected = function(index) {
-
 	if (index >= this.getDeviceCount()) {
 		return false;
 	} else {
@@ -2689,6 +2722,17 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 	}
 };
 
+
+DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
+    const index = this.lookupRobotIndexById(deviceId);
+    let robot = null;
+    if (index >= 0) {
+        robot = this.connectedDevices[index];
+    }
+    if (robot != null) {
+        robot.setBatteryStatus(batteryStatus);
+    }
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -2758,6 +2802,12 @@ DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
 		manager.updateConnectionStatus(deviceId, isConnected);
 	});
 	CodeManager.updateConnectionStatus();
+};
+
+DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
+    DeviceManager.forEach(function(manager) {
+		manager.updateRobotBatteryStatus(robotId, batteryStatus);
+	});
 };
 
 /**
@@ -4676,8 +4726,16 @@ function VectorPaths(){
 	VP.checkmark.height=6;
 	VP.flag={};
 	VP.flag.path="m 0,0 11.2202,0 0,5.69439 c 0,3.1469 7.23037,5.69439 16.16532,5.69439 8.91622,0 16.14659,-2.54749 16.14659,-5.69439 0,-3.12817 7.24911,-5.69439 16.16533,-5.69439 8.93494,0 16.16532,2.56622 16.16532,5.69439 l 0,45.53639 c 0,-3.1469 -7.23038,-5.69439 -16.16532,-5.69439 -8.91622,0 -16.16533,2.54749 -16.16533,5.69439 0,3.1469 -7.23037,5.69439 -16.14659,5.69439 -8.93495,0 -16.16532,-2.54749 -16.16532,-5.69439 l 0,53.04774 -11.2202,0 z";
+
 	VP.flag.width=75.863;
 	VP.flag.height=104.279;
+
+	VP.battery={};
+	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 91.98 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,117 70,113.4 70,109.02 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
+	VP.battery.width=75.863;
+    VP.battery.height=104.279;
+
+
 	VP.stage={};
 	VP.stage.path="m 80.789,36.957 12.02565,0 0,14.16105 0,0 0,8.82256 -28.99643,0 z m -80.78916,0 11.96946,0 16.97078,22.98361 -28.94024,0 z m 92.81481,-30.08286 0,27.79761 -12.13804,0 -16.0342,-21.69113 3.42787,-0.33716 c 9.96518,-1.18009 18.45057,-3.1469 24.44467,-5.61947 z m -92.81481,-0.0187 0.37463,0.16858 c 5.9941,2.47257 14.47949,4.43938 24.44467,5.61947 l 3.29675,0.33716 -16.0342,21.69113 -12.08185,0 z m 0,-6.85575 92.88974,0 0,4.28953 -1.49853,0.76799 c -5.60073,2.54749 -14.3109,4.5705 -24.78183,5.71312 l -3.35295,0.33717 -1.40486,0.13112 -6.66843,0.39336 -1.70458,0.0749 -7.02432,0.13112 -7.04307,-0.13112 -1.70457,-0.0749 -6.66843,-0.39336 -1.53598,-0.14985 -3.22183,-0.31844 c -10.47093,-1.14262 -19.16237,-3.16563 -24.78183,-5.71312 l -1.49853,-0.76799 z";
 	VP.stage.width=92.890;
@@ -6761,6 +6819,7 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
+	TB.batteryFill = Colors.lightGray;
 	TB.stopFill = "#f00";
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
@@ -6779,7 +6838,8 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.batteryBnX  = TB.flagBnX - TB.buttonW - TB.buttonMargin;
+	TB.undoBnX = TB.batteryBnX - TB.buttonW - 3 * TB.buttonMargin;
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
@@ -6818,6 +6878,7 @@ TitleBar.makeButtons = function() {
 	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
+	TB.addBatteryBtn();
 
 	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -6872,6 +6933,14 @@ TitleBar.makeTitleText = function() {
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 
+
+TitleBar.addBatteryBtn = function() {
+    let TB = TitleBar;
+    const TBLayer = GuiElements.layers.titlebar;
+    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+}
 /**
  * Sets the text of the TitleBar
  * @param {string|null} text - The text to display or null if there is no text
@@ -12750,7 +12819,6 @@ CodeManager.eventFlagClicked = function() {
 	TabManager.eventFlagClicked();
 };
 
-
 /**
  * Tells DeviceDropSlots or a certain type to hide their drop downs and just use labels
  * @param deviceClass - subclass of Device, type of slots affected
@@ -17900,6 +17968,13 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+
+CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
+    robotId = HtmlServer.decodeHtml(robotId);
+    DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
+    return true;
+}
+
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot

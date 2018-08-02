@@ -151,6 +151,13 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+
+CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
+    robotId = HtmlServer.decodeHtml(robotId);
+    DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
+    return true;
+}
+
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
