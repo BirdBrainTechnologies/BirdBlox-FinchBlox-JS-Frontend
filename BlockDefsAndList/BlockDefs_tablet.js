@@ -247,7 +247,7 @@ B_DeviceAcceleration.prototype.updateAction = function() {
 				let z = Number(parts[2]);
 				result = Math.round(Math.sqrt(x * x + y * y + z * z) * 100)/100;
 			} else {
-				result = Math.round(Number(parts[mem.axis]) * 100)/100;
+				result = Math.round(Number(parts[mem.axis]) * 100) / 100;
 			}
 			return new ExecutionStatusResult(new NumData(result, true));
 		} else {

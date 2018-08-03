@@ -2906,7 +2906,7 @@ function DeviceHummingbird(name, id, RSSI, device) {
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
-Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
+Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird Duo", "HB");
 /**
  * Manages communication with a Hummingbird Bit
  * @param {string} name
@@ -2918,7 +2918,7 @@ function DeviceHummingbirdBit(name, id, RSSI, device) {
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
-Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit", "BB");
+Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "Hummingbird Bit", "BB");
 
 /**
  * Manages communication with a Hummingbird
@@ -26783,7 +26783,7 @@ B_DeviceAcceleration.prototype.updateAction = function() {
 				let z = Number(parts[2]);
 				result = Math.round(Math.sqrt(x * x + y * y + z * z) * 100)/100;
 			} else {
-				result = Math.round(Number(parts[mem.axis]) * 100)/100;
+				result = Math.round(Number(parts[mem.axis]) * 100) / 100;
 			}
 			return new ExecutionStatusResult(new NumData(result, true));
 		} else {

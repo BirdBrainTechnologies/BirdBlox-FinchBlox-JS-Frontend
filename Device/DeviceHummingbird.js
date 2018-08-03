@@ -9,4 +9,4 @@ function DeviceHummingbird(name, id, RSSI, device) {
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
-Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
+Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird Duo", "HB");
