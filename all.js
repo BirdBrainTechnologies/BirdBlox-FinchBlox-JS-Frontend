@@ -2931,7 +2931,7 @@ function DeviceMicroBit(name, id, RSSI, device) {
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
-Device.setDeviceTypeName(DeviceMicroBit, "microbit", "micro:bit", "MB");
+Device.setDeviceTypeName(DeviceMicroBit, "microbit", "micro:bit", "micro:bit");
 
 /**
  * Manages communication with a Flutter
