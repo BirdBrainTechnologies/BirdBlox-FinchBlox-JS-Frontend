@@ -269,7 +269,8 @@ B_BBMagnetometer.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue() * 100) / 100;
+                
                 return new ExecutionStatusResult(new NumData(num));
             }
         }
