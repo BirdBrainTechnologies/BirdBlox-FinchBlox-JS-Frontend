@@ -167,9 +167,6 @@ function B_BBButton(x, y) {
 B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
 
-
-
-<<<<<<< HEAD
 // Try #2
 
 // Beginning of Try #2
@@ -228,48 +225,6 @@ B_BBMagnetometer.prototype.startAction=function(){
 
 
 B_BBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
-
-// End of Try #2
-
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
-function B_BBAccelerometerMagnetometer(x, y){
-	CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-	this.deviceClass = DeviceHummingbirdBit;
-	this.displayName = "";
-
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-<<<<<<< HEAD
 B_BBAccelerometerMagnetometer.prototype.startAction=function(){
 	let deviceIndex = this.slots[0].getData().getValue();
 	let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -292,8 +247,7 @@ B_BBAccelerometerMagnetometer.prototype.startAction=function(){
 	}
 };
 
-=======
->>>>>>> 354364b10899ef69b4dd7398a0383c56fb7f9e5f
+
 B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
 B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
 

@@ -151,19 +151,19 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, "Tri-LED"));
+	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	this.addPart(new LabelText(this, "R"));
+	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, "G"));
+	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, "B"));
+	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot3);

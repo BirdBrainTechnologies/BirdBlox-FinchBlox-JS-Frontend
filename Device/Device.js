@@ -25,7 +25,7 @@ function Device(name, id, RSSI, device) {
 	this.connected = false;
 	/** @type {Device.firmwareStatuses} */
 	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-
+    this.batteryState = "3";
 	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
@@ -156,7 +156,13 @@ Device.prototype.setConnected = function(isConnected) {
 	if (this.statusListener != null) this.statusListener(this.getStatus());
 	DeviceManager.updateStatus();
 };
+Device.prototype.setBatteryStatus = function(batteryStatus) {
+    this.batteryState = batteryStatus;
+}
 
+Device.prototype.getBatteryStatus = function() {
+    return this.batteryState;
+}
 /**
  * @return {boolean}
  */

@@ -45,15 +45,41 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-
+    DM.batteryCheckInterval = 10000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
-	
+	DM.batteryChecker = self.setInterval(function() {
+    		DeviceManager.checkBattery();
+    }, DM.batteryCheckInterval);
 	/* The maximum number of devices that can be connected at one time */
 	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
+
+DeviceManager.checkBattery = function() {
+    var worstBatteryStatus = "3";
+    var curBatteryStatus = "";
+    DeviceManager.forEach(function(manager) {
+        for (var i = 0; i < manager.connectedDevices.length; i++) {
+            let robot = manager.connectedDevices[i];
+            curBatteryStatus = robot.getBatteryStatus();
+            if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
+                worstBatteryStatus = curBatteryStatus;
+            }
+        }
+    });
+    if (worstBatteryStatus === "2") {
+        TitleBar.batteryFill = "#0f0";
+    } else if (worstBatteryStatus === "1") {
+        TitleBar.batteryFill = "#ff0";
+    } else if (worstBatteryStatus === "0"){
+        TitleBar.batteryFill = "#f00";
+    } else {
+        TitleBar.batteryFill = Colors.lightGray;
+    }
+    TitleBar.addBatteryBtn();
+}
 /**
  * Retrieves the number of devices in this.connectedDevices
  * @return {number}
@@ -209,7 +235,6 @@ DeviceManager.prototype.removeAllDevices = function() {
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
 DeviceManager.prototype.deviceIsConnected = function(index) {
-
 	if (index >= this.getDeviceCount()) {
 		return false;
 	} else {
@@ -413,6 +438,17 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 	}
 };
 
+
+DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
+    const index = this.lookupRobotIndexById(deviceId);
+    let robot = null;
+    if (index >= 0) {
+        robot = this.connectedDevices[index];
+    }
+    if (robot != null) {
+        robot.setBatteryStatus(batteryStatus);
+    }
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -482,6 +518,12 @@ DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
 		manager.updateConnectionStatus(deviceId, isConnected);
 	});
 	CodeManager.updateConnectionStatus();
+};
+
+DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
+    DeviceManager.forEach(function(manager) {
+		manager.updateRobotBatteryStatus(robotId, batteryStatus);
+	});
 };
 
 /**

@@ -35,9 +35,10 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
-	//TB.bg = Colors.black;
+
 	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
+	TB.batteryFill = Colors.lightGray;
 	TB.stopFill = "#f00";
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
@@ -56,17 +57,11 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.batteryBnX  = TB.flagBnX - TB.buttonW - TB.buttonMargin;
+	TB.undoBnX = TB.batteryBnX - TB.buttonW - 3 * TB.buttonMargin;
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
-	
-	/*
-	if (GuiElements.smallMode) {
-		TB.showBnX = TB.buttonMargin;
-		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
-	}
-	*/
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
@@ -102,20 +97,12 @@ TitleBar.makeButtons = function() {
 	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
+	TB.addBatteryBtn();
 
 	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-	/*
-	if (GuiElements.smallMode) {
-		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
-		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
-		TB.showHideBn.build(GuiElements.paletteLayersVisible);
-	} else {
-		TB.showHideBn = null;
-	}
-	*/
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
@@ -165,6 +152,14 @@ TitleBar.makeTitleText = function() {
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 
+
+TitleBar.addBatteryBtn = function() {
+    let TB = TitleBar;
+    const TBLayer = GuiElements.layers.titlebar;
+    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+}
 /**
  * Sets the text of the TitleBar
  * @param {string|null} text - The text to display or null if there is no text

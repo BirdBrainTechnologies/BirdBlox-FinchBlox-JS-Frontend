@@ -12,8 +12,8 @@ function Colors() {
 Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#7B7B7B";
-	Colors.lightLightGray = "#CDCDCD";
-	Colors.windowColor = "#CCC";
+    Colors.lightLightGray = "#CDCDCD";
+    Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
@@ -22,19 +22,14 @@ Colors.setCommon = function() {
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		/*
-		
-		*/
-		
 		"robots": "#209BA9",
-		"hummingbird": "#209BA9",
+        "hummingbird": "#209BA9",
         "hummingbirdbit": "#209BA9",
         "microbit": "#209BA9",
         "flutter": "#209BA9",
         "finch": "#209BA9",
-		
-		"tablet": "#FAA525",
-		"operators": "#8EC449",
+        "tablet": "#FAA525",
+        "operators": "#8EC449",
 		"sound": "#EE00FF",
 		"control": "#FFCC00",
 		"variables": "#FF5B00",

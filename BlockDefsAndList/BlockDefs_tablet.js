@@ -17,7 +17,7 @@ B_ThrowError.prototype.startAction = function() {
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Shaken"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Shaken")));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
@@ -56,7 +56,7 @@ B_DeviceShaken.prototype.checkActive = function() {
 
 function B_DeviceSSID(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "Device SSID"));
+	this.addPart(new LabelText(this, Language.getStr("Device_SSID")));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
@@ -92,7 +92,7 @@ B_DeviceSSID.prototype.updateAction = function() {
 
 function B_DevicePressure(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Pressure"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Pressure")));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
@@ -133,7 +133,7 @@ Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 function B_DeviceRelativeAltitude(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Relative Altitude"));
+	this.addPart(new LabelText(this,  Language.getStr("Device_Relative_Altitude")));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
@@ -174,7 +174,7 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 function B_DeviceOrientation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "Device Orientation"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Orientation")));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
@@ -213,14 +213,14 @@ B_DeviceOrientation.prototype.checkActive = function() {
 
 function B_DeviceAcceleration(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "Device"));
+	this.addPart(new LabelText(this,  Language.getStr("Device")));
 	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
 	dS.addOption(new SelectionData("Total", "total"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "Acceleration"));
+	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
 }
 B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
@@ -271,10 +271,10 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 function B_DeviceLocation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "Device"));
-	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData("Latitude", 0));
-	dS.addOption(new SelectionData("Latitude", 0));
-	dS.addOption(new SelectionData("Longitude", 1));
+	this.addPart(new LabelText(this, Language.getStr("Device")));
+	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
+	dS.addOption(new SelectionData(Language.getStr("Latitude"), 0));
+	dS.addOption(new SelectionData(Language.getStr("Longitude"), 1));
 	this.addPart(dS);
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);

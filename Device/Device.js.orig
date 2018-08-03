@@ -9,10 +9,7 @@
  * @param {string} name - The display name of the device
  * @param {string} id - The string used to refer to the device when communicating with the backend
  * @param {string} RSSI - The strength of the bluetooth signal
-<<<<<<< HEAD
  * @param {string} device - The type of device (Finch, Duo, etc.)
-=======
->>>>>>> de72e7ac3c2bf046bc5301954e30dcd062fffe6d
  * @constructor
  */
 function Device(name, id, RSSI, device) {

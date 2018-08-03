@@ -432,9 +432,9 @@ B_CopyListToList.prototype.startAction = function() {
 
 function B_ItemOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "item"));
+	this.addPart(new LabelText(this, Language.getStr("item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
@@ -481,7 +481,7 @@ B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
 
 function B_LengthOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "length of"));
+	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
@@ -506,7 +506,7 @@ B_LengthOfList.prototype.startAction = function() {
 function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, "contains"));
+	this.addPart(new LabelText(this, Language.getStr("contains")));
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
 	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));

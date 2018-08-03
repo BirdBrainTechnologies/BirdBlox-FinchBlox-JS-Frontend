@@ -16,7 +16,7 @@ B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = "Display";
+  this.displayName = Language.getStr("Display");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   const label = new LabelText(this,this.displayName);
@@ -80,7 +80,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MBPrint(x, y){
     CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Print";
+    this.displayName = Language.getStr("Print");
     this.draggable = true;
 
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -117,72 +117,11 @@ B_MBPrint.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
 
-
-
-// End of Try #3 at micro:bit blocks.
-
-
-
-// Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
-function B_MBAccelerometerMagnetometer(x, y){
-    CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = "";
-    this.draggable = true;
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
-
-
-
-B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
-
-
-// End of Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
 }
 B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_MBLedArray.prototype.constructor = B_MBLedArray;
-
-/*
-//MARK: inputs
-function B_MBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
-}
-B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-function B_MBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
-}
-B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-*/
-
 
 function B_MBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
@@ -194,11 +133,11 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
 
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
     this.addPart(pickBlock);
 
@@ -273,7 +212,7 @@ function B_MBButton(x, y){
     //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Button";
+    this.displayName = Language.getStr("Button");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -344,25 +283,6 @@ B_MBButton.prototype.updateAction = function() {
 
 };
 
-
-/*
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
 function B_MBOrientation(x, y){
     //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
@@ -374,14 +294,14 @@ function B_MBOrientation(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
-    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
-    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
-    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
-    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
-    orientation.addOption(new SelectionData("Shake", "shake"));
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
     this.addPart(orientation);
 
 };
@@ -457,7 +377,7 @@ B_MBOrientation.prototype.updateAction = function() {
 function B_MBCompass(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Compass";
+    this.displayName = Language.getStr("Compass");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -514,7 +434,7 @@ B_MBCompass.prototype.updateAction = function(){
 function B_MBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "CompassCalibrate";
+    this.displayName = Language.getStr("CompassCalibrate");
     this.numberOfPorts = 1;
     this.draggable = false;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

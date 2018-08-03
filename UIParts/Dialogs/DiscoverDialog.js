@@ -103,12 +103,10 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	
-	
-	var deviceName = this.discoveredDevices[index].name;
-	var words = deviceName.split(" ");
-	var newName = "";
-	for (var i = 0; i < words.length; i++) {
+    var deviceName = this.discoveredDevices[index].name;
+    var words = deviceName.split(" ");
+    var newName = "";
+    for (var i = 0; i < words.length; i++) {
         newName += words[i][0];
     };
 

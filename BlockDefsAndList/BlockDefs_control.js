@@ -3,10 +3,10 @@
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when"));
+	this.addPart(new LabelText(this, Language.getStr("when")));
 	// Add flag icon with height 15
 	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.addPart(new LabelText(this, "tapped"));
+	this.addPart(new LabelText(this, Language.getStr("tapped")));
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
@@ -23,7 +23,7 @@ B_WhenFlagTapped.prototype.startAction = function() {
 
 function B_WhenIReceive(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when I receive"));
+	this.addPart(new LabelText(this, Language.getStr("when_I_receive")));
 	// Creates a BroadcastDropSlot that does nt allow snapping
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", true));
 }
@@ -58,9 +58,9 @@ function B_Wait(x, y) {
 	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
 	// Build Block out of things found in the BlockParts folder
-	this.addPart(new LabelText(this, "wait"));
+	this.addPart(new LabelText(this, Language.getStr("wait")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.addPart(new LabelText(this, "secs"));
+	this.addPart(new LabelText(this, Language.getStr("secs")));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -87,7 +87,7 @@ B_Wait.prototype.updateAction = function() {
 
 function B_WaitUntil(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "wait until"));
+	this.addPart(new LabelText(this, Language.getStr("wait_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
@@ -108,7 +108,7 @@ B_WaitUntil.prototype.startAction = function() {
 
 function B_Forever(x, y) {
 	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
-	this.addPart(new LabelText(this, "repeat forever"));
+	this.addPart(new LabelText(this, Language.getStr("repeat_forever")));
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
@@ -134,7 +134,7 @@ B_Forever.prototype.updateAction = function() {
 
 function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "repeat"));
+	this.addPart(new LabelText(this, Language.getStr("repeat")));
 	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
@@ -175,7 +175,7 @@ B_Repeat.prototype.updateAction = function() {
 
 function B_RepeatUntil(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "repeat until"));
+	this.addPart(new LabelText(this, Language.getStr("repeat_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
@@ -208,7 +208,7 @@ B_RepeatUntil.prototype.updateAction = function() {
 
 function B_If(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "if"));
+	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
@@ -231,8 +231,8 @@ B_If.prototype.updateAction = function() {
 
 
 function B_IfElse(x, y) {
-	DoubleLoopBlock.call(this, x, y, "control", "else");
-	this.addPart(new LabelText(this, "if"));
+	DoubleLoopBlock.call(this, x, y, "control", Language.getStr("else"));
+	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
@@ -261,7 +261,7 @@ B_IfElse.prototype.updateAction = function() {
 
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "broadcast"));
+	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
@@ -299,9 +299,9 @@ B_Broadcast.prototype.updateAction = function() {
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "broadcast"));
+	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
-	this.addPart(new LabelText(this, "and wait"));
+	this.addPart(new LabelText(this, Language.getStr("and_wait")));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
@@ -328,7 +328,7 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "message"));
+	this.addPart(new LabelText(this, Language.getStr("message")));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
@@ -341,12 +341,12 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
-	this.addPart(new LabelText(this, "stop"));
-	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
-	dS.addOption(new SelectionData("all", "all"));
-	dS.addOption(new SelectionData("this script", "this_script"));
+	this.addPart(new LabelText(this, Language.getStr("stop")));
+	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
+	dS.addOption(new SelectionData(Language.getStr("all"), "all"));
+	dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
 	//dS.addOption(new SelectionData("this block", "this_block"));
-	dS.addOption(new SelectionData("all but this script", "all_but_this_script"));
+	dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
 	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
 	this.addPart(dS);
 }
@@ -373,7 +373,7 @@ B_Stop.prototype.startAction = function() {
 
 function B_When(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when"));
+	this.addPart(new LabelText(this, Language.getStr("when")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);

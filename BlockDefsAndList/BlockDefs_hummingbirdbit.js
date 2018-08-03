@@ -11,7 +11,7 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Position Servo", 4, "angle", 0, 180, "Angle");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle");
 
     this.addPart(new LabelText(this,'\xBA'));
 }
@@ -20,7 +20,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Rotation Servo", 4, "percent", -100, 100, "Percent");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Percent");
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -29,7 +29,7 @@ B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 3, "intensity", 0, 100, "Intensity");
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, "Intensity");
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -48,7 +48,7 @@ B_BBTriLed.prototype.constructor = B_BBTriLed;
 function B_BBBuzzer(x, y){
   CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
   this.deviceClass = DeviceHummingbirdBit;
-  this.displayName = "Play Note";
+  this.displayName = Language.getStr("Play_Note");
   this.draggable = true;
   this.minNote = 0
   this.maxNote = 127
@@ -59,11 +59,11 @@ function B_BBBuzzer(x, y){
   const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, "Note");
   this.addPart(noteSlot);
-  this.addPart(new LabelText(this,"for"));
+  this.addPart(new LabelText(this, Language.getStr("for")));
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
   beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
   this.addPart(beatsSlot);
-  this.addPart(new LabelText(this,"Beats"));
+  this.addPart(new LabelText(this,Language.getStr("Beats")));
 }
 B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_BBBuzzer.prototype.constructor = B_BBBuzzer;
@@ -151,13 +151,13 @@ function B_BBSensors(x, y){
     this.numberOfPorts = 3;
 
   // Default option for sensor is Light.
-  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("Light", "light"));
+  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
   //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
-  dS.addOption(new SelectionData("Distance (cm)", "distance"));
-  dS.addOption(new SelectionData("Dial", "dial"));
-  dS.addOption(new SelectionData("Light", "light"));
-  dS.addOption(new SelectionData("Sound", "sound"));
-  dS.addOption(new SelectionData("Other (V)", "other"));
+  dS.addOption(new SelectionData(Language.getStr("Distance") + "(cm)", "distance"));
+  dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
+  dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
+  dS.addOption(new SelectionData(Language.getStr("Sound"), "sound"));
+  dS.addOption(new SelectionData(Language.getStr("Other") + "(V)", "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
@@ -192,21 +192,6 @@ B_BBSensors.prototype.startAction=function(){
 /* Returns the result of the request */
 B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
-//MARK: microbit sensor
-/*
-function B_BBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, "button", "Button", 2);
-}
-B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_BBButton.prototype.constructor = B_BBButton;
-*/
-
-
-// Try #2
-
-// Beginning of Try #2
-
-
 function B_BBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
@@ -217,13 +202,13 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
+    + ")", "accelerometer"));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
-    
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -278,78 +263,6 @@ B_BBMagnetometer.prototype.updateAction = function(){
 
 }
 
-
-
-
-// End of Try #2
-
-
-
-
-
-
-
-
-
-
-function B_BBAccelerometerMagnetometer(x, y){
-    CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "";
-    this.draggable = true;
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
-    //pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_BBAccelerometerMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = this.slots[1].getData().getValue();
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readSensor(mem.requestStatus, this.sensorType, port);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
-
-B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
-
-
-
 // micro:bit LED block that has been added to the HummingbirdBit menu
 
 function B_BBLedArray(x,y){
@@ -369,7 +282,7 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 function B_BBPrint(x, y){
     CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Print";
+    this.displayName = Language.getStr("Print");
     this.draggable = true;
 
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -414,7 +327,7 @@ function B_BBButton(x, y){
     
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Button"; 
+    this.displayName = Language.getStr("Button");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -499,15 +412,14 @@ function B_BBOrientation(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
-    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
-    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
-    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
-    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
-    orientation.addOption(new SelectionData("Shake", "shake"));
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
     this.addPart(orientation);
 
 };
@@ -583,7 +495,7 @@ B_BBOrientation.prototype.updateAction = function() {
 function B_BBCompass(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Compass";
+    this.displayName = Language.getStr("Compass");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -639,7 +551,7 @@ B_BBCompass.prototype.updateAction = function(){
 function B_BBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Compass Calibrate";
+    this.displayName = Language.getStr("CompassCalibrate");
     this.draggable = false;
     this.numberOfPorts = 1;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

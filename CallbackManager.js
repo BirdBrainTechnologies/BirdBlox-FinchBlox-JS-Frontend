@@ -151,6 +151,13 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+
+CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
+    robotId = HtmlServer.decodeHtml(robotId);
+    DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
+    return true;
+}
+
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -250,6 +257,17 @@ CallbackManager.tablet.addSensor = function(sensor){
 CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };
+
+/**
+ * Tells the frontend that the language of the system
+ * @param {string} sensor - A non percent encoded string representing the unsupported sensor
+ * @return {boolean} - Whether the sensor string was valid
+ */
+
+CallbackManager.tablet.getLanguage = function(lang){
+    Language.setLanguage(lang);
+};
+
 
 /**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access

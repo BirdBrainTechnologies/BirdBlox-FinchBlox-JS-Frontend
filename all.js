@@ -1275,6 +1275,523 @@ List.prototype.delete = function() {
 		CodeManager.deleteList(this);
 	}
 };
+
+
+/**
+ * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
+ * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
+ */
+function Language() {
+
+};
+
+
+Language.lang = "US";
+Language.langs = ["US", "CN", "FR", "ES"];
+
+Language.US = {
+    "CompassCalibrate":"Compass Calibrate",
+    "Compass": "Compass",
+    "Screen_Up": "Screen Up",
+    "Screen_Down": "Screen Down",
+    "Tilt_Left": "Tilt Left",
+    "Tilt_Right": "Tilt Right",
+    "Logo_Up": "Logo Up",
+    "Logo_Down": "Logo Down",
+    "Shake": "Shake",
+    "Button": "Button",
+    "Magnetometer": "Magnetometer",
+    "Accelerometer": "Accelerometer",
+    "Print": "Print",
+    "Display": "Display",
+    "Distance": "Distance",
+    "Dial": "Dial",
+    "Light": "Light",
+    "Sound": "Sound",
+    "Other": "Other",
+    "Play_Note": "Play Note",
+    "for": "for",
+    "Beats": "Beats",
+    "Position_Servo": "Position Servo",
+    "Rotation_Servo": "Rotation Servo",
+    "LED": "LED",
+    "Tri_LED": "Tri-LED",
+    "R": "R",
+    "G": "G",
+    "B": "B",
+    "Servo": "Servo",
+    "Vibration":"Vibration",
+    "Motor":"Motor",
+    "Temperature_C":"Temperature C",
+    "Temperature_F":"Temperature F",
+    "Knob": "Knob",
+    "Device_Shaken":"Device Shaken",
+    "Device_SSID":"Device SSID",
+    "Device_Pressure":"Device Pressure",
+    "Device_Relative_Altitude":"Device Relative Altitude",
+    "Device_Orientation":"Device Orientation",
+    "Device":"Device",
+    "Acceleration":"Acceleration",
+    "Latitude":"Latitude",
+    "Longitude":"Longitude",
+    "when":"when",
+    "tapped":"tapped",
+    "when_I_receive":"when I receive",
+    "wait_until":"wait until",
+    "repeat_forever":"repeat forever",
+    "repeat":"repeat",
+    "repeat_until":"repeat until",
+    "if":"if",
+    "broadcast":"broadcast",
+    "and_wait":"and wait",
+    "stop":"stop",
+    "all":"all",
+    "this_script":"this script",
+    "all_but_this_script":"all but this script",
+    "message":"message",
+    "wait":"wait",
+    "secs":"secs",
+    "else":"else",
+    "item":"item",
+    "of":"of",
+    "length":"length",
+    "contains":"contains",
+    "play_sound":"play sound",
+    "play_sound_until_done":"play sound until done",
+    "play_recording":"play recording",
+    "play_recording_until_done":"play recording until done",
+    "stop_all_sounds":"stop all sounds",
+    "rest_for":"rest for",
+    "for":"for",
+    "play_note":"play note",
+    "change_tempo_by":"change tempo by",
+    "set_tempo_to":"set tempo to",
+    "tempo":"tempo",
+    "round":"round",
+    "mod":"mod",
+    "pick_random":"pick random",
+    "to":"to",
+    "and":"and",
+    "or":"or",
+    "not":"not",
+    "true":"true",
+    "false":"false",
+    "letter":"letter",
+    "join":"join",
+    "split":"split",
+    "by":"by",
+    "whitespace":"whitespace",
+    "number":"number",
+    "text":"text",
+    "boolean":"boolean",
+    "list":"list",
+    "invalid_number":"invalid number",
+    "Edit_Text":"Edit Text",
+    "is":"is",
+    "a":"a",
+    "reset_timer":"reset timer",
+    "and_wait":"and wait",
+    "ask": "ask",
+    "at":"at",
+    "Position":"Position",
+    "current":"current",
+    "year":"year",
+    "month":"month",
+    "date":"date",
+    "hour":"hour",
+    "minute":"minute",
+    "second":"second",
+    "day_of_the_week":"day of the week",
+    "time_in_milliseconds":"time in milliseconds",
+    "answer":"answer",
+    "timer":"timer",
+    "Record_Sounds":"Record Sound",
+    "Create_Variable":"Create Variable",
+    "Create_List":"Create List"
+};
+
+Language.CN = {
+    "CompassCalibrate":"CN",
+    "Compass": "CN",
+    "Screen_Up": "CN",
+    "Screen_Down": "CN",
+    "Tilt_Left": "CN",
+    "Tilt_Right": "CN",
+    "Logo_Up": "CN",
+    "Logo_Down": "CN",
+    "Shake": "CN",
+    "Button": "CN",
+    "Magnetometer": "CN",
+    "Accelerometer": "CN",
+    "Print": "CN",
+    "Display": "CN",
+    "Distance": "CN",
+    "Dial": "CN",
+    "Light": "CN",
+    "Sound": "CN",
+    "Other": "CN",
+    "Play_Note": "CN",
+    "for": "CN",
+    "Beats": "CN",
+    "Position_Servo": "CN",
+    "Rotation_Servo": "CN",
+    "LED": "CN",
+    "Tri_LED": "CN",
+    "R": "R",
+    "G": "G",
+    "B": "B",
+    "Servo": "CN",
+    "Vibration":"CN",
+    "Motor":"CN",
+    "Temperature_C":"CN",
+    "Temperature_F":"CN",
+    "Knob": "CN",
+    "Device_Shaken":"CN",
+    "Device_SSID":"CN",
+    "Device_Pressure":"CN",
+    "Device_Relative_Altitude":"CN",
+    "Device_Orientation":"CN",
+    "Device":"CN",
+    "Acceleration":"CN",
+    "Latitude":"CN",
+    "Longitude":"CN",
+    "when":"CN",
+    "tapped":"CN",
+    "when_I_receive":"CN",
+    "wait_until":"CN",
+    "repeat_forever":"CN",
+    "repeat":"CN",
+    "repeat_until":"CN",
+    "if":"CN",
+    "broadcast":"CN",
+    "and_wait":"CN",
+    "stop":"CN",
+    "all":"CN",
+    "this_script":"CN",
+    "all_but_this_script":"CN",
+    "message":"CN",
+    "wait":"CN",
+    "secs":"CN",
+    "else":"CN",
+    "item":"CN",
+    "of":"CN",
+    "length":"CN",
+    "contains":"CN",
+    "play_sound":"CN",
+    "play_sound_until_done":"CN",
+    "play_recording":"CN",
+    "play_recording_until_done":"CN",
+    "stop_all_sounds":"CN",
+    "rest_for":"CN",
+    "for":"CN",
+    "play_note":"CN",
+    "change_tempo_by":"CN",
+    "set_tempo_to":"CN",
+    "tempo":"CN",
+    "round":"CN",
+    "mod":"CN",
+    "pick_random":"CN",
+    "to":"CN",
+    "and":"CN",
+    "or":"CN",
+    "not":"CN",
+    "true":"CN",
+    "false":"CN",
+    "letter":"CN",
+    "join":"CN",
+    "split":"CN",
+    "by":"CN",
+    "whitespace":"CN",
+    "number":"CN",
+    "text":"CN",
+    "boolean":"CN",
+    "list":"CN",
+    "invalid_number":"CN",
+    "Edit_Text":"CN",
+    "is":"CN",
+    "a":"CN",
+    "reset_timer":"CN",
+    "and_wait":"CN",
+    "ask": "CN",
+    "at":"CN",
+    "Position":"CN",
+    "current":"CN",
+    "year":"CN",
+    "month":"CN",
+    "date":"CN",
+    "hour":"CN",
+    "minute":"CN",
+    "second":"CN",
+    "day_of_the_week":"CN",
+    "time_in_milliseconds":"CN",
+    "answer":"CN",
+    "timer":"CN",
+    "Record_Sounds":"CN",
+    "Create_Variable":"CN",
+    "Create_List":"CN"
+}
+
+Language.ES = {
+    "CompassCalibrate":"ESP",
+    "Compass": "ESP",
+    "Screen_Up": "ESP",
+    "Screen_Down": "ESP",
+    "Tilt_Left": "ESP",
+    "Tilt_Right": "ESP",
+    "Logo_Up": "ESP",
+    "Logo_Down": "ESP",
+    "Shake": "ESP",
+    "Button": "ESP",
+    "Magnetometer": "ESP",
+    "Accelerometer": "ESP",
+    "Print": "ESP",
+    "Display": "ESP",
+    "Distance": "ESP",
+    "Dial": "ESP",
+    "Light": "ESP",
+    "Sound": "ESP",
+    "Other": "ESP",
+    "Play_Note": "ESP",
+    "for": "ESP",
+    "Beats": "ESP",
+    "Position_Servo": "ESP",
+    "Rotation_Servo": "ESP",
+    "LED": "ESP",
+    "Tri_LED": "ESP",
+    "R": "R",
+    "G": "G",
+    "B": "B",
+    "Servo": "ESP",
+    "Vibration":"ESP",
+    "Motor":"ESP",
+    "Temperature_C":"ESP",
+    "Temperature_F":"ESP",
+    "Knob": "ESP",
+    "Device_Shaken":"ESP",
+    "Device_SSID":"ESP",
+    "Device_Pressure":"ESP",
+    "Device_Relative_Altitude":"ESP",
+    "Device_Orientation":"ESP",
+    "Device":"ESP",
+    "Acceleration":"ESP",
+    "Latitude":"ESP",
+    "Longitude":"ESP",
+    "when":"ESP",
+    "tapped":"ESP",
+    "when_I_receive":"ESP",
+    "wait_until":"ESP",
+    "repeat_forever":"ESP",
+    "repeat":"ESP",
+    "repeat_until":"ESP",
+    "if":"ESP",
+    "broadcast":"ESP",
+    "and_wait":"ESP",
+    "stop":"ESP",
+    "all":"ESP",
+    "this_script":"ESP",
+    "all_but_this_script":"ESP",
+    "message":"ESP",
+    "wait":"ESP",
+    "secs":"ESP",
+    "else":"ESP",
+    "item":"ESP",
+    "of":"ESP",
+    "length":"ESP",
+    "contains":"ESP",
+    "play_sound":"ESP",
+    "play_sound_until_done":"ESP",
+    "play_recording":"ESP",
+    "play_recording_until_done":"ESP",
+    "stop_all_sounds":"ESP",
+    "rest_for":"ESP",
+    "for":"ESP",
+    "play_note":"ESP",
+    "change_tempo_by":"ESP",
+    "set_tempo_to":"ESP",
+    "tempo":"ESP",
+    "round":"ESP",
+    "mod":"ESP",
+    "pick_random":"ESP",
+    "to":"ESP",
+    "and":"ESP",
+    "or":"ESP",
+    "not":"ESP",
+    "true":"ESP",
+    "false":"ESP",
+    "letter":"ESP",
+    "join":"ESP",
+    "split":"ESP",
+    "by":"ESP",
+    "whitespace":"ESP",
+    "number":"ESP",
+    "text":"ESP",
+    "boolean":"ESP",
+    "list":"ESP",
+    "invalid_number":"ESP",
+    "Edit_Text":"ESP",
+    "is":"ESP",
+    "a":"ESP",
+    "reset_timer":"ESP",
+    "and_wait":"ESP",
+    "ask": "ESP",
+    "at":"ESP",
+    "Position":"ESP",
+    "current":"ESP",
+    "year":"ESP",
+    "month":"ESP",
+    "date":"ESP",
+    "hour":"ESP",
+    "minute":"ESP",
+    "second":"ESP",
+    "day_of_the_week":"ESP",
+    "time_in_milliseconds":"ESP",
+    "answer":"ESP",
+    "timer":"ESP",
+    "Record_Sounds":"ESP",
+    "Create_Variable":"ESP",
+    "Create_List":"ESP"
+}
+
+Language.FR = {
+    "Calibrate":"French",
+    "Compass": "French",
+    "Screen_Up": "French",
+    "Screen_Down": "French",
+    "Tilt_Left": "French",
+    "Tilt_Right": "French",
+    "Logo_Up": "French",
+    "Logo_Down": "French",
+    "Shake": "French",
+    "Button": "French",
+    "Magnetometer": "French",
+    "Accelerometer": "French",
+    "Print": "French",
+    "Display": "French",
+    "Distance": "French",
+    "Dial": "French",
+    "Light": "French",
+    "Sound": "French",
+    "Other": "French",
+    "Play_Note": "French",
+    "for": "French",
+    "Beats": "French",
+    "Position_Servo": "French",
+    "Rotation_Servo": "French",
+    "LED": "French",
+    "Tri_LED": "French",
+    "R": "R",
+    "G": "G",
+    "B": "B",
+    "Servo": "French",
+    "Vibration":"French",
+    "Motor":"French",
+    "Temperature_C":"French",
+    "Temperature_F":"French",
+    "Knob": "French",
+    "Device_Shaken":"French",
+    "Device_SSID":"French",
+    "Device_Pressure":"French",
+    "Device_Relative_Altitude":"French",
+    "Device_Orientation":"French",
+    "Device":"French",
+    "Acceleration":"French",
+    "Latitude":"French",
+    "Longitude":"French",
+    "when":"French",
+    "tapped":"French",
+    "when_I_receive":"French",
+    "wait_until":"French",
+    "repeat_forever":"French",
+    "repeat":"French",
+    "repeat_until":"French",
+    "if":"French",
+    "broadcast":"French",
+    "and_wait":"French",
+    "stop":"French",
+    "all":"French",
+    "this_script":"French",
+    "all_but_this_script":"French",
+    "message":"French",
+    "wait":"French",
+    "secs":"French",
+    "else":"French",
+    "item":"French",
+    "of":"French",
+    "length":"French",
+    "contains":"French",
+    "play_sound":"French",
+    "play_sound_until_done":"French",
+    "play_recording":"French",
+    "play_recording_until_done":"French",
+    "stop_all_sounds":"French",
+    "rest_for":"French",
+    "for":"French",
+    "play_note":"French",
+    "change_tempo_by":"French",
+    "set_tempo_to":"French",
+    "tempo":"French",
+    "round":"French",
+    "mod":"French",
+    "pick_random":"French",
+    "to":"French",
+    "and":"French",
+    "or":"French",
+    "not":"French",
+    "true":"French",
+    "false":"French",
+    "letter":"French",
+    "join":"French",
+    "split":"French",
+    "by":"French",
+    "whitespace":"French",
+    "number":"French",
+    "text":"French",
+    "boolean":"French",
+    "list":"French",
+    "invalid_number":"French",
+    "Edit_Text":"French",
+    "is":"French",
+    "a":"French",
+    "reset_timer":"French",
+    "and_wait":"French",
+    "ask": "French",
+    "at":"French",
+    "Position":"French",
+    "current":"French",
+    "year":"French",
+    "month":"French",
+    "date":"French",
+    "hour":"French",
+    "minute":"French",
+    "second":"French",
+    "day_of_the_week":"French",
+    "time_in_milliseconds":"French",
+    "answer":"French",
+    "timer":"French",
+    "Record_Sounds":"French",
+    "Create_Variable":"French",
+    "Create_List":"French"
+
+}
+
+
+Language.setLanguage = function(lang) {
+    if (Language.langs.indexOf(lang) === -1) {
+        Language.lang = "US";
+    } else {
+        Language.lang = lang;
+    }
+}
+
+Language.getLanguage = function () {
+    return "Language." + Language.lang + ".";
+}
+
+Language.getStr = function(str) {
+    return eval(Language.getLanguage() + str);
+}
+
+
 /**
  * Device is an abstract class.  Each subclass (DeviceHummingbird, DeviceFlutter) represents a specific type of
  * robot.  Instances of the Device class have functions to to issue Bluetooth commands for connecting, disconnecting,
@@ -1302,7 +1819,7 @@ function Device(name, id, RSSI, device) {
 	this.connected = false;
 	/** @type {Device.firmwareStatuses} */
 	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-
+    this.batteryState = "3";
 	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
@@ -1433,7 +1950,13 @@ Device.prototype.setConnected = function(isConnected) {
 	if (this.statusListener != null) this.statusListener(this.getStatus());
 	DeviceManager.updateStatus();
 };
+Device.prototype.setBatteryStatus = function(batteryStatus) {
+    this.batteryState = batteryStatus;
+}
 
+Device.prototype.getBatteryStatus = function() {
+    return this.batteryState;
+}
 /**
  * @return {boolean}
  */
@@ -1804,15 +2327,43 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-
+    DM.batteryCheckInterval = 5000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
-	
+	DM.batteryChecker = self.setInterval(function() {
+    		DeviceManager.checkBattery();
+    }, DM.batteryCheckInterval);
 	/* The maximum number of devices that can be connected at one time */
 	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
+
+DeviceManager.checkBattery = function() {
+    var worstBatteryStatus = "3";
+    var curBatteryStatus = "";
+    DeviceManager.forEach(function(manager) {
+        for (var i = 0; i < manager.connectedDevices.length; i++) {
+            let robot = manager.connectedDevices[i];
+            curBatteryStatus = robot.getBatteryStatus();
+            if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
+                console.log("trying setting status" + worstBatteryStatus);
+                worstBatteryStatus = curBatteryStatus;
+            }
+        }
+    });
+    console.log("trying getting status" + worstBatteryStatus);
+    if (worstBatteryStatus === "2") {
+        TitleBar.batteryFill = "#0f0";
+    } else if (worstBatteryStatus === "1") {
+        TitleBar.batteryFill = "#ff0";
+    } else if (worstBatteryStatus === "0"){
+        TitleBar.batteryFill = "#f00";
+    } else {
+        TitleBar.batteryFill = Colors.lightGray;
+    }
+    TitleBar.addBatteryBtn();
+}
 /**
  * Retrieves the number of devices in this.connectedDevices
  * @return {number}
@@ -1968,7 +2519,6 @@ DeviceManager.prototype.removeAllDevices = function() {
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
 DeviceManager.prototype.deviceIsConnected = function(index) {
-
 	if (index >= this.getDeviceCount()) {
 		return false;
 	} else {
@@ -2172,6 +2722,17 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 	}
 };
 
+
+DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
+    const index = this.lookupRobotIndexById(deviceId);
+    let robot = null;
+    if (index >= 0) {
+        robot = this.connectedDevices[index];
+    }
+    if (robot != null) {
+        robot.setBatteryStatus(batteryStatus);
+    }
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -2241,6 +2802,12 @@ DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
 		manager.updateConnectionStatus(deviceId, isConnected);
 	});
 	CodeManager.updateConnectionStatus();
+};
+
+DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
+    DeviceManager.forEach(function(manager) {
+		manager.updateRobotBatteryStatus(robotId, batteryStatus);
+	});
 };
 
 /**
@@ -3783,7 +4350,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton("Record sounds", RecordingDialog.showDialog, true);
+	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -3805,7 +4372,7 @@ BlockList.populateCat_sound = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_variables = function(category) {
-	category.addButton("Create variable", CodeManager.newVariable);
+	category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
 	category.addSpace();
 
 	const variables = CodeManager.variableList;
@@ -3822,7 +4389,7 @@ BlockList.populateCat_variables = function(category) {
 	}
 
 	category.addSpace();
-	category.addButton("Create list", CodeManager.newList);
+	category.addButton(Language.getStr("Create_List"), CodeManager.newList);
 	category.addSpace();
 
 	const lists = CodeManager.listList;
@@ -3976,8 +4543,8 @@ function Colors() {
 Colors.setCommon = function() {
 	Colors.white = "#fff";
 	Colors.lightGray = "#7B7B7B";
-	Colors.lightLightGray = "#CDCDCD";
-	Colors.windowColor = "#CCC";
+    Colors.lightLightGray = "#CDCDCD";
+    Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
@@ -3986,19 +4553,14 @@ Colors.setCommon = function() {
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		/*
-		
-		*/
-		
 		"robots": "#209BA9",
-		"hummingbird": "#209BA9",
+        "hummingbird": "#209BA9",
         "hummingbirdbit": "#209BA9",
         "microbit": "#209BA9",
         "flutter": "#209BA9",
         "finch": "#209BA9",
-		
-		"tablet": "#FAA525",
-		"operators": "#8EC449",
+        "tablet": "#FAA525",
+        "operators": "#8EC449",
 		"sound": "#EE00FF",
 		"control": "#FFCC00",
 		"variables": "#FF5B00",
@@ -4164,8 +4726,16 @@ function VectorPaths(){
 	VP.checkmark.height=6;
 	VP.flag={};
 	VP.flag.path="m 0,0 11.2202,0 0,5.69439 c 0,3.1469 7.23037,5.69439 16.16532,5.69439 8.91622,0 16.14659,-2.54749 16.14659,-5.69439 0,-3.12817 7.24911,-5.69439 16.16533,-5.69439 8.93494,0 16.16532,2.56622 16.16532,5.69439 l 0,45.53639 c 0,-3.1469 -7.23038,-5.69439 -16.16532,-5.69439 -8.91622,0 -16.16533,2.54749 -16.16533,5.69439 0,3.1469 -7.23037,5.69439 -16.14659,5.69439 -8.93495,0 -16.16532,-2.54749 -16.16532,-5.69439 l 0,53.04774 -11.2202,0 z";
+
 	VP.flag.width=75.863;
 	VP.flag.height=104.279;
+
+	VP.battery={};
+	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 91.98 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,117 70,113.4 70,109.02 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
+	VP.battery.width=75.863;
+    VP.battery.height=104.279;
+
+
 	VP.stage={};
 	VP.stage.path="m 80.789,36.957 12.02565,0 0,14.16105 0,0 0,8.82256 -28.99643,0 z m -80.78916,0 11.96946,0 16.97078,22.98361 -28.94024,0 z m 92.81481,-30.08286 0,27.79761 -12.13804,0 -16.0342,-21.69113 3.42787,-0.33716 c 9.96518,-1.18009 18.45057,-3.1469 24.44467,-5.61947 z m -92.81481,-0.0187 0.37463,0.16858 c 5.9941,2.47257 14.47949,4.43938 24.44467,5.61947 l 3.29675,0.33716 -16.0342,21.69113 -12.08185,0 z m 0,-6.85575 92.88974,0 0,4.28953 -1.49853,0.76799 c -5.60073,2.54749 -14.3109,4.5705 -24.78183,5.71312 l -3.35295,0.33717 -1.40486,0.13112 -6.66843,0.39336 -1.70458,0.0749 -7.02432,0.13112 -7.04307,-0.13112 -1.70457,-0.0749 -6.66843,-0.39336 -1.53598,-0.14985 -3.22183,-0.31844 c -10.47093,-1.14262 -19.16237,-3.16563 -24.78183,-5.71312 l -1.49853,-0.76799 z";
 	VP.stage.width=92.890;
@@ -4652,7 +5222,7 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
 	const radius = height / 2;
 	const flatWidth = width - height;
 	let path = "";
-	path += "m " + (x + radius) + "," + (y + height);
+	path += "m " + (x + radius) + "," + (y + height - 2);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;
@@ -6246,9 +6816,10 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.longButtonW = 85;
 	TB.bnIconMargin = 3;
-	//TB.bg = Colors.black;
+
 	TB.bg = Colors.lightGray;
 	TB.flagFill = "#0f0";
+	TB.batteryFill = Colors.lightGray;
 	TB.stopFill = "#f00";
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
@@ -6267,17 +6838,11 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.batteryBnX  = TB.flagBnX - TB.buttonW - TB.buttonMargin;
+	TB.undoBnX = TB.batteryBnX - TB.buttonW - 3 * TB.buttonMargin;
 	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
-	
-	/*
-	if (GuiElements.smallMode) {
-		TB.showBnX = TB.buttonMargin;
-		TB.fileBnX = TB.showBnX + TB.buttonMargin + TB.shortButtonW;
-	}
-	*/
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
 	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
 
@@ -6313,20 +6878,12 @@ TitleBar.makeButtons = function() {
 	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
+	TB.addBatteryBtn();
 
 	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-	/*
-	if (GuiElements.smallMode) {
-		TB.showHideBn = new ShowHideButton(this.showBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, TB.bnIconH);
-		TB.showHideBn.setCallbackFunctions(GuiElements.showPaletteLayers, GuiElements.hidePaletteLayers);
-		TB.showHideBn.build(GuiElements.paletteLayersVisible);
-	} else {
-		TB.showHideBn = null;
-	}
-	*/
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
@@ -6376,6 +6933,14 @@ TitleBar.makeTitleText = function() {
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
 
+
+TitleBar.addBatteryBtn = function() {
+    let TB = TitleBar;
+    const TBLayer = GuiElements.layers.titlebar;
+    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+}
 /**
  * Sets the text of the TitleBar
  * @param {string|null} text - The text to display or null if there is no text
@@ -12254,7 +12819,6 @@ CodeManager.eventFlagClicked = function() {
 	TabManager.eventFlagClicked();
 };
 
-
 /**
  * Tells DeviceDropSlots or a certain type to hide their drop downs and just use labels
  * @param deviceClass - subclass of Device, type of slots affected
@@ -12525,9 +13089,7 @@ TabManager.setGraphics = function() {
  */
 TabManager.createTabSpaceBg = function() {
 	const TM = TabManager;
-	//TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, Colors.lightGray);
 	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
-
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
@@ -15590,10 +16152,10 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
 	var words = robot.name.split(" ");
-    	var newName = "";
-        for (var i = 0; i < words.length; i++) {
-            newName += words[i][0];
-        };
+    var newName = "";
+    for (var i = 0; i < words.length; i++) {
+        newName += words[i][0];
+    };
 	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
 		me.close();
 		if (me.index == null) {
@@ -15730,12 +16292,10 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	
-	
-	var deviceName = this.discoveredDevices[index].name;
-	var words = deviceName.split(" ");
-	var newName = "";
-	for (var i = 0; i < words.length; i++) {
+    var deviceName = this.discoveredDevices[index].name;
+    var words = deviceName.split(" ");
+    var newName = "";
+    for (var i = 0; i < words.length; i++) {
         newName += words[i][0];
     };
 
@@ -17408,6 +17968,13 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
+
+CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
+    robotId = HtmlServer.decodeHtml(robotId);
+    DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
+    return true;
+}
+
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -17507,6 +18074,17 @@ CallbackManager.tablet.addSensor = function(sensor){
 CallbackManager.tablet.removeSensor = function(sensor){
 	return TabletSensors.removeSensor(sensor);
 };
+
+/**
+ * Tells the frontend that the language of the system
+ * @param {string} sensor - A non percent encoded string representing the unsupported sensor
+ * @return {boolean} - Whether the sensor string was valid
+ */
+
+CallbackManager.tablet.getLanguage = function(lang){
+    Language.setLanguage(lang);
+};
+
 
 /**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
@@ -23359,19 +23937,19 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, "Tri-LED"));
+	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	this.addPart(new LabelText(this, "R"));
+	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, "G"));
+	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, "B"));
+	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot3);
@@ -23429,7 +24007,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 function B_HBServo(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", "Servo", 4, "angle", 0, 180, "Angle");
+	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, "Angle");
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -23438,7 +24016,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 function B_HBMotor(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", "Motor", 2, "speed", -100, 100, "Speed");
+	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, "Speed");
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -23447,7 +24025,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 function B_HBVibration(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", "Vibration", 2, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, "Intensity");
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -23456,7 +24034,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", "LED", 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, "Intensity");
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -23474,7 +24052,7 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 function B_HBLight(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "light", "Light");
+	B_HummingbirdSensorBase.call(this, x, y, "light", Language.getStr("Light"));
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBLight.prototype.constructor = B_HBLight;
@@ -23483,7 +24061,7 @@ B_HBLight.prototype.constructor = B_HBLight;
 
 function B_HBTempC(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", "Temperature C");
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_C"));
 }
 B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
@@ -23493,7 +24071,7 @@ Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 function B_HBDistCM(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", "Distance CM");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " CM");
 }
 B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -23503,7 +24081,7 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 function B_HBKnob(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", "Knob");
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Knob"));
 }
 B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
@@ -23512,7 +24090,7 @@ B_HBKnob.prototype.constructor = B_HBKnob;
 
 function B_HBSound(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "sound", "Sound");
+	B_HummingbirdSensorBase.call(this, x, y, "sound", Language.getStr("Sound"));
 }
 B_HBSound.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBSound.prototype.constructor = B_HBSound;
@@ -23531,7 +24109,7 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 
 function B_HBTempF(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", "Temperature F");
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_F"));
 }
 B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
@@ -23556,7 +24134,7 @@ Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 function B_HBDistInch(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", "Distance Inch");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") +" Inch");
 }
 B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;
@@ -23594,7 +24172,7 @@ B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = "Display";
+  this.displayName = Language.getStr("Display");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   const label = new LabelText(this,this.displayName);
@@ -23658,7 +24236,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MBPrint(x, y){
     CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Print";
+    this.displayName = Language.getStr("Print");
     this.draggable = true;
 
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23695,72 +24273,11 @@ B_MBPrint.prototype.startAction = function() {
 /* Waits until the request completes */
 B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
 
-
-
-// End of Try #3 at micro:bit blocks.
-
-
-
-// Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
-function B_MBAccelerometerMagnetometer(x, y){
-    CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = "";
-    this.draggable = true;
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer", "accelerometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_MBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_MBAccelerometerMagnetometer.prototype.constructor = B_MBAccelerometerMagnetometer;
-
-
-
-B_MBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_MBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
-
-
-// End of Try #1 of creating the micro:bit accelerometer and magnetometer blocks
-
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
 }
 B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_MBLedArray.prototype.constructor = B_MBLedArray;
-
-/*
-//MARK: inputs
-function B_MBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
-}
-B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-function B_MBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceMicroBit, "button", "Button", 2);
-}
-B_MBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-*/
-
 
 function B_MBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
@@ -23772,11 +24289,11 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
 
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
     this.addPart(pickBlock);
 
@@ -23851,7 +24368,7 @@ function B_MBButton(x, y){
     //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Button";
+    this.displayName = Language.getStr("Button");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -23922,25 +24439,6 @@ B_MBButton.prototype.updateAction = function() {
 
 };
 
-
-/*
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
 function B_MBOrientation(x, y){
     //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
@@ -23952,14 +24450,14 @@ function B_MBOrientation(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
-    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
-    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
-    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
-    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
-    orientation.addOption(new SelectionData("Shake", "shake"));
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
     this.addPart(orientation);
 
 };
@@ -24035,7 +24533,7 @@ B_MBOrientation.prototype.updateAction = function() {
 function B_MBCompass(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "Compass";
+    this.displayName = Language.getStr("Compass");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24092,7 +24590,7 @@ B_MBCompass.prototype.updateAction = function(){
 function B_MBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = "CompassCalibrate";
+    this.displayName = Language.getStr("CompassCalibrate");
     this.numberOfPorts = 1;
     this.draggable = false;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24162,7 +24660,7 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Position Servo", 4, "angle", 0, 180, "Angle");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle");
 
     this.addPart(new LabelText(this,'\xBA'));
 }
@@ -24171,7 +24669,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "Rotation Servo", 4, "percent", -100, 100, "Percent");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Percent");
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -24180,7 +24678,7 @@ B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", "LED", 3, "intensity", 0, 100, "Intensity");
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, "Intensity");
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -24199,7 +24697,7 @@ B_BBTriLed.prototype.constructor = B_BBTriLed;
 function B_BBBuzzer(x, y){
   CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
   this.deviceClass = DeviceHummingbirdBit;
-  this.displayName = "Play Note";
+  this.displayName = Language.getStr("Play_Note");
   this.draggable = true;
   this.minNote = 0
   this.maxNote = 127
@@ -24210,11 +24708,11 @@ function B_BBBuzzer(x, y){
   const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, "Note");
   this.addPart(noteSlot);
-  this.addPart(new LabelText(this,"for"));
+  this.addPart(new LabelText(this, Language.getStr("for")));
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
   beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
   this.addPart(beatsSlot);
-  this.addPart(new LabelText(this,"Beats"));
+  this.addPart(new LabelText(this,Language.getStr("Beats")));
 }
 B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_BBBuzzer.prototype.constructor = B_BBBuzzer;
@@ -24302,13 +24800,13 @@ function B_BBSensors(x, y){
     this.numberOfPorts = 3;
 
   // Default option for sensor is Light.
-  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("Light", "light"));
+  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
   //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
-  dS.addOption(new SelectionData("Distance (cm)", "distance"));
-  dS.addOption(new SelectionData("Dial", "dial"));
-  dS.addOption(new SelectionData("Light", "light"));
-  dS.addOption(new SelectionData("Sound", "sound"));
-  dS.addOption(new SelectionData("Other (V)", "other"));
+  dS.addOption(new SelectionData(Language.getStr("Distance") + "(cm)", "distance"));
+  dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
+  dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
+  dS.addOption(new SelectionData(Language.getStr("Sound"), "sound"));
+  dS.addOption(new SelectionData(Language.getStr("Other") + "(V)", "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
@@ -24343,21 +24841,6 @@ B_BBSensors.prototype.startAction=function(){
 /* Returns the result of the request */
 B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
 
-//MARK: microbit sensor
-/*
-function B_BBButton(x, y) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, "button", "Button", 2);
-}
-B_BBButton.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_BBButton.prototype.constructor = B_BBButton;
-*/
-
-
-// Try #2
-
-// Beginning of Try #2
-
-
 function B_BBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
@@ -24368,13 +24851,13 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
+    + ")", "accelerometer"));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
     + ")", "accelerometer"));
-    
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -24429,78 +24912,6 @@ B_BBMagnetometer.prototype.updateAction = function(){
 
 }
 
-
-
-
-// End of Try #2
-
-
-
-
-
-
-
-
-
-
-function B_BBAccelerometerMagnetometer(x, y){
-    CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "";
-    this.draggable = true;
-    this.addPart(new LabelText(this, this.displayName));
-    // Device menu
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-
-    //There are no ports for the accelerometer/magnetometer.
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
-    //pickBlock.addOption(new SelectionData("Magnetometer", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Magnetometer (" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData("Accelerometer " + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-};
-
-
-B_BBAccelerometerMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = this.slots[1].getData().getValue();
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readSensor(mem.requestStatus, this.sensorType, port);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-B_BBAccelerometerMagnetometer.prototype = Object.create(CommandBlock.prototype);
-B_BBAccelerometerMagnetometer.prototype.constructor = B_BBAccelerometerMagnetometer;
-
-B_BBAccelerometerMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-B_BBAccelerometerMagnetometer.prototype.startAction = B_DeviceWithPortsSensorBase.prototype.startAction;
-
-
-
 // micro:bit LED block that has been added to the HummingbirdBit menu
 
 function B_BBLedArray(x,y){
@@ -24520,7 +24931,7 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 function B_BBPrint(x, y){
     CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Print";
+    this.displayName = Language.getStr("Print");
     this.draggable = true;
 
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24565,7 +24976,7 @@ function B_BBButton(x, y){
     
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Button"; 
+    this.displayName = Language.getStr("Button");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24650,15 +25061,14 @@ function B_BBOrientation(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Up", "screenUp"));
-    orientation.addOption(new SelectionData("Screen Down", "screenDown"));
-    orientation.addOption(new SelectionData("Tilt Left", "tiltLeft"));
-    orientation.addOption(new SelectionData("Tilt Right", "tiltRight"));
-    orientation.addOption(new SelectionData("Logo Up", "logoUp"));
-    orientation.addOption(new SelectionData("Logo Down", "logoDown"));
-    orientation.addOption(new SelectionData("Shake", "shake"));
+    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
+    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
+    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
+    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
     this.addPart(orientation);
 
 };
@@ -24734,7 +25144,7 @@ B_BBOrientation.prototype.updateAction = function() {
 function B_BBCompass(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Compass";
+    this.displayName = Language.getStr("Compass");
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -24790,7 +25200,7 @@ B_BBCompass.prototype.updateAction = function(){
 function B_BBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "Compass Calibrate";
+    this.displayName = Language.getStr("CompassCalibrate");
     this.draggable = false;
     this.numberOfPorts = 1;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -25051,10 +25461,10 @@ B_FinchSetAll.prototype.updateAction = function() {
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when"));
+	this.addPart(new LabelText(this, Language.getStr("when")));
 	// Add flag icon with height 15
 	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.addPart(new LabelText(this, "tapped"));
+	this.addPart(new LabelText(this, Language.getStr("tapped")));
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
@@ -25071,7 +25481,7 @@ B_WhenFlagTapped.prototype.startAction = function() {
 
 function B_WhenIReceive(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when I receive"));
+	this.addPart(new LabelText(this, Language.getStr("when_I_receive")));
 	// Creates a BroadcastDropSlot that does nt allow snapping
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", true));
 }
@@ -25106,9 +25516,9 @@ function B_Wait(x, y) {
 	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
 	// Build Block out of things found in the BlockParts folder
-	this.addPart(new LabelText(this, "wait"));
+	this.addPart(new LabelText(this, Language.getStr("wait")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.addPart(new LabelText(this, "secs"));
+	this.addPart(new LabelText(this, Language.getStr("secs")));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -25135,7 +25545,7 @@ B_Wait.prototype.updateAction = function() {
 
 function B_WaitUntil(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "wait until"));
+	this.addPart(new LabelText(this, Language.getStr("wait_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
@@ -25156,7 +25566,7 @@ B_WaitUntil.prototype.startAction = function() {
 
 function B_Forever(x, y) {
 	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
-	this.addPart(new LabelText(this, "repeat forever"));
+	this.addPart(new LabelText(this, Language.getStr("repeat_forever")));
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
@@ -25182,7 +25592,7 @@ B_Forever.prototype.updateAction = function() {
 
 function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "repeat"));
+	this.addPart(new LabelText(this, Language.getStr("repeat")));
 	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
@@ -25223,7 +25633,7 @@ B_Repeat.prototype.updateAction = function() {
 
 function B_RepeatUntil(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "repeat until"));
+	this.addPart(new LabelText(this, Language.getStr("repeat_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
@@ -25256,7 +25666,7 @@ B_RepeatUntil.prototype.updateAction = function() {
 
 function B_If(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "if"));
+	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
@@ -25279,8 +25689,8 @@ B_If.prototype.updateAction = function() {
 
 
 function B_IfElse(x, y) {
-	DoubleLoopBlock.call(this, x, y, "control", "else");
-	this.addPart(new LabelText(this, "if"));
+	DoubleLoopBlock.call(this, x, y, "control", Language.getStr("else"));
+	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
@@ -25309,7 +25719,7 @@ B_IfElse.prototype.updateAction = function() {
 
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "broadcast"));
+	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
@@ -25347,9 +25757,9 @@ B_Broadcast.prototype.updateAction = function() {
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "broadcast"));
+	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
-	this.addPart(new LabelText(this, "and wait"));
+	this.addPart(new LabelText(this, Language.getStr("and_wait")));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
@@ -25376,7 +25786,7 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "message"));
+	this.addPart(new LabelText(this, Language.getStr("message")));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
@@ -25389,12 +25799,12 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
-	this.addPart(new LabelText(this, "stop"));
-	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData("all", "all"));
-	dS.addOption(new SelectionData("all", "all"));
-	dS.addOption(new SelectionData("this script", "this_script"));
+	this.addPart(new LabelText(this, Language.getStr("stop")));
+	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
+	dS.addOption(new SelectionData(Language.getStr("all"), "all"));
+	dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
 	//dS.addOption(new SelectionData("this block", "this_block"));
-	dS.addOption(new SelectionData("all but this script", "all_but_this_script"));
+	dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
 	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
 	this.addPart(dS);
 }
@@ -25421,7 +25831,7 @@ B_Stop.prototype.startAction = function() {
 
 function B_When(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, "when"));
+	this.addPart(new LabelText(this, Language.getStr("when")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);
@@ -25447,9 +25857,9 @@ B_When.prototype.startAction = function() {
 /* TODO: make sure dialogs don't show while a save dialog is up */
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "ask"));
+	this.addPart(new LabelText(this, Language.getStr("ask")));
 	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
-	this.addPart(new LabelText(this, "and wait"));
+	this.addPart(new LabelText(this, Language.getStr("and_wait")));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
@@ -25505,7 +25915,7 @@ B_Ask.prototype.showQuestion = function() {
 
 function B_Answer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "answer"));
+	this.addPart(new LabelText(this, Language.getStr("answer")));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
@@ -25518,7 +25928,7 @@ B_Answer.prototype.startAction = function() {
 
 function B_ResetTimer(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "reset timer"));
+	this.addPart(new LabelText(this, Language.getStr("reset_timer")));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
@@ -25532,7 +25942,7 @@ B_ResetTimer.prototype.startAction = function() {
 
 function B_Timer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "timer"));
+	this.addPart(new LabelText(this,  Language.getStr("timer")));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
@@ -25549,16 +25959,16 @@ Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "current"));
-	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData("date", "date"));
-	dS.addOption(new SelectionData("year", "year"));
-	dS.addOption(new SelectionData("month", "month"));
-	dS.addOption(new SelectionData("date", "date"));
-	dS.addOption(new SelectionData("day of the week", "day of the week"));
-	dS.addOption(new SelectionData("hour", "hour"));
-	dS.addOption(new SelectionData("minute", "minute"));
-	dS.addOption(new SelectionData("second", "second"));
-	dS.addOption(new SelectionData("time in milliseconds", "time in milliseconds"));
+	this.addPart(new LabelText(this, Language.getStr("current")));
+	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
+	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
+	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
+	dS.addOption(new SelectionData(Language.getStr("date"), "date"));
+	dS.addOption(new SelectionData(Language.getStr("day_of_the_week"), "day of the week"));
+	dS.addOption(new SelectionData(Language.getStr("hour"), "hour"));
+	dS.addOption(new SelectionData(Language.getStr("minute"), "minute"));
+	dS.addOption(new SelectionData(Language.getStr("second"), "second"));
+	dS.addOption(new SelectionData(Language.getStr("time_in_milliseconds"), "time in milliseconds"));
 	this.addPart(dS);
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
@@ -25594,13 +26004,13 @@ B_CurrentTime.prototype.startAction = function() {
 
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Display"));
+	this.addPart(new LabelText(this, Language.getStr("Display")));
 	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
-	this.addPart(new LabelText(this, "at"));
-	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData("Position 3", "position3"));
-	dS.addOption(new SelectionData("Position 1", "position1"));
-	dS.addOption(new SelectionData("Position 2", "position2"));
-	dS.addOption(new SelectionData("Position 3", "position3"));
+	this.addPart(new LabelText(this, Language.getStr("at")));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
+	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
+	dS.addOption(new SelectionData(Language.getStr("Position") +" 2", "position2"));
+	dS.addOption(new SelectionData(Language.getStr("Position") +" 3", "position3"));
 	this.addPart(dS);
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
@@ -25698,7 +26108,7 @@ B_Divide.prototype.startAction = function() {
 function B_Mod(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 17));
-	this.addPart(new LabelText(this, "mod"));
+	this.addPart(new LabelText(this, Language.getStr("mod")));
 	this.addPart(new NumSlot(this, "NumS_2", 10));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
@@ -25722,7 +26132,7 @@ B_Mod.prototype.startAction = function() {
 
 function B_Round(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "round"));
+	this.addPart(new LabelText(this, Language.getStr("round")));
 	this.addPart(new NumSlot(this, "NumS_1", 0.5));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
@@ -25739,9 +26149,9 @@ B_Round.prototype.startAction = function() {
 
 function B_PickRandom(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "pick random"));
+	this.addPart(new LabelText(this, Language.getStr("pick_random")));
 	this.addPart(new NumSlot(this, "NumS_min", 1));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumSlot(this, "NumS_max", 10));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
@@ -25825,7 +26235,7 @@ B_GreaterThan.prototype.startAction = function() {
 function B_And(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, "and"));
+	this.addPart(new LabelText(this, Language.getStr("and")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
@@ -25842,7 +26252,7 @@ B_And.prototype.startAction = function() {
 function B_Or(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, "or"));
+	this.addPart(new LabelText(this, Language.getStr("or")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
@@ -25858,7 +26268,7 @@ B_Or.prototype.startAction = function() {
 
 function B_Not(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "not"));
+	this.addPart(new LabelText(this, Language.getStr("not")));
 	this.addPart(new BoolSlot(this, "BoolS_1"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
@@ -25873,7 +26283,7 @@ B_Not.prototype.startAction = function() {
 
 function B_True(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "true"));
+	this.addPart(new LabelText(this, Language.getStr("true")));
 }
 B_True.prototype = Object.create(PredicateBlock.prototype);
 B_True.prototype.constructor = B_True;
@@ -25886,7 +26296,7 @@ B_True.prototype.startAction = function() {
 
 function B_False(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "false"));
+	this.addPart(new LabelText(this, Language.getStr("false")));
 }
 B_False.prototype = Object.create(PredicateBlock.prototype);
 B_False.prototype.constructor = B_False;
@@ -25899,11 +26309,11 @@ B_False.prototype.startAction = function() {
 
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "letter"));
+	this.addPart(new LabelText(this, Language.getStr("letter")));
 	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
 	nS.addLimits(1);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
@@ -25923,7 +26333,7 @@ B_LetterOf.prototype.startAction = function() {
 
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "length of"));
+	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	this.addPart(new StringSlot(this, "StrS_text", "world"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
@@ -25938,9 +26348,9 @@ B_LengthOf.prototype.startAction = function() {
 
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "join"));
+	this.addPart(new LabelText(this, Language.getStr("join")));
 	this.addPart(new StringSlot(this, "StrS_1", "hello "));
-	this.addPart(new LabelText(this, "and"));
+	this.addPart(new LabelText(this, Language.getStr("and")));
 	this.addPart(new StringSlot(this, "StrS_2", "world"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
@@ -25956,17 +26366,17 @@ B_join.prototype.startAction = function() {
 
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
-	this.addPart(new LabelText(this, "split"));
+	this.addPart(new LabelText(this, Language.getStr("split")));
 	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
-	this.addPart(new LabelText(this, "by"));
+	this.addPart(new LabelText(this, Language.getStr("by")));
 
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
-	const data = new SelectionData("whitespace", "whitespace");
+	const data = new SelectionData(Language.getStr("whitespace"), "whitespace");
 	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-	dS.addEnterText("Edit text");
-	dS.addOption(new SelectionData("letter", "letter"));
-	dS.addOption(new SelectionData("whitespace", "whitespace"));
+	dS.addEnterText(Language.getStr("Edit_Text"));
+	dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
+	dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
 	this.addPart(dS);
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
@@ -26000,15 +26410,15 @@ B_Split.prototype.startAction = function() {
 
 function B_IsAType(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, "is"));
+	this.addPart(new LabelText(this, Language.getStr("is")));
 	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
-	this.addPart(new LabelText(this, "a"));
-	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData("number", "number"));
-	dS.addOption(new SelectionData("number", "number"));
-	dS.addOption(new SelectionData("text", "text"));
-	dS.addOption(new SelectionData("boolean", "boolean"));
-	dS.addOption(new SelectionData("list", "list"));
-	dS.addOption(new SelectionData("invalid number", "invalid_num"));
+	this.addPart(new LabelText(this, Language.getStr("a")));
+	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
+	dS.addOption(new SelectionData(Language.getStr("number"), "number"));
+	dS.addOption(new SelectionData(Language.getStr("text"), "text"));
+	dS.addOption(new SelectionData(Language.getStr("boolean"), "boolean"));
+	dS.addOption(new SelectionData(Language.getStr("list"), "list"));
+	dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this, "?"));
 }
@@ -26073,7 +26483,7 @@ function B_mathOfNumber(x, y) {
 	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
@@ -26145,7 +26555,7 @@ B_ThrowError.prototype.startAction = function() {
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Shaken"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Shaken")));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
@@ -26184,7 +26594,7 @@ B_DeviceShaken.prototype.checkActive = function() {
 
 function B_DeviceSSID(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "Device SSID"));
+	this.addPart(new LabelText(this, Language.getStr("Device_SSID")));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
@@ -26220,7 +26630,7 @@ B_DeviceSSID.prototype.updateAction = function() {
 
 function B_DevicePressure(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Pressure"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Pressure")));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
@@ -26261,7 +26671,7 @@ Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 function B_DeviceRelativeAltitude(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, "Device Relative Altitude"));
+	this.addPart(new LabelText(this,  Language.getStr("Device_Relative_Altitude")));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
@@ -26302,7 +26712,7 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 function B_DeviceOrientation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "Device Orientation"));
+	this.addPart(new LabelText(this, Language.getStr("Device_Orientation")));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
@@ -26341,14 +26751,14 @@ B_DeviceOrientation.prototype.checkActive = function() {
 
 function B_DeviceAcceleration(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "Device"));
+	this.addPart(new LabelText(this,  Language.getStr("Device")));
 	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
 	dS.addOption(new SelectionData("Total", "total"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "Acceleration"));
+	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
 }
 B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
@@ -26399,10 +26809,10 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 function B_DeviceLocation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "Device"));
-	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData("Latitude", 0));
-	dS.addOption(new SelectionData("Latitude", 0));
-	dS.addOption(new SelectionData("Longitude", 1));
+	this.addPart(new LabelText(this, Language.getStr("Device")));
+	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
+	dS.addOption(new SelectionData(Language.getStr("Latitude"), 0));
+	dS.addOption(new SelectionData(Language.getStr("Longitude"), 1));
 	this.addPart(dS);
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
@@ -26495,7 +26905,7 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 
 
 function B_PlaySound(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play sound", false, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound"), false, false);
 }
 B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySound.prototype.constructor = B_PlaySound;
@@ -26503,7 +26913,7 @@ B_PlaySound.prototype.constructor = B_PlaySound;
 
 
 function B_PlaySoundUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play sound until done", false, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound_until_done"), false, true);
 }
 B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
@@ -26511,7 +26921,7 @@ B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 
 
 function B_PlayRecording(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play recording", true, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording"), true, false);
 }
 B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecording.prototype.constructor = B_PlayRecording;
@@ -26519,7 +26929,7 @@ B_PlayRecording.prototype.constructor = B_PlayRecording;
 
 
 function B_PlayRecordingUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, "play recording until done", true, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording_until_done"), true, true);
 }
 B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
@@ -26528,7 +26938,7 @@ B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
 
 function B_StopAllSounds(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "stop all sounds"));
+	this.addPart(new LabelText(this, Language.getStr("stop_all_sounds")));
 }
 B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
@@ -26552,9 +26962,9 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "rest for"));
+	this.addPart(new LabelText(this, Language.getStr("rest_for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
-	this.addPart(new LabelText(this, "beats"));
+	this.addPart(new LabelText(this, Language.getStr("Beats")));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
@@ -26580,11 +26990,11 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "play note"));
+	this.addPart(new LabelText(this, Language.getStr("play_note")));
 	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new LabelText(this, "for"));
+	this.addPart(new LabelText(this, Language.getStr("for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
-	this.addPart(new LabelText(this, "beats"));
+	this.addPart(new LabelText(this, Language.getStr("Beats")));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
@@ -26623,7 +27033,7 @@ B_PlayNoteForBeats.prototype.updateAction = function() {
 
 function B_ChangeTempoBy(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "change tempo by"));
+	this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
 	this.addPart(new NumSlot(this, "NumS_amt", 20));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
@@ -26642,7 +27052,7 @@ B_ChangeTempoBy.prototype.startAction = function() {
 
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "set tempo to"));
+	this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
 	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
@@ -26664,7 +27074,7 @@ B_SetTempoTo.prototype.startAction = function() {
 
 function B_Tempo(x, y) {
 	ReporterBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, "tempo"));
+	this.addPart(new LabelText(this, Language.getStr("tempo")));
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
@@ -27106,9 +27516,9 @@ B_CopyListToList.prototype.startAction = function() {
 
 function B_ItemOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
-	this.addPart(new LabelText(this, "item"));
+	this.addPart(new LabelText(this, Language.getStr("item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
@@ -27155,7 +27565,7 @@ B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
 
 function B_LengthOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
-	this.addPart(new LabelText(this, "length of"));
+	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 }
@@ -27180,7 +27590,7 @@ B_LengthOfList.prototype.startAction = function() {
 function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, "contains"));
+	this.addPart(new LabelText(this, Language.getStr("contains")));
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
 	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));

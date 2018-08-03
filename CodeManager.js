@@ -564,7 +564,6 @@ CodeManager.eventFlagClicked = function() {
 	TabManager.eventFlagClicked();
 };
 
-
 /**
  * Tells DeviceDropSlots or a certain type to hide their drop downs and just use labels
  * @param deviceClass - subclass of Device, type of slots affected
