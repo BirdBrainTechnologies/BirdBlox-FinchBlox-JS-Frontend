@@ -2327,7 +2327,7 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-    DM.batteryCheckInterval = 5000;
+    DM.batteryCheckInterval = 10000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
 	DM.batteryChecker = self.setInterval(function() {
@@ -2347,12 +2347,10 @@ DeviceManager.checkBattery = function() {
             let robot = manager.connectedDevices[i];
             curBatteryStatus = robot.getBatteryStatus();
             if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
-                console.log("trying setting status" + worstBatteryStatus);
                 worstBatteryStatus = curBatteryStatus;
             }
         }
     });
-    console.log("trying getting status" + worstBatteryStatus);
     if (worstBatteryStatus === "2") {
         TitleBar.batteryFill = "#0f0";
     } else if (worstBatteryStatus === "1") {
@@ -24346,7 +24344,7 @@ B_MBMagnetometer.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue() * 100) / 100;
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -24578,7 +24576,7 @@ B_MBCompass.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -25187,7 +25185,7 @@ B_BBCompass.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
