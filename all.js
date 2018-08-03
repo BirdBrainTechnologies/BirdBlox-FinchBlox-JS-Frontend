@@ -2906,7 +2906,7 @@ function DeviceHummingbird(name, id, RSSI, device) {
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
-Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird Duo", "HB");
+Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird Duo", "Duo");
 /**
  * Manages communication with a Hummingbird Bit
  * @param {string} name
@@ -2918,7 +2918,7 @@ function DeviceHummingbirdBit(name, id, RSSI, device) {
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
-Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "Hummingbird Bit", "BB");
+Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "Hummingbird Bit", "Bit");
 
 /**
  * Manages communication with a Hummingbird
@@ -22715,7 +22715,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	// When the Slot's value changes, its parent Block must re-check if it is active
 	this.assignUpdateActive(parent);
 	if (shortText == null) {
-		shortText = false;
+		shortText = true;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
