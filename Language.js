@@ -153,7 +153,8 @@ Language.US = {
     "Tap":"Tap",
     "to_connect":"to connect",
     "Cancel":"Cancel",
-    "Scanning_for_devices":"Scanning for devices"
+    "Scanning_for_devices":"Scanning for devices",
+    "Sign_in":"Sign_in"
 };
 
 Language.CN = {
@@ -297,7 +298,8 @@ Language.CN = {
     "Tap":"CN",
     "to_connect":"CN",
     "Cancel":"CN",
-    "Scanning_for_devices":"CN"
+    "Scanning_for_devices":"CN",
+    "Sign_in":"CN"
 }
 
 Language.ES = {
@@ -441,7 +443,8 @@ Language.ES = {
     "Tap":"ESP",
     "to_connect":"ESP",
     "Cancel":"ESP",
-    "Scanning_for_devices":"ESP"
+    "Scanning_for_devices":"ESP",
+    "Sign_in":"ESP"
 }
 
 Language.FR = {
@@ -585,7 +588,8 @@ Language.FR = {
     "Tap":"French",
     "to_connect":"French",
     "Cancel":"French",
-    "Scanning_for_devices":"French"
+    "Scanning_for_devices":"French",
+    "Sign_in": "French"
 }
 
 
@@ -602,6 +606,11 @@ Language.getLanguage = function () {
 }
 
 Language.getStr = function(str) {
-    return eval(Language.getLanguage() + str);
+    let translatedStr = eval(Language.getLanguage() + str);
+    if (translatedStr != null) {
+        return translatedStr;
+    } else {
+        return "Translation required";
+    }
 }
 

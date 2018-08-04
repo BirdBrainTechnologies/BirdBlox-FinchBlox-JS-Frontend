@@ -108,7 +108,7 @@ OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup)
 	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
 		HtmlServer.sendRequestWithCallback("cloud/signIn");
 	}.bind(this));
-	button.addText("Sign in");
+	button.addText(Language.getStr("Sign_in"));
 };
 
 /**
