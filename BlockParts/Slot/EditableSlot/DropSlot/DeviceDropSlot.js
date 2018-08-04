@@ -11,7 +11,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	// When the Slot's value changes, its parent Block must re-check if it is active
 	this.assignUpdateActive(parent);
 	if (shortText == null) {
-		shortText = false;
+		shortText = true;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";

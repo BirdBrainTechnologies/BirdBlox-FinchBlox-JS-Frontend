@@ -2328,6 +2328,7 @@ DeviceManager.setStatics = function() {
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
     DM.batteryCheckInterval = 1000;
+
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
 	DM.batteryChecker = self.setInterval(function() {
@@ -2905,7 +2906,7 @@ function DeviceHummingbird(name, id, RSSI, device) {
 }
 DeviceHummingbird.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbird.prototype.constructor = DeviceHummingbird;
-Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird", "HB");
+Device.setDeviceTypeName(DeviceHummingbird, "hummingbird", "Hummingbird Duo", "Duo");
 /**
  * Manages communication with a Hummingbird Bit
  * @param {string} name
@@ -2917,7 +2918,7 @@ function DeviceHummingbirdBit(name, id, RSSI, device) {
 }
 DeviceHummingbirdBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHummingbirdBit.prototype.constructor = DeviceHummingbirdBit;
-Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "HummingbirdBit", "BB");
+Device.setDeviceTypeName(DeviceHummingbirdBit, "hummingbirdbit", "Hummingbird Bit", "Bit");
 
 /**
  * Manages communication with a Hummingbird
@@ -2930,7 +2931,7 @@ function DeviceMicroBit(name, id, RSSI, device) {
 }
 DeviceMicroBit.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceMicroBit.prototype.constructor = DeviceMicroBit;
-Device.setDeviceTypeName(DeviceMicroBit, "microbit", "micro:bit", "MB");
+Device.setDeviceTypeName(DeviceMicroBit, "microbit", "micro:bit", "micro:bit");
 
 /**
  * Manages communication with a Flutter
@@ -22779,7 +22780,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	// When the Slot's value changes, its parent Block must re-check if it is active
 	this.assignUpdateActive(parent);
 	if (shortText == null) {
-		shortText = false;
+		shortText = true;
 	}
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
@@ -24408,7 +24409,7 @@ B_MBMagnetometer.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue() * 100) / 100;
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -24640,7 +24641,7 @@ B_MBCompass.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -24965,7 +24966,8 @@ B_BBMagnetometer.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue() * 100) / 100;
+                
                 return new ExecutionStatusResult(new NumData(num));
             }
         }
@@ -25248,7 +25250,7 @@ B_BBCompass.prototype.updateAction = function(){
                 return new ExecutionStatusError();
             } else {
                 const result = new StringData(status.result);
-                const num = result.asNum().getValue();
+                const num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -26844,9 +26846,9 @@ B_DeviceAcceleration.prototype.updateAction = function() {
 				let x = Number(parts[0]);
 				let y = Number(parts[1]);
 				let z = Number(parts[2]);
-				result = Math.sqrt(x * x + y * y + z * z);
+				result = Math.round(Math.sqrt(x * x + y * y + z * z) * 100)/100;
 			} else {
-				result = Number(parts[mem.axis]);
+				result = Math.round(Number(parts[mem.axis]) * 100) / 100;
 			}
 			return new ExecutionStatusResult(new NumData(result, true));
 		} else {
