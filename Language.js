@@ -130,7 +130,28 @@ Language.US = {
     "timer":"timer",
     "Record_Sounds":"Record Sound",
     "Create_Variable":"Create Variable",
-    "Create_List":"Create List"
+    "Create_List":"Create List",
+    "Zoom in":"Zoom in",
+    "Zoom out":"Zoom out",
+    "Reset zoom":"Reset zoom",
+    "Disable snap noise":"Disable snap noise",
+    "Enable snap noise":"Enable snap noise",
+    "Send debug log":"Send debug log",
+    "Show debug menu":"Show debug menu",
+    "Disconnect Device":"Disconnect Device",
+    "Connect Device":"Connect Device",
+    "Connect Multiple":"Connect Multiple",
+    "New":"New",
+    "Open","Open",
+    "No saved programs":"No saved programs",
+    "On Device":"On Device",
+    "Cloud":"Cloud",
+    "Device limit reached":"Device limit reached",
+    "Tap record to start":"Tap record to start",
+    "Done":"Done",
+    "Loading":"Loading",
+    "Tap":"Tap",
+    "to connect":"to connect"
 };
 
 Language.CN = {
@@ -251,7 +272,28 @@ Language.CN = {
     "timer":"CN",
     "Record_Sounds":"CN",
     "Create_Variable":"CN",
-    "Create_List":"CN"
+    "Create_List":"CN",
+    "Zoom in":"CN",
+    "Zoom out":"CN",
+    "Reset zoom":"CN",
+    "Disable snap noise":"CN",
+    "Enable snap noise":"CN",
+    "Send debug log":"CN",
+    "Show debug menu":"CN",
+    "Disconnect Device":"CN",
+    "Connect Device":"CN",
+    "Connect Multiple":"CN",
+    "New":"CN",
+    "Open","CN",
+    "No saved programs":"CN",
+    "On Device":"CN",
+    "Cloud":"CN",
+    "Device limit reached":"CN",
+    "Tap record to start":"CN",
+    "Done":"CN",
+    "Loading":"CN",
+    "Tap":"CN",
+    "to connect":"CN"
 }
 
 Language.ES = {
@@ -372,7 +414,28 @@ Language.ES = {
     "timer":"ESP",
     "Record_Sounds":"ESP",
     "Create_Variable":"ESP",
-    "Create_List":"ESP"
+    "Create_List":"ESP",
+    "Zoom in":"ESP",
+    "Zoom out":"ESP",
+    "Reset zoom":"ESP",
+    "Disable snap noise":"ESP",
+    "Enable snap noise":"ESP",
+    "Send debug log":"ESP",
+    "Show debug menu":"ESP",
+    "Disconnect Device":"ESP",
+    "Connect Device":"ESP",
+    "Connect Multiple":"ESP",
+    "New":"ESP",
+    "Open","ESP",
+    "No saved programs":"ESP",
+    "On Device":"ESP",
+    "Cloud":"ESP",
+    "Device limit reached":"ESP",
+    "Tap record to start":"ESP",
+    "Done":"ESP",
+    "Loading":"ESP",
+    "Tap":"ESP",
+    "to connect":"ESP"
 }
 
 Language.FR = {
@@ -493,8 +556,28 @@ Language.FR = {
     "timer":"French",
     "Record_Sounds":"French",
     "Create_Variable":"French",
-    "Create_List":"French"
-
+    "Create_List":"French",
+    "Zoom in":"French",
+    "Zoom out":"French",
+    "Reset zoom":"French",
+    "Disable snap noise":"French",
+    "Enable snap noise":"French",
+    "Send debug log":"French",
+    "Show debug menu":"French",
+    "Disconnect Device":"French",
+    "Connect Device":"French",
+    "Connect Multiple":"French",
+    "New":"French",
+    "Open","French",
+    "No saved programs":"French",
+    "On Device":"French",
+    "Cloud":"French",
+    "Device limit reached":"French",
+    "Tap record to start":"French",
+    "Done":"French",
+    "Loading":"French",
+    "Tap":"French",
+    "to connect":"French"
 }
 
 
@@ -511,6 +594,11 @@ Language.getLanguage = function () {
 }
 
 Language.getStr = function(str) {
-    return eval(Language.getLanguage() + str);
+    let translatedStr = eval(Language.getLanguage() + str);
+    if (translatedStr != null) {
+        return translatedStr;
+    } else {
+        return "Translation required";
+    }
 }
 

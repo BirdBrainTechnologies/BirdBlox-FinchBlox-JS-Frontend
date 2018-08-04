@@ -37,16 +37,16 @@ DeviceMenu.prototype.loadOptions = function() {
 		// If there is a device connected, we add an option to display firmware info about the device
 		this.addDeviceOption(connectedClass);
 		// And we add an option to disconnect from it.
-		this.addOption("Disconnect Device", function() {
+		this.addOption(Language.getStr("Disconnect Device"), function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-        this.addOption("Connect Device", function() {
+        this.addOption(Language.getStr("Connect Device"), function() {
             (new DiscoverDialog(DeviceHummingbirdBit)).show();
         });
 	}
 	// Regardless, we provide an option to connect to every type of device
-	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
+	this.addOption(Language.getStr("Connect Multiple"), ConnectMultipleDialog.showDialog);
 };
 
 /**

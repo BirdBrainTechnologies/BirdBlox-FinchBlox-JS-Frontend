@@ -21,9 +21,9 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 			// An error occurred, display the error
 			hintText = error;
 		} else if (this.loading) {
-			hintText = "Loading...";
+			hintText = Language.getStr("Loading") + "...";
 		} else {
-			hintText = "No saved programs"
+			hintText = Language.getStr("No saved programs");
 		}
 		this.files = cloudFileList;
 		if (this.files == null) {
@@ -32,7 +32,7 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 		count = this.files.length;
 	}
 
-	RD.call(this, false, "Open", count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
+	RD.call(this, false, Language.getStr("Open"), count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText(hintText);
 

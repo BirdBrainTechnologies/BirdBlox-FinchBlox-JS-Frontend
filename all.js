@@ -24,7 +24,7 @@ function DebugOptions() {
 	// When scanning, virtual devices can be added to the lists
 	DO.allowVirtualDevices = false;
 	DO.showVersion = false;
-	DO.showDebugMenu = true;
+	DO.showDebugMenu = false;
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;
@@ -1407,7 +1407,28 @@ Language.US = {
     "timer":"timer",
     "Record_Sounds":"Record Sound",
     "Create_Variable":"Create Variable",
-    "Create_List":"Create List"
+    "Create_List":"Create List",
+    "Zoom in":"Zoom in",
+    "Zoom out":"Zoom out",
+    "Reset zoom":"Reset zoom",
+    "Disable snap noise":"Disable snap noise",
+    "Enable snap noise":"Enable snap noise",
+    "Send debug log":"Send debug log",
+    "Show debug menu":"Show debug menu",
+    "Disconnect Device":"Disconnect Device",
+    "Connect Device":"Connect Device",
+    "Connect Multiple":"Connect Multiple",
+    "New":"New",
+    "Open","Open",
+    "No saved programs":"No saved programs",
+    "On Device":"On Device",
+    "Cloud":"Cloud",
+    "Device limit reached":"Device limit reached",
+    "Tap record to start":"Tap record to start",
+    "Done":"Done",
+    "Loading":"Loading",
+    "Tap":"Tap",
+    "to connect":"to connect"
 };
 
 Language.CN = {
@@ -1528,7 +1549,28 @@ Language.CN = {
     "timer":"CN",
     "Record_Sounds":"CN",
     "Create_Variable":"CN",
-    "Create_List":"CN"
+    "Create_List":"CN",
+    "Zoom in":"CN",
+    "Zoom out":"CN",
+    "Reset zoom":"CN",
+    "Disable snap noise":"CN",
+    "Enable snap noise":"CN",
+    "Send debug log":"CN",
+    "Show debug menu":"CN",
+    "Disconnect Device":"CN",
+    "Connect Device":"CN",
+    "Connect Multiple":"CN",
+    "New":"CN",
+    "Open","CN",
+    "No saved programs":"CN",
+    "On Device":"CN",
+    "Cloud":"CN",
+    "Device limit reached":"CN",
+    "Tap record to start":"CN",
+    "Done":"CN",
+    "Loading":"CN",
+    "Tap":"CN",
+    "to connect":"CN"
 }
 
 Language.ES = {
@@ -1649,7 +1691,28 @@ Language.ES = {
     "timer":"ESP",
     "Record_Sounds":"ESP",
     "Create_Variable":"ESP",
-    "Create_List":"ESP"
+    "Create_List":"ESP",
+    "Zoom in":"ESP",
+    "Zoom out":"ESP",
+    "Reset zoom":"ESP",
+    "Disable snap noise":"ESP",
+    "Enable snap noise":"ESP",
+    "Send debug log":"ESP",
+    "Show debug menu":"ESP",
+    "Disconnect Device":"ESP",
+    "Connect Device":"ESP",
+    "Connect Multiple":"ESP",
+    "New":"ESP",
+    "Open","ESP",
+    "No saved programs":"ESP",
+    "On Device":"ESP",
+    "Cloud":"ESP",
+    "Device limit reached":"ESP",
+    "Tap record to start":"ESP",
+    "Done":"ESP",
+    "Loading":"ESP",
+    "Tap":"ESP",
+    "to connect":"ESP"
 }
 
 Language.FR = {
@@ -1770,8 +1833,28 @@ Language.FR = {
     "timer":"French",
     "Record_Sounds":"French",
     "Create_Variable":"French",
-    "Create_List":"French"
-
+    "Create_List":"French",
+    "Zoom in":"French",
+    "Zoom out":"French",
+    "Reset zoom":"French",
+    "Disable snap noise":"French",
+    "Enable snap noise":"French",
+    "Send debug log":"French",
+    "Show debug menu":"French",
+    "Disconnect Device":"French",
+    "Connect Device":"French",
+    "Connect Multiple":"French",
+    "New":"French",
+    "Open","French",
+    "No saved programs":"French",
+    "On Device":"French",
+    "Cloud":"French",
+    "Device limit reached":"French",
+    "Tap record to start":"French",
+    "Done":"French",
+    "Loading":"French",
+    "Tap":"French",
+    "to connect":"French"
 }
 
 
@@ -1788,7 +1871,12 @@ Language.getLanguage = function () {
 }
 
 Language.getStr = function(str) {
-    return eval(Language.getLanguage() + str);
+    let translatedStr = eval(Language.getLanguage() + str);
+    if (translatedStr != null) {
+        return translatedStr;
+    } else {
+        return "Translation required";
+    }
 }
 
 
@@ -2328,7 +2416,6 @@ DeviceManager.setStatics = function() {
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
     DM.batteryCheckInterval = 1000;
-
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
 	DM.batteryChecker = self.setInterval(function() {
@@ -11715,17 +11802,17 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  */
 SettingsMenu.prototype.loadOptions = function() {
 	// Used to have icons, but they didn't work two well and have been disabled
-	this.addOption("Zoom in", this.optionZoomIn, false); //, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut, false); //, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom, true); //, VectorPaths.resetZoom);
+	this.addOption(Language.getStr("Zoom in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
+	this.addOption(Language.getStr("Zoom out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
+	this.addOption(Language.getStr("Reset zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
 	if (SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
+		this.addOption(Language.getStr("Disable snap noise"), this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
+		this.addOption(Language.getStr("Enable snap noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
-		this.addOption("Send debug log", this.optionSendDebugLog, true);
-		this.addOption("Show debug menu", this.enableDebug, true);
+		this.addOption(Language.getStr("Send debug log"), this.optionSendDebugLog, true);
+		this.addOption(Language.getStr("Show debug menu"), this.enableDebug, true);
 	}
 };
 
@@ -11846,16 +11933,16 @@ DeviceMenu.prototype.loadOptions = function() {
 		// If there is a device connected, we add an option to display firmware info about the device
 		this.addDeviceOption(connectedClass);
 		// And we add an option to disconnect from it.
-		this.addOption("Disconnect Device", function() {
+		this.addOption(Language.getStr("Disconnect Device"), function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-        this.addOption("Connect Device", function() {
+        this.addOption(Language.getStr("Connect Device"), function() {
             (new DiscoverDialog(DeviceHummingbirdBit)).show();
         });
 	}
 	// Regardless, we provide an option to connect to every type of device
-	this.addOption("Connect Multiple", ConnectMultipleDialog.showDialog);
+	this.addOption(Language.getStr("Connect Multiple"), ConnectMultipleDialog.showDialog);
 };
 
 /**
@@ -14705,12 +14792,12 @@ function OpenDialog(fileList) {
 	this.files = fileList.localFiles;
 	if (GuiElements.isAndroid) {
 		// On Android, space is needed for the row of tabs
-		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+		RD.call(this, false, Language.getStr("Open"), this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
 	} else {
-		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
+		RD.call(this, false, Language.getStr("Open"), this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
-	this.addHintText("No saved programs");
+	this.addHintText(Language.getStr("No saved programs"));
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.prototype.constructor = OpenDialog;
@@ -14898,7 +14985,7 @@ OpenDialog.prototype.createNewBn = function() {
 	let x = RD.bnMargin;
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
-	button.addText("New");
+	button.addText(Language.getStr("New"));
 	button.setCallbackFunction(function() {
 		SaveManager.userNew(this.closeDialog.bind(this))
 	}.bind(this), true);
@@ -14944,7 +15031,7 @@ OpenDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab("On Device", "device");
+	tabRow.addTab(Language.getStr("On Device"), "device");
 	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
 	tabRow.setCallbackFunction(this.tabSelected.bind(this));
@@ -15032,9 +15119,9 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 			// An error occurred, display the error
 			hintText = error;
 		} else if (this.loading) {
-			hintText = "Loading...";
+			hintText = Language.getStr("Loading") + "...";
 		} else {
-			hintText = "No saved programs"
+			hintText = Language.getStr("No saved programs");
 		}
 		this.files = cloudFileList;
 		if (this.files == null) {
@@ -15043,7 +15130,7 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 		count = this.files.length;
 	}
 
-	RD.call(this, false, "Open", count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
+	RD.call(this, false, Language.getStr("Open"), count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText(hintText);
 
@@ -15327,7 +15414,7 @@ FileList.prototype.getCloudTitle = function(){
 	if (this.account != null) {
 		return this.account;
 	}
-	return "Cloud";
+	return Language.getStr("Cloud");
 };
 /**
  * A tabbed dialog for connecting multiple devices.  Each type of device has a tab in which devices can be reordered,
@@ -15347,7 +15434,7 @@ function ConnectMultipleDialog(deviceClass) {
     });
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton("Done", this.closeDialog.bind(this));
-    this.addHintText("Tap \"+\" to connect");
+    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to connect"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -15514,7 +15601,7 @@ ConnectMultipleDialog.prototype.show = function() {
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
     } else {
-        this.addHintText("Device limit reached");
+        this.addHintText(Language.getStr("Device limit reached"));
         this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {
@@ -15622,8 +15709,8 @@ function RecordingDialog(listOfRecordings) {
 	});
 	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
-	this.addCenteredButton("Done", this.closeDialog.bind(this));
-	this.addHintText("Tap record to start");
+	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+	this.addHintText(Language.getStr("Tap record to start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
 	this.state = RecordingManager.state;
 }

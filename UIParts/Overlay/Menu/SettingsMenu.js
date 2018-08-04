@@ -14,17 +14,17 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  */
 SettingsMenu.prototype.loadOptions = function() {
 	// Used to have icons, but they didn't work two well and have been disabled
-	this.addOption("Zoom in", this.optionZoomIn, false); //, VectorPaths.zoomIn);
-	this.addOption("Zoom out", this.optionZoomOut, false); //, VectorPaths.zoomOut);
-	this.addOption("Reset zoom", this.optionResetZoom, true); //, VectorPaths.resetZoom);
+	this.addOption(Language.getStr("Zoom in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
+	this.addOption(Language.getStr("Zoom out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
+	this.addOption(Language.getStr("Reset zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
 	if (SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption("Disable snap noise", this.disableSnapping, true); //, VectorPaths.volumeMute);
+		this.addOption(Language.getStr("Disable snap noise"), this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption("Enable snap noise", this.enableSnapping, true); //, VectorPaths.volumeUp);
+		this.addOption(Language.getStr("Enable snap noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
-		this.addOption("Send debug log", this.optionSendDebugLog, true);
-		this.addOption("Show debug menu", this.enableDebug, true);
+		this.addOption(Language.getStr("Send debug log"), this.optionSendDebugLog, true);
+		this.addOption(Language.getStr("Show debug menu"), this.enableDebug, true);
 	}
 };
 

@@ -29,5 +29,5 @@ FileList.prototype.getCloudTitle = function(){
 	if (this.account != null) {
 		return this.account;
 	}
-	return "Cloud";
+	return Language.getStr("Cloud");
 };

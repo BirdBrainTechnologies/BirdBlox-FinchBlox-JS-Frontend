@@ -11,12 +11,12 @@ function OpenDialog(fileList) {
 	this.files = fileList.localFiles;
 	if (GuiElements.isAndroid) {
 		// On Android, space is needed for the row of tabs
-		RD.call(this, false, "Open", this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+		RD.call(this, false, Language.getStr("Open"), this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
 	} else {
-		RD.call(this, false, "Open", this.files.length, 0, OpenDialog.extraBottomSpace);
+		RD.call(this, false, Language.getStr("Open"), this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
-	this.addHintText("No saved programs");
+	this.addHintText(Language.getStr("No saved programs"));
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.prototype.constructor = OpenDialog;
@@ -204,7 +204,7 @@ OpenDialog.prototype.createNewBn = function() {
 	let x = RD.bnMargin;
 	let y = this.getExtraBottomY();
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
-	button.addText("New");
+	button.addText(Language.getStr("New"));
 	button.setCallbackFunction(function() {
 		SaveManager.userNew(this.closeDialog.bind(this))
 	}.bind(this), true);
@@ -250,7 +250,7 @@ OpenDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab("On Device", "device");
+	tabRow.addTab(Language.getStr("On Device"), "device");
 	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
 	tabRow.setCallbackFunction(this.tabSelected.bind(this));

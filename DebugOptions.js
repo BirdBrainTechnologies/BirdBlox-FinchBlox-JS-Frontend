@@ -22,7 +22,7 @@ function DebugOptions() {
 	// When scanning, virtual devices can be added to the lists
 	DO.allowVirtualDevices = false;
 	DO.showVersion = false;
-	DO.showDebugMenu = true;
+	DO.showDebugMenu = false;
 	// When there's an error, should the entire UI freeze to ensure it isn't missed?
 	DO.lockErrors = false;
 	DO.errorLocked = false;

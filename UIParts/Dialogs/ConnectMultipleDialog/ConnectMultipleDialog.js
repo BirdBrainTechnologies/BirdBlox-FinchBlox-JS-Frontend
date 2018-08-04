@@ -16,7 +16,7 @@ function ConnectMultipleDialog(deviceClass) {
     });
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton("Done", this.closeDialog.bind(this));
-    this.addHintText("Tap \"+\" to connect");
+    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to connect"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -183,7 +183,7 @@ ConnectMultipleDialog.prototype.show = function() {
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
     } else {
-        this.addHintText("Device limit reached");
+        this.addHintText(Language.getStr("Device limit reached"));
         this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {
