@@ -45,7 +45,7 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-    DM.batteryCheckInterval = 10000;
+    DM.batteryCheckInterval = 1000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
 	DM.batteryChecker = self.setInterval(function() {
@@ -60,6 +60,7 @@ DeviceManager.setStatics();
 DeviceManager.checkBattery = function() {
     var worstBatteryStatus = "3";
     var curBatteryStatus = "";
+    var color = Colors.lightGray;
     DeviceManager.forEach(function(manager) {
         for (var i = 0; i < manager.connectedDevices.length; i++) {
             let robot = manager.connectedDevices[i];
@@ -70,15 +71,13 @@ DeviceManager.checkBattery = function() {
         }
     });
     if (worstBatteryStatus === "2") {
-        TitleBar.batteryFill = "#0f0";
+        color = "#0f0";
     } else if (worstBatteryStatus === "1") {
-        TitleBar.batteryFill = "#ff0";
+        color = "#ff0";
     } else if (worstBatteryStatus === "0"){
-        TitleBar.batteryFill = "#f00";
-    } else {
-        TitleBar.batteryFill = Colors.lightGray;
+        color = "#f00";
     }
-    TitleBar.addBatteryBtn();
+    TitleBar.batteryBn.icon.setColor(color);
 }
 /**
  * Retrieves the number of devices in this.connectedDevices

@@ -57,9 +57,9 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.batteryBnX  = TB.flagBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.batteryBnX - TB.buttonW - 3 * TB.buttonMargin;
-	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+	TB.debugX = TB.batteryBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
@@ -97,8 +97,9 @@ TitleBar.makeButtons = function() {
 	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
-	TB.addBatteryBtn();
-
+	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
 	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
@@ -138,6 +139,7 @@ TitleBar.removeButtons = function() {
 	TB.viewBn.remove();
 	TB.undoButton.remove();
 	TB.hummingbirdBn.remove();
+	TB.batteryBn.remove();
 	if (TB.debugBn != null) TB.debugBn.remove();
 	if (TB.showHideBn != null) TB.showHideBn.remove();
 	TB.deviceStatusLight.remove();
@@ -153,13 +155,7 @@ TitleBar.makeTitleText = function() {
 };
 
 
-TitleBar.addBatteryBtn = function() {
-    let TB = TitleBar;
-    const TBLayer = GuiElements.layers.titlebar;
-    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
-}
+
 /**
  * Sets the text of the TitleBar
  * @param {string|null} text - The text to display or null if there is no text

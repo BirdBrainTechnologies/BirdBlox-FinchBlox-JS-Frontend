@@ -2327,7 +2327,7 @@ DeviceManager.setStatics = function() {
 
 	/* Stores the overall status of Devices controlled by this DeviceManager combined */
 	DM.totalStatus = statuses.noDevices;
-    DM.batteryCheckInterval = 5000;
+    DM.batteryCheckInterval = 1000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
 	DM.batteryChecker = self.setInterval(function() {
@@ -2342,27 +2342,24 @@ DeviceManager.setStatics();
 DeviceManager.checkBattery = function() {
     var worstBatteryStatus = "3";
     var curBatteryStatus = "";
+    var color = Colors.lightGray;
     DeviceManager.forEach(function(manager) {
         for (var i = 0; i < manager.connectedDevices.length; i++) {
             let robot = manager.connectedDevices[i];
             curBatteryStatus = robot.getBatteryStatus();
             if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
-                console.log("trying setting status" + worstBatteryStatus);
                 worstBatteryStatus = curBatteryStatus;
             }
         }
     });
-    console.log("trying getting status" + worstBatteryStatus);
     if (worstBatteryStatus === "2") {
-        TitleBar.batteryFill = "#0f0";
+        color = "#0f0";
     } else if (worstBatteryStatus === "1") {
-        TitleBar.batteryFill = "#ff0";
+        color = "#ff0";
     } else if (worstBatteryStatus === "0"){
-        TitleBar.batteryFill = "#f00";
-    } else {
-        TitleBar.batteryFill = Colors.lightGray;
+        color = "#f00";
     }
-    TitleBar.addBatteryBtn();
+    TitleBar.batteryBn.icon.setColor(color);
 }
 /**
  * Retrieves the number of devices in this.connectedDevices
@@ -3180,6 +3177,7 @@ GuiElements.setConstants = function() {
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
+	BatteryMenu.setGraphics();
 	TabletSensors();
 
 	BubbleOverlay.setGraphics();
@@ -6838,9 +6836,9 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.batteryBnX  = TB.flagBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.batteryBnX - TB.buttonW - 3 * TB.buttonMargin;
-	TB.debugX = TB.undoBnX - TB.longButtonW - 3 * TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+	TB.debugX = TB.batteryBnX - TB.longButtonW - 3 * TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
@@ -6878,8 +6876,9 @@ TitleBar.makeButtons = function() {
 	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
-	TB.addBatteryBtn();
-
+	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
 	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
@@ -6919,6 +6918,7 @@ TitleBar.removeButtons = function() {
 	TB.viewBn.remove();
 	TB.undoButton.remove();
 	TB.hummingbirdBn.remove();
+	TB.batteryBn.remove();
 	if (TB.debugBn != null) TB.debugBn.remove();
 	if (TB.showHideBn != null) TB.showHideBn.remove();
 	TB.deviceStatusLight.remove();
@@ -6934,13 +6934,7 @@ TitleBar.makeTitleText = function() {
 };
 
 
-TitleBar.addBatteryBtn = function() {
-    let TB = TitleBar;
-    const TBLayer = GuiElements.layers.titlebar;
-    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
-}
+
 /**
  * Sets the text of the TitleBar
  * @param {string|null} text - The text to display or null if there is no text
@@ -10971,9 +10965,9 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
 	// Prepare list to store options.
 	/** @type {Array<object>} - An array of objects with properties like text, func, and addTextFn */
 	this.options = [];
+	this.iconColors = [];
 	/** @type {null|Array<object>} */
 	this.bns = null;
-
 	// Build the scroll box but not the buttons
 	this.build();
 	this.parentGroup = parentGroup;
@@ -11072,12 +11066,29 @@ SmoothMenuBnList.prototype.hide = function() {
 SmoothMenuBnList.prototype.generateBns = function() {
 	// The width is computed and stored in this.width
 	this.computeWidth();
+	if (this.parent.constructor.name === "BatteryMenu") {
+	    let deviceTypeList = Device.getTypeList();
+        let deviceTypeLen = deviceTypeList.length;
+        for (var i = 0; i < deviceTypeLen; i++) {
+           let manager = deviceTypeList[i].getManager();
+           for (var j = 0; j < manager.getDeviceCount(); j++) {
+               let robot = manager.connectedDevices[j];
+               this.iconColors.push(BatteryMenu.getColorForBatteryStatus(robot.getBatteryStatus()));
+	        }
+	    }
+	}
+
 	if (!this.bnsGenerated) {
 		this.clearBnsArray();
 		let currentY = 0;
 		let count = this.options.length;
 		for (let i = 0; i < count; i++) {
-			this.bns.push(this.generateBn(0, currentY, this.width, this.options[i]));
+			if (this.parent.constructor.name === "BatteryMenu") {
+			    this.bns.push(this.generateBn(0, currentY, this.width - this.bnMargin - TitleBar.buttonW, this.options[i]));
+                this.bns.push(this.generateBn(this.width - TitleBar.buttonW, currentY, TitleBar.buttonW, null, VectorPaths.battery, this.iconColors[i]));
+			} else {
+			    this.bns.push(this.generateBn(0, currentY, this.width, this.options[i]));
+			}
 			currentY += this.bnHeight + this.bnMargin;
 		}
 		currentY -= this.bnMargin;
@@ -11145,14 +11156,18 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
  * @param {object} option - Object with fields for func, text, and/or addTextFn
  * @return {Button}
  */
-SmoothMenuBnList.prototype.generateBn = function(x, y, width, option) {
+SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, color) {
 	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
 	bn.setCallbackFunction(option.func, true);
-	if (option.addTextFn != null) {
+	if (option!= null && option.addTextFn != null) {
 		// Provides flexibility to format the button
 		option.addTextFn(bn);
 	} else {
 		bn.addText(option.text);
+	}
+
+	if (icon != null && color != null) {
+	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
@@ -11456,6 +11471,53 @@ Menu.prototype.updateZoom = function() {
 		this.menuBnList.updateZoom();
 	}
 };
+/**
+ * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * @param {Button} button
+ * @constructor
+ */
+function BatteryMenu(button) {
+    this.offsetX = button.x + BatteryMenu.iconX + TitleBar.buttonMargin;
+	Menu.call(this, button, BatteryMenu.width);
+}
+BatteryMenu.prototype = Object.create(Menu.prototype);
+BatteryMenu.prototype.constructor = BatteryMenu;
+
+BatteryMenu.prototype.loadOptions = function() {
+    let deviceTypeList = Device.getTypeList();
+    let deviceTypeLen = deviceTypeList.length;
+    for (var i = 0; i < deviceTypeLen; i++) {
+           let manager = deviceTypeList[i].getManager();
+           var curBatteryStatus = "3";
+           for (var j = 0; j < manager.getDeviceCount(); j++) {
+               let robot = manager.connectedDevices[j];
+               var words = robot.name.split(" ");
+               var newName = "";
+               var color = Colors.lightGray;
+               for (var k = 0; k < words.length; k++) {
+                   newName += words[k][0];
+               };
+               this.addOption(newName, null);
+           }
+    }
+};
+BatteryMenu.setGraphics = function() {
+	BatteryMenu.width = 150;
+	BatteryMenu.iconX = BatteryMenu.width - 5;
+//	BatteryMenu.maxDeviceNameChars = 8;
+};
+
+BatteryMenu.getColorForBatteryStatus = function(status) {
+    if (status === "2") {
+        return "#0f0";
+    } else if (status === "1") {
+        return "#ff0";
+    } else if (status === "0") {
+        return "#f00";
+    } else {
+        return Colors.lightGray;
+    }
+}
 /**
  * Deprecated class that used to be used as a file menu
  * @param {Button} button

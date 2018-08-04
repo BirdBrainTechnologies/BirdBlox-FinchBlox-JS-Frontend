@@ -32,9 +32,9 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
 	// Prepare list to store options.
 	/** @type {Array<object>} - An array of objects with properties like text, func, and addTextFn */
 	this.options = [];
+	this.iconColors = [];
 	/** @type {null|Array<object>} */
 	this.bns = null;
-
 	// Build the scroll box but not the buttons
 	this.build();
 	this.parentGroup = parentGroup;
@@ -133,12 +133,29 @@ SmoothMenuBnList.prototype.hide = function() {
 SmoothMenuBnList.prototype.generateBns = function() {
 	// The width is computed and stored in this.width
 	this.computeWidth();
+	if (this.parent.constructor.name === "BatteryMenu") {
+	    let deviceTypeList = Device.getTypeList();
+        let deviceTypeLen = deviceTypeList.length;
+        for (var i = 0; i < deviceTypeLen; i++) {
+           let manager = deviceTypeList[i].getManager();
+           for (var j = 0; j < manager.getDeviceCount(); j++) {
+               let robot = manager.connectedDevices[j];
+               this.iconColors.push(BatteryMenu.getColorForBatteryStatus(robot.getBatteryStatus()));
+	        }
+	    }
+	}
+
 	if (!this.bnsGenerated) {
 		this.clearBnsArray();
 		let currentY = 0;
 		let count = this.options.length;
 		for (let i = 0; i < count; i++) {
-			this.bns.push(this.generateBn(0, currentY, this.width, this.options[i]));
+			if (this.parent.constructor.name === "BatteryMenu") {
+			    this.bns.push(this.generateBn(0, currentY, this.width - this.bnMargin - TitleBar.buttonW, this.options[i]));
+                this.bns.push(this.generateBn(this.width - TitleBar.buttonW, currentY, TitleBar.buttonW, null, VectorPaths.battery, this.iconColors[i]));
+			} else {
+			    this.bns.push(this.generateBn(0, currentY, this.width, this.options[i]));
+			}
 			currentY += this.bnHeight + this.bnMargin;
 		}
 		currentY -= this.bnMargin;
@@ -206,14 +223,18 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
  * @param {object} option - Object with fields for func, text, and/or addTextFn
  * @return {Button}
  */
-SmoothMenuBnList.prototype.generateBn = function(x, y, width, option) {
+SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, color) {
 	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
 	bn.setCallbackFunction(option.func, true);
-	if (option.addTextFn != null) {
+	if (option!= null && option.addTextFn != null) {
 		// Provides flexibility to format the button
 		option.addTextFn(bn);
 	} else {
 		bn.addText(option.text);
+	}
+
+	if (icon != null && color != null) {
+	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();

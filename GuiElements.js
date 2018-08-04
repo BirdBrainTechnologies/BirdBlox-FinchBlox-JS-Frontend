@@ -110,6 +110,7 @@ GuiElements.setConstants = function() {
 	SmoothMenuBnList.setGraphics();
 	Menu.setGraphics();
 	DeviceMenu.setGraphics();
+	BatteryMenu.setGraphics();
 	TabletSensors();
 
 	BubbleOverlay.setGraphics();
