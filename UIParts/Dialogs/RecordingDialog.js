@@ -13,7 +13,7 @@ function RecordingDialog(listOfRecordings) {
 	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
-	this.addHintText(Language.getStr("Tap record to start"));
+	this.addHintText(Language.getStr("Tap_record_to_start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
 	this.state = RecordingManager.state;
 }

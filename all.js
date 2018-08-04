@@ -1408,27 +1408,29 @@ Language.US = {
     "Record_Sounds":"Record Sound",
     "Create_Variable":"Create Variable",
     "Create_List":"Create List",
-    "Zoom in":"Zoom in",
-    "Zoom out":"Zoom out",
-    "Reset zoom":"Reset zoom",
-    "Disable snap noise":"Disable snap noise",
-    "Enable snap noise":"Enable snap noise",
-    "Send debug log":"Send debug log",
-    "Show debug menu":"Show debug menu",
-    "Disconnect Device":"Disconnect Device",
-    "Connect Device":"Connect Device",
-    "Connect Multiple":"Connect Multiple",
+    "Zoom_in":"Zoom in",
+    "Zoom_out":"Zoom out",
+    "Reset_zoom":"Reset zoom",
+    "Disable_snap_noise":"Disable snap noise",
+    "Enable_snap_noise":"Enable snap noise",
+    "Send_debug_log":"Send debug log",
+    "Show_debug_menu":"Show debug menu",
+    "Disconnect_Device":"Disconnect Device",
+    "Connect_Device":"Connect Device",
+    "Connect_Multiple":"Connect Multiple",
     "New":"New",
-    "Open","Open",
-    "No saved programs":"No saved programs",
-    "On Device":"On Device",
+    "Open":"Open",
+    "No_saved_programs":"No saved programs",
+    "On_Device":"On Device",
     "Cloud":"Cloud",
     "Device limit reached":"Device limit reached",
-    "Tap record to start":"Tap record to start",
+    "Tap_record_to_start":"Tap record to start",
     "Done":"Done",
     "Loading":"Loading",
     "Tap":"Tap",
-    "to connect":"to connect"
+    "to_connect":"to connect",
+    "Cancel":"Cancel",
+    "Scanning_for_devices":"Scanning for devices"
 };
 
 Language.CN = {
@@ -1550,27 +1552,29 @@ Language.CN = {
     "Record_Sounds":"CN",
     "Create_Variable":"CN",
     "Create_List":"CN",
-    "Zoom in":"CN",
-    "Zoom out":"CN",
-    "Reset zoom":"CN",
-    "Disable snap noise":"CN",
-    "Enable snap noise":"CN",
-    "Send debug log":"CN",
-    "Show debug menu":"CN",
-    "Disconnect Device":"CN",
-    "Connect Device":"CN",
-    "Connect Multiple":"CN",
+    "Zoom_in":"CN",
+    "Zoom_out":"CN",
+    "Reset_zoom":"CN",
+    "Disable_snap_noise":"CN",
+    "Enable_snap_noise":"CN",
+    "Send_debug_log":"CN",
+    "Show_debug_menu":"CN",
+    "Disconnect_Device":"CN",
+    "Connect_Device":"CN",
+    "Connect_Multiple":"CN",
     "New":"CN",
-    "Open","CN",
-    "No saved programs":"CN",
-    "On Device":"CN",
+    "Open":"CN",
+    "No_saved_programs":"CN",
+    "On_Device":"CN",
     "Cloud":"CN",
     "Device limit reached":"CN",
-    "Tap record to start":"CN",
+    "Tap_record_to_start":"CN",
     "Done":"CN",
     "Loading":"CN",
     "Tap":"CN",
-    "to connect":"CN"
+    "to_connect":"CN",
+    "Cancel":"CN",
+    "Scanning_for_devices":"CN"
 }
 
 Language.ES = {
@@ -1692,27 +1696,29 @@ Language.ES = {
     "Record_Sounds":"ESP",
     "Create_Variable":"ESP",
     "Create_List":"ESP",
-    "Zoom in":"ESP",
-    "Zoom out":"ESP",
-    "Reset zoom":"ESP",
-    "Disable snap noise":"ESP",
-    "Enable snap noise":"ESP",
-    "Send debug log":"ESP",
-    "Show debug menu":"ESP",
-    "Disconnect Device":"ESP",
-    "Connect Device":"ESP",
-    "Connect Multiple":"ESP",
+    "Zoom_in":"ESP",
+    "Zoom_out":"ESP",
+    "Reset_zoom":"ESP",
+    "Disable_snap_noise":"ESP",
+    "Enable_snap_noise":"ESP",
+    "Send_debug_log":"ESP",
+    "Show_debug_menu":"ESP",
+    "Disconnect_Device":"ESP",
+    "Connect_Device":"ESP",
+    "Connect_Multiple":"ESP",
     "New":"ESP",
-    "Open","ESP",
-    "No saved programs":"ESP",
-    "On Device":"ESP",
+    "Open":"ESP",
+    "No_saved_programs":"ESP",
+    "On_Device":"ESP",
     "Cloud":"ESP",
     "Device limit reached":"ESP",
-    "Tap record to start":"ESP",
+    "Tap_record_to_start":"ESP",
     "Done":"ESP",
     "Loading":"ESP",
     "Tap":"ESP",
-    "to connect":"ESP"
+    "to_connect":"ESP",
+    "Cancel":"ESP",
+    "Scanning_for_devices":"ESP"
 }
 
 Language.FR = {
@@ -1834,27 +1840,29 @@ Language.FR = {
     "Record_Sounds":"French",
     "Create_Variable":"French",
     "Create_List":"French",
-    "Zoom in":"French",
-    "Zoom out":"French",
-    "Reset zoom":"French",
-    "Disable snap noise":"French",
-    "Enable snap noise":"French",
-    "Send debug log":"French",
-    "Show debug menu":"French",
-    "Disconnect Device":"French",
-    "Connect Device":"French",
-    "Connect Multiple":"French",
+    "Zoom_in":"French",
+    "Zoom_out":"French",
+    "Reset_zoom":"French",
+    "Disable_snap_noise":"French",
+    "Enable_snap_noise":"French",
+    "Send_debug_log":"French",
+    "Show_debug_menu":"French",
+    "Disconnect_Device":"French",
+    "Connect_Device":"French",
+    "Connect_Multiple":"French",
     "New":"French",
-    "Open","French",
-    "No saved programs":"French",
-    "On Device":"French",
+    "Open":"French",
+    "No_saved_programs":"French",
+    "On_Device":"French",
     "Cloud":"French",
     "Device limit reached":"French",
-    "Tap record to start":"French",
+    "Tap_record_to_start":"French",
     "Done":"French",
     "Loading":"French",
     "Tap":"French",
-    "to connect":"French"
+    "to_connect":"French",
+    "Cancel":"French",
+    "Scanning_for_devices":"French"
 }
 
 
@@ -1871,12 +1879,7 @@ Language.getLanguage = function () {
 }
 
 Language.getStr = function(str) {
-    let translatedStr = eval(Language.getLanguage() + str);
-    if (translatedStr != null) {
-        return translatedStr;
-    } else {
-        return "Translation required";
-    }
+    return eval(Language.getLanguage() + str);
 }
 
 
@@ -1982,7 +1985,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 * @return {string}
 	 */
 	deviceClass.getConnectionInstructions = function() {
-		return "Scanning for devices...";
+		return Language.getStr("Scanning_for_devices") + "...";
 	};
 };
 
@@ -11768,9 +11771,9 @@ function ViewMenu(button) {
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
 ViewMenu.prototype.loadOptions = function() {
-	this.addOption("Zoom in", this.optionZoomIn, false);
-	this.addOption("Zoom out", this.optionZoomOut, false);
-	this.addOption("Reset zoom", this.optionResetZoom, true);
+	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false);
+	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false);
+	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true);
 };
 ViewMenu.prototype.optionZoomIn = function() {
 	GuiElements.zoomMultiple += GuiElements.zoomAmount;
@@ -11802,17 +11805,17 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  */
 SettingsMenu.prototype.loadOptions = function() {
 	// Used to have icons, but they didn't work two well and have been disabled
-	this.addOption(Language.getStr("Zoom in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
-	this.addOption(Language.getStr("Zoom out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
-	this.addOption(Language.getStr("Reset zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
+	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
+	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
+	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
 	if (SettingsManager.enableSnapNoise.getValue() === "true") {
-		this.addOption(Language.getStr("Disable snap noise"), this.disableSnapping, true); //, VectorPaths.volumeMute);
+		this.addOption(Language.getStr("Disable_snap_noise"), this.disableSnapping, true); //, VectorPaths.volumeMute);
 	} else {
-		this.addOption(Language.getStr("Enable snap noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
+		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
-		this.addOption(Language.getStr("Send debug log"), this.optionSendDebugLog, true);
-		this.addOption(Language.getStr("Show debug menu"), this.enableDebug, true);
+		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
+		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}
 };
 
@@ -11933,16 +11936,16 @@ DeviceMenu.prototype.loadOptions = function() {
 		// If there is a device connected, we add an option to display firmware info about the device
 		this.addDeviceOption(connectedClass);
 		// And we add an option to disconnect from it.
-		this.addOption(Language.getStr("Disconnect Device"), function() {
+		this.addOption(Language.getStr("Disconnect_Device"), function() {
 			connectedClass.getManager().removeAllDevices();
 		});
 	} else {
-        this.addOption(Language.getStr("Connect Device"), function() {
+        this.addOption(Language.getStr("Connect_Device"), function() {
             (new DiscoverDialog(DeviceHummingbirdBit)).show();
         });
 	}
 	// Regardless, we provide an option to connect to every type of device
-	this.addOption(Language.getStr("Connect Multiple"), ConnectMultipleDialog.showDialog);
+	this.addOption(Language.getStr("Connect_Multiple"), ConnectMultipleDialog.showDialog);
 };
 
 /**
@@ -14797,7 +14800,7 @@ function OpenDialog(fileList) {
 		RD.call(this, false, Language.getStr("Open"), this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
-	this.addHintText(Language.getStr("No saved programs"));
+	this.addHintText(Language.getStr("No_saved_programs"));
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.prototype.constructor = OpenDialog;
@@ -15031,7 +15034,7 @@ OpenDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab(Language.getStr("On Device"), "device");
+	tabRow.addTab(Language.getStr("On_Device"), "device");
 	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
 	tabRow.setCallbackFunction(this.tabSelected.bind(this));
@@ -15121,7 +15124,7 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 		} else if (this.loading) {
 			hintText = Language.getStr("Loading") + "...";
 		} else {
-			hintText = Language.getStr("No saved programs");
+			hintText = Language.getStr("No_saved_programs");
 		}
 		this.files = cloudFileList;
 		if (this.files == null) {
@@ -15426,15 +15429,15 @@ FileList.prototype.getCloudTitle = function(){
 function ConnectMultipleDialog(deviceClass) {
     let CMD = ConnectMultipleDialog;
     // Store the open tab so it can be reopened by default next time
-    let title = "Connect Multiple";
+    let title = Language.getStr("Connect_Multiple");
     this.deviceClass = deviceClass;
     let count = 0;
     Device.getTypeList().forEach(function(dvcClass) {
         count += dvcClass.getManager().getDeviceCount();
     });
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
-    this.addCenteredButton("Done", this.closeDialog.bind(this));
-    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to connect"));
+    this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -15601,7 +15604,7 @@ ConnectMultipleDialog.prototype.show = function() {
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
     } else {
-        this.addHintText(Language.getStr("Device limit reached"));
+        this.addHintText(Language.getStr("Device_limit_reached"));
         this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {
@@ -15710,7 +15713,7 @@ function RecordingDialog(listOfRecordings) {
 	// Extra space at the bottom is needed for the recording controls
 	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
-	this.addHintText(Language.getStr("Tap record to start"));
+	this.addHintText(Language.getStr("Tap_record_to_start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
 	this.state = RecordingManager.state;
 }
@@ -16346,9 +16349,9 @@ RobotConnectionList.prototype.relToAbsY = function(y) {
  */
 function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
-	let title = "Connect Device";
+	let title = Language.getStr("Connect_Device");
 	RowDialog.call(this, false, title, 0, 0, 0);
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
 	this.addHintText(deviceClass.getConnectionInstructions());
 

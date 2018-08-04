@@ -100,7 +100,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 * @return {string}
 	 */
 	deviceClass.getConnectionInstructions = function() {
-		return "Scanning for devices...";
+		return Language.getStr("Scanning_for_devices") + "...";
 	};
 };
 

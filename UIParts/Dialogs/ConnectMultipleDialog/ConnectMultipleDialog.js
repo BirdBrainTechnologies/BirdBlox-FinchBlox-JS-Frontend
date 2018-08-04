@@ -8,15 +8,15 @@
 function ConnectMultipleDialog(deviceClass) {
     let CMD = ConnectMultipleDialog;
     // Store the open tab so it can be reopened by default next time
-    let title = "Connect Multiple";
+    let title = Language.getStr("Connect_Multiple");
     this.deviceClass = deviceClass;
     let count = 0;
     Device.getTypeList().forEach(function(dvcClass) {
         count += dvcClass.getManager().getDeviceCount();
     });
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
-    this.addCenteredButton("Done", this.closeDialog.bind(this));
-    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to connect"));
+    this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -183,7 +183,7 @@ ConnectMultipleDialog.prototype.show = function() {
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
     } else {
-        this.addHintText(Language.getStr("Device limit reached"));
+        this.addHintText(Language.getStr("Device_limit_reached"));
         this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {

@@ -16,7 +16,7 @@ function OpenDialog(fileList) {
 		RD.call(this, false, Language.getStr("Open"), this.files.length, 0, OpenDialog.extraBottomSpace);
 	}
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
-	this.addHintText(Language.getStr("No saved programs"));
+	this.addHintText(Language.getStr("No_saved_programs"));
 }
 OpenDialog.prototype = Object.create(RowDialog.prototype);
 OpenDialog.prototype.constructor = OpenDialog;
@@ -250,7 +250,7 @@ OpenDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
-	tabRow.addTab(Language.getStr("On Device"), "device");
+	tabRow.addTab(Language.getStr("On_Device"), "device");
 	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
 
 	tabRow.setCallbackFunction(this.tabSelected.bind(this));

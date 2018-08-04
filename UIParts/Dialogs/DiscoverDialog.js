@@ -7,9 +7,9 @@
  */
 function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
-	let title = "Connect Device";
+	let title = Language.getStr("Connect_Device");
 	RowDialog.call(this, false, title, 0, 0, 0);
-	this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+	this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
 	this.addHintText(deviceClass.getConnectionInstructions());
 

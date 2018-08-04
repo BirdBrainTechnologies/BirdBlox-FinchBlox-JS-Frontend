@@ -23,7 +23,7 @@ function OpenCloudDialog(fileList, cloudFileList, error) {
 		} else if (this.loading) {
 			hintText = Language.getStr("Loading") + "...";
 		} else {
-			hintText = Language.getStr("No saved programs");
+			hintText = Language.getStr("No_saved_programs");
 		}
 		this.files = cloudFileList;
 		if (this.files == null) {
