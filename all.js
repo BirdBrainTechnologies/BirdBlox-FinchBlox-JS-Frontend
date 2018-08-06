@@ -5949,7 +5949,10 @@ Sound.nameFromId = function(id, isRecording){
 		name = name.substring(0, name.length - 4);
 	}*/
 	name = name.split("_").join(" ");
-	name = name.replace(/\b\w/g, l => l.toUpperCase());
+	//name = name.replace(/\b\w/g, l => l.toUpperCase());
+	name = name.replace(/\b\w/g, function(l){ 
+		return l.toUpperCase();
+	});
 	return name;
 };
 
@@ -6023,6 +6026,7 @@ Sound.playSnap = function(){
 		HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
 	}
 };
+
 
 
 /**
@@ -11258,14 +11262,15 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
  */
 SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, color) {
 	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
-	bn.setCallbackFunction(option.func, true);
-	if (option!= null && option.addTextFn != null) {
+	if (option != null) {
+		bn.setCallbackFunction(option.func, true);
+		if (option.addTextFn != null) {
 		// Provides flexibility to format the button
-		option.addTextFn(bn);
-	} else {
-		bn.addText(option.text);
+			option.addTextFn(bn);
+		} else {
+			bn.addText(option.text);
+		}
 	}
-
 	if (icon != null && color != null) {
 	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
 	}
@@ -11371,6 +11376,7 @@ SmoothMenuBnList.previewHeight = function(count, maxHeight) {
 	}
 	return height;
 };
+
 /**
  * Abstract class that represents a menu displayed when a Button in the TitleBar is tapped.  The Menu requires a button
  * to attach to, which it automatically configures the callbacks for.  Subclasses override the loadOptions function
