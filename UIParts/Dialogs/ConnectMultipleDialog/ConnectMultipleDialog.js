@@ -16,6 +16,7 @@ function ConnectMultipleDialog(deviceClass) {
     });
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+
     this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);

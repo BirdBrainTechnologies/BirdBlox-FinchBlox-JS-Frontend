@@ -29,7 +29,7 @@ DeviceMenu.prototype.loadOptions = function() {
 		 * is it the connectedClass */
 		let deviceManager = deviceClass.getManager();
 		const statuses = DeviceManager.statuses;
-		if (deviceManager.getDeviceCount() > 0 && deviceManager.getStatus() == statuses.connected) {
+		if (deviceManager.getDeviceCount() > 0 ) {
 			connectedClass = deviceClass;
 		}
 	});
