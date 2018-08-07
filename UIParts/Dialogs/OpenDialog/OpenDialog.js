@@ -7,6 +7,7 @@
 function OpenDialog(fileList) {
 	const OD = OpenDialog;
 	const RD = RowDialog;
+
 	this.fileList = fileList;
 	this.files = fileList.localFiles;
 	if (GuiElements.isAndroid) {
@@ -32,15 +33,21 @@ OpenDialog.setConstants = function() {
  * @inheritDoc
  */
 OpenDialog.prototype.show = function() {
-	RowDialog.prototype.show.call(this);
-	OpenDialog.currentDialog = this;
-	this.createNewBn();
-	if (GuiElements.isIos) {
-		this.createCloudBn();
-	}
-	if (GuiElements.isAndroid) {
-		this.createTabRow();
-	}
+    if (OpenDialog.defaultFile === undefined || OpenDialog.defaultFile === "") {
+        RowDialog.prototype.show.call(this);
+        OpenDialog.currentDialog = this;
+        this.createNewBn();
+        if (GuiElements.isIos) {
+            this.createCloudBn();
+        }
+        if (GuiElements.isAndroid) {
+            this.createTabRow();
+        }
+
+    } else {
+        SaveManager.userOpenFile(OpenDialog.defaultFile);
+        OpenDialog.defaultFile = "";
+    }
 };
 
 /**
@@ -315,3 +322,7 @@ OpenDialog.filesChanged = function() {
 		OpenDialog.currentDialog.reloadDialog();
 	}
 };
+
+OpenDialog.setDefaultFile = function(fileName) {
+    OpenDialog.defaultFile = fileName;
+}

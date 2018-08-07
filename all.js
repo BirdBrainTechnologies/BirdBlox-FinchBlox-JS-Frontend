@@ -5950,7 +5950,7 @@ Sound.nameFromId = function(id, isRecording){
 	}*/
 	name = name.split("_").join(" ");
 	//name = name.replace(/\b\w/g, l => l.toUpperCase());
-	name = name.replace(/\b\w/g, function(l){ 
+	name = name.replace(/\b\w/g, function(l){
 		return l.toUpperCase();
 	});
 	return name;
@@ -14806,6 +14806,7 @@ RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackF
 function OpenDialog(fileList) {
 	const OD = OpenDialog;
 	const RD = RowDialog;
+
 	this.fileList = fileList;
 	this.files = fileList.localFiles;
 	if (GuiElements.isAndroid) {
@@ -14831,15 +14832,21 @@ OpenDialog.setConstants = function() {
  * @inheritDoc
  */
 OpenDialog.prototype.show = function() {
-	RowDialog.prototype.show.call(this);
-	OpenDialog.currentDialog = this;
-	this.createNewBn();
-	if (GuiElements.isIos) {
-		this.createCloudBn();
-	}
-	if (GuiElements.isAndroid) {
-		this.createTabRow();
-	}
+    if (OpenDialog.defaultFile === undefined || OpenDialog.defaultFile === "") {
+        RowDialog.prototype.show.call(this);
+        OpenDialog.currentDialog = this;
+        this.createNewBn();
+        if (GuiElements.isIos) {
+            this.createCloudBn();
+        }
+        if (GuiElements.isAndroid) {
+            this.createTabRow();
+        }
+
+    } else {
+        SaveManager.userOpenFile(OpenDialog.defaultFile);
+        OpenDialog.defaultFile = "";
+    }
 };
 
 /**
@@ -15114,6 +15121,10 @@ OpenDialog.filesChanged = function() {
 		OpenDialog.currentDialog.reloadDialog();
 	}
 };
+
+OpenDialog.setDefaultFile = function(fileName) {
+    OpenDialog.defaultFile = fileName;
+}
 /**
  * A dialog for managing cloud files on Android.  Contains a tab for returning to the OpenDialog
  * @param {FileList} fileList - Used to obtain account information
@@ -18253,7 +18264,9 @@ CallbackManager.tablet.removeSensor = function(sensor){
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
-
+CallbackManager.tablet.getFile = function(fileName) {
+    OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
+}
 
 /**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
@@ -18731,6 +18744,7 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
+    SaveManager.fileName = fileName;
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");

@@ -267,7 +267,9 @@ CallbackManager.tablet.removeSensor = function(sensor){
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
-
+CallbackManager.tablet.getFile = function(fileName) {
+    OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
+}
 
 /**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
