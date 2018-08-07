@@ -189,7 +189,10 @@ Sound.nameFromId = function(id, isRecording){
 		name = name.substring(0, name.length - 4);
 	}*/
 	name = name.split("_").join(" ");
-	name = name.replace(/\b\w/g, l => l.toUpperCase());
+	//name = name.replace(/\b\w/g, l => l.toUpperCase());
+	name = name.replace(/\b\w/g, function(l){
+		return l.toUpperCase();
+	});
 	return name;
 };
 

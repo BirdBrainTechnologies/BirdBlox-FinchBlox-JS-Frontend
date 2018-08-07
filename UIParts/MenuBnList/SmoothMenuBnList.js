@@ -225,14 +225,15 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
  */
 SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, color) {
 	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
-	bn.setCallbackFunction(option.func, true);
-	if (option!= null && option.addTextFn != null) {
+	if (option != null) {
+		bn.setCallbackFunction(option.func, true);
+		if (option.addTextFn != null) {
 		// Provides flexibility to format the button
-		option.addTextFn(bn);
-	} else {
-		bn.addText(option.text);
+			option.addTextFn(bn);
+		} else {
+			bn.addText(option.text);
+		}
 	}
-
 	if (icon != null && color != null) {
 	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
 	}
