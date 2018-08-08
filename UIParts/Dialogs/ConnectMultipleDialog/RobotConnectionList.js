@@ -33,7 +33,7 @@ RobotConnectionList.setConstants = function() {
 	RCL.bgColor = Colors.lightGray;
 	RCL.updateInterval = DiscoverDialog.updateInterval;
 	RCL.height = 150;
-	RCL.width = 200;
+	RCL.width = 350;
 };
 
 /**
