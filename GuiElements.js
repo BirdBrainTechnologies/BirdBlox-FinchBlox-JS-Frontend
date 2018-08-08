@@ -7,6 +7,7 @@
  * TODO: Refactor GuiElements moving the parts that deal with getting device properties to a different class
  */
 function GuiElements() {
+
 	// Clear the debug span
 	document.getElementById("debug").innerHTML = "";
 	// Find parts of the html and store them
@@ -138,6 +139,7 @@ GuiElements.setConstants = function() {
 };
 /** Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI = function() {
+
 	document.body.style.backgroundColor = Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
@@ -150,7 +152,6 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-
 	GuiElements.blockInteraction();
 	OpenDialog.showDialog();
 	DebugOptions.applyActions();

@@ -384,9 +384,37 @@ Block.prototype.updateDim = function() {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
 		lineWidth += this.parts[i].width; //Fill the width of the middle of the Block
 		if (this.parts[i].height > lineHeight[currentLine]) { //The height of the Block is the height of the tallest member.
-			lineHeight[currentLine] = this.parts[i].height;
+		    if (this.parts[i].constructor.name === "LabelText") {
+		        switch (this.type) {
+		            case 0:
+		                lineHeight[currentLine] = this.parts[i].height + 12;
+                        break;
+		            case 1:
+		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                break;
+		            case 2:
+		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                break;
+		            case 7:
+		                 lineHeight[currentLine] = this.parts[i].height + 7;
+		                 break;
+		            default:
+		                lineHeight[currentLine] = this.parts[i].height;
+		                break;
+		        }
+		     } else {
+		        switch (this.type) {
+		            case 1:
+			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            break;
+			        default:
+			            lineHeight[currentLine] = this.parts[i].height;
+			            break;
+			    }
+			 }
 		}
 		if (i < this.parts.length - 1 && !this.parts[i].isEndOfLine) {
+
 			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 		if (lineWidth > width) { //The block width is the width of the longest line of parts
