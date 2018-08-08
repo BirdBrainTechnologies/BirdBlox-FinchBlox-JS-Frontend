@@ -307,7 +307,6 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	let path = "";
 	path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y;
 	path += BlockGraphics.command.path1;
-
 	path += width - BlockGraphics.command.extraWidth;
 	path += BlockGraphics.command.path2;
 	path += height - BlockGraphics.command.extraHeight;

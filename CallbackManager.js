@@ -5,7 +5,6 @@
  * everything worked, while false indicates the request was bad, unimplemented, or encountered an error.
  */
 function CallbackManager(){
-
 }
 
 CallbackManager.sounds = {};
@@ -267,8 +266,12 @@ CallbackManager.tablet.removeSensor = function(sensor){
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
-CallbackManager.tablet.getFile = function(fileName) {
+CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
+}
+
+CallbackManager.tablet.runFile = function(fileName) {
+    SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
 
 /**

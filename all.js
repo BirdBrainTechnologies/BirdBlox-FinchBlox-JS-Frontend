@@ -3174,6 +3174,7 @@ TabletSensors.clear = function(){
  * TODO: Refactor GuiElements moving the parts that deal with getting device properties to a different class
  */
 function GuiElements() {
+
 	// Clear the debug span
 	document.getElementById("debug").innerHTML = "";
 	// Find parts of the html and store them
@@ -3305,6 +3306,7 @@ GuiElements.setConstants = function() {
 };
 /** Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI = function() {
+
 	document.body.style.backgroundColor = Colors.black; //Sets the background color of the webpage
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
@@ -3317,7 +3319,6 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-
 	GuiElements.blockInteraction();
 	OpenDialog.showDialog();
 	DebugOptions.applyActions();
@@ -5281,7 +5282,6 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	let path = "";
 	path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y;
 	path += BlockGraphics.command.path1;
-
 	path += width - BlockGraphics.command.extraWidth;
 	path += BlockGraphics.command.path2;
 	path += height - BlockGraphics.command.extraHeight;
@@ -14832,6 +14832,7 @@ OpenDialog.setConstants = function() {
  * @inheritDoc
  */
 OpenDialog.prototype.show = function() {
+
     if (OpenDialog.defaultFile === undefined || OpenDialog.defaultFile === "") {
         RowDialog.prototype.show.call(this);
         OpenDialog.currentDialog = this;
@@ -14842,7 +14843,6 @@ OpenDialog.prototype.show = function() {
         if (GuiElements.isAndroid) {
             this.createTabRow();
         }
-
     } else {
         SaveManager.userOpenFile(OpenDialog.defaultFile);
         OpenDialog.defaultFile = "";
@@ -15125,6 +15125,7 @@ OpenDialog.filesChanged = function() {
 OpenDialog.setDefaultFile = function(fileName) {
     OpenDialog.defaultFile = fileName;
 }
+
 /**
  * A dialog for managing cloud files on Android.  Contains a tab for returning to the OpenDialog
  * @param {FileList} fileList - Used to obtain account information
@@ -18002,7 +18003,6 @@ DialogManager.showAlertDialog = function(title, message, button, callbackFn, cal
  * everything worked, while false indicates the request was bad, unimplemented, or encountered an error.
  */
 function CallbackManager(){
-
 }
 
 CallbackManager.sounds = {};
@@ -18264,8 +18264,12 @@ CallbackManager.tablet.removeSensor = function(sensor){
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
-CallbackManager.tablet.getFile = function(fileName) {
+CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
+}
+
+CallbackManager.tablet.runFile = function(fileName) {
+    SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
 
 /**
@@ -19563,9 +19567,37 @@ Block.prototype.updateDim = function() {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
 		lineWidth += this.parts[i].width; //Fill the width of the middle of the Block
 		if (this.parts[i].height > lineHeight[currentLine]) { //The height of the Block is the height of the tallest member.
-			lineHeight[currentLine] = this.parts[i].height;
+		    if (this.parts[i].constructor.name === "LabelText") {
+		        switch (this.type) {
+		            case 0:
+		                lineHeight[currentLine] = this.parts[i].height + 12;
+                        break;
+		            case 1:
+		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                break;
+		            case 2:
+		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                break;
+		            case 7:
+		                 lineHeight[currentLine] = this.parts[i].height + 7;
+		                 break;
+		            default:
+		                lineHeight[currentLine] = this.parts[i].height;
+		                break;
+		        }
+		     } else {
+		        switch (this.type) {
+		            case 1:
+			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            break;
+			        default:
+			            lineHeight[currentLine] = this.parts[i].height;
+			            break;
+			    }
+			 }
 		}
 		if (i < this.parts.length - 1 && !this.parts[i].isEndOfLine) {
+
 			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 		if (lineWidth > width) { //The block width is the width of the longest line of parts
@@ -20957,7 +20989,7 @@ RoundSlotShape.prototype.updateDim = function() {
  */
 RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 3, this.width, this.height, 1, true); //Fix! BG
 };
 
 /**

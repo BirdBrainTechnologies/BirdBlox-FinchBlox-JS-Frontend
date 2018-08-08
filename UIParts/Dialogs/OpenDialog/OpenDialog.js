@@ -33,6 +33,7 @@ OpenDialog.setConstants = function() {
  * @inheritDoc
  */
 OpenDialog.prototype.show = function() {
+
     if (OpenDialog.defaultFile === undefined || OpenDialog.defaultFile === "") {
         RowDialog.prototype.show.call(this);
         OpenDialog.currentDialog = this;
@@ -43,7 +44,6 @@ OpenDialog.prototype.show = function() {
         if (GuiElements.isAndroid) {
             this.createTabRow();
         }
-
     } else {
         SaveManager.userOpenFile(OpenDialog.defaultFile);
         OpenDialog.defaultFile = "";
