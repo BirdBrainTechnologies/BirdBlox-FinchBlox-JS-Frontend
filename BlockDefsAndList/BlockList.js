@@ -32,7 +32,7 @@ BlockList.getCatId = function(index) {
  * @return {string} - The category's name.
  */
 BlockList.getCatName = function(index) {
-	return BlockList.categories[index];
+	return Language.getStr(BlockList.categories[index]);
 };
 
 /**
