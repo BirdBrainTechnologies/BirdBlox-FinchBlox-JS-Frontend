@@ -611,9 +611,7 @@ B_BBCompassCalibrate.prototype.updateAction = function(){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            const result = new StringData(status.result);
-            const num = result.asNum().getValue();
-            return new ExecutionStatusResult(new NumData(num));
+            return new ExecutionStatusDone();
         }
     }
     return new ExecutionStatusRunning(); // Still running
