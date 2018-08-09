@@ -7607,6 +7607,7 @@ CategoryBN.prototype.addListeners = function() {
 	TouchReceiver.addListenersCat(this.colorRect, cat);
 	TouchReceiver.addListenersCat(this.label, cat);
 };
+
 /**
  * Represents a selection of Blocks available in the BlockPalette.  Each Category has a button which, when pressed,
  * brings it to the foreground.
@@ -20445,6 +20446,11 @@ Block.setDisplaySuffix = function(Class, suffix) {
 		return suffix;
 	});
 };
+Block.removeDisplaySuffix = function(Class) {
+	Class.prototype.displayResult = function(data) {
+			this.displayValue(data.asString().getValue(), false);
+	};
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to append a suffix, determined from a function
@@ -24530,12 +24536,10 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -24552,6 +24556,12 @@ B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 B_MBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
@@ -25034,11 +25044,11 @@ function B_BBSensors(x, y){
   // Default option for sensor is Light.
   const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
   //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
-  dS.addOption(new SelectionData(Language.getStr("Distance") + "(cm)", "distance"));
+  dS.addOption(new SelectionData(Language.getStr("Distance"), "distance"));
   dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
   dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
   dS.addOption(new SelectionData(Language.getStr("Sound"), "sound"));
-  dS.addOption(new SelectionData(Language.getStr("Other") + "(V)", "other"));
+  dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
@@ -25051,6 +25061,14 @@ B_BBSensors.prototype.constructor = B_BBSensors;
 B_BBSensors.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "distance"){
+        Block.setDisplaySuffix(B_BBSensors, "cm");
+    } else if (sensorSelection == "other") {
+        Block.setDisplaySuffix(B_BBSensors, "V");
+    } else {
+        Block.removeDisplaySuffix(B_BBSensors);
+    }
+
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
@@ -25083,12 +25101,10 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     this.addPart(pickBlock);
 
@@ -25106,6 +25122,12 @@ B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
 B_BBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_BBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_BBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {

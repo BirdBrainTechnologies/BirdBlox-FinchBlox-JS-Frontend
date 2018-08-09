@@ -1254,6 +1254,11 @@ Block.setDisplaySuffix = function(Class, suffix) {
 		return suffix;
 	});
 };
+Block.removeDisplaySuffix = function(Class) {
+	Class.prototype.displayResult = function(data) {
+			this.displayValue(data.asString().getValue(), false);
+	};
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to append a suffix, determined from a function

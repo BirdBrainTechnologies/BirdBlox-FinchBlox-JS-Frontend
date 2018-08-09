@@ -151,12 +151,10 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -173,6 +171,12 @@ B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 B_MBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
