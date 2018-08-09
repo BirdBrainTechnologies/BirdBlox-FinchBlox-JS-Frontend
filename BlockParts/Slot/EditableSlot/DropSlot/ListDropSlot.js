@@ -31,7 +31,7 @@ ListDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(list.getSelectionData());
 	});
 	// Add the Create list option
-	selectPad.addAction("Create list", function(callback) {
+	selectPad.addAction(Language.getStr("Create_List"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a list
 		CodeManager.newList(function(list) {
 			// If successful, save the newly created variable as the value
