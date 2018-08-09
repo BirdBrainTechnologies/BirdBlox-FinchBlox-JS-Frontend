@@ -155,6 +155,9 @@ DeviceManager.prototype.removeDevice = function(robotName) {
 	for (let index = 0; index < this.getDeviceCount(); index++) {
 	    if (this.connectedDevices[index].name === robotName) {
 	        this.connectedDevices[index].disconnect();
+	        if (this.scanning) {
+	            this.markStoppedDiscover();
+	        }
 	        removedIndex = index;
 	        break;
 	    }
@@ -221,6 +224,9 @@ DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
  * Disconnects from all the devices, making the list empty
  */
 DeviceManager.prototype.removeAllDevices = function() {
+    if (this.scanning) {
+        this.markStoppedDiscover();
+    }
 	this.connectedDevices.forEach(function(device) {
 		device.disconnect();
 	});
@@ -238,7 +244,6 @@ DeviceManager.prototype.deviceIsConnected = function(index) {
 		return false;
 	} else {
 		const deviceStatus = this.connectedDevices[index].getStatus();
-
 		const statuses = DeviceManager.statuses;
 		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
@@ -432,7 +437,10 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 		const wasConnected = robot.getConnected();
 		robot.setConnected(isConnected);
 		if (wasConnected && !isConnected && !this.scanning) {
-			this.startDiscover();
+			this.startDiscover(function() { return true;});
+		}
+		if (isConnected && !wasConnected && this.scanning) {
+		    this.markStoppedDiscover();
 		}
 	}
 };
