@@ -79,7 +79,7 @@ B_BBBuzzer.prototype.startAction = function() {
     //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     //let soundDuration = CodeManager.beatsToMs(beats);
-    
+
     const mem = this.runMem;
     const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
@@ -153,11 +153,11 @@ function B_BBSensors(x, y){
   // Default option for sensor is Light.
   const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
   //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
-  dS.addOption(new SelectionData(Language.getStr("Distance") + "(cm)", "distance"));
+  dS.addOption(new SelectionData(Language.getStr("Distance"), "distance"));
   dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
   dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
   dS.addOption(new SelectionData(Language.getStr("Sound"), "sound"));
-  dS.addOption(new SelectionData(Language.getStr("Other") + "(V)", "other"));
+  dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
@@ -170,6 +170,14 @@ B_BBSensors.prototype.constructor = B_BBSensors;
 B_BBSensors.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "distance"){
+        Block.setDisplaySuffix(B_BBSensors, "cm");
+    } else if (sensorSelection == "other") {
+        Block.setDisplaySuffix(B_BBSensors, "V");
+    } else {
+        Block.removeDisplaySuffix(B_BBSensors);
+    }
+
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
@@ -202,12 +210,10 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     this.addPart(pickBlock);
 
@@ -225,6 +231,12 @@ B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
 B_BBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_BBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_BBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
@@ -255,7 +267,7 @@ B_BBMagnetometer.prototype.updateAction = function(){
             } else {
                 const result = new StringData(status.result);
                 const num = Math.round(result.asNum().getValue() * 100) / 100;
-                
+
                 return new ExecutionStatusResult(new NumData(num));
             }
         }
@@ -306,6 +318,8 @@ B_BBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue().substring(0,18);
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -317,14 +331,30 @@ B_BBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_BBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_BBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 
 
 // Here is the block for B_BBButton.
 
 function B_BBButton(x, y){
-    
+
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
     this.displayName = Language.getStr("Button");
@@ -406,7 +436,7 @@ B_BBButton.prototype.updateAction = function() {
 function B_BBOrientation(x, y){
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; 
+    this.displayName = "";
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -593,9 +623,7 @@ B_BBCompassCalibrate.prototype.updateAction = function(){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            const result = new StringData(status.result);
-            const num = result.asNum().getValue();
-            return new ExecutionStatusResult(new NumData(num));
+            return new ExecutionStatusDone();
         }
     }
     return new ExecutionStatusRunning(); // Still running

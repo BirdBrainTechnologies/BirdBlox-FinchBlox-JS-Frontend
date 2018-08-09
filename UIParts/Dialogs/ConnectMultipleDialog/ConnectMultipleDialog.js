@@ -49,9 +49,11 @@ ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, con
     let index = 0;
     let numberX = statusX + DeviceStatusLight.radius * 2;
     let mainBnX = numberX + CMD.numberWidth;
-    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
-    let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
-    let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    //let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) - mainBnX;
+    //let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+    //let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    let removeBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
     Device.getTypeList().forEach(function(dvcClass) {
         let curDeviceCnt = dvcClass.getManager().getDeviceCount();
         for (let i = 0; i < curDeviceCnt; i++) {
@@ -59,7 +61,7 @@ ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, con
              CMD.currentDialog.createStatusLight(robot, statusX, y, contentGroup);
              CMD.currentDialog.createNumberText(index, numberX, y, contentGroup);
              CMD.currentDialog.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
-             CMD.currentDialog.createInfoBn(robot, index, infoBnX, y, contentGroup);
+             //CMD.currentDialog.createInfoBn(robot, index, infoBnX, y, contentGroup);
              CMD.currentDialog.createRemoveBn(robot, index, removeBnX, y, contentGroup);
              y += RowDialog.bnHeight + RowDialog.bnMargin;
              index = index + 1;
@@ -114,13 +116,17 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
-    let connectionX = this.x + this.width / 2;
+    //let connectionX = this.x + this.width / 2;
+    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+/*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         let upperY = this.contentRelToAbsY(y);
         let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
         // When tapped, a list of robots to connect from appears
         (new RobotConnectionList(connectionX, upperY, lowerY, index)).show();
-    }.bind(this));
+
+
+    }.bind(this));*/
 };
 
 /**
@@ -183,9 +189,6 @@ ConnectMultipleDialog.prototype.show = function() {
         });
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
-    } else {
-        this.addHintText(Language.getStr("Device_limit_reached"));
-        this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {
         return this.visible;

@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -7615,6 +7615,7 @@ CategoryBN.prototype.addListeners = function() {
 	TouchReceiver.addListenersCat(this.colorRect, cat);
 	TouchReceiver.addListenersCat(this.label, cat);
 };
+
 /**
  * Represents a selection of Blocks available in the BlockPalette.  Each Category has a button which, when pressed,
  * brings it to the foreground.
@@ -15505,9 +15506,11 @@ ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, con
     let index = 0;
     let numberX = statusX + DeviceStatusLight.radius * 2;
     let mainBnX = numberX + CMD.numberWidth;
-    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
-    let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
-    let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    //let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) - mainBnX;
+    //let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+    //let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    let removeBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
     Device.getTypeList().forEach(function(dvcClass) {
         let curDeviceCnt = dvcClass.getManager().getDeviceCount();
         for (let i = 0; i < curDeviceCnt; i++) {
@@ -15515,7 +15518,7 @@ ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, con
              CMD.currentDialog.createStatusLight(robot, statusX, y, contentGroup);
              CMD.currentDialog.createNumberText(index, numberX, y, contentGroup);
              CMD.currentDialog.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
-             CMD.currentDialog.createInfoBn(robot, index, infoBnX, y, contentGroup);
+             //CMD.currentDialog.createInfoBn(robot, index, infoBnX, y, contentGroup);
              CMD.currentDialog.createRemoveBn(robot, index, removeBnX, y, contentGroup);
              y += RowDialog.bnHeight + RowDialog.bnMargin;
              index = index + 1;
@@ -15570,13 +15573,17 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
-    let connectionX = this.x + this.width / 2;
+    //let connectionX = this.x + this.width / 2;
+    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+/*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         let upperY = this.contentRelToAbsY(y);
         let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
         // When tapped, a list of robots to connect from appears
         (new RobotConnectionList(connectionX, upperY, lowerY, index)).show();
-    }.bind(this));
+
+
+    }.bind(this));*/
 };
 
 /**
@@ -15639,9 +15646,6 @@ ConnectMultipleDialog.prototype.show = function() {
         });
     if (count < ConnectMultipleDialog.deviceLimit) {
         this.createConnectBn();
-    } else {
-        this.addHintText(Language.getStr("Device_limit_reached"));
-        this.createHintText(0,280);
     }
     DeviceHummingbirdBit.getManager().startDiscover(function() {
         return this.visible;
@@ -15734,6 +15738,7 @@ ConnectMultipleDialog.showDialog = function() {
         CMD.currentDialog.show();
     }
 };
+
 /**
  * A dialog for creating and managing recordings.  RecordingDialogs interact with the RecordingManager for making
  * recordings, the Sound class for playing recordings, and SaveManager for renaming and deleting recordings
@@ -16258,7 +16263,7 @@ RobotConnectionList.setConstants = function() {
 	RCL.bgColor = Colors.lightGray;
 	RCL.updateInterval = DiscoverDialog.updateInterval;
 	RCL.height = 150;
-	RCL.width = 200;
+	RCL.width = 350;
 };
 
 /**
@@ -16313,8 +16318,11 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
 	 * Robots to swap places. */
 	const includeConnected = this.index !== null;
-	const robotArray = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+	const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
 
+	const robotArray = robotArrayUnsorted.sort(function(a,b) {
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
+	});
 	// We perform the update and try to keep the scrolling the same
 	let oldScroll = null;
 	if (this.menuBnList != null) {
@@ -16376,6 +16384,7 @@ RobotConnectionList.prototype.relToAbsY = function(y) {
 	if (!this.visible) return y;
 	return this.bubbleOverlay.relToAbsY(y);
 };
+
 
 
 /**
@@ -20445,6 +20454,11 @@ Block.setDisplaySuffix = function(Class, suffix) {
 		return suffix;
 	});
 };
+Block.removeDisplaySuffix = function(Class) {
+	Class.prototype.displayResult = function(data) {
+			this.displayValue(data.asString().getValue(), false);
+	};
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to append a suffix, determined from a function
@@ -24483,6 +24497,8 @@ B_MBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue();
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -24494,7 +24510,23 @@ B_MBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_MBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -24512,12 +24544,10 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -24534,6 +24564,12 @@ B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 B_MBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
@@ -24854,21 +24890,12 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            const result = new StringData(status.result);
-            const num = result.asNum().getValue();
-            return new ExecutionStatusResult(new NumData(num));
+            return new ExecutionStatusDone();
         }
     }
     return new ExecutionStatusRunning(); // Still running
 
 };
-
-
-
-
-
-
-
 
 /* This file contains the implementations of hummingbird bit blocks
  */
@@ -24951,7 +24978,7 @@ B_BBBuzzer.prototype.startAction = function() {
     //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     //let soundDuration = CodeManager.beatsToMs(beats);
-    
+
     const mem = this.runMem;
     const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
@@ -25025,11 +25052,11 @@ function B_BBSensors(x, y){
   // Default option for sensor is Light.
   const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
   //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
-  dS.addOption(new SelectionData(Language.getStr("Distance") + "(cm)", "distance"));
+  dS.addOption(new SelectionData(Language.getStr("Distance"), "distance"));
   dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
   dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
   dS.addOption(new SelectionData(Language.getStr("Sound"), "sound"));
-  dS.addOption(new SelectionData(Language.getStr("Other") + "(V)", "other"));
+  dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
@@ -25042,6 +25069,14 @@ B_BBSensors.prototype.constructor = B_BBSensors;
 B_BBSensors.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "distance"){
+        Block.setDisplaySuffix(B_BBSensors, "cm");
+    } else if (sensorSelection == "other") {
+        Block.setDisplaySuffix(B_BBSensors, "V");
+    } else {
+        Block.removeDisplaySuffix(B_BBSensors);
+    }
+
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
@@ -25074,12 +25109,10 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     this.addPart(pickBlock);
 
@@ -25097,6 +25130,12 @@ B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
 B_BBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_BBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_BBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
@@ -25127,7 +25166,7 @@ B_BBMagnetometer.prototype.updateAction = function(){
             } else {
                 const result = new StringData(status.result);
                 const num = Math.round(result.asNum().getValue() * 100) / 100;
-                
+
                 return new ExecutionStatusResult(new NumData(num));
             }
         }
@@ -25178,6 +25217,8 @@ B_BBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue().substring(0,18);
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -25189,14 +25230,30 @@ B_BBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_BBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_BBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 
 
 // Here is the block for B_BBButton.
 
 function B_BBButton(x, y){
-    
+
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
     this.displayName = Language.getStr("Button");
@@ -25278,7 +25335,7 @@ B_BBButton.prototype.updateAction = function() {
 function B_BBOrientation(x, y){
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; 
+    this.displayName = "";
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -25465,9 +25522,7 @@ B_BBCompassCalibrate.prototype.updateAction = function(){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            const result = new StringData(status.result);
-            const num = result.asNum().getValue();
-            return new ExecutionStatusResult(new NumData(num));
+            return new ExecutionStatusDone();
         }
     }
     return new ExecutionStatusRunning(); // Still running
@@ -26872,7 +26927,8 @@ B_DevicePressure.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			const result = Number(status.result);
-			return new ExecutionStatusResult(new NumData(result, true));
+			const num = Math.round(result * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
@@ -27056,7 +27112,8 @@ B_DeviceLocation.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			const result = status.result.split(" ")[mem.axis];
-			return new ExecutionStatusResult(new NumData(Number(result), true));
+			const num = Math.round(result.asNum().getValue() * 100) / 100;
+			return new ExecutionStatusResult(new NumData(Number(num), true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);

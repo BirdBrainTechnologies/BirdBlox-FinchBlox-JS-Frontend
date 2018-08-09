@@ -104,6 +104,8 @@ B_MBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue();
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -115,7 +117,23 @@ B_MBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_MBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -133,12 +151,10 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer")  + "(" + String.fromCharCode(956) + "T)", "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer") + "(m/s" + String.fromCharCode(178)
-    + ")", "accelerometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
     this.addPart(pickBlock);
 
     const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
@@ -155,6 +171,12 @@ B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 B_MBMagnetometer.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
     let sensorSelection = this.slots[1].getData().getValue();
+    if (sensorSelection == "accelerometer") {
+        Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
+    } else {
+        Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
+    }
+
     let axisSelection = this.slots[2].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
@@ -475,18 +497,9 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            const result = new StringData(status.result);
-            const num = result.asNum().getValue();
-            return new ExecutionStatusResult(new NumData(num));
+            return new ExecutionStatusDone();
         }
     }
     return new ExecutionStatusRunning(); // Still running
 
 };
-
-
-
-
-
-
-

@@ -33,7 +33,7 @@ RobotConnectionList.setConstants = function() {
 	RCL.bgColor = Colors.lightGray;
 	RCL.updateInterval = DiscoverDialog.updateInterval;
 	RCL.height = 150;
-	RCL.width = 200;
+	RCL.width = 350;
 };
 
 /**
@@ -88,8 +88,11 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
 	 * Robots to swap places. */
 	const includeConnected = this.index !== null;
-	const robotArray = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+	const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
 
+	const robotArray = robotArrayUnsorted.sort(function(a,b) {
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
+	});
 	// We perform the update and try to keep the scrolling the same
 	let oldScroll = null;
 	if (this.menuBnList != null) {
