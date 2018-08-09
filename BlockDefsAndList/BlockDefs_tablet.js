@@ -218,7 +218,7 @@ function B_DeviceAcceleration(x, y) {
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
-	dS.addOption(new SelectionData("Total", "total"));
+	dS.addOption(new SelectionData(Language.getStr("Total"), "total"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
 }

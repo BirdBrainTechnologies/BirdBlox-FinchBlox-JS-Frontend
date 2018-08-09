@@ -205,7 +205,7 @@ function B_SetTempoTo(x, y) {
 	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, "bpm"));
+	this.addPart(new LabelText(this, Language.getStr("bpm")));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
