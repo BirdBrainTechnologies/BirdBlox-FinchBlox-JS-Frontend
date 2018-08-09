@@ -25,7 +25,9 @@ ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
 ConnectMultipleDialog.setConstants = function() {
     let CMD = ConnectMultipleDialog;
     CMD.currentDialog = null;
-    CMD.deviceLimit = 3;
+    if (CMD.deviceLimit === undefined) {
+        CMD.deviceLimit = 3;
+    }
     CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
     CMD.tabRowHeight = 0;
     CMD.numberWidth = 35;

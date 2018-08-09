@@ -15482,7 +15482,9 @@ ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
 ConnectMultipleDialog.setConstants = function() {
     let CMD = ConnectMultipleDialog;
     CMD.currentDialog = null;
-    CMD.deviceLimit = 3;
+    if (CMD.deviceLimit === undefined) {
+        CMD.deviceLimit = 3;
+    }
     CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
     CMD.tabRowHeight = 0;
     CMD.numberWidth = 35;
@@ -18287,6 +18289,10 @@ CallbackManager.tablet.setFile = function(fileName) {
 
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
+}
+CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
+    console.log("trying changing device limit to" + parseInt(HtmlServer.decodeHtml(numOfDevice), 10))
+    ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
 
 /**

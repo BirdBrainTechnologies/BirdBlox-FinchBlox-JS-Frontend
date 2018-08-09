@@ -273,6 +273,10 @@ CallbackManager.tablet.setFile = function(fileName) {
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
+CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
+    console.log("trying changing device limit to" + parseInt(HtmlServer.decodeHtml(numOfDevice), 10))
+    ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
+}
 
 /**
  * Tells the frontend to tell the backend something.  Exists because certain functions in that backend can't access
