@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
