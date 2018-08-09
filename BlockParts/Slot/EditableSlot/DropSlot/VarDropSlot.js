@@ -28,7 +28,7 @@ VarDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(variable.getSelectionData());
 	});
 	// Add the Create variable option
-	selectPad.addAction("Create variable", function(callback) {
+	selectPad.addAction(Language.getStr("Create_Variable"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a variable
 		CodeManager.newVariable(function(variable) {
 			// If successful, save the newly created variable as the value

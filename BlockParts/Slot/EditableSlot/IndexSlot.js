@@ -15,10 +15,10 @@ function IndexSlot(parent, key, includeAll) {
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 
 	// Add selectable options
-	this.addOption(new SelectionData("last", "last"));
-	this.addOption(new SelectionData("random", "random"));
+	this.addOption(new SelectionData(Language.getStr("last"), "last"));
+	this.addOption(new SelectionData(Language.getStr("random"), "random"));
 	if (includeAll) {
-		this.addOption(new SelectionData("all", "all"));
+		this.addOption(new SelectionData(Language.getStr("all"), "all"));
 	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
