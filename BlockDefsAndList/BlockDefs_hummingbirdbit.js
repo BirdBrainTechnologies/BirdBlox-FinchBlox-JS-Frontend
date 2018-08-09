@@ -577,6 +577,9 @@ B_BBCompass.prototype.updateAction = function(){
 
 };
 
+Block.setDisplaySuffix(B_BBCompass, String.fromCharCode(176));
+
+
 
 function B_BBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());

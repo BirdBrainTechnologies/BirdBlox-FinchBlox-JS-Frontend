@@ -453,6 +453,9 @@ B_MBCompass.prototype.updateAction = function(){
 
 };
 
+Block.setDisplaySuffix(B_MBCompass, String.fromCharCode(176));
+
+
 function B_MBCompassCalibrate(x, y){
     CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
