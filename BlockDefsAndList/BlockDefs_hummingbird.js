@@ -85,7 +85,7 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 function B_HBKnob(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Knob"));
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Dial"));
 }
 B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;

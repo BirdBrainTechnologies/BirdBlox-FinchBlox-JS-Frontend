@@ -290,7 +290,7 @@ function B_LetterOf(x, y) {
 	nS.addLimits(1);
 	this.addPart(nS);
 	this.addPart(new LabelText(this, Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -310,7 +310,7 @@ B_LetterOf.prototype.startAction = function() {
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -325,9 +325,9 @@ B_LengthOf.prototype.startAction = function() {
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
 	this.addPart(new LabelText(this, Language.getStr("join")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello "));
+	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
 	this.addPart(new LabelText(this, Language.getStr("and")));
-	this.addPart(new StringSlot(this, "StrS_2", "world"));
+	this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -343,7 +343,7 @@ B_join.prototype.startAction = function() {
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
 	this.addPart(new LabelText(this, Language.getStr("split")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
+	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
 	this.addPart(new LabelText(this, Language.getStr("by")));
 
 	const inputType = EditableSlot.inputTypes.any;

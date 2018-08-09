@@ -8,7 +8,7 @@
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, Language.getStr("ask")));
-	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
+	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
 	this.addPart(new LabelText(this, Language.getStr("and_wait")));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
@@ -57,7 +57,7 @@ B_Ask.prototype.showQuestion = function() {
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
 		mem.finished = true;   // Done waiting.
 	};
-	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog(Language.getStr("Question"), mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
@@ -155,7 +155,7 @@ B_CurrentTime.prototype.startAction = function() {
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, Language.getStr("Display")));
-	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
 	this.addPart(new LabelText(this, Language.getStr("at")));
 	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
 	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
