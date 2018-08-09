@@ -16250,7 +16250,7 @@ RobotConnectionList.setConstants = function() {
 	RCL.bgColor = Colors.lightGray;
 	RCL.updateInterval = DiscoverDialog.updateInterval;
 	RCL.height = 150;
-	RCL.width = 200;
+	RCL.width = 350;
 };
 
 /**
@@ -16368,6 +16368,7 @@ RobotConnectionList.prototype.relToAbsY = function(y) {
 	if (!this.visible) return y;
 	return this.bubbleOverlay.relToAbsY(y);
 };
+
 
 
 /**
@@ -24475,6 +24476,8 @@ B_MBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue();
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -24486,7 +24489,23 @@ B_MBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_MBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -24855,13 +24874,6 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
 
 };
 
-
-
-
-
-
-
-
 /* This file contains the implementations of hummingbird bit blocks
  */
 
@@ -24943,7 +24955,7 @@ B_BBBuzzer.prototype.startAction = function() {
     //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     //let soundDuration = CodeManager.beatsToMs(beats);
-    
+
     const mem = this.runMem;
     const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
@@ -25119,7 +25131,7 @@ B_BBMagnetometer.prototype.updateAction = function(){
             } else {
                 const result = new StringData(status.result);
                 const num = Math.round(result.asNum().getValue() * 100) / 100;
-                
+
                 return new ExecutionStatusResult(new NumData(num));
             }
         }
@@ -25170,6 +25182,8 @@ B_BBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue().substring(0,18);
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -25181,14 +25195,30 @@ B_BBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_BBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_BBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 
 
 // Here is the block for B_BBButton.
 
 function B_BBButton(x, y){
-    
+
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
     this.displayName = Language.getStr("Button");
@@ -25270,7 +25300,7 @@ B_BBButton.prototype.updateAction = function() {
 function B_BBOrientation(x, y){
     PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; 
+    this.displayName = "";
     this.numberOfPorts = 1;
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

@@ -104,6 +104,8 @@ B_MBPrint.prototype.startAction = function() {
 
     let mem = this.runMem;
     let printString = this.slots[1].getData().getValue();
+    mem.blockDuration = (printString.length * 600);
+    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
@@ -115,7 +117,23 @@ B_MBPrint.prototype.startAction = function() {
 };
 
 /* Waits until the request completes */
-B_MBPrint.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+B_MBPrint.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
@@ -483,10 +501,3 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
     return new ExecutionStatusRunning(); // Still running
 
 };
-
-
-
-
-
-
-
