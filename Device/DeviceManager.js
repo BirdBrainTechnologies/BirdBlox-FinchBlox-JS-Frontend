@@ -56,7 +56,9 @@ DeviceManager.setStatics = function() {
 };
 DeviceManager.setStatics();
 
-
+/**
+ * Retrieves the number of devices in this.connectedDevices
+ */
 DeviceManager.checkBattery = function() {
     var worstBatteryStatus = "3";
     var curBatteryStatus = "";
