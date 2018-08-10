@@ -1,17 +1,23 @@
 "use strict";
 
 /**
- * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
- * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
+ * Language is a static class that provides translation for blocks.
  */
 function Language() {
 
 };
 
-
+//The default language for the app is english
 Language.lang = "EN";
+
+/* The list of languages that are currently supported by birdblox. Any new language should be added
+to this list */
 Language.langs = ["EN", "ZH", "FR", "ES"];
 
+
+/* The disctionary for English, an underscore is necessary to separate the words in keys.
+   If translation for a word is not found in the dictionary.
+   No translation will be shown for the block.*/
 Language.EN = {
     "CompassCalibrate":"Compass Calibrate",
     "Compass": "Compass",
@@ -157,6 +163,7 @@ Language.EN = {
     "Sign_in":"Sign_in"
 };
 
+/* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
 Language.ZH = {
     "CompassCalibrate":"CN",
     "Compass": "CN",
@@ -302,6 +309,8 @@ Language.ZH = {
     "Sign_in":"CN"
 }
 
+
+/* The disctionary for Spanish, an underscore is necessary to separate the words in keys.*/
 Language.ES = {
     "CompassCalibrate":"ESP",
     "Compass": "ESP",
@@ -447,6 +456,7 @@ Language.ES = {
     "Sign_in":"ESP"
 }
 
+/* The disctionary for French, an underscore is necessary to separate the words in keys.*/
 Language.FR = {
     "Calibrate":"French",
     "Compass": "French",
@@ -592,7 +602,9 @@ Language.FR = {
     "Sign_in": "French"
 }
 
-
+/* The Callback manager receives a request from the backend to set the default language to be
+   displayed in the frontend based on the system language preference. If the language is currently
+   not supported, english, the default language will be used..*/
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "EN";
@@ -601,10 +613,14 @@ Language.setLanguage = function(lang) {
     }
 }
 
+/* getLanguage returns the language that is currently being used by the birdblox.*/
 Language.getLanguage = function () {
     return "Language." + Language.lang + ".";
 }
 
+/* getStr returns the translation for the given string based on the language of the app and
+   translation provided in the dictionary for that language. If no translation is provided,
+   No Translation will be shown*/
 Language.getStr = function(str) {
     let translatedStr = eval(Language.getLanguage() + str);
     if (translatedStr != null) {

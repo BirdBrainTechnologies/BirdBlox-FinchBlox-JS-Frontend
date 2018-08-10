@@ -259,20 +259,35 @@ CallbackManager.tablet.removeSensor = function(sensor){
 
 /**
  * Tells the frontend that the language of the system
- * @param {string} sensor - A non percent encoded string representing the unsupported sensor
- * @return {boolean} - Whether the sensor string was valid
+ * @param {string} lang - A non percent encoded string representing the language
  */
 
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
+
+/**
+ * Opens the file based on the directory on app starts.
+ * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
+ */
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
+
+/**
+ * Opens the file based on the directory when the user does not close the app before attempting to
+   open a file.
+ * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
+ */
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
+
+/**
+ * Changes the device limit that is supported based on the request from the backend.
+ * @param {string} numOfDevice - The number of devices to be supported.
+ */
 CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
     ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
