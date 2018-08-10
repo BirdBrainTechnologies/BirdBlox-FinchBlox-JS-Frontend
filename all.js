@@ -1286,10 +1286,10 @@ function Language() {
 };
 
 
-Language.lang = "US";
-Language.langs = ["US", "CN", "FR", "ES"];
+Language.lang = "EN";
+Language.langs = ["EN", "ZH", "FR", "ES"];
 
-Language.US = {
+Language.EN = {
     "CompassCalibrate":"Compass Calibrate",
     "Compass": "Compass",
     "Screen_Up": "Screen Up",
@@ -1434,7 +1434,7 @@ Language.US = {
     "Sign_in":"Sign_in"
 };
 
-Language.CN = {
+Language.ZH = {
     "CompassCalibrate":"CN",
     "Compass": "CN",
     "Screen_Up": "CN",
@@ -1872,7 +1872,7 @@ Language.FR = {
 
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
-        Language.lang = "US";
+        Language.lang = "EN";
     } else {
         Language.lang = lang;
     }
