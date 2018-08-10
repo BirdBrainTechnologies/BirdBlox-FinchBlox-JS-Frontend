@@ -18952,8 +18952,9 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
 		if (response === "2") {
 			//If we are trying to delete the currently open file, close it first.
-			if (SaveManager.fileName == filename) {
-				SaveManager.userClose(SaveManager.delete(isRecording, filename, nextAction));
+			if (SaveManager.fileName === filename) {
+				SaveManager.userClose(OpenDialog.showDialog);
+				SaveManager.delete(isRecording, filename, nextAction);
 			} else {
 				SaveManager.delete(isRecording, filename, nextAction);
 			}
@@ -25017,8 +25018,8 @@ function B_BBBuzzer(x, y){
   this.deviceClass = DeviceHummingbirdBit;
   this.displayName = Language.getStr("Play_Note");
   this.draggable = true;
-  this.minNote = 0
-  this.maxNote = 127
+  this.minNote = 32
+  this.maxNote = 135
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

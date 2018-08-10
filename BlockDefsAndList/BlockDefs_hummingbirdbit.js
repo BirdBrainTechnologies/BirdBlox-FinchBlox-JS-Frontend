@@ -50,8 +50,8 @@ function B_BBBuzzer(x, y){
   this.deviceClass = DeviceHummingbirdBit;
   this.displayName = Language.getStr("Play_Note");
   this.draggable = true;
-  this.minNote = 0
-  this.maxNote = 127
+  this.minNote = 32
+  this.maxNote = 135
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
