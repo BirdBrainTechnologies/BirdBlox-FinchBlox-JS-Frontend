@@ -1562,7 +1562,7 @@ Language.CN = {
     "Show_debug_menu":"CN",
     "Disconnect_Device":"CN",
     "Connect_Device":"CN",
-    "Connect_Multiple":"CN",
+    "Connect_Multiple":"CN Connect Multiple",
     "New":"CN",
     "Open":"CN",
     "No_saved_programs":"CN",
@@ -1707,7 +1707,7 @@ Language.ES = {
     "Show_debug_menu":"ESP",
     "Disconnect_Device":"ESP",
     "Connect_Device":"ESP",
-    "Connect_Multiple":"ESP",
+    "Connect_Multiple":"ESP Connect Multiple",
     "New":"ESP",
     "Open":"ESP",
     "No_saved_programs":"ESP",
@@ -1852,7 +1852,7 @@ Language.FR = {
     "Show_debug_menu":"French",
     "Disconnect_Device":"French",
     "Connect_Device":"French",
-    "Connect_Multiple":"French",
+    "Connect_Multiple":"French Connect Multiple",
     "New":"French",
     "Open":"French",
     "No_saved_programs":"French",
@@ -14400,7 +14400,7 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-
+        console.log("trying showing row dialog");
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
@@ -14498,7 +14498,7 @@ RowDialog.prototype.createContent = function() {
 	let y = 0;
 	const rowGroup = GuiElements.create.group(0, 0);
 	if (this.rowCount > 0) {
-	    if (this.title === "Connect Multiple") {
+	    if (this.title === Language.getStr("Connect_Multiple")) {
                 this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
 	    } else {
             for (let i = 0; i < this.rowCount; i++) {
@@ -15465,7 +15465,8 @@ FileList.prototype.getCloudTitle = function(){
 function ConnectMultipleDialog(deviceClass) {
     let CMD = ConnectMultipleDialog;
     // Store the open tab so it can be reopened by default next time
-    let title = Language.getStr("Connect_Multiple");
+    let title =  Language.getStr("Connect_Multiple")
+
     this.deviceClass = deviceClass;
     let count = 0;
     Device.getTypeList().forEach(function(dvcClass) {
@@ -15640,7 +15641,7 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
  * @inheritDoc
  */
 ConnectMultipleDialog.prototype.show = function() {
-
+    console.log("trying showing connnect multiple dialog")
     RowDialog.prototype.show.call(this);
     let count = 0
     Device.getTypeList().forEach(function(dvcClass) {
@@ -15703,6 +15704,7 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
     if (ConnectMultipleDialog.currentDialog.deviceClass === null) {
         ConnectMultipleDialog.currentDialog.deviceClass = deviceClass;
     }
+    console.log("trying reloading dialog");
     dialog.show();
 
     dialog.setScroll(thisScroll);
@@ -15734,9 +15736,11 @@ ConnectMultipleDialog.reloadDialog = function(deviceClass) {
 ConnectMultipleDialog.showDialog = function() {
     let CMD = ConnectMultipleDialog;
     if (CMD.currentDialog === null) {
+        console.log("trying showing null dialog");
         CMD.currentDialog = new ConnectMultipleDialog(null);
         CMD.currentDialog.show();
     } else {
+        console.log("trying showing non null dialog");
         CMD.currentDialog.show();
     }
 };
@@ -18291,7 +18295,6 @@ CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
 CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
-    console.log("trying changing device limit to" + parseInt(HtmlServer.decodeHtml(numOfDevice), 10))
     ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
 

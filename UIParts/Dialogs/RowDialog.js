@@ -90,7 +90,7 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-
+        console.log("trying showing row dialog");
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
@@ -188,7 +188,7 @@ RowDialog.prototype.createContent = function() {
 	let y = 0;
 	const rowGroup = GuiElements.create.group(0, 0);
 	if (this.rowCount > 0) {
-	    if (this.title === "Connect Multiple") {
+	    if (this.title === Language.getStr("Connect_Multiple")) {
                 this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
 	    } else {
             for (let i = 0; i < this.rowCount; i++) {
