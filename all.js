@@ -2454,7 +2454,9 @@ DeviceManager.setStatics = function() {
 };
 DeviceManager.setStatics();
 
-
+/**
+ * Retrieves the number of devices in this.connectedDevices
+ */
 DeviceManager.checkBattery = function() {
     var worstBatteryStatus = "3";
     var curBatteryStatus = "";
@@ -20633,7 +20635,6 @@ DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
  * @param {number} x - The x coord for the Block.
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.
- * @param {boolean} bottomOpen - Can Blocks be attached to the bottom of this Block?
  */
 function CalibrateBlock(x, y, category) {
     Block.call(this, 7, Block.returnTypes.none, x, y, category);
