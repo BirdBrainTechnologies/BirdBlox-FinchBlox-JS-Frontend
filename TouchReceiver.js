@@ -388,6 +388,16 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 	}
 };
 
+TouchReceiver.touchStartDialogBlock = function(e) {
+	if (SaveManager.fileName == null) {
+		SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+			SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
+		});
+	} else {
+		RowDialog.currentDialog.closeDialog();
+	}
+}
+
 /**
  * Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
@@ -781,6 +791,15 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
 	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartCollapsibleItem(item, e);
+	}, false);
+};
+/**
+ * @param {Element} element
+ */
+TouchReceiver.addListenersDialogBlock = function(element) {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
+		TouchReceiver.touchStartDialogBlock(e);
 	}, false);
 };
 

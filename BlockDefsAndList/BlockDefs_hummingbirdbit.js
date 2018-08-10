@@ -190,6 +190,7 @@ B_BBSensors.prototype.startAction=function(){
         mem.requestStatus.finished = false;
         mem.requestStatus.error = false;
         mem.requestStatus.result = null;
+        mem.requestStatus.sensorSelection = sensorSelection;
         device.readSensor(mem.requestStatus, sensorSelection, port);
         return new ExecutionStatusRunning();
     } else {
@@ -198,7 +199,24 @@ B_BBSensors.prototype.startAction=function(){
     }
 };
 /* Returns the result of the request */
-B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+B_BBSensors.prototype.updateAction = function(){
+	const status = this.runMem.requestStatus;
+	if (status.finished) {
+		if(status.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		} else {
+			const result = new StringData(status.result);
+			const num = result.asNum().getValue();
+			var rounded = Math.round(num);
+      if (status.sensorSelection == "other") {
+        rounded = Math.round(num * 100) / 100;
+      }
+			return new ExecutionStatusResult(new NumData(rounded));
+		}
+	}
+	return new ExecutionStatusRunning(); // Still running
+};
 
 function B_BBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());

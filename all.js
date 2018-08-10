@@ -1278,17 +1278,23 @@ List.prototype.delete = function() {
 
 
 /**
- * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
- * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
+ * Language is a static class that provides translation for blocks.
  */
 function Language() {
 
 };
 
-
+//The default language for the app is english
 Language.lang = "EN";
+
+/* The list of languages that are currently supported by birdblox. Any new language should be added
+to this list */
 Language.langs = ["EN", "ZH", "FR", "ES"];
 
+
+/* The disctionary for English, an underscore is necessary to separate the words in keys.
+   If translation for a word is not found in the dictionary.
+   No translation will be shown for the block.*/
 Language.EN = {
     "CompassCalibrate":"Compass Calibrate",
     "Compass": "Compass",
@@ -1434,6 +1440,7 @@ Language.EN = {
     "Sign_in":"Sign_in"
 };
 
+/* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
 Language.ZH = {
     "CompassCalibrate":"CN",
     "Compass": "CN",
@@ -1579,6 +1586,8 @@ Language.ZH = {
     "Sign_in":"CN"
 }
 
+
+/* The disctionary for Spanish, an underscore is necessary to separate the words in keys.*/
 Language.ES = {
     "CompassCalibrate":"ESP",
     "Compass": "ESP",
@@ -1724,6 +1733,7 @@ Language.ES = {
     "Sign_in":"ESP"
 }
 
+/* The disctionary for French, an underscore is necessary to separate the words in keys.*/
 Language.FR = {
     "Calibrate":"French",
     "Compass": "French",
@@ -1869,7 +1879,9 @@ Language.FR = {
     "Sign_in": "French"
 }
 
-
+/* The Callback manager receives a request from the backend to set the default language to be
+   displayed in the frontend based on the system language preference. If the language is currently
+   not supported, english, the default language will be used..*/
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "EN";
@@ -1878,16 +1890,20 @@ Language.setLanguage = function(lang) {
     }
 }
 
+/* getLanguage returns the language that is currently being used by the birdblox.*/
 Language.getLanguage = function () {
     return "Language." + Language.lang + ".";
 }
 
+/* getStr returns the translation for the given string based on the language of the app and
+   translation provided in the dictionary for that language. If no translation is provided,
+   No Translation will be shown*/
 Language.getStr = function(str) {
     let translatedStr = eval(Language.getLanguage() + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
-        return "Translation required";
+        return "No Translation";
     }
 }
 
@@ -4040,6 +4056,7 @@ GuiElements.blockInteraction = function() {
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
+		TouchReceiver.addListenersDialogBlock(rect);
 		GuiElements.dialogBlock = rect;
 	}
 };
@@ -4316,6 +4333,7 @@ GuiElements.checkSmallMode = function() {
 		SettingsManager.sideBarVisible.writeValue("true");
 	}
 };
+
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
@@ -6425,6 +6443,16 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 	}
 };
 
+TouchReceiver.touchStartDialogBlock = function(e) {
+	if (SaveManager.fileName == null) {
+		SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+			SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
+		});
+	} else {
+		RowDialog.currentDialog.closeDialog();
+	}
+}
+
 /**
  * Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
@@ -6820,6 +6848,15 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
 		TouchReceiver.touchStartCollapsibleItem(item, e);
 	}, false);
 };
+/**
+ * @param {Element} element
+ */
+TouchReceiver.addListenersDialogBlock = function(element) {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
+		TouchReceiver.touchStartDialogBlock(e);
+	}, false);
+};
 
 /**
  * Makes the element call the function when the right type of listener is triggered.  The function is made safe by
@@ -6889,6 +6926,7 @@ TouchReceiver.setInitialScrollFix = function(div) {
 		div.scrollTop = 1;
 	}
 };
+
 /**
  * The bar at the top of the screen.  The TitleBar is a static class which builds the title bar when TitleBar() is
  * called by GuiElements.  It changes its appearance on small screens, becoming shorter and adding a show/hide button
@@ -6998,7 +7036,8 @@ TitleBar.makeButtons = function() {
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
-	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+	//TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
 
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
@@ -7138,6 +7177,7 @@ TitleBar.updateZoomPart2 = function() {
 	}
 	TB.updateText();
 };
+
 
 
 /**
@@ -14896,7 +14936,7 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
-		SaveManager.userOpenFile(file);
+		SaveManager.userClose(SaveManager.userOpenFile(file));
 	}.bind(this));
 };
 
@@ -18274,20 +18314,35 @@ CallbackManager.tablet.removeSensor = function(sensor){
 
 /**
  * Tells the frontend that the language of the system
- * @param {string} sensor - A non percent encoded string representing the unsupported sensor
- * @return {boolean} - Whether the sensor string was valid
+ * @param {string} lang - A non percent encoded string representing the language
  */
 
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
+
+/**
+ * Opens the file based on the directory on app starts.
+ * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
+ */
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
+
+/**
+ * Opens the file based on the directory when the user does not close the app before attempting to
+   open a file.
+ * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
+ */
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
+
+/**
+ * Changes the device limit that is supported based on the request from the backend.
+ * @param {string} numOfDevice - The number of devices to be supported.
+ */
 CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
     ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
@@ -18894,7 +18949,12 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
 	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
 		if (response === "2") {
-			SaveManager.delete(isRecording, filename, nextAction);
+			//If we are trying to delete the currently open file, close it first.
+			if (SaveManager.fileName == filename) {
+				SaveManager.userClose(SaveManager.delete(isRecording, filename, nextAction));
+			} else {
+				SaveManager.delete(isRecording, filename, nextAction);
+			}
 		}
 	}, null);
 };
@@ -19125,6 +19185,7 @@ SaveManager.addTypeToRequest = function(request, isRecording) {
 SaveManager.fileIsOpen = function() {
 	return SaveManager.fileName != null;
 };
+
 /**
  * The UndoManager is a static class that keeps a stack (as in the data structure) or recently deleted BlockStacks
  * so they can be undeleted.  It can be assigned an undo button, which it will then enable/disable as necessary.
@@ -25095,6 +25156,7 @@ B_BBSensors.prototype.startAction=function(){
         mem.requestStatus.finished = false;
         mem.requestStatus.error = false;
         mem.requestStatus.result = null;
+        mem.requestStatus.sensorSelection = sensorSelection;
         device.readSensor(mem.requestStatus, sensorSelection, port);
         return new ExecutionStatusRunning();
     } else {
@@ -25103,7 +25165,24 @@ B_BBSensors.prototype.startAction=function(){
     }
 };
 /* Returns the result of the request */
-B_BBSensors.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
+B_BBSensors.prototype.updateAction = function(){
+	const status = this.runMem.requestStatus;
+	if (status.finished) {
+		if(status.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		} else {
+			const result = new StringData(status.result);
+			const num = result.asNum().getValue();
+			var rounded = Math.round(num);
+      if (status.sensorSelection == "other") {
+        rounded = Math.round(num * 100) / 100;
+      }
+			return new ExecutionStatusResult(new NumData(rounded));
+		}
+	}
+	return new ExecutionStatusRunning(); // Still running
+};
 
 function B_BBMagnetometer(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
