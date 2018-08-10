@@ -89,7 +89,7 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
-		SaveManager.userOpenFile(file);
+		SaveManager.userClose(SaveManager.userOpenFile(file));
 	}.bind(this));
 };
 

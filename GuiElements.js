@@ -865,6 +865,7 @@ GuiElements.blockInteraction = function() {
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
+		TouchReceiver.addListenersDialogBlock(rect);
 		GuiElements.dialogBlock = rect;
 	}
 };
