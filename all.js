@@ -14400,7 +14400,6 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-        console.log("trying showing row dialog");
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
@@ -15641,7 +15640,6 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
  * @inheritDoc
  */
 ConnectMultipleDialog.prototype.show = function() {
-    console.log("trying showing connnect multiple dialog")
     RowDialog.prototype.show.call(this);
     let count = 0
     Device.getTypeList().forEach(function(dvcClass) {
@@ -15704,9 +15702,7 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
     if (ConnectMultipleDialog.currentDialog.deviceClass === null) {
         ConnectMultipleDialog.currentDialog.deviceClass = deviceClass;
     }
-    console.log("trying reloading dialog");
     dialog.show();
-
     dialog.setScroll(thisScroll);
 
 };
@@ -15736,11 +15732,9 @@ ConnectMultipleDialog.reloadDialog = function(deviceClass) {
 ConnectMultipleDialog.showDialog = function() {
     let CMD = ConnectMultipleDialog;
     if (CMD.currentDialog === null) {
-        console.log("trying showing null dialog");
         CMD.currentDialog = new ConnectMultipleDialog(null);
         CMD.currentDialog.show();
     } else {
-        console.log("trying showing non null dialog");
         CMD.currentDialog.show();
     }
 };

@@ -90,7 +90,6 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-        console.log("trying showing row dialog");
 		this.titleRect = this.createTitleRect();
 		this.titleText = this.createTitleLabel(this.title);
 
