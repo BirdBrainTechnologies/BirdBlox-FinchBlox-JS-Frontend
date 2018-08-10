@@ -2707,7 +2707,6 @@ DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	if(!this.scanning) {
 		this.scanning = true;
 		this.discoverCache = null;
-
 		let request = new HttpRequestBuilder("robot/startDiscover");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	}
