@@ -4857,7 +4857,7 @@ function VectorPaths(){
 	VP.flag.height=104.279;
 
 	VP.battery={};
-	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 91.98 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,117 70,113.4 70,109.02 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
+	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 80 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,105 70,101 70,97 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
 	VP.battery.width=75.863;
     VP.battery.height=104.279;
 
@@ -4987,6 +4987,7 @@ function VectorPaths(){
 	VP.undoDelete.height = 113.045;
 	VP.undoDelete.path = "m 28.262,0 -6.28125,6.2793 -21.98047,0 0,12.56054 87.92383,0 0,-12.56054 -21.98047,0 -6.28125,-6.2793 -31.40039,0 z m -21.98242,25.12109 0,75.36329 c 0,6.90831 5.65224,12.56054 12.56055,12.56054 l 50.24218,0 c 6.90832,0 12.56055,-5.65223 12.56055,-12.56054 l 0,-75.36329 -75.36328,0 z m 35.52344,12.25586 0,13.23243 c 32.63892,-0.75632 39.13249,32.15793 17.60156,42.08984 8.4063,-6.82329 9.65417,-28.23254 -17.60156,-27.66406 l 0,13.51953 -25.80078,-21.14063 25.80078,-20.03711 z";
 }
+
 /**
  * Static class contains metadata about images used in the app.  Currently not images are actually used since vectors
  * are better and don't take time to load.  Each record is an object and can be passed to UI-related functions
