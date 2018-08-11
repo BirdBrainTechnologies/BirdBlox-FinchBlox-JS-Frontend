@@ -322,8 +322,9 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 		if (response === "2") {
 			//If we are trying to delete the currently open file, close it first.
 			if (SaveManager.fileName === filename) {
-				SaveManager.userClose(OpenDialog.showDialog);
-				SaveManager.delete(isRecording, filename, nextAction);
+				SaveManager.userClose(function(response) {
+					SaveManager.delete(isRecording, filename, nextAction);
+				});
 			} else {
 				SaveManager.delete(isRecording, filename, nextAction);
 			}
