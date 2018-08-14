@@ -1,5 +1,4 @@
-"use strict";
-const FrontendVersion = 393;
+var FrontendVersion = 393;
 
 
 /**
@@ -8,7 +7,7 @@ const FrontendVersion = 393;
  * features turn off, except error logging, which happens silently in the background
  */
 function DebugOptions() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
@@ -41,7 +40,7 @@ function DebugOptions() {
  * Runs before other classes setConstants functions.  Provides an opportunity to do some setup
  */
 DebugOptions.applyConstants = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	if (!DO.enabled) return;
 	// Currently nothing happens here.
 };
@@ -50,14 +49,14 @@ DebugOptions.applyConstants = function() {
  * Runs after the UI is loaded
  */
 DebugOptions.applyActions = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	if (!DO.enabled) return;
 	if (DO.addVirtualHB) {
-		let virHB = DO.createVirtualDevice(DeviceHummingbird, "");
+		var virHB = DO.createVirtualDevice(DeviceHummingbird, "");
 		DeviceHummingbird.getManager().appendDevice(virHB);
 	}
 	if (DO.addVirtualFlutter) {
-		let virHB = DO.createVirtualDevice(DeviceFlutter, "");
+		var virHB = DO.createVirtualDevice(DeviceFlutter, "");
 		DeviceFlutter.getManager().appendDevice(virHB);
 	}
 	if (DO.showVersion) {
@@ -75,8 +74,8 @@ DebugOptions.applyActions = function() {
  * @return {Device}
  */
 DebugOptions.createVirtualDevice = function(deviceClass, id) {
-	const typeName = deviceClass.getDeviceTypeName(true);
-	const name = "Virtual" + typeName + id;
+	var typeName = deviceClass.getDeviceTypeName(true);
+	var name = "Virtual" + typeName + id;
 	return new deviceClass(name, name);
 };
 
@@ -95,38 +94,38 @@ DebugOptions.shouldUseMouseMode = function() {
 };
 /** @return {boolean} */
 DebugOptions.shouldSkipInitSettings = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.enabled && DO.mouse && DO.skipInitSettings;
 };
 /** @return {boolean} */
 DebugOptions.shouldSkipHtmlRequests = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.enabled && (DO.skipHtmlRequests || DO.mouse);
 };
 /** @return {boolean} */
 DebugOptions.shouldUseJSDialogs = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.enabled && (DO.mouse);
 };
 /** @return {boolean} */
 DebugOptions.shouldLogHttp = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.enabled && DO.logHttp;
 };
 /** @return {boolean} */
 DebugOptions.shouldAllowVirtualDevices = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.allowVirtualDevices && DO.enabled;
 };
 /** @return {boolean} */
 DebugOptions.shouldAllowLogging = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	return DO.allowLogging && DO.enabled;
 };
 
 /* These functions configure DO */
 DebugOptions.enableVirtualDevices = function() {
-	const DO = DebugOptions;
+	var DO = DebugOptions;
 	DO.allowVirtualDevices = true;
 };
 DebugOptions.stopErrorLocking = function() {
@@ -152,8 +151,8 @@ DebugOptions.safeFunc = function(func) {
 				}
 			} catch (err) {
 				DebugOptions.errorLocked = true;
-				const request = new HttpRequestBuilder("debug/log");
-				const errorTrace = err.message + "\n" + err.stack;
+				var request = new HttpRequestBuilder("debug/log");
+				var errorTrace = err.message + "\n" + err.stack;
 				HtmlServer.sendRequestWithCallback(request.toString(), null, null, true, errorTrace);
 				if (DebugOptions.shouldNotifyErrors()) {
 					GuiElements.alert("ERROR: " + err.message);
@@ -173,7 +172,7 @@ DebugOptions.safeFunc = function(func) {
  */
 DebugOptions.validateNumbers = function() {
 	if (!DebugOptions.shouldLogErrors()) return;
-	for (let i = 0; i < arguments.length; i++) {
+	for (var i = 0; i < arguments.length; i++) {
 		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
 			throw new UserException("Invalid Number");
 		}
@@ -184,7 +183,7 @@ DebugOptions.validateNumbers = function() {
  */
 DebugOptions.validateNonNull = function() {
 	if (!DebugOptions.shouldLogErrors()) return;
-	for (let i = 0; i < arguments.length; i++) {
+	for (var i = 0; i < arguments.length; i++) {
 		if (arguments[i] == null) {
 			throw new UserException("Null parameter");
 		}
@@ -195,7 +194,7 @@ DebugOptions.validateNonNull = function() {
  */
 DebugOptions.validateOptionalNums = function() {
 	if (!DebugOptions.shouldLogErrors()) return;
-	for (let i = 0; i < arguments.length; i++) {
+	for (var i = 0; i < arguments.length; i++) {
 		if (arguments[i] != null && (isNaN(arguments[i]) || !isFinite(arguments[i]))) {
 			throw new UserException("Invalid optional number");
 		}
@@ -327,14 +326,14 @@ Data.prototype.isNumber = function() {
  * @return {boolean}
  */
 Data.checkEquality = function(data1, data2) {
-	const val1 = data1.getValue();
-	const val2 = data2.getValue();
-	const string1 = data1.asString().getValue();
-	const string2 = data2.asString().getValue();
-	const numD1 = data1.asNum();
-	const numD2 = data2.asNum();
-	const types = Data.types;
-	const isValid = data1.isValid && data2.isValid;
+	var val1 = data1.getValue();
+	var val2 = data2.getValue();
+	var string1 = data1.asString().getValue();
+	var string2 = data2.asString().getValue();
+	var numD1 = data1.asNum();
+	var numD2 = data2.asNum();
+	var types = Data.types;
+	var isValid = data1.isValid && data2.isValid;
 	if (data1.type === data2.type) { //If the types match, just compare directly.
 		return isValid && val1 === val2; //Invalid data is never equal.
 	} else if (data1.type === types.string || data2.type === types.string) { //If one is a string...
@@ -362,19 +361,19 @@ Data.checkEquality = function(data1, data2) {
 Data.prototype.createXml = function(xmlDoc) {
 	// We store the type of Data, whether it is valid, and what its value is
 
-	const data = XmlWriter.createElement(xmlDoc, "data");
+	var data = XmlWriter.createElement(xmlDoc, "data");
 	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
 	XmlWriter.setAttribute(data, "isValid", this.isValid);
 
 	// The value is converted to a string by appending "".  For Variables and Lists, the name is used.
-	const value = XmlWriter.createElement(xmlDoc, "value");
-	let valueString = this.getValue() + "";
+	var value = XmlWriter.createElement(xmlDoc, "value");
+	var valueString = this.getValue() + "";
 	if (this.getValue().constructor.name === "Variable") {
 		valueString = this.getValue().name;
 	} else if (this.getValue().constructor.name === "List") {
 		valueString = this.getValue().name;
 	}
-	const valueText = XmlWriter.createTextNode(xmlDoc, valueString);
+	var valueText = XmlWriter.createTextNode(xmlDoc, valueString);
 	value.appendChild(valueText);
 	data.appendChild(value);
 	return data;
@@ -386,8 +385,8 @@ Data.prototype.createXml = function(xmlDoc) {
  * @return {Data|null}
  */
 Data.importXml = function(dataNode) {
-	const typeName = XmlWriter.getAttribute(dataNode, "type");
-	const type = Data.getDataTypeFromName(typeName);
+	var typeName = XmlWriter.getAttribute(dataNode, "type");
+	var type = Data.getDataTypeFromName(typeName);
 	if (type == null) {
 		return null;
 	}
@@ -477,7 +476,7 @@ NumData.prototype.asBool = function() {
  */
 NumData.prototype.asString = function() {
 	if (this.isValid) {
-		let num = this.getValue();
+		var num = this.getValue();
 		num = +num.toFixed(10);
 		return new StringData(num + "", true);
 	} else {
@@ -490,7 +489,7 @@ NumData.prototype.asString = function() {
  * @return {StringData}
  */
 NumData.prototype.asPositiveString = function() {
-	let num = Math.abs(this.getValue());
+	var num = Math.abs(this.getValue());
 	num = +num.toFixed(10);
 	return new StringData(num + "", true);
 };
@@ -504,7 +503,7 @@ NumData.prototype.asPositiveString = function() {
  * @return {number}
  */
 NumData.prototype.getValueInR = function(min, max, positive, integer) {
-	let val = this.getValue();
+	var val = this.getValue();
 	if (positive === true && val < 0) {
 		val = 0;
 	}
@@ -527,7 +526,7 @@ NumData.prototype.getValueInR = function(min, max, positive, integer) {
  * @return {number}
  */
 NumData.prototype.getValueWithC = function(positive, integer) {
-	let val = this.getValue();
+	var val = this.getValue();
 	if (positive === true && val < 0) {
 		val = 0;
 	}
@@ -543,11 +542,11 @@ NumData.prototype.getValueWithC = function(positive, integer) {
  * @return {NumData|null}
  */
 NumData.importXml = function(dataNode) {
-	const value = XmlWriter.getTextNode(dataNode, "value", null, true);
+	var value = XmlWriter.getTextNode(dataNode, "value", null, true);
 	if (value == null) return null;
 	// We use StringData to help with the conversion
-	const stringData = new StringData(value);
-	const numData = stringData.asNum();
+	var stringData = new StringData(value);
+	var numData = stringData.asNum();
 	if (numData.isValid) {
 		return numData;
 	} else {
@@ -602,7 +601,7 @@ BoolData.prototype.asString = function() {
  * @return {BoolData|null}
  */
 BoolData.importXml = function(dataNode) {
-	let value = XmlWriter.getTextNode(dataNode, "value");
+	var value = XmlWriter.getTextNode(dataNode, "value");
 	if (value == null) return null;
 	return new BoolData(value === "true");
 };
@@ -656,7 +655,7 @@ StringData.prototype.asString = function() {
  */
 StringData.prototype.isNumber = function() {
 	//from https://en.wikipedia.org/wiki/Regular_expression
-	const numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
+	var numberRE = /^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
 	return numberRE.test(this.getValue());
 };
 
@@ -666,7 +665,7 @@ StringData.prototype.isNumber = function() {
  * @return {StringData|null}
  */
 StringData.importXml = function(dataNode) {
-	const value = XmlWriter.getTextNode(dataNode, "value");
+	var value = XmlWriter.getTextNode(dataNode, "value");
 	if (value == null) return null;
 	return new StringData(value);
 };
@@ -691,8 +690,8 @@ ListData.prototype.constructor = ListData;
  * @return {ListData}
  */
 ListData.prototype.duplicate = function() {
-	const arrayCopy = [];
-	for (let i = 0; i < this.value.length; i++) {
+	var arrayCopy = [];
+	for (var i = 0; i < this.value.length; i++) {
 		arrayCopy.push(this.value[i]);
 	}
 	return new ListData(arrayCopy, this.isValid);
@@ -715,8 +714,8 @@ ListData.prototype.asNum = function() {
  * @return {StringData}
  */
 ListData.prototype.asString = function() {
-	let resultStr = "";
-	for (let i = 0; i < this.value.length; i++) {
+	var resultStr = "";
+	for (var i = 0; i < this.value.length; i++) {
 		resultStr += this.value[i].asString().getValue();
 		if (i < this.value.length - 1) {
 			resultStr += ", ";
@@ -750,16 +749,16 @@ ListData.prototype.asList = function() {
  * @return {number|null}
  */
 ListData.prototype.getIndex = function(indexData) {
-	const array = this.getValue();
+	var array = this.getValue();
 	if (array.length === 0) {
 		return null; // There are no valid indices to return
 	}
 	if (indexData == null) {
 		return null; // The index data is already invalid
 	}
-	const indexV = indexData.getValue();
-	const min = 1;
-	const max = array.length;
+	var indexV = indexData.getValue();
+	var min = 1;
+	var max = array.length;
 	if (indexData.type === Data.types.selection) {
 		if (indexV === "last") {
 			// Return the index of the last item
@@ -789,13 +788,13 @@ ListData.prototype.getIndex = function(indexData) {
  * @return {Node}
  */
 ListData.prototype.createXml = function(xmlDoc) {
-	const data = XmlWriter.createElement(xmlDoc, "data");
+	var data = XmlWriter.createElement(xmlDoc, "data");
 	XmlWriter.setAttribute(data, "type", this.getDataTypeName());
 	XmlWriter.setAttribute(data, "isValid", this.isValid);
 
 	// The value is a list of Data objects
-	const value = xmlDoc.createElement("value");
-	for (let i = 0; i < this.value.length; i++) {
+	var value = xmlDoc.createElement("value");
+	for (var i = 0; i < this.value.length; i++) {
 		value.appendChild(this.value[i].createXml(xmlDoc));
 	}
 	data.appendChild(value);
@@ -808,12 +807,12 @@ ListData.prototype.createXml = function(xmlDoc) {
  * @return {ListData}
  */
 ListData.importXml = function(dataNode) {
-	const valueNode = XmlWriter.findSubElement(dataNode, "value");
-	const dataNodes = XmlWriter.findSubElements(valueNode, "data");
-	const valueArray = [];
-	for (let i = 0; i < dataNodes.length; i++) {
+	var valueNode = XmlWriter.findSubElement(dataNode, "value");
+	var dataNodes = XmlWriter.findSubElements(valueNode, "data");
+	var valueArray = [];
+	for (var i = 0; i < dataNodes.length; i++) {
 		// Add every valid data node
-		const dataEntry = Data.importXml(dataNodes[i]);
+		var dataEntry = Data.importXml(dataNodes[i]);
 		if (dataEntry != null) {
 			valueArray.push(dataEntry);
 		}
@@ -877,7 +876,7 @@ SelectionData.prototype.isEmpty = function() {
  * @return {SelectionData|null}
  */
 SelectionData.importXml = function(dataNode) {
-	const value = XmlWriter.getTextNode(dataNode, "value");
+	var value = XmlWriter.getTextNode(dataNode, "value");
 	if (value == null) return null;
 	return new SelectionData("", value);
 };
@@ -1091,7 +1090,7 @@ Variable.prototype.remove = function() {
  * @return {Node} - The node for the Variable
  */
 Variable.prototype.createXml = function(xmlDoc) {
-	const variable = XmlWriter.createElement(xmlDoc, "variable");
+	var variable = XmlWriter.createElement(xmlDoc, "variable");
 	XmlWriter.setAttribute(variable, "name", this.name);
 	variable.appendChild(this.data.createXml(xmlDoc));
 	return variable;
@@ -1103,12 +1102,12 @@ Variable.prototype.createXml = function(xmlDoc) {
  * @return {Variable|null}
  */
 Variable.importXml = function(variableNode) {
-	const name = XmlWriter.getAttribute(variableNode, "name");
+	var name = XmlWriter.getAttribute(variableNode, "name");
 	if (name != null) {
-		const dataNode = XmlWriter.findSubElement(variableNode, "data");
-		let data = new NumData(0);
+		var dataNode = XmlWriter.findSubElement(variableNode, "data");
+		var data = new NumData(0);
 		if (dataNode != null) {
-			const newData = Data.importXml(dataNode);
+			var newData = Data.importXml(dataNode);
 			if (newData != null) {
 				data = newData;
 			}
@@ -1122,7 +1121,7 @@ Variable.importXml = function(variableNode) {
  * Prompts the user to rename the variable
  */
 Variable.prototype.rename = function() {
-	const callbackFn = function(cancelled, response) {
+	var callbackFn = function(cancelled, response) {
 		if (!cancelled && CodeManager.checkVarName(response)) {
 			callbackFn.variable.name = response;
 			CodeManager.renameVariable(callbackFn.variable);
@@ -1137,14 +1136,14 @@ Variable.prototype.rename = function() {
  */
 Variable.prototype.delete = function() {
 	if (CodeManager.checkVariableUsed(this)) {
-		const callbackFn = function(response) {
+		var callbackFn = function(response) {
 			if (response === "2") {
 				callbackFn.variable.remove();
 				CodeManager.deleteVariable(callbackFn.variable);
 			}
 		};
 		callbackFn.variable = this;
-		let question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
+		var question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
 		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
 	} else {
@@ -1216,7 +1215,7 @@ List.prototype.remove = function() {
  * @return {Node} - The XML Node for the List
  */
 List.prototype.createXml = function(xmlDoc) {
-	const list = XmlWriter.createElement(xmlDoc, "list");
+	var list = XmlWriter.createElement(xmlDoc, "list");
 	XmlWriter.setAttribute(list, "name", this.name);
 	list.appendChild(this.data.createXml(xmlDoc));
 	return list;
@@ -1228,12 +1227,12 @@ List.prototype.createXml = function(xmlDoc) {
  * @return {List}
  */
 List.importXml = function(listNode) {
-	const name = XmlWriter.getAttribute(listNode, "name");
+	var name = XmlWriter.getAttribute(listNode, "name");
 	if (name != null) {
-		const dataNode = XmlWriter.findSubElement(listNode, "data");
-		let data = new ListData();
+		var dataNode = XmlWriter.findSubElement(listNode, "data");
+		var data = new ListData();
 		if (dataNode != null) {
-			const newData = Data.importXml(dataNode);
+			var newData = Data.importXml(dataNode);
 			if (newData != null) {
 				data = newData;
 			}
@@ -1246,7 +1245,7 @@ List.importXml = function(listNode) {
  * Prompts the user to rename the list
  */
 List.prototype.rename = function() {
-	const callbackFn = function(cancelled, response) {
+	var callbackFn = function(cancelled, response) {
 		if (!cancelled && CodeManager.checkListName(response)) {
 			this.name = response;
 			CodeManager.renameList(this);
@@ -1260,14 +1259,14 @@ List.prototype.rename = function() {
  */
 List.prototype.delete = function() {
 	if (CodeManager.checkListUsed(this)) {
-		const callbackFn = function(response) {
+		var callbackFn = function(response) {
 			if (response === "2") {
 				this.remove();
 				CodeManager.deleteList(this);
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
+		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
 		question += "This will delete all copies of this block.";
 		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
 	} else {
@@ -1899,7 +1898,7 @@ Language.getLanguage = function () {
    translation provided in the dictionary for that language. If no translation is provided,
    No Translation will be shown*/
 Language.getStr = function(str) {
-    let translatedStr = eval(Language.getLanguage() + str);
+    var translatedStr = eval(Language.getLanguage() + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
@@ -1999,7 +1998,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 		}
 	};
 
-	const manager = new DeviceManager(deviceClass);
+	var manager = new DeviceManager(deviceClass);
 	/** @return {DeviceManager} */
 	deviceClass.getManager = function() {
 		return manager;
@@ -2037,7 +2036,7 @@ Device.prototype.getDeviceTypeId = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.disconnect = function() {
-	const request = new HttpRequestBuilder("robot/disconnect");
+	var request = new HttpRequestBuilder("robot/disconnect");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -2048,7 +2047,7 @@ Device.prototype.disconnect = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.connect = function() {
-	const request = new HttpRequestBuilder("robot/connect");
+	var request = new HttpRequestBuilder("robot/connect");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -2100,8 +2099,8 @@ Device.prototype.setFirmwareStatus = function(status) {
  * @return {DeviceManager.statuses}
  */
 Device.prototype.getStatus = function() {
-	const statuses = DeviceManager.statuses;
-	const firmwareStatuses = Device.firmwareStatuses;
+	var statuses = DeviceManager.statuses;
+	var firmwareStatuses = Device.firmwareStatuses;
 	if (!this.connected) {
 		return statuses.disconnected;
 	} else {
@@ -2143,7 +2142,7 @@ Device.prototype.setFirmwareStatusListener = function(callbackFn) {
  * with choices "Close" and "Update Firmware".
  */
 Device.prototype.showFirmwareInfo = function() {
-	const request = new HttpRequestBuilder("robot/showInfo");
+	var request = new HttpRequestBuilder("robot/showInfo");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -2155,12 +2154,12 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
+	var msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
 	msg += "\nDevice firmware version: " + oldFirmware;
 	msg += "\nRequired firmware version: " + minFirmware;
 	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
 		if (result === "2") {
-			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+			var request = new HttpRequestBuilder("robot/showUpdateInstructions");
 			request.addParam("type", this.getDeviceTypeId());
 			HtmlServer.sendRequestWithCallback(request.toString());
 		}
@@ -2190,8 +2189,8 @@ Device.fromJson = function(json) {
  * @return {Array}
  */
 Device.fromJsonArray = function(json) {
-	let res = [];
-	for (let i = 0; i < json.length; i++) {
+	var res = [];
+	for (var i = 0; i < json.length; i++) {
 		res.push(Device.fromJson(json[i]));
 	}
 	return res;
@@ -2205,7 +2204,7 @@ Device.fromJsonArray = function(json) {
  */
 Device.fromJsonArrayString = function(deviceList) {
 	if (deviceList == null) return [];
-	let json = [];
+	var json = [];
 	try {
 		json = JSON.parse(deviceList);
 	} catch (e) {
@@ -2227,7 +2226,7 @@ Device.getTypeList = function() {
  * Sends a request to the backend to turn off all motors, servos, LEDs, etc. on all robots
  */
 Device.stopAll = function() {
-	const request = new HttpRequestBuilder("robot/stopAll");
+	var request = new HttpRequestBuilder("robot/stopAll");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
@@ -2251,7 +2250,7 @@ DeviceWithPorts.prototype.constructor = Device;
  * @param {number} port - Added to the request to indicate the port.
  */
 DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
-	const request = new HttpRequestBuilder("robot/in");
+	var request = new HttpRequestBuilder("robot/in");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
@@ -2268,7 +2267,7 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
  * @param {number} axisType - Added to the request to indicate the port.
  */
 DeviceWithPorts.prototype.readMagnetometerSensor = function(status, sensorType, axisType) {
-	const request = new HttpRequestBuilder("robot/in");
+	var request = new HttpRequestBuilder("robot/in");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("axis", axisType);
@@ -2286,7 +2285,7 @@ DeviceWithPorts.prototype.readMagnetometerSensor = function(status, sensorType, 
  * @param {string} sensorType - Added as a parameter to the request so the backend knows how to read the sensor
  */
 DeviceWithPorts.prototype.readButtonSensor = function(status, sensorType) {
-	const request = new HttpRequestBuilder("robot/in");
+	var request = new HttpRequestBuilder("robot/in");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("sensor", sensorType);
@@ -2299,7 +2298,7 @@ DeviceWithPorts.prototype.readButtonSensor = function(status, sensorType) {
  * @param {string} printString - The string that the led array is supposed to flash.
  */
 DeviceWithPorts.prototype.readPrintBlock = function(status, printString) {
-	const request = new HttpRequestBuilder("robot/out/printBlock");
+	var request = new HttpRequestBuilder("robot/out/printBlock");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("printString", printString);
@@ -2316,7 +2315,7 @@ DeviceWithPorts.prototype.readPrintBlock = function(status, printString) {
  * @param {string} valueKey - The key to use when adding the value as a parameter to the request
  */
 DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, valueKey) {
-	const request = new HttpRequestBuilder("robot/out/" + outputType);
+	var request = new HttpRequestBuilder("robot/out/" + outputType);
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
@@ -2333,7 +2332,7 @@ DeviceWithPorts.prototype.setOutput = function(status, outputType, port, value, 
  * @param {number} blue
  */
 DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
-	const request = new HttpRequestBuilder("robot/out/triled");
+	var request = new HttpRequestBuilder("robot/out/triled");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("port", port);
@@ -2350,7 +2349,7 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
  * @param {number} beats - The duration of the note
  */
 DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
-	const request = new HttpRequestBuilder("robot/out/buzzer");
+	var request = new HttpRequestBuilder("robot/out/buzzer");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("note", note);
@@ -2366,7 +2365,7 @@ DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
  * @param {String} ledStatusString - the on/off status to set for each led in the array represented as a string of 0's and 1's
  */
 DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
-	const request = new HttpRequestBuilder("robot/out/ledArray");
+	var request = new HttpRequestBuilder("robot/out/ledArray");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("ledArrayStatus", ledStatusString);
@@ -2380,7 +2379,7 @@ DeviceWithPorts.prototype.setLedArray = function(status, ledStatusString) {
  * @param {object} status - An object provided by the caller to track the progress of the request
  */
 DeviceWithPorts.prototype.readCompass = function(status) {
-	const request = new HttpRequestBuilder("robot/in");
+	var request = new HttpRequestBuilder("robot/in");
     request.addParam("type", this.getDeviceTypeId());
     request.addParam("id", this.id);
     request.addParam("sensor", "compass");
@@ -2388,7 +2387,7 @@ DeviceWithPorts.prototype.readCompass = function(status) {
 };
 
 DeviceWithPorts.prototype.calibrateCompass = function(status) {
-	const request = new HttpRequestBuilder("robot/out/compassCalibrate");
+	var request = new HttpRequestBuilder("robot/out/compassCalibrate");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	HtmlServer.sendRequest(request.toString(), status, true);
@@ -2429,10 +2428,10 @@ function DeviceManager(deviceClass) {
 }
 
 DeviceManager.setStatics = function() {
-	const DM = DeviceManager;
+	var DM = DeviceManager;
 
 	/** @enum {number} */
-	const statuses = DeviceManager.statuses = {
+	var statuses = DeviceManager.statuses = {
 		// Ordered such that the total status is just Math.min of the individual statuses
 		disconnected: 0,
 		incompatibleFirmware: 1,
@@ -2463,7 +2462,7 @@ DeviceManager.checkBattery = function() {
     var color = Colors.lightGray;
     DeviceManager.forEach(function(manager) {
         for (var i = 0; i < manager.connectedDevices.length; i++) {
-            let robot = manager.connectedDevices[i];
+            var robot = manager.connectedDevices[i];
             curBatteryStatus = robot.getBatteryStatus();
             if (parseInt(curBatteryStatus,10) < parseInt(worstBatteryStatus,10)) {
                 worstBatteryStatus = curBatteryStatus;
@@ -2503,7 +2502,7 @@ DeviceManager.prototype.getDevice = function(index) {
  * @return {number}
  */
 DeviceManager.prototype.lookupRobotIndexById = function(id) {
-	for (let i = 0; i < this.connectedDevices.length; i++) {
+	for (var i = 0; i < this.connectedDevices.length; i++) {
 		if (this.connectedDevices[i].id === id) {
 			return i;
 		}
@@ -2551,8 +2550,8 @@ DeviceManager.getDeviceClass = function(robot) {
  * @param {number} index
  */
 DeviceManager.prototype.removeDevice = function(robotName) {
-    let removedIndex = -1;
-	for (let index = 0; index < this.getDeviceCount(); index++) {
+    var removedIndex = -1;
+	for (var index = 0; index < this.getDeviceCount(); index++) {
 	    if (this.connectedDevices[index].name === robotName) {
 	        this.connectedDevices[index].disconnect();
 	        if (this.scanning) {
@@ -2583,7 +2582,7 @@ DeviceManager.prototype.appendDevice = function(newDevice) {
  * @param {Device} newDevice
  */
 DeviceManager.prototype.setOneDevice = function(newDevice) {
-	for (let i = 0; i < this.connectedDevices.length; i++) {
+	for (var i = 0; i < this.connectedDevices.length; i++) {
 		this.connectedDevices[i].disconnect();
 	}
 	newDevice.connect();
@@ -2598,8 +2597,8 @@ DeviceManager.prototype.setOneDevice = function(newDevice) {
  * @param {number} index2
  */
 DeviceManager.prototype.swapDevices = function(index1, index2) {
-	const device1 = this.connectedDevices[index1];
-	const device2 = this.connectedDevices[index2];
+	var device1 = this.connectedDevices[index1];
+	var device2 = this.connectedDevices[index2];
 	this.connectedDevices[index1] = device2;
 	this.connectedDevices[index2] = device1;
 	this.devicesChanged(null, false);
@@ -2612,7 +2611,7 @@ DeviceManager.prototype.swapDevices = function(index1, index2) {
  * @param newDevice
  */
 DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
-	const newIndex = this.lookupRobotIndexById(newDevice.id);
+	var newIndex = this.lookupRobotIndexById(newDevice.id);
 	if (newIndex > -1) {
 		this.swapDevices(index, newIndex);
 	} else {
@@ -2643,8 +2642,8 @@ DeviceManager.prototype.deviceIsConnected = function(index) {
 	if (index >= this.getDeviceCount()) {
 		return false;
 	} else {
-		const deviceStatus = this.connectedDevices[index].getStatus();
-		const statuses = DeviceManager.statuses;
+		var deviceStatus = this.connectedDevices[index].getStatus();
+		var statuses = DeviceManager.statuses;
 		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
 };
@@ -2657,10 +2656,10 @@ DeviceManager.prototype.deviceIsConnected = function(index) {
  * as well as modify existing programs that may use more devices than the currently connected number.
  */
 DeviceManager.prototype.updateSelectableDevices = function() {
-	const oldCount = this.selectableDevices;
-	const inUse = CodeManager.countDevicesInUse(this.deviceClass);
-	const numConnected = this.getDeviceCount();
-	const newCount = Math.max(numConnected, inUse);
+	var oldCount = this.selectableDevices;
+	var inUse = CodeManager.countDevicesInUse(this.deviceClass);
+	var numConnected = this.getDeviceCount();
+	var newCount = Math.max(numConnected, inUse);
 	this.selectableDevices = newCount;
 
 	if (newCount <= 1 && oldCount > 1) {
@@ -2670,7 +2669,7 @@ DeviceManager.prototype.updateSelectableDevices = function() {
 	}
 
 	// Sections of the palette are expanded if the count > 0
-	const suggestedCollapse = newCount === 0;
+	var suggestedCollapse = newCount === 0;
 	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
 
@@ -2707,7 +2706,7 @@ DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	if(!this.scanning) {
 		this.scanning = true;
 		this.discoverCache = null;
-		let request = new HttpRequestBuilder("robot/startDiscover");
+		var request = new HttpRequestBuilder("robot/startDiscover");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	}
 };
@@ -2753,12 +2752,12 @@ DeviceManager.prototype.possiblyRescan = function() {
  */
 DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeConnected, excludeIndex) {
 	// Get the devices from the request
-	let robotList = Device.fromJsonArrayString(robotListString);
+	var robotList = Device.fromJsonArrayString(robotListString);
 	// Accumulate devices that are not currently connected
-	let disconnectedRobotsList = [];
+	var disconnectedRobotsList = [];
 	robotList.forEach(function(robot) {
 		// Try to find the device
-		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+		var connectedRobotIndex = this.lookupRobotIndexById(robot.id);
 		// Only include the device if we didn't find it and it isn't the excludeId robot
 		if (connectedRobotIndex === -1) {
 			// Include the device in the list
@@ -2767,7 +2766,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 	}.bind(this));
 
 	// If we're including connected devices, add them at the top
-	let newList = disconnectedRobotsList;
+	var newList = disconnectedRobotsList;
 	if (includeConnected) {
 		newList = this.connectedDevices.concat(robotList);
 		if (excludeIndex != null) {
@@ -2792,7 +2791,7 @@ DeviceManager.prototype.backendDiscovered = function(robotList) {
  * @param {function} [callbackErr]
  */
 DeviceManager.prototype.stopDiscover = function(callbackFn, callbackErr) {
-	let request = new HttpRequestBuilder("robot/stopDiscover");
+	var request = new HttpRequestBuilder("robot/stopDiscover");
 	HtmlServer.sendRequestWithCallback(request.toString(), callbackFn, callbackErr);
 	this.markStoppedDiscover();
 };
@@ -2812,9 +2811,9 @@ DeviceManager.prototype.markStoppedDiscover = function() {
  * @return {Array<Device>}
  */
 DeviceManager.prototype.createVirtualDeviceList = function() {
-	let list = [];
-	let rand = Math.random() * 20 + 20;
-	for (let i = 0; i < rand; i++) {
+	var list = [];
+	var rand = Math.random() * 20 + 20;
+	for (var i = 0; i < rand; i++) {
 		list.push(DebugOptions.createVirtualDevice(this.deviceClass, i + ""));
 	}
 	return list;
@@ -2827,13 +2826,13 @@ DeviceManager.prototype.createVirtualDeviceList = function() {
  * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
  */
 DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected) {
-	const index = this.lookupRobotIndexById(deviceId);
-	let robot = null;
+	var index = this.lookupRobotIndexById(deviceId);
+	var robot = null;
 	if (index >= 0) {
 		robot = this.connectedDevices[index];
 	}
 	if (robot != null) {
-		const wasConnected = robot.getConnected();
+		var wasConnected = robot.getConnected();
 		robot.setConnected(isConnected);
 		if (wasConnected && !isConnected && !this.scanning) {
 			this.startDiscover(function() { return true;});
@@ -2846,8 +2845,8 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 
 
 DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
-    const index = this.lookupRobotIndexById(deviceId);
-    let robot = null;
+    var index = this.lookupRobotIndexById(deviceId);
+    var robot = null;
     if (index >= 0) {
         robot = this.connectedDevices[index];
     }
@@ -2861,8 +2860,8 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
  * @param {Device.firmwareStatuses} status
  */
 DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
-	const index = this.lookupRobotIndexById(deviceId);
-	let robot = null;
+	var index = this.lookupRobotIndexById(deviceId);
+	var robot = null;
 	if (index >= 0) {
 		robot = this.connectedDevices[index];
 	}
@@ -2872,9 +2871,9 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 };
 
 DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
-	const index = this.lookupRobotIndexById(robotId);
+	var index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
-		const robot = this.connectedDevices[index];
+		var robot = this.connectedDevices[index];
 		this.connectedDevices.splice(index, 1);
 		this.devicesChanged(null, false);
 		robot.notifyIncompatible(oldFirmware, minFirmware);
@@ -2886,8 +2885,8 @@ DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, 
  * @return {DeviceManager.statuses}
  */
 DeviceManager.prototype.getStatus = function() {
-	const statuses = DeviceManager.statuses;
-	let status = statuses.noDevices;
+	var statuses = DeviceManager.statuses;
+	var status = statuses.noDevices;
 	this.connectedDevices.forEach(function(device) {
 		status = Math.min(status, device.getStatus());
 	});
@@ -2948,8 +2947,8 @@ DeviceManager.updateFirmwareStatus = function(deviceId, status) {
  * Computes the total status of all DeviceManagers and updates the statusListener
  */
 DeviceManager.updateStatus = function() {
-	const DM = DeviceManager;
-	let totalStatus = DM.getStatus();
+	var DM = DeviceManager;
+	var totalStatus = DM.getStatus();
 	if (DM.statusListener != null) DM.statusListener(totalStatus);
 	return totalStatus;
 };
@@ -2959,8 +2958,8 @@ DeviceManager.updateStatus = function() {
  * @return {DeviceManager.statuses}
  */
 DeviceManager.getStatus = function() {
-	let DM = DeviceManager;
-	let minStatus = DM.statuses.noDevices;
+	var DM = DeviceManager;
+	var minStatus = DM.statuses.noDevices;
 	DM.forEach(function(manager) {
 		minStatus = DM.minStatus(manager.getStatus(), minStatus);
 	});
@@ -3077,7 +3076,7 @@ DeviceFlutter.prototype.constructor = DeviceFlutter;
  * @param {number} frequency - The frequency of the sound the buzzer produces
  */
 DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
-	const request = new HttpRequestBuilder("robot/out/buzzer");
+	var request = new HttpRequestBuilder("robot/out/buzzer");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("volume", volume);
@@ -3106,7 +3105,7 @@ Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.prototype.setAll = function(status, data) {
-	const request = new HttpRequestBuilder("robot/out/setAll");
+	var request = new HttpRequestBuilder("robot/out/setAll");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("data", data);
@@ -3116,7 +3115,7 @@ DeviceFinch.prototype.setAll = function(status, data) {
  * Static class keeps track of which sensors are available on the device
  */
 function TabletSensors(){
-	const TS = TabletSensors;
+	var TS = TabletSensors;
 	TabletSensors.clear();
 	TabletSensors.requestAvailable();
 }
@@ -3125,7 +3124,7 @@ function TabletSensors(){
  * Requests backend for a list of available sensors
  */
 TabletSensors.requestAvailable = function(){
-	const request = new HttpRequestBuilder("tablet/availableSensors");
+	var request = new HttpRequestBuilder("tablet/availableSensors");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response){
 		TabletSensors.updateAvailable(response);
 	});
@@ -3137,8 +3136,8 @@ TabletSensors.requestAvailable = function(){
  */
 TabletSensors.updateAvailable = function(sensorList){
 	TabletSensors.clear();
-	const sensors = TabletSensors.sensors;
-	let list = sensorList.split("\n");
+	var sensors = TabletSensors.sensors;
+	var list = sensorList.split("\n");
 	if(sensorList === "") {
 		list = [];
 	}
@@ -3156,7 +3155,7 @@ TabletSensors.updateAvailable = function(sensorList){
  * @return {boolean}
  */
 TabletSensors.addSensor = function(sensor){
-	const TS = TabletSensors;
+	var TS = TabletSensors;
 	if(TS.sensors[sensor] != null) {
 		TS.sensors[sensor] = true;
 		CodeManager.updateAvailableSensors();
@@ -3171,7 +3170,7 @@ TabletSensors.addSensor = function(sensor){
  * @return {boolean}
  */
 TabletSensors.removeSensor = function(sensor){
-	const TS = TabletSensors;
+	var TS = TabletSensors;
 	if(TS.sensors[sensor] != null) {
 		TS.sensors[sensor] = false;
 		CodeManager.updateAvailableSensors();
@@ -3184,7 +3183,7 @@ TabletSensors.removeSensor = function(sensor){
  * Marks all sensors as unavailable.
  */
 TabletSensors.clear = function(){
-	const sensors = TabletSensors.sensors = {};
+	var sensors = TabletSensors.sensors = {};
 	sensors.accelerometer = false;
 	sensors.barometer = false;
 	sensors.microphone = false;
@@ -3203,9 +3202,9 @@ function GuiElements() {
 	// Clear the debug span
 	document.getElementById("debug").innerHTML = "";
 	// Find parts of the html and store them
-	let svg2 = document.getElementById("frontSvg");
-	let svg1 = document.getElementById("middleSvg");
-	let svg0 = document.getElementById("backSvg");
+	var svg2 = document.getElementById("frontSvg");
+	var svg1 = document.getElementById("middleSvg");
+	var svg0 = document.getElementById("backSvg");
 	GuiElements.svgs = [svg0, svg1, svg2];
 	GuiElements.defs = document.getElementById("SvgDefs");
 	GuiElements.loaded = false;
@@ -3353,17 +3352,17 @@ GuiElements.buildUI = function() {
  * Layers are accessible in the form GuiElements.layers.[layerName]
  */
 GuiElements.createLayers = function() {
-	const create = GuiElements.create; //shorthand
+	var create = GuiElements.create; //shorthand
 	GuiElements.zoomGroups = [];
 	GuiElements.svgs.forEach(function(svg) {
-		let zoomGroup = create.group(0, 0, svg);
+		var zoomGroup = create.group(0, 0, svg);
 		GuiElements.zoomGroups.push(zoomGroup);
 		GuiElements.update.zoom(zoomGroup, GuiElements.zoomFactor);
 	});
 
 	GuiElements.layers = {};
-	let i = 0;
-	const layers = GuiElements.layers;
+	var i = 0;
+	var layers = GuiElements.layers;
 	layers.temp = create.layer(i);
 	layers.aTabBg = create.layer(i);
 	layers.activeTab = create.layer(i);
@@ -3399,7 +3398,7 @@ GuiElements.createLayers = function() {
  */
 GuiElements.alert = function(message) {
 	if (!DebugOptions.shouldAllowLogging()) return;
-	let result = message;
+	var result = message;
 	debug.innerHTML = result;
 };
 
@@ -3417,7 +3416,7 @@ GuiElements.create = {};
  */
 GuiElements.create.group = function(x, y, parent) {
 	DebugOptions.validateOptionalNums(x, y);
-	const group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+	var group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
 	group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")"); //Move the group to (x,y).
 	if (parent != null) { //If provided, add it to the parent.
 		parent.appendChild(group);
@@ -3433,9 +3432,9 @@ GuiElements.create.group = function(x, y, parent) {
  */
 GuiElements.create.layer = function(depth) {
 	DebugOptions.validateNumbers(depth);
-	let layerG = GuiElements.create.group(0, 0, GuiElements.zoomGroups[depth]);
-	let showHideLayer = GuiElements.create.group(0, 0, layerG);
-	let layer = {};
+	var layerG = GuiElements.create.group(0, 0, GuiElements.zoomGroups[depth]);
+	var showHideLayer = GuiElements.create.group(0, 0, layerG);
+	var layer = {};
 	// We forward these group-like functions to the inner group
 	layer.appendChild = showHideLayer.appendChild.bind(showHideLayer);
 	layer.setAttributeNS = showHideLayer.setAttributeNS.bind(showHideLayer);
@@ -3453,18 +3452,18 @@ GuiElements.create.layer = function(depth) {
  */
 GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
 	DebugOptions.validateNonNull(color1, color2);
-	const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
 	gradient.setAttributeNS(null, "id", id); //Set attributes.
 	gradient.setAttributeNS(null, "x1", "0%");
 	gradient.setAttributeNS(null, "x2", "0%");
 	gradient.setAttributeNS(null, "y1", "0%");
 	gradient.setAttributeNS(null, "y2", "100%");
 	GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
-	const stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
+	var stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
 	stop1.setAttributeNS(null, "offset", "0%");
 	stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
 	gradient.appendChild(stop1);
-	const stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
+	var stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
 	stop2.setAttributeNS(null, "offset", "100%");
 	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
@@ -3475,7 +3474,7 @@ GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradien
  * @return {Element} - The path which was created.
  */
 GuiElements.create.path = function(group) {
-	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	var path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(path);
 	}
@@ -3501,7 +3500,7 @@ GuiElements.create.image = function() {
  * @return {Element}
  */
 GuiElements.create.svg = function(group) {
-	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
 	if (group != null) {
 		group.appendChild(svg);
@@ -3514,7 +3513,7 @@ GuiElements.create.svg = function(group) {
  * @return {Element}
  */
 GuiElements.create.scrollDiv = function(group) {
-	const div = document.createElement("div");
+	var div = document.createElement("div");
 	div.style.position = "absolute";
 	if (group != null) {
 		group.appendChild(div);
@@ -3527,7 +3526,7 @@ GuiElements.create.scrollDiv = function(group) {
  * @return {Element} - The rect which was created.
  */
 GuiElements.create.rect = function(group) {
-	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	if (group != null) { //Add it to the parent group if present.
 		group.appendChild(rect);
 	}
@@ -3549,7 +3548,7 @@ GuiElements.draw = {};
  */
 GuiElements.draw.rect = function(x, y, width, height, color) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	rect.setAttributeNS(null, "x", x); //Set its attributes.
 	rect.setAttributeNS(null, "y", y);
 	rect.setAttributeNS(null, "width", width);
@@ -3571,7 +3570,7 @@ GuiElements.draw.rect = function(x, y, width, height, color) {
 GuiElements.draw.triangle = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangle(triangle, x, y, width, height); //Set its path description (points).
 	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
@@ -3588,7 +3587,7 @@ GuiElements.draw.triangle = function(x, y, width, height, color) {
 GuiElements.draw.triangleFromPoint = function(x, y, width, height, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	const triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.triangleFromPoint(triangle, x, y, width, height); //Set its path description (points).
 	triangle.setAttributeNS(null, "fill", color); //Set the fill.
 	return triangle; //Return the finished triangle.
@@ -3606,7 +3605,7 @@ GuiElements.draw.triangleFromPoint = function(x, y, width, height, color) {
 GuiElements.draw.trapezoid = function(x, y, width, height, slantW, color) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	const trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	var trapezoid = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
 	GuiElements.update.trapezoid(trapezoid, x, y, width, height, slantW); //Set its path description.
 	trapezoid.setAttributeNS(null, "fill", color); //Set the fill.
 	return trapezoid; //Return the finished trapezoid.
@@ -3623,7 +3622,7 @@ GuiElements.draw.trapezoid = function(x, y, width, height, slantW, color) {
 GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(cx, cy, radius);
-	const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+	var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 	circle.setAttributeNS(null, "cx", cx);
 	circle.setAttributeNS(null, "cy", cy);
 	circle.setAttributeNS(null, "r", radius);
@@ -3645,7 +3644,7 @@ GuiElements.draw.circle = function(cx, cy, radius, color, group) {
  */
 GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	const imageElement = GuiElements.create.image();
+	var imageElement = GuiElements.create.image();
 	imageElement.setAttributeNS(null, "x", x);
 	imageElement.setAttributeNS(null, "y", y);
 	imageElement.setAttributeNS(null, "width", width);
@@ -3671,7 +3670,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.assert(test == null);
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
-	const textElement = GuiElements.create.text();
+	var textElement = GuiElements.create.text();
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -3681,7 +3680,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
 	text += ""; //Make text into a string
 	text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
-	const textNode = document.createTextNode(text);
+	var textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
@@ -3729,7 +3728,7 @@ GuiElements.update.text = function(textE, newText) {
 	if (textE.textNode != null) {
 		textE.textNode.remove(); //Remove old text.
 	}
-	const textNode = document.createTextNode(newText); //Create new text.
+	var textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
 };
@@ -3742,13 +3741,13 @@ GuiElements.update.text = function(textE, newText) {
  */
 GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
 	GuiElements.update.text(textE, text);
-	let currentWidth = GuiElements.measure.textWidth(textE);
+	var currentWidth = GuiElements.measure.textWidth(textE);
 	if (currentWidth < maxWidth || text == "") {
 		return;
 	}
-	let chars = 1;
-	const maxChars = text.length;
-	let currentText;
+	var chars = 1;
+	var maxChars = text.length;
+	var currentText;
 	while (chars <= maxChars) {
 		currentText = text.substring(0, chars);
 		GuiElements.update.text(textE, currentText + "...");
@@ -3772,8 +3771,8 @@ GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
  */
 GuiElements.update.triangle = function(pathE, x, y, width, height) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	const xshift = width / 2;
-	let path = "";
+	var xshift = width / 2;
+	var path = "";
 	path += "m " + x + "," + y; //Draws bottom-left point.
 	path += " " + xshift + "," + (0 - height); //Draws top-middle point.
 	path += " " + xshift + "," + (height); //Draws bottom-right point.
@@ -3795,8 +3794,8 @@ GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vert
 		vertical = 0;
 	}
 
-	const xshift = width / 2;
-	let path = "";
+	var xshift = width / 2;
+	var path = "";
 	path += "m " + x + "," + y; //Draws top-middle point.
 	if (vertical) {
 		path += " " + xshift + "," + (height);
@@ -3819,8 +3818,8 @@ GuiElements.update.triangleFromPoint = function(pathE, x, y, width, height, vert
  */
 GuiElements.update.trapezoid = function(pathE, x, y, width, height, slantW) {
 	DebugOptions.validateNumbers(x, y, width, height, slantW);
-	const shortW = width - 2 * slantW; //The width of the top of the trapezoid.
-	let path = "";
+	var shortW = width - 2 * slantW; //The width of the top of the trapezoid.
+	var path = "";
 	path += "m " + x + "," + (y + height); //Draws the points.
 	path += " " + slantW + "," + (0 - height);
 	path += " " + shortW + "," + 0;
@@ -3881,8 +3880,8 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 	foreignObj.setAttributeNS(null,"width",width * zoom);
 	foreignObj.setAttributeNS(null,"height",height * zoom);*/
 
-	const scrollY = innerHeight > height;
-	const scrollX = innerWidth > width;
+	var scrollY = innerHeight > height;
+	var scrollX = innerWidth > width;
 	div.classList.remove("noScroll");
 	div.classList.remove("smoothScrollXY");
 	div.classList.remove("smoothScrollX");
@@ -3897,7 +3896,7 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 		div.classList.add("noScroll");
 	}
 
-	const zoom = GuiElements.zoomFactor;
+	var zoom = GuiElements.zoomFactor;
 
 	div.style.top = y + "px";
 	div.style.left = x + "px";
@@ -3968,9 +3967,9 @@ GuiElements.move.element = function(element, x, y) {
  */
 GuiElements.clip = function(x, y, width, height, element) {
 	DebugOptions.validateNumbers(x, y, width, height);
-	const id = Math.random() + "";
-	const clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
-	const clipRect = GuiElements.draw.rect(x, y, width, height);
+	var id = Math.random() + "";
+	var clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath'); //Create the rect.
+	var clipRect = GuiElements.draw.rect(x, y, width, height);
 	clipPath.appendChild(clipRect);
 	clipPath.setAttributeNS(null, "id", id);
 	GuiElements.defs.appendChild(clipPath);
@@ -4010,13 +4009,13 @@ GuiElements.measure.textDim = function(textE, height) { //Measures an existing t
 		return 0;
 	}
 	//Gets the bounding box, but that is 0 if it isn't visible on the screen.
-	let bbox = textE.getBBox();
-	let textD = bbox.width; //Gets the width of the bounding box.
+	var bbox = textE.getBBox();
+	var textD = bbox.width; //Gets the width of the bounding box.
 	if (height) {
 		textD = bbox.height; //Gets the height of the bounding box.
 	}
 	if (textD === 0) { //The text element probably is not visible on the screen.
-		const parent = textE.parentNode; //Store the text element's current (hidden) parent.
+		var parent = textE.parentNode; //Store the text element's current (hidden) parent.
 		GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
 		bbox = textE.getBBox(); //Now get its bounding box.
 		textD = bbox.width;
@@ -4037,12 +4036,12 @@ GuiElements.measure.textDim = function(textE, height) { //Measures an existing t
  * @return {number} - The width of the text element made using the string.
  */
 GuiElements.measure.stringWidth = function(text, font) {
-	const textElement = GuiElements.create.text(); //Make the text element.
+	var textElement = GuiElements.create.text(); //Make the text element.
 	textElement.setAttributeNS(null, "font-family", font.fontFamily); //Set the attributes.
 	textElement.setAttributeNS(null, "font-size", font.fontSize);
 	textElement.setAttributeNS(null, "font-weight", font.fontWeight);
 	textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
-	const textNode = document.createTextNode(text); //Add the text to the text element.
+	var textNode = document.createTextNode(text); //Add the text to the text element.
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return GuiElements.measure.textWidth(textElement); //Measure it.
@@ -4053,7 +4052,7 @@ GuiElements.measure.stringWidth = function(text, font) {
  */
 GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
-		const rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
+		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
@@ -4138,17 +4137,17 @@ GuiElements.loadInitialSettings = function(callback) {
 	GuiElements.setGuiConstants();
 	SettingsManager();
 	// The checklist of thing to load
-	const loadProg = {};
+	var loadProg = {};
 	loadProg.version = false;
 	loadProg.zoom = false;
 	loadProg.os = false;
 	loadProg.lastFileName = true;
 	loadProg.lastFileNamed = true;
-	const load = GuiElements.load;
+	var load = GuiElements.load;
 	if (!DebugOptions.shouldSkipInitSettings()) {
-		let count = 0;
+		var count = 0;
 		// Function checks if all the pieces are done loading and calls the callback when they are
-		const checkIfDone = function() {
+		var checkIfDone = function() {
 			count++;
 			GuiElements.alert("" + loadProg.version + loadProg.zoom + loadProg.os +
 				loadProg.lastFileName + loadProg.lastFileNamed);
@@ -4191,7 +4190,7 @@ GuiElements.load.getAppVersion = function(callback) {
 GuiElements.load.getOsVersion = function(callback) {
 	HtmlServer.sendRequestWithCallback("properties/os", function(resp) {
 		GuiElements.osVersion = resp;
-		const parts = resp.split(" ");
+		var parts = resp.split(" ");
 		GuiElements.isKindle = (parts.length >= 1 && parts[0] === "Kindle");
 		GuiElements.isAndroid = (parts.length >= 1 && parts[0] === "Android") || GuiElements.isKindle;
 		GuiElements.isIos = (parts.length >= 1 && parts[0] === "iOS");
@@ -4207,9 +4206,9 @@ GuiElements.load.getOsVersion = function(callback) {
  * @param {function} callback
  */
 GuiElements.load.configureZoom = function(callback) {
-	const GE = GuiElements;
+	var GE = GuiElements;
 	SettingsManager.loadSettings(function() {
-		const callbackFn = function() {
+		var callbackFn = function() {
 			GE.zoomMultiple = SettingsManager.zoom.getValue();
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
@@ -4240,15 +4239,15 @@ GuiElements.load.configureZoom = function(callback) {
 GuiElements.computeZoomFromDims = function(dims) {
 	//GuiElements.alert("Got dimensions from device.  Computing zoom.");
 	//GuiElements.alert("received dims: " + dims);
-	const parts = dims.split(",");
+	var parts = dims.split(",");
 	if (parts.length === 2) {
-		const widthMm = parseFloat(parts[0]);
-		const heightMm = parseFloat(parts[1]);
-		const diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
-		const widthPx = window.innerWidth;
-		const heightPx = window.innerHeight;
-		const diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
-		const zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
+		var widthMm = parseFloat(parts[0]);
+		var heightMm = parseFloat(parts[1]);
+		var diagMm = Math.sqrt(widthMm * widthMm + heightMm * heightMm);
+		var widthPx = window.innerWidth;
+		var heightPx = window.innerHeight;
+		var diagPx = Math.sqrt(widthPx * widthPx + heightPx * heightPx);
+		var zoom = (diagPx * GuiElements.defaultZoomMm) / (GuiElements.defaultZoomPx * diagMm);
 		//GuiElements.alert("Computed zoom to: " + zoom + " diagPx:" + diagPx + " diagMm:" + diagMm);
 		return zoom * GuiElements.defaultZoomMultiple;
 	} else {
@@ -4284,7 +4283,7 @@ GuiElements.hidePaletteLayers = function(skipUpdate) {
 	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
-	let GE = GuiElements;
+	var GE = GuiElements;
 	if (GuiElements.paletteLayersVisible) {
 		GuiElements.paletteLayersVisible = false;
 		SettingsManager.sideBarVisible.writeValue("false");
@@ -4303,7 +4302,7 @@ GuiElements.hidePaletteLayers = function(skipUpdate) {
  * @param {boolean} [skipUpdate=false] - Whether updating the TabManager should be skipped
  */
 GuiElements.showPaletteLayers = function(skipUpdate) {
-	let GE = GuiElements;
+	var GE = GuiElements;
 	if (skipUpdate == null) {
 		skipUpdate = false;
 	}
@@ -4325,7 +4324,7 @@ GuiElements.showPaletteLayers = function(skipUpdate) {
  * Checks if the UI should enter/exit small mode based on the current width
  */
 GuiElements.checkSmallMode = function() {
-	let GE = GuiElements;
+	var GE = GuiElements;
 	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
 	if (!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
@@ -4342,7 +4341,7 @@ GuiElements.checkSmallMode = function() {
  * Populates the list of category names. Run by GuiElements.
  */
 function BlockList() {
-	const cat = BlockList.categories = [];
+	var cat = BlockList.categories = [];
 
 	// List only includes categories that will appear in the BlockPalette in order.
 	// Category names should be capitalized in the way they should be displayed on screen.
@@ -4476,7 +4475,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
+	var button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -4501,7 +4500,7 @@ BlockList.populateCat_variables = function(category) {
 	category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
 	category.addSpace();
 
-	const variables = CodeManager.variableList;
+	var variables = CodeManager.variableList;
 	if (variables.length > 0) {
 		// We show a variable Block for every variable
 		variables.forEach(function(variable) {
@@ -4509,7 +4508,7 @@ BlockList.populateCat_variables = function(category) {
 		});
 		category.addSpace();
 
-		// These Blocks let the variable be selected from a DropSlot, so we only need one of each of them
+		// These Blocks var the variable be selected from a DropSlot, so we only need one of each of them
 		category.addBlockByName("B_SetTo");
 		category.addBlockByName("B_ChangeBy");
 	}
@@ -4518,7 +4517,7 @@ BlockList.populateCat_variables = function(category) {
 	category.addButton(Language.getStr("Create_List"), CodeManager.newList);
 	category.addSpace();
 
-	const lists = CodeManager.listList;
+	var lists = CodeManager.listList;
 	if (lists.length > 0) {
 		lists.forEach(function(list) {
 			category.addListBlock(list);
@@ -4545,20 +4544,20 @@ BlockList.populateCat_variables = function(category) {
  */
 BlockList.populateCat_robots = function(category) {
 	// A list of names and ids to give the Collapsible Set constructor
-	let nameIdList = [];
-	let typeList = Device.getTypeList();
+	var nameIdList = [];
+	var typeList = Device.getTypeList();
 	typeList.forEach(function(deviceClass) {
-		let entry = {};
+		var entry = {};
 		entry.name = deviceClass.getDeviceTypeName();
 		entry.id = deviceClass.getDeviceTypeId();
 		nameIdList.push(entry);
 	});
 	// Create the set and add it to the category
-	const set = category.addCollapsibleSet(nameIdList);
+	var set = category.addCollapsibleSet(nameIdList);
 
-	for (let i = 0; i < typeList.length; i++) {
+	for (var i = 0; i < typeList.length; i++) {
 		// Populate each item in the set
-		const item = set.getItem(i);
+		var item = set.getItem(i);
 		BlockList["populateItem_" + typeList[i].getDeviceTypeId()](item);
 	}
 	category.trimBottom();
@@ -4719,7 +4718,7 @@ Colors.createGradients = function() {
  */
 Colors.createGradientSet = function(name, multStart, multEnd) {
 	Object.keys(Colors.categoryColors).map(function(category) {
-		let color = Colors.categoryColors[category];
+		var color = Colors.categoryColors[category];
 		Colors.createGradientFromColorAndMults(name, category, color, multStart, multEnd);
 	});
 };
@@ -4733,9 +4732,9 @@ Colors.createGradientSet = function(name, multStart, multEnd) {
  * @param {number} multEnd - number from 0 to 1 for end color darkness
  */
 Colors.createGradientFromColorAndMults = function(name, catId, color, multStart, multEnd) {
-	const darken = Colors.darkenColor;
-	const color1 = darken(color, multStart);
-	const color2 = darken(color, multEnd);
+	var darken = Colors.darkenColor;
+	var color1 = darken(color, multStart);
+	var color2 = darken(color, multEnd);
 	GuiElements.create.gradient(name + catId, color1, color2);
 };
 
@@ -4748,8 +4747,8 @@ Colors.createGradientFromColorAndMults = function(name, catId, color, multStart,
 Colors.darkenColor = function(color, amt) {
 	// Source:
 	// stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-	const col = parseInt(color.slice(1), 16);
-	let result = (((col & 0x0000FF) * amt) | ((((col >> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
+	var col = parseInt(color.slice(1), 16);
+	var result = (((col & 0x0000FF) * amt) | ((((col >> 8) & 0x00FF) * amt) << 8) | (((col >> 16) * amt) << 16)).toString(16);
 	while (result.length < 6) {
 		result = "0" + result;
 	}
@@ -4841,7 +4840,7 @@ Font.uiFont = function(fontSize){
  * @static
  */
 function VectorPaths(){
-	const VP=VectorPaths;
+	var VP=VectorPaths;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -4994,7 +4993,7 @@ function VectorPaths(){
  * that need a reference to an image
  */
 function ImageLists() {
-	const IL = ImageLists;
+	var IL = ImageLists;
 	IL.hBIcon = {};
 	IL.hBIcon.lightName = "hBIconWhite";
 	IL.hBIcon.darkName = "hBIconDarkGray";
@@ -5224,7 +5223,7 @@ BlockGraphics.SetGlow = function() {
 
 /* Computes intermediate values from constants */
 BlockGraphics.CalcCommand = function() {
-	const com = BlockGraphics.command;
+	var com = BlockGraphics.command;
 	com.extraHeight = 2 * com.cornerRadius;
 	com.extraWidth = 2 * com.cornerRadius + com.bumpTopWidth + com.bumpOffset;
 	com.bumpSlantWidth = (com.bumpTopWidth - com.bumpBottomWidth) / 2;
@@ -5232,32 +5231,32 @@ BlockGraphics.CalcCommand = function() {
 
 /* Generates pre-made parts of paths. Final paths are generated by inserting numbers between pre-made strings */
 BlockGraphics.CalcPaths = function() {
-	const com = BlockGraphics.command;
-	let path1 = "";
+	var com = BlockGraphics.command;
+	var path1 = "";
 	//path1+="m "+com.x+","+com.y;
 	path1 += " " + com.bumpOffset + ",0";
 	path1 += " " + com.bumpSlantWidth + "," + com.bumpDepth;
 	path1 += " " + com.bumpBottomWidth + ",0";
 	path1 += " " + com.bumpSlantWidth + "," + (0 - com.bumpDepth);
 	path1 += " ";
-	let path2 = ",0";
+	var path2 = ",0";
 	path2 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + com.cornerRadius;
 	path2 += " l 0,";
-	let path3 = "";
+	var path3 = "";
 	path3 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + com.cornerRadius;
 	path3 += " l ";
-	let path4 = ",0";
+	var path4 = ",0";
 	path4 += " " + (0 - com.bumpSlantWidth) + "," + com.bumpDepth;
 	path4 += " " + (0 - com.bumpBottomWidth) + ",0";
 	path4 += " " + (0 - com.bumpSlantWidth) + "," + (0 - com.bumpDepth);
 	path4 += " " + (0 - com.bumpOffset) + ",0";
 	path4 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
 	path4 += " ";
-	let path4NoBump = ",0";
+	var path4NoBump = ",0";
 	path4NoBump += " " + (0 - com.bumpSlantWidth - com.bumpBottomWidth - com.bumpSlantWidth - com.bumpOffset) + ",0";
 	path4NoBump += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
 	path4NoBump += " ";
-	let path5 = "";
+	var path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
 	com.path1 = path1;
@@ -5307,7 +5306,7 @@ BlockGraphics.buildPath = {};
  * @return {string}
  */
 BlockGraphics.buildPath.command = function(x, y, width, height) {
-	let path = "";
+	var path = "";
 	path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y;
 	path += BlockGraphics.command.path1;
 	path += width - BlockGraphics.command.extraWidth;
@@ -5328,7 +5327,7 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.highlightCommand = function(x, y) {
-	let path = "";
+	var path = "";
 	path += "m " + x + "," + y;
 	path += "l " + BlockGraphics.command.cornerRadius + ",0";
 	path += BlockGraphics.command.path1;
@@ -5345,9 +5344,9 @@ BlockGraphics.buildPath.highlightCommand = function(x, y) {
  * @return {string}
  */
 BlockGraphics.buildPath.reporter = function(x, y, width, height) {
-	const radius = height / 2;
-	const flatWidth = width - height;
-	let path = "";
+	var radius = height / 2;
+	var flatWidth = width - height;
+	var path = "";
 	path += "m " + (x + radius) + "," + (y + height - 2);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
@@ -5367,9 +5366,9 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.predicate = function(x, y, width, height, isSlot, isHighlight) {
-	let hexEndL;
-	let halfHeight = height / 2;
-	let bG;
+	var hexEndL;
+	var halfHeight = height / 2;
+	var bG;
 	if (isHighlight) {
 		bG = BlockGraphics.highlight;
 	} else {
@@ -5380,8 +5379,8 @@ BlockGraphics.buildPath.predicate = function(x, y, width, height, isSlot, isHigh
 	} else {
 		hexEndL = bG.hexEndL;
 	}
-	let flatWidth = width - 2 * hexEndL;
-	let path = "";
+	var flatWidth = width - 2 * hexEndL;
+	var path = "";
 	path += "m " + x + "," + (y + halfHeight);
 	path += " " + hexEndL + "," + (0 - halfHeight);
 	path += " " + flatWidth + ",0";
@@ -5395,7 +5394,7 @@ BlockGraphics.buildPath.predicate = function(x, y, width, height, isSlot, isHigh
 
 /* Creates the rectangular path of a RectSlot */
 BlockGraphics.buildPath.string = function(x, y, width, height) {
-	let path = "";
+	var path = "";
 	path += "m " + x + "," + y;
 	path += " " + width + ",0";
 	path += " 0," + height;
@@ -5406,10 +5405,10 @@ BlockGraphics.buildPath.string = function(x, y, width, height) {
 
 /* Creates the path of a HatBlock */
 BlockGraphics.buildPath.hat = function(x, y, width, height) {
-	let path = "";
-	let hat = BlockGraphics.hat;
-	let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
-	let flatHeight = height - BlockGraphics.command.cornerRadius * 2;
+	var path = "";
+	var hat = BlockGraphics.hat;
+	var flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
+	var flatHeight = height - BlockGraphics.command.cornerRadius * 2;
 	path += "m " + x + "," + y;
 	path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
 	path += " l " + flatWidth;
@@ -5436,9 +5435,9 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}
-	let path = "";
-	const loop = BlockGraphics.loop;
-	const comm = BlockGraphics.command;
+	var path = "";
+	var loop = BlockGraphics.loop;
+	var comm = BlockGraphics.command;
 	path += "m " + (x + comm.cornerRadius) + "," + y;
 	path += comm.path1;
 	path += width - comm.extraWidth;
@@ -5480,15 +5479,15 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
  * @return {string}
  */
 BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1, innerHeight2, midHeight) {
-	let path = "";
-	const loop = BlockGraphics.loop;
-	const comm = BlockGraphics.command;
+	var path = "";
+	var loop = BlockGraphics.loop;
+	var comm = BlockGraphics.command;
 	path += "m " + (x + comm.cornerRadius) + "," + y;
 	path += comm.path1;
 	path += width - comm.extraWidth;
-	let innerHeight = innerHeight1;
-	let currentH = height - midHeight - innerHeight1 - innerHeight2 - 2 * comm.cornerRadius - loop.bottomH;
-	for (let i = 0; i < 2; i++) {
+	var innerHeight = innerHeight1;
+	var currentH = height - midHeight - innerHeight1 - innerHeight2 - 2 * comm.cornerRadius - loop.bottomH;
+	for (var i = 0; i < 2; i++) {
 		path += comm.path2;
 		path += currentH;
 		path += comm.path3;
@@ -5525,10 +5524,10 @@ BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1,
  * @return {string}
  */
 BlockGraphics.buildPath.calibrate = function(x, y, width, height) {
-	let halfHeight = height / 2;
-	let bG = BlockGraphics.calibrate;
-	let flatWidth = width;
-	let path = "";
+	var halfHeight = height / 2;
+	var bG = BlockGraphics.calibrate;
+	var flatWidth = width;
+	var path = "";
 	path += "m " + x + "," + (y + halfHeight);
 	path += " " + 0 + "," + (0 - halfHeight);
 	path += " " + flatWidth + ",0";
@@ -5552,8 +5551,8 @@ BlockGraphics.create = {};
  */
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
 	if (!active) category = "inactive";
-	const path = GuiElements.create.path(group);
-	const fill = Colors.getGradient(category);
+	var path = GuiElements.create.path(group);
+	var fill = Colors.getGradient(category);
 	path.setAttributeNS(null, "fill", fill);
 	BlockGraphics.update.stroke(path, category, returnsValue, active);
 	return path;
@@ -5568,8 +5567,8 @@ BlockGraphics.create.block = function(category, group, returnsValue, active) {
  */
 BlockGraphics.create.slot = function(group, type, category, active) {
 	if (!active) category = "inactive";
-	const bG = BlockGraphics.reporter;
-	const path = GuiElements.create.path(group);
+	var bG = BlockGraphics.reporter;
+	var path = GuiElements.create.path(group);
 	if (type === 2) {
 		path.setAttributeNS(null, "fill", "url(#gradient_dark_" + category + ")");
 	} else {
@@ -5583,7 +5582,7 @@ BlockGraphics.create.slot = function(group, type, category, active) {
  * @param {Element} group
  */
 BlockGraphics.create.slotHitBox = function(group) {
-	const rectE = GuiElements.create.rect(group);
+	var rectE = GuiElements.create.rect(group);
 	rectE.setAttributeNS(null, "fill", "#000");
 	GuiElements.update.opacity(rectE, 0);
 	return rectE;
@@ -5595,14 +5594,14 @@ BlockGraphics.create.slotHitBox = function(group) {
  * @param {Element} group
  */
 BlockGraphics.create.labelText = function(text, group) {
-	const bG = BlockGraphics.labelText;
-	const textElement = GuiElements.create.text();
+	var bG = BlockGraphics.labelText;
+	var textElement = GuiElements.create.text();
 	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
 	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
 	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
 	textElement.setAttributeNS(null, "fill", bG.fill);
 	textElement.setAttributeNS(null, "class", "noselect");
-	const textNode = document.createTextNode(text);
+	var textNode = document.createTextNode(text);
 	textElement.appendChild(textNode);
 	group.appendChild(textElement);
 	return textElement;
@@ -5614,8 +5613,8 @@ BlockGraphics.create.labelText = function(text, group) {
  * @param {Element} group
  */
 BlockGraphics.create.valueText = function(text, group) {
-	const bG = BlockGraphics.valueText;
-	const textElement = GuiElements.create.text();
+	var bG = BlockGraphics.valueText;
+	var textElement = GuiElements.create.text();
 	textElement.setAttributeNS(null, "font-family", bG.font.fontFamily);
 	textElement.setAttributeNS(null, "font-size", bG.font.fontSize);
 	textElement.setAttributeNS(null, "font-weight", bG.font.fontWeight);
@@ -5645,7 +5644,7 @@ BlockGraphics.update = {};
  * @return {*}
  */
 BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, innerHeight1, innerHeight2, midHeight, bottomOpen) {
-	let pathD;
+	var pathD;
 	switch (type) {
 		case 0:
 			pathD = BlockGraphics.buildPath.command(x, y, width, height);
@@ -5692,7 +5691,7 @@ BlockGraphics.update.text = function(text, x, y) {
  * @param {Element} path
  */
 BlockGraphics.update.glow = function(path) {
-	const glow = BlockGraphics.glow;
+	var glow = BlockGraphics.glow;
 	path.setAttributeNS(null, "stroke", glow.color);
 	path.setAttributeNS(null, "stroke-width", glow.strokeW);
 };
@@ -5707,7 +5706,7 @@ BlockGraphics.update.glow = function(path) {
 BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
 	if (!active) category = "inactive";
 	if (returnsValue) {
-		const outline = Colors.getColor(category);
+		var outline = Colors.getColor(category);
 		path.setAttributeNS(null, "stroke", outline);
 		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
 	} else {
@@ -5736,7 +5735,7 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
  */
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
 	if (!active) category = "inactive";
-	const fill = Colors.getGradient(category);
+	var fill = Colors.getGradient(category);
 	path.setAttributeNS(null, "fill", fill);
 	if (!glowing) {
 		BlockGraphics.update.stroke(path, category, returnsValue, active);
@@ -5754,12 +5753,12 @@ BlockGraphics.update.blockActive = function(path, category, returnsValue, active
  * @return {string}
  */
 BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) {
-	const bG = BlockGraphics.highlight;
-	let pathD;
-	const hX = x - bG.margin;
-	const hY = y - bG.margin;
-	const hWidth = width + 2 * bG.margin;
-	const hHeight = height + 2 * bG.margin;
+	var bG = BlockGraphics.highlight;
+	var pathD;
+	var hX = x - bG.margin;
+	var hY = y - bG.margin;
+	var hWidth = width + 2 * bG.margin;
+	var hHeight = height + 2 * bG.margin;
 	switch (type) {
 		case 0:
 			pathD = BlockGraphics.buildPath.highlightCommand(x, y);
@@ -5854,29 +5853,29 @@ Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, d
  * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
  */
 Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
-	let status = {};
+	var status = {};
 	status.donePlayingCallback = donePlayingCallback;
 	Sound.playingSoundStatuses.push(status);
-	const removeEntry = function(){
-		let index = Sound.playingSoundStatuses.indexOf(status);
+	var removeEntry = function(){
+		var index = Sound.playingSoundStatuses.indexOf(status);
 		if(index > -1) {
 			Sound.playingSoundStatuses.splice(index, 1);
 			return true;
 		}
 		return false;
 	};
-	const errorFn = function(){
+	var errorFn = function(){
 		removeEntry();
 		if(errorCallback != null) errorCallback();
 	};
-	const donePlayingFn = function(){
+	var donePlayingFn = function(){
 		if(removeEntry()) {
 			if (donePlayingCallback != null) donePlayingCallback();
 		}
 	};
 	Sound.getDuration(id, isRecording, function(duration){
 		//id = id.split(".wav").join(""); //TODO: remove .wav replacement
-		let request = new HttpRequestBuilder("sound/play");
+		var request = new HttpRequestBuilder("sound/play");
 		request.addParam("filename", id);
 		request.addParam("type", Sound.boolToType(isRecording));
 		HtmlServer.sendRequestWithCallback(request.toString(), function(){
@@ -5921,11 +5920,11 @@ Sound.play = function(id, isRecording, status){
  * @param {function} callbackError
  */
 Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
-	let request = new HttpRequestBuilder("sound/duration");
+	var request = new HttpRequestBuilder("sound/duration");
 	request.addParam("filename", id);
 	request.addParam("type", Sound.boolToType(isRecording));
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let res = Number(result);
+		var res = Number(result);
 		if(!isNaN(res)){
 			if(callbackFn != null) callbackFn(res);
 		} else{
@@ -5947,12 +5946,12 @@ Sound.changeFile = function(){
  * @param {function} [callbackFn] - Called with a list of Sounds when that are loaded
  */
 Sound.loadSounds = function(isRecording, callbackFn){
-	let request = new HttpRequestBuilder("sound/names");
+	var request = new HttpRequestBuilder("sound/names");
 	request.addParam("type", Sound.boolToType(isRecording));
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let list = result.split("\n");
+		var list = result.split("\n");
 		if(result === "") list = [];
-		let resultList = list.map(function(id){
+		var resultList = list.map(function(id){
 			return new Sound(id, isRecording);
 		});
 		if(isRecording){
@@ -5972,7 +5971,7 @@ Sound.loadSounds = function(isRecording, callbackFn){
  */
 Sound.nameFromId = function(id, isRecording){
 	if(isRecording) return id;
-	let name = id;
+	var name = id;
 	/*if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
 		name = name.substring(0, name.length - 4);
 	}*/
@@ -5991,8 +5990,8 @@ Sound.nameFromId = function(id, isRecording){
  */
 Sound.stopAllSounds=function(status, callbackFn){
 	if(status == null) status = {};
-	let request = new HttpRequestBuilder("sound/stopAll");
-	let callback = function() {
+	var request = new HttpRequestBuilder("sound/stopAll");
+	var callback = function() {
 		status.finished = true;
 		Sound.playingSoundStatuses.forEach(function (playStatus) {
 			if(playStatus.donePlayingCallback != null) playStatus.donePlayingCallback();
@@ -6034,7 +6033,7 @@ Sound.boolToType = function(isRecording){
  * @return {string|null}
  */
 Sound.lookupById = function(id){
-	let result = null;
+	var result = null;
 	Sound.soundList.forEach(function(sound){
 		if(sound.id === id) {
 			result = sound;
@@ -6048,7 +6047,7 @@ Sound.lookupById = function(id){
  */
 Sound.playSnap = function(){
 	if(SettingsManager.enableSnapNoise.getValue() === "true") {
-		let snapSoundRequest = new HttpRequestBuilder("sound/play");
+		var snapSoundRequest = new HttpRequestBuilder("sound/play");
 		snapSoundRequest.addParam("type", Sound.type.ui);
 		snapSoundRequest.addParam("filename", Sound.click);
 		HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
@@ -6062,7 +6061,7 @@ Sound.playSnap = function(){
  * It adds touch event handlers and keeps track of what types of objects are being touched/dragged.
  */
 function TouchReceiver() {
-	const TR = TouchReceiver;   // shorthand
+	var TR = TouchReceiver;   // shorthand
 	TR.mouse = DebugOptions.shouldUseMouseMode();   // Use true when debugging on a desktop.
 	TR.longTouchInterval = 700;   // The number of ms before a touch is considered a long touch.
 	TR.fixScrollingInterval = 100;   // Duration between firing fix scroll timer
@@ -6082,9 +6081,9 @@ function TouchReceiver() {
 	TR.moveThreshold = 10;   // The minimum threshold before we consider the user to be dragging the screen
 	TR.interactionEnabeled = true;   // Whether touches should be responded to
 	TR.interactionTimeOut = null;
-	let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
-	let handlerUp = "touchend";
-	let handlerDown = "touchstart";
+	var handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
+	var handlerUp = "touchend";
+	var handlerDown = "touchstart";
 	if (TR.mouse) {
 		handlerMove = "mousemove";
 		handlerUp = "mouseup";
@@ -6101,7 +6100,7 @@ function TouchReceiver() {
  * Adds event handlers for handlerMove and handlerUp events to the whole document.
  */
 TouchReceiver.addListeners = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(document.body, TR.handlerMove, TouchReceiver.handleMove, false);
 	TR.addEventListenerSafe(document.body, TR.handlerUp, TouchReceiver.handleUp, false);
 	TR.addEventListenerSafe(document.body, TR.handlerDown, TouchReceiver.handleDocumentDown, false);
@@ -6138,7 +6137,7 @@ TouchReceiver.handleDocumentDown = function(event) {
  * @param {number} timeOut
  */
 TouchReceiver.disableInteraction = function(timeOut) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.interactionEnabeled = false;
 	TR.interactionTimeOut = window.setTimeout(function() {
 		TouchReceiver.enableInteraction();
@@ -6149,7 +6148,7 @@ TouchReceiver.disableInteraction = function(timeOut) {
  * Re-enables interaction
  */
 TouchReceiver.enableInteraction = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.interactionEnabeled = true;
 	if (TR.interactionTimeOut != null) {
 		window.clearTimeout(TR.interactionTimeOut);
@@ -6209,7 +6208,7 @@ TouchReceiver.getTouchY = function(e, i) {
  * @return {boolean} - returns true iff !TR.touchDown
  */
 TouchReceiver.touchstart = function(e, preventD) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (!TR.interactionEnabeled) {
 		e.preventDefault();
 		return false;
@@ -6222,7 +6221,7 @@ TouchReceiver.touchstart = function(e, preventD) {
 		e.preventDefault();   // Stops 300 ms delay events
 	}
 	// e.stopPropagation();
-	const startTouch = !TR.touchDown;
+	var startTouch = !TR.touchDown;
 	if (startTouch) {   // prevents multitouch issues.
 		TR.stopLongTouchTimer();
 		TR.dragging = false;
@@ -6241,7 +6240,7 @@ TouchReceiver.touchstart = function(e, preventD) {
  * @param {event} e
  */
 TouchReceiver.checkStartZoom = function(e) {
-	const TR = TouchReceiver;   // shorthand
+	var TR = TouchReceiver;   // shorthand
 	if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
 		// There must be 2 touches in touch mode and not already be zooming
 		// We know the current touch is on the canvas
@@ -6269,7 +6268,7 @@ TouchReceiver.checkStartZoom = function(e) {
  * @return {boolean}
  */
 TouchReceiver.targetIsInTabSpace = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.targetType === "tabSpace") {
 		return true;
 	} else if (TR.targetType === "block") {
@@ -6288,7 +6287,7 @@ TouchReceiver.targetIsInTabSpace = function() {
  * @fix rename to touchStartBlock.
  */
 TouchReceiver.touchStartBlock = function(target, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (!target.stack.isDisplayStack) {
 		TR.checkStartZoom(e);
 	}
@@ -6310,7 +6309,7 @@ TouchReceiver.touchStartBlock = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartSlot = function(slot, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (!slot.parent.stack.isDisplayStack) {
 		TR.checkStartZoom(e);
 	}
@@ -6329,7 +6328,7 @@ TouchReceiver.touchStartSlot = function(slot, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartCatBN = function(target, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e)) {
 		Overlay.closeOverlays();   // Close any visible overlays.
 		TR.targetType = "category";
@@ -6343,8 +6342,8 @@ TouchReceiver.touchStartCatBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartBN = function(target, e) {
-	const TR = TouchReceiver;
-	const shouldPreventDefault = !target.scrollable && target.menuBnList == null;
+	var TR = TouchReceiver;
+	var shouldPreventDefault = !target.scrollable && target.menuBnList == null;
 	if (!shouldPreventDefault) {
 		e.stopPropagation();   // Prevent other calls from preventing default
 	}
@@ -6361,7 +6360,7 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType = "scrollBox";
@@ -6373,7 +6372,7 @@ TouchReceiver.touchStartScrollBox = function(target, e) {
  * @param {event} e
  */
 TouchReceiver.touchStartTabSpace = function(e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.checkStartZoom(e);
 	if (TR.touchstart(e)) {
 		Overlay.closeOverlays();   // Close any visible overlays.
@@ -6385,7 +6384,7 @@ TouchReceiver.touchStartTabSpace = function(e) {
  * @param {event} e
  */
 TouchReceiver.touchStartDisplayBox = function(e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e)) {
 		Overlay.closeOverlays();   // Close any visible overlays.
 		TR.targetType = "displayBox";
@@ -6400,7 +6399,7 @@ TouchReceiver.touchStartDisplayBox = function(e) {
  * @param {event} e
  */
 TouchReceiver.touchStartOverlayPart = function(e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e)) {
 
 	}
@@ -6410,7 +6409,7 @@ TouchReceiver.touchStartOverlayPart = function(e) {
  * @param e
  */
 TouchReceiver.touchStartSmoothMenuBnList = function(target, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
 		TR.targetType = "smoothMenuBnList";
@@ -6424,7 +6423,7 @@ TouchReceiver.touchStartSmoothMenuBnList = function(target, e) {
  * @param e
  */
 TouchReceiver.touchStartTabRow = function(tabRow, index, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e)) {
 		Overlay.closeOverlaysExcept(tabRow.partOfOverlay);
 		TR.targetType = "tabrow";
@@ -6436,7 +6435,7 @@ TouchReceiver.touchStartTabRow = function(tabRow, index, e) {
  * @param e
  */
 TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlays();
 		TR.targetType = "collapsibleItem";
@@ -6460,8 +6459,8 @@ TouchReceiver.touchStartDialogBlock = function(e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchmove = function(e) {
-	const TR = TouchReceiver;
-	let shouldPreventDefault = true;   // Don't prevent default if the target scrolls
+	var TR = TouchReceiver;
+	var shouldPreventDefault = true;   // Don't prevent default if the target scrolls
 	if (!TR.interactionEnabeled) {
 		e.preventDefault();
 		return;
@@ -6479,10 +6478,10 @@ TouchReceiver.touchmove = function(e) {
 			if (e.touches.length < 2) {
 				TR.touchend(e);
 			} else {
-				const x1 = TR.getTouchX(e, 0);
-				const y1 = TR.getTouchY(e, 0);
-				const x2 = TR.getTouchX(e, 1);
-				const y2 = TR.getTouchY(e, 1);
+				var x1 = TR.getTouchX(e, 0);
+				var y1 = TR.getTouchY(e, 0);
+				var x2 = TR.getTouchX(e, 1);
+				var y2 = TR.getTouchY(e, 1);
 				TabManager.updateZooming(x1, y1, x2, y2);
 			}
 		} else {
@@ -6499,8 +6498,8 @@ TouchReceiver.touchmove = function(e) {
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType === "displayStack") {
 			    if (typeof TR.target.draggable == "undefined" || TR.target.draggable) {
-			        const x = TR.target.stack.getAbsX();
-                    const y = TR.target.stack.getAbsY();
+			        var x = TR.target.stack.getAbsX();
+                    var y = TR.target.stack.getAbsY();
                     // The first block of the duplicated BlockStack is the new target.
                     TR.target = TR.target.stack.duplicate(x, y).firstBlock;
                     TR.targetType = "block";
@@ -6511,8 +6510,8 @@ TouchReceiver.touchmove = function(e) {
 			 then the BlockStack should move. */
 			if (TR.targetType === "block") {
 				// If the CodeManager has not started the movement, this must be done first.
-				let x = TR.getX(e);
-				let y = TR.getY(e);
+				var x = TR.getX(e);
+				var y = TR.getY(e);
 				if (TR.blocksMoving) {
 					// The CodeManager handles moving BlockStacks.
 					CodeManager.move.update(x, y);
@@ -6570,10 +6569,10 @@ TouchReceiver.touchmove = function(e) {
  * @return {boolean}
  */
 TouchReceiver.hasMovedOutsideThreshold = function(e) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (!TR.touchDown) return false;
-	const distX = TR.startX - TR.getX(e);
-	const distY = TR.startY - TR.getY(e);
+	var distX = TR.startX - TR.getX(e);
+	var distY = TR.startY - TR.getY(e);
 	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
 };
 
@@ -6583,8 +6582,8 @@ TouchReceiver.hasMovedOutsideThreshold = function(e) {
  * @fix DateTime is no longer necessary to prevent repeat events.
  */
 TouchReceiver.touchend = function(e) {
-	const TR = TouchReceiver;
-	let shouldPreventDefault = true;
+	var TR = TouchReceiver;
+	var shouldPreventDefault = true;
 	if (TR.zooming) {
 		if (e.touches.length === 0) {
 			TabManager.endZooming();
@@ -6625,8 +6624,8 @@ TouchReceiver.touchend = function(e) {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
 		    // tapping a block in the display stack runs the block once
-		    const x = TR.target.stack.getAbsX();
-            const y = TR.target.stack.getAbsY();
+		    var x = TR.target.stack.getAbsX();
+            var y = TR.target.stack.getAbsY();
             TR.targetType = "block";
             TR.target.updateRun();
             // start the execution of a block
@@ -6652,8 +6651,8 @@ TouchReceiver.touchend = function(e) {
  * Blocks that are moving should stop moving, but actions should not be triggered.
  */
 TouchReceiver.touchInterrupt = function() {
-	const TR = TouchReceiver;
-	const touchWasDown = TR.touchDown;
+	var TR = TouchReceiver;
+	var touchWasDown = TR.touchDown;
 	TR.touchDown = false;
 	if (touchWasDown && !TR.longTouch) {   // Only interrupt if there is a finger on the screen.
 		TR.touchDown = false;
@@ -6674,7 +6673,7 @@ TouchReceiver.touchInterrupt = function() {
  * Triggered when the longTouchTimer tics.  Potentially shows a context menu
  */
 TouchReceiver.touchLong = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.stopLongTouchTimer();
 	if (TR.touchDown && !TR.zooming) {
 		if (TR.targetType === "slot") {
@@ -6706,7 +6705,7 @@ TouchReceiver.touchLong = function() {
  * Starts the longTouchTimer
  */
 TouchReceiver.setLongTouchTimer = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.stopLongTouchTimer();
 	TR.longTouchTimer = self.setInterval(function() {
 		TouchReceiver.touchLong();
@@ -6718,7 +6717,7 @@ TouchReceiver.setLongTouchTimer = function() {
  * Stops the longTouchTimer
  */
 TouchReceiver.stopLongTouchTimer = function() {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	if (TR.timerRunning) {
 		TR.longTouchTimer = window.clearInterval(this.longTouchTimer);
 		TR.timerRunning = false;
@@ -6731,7 +6730,7 @@ TouchReceiver.stopLongTouchTimer = function() {
  * @param {Category} category - The category of the CategoryBN.
  */
 TouchReceiver.addListenersCat = function(element, category) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Category.
 		TouchReceiver.touchStartCatBN(category, e);
@@ -6743,7 +6742,7 @@ TouchReceiver.addListenersCat = function(element, category) {
  * @param {Block} parent - The Block the SVG element belongs to.
  */
 TouchReceiver.addListenersChild = function(element, parent) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Block.
 		TouchReceiver.touchStartBlock(parent, e);
@@ -6755,7 +6754,7 @@ TouchReceiver.addListenersChild = function(element, parent) {
  * @param {Slot} slot - The Slot the SVG element belongs to.
  */
 TouchReceiver.addListenersSlot = function(element, slot) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Slot.
 		TouchReceiver.touchStartSlot(slot, e);
@@ -6767,7 +6766,7 @@ TouchReceiver.addListenersSlot = function(element, slot) {
  * @param {Button} parent - The Button the SVG element belongs to.
  */
 TouchReceiver.addListenersBN = function(element, parent) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Button.
 		TouchReceiver.touchStartBN(parent, e);
@@ -6778,7 +6777,7 @@ TouchReceiver.addListenersBN = function(element, parent) {
  * @param {SmoothScrollBox} parent
  */
 TouchReceiver.addListenersScrollBox = function(element, parent) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartScrollBox(parent, e);
@@ -6789,7 +6788,7 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
  * @param {Element} element
  */
 TouchReceiver.addListenersTabSpace = function(element) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TabManager.
 		TouchReceiver.touchStartTabSpace(e);
@@ -6800,7 +6799,7 @@ TouchReceiver.addListenersTabSpace = function(element) {
  * @param {Element} element - The part of the displayBox the listeners are being applied to.
  */
 TouchReceiver.addListenersDisplayBox = function(element) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartDisplayBox(e);
@@ -6812,7 +6811,7 @@ TouchReceiver.addListenersDisplayBox = function(element) {
  * @param {number} index
  */
 TouchReceiver.addListenersTabRow = function(element, tabRow, index) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartTabRow(tabRow, index, e);
 		TR.touchDown = false;
@@ -6824,7 +6823,7 @@ TouchReceiver.addListenersTabRow = function(element, tabRow, index) {
  * @param {Element} element - The part the listeners are being applied to.
  */
 TouchReceiver.addListenersOverlayPart = function(element) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartOverlayPart(e);
 	}, false);
@@ -6834,7 +6833,7 @@ TouchReceiver.addListenersOverlayPart = function(element) {
  * @param {SmoothMenuBnList} parent
  */
 TouchReceiver.addListenersSmoothMenuBnListScrollRect = function(element, parent) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	element.parent = parent;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartSmoothMenuBnList(this.parent, e);
@@ -6845,7 +6844,7 @@ TouchReceiver.addListenersSmoothMenuBnListScrollRect = function(element, parent)
  * @param {CollapsibleItem} item
  */
 TouchReceiver.addListenersCollapsibleItem = function(element, item) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartCollapsibleItem(item, e);
 	}, false);
@@ -6854,7 +6853,7 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
  * @param {Element} element
  */
 TouchReceiver.addListenersDialogBlock = function(element) {
-	const TR = TouchReceiver;
+	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
 		TouchReceiver.touchStartDialogBlock(e);
 	}, false);
@@ -6883,14 +6882,14 @@ TouchReceiver.addEventListenerSafe = function(element, type, func) {
 TouchReceiver.createScrollFixTimer = function(div, statusObj) {
 	// If the timer isn't necessary and there is no status object, there is no reason to make the timer
 	if (!GuiElements.isIos && statusObj == null) return null;
-	const mem = {};
+	var mem = {};
 	// Used to detect scrolling
 	mem.lastY = null;
 	mem.lastX = null;
-	const fixScroll = function() {
-		const stillY = mem.lastY == null || mem.lastY === div.scrollTop;
-		const stillX = mem.lastX == null || mem.lastX === div.scrollLeft;
-		const still = stillX && stillY;
+	var fixScroll = function() {
+		var stillY = mem.lastY == null || mem.lastY === div.scrollTop;
+		var stillX = mem.lastX == null || mem.lastX === div.scrollLeft;
+		var still = stillX && stillY;
 
 		// Update status object
 		if (statusObj != null) statusObj.still = still;
@@ -6900,7 +6899,7 @@ TouchReceiver.createScrollFixTimer = function(div, statusObj) {
 		mem.lastY = div.scrollTop;
 		mem.lastX = div.scrollLeft;
 
-		const height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
+		var height = parseInt(window.getComputedStyle(div).getPropertyValue('height'), 10);
 		// Don't do the fix until the div stops moving
 		if (TouchReceiver.touchDown || !still) return;
 		// The div can't move so it doesn't matter
@@ -6935,7 +6934,7 @@ TouchReceiver.setInitialScrollFix = function(div) {
  * to show/hide the BlockPalette.  Its title shows the name of the current project.
  */
 function TitleBar() {
-	let TB = TitleBar;
+	var TB = TitleBar;
 	TB.titleTextVisble = true;
 	TB.titleText = "";
 	TB.prevTitleText = "";
@@ -6950,7 +6949,7 @@ function TitleBar() {
  * functions.
  */
 TitleBar.setGraphicsPart1 = function() {
-	const TB = TitleBar;
+	var TB = TitleBar;
 	if (GuiElements.smallMode) {
 		TB.height = 35;
 		TB.buttonMargin = Button.defaultMargin / 2;
@@ -6961,7 +6960,7 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.width = GuiElements.width;
 	TB.buttonW = TB.height * 64 / 54;
 
-	const maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+	var maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
 	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
 
 	TB.longButtonW = 85;
@@ -6976,7 +6975,7 @@ TitleBar.setGraphicsPart1 = function() {
 
 	TB.buttonH = TB.height - 2 * TB.buttonMargin;
 	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
-	const maxIconHeight = maxBnWidth * 0.7;
+	var maxIconHeight = maxBnWidth * 0.7;
 	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
@@ -6985,7 +6984,7 @@ TitleBar.setGraphicsPart1 = function() {
 
 TitleBar.setGraphicsPart2 = function() {
 	/* Compute the locations of all the buttons */
-	const TB = TitleBar;
+	var TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
 	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
@@ -7000,7 +6999,7 @@ TitleBar.setGraphicsPart2 = function() {
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
 	TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 
-	let suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
+	var suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
 	if (TB.undoBnX < suggestedUndoBnX) {
 		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
 	}
@@ -7011,7 +7010,7 @@ TitleBar.setGraphicsPart2 = function() {
  * Creates the rectangle for the TitleBar
  */
 TitleBar.createBar = function() {
-	const TB = TitleBar;
+	var TB = TitleBar;
 	TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
 };
@@ -7020,8 +7019,8 @@ TitleBar.createBar = function() {
  * Creates all the buttons and menus
  */
 TitleBar.makeButtons = function() {
-	const TB = TitleBar;
-	const TBLayer = GuiElements.layers.titlebar;
+	var TB = TitleBar;
+	var TBLayer = GuiElements.layers.titlebar;
 	TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
 	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
@@ -7064,7 +7063,7 @@ TitleBar.makeButtons = function() {
  * Removes all the buttons so they can be redrawn
  */
 TitleBar.removeButtons = function() {
-	let TB = TitleBar;
+	var TB = TitleBar;
 	TB.flagBn.remove();
 	TB.stopBn.remove();
 	TB.fileBn.remove();
@@ -7081,7 +7080,7 @@ TitleBar.removeButtons = function() {
  * Makes the text element for the TitleBar
  */
 TitleBar.makeTitleText = function() {
-	const TB = TitleBar;
+	var TB = TitleBar;
 	TB.titleLabel = GuiElements.draw.text(0, 0, "", TB.font, TB.titleColor);
 	GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 };
@@ -7093,7 +7092,7 @@ TitleBar.makeTitleText = function() {
  * @param {string|null} text - The text to display or null if there is no text
  */
 TitleBar.setText = function(text) {
-	const TB = TitleBar;
+	var TB = TitleBar;
 	if (text == null) text = TB.prevTitleText;
 	else TB.prevTitleText = text;
 	TB.titleText = text;
@@ -7104,7 +7103,7 @@ TitleBar.setText = function(text) {
  * Moves the text to the correct position
  */
 TitleBar.updateText = function() {
-	let TB = TitleBar;
+	var TB = TitleBar;
 	if (GuiElements.width < BlockPalette.width * 2) {
 		if (TB.titleTextVisble) {
 			// The text doesn't fit.  Hide it.
@@ -7117,11 +7116,11 @@ TitleBar.updateText = function() {
 			GuiElements.layers.titlebar.appendChild(TB.titleLabel);
 			TB.titleTextVisble = true;
 		}
-		let maxWidth = TB.titleWidth;
+		var maxWidth = TB.titleWidth;
 		GuiElements.update.textLimitWidth(TB.titleLabel, TB.titleText, maxWidth);
-		let width = GuiElements.measure.textWidth(TB.titleLabel);
-		let x = GuiElements.width / 2 - width / 2;
-		let y = TB.height / 2 + TB.font.charHeight / 2;
+		var width = GuiElements.measure.textWidth(TB.titleLabel);
+		var x = GuiElements.width / 2 - width / 2;
+		var y = TB.height / 2 + TB.font.charHeight / 2;
 		if (x < TB.titleLeftX) {
 			x = TB.titleLeftX;
 		} else if (x + width > TB.titleRightX) {
@@ -7135,9 +7134,9 @@ TitleBar.updateText = function() {
  * Builds the debug Button
  */
 TitleBar.enableDebug = function() {
-	const TB = TitleBar;
+	var TB = TitleBar;
 	TB.debugEnabled = true;
-	const TBLayer = GuiElements.layers.titlebar;
+	var TBLayer = GuiElements.layers.titlebar;
 	if (TB.debugBn == null) {
 		TB.debugBn = new Button(TB.debugX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
 		TB.debugBn.addText("Debug");
@@ -7165,8 +7164,8 @@ TitleBar.updateZoomPart1 = function() {
  * Redraws the buttons
  */
 TitleBar.updateZoomPart2 = function() {
-	let TB = TitleBar;
-	let viewShowing = TB.viewBn.toggled;
+	var TB = TitleBar;
+	var viewShowing = TB.viewBn.toggled;
 	TB.setGraphicsPart2();
 	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
 	TitleBar.removeButtons();
@@ -7235,12 +7234,12 @@ BlockPalette.setGraphics = function() {
  * Called when the zoom level changes or the screen is resized to recompute dimensions
  */
 BlockPalette.updateZoom = function() {
-	let BP = BlockPalette;
+	var BP = BlockPalette;
 	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
 	GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
 	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
-	for (let i = 0; i < BlockPalette.categories.length; i++) {
+	for (var i = 0; i < BlockPalette.categories.length; i++) {
 		BlockPalette.categories[i].updateZoom();
 	}
 };
@@ -7249,7 +7248,7 @@ BlockPalette.updateZoom = function() {
  * Creates the gray rectangle below the CategoryBNs
  */
 BlockPalette.createCatBg = function() {
-	let BP = BlockPalette;
+	var BP = BlockPalette;
 	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
 	GuiElements.layers.catBg.appendChild(BP.catRect);
 	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
@@ -7259,7 +7258,7 @@ BlockPalette.createCatBg = function() {
  * Creates the long black rectangle on the left of the screen
  */
 BlockPalette.createPalBg = function() {
-	let BP = BlockPalette;
+	var BP = BlockPalette;
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
 };
@@ -7268,24 +7267,24 @@ BlockPalette.createPalBg = function() {
  * Creates the categories listed in the BlockList
  */
 BlockPalette.createCategories = function() {
-	const catCount = BlockList.catCount();
-	const numberOfRows = Math.ceil(catCount / 2);
+	var catCount = BlockList.catCount();
+	var numberOfRows = Math.ceil(catCount / 2);
 
 	// Automatically alternates between two columns while adding categories
-	const col1X = BlockPalette.catHMargin;
-	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+	var col1X = BlockPalette.catHMargin;
+	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
 
-	let firstColumn = true;
-	let currentY = BlockPalette.catVMargin;
-	let currentX = col1X;
-	let usedRows = 0;
-	for (let i = 0; i < catCount; i++) {
+	var firstColumn = true;
+	var currentY = BlockPalette.catVMargin;
+	var currentX = col1X;
+	var usedRows = 0;
+	for (var i = 0; i < catCount; i++) {
 		if (firstColumn && usedRows >= numberOfRows) {
 			currentX = col2X;
 			firstColumn = false;
 			currentY = BlockPalette.catVMargin;
 		}
-		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
 		BlockPalette.categories.push(currentCat);
 		usedRows++;
 		currentY += CategoryBN.height + CategoryBN.vMargin;
@@ -7298,7 +7297,7 @@ BlockPalette.createCategories = function() {
  * @return {Category}
  */
 BlockPalette.getCategory = function(id) {
-	let i = 0;
+	var i = 0;
 	while (BlockPalette.categories[i].id !== id) {
 		i++;
 	}
@@ -7319,7 +7318,7 @@ BlockPalette.selectFirstCat = function() {
  * @return {boolean}
  */
 BlockPalette.isStackOverPalette = function(x, y) {
-	const BP = BlockPalette;
+	var BP = BlockPalette;
 	if (!GuiElements.paletteLayersVisible) return false;
 	return CodeManager.move.pInRange(x, y, 0, BP.catY, BP.width, GuiElements.height - TitleBar.height);
 };
@@ -7328,18 +7327,18 @@ BlockPalette.isStackOverPalette = function(x, y) {
  * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
  */
 BlockPalette.showTrash = function() {
-	let BP = BlockPalette;
+	var BP = BlockPalette;
 	// If the trash is not visible
 	if (!BP.trash) {
 		BP.trash = GuiElements.create.group(0, 0);
-		let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+		var trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 		GuiElements.update.opacity(trashBg, BP.trashOpacity);
 		BP.trash.appendChild(trashBg);
 
-		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
-		let imgX = BP.width / 2 - trashWidth / 2; // Center X
-		let imgY = BP.y + BP.height / 2 - BP.trashHeight / 2; // Center Y
-		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
+		var trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
+		var imgX = BP.width / 2 - trashWidth / 2; // Center X
+		var imgY = BP.y + BP.height / 2 - BP.trashHeight / 2; // Center Y
+		var trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
 		GuiElements.layers.trash.appendChild(BP.trash);
@@ -7350,7 +7349,7 @@ BlockPalette.showTrash = function() {
  * Removes the trash icon
  */
 BlockPalette.hideTrash = function() {
-	let BP = BlockPalette;
+	var BP = BlockPalette;
 	if (BP.trash) {
 		BP.trash.remove();
 		BP.trash = null;
@@ -7387,7 +7386,7 @@ BlockPalette.passRecursivelyDown = function(message) {
  * @param {string} functionName - The function to call on each category
  */
 BlockPalette.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	BlockPalette.categories.forEach(function(category) {
 		category[functionName].apply(category, args);
 	});
@@ -7529,8 +7528,8 @@ DisplayStack.prototype.move = function(x, y) {
  * @return {BlockStack}
  */
 DisplayStack.prototype.duplicate = function(x, y) {
-	const tab = TabManager.activeTab;
-	const firstCopyBlock = this.firstBlock.duplicate(x, y);
+	var tab = TabManager.activeTab;
+	var firstCopyBlock = this.firstBlock.duplicate(x, y);
 	return new BlockStack(firstCopyBlock, tab);
 };
 
@@ -7559,8 +7558,8 @@ DisplayStack.prototype.showDeviceDropDowns = function(deviceClass) {
  * @param {string} message
  */
 DisplayStack.prototype.passRecursivelyDown = function(message) {
-	const myMessage = message;
-	let funArgs = Array.prototype.slice.call(arguments, 1);
+	var myMessage = message;
+	var funArgs = Array.prototype.slice.call(arguments, 1);
 
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -7577,7 +7576,7 @@ DisplayStack.prototype.passRecursivelyDown = function(message) {
  * @param {string} functionName
  */
 DisplayStack.prototype.passRecursively = function(functionName) {
-	let args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock, args);
 };
 /**
@@ -7598,8 +7597,8 @@ function CategoryBN(x, y, category) {
 }
 
 CategoryBN.setGraphics = function() {
-	const BP = BlockPalette;
-	const CBN = CategoryBN;
+	var BP = BlockPalette;
+	var CBN = CategoryBN;
 	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
 	CBN.foreground = "#000";
@@ -7609,7 +7608,7 @@ CategoryBN.setGraphics = function() {
 
 	CBN.hMargin = BP.catHMargin;
 	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
-	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
+	var numberOfRows = Math.ceil(BlockList.catCount() / 2);
 	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
@@ -7619,7 +7618,7 @@ CategoryBN.setGraphics = function() {
  * Renders the visuals of the CategoryBN
  */
 CategoryBN.prototype.buildGraphics = function() {
-	const CBN = CategoryBN;
+	var CBN = CategoryBN;
 	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
 	this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
 	this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
@@ -7651,8 +7650,8 @@ CategoryBN.prototype.deselect = function() {
  * Adds event listeners to the parts of the button
  */
 CategoryBN.prototype.addListeners = function() {
-	const TR = TouchReceiver;
-	const cat = this.category;
+	var TR = TouchReceiver;
+	var cat = this.category;
 	TouchReceiver.addListenersCat(this.bgRect, cat);
 	TouchReceiver.addListenersCat(this.colorRect, cat);
 	TouchReceiver.addListenersCat(this.label, cat);
@@ -7761,7 +7760,7 @@ Category.prototype.finalize = function() {
  */
 Category.prototype.addBlockByName = function(blockName) {
 	DebugOptions.assert(!this.finalized);
-	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
+	var block = new window[blockName](this.currentBlockX, this.currentBlockY);
 	this.addBlock(block);
 };
 
@@ -7771,7 +7770,7 @@ Category.prototype.addBlockByName = function(blockName) {
  */
 Category.prototype.addVariableBlock = function(variable) {
 	DebugOptions.assert(!this.finalized);
-	const block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
+	var block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
 	this.addBlock(block);
 };
 
@@ -7781,7 +7780,7 @@ Category.prototype.addVariableBlock = function(variable) {
  */
 Category.prototype.addListBlock = function(list) {
 	DebugOptions.assert(!this.finalized);
-	const block = new B_List(this.currentBlockX, this.currentBlockY, list);
+	var block = new B_List(this.currentBlockX, this.currentBlockY, list);
 	this.addBlock(block);
 };
 
@@ -7803,7 +7802,7 @@ Category.prototype.addBlock = function(block) {
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
 	// We put the Block in a DisplayStack
-	const displayStack = new DisplayStack(block, this.group, this);
+	var displayStack = new DisplayStack(block, this.group, this);
 	this.displayStacks.push(displayStack);
 	// Update the coords for the next Block
 	this.currentBlockY += displayStack.firstBlock.height;
@@ -7819,9 +7818,9 @@ Category.prototype.addBlock = function(block) {
  */
 Category.prototype.addCollapsibleSet = function(nameIdList) {
 	DebugOptions.assert(!this.finalized);
-	const x = this.currentBlockX;
-	const y = this.currentBlockY;
-	const set = new CollapsibleSet(y, nameIdList, this, this.group);
+	var x = this.currentBlockX;
+	var y = this.currentBlockY;
+	var set = new CollapsibleSet(y, nameIdList, this, this.group);
 	this.collapsibleSets.push(set);
 	this.lastHadStud = false;
 	this.currentBlockY += set.height;
@@ -7850,14 +7849,14 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
 		onlyEnabledIfOpen = false;
 	}
 
-	const width = BlockPalette.insideBnW;
-	const height = BlockPalette.insideBnH;
+	var width = BlockPalette.insideBnW;
+	var height = BlockPalette.insideBnH;
 	if (this.lastHadStud) {
 		this.currentBlockY += BlockGraphics.command.bumpDepth;
 	}
 
-	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
-	const BP = BlockPalette;
+	var button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
+	var BP = BlockPalette;
 	button.addText(text);
 	button.setCallbackFunction(callback, true);
 	this.currentBlockY += height;
@@ -7879,13 +7878,13 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
  */
 Category.prototype.addLabel = function(text) {
 	DebugOptions.assert(!this.finalized);
-	const BP = BlockPalette;
-	const x = this.currentBlockX;
-	const y = this.currentBlockY;
-	const labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
+	var BP = BlockPalette;
+	var x = this.currentBlockX;
+	var y = this.currentBlockY;
+	var labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
 	this.group.appendChild(labelE);
 	this.labels.push(labelE);
-	const height = GuiElements.measure.textHeight(labelE);
+	var height = GuiElements.measure.textHeight(labelE);
 	GuiElements.move.element(labelE, x, y + height);
 	this.currentBlockY += height;
 	this.currentBlockY += BlockPalette.blockMargin;
@@ -7932,16 +7931,16 @@ Category.prototype.deselect = function() {
  * Computes the width of the Category and stores it in this.width
  */
 Category.prototype.computeWidth = function() {
-	let currentWidth = 0;
+	var currentWidth = 0;
 	// The width is the maximum width across DisplayStacks and CollapsibleSets
-	for (let i = 0; i < this.blocks.length; i++) {
-		const blockW = this.blocks[i].width;
+	for (var i = 0; i < this.blocks.length; i++) {
+		var blockW = this.blocks[i].width;
 		if (blockW > currentWidth) {
 			currentWidth = blockW;
 		}
 	}
 	this.collapsibleSets.forEach(function(set) {
-		const width = set.width;
+		var width = set.width;
 		currentWidth = Math.max(width, currentWidth);
 	});
 	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
@@ -7963,7 +7962,7 @@ Category.prototype.updateWidth = function() {
 Category.prototype.updateDimSet = function() {
 	if (!this.finalized) return;
 	this.computeWidth();
-	let currentH = BlockPalette.mainVMargin;
+	var currentH = BlockPalette.mainVMargin;
 	this.collapsibleSets.forEach(function(set) {
 		currentH += set.height;
 		currentH += BlockPalette.blockMargin;
@@ -8041,7 +8040,7 @@ Category.prototype.passRecursivelyDown = function(message) {
  * @param {string} functionName
  */
 Category.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	this.displayStacks.forEach(function(stack) {
 		stack[functionName].apply(stack, args);
 	});
@@ -8092,7 +8091,7 @@ function CollapsibleSet(y, nameIdList, category, group) {
 }
 
 CollapsibleSet.setConstants = function(){
-	const CS = CollapsibleSet;
+	var CS = CollapsibleSet;
 	CS.itemMargin = 0;
 };
 
@@ -8111,8 +8110,8 @@ CollapsibleSet.prototype.getItem = function(index) {
  * @return {number}
  */
 CollapsibleSet.prototype.findItem = function(id) {
-	const items = this.collapsibleItems;
-	for(let i = 0; i < items.length; i++) {
+	var items = this.collapsibleItems;
+	for(var i = 0; i < items.length; i++) {
 		if(items[i].id === id) {
 			return i;
 		}
@@ -8142,9 +8141,9 @@ CollapsibleSet.prototype.collapse = function(index) {
  * Updates the dimensions and alignment of the CollapsibleSet and notifies its Category to update dimensions
  */
 CollapsibleSet.prototype.updateDimAlign = function() {
-	const CS = CollapsibleSet;
-	let currentY = this.y;
-	let width = 0;
+	var CS = CollapsibleSet;
+	var currentY = this.y;
+	var width = 0;
 	this.collapsibleItems.forEach(function(item) {
 		currentY += item.updateDimAlign(currentY);
 		currentY += CS.itemMargin;
@@ -8161,7 +8160,7 @@ CollapsibleSet.prototype.updateDimAlign = function() {
  * Triggered when a block inside changes width
  */
 CollapsibleSet.prototype.updateWidth = function() {
-	let width = 0;
+	var width = 0;
 	this.collapsibleItems.forEach(function(item) {
 		width = Math.max(width, item.getWidth());
 	});
@@ -8192,7 +8191,7 @@ CollapsibleSet.prototype.passRecursivelyDown = function(message){
 	this.passRecursively.apply(this, arguments);
 };
 CollapsibleSet.prototype.passRecursively = function(functionName){
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	this.collapsibleItems.forEach(function(item){
 		item[functionName].apply(item,args);
 	});
@@ -8206,7 +8205,7 @@ CollapsibleSet.prototype.passRecursively = function(functionName){
  * @constructor
  */
 function CollapsibleItem(name, id, collapsibleSet, group) {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	this.x = 0;
 	this.name = name;
 	this.id = id;
@@ -8222,7 +8221,7 @@ function CollapsibleItem(name, id, collapsibleSet, group) {
 }
 
 CollapsibleItem.setConstants = function() {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	CI.hitboxHeight = 30;
 	CI.hitboxWidth = BlockPalette.width;
 
@@ -8238,13 +8237,13 @@ CollapsibleItem.setConstants = function() {
  * Creates the header above the blocks, which includes a triangle, a label, and a hit box around both
  */
 CollapsibleItem.prototype.createLabel = function() {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 
 	this.triE = GuiElements.create.path();
 	GuiElements.update.color(this.triE, CI.labelColor);
 	this.updateTriangle();
 
-	const labelY = (CI.hitboxHeight + CI.labelFont.charHeight) / 2;
+	var labelY = (CI.hitboxHeight + CI.labelFont.charHeight) / 2;
 	this.label = GuiElements.draw.text(CI.triBoxWidth, labelY, this.name, CI.labelFont, CI.labelColor);
 	this.hitboxE = GuiElements.draw.rect(0, 0, CI.hitboxWidth, CI.hitboxHeight, CI.labelColor);
 	GuiElements.update.opacity(this.hitboxE, 0);
@@ -8259,10 +8258,10 @@ CollapsibleItem.prototype.createLabel = function() {
  * Changes the path of the triangle to be horizontal/vertical depending on the state of the item
  */
 CollapsibleItem.prototype.updateTriangle = function() {
-	let vertical = !this.collapsed;
-	const CI = CollapsibleItem;
-	let pointX;
-	let pointY;
+	var vertical = !this.collapsed;
+	var CI = CollapsibleItem;
+	var pointX;
+	var pointY;
 	if (!vertical) {
 		pointX = (CI.triBoxWidth + CI.triangleHeight) / 2;
 		pointY = CI.hitboxHeight / 2;
@@ -8301,7 +8300,7 @@ CollapsibleItem.prototype.finalize = function() {
  */
 CollapsibleItem.prototype.addBlockByName = function(blockName) {
 	DebugOptions.assert(!this.finalized);
-	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
+	var block = new window[blockName](this.currentBlockX, this.currentBlockY);
 	this.addBlock(block);
 };
 
@@ -8320,7 +8319,7 @@ CollapsibleItem.prototype.addBlock = function(block) {
 		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
-	const displayStack = new DisplayStack(block, this.innerGroup, this);
+	var displayStack = new DisplayStack(block, this.innerGroup, this);
 	this.displayStacks.push(displayStack);
 	this.currentBlockY += displayStack.firstBlock.height;
 	this.currentBlockY += BlockPalette.blockMargin;
@@ -8375,7 +8374,7 @@ CollapsibleItem.prototype.getWidth = function() {
  * @return {number}
  */
 CollapsibleItem.prototype.getHeight = function() {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	if (this.collapsed) {
 		return CI.hitboxHeight;
 	} else {
@@ -8387,9 +8386,9 @@ CollapsibleItem.prototype.getHeight = function() {
  * Computes and stores the width of the item
  */
 CollapsibleItem.prototype.computeWidth = function() {
-	let currentWidth = 0;
-	for (let i = 0; i < this.blocks.length; i++) {
-		const blockW = this.blocks[i].width;
+	var currentWidth = 0;
+	for (var i = 0; i < this.blocks.length; i++) {
+		var blockW = this.blocks[i].width;
 		if (blockW > currentWidth) {
 			currentWidth = blockW;
 		}
@@ -8435,7 +8434,7 @@ CollapsibleItem.prototype.updateWidth = function() {
  * @return {number}
  */
 CollapsibleItem.prototype.relToAbsX = function(x) {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	return this.set.category.relToAbsX(x + this.x);
 };
 /**
@@ -8443,7 +8442,7 @@ CollapsibleItem.prototype.relToAbsX = function(x) {
  * @return {number}
  */
 CollapsibleItem.prototype.relToAbsY = function(y) {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	return this.set.category.relToAbsY(y + this.y + CI.hitboxHeight);
 };
 /**
@@ -8451,7 +8450,7 @@ CollapsibleItem.prototype.relToAbsY = function(y) {
  * @return {number}
  */
 CollapsibleItem.prototype.absToRelX = function(x) {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	return this.set.category.absToRelX(x) - this.x;
 };
 /**
@@ -8459,7 +8458,7 @@ CollapsibleItem.prototype.absToRelX = function(x) {
  * @return {number}
  */
 CollapsibleItem.prototype.absToRelY = function(y) {
-	const CI = CollapsibleItem;
+	var CI = CollapsibleItem;
 	return this.set.category.absToRelY(y) - this.y - CI.hitboxHeight;
 };
 
@@ -8508,7 +8507,7 @@ CollapsibleItem.prototype.passRecursivelyDown = function(message) {
 	this.passRecursively.apply(this, arguments);
 };
 CollapsibleItem.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	this.displayStacks.forEach(function(stack) {
 		stack[functionName].apply(stack, args);
 	});
@@ -8598,9 +8597,9 @@ Button.prototype.addText = function(text, font) {
 	this.group.appendChild(this.textE);
 	
 	// Text is centered
-	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = (this.width - textW) / 2;
-	const textY = (this.height + font.charHeight) / 2;
+	var textW = GuiElements.measure.textWidth(this.textE);
+	var textX = (this.width - textW) / 2;
+	var textY = (this.height + font.charHeight) / 2;
 	GuiElements.move.text(this.textE, textX, textY);
 	this.hasText = true;
 	TouchReceiver.addListenersBN(this.textE, this);
@@ -8619,9 +8618,9 @@ Button.prototype.addIcon = function(pathId, height) {
 	this.hasIcon = true;
 	this.iconInverts = true;
 	// Icon is centered vertiacally and horizontally.
-	const iconW = VectorIcon.computeWidth(pathId, height);
-	const iconX = (this.width - iconW) / 2;
-	const iconY = (this.height - height) / 2;
+	var iconW = VectorIcon.computeWidth(pathId, height);
+	var iconX = (this.width - iconW) / 2;
+	var iconY = (this.height - height) / 2;
 	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
@@ -8655,16 +8654,16 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
 	this.hasIcon = true;
 	this.hasText = true;
 
-	const iconW = VectorIcon.computeWidth(pathId, iconHeight);
+	var iconW = VectorIcon.computeWidth(pathId, iconHeight);
 	this.textE = GuiElements.draw.text(0, 0, "", font, color);
 	GuiElements.update.textLimitWidth(this.textE, text, this.width - iconW - sideMargin);
 	this.group.appendChild(this.textE);
-	const textW = GuiElements.measure.textWidth(this.textE);
-	const totalW = textW + iconW + sideMargin;
-	const iconX = (this.width - totalW) / 2;
-	const iconY = (this.height - iconHeight) / 2;
-	const textX = iconX + iconW + sideMargin;
-	const textY = (this.height + font.charHeight) / 2;
+	var textW = GuiElements.measure.textWidth(this.textE);
+	var totalW = textW + iconW + sideMargin;
+	var iconX = (this.width - totalW) / 2;
+	var iconY = (this.height - iconHeight) / 2;
+	var textX = iconX + iconW + sideMargin;
+	var textY = (this.height + font.charHeight) / 2;
 	GuiElements.move.text(this.textE, textX, textY);
 	TouchReceiver.addListenersBN(this.textE, this);
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
@@ -8710,24 +8709,24 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
 	this.hasText = true;
 
 	/* Margin between icon and side of button is equal to vertical margin */
-	const sideMargin = (this.height - iconHeight) / 2;
-	const iconW = VectorIcon.computeWidth(pathId, iconHeight);
+	var sideMargin = (this.height - iconHeight) / 2;
+	var iconW = VectorIcon.computeWidth(pathId, iconHeight);
 	this.textE = GuiElements.draw.text(0, 0, "", font, color);
 	/* Text must leave space for icon, margin between icon and text, and margins for both sides */
-	const textMaxW = this.width - iconW - sideMargin * 3;
+	var textMaxW = this.width - iconW - sideMargin * 3;
 	GuiElements.update.textLimitWidth(this.textE, text, textMaxW);
 	this.group.appendChild(this.textE);
-	const textW = GuiElements.measure.textWidth(this.textE);
+	var textW = GuiElements.measure.textWidth(this.textE);
 
-	let iconX;
+	var iconX;
 	if (leftSide) {
 		iconX = sideMargin;
 	} else {
 		iconX = this.width - iconW - sideMargin;
 	}
-	const iconY = (this.height - iconHeight) / 2;
+	var iconY = (this.height - iconHeight) / 2;
 
-	let textX;
+	var textX;
 	if (!shiftCenter) {
 		textX = (this.width - textW) / 2;
 	} else if (leftSide) {
@@ -8742,7 +8741,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
 		textX = Math.min(textX, iconX - textW - sideMargin);
 	}
 
-	const textY = (this.height + font.charHeight) / 2;
+	var textY = (this.height + font.charHeight) / 2;
 	GuiElements.move.text(this.textE, textX, textY);
 	TouchReceiver.addListenersBN(this.textE, this);
 	this.icon = new VectorIcon(iconX, iconY, pathId, iconColor, iconHeight, this.group);
@@ -8757,9 +8756,9 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
  */
 Button.prototype.addImage = function(imageData, height) {
 	this.removeContent();
-	const imageW = imageData.width / imageData.height * height;
-	const imageX = (this.width - imageW) / 2;
-	const imageY = (this.height - height) / 2;
+	var imageW = imageData.width / imageData.height * height;
+	var imageX = (this.width - imageW) / 2;
+	var imageY = (this.height - height) / 2;
 	this.imageE = GuiElements.draw.image(imageData.lightName, imageX, imageY, imageW, height, this.group);
 	this.imageData = imageData;
 	this.hasImage = true;
@@ -8777,9 +8776,9 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = false;
-	const iconW = VectorIcon.computeWidth(pathId, height);
-	const iconX = (this.width - iconW) / 2;
-	const iconY = (this.height - height) / 2;
+	var iconW = VectorIcon.computeWidth(pathId, height);
+	var iconX = (this.width - iconW) / 2;
+	var iconY = (this.height - height) / 2;
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
@@ -9073,7 +9072,7 @@ ShowHideButton.prototype.build = function(isShowing) {
 	this.hideBn.setCallbackFunction(this.hideFn, false);
 
 	// Function to switch to the "hidden" mode
-	let toggle1 = function() {
+	var toggle1 = function() {
 		this.showBn.hide();
 		this.hideBn.show();
 	}.bind(this);
@@ -9087,7 +9086,7 @@ ShowHideButton.prototype.build = function(isShowing) {
 	};
 
 	// Function to switch to the "showing" mode
-	let toggle2 = function() {
+	var toggle2 = function() {
 		this.showBn.show();
 		this.hideBn.hide();
 	}.bind(this);
@@ -9136,7 +9135,7 @@ ShowHideButton.prototype.remove = function() {
  * @constructor
  */
 function DeviceStatusLight(x, centerY, parent, statusProvider) {
-	const DSL = DeviceStatusLight;
+	var DSL = DeviceStatusLight;
 	this.cx = x + DSL.radius;
 	this.cy = centerY;
 	this.parentGroup = parent;
@@ -9149,7 +9148,7 @@ function DeviceStatusLight(x, centerY, parent, statusProvider) {
 }
 
 DeviceStatusLight.setConstants = function() {
-	const DSL = DeviceStatusLight;
+	var DSL = DeviceStatusLight;
 	DSL.greenColor = "#0f0";
 	DSL.redColor = "#f00";
 	DSL.yellowColor = "#ff0";
@@ -9163,7 +9162,7 @@ DeviceStatusLight.setConstants = function() {
  * Draws the circle for the light
  */
 DeviceStatusLight.prototype.generateCircle = function() {
-	let DSL = DeviceStatusLight;
+	var DSL = DeviceStatusLight;
 	return GuiElements.draw.circle(this.cx, this.cy, DSL.radius, DSL.startColor, this.parentGroup);
 };
 
@@ -9172,9 +9171,9 @@ DeviceStatusLight.prototype.generateCircle = function() {
  * @param {DeviceManager.statuses} status
  */
 DeviceStatusLight.prototype.updateStatus = function(status) {
-	const DSL = DeviceStatusLight;
-	let color = null;
-	const statuses = DeviceManager.statuses;
+	var DSL = DeviceStatusLight;
+	var color = null;
+	var statuses = DeviceManager.statuses;
 	if (status === statuses.connected) {
 		color = DSL.greenColor;
 	} else if (status === statuses.oldFirmware) {
@@ -9306,7 +9305,7 @@ function TabRow(x, y, width, height, parent, initialTab) {
 }
 
 TabRow.setConstants = function() {
-	const TR = TabRow;
+	var TR = TabRow;
 	TR.slantW = 5;
 	TR.deselectedColor = "#999";
 	TR.selectedColor = Colors.lightLightGray;
@@ -9337,7 +9336,7 @@ TabRow.prototype.show = function() {
  *                                    be drawn on the Tab
  */
 TabRow.prototype.addTab = function(text, id, closeFn) {
-	let entry = {};
+	var entry = {};
 	entry.text = text;
 	entry.id = id;
 	entry.closeFn = closeFn;
@@ -9348,12 +9347,12 @@ TabRow.prototype.addTab = function(text, id, closeFn) {
  * Renders the tabs and close buttons according to the labList
  */
 TabRow.prototype.createTabs = function() {
-	let tabCount = this.tabList.length;
-	let tabWidth = this.width / tabCount;
+	var tabCount = this.tabList.length;
+	var tabWidth = this.width / tabCount;
 	this.tabEList = [];
 	this.tabList.forEach(function(entry, index) {
-		const tabX = index * tabWidth;
-		const hasClose = entry.closeFn != null;
+		var tabX = index * tabWidth;
+		var hasClose = entry.closeFn != null;
 		this.tabEList.push(this.createTab(index, entry.text, tabWidth, tabX, hasClose));
 		if (hasClose) {
 			this.createClose(tabWidth, tabX, entry.closeFn);
@@ -9370,24 +9369,24 @@ TabRow.prototype.createTabs = function() {
  * @param {boolean} hasClose - Whether space should be reserved for a close button
  */
 TabRow.prototype.createTab = function(index, text, width, x, hasClose) {
-	const TR = TabRow;
+	var TR = TabRow;
 
-	let textMaxWidth = width - 2 * TR.slantW;
-	const closeSpace = 2 * TR.closeMargin + TR.closeHeight;
+	var textMaxWidth = width - 2 * TR.slantW;
+	var closeSpace = 2 * TR.closeMargin + TR.closeHeight;
 	if (hasClose) {
 		textMaxWidth = width - closeSpace - TR.slantW;
 	}
-	let tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
+	var tabE = GuiElements.draw.trapezoid(x, 0, width, this.height, TR.slantW, TR.deselectedColor);
 	this.group.appendChild(tabE);
-	let textE = GuiElements.draw.text(0, 0, "", TR.font, TR.foregroundColor);
+	var textE = GuiElements.draw.text(0, 0, "", TR.font, TR.foregroundColor);
 	GuiElements.update.textLimitWidth(textE, text, textMaxWidth);
 
-	let textW = GuiElements.measure.textWidth(textE);
-	let textX = x + (width - textW) / 2;
+	var textW = GuiElements.measure.textWidth(textE);
+	var textX = x + (width - textW) / 2;
 	if (hasClose) {
 		textX = Math.min(textX, x + width - textW - closeSpace);
 	}
-	let textY = (this.height + TR.font.charHeight) / 2;
+	var textY = (this.height + TR.font.charHeight) / 2;
 	GuiElements.move.text(textE, textX, textY);
 
 	TouchReceiver.addListenersTabRow(textE, this, index);
@@ -9403,10 +9402,10 @@ TabRow.prototype.createTab = function(index, text, width, x, hasClose) {
  * @param {function} closeFn - The function to call when the close button is tapped
  */
 TabRow.prototype.createClose = function(tabX, tabW, closeFn) {
-	const TR = TabRow;
-	const cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
-	const cy = this.height / 2;
-	const closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
+	var TR = TabRow;
+	var cx = tabX + tabW - TR.closeMargin - TR.closeHeight / 2;
+	var cy = this.height / 2;
+	var closeBn = new CloseButton(cx, cy, TR.closeHeight, closeFn, this.group);
 };
 
 /**
@@ -9426,8 +9425,8 @@ TabRow.prototype.selectTab = function(index) {
  * @param {number} index - The tab to select
  */
 TabRow.prototype.visuallySelectTab = function(index) {
-	let TR = TabRow;
-	let tabE = this.tabEList[index];
+	var TR = TabRow;
+	var tabE = this.tabEList[index];
 	GuiElements.update.color(tabE, TR.selectedColor);
 };
 
@@ -9457,11 +9456,11 @@ TabRow.prototype.markAsOverlayPart = function(overlay) {
  * @constructor
  */
 function CloseButton(cx, cy, height, callbackFn, group){
-	const CB = CloseButton;
+	var CB = CloseButton;
 	this.pressed = false;
 	this.group = group;
 	this.circleE = GuiElements.draw.circle(cx, cy, height / 2, CB.bg, this.group);
-	const iconH = height * CB.iconHMult;
+	var iconH = height * CB.iconHMult;
 	this.icon = new VectorIcon(cx - iconH / 2, cy - iconH / 2, VectorPaths.letterX, CB.foreground, iconH, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE,this);
 	TouchReceiver.addListenersBN(this.circleE,this);
@@ -9469,7 +9468,7 @@ function CloseButton(cx, cy, height, callbackFn, group){
 }
 
 CloseButton.setGraphics=function(){
-	const CB = CloseButton;
+	var CB = CloseButton;
 	CB.bg = Button.bg;
 	CB.foreground = Button.foreground;
 	CB.highlightBg = Button.highlightBg;
@@ -9521,7 +9520,7 @@ CloseButton.prototype.markAsOverlayPart = function(overlay){
  * @param {boolean} isPressed - Whether the button is pressed
  */
 CloseButton.prototype.setColor = function(isPressed) {
-	const CB = CloseButton;
+	var CB = CloseButton;
 	if (isPressed) {
 		this.icon.setColor(CB.highlightFore);
 		GuiElements.update.color(this.circleE, CB.highlightBg);
@@ -9591,9 +9590,9 @@ function InputDialog(textSummary, acceptsEmptyString) {
  */
 InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
-	const oldVal = data.asString().getValue();
+	var oldVal = data.asString().getValue();
 	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
-	const shouldPrefill = data.type === Data.types.string;
+	var shouldPrefill = data.type === Data.types.string;
 	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
 		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
 			// Set the data
@@ -9623,7 +9622,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 function InputPad(x1, x2, y1, y2) {
 	InputSystem.call(this);
 	this.widgets = [];
-	const coords = this.coords = {};
+	var coords = this.coords = {};
 	coords.x1 = x1;
 	coords.x2 = x2;
 	coords.y1 = y1;
@@ -9633,7 +9632,7 @@ InputPad.prototype = Object.create(InputSystem.prototype);
 InputPad.prototype.constructor = InputPad;
 
 InputPad.setConstants = function() {
-	const IP = InputPad;
+	var IP = InputPad;
 	IP.background = Colors.lightGray;
 	IP.margin = Button.defaultMargin;
 	IP.width = 160;
@@ -9657,12 +9656,12 @@ InputPad.prototype.addWidget = function(widget) {
  */
 InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
-	const IP = InputPad;
+	var IP = InputPad;
 	this.group = GuiElements.create.group(0, 0);
 	this.updateDim();
-	const type = Overlay.types.inputPad;
-	const layer = GuiElements.layers.inputPad;
-	const coords = this.coords;
+	var type = Overlay.types.inputPad;
+	var layer = GuiElements.layers.inputPad;
+	var coords = this.coords;
 	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
@@ -9672,8 +9671,8 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
  * Computes the dimensions of the InputPad and its widgets, storing them in this.width and this.height
  */
 InputPad.prototype.updateDim = function() {
-	const IP = InputPad;
-	let height = 0;
+	var IP = InputPad;
+	var height = 0;
 	this.widgets.forEach(function(widget) {
 		// Some widgets have adjustable heights (like SelectPads)
 		if (widget.fixedHeight()) {
@@ -9685,10 +9684,10 @@ InputPad.prototype.updateDim = function() {
 	});
 	height -= IP.margin;
 	height = Math.max(height, 0);
-	const maxHeight = GuiElements.height - 2 * IP.margin;
+	var maxHeight = GuiElements.height - 2 * IP.margin;
 	// The remaining available screen space is computed and allocated to adjustable-height widgets
 	// TODO: currently this code only works if there is at most one adjustable-height widget
-	let allocH = (maxHeight - height);
+	var allocH = (maxHeight - height);
 	this.widgets.forEach(function(widget) {
 		if (!widget.fixedHeight()) {
 			// Gives all the remaining space to this widget
@@ -9708,9 +9707,9 @@ InputPad.prototype.updateDim = function() {
  * @param {BubbleOverlay} overlay
  */
 InputPad.prototype.showWidgets = function(overlay) {
-	const IP = InputPad;
-	let y = 0;
-	for (let i = 0; i < this.widgets.length; i++) {
+	var IP = InputPad;
+	var y = 0;
+	for (var i = 0; i < this.widgets.length; i++) {
 		this.widgets[i].show(0, y, this.group, overlay, this.slotShape, this.updateEdit.bind(this),
 			this.finishEdit.bind(this), this.currentData);
 		y += this.widgets[i].height + IP.margin;
@@ -9819,7 +9818,7 @@ InputWidget.Label.prototype = Object.create(InputWidget.prototype);
 InputWidget.Label.prototype.constructor = InputWidget.Label;
 
 InputWidget.Label.setConstants = function() {
-	const L = InputWidget.Label;
+	var L = InputWidget.Label;
 	L.font = Font.uiFont(16).bold();
 	L.margin = 2;
 	L.color = Colors.white;
@@ -9832,12 +9831,12 @@ InputWidget.Label.setConstants = function() {
  * @param {Element} parentGroup
  */
 InputWidget.Label.prototype.show = function(x, y, parentGroup) {
-	const L = InputWidget.Label;
+	var L = InputWidget.Label;
 	this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
 	GuiElements.update.textLimitWidth(this.textE, this.text, InputPad.width);
-	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = InputPad.width / 2 - textW / 2;
-	const textY = y + L.font.charHeight + L.margin;
+	var textW = GuiElements.measure.textWidth(this.textE);
+	var textX = InputPad.width / 2 - textW / 2;
+	var textY = y + L.font.charHeight + L.margin;
 	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
 };
@@ -9846,7 +9845,7 @@ InputWidget.Label.prototype.show = function(x, y, parentGroup) {
  * Computes the height of the label
  */
 InputWidget.Label.prototype.updateDim = function() {
-	const L = InputWidget.Label;
+	var L = InputWidget.Label;
 	this.height = L.font.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
@@ -9864,7 +9863,7 @@ InputWidget.NumPad.prototype = Object.create(InputWidget.prototype);
 InputWidget.NumPad.prototype.constructor = InputWidget.NumPad;
 
 InputWidget.NumPad.setConstants = function() {
-	const NP = InputWidget.NumPad;
+	var NP = InputWidget.NumPad;
 	NP.bnMargin = InputPad.margin;
 	NP.bnWidth = (InputPad.width - NP.bnMargin * 2) / 3;
 	NP.bnHeight = 40;
@@ -9902,7 +9901,7 @@ InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotSha
  * @param {number} y
  */
 InputWidget.NumPad.prototype.updateDim = function(x, y) {
-	const NP = InputWidget.NumPad;
+	var NP = InputWidget.NumPad;
 	this.height = NP.bnHeight * 5 + NP.bnMargin * 4;
 	this.width = InputPad.width;
 };
@@ -9912,7 +9911,7 @@ InputWidget.NumPad.prototype.updateDim = function(x, y) {
  * nothing to modify
  */
 InputWidget.NumPad.prototype.grayOutUnlessZero = function() {
-	const data = this.displayNum.getData();
+	var data = this.displayNum.getData();
 	if (this.displayNum.isNum || data.getValue() !== 0) {
 		this.slotShape.grayOutValue();
 	}
@@ -9922,13 +9921,13 @@ InputWidget.NumPad.prototype.grayOutUnlessZero = function() {
  * Generates the buttons for the NumPad
  */
 InputWidget.NumPad.prototype.makeBns = function() {
-	const NP = InputWidget.NumPad;
-	let currentNum;
-	let xPos = 0;
-	let yPos = 0;
-	for (let i = 0; i < 3; i++) {
+	var NP = InputWidget.NumPad;
+	var currentNum;
+	var xPos = 0;
+	var yPos = 0;
+	for (var i = 0; i < 3; i++) {
 		xPos = 0;
-		for (let j = 0; j < 3; j++) {
+		for (var j = 0; j < 3; j++) {
 			currentNum = 7 - i * 3 + j;
 			this.makeNumBn(xPos, yPos, currentNum);
 			xPos += NP.bnMargin;
@@ -9953,8 +9952,8 @@ InputWidget.NumPad.prototype.makeBns = function() {
  * @return {Button}
  */
 InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
-	const NP = InputWidget.NumPad;
-	let button = new Button(x, y, NP.bnWidth, NP.bnHeight, this.group);
+	var NP = InputWidget.NumPad;
+	var button = new Button(x, y, NP.bnWidth, NP.bnHeight, this.group);
 	button.addText(text, NP.font);
 	button.setCallbackFunction(callbackFn, false);
 	button.markAsOverlayPart(this.overlay);
@@ -9981,7 +9980,7 @@ InputWidget.NumPad.prototype.makeNumBn = function(x, y, num) {
  * @return {Button}
  */
 InputWidget.NumPad.prototype.makePlusMinusBn = function(x, y) {
-	let button = this.makeTextButton(x, y, String.fromCharCode(177), this.plusMinusPressed.bind(this));
+	var button = this.makeTextButton(x, y, String.fromCharCode(177), this.plusMinusPressed.bind(this));
 	if (this.positive) button.disable();
 	return button;
 };
@@ -9993,7 +9992,7 @@ InputWidget.NumPad.prototype.makePlusMinusBn = function(x, y) {
  * @return {Button}
  */
 InputWidget.NumPad.prototype.makeDecimalBn = function(x, y) {
-	let button = this.makeTextButton(x, y, ".", this.decimalPressed.bind(this));
+	var button = this.makeTextButton(x, y, ".", this.decimalPressed.bind(this));
 	if (this.integer) button.disable();
 	return button;
 };
@@ -10005,8 +10004,8 @@ InputWidget.NumPad.prototype.makeDecimalBn = function(x, y) {
  * @return {Button}
  */
 InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
-	const NP = InputWidget.NumPad;
-	let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
+	var NP = InputWidget.NumPad;
+	var button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
 	button.addIcon(VectorPaths.backspace, NP.bsIconH);
 	button.setCallbackFunction(this.bsPressed.bind(this), false);
 	button.setCallbackFunction(this.bsReleased.bind(this), true);
@@ -10021,8 +10020,8 @@ InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
  * @return {Button}
  */
 InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
-	const NP = InputWidget.NumPad;
-	let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
+	var NP = InputWidget.NumPad;
+	var button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
 	button.addIcon(VectorPaths.checkmark, NP.okIconH);
 	button.setCallbackFunction(this.okPressed.bind(this), true);
 	button.markAsOverlayPart(this.overlay);
@@ -10105,7 +10104,7 @@ InputWidget.NumPad.prototype.removeUndoDelayed = function() {
  * Changes the icon of the backspace button to match its current state (backspace/undo)
  */
 InputWidget.NumPad.prototype.updateBsIcon = function() {
-	const NP = InputWidget.NumPad;
+	var NP = InputWidget.NumPad;
 	if (this.undoAvailable !== this.undoVisible) {
 		if (this.undoAvailable) {
 			this.bsButton.addIcon(VectorPaths.undo, NP.bsIconH);
@@ -10121,7 +10120,7 @@ InputWidget.NumPad.prototype.updateBsIcon = function() {
  * Restores the stored undo data and replaces the undo button with a backspace button
  */
 InputWidget.NumPad.prototype.undo = function() {
-	const NP = InputWidget.NumPad;
+	var NP = InputWidget.NumPad;
 	if (this.undoAvailable) {
 		this.displayNum = new DisplayNum(this.undoData);
 		this.removeUndoDelayed();
@@ -10187,8 +10186,8 @@ function DisplayNum(initialData) {
 	// A boolean tracks if the number is negative
 	this.isNegative = (initialData.getValue() < 0);
 	// A positive string representation of the number, without scientific notation
-	const asStringData = initialData.asPositiveString();
-	const parts = asStringData.getValue().split(".");
+	var asStringData = initialData.asPositiveString();
+	var parts = asStringData.getValue().split(".");
 	// The integer part is everything before the decimal point, stored as a string
 	this.integerPart = parts[0];
 	if (this.integerPart === "") {
@@ -10213,14 +10212,14 @@ DisplayNum.prototype.backspace = function() {
 	if (!this.isNum) return;
 	if (this.hasDecimalPoint && this.decimalPart !== "") {
 		// If there is a decimal part, cut off the last digit
-		const newL = this.decimalPart.length - 1;
+		var newL = this.decimalPart.length - 1;
 		this.decimalPart = this.decimalPart.substring(0, newL);
 	} else if (this.hasDecimalPoint) {
 		// If there's a decimal point but no decimalPart, remove the point
 		this.hasDecimalPoint = false;
 	} else if (this.integerPart.length > 1) {
 		// If there's an integer part that's longer than 1 digit, cut off the last digit
-		const newL = this.integerPart.length - 1;
+		var newL = this.integerPart.length - 1;
 		this.integerPart = this.integerPart.substring(0, newL);
 	} else if (this.integerPart !== "0") {
 		// If there's just one digit and it isn't 0, make the number 0.
@@ -10279,7 +10278,7 @@ DisplayNum.prototype.getString = function() {
 	if (!this.isNum) {
 		return null;
 	}
-	let rVal = "";
+	var rVal = "";
 	if (this.isNegative) {
 		rVal += "-";
 	}
@@ -10299,9 +10298,9 @@ DisplayNum.prototype.getData = function() {
 	if (!this.isNum) {
 		return this.data;
 	}
-	let rVal = parseInt(this.integerPart, 10);
+	var rVal = parseInt(this.integerPart, 10);
 	if (this.hasDecimalPoint && this.decimalPart.length > 0) {
-		let decPart = parseInt(this.decimalPart, 10);
+		var decPart = parseInt(this.decimalPart, 10);
 		decPart /= Math.pow(10, this.decimalPart.length);
 		rVal += decPart;
 	}
@@ -10321,7 +10320,7 @@ InputWidget.SelectPad.prototype = Object.create(InputWidget);
 InputWidget.SelectPad.constructor = InputWidget.SelectPad;
 InputWidget.SelectPad.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data){
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
-	const layer = GuiElements.layers.frontScroll;
+	var layer = GuiElements.layers.frontScroll;
 	this.menuBnList = new SmoothMenuBnList(this, parentGroup, x, y, InputPad.width, layer);
 	this.optionsList.forEach(function(option){
 		this.menuBnList.addOption(option.text, option.callbackFn);
@@ -10346,18 +10345,18 @@ InputWidget.SelectPad.prototype.addOption = function(data, text) {
 	if(text == null){
 		text = data.asString().getValue();
 	}
-	const option = {};
+	var option = {};
 	option.text = text;
-	const me = this;
+	var me = this;
 	option.callbackFn = function(){
 		me.finishFn(data);
 	};
 	this.optionsList.push(option);
 };
 InputWidget.SelectPad.prototype.addAction = function(text, callbackFn){
-	const option = {};
+	var option = {};
 	option.text = text;
-	const me = this;
+	var me = this;
 	option.callbackFn = function(){
 		callbackFn(me.actionCallback.bind(me));
 	};
@@ -10400,7 +10399,7 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
  */
 function SoundInputPad(x1, x2, y1, y2, isRecording) {
 	InputSystem.call(this);
-	const coords = this.coords = {};
+	var coords = this.coords = {};
 	coords.x1 = x1;
 	coords.x2 = x2;
 	coords.y1 = y1;
@@ -10411,7 +10410,7 @@ SoundInputPad.prototype = Object.create(InputSystem.prototype);
 SoundInputPad.prototype.constructor = InputSystem;
 
 SoundInputPad.setConstants = function() {
-	const SIP = SoundInputPad;
+	var SIP = SoundInputPad;
 	SIP.margin = InputPad.margin;
 	SIP.rowHeight = SmoothMenuBnList.bnHeight;
 	SIP.width = 300;
@@ -10430,7 +10429,7 @@ SoundInputPad.setConstants = function() {
  */
 SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
-	const SIP = SoundInputPad;
+	var SIP = SoundInputPad;
 
 	// Make a group for everything
 	this.group = GuiElements.create.group(0, 0);
@@ -10439,22 +10438,22 @@ SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	this.updateDim();
 
 	// Create the BubbleOverlay for this pad
-	const bubbleGroup = GuiElements.create.group(0, 0);
-	const type = Overlay.types.inputPad;
-	const layer = GuiElements.layers.inputPad;
+	var bubbleGroup = GuiElements.create.group(0, 0);
+	var type = Overlay.types.inputPad;
+	var layer = GuiElements.layers.inputPad;
 	this.bubbleOverlay = new BubbleOverlay(type, SIP.background, SIP.margin, bubbleGroup, this, layer);
-	const coords = this.coords;
+	var coords = this.coords;
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 
 	// Get the coords of the pad
-	const absX = this.bubbleOverlay.relToAbsX(0);
-	const absY = this.bubbleOverlay.relToAbsY(0);
+	var absX = this.bubbleOverlay.relToAbsX(0);
+	var absY = this.bubbleOverlay.relToAbsY(0);
 
 	// Generate content
 	this.createRows();
 
 	// Put it all in a scrollBox
-	const scrollLayer = GuiElements.layers.frontScroll;
+	var scrollLayer = GuiElements.layers.frontScroll;
 	this.smoothScrollBox = new SmoothScrollBox(this.group, scrollLayer, absX, absY, this.width, this.height, this.width,
 		this.innerHeight, this.bubbleOverlay);
 	this.smoothScrollBox.show();
@@ -10464,11 +10463,11 @@ SoundInputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
  * Computes the dimensions of the pad, incorporating the screen height and number of entries
  */
 SoundInputPad.prototype.updateDim = function() {
-	const SIP = SoundInputPad;
-	const maxHeight = GuiElements.height - SIP.margin * 2;
+	var SIP = SoundInputPad;
+	var maxHeight = GuiElements.height - SIP.margin * 2;
 	// The number of recordings is retrieved from a cache
-	const soundCount = Sound.getSoundList(this.isRecording).length;
-	let desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
+	var soundCount = Sound.getSoundList(this.isRecording).length;
+	var desiredHeight = (SIP.rowHeight + SIP.margin) * soundCount - SIP.margin;
 	if (this.isRecording) {
 		desiredHeight += SIP.margin + SIP.rowHeight;
 	}
@@ -10482,8 +10481,8 @@ SoundInputPad.prototype.updateDim = function() {
  * Creates the content of the SoundInputPad
  */
 SoundInputPad.prototype.createRows = function() {
-	const SIP = SoundInputPad;
-	let y = 0;
+	var SIP = SoundInputPad;
+	var y = 0;
 	Sound.getSoundList(this.isRecording).forEach(function(sound) {
 		this.createRow(sound, y);
 		y += SIP.margin + SIP.rowHeight;
@@ -10499,7 +10498,7 @@ SoundInputPad.prototype.createRows = function() {
  * @param {number} y
  */
 SoundInputPad.prototype.createRow = function(sound, y) {
-	const SIP = SoundInputPad;
+	var SIP = SoundInputPad;
 	this.createMainBn(sound, 0, y, SIP.mainBnWidth, SIP.rowHeight, this.group);
 	this.createPlayBn(sound, SIP.margin + SIP.mainBnWidth, y, SIP.playBnWidth);
 };
@@ -10511,8 +10510,8 @@ SoundInputPad.prototype.createRow = function(sound, y) {
  * @param {number} width
  */
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
-	const SIP = SoundInputPad;
-	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	var SIP = SoundInputPad;
+	var button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText("Record sounds");
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
@@ -10530,8 +10529,8 @@ SoundInputPad.prototype.createRecordBn = function(x, y, width) {
  * @param {number} width
  */
 SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
-	const SIP = SoundInputPad;
-	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	var SIP = SoundInputPad;
+	var button = new Button(x, y, width, SIP.rowHeight, this.group);
 	button.addText(sound.name);
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
@@ -10549,14 +10548,14 @@ SoundInputPad.prototype.createMainBn = function(sound, x, y, width) {
  * @param {number} width
  */
 SoundInputPad.prototype.createPlayBn = function(sound, x, y, width) {
-	const SIP = SoundInputPad;
-	const button = new Button(x, y, width, SIP.rowHeight, this.group);
+	var SIP = SoundInputPad;
+	var button = new Button(x, y, width, SIP.rowHeight, this.group);
 	// Store the state of the Button
-	const mem = {};
+	var mem = {};
 	mem.playing = false;
 	button.addIcon(VectorPaths.play, SIP.iconH);
 	button.markAsOverlayPart(this.bubbleOverlay);
-	const stoppedPlaying = function() {
+	var stoppedPlaying = function() {
 		mem.playing = false;
 		button.addIcon(VectorPaths.play, SIP.iconH);
 	};
@@ -10693,40 +10692,40 @@ BubbleOverlay.prototype.close = function() {
  */
 BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeight) {
 	DebugOptions.validateNumbers(x1, x2, y1, y2, innerWidth, innerHeight);
-	const BO = BubbleOverlay;
+	var BO = BubbleOverlay;
 
 	/* Compute dimensions of the bubble */
-	let width = innerWidth + 2 * this.margin;
+	var width = innerWidth + 2 * this.margin;
 	if (width < BO.minW) {
 		width = BO.minW;
 	}
-	const height = innerHeight + 2 * this.margin;
+	var height = innerHeight + 2 * this.margin;
 
 	/* Center the content in the bubble */
 	GuiElements.move.group(this.innerGroup, (width - innerWidth) / 2, (height - innerHeight) / 2);
 
 	/* Compute dimension depending on orientation */
-	const longW = width + BO.triangleH;
-	const longH = height + BO.triangleH;
+	var longW = width + BO.triangleH;
+	var longH = height + BO.triangleH;
 
 	/* Determine how much content is cut off if the bubble goes in each direction */
-	const attemptB = Math.max(0, y2 + longH - GuiElements.height);
-	const attemptT = Math.max(0, longH - y1);
-	const attemptR = Math.max(0, x2 + longW - GuiElements.width);
-	const attemptL = Math.max(0, longW - x1);
+	var attemptB = Math.max(0, y2 + longH - GuiElements.height);
+	var attemptT = Math.max(0, longH - y1);
+	var attemptR = Math.max(0, x2 + longW - GuiElements.width);
+	var attemptL = Math.max(0, longW - x1);
 
 	/* Find the amount of content cut off using the best attempt */
-	const min = Math.min(attemptT, attemptB, attemptL, attemptR);
+	var min = Math.min(attemptT, attemptB, attemptL, attemptR);
 
 	/* The vertical direction is used if the top or bottom attempts were the best */
-	const vertical = attemptT <= min || attemptB <= min;
+	var vertical = attemptT <= min || attemptB <= min;
 
 	/* To be determined */
-	let topLeftX = NaN;   // The x coord of the background rect
-	let topLeftY = NaN;   // The y coord of the background rect
-	let x = NaN;   // The x coord of the point of the triangle
-	let y = NaN;   // The y coord of the point of the triangle
-	let triangleDir = 1;   // 1 or -1
+	var topLeftX = NaN;   // The x coord of the background rect
+	var topLeftY = NaN;   // The y coord of the background rect
+	var x = NaN;   // The x coord of the point of the triangle
+	var y = NaN;   // The y coord of the point of the triangle
+	var triangleDir = 1;   // 1 or -1
 	if (vertical) {
 		x = (x1 + x2) / 2;
 		// Find the best x for the background rect
@@ -10754,9 +10753,9 @@ BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeig
 	}
 
 	// Convert the triangle's coords from abs to rel coords
-	const triX = x - topLeftX;
-	const triY = y - topLeftY;
-	const triH = (BO.triangleH + BO.overlap) * triangleDir;
+	var triX = x - topLeftX;
+	var triY = y - topLeftY;
+	var triH = (BO.triangleH + BO.overlap) * triangleDir;
 	this.x = topLeftX;
 	this.y = topLeftY;
 	GuiElements.move.group(this.group, topLeftX, topLeftY);
@@ -10776,7 +10775,7 @@ BubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHeig
  * @return {number} - The x coord the object should have
  */
 BubbleOverlay.prototype.fitLocationToRange = function(center, width, range) {
-	let res = center - width / 2;   // The object would like this x coord
+	var res = center - width / 2;   // The object would like this x coord
 	if (width > range) {
 		// The object is bigger than the range, so we make it extend beyond both sides equally
 		// result:   --[----]--
@@ -10822,30 +10821,30 @@ BubbleOverlay.prototype.relToAbsY = function(y) {
  * @constructor
  */
 function ResultBubble(leftX, rightX, upperY, lowerY, text, error) {
-	const RB = ResultBubble;
+	var RB = ResultBubble;
 	if (error == null) {
 		error = false;
 	}
-	let fontColor = RB.fontColor;
-	let bgColor = RB.bgColor;
+	var fontColor = RB.fontColor;
+	var bgColor = RB.bgColor;
 	if (error) {
 		fontColor = RB.errorFontColor;
 		bgColor = RB.errorBgColor;
 	}
-	const height = RB.font.charHeight;
-	const textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
+	var height = RB.font.charHeight;
+	var textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
 	GuiElements.update.textLimitWidth(textE, text, GuiElements.width - RB.hMargin * 2);
-	const width = GuiElements.measure.textWidth(textE);
-	const group = GuiElements.create.group(0, 0);
+	var width = GuiElements.measure.textWidth(textE);
+	var group = GuiElements.create.group(0, 0);
 	group.appendChild(textE);
-	let layer = GuiElements.layers.resultBubble;
-	let overlayType = Overlay.types.resultBubble;
+	var layer = GuiElements.layers.resultBubble;
+	var overlayType = Overlay.types.resultBubble;
 	this.bubbleOverlay = new BubbleOverlay(overlayType, bgColor, RB.margin, group, this, layer);
 	this.bubbleOverlay.display(leftX, rightX, upperY, lowerY, width, height);
 }
 
 ResultBubble.setConstants = function() {
-	const RB = ResultBubble;
+	var RB = ResultBubble;
 	RB.fontColor = Colors.black;
 	RB.errorFontColor = Colors.white;
 	RB.bgColor = Colors.white;
@@ -10876,10 +10875,10 @@ ResultBubble.displayValue = function(value, x, y, width, height, error) {
 	if (error == null) {
 		error = false;
 	}
-	const leftX = x;
-	const rightX = x + width;
-	const upperY = y;
-	const lowerY = y + height;
+	var leftX = x;
+	var rightX = x + width;
+	var upperY = y;
+	var lowerY = y + height;
 	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
 };
 /**
@@ -10940,8 +10939,8 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
  */
 SmoothScrollBox.prototype.updateScrollSet = function() {
 	if (this.visible) {
-		let realX = GuiElements.relToAbsX(this.x);
-		let realY = GuiElements.relToAbsY(this.y);
+		var realX = GuiElements.relToAbsX(this.x);
+		var realY = GuiElements.relToAbsY(this.y);
 
 		GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
 			this.height, this.innerWidth, this.innerHeight);
@@ -10952,8 +10951,8 @@ SmoothScrollBox.prototype.updateScrollSet = function() {
  * Captures the scroll position, calls updateScrollSet, and restores the scroll position
  */
 SmoothScrollBox.prototype.updateZoom = function() {
-	const currentScrollX = this.getScrollX();
-	const currentScrollY = this.getScrollY();
+	var currentScrollX = this.getScrollX();
+	var currentScrollY = this.getScrollY();
 	this.currentZoom = GuiElements.zoomFactor;
 	this.updateScrollSet();
 	this.setScrollX(currentScrollX);
@@ -11141,7 +11140,7 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
 }
 
 SmoothMenuBnList.setGraphics = function() {
-	const SMBL = SmoothMenuBnList;
+	var SMBL = SmoothMenuBnList;
 	SMBL.bnHeight = 34;
 	SMBL.bnHMargin = 10; //only used when width not specified.
 	SMBL.minWidth = 40;
@@ -11180,7 +11179,7 @@ SmoothMenuBnList.prototype.addOption = function(text, func, addTextFn) {
 	}
 
 	this.bnsGenerated = false;
-	const option = {};
+	var option = {};
 	option.func = func;
 	option.text = text;
 	option.addTextFn = addTextFn;
@@ -11222,12 +11221,12 @@ SmoothMenuBnList.prototype.generateBns = function() {
 	// The width is computed and stored in this.width
 	this.computeWidth();
 	if (this.parent.constructor.name === "BatteryMenu") {
-	    let deviceTypeList = Device.getTypeList();
-        let deviceTypeLen = deviceTypeList.length;
+	    var deviceTypeList = Device.getTypeList();
+        var deviceTypeLen = deviceTypeList.length;
         for (var i = 0; i < deviceTypeLen; i++) {
-           let manager = deviceTypeList[i].getManager();
+           var manager = deviceTypeList[i].getManager();
            for (var j = 0; j < manager.getDeviceCount(); j++) {
-               let robot = manager.connectedDevices[j];
+               var robot = manager.connectedDevices[j];
                this.iconColors.push(BatteryMenu.getColorForBatteryStatus(robot.getBatteryStatus()));
 	        }
 	    }
@@ -11235,9 +11234,9 @@ SmoothMenuBnList.prototype.generateBns = function() {
 
 	if (!this.bnsGenerated) {
 		this.clearBnsArray();
-		let currentY = 0;
-		let count = this.options.length;
-		for (let i = 0; i < count; i++) {
+		var currentY = 0;
+		var count = this.options.length;
+		for (var i = 0; i < count; i++) {
 			if (this.parent.constructor.name === "BatteryMenu") {
 			    this.bns.push(this.generateBn(0, currentY, this.width - this.bnMargin - TitleBar.buttonW, this.options[i]));
                 this.bns.push(this.generateBn(this.width - TitleBar.buttonW, currentY, TitleBar.buttonW, null, VectorPaths.battery, this.iconColors[i]));
@@ -11266,12 +11265,12 @@ SmoothMenuBnList.prototype.generateBns = function() {
  */
 SmoothMenuBnList.prototype.computeWidth = function() {
 	if (this.width == null) {
-		const columns = 1;
-		const MBL = SmoothMenuBnList;
-		let longestW = 0;
-		for (let i = 0; i < this.options.length; i++) {
-			const string = this.options[i].text;
-			const currentW = GuiElements.measure.stringWidth(string, Button.defaultFont);
+		var columns = 1;
+		var MBL = SmoothMenuBnList;
+		var longestW = 0;
+		for (var i = 0; i < this.options.length; i++) {
+			var string = this.options[i].text;
+			var currentW = GuiElements.measure.stringWidth(string, Button.defaultFont);
 			if (currentW > longestW) {
 				longestW = currentW;
 			}
@@ -11296,7 +11295,7 @@ SmoothMenuBnList.prototype.isEmpty = function() {
  */
 SmoothMenuBnList.prototype.clearBnsArray = function() {
 	if (this.bns != null) {
-		for (let i = 0; i < this.bns.length; i++) {
+		for (var i = 0; i < this.bns.length; i++) {
 			this.bns[i].remove();
 		}
 	}
@@ -11312,7 +11311,7 @@ SmoothMenuBnList.prototype.clearBnsArray = function() {
  * @return {Button}
  */
 SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, color) {
-	const bn = new Button(x, y, width, this.bnHeight, this.zoomG);
+	var bn = new Button(x, y, width, this.bnHeight, this.zoomG);
 	if (option != null) {
 		bn.setCallbackFunction(option.func, true);
 		if (option.addTextFn != null) {
@@ -11335,8 +11334,8 @@ SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, colo
  */
 SmoothMenuBnList.prototype.updatePosition = function() {
 	if (this.visible) {
-		let realX = this.parent.relToAbsX(this.x);
-		let realY = this.parent.relToAbsY(this.y);
+		var realX = this.parent.relToAbsX(this.x);
+		var realY = this.parent.relToAbsY(this.y);
 		// SmoothMenuBnLists need real absolute coords that account for the zoom level
 		realX = GuiElements.relToAbsX(realX);
 		realY = GuiElements.relToAbsY(realY);
@@ -11369,7 +11368,7 @@ SmoothMenuBnList.prototype.getScroll = function() {
 SmoothMenuBnList.prototype.setScroll = function(scrollTop) {
 	if (!this.visible) return;
 	scrollTop = Math.max(0, scrollTop);
-	const height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
+	var height = parseInt(window.getComputedStyle(this.scrollDiv).getPropertyValue('height'), 10);
 	scrollTop = Math.min(this.scrollDiv.scrollHeight - height, scrollTop);
 	this.scrollDiv.scrollTop = scrollTop;
 };
@@ -11396,7 +11395,7 @@ SmoothMenuBnList.prototype.isScrolling = function() {
  * @return {number}
  */
 SmoothMenuBnList.prototype.previewHeight = function() {
-	let height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
+	var height = (this.bnHeight + this.bnMargin) * this.options.length - this.bnMargin;
 	height = Math.max(height, 0);
 	if (this.maxHeight != null) {
 		height = Math.min(height, this.maxHeight);
@@ -11420,7 +11419,7 @@ SmoothMenuBnList.prototype.previewWidth = function() {
  * @return {number}
  */
 SmoothMenuBnList.previewHeight = function(count, maxHeight) {
-	let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+	var height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
 	height = Math.max(height, 0);
 	if (maxHeight != null) {
 		height = Math.min(height, maxHeight);
@@ -11494,10 +11493,10 @@ Menu.prototype.createMenuBnList = function() {
 	if (this.menuBnList != null) {
 		this.menuBnList.hide();
 	}
-	const bnM = Menu.bnMargin;
+	var bnM = Menu.bnMargin;
 	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
 	this.menuBnList.markAsOverlayPart(this);
-	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
 };
 
@@ -11531,7 +11530,7 @@ Menu.prototype.addOption = function(text, func, close, addTextFn) {
  * Creates the buttons and background of the menu
  */
 Menu.prototype.buildMenu = function() {
-	const mBL = this.menuBnList;
+	var mBL = this.menuBnList;
 	mBL.generateBns();
 	GuiElements.update.rect(this.bgRect, 0, 0, mBL.width + 2 * Menu.bnMargin, mBL.height + 2 * Menu.bnMargin);
 };
@@ -11641,13 +11640,13 @@ BatteryMenu.prototype = Object.create(Menu.prototype);
 BatteryMenu.prototype.constructor = BatteryMenu;
 
 BatteryMenu.prototype.loadOptions = function() {
-    let deviceTypeList = Device.getTypeList();
-    let deviceTypeLen = deviceTypeList.length;
+    var deviceTypeList = Device.getTypeList();
+    var deviceTypeLen = deviceTypeList.length;
     for (var i = 0; i < deviceTypeLen; i++) {
-           let manager = deviceTypeList[i].getManager();
+           var manager = deviceTypeList[i].getManager();
            var curBatteryStatus = "3";
            for (var j = 0; j < manager.getDeviceCount(); j++) {
-               let robot = manager.connectedDevices[j];
+               var robot = manager.connectedDevices[j];
                var words = robot.name.split(" ");
                var newName = "";
                var color = Colors.lightGray;
@@ -11687,7 +11686,7 @@ FileMenu.prototype = Object.create(Menu.prototype);
 FileMenu.prototype.constructor = FileMenu;
 FileMenu.prototype.loadOptions = function() {
 	this.addOption("New", function() {
-		let request = new HttpRequestBuilder("data/createNewFile");
+		var request = new HttpRequestBuilder("data/createNewFile");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 	this.addOption("Open", OpenDialog.showDialog);
@@ -11696,7 +11695,7 @@ FileMenu.prototype.loadOptions = function() {
 	this.addOption("Delete", SaveManager.userDelete);
 	this.addOption("Share", SaveManager.userExport);
 	this.addOption("OpenFromCloud", function() {
-		let request = new HttpRequestBuilder("data/showCloudPicker");
+		var request = new HttpRequestBuilder("data/showCloudPicker");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
 	//this.addOption("Debug", this.optionEnableDebug);
@@ -11778,8 +11777,8 @@ DebugMenu.prototype.loadFile = function() {
  * Opens the XML for the current file in a new tab
  */
 DebugMenu.prototype.downloadFile = function() {
-	const xml = XmlWriter.docToText(CodeManager.createXml());
-	const url = "data:text/plain," + HtmlServer.encodeHtml(xml);
+	var xml = XmlWriter.docToText(CodeManager.createXml());
+	var url = "data:text/plain," + HtmlServer.encodeHtml(xml);
 	window.open(url, '_blank');
 };
 
@@ -11801,11 +11800,11 @@ DebugMenu.prototype.optionClearLog = function() {
  * Provides a dialog for sending requests to the backend
  */
 DebugMenu.prototype.optionSendRequest = function() {
-	let message = this.lastResponse;
+	var message = this.lastResponse;
 	if (this.lastResponse === "") {
 		message = "Request: http://localhost:22179/[...]"
 	}
-	const me = this;
+	var me = this;
 	DialogManager.showPromptDialog("Send request", message, this.lastRequest, true, function(cancel, request) {
 		if (!cancel && (request !== "" || me.lastRequest !== "")) {
 			if (request === "") {
@@ -11930,7 +11929,7 @@ SettingsMenu.prototype.disableSnapping = function() {
  * Tells the backend to send the current debug log
  */
 SettingsMenu.prototype.optionSendDebugLog = function() {
-	const request = new HttpRequestBuilder("debug/shareLog");
+	var request = new HttpRequestBuilder("debug/shareLog");
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
@@ -11988,12 +11987,12 @@ DeviceMenu.setGraphics = function() {
  * @inheritDoc
  */
 DeviceMenu.prototype.loadOptions = function() {
-	let connectedClass = null;
+	var connectedClass = null;
 	Device.getTypeList().forEach(function(deviceClass) {
 		/* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
 		 * is it the connectedClass */
-		let deviceManager = deviceClass.getManager();
-		const statuses = DeviceManager.statuses;
+		var deviceManager = deviceClass.getManager();
+		var statuses = DeviceManager.statuses;
 		if (deviceManager.getDeviceCount() > 0 ) {
 			connectedClass = deviceClass;
 		}
@@ -12020,11 +12019,11 @@ DeviceMenu.prototype.loadOptions = function() {
  * @param connectedClass - Subclass of Device
  */
 DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
-	const device = connectedClass.getManager().getDevice(0);
-	const status = device.getFirmwareStatus();
-	const statuses = Device.firmwareStatuses;
-	let icon = null;
-	let color = null;
+	var device = connectedClass.getManager().getDevice(0);
+	var status = device.getFirmwareStatus();
+	var statuses = Device.firmwareStatuses;
+	var icon = null;
+	var color = null;
 	if (status === statuses.old) {
 		// If the firmware is old but usable, a yellow icon is used
 		icon = VectorPaths.warning;
@@ -12043,7 +12042,7 @@ DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
  * @return {boolean}
  */
 DeviceMenu.prototype.previewOpen = function() {
-	let connectionCount = 0;
+	var connectionCount = 0;
 	Device.getTypeList().forEach(function(deviceClass) {
 		connectionCount += deviceClass.getManager().getDeviceCount();
 	});
@@ -12084,7 +12083,7 @@ function BlockContextMenu(block, x, y) {
 }
 
 BlockContextMenu.setGraphics = function() {
-	const BCM = BlockContextMenu;
+	var BCM = BlockContextMenu;
 	BCM.bnMargin = Button.defaultMargin;
 	BCM.bgColor = Colors.lightGray;
 	BCM.blockShift = 20;
@@ -12094,17 +12093,17 @@ BlockContextMenu.setGraphics = function() {
  * Renders the menu
  */
 BlockContextMenu.prototype.showMenu = function() {
-	const BCM = BlockContextMenu;
+	var BCM = BlockContextMenu;
 	this.group = GuiElements.create.group(0, 0);
 
-	let layer = GuiElements.layers.inputPad;
-	let overlayType = Overlay.types.inputPad;
+	var layer = GuiElements.layers.inputPad;
+	var overlayType = Overlay.types.inputPad;
 	this.bubbleOverlay = new BubbleOverlay(overlayType, BCM.bgColor, BCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
-	const height = this.menuBnList.previewHeight();
-	const width = this.menuBnList.previewWidth();
+	var height = this.menuBnList.previewHeight();
+	var width = this.menuBnList.previewWidth();
 	this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
 	this.menuBnList.show();
 };
@@ -12160,12 +12159,12 @@ BlockContextMenu.prototype.addOptions = function() {
  * Duplicates this menu's Block and all blocks below it.
  */
 BlockContextMenu.prototype.duplicate = function() {
-	const BCM = BlockContextMenu;
-	const newX = this.block.getAbsX() + BCM.blockShift;
-	const newY = this.block.getAbsY() + BCM.blockShift;
-	const blockCopy = this.block.duplicate(newX, newY);
-	const tab = this.block.stack.tab;
-	const copyStack = new BlockStack(blockCopy, tab);
+	var BCM = BlockContextMenu;
+	var newX = this.block.getAbsX() + BCM.blockShift;
+	var newY = this.block.getAbsY() + BCM.blockShift;
+	var blockCopy = this.block.duplicate(newX, newY);
+	var tab = this.block.stack.tab;
+	var copyStack = new BlockStack(blockCopy, tab);
 	//copyStack.updateDim();
 	this.close();
 };
@@ -12207,7 +12206,7 @@ function VectorIcon(x, y, pathId, color, height, parent) {
  * @return {number} - The width the icon would have, if created
  */
 VectorIcon.computeWidth = function(pathId, height) {
-	const scale = height / pathId.height;
+	var scale = height / pathId.height;
 	return scale * pathId.width;
 };
 
@@ -12263,8 +12262,8 @@ function Highlighter() {
  * @return {Element}
  */
 Highlighter.createPath = function() {
-	const bG = BlockGraphics.highlight;
-	const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+	var bG = BlockGraphics.highlight;
+	var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
 	path.setAttributeNS(null, "stroke", bG.strokeC);
 	path.setAttributeNS(null, "stroke-width", bG.strokeW);
 	path.setAttributeNS(null, "fill", "none");
@@ -12283,15 +12282,15 @@ Highlighter.createPath = function() {
  *                              and should therefore by highlighted in black
  */
 Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
-	const myX = CodeManager.dragAbsToRelX(x);
-	const myY = CodeManager.dragAbsToRelX(y);
-	const pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
+	var myX = CodeManager.dragAbsToRelX(x);
+	var myY = CodeManager.dragAbsToRelX(y);
+	var pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
 	Highlighter.path.setAttributeNS(null, "d", pathD);
 	if (!Highlighter.visible) {
 		GuiElements.layers.highlight.appendChild(Highlighter.path);
 		Highlighter.visible = true;
 	}
-	const bG = BlockGraphics.highlight;
+	var bG = BlockGraphics.highlight;
 	if (isGlowing != null && isGlowing) {
 		Highlighter.path.setAttributeNS(null, "stroke", bG.strokeDarkC);
 	} else {
@@ -12313,10 +12312,10 @@ Highlighter.hide = function() {
  * which box is shown depends on the position parameter of the block
  */
 function DisplayBoxManager(){
-	const DBM = DisplayBoxManager;
+	var DBM = DisplayBoxManager;
 	DBM.boxes = [];
 	// Create 3 boxes
-	for(let i = 0; i < 3; i++) {
+	for(var i = 0; i < 3; i++) {
 		DBM.boxes[i] = new DisplayBox(i);
 	}
 	// Build each box
@@ -12327,7 +12326,7 @@ function DisplayBoxManager(){
  * Builds all the Manager's boxes
  */
 DisplayBoxManager.build = function(){
-	const DBM = DisplayBoxManager;
+	var DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.build();
 	});
@@ -12339,7 +12338,7 @@ DisplayBoxManager.build = function(){
  * @param {string} positionString - "position#", The position of the box, as a string
  */
 DisplayBoxManager.displayText = function(message, positionString) {
-	const DBM = DisplayBoxManager;
+	var DBM = DisplayBoxManager;
 	if(positionString === "position1") {
 		DBM.boxes[0].displayText(message);
 	} else if(positionString === "position2") {
@@ -12356,7 +12355,7 @@ DisplayBoxManager.displayText = function(message, positionString) {
  * Hides all DisplayBoxes (when one is tapped)
  */
 DisplayBoxManager.hide = function(){
-	const DBM = DisplayBoxManager;
+	var DBM = DisplayBoxManager;
 	DBM.boxes.forEach(function(box){
 		box.hide();
 	});
@@ -12384,7 +12383,7 @@ function DisplayBox(position) {
 }
 
 DisplayBox.setGraphics = function() {
-	const DB = DisplayBox;
+	var DB = DisplayBox;
 	DB.bgColor = Colors.white;
 	DB.fontColor = Colors.black;
 	DB.font = Font.uiFont(35);
@@ -12399,7 +12398,7 @@ DisplayBox.setGraphics = function() {
  * Builds the elements of the box
  */
 DisplayBox.prototype.build = function() {
-	const DB = DisplayBox;
+	var DB = DisplayBox;
 	this.rectY = this.getRectY();
 	this.rectE = GuiElements.draw.rect(DB.rectX, this.rectY, DB.rectW, DB.rectH, DB.bgColor);
 	this.textE = GuiElements.draw.text(0, 0, "", DB.font, DB.fontColor);
@@ -12412,8 +12411,8 @@ DisplayBox.prototype.build = function() {
  * @return {number}
  */
 DisplayBox.prototype.getRectY = function() {
-	const DB = DisplayBox;
-	const fromBottom = 2 - this.position;
+	var DB = DisplayBox;
+	var fromBottom = 2 - this.position;
 	return GuiElements.height - (DB.rectH + DB.margin) * fromBottom - DB.rectH - DB.screenMargin;
 };
 
@@ -12428,11 +12427,11 @@ DisplayBox.updateZoom = function() {
  * Resizes the box
  */
 DisplayBox.prototype.updateZoom = function() {
-	const DB = DisplayBox;
+	var DB = DisplayBox;
 	this.rectY = this.getRectY();
-	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
-	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	var textW = GuiElements.measure.textWidth(this.textE);
+	var textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	var textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
 	GuiElements.move.text(this.textE, textX, textY);
 	GuiElements.update.rect(this.rectE, DB.rectX, this.rectY, DB.rectW, DB.rectH);
 };
@@ -12442,11 +12441,11 @@ DisplayBox.prototype.updateZoom = function() {
  * @param {string} text - The text to show
  */
 DisplayBox.prototype.displayText = function(text) {
-	const DB = DisplayBox;
+	var DB = DisplayBox;
 	GuiElements.update.textLimitWidth(this.textE, text, DB.rectW);
-	const textW = GuiElements.measure.textWidth(this.textE);
-	const textX = DB.rectX + DB.rectW / 2 - textW / 2;
-	const textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
+	var textW = GuiElements.measure.textWidth(this.textE);
+	var textX = DB.rectX + DB.rectW / 2 - textW / 2;
+	var textY = this.rectY + DB.rectH / 2 + DB.font.charHeight / 2;
 	GuiElements.move.text(this.textE, textX, textY);
 	this.show();
 };
@@ -12479,7 +12478,7 @@ DisplayBox.prototype.hide = function() {
  * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
  */
 function CodeManager() {
-	const move = CodeManager.move;   // shorthand
+	var move = CodeManager.move;   // shorthand
 	move.moving = false;   // Is there a BlockStack that is currently moving?
 	move.stack = null;   // Reference to BlockStack that is currently moving.
 	move.offsetX = 0;   // The difference between the BlockStack's x and the touch x.
@@ -12533,13 +12532,13 @@ CodeManager.move = {};
  * @param {number} y - The y coord of the user's finger.
  */
 CodeManager.move.start = function(block, x, y) {
-	const move = CodeManager.move;   // shorthand
+	var move = CodeManager.move;   // shorthand
 	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
 		Overlay.closeOverlays();   // Close any visible overlays.
 		move.moving = true;   // Record that a Block is now moving.
 		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
 		containing only the Block and the Blocks below it. */
-		const stack = block.unsnap();
+		var stack = block.unsnap();
 		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
 		move.bottomX = stack.relToAbsX(stack.dim.rw);   // Store the BlockStack's dimensions.
 		move.bottomY = stack.relToAbsY(stack.dim.rh);
@@ -12566,7 +12565,7 @@ CodeManager.move.start = function(block, x, y) {
  * @param {number} y - The y coord of the user's finger.
  */
 CodeManager.move.update = function(x, y) {
-	const move = CodeManager.move;   // shorthand
+	var move = CodeManager.move;   // shorthand
 	if (move.moving) {   // Only update if a BlockStack is currently moving.
 		move.touchX = x;
 		move.touchY = y;
@@ -12599,8 +12598,8 @@ CodeManager.move.update = function(x, y) {
  * Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
  */
 CodeManager.move.end = function() {
-	const move = CodeManager.move;   // shorthand
-	const fit = CodeManager.fit;   // shorthand
+	var move = CodeManager.move;   // shorthand
+	var fit = CodeManager.fit;   // shorthand
 	if (move.moving) {   // Only run if a BlockStack is currently moving.
 		move.topX = move.offsetX + move.touchX;
 		move.topY = move.offsetY + move.touchY;
@@ -12638,7 +12637,7 @@ CodeManager.move.end = function() {
  * Drops the BlockStack where it is without attaching it to anything or deleting it.
  */
 CodeManager.move.interrupt = function() {
-	const move = CodeManager.move;   // shorthand
+	var move = CodeManager.move;   // shorthand
 	if (move.moving) {   // Only run if a BlockStack is currently moving.
 		move.topX = move.offsetX + move.touchX;
 		move.topY = move.offsetY + move.touchY;
@@ -12681,13 +12680,13 @@ CodeManager.move.pInRange = function(x1, y1, xR, yR, width, height) {
 CodeManager.move.rInRange = function(x1, y1, width1, height1, x2, y2, width2, height2) {
 	// These conditions check that there are no vertical or horizontal gaps between the regions.
 	// Is the right side of region 1 to the right of the left side of region 2?
-	const xBigEnough = x1 + width1 >= x2;
+	var xBigEnough = x1 + width1 >= x2;
 	// Is the bottom side of region 1 below the top side of region 2?
-	const yBigEnough = y1 + height1 >= y2;
+	var yBigEnough = y1 + height1 >= y2;
 	// Is the left side of region 1 to the left of the right side of region 2?
-	const xSmallEnough = x1 <= x2 + width2;
+	var xSmallEnough = x1 <= x2 + width2;
 	// Is the top side of region 1 above the bottom side of region 2?
-	const ySmallEnough = y1 <= y2 + height2;
+	var ySmallEnough = y1 <= y2 + height2;
 	// If it passes all 4 checks, the regions overlap.
 	return xBigEnough && yBigEnough && xSmallEnough && ySmallEnough;
 };
@@ -12697,7 +12696,7 @@ CodeManager.move.rInRange = function(x1, y1, width1, height1, x2, y2, width2, he
  * All results are stored in CodeManager.fit.  Nothing is returned.
  */
 CodeManager.findBestFit = function() {
-	const fit = CodeManager.fit;   // shorthand
+	var fit = CodeManager.fit;   // shorthand
 	fit.found = false;   // Have any matching slot/block been found?
 	fit.bestFit = null;   // Slot/Block that is closest to the item?
 	fit.dist = 0;   // How far is the best candidate from the ideal location?
@@ -12710,7 +12709,7 @@ CodeManager.findBestFit = function() {
  * Stops the update timer if all Blocks are finished.
  */
 CodeManager.updateRun = function() {
-	const CM = CodeManager;
+	var CM = CodeManager;
 	if (!TabManager.updateRun().isRunning()) {   // A recursive call.  Returns true if any Blocks are running.
 		CM.stopUpdateTimer();   // If no Blocks are running, stop the update timer.
 	}
@@ -12773,7 +12772,7 @@ CodeManager.addVariable = function(variable) {
  * @param {Variable} variable
  */
 CodeManager.removeVariable = function(variable) {
-	const index = CodeManager.variableList.indexOf(variable);
+	var index = CodeManager.variableList.indexOf(variable);
 	CodeManager.variableList.splice(index, 1);
 };
 
@@ -12786,7 +12785,7 @@ CodeManager.newVariable = function(callbackCreate, callbackCancel) {
 	DialogManager.showPromptDialog("Create variable", "Enter variable name", "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
-			const variable = new Variable(result);
+			var variable = new Variable(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
 			if (callbackCreate != null) callbackCreate(variable);
@@ -12804,8 +12803,8 @@ CodeManager.newVariable = function(callbackCreate, callbackCancel) {
 CodeManager.checkVarName = function(name) {
 	name = name.trim();
 	if (name.length > 0) {
-		const variables = CodeManager.variableList;
-		for (let i = 0; i < variables.length; i++) {
+		var variables = CodeManager.variableList;
+		for (var i = 0; i < variables.length; i++) {
 			if (variables[i].getName() === name) {
 				return false;
 			}
@@ -12821,8 +12820,8 @@ CodeManager.checkVarName = function(name) {
  * @return {Variable|null} - The variable or null if it can't be found
  */
 CodeManager.findVar = function(name) {
-	const variables = CodeManager.variableList;
-	for (let i = 0; i < variables.length; i++) {
+	var variables = CodeManager.variableList;
+	for (var i = 0; i < variables.length; i++) {
 		if (variables[i].getName() === name) {
 			return variables[i];
 		}
@@ -12843,7 +12842,7 @@ CodeManager.addList = function(list) {
  * @param {List} list
  */
 CodeManager.removeList = function(list) {
-	const index = CodeManager.listList.indexOf(list);
+	var index = CodeManager.listList.indexOf(list);
 	CodeManager.listList.splice(index, 1);
 };
 
@@ -12856,7 +12855,7 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
 	DialogManager.showPromptDialog("Create list", "Enter list name", "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
-			const list = new List(result);
+			var list = new List(result);
 			SaveManager.markEdited();
 			BlockPalette.getCategory("variables").refreshGroup();
 			if (callbackCreate != null) callbackCreate(list);
@@ -12874,8 +12873,8 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
 CodeManager.checkListName = function(name) {
 	name = name.trim();
 	if (name.length > 0) {
-		const lists = CodeManager.listList;
-		for (let i = 0; i < lists.length; i++) {
+		var lists = CodeManager.listList;
+		for (var i = 0; i < lists.length; i++) {
 			if (lists[i].getName() === name) {
 				return false;
 			}
@@ -12891,8 +12890,8 @@ CodeManager.checkListName = function(name) {
  * @return {List|null} - The List or null if it can't be found
  */
 CodeManager.findList = function(name) {
-	const lists = CodeManager.listList;
-	for (let i = 0; i < lists.length; i++) {
+	var lists = CodeManager.listList;
+	for (var i = 0; i < lists.length; i++) {
 		if (lists[i].getName() === name) {
 			return lists[i];
 		}
@@ -12987,8 +12986,8 @@ CodeManager.deleteRecording = function(recording) {
  * TODO: Just use a set instead of a list for CodeManager.broadcastList
  */
 CodeManager.checkBroadcastMessage = function(message) {
-	const messages = CodeManager.broadcastList;
-	for (let i = 0; i < messages.length; i++) {
+	var messages = CodeManager.broadcastList;
+	for (var i = 0; i < messages.length; i++) {
 		if (messages[i] === message) {
 			return false;
 		}
@@ -13086,8 +13085,8 @@ CodeManager.updateConnectionStatus = function() {
  * @return {number}
  */
 CodeManager.beatsToMs = function(beats) {
-	const tempo = CodeManager.sound.tempo;
-	const res = beats / tempo * 60 * 1000;
+	var tempo = CodeManager.sound.tempo;
+	var res = beats / tempo * 60 * 1000;
 	if (isNaN(res) || !isFinite(res)) {
 		return 0;
 	}
@@ -13117,7 +13116,7 @@ CodeManager.setSoundTempo = function(newTempo) {
  * @param {boolean} includePalette - Whether Blocks in the palette should also get the message
  */
 CodeManager.passRecursivelyDown = function(message, includePalette) {
-	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
+	var args = [message].concat(Array.prototype.splice.call(arguments, 2));
 	TabManager.passRecursivelyDown.apply(TabManager, args);
 	if (includePalette) {
 		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
@@ -13130,10 +13129,10 @@ CodeManager.passRecursivelyDown = function(message, includePalette) {
  * @return {Document} - The completed XML document
  */
 CodeManager.createXml = function() {
-	const CM = CodeManager;
-	const xmlDoc = XmlWriter.newDoc("project");
-	const project = xmlDoc.getElementsByTagName("project")[0];
-	let fileName = "project";
+	var CM = CodeManager;
+	var xmlDoc = XmlWriter.newDoc("project");
+	var project = xmlDoc.getElementsByTagName("project")[0];
+	var fileName = "project";
 	if (SaveManager.fileName != null) {
 		fileName = SaveManager.fileName;
 	}
@@ -13141,13 +13140,13 @@ CodeManager.createXml = function() {
 	XmlWriter.setAttribute(project, "appVersion", GuiElements.appVersion);
 	XmlWriter.setAttribute(project, "created", CodeManager.createdTime);
 	XmlWriter.setAttribute(project, "modified", CodeManager.modifiedTime);
-	const variables = XmlWriter.createElement(xmlDoc, "variables");
-	for (let i = 0; i < CM.variableList.length; i++) {
+	var variables = XmlWriter.createElement(xmlDoc, "variables");
+	for (var i = 0; i < CM.variableList.length; i++) {
 		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
 	}
 	project.appendChild(variables);
-	const lists = XmlWriter.createElement(xmlDoc, "lists");
-	for (let i = 0; i < CM.listList.length; i++) {
+	var lists = XmlWriter.createElement(xmlDoc, "lists");
+	for (var i = 0; i < CM.listList.length; i++) {
 		lists.appendChild(CM.listList[i].createXml(xmlDoc));
 	}
 	project.appendChild(lists);
@@ -13164,22 +13163,22 @@ CodeManager.importXml = function(projectNode) {
 	Sound.changeFile();
 	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
 	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
-	const variablesNode = XmlWriter.findSubElement(projectNode, "variables");
+	var variablesNode = XmlWriter.findSubElement(projectNode, "variables");
 	if (variablesNode != null) {
-		const variableNodes = XmlWriter.findSubElements(variablesNode, "variable");
-		for (let i = 0; i < variableNodes.length; i++) {
+		var variableNodes = XmlWriter.findSubElements(variablesNode, "variable");
+		for (var i = 0; i < variableNodes.length; i++) {
 			Variable.importXml(variableNodes[i]);
 		}
 	}
-	const listsNode = XmlWriter.findSubElement(projectNode, "lists");
+	var listsNode = XmlWriter.findSubElement(projectNode, "lists");
 	if (listsNode != null) {
-		const listNodes = XmlWriter.findSubElements(listsNode, "list");
-		for (let i = 0; i < listNodes.length; i++) {
+		var listNodes = XmlWriter.findSubElements(listsNode, "list");
+		for (var i = 0; i < listNodes.length; i++) {
 			List.importXml(listNodes[i]);
 		}
 	}
 	BlockPalette.getCategory("variables").refreshGroup();
-	const tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
+	var tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
 	TabManager.importXml(tabsNode);
 	BlockPalette.refresh();
 	DeviceManager.updateSelectableDevices();
@@ -13198,7 +13197,7 @@ CodeManager.updateModified = function() {
  * Deletes all tabs, stacks, and Blocks so a new project can be loaded
  */
 CodeManager.deleteAll = function() {
-	const CM = CodeManager;
+	var CM = CodeManager;
 	CM.stop();
 	TabManager.deleteAll();
 	UndoManager.clearUndos();
@@ -13269,7 +13268,7 @@ CodeManager.dragRelToAbsY = function(y) {
  * The TabManager's main job is passing messages to the active tab
  */
 function TabManager() {
-	const TM = TabManager;
+	var TM = TabManager;
 	TM.tabList = [];
 	TM.activeTab = null;
 	TM.createInitialTab();
@@ -13280,7 +13279,7 @@ function TabManager() {
 }
 
 TabManager.setGraphics = function() {
-	const TM = TabManager;
+	var TM = TabManager;
 	TM.bg = Colors.black;
 
 	TM.minZoom = 0.35;
@@ -13307,7 +13306,7 @@ TabManager.setGraphics = function() {
  * Creates the rectangle for the canvas
  */
 TabManager.createTabSpaceBg = function() {
-	const TM = TabManager;
+	var TM = TabManager;
 	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
@@ -13326,7 +13325,7 @@ TabManager.addTab = function(tab) {
  * @param {Tab} tab
  */
 TabManager.removeTab = function(tab) {
-	const index = TabManager.tabList.indexOf(tab);
+	var index = TabManager.tabList.indexOf(tab);
 	TabManager.stackList.splice(index, 1);
 };
 
@@ -13334,8 +13333,8 @@ TabManager.removeTab = function(tab) {
  * Creates a tab to be the initial Tab
  */
 TabManager.createInitialTab = function() {
-	const TM = TabManager;
-	const t = new Tab();
+	var TM = TabManager;
+	var t = new Tab();
 	TM.activateTab(TM.tabList[0]);
 };
 
@@ -13356,8 +13355,8 @@ TabManager.updateRun = function() {
 	if (!this.isRunning) {
 		return new ExecutionStatusDone();
 	}
-	let rVal = false;
-	for (let i = 0; i < TabManager.tabList.length; i++) {
+	var rVal = false;
+	for (var i = 0; i < TabManager.tabList.length; i++) {
 		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning = rVal;
@@ -13400,7 +13399,7 @@ TabManager.startRun = function() {
  * @param {number} y
  */
 TabManager.startScroll = function(x, y) {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (!TM.scrolling) {
 		TM.scrolling = true;
 		TM.activeTab.startScroll(x, y);
@@ -13412,7 +13411,7 @@ TabManager.startScroll = function(x, y) {
  * @param {number} y
  */
 TabManager.updateScroll = function(x, y) {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (TM.scrolling) {
 		TM.activeTab.updateScroll(x, y);
 	}
@@ -13421,7 +13420,7 @@ TabManager.updateScroll = function(x, y) {
  * Passes message to Tab
  */
 TabManager.endScroll = function() {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (TM.scrolling) {
 		TM.scrolling = false;
 		TM.activeTab.endScroll();
@@ -13435,7 +13434,7 @@ TabManager.endScroll = function() {
  * @param {number} y2
  */
 TabManager.startZooming = function(x1, y1, x2, y2) {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (!TM.zooming) {
 		TM.zooming = true;
 		TM.activeTab.startZooming(x1, y1, x2, y2);
@@ -13449,7 +13448,7 @@ TabManager.startZooming = function(x1, y1, x2, y2) {
  * @param {number} y2
  */
 TabManager.updateZooming = function(x1, y1, x2, y2) {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (TM.zooming) {
 		TM.activeTab.updateZooming(x1, y1, x2, y2);
 	}
@@ -13458,7 +13457,7 @@ TabManager.updateZooming = function(x1, y1, x2, y2) {
  * Passes message to Tab
  */
 TabManager.endZooming = function() {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (TM.zooming) {
 		TM.zooming = false;
 		TM.activeTab.endZooming();
@@ -13480,9 +13479,9 @@ TabManager.undoDelete = function(stackNode) {
  * @return {Node} - The XML node containing the data
  */
 TabManager.createXml = function(xmlDoc) {
-	const TM = TabManager;
-	const tabs = XmlWriter.createElement(xmlDoc, "tabs");
-	for (let i = 0; i < TM.tabList.length; i++) {
+	var TM = TabManager;
+	var tabs = XmlWriter.createElement(xmlDoc, "tabs");
+	for (var i = 0; i < TM.tabList.length; i++) {
 		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
 	}
 	return tabs;
@@ -13493,10 +13492,10 @@ TabManager.createXml = function(xmlDoc) {
  * @param {Node} tabsNode - The XML node containing information about the Tabs
  */
 TabManager.importXml = function(tabsNode) {
-	const TM = TabManager;
+	var TM = TabManager;
 	if (tabsNode != null) {
-		const tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
-		for (let i = 0; i < tabNodes.length; i++) {
+		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		for (var i = 0; i < tabNodes.length; i++) {
 			Tab.importXml(tabNodes[i]);
 		}
 	}
@@ -13511,8 +13510,8 @@ TabManager.importXml = function(tabsNode) {
  * Clears and removes all tabs
  */
 TabManager.deleteAll = function() {
-	const TM = TabManager;
-	for (let i = 0; i < TM.tabList.length; i++) {
+	var TM = TabManager;
+	for (var i = 0; i < TM.tabList.length; i++) {
 		TM.tabList[i].delete();
 	}
 	TM.tabList = [];
@@ -13566,7 +13565,7 @@ TabManager.deleteList = function(list) {
  */
 TabManager.checkBroadcastRunning = function(message) {
 	if (this.isRunning) {
-		for (let i = 0; i < TabManager.tabList.length; i++) {
+		for (var i = 0; i < TabManager.tabList.length; i++) {
 			if (TabManager.tabList[i].checkBroadcastRunning(message)) {
 				return true;
 			}
@@ -13579,7 +13578,7 @@ TabManager.checkBroadcastRunning = function(message) {
  * @return {boolean}
  */
 TabManager.checkVariableUsed = function(variable) {
-	for (let i = 0; i < TabManager.tabList.length; i++) {
+	for (var i = 0; i < TabManager.tabList.length; i++) {
 		if (TabManager.tabList[i].checkVariableUsed(variable)) {
 			return true;
 		}
@@ -13591,7 +13590,7 @@ TabManager.checkVariableUsed = function(variable) {
  * @return {boolean}
  */
 TabManager.checkListUsed = function(list) {
-	for (let i = 0; i < TabManager.tabList.length; i++) {
+	for (var i = 0; i < TabManager.tabList.length; i++) {
 		if (TabManager.tabList[i].checkListUsed(list)) {
 			return true;
 		}
@@ -13605,8 +13604,8 @@ TabManager.checkListUsed = function(list) {
  * @return {number}
  */
 TabManager.countDevicesInUse = function(deviceClass) {
-	let largest = 0;
-	for (let i = 0; i < TabManager.tabList.length; i++) {
+	var largest = 0;
+	for (var i = 0; i < TabManager.tabList.length; i++) {
 		largest = Math.max(largest, TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
@@ -13626,9 +13625,9 @@ TabManager.passRecursivelyDown = function(message) {
  * @param {function} functionName - The name of the function to call
  */
 TabManager.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
-	for (let i = 0; i < TabManager.tabList.length; i++) {
-		const currentList = TabManager.tabList[i];
+	var args = Array.prototype.slice.call(arguments, 1);
+	for (var i = 0; i < TabManager.tabList.length; i++) {
+		var currentList = TabManager.tabList[i];
 		currentList[functionName].apply(currentList, args);
 	}
 };
@@ -13637,7 +13636,7 @@ TabManager.passRecursively = function(functionName) {
  * Updates the background rectangle and tells children to update dimensions
  */
 TabManager.updateZoom = function() {
-	const TM = TabManager;
+	var TM = TabManager;
 	TM.setGraphics();
 	GuiElements.update.rect(TM.bgRect, TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight);
 	TabManager.passRecursively("updateZoom");
@@ -13717,7 +13716,7 @@ Tab.prototype.addStack = function(stack) {
  * @param {BlockStack} stack
  */
 Tab.prototype.removeStack = function(stack) {
-	const index = this.stackList.indexOf(stack);
+	var index = this.stackList.indexOf(stack);
 	this.stackList.splice(index, 1);
 };
 
@@ -13797,8 +13796,8 @@ Tab.prototype.deleteList = function(list) {
  */
 Tab.prototype.checkBroadcastRunning = function(message) {
 	if (this.isRunning) {
-		const stacks = this.stackList;
-		for (let i = 0; i < stacks.length; i++) {
+		var stacks = this.stackList;
+		for (var i = 0; i < stacks.length; i++) {
 			if (stacks[i].checkBroadcastRunning(message)) {
 				return true;
 			}
@@ -13811,8 +13810,8 @@ Tab.prototype.checkBroadcastRunning = function(message) {
  * @return {boolean}
  */
 Tab.prototype.checkVariableUsed = function(variable) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
+	var stacks = this.stackList;
+	for (var i = 0; i < stacks.length; i++) {
 		if (stacks[i].checkVariableUsed(variable)) {
 			return true;
 		}
@@ -13824,8 +13823,8 @@ Tab.prototype.checkVariableUsed = function(variable) {
  * @return {boolean}
  */
 Tab.prototype.checkListUsed = function(list) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
+	var stacks = this.stackList;
+	for (var i = 0; i < stacks.length; i++) {
 		if (stacks[i].checkListUsed(list)) {
 			return true;
 		}
@@ -13841,9 +13840,9 @@ Tab.prototype.updateRun = function() {
 	if (!this.isRunning) {
 		return new ExecutionStatusDone();
 	}
-	const stacks = this.stackList;
-	let rVal = false;
-	for (let i = 0; i < stacks.length; i++) {
+	var stacks = this.stackList;
+	var rVal = false;
+	for (var i = 0; i < stacks.length; i++) {
 		rVal = stacks[i].updateRun().isRunning() || rVal;
 	}
 	this.isRunning = rVal;
@@ -13867,8 +13866,8 @@ Tab.prototype.stop = function() {
  * @param stack
  */
 Tab.prototype.stopAllButStack = function(stack) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
+	var stacks = this.stackList;
+	for (var i = 0; i < stacks.length; i++) {
 		if (stacks[i] !== stack) {
 			stacks[i].stop();
 		}
@@ -13928,12 +13927,12 @@ Tab.prototype.endScroll = function() {
 Tab.prototype.startZooming = function(x1, y1, x2, y2) {
 	if (!this.zooming) {
 		this.zooming = true;
-		const x = (x1 + x2) / 2;
-		const y = (y1 + y2) / 2;
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
 		this.scrollXOffset = this.scrollX - x;
 		this.scrollYOffset = this.scrollY - y;
-		const deltaX = x2 - x1;
-		const deltaY = y2 - y1;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
 		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.startZoom = this.zoomFactor;
 		this.updateTabDim();
@@ -13949,14 +13948,14 @@ Tab.prototype.startZooming = function(x1, y1, x2, y2) {
  */
 Tab.prototype.updateZooming = function(x1, y1, x2, y2) {
 	if (this.zooming) {
-		const x = (x1 + x2) / 2;
-		const y = (y1 + y2) / 2;
-		const deltaX = x2 - x1;
-		const deltaY = y2 - y1;
-		const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		var x = (x1 + x2) / 2;
+		var y = (y1 + y2) / 2;
+		var deltaX = x2 - x1;
+		var deltaY = y2 - y1;
+		var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
 		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
-		const zoomRatio = this.zoomFactor / this.startZoom;
+		var zoomRatio = this.zoomFactor / this.startZoom;
 		this.scrollX = this.scrollXOffset * zoomRatio + x;
 		this.scrollY = this.scrollYOffset * zoomRatio + y;
 		this.updateTransform();
@@ -13984,7 +13983,7 @@ Tab.prototype.updateTransform = function() {
  * Recursively computes the dimensions of the Tab by allowing all stacks to update the bounding box
  */
 Tab.prototype.updateTabDim = function() {
-	const dim = this.dim;
+	var dim = this.dim;
 	dim.width = 0;
 	dim.height = 0;
 	dim.x1 = null;
@@ -14006,13 +14005,13 @@ Tab.prototype.updateTabDim = function() {
  * @return {Node} - The XML Node for this Tab
  */
 Tab.prototype.createXml = function(xmlDoc) {
-	const tab = XmlWriter.createElement(xmlDoc, "tab");
+	var tab = XmlWriter.createElement(xmlDoc, "tab");
 	//XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab, "x", this.scrollX);
 	XmlWriter.setAttribute(tab, "y", this.scrollY);
 	XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
-	const stacks = XmlWriter.createElement(xmlDoc, "stacks");
-	for (let i = 0; i < this.stackList.length; i++) {
+	var stacks = XmlWriter.createElement(xmlDoc, "stacks");
+	for (var i = 0; i < this.stackList.length; i++) {
 		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
 	}
 	tab.appendChild(stacks);
@@ -14025,18 +14024,18 @@ Tab.prototype.createXml = function(xmlDoc) {
  * @return {Tab}
  */
 Tab.importXml = function(tabNode) {
-	const x = XmlWriter.getAttribute(tabNode, "x", 0, true);
-	const y = XmlWriter.getAttribute(tabNode, "y", 0, true);
-	const zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
-	const tab = new Tab();
+	var x = XmlWriter.getAttribute(tabNode, "x", 0, true);
+	var y = XmlWriter.getAttribute(tabNode, "y", 0, true);
+	var zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+	var tab = new Tab();
 	tab.scrollX = x;
 	tab.scrollY = y;
 	tab.zoomFactor = zoom;
 	tab.updateTransform();
-	const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
+	var stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
 	if (stacksNode != null) {
-		const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
-		for (let i = 0; i < stackNodes.length; i++) {
+		var stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+		for (var i = 0; i < stackNodes.length; i++) {
 			BlockStack.importXml(stackNodes[i], tab);
 		}
 	}
@@ -14059,12 +14058,12 @@ Tab.prototype.delete = function() {
  */
 Tab.prototype.undoDelete = function(stackNode) {
 	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
-	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
-	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+	var xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+	var yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 
-	const x = this.absToRelX(xMargin + BlockPalette.width);
-	const y = this.absToRelY(yMargin + TitleBar.height);
-	const stack = BlockStack.importXml(stackNode, this);
+	var x = this.absToRelX(xMargin + BlockPalette.width);
+	var y = this.absToRelY(yMargin + TitleBar.height);
+	var stack = BlockStack.importXml(stackNode, this);
 	if (stack == null) {
 		return false;
 	}
@@ -14079,9 +14078,9 @@ Tab.prototype.undoDelete = function(stackNode) {
  * @return {number}
  */
 Tab.prototype.countDevicesInUse = function(deviceClass) {
-	let largest = 0;
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
+	var largest = 0;
+	var stacks = this.stackList;
+	for (var i = 0; i < stacks.length; i++) {
 		largest = Math.max(largest, stacks[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
@@ -14101,11 +14100,11 @@ Tab.prototype.passRecursivelyDown = function(message) {
  * @param {function} functionName - The name of the function to call
  */
 Tab.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		const currentStack = stacks[i];
-		const currentL = stacks.length;
+	var args = Array.prototype.slice.call(arguments, 1);
+	var stacks = this.stackList;
+	for (var i = 0; i < stacks.length; i++) {
+		var currentStack = stacks[i];
+		var currentL = stacks.length;
 		currentStack[functionName].apply(currentStack, args);
 		if (currentL !== stacks.length) {
 			i--;
@@ -14134,10 +14133,10 @@ Tab.prototype.updateZoom = function() {
  */
 Tab.prototype.updateArrows = function() {
 	this.updateTabDim();
-	const x1 = this.relToAbsX(this.dim.x1);
-	const y1 = this.relToAbsY(this.dim.y1);
-	const x2 = this.relToAbsX(this.dim.x2);
-	const y2 = this.relToAbsY(this.dim.y2);
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 
@@ -14146,17 +14145,17 @@ Tab.prototype.updateArrows = function() {
  * and the Blocks have not changed
  */
 Tab.prototype.updateArrowsShift = function() {
-	const x1 = this.relToAbsX(this.dim.x1);
-	const y1 = this.relToAbsY(this.dim.y1);
-	const x2 = this.relToAbsX(this.dim.x2);
-	const y2 = this.relToAbsY(this.dim.y2);
+	var x1 = this.relToAbsX(this.dim.x1);
+	var y1 = this.relToAbsY(this.dim.y1);
+	var x2 = this.relToAbsX(this.dim.x2);
+	var y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 /**
  * A static class that manages making recordings
  */
 function RecordingManager() {
-	let RM = RecordingManager;
+	var RM = RecordingManager;
 
 	/** @enum {number} */
 	RM.recordingStates = {
@@ -14194,15 +14193,15 @@ RecordingManager.userDeleteFile = function(filename, nextAction) {
  * Tries to start recording
  */
 RecordingManager.startRecording = function() {
-	let RM = RecordingManager;
-	let request = new HttpRequestBuilder("sound/recording/start");
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/start");
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result) {
 		if (result === "Started") {
 			// Successfully started recording. Change state
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
 		} else if (result === "Permission denied") {
-			let message = "Please grant recording permissions to the BirdBlox app in settings";
+			var message = "Please grant recording permissions to the BirdBlox app in settings";
 			DialogManager.showAlertDialog("Permission denied", message, "Dismiss");
 		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
@@ -14214,9 +14213,9 @@ RecordingManager.startRecording = function() {
  * Tell the backend to stop recording
  */
 RecordingManager.stopRecording = function() {
-	let RM = RecordingManager;
-	let request = new HttpRequestBuilder("sound/recording/stop");
-	let stopRec = function() {
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/stop");
+	var stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
@@ -14227,7 +14226,7 @@ RecordingManager.stopRecording = function() {
  * Called from backend when there is an unexpected interruption.
  */
 RecordingManager.interruptRecording = function() {
-	let RM = RecordingManager;
+	var RM = RecordingManager;
 	RM.setState(RM.recordingStates.stopped);
 	RecordingDialog.stoppedRecording();
 };
@@ -14236,13 +14235,13 @@ RecordingManager.interruptRecording = function() {
  * Tells the backend to pause recording
  */
 RecordingManager.pauseRecording = function() {
-	let RM = RecordingManager;
-	let request = new HttpRequestBuilder("sound/recording/pause");
-	let stopRec = function() {
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/pause");
+	var stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let pauseRec = function() {
+	var pauseRec = function() {
 		RM.setState(RM.recordingStates.paused);
 		RecordingDialog.pausedRecording();
 	};
@@ -14253,15 +14252,15 @@ RecordingManager.pauseRecording = function() {
  * Prompts the user to discard the current recording
  */
 RecordingManager.discardRecording = function() {
-	let RM = RecordingManager;
-	let stopRec = function() {
+	var RM = RecordingManager;
+	var stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let message = "Are you sure you would like to delete the current recording?";
+	var message = "Are you sure you would like to delete the current recording?";
 	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result) {
 		if (result === "2") {
-			let request = new HttpRequestBuilder("sound/recording/discard");
+			var request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
 		}
 	}, stopRec);
@@ -14271,13 +14270,13 @@ RecordingManager.discardRecording = function() {
  * Tells the backend to resume recording
  */
 RecordingManager.resumeRecording = function() {
-	let RM = RecordingManager;
-	let request = new HttpRequestBuilder("sound/recording/unpause");
-	let stopRec = function() {
+	var RM = RecordingManager;
+	var request = new HttpRequestBuilder("sound/recording/unpause");
+	var stopRec = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let resumeRec = function() {
+	var resumeRec = function() {
 		RM.setState(RM.recordingStates.recording);
 		RecordingDialog.startedRecording();
 	};
@@ -14297,10 +14296,10 @@ RecordingManager.listRecordings = function(callbackFn) {
  * @param state
  */
 RecordingManager.setState = function(state) {
-	let RM = RecordingManager;
-	let prevState = RM.state;
+	var RM = RecordingManager;
+	var prevState = RM.state;
 	RM.state = state;
-	let states = RM.recordingStates;
+	var states = RM.recordingStates;
 	if (state === states.recording) {
 		if (RM.updateTimer == null) {
 			if (prevState === states.stopped) RM.pausedTime = 0;
@@ -14325,7 +14324,7 @@ RecordingManager.setState = function(state) {
  * Updates the elapsed time counters on any open dialogs
  */
 RecordingManager.updateCounter = function() {
-	let RM = RecordingManager;
+	var RM = RecordingManager;
 	RecordingDialog.updateCounter(RM.getElapsedTime());
 };
 
@@ -14334,7 +14333,7 @@ RecordingManager.updateCounter = function() {
  * @return {number} - Recording time in milliseconds
  */
 RecordingManager.getElapsedTime = function() {
-	let RM = RecordingManager;
+	var RM = RecordingManager;
 	return new Date().getTime() - RM.startTime + RM.pausedTime;
 };
 
@@ -14342,7 +14341,7 @@ RecordingManager.getElapsedTime = function() {
  * Starts recording if permission is granted and the app was waiting for permission
  */
 RecordingManager.permissionGranted = function() {
-	let RM = RecordingManager;
+	var RM = RecordingManager;
 	if (RM.awaitingPermission) {
 		RM.awaitingPermission = false;
 		if (RecordingDialog.currentDialog != null) {
@@ -14419,7 +14418,7 @@ RowDialog.setConstants = function() {
  * @param {function} callbackFn - The function to call when the button is tapped
  */
 RowDialog.prototype.addCenteredButton = function(text, callbackFn) {
-	let entry = {};
+	var entry = {};
 	entry.text = text;
 	entry.callbackFn = callbackFn;
 	this.centeredButtons.push(entry);
@@ -14463,14 +14462,14 @@ RowDialog.prototype.show = function() {
  * Computes the height of the dialog and its content.
  */
 RowDialog.prototype.calcHeights = function() {
-	const RD = RowDialog;
-	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
-	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
+	var RD = RowDialog;
+	var centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
+	var nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
-	let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
-	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
-	let totalHeight = nonScrollHeight + ScrollHeight;
+	var shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	var minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
+	var ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
+	var totalHeight = nonScrollHeight + ScrollHeight;
 	if (!this.autoHeight) totalHeight = 0;
 	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
@@ -14485,8 +14484,8 @@ RowDialog.prototype.calcHeights = function() {
  * Computes the width of the dialog and its content.
  */
 RowDialog.prototype.calcWidths = function() {
-	const RD = RowDialog;
-	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+	var RD = RowDialog;
+	var shorterDim = Math.min(GuiElements.height, GuiElements.width);
 	this.width = Math.min(GuiElements.width, Math.max(shorterDim * RD.widthRatio, RD.minWidth));
 	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
 	this.scrollBoxX = RD.bnMargin;
@@ -14499,7 +14498,7 @@ RowDialog.prototype.calcWidths = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.drawBackground = function() {
-	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
+	var rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -14509,8 +14508,8 @@ RowDialog.prototype.drawBackground = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.createTitleRect = function() {
-	const RD = RowDialog;
-	const rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+	var RD = RowDialog;
+	var rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -14535,14 +14534,14 @@ RowDialog.prototype.createTitleLabel = function(title) {
  * @return {Element} the SVG group element containing the rows
  */
 RowDialog.prototype.createContent = function() {
-	const RD = RowDialog;
-	let y = 0;
-	const rowGroup = GuiElements.create.group(0, 0);
+	var RD = RowDialog;
+	var y = 0;
+	var rowGroup = GuiElements.create.group(0, 0);
 	if (this.rowCount > 0) {
 	    if (this.title === Language.getStr("Connect_Multiple")) {
                 this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
 	    } else {
-            for (let i = 0; i < this.rowCount; i++) {
+            for (var i = 0; i < this.rowCount; i++) {
                 // Determined by subclass
                 this.createRow(i, y, this.contentWidth, rowGroup);
                 y += RD.bnHeight + RD.bnMargin;
@@ -14574,11 +14573,11 @@ RowDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * Generates the centered buttons and adds them to the group
  */
 RowDialog.prototype.createCenteredBns = function() {
-	const RD = RowDialog;
-	let y = this.centeredButtonY;
+	var RD = RowDialog;
+	var y = this.centeredButtonY;
 	this.centeredButtonEs = [];
-	for (let i = 0; i < this.centeredButtons.length; i++) {
-		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+	for (var i = 0; i < this.centeredButtons.length; i++) {
+		var bn = this.createCenteredBn(y, this.centeredButtons[i]);
 		this.centeredButtonEs.push(bn);
 		y += RD.bnHeight + RD.bnMargin;
 	}
@@ -14591,8 +14590,8 @@ RowDialog.prototype.createCenteredBns = function() {
  * @return {Button}
  */
 RowDialog.prototype.createCenteredBn = function(y, entry) {
-	const RD = RowDialog;
-	const button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
+	var RD = RowDialog;
+	var button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
 	button.addText(entry.text, null, null, RD.centeredfontWeight);
 	button.setCallbackFunction(entry.callbackFn, true);
 	return button;
@@ -14604,8 +14603,8 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  */
 RowDialog.prototype.createScrollBox = function() {
 	if (this.rowCount === 0) return null;
-	let x = this.x + this.scrollBoxX;
-	let y = this.y + this.scrollBoxY;
+	var x = this.x + this.scrollBoxX;
+	var y = this.y + this.scrollBoxY;
 	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
 		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
 };
@@ -14620,12 +14619,12 @@ RowDialog.prototype.createHintText = function(offsetX,offsetY) {
     if (offsetY == null) {
         offsetY = 0;
     }
-	const RD = RowDialog;
+	var RD = RowDialog;
 	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
 	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
-	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
-	let x = this.width / 2 - textWidth / 2 + offsetX;
-	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin + offsetY;
+	var textWidth = GuiElements.measure.textWidth(this.hintTextE);
+	var x = this.width / 2 - textWidth / 2 + offsetX;
+	var y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin + offsetY;
 	GuiElements.move.text(this.hintTextE, x, y);
 	this.group.appendChild(this.hintTextE);
 };
@@ -14663,7 +14662,7 @@ RowDialog.prototype.setScroll = function(y) {
  */
 RowDialog.prototype.updateZoom = function() {
 	if (this.visible) {
-		let scroll = this.getScroll();
+		var scroll = this.getScroll();
 		this.closeDialog();
 		this.show();
 		this.setScroll(scroll);
@@ -14703,7 +14702,7 @@ RowDialog.prototype.hide = function() {
 RowDialog.prototype.reloadRows = function(rowCount) {
 	this.rowCount = rowCount;
 	if (this.visible) {
-		let scroll = this.getScroll();
+		var scroll = this.getScroll();
 		this.hide();
 		this.show();
 		this.setScroll(scroll);
@@ -14789,8 +14788,8 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
  * @return {Button}
  */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
-	const RD = RowDialog;
-	const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+	var RD = RowDialog;
+	var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
@@ -14809,7 +14808,7 @@ RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
  * @return {Button}
  */
 RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
 	button.addText(text);
 	return button;
 };
@@ -14823,8 +14822,8 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
  * @return {Button}
  */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
-	const RD = RowDialog;
-	const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+	var RD = RowDialog;
+	var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
 	if (callbackFn != null) {
 		button.setCallbackFunction(callbackFn, true);
 	}
@@ -14842,8 +14841,8 @@ RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
  * @return {Button}
  */
 RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackFn) {
-	let RD = RowDialog;
-	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+	var RD = RowDialog;
+	var button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
 	button.addIcon(pathId, RD.iconH);
 	return button;
 };
@@ -14854,8 +14853,8 @@ RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackF
  * @constructor
  */
 function OpenDialog(fileList) {
-	const OD = OpenDialog;
-	const RD = RowDialog;
+	var OD = OpenDialog;
+	var RD = RowDialog;
 
 	this.fileList = fileList;
 	this.files = fileList.localFiles;
@@ -14907,13 +14906,13 @@ OpenDialog.prototype.show = function() {
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	const cols = 3;
-	const RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
-	const file = this.files[index];
+	var cols = 3;
+	var RD = RowDialog;
+	var largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+	var file = this.files[index];
 	this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
-	let currentX = largeBnWidth + RD.bnMargin;
+	var currentX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(file, currentX, y, contentGroup);
 	currentX += RD.bnMargin + RD.smallBnWidth;
 	//this.createDuplicateBn(file, currentX, y, contentGroup);
@@ -14951,7 +14950,7 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) 
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
 		SaveManager.userDeleteFile(false, file, function() {
 			me.reloadDialog();
@@ -14967,7 +14966,7 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
 		SaveManager.userRenameFile(false, file, function() {
 			me.reloadDialog();
@@ -14983,7 +14982,7 @@ OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.copy, x, y, contentGroup, function() {
 		SaveManager.userDuplicateFile(file, function() {
 			me.reloadDialog();
@@ -14999,12 +14998,12 @@ OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function() {
-		let x1 = this.contentRelToAbsX(x);
-		let x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
-		let y1 = this.contentRelToAbsY(y);
-		let y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		var x1 = this.contentRelToAbsX(x);
+		var x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		var y1 = this.contentRelToAbsY(y);
+		var y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
 		x1 = GuiElements.relToAbsX(x1);
 		x2 = GuiElements.relToAbsX(x2);
 		y1 = GuiElements.relToAbsX(y1);
@@ -15021,9 +15020,9 @@ OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.cloudUpload, x, y, contentGroup, function() {
-		const request = new HttpRequestBuilder("cloud/upload");
+		var request = new HttpRequestBuilder("cloud/upload");
 		request.addParam("filename", file);
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
@@ -15038,11 +15037,11 @@ OpenDialog.prototype.createUploadBn = function(file, x, y, contentGroup) {
  */
 OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
 	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
-		const x1 = this.contentRelToAbsX(x);
-		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
-		const y1 = this.contentRelToAbsY(y);
-		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		let type = FileContextMenu.types.localSignedOut;
+		var x1 = this.contentRelToAbsX(x);
+		var x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		var y1 = this.contentRelToAbsY(y);
+		var y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		var type = FileContextMenu.types.localSignedOut;
 		if (this.fileList.signedIn) {
 			type = FileContextMenu.types.localSignedIn;
 		}
@@ -15055,11 +15054,11 @@ OpenDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
  * @return {Button}
  */
 OpenDialog.prototype.createNewBn = function() {
-	let RD = RowDialog;
-	let OD = OpenDialog;
-	let x = RD.bnMargin;
-	let y = this.getExtraBottomY();
-	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	var RD = RowDialog;
+	var OD = OpenDialog;
+	var x = RD.bnMargin;
+	var y = this.getExtraBottomY();
+	var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	button.addText(Language.getStr("New"));
 	button.setCallbackFunction(function() {
 		SaveManager.userNew(this.closeDialog.bind(this))
@@ -15071,12 +15070,12 @@ OpenDialog.prototype.createNewBn = function() {
  * Re-retrieves the list of open files from the backend and reloads the dialog
  */
 OpenDialog.prototype.reloadDialog = function() {
-	let thisScroll = this.getScroll();
-	let me = this;
+	var thisScroll = this.getScroll();
+	var me = this;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (OpenDialog.currentDialog === me) {
 			me.closeDialog();
-			const openDialog = new OpenDialog(new FileList(response));
+			var openDialog = new OpenDialog(new FileList(response));
 			openDialog.show();
 			openDialog.setScroll(thisScroll);
 		}
@@ -15087,10 +15086,10 @@ OpenDialog.prototype.reloadDialog = function() {
  * Creates a button in the top-right corner of the dialog for opening from cloud storage (iOS only)
  */
 OpenDialog.prototype.createCloudBn = function() {
-	const OD = OpenDialog;
-	const RD = RowDialog;
-	const x = this.width - RD.bnMargin - OD.cloudBnWidth;
-	let button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
+	var OD = OpenDialog;
+	var RD = RowDialog;
+	var x = this.width - RD.bnMargin - OD.cloudBnWidth;
+	var button = new Button(x, RD.bnMargin, OD.cloudBnWidth, RD.titleBarH - 2 * RD.bnMargin, this.group);
 	button.addIcon(VectorPaths.cloud);
 	button.setCallbackFunction(function() {
 		HtmlServer.sendRequestWithCallback("cloud/showPicker");
@@ -15102,9 +15101,9 @@ OpenDialog.prototype.createCloudBn = function() {
  * @return {TabRow}
  */
 OpenDialog.prototype.createTabRow = function() {
-	const OD = OpenDialog;
-	let y = this.getExtraTopY();
-	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
+	var OD = OpenDialog;
+	var y = this.getExtraTopY();
+	var tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 0);
 
 	tabRow.addTab(Language.getStr("On_Device"), "device");
 	tabRow.addTab(this.fileList.getCloudTitle(), "cloud");
@@ -15120,7 +15119,7 @@ OpenDialog.prototype.createTabRow = function() {
  */
 OpenDialog.prototype.tabSelected = function(tab) {
 	if (tab === "cloud") {
-		const cloudDialog = new OpenCloudDialog(this.fileList);
+		var cloudDialog = new OpenCloudDialog(this.fileList);
 		this.hide();
 		cloudDialog.show();
 	}
@@ -15133,7 +15132,7 @@ OpenDialog.showDialog = function() {
 	OpenDialog.opening = true; // Allows the action to be canceled if OpenDialog.closeDialog is called in the interval
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (!OpenDialog.opening) return;
-		const openDialog = new OpenDialog(new FileList(response));
+		var openDialog = new OpenDialog(new FileList(response));
 		openDialog.show();
 		OpenDialog.opening = false;
 	}, function() {
@@ -15184,15 +15183,15 @@ OpenDialog.setDefaultFile = function(fileName) {
  * @constructor
  */
 function OpenCloudDialog(fileList, cloudFileList, error) {
-	const OD = OpenDialog;
-	const RD = RowDialog;
+	var OD = OpenDialog;
+	var RD = RowDialog;
 	this.fileList = fileList;
 	// We need to load the files if the user is signed in and the files aren't loaded and there isn't an error
 	this.loading = cloudFileList == null && this.fileList.signedIn && error == null;
 	// There's only one row for the sign in button if there are no files
-	let count = 1;
+	var count = 1;
 	// There isn't any hint text unless we are signed in
-	let hintText = "";
+	var hintText = "";
 
 	if (this.fileList.signedIn) {
 		if (error != null) {
@@ -15240,15 +15239,15 @@ OpenCloudDialog.prototype.show = function() {
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	const RD = RowDialog;
+	var RD = RowDialog;
 	if (this.fileList.signedIn) {
-		const cols = 2;
-		const file = this.files[index];
+		var cols = 2;
+		var file = this.files[index];
 
-		const largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+		var largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
 		this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
-		let currentX = largeBnWidth + RD.bnMargin;
+		var currentX = largeBnWidth + RD.bnMargin;
 		this.createRenameBn(file, currentX, y, contentGroup);
 		currentX += RD.bnMargin + RD.smallBnWidth;
 		this.createMoreBn(file, currentX, y, contentGroup);
@@ -15267,8 +15266,8 @@ OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
-		const request = new HttpRequestBuilder("cloud/download");
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+		var request = new HttpRequestBuilder("cloud/download");
 		request.addParam("filename", file);
 		HtmlServer.sendRequestWithCallback(request.toString());
 	}.bind(this));
@@ -15283,7 +15282,7 @@ OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGr
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
 		HtmlServer.sendRequestWithCallback("cloud/signIn");
 	}.bind(this));
 	button.addText(Language.getStr("Sign_in"));
@@ -15297,9 +15296,9 @@ OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup)
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
-	const me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
-		const request = new HttpRequestBuilder("cloud/rename");
+		var request = new HttpRequestBuilder("cloud/rename");
 		request.addParam("filename", file);
 		HtmlServer.sendRequestWithCallback(request.toString());
 	});
@@ -15315,10 +15314,10 @@ OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
 OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
 	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
 		// Get the coords to show the menu at
-		const x1 = this.contentRelToAbsX(x);
-		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
-		const y1 = this.contentRelToAbsY(y);
-		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+		var x1 = this.contentRelToAbsX(x);
+		var x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+		var y1 = this.contentRelToAbsY(y);
+		var y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
 		// Show the more options menu
 		new FileContextMenu(this, file, FileContextMenu.types.cloud, x1, x2, y1, y2);
 	}.bind(this));
@@ -15329,12 +15328,12 @@ OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
  * @return {TabRow}
  */
 OpenCloudDialog.prototype.createTabRow = function() {
-	const OD = OpenDialog;
-	let y = this.getExtraTopY();
-	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
+	var OD = OpenDialog;
+	var y = this.getExtraTopY();
+	var tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
 
 	tabRow.addTab("On Device", "device");
-	let signOutFn = null;
+	var signOutFn = null;
 	// If signed in, an X appears in the tab which signs the user out
 	if (this.fileList.signedIn) {
 		signOutFn = this.userSignOut.bind(this);
@@ -15352,7 +15351,7 @@ OpenCloudDialog.prototype.createTabRow = function() {
  */
 OpenCloudDialog.prototype.tabSelected = function(tab) {
 	if (tab === "device") {
-		const openDialog = new OpenDialog(this.fileList);
+		var openDialog = new OpenDialog(this.fileList);
 		this.hide();
 		openDialog.show();
 		openDialog.reloadDialog();
@@ -15371,11 +15370,11 @@ OpenCloudDialog.prototype.closeDialog = function() {
  * Re-retrieves the local files and shows an OpenDialog
  */
 OpenCloudDialog.prototype.reloadToOpen = function() {
-	const me = this;
+	var me = this;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (OpenDialog.currentDialog === me) {
 			me.closeDialog();
-			const openDialog = new OpenDialog(new FileList(response));
+			var openDialog = new OpenDialog(new FileList(response));
 			openDialog.show();
 		}
 	});
@@ -15390,12 +15389,12 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
 		cloudFileList = null;
 	}
 
-	let thisScroll = this.getScroll();
-	let me = this;
+	var thisScroll = this.getScroll();
+	var me = this;
 	HtmlServer.sendRequestWithCallback("data/files", function(response) {
 		if (OpenDialog.currentDialog === me) {
 			me.closeDialog();
-			const openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
+			var openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
 			openDialog.show();
 			openDialog.setScroll(thisScroll);
 		}
@@ -15407,9 +15406,9 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
  */
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
-	let message = "Disconnect account " + this.fileList.account + "?\n";
+	var message = "Disconnect account " + this.fileList.account + "?\n";
 	message += "Downloaded files will remain on this device.";
-	const me = this;
+	var me = this;
 	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result) {
 		if (result === "2") {
 			me.signOut();
@@ -15421,7 +15420,7 @@ OpenCloudDialog.prototype.userSignOut = function() {
  * Issues a signOut request and reloads the dialog
  */
 OpenCloudDialog.prototype.signOut = function() {
-	const me = this;
+	var me = this;
 	HtmlServer.sendRequestWithCallback("cloud/signOut", function() {
 		me.reloadDialog();
 	});
@@ -15431,21 +15430,21 @@ OpenCloudDialog.prototype.signOut = function() {
  * Requests the list of cloud files and creates a new OpenCloudDialog with them, or shows an error
  */
 OpenCloudDialog.prototype.loadFiles = function() {
-	const me = this;
+	var me = this;
 	HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
 		if (OpenDialog.currentDialog === me) {
-			const object = JSON.parse(response);
-			let files = object.files;
+			var object = JSON.parse(response);
+			var files = object.files;
 			if (files != null) {
 				me.closeDialog();
-				const cloudDialog = new OpenCloudDialog(me.fileList, files);
+				var cloudDialog = new OpenCloudDialog(me.fileList, files);
 				cloudDialog.show();
 			}
 		}
 	}, function(status, error) {
 		if (OpenDialog.currentDialog === me) {
 			me.closeDialog();
-			const cloudDialog = new OpenCloudDialog(me.fileList, null, error);
+			var cloudDialog = new OpenCloudDialog(me.fileList, null, error);
 			cloudDialog.show();
 		}
 	});
@@ -15470,7 +15469,7 @@ OpenCloudDialog.filesChanged = function(jsonString) {
  * @constructor
  */
 function FileList(jsonString) {
-	const object = JSON.parse(jsonString);
+	var object = JSON.parse(jsonString);
 	this.localFiles = object.files;
 	if (this.localFiles == null) {
 		this.localFiles = []
@@ -15504,12 +15503,12 @@ FileList.prototype.getCloudTitle = function(){
  * @constructor
  */
 function ConnectMultipleDialog(deviceClass) {
-    let CMD = ConnectMultipleDialog;
+    var CMD = ConnectMultipleDialog;
     // Store the open tab so it can be reopened by default next time
-    let title =  Language.getStr("Connect_Multiple")
+    var title =  Language.getStr("Connect_Multiple")
 
     this.deviceClass = deviceClass;
-    let count = 0;
+    var count = 0;
     Device.getTypeList().forEach(function(dvcClass) {
         count += dvcClass.getManager().getDeviceCount();
     });
@@ -15522,7 +15521,7 @@ ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
 
 ConnectMultipleDialog.setConstants = function() {
-    let CMD = ConnectMultipleDialog;
+    var CMD = ConnectMultipleDialog;
     CMD.currentDialog = null;
     if (CMD.deviceLimit === undefined) {
         CMD.deviceLimit = 3;
@@ -15545,20 +15544,20 @@ ConnectMultipleDialog.setConstants = function() {
  * @param {Element} contentGroup
  */
 ConnectMultipleDialog.prototype.createMultipleDialogRow = function(y, width, contentGroup) {
-    let CMD = ConnectMultipleDialog;
-    let statusX = 0;
-    let index = 0;
-    let numberX = statusX + DeviceStatusLight.radius * 2;
-    let mainBnX = numberX + CMD.numberWidth;
-    //let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
-    let mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) - mainBnX;
-    //let infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
-    //let removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
-    let removeBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+    var CMD = ConnectMultipleDialog;
+    var statusX = 0;
+    var index = 0;
+    var numberX = statusX + DeviceStatusLight.radius * 2;
+    var mainBnX = numberX + CMD.numberWidth;
+    //var mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) * 2 - mainBnX;
+    var mainBnWidth = width - (RowDialog.smallBnWidth + RowDialog.bnMargin) - mainBnX;
+    //var infoBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
+    //var removeBnX = infoBnX + RowDialog.bnMargin + RowDialog.smallBnWidth;
+    var removeBnX = mainBnX + RowDialog.bnMargin + mainBnWidth;
     Device.getTypeList().forEach(function(dvcClass) {
-        let curDeviceCnt = dvcClass.getManager().getDeviceCount();
-        for (let i = 0; i < curDeviceCnt; i++) {
-             let robot = dvcClass.getManager().getDevice(i);
+        var curDeviceCnt = dvcClass.getManager().getDeviceCount();
+        for (var i = 0; i < curDeviceCnt; i++) {
+             var robot = dvcClass.getManager().getDevice(i);
              CMD.currentDialog.createStatusLight(robot, statusX, y, contentGroup);
              CMD.currentDialog.createNumberText(index, numberX, y, contentGroup);
              CMD.currentDialog.createMainBn(robot, index, mainBnWidth, mainBnX, y, contentGroup);
@@ -15594,11 +15593,11 @@ ConnectMultipleDialog.prototype.createStatusLight = function(robot, x, y, conten
  * @param {Element} contentGroup
  */
 ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, contentGroup) {
-    let CMD = ConnectMultipleDialog;
-    let textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
-    let textW = GuiElements.measure.textWidth(textE);
-    let textX = x + (CMD.numberWidth - textW) / 2;
-    let textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
+    var CMD = ConnectMultipleDialog;
+    var textE = GuiElements.draw.text(0, 0, (index + 1) + "", CMD.numberFont, CMD.numberColor);
+    var textW = GuiElements.measure.textWidth(textE);
+    var textX = x + (CMD.numberWidth - textW) / 2;
+    var textY = y + (RowDialog.bnHeight + CMD.numberFont.charHeight) / 2;
     GuiElements.move.text(textE, textX, textY);
     contentGroup.appendChild(textE);
     return textE;
@@ -15617,12 +15616,12 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
-    //let connectionX = this.x + this.width / 2;
+    //var connectionX = this.x + this.width / 2;
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
-        let upperY = this.contentRelToAbsY(y);
-        let lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
+        var upperY = this.contentRelToAbsY(y);
+        var lowerY = this.contentRelToAbsY(y + RowDialog.bnHeight);
         // When tapped, a list of robots to connect from appears
         (new RobotConnectionList(connectionX, upperY, lowerY, index)).show();
 
@@ -15640,7 +15639,7 @@ ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, contentGroup) {
-    let button = RowDialog.createSmallBn(x, y, contentGroup);
+    var button = RowDialog.createSmallBn(x, y, contentGroup);
     button.addText("X");
     button.setCallbackFunction(function() {
         DeviceManager.getDeviceClass(robot).getManager().removeDevice(robot.name);
@@ -15658,10 +15657,10 @@ ConnectMultipleDialog.prototype.createRemoveBn = function(robot, index, x, y, co
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, contentGroup) {
-    let button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    var button = RowDialog.createSmallBn(x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 
     // The appearance of the button changes depending on the firmwareStatus
-    const statuses = Device.firmwareStatuses;
+    var statuses = Device.firmwareStatuses;
     function updateStatus(firmwareStatus) {
         if (firmwareStatus === statuses.old) {
             button.addColorIcon(VectorPaths.warning, RowDialog.iconH, DeviceStatusLight.yellowColor);
@@ -15683,7 +15682,7 @@ ConnectMultipleDialog.prototype.createInfoBn = function(robot, index, x, y, cont
  */
 ConnectMultipleDialog.prototype.show = function() {
     RowDialog.prototype.show.call(this);
-    let count = 0
+    var count = 0
     Device.getTypeList().forEach(function(dvcClass) {
             count += dvcClass.getManager().getDeviceCount();
         });
@@ -15700,17 +15699,17 @@ ConnectMultipleDialog.prototype.show = function() {
  * @return {Button}
  */
 ConnectMultipleDialog.prototype.createConnectBn = function() {
-    let CMD = ConnectMultipleDialog;
-    let bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
-    let x = (this.width - bnWidth) / 2;
+    var CMD = ConnectMultipleDialog;
+    var bnWidth = this.getContentWidth() - RowDialog.smallBnWidth - DeviceStatusLight.radius * 2 - CMD.numberWidth;
+    var x = (this.width - bnWidth) / 2;
     // Gets the location to add the button
-    let y = this.getExtraBottomY();
-    let button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
+    var y = this.getExtraBottomY();
+    var button = new Button(x, y, bnWidth, RowDialog.bnHeight, this.group);
     button.addText("+", CMD.plusFont);
-    let upperY = y + this.y;
-    let lowerY = upperY + RowDialog.bnHeight;
-    let connectionX = this.x + this.width / 2;
-    let curDeviceCnt = 0;
+    var upperY = y + this.y;
+    var lowerY = upperY + RowDialog.bnHeight;
+    var connectionX = this.x + this.width / 2;
+    var curDeviceCnt = 0;
     button.setCallbackFunction(function() {
         // Shows a list of devices to connect
         (new RobotConnectionList(connectionX, upperY, lowerY, null)).show();
@@ -15737,9 +15736,9 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
         // Stop discovery before switching tabs
         this.deviceClass.getManager().stopDiscover();
     }
-    let thisScroll = this.getScroll();
+    var thisScroll = this.getScroll();
     this.hide();
-    let dialog = new ConnectMultipleDialog(deviceClass);
+    var dialog = new ConnectMultipleDialog(deviceClass);
     ConnectMultipleDialog.currentDialog = dialog;
     if (ConnectMultipleDialog.currentDialog.deviceClass === null) {
         ConnectMultipleDialog.currentDialog.deviceClass = deviceClass;
@@ -15754,7 +15753,7 @@ ConnectMultipleDialog.prototype.reloadDialog = function(deviceClass) {
  * @inheritDoc
  */
 ConnectMultipleDialog.prototype.closeDialog = function() {
-    let CMD = ConnectMultipleDialog;
+    var CMD = ConnectMultipleDialog;
     RowDialog.prototype.closeDialog.call(this);
     CMD.currentDialog = null;
     DeviceHummingbirdBit.getManager().stopDiscover();
@@ -15764,7 +15763,7 @@ ConnectMultipleDialog.prototype.closeDialog = function() {
  * Reloads the currently open dialog
  */
 ConnectMultipleDialog.reloadDialog = function(deviceClass) {
-    let curDialog = ConnectMultipleDialog.currentDialog;
+    var curDialog = ConnectMultipleDialog.currentDialog;
     curDialog.reloadDialog(deviceClass);
 };
 
@@ -15772,7 +15771,7 @@ ConnectMultipleDialog.reloadDialog = function(deviceClass) {
  * Creates and shows a ConnectMultipleDialog with the default tab open
  */
 ConnectMultipleDialog.showDialog = function() {
-    let CMD = ConnectMultipleDialog;
+    var CMD = ConnectMultipleDialog;
     if (CMD.currentDialog === null) {
         CMD.currentDialog = new ConnectMultipleDialog(null);
         CMD.currentDialog.show();
@@ -15788,7 +15787,7 @@ ConnectMultipleDialog.showDialog = function() {
  * @constructor
  */
 function RecordingDialog(listOfRecordings) {
-	const RecD = RecordingDialog;
+	var RecD = RecordingDialog;
 	// Create an array of ids
 	this.recordings = listOfRecordings.map(function(x) {
 		return x.id;
@@ -15804,7 +15803,7 @@ RecordingDialog.prototype = Object.create(RowDialog.prototype);
 RecordingDialog.prototype.constructor = RecordingDialog;
 
 RecordingDialog.setConstants = function() {
-	let RecD = RecordingDialog;
+	var RecD = RecordingDialog;
 	RecD.currentDialog = null;
 	RecD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
 	RecD.coverRectOpacity = 0.8;
@@ -15830,13 +15829,13 @@ RecordingDialog.setConstants = function() {
  * @param {Element} contentGroup
  */
 RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	let RD = RowDialog;
-	let largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
-	let recording = this.recordings[index];
+	var RD = RowDialog;
+	var largeBnWidth = width - RD.smallBnWidth * 2 - RD.bnMargin * 2;
+	var recording = this.recordings[index];
 	this.createMainBn(recording, largeBnWidth, 0, y, contentGroup);
-	let renameBnX = largeBnWidth + RD.bnMargin;
+	var renameBnX = largeBnWidth + RD.bnMargin;
 	this.createRenameBn(recording, renameBnX, y, contentGroup);
-	let deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
+	var deleteBnX = renameBnX + RD.smallBnWidth + RD.bnMargin;
 	this.createDeleteBn(recording, deleteBnX, y, contentGroup);
 };
 
@@ -15849,15 +15848,15 @@ RecordingDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param {Element} contentGroup
  */
 RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, contentGroup) {
-	let button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
+	var button = RowDialog.createMainBn(bnWidth, x, y, contentGroup);
 	// Track whether the button is currently playing the recording
-	const state = {};
+	var state = {};
 	state.playing = false;
-	let me = this;
-	let showPlay = function() {
+	var me = this;
+	var showPlay = function() {
 		button.addSideTextAndIcon(VectorPaths.play, RowDialog.iconH, recording);
 	};
-	let showStop = function() {
+	var showStop = function() {
 		button.addSideTextAndIcon(VectorPaths.square, RowDialog.iconH, recording);
 	};
 	// When the button is tapped...
@@ -15892,7 +15891,7 @@ RecordingDialog.prototype.createMainBn = function(recording, bnWidth, x, y, cont
  * @param {Element} contentGroup
  */
 RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
-	let me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
 		RecordingManager.userDeleteFile(file, function() {
 			me.reloadDialog();
@@ -15908,7 +15907,7 @@ RecordingDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 RecordingDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
-	let me = this;
+	var me = this;
 	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
 		RecordingManager.userRenameFile(file, function() {
 			me.reloadDialog();
@@ -15955,12 +15954,12 @@ RecordingDialog.prototype.closeDialog = function() {
  * @return {Button}
  */
 RecordingDialog.prototype.createRecordButton = function() {
-	let RD = RowDialog;
-	let RecD = RecordingDialog;
-	let x = RD.bnMargin;
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	var x = RD.bnMargin;
 	// gets the location of additional content
-	let y = this.getExtraBottomY();
-	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+	var y = this.getExtraBottomY();
+	var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
 		"Record", RecD.recordFont, RecD.recordColor);
@@ -15977,11 +15976,11 @@ RecordingDialog.prototype.createRecordButton = function() {
  * @return {Button}
  */
 RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn) {
-	let RD = RowDialog;
-	let width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
-	let x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
-	let y = this.getExtraBottomY();
-	let button = new Button(x, y, width, RD.bnHeight, this.group);
+	var RD = RowDialog;
+	var width = (this.getContentWidth() - RD.bnMargin * 2) / 3;
+	var x = (RD.bnMargin + width) * buttonPosition + RD.bnMargin;
+	var y = this.getExtraBottomY();
+	var button = new Button(x, y, width, RD.bnHeight, this.group);
 	button.setCallbackFunction(callbackFn, true);
 	return button;
 };
@@ -15991,9 +15990,9 @@ RecordingDialog.prototype.createOneThirdBn = function(buttonPosition, callbackFn
  * @return {Button}
  */
 RecordingDialog.prototype.createDiscardButton = function() {
-	let RD = RowDialog;
-	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(0, function() {
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	var button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
 	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
@@ -16005,9 +16004,9 @@ RecordingDialog.prototype.createDiscardButton = function() {
  * @return {Button}
  */
 RecordingDialog.prototype.createSaveButton = function() {
-	let RD = RowDialog;
-	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(1, function() {
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	var button = this.createOneThirdBn(1, function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
@@ -16020,9 +16019,9 @@ RecordingDialog.prototype.createSaveButton = function() {
  * @return {Button}
  */
 RecordingDialog.prototype.createPauseButton = function() {
-	let RD = RowDialog;
-	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function() {
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	var button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
@@ -16035,9 +16034,9 @@ RecordingDialog.prototype.createPauseButton = function() {
  * @return {Button}
  */
 RecordingDialog.prototype.createResumeRecordingBn = function() {
-	let RD = RowDialog;
-	let RecD = RecordingDialog;
-	let button = this.createOneThirdBn(2, function() {
+	var RD = RowDialog;
+	var RecD = RecordingDialog;
+	var button = this.createOneThirdBn(2, function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
@@ -16050,12 +16049,12 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
  * @return {Element}
  */
 RecordingDialog.prototype.drawCoverRect = function() {
-	let halfStep = RowDialog.bnMargin / 2;
-	let x = this.x + halfStep;
-	let y = this.y + this.getExtraTopY() + halfStep;
-	let height = this.getExtraBottomY() - this.getExtraTopY() - RowDialog.bnMargin;
-	let width = this.width - RowDialog.bnMargin;
-	let rect = GuiElements.draw.rect(x, y, width, height, RecordingDialog.coverRectColor);
+	var halfStep = RowDialog.bnMargin / 2;
+	var x = this.x + halfStep;
+	var y = this.y + this.getExtraTopY() + halfStep;
+	var height = this.getExtraBottomY() - this.getExtraTopY() - RowDialog.bnMargin;
+	var width = this.width - RowDialog.bnMargin;
+	var rect = GuiElements.draw.rect(x, y, width, height, RecordingDialog.coverRectColor);
 	GuiElements.update.opacity(rect, RecordingDialog.coverRectOpacity);
 	GuiElements.layers.overlayOverlay.appendChild(rect);
 	return rect;
@@ -16066,15 +16065,15 @@ RecordingDialog.prototype.drawCoverRect = function() {
  * @return {Element} - An SVG text element
  */
 RecordingDialog.prototype.drawTimeCounter = function() {
-	let RD = RecordingDialog;
+	var RD = RecordingDialog;
 
-	let textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
+	var textE = GuiElements.draw.text(0, 0, "0:00", RD.counterFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(textE);
-	let width = GuiElements.measure.textWidth(textE);
-	let height = GuiElements.measure.textHeight(textE);
-	let x = this.x + this.width / 2 - width / 2;
-	let y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
-	let span = this.getExtraBottomY() - this.getExtraTopY() - height;
+	var width = GuiElements.measure.textWidth(textE);
+	var height = GuiElements.measure.textHeight(textE);
+	var x = this.x + this.width / 2 - width / 2;
+	var y = this.getExtraBottomY() - RecordingDialog.counterBottomMargin;
+	var span = this.getExtraBottomY() - this.getExtraTopY() - height;
 	if (span < 2 * RecordingDialog.counterBottomMargin) {
 		y = this.getExtraBottomY() - span / 2;
 	}
@@ -16083,9 +16082,9 @@ RecordingDialog.prototype.drawTimeCounter = function() {
 	GuiElements.move.text(textE, x, y);
 	this.counter =  textE;
 
-	let remainingY = y + RD.remainingFont.charHeight + RD.remainingMargin;
-	let remainingWidth = GuiElements.measure.stringWidth("0:00 Remaining", RD.remainingFont);
-	let remainingX = this.x + (this.width - remainingWidth) / 2;
+	var remainingY = y + RD.remainingFont.charHeight + RD.remainingMargin;
+	var remainingWidth = GuiElements.measure.stringWidth("0:00 Remaining", RD.remainingFont);
+	var remainingX = this.x + (this.width - remainingWidth) / 2;
 	this.remainingY = remainingY;
 	this.remaingingText = GuiElements.draw.text(remainingX, remainingY, "", RD.remainingFont, RD.counterColor);
 	GuiElements.layers.overlayOverlay.appendChild(this.remaingingText);
@@ -16096,7 +16095,7 @@ RecordingDialog.prototype.drawTimeCounter = function() {
  */
 RecordingDialog.showDialog = function() {
 	RecordingManager.listRecordings(function(result) {
-		let recordDialog = new RecordingDialog(result);
+		var recordDialog = new RecordingDialog(result);
 		recordDialog.show();
 	});
 };
@@ -16106,9 +16105,9 @@ RecordingDialog.showDialog = function() {
  * @param {RecordingManager.recordingStates} state - The state this RecordingDialog should enter
  */
 RecordingDialog.prototype.goToState = function(state) {
-	let RecD = RecordingDialog;
+	var RecD = RecordingDialog;
 	this.state = state;
-	let states = RecordingManager.recordingStates;
+	var states = RecordingManager.recordingStates;
 	if (state === states.stopped) {
 		this.recordButton.show();
 		this.discardButton.hide();
@@ -16169,11 +16168,11 @@ RecordingDialog.pausedRecording = function() {
  * @inheritDoc
  */
 RecordingDialog.prototype.reloadDialog = function() {
-	let thisScroll = this.getScroll();
-	let me = this;
+	var thisScroll = this.getScroll();
+	var me = this;
 	RecordingManager.listRecordings(function(response) {
 		me.closeDialog();
-		let dialog = new RecordingDialog(response);
+		var dialog = new RecordingDialog(response);
 		dialog.show();
 		dialog.setScroll(thisScroll);
 	});
@@ -16212,17 +16211,17 @@ RecordingDialog.prototype.setCounterVisibility = function(visible) {
 
 RecordingDialog.prototype.timeToString = function(time) {
 	if (this.counter == null) return;
-	let totalSeconds = Math.floor(time / 1000);
-	let seconds = totalSeconds % 60;
-	let totalMinutes = Math.floor(totalSeconds / 60);
-	let minutes = totalMinutes % 60;
-	let hours = Math.floor(totalMinutes / 60);
-	let secondsString = seconds + "";
+	var totalSeconds = Math.floor(time / 1000);
+	var seconds = totalSeconds % 60;
+	var totalMinutes = Math.floor(totalSeconds / 60);
+	var minutes = totalMinutes % 60;
+	var hours = Math.floor(totalMinutes / 60);
+	var secondsString = seconds + "";
 	if (secondsString.length < 2) {
 		secondsString = "0" + secondsString;
 	}
-	let minutesString = minutes + "";
-	let totalString = minutesString + ":" + secondsString;
+	var minutesString = minutes + "";
+	var totalString = minutesString + ":" + secondsString;
 	if (hours > 0) {
 		if (minutesString.length < 2) {
 			minutesString = "0" + minutesString;
@@ -16232,20 +16231,20 @@ RecordingDialog.prototype.timeToString = function(time) {
 	return totalString;
 };
 RecordingDialog.prototype.updateCounter = function(time) {
-	const RD = RecordingDialog;
+	var RD = RecordingDialog;
 	if (this.counter == null) return;
-	const totalString = this.timeToString(time);
+	var totalString = this.timeToString(time);
 	GuiElements.update.text(this.counter, totalString);
-	let width = GuiElements.measure.textWidth(this.counter);
-	let counterX = this.x + this.width / 2 - width / 2;
+	var width = GuiElements.measure.textWidth(this.counter);
+	var counterX = this.x + this.width / 2 - width / 2;
 	GuiElements.move.text(this.counter, counterX, this.counterY);
 
-	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
+	var remainingMs = Math.max(0, RD.recordingLimit - time + 999);
 	if (remainingMs < RD.remainingThreshold) {
-		const remainingString = this.timeToString(remainingMs) + " remaining";
+		var remainingString = this.timeToString(remainingMs) + " remaining";
 		GuiElements.update.text(this.remaingingText, remainingString);
-		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
-		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
+		var remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
+		var remainingX = this.x + this.width / 2 - remainingWidth / 2;
 		GuiElements.move.text(this.remaingingText, remainingX, this.remainingY);
 	}
 };
@@ -16267,7 +16266,7 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
-	let message = "Please open a project before recording";
+	var message = "Please open a project before recording";
 	DialogManager.showAlertDialog("No project open", message, "OK");
 };
 /**
@@ -16300,7 +16299,7 @@ function RobotConnectionList(x, upperY, lowerY, index) {
 }
 
 RobotConnectionList.setConstants = function() {
-	let RCL = RobotConnectionList;
+	var RCL = RobotConnectionList;
 	RCL.bnMargin = 5;
 	RCL.bgColor = Colors.lightGray;
 	RCL.updateInterval = DiscoverDialog.updateInterval;
@@ -16320,12 +16319,12 @@ RobotConnectionList.prototype.show = function() {
  * @param {string} list - A JSON-encoded list of robots as a string
  */
 RobotConnectionList.prototype.showWithList = function(list) {
-	let RCL = RobotConnectionList;
+	var RCL = RobotConnectionList;
 	this.visible = true;
 	this.group = GuiElements.create.group(0, 0);
 	this.menuBnList = null;
-	let layer = GuiElements.layers.overlayOverlay;
-	let overlayType = Overlay.types.connectionList;
+	var layer = GuiElements.layers.overlayOverlay;
+	var overlayType = Overlay.types.connectionList;
 	this.bubbleOverlay = new BubbleOverlay(overlayType, RCL.bgColor, RCL.bnMargin, this.group, this, layer);
 	this.bubbleOverlay.display(this.x, this.x, this.upperY, this.lowerY, RCL.width, RCL.height);
 	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
@@ -16346,8 +16345,8 @@ RobotConnectionList.prototype.checkPendingUpdate = function() {
  * @param {string} jsonArray - A JSON-encoded array of robots as a string
  */
 RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
-	const RCL = RobotConnectionList;
-	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
+	var RCL = RobotConnectionList;
+	var isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
 	if (TouchReceiver.touchDown || !this.visible || isScrolling) {
 		// Can't update, mark update pending and return
 		this.updatePending = true;
@@ -16359,23 +16358,23 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	this.updateTimer.stop();
 	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
 	 * Robots to swap places. */
-	const includeConnected = this.index !== null;
-	const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+	var includeConnected = this.index !== null;
+	var robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
 
-	const robotArray = robotArrayUnsorted.sort(function(a,b) {
+	var robotArray = robotArrayUnsorted.sort(function(a,b) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
 	// We perform the update and try to keep the scrolling the same
-	let oldScroll = null;
+	var oldScroll = null;
 	if (this.menuBnList != null) {
 		oldScroll = this.menuBnList.getScroll();
 		this.menuBnList.hide();
 	}
-	let layer = GuiElements.layers.overlayOverlayScroll;
+	var layer = GuiElements.layers.overlayOverlayScroll;
 	this.menuBnList = new SmoothMenuBnList(this, this.group, 0, 0, RCL.width, layer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.menuBnList.setMaxHeight(RCL.height);
-	for (let i = 0; i < robotArray.length; i++) {
+	for (var i = 0; i < robotArray.length; i++) {
 		this.addBnListOption(robotArray[i]);
 	}
 	this.menuBnList.show();
@@ -16389,7 +16388,7 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  * @param {Device} robot
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
-	let me = this;
+	var me = this;
 	var words = robot.name.split(" ");
     var newName = "";
     for (var i = 0; i < words.length; i++) {
@@ -16435,8 +16434,8 @@ RobotConnectionList.prototype.relToAbsY = function(y) {
  * @constructor
  */
 function DiscoverDialog(deviceClass) {
-	let DD = DiscoverDialog;
-	let title = Language.getStr("Connect_Device");
+	var DD = DiscoverDialog;
+	var title = Language.getStr("Connect_Device");
 	RowDialog.call(this, false, title, 0, 0, 0);
 	this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
@@ -16458,7 +16457,7 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
  * @inheritDoc
  */
 DiscoverDialog.prototype.show = function() {
-	const DD = DiscoverDialog;
+	var DD = DiscoverDialog;
 	RowDialog.prototype.show.call(this);
 	this.discoverDevices();
 };
@@ -16467,7 +16466,7 @@ DiscoverDialog.prototype.show = function() {
  * Starts the scan for devices and registers the dialog to receive updates when devices are detected
  */
 DiscoverDialog.prototype.discoverDevices = function() {
-	let me = this;
+	var me = this;
 	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
 		// Tell the device manager that it should scan again if the dialog is still open
@@ -16531,7 +16530,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
-	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
+	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
     var deviceName = this.discoveredDevices[index].name;
     var words = deviceName.split(" ");
     var newName = "";
@@ -16540,7 +16539,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
     };
 
 	button.addText(newName + " - " + this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
-	const me = this;
+	var me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
 	}, true);
@@ -16588,7 +16587,7 @@ function FileContextMenu(dialog, file, type, x1, x2, y1, y2) {
 }
 
 FileContextMenu.setGraphics = function() {
-	const FCM = FileContextMenu;
+	var FCM = FileContextMenu;
 
 	/** @enum {number} */
 	FCM.types = {
@@ -16607,16 +16606,16 @@ FileContextMenu.setGraphics = function() {
  * Generates and presents the menu
  */
 FileContextMenu.prototype.showMenu = function() {
-	const FCM = FileContextMenu;
+	var FCM = FileContextMenu;
 	this.group = GuiElements.create.group(0, 0);
-	const layer = GuiElements.layers.overlayOverlay;
-	const scrollLayer = GuiElements.layers.overlayOverlayScroll;
-	const overlayType = Overlay.types.inputPad;
+	var layer = GuiElements.layers.overlayOverlay;
+	var scrollLayer = GuiElements.layers.overlayOverlayScroll;
+	var overlayType = Overlay.types.inputPad;
 	this.bubbleOverlay = new BubbleOverlay(overlayType, FCM.bgColor, FCM.bnMargin, this.group, this, layer);
 	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0, FCM.width, scrollLayer);
 	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
 	this.addOptions();
-	const height = this.menuBnList.previewHeight();
+	var height = this.menuBnList.previewHeight();
 	this.bubbleOverlay.display(this.x1, this.x2, this.y1, this.y2, FCM.width, height);
 	this.menuBnList.show();
 };
@@ -16625,7 +16624,7 @@ FileContextMenu.prototype.showMenu = function() {
  * Adds options and their behaviors to the menu
  */
 FileContextMenu.prototype.addOptions = function() {
-	const FCM = FileContextMenu;
+	var FCM = FileContextMenu;
 	if (this.type === FCM.types.localSignedIn) {
 		this.menuBnList.addOption("", function() {
 			SaveManager.userExportFile(this.file);
@@ -16634,7 +16633,7 @@ FileContextMenu.prototype.addOptions = function() {
 	}
 	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
 		this.menuBnList.addOption("", function() {
-			const dialog = this.dialog;
+			var dialog = this.dialog;
 			SaveManager.userDuplicateFile(this.file, function() {
 				dialog.reloadDialog();
 			});
@@ -16643,12 +16642,12 @@ FileContextMenu.prototype.addOptions = function() {
 	}
 	this.menuBnList.addOption("", function() {
 		if (this.type === FCM.types.cloud) {
-			const request = new HttpRequestBuilder("cloud/delete");
+			var request = new HttpRequestBuilder("cloud/delete");
 			request.addParam("filename", this.file);
 			HtmlServer.sendRequestWithCallback(request.toString());
 			this.close();
 		} else {
-			const dialog = this.dialog;
+			var dialog = this.dialog;
 			SaveManager.userDeleteFile(false, this.file, function() {
 				dialog.reloadDialog();
 			});
@@ -16691,7 +16690,7 @@ function OverflowArrows() {
 }
 
 OverflowArrows.setConstants = function() {
-	const OA = OverflowArrows;
+	var OA = OverflowArrows;
 	OA.triangleW = 25;
 	OA.triangleH = 15;
 	OA.margin = 15;
@@ -16703,8 +16702,8 @@ OverflowArrows.setConstants = function() {
  * @return {Element} - The SVG path element
  */
 OverflowArrows.prototype.makeTriangle = function() {
-	const OA = OverflowArrows;
-	const tri = GuiElements.create.path();
+	var OA = OverflowArrows;
+	var tri = GuiElements.create.path();
 	GuiElements.update.color(tri, Colors.white);
 	GuiElements.update.opacity(tri, OA.opacity);
 	GuiElements.update.makeClickThrough(tri);
@@ -16782,7 +16781,7 @@ OverflowArrows.prototype.updateZoom = function() {
  * Moves overflowArrows to the correct positions and stores the boundary of the portion of the screen for the canvas
  */
 OverflowArrows.prototype.setArrowPos = function() {
-	const OA = OverflowArrows;
+	var OA = OverflowArrows;
 	this.left = BlockPalette.width;
 	if (!GuiElements.paletteLayersVisible) {
 		this.left = 0;
@@ -16791,12 +16790,12 @@ OverflowArrows.prototype.setArrowPos = function() {
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
 
-	const midX = (this.left + this.right) / 2;
-	const midY = (this.top + this.bottom) / 2;
-	const topY = this.top + OA.margin;
-	const bottomY = this.bottom - OA.margin;
-	const leftX = this.left + OA.margin;
-	const rightX = this.right - OA.margin;
+	var midX = (this.left + this.right) / 2;
+	var midY = (this.top + this.bottom) / 2;
+	var topY = this.top + OA.margin;
+	var bottomY = this.bottom - OA.margin;
+	var leftX = this.left + OA.margin;
+	var rightX = this.right - OA.margin;
 
 	GuiElements.update.triangleFromPoint(this.triTop, midX, topY, OA.triangleW, OA.triangleH, true);
 	GuiElements.update.triangleFromPoint(this.triLeft, leftX, midY, OA.triangleW, OA.triangleH, false);
@@ -16943,7 +16942,7 @@ BlockStack.prototype.getAbsY = function() {
  * Returns no values but stores results on CodeManager.fit.
  */
 BlockStack.prototype.findBestFit = function() {
-	const move = CodeManager.move;
+	var move = CodeManager.move;
 	// If this BlockStack is the one being moved, it can't attach to itself.
 	if (move.stack === this) {
 		return;
@@ -16955,10 +16954,10 @@ BlockStack.prototype.findBestFit = function() {
 	// Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
 	if (move.topOpen) {
 		// Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
-		let absCx = this.relToAbsX(this.dim.cx1);
-		let absCy = this.relToAbsY(this.dim.cy1);
-		let absW = this.relToAbsX(this.dim.cw) - absCx;
-		let absH = this.relToAbsY(this.dim.ch) - absCy;
+		var absCx = this.relToAbsX(this.dim.cx1);
+		var absCy = this.relToAbsY(this.dim.cy1);
+		var absW = this.relToAbsX(this.dim.cw) - absCx;
+		var absH = this.relToAbsY(this.dim.ch) - absCy;
 		if (move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
 			this.firstBlock.findBestFit();
 		}
@@ -16966,12 +16965,12 @@ BlockStack.prototype.findBestFit = function() {
 	// Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
 	if (move.returnsValue) {
 		// Only check if the BlockStack's bounding box overlaps with this BlockStack's bounding box.
-		let absRx = this.relToAbsX(this.dim.rx1);
-		let absRy = this.relToAbsY(this.dim.ry1);
-		let absW = this.relToAbsX(this.dim.rw) - absRx;
-		let absH = this.relToAbsY(this.dim.rh) - absRy;
-		let width = move.bottomX - move.topX;
-		let height = move.bottomY - move.topY;
+		var absRx = this.relToAbsX(this.dim.rx1);
+		var absRy = this.relToAbsY(this.dim.ry1);
+		var absW = this.relToAbsX(this.dim.rw) - absRx;
+		var absH = this.relToAbsY(this.dim.rh) - absRy;
+		var width = move.bottomX - move.topX;
+		var height = move.bottomY - move.topY;
 		if (move.rInRange(move.topX, move.topY, width, height, absRx, absRy, absW, absH)) {
 			this.firstBlock.findBestFit();
 		}
@@ -17013,7 +17012,7 @@ BlockStack.prototype.updateRun = function() {
 				return new ExecutionStatusDone();
 			}
 			// Update the current Block.
-			let execStatus = this.currentBlock.updateRun();
+			var execStatus = this.currentBlock.updateRun();
 			if (!execStatus.isRunning()) {
 				// If the block threw a error, display it
 				if (execStatus.hasError()) {
@@ -17033,7 +17032,7 @@ BlockStack.prototype.updateRun = function() {
 			}
 		} else {
 			// Procedure for Blocks that return a value.
-			let execStatus = this.currentBlock.updateRun();
+			var execStatus = this.currentBlock.updateRun();
 			if (execStatus.isRunning()) {
 				return new ExecutionStatusRunning();
 			} else if (execStatus.hasError()) {
@@ -17087,27 +17086,27 @@ BlockStack.prototype.endRun = function() {
  * Only called if moving BlockStack returns no value.
  */
 BlockStack.prototype.findBestFitTop = function() {
-	const snap = BlockGraphics.command.snap; // Get snap bounding box for command Blocks.
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
-	const x = this.firstBlock.getAbsX(); // Uses screen coordinates.
-	const y = this.firstBlock.getAbsY();
-	const height = this.relToAbsY(this.firstBlock.height) - y;
+	var snap = BlockGraphics.command.snap; // Get snap bounding box for command Blocks.
+	var move = CodeManager.move;
+	var fit = CodeManager.fit;
+	var x = this.firstBlock.getAbsX(); // Uses screen coordinates.
+	var y = this.firstBlock.getAbsY();
+	var height = this.relToAbsY(this.firstBlock.height) - y;
 	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
 	 * the snap bounding box of the first Block in the BlockStack. */
 	// Gets the bottom-left corner of the moving BlockStack.
-	const moveBottomLeftX = move.topX;
-	const moveBottomLeftY = move.bottomY;
+	var moveBottomLeftX = move.topX;
+	var moveBottomLeftY = move.bottomY;
 	// Gets the snap bounding box of the first Block.
-	const snapBLeft = x - snap.left;
-	const snapBTop = y - snap.top;
-	const snapBWidth = snap.left + snap.right;
-	const snapBHeight = snap.top + height + snap.bottom;
+	var snapBLeft = x - snap.left;
+	var snapBTop = y - snap.top;
+	var snapBWidth = snap.left + snap.right;
+	var snapBHeight = snap.top + height + snap.bottom;
 	// Checks if the point falls in the box.
 	if (move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
-		const xDist = move.topX - x;
-		const yDist = move.bottomY - y;
-		const dist = xDist * xDist + yDist * yDist; // Computes the distance.
+		var xDist = move.topX - x;
+		var yDist = move.bottomY - y;
+		var dist = xDist * xDist + yDist * yDist; // Computes the distance.
 		if (!fit.found || dist < fit.dist) { // Compares it to existing fit.
 			fit.found = true;
 			fit.bestFit = this; // Note that in this case the bestFit is set to a BlockStack, not a Block.
@@ -17131,11 +17130,11 @@ BlockStack.prototype.snap = function(block) {
 	this.move(this.x, this.y - block.stack.getHeight());
 
 	// The new top Block.
-	const topStackBlock = block;
+	var topStackBlock = block;
 	// The last Block in the stack being added.
-	const bottomStackBlock = block.getLastBlock();
+	var bottomStackBlock = block.getLastBlock();
 	// The topmost of the existing Blocks.
-	const upperBlock = this.firstBlock;
+	var upperBlock = this.firstBlock;
 
 	// Fix references between Blocks to glue them together.
 	this.firstBlock = topStackBlock;
@@ -17143,7 +17142,7 @@ BlockStack.prototype.snap = function(block) {
 	bottomStackBlock.nextBlock = upperBlock;
 	upperBlock.parent = bottomStackBlock;
 	// The old BlockStack can now be destroyed.
-	const oldG = block.stack.group;
+	var oldG = block.stack.group;
 	block.stack.remove();
 	block.changeStack(this);
 	oldG.remove();
@@ -17173,7 +17172,7 @@ BlockStack.prototype.shiftOver = function(x, y) {
  */
 BlockStack.prototype.duplicate = function(x, y) {
 	// First duplicate the Blocks.
-	const firstCopyBlock = this.firstBlock.duplicate(x, y);
+	var firstCopyBlock = this.firstBlock.duplicate(x, y);
 	// Then put them in a new BlockStack.
 	return new BlockStack(firstCopyBlock, this.tab);
 };
@@ -17195,8 +17194,8 @@ BlockStack.prototype.fly = function() {
 	// Add group to drag layer.
 	GuiElements.layers.drag.appendChild(this.group);
 	// Get current location on screen.
-	const absX = this.getAbsX();
-	const absY = this.getAbsY();
+	var absX = this.getAbsX();
+	var absY = this.getAbsY();
 	// Record that this BlockStack is flying.
 	this.flying = true;
 	// Move to ensure that position on screen does not change.
@@ -17210,8 +17209,8 @@ BlockStack.prototype.fly = function() {
 BlockStack.prototype.land = function() {
 	this.group.remove(); // Remove from drag layer.
 	this.tabGroup.appendChild(this.group); // Go back into tab group.
-	const absX = this.getAbsX(); // Get current location on screen.
-	const absY = this.getAbsY();
+	var absX = this.getAbsX(); // Get current location on screen.
+	var absY = this.getAbsY();
 	this.flying = false;
 	// Move to ensure that position on screen does not change.
 	this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
@@ -17280,18 +17279,18 @@ BlockStack.prototype.updateTabDim = function() {
 	if (this.flying) return;
 
 	// If this stack's bounding box is outside the Tab's current bounding box, update the Tab's box to include it.
-	const dim = this.tab.dim;
+	var dim = this.tab.dim;
 	if (dim.x1 == null || this.x < dim.x1) {
 		dim.x1 = this.x;
 	}
 	if (dim.y1 == null || this.y < dim.y1) {
 		dim.y1 = this.y;
 	}
-	const x2 = this.x + this.dim.rw;
+	var x2 = this.x + this.dim.rw;
 	if (dim.x2 == null || x2 > dim.x2) {
 		dim.x2 = x2;
 	}
-	const y2 = this.y + this.dim.rh;
+	var y2 = this.y + this.dim.rh;
 	if (dim.y2 == null || y2 > dim.y2) {
 		dim.y2 = y2;
 	}
@@ -17303,11 +17302,11 @@ BlockStack.prototype.updateTabDim = function() {
  * @return {Node} - The XML node representing the BlockStack
  */
 BlockStack.prototype.createXml = function(xmlDoc) {
-	const stack = XmlWriter.createElement(xmlDoc, "stack");
+	var stack = XmlWriter.createElement(xmlDoc, "stack");
 	XmlWriter.setAttribute(stack, "x", this.x);
 	XmlWriter.setAttribute(stack, "y", this.y);
 	// Create a tag for Blocks and recursively write the Blocks to it.
-	const blocks = XmlWriter.createElement(xmlDoc, "blocks");
+	var blocks = XmlWriter.createElement(xmlDoc, "blocks");
 	this.firstBlock.writeToXml(xmlDoc, blocks);
 	stack.appendChild(blocks);
 	return stack;
@@ -17320,14 +17319,14 @@ BlockStack.prototype.createXml = function(xmlDoc) {
  * @return {BlockStack|null} stack - The imported stack
  */
 BlockStack.importXml = function(stackNode, tab) {
-	const x = XmlWriter.getAttribute(stackNode, "x", 0, true);
-	const y = XmlWriter.getAttribute(stackNode, "y", 0, true);
-	const blocksNode = XmlWriter.findSubElement(stackNode, "blocks");
-	const blockNodes = XmlWriter.findSubElements(blocksNode, "block");
+	var x = XmlWriter.getAttribute(stackNode, "x", 0, true);
+	var y = XmlWriter.getAttribute(stackNode, "y", 0, true);
+	var blocksNode = XmlWriter.findSubElement(stackNode, "blocks");
+	var blockNodes = XmlWriter.findSubElements(blocksNode, "block");
 
 	// All stacks must have at least one Block to be created
-	let firstBlock = null;
-	let i = 0;
+	var firstBlock = null;
+	var i = 0;
 	// The first Block to successfully import becomes the first Block in the Stack
 	while (firstBlock == null && i < blockNodes.length) {
 		firstBlock = Block.importXml(blockNodes[i]);
@@ -17337,12 +17336,12 @@ BlockStack.importXml = function(stackNode, tab) {
 		// All Blocks could not import.  Exit.
 		return null;
 	}
-	const stack = new BlockStack(firstBlock, tab);
+	var stack = new BlockStack(firstBlock, tab);
 	stack.move(x, y);
 	// We iterate through the Blocks, keeping track of the previous Block so we can link them properly
-	let previousBlock = firstBlock;
+	var previousBlock = firstBlock;
 	while (i < blockNodes.length) {
-		const newBlock = Block.importXml(blockNodes[i]);
+		var newBlock = Block.importXml(blockNodes[i]);
 		if (newBlock != null) {
 			previousBlock.snap(newBlock);
 			previousBlock = newBlock;
@@ -17429,8 +17428,8 @@ BlockStack.prototype.countDevicesInUse = function(deviceClass) {
  * @param {string} message
  */
 BlockStack.prototype.passRecursivelyDown = function(message) {
-	const myMessage = message;
-	let funArgs = Array.prototype.slice.call(arguments, 1);
+	var myMessage = message;
+	var funArgs = Array.prototype.slice.call(arguments, 1);
 
 	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
 	this.passRecursively.apply(this, arguments);
@@ -17448,7 +17447,7 @@ BlockStack.prototype.passRecursivelyDown = function(message) {
  * @param {string} functionName
  */
 BlockStack.prototype.passRecursively = function(functionName) {
-	let args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	this.firstBlock[functionName].apply(this.firstBlock, args);
 };
 
@@ -17552,7 +17551,7 @@ Setting.prototype.writeValue = function(value){
 	if(this.number) {
 		this.value = (new NumData(value)).getValueInR(this.min, this.max);
 	}
-	const request = new HttpRequestBuilder("settings/set");
+	var request = new HttpRequestBuilder("settings/set");
 	request.addParam("key", this.key);
 	request.addParam("value", HtmlServer.encodeHtml(this.value + ""));
 	HtmlServer.sendRequestWithCallback(request.toString());
@@ -17563,12 +17562,12 @@ Setting.prototype.writeValue = function(value){
  * @param {function} callbackFn - type (string|number) -> () called with value once read, or with current value if error
  */
 Setting.prototype.readValue = function(callbackFn){
-	const request = new HttpRequestBuilder("settings/get");
+	var request = new HttpRequestBuilder("settings/get");
 	request.addParam("key", this.key);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let res = result;
+		var res = result;
 		if(this.number) {
-			const numData = (new StringData(res)).asNum();
+			var numData = (new StringData(res)).asNum();
 			if(numData.isValid) {
 				this.value = numData.getValueInR(this.min, this.max, false, this.integer);
 			}
@@ -17584,7 +17583,7 @@ Setting.prototype.readValue = function(callbackFn){
  * Static class stores Settings and makes them accessible to other classes
  */
 function SettingsManager() {
-	const SM = SettingsManager;
+	var SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
 	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");
 	SM.sideBarVisible = new Setting("sideBarVisible", "true");
@@ -17595,7 +17594,7 @@ function SettingsManager() {
  * @param {function} callbackFn - Called when done loading/tying to load settings
  */
 SettingsManager.loadSettings = function(callbackFn) {
-	const SM = SettingsManager;
+	var SM = SettingsManager;
 	SM.sideBarVisible.readValue(function() {
 		SM.enableSnapNoise.readValue(function() {
 			SM.zoom.readValue(callbackFn);
@@ -17652,7 +17651,7 @@ HtmlServer.encodeHtml = function(message) {
 	/*if(message==""){
 		return "%20"; //Empty strings can't be used in the URL.
 	}*/
-	let eVal;
+	var eVal;
 	if (!encodeURIComponent) {
 		eVal = escape(message);
 		eVal = eVal.replace(/@/g, "%40");
@@ -17722,12 +17721,12 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
 		return;
 	}
-	let requestType = "GET";
+	var requestType = "GET";
 	if (isPost) {
 		requestType = "POST";
 	}
 	try {
-		const xhttp = new XMLHttpRequest();
+		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 			if (xhttp.readyState === 4) {
 				HtmlServer.unansweredCount--;
@@ -17770,11 +17769,11 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
 	if (requestStatus != null) {
 		requestStatus.error = false;
-		const callbackFn = function(response) {
+		var callbackFn = function(response) {
 			requestStatus.finished = true;
 			requestStatus.result = response;
 		};
-		const callbackErr = function(code, result) {
+		var callbackErr = function(code, result) {
 			requestStatus.finished = true;
 			requestStatus.error = true;
 			requestStatus.code = code;
@@ -17817,11 +17816,11 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 		isBluetoothBlock = false;
 	}
 
-	let id = null;
+	var id = null;
 	while (id == null || HtmlServer.iosRequests[id] != null) {
 		id = "requestId" + Math.random();
 	}
-	const requestObject = {};
+	var requestObject = {};
 	requestObject.request = request;
 	if (isPost) {
 		requestObject.body = postData;
@@ -17845,7 +17844,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
 	//GuiElements.alert("got resp from native");
-	const callbackObj = HtmlServer.iosRequests[id];
+	var callbackObj = HtmlServer.iosRequests[id];
 	HtmlServer.iosRequests[id] = undefined;
 	if (callbackObj == null) {
 		return;
@@ -17869,7 +17868,7 @@ HtmlServer.responseFromIosCall = function(id, status, body) {
  * Sends requests to show dialogs and keeps track of open dialogs
  */
 function DialogManager() {
-	let DM = DialogManager;
+	var DM = DialogManager;
 	/* A dialog generated through Block execution must wait this amount before showing another dialog to give
 	 * the user a chance to stop the program */
 	DM.repeatDialogDelay = 500;
@@ -17887,8 +17886,8 @@ function DialogManager() {
  * @return {boolean}
  */
 DialogManager.checkDialogDelay = function() {
-	let DM = DialogManager;
-	let now = new Date().getTime();
+	var DM = DialogManager;
+	var now = new Date().getTime();
 	if (DM.dialogVisible) {
 		return false;
 	}
@@ -17899,7 +17898,7 @@ DialogManager.checkDialogDelay = function() {
  * Sets the time a dialog was last closed to now
  */
 DialogManager.updateDialogDelay = function() {
-	let DM = DialogManager;
+	var DM = DialogManager;
 	DM.lastDialogDisplayTime = new Date().getTime();
 };
 
@@ -17914,7 +17913,7 @@ DialogManager.updateDialogDelay = function() {
  * @param callbackErr - type () -> (), the function to call if showing the dialog fails
  */
 DialogManager.showChoiceDialog = function(title, question, option1, option2, swapIfMouse, callbackFn, callbackErr) {
-	const DM = DialogManager;
+	var DM = DialogManager;
 	if (DM.dialogVisible) {
 		// If there's already a dialog, call the fail function
 		if (callbackErr != null) callbackErr();
@@ -17923,7 +17922,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
 	TouchReceiver.touchInterrupt();
 	DM.dialogVisible = true;
 	if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
-		let result = confirm(question);
+		var result = confirm(question);
 		DM.dialogVisible = false;
 		if (swapIfMouse) {
 			result = !result;
@@ -17934,18 +17933,18 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
 			callbackFn("2");
 		}
 	} else {
-		const HS = HtmlServer;
-		const request = new HttpRequestBuilder("tablet/choice");
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/choice");
 		request.addParam("title", title);
 		request.addParam("question", question);
 		request.addParam("button1", option1);
 		if (option2 != null) {
 			request.addParam("button2", option2);
 		}
-		const onDialogPresented = function() {
+		var onDialogPresented = function() {
 			DM.choiceCallback = callbackFn;
 		};
-		const onDialogFail = function() {
+		var onDialogFail = function() {
 			DM.dialogVisible = false;
 			if (callbackErr != null) {
 				callbackErr();
@@ -17961,10 +17960,10 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
  * @param {boolean} [firstSelected] - Whether the user selected the first option
  */
 DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
-	const DM = DialogManager;
+	var DM = DialogManager;
 	DM.dialogVisible = false;
 	if (DM.choiceCallback != null) {
-		let resp;
+		var resp;
 		if (cancelled) {
 			resp = "cancelled";
 		} else if (firstSelected) {
@@ -17988,7 +17987,7 @@ DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
  * @param {function} [callbackErr] - type () -> (), Called if showing the dialog causes an error
  */
 DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefill, callbackFn, callbackErr) {
-	const DM = DialogManager;
+	var DM = DialogManager;
 	if (DM.dialogVisible) {
 		// Dialog is already visible so we throw an error.
 		if (callbackErr != null) callbackErr();
@@ -17997,12 +17996,12 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 	TouchReceiver.touchInterrupt();
 	DM.dialogVisible = true;
 	if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
-		const newText = prompt(question);
+		var newText = prompt(question);
 		DM.dialogVisible = false;
 		callbackFn(newText == null, newText);
 	} else {
-		const HS = HtmlServer;
-		const request = new HttpRequestBuilder("tablet/dialog");
+		var HS = HtmlServer;
+		var request = new HttpRequestBuilder("tablet/dialog");
 		request.addParam("title", title);
 		request.addParam("question", question);
 		if (shouldPrefill) {
@@ -18011,10 +18010,10 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 			request.addParam("placeholder", prefill);
 		}
 		request.addParam("selectAll", "true");
-		const onDialogPresented = function(result) {
+		var onDialogPresented = function(result) {
 			DM.promptCallback = callbackFn;
 		};
-		const onDialogFail = function() {
+		var onDialogFail = function() {
 			DM.dialogVisible = false;
 			if (callbackErr != null) {
 				callbackErr();
@@ -18030,7 +18029,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
  * @param {string} [response] - The user's response to the prompt
  */
 DialogManager.promptDialogResponded = function(cancelled, response) {
-	const DM = DialogManager;
+	var DM = DialogManager;
 	DM.dialogVisible = false;
 	DM.updateDialogDelay();   // Tell DialogManager to reset the dialog delay clock.
 	if (DM.promptCallback != null) {
@@ -18229,7 +18228,7 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
-    let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
+    var msg = "Connection to \"" + robotId + "\" failed, please try again later.";
     DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
     		return;
     	}.bind(this));
@@ -18243,8 +18242,8 @@ CallbackManager.robot.connectionFailure = function(robotId) {
 CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	robotId = HtmlServer.decodeHtml(robotId);
 	status = HtmlServer.decodeHtml(status);
-	const statuses = Device.firmwareStatuses;
-	let firmwareStatus;
+	var statuses = Device.firmwareStatuses;
+	var firmwareStatus;
 	if(status === "upToDate") {
 		firmwareStatus = statuses.upToDate;
 	} else if(status === "old") {
@@ -18389,8 +18388,8 @@ function XmlWriter() {
  */
 XmlWriter.newDoc = function(tagName) {
 	tagName = XmlWriter.escape(tagName);
-	const xmlString = "<" + tagName + "></" + tagName + ">";
-	const parser = new DOMParser();
+	var xmlString = "<" + tagName + "></" + tagName + ">";
+	var parser = new DOMParser();
 	return parser.parseFromString(xmlString, "text/xml");
 };
 
@@ -18475,7 +18474,7 @@ XmlWriter.downloadDoc = function(xmlDoc) {
  * @return {Document}
  */
 XmlWriter.openDoc = function(xmlString) {
-	const parser = new DOMParser();
+	var parser = new DOMParser();
 	return parser.parseFromString(xmlString, "text/xml");
 };
 
@@ -18487,7 +18486,7 @@ XmlWriter.openDoc = function(xmlString) {
  */
 XmlWriter.findElement = function(xmlDoc, tagName) {
 	tagName = XmlWriter.escape(tagName);
-	const results = xmlDoc.getElementsByTagName(tagName);
+	var results = xmlDoc.getElementsByTagName(tagName);
 	if (results.length === 0) {
 		return null;
 	}
@@ -18504,9 +18503,9 @@ XmlWriter.findSubElements = function(node, tagName) {
 	if (node == null) {
 		return [];
 	}
-	const children = node.childNodes;
-	const results = [];
-	for (let i = 0; i < children.length; i++) {
+	var children = node.childNodes;
+	var results = [];
+	for (var i = 0; i < children.length; i++) {
 		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
 			results.push(children[i]);
 		}
@@ -18524,8 +18523,8 @@ XmlWriter.findSubElement = function(node, tagName) {
 	if (node == null) {
 		return null;
 	}
-	const children = node.childNodes;
-	for (let i = 0; i < children.length; i++) {
+	var children = node.childNodes;
+	for (var i = 0; i < children.length; i++) {
 		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
 			return children[i];
 		}
@@ -18548,13 +18547,13 @@ XmlWriter.getAttribute = function(element, name, defaultVal, isNum) {
 	if (defaultVal == null) {
 		defaultVal = null;
 	}
-	let val = element.getAttribute(XmlWriter.escape(name));
+	var val = element.getAttribute(XmlWriter.escape(name));
 	if (val == null) {
 		return defaultVal;
 	}
 	val = XmlWriter.unEscape(val);
 	if (isNum) {
-		const numData = (new StringData(val)).asNum();
+		var numData = (new StringData(val)).asNum();
 		if (numData.isValid) {
 			return numData.getValue();
 		}
@@ -18578,19 +18577,19 @@ XmlWriter.getTextNode = function(element, name, defaultVal, isNum) {
 	if (defaultVal == null) {
 		defaultVal = null;
 	}
-	const innerNode = XmlWriter.findSubElement(element, name);
+	var innerNode = XmlWriter.findSubElement(element, name);
 	if (innerNode == null) {
 		return defaultVal;
 	}
-	const childNodes = innerNode.childNodes;
+	var childNodes = innerNode.childNodes;
 	if (childNodes.length >= 1 && childNodes[0].nodeType === 3) {
-		let val = childNodes[0].nodeValue;
+		var val = childNodes[0].nodeValue;
 		if (val == null) {
 			return defaultVal;
 		}
 		val = XmlWriter.unEscape(val);
 		if (isNum) {
-			const numData = (new StringData(val)).asNum();
+			var numData = (new StringData(val)).asNum();
 			if (numData.isValid) {
 				return numData.getValue();
 			}
@@ -18609,7 +18608,7 @@ XmlWriter.getTextNode = function(element, name, defaultVal, isNum) {
  * @return {string}
  */
 XmlWriter.docToText = function(xmlDoc) {
-	const serializer = new XMLSerializer();
+	var serializer = new XMLSerializer();
 	return serializer.serializeToString(xmlDoc);
 };
 
@@ -18621,8 +18620,8 @@ XmlWriter.docToText = function(xmlDoc) {
  * @return {null|Node}
  */
 XmlWriter.findNodeByKey = function(nodes, key) {
-	for (let i = 0; i < nodes.length; i++) {
-		const nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+	for (var i = 0; i < nodes.length; i++) {
+		var nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
 		if (nodeKey === key) {
 			return nodes[i];
 		}
@@ -18673,8 +18672,8 @@ SaveManager.loadData = function(data) {
 			// The data haas an extra layer of encoding that needs to be removed
 			data = decodeURIComponent(data);
 		}
-		const xmlDoc = XmlWriter.openDoc(data);
-		const project = XmlWriter.findElement(xmlDoc, "project");
+		var xmlDoc = XmlWriter.openDoc(data);
+		var project = XmlWriter.findElement(xmlDoc, "project");
 		if (project == null) {
 			// There's no project tag.  The data is seriously corrupt, so we just open an empty file
 			SaveManager.loadData(SaveManager.emptyProgData);
@@ -18727,7 +18726,7 @@ SaveManager.loadBlank = function() {
  */
 SaveManager.userClose = function(nextAction) {
 	SaveManager.loadBlank();
-	const request = new HttpRequestBuilder("data/close");
+	var request = new HttpRequestBuilder("data/close");
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 
@@ -18771,7 +18770,7 @@ SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction
  */
 SaveManager.sanitizeNew = function(proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		var message = "Name cannot be blank. Enter a file name.";
 		SaveManager.promptNewFile(message, nextAction);
 	} else {
 		GuiElements.alert("getting name");
@@ -18781,11 +18780,11 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
 				SaveManager.newSoft(availableName, nextAction);
 			} else if (!alreadySanitized) {
 				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-				let message = "The following characters cannot be included in file names: \n";
+				var message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			}
 		});
@@ -18798,7 +18797,7 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.newSoft = function(filename, nextAction) {
-	const request = new HttpRequestBuilder("data/new");
+	var request = new HttpRequestBuilder("data/new");
 	request.addParam("filename", filename);
 	SaveManager.loadBlank();
 	CodeManager.markLoading("Saving...");
@@ -18815,8 +18814,8 @@ SaveManager.autoSave = function(nextAction) {
 		if (nextAction != null) nextAction();
 		return;
 	}
-	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	const request = new HttpRequestBuilder("data/autoSave");
+	var xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/autoSave");
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
 };
 
@@ -18826,7 +18825,7 @@ SaveManager.autoSave = function(nextAction) {
  */
 SaveManager.userOpenFile = function(fileName) {
     SaveManager.fileName = fileName;
-	const request = new HttpRequestBuilder("data/open");
+	var request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
 	CodeManager.markLoading("Loading...");
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
@@ -18893,11 +18892,11 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		var message = "Name cannot be blank. Enter a file name.";
 		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
 	} else if (proposedName === oldFilename) {
 		if (!isRecording && SaveManager.fileName === oldFilename) {
-			const request = new HttpRequestBuilder("data/markAsNamed");
+			var request = new HttpRequestBuilder("data/markAsNamed");
 			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 		} else {
 			if (nextAction != null) nextAction();
@@ -18907,11 +18906,11 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				var message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
@@ -18927,11 +18926,11 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
  * @param {function} nextAction
  */
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
-	const request = new HttpRequestBuilder("data/rename");
+	var request = new HttpRequestBuilder("data/rename");
 	request.addParam("oldFilename", oldFilename);
 	request.addParam("newFilename", newName);
 	SaveManager.addTypeToRequest(request, isRecording);
-	let callback = nextAction;
+	var callback = nextAction;
 	if (isRecording) {
 		callback = function() {
 			CodeManager.renameRecording(oldFilename, newName);
@@ -18948,7 +18947,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	const question = "Are you sure you want to delete \"" + filename + "\"?";
+	var question = "Are you sure you want to delete \"" + filename + "\"?";
 	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
 		if (response === "2") {
 			//If we are trying to delete the currently open file, close it first.
@@ -18970,10 +18969,10 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
  * @param {function} nextAction
  */
 SaveManager.delete = function(isRecording, filename, nextAction) {
-	const request = new HttpRequestBuilder("data/delete");
+	var request = new HttpRequestBuilder("data/delete");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
-	let callback = nextAction;
+	var callback = nextAction;
 	if (isRecording) {
 		callback = function() {
 			CodeManager.deleteRecording(filename);
@@ -18995,11 +18994,11 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
 	}
 	DebugOptions.validateNonNull(callbackFn);
 	// Ask the backend if the name is ok
-	const request = new HttpRequestBuilder("data/getAvailableName");
+	var request = new HttpRequestBuilder("data/getAvailableName");
 	request.addParam("filename", filename);
 	SaveManager.addTypeToRequest(request, isRecording);
 	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
-		let json = {};
+		var json = {};
 		try {
 			// Response is a JSON object
 			json = JSON.parse(response);
@@ -19067,11 +19066,11 @@ SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				var message = "The following characters cannot be included in file names: \n";
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
@@ -19085,7 +19084,7 @@ SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.duplicate = function(filename, newName, nextAction) {
-	const request = new HttpRequestBuilder("data/duplicate");
+	var request = new HttpRequestBuilder("data/duplicate");
 	request.addParam("filename", filename);
 	request.addParam("newFilename", newName);
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
@@ -19112,7 +19111,7 @@ SaveManager.userExportFile = function(filename, x1, x2, y1, y2) {
  * @param {number} y2
  */
 SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
-	const request = new HttpRequestBuilder("data/export");
+	var request = new HttpRequestBuilder("data/export");
 	request.addParam("filename", filename);
 	if (x1 != null && x2 != null && y1 != null && y2 != null) {
 		request.addParam("tlx", x1);
@@ -19128,8 +19127,8 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
  * when completed
  */
 SaveManager.saveAsNew = function() {
-	const request = new HttpRequestBuilder("data/new");
-	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+	var request = new HttpRequestBuilder("data/new");
+	var xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	CodeManager.markLoading("Saving...");
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
@@ -19154,7 +19153,7 @@ SaveManager.markEdited = function() {
  */
 SaveManager.currentDoc = function() {
 	if (SaveManager.fileName == null) return null;
-	const result = {};
+	var result = {};
 	result.data = XmlWriter.docToText(CodeManager.createXml());
 	result.filename = SaveManager.fileName;
 	return result;
@@ -19196,7 +19195,7 @@ SaveManager.fileIsOpen = function() {
  * The UndoManager stores the deleted BlockStacks as XML nodes.
  */
 function UndoManager() {
-	const UM = UndoManager;
+	var UM = UndoManager;
 	UM.undoButton = null;
 	UM.undoStack = [];
 	UM.undoLimit = 20;
@@ -19208,7 +19207,7 @@ function UndoManager() {
  * @param {Button} button
  */
 UndoManager.setUndoButton = function(button) {
-	const UM = UndoManager;
+	var UM = UndoManager;
 	UM.undoButton = button;
 	UM.undoButton.setCallbackFunction(UndoManager.undoDelete, true);
 	UM.updateButtonEnabled();
@@ -19219,9 +19218,9 @@ UndoManager.setUndoButton = function(button) {
  * @param stack
  */
 UndoManager.deleteStack = function(stack) {
-	const UM = UndoManager;
-	const doc = XmlWriter.newDoc("undoData");
-	const stackData = stack.createXml(doc);
+	var UM = UndoManager;
+	var doc = XmlWriter.newDoc("undoData");
+	var stackData = stack.createXml(doc);
 	stack.remove();
 	UM.undoStack.push(stackData);
 	while(UM.undoStack.length > UM.undoLimit) {
@@ -19234,11 +19233,11 @@ UndoManager.deleteStack = function(stack) {
  * Pops an item from the stack and rebuilds it, placing it in the corner of the canvas
  */
 UndoManager.undoDelete = function(){
-	const UM = UndoManager;
+	var UM = UndoManager;
 	if(UM.undoStack.length === 0) return;
-	let success = false;
+	var success = false;
 	while (!success) {
-		const stackData = UM.undoStack.pop();
+		var stackData = UM.undoStack.pop();
 		success = success || TabManager.undoDelete(stackData);
 	}
 	UM.updateButtonEnabled();
@@ -19249,7 +19248,7 @@ UndoManager.undoDelete = function(){
  * Updates the enabled/disabled state of the undo button based in if the stack is empty
  */
 UndoManager.updateButtonEnabled = function(){
-	const UM = UndoManager;
+	var UM = UndoManager;
 	if(UM.undoButton == null) return;
 	if(UM.undoStack.length > 0) {
 		UM.undoButton.enable();
@@ -19262,7 +19261,7 @@ UndoManager.updateButtonEnabled = function(){
  * Deletes the undo stack (for when a program is closed/opened)
  */
 UndoManager.clearUndos = function() {
-	const UM = UndoManager;
+	var UM = UndoManager;
 	UM.undoStack = [];
 	UM.updateButtonEnabled();
 };
@@ -19403,7 +19402,7 @@ Block.prototype.getAbsY = function() {
  * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function() {
-	const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
+	var pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
 	TouchReceiver.addListenersChild(pathE, this);
 	return pathE;
 };
@@ -19438,7 +19437,7 @@ Block.prototype.move = function(x, y) {
 Block.prototype.stop = function() {
 	this.running = 0; //Stop this Block.
 	this.runMem = {}; //Clear memory
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		this.slots[i].stop(); //Stop this Block's Slots.
 	}
 	if (this.blockSlot1 != null) {
@@ -19459,16 +19458,16 @@ Block.prototype.stop = function() {
 Block.prototype.updateRun = function() {
 	//If a Block is told to run and it has not started or believes it is finished (from a previous execution)...
 	if (this.running === 0 || this.running === 3) {
-		for (let i = 0; i < this.slots.length; i++) { //...Reset all Slots to prepare for execution
+		for (var i = 0; i < this.slots.length; i++) { //...Reset all Slots to prepare for execution
 			this.slots[i].stop();
 		}
 		this.running = 1; //Now the Block is ready to run its Slots.
 	}
-	let myExecStatus; //The value to return.
+	var myExecStatus; //The value to return.
 	if (this.running === 1) { //If the Block is currently waiting on its Slots...
-		for (let i = 0; i < this.slots.length; i++) {
+		for (var i = 0; i < this.slots.length; i++) {
 			//Check to see if each Slot is done and update the first Slot that isn't done.
-			let slotExecStatus = this.slots[i].updateRun();
+			var slotExecStatus = this.slots[i].updateRun();
 			//If the slot is still running...
 			if (slotExecStatus.isRunning()) {
 				//The Block is still running and will execute again next time
@@ -19535,7 +19534,7 @@ Block.prototype.changeStack = function(stack) {
 	this.stack = stack; //Move this Block to the stack
 	this.group.remove(); //Remove this Block's SVG group from that of the old stack.
 	stack.group.appendChild(this.group); //Add this Block's SVG group to the new stack.
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		this.slots[i].changeStack(stack); //Recursively tell this Block's Slots to move thir children to the new stack.
 	}
 	if (this.nextBlock != null) {
@@ -19575,7 +19574,7 @@ Block.prototype.updateStackDim = function() {
  * updateStackDimO handled the actual updates.
  */
 Block.prototype.updateStackDimRI = function() {
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		this.slots[i].updateStackDim(); //Pass message on to Slots.
 	}
 	this.updateStackDimO(); //Update this Block.
@@ -19592,13 +19591,13 @@ Block.prototype.updateStackDimRI = function() {
  * stack have to be investigated.
  */
 Block.prototype.updateStackDimO = function() {
-	let sDim = this.stack.dim; //Loads the stack's dimension data.
-	let snap = BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
+	var sDim = this.stack.dim; //Loads the stack's dimension data.
+	var snap = BlockGraphics.command.snap; //Loads the snap bounding box for command blocks.
 	if (this.bottomOpen || this.topOpen) { //Only update the c box if this is a command block //Fix! use !this.returnsValue
-		let cx1 = this.x - snap.left; //Create bounding rectangle for this particular command Block
-		let cy1 = this.y - snap.top;
-		let cx2 = this.x + snap.right;
-		let cy2 = this.y + this.height + snap.bottom;
+		var cx1 = this.x - snap.left; //Create bounding rectangle for this particular command Block
+		var cy1 = this.y - snap.top;
+		var cx2 = this.x + snap.right;
+		var cy2 = this.y + this.height + snap.bottom;
 		if (cx1 < sDim.cx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1 = cx1;
 		}
@@ -19612,10 +19611,10 @@ Block.prototype.updateStackDimO = function() {
 			sDim.cy2 = cy2;
 		}
 	}
-	let rx1 = this.x; //The r bounding box is just the size of the Block itself.
-	let ry1 = this.y;
-	let rx2 = this.x + this.width;
-	let ry2 = this.y + this.height;
+	var rx1 = this.x; //The r bounding box is just the size of the Block itself.
+	var ry1 = this.y;
+	var rx2 = this.x + this.width;
+	var ry2 = this.y + this.height;
 	if (rx1 < sDim.rx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 		sDim.rx1 = rx1;
 	}
@@ -19637,18 +19636,18 @@ Block.prototype.updateStackDimO = function() {
  * It does not move the parts, however.  That is done later using updateAlign once the sizing is finished.
  */
 Block.prototype.updateDim = function() {
-	let bG = BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
+	var bG = BlockGraphics.getType(this.type); //Fix! loads dimension data from BlockGraphics.
 	if (this.topOpen || this.bottomOpen) { //If this is a command block, then use the BlockGraphics for command blocks.
 		bG = BlockGraphics.command; //If the block if a Loop or DoubleLoop, use the CommandBlock dimension instead.
 	}
-	let width = 0;
+	var width = 0;
 	width += bG.hMargin; //The left margin of the Block.
-	let lineWidth = width;
-	let height = 0;
-	let currentLine = 0;
-	let lineHeight = [];
+	var lineWidth = width;
+	var height = 0;
+	var currentLine = 0;
+	var lineHeight = [];
 	lineHeight[currentLine] = 0;
-	for (let i = 0; i < this.parts.length; i++) {
+	for (var i = 0; i < this.parts.length; i++) {
 		this.parts[i].updateDim(); //Tell all parts of the Block to update before using their widths for calculations.
 		lineWidth += this.parts[i].width; //Fill the width of the middle of the Block
 		if (this.parts[i].height > lineHeight[currentLine]) { //The height of the Block is the height of the tallest member.
@@ -19743,7 +19742,7 @@ Block.prototype.updateDim = function() {
  * y is measured from the top for all Blocks, x is measured from the left.
  */
 Block.prototype.updateAlign = function(x, y) {
-	let bG = BlockGraphics;
+	var bG = BlockGraphics;
 	this.updateAlignRI(x, y); //Update recursively within the block.
 	if (this.hasBlockSlot1) { //Then tell all susequent blocks to align.
 		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
@@ -19766,18 +19765,18 @@ Block.prototype.updateAlign = function(x, y) {
  */
 Block.prototype.updateAlignRI = function(x, y) {
 	this.move(x, y); //Move to the desired location
-	let bG = BlockGraphics.getType(this.type);
+	var bG = BlockGraphics.getType(this.type);
 	if (this.bottomOpen || this.topOpen) {
 		bG = BlockGraphics.command;
 	}
-	let currentLine = 0;
-	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
-	let xCoord = 0;
+	var currentLine = 0;
+	var yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
+	var xCoord = 0;
 	if (this.hasBlockSlot1) {
 		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
 	}
 	xCoord += bG.hMargin;
-	for (let i = 0; i < this.parts.length; i++) {
+	for (var i = 0; i < this.parts.length; i++) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
 		if (this.parts[i].isEndOfLine){
 			xCoord = bG.hMargin;
@@ -19796,14 +19795,14 @@ Block.prototype.updateAlignRI = function(x, y) {
  * @param {number} height - The desired height of the Block.
  */
 Block.prototype.resize = function(width, height) {
-	let BG = BlockGraphics;
+	var BG = BlockGraphics;
 	//First set width and height properties.
 	this.width = width;
 	this.height = height;
 	//Then collect other necessary information.
-	let innerHeight1 = 0;
-	let innerHeight2 = 0;
-	let midHeight = 0;
+	var innerHeight1 = 0;
+	var innerHeight2 = 0;
+	var midHeight = 0;
 	if (this.hasBlockSlot1) {
 		innerHeight1 = this.blockSlot1.height;
 	}
@@ -19822,30 +19821,30 @@ Block.prototype.resize = function(width, height) {
  * Connections to the top of the stack's findBestFit.
  */
 Block.prototype.findBestFit = function() {
-	let move = CodeManager.move;
-	let fit = CodeManager.fit;
-	let x = this.getAbsX(); //Get coords to compare.
-	let y = this.getAbsY();
-	let height = this.relToAbsY(this.height) - y;
-	let hasMatch = false;
+	var move = CodeManager.move;
+	var fit = CodeManager.fit;
+	var x = this.getAbsX(); //Get coords to compare.
+	var y = this.getAbsY();
+	var height = this.relToAbsY(this.height) - y;
+	var hasMatch = false;
 
 	if (move.returnsValue) { //If a connection between the stack and block are possible...
-		for (let i = 0; i < this.slots.length; i++) {
-			let slotHasMatch = this.slots[i].findBestFit();
+		for (var i = 0; i < this.slots.length; i++) {
+			var slotHasMatch = this.slots[i].findBestFit();
 			hasMatch = slotHasMatch || hasMatch;
 		}
 	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
-		let snap = BlockGraphics.command.snap; //Load snap bounding box
+		var snap = BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
-		let snapBLeft = x - snap.left;
-		let snapBTop = y - snap.top;
-		let snapBWidth = snap.left + snap.right;
-		let snapBHeight = snap.top + height + snap.bottom;
+		var snapBLeft = x - snap.left;
+		var snapBTop = y - snap.top;
+		var snapBWidth = snap.left + snap.right;
+		var snapBHeight = snap.top + height + snap.bottom;
 		//Check if point falls in a rectangular range.
 		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
-			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
-			let yDist = move.topY - (y + height);
-			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			var yDist = move.topY - (y + height);
+			var dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
 				fit.bestFit = this;
@@ -19884,14 +19883,14 @@ Block.prototype.highlight = function() {
 Block.prototype.snap = function(block) {
 	//If the Block cannot have other blocks below it, any other blocks must now be disconnected.
 	//Get the bottom Block in the stack to be inserted.
-	let bottomStackBlock = block.getLastBlock();
+	var bottomStackBlock = block.getLastBlock();
 	//If the stack being inserted can't have blocks below it, and there is a block after this Block...
 	if (!bottomStackBlock.bottomOpen && this.nextBlock != null) {
-		let bG = BlockGraphics.command;
+		var bG = BlockGraphics.command;
 		//Disconnect the blocks after this Block and shift them over to make room.
 		this.nextBlock.unsnap().shiftOver(bG.shiftX, block.stack.getHeight() + bG.shiftY);
 	}
-	let stack = this.stack;
+	var stack = this.stack;
 	//If the Block we are inserting is part of a stack...
 	if (block.stack != null) {
 		block.stack.stop();
@@ -19900,9 +19899,9 @@ Block.prototype.snap = function(block) {
 			block.glow();
 		}
 	}
-	let upperBlock = this; //The Block which will go above the inserted stack.
-	let lowerBlock = this.nextBlock; //The Block which will go below the inserted stack. Might be null.
-	let topStackBlock = block; //The top Block in the stack to be inserted.
+	var upperBlock = this; //The Block which will go above the inserted stack.
+	var lowerBlock = this.nextBlock; //The Block which will go below the inserted stack. Might be null.
+	var topStackBlock = block; //The top Block in the stack to be inserted.
 
 	//The top of where the stack is inserted note which Blocks are above/below them.
 	upperBlock.nextBlock = topStackBlock;
@@ -19912,7 +19911,7 @@ Block.prototype.snap = function(block) {
 	if (lowerBlock != null) { //There might not be a Block below the inserted stack.
 		lowerBlock.parent = bottomStackBlock;
 	}
-	let oldG = null;
+	var oldG = null;
 	if (block.stack != null) {
 		oldG = block.stack.group; //Get a handle to the old stack's group
 		block.stack.remove(); //Remove the old stack.
@@ -19985,7 +19984,7 @@ Block.prototype.addHeights = function() {
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y) {
-	let myCopy = null;
+	var myCopy = null;
 	// First we use this Block's constructor to create a new block of the same type
 	// If this Block is a list or variable Block, we must pass that data to the constructor
 	if (this.variable != null) {
@@ -20007,7 +20006,7 @@ Block.prototype.duplicate = function(x, y) {
  */
 Block.prototype.copyFrom = function(block) {
 	DebugOptions.assert(block.blockTypeName === this.blockTypeName);
-	for (let i = 0; i < this.slots.length; i++) { //Copy block's slots to this Block.
+	for (var i = 0; i < this.slots.length; i++) { //Copy block's slots to this Block.
 		this.slots[i].copyFrom(block.slots[i]);
 	}
 	if (this.blockSlot1 != null) { //Copy the contents of its BlockSlots.
@@ -20029,8 +20028,8 @@ Block.prototype.copyFrom = function(block) {
  * @return {string} - The finished text summary.
  */
 Block.prototype.textSummary = function(slotToExclude) {
-	let summary = "";
-	for (let i = 0; i < this.parts.length; i++) {
+	var summary = "";
+	for (var i = 0; i < this.parts.length; i++) {
 		if (this.parts[i] === slotToExclude) {
 			//Replace slot with underscores.
 			summary += "___";
@@ -20070,7 +20069,7 @@ Block.prototype.checkBroadcastRunning = function(message) {
  * Recursively updates the available broadcast messages.
  */
 Block.prototype.updateAvailableMessages = function() {
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		this.slots[i].updateAvailableMessages();
 	}
 	if (this.blockSlot1 != null) {
@@ -20091,7 +20090,7 @@ Block.prototype.updateAvailableMessages = function() {
 Block.prototype.clearMem = function() {
 	//Delete all runMem.
 	this.runMem = new function() {};
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		this.slots[i].clearMem(); //Removes resultData and resets running state to 0 (NOT recursive).
 	}
 };
@@ -20102,7 +20101,7 @@ Block.prototype.clearMem = function() {
  */
 Block.prototype.getResultData = function() {
 	DebugOptions.assert(this.resultData != null);
-	let result = this.resultData;
+	var result = this.resultData;
 	this.resultData = null;
 	return result;
 };
@@ -20214,18 +20213,18 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc) {
-	let block = XmlWriter.createElement(xmlDoc, "block");
+	var block = XmlWriter.createElement(xmlDoc, "block");
 	XmlWriter.setAttribute(block, "type", this.blockTypeName);
-	let slots = XmlWriter.createElement(xmlDoc, "slots");
+	var slots = XmlWriter.createElement(xmlDoc, "slots");
 	// Indicates that we are using the new saving system, which uses keys assigned to each Slot to identify
 	// which data goes to which Slot.  The old system uses the order of appearance in the XML to match data to Slots
 	XmlWriter.setAttribute(slots, "keyVal", "true");
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		slots.appendChild(this.slots[i].createXml(xmlDoc));
 	}
 	block.appendChild(slots);
 	if (this.blockSlot1 != null) {
-		let blockSlots = XmlWriter.createElement(xmlDoc, "blockSlots");
+		var blockSlots = XmlWriter.createElement(xmlDoc, "blockSlots");
 		blockSlots.appendChild(this.blockSlot1.createXml(xmlDoc));
 		if (this.blockSlot2 != null) {
 			blockSlots.appendChild(this.blockSlot2.createXml(xmlDoc));
@@ -20242,8 +20241,8 @@ Block.prototype.createXml = function(xmlDoc) {
  */
 Block.importXml = function(blockNode) {
 	// Get the correct class of the Block
-	let type = XmlWriter.getAttribute(blockNode, "type");
-	let block;
+	var type = XmlWriter.getAttribute(blockNode, "type");
+	var block;
 	try {
 		// All classes start with "B_"
 		if (type.substring(0, 2) === "B_") {
@@ -20273,11 +20272,11 @@ Block.importXml = function(blockNode) {
  * @param {Node} blockNode - The node to copy the data from
  */
 Block.prototype.copyFromXml = function(blockNode) {
-	let slotsNode = XmlWriter.findSubElement(blockNode, "slots");
+	var slotsNode = XmlWriter.findSubElement(blockNode, "slots");
 	// Copy the data about the Slots into the Block.
 	this.importSlotXml(slotsNode);
-	let blockSlotsNode = XmlWriter.findSubElement(blockNode, "blockSlots");
-	let blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode, "blockSlot");
+	var blockSlotsNode = XmlWriter.findSubElement(blockNode, "blockSlots");
+	var blockSlotNodes = XmlWriter.findSubElements(blockSlotsNode, "blockSlot");
 	// Copy data about BlockSlots
 	if (this.blockSlot1 != null && blockSlotNodes.length >= 1) {
 		this.blockSlot1.importXml(blockSlotNodes[0]);
@@ -20293,13 +20292,13 @@ Block.prototype.copyFromXml = function(blockNode) {
  */
 Block.prototype.importSlotXml = function(slotsNode) {
 	// Determine if we are using the key/value system or legacy, order dependant system.
-	let keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") === "true";
-	let slotNodes = XmlWriter.findSubElements(slotsNode, "slot");
+	var keyVal = XmlWriter.getAttribute(slotsNode, "keyVal", "false") === "true";
+	var slotNodes = XmlWriter.findSubElements(slotsNode, "slot");
 	if (keyVal) {
 		// Import data for each slot
 		this.slots.forEach(function(slot) {
-			let key = slot.getKey();
-			let slotNode = XmlWriter.findNodeByKey(slotNodes, key);
+			var key = slot.getKey();
+			var slotNode = XmlWriter.findNodeByKey(slotNodes, key);
 			// Import data if that key exists.  Otherwise, leave the Slot at default values
 			if (slot != null) {
 				slot.importXml(slotNode);
@@ -20307,7 +20306,7 @@ Block.prototype.importSlotXml = function(slotsNode) {
 		});
 	} else {
 		// Import the data for each Slot in order
-		for (let i = 0; i < slotNodes.length && i < this.slots.length; i++) {
+		for (var i = 0; i < slotNodes.length && i < this.slots.length; i++) {
 			this.slots[i].importXml(slotNodes[i]);
 		}
 	}
@@ -20351,7 +20350,7 @@ Block.prototype.deleteList = function(list) {
  * @return {boolean} - true iff the variable is used in at least one Block
  */
 Block.prototype.checkVariableUsed = function(variable) {
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		if (this.slots[i].checkVariableUsed(variable)) {
 			return true;
 		}
@@ -20380,7 +20379,7 @@ Block.prototype.checkVariableUsed = function(variable) {
  * @return {boolean} - true iff the list is used in at least one Block
  */
 Block.prototype.checkListUsed = function(list) {
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		if (this.slots[i].checkListUsed(list)) {
 			return true;
 		}
@@ -20410,9 +20409,9 @@ Block.prototype.checkListUsed = function(list) {
  */
 Block.prototype.countDevicesInUse = function(deviceClass) {
 	// At least 1 option is available on all DropDowns
-	let largest = 0;
+	var largest = 0;
 	// Find the largest result of all calls
-	for (let i = 0; i < this.slots.length; i++) {
+	for (var i = 0; i < this.slots.length; i++) {
 		largest = Math.max(largest, this.slots[i].countDevicesInUse(deviceClass));
 	}
 	if (this.blockSlot1 != null) {
@@ -20440,9 +20439,9 @@ Block.prototype.updateAvailableSensors = function() {
  * @param functionName - The name of the function to call on each child
  */
 Block.prototype.passRecursively = function(functionName) {
-	let args = Array.prototype.slice.call(arguments, 1);
-	for (let i = 0; i < this.slots.length; i++) {
-		let currentSlot = this.slots[i];
+	var args = Array.prototype.slice.call(arguments, 1);
+	for (var i = 0; i < this.slots.length; i++) {
+		var currentSlot = this.slots[i];
 		currentSlot[functionName].apply(currentSlot, args);
 	}
 	if (this.blockSlot1 != null) {
@@ -20462,8 +20461,8 @@ Block.prototype.passRecursively = function(functionName) {
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message) {
-	const myMessage = message;
-	let funArgs = Array.prototype.slice.call(arguments, 1);
+	var myMessage = message;
+	var funArgs = Array.prototype.slice.call(arguments, 1);
 	// If the message implemented by this Block...
 
 	if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
@@ -20483,7 +20482,7 @@ Block.prototype.passRecursivelyDown = function(message) {
  */
 Block.prototype.displayResult = function(data) {
 	// Get the string representation of the data
-	let value = data.asString().getValue();
+	var value = data.asString().getValue();
 	// Display it, not as an error
 	this.displayValue(value, false);
 };
@@ -20495,10 +20494,10 @@ Block.prototype.displayResult = function(data) {
  */
 Block.prototype.displayValue = function(message, error) {
 	// Get the coords where to show the bubble
-	let x = this.getAbsX();
-	let y = this.getAbsY();
-	let width = this.relToAbsX(this.width) - x;
-	let height = this.relToAbsY(this.height) - y;
+	var x = this.getAbsX();
+	var y = this.getAbsY();
+	var width = this.relToAbsX(this.width) - x;
+	var height = this.relToAbsY(this.height) - y;
 	// Display a bubble at the location
 	ResultBubble.displayValue(message, x, y, width, height, error);
 };
@@ -20537,7 +20536,7 @@ Block.setDeviceSuffixFn = function(Class, suffixFn) {
 	Class.prototype.displayResult = function(data) {
 		// Only valid data is followed by a suffix
 		if (data.isValid) {
-			let value = data.asString().getValue();
+			var value = data.asString().getValue();
 			this.displayValue(value + " " + suffixFn(), false);
 		} else {
 			this.displayValue(data.asString().getValue(), false);
@@ -20780,7 +20779,7 @@ EditableSlotShape.prototype = Object.create(SlotShape.prototype);
 EditableSlotShape.prototype.constructor = EditableSlotShape;
 
 EditableSlotShape.setConstants = function() {
-	const ESS = EditableSlotShape;
+	var ESS = EditableSlotShape;
 	ESS.charHeight = BlockGraphics.valueText.font.charHeight;
 	ESS.hitBox = {};
 	ESS.hitBox.hMargin = BlockGraphics.hitBox.hMargin;
@@ -20825,7 +20824,7 @@ EditableSlotShape.prototype.changeText = function(text) {
  * Make the SlotShape appear selected
  */
 EditableSlotShape.prototype.select = function() {
-	const dC = this.dimConstants;
+	var dC = this.dimConstants;
 	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 };
 
@@ -20833,7 +20832,7 @@ EditableSlotShape.prototype.select = function() {
  * Make the SlotShape appear deselected
  */
 EditableSlotShape.prototype.deselect = function() {
-	const dC = this.dimConstants;
+	var dC = this.dimConstants;
 	GuiElements.update.color(this.textE, dC.valueText.fill);
 };
 
@@ -20841,7 +20840,7 @@ EditableSlotShape.prototype.deselect = function() {
  * Make the SlotShape's text grayed out
  */
 EditableSlotShape.prototype.grayOutValue = function() {
-	const dC = this.dimConstants;
+	var dC = this.dimConstants;
 	GuiElements.update.color(this.textE, dC.valueText.grayedFill);
 	this.isGray = true;
 };
@@ -20850,7 +20849,7 @@ EditableSlotShape.prototype.grayOutValue = function() {
  * Stop the SlotShape's text from being grayed out
  */
 EditableSlotShape.prototype.unGrayOutValue = function() {
-	const dC = this.dimConstants;
+	var dC = this.dimConstants;
 	GuiElements.update.color(this.textE, dC.valueText.selectedFill);
 	this.isGray = false;
 };
@@ -20859,10 +20858,10 @@ EditableSlotShape.prototype.unGrayOutValue = function() {
  * Compute the width and height of the SlotShape.  Called agin when text changes
  */
 EditableSlotShape.prototype.updateDim = function() {
-	const dC = this.dimConstants;
+	var dC = this.dimConstants;
 	this.textW = GuiElements.measure.textWidth(this.textE); //Measure text element.
-	let width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
-	let height = dC.slotHeight; //Has no child, so is just the default height.
+	var width = this.textW + dC.slotLMargin + dC.slotRMargin; //Add space for margins.
+	var height = dC.slotHeight; //Has no child, so is just the default height.
 	if (width < dC.slotWidth) { //Check if width is less than the minimum.
 		width = dC.slotWidth;
 	}
@@ -20874,15 +20873,15 @@ EditableSlotShape.prototype.updateDim = function() {
  * Move all the parts of the SlotShape to the correct location
  */
 EditableSlotShape.prototype.updateAlign = function() {
-	const dC = this.dimConstants;
-	const textX = (this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW / 2; //Centers the text horizontally.
-	const textY = EditableSlotShape.charHeight / 2 + this.height / 2; //Centers the text vertically
+	var dC = this.dimConstants;
+	var textX = (this.width + dC.slotLMargin - dC.slotRMargin) / 2 - this.textW / 2; //Centers the text horizontally.
+	var textY = EditableSlotShape.charHeight / 2 + this.height / 2; //Centers the text vertically
 	BlockGraphics.update.text(this.textE, textX, textY); //Move the text.
-	const bGHB = BlockGraphics.hitBox; //Get data about the size of the hit box.
-	const hitX = bGHB.hMargin; //Compute its x and y coords.
-	const hitY = bGHB.vMargin;
-	const hitW = this.width + bGHB.hMargin * 2; //Compute its width and height.
-	const hitH = this.height + bGHB.vMargin * 2;
+	var bGHB = BlockGraphics.hitBox; //Get data about the size of the hit box.
+	var hitX = bGHB.hMargin; //Compute its x and y coords.
+	var hitY = bGHB.vMargin;
+	var hitW = this.width + bGHB.hMargin * 2; //Compute its width and height.
+	var hitH = this.height + bGHB.vMargin * 2;
 	GuiElements.update.rect(this.hitBoxE, hitX, hitY, hitW, hitH); //Move/resize its rectangle.
 };
 /**
@@ -20898,7 +20897,7 @@ RectSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RectSlotShape.prototype.constructor = RectSlotShape;
 
 RectSlotShape.setConstants = function() {
-	const RSS = RectSlotShape;
+	var RSS = RectSlotShape;
 	RSS.slotLMargin = BlockGraphics.string.slotHMargin;
 	RSS.slotRMargin = BlockGraphics.string.slotHMargin;
 	RSS.slotHeight = BlockGraphics.string.slotHeight;
@@ -20946,7 +20945,7 @@ RectSlotShape.prototype.updateAlign = function() {
  * @inheritDoc
  */
 RectSlotShape.prototype.select = function() {
-	const RSS = RectSlotShape;
+	var RSS = RectSlotShape;
 	EditableSlotShape.prototype.select.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
@@ -20955,7 +20954,7 @@ RectSlotShape.prototype.select = function() {
  * @inheritDoc
  */
 RectSlotShape.prototype.deselect = function() {
-	const RSS = RectSlotShape;
+	var RSS = RectSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
@@ -20971,8 +20970,8 @@ HexSlotShape.prototype = Object.create(SlotShape.prototype);
 HexSlotShape.prototype.constructor = HexSlotShape;
 
 HexSlotShape.setConstants = function() {
-	const HSS = HexSlotShape;
-	const bG = BlockGraphics.predicate;
+	var HSS = HexSlotShape;
+	var bG = BlockGraphics.predicate;
 	HSS.slotWidth = bG.slotWidth;
 	HSS.slotHeight = bG.slotHeight;
 };
@@ -20981,7 +20980,7 @@ HexSlotShape.setConstants = function() {
  * @inheritDoc
  */
 HexSlotShape.prototype.buildSlot = function() {
-	const HSS = HexSlotShape;
+	var HSS = HexSlotShape;
 	SlotShape.prototype.buildSlot.call(this);
 	this.slotE = BlockGraphics.create.slot(this.group, 2, this.slot.parent.category, this.active);
 	TouchReceiver.addListenersSlot(this.slotE, this.slot); //Adds event listeners.
@@ -20991,7 +20990,7 @@ HexSlotShape.prototype.buildSlot = function() {
  * @inheritDoc
  */
 HexSlotShape.prototype.updateDim = function() {
-	const HSS = HexSlotShape;
+	var HSS = HexSlotShape;
 	this.width = HSS.slotWidth;
 	this.height = HSS.slotHeight;
 };
@@ -21035,8 +21034,8 @@ RoundSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 RoundSlotShape.prototype.constructor = RoundSlotShape;
 
 RoundSlotShape.setConstants = function() {
-	const RSS = RoundSlotShape;
-	const bG = BlockGraphics.reporter;
+	var RSS = RoundSlotShape;
+	var bG = BlockGraphics.reporter;
 	RSS.slotLMargin = bG.slotHMargin;
 	RSS.slotRMargin = bG.slotHMargin;
 	RSS.slotHeight = bG.slotHeight;
@@ -21085,7 +21084,7 @@ RoundSlotShape.prototype.updateAlign = function() {
  * @inheritDoc
  */
 RoundSlotShape.prototype.select = function() {
-	const RSS = RoundSlotShape;
+	var RSS = RoundSlotShape;
 	EditableSlotShape.prototype.select.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotSelectedFill);
 };
@@ -21094,7 +21093,7 @@ RoundSlotShape.prototype.select = function() {
  * @inheritDoc
  */
 RoundSlotShape.prototype.deselect = function() {
-	const RSS = RoundSlotShape;
+	var RSS = RoundSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
@@ -21110,8 +21109,8 @@ function DropSlotShape(slot, initialText) {
 DropSlotShape.prototype = Object.create(EditableSlotShape.prototype);
 DropSlotShape.prototype.constructor = DropSlotShape;
 DropSlotShape.setConstants = function() {
-	const DSS = DropSlotShape;
-	const bG = BlockGraphics.dropSlot;
+	var DSS = DropSlotShape;
+	var bG = BlockGraphics.dropSlot;
 	DSS.bgColor = bG.bg;
 	DSS.bgOpacity = bG.bgOpacity;
 	DSS.selectedBgOpacity = bG.selectedBgOpacity;
@@ -21152,8 +21151,8 @@ DropSlotShape.prototype.buildBackground = function() {
  * @return {Node} - The rectangle for the background
  */
 DropSlotShape.prototype.generateBg = function() {
-	const DSS = DropSlotShape;
-	const bgE = GuiElements.create.rect(this.group);
+	var DSS = DropSlotShape;
+	var bgE = GuiElements.create.rect(this.group);
 	GuiElements.update.color(bgE, DSS.bgColor);
 	GuiElements.update.opacity(bgE, DSS.bgOpacity);
 	TouchReceiver.addListenersSlot(bgE, this.slot);
@@ -21165,8 +21164,8 @@ DropSlotShape.prototype.generateBg = function() {
  * @return {Node} - an SVG path object
  */
 DropSlotShape.prototype.generateTri = function() {
-	const DSS = DropSlotShape;
-	const triE = GuiElements.create.path(this.group);
+	var DSS = DropSlotShape;
+	var triE = GuiElements.create.path(this.group);
 	GuiElements.update.color(triE, DSS.triColor);
 	TouchReceiver.addListenersSlot(triE, this.slot);
 	return triE;
@@ -21183,13 +21182,13 @@ DropSlotShape.prototype.updateDim = function() {
  * @inheritDoc
  */
 DropSlotShape.prototype.updateAlign = function() {
-	const DSS = DropSlotShape;
+	var DSS = DropSlotShape;
 	// Align the text and hit box of the Slot
 	EditableSlotShape.prototype.updateAlign.call(this);
 
 	// Compute the location of the triangle
-	const triX = this.width - DSS.slotRMargin + DSS.textMargin;
-	const triY = this.height / 2 - DSS.triH / 2;
+	var triX = this.width - DSS.slotRMargin + DSS.textMargin;
+	var triY = this.height / 2 - DSS.triH / 2;
 	GuiElements.update.triangle(this.triE, triX, triY, DSS.triW, 0 - DSS.triH);
 
 	// Align the background
@@ -21200,7 +21199,7 @@ DropSlotShape.prototype.updateAlign = function() {
  * @inheritDoc
  */
 DropSlotShape.prototype.select = function() {
-	const DSS = DropSlotShape;
+	var DSS = DropSlotShape;
 	EditableSlotShape.prototype.select.call(this);
 	GuiElements.update.opacity(this.bgE, DSS.selectedBgOpacity);
 	GuiElements.update.color(this.triE, DSS.selectedTriColor);
@@ -21210,7 +21209,7 @@ DropSlotShape.prototype.select = function() {
  * @inheritDoc
  */
 DropSlotShape.prototype.deselect = function() {
-	const DSS = DropSlotShape;
+	var DSS = DropSlotShape;
 	EditableSlotShape.prototype.deselect.call(this);
 	GuiElements.update.opacity(this.bgE, DSS.bgOpacity);
 	GuiElements.update.color(this.triE, DSS.triColor);
@@ -21371,8 +21370,8 @@ Slot.prototype.updateAlign = function(x, y){
 	if(this.hasChild){
 		//The x and y coords the child should have.
 		//TODO: Use relToAbs for this
-		const xCoord = x + this.parent.x; //converts coord from inside this Block's g to outside g
-		const yCoord = y + this.parent.y - this.height / 2; //Converts y to make it relative to top of Block.
+		var xCoord = x + this.parent.x; //converts coord from inside this Block's g to outside g
+		var yCoord = y + this.parent.y - this.height / 2; //Converts y to make it relative to top of Block.
 		this.x = x; //Sets this Slot's x.
 		this.y = y - this.height / 2; //Converts y to make it relative to top of Block.
 		return this.child.updateAlign(xCoord, yCoord); //Update child.
@@ -21395,7 +21394,7 @@ Slot.prototype.snap = function(block){
 	DebugOptions.validateNonNull(block);
 	block.parent = this; //Set the Block's parent.
 	if(this.hasChild){ //If the Slot already has a child, detach it and move it out of the way.
-		const prevChild = this.child;
+		var prevChild = this.child;
 		prevChild.unsnap(); //Detach the old Block.
 		prevChild.stack.shiftOver(block.stack.dim.rw, block.stack.dim.rh); //Move it over. //Fix! stack.dim
 	}
@@ -21403,7 +21402,7 @@ Slot.prototype.snap = function(block){
 	this.child = block; //Set child.
 	this.slotShape.hide(); //Slot graphics are covered and should be hidden.
 	if(block.stack != null) {
-		const oldG = block.stack.group; //Old group can be deleted.
+		var oldG = block.stack.group; //Old group can be deleted.
 		block.stack.remove(); //TODO: use delete() instead.
 		block.changeStack(this.parent.stack); //Move Block into this stack.
 		oldG.remove();
@@ -21443,7 +21442,7 @@ Slot.prototype.updateRun = function(){
 		return new ExecutionStatusDone(); //Done running
 	}
 	if(this.hasChild){
-		let childExecStatus = this.child.updateRun();
+		var childExecStatus = this.child.updateRun();
 		if(!childExecStatus.isRunning()){ //Update the child first until it is done.
 			if(childExecStatus.hasError()){
 				this.running = 3;
@@ -21516,7 +21515,7 @@ Slot.prototype.removeChild = function(){
  */
 Slot.prototype.findBestFit = function(){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
-	let childHasMatch = false;
+	var childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
 		childHasMatch = this.child.findBestFit(); // Pass on the message.
@@ -21527,28 +21526,28 @@ Slot.prototype.findBestFit = function(){
 	}
 
 	// shorthand
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
+	var move = CodeManager.move;
+	var fit = CodeManager.fit;
 
 	// Use coords relative to screen.
-	const x = this.getAbsX();
-	const y = this.getAbsY();
-	const myHeight = this.getAbsHeight();
-	const myWidth = this.getAbsWidth();
+	var x = this.getAbsX();
+	var y = this.getAbsY();
+	var myHeight = this.getAbsHeight();
+	var myWidth = this.getAbsWidth();
 
 	// Is the BlockStack's type compatible with the Slot?
-	const typeMatches = this.checkFit(move.returnType);
+	var typeMatches = this.checkFit(move.returnType);
 
 	// Does the bounding box of the BlockStack overlap with the bounding box of the Slot?
-	const width = move.bottomX - move.topX;
-	const height = move.bottomY - move.topY;
-	const locationMatches = move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
+	var width = move.bottomX - move.topX;
+	var height = move.bottomY - move.topY;
+	var locationMatches = move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
 
 	// If so, use distance to find the best fit
 	if(typeMatches && locationMatches){
-		const xDist = move.touchX - (x + this.width / 2); //Compute the distance.
-		const yDist = move.touchY - (y + this.height / 2);
-		const dist = xDist * xDist + yDist * yDist;
+		var xDist = move.touchX - (x + this.width / 2); //Compute the distance.
+		var yDist = move.touchY - (y + this.height / 2);
+		var dist = xDist * xDist + yDist * yDist;
 		if(!fit.found || dist < fit.dist){
 			fit.found = true; //Store the match.
 			fit.bestFit = this;
@@ -21568,9 +21567,9 @@ Slot.prototype.findBestFit = function(){
  */
 Slot.prototype.checkFit = function(outputType){
 	DebugOptions.validateNonNull(outputType);
-	const sT = Slot.snapTypes;
-	const rT = Block.returnTypes;
-	const snapType = this.snapType;
+	var sT = Slot.snapTypes;
+	var rT = Block.returnTypes;
+	var snapType = this.snapType;
 	if(snapType === sT.none){
 		//If the Slot accepts nothing, it isn't compatible.
 		return false;
@@ -21679,8 +21678,8 @@ Slot.prototype.clearMem = function(){
  */
 Slot.prototype.convertData = function(data){
 	DebugOptions.validateNonNull(data);
-	const outType = this.outputType;
-	const oT = Slot.outputTypes;
+	var outType = this.outputType;
+	var oT = Slot.outputTypes;
 	if(outType === oT.any){
 		//If any type will do, just return it.
 		return data;
@@ -21761,8 +21760,8 @@ Slot.prototype.countDevicesInUse = function(deviceClass){
  * @param {string} message - The message to send
  */
 Slot.prototype.passRecursivelyDown = function(message){
-	const myMessage = message;
-	let funArgs = Array.prototype.slice.call(arguments, 1);
+	var myMessage = message;
+	var funArgs = Array.prototype.slice.call(arguments, 1);
 	if(myMessage === "updateConnectionStatus" && this.updateConnectionStatus != null) {
 		// Implemented by DeviceDropSlots
 		this.updateConnectionStatus.apply(this, funArgs);
@@ -21794,7 +21793,7 @@ Slot.prototype.passRecursivelyDown = function(message){
  * @param {string} functionName - The name of the function being called
  */
 Slot.prototype.passRecursively = function(functionName){
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	if(this.hasChild){
 		this.child[functionName].apply(this.child, args);
 	}
@@ -21831,10 +21830,10 @@ Slot.prototype.checkListUsed = function(list){
  */
 Slot.prototype.createXml = function(xmlDoc){
 	DebugOptions.validateNonNull(xmlDoc);
-	const slot = XmlWriter.createElement(xmlDoc,"slot");
+	var slot = XmlWriter.createElement(xmlDoc,"slot");
 	XmlWriter.setAttribute(slot,"key",this.key);
 	if(this.hasChild){
-		const child = XmlWriter.createElement(xmlDoc,"child");
+		var child = XmlWriter.createElement(xmlDoc,"child");
 		child.appendChild(this.child.createXml(xmlDoc));
 		slot.appendChild(child);
 	}
@@ -21848,10 +21847,10 @@ Slot.prototype.createXml = function(xmlDoc){
  */
 Slot.prototype.importXml = function(slotNode) {
 	DebugOptions.validateNonNull(slotNode);
-	const childNode = XmlWriter.findSubElement(slotNode, "child");
-	const blockNode = XmlWriter.findSubElement(childNode, "block");
+	var childNode = XmlWriter.findSubElement(slotNode, "child");
+	var blockNode = XmlWriter.findSubElement(childNode, "block");
 	if(blockNode != null) {
-		const childBlock = Block.importXml(blockNode);
+		var childBlock = Block.importXml(blockNode);
 		if(childBlock != null) {
 			this.snap(childBlock);
 		}
@@ -21946,7 +21945,7 @@ HexSlot.prototype.constructor = HexSlot;
  * TODO: fix BlockGraphics
  */
 HexSlot.prototype.highlight = function() {
-	const slotGraphicShowing = !this.hasChild;
+	var slotGraphicShowing = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 2, slotGraphicShowing);
 };
 
@@ -22020,7 +22019,7 @@ EditableSlot.prototype.edit = function() {
 	if (!this.editing) {
 		this.editing = true;
 		this.slotShape.select();
-		const inputSys = this.createInputSystem();
+		var inputSys = this.createInputSystem();
 		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
 	}
 };
@@ -22109,7 +22108,7 @@ EditableSlot.prototype.dataToString = function(data) {
  */
 EditableSlot.prototype.sanitizeData = function(data) {
 	if (data == null) return null;
-	const inputTypes = EditableSlot.inputTypes;
+	var inputTypes = EditableSlot.inputTypes;
 	// Only valid Data of the correct type is allowed
 	if (this.inputType === inputTypes.string) {
 		data = data.asString();
@@ -22129,7 +22128,7 @@ EditableSlot.prototype.sanitizeData = function(data) {
  * @return {string}
  */
 EditableSlot.prototype.textSummary = function() {
-	let result = "...";
+	var result = "...";
 	if (!this.hasChild) { //If it has a child, just use an ellipsis.
 		result = this.dataToString(this.enteredData);
 	}
@@ -22160,8 +22159,8 @@ EditableSlot.prototype.getDataNotFromChild = function() {
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {
-	let slot = Slot.prototype.createXml.call(this, xmlDoc);
-	let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
+	var slot = Slot.prototype.createXml.call(this, xmlDoc);
+	var enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
 	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
 	slot.appendChild(enteredData);
 	return slot;
@@ -22174,10 +22173,10 @@ EditableSlot.prototype.createXml = function(xmlDoc) {
  */
 EditableSlot.prototype.importXml = function(slotNode) {
 	Slot.prototype.importXml.call(this, slotNode);
-	const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
-	const dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
+	var enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
+	var dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
 	if (dataNode != null) {
-		const data = Data.importXml(dataNode);
+		var data = Data.importXml(dataNode);
 		if (data != null) {
 			this.setData(data, true, false);
 		}
@@ -22222,7 +22221,7 @@ RectSlot.prototype.constructor = RectSlot;
  * @inheritDoc
  */
 RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
-	let isSlot = !this.hasChild;
+	var isSlot = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
 };
 
@@ -22274,7 +22273,7 @@ RoundSlot.prototype.constructor = RoundSlot;
  * @inheritDoc
  */
 RoundSlot.prototype.highlight = function() {
-	const isSlot = !this.hasChild; //TODO: Fix! unclear.
+	var isSlot = !this.hasChild; //TODO: Fix! unclear.
 	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 1, isSlot);
 };
 
@@ -22296,7 +22295,7 @@ RoundSlot.prototype.addOption = function(data, displayText) {
 	if (displayText == null) {
 		displayText = null;
 	}
-	const option = {};
+	var option = {};
 	option.displayText = displayText;
 	option.data = data;
 	this.optionsList.push(option);
@@ -22317,18 +22316,18 @@ RoundSlot.prototype.populatePad = function(selectPad) {
  * @return {InputPad}
  */
 RoundSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
+	var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
+	var inputPad = new InputPad(x1, x2, y1, y2);
 
 	// Add label to the top of the pad
 	if (this.labelText !== "") {
 		inputPad.addWidget(new InputWidget.Label(this.labelText));
 	}
 
-	const selectPad = new InputWidget.SelectPad();
+	var selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
 	if (!selectPad.isEmpty()) {
 		inputPad.addWidget(selectPad);
@@ -22344,8 +22343,8 @@ RoundSlot.prototype.createInputSystem = function() {
  * @return {SelectionData|null}
  */
 RoundSlot.prototype.selectionDataFromValue = function(value) {
-	for (let i = 0; i < this.optionsList.length; i++) {
-		const option = this.optionsList[i];
+	for (var i = 0; i < this.optionsList.length; i++) {
+		var option = this.optionsList[i];
 		if (option.data.getValue() === value) {
 			return option.data;
 		}
@@ -22364,7 +22363,7 @@ RoundSlot.prototype.sanitizeData = function(data) {
 	if (data == null) return null;
 	if (data.isSelection()) {
 		// Never trust the displayText of user-provided SelectionData. Instead, look it up based on value
-		const value = data.getValue();
+		var value = data.getValue();
 		return this.selectionDataFromValue(value);
 	}
 	// If the Data is not SelectionData and it's of the correct type, it must be valid
@@ -22419,7 +22418,7 @@ DropSlot.prototype.constructor = DropSlot;
  * TODO: fix BlockGraphics
  */
 DropSlot.prototype.highlight = function() {
-	const isSlot = !this.hasChild;
+	var isSlot = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
 
@@ -22437,7 +22436,7 @@ DropSlot.prototype.formatTextSummary = function(textSummary) {
  * @param {string} displayText - The text used to display the option
  */
 DropSlot.prototype.addEnterText = function(displayText) {
-	const option = {};
+	var option = {};
 	option.displayText = displayText;
 	option.isAction = true;
 	this.optionsList.push(option);
@@ -22452,7 +22451,7 @@ DropSlot.prototype.addOption = function(data, displayText) {
 	if (displayText == null) {
 		displayText = null;
 	}
-	const option = {};
+	var option = {};
 	option.displayText = displayText;
 	option.data = data;
 	option.isAction = false;
@@ -22469,7 +22468,7 @@ DropSlot.prototype.populatePad = function(selectPad) {
 		if (option.isAction) {
 			selectPad.addAction(option.displayText, function(callbackFn) {
 				// When selected, the item shows a text entry dialog
-				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+				var inputDialog = new InputDialog(this.parent.textSummary(this), true);
 				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
 					// When the dialog is closed, the item runns the callback with the data the user entered
 					callbackFn(data, !cancelled);
@@ -22486,13 +22485,13 @@ DropSlot.prototype.populatePad = function(selectPad) {
  * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
+	var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
+	var inputPad = new InputPad(x1, x2, y1, y2);
 
-	const selectPad = new InputWidget.SelectPad();
+	var selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
 	inputPad.addWidget(selectPad);
 
@@ -22505,8 +22504,8 @@ DropSlot.prototype.createInputSystem = function() {
  * @return {SelectionData|null}
  */
 DropSlot.prototype.selectionDataFromValue = function(value) {
-	for (let i = 0; i < this.optionsList.length; i++) {
-		const option = this.optionsList[i];
+	for (var i = 0; i < this.optionsList.length; i++) {
+		var option = this.optionsList[i];
 		if (!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
@@ -22532,7 +22531,7 @@ DropSlot.prototype.sanitizeData = function(data) {
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
 	if (data.isSelection()) {
-		const value = data.getValue();
+		var value = data.getValue();
 		if (value === "" && this.nullable) {
 			return SelectionData.empty();
 		}
@@ -22581,7 +22580,7 @@ DropSlot.prototype.constructor = DropSlot;
  * TODO: fix BlockGraphics
  */
 DropSlot.prototype.highlight = function() {
-	const isSlot = !this.hasChild;
+	var isSlot = !this.hasChild;
 	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
 
@@ -22599,7 +22598,7 @@ DropSlot.prototype.formatTextSummary = function(textSummary) {
  * @param {string} displayText - The text used to display the option
  */
 DropSlot.prototype.addEnterText = function(displayText) {
-	const option = {};
+	var option = {};
 	option.displayText = displayText;
 	option.isAction = true;
 	this.optionsList.push(option);
@@ -22614,7 +22613,7 @@ DropSlot.prototype.addOption = function(data, displayText) {
 	if (displayText == null) {
 		displayText = null;
 	}
-	const option = {};
+	var option = {};
 	option.displayText = displayText;
 	option.data = data;
 	option.isAction = false;
@@ -22631,7 +22630,7 @@ DropSlot.prototype.populatePad = function(selectPad) {
 		if (option.isAction) {
 			selectPad.addAction(option.displayText, function(callbackFn) {
 				// When selected, the item shows a text entry dialog
-				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+				var inputDialog = new InputDialog(this.parent.textSummary(this), true);
 				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
 					// When the dialog is closed, the item runns the callback with the data the user entered
 					callbackFn(data, !cancelled);
@@ -22648,13 +22647,13 @@ DropSlot.prototype.populatePad = function(selectPad) {
  * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
+	var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
+	var inputPad = new InputPad(x1, x2, y1, y2);
 
-	const selectPad = new InputWidget.SelectPad();
+	var selectPad = new InputWidget.SelectPad();
 	this.populatePad(selectPad);
 	inputPad.addWidget(selectPad);
 
@@ -22667,8 +22666,8 @@ DropSlot.prototype.createInputSystem = function() {
  * @return {SelectionData|null}
  */
 DropSlot.prototype.selectionDataFromValue = function(value) {
-	for (let i = 0; i < this.optionsList.length; i++) {
-		const option = this.optionsList[i];
+	for (var i = 0; i < this.optionsList.length; i++) {
+		var option = this.optionsList[i];
 		if (!option.isAction && option.data.getValue() === value) {
 			return option.data;
 		}
@@ -22694,7 +22693,7 @@ DropSlot.prototype.sanitizeData = function(data) {
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
 	if (data.isSelection()) {
-		const value = data.getValue();
+		var value = data.getValue();
 		if (value === "" && this.nullable) {
 			return SelectionData.empty();
 		}
@@ -22709,11 +22708,11 @@ DropSlot.prototype.sanitizeData = function(data) {
  * @constructor
  */
 function VarDropSlot(parent, key) {
-	const variables = CodeManager.variableList;
+	var variables = CodeManager.variableList;
 	// When created, a variable slot shows the most recently created variable as its value
-	let data = SelectionData.empty();
+	var data = SelectionData.empty();
 	if (variables.length > 0) {
-		const lastVar = variables[variables.length - 1];
+		var lastVar = variables[variables.length - 1];
 		data = lastVar.getSelectionData();
 	}
 	// Variable Blocks are nullable, even though they have a default value
@@ -22756,7 +22755,7 @@ VarDropSlot.prototype.selectionDataFromValue = function(value) {
 	if (value.constructor === Variable) return value.getSelectionData();
 	// Otherwise, assume the value is a string and look it up in CodeManager
 	// TODO: perhaps verify the value is a string
-	const variable = CodeManager.findVar(value);
+	var variable = CodeManager.findVar(value);
 	if (variable == null) return null;
 	// If we find something, use that
 	return variable.getSelectionData();
@@ -22807,10 +22806,10 @@ function ListDropSlot(parent, key, snapType) {
 		snapType = Slot.snapTypes.none
 	}
 	// When created, a list slot shows the most recently created list as its value
-	const lists = CodeManager.listList;
-	let data = SelectionData.empty();
+	var lists = CodeManager.listList;
+	var data = SelectionData.empty();
 	if (lists.length > 0) {
-		const lastList = lists[lists.length - 1];
+		var lastList = lists[lists.length - 1];
 		data = lastList.getSelectionData();
 	}
 	DropSlot.call(this, parent, key, null, snapType, data, true);
@@ -22852,7 +22851,7 @@ ListDropSlot.prototype.selectionDataFromValue = function(value) {
 	if (value.constructor === List) return value.getSelectionData();
 	// Otherwise, assume the value is a string and look it up in CodeManager
 	// TODO: perhaps verify the value is a string
-	const list = CodeManager.findList(value);
+	var list = CodeManager.findList(value);
 	if (list == null) return null;
 	// If we find something, use that
 	return list.getSelectionData();
@@ -22904,7 +22903,7 @@ ListDropSlot.prototype.checkListUsed = function(list) {
 function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
-	for (let portNum = 1; portNum <= this.maxPorts; portNum++) {
+	for (var portNum = 1; portNum <= this.maxPorts; portNum++) {
 		this.addOption(new NumData(portNum), "Port " + portNum.toString());
 	}
 }
@@ -22919,7 +22918,7 @@ PortSlot.prototype.constructor = PortSlot;
 PortSlot.prototype.sanitizeData = function(data) {
 	data = EditableSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
-	const value = data.asNum().getValueInR(1, this.maxPorts, true, true);
+	var value = data.asNum().getValueInR(1, this.maxPorts, true, true);
 	return new NumData(value, data.isValid);
 };
 /**
@@ -22935,7 +22934,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
 	if (isHatBlock == null) {
 		isHatBlock = false;
 	}
-	let snapType = Slot.snapTypes.numStrBool;
+	var snapType = Slot.snapTypes.numStrBool;
 	if (isHatBlock) {
 		snapType = Slot.snapTypes.none;
 	}
@@ -22955,7 +22954,7 @@ BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 	DropSlot.prototype.populatePad.call(this, selectPad);
 	// Refresh the list of messages
 	CodeManager.updateAvailableMessages();
-	const messages = CodeManager.broadcastList;
+	var messages = CodeManager.broadcastList;
 	// Add an option for each message
 	messages.forEach(function(message) {
 		// Broadcasts are surrounded in quotes
@@ -22965,7 +22964,7 @@ BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 	// Add an Edit Text option
 	selectPad.addAction("new", function(callbackFn) {
 		// When the option is selected, show a dialog
-		const inputDialog = new InputDialog(this.parent.textSummary(this), false);
+		var inputDialog = new InputDialog(this.parent.textSummary(this), false);
 		inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
 			// When the dialog is closed, notify the InputSystem of the result using a callback
 			callbackFn(data, !cancelled);
@@ -23002,7 +23001,7 @@ BroadcastDropSlot.prototype.sanitizeNonSelectionData = function(data) {
  * @return {string}
  */
 BroadcastDropSlot.prototype.dataToString = function(data) {
-	let result = EditableSlot.prototype.dataToString.call(this, data);
+	var result = EditableSlot.prototype.dataToString.call(this, data);
 	if (data.type === Data.types.string) {
 		result = "\"" + result + "\"";
 	}
@@ -23026,7 +23025,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	this.shortText = shortText;
 	this.prefixText = deviceClass.getDeviceTypeName(shortText) + " ";
 	// The values of the SelectionData are 0 - indexed, but they appear as 1 - indexed
-	const data = new SelectionData(this.prefixText + 1, 0);
+	var data = new SelectionData(this.prefixText + 1, 0);
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.select, Slot.snapTypes.none, data, false);
 
 	this.deviceClass = deviceClass;
@@ -23035,7 +23034,7 @@ function DeviceDropSlot(parent, key, deviceClass, shortText) {
 	this.labelText = new LabelText(this.parent, this.prefixText.trim());
 	this.labelMode = false;
 	// Check to see which state it should start in
-	const deviceCount = deviceClass.getManager().getSelectableDeviceCount();
+	var deviceCount = deviceClass.getManager().getSelectableDeviceCount();
 	if (deviceCount <= 1) {
 		this.switchToLabel();
 	} else {
@@ -23055,12 +23054,12 @@ DeviceDropSlot.prototype.constructor = DeviceDropSlot;
  * @param {Block} parent - This Block's parent
  */
 DeviceDropSlot.prototype.assignUpdateActive = function(parent){
-	const me = this;
+	var me = this;
 	// Get a copy of the old checkActive function
-	const oldFn = parent.checkActive.bind(parent);
+	var oldFn = parent.checkActive.bind(parent);
 	parent.checkActive = function(){
 		// The new checkActive function runs the old function and makes sure this device is connected
-		const index = me.getDataNotFromChild().getValue();
+		var index = me.getDataNotFromChild().getValue();
 		return oldFn() && me.deviceClass.getManager().deviceIsConnected(index);
 	};
 };
@@ -23090,9 +23089,9 @@ DeviceDropSlot.prototype.updateConnectionStatus = function(){
  * @param {InputWidget.SelectPad} selectPad - the pad to populate
  */
 DeviceDropSlot.prototype.populatePad = function(selectPad) {
-	let deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
+	var deviceCount = this.deviceClass.getManager().getSelectableDeviceCount();
 	deviceCount = Math.max(1, deviceCount);
-	for (let i = 0; i < deviceCount; i++) {
+	for (var i = 0; i < deviceCount; i++) {
 		// We'll store a 0-indexed value but display it +1.
 		selectPad.addOption(new SelectionData(this.prefixText + (i + 1), i));
 		// TODO: should probably use the full name when showing the list
@@ -23177,7 +23176,7 @@ DeviceDropSlot.prototype.showDeviceDropDowns = function(deviceClass) {
  */
 DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
 	if (this.deviceClass === deviceClass) {
-		const myVal = this.getDataNotFromChild().getValue();
+		var myVal = this.getDataNotFromChild().getValue();
 		return myVal + 1;
 	} else {
 		return 0;
@@ -23191,9 +23190,9 @@ DeviceDropSlot.prototype.countDevicesInUse = function(deviceClass) {
  * @return {SelectionData}
  */
 DeviceDropSlot.prototype.selectionDataFromValue = function(value){
-	const numData = (new StringData(value).asNum());
+	var numData = (new StringData(value).asNum());
 	if(!numData.isValid) return null;
-	const numVal = numData.getValueWithC(true, true);
+	var numVal = numData.getValueWithC(true, true);
 	// Prevents rendering huge lists
 	if(numVal >= 30) return null; // TODO: implement connection limit
 	return new SelectionData(this.prefixText + (numVal + 1), numVal);
@@ -23237,10 +23236,10 @@ SoundDropSlot.prototype.constructor = SoundDropSlot;
  * @return {SoundInputPad}
  */
 SoundDropSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
+	var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
 	return new SoundInputPad(x1, x2, y1, y2, this.isRecording);
 };
 
@@ -23260,7 +23259,7 @@ SoundDropSlot.prototype.selectionDataFromValue = function(value) {
 		return new SelectionData(value, value);
 	} else {
 		// Otherwise, look up the correct name and use that
-		let sound = Sound.lookupById(value);
+		var sound = Sound.lookupById(value);
 		if (sound != null) return new SelectionData(sound.name, sound.id);
 		// If the sound can't be found (maybe it isn't in this version of he app), use the value as the display name
 		return new SelectionData(value, value);
@@ -23312,9 +23311,9 @@ function NumSlot(parent, key, value, positive, integer) {
 	if (integer == null) {
 		integer = false;
 	}
-	const inputType = EditableSlot.inputTypes.num;
-	const snapType = Slot.snapTypes.numStrBool;
-	const outputType = Slot.outputTypes.num;
+	var inputType = EditableSlot.inputTypes.num;
+	var snapType = Slot.snapTypes.numStrBool;
+	var outputType = Slot.outputTypes.num;
 
 	// Make RoundSlot.
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
@@ -23353,7 +23352,7 @@ NumSlot.prototype.sanitizeData = function(data) {
 	// Forces Data to NumData
 	data = RoundSlot.prototype.sanitizeData.call(this, data);
 	if (data == null) return null;
-	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+	var value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
 	return new NumData(value, data.isValid);
 };
 /**
@@ -23379,9 +23378,9 @@ StringSlot.prototype.constructor = StringSlot;
  * @constructor
  */
 function NumOrStringSlot(parent, key, data){
-	const inputType = EditableSlot.inputTypes.any;
-	const snapType = Slot.snapTypes.numStrBool;
-	const outputType = Slot.outputTypes.any;
+	var inputType = EditableSlot.inputTypes.any;
+	var snapType = Slot.snapTypes.numStrBool;
+	var outputType = Slot.outputTypes.any;
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, data, false, false);
 }
 NumOrStringSlot.prototype = Object.create(RoundSlot.prototype);
@@ -23394,7 +23393,7 @@ NumOrStringSlot.prototype.constructor = NumOrStringSlot;
 NumOrStringSlot.prototype.populatePad = function(selectPad){
 	selectPad.addAction("Enter text", function(callbackFn){
 		// When "Enter text" is selected, create a new inputDialog
-		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+		var inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
 			// When the inputDialog is closed, tell the selectPad to set the data to the result of the inputDialog.
 			// CLose the selectPad if the inputDialog wasn't canceled.
@@ -23411,10 +23410,10 @@ NumOrStringSlot.prototype.populatePad = function(selectPad){
  */
 function IndexSlot(parent, key, includeAll) {
 	// inputType doesn't matter as much since we have our own sanitize function
-	const inputType = EditableSlot.inputTypes.any;
-	const snapType = Slot.snapTypes.numStrBool;
+	var inputType = EditableSlot.inputTypes.any;
+	var snapType = Slot.snapTypes.numStrBool;
 	// Both SelectionData and NumData must be allowed
-	const outputType = Slot.outputTypes.any;
+	var outputType = Slot.outputTypes.any;
 	// Default value is 1
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 
@@ -23439,9 +23438,9 @@ IndexSlot.prototype.sanitizeData = function(data) {
 	if (data == null) return null;
 	if (!data.isSelection()) {
 		// If it isn't selectionData, make sure it is a positive integer, fixing it as necessary
-		const numData = data.asNum();
+		var numData = data.asNum();
 		if (!numData.isValid) return null;
-		let value = numData.getValueWithC(true, true);
+		var value = numData.getValueWithC(true, true);
 		value = Math.max(1, value);
 		return new NumData(value);
 	}
@@ -23505,8 +23504,8 @@ IndexSlot.prototype.sanitizeData = function(data) {
   * @return {Node}
   */
  ToggleSlot.prototype.createXml = function(xmlDoc) {
- 	let slot = Slot.prototype.createXml.call(this, xmlDoc);
- 	let isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
+ 	var slot = Slot.prototype.createXml.call(this, xmlDoc);
+ 	var isTrue = XmlWriter.createElement(xmlDoc, "isTrue");
  	isTrue.appendChild(this.isTrue.createXml(xmlDoc));
  	slot.appendChild(isTrue);
  	return slot;
@@ -23519,10 +23518,10 @@ IndexSlot.prototype.sanitizeData = function(data) {
   */
  ToggleSlot.prototype.importXml = function(slotNode) {
  	Slot.prototype.importXml.call(this, slotNode);
- 	const isTrueNode = XmlWriter.findSubElement(slotNode, "isTrue");
- 	const dataNode = XmlWriter.findSubElement(isTrueNode, "data");
+ 	var isTrueNode = XmlWriter.findSubElement(slotNode, "isTrue");
+ 	var dataNode = XmlWriter.findSubElement(isTrueNode, "data");
  	if (dataNode != null) {
- 		const data = Data.importXml(dataNode);
+ 		var data = Data.importXml(dataNode);
  		if (data != null) {
  			this.setVal(data.getValue());
  		}
@@ -23603,12 +23602,12 @@ BlockSlot.prototype.updateAlign = function(x, y) {
 BlockSlot.prototype.snap = function(block) {
 	// Displace existing block, if more Blocks can't go below this one
 	if (!block.getLastBlock().bottomOpen && this.child != null) {
-		const BG = BlockGraphics.command;
+		var BG = BlockGraphics.command;
 		this.child.unsnap().shiftOver(BG.shiftX, block.stack.getHeight() + BG.shiftY);
 	}
 
 	// Set the stack's execution status and glow
-	const stack = this.parent.stack;
+	var stack = this.parent.stack;
 	if (stack != null && block.stack != null) {
 		block.stack.stop();
 		if(stack.isRunning) {
@@ -23619,8 +23618,8 @@ BlockSlot.prototype.snap = function(block) {
 	// Fix relationships between Blocks
 	block.parent = this;
 	if (this.hasChild) {
-		const lastBlock = block.getLastBlock();
-		const prevChild = this.child;
+		var lastBlock = block.getLastBlock();
+		var prevChild = this.child;
 		lastBlock.nextBlock = prevChild;
 		prevChild.parent = lastBlock;
 	}
@@ -23629,7 +23628,7 @@ BlockSlot.prototype.snap = function(block) {
 
 	if (block.stack != null) {
 		// Remove the old BlockStack and transfer the Block to this one
-		const oldG = block.stack.group;
+		var oldG = block.stack.group;
 		block.stack.remove();
 		block.changeStack(this.parent.stack);
 		oldG.remove();
@@ -23671,17 +23670,17 @@ BlockSlot.prototype.removeChild = function() {
  * Checks if the moving Block could fit in this BlockStack and then passes the findBestFit message recursively
  */
 BlockSlot.prototype.findBestFit = function() {
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
-	const x = this.getAbsX();
-	const y = this.getAbsY();
+	var move = CodeManager.move;
+	var fit = CodeManager.fit;
+	var x = this.getAbsX();
+	var y = this.getAbsY();
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
-		const snap = BlockGraphics.command.snap;
+		var snap = BlockGraphics.command.snap;
 		if (move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
-			const xDist = move.topX - x;
-			const yDist = move.topY - y;
-			const dist = xDist * xDist + yDist * yDist;
+			var xDist = move.topX - x;
+			var yDist = move.topY - y;
+			var dist = xDist * xDist + yDist * yDist;
 			if (!fit.found || dist < fit.dist) {
 				fit.found = true;
 				fit.bestFit = this;
@@ -23744,7 +23743,7 @@ BlockSlot.prototype.updateRun = function() {
 			return new ExecutionStatusDone();
 		}
 		// Run the current Block
-		let execStatus = this.currentBlock.updateRun();
+		var execStatus = this.currentBlock.updateRun();
 		if (!execStatus.isRunning()) {
 			// If the current Block is done, show an error or move on to the next one
 			if (execStatus.hasError()) {
@@ -23799,9 +23798,9 @@ BlockSlot.prototype.updateAvailableMessages = function() {
  * @return {Node} - The XML representing this BlockSlot
  */
 BlockSlot.prototype.createXml = function(xmlDoc) {
-	const blockSlot = XmlWriter.createElement(xmlDoc, "blockSlot");
+	var blockSlot = XmlWriter.createElement(xmlDoc, "blockSlot");
 	if (this.hasChild) {
-		const blocks = XmlWriter.createElement(xmlDoc, "blocks");
+		var blocks = XmlWriter.createElement(xmlDoc, "blocks");
 		this.child.writeToXml(xmlDoc, blocks);
 		blockSlot.appendChild(blocks);
 	}
@@ -23813,11 +23812,11 @@ BlockSlot.prototype.createXml = function(xmlDoc) {
  * @param {Node} blockSlotNode
  */
 BlockSlot.prototype.importXml = function(blockSlotNode) {
-	const blocksNode = XmlWriter.findSubElement(blockSlotNode, "blocks");
-	const blockNodes = XmlWriter.findSubElements(blocksNode, "block");
+	var blocksNode = XmlWriter.findSubElement(blockSlotNode, "blocks");
+	var blockNodes = XmlWriter.findSubElements(blocksNode, "block");
 	if (blockNodes.length > 0) {
-		let firstBlock = null;
-		let i = 0;
+		var firstBlock = null;
+		var i = 0;
 		while (firstBlock == null && i < blockNodes.length) {
 			// Get the first Block to import correctly
 			firstBlock = Block.importXml(blockNodes[i]);
@@ -23828,10 +23827,10 @@ BlockSlot.prototype.importXml = function(blockSlotNode) {
 			return;
 		}
 		this.snap(firstBlock);
-		let previousBlock = firstBlock;
+		var previousBlock = firstBlock;
 		// Import the rest of the Blocks
 		while (i < blockNodes.length) {
-			const newBlock = Block.importXml(blockNodes[i]);
+			var newBlock = Block.importXml(blockNodes[i]);
 			if (newBlock != null) {
 				previousBlock.snap(newBlock);
 				previousBlock = newBlock;
@@ -23911,7 +23910,7 @@ BlockSlot.prototype.passRecursivelyDown = function(message) {
  * @param {string} functionName
  */
 BlockSlot.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
+	var args = Array.prototype.slice.call(arguments, 1);
 	if (this.hasChild) {
 		this.child[functionName].apply(this.child, args);
 	}
@@ -23966,7 +23965,7 @@ LabelText.prototype.updateDim = function() {
  * @return {Node} - The SVG text element
  */
 LabelText.prototype.generateText = function(text) {
-	const obj = BlockGraphics.create.labelText(text, this.parent.group);
+	var obj = BlockGraphics.create.labelText(text, this.parent.group);
 	TouchReceiver.addListenersChild(obj, this.parent);
 	return obj;
 };
@@ -24116,14 +24115,14 @@ B_DeviceWithPortsSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceWithPortsSensorBase.prototype.constructor = B_DeviceWithPortsSensorBase;
 /* Sends the request for the sensor data. */
 B_DeviceWithPortsSensorBase.prototype.startAction=function(){
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	var deviceIndex = this.slots[0].getData().getValue();
+	var device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
 		this.displayError(this.deviceClass.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
-	let mem = this.runMem;
-	let port = this.slots[1].getData().getValue();
+	var mem = this.runMem;
+	var port = this.slots[1].getData().getValue();
 	if (port != null && port > 0 && port <= this.numberOfPorts) {
 		mem.requestStatus = {};
 		mem.requestStatus.finished = false;
@@ -24138,15 +24137,15 @@ B_DeviceWithPortsSensorBase.prototype.startAction=function(){
 };
 /* Returns the result of the request */
 B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
-	const status = this.runMem.requestStatus;
+	var status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else {
-			const result = new StringData(status.result);
-			const num = result.asNum().getValue();
-			const rounded = Math.round(num);
+			var result = new StringData(status.result);
+			var num = result.asNum().getValue();
+			var rounded = Math.round(num);
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -24183,7 +24182,7 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	var numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
 }
@@ -24191,15 +24190,15 @@ B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
 /* Sends the request */
 B_DeviceWithPortsOutputBase.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	var deviceIndex = this.slots[0].getData().getValue();
+	var device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
 		this.displayError(this.deviceClass.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
-	let mem = this.runMem;
-	let port = this.slots[1].getData().getValue();
-	let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+	var mem = this.runMem;
+	var port = this.slots[1].getData().getValue();
+	var value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
 	if (port != null && port > 0 && port <= this.numberOfPorts) {
 		mem.requestStatus = {};
 		mem.requestStatus.finished = false;
@@ -24216,7 +24215,7 @@ B_DeviceWithPortsOutputBase.prototype.startAction = function() {
 B_DeviceWithPortsOutputBase.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			let status = this.runMem.requestStatus;
+			var status = this.runMem.requestStatus;
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
@@ -24244,17 +24243,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, Language.getStr("R")));
-	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
+	var ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("G")));
-	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
+	var ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("B")));
-	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
+	var ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, "Intensity");
 	this.addPart(ledSlot3);
 	this.addPart(new LabelText(this, "%"));
@@ -24263,18 +24262,18 @@ B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
 /* Sends the request */
 B_DeviceWithPortsTriLed.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = this.deviceClass.getManager().getDevice(deviceIndex);
+	var deviceIndex = this.slots[0].getData().getValue();
+	var device = this.deviceClass.getManager().getDevice(deviceIndex);
 	if (device == null) {
 		this.displayError(this.deviceClass.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
-	let mem = this.runMem;
+	var mem = this.runMem;
 	mem.requestStatus = {};
-	let port = this.slots[1].getData().getValue(); // Positive integer.
-	let valueR = this.slots[2].getData().getValueInR(0, 100, true, true); //Positive integer.
-	let valueG = this.slots[3].getData().getValueInR(0, 100, true, true); //Positive integer.
-	let valueB = this.slots[4].getData().getValueInR(0, 100, true, true); //Positive integer.
+	var port = this.slots[1].getData().getValue(); // Positive integer.
+	var valueR = this.slots[2].getData().getValueInR(0, 100, true, true); //Positive integer.
+	var valueG = this.slots[3].getData().getValueInR(0, 100, true, true); //Positive integer.
+	var valueB = this.slots[4].getData().getValueInR(0, 100, true, true); //Positive integer.
 	if (port != null && port > 0 && port <= this.numberOfPorts) {
 		device.setTriLed(mem.requestStatus, port, valueR, valueG, valueB);
 		return new ExecutionStatusRunning();
@@ -24287,7 +24286,7 @@ B_DeviceWithPortsTriLed.prototype.startAction = function() {
 B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	if(this.runMem.requestStatus.finished){
 		if(this.runMem.requestStatus.error){
-			let status = this.runMem.requestStatus;
+			var status = this.runMem.requestStatus;
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
@@ -24419,13 +24418,13 @@ B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
 /* Waits for the request to finish then converts C to F. */
 B_HBTempF.prototype.updateAction = function() {
-	const status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
-		let resultC = status.getResult();
+		var resultC = status.getResult();
 		if (resultC != null && resultC.isValid) {
-			let result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
+			var result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -24444,13 +24443,13 @@ B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_HBDistInch.prototype.updateAction = function() {
-	const status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
+	var status = B_DeviceWithPortsSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
-		let resultMm = status.getResult();
+		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			let result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -24479,16 +24478,16 @@ function B_MicroBitLedArray(x, y, deviceClass) {
   this.displayName = Language.getStr("Display");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  const label = new LabelText(this,this.displayName);
+  var label = new LabelText(this,this.displayName);
   label.isEndOfLine = true;
   this.addPart(label);
 
-  for (let i = 0; i < 5; i++ ){
+  for (var i = 0; i < 5; i++ ){
     this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
     this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
     this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
     this.addPart(new ToggleSlot(this, "Toggle_led4" + i, false));
-    const lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
+    var lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
     lastLed.isEndOfLine = true;
     this.addPart(lastLed);
   }
@@ -24499,15 +24498,15 @@ B_MicroBitLedArray.prototype = Object.create(CommandBlock.prototype);
 B_MicroBitLedArray.prototype.constructor = B_MicroBitLedArray;
 /* Sends the request */
 B_MicroBitLedArray.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
 
-  let ledStatusString = "";
-  for (let i = 0; i < 25; i++){
+  var ledStatusString = "";
+  for (var i = 0; i < 25; i++){
     if (this.slots[i + 1].getData().getValue()){
       ledStatusString += "1";
     } else {
@@ -24515,7 +24514,7 @@ B_MicroBitLedArray.prototype.startAction = function() {
     }
   }
 
-    let mem = this.runMem;
+    var mem = this.runMem;
   mem.requestStatus = {};
     mem.requestStatus.finished = false;
     mem.requestStatus.error = false;
@@ -24555,15 +24554,15 @@ B_MBPrint.prototype.constructor = B_MBPrint;
 
 /* Sends the request */
 B_MBPrint.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
 
-    let mem = this.runMem;
-    let printString = this.slots[1].getData().getValue();
+    var mem = this.runMem;
+    var printString = this.slots[1].getData().getValue();
     mem.blockDuration = (printString.length * 600);
     mem.timerStarted = false;
 
@@ -24578,9 +24577,9 @@ B_MBPrint.prototype.startAction = function() {
 
 /* Waits until the request completes */
 B_MBPrint.prototype.updateAction = function() {
-    const mem = this.runMem;
+    var mem = this.runMem;
     if (!mem.timerStarted) {
-        const status = mem.requestStatus;
+        var status = mem.requestStatus;
         if (status.finished === true) {
             mem.startTime = new Date().getTime();
             mem.timerStarted = true;
@@ -24611,13 +24610,13 @@ function B_MBMagnetometer(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+    var pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
     pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
     this.addPart(pickBlock);
 
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    var pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
     pickAxis.addOption(new SelectionData("X", "x"));
     pickAxis.addOption(new SelectionData("Y", "y"));
     pickAxis.addOption(new SelectionData("Z", "z"));
@@ -24629,22 +24628,22 @@ B_MBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
 B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 /* Sends the request for the sensor data. */
 B_MBMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
     if (sensorSelection == "accelerometer") {
         Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
     } else {
         Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
     }
 
-    let axisSelection = this.slots[2].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var axisSelection = this.slots[2].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -24665,14 +24664,14 @@ B_MBMagnetometer.prototype.startAction=function(){
 
 B_MBMagnetometer.prototype.updateAction = function(){
 
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
         if (status.finished) {
             if(status.error){
                 this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
                 return new ExecutionStatusError();
             } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue() * 100) / 100;
+                var result = new StringData(status.result);
+                var num = Math.round(result.asNum().getValue() * 100) / 100;
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -24701,7 +24700,7 @@ function B_MBButton(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
+    var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
     choice.addOption(new SelectionData("A", "buttonA"));
     choice.addOption(new SelectionData("B", "buttonB"));
     this.addPart(choice);
@@ -24716,16 +24715,16 @@ B_MBButton.prototype.constructor = B_MBButton;
 
 
 B_MBButton.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
 
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -24746,8 +24745,8 @@ B_MBButton.prototype.startAction=function(){
 B_MBButton.prototype.updateAction = function() {
 
 
-    const mem = this.runMem;
-    const status = mem.requestStatus;
+    var mem = this.runMem;
+    var status = mem.requestStatus;
     if (status.finished === true) {
         if (status.error === false) {
             return new ExecutionStatusResult(new BoolData(status.result === "1", true));
@@ -24776,7 +24775,7 @@ function B_MBOrientation(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    var orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
     orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
     orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
     orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
@@ -24797,16 +24796,16 @@ B_MBOrientation.prototype.constructor = B_MBOrientation;
 
 
 B_MBOrientation.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
 
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -24827,8 +24826,8 @@ B_MBOrientation.prototype.startAction=function(){
 
 B_MBOrientation.prototype.updateAction = function() {
 
-    const mem = this.runMem;
-    const status = mem.requestStatus;
+    var mem = this.runMem;
+    var status = mem.requestStatus;
     if (status.finished === true) {
         if (status.error === false) {
             return new ExecutionStatusResult(new BoolData(status.result === "1", true));
@@ -24872,14 +24871,14 @@ B_MBCompass.prototype.constructor = B_MBCompass;
 
 
 B_MBCompass.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -24897,14 +24896,14 @@ B_MBCompass.prototype.startAction=function(){
 
 B_MBCompass.prototype.updateAction = function(){
 
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
         if (status.finished) {
             if(status.error){
                 this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
                 return new ExecutionStatusError();
             } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue());
+                var result = new StringData(status.result);
+                var num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -24930,14 +24929,14 @@ B_MBCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
 B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
 
 B_MBCompassCalibrate.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -24954,7 +24953,7 @@ B_MBCompassCalibrate.prototype.startAction=function(){
 
 
 B_MBCompassCalibrate.prototype.updateAction = function(){
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
     if (status.finished) {
         if(status.error){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
@@ -25025,11 +25024,11 @@ function B_BBBuzzer(x, y){
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
-  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  var noteSlot = new NumSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, "Note");
   this.addPart(noteSlot);
   this.addPart(new LabelText(this, Language.getStr("for")));
-  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
+  var beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
   beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
   this.addPart(beatsSlot);
   this.addPart(new LabelText(this,Language.getStr("Beats")));
@@ -25038,22 +25037,22 @@ B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_BBBuzzer.prototype.constructor = B_BBBuzzer;
 /* Sends the request */
 B_BBBuzzer.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    //let mem = this.runMem;
-    //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-    //let soundDuration = CodeManager.beatsToMs(beats);
+    //var mem = this.runMem;
+    //var note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    //var beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    //var soundDuration = CodeManager.beatsToMs(beats);
 
-    const mem = this.runMem;
-    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    var mem = this.runMem;
+    var note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    var beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     mem.soundDuration = CodeManager.beatsToMs(beats);
-    let soundDuration = CodeManager.beatsToMs(beats);
+    var soundDuration = CodeManager.beatsToMs(beats);
     mem.timerStarted = false;
 
     mem.requestStatus = {};
@@ -25067,9 +25066,9 @@ B_BBBuzzer.prototype.startAction = function() {
 //B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 B_BBBuzzer.prototype.updateAction = function() {
-    const mem = this.runMem;
+    var mem = this.runMem;
     if (!mem.timerStarted) {
-        const status = mem.requestStatus;
+        var status = mem.requestStatus;
         if (status.finished === true) {
             mem.startTime = new Date().getTime();
             mem.timerStarted = true;
@@ -25120,8 +25119,8 @@ function B_BBSensors(x, y){
     this.numberOfPorts = 3;
 
   // Default option for sensor is Light.
-  const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
-  //const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
+  var dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
+  //var dS = new DropSlot(this, "SDS_1", null, null, new SelectionData("", 0));
   dS.addOption(new SelectionData(Language.getStr("Distance"), "distance"));
   dS.addOption(new SelectionData(Language.getStr("Dial"), "dial"));
   dS.addOption(new SelectionData(Language.getStr("Light"), "light"));
@@ -25137,8 +25136,8 @@ B_BBSensors.prototype = Object.create(ReporterBlock.prototype);
 B_BBSensors.prototype.constructor = B_BBSensors;
 /* Sends the request for the sensor data. */
 B_BBSensors.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
     if (sensorSelection == "distance"){
         Block.setDisplaySuffix(B_BBSensors, "cm");
     } else if (sensorSelection == "other") {
@@ -25147,13 +25146,13 @@ B_BBSensors.prototype.startAction=function(){
         Block.removeDisplaySuffix(B_BBSensors);
     }
 
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = this.slots[2].getData().getValue();
+    var mem = this.runMem;
+    var port = this.slots[2].getData().getValue();
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25169,14 +25168,14 @@ B_BBSensors.prototype.startAction=function(){
 };
 /* Returns the result of the request */
 B_BBSensors.prototype.updateAction = function(){
-	const status = this.runMem.requestStatus;
+	var status = this.runMem.requestStatus;
 	if (status.finished) {
 		if(status.error){
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else {
-			const result = new StringData(status.result);
-			const num = result.asNum().getValue();
+			var result = new StringData(status.result);
+			var num = result.asNum().getValue();
 			var rounded = Math.round(num);
       if (status.sensorSelection == "other") {
         rounded = Math.round(num * 100) / 100;
@@ -25197,14 +25196,14 @@ function B_BBMagnetometer(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+    var pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
     pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
 
     this.addPart(pickBlock);
 
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+    var pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
     pickAxis.addOption(new SelectionData("X", "x"));
     pickAxis.addOption(new SelectionData("Y", "y"));
     pickAxis.addOption(new SelectionData("Z", "z"));
@@ -25216,22 +25215,22 @@ B_BBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
 B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
 /* Sends the request for the sensor data. */
 B_BBMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
     if (sensorSelection == "accelerometer") {
         Block.setDisplaySuffix(B_BBMagnetometer, "m/s" + String.fromCharCode(178));
     } else {
         Block.setDisplaySuffix(B_BBMagnetometer, String.fromCharCode(956) + "T");
     }
 
-    let axisSelection = this.slots[2].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var axisSelection = this.slots[2].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25246,14 +25245,14 @@ B_BBMagnetometer.prototype.startAction=function(){
 
 
 B_BBMagnetometer.prototype.updateAction = function(){
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
         if (status.finished) {
             if(status.error){
                 this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
                 return new ExecutionStatusError();
             } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue() * 100) / 100;
+                var result = new StringData(status.result);
+                var num = Math.round(result.asNum().getValue() * 100) / 100;
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -25296,15 +25295,15 @@ B_BBPrint.prototype.constructor = B_BBPrint;
 
 /* Sends the request */
 B_BBPrint.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
 
-    let mem = this.runMem;
-    let printString = this.slots[1].getData().getValue().substring(0,18);
+    var mem = this.runMem;
+    var printString = this.slots[1].getData().getValue().substring(0,18);
     mem.blockDuration = (printString.length * 600);
     mem.timerStarted = false;
 
@@ -25319,9 +25318,9 @@ B_BBPrint.prototype.startAction = function() {
 
 /* Waits until the request completes */
 B_BBPrint.prototype.updateAction = function() {
-    const mem = this.runMem;
+    var mem = this.runMem;
     if (!mem.timerStarted) {
-        const status = mem.requestStatus;
+        var status = mem.requestStatus;
         if (status.finished === true) {
             mem.startTime = new Date().getTime();
             mem.timerStarted = true;
@@ -25351,7 +25350,7 @@ function B_BBButton(x, y){
     this.addPart(new LabelText(this,this.displayName));
 
 
-    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
+    var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
     choice.addOption(new SelectionData("A", "buttonA"));
     choice.addOption(new SelectionData("B", "buttonB"));
     this.addPart(choice);
@@ -25366,15 +25365,15 @@ B_BBButton.prototype.constructor = B_BBButton;
 
 
 B_BBButton.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25394,8 +25393,8 @@ B_BBButton.prototype.startAction=function(){
 B_BBButton.prototype.updateAction = function() {
 
 
-    const mem = this.runMem;
-    const status = mem.requestStatus;
+    var mem = this.runMem;
+    var status = mem.requestStatus;
     if (status.finished === true) {
         if (status.error === false) {
             return new ExecutionStatusResult(new BoolData(status.result === "1", true));
@@ -25429,7 +25428,7 @@ function B_BBOrientation(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+    var orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
     orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
     orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
     orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
@@ -25450,15 +25449,15 @@ B_BBOrientation.prototype.constructor = B_BBOrientation;
 
 
 B_BBOrientation.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var sensorSelection = this.slots[1].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25479,8 +25478,8 @@ B_BBOrientation.prototype.startAction=function(){
 
 B_BBOrientation.prototype.updateAction = function() {
 
-    const mem = this.runMem;
-    const status = mem.requestStatus;
+    var mem = this.runMem;
+    var status = mem.requestStatus;
     if (status.finished === true) {
         if (status.error === false) {
             return new ExecutionStatusResult(new BoolData(status.result === "1", true));
@@ -25523,14 +25522,14 @@ B_BBCompass.prototype = Object.create(ReporterBlock.prototype);
 B_BBCompass.prototype.constructor = B_BBCompass;
 
 B_BBCompass.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25548,14 +25547,14 @@ B_BBCompass.prototype.startAction=function(){
 
 B_BBCompass.prototype.updateAction = function(){
 
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
         if (status.finished) {
             if(status.error){
                 this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
                 return new ExecutionStatusError();
             } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue());
+                var result = new StringData(status.result);
+                var num = Math.round(result.asNum().getValue());
 
                 return new ExecutionStatusResult(new NumData(num));
             }
@@ -25583,14 +25582,14 @@ B_BBCompassCalibrate.prototype.constructor = B_BBCompassCalibrate;
 
 
 B_BBCompassCalibrate.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    var deviceIndex = this.slots[0].getData().getValue();
+    var device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-    let mem = this.runMem;
-    let port = 1;
+    var mem = this.runMem;
+    var port = 1;
     if (port != null && port > 0 && port <= this.numberOfPorts) {
         mem.requestStatus = {};
         mem.requestStatus.finished = false;
@@ -25607,7 +25606,7 @@ B_BBCompassCalibrate.prototype.startAction=function(){
 
 
 B_BBCompassCalibrate.prototype.updateAction = function(){
-    const status = this.runMem.requestStatus;
+    var status = this.runMem.requestStatus;
     if (status.finished) {
         if(status.error){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
@@ -25647,11 +25646,11 @@ function B_FlutterBuzzer(x, y) {
 	this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceFlutter, true));
 	this.addPart(new LabelText(this, "Buzzer"));
 	this.addPart(new LabelText(this, "Volume"));
-	const numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
+	var numSlot = new NumSlot(this, "NumS_vol", 20, true, true);
 	numSlot.addLimits(0, 100);
 	this.addPart(numSlot);
 	this.addPart(new LabelText(this, "Frequency"));
-	const numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
+	var numSlot2 = new NumSlot(this, "NumS_freq", 10000, true, true);
 	numSlot2.addLimits(0, 20000);
 	this.addPart(numSlot2);
 }
@@ -25659,14 +25658,14 @@ B_FlutterBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_FlutterBuzzer.prototype.constructor = B_FlutterBuzzer;
 /* Sends request */
 B_FlutterBuzzer.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = DeviceFlutter.getManager().getDevice(deviceIndex);
+	var deviceIndex = this.slots[0].getData().getValue();
+	var device = DeviceFlutter.getManager().getDevice(deviceIndex);
 	if (device == null) {
 		this.displayError(DeviceFlutter.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Flutter was invalid, exit early
 	}
-	let volume = this.slots[1].getData().getValueInR(0, 100, true, true);
-	let frequency = this.slots[2].getData().getValueInR(0, 20000, true, true);
+	var volume = this.slots[1].getData().getValueInR(0, 100, true, true);
+	var frequency = this.slots[2].getData().getValueInR(0, 20000, true, true);
 	this.runMem.requestStatus = {};
 	device.setBuzzer(this.runMem.requestStatus, volume, frequency);
 	return new ExecutionStatusRunning();
@@ -25675,7 +25674,7 @@ B_FlutterBuzzer.prototype.startAction = function() {
 B_FlutterBuzzer.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			const status = this.runMem.requestStatus;
+			var status = this.runMem.requestStatus;
 			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
@@ -25753,13 +25752,13 @@ B_FlutterTempF.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterTempF.prototype.constructor = B_FlutterTempF;
 /* Waits for the request to finish then converts C to F. */
 B_FlutterTempF.prototype.updateAction = function() {
-	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
-		let resultC = status.getResult();
+		var resultC = status.getResult();
 		if (resultC != null && resultC.isValid) {
-			let result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
+			var result = new NumData(Math.round(resultC.getValue() * 1.8 + 32));
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -25777,13 +25776,13 @@ B_FlutterDistInch.prototype = Object.create(B_FlutterSensorBase.prototype);
 B_FlutterDistInch.prototype.constructor = B_FlutterDistInch;
 /* Waits for the request to finish then converts cm to in. */
 B_FlutterDistInch.prototype.updateAction = function() {
-	const status = B_FlutterSensorBase.prototype.updateAction.call(this);
+	var status = B_FlutterSensorBase.prototype.updateAction.call(this);
 	if (status.hasError() || status.isRunning()) {
 		return status;
 	} else {
-		let resultMm = status.getResult();
+		var resultMm = status.getResult();
 		if (resultMm != null && resultMm.isValid) {
-			let result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
+			var result = new NumData((resultMm.getValue() / 2.54).toFixed(0) * 1);
 			return new ExecutionStatusResult(result);
 		} else {
 			return status;
@@ -25802,13 +25801,13 @@ B_FinchSetAll.prototype = Object.create(CommandBlock.prototype);
 B_FinchSetAll.prototype.constructor = B_FinchSetAll;
 /* Sends request */
 B_FinchSetAll.prototype.startAction = function() {
-	let deviceIndex = this.slots[0].getData().getValue();
-	let device = DeviceFinch.getManager().getDevice(deviceIndex);
+	var deviceIndex = this.slots[0].getData().getValue();
+	var device = DeviceFinch.getManager().getDevice(deviceIndex);
 	if (device == null) {
 		this.displayError(DeviceFinch.getNotConnectedMessage());
 		return new ExecutionStatusError(); // Finch was invalid, exit early
 	}
-	const status = this.runMem.requestStatus = {};
+	var status = this.runMem.requestStatus = {};
 	device.setAll(status, this.slots[1].getData().getValue());
 	return new ExecutionStatusRunning();
 };
@@ -25816,7 +25815,7 @@ B_FinchSetAll.prototype.startAction = function() {
 B_FinchSetAll.prototype.updateAction = function() {
 	if (this.runMem.requestStatus.finished) {
 		if (this.runMem.requestStatus.error) {
-			const status = this.runMem.requestStatus;
+			var status = this.runMem.requestStatus;
 			this.displayError(DeviceFlutter.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		}
@@ -25858,10 +25857,10 @@ B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
 B_WhenIReceive.prototype.eventBroadcast = function(message) {
 	// Get data from Slot (returns instantly since snapping is not allowed)
-	const data = this.slots[0].getDataNotFromChild();
-	let shouldRun = false;
+	var data = this.slots[0].getDataNotFromChild();
+	var shouldRun = false;
 	if (data.isSelection()) {
-		const selection = data.getValue();
+		var selection = data.getValue();
 		if(selection === "any_message") {
 			shouldRun = true;
 		}
@@ -25894,7 +25893,7 @@ B_Wait.prototype.constructor = B_Wait;
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
 	// Each Block has runMem to store information for that execution
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.startTime = new Date().getTime();
 	// Extract a positive value from first slot
 	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
@@ -25902,7 +25901,7 @@ B_Wait.prototype.startAction = function() {
 };
 /* Waits until current time exceeds stored time plus delay. */
 B_Wait.prototype.updateAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -25921,7 +25920,7 @@ B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_WaitUntil.prototype.startAction = function() {
-	const stopWaiting = this.slots[0].getData().getValue();
+	var stopWaiting = this.slots[0].getData().getValue();
 	if (stopWaiting) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -25946,7 +25945,7 @@ B_Forever.prototype.startAction = function() {
 };
 /* Continues executing contents. If contents are done, runs them again. */
 B_Forever.prototype.updateAction = function() {
-	let blockSlotStatus = this.blockSlot1.updateRun();
+	var blockSlotStatus = this.blockSlot1.updateRun();
 	if (!blockSlotStatus.isRunning()) {
 		if (blockSlotStatus.hasError()) {
 			return blockSlotStatus;
@@ -25968,7 +25967,7 @@ B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.timesD = this.slots[0].getData();
 	mem.times = mem.timesD.getValueWithC(true, true);
 	mem.count = 0;
@@ -25981,12 +25980,12 @@ B_Repeat.prototype.startAction = function() {
 };
 /* Update contents. When they finish, increment counter and possibly run them again. */
 B_Repeat.prototype.updateAction = function() {
-	let blockSlotStatus = this.blockSlot1.updateRun();
+	var blockSlotStatus = this.blockSlot1.updateRun();
 	if (!blockSlotStatus.isRunning()) {
 		if (blockSlotStatus.hasError()) {
 			return blockSlotStatus;
 		} else {
-			const mem = this.runMem;
+			var mem = this.runMem;
 			mem.count++;
 			if (mem.count >= mem.times) {
 				return new ExecutionStatusDone(); //Done running
@@ -26009,7 +26008,7 @@ B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
 /* Checks condition and either stops running or executes contents. */
 B_RepeatUntil.prototype.startAction = function() {
-	const stopRepeating = this.slots[0].getData().getValue();
+	var stopRepeating = this.slots[0].getData().getValue();
 	if (stopRepeating) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -26019,7 +26018,7 @@ B_RepeatUntil.prototype.startAction = function() {
 };
 /* Updates contents until completed. Then resets Block to condition can be checked again. */
 B_RepeatUntil.prototype.updateAction = function() {
-	let blockSlotStatus = this.blockSlot1.updateRun();
+	var blockSlotStatus = this.blockSlot1.updateRun();
 	if (!blockSlotStatus.isRunning()) {
 		if (blockSlotStatus.hasError()) {
 			return blockSlotStatus;
@@ -26042,7 +26041,7 @@ B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
 /* Either stops running or executes contents. */
 B_If.prototype.startAction = function() {
-	const check = this.slots[0].getData().getValue();
+	var check = this.slots[0].getData().getValue();
 	if (check) {
 		this.blockSlot1.startRun();
 		return new ExecutionStatusRunning(); //Still running
@@ -26096,7 +26095,7 @@ B_Broadcast.prototype.constructor = B_Broadcast;
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
 	this.runMem.finished = false;
-	const message = this.runMem.message = this.slots[0].getData().asString().getValue();
+	var message = this.runMem.message = this.slots[0].getData().asString().getValue();
 	if (message === "") {
 		return new ExecutionStatusDone();
 	}
@@ -26113,7 +26112,7 @@ B_Broadcast.prototype.updateAction = function() {
 	if (this.runMem.finished) {
 		return new ExecutionStatusDone();
 	}
-	const message = this.runMem.message;
+	var message = this.runMem.message;
 	if (CodeManager.checkBroadcastDelay()) {
 		CodeManager.message = new StringData(message);
 		CodeManager.eventBroadcast(message);
@@ -26134,7 +26133,7 @@ B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
 /* Broadcasts the message */
 B_BroadcastAndWait.prototype.startAction = function() {
-	const message = this.slots[0].getData().asString().getValue();
+	var message = this.slots[0].getData().asString().getValue();
 	if (message !== "") {
 		this.runMem.message = message;
 		CodeManager.message = new StringData(message);
@@ -26169,7 +26168,7 @@ B_Message.prototype.startAction = function() {
 function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
 	this.addPart(new LabelText(this, Language.getStr("stop")));
-	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
+	var dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
 	//dS.addOption(new SelectionData("this block", "this_block"));
@@ -26181,7 +26180,7 @@ B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
 /* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
-	const selection = this.slots[0].getData().getValue();
+	var selection = this.slots[0].getData().getValue();
 	if (selection === "all") {
 		CodeManager.stop();
 	} else if (selection === "this_script") {
@@ -26207,7 +26206,7 @@ B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
-	const stopWaiting = this.slots[0].getData().getValue();
+	var stopWaiting = this.slots[0].getData().getValue();
 	if (stopWaiting) {
 		return new ExecutionStatusDone(); //Done running
 	} else {
@@ -26234,7 +26233,7 @@ B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
 /* Show a dialog with the question unless another dialog is already visible or has been displayed recently. */
 B_Ask.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.question = this.slots[0].getData().getValue();
 	mem.questionDisplayed = false;
 	// There is a delay between repeated dialogs to give the user time to stop the program.
@@ -26246,7 +26245,7 @@ B_Ask.prototype.startAction = function() {
 };
 /* Waits until the dialog has been displayed and completed. */
 B_Ask.prototype.updateAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	if (!mem.questionDisplayed) {   // If the question has not yet been displayed...
 		if (DialogManager.checkDialogDelay()) {   // Check if we can show the dialog or should delay.
 			this.showQuestion();   // Display the question.
@@ -26262,9 +26261,9 @@ B_Ask.prototype.updateAction = function() {
 };
 /* Sends the request to show the dialog */
 B_Ask.prototype.showQuestion = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.finished = false;   // Will be changed once answered.
-	const callbackFn = function(cancelled, response) {
+	var callbackFn = function(cancelled, response) {
 		if (cancelled) {
 			CodeManager.answer = new StringData("", true);   //"" is the default answer.
 		} else {
@@ -26272,7 +26271,7 @@ B_Ask.prototype.showQuestion = function() {
 		}
 		mem.finished = true;   // Done waiting.
 	};
-	const callbackErr = function() {   // If an error occurs...
+	var callbackErr = function() {   // If an error occurs...
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
 		mem.finished = true;   // Done waiting.
 	};
@@ -26317,8 +26316,8 @@ B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
 /* Get the time and convert it to seconds */
 B_Timer.prototype.startAction = function() {
-	const now = new Date().getTime();
-	const start = CodeManager.timerForSensingBlock;
+	var now = new Date().getTime();
+	var start = CodeManager.timerForSensingBlock;
 	/* Round to 1 decimal */
 	return new ExecutionStatusResult(new NumData((now - start) / 1000));
 };
@@ -26329,7 +26328,7 @@ Block.setDisplaySuffix(B_Timer, "s");
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, Language.getStr("current")));
-	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
+	var dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
 	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
 	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
 	dS.addOption(new SelectionData(Language.getStr("date"), "date"));
@@ -26344,11 +26343,11 @@ B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
 /* Returns the current time in the desired units */
 B_CurrentTime.prototype.startAction = function() {
-	const unitD = this.slots[0].getData();
+	var unitD = this.slots[0].getData();
 	if (unitD == null) {
 		return new ExecutionStatusResult(new NumData(0, false));
 	}
-	const unit = unitD.getValue();
+	var unit = unitD.getValue();
 	if (unit === "year") {
 		return new ExecutionStatusResult(new NumData(new Date().getFullYear()));
 	} else if (unit === "month") {
@@ -26376,7 +26375,7 @@ function B_Display(x, y) {
 	this.addPart(new LabelText(this, Language.getStr("Display")));
 	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
 	this.addPart(new LabelText(this, Language.getStr("at")));
-	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
+	var dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
 	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
 	dS.addOption(new SelectionData(Language.getStr("Position") +" 2", "position2"));
 	dS.addOption(new SelectionData(Language.getStr("Position") +" 3", "position3"));
@@ -26386,8 +26385,8 @@ B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;
 /* Displays the value on the screen */
 B_Display.prototype.startAction = function() {
-	const message = this.slots[0].getData().getValue();
-	const position = this.slots[1].getData().getValue();
+	var message = this.slots[0].getData().getValue();
+	var position = this.slots[1].getData().getValue();
 	DisplayBoxManager.displayText(message, position);
 	return new ExecutionStatusDone(); // Done running
 };
@@ -26402,10 +26401,10 @@ B_Add.prototype = Object.create(ReporterBlock.prototype);
 B_Add.prototype.constructor = B_Add;
 /* Returns the sum of the Slots. Result is valid only if both inputs are. */
 B_Add.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const isValid = data1.isValid && data2.isValid;
-	const val = data1.getValue() + data2.getValue();
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var isValid = data1.isValid && data2.isValid;
+	var val = data1.getValue() + data2.getValue();
 	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
@@ -26421,10 +26420,10 @@ B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
 /* Sets the result to the difference between the Slots. Result is valid only if both inputs are. */
 B_Subtract.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const isValid = data1.isValid && data2.isValid;
-	const val = data1.getValue() - data2.getValue();
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var isValid = data1.isValid && data2.isValid;
+	var val = data1.getValue() - data2.getValue();
 	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
@@ -26440,10 +26439,10 @@ B_Multiply.prototype = Object.create(ReporterBlock.prototype);
 B_Multiply.prototype.constructor = B_Multiply;
 /* Sets the result to the product of the Slots. Result is valid only if both inputs are. */
 B_Multiply.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const isValid = data1.isValid && data2.isValid;
-	const val = data1.getValue() * data2.getValue();
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var isValid = data1.isValid && data2.isValid;
+	var val = data1.getValue() * data2.getValue();
 	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
@@ -26459,12 +26458,12 @@ B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
 /* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2 != 0. */
 B_Divide.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const val1 = data1.getValue();
-	const val2 = data2.getValue();
-	let isValid = data1.isValid && data2.isValid;
-	let val = val1 / val2;
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var val1 = data1.getValue();
+	var val2 = data2.getValue();
+	var isValid = data1.isValid && data2.isValid;
+	var val = val1 / val2;
 	if (val2 === 0) {
 		val = 0; // Return invalid 0 if told to divide by 0.
 		isValid = false;
@@ -26484,12 +26483,12 @@ B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
 /* Sets the result to the first Slot mod the second Slot. Valid if Slots are valid and second isn't 0. */
 B_Mod.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const val1 = data1.getValue();
-	const val2 = data2.getValue();
-	let isValid = data1.isValid && data2.isValid;
-	let result = ((val1 % val2) + val2) % val2;
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var val1 = data1.getValue();
+	var val2 = data2.getValue();
+	var isValid = data1.isValid && data2.isValid;
+	var result = ((val1 % val2) + val2) % val2;
 	if (val2 === 0) {
 		result = 0;
 		isValid = false;
@@ -26508,9 +26507,9 @@ B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
 /* Sets the result to the rounded value of the Slot. Is valid only if Slot is. */
 B_Round.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const isValid = data1.isValid;
-	const val = data1.getValueWithC(false, true); // Integer
+	var data1 = this.slots[0].getData();
+	var isValid = data1.isValid;
+	var val = data1.getValueWithC(false, true); // Integer
 	return new ExecutionStatusResult(new NumData(val, isValid));
 };
 
@@ -26527,15 +26526,15 @@ function B_PickRandom(x, y) {
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
 B_PickRandom.prototype.constructor = B_PickRandom;
 B_PickRandom.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
-	const isValid = data1.isValid && data2.isValid;
-	const val1 = data1.getValue();
-	const val2 = data2.getValue();
-	const integer = Number.isInteger(val1) && Number.isInteger(val2);
-	let min = val1;
-	let max = val2;
-	let rVal;
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
+	var isValid = data1.isValid && data2.isValid;
+	var val1 = data1.getValue();
+	var val2 = data2.getValue();
+	var integer = Number.isInteger(val1) && Number.isInteger(val2);
+	var min = val1;
+	var max = val2;
+	var rVal;
 	if (min > max) {
 		min = val2;
 		max = val1;
@@ -26560,8 +26559,8 @@ B_LessThan.prototype = Object.create(PredicateBlock.prototype);
 B_LessThan.prototype.constructor = B_LessThan;
 /* Result is a valid boolean indicating is Slot1 < Slot2. */
 B_LessThan.prototype.startAction = function() {
-	const val1 = this.slots[0].getData().getValue();
-	const val2 = this.slots[1].getData().getValue();
+	var val1 = this.slots[0].getData().getValue();
+	var val2 = this.slots[1].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(val1 < val2));
 };
 
@@ -26577,8 +26576,8 @@ B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
 /* Compares data of any type to determine equality. Result is always valid. */
 B_EqualTo.prototype.startAction = function() {
-	const data1 = this.slots[0].getData();
-	const data2 = this.slots[1].getData();
+	var data1 = this.slots[0].getData();
+	var data2 = this.slots[1].getData();
 	return new ExecutionStatusResult(new BoolData(Data.checkEquality(data1, data2)));
 };
 
@@ -26594,8 +26593,8 @@ B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
 B_GreaterThan.prototype.constructor = B_GreaterThan;
 /* Result is a valid boolean indicating is Slot1 > Slot2. */
 B_GreaterThan.prototype.startAction = function() {
-	const val1 = this.slots[0].getData().getValue();
-	const val2 = this.slots[1].getData().getValue();
+	var val1 = this.slots[0].getData().getValue();
+	var val2 = this.slots[1].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(val1 > val2));
 };
 
@@ -26611,8 +26610,8 @@ B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
 /* Result is true if both are true. Always valid. */
 B_And.prototype.startAction = function() {
-	const val1 = this.slots[0].getData().getValue();
-	const val2 = this.slots[1].getData().getValue();
+	var val1 = this.slots[0].getData().getValue();
+	var val2 = this.slots[1].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(val1 && val2));
 };
 
@@ -26628,8 +26627,8 @@ B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
 /* Result is true if either is true. Always valid. */
 B_Or.prototype.startAction = function() {
-	const val1 = this.slots[0].getData().getValue();
-	const val2 = this.slots[1].getData().getValue();
+	var val1 = this.slots[0].getData().getValue();
+	var val2 = this.slots[1].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(val1 || val2));
 };
 
@@ -26644,7 +26643,7 @@ B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
 /* Result is true if Slot is false. Always valid. */
 B_Not.prototype.startAction = function() {
-	const val1 = this.slots[0].getData().getValue();
+	var val1 = this.slots[0].getData().getValue();
 	return new ExecutionStatusResult(new BoolData(!val1));
 };
 
@@ -26679,7 +26678,7 @@ B_False.prototype.startAction = function() {
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new LabelText(this, Language.getStr("letter")));
-	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
+	var nS = new NumSlot(this, "NumS_idx", 1, true, true);
 	nS.addLimits(1);
 	this.addPart(nS);
 	this.addPart(new LabelText(this, Language.getStr("of")));
@@ -26689,8 +26688,8 @@ B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
 /* Result is nth letter of word. Makes n and integer in range. Always valid. */
 B_LetterOf.prototype.startAction = function() {
-	const word = this.slots[1].getData().getValue();
-	const index = this.slots[0].getData().getValueInR(1, word.length, true, true);
+	var word = this.slots[1].getData().getValue();
+	var index = this.slots[0].getData().getValueInR(1, word.length, true, true);
 	if (word.length > 0) {
 		return new ExecutionStatusResult(new StringData(word.substring(index - 1, index)));
 	} else {
@@ -26709,7 +26708,7 @@ B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
 /* Result is length of word. Always valid. */
 B_LengthOf.prototype.startAction = function() {
-	const word = this.slots[0].getData().getValue();
+	var word = this.slots[0].getData().getValue();
 	return new ExecutionStatusResult(new NumData(word.length));
 };
 
@@ -26726,8 +26725,8 @@ B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
 /* Result is Slots concatenated. Always valid. */
 B_join.prototype.startAction = function() {
-	const word1 = this.slots[0].getData().getValue();
-	const word2 = this.slots[1].getData().getValue();
+	var word1 = this.slots[0].getData().getValue();
+	var word2 = this.slots[1].getData().getValue();
 	return new ExecutionStatusResult(new StringData(word1 + word2));
 };
 
@@ -26739,10 +26738,10 @@ function B_Split(x, y) {
 	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
 	this.addPart(new LabelText(this, Language.getStr("by")));
 
-	const inputType = EditableSlot.inputTypes.any;
-	const snapType = Slot.snapTypes.numStrBool;
-	const data = new SelectionData(Language.getStr("whitespace"), "whitespace");
-	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
+	var inputType = EditableSlot.inputTypes.any;
+	var snapType = Slot.snapTypes.numStrBool;
+	var data = new SelectionData(Language.getStr("whitespace"), "whitespace");
+	var dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
 	dS.addEnterText(Language.getStr("Edit_Text"));
 	dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
 	dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
@@ -26752,14 +26751,14 @@ B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
 /* Returns a list made from splitting the string by the provided character. */
 B_Split.prototype.startAction = function() {
-	const string1 = this.slots[0].getData().getValue();
-	const splitD = this.slots[1].getData();
-	let resultArray;
+	var string1 = this.slots[0].getData().getValue();
+	var splitD = this.slots[1].getData();
+	var resultArray;
 	if (splitD.type === Data.types.string) {
-		const splitStr = splitD.getValue();
+		var splitStr = splitD.getValue();
 		resultArray = string1.split(splitStr);
 	} else if (splitD.type === Data.types.selection) {
-		const selection = splitD.getValue();
+		var selection = splitD.getValue();
 		if (selection === "letter") {
 			resultArray = string1.split("");
 		} else if (selection === "whitespace") {
@@ -26768,8 +26767,8 @@ B_Split.prototype.startAction = function() {
 	} else {
 		resultArray = [];
 	}
-	const dataArray = new Array(resultArray.length);
-	for (let i = 0; i < resultArray.length; i++) {
+	var dataArray = new Array(resultArray.length);
+	for (var i = 0; i < resultArray.length; i++) {
 		dataArray[i] = new StringData(resultArray[i]);
 	}
 	return new ExecutionStatusResult(new ListData(dataArray));
@@ -26782,7 +26781,7 @@ function B_IsAType(x, y) {
 	this.addPart(new LabelText(this, Language.getStr("is")));
 	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
 	this.addPart(new LabelText(this, Language.getStr("a")));
-	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
+	var dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("text"), "text"));
 	dS.addOption(new SelectionData(Language.getStr("boolean"), "boolean"));
@@ -26795,10 +26794,10 @@ B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
 /* Returns whether the data is of the selected type */
 B_IsAType.prototype.startAction = function() {
-	const data = this.slots[0].getData();
-	const selectionD = this.slots[1].getData();
-	const selection = selectionD.getValue();
-	const types = Data.types;
+	var data = this.slots[0].getData();
+	var selectionD = this.slots[1].getData();
+	var selection = selectionD.getValue();
+	var types = Data.types;
 	if (selection === "number") {
 		if (data.type === types.num && data.isValid) {
 			return new ExecutionStatusResult(new BoolData(true));
@@ -26814,7 +26813,7 @@ B_IsAType.prototype.startAction = function() {
 	} else if (selection === "list") {
 		return new ExecutionStatusResult(new BoolData(data.type === types.list));
 	} else if (selection === "invalid_num") {
-		const invalidNumStr = (new NumData(0 / 0).asString().getValue()); // "not a valid number"
+		var invalidNumStr = (new NumData(0 / 0).asString().getValue()); // "not a valid number"
 		if (data.type === types.num && !data.isValid) {
 			return new ExecutionStatusResult(new BoolData(true));
 		} else if (data.type === types.string && data.getValue() === invalidNumStr) {
@@ -26831,7 +26830,7 @@ B_IsAType.prototype.startAction = function() {
 
 function B_mathOfNumber(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	var dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));
@@ -26859,10 +26858,10 @@ B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;
 /* Applies selected operation to input */
 B_mathOfNumber.prototype.startAction = function() {
-	const operator = this.slots[0].getData().getValue();
-	const data = this.slots[1].getData();
-	let value = data.getValue();
-	let isValid = data.isValid;
+	var operator = this.slots[0].getData().getValue();
+	var data = this.slots[1].getData();
+	var value = data.getValue();
+	var isValid = data.isValid;
 	if (operator === "sin") {
 		value = Math.sin(value / 180 * Math.PI);
 	} else if (operator === "cos") {
@@ -26930,7 +26929,7 @@ B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
 /* Make the request. */
 B_DeviceShaken.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/shake";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -26938,8 +26937,8 @@ B_DeviceShaken.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_DeviceShaken.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
 			return new ExecutionStatusResult(new BoolData(status.result === "1", true));
@@ -26969,7 +26968,7 @@ B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
 /* Make the request. */
 B_DeviceSSID.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/ssid";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -26977,8 +26976,8 @@ B_DeviceSSID.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_DeviceSSID.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
 			return new ExecutionStatusResult(new StringData(status.result, true));
@@ -27005,7 +27004,7 @@ B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
 /* Make the request. */
 B_DevicePressure.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/pressure";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -27013,12 +27012,12 @@ B_DevicePressure.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_DevicePressure.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const result = Number(status.result);
-			const num = Math.round(result * 100) / 100;
+			var result = Number(status.result);
+			var num = Math.round(result * 100) / 100;
 			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
@@ -27047,7 +27046,7 @@ B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
 /* Make the request. */
 B_DeviceRelativeAltitude.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/altitude";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -27055,11 +27054,11 @@ B_DeviceRelativeAltitude.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_DeviceRelativeAltitude.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const result = Number(status.result);
+			var result = Number(status.result);
 			return new ExecutionStatusResult(new NumData(result, true));
 		} else {
 			if (status.result.length > 0) {
@@ -27088,7 +27087,7 @@ B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
 /* Make the request. */
 B_DeviceOrientation.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/orientation";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -27096,8 +27095,8 @@ B_DeviceOrientation.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_DeviceOrientation.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
 			return new ExecutionStatusResult(new StringData(status.result, true));
@@ -27122,7 +27121,7 @@ B_DeviceOrientation.prototype.checkActive = function() {
 function B_DeviceAcceleration(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
 	this.addPart(new LabelText(this,  Language.getStr("Device")));
-	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
+	var dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
@@ -27134,7 +27133,7 @@ B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
 /* Make the request. */
 B_DeviceAcceleration.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/acceleration";
 	mem.requestStatus = function() {};
 	mem.axis = this.slots[0].getData().getValue();
@@ -27143,16 +27142,16 @@ B_DeviceAcceleration.prototype.startAction = function() {
 };
 /* Wait for the request to finish. Then get the correct axis. */
 B_DeviceAcceleration.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const parts = status.result.split(" ");
-			let result;
+			var parts = status.result.split(" ");
+			var result;
 			if (mem.axis === "total") {
-				let x = Number(parts[0]);
-				let y = Number(parts[1]);
-				let z = Number(parts[2]);
+				var x = Number(parts[0]);
+				var y = Number(parts[1]);
+				var z = Number(parts[2]);
 				result = Math.round(Math.sqrt(x * x + y * y + z * z) * 100)/100;
 			} else {
 				result = Math.round(Number(parts[mem.axis]) * 100) / 100;
@@ -27180,7 +27179,7 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 function B_DeviceLocation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
 	this.addPart(new LabelText(this, Language.getStr("Device")));
-	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
+	var dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Longitude"), 1));
 	this.addPart(dS);
@@ -27189,7 +27188,7 @@ B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceLocation.prototype.constructor = B_DeviceLocation;
 /* Make the request. */
 B_DeviceLocation.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.request = "tablet/location";
 	mem.requestStatus = function() {};
 	mem.axis = this.slots[0].getData().getValue();
@@ -27198,12 +27197,12 @@ B_DeviceLocation.prototype.startAction = function() {
 };
 /* Wait for the request to finish. Then get the correct axis. */
 B_DeviceLocation.prototype.updateAction = function() {
-	const mem = this.runMem;
-	const status = mem.requestStatus;
+	var mem = this.runMem;
+	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const result = status.result.split(" ")[mem.axis];
-			const num = Math.round(Number(result).getValue() * 100) / 100;
+			var result = status.result.split(" ")[mem.axis];
+			var num = Math.round(Number(result).getValue() * 100) / 100;
 			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
@@ -27239,19 +27238,19 @@ function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	this.isRecording = isRecording;
 	this.waitUntilDone = waitUntilDone;
 	this.addPart(new LabelText(this, label));
-	let dS = new SoundDropSlot(this, "SDS_1", isRecording);
+	var dS = new SoundDropSlot(this, "SDS_1", isRecording);
 	this.addPart(dS);
 }
 B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
 B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
 /* Makes request using Sound class */
 B_PlaySoundOrRecording.prototype.startAction = function() {
-	let soundData = this.slots[0].getData();
+	var soundData = this.slots[0].getData();
 	if (soundData.isEmpty()) {
 		return new ExecutionStatusDone();
 	}
-	let soundId = soundData.getValue();
-	let status = {};
+	var soundId = soundData.getValue();
+	var status = {};
 	this.runMem.playStatus = status;
 	status.donePlaying = false;
 	status.requestSent = false;
@@ -27260,9 +27259,9 @@ B_PlaySoundOrRecording.prototype.startAction = function() {
 };
 /* Wait for the request to finish. */
 B_PlaySoundOrRecording.prototype.updateAction = function() {
-	let mem = this.runMem;
-	let status = mem.playStatus;
-	let done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
+	var mem = this.runMem;
+	var status = mem.playStatus;
+	var done = (status.requestSent && !this.waitUntilDone) || (status.donePlaying && this.waitUntilDone);
 	if (done) {
 		if (status.error) {
 			this.displayError("Sound not found");
@@ -27316,7 +27315,7 @@ B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
 /* Send request */
 B_StopAllSounds.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.requestStatus = {};
 	Sound.stopAllSounds(mem.requestStatus);
 	return new ExecutionStatusRunning(); // Still running
@@ -27342,15 +27341,15 @@ B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
 /* Store the current time */
 B_RestForBeats.prototype.startAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	mem.startTime = new Date().getTime();
-	const beats = this.slots[0].getData().getValueWithC(true); // Positive
+	var beats = this.slots[0].getData().getValueWithC(true); // Positive
 	mem.delayTime = CodeManager.beatsToMs(beats);
 	return new ExecutionStatusRunning(); // Still running
 };
 /* Wait until the time is up */
 B_RestForBeats.prototype.updateAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	if (new Date().getTime() >= mem.startTime + mem.delayTime) {
 		return new ExecutionStatusDone(); // Done running
 	} else {
@@ -27372,9 +27371,9 @@ B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
 /* Send request */
 B_PlayNoteForBeats.prototype.startAction = function() {
-	const mem = this.runMem;
-	const note = this.slots[0].getData().getValueWithC(true, true);
-	const beats = this.slots[1].getData().getValueWithC(true); // Positive
+	var mem = this.runMem;
+	var note = this.slots[0].getData().getValueWithC(true, true);
+	var beats = this.slots[1].getData().getValueWithC(true); // Positive
 	mem.soundDuration = CodeManager.beatsToMs(beats);
 	mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
 	mem.timerStarted = false;
@@ -27384,9 +27383,9 @@ B_PlayNoteForBeats.prototype.startAction = function() {
 };
 /* When the request is sent, start a timer then wait for the timer to expire */
 B_PlayNoteForBeats.prototype.updateAction = function() {
-	const mem = this.runMem;
+	var mem = this.runMem;
 	if (!mem.timerStarted) {
-		const status = mem.requestStatus;
+		var status = mem.requestStatus;
 		if (status.finished === true) {
 			mem.startTime = new Date().getTime();
 			mem.timerStarted = true;
@@ -27412,9 +27411,9 @@ B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
 /* Changes the tempo stored in CodeManager */
 B_ChangeTempoBy.prototype.startAction = function() {
-	const slotData = this.slots[0].getData();
+	var slotData = this.slots[0].getData();
 	if (slotData.isValid) {
-		const newTempo = CodeManager.sound.tempo + slotData.getValue();
+		var newTempo = CodeManager.sound.tempo + slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
 	return new ExecutionStatusDone();
@@ -27425,7 +27424,7 @@ B_ChangeTempoBy.prototype.startAction = function() {
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
 	this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
-	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
+	var nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
 	this.addPart(new LabelText(this, "bpm"));
@@ -27434,9 +27433,9 @@ B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
 /* Sets the tempo stored in CodeManager */
 B_SetTempoTo.prototype.startAction = function() {
-	const slotData = this.slots[0].getData();
+	var slotData = this.slots[0].getData();
 	if (slotData.isValid) {
-		const newTempo = slotData.getValue();
+		var newTempo = slotData.getValue();
 		CodeManager.setSoundTempo(newTempo);
 	}
 	return new ExecutionStatusDone();
@@ -27484,7 +27483,7 @@ B_Variable.prototype.startAction = function() {
  * @return {Node} - The node for this Block
  */
 B_Variable.prototype.createXml = function(xmlDoc) {
-	const block = XmlWriter.createElement(xmlDoc, "block");
+	var block = XmlWriter.createElement(xmlDoc, "block");
 	XmlWriter.setAttribute(block, "type", this.blockTypeName);
 	XmlWriter.setAttribute(block, "variable", this.variable.getName());
 	return block;
@@ -27542,8 +27541,8 @@ B_Variable.prototype.checkVariableUsed = function(variable) {
  * @return {Block|null} - The imported Block
  */
 B_Variable.importXml = function(blockNode) {
-	const variableName = XmlWriter.getAttribute(blockNode, "variable");
-	const variable = CodeManager.findVar(variableName);
+	var variableName = XmlWriter.getAttribute(blockNode, "variable");
+	var variable = CodeManager.findVar(variableName);
 	if (variable != null) {
 		return new B_Variable(0, 0, variable);
 	}
@@ -27564,16 +27563,16 @@ B_SetTo.prototype.constructor = B_SetTo;
 /* Sets the variable to the provided value */
 B_SetTo.prototype.startAction = function() {
 	// Get the selection data that refers to a variable
-	const variableD = this.slots[0].getData();
+	var variableD = this.slots[0].getData();
 	// Get the data to assign to the variable
-	const data = this.slots[1].getData();
-	const type = data.type;
-	const types = Data.types;
+	var data = this.slots[1].getData();
+	var type = data.type;
+	var types = Data.types;
 	if (type === types.bool || type === types.num || type === types.string) {
 		// If the selection data is not empty
 		if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
 			// Extract the indicated variable
-			const variable = variableD.getValue();
+			var variable = variableD.getValue();
 			// And set its value
 			variable.setData(data);
 		}
@@ -27594,14 +27593,14 @@ B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
 /* Adds the value to the indicated variable */
 B_ChangeBy.prototype.startAction = function() {
-	const variableD = this.slots[0].getData();
-	const incrementD = this.slots[1].getData();
+	var variableD = this.slots[0].getData();
+	var incrementD = this.slots[1].getData();
 	if (variableD.type === Data.types.selection && !variableD.isEmpty()) {
-		const variable = variableD.getValue();
-		const currentD = variable.getData().asNum();
-		const newV = incrementD.getValue() + currentD.getValue();
-		const isValid = currentD.isValid && incrementD.isValid;
-		const newD = new NumData(newV, isValid);
+		var variable = variableD.getValue();
+		var currentD = variable.getData().asNum();
+		var newV = incrementD.getValue() + currentD.getValue();
+		var isValid = currentD.isValid && incrementD.isValid;
+		var newD = new NumData(newV, isValid);
 		variable.setData(newD);
 	}
 	return new ExecutionStatusDone();
@@ -27632,7 +27631,7 @@ B_List.prototype.startAction = function() {
  * @return {Node} - The Block node
  */
 B_List.prototype.createXml = function(xmlDoc) {
-	const block = XmlWriter.createElement(xmlDoc, "block");
+	var block = XmlWriter.createElement(xmlDoc, "block");
 	XmlWriter.setAttribute(block, "type", this.blockTypeName);
 	XmlWriter.setAttribute(block, "list", this.list.getName());
 	return block;
@@ -27644,8 +27643,8 @@ B_List.prototype.createXml = function(xmlDoc) {
  */
 B_List.importXml = function(blockNode) {
 	// The list is stored as a string
-	const listName = XmlWriter.getAttribute(blockNode, "list");
-	const list = CodeManager.findList(listName);
+	var listName = XmlWriter.getAttribute(blockNode, "list");
+	var list = CodeManager.findList(listName);
 	if (list != null) {
 		return new B_List(0, 0, list);
 	}
@@ -27700,8 +27699,8 @@ function B_AddToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
 	this.addPart(new LabelText(this, "add"));
 	/* Any type can be added to a list */
-	const snapType = Slot.snapTypes.numStrBool;
-	const inputType = Slot.outputTypes.any;
+	var snapType = Slot.snapTypes.numStrBool;
+	var inputType = Slot.outputTypes.any;
 	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
 	this.addPart(new LabelText(this, "to"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
@@ -27711,14 +27710,14 @@ B_AddToList.prototype.constructor = B_AddToList;
 /* Adds the item to the list */
 B_AddToList.prototype.startAction = function() {
 	/* Gets the SelectionData referring to the list */
-	const listD = this.slots[1].getData();
+	var listD = this.slots[1].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
 		/* Extracts the List from the SelectionData */
-		const list = listD.getValue();
+		var list = listD.getValue();
 		/* Gets the array value of the ListData stored in the List */
-		const array = list.getData().getValue();
+		var array = list.getData().getValue();
 		/* Gets the item to add */
-		const itemD = this.slots[0].getData();
+		var itemD = this.slots[0].getData();
 		/* Adds the item to the array */
 		if (itemD.isValid) {
 			array.push(itemD);
@@ -27742,17 +27741,17 @@ B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
 /* Deletes the item from the List if it exists */
 B_DeleteItemOfList.prototype.startAction = function() {
-	const listD = this.slots[1].getData();
+	var listD = this.slots[1].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
-		const indexD = this.slots[0].getData();
-		const list = listD.getValue();
-		const listData = list.getData();
-		const array = listData.getValue();
+		var indexD = this.slots[0].getData();
+		var list = listD.getValue();
+		var listData = list.getData();
+		var array = listData.getValue();
 		if (indexD.type === Data.types.selection && indexD.getValue() === "all") {
 			// Delete everything from the List
 			list.setData(new ListData());
 		} else {
-			const index = listData.getIndex(indexD);
+			var index = listData.getIndex(indexD);
 			if (index != null) {
 				// Delete the indicated index
 				array.splice(index, 1);
@@ -27777,17 +27776,17 @@ B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
 /* Inserts the item at the indicated position */
 B_InsertItemAtOfList.prototype.startAction = function() {
-	const listD = this.slots[2].getData();
+	var listD = this.slots[2].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
-		const indexD = this.slots[1].getData();
-		const list = listD.getValue();
-		const listData = list.getData();
-		const array = listData.getValue();
-		const itemD = this.slots[0].getData();
-		const index = listData.getIndex(indexD);
+		var indexD = this.slots[1].getData();
+		var list = listD.getValue();
+		var listData = list.getData();
+		var array = listData.getValue();
+		var itemD = this.slots[0].getData();
+		var index = listData.getIndex(indexD);
 		// If the value the user provided is too large, insert after the last element
 		if (index == null || indexD.getValue() > array.length) {
-			let insertAtEnd = indexD.type === Data.types.num && indexD.getValue() > array.length;
+			var insertAtEnd = indexD.type === Data.types.num && indexD.getValue() > array.length;
 			// Or if the user selected "last" (the only SelectionData)
 			insertAtEnd = insertAtEnd || (indexD.isSelection());
 			if (insertAtEnd) {
@@ -27824,14 +27823,14 @@ B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
 /* Replaces the item at the specified index with another one */
 B_ReplaceItemOfListWith.prototype.startAction = function() {
-	const listD = this.slots[1].getData();
+	var listD = this.slots[1].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
-		const indexD = this.slots[0].getData();
-		const list = listD.getValue();
-		const listData = list.getData();
-		const array = listData.getValue();
-		const itemD = this.slots[2].getData();
-		const index = listData.getIndex(indexD);
+		var indexD = this.slots[0].getData();
+		var list = listD.getValue();
+		var listData = list.getData();
+		var array = listData.getValue();
+		var itemD = this.slots[2].getData();
+		var index = listData.getIndex(indexD);
 		if (index == null) {
 			// Index is out of bounds, do nothing
 			return new ExecutionStatusDone();
@@ -27861,11 +27860,11 @@ B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
 /* Copies one list to another */
 B_CopyListToList.prototype.startAction = function() {
-	const listD1 = this.slots[0].getData();
-	const listD2 = this.slots[1].getData();
+	var listD1 = this.slots[0].getData();
+	var listD2 = this.slots[1].getData();
 	// If the second list is valid
 	if (listD2.type === Data.types.selection && !listD2.isEmpty()) {
-		let listDataToCopy;
+		var listDataToCopy;
 		if (listD1.type === Data.types.selection && !listD1.isEmpty()) {
 			// Retrieve the first list's data if it was selected from the DropSlot
 			listDataToCopy = listD1.getValue().getData();
@@ -27877,7 +27876,7 @@ B_CopyListToList.prototype.startAction = function() {
 			return new ExecutionStatusDone();
 		}
 		// Get the List from the SelectionData
-		const listToCopyTo = listD2.getValue();
+		var listToCopyTo = listD2.getValue();
 		// Copy the Data to it
 		listToCopyTo.setData(listDataToCopy.duplicate());
 	}
@@ -27898,13 +27897,13 @@ B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
 /* Gets the item form the list */
 B_ItemOfList.prototype.startAction = function() {
-	const listD = this.slots[1].getData();
-	let indexD;
+	var listD = this.slots[1].getData();
+	var indexD;
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
 		// If the list was selected, retrieve it
 		indexD = this.slots[0].getData();
-		const list = listD.getValue();
-		const listData = list.getData();
+		var list = listD.getValue();
+		var listData = list.getData();
 		// Index in and return the value
 		return new ExecutionStatusResult(this.getItemOfList(listData, indexD));
 	} else if (listD.type === Data.types.list) {
@@ -27924,8 +27923,8 @@ B_ItemOfList.prototype.startAction = function() {
  * @return {StringData} - The retrieved data, as a StringData
  */
 B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
-	const array = listData.getValue();
-	const index = listData.getIndex(indexD);
+	var array = listData.getValue();
+	var index = listData.getIndex(indexD);
 	if (index == null) {
 		return new StringData("", false);
 	} else {
@@ -27945,10 +27944,10 @@ B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
 /* Returns the number of items in the List or ListData */
 B_LengthOfList.prototype.startAction = function() {
-	const listD = this.slots[0].getData();
+	var listD = this.slots[0].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
-		const list = listD.getValue();
-		const array = list.getData().getValue();
+		var list = listD.getValue();
+		var array = list.getData().getValue();
 		return new ExecutionStatusResult(new NumData(array.length));
 	} else if (listD.type === Data.types.list) {
 		return new ExecutionStatusResult(new NumData(listD.getValue().length));
@@ -27963,22 +27962,22 @@ function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
 	this.addPart(new LabelText(this, Language.getStr("contains")));
-	const snapType = Slot.snapTypes.numStrBool;
-	const inputType = Slot.outputTypes.any;
+	var snapType = Slot.snapTypes.numStrBool;
+	var inputType = Slot.outputTypes.any;
 	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
 /* Returns BoolData indicating if the item is in the List */
 B_ListContainsItem.prototype.startAction = function() {
-	const listD = this.slots[0].getData();
+	var listD = this.slots[0].getData();
 	if (listD.type === Data.types.selection && !listD.isEmpty()) {
-		const list = listD.getValue();
-		const listData = list.getData();
-		const itemD = this.slots[1].getData();
+		var list = listD.getValue();
+		var listData = list.getData();
+		var itemD = this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listData, itemD));
 	} else if (listD.type === Data.types.list) {
-		const itemD = this.slots[1].getData();
+		var itemD = this.slots[1].getData();
 		return new ExecutionStatusResult(this.checkListContainsItem(listD, itemD));
 	} else {
 		return new ExecutionStatusResult(new BoolData(false, true));
@@ -27991,8 +27990,8 @@ B_ListContainsItem.prototype.startAction = function() {
  * @return {BoolData} - true iff itemD appears in listData
  */
 B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
-	const array = listData.getValue();
-	for (let i = 0; i < array.length; i++) {
+	var array = listData.getValue();
+	for (var i = 0; i < array.length; i++) {
 		if (Data.checkEquality(itemD, array[i])) {
 			return new BoolData(true, true);
 		}
