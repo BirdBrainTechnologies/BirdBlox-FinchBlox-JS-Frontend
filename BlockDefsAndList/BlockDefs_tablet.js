@@ -295,8 +295,8 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const result = status.result.split(" ")[mem.axis];
-			const num = Math.round(Number(result).getValue() * 100) / 100;
+			const result = new StringData( status.result.split(" ")[mem.axis] );
+			const num = Math.round(result.asNum().getValue() * 100) / 100;
 			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {

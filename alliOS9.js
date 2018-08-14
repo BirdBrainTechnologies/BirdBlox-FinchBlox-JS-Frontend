@@ -27201,8 +27201,8 @@ B_DeviceLocation.prototype.updateAction = function() {
 	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			var result = status.result.split(" ")[mem.axis];
-			var num = Math.round(Number(result).getValue() * 100) / 100;
+			var result = new StringData( status.result.split(" ")[mem.axis] );
+			var num = Math.round(result.asNum().getValue() * 100) / 100;
 			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
