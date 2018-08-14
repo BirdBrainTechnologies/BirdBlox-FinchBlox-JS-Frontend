@@ -389,10 +389,16 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 };
 
 TouchReceiver.touchStartDialogBlock = function(e) {
-	if (SaveManager.fileName == null) {
-		SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
-			SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
-		});
+	if (SaveManager.fileName == null)  {
+		if (OpenDialog.lastOpenFile != null) {
+			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
+			OpenDialog.lastOpenFile = null;
+			RowDialog.currentDialog.closeDialog();
+		} else {
+			SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+				SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
+			});
+		}
 	} else {
 		RowDialog.currentDialog.closeDialog();
 	}

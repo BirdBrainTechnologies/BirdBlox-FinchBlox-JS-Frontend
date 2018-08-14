@@ -27,6 +27,7 @@ OpenDialog.setConstants = function() {
 	OpenDialog.currentDialog = null; // The currently open dialog, can also be an OpenCloudDialog
 	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
 	OpenDialog.tabRowHeight = RowDialog.titleBarH;
+	OpenDialog.lastOpenFile = null;
 };
 
 /**
@@ -89,7 +90,7 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
-		SaveManager.userClose(SaveManager.userOpenFile(file));
+		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
 
@@ -293,6 +294,9 @@ OpenDialog.showDialog = function() {
 };
 
 OpenDialog.closeFileAndShowDialog = function() {
+	if (SaveManager.fileName != null) {
+		OpenDialog.lastOpenFile = SaveManager.fileName;
+	}
 	SaveManager.userClose(OpenDialog.showDialog);
 };
 

@@ -6446,10 +6446,16 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 };
 
 TouchReceiver.touchStartDialogBlock = function(e) {
-	if (SaveManager.fileName == null) {
-		SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
-			SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
-		});
+	if (SaveManager.fileName == null)  {
+		if (OpenDialog.lastOpenFile != null) {
+			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
+			OpenDialog.lastOpenFile = null;
+			RowDialog.currentDialog.closeDialog();
+		} else {
+			SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+				SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
+			});
+		}
 	} else {
 		RowDialog.currentDialog.closeDialog();
 	}
@@ -7038,8 +7044,7 @@ TitleBar.makeButtons = function() {
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
-	//TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
-	TB.fileBn.setCallbackFunction(OpenDialog.showDialog, true);
+	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
 
 	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
@@ -14876,6 +14881,7 @@ OpenDialog.setConstants = function() {
 	OpenDialog.currentDialog = null; // The currently open dialog, can also be an OpenCloudDialog
 	OpenDialog.cloudBnWidth = RowDialog.smallBnWidth * 1.6;
 	OpenDialog.tabRowHeight = RowDialog.titleBarH;
+	OpenDialog.lastOpenFile = null;
 };
 
 /**
@@ -14938,7 +14944,7 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
 OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
 	RowDialog.createMainBnWithText(file, bnWidth, x, y, contentGroup, function() {
 		this.closeDialog();
-		SaveManager.userClose(SaveManager.userOpenFile(file));
+		SaveManager.userOpenFile(file);
 	}.bind(this));
 };
 
@@ -15142,6 +15148,9 @@ OpenDialog.showDialog = function() {
 };
 
 OpenDialog.closeFileAndShowDialog = function() {
+	if (SaveManager.fileName != null) {
+		OpenDialog.lastOpenFile = SaveManager.fileName;
+	}
 	SaveManager.userClose(OpenDialog.showDialog);
 };
 
@@ -17586,7 +17595,7 @@ Setting.prototype.readValue = function(callbackFn){
 function SettingsManager() {
 	const SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
-	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");
+	SM.enableSnapNoise = new Setting("enableSnapNoise", "false");
 	SM.sideBarVisible = new Setting("sideBarVisible", "true");
 }
 
@@ -17602,6 +17611,7 @@ SettingsManager.loadSettings = function(callbackFn) {
 		});
 	});
 };
+
 /**
  * HtmlServer is a static class sends messages to the backend
  */
@@ -18937,6 +18947,8 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 			CodeManager.renameRecording(oldFilename, newName);
 			if (nextAction != null) nextAction();
 		}
+	} else if (OpenDialog.lastOpenFile == oldFilename) {
+		OpenDialog.lastOpenFile = newName
 	}
 	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
@@ -18951,14 +18963,10 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
 	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
 		if (response === "2") {
-			//If we are trying to delete the currently open file, close it first.
-			if (SaveManager.fileName === filename) {
-				SaveManager.userClose(function(response) {
-					SaveManager.delete(isRecording, filename, nextAction);
-				});
-			} else {
-				SaveManager.delete(isRecording, filename, nextAction);
+			if (OpenDialog.lastOpenFile == filename){
+				OpenDialog.lastOpenFile = null;
 			}
+			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);
 };

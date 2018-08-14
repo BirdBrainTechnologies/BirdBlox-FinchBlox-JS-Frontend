@@ -306,6 +306,8 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 			CodeManager.renameRecording(oldFilename, newName);
 			if (nextAction != null) nextAction();
 		}
+	} else if (OpenDialog.lastOpenFile == oldFilename) {
+		OpenDialog.lastOpenFile = newName
 	}
 	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
@@ -320,14 +322,10 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = "Are you sure you want to delete \"" + filename + "\"?";
 	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
 		if (response === "2") {
-			//If we are trying to delete the currently open file, close it first.
-			if (SaveManager.fileName === filename) {
-				SaveManager.userClose(function(response) {
-					SaveManager.delete(isRecording, filename, nextAction);
-				});
-			} else {
-				SaveManager.delete(isRecording, filename, nextAction);
+			if (OpenDialog.lastOpenFile == filename){
+				OpenDialog.lastOpenFile = null;
 			}
+			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);
 };
