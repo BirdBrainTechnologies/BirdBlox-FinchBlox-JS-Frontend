@@ -1,19 +1,34 @@
 /*
 color:textColor;
 */
-body
+html
 {
-    background-color:#333;
+    width: 100%;
+    height: 100%;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
-#MainSvg
+.mainBody
+{
+    background-color:#fff;
+	position: fixed;
+    width: 100%;
+    height: 100%;
+}
+.mainSvg
 {
     position:absolute;
 	top:0px;
-	right:0px;
-	left:0px;
-	bottom:0px;
+    left:0px;
+    /*right:0px;
+	bottom:0px;*/
 	height:100%;
 	width:100%;
+    pointer-events: none;
+}
+.mainSvg g
+{
+    pointer-events: auto;
 }
 path{
 	fill-rule:evenodd;
@@ -26,4 +41,41 @@ path{
 	-moz-user-select: none;			
 	-ms-user-select: none;			 
 	user-select: none;	                                 
+}
+.smoothScrollX {
+	overflow-y: hidden; /* has to be scroll, not auto */
+    overflow-x: scroll;
+	-webkit-overflow-scrolling: touch;
+}
+.smoothScrollY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+.smoothScrollXY {
+    overflow-y: scroll; /* has to be scroll, not auto */
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+.noScroll {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+.subBody
+{
+    padding:0px;
+    margin:0px;
+}
+.divLayer {
+    position:absolute;
+    top:0px;
+    right:0px;
+    left:0px;
+    bottom:0px;
+    height:100%;
+    width:100%;
+    pointer-events: none;
+}
+.divLayer div {
+    pointer-events: auto;
 }

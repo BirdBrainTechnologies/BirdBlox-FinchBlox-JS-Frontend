@@ -1,247 +1,392 @@
-function TabManager(){
-	var TM=TabManager;
-	TM.buildTabBar();
-	TM.tabList=new Array();
-	TM.activeTab=null;
+/**
+ * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
+ * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
+ * We decided not to have tabs, so there's just one tab, which is generated and controlled by the TabManager.
+ *
+ * The TabManager's main job is passing messages to the active tab
+ */
+function TabManager() {
+	const TM = TabManager;
+	TM.tabList = [];
+	TM.activeTab = null;
 	TM.createInitialTab();
 	TabManager.createTabSpaceBg();
-	TM.isRunning=false;
-	TM.scrolling=false;
+	TM.isRunning = false;
+	TM.scrolling = false;
+	TM.zooming = false;
 }
-TabManager.setGraphics=function(){
-	var TM=TabManager;
-	TM.bg=Colors.black;
-	TM.tabAreaHeight=TitleBar.height;
-	TM.activeTabFill=Colors.lightGray;
-	TM.hiddenTabFill=Colors.darkGray;
-	TM.tabSlantWidth=15;
-	TM.tabHMargin=7;
-	TM.tabMinW=80;
-	
-	TM.labelFill=Colors.white;
-	TM.labelFont="Arial";
-	TM.labelFontSize=14;
-	TM.labelFontCharH=12;
-	
-	TM.bgHeight=TitleBar.height+TM.tabAreaHeight;
-	TM.bgWidth=GuiElements.width;
-	TM.tabAreaX=BlockPalette.width;
-	TM.tabAreaY=TitleBar.height;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
 
-	TM.tabSpaceX=BlockPalette.width;
-	TM.tabSpaceY=TitleBar.height+TM.tabAreaHeight;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
-	TM.spaceScrollMargin=50;
+TabManager.setGraphics = function() {
+	const TM = TabManager;
+	TM.bg = Colors.black;
+
+	TM.minZoom = 0.35;
+	TM.maxZoom = 3;
+
+	TM.tabAreaX = BlockPalette.width;
+	if (GuiElements.smallMode) {
+		TM.tabAreaX = 0;
+	}
+	TM.tabAreaY = TitleBar.height;
+	TM.tabAreaWidth = GuiElements.width - TM.tabAreaXh;
+
+	/* No longer different from tabArea since tab bar was removed */
+	TM.tabSpaceX = TM.tabAreaX;
+	TM.tabSpaceY = TitleBar.height;
+	TM.tabSpaceWidth = GuiElements.width - TM.tabSpaceX;
+	TM.tabSpaceHeight = GuiElements.height - TM.tabSpaceY;
+	TM.spaceScrollMargin = 50;
+	TM.undoDeleteMarginBase = 40;
+	TM.undoDeleteMarginRand = 40;
 };
-TabManager.buildTabBar=function(){
-	var TM=TabManager;
-	TM.tabBgRect=GuiElements.draw.rect(0,0,TM.bgWidth,TM.bgHeight,TM.bg);
-	GuiElements.layers.TabsBg.appendChild(TM.tabBgRect);
-	TM.tabBarG=GuiElements.create.group(TM.tabAreaX,TM.tabAreaY);
-	GuiElements.layers.TabsBg.appendChild(TM.tabBarG);
-};
-TabManager.createTabSpaceBg=function(){
-	var TM=TabManager;
-	TM.bgRect=GuiElements.draw.rect(TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight,Colors.lightGray);
-	TouchReceiver.addListenersTabSpace(TM.bgRect)
+
+/**
+ * Creates the rectangle for the canvas
+ */
+TabManager.createTabSpaceBg = function() {
+	const TM = TabManager;
+	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
+	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
-TabManager.updatePositions=function(){
-	var x=0;
-	for(var i=0;i<TabManager.tabList.length;i++){
-		x=TabManager.tabList[i].updatePosition(x);
-	}
-}
-TabManager.addTab=function(tab){
+
+/**
+ * Adds a Tab to the list (called in Tab constructor)
+ * @param {Tab} tab
+ */
+TabManager.addTab = function(tab) {
 	TabManager.tabList.push(tab);
-}
-TabManager.removeTab=function(tab){
-	var index=TabManager.tabList.indexOf(tab);
-	TabManager.stackList.splice(index,1);
-}
-TabManager.createInitialTab=function(){
-	var TM=TabManager;
-	var t=new Tab(null,"Scripts");
+};
+
+/**
+ * Removes a tab from the list
+ * @param {Tab} tab
+ */
+TabManager.removeTab = function(tab) {
+	const index = TabManager.tabList.indexOf(tab);
+	TabManager.stackList.splice(index, 1);
+};
+
+/**
+ * Creates a tab to be the initial Tab
+ */
+TabManager.createInitialTab = function() {
+	const TM = TabManager;
+	const t = new Tab();
 	TM.activateTab(TM.tabList[0]);
-	TM.updatePositions();
-}
-TabManager.activateTab=function(tab){
-	if(TabManager.activeTab!=null){
-		TabManager.activeTab.deactivate();
-	}
+};
+
+/**
+ * Sets a tab as the active Tab
+ * @param {Tab} tab
+ */
+TabManager.activateTab = function(tab) {
 	tab.activate();
-	TabManager.activeTab=tab;
-}
-TabManager.eventFlagClicked=function(){
+	TabManager.activeTab = tab;
+};
+
+/**
+ * Tells each Tab to update execution
+ * @return {ExecutionStatus} - Whether the tab is currently running
+ */
+TabManager.updateRun = function() {
+	if (!this.isRunning) {
+		return new ExecutionStatusDone();
+	}
+	let rVal = false;
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		rVal = TabManager.tabList[i].updateRun().isRunning() || rVal;
+	}
+	this.isRunning = rVal;
+	if (this.isRunning) {
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusDone();
+	}
+};
+
+/**
+ * Stops execution in the tab
+ */
+TabManager.stop = function() {
+	TabManager.passRecursively("stop");
+	this.isRunning = false;
+};
+
+/**
+ * Tells the tab to stop execution everywhere except one stack
+ * @param {BlockStack} stack
+ */
+TabManager.stopAllButStack = function(stack) {
+	TabManager.passRecursively("stopAllButStack", stack);
+};
+
+/**
+ * Passes message up from Tab to start execution
+ */
+TabManager.startRun = function() {
+	TabManager.isRunning = true;
+	CodeManager.startUpdateTimer();
+};
+
+/* The TabManager tracks information about scrolling before passing messages to the tab.  This way the TouchReceiver
+ * can send messages straight to the TabManager instead of trying to find the active Tab */
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ */
+TabManager.startScroll = function(x, y) {
+	const TM = TabManager;
+	if (!TM.scrolling) {
+		TM.scrolling = true;
+		TM.activeTab.startScroll(x, y);
+	}
+};
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ */
+TabManager.updateScroll = function(x, y) {
+	const TM = TabManager;
+	if (TM.scrolling) {
+		TM.activeTab.updateScroll(x, y);
+	}
+};
+/**
+ * Passes message to Tab
+ */
+TabManager.endScroll = function() {
+	const TM = TabManager;
+	if (TM.scrolling) {
+		TM.scrolling = false;
+		TM.activeTab.endScroll();
+	}
+};
+/**
+ * Passes message to Tab
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ */
+TabManager.startZooming = function(x1, y1, x2, y2) {
+	const TM = TabManager;
+	if (!TM.zooming) {
+		TM.zooming = true;
+		TM.activeTab.startZooming(x1, y1, x2, y2);
+	}
+};
+/**
+ * Passes message to Tab
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ */
+TabManager.updateZooming = function(x1, y1, x2, y2) {
+	const TM = TabManager;
+	if (TM.zooming) {
+		TM.activeTab.updateZooming(x1, y1, x2, y2);
+	}
+};
+/**
+ * Passes message to Tab
+ */
+TabManager.endZooming = function() {
+	const TM = TabManager;
+	if (TM.zooming) {
+		TM.zooming = false;
+		TM.activeTab.endZooming();
+	}
+};
+
+/**
+ * Tells tab to restore a deleted stack from XML data
+ * @param {Node} stackNode - The node to get the data from
+ * @return {boolean} - Whether the data was valid
+ */
+TabManager.undoDelete = function(stackNode) {
+	return TabManager.activeTab.undoDelete(stackNode);
+};
+
+/**
+ * Generates XML for the all the Tabs
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node} - The XML node containing the data
+ */
+TabManager.createXml = function(xmlDoc) {
+	const TM = TabManager;
+	const tabs = XmlWriter.createElement(xmlDoc, "tabs");
+	for (let i = 0; i < TM.tabList.length; i++) {
+		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
+	}
+	return tabs;
+};
+
+/**
+ * Imports the Tab data from the XML
+ * @param {Node} tabsNode - The XML node containing information about the Tabs
+ */
+TabManager.importXml = function(tabsNode) {
+	const TM = TabManager;
+	if (tabsNode != null) {
+		const tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
+		for (let i = 0; i < tabNodes.length; i++) {
+			Tab.importXml(tabNodes[i]);
+		}
+	}
+	if (TM.tabList.length === 0) {
+		TM.createInitialTab();
+	} else {
+		TM.activateTab(TM.tabList[0]);
+	}
+};
+
+/**
+ * Clears and removes all tabs
+ */
+TabManager.deleteAll = function() {
+	const TM = TabManager;
+	for (let i = 0; i < TM.tabList.length; i++) {
+		TM.tabList[i].delete();
+	}
+	TM.tabList = [];
+	TM.activeTab = null;
+	TM.isRunning = false;
+	TM.scrolling = false;
+};
+
+/* Messages passed directly to tabs */
+TabManager.eventFlagClicked = function() {
 	TabManager.passRecursively("eventFlagClicked");
 };
-TabManager.eventBroadcast=function(message){
-	TabManager.passRecursively("eventBroadcast",message);
+/**
+ * @param {string} message
+ */
+TabManager.eventBroadcast = function(message) {
+	TabManager.passRecursively("eventBroadcast", message);
 };
-TabManager.checkBroadcastRunning=function(message){
-	if(this.isRunning){
-		for(var i=0;i<TabManager.tabList.length;i++){
-			if(TabManager.tabList[i].checkBroadcastRunning(message)){
+TabManager.updateAvailableMessages = function() {
+	TabManager.passRecursively("updateAvailableMessages");
+};
+/**
+ * @param {Variable} variable
+ */
+TabManager.renameVariable = function(variable) {
+	TabManager.passRecursively("renameVariable", variable);
+};
+/**
+ * @param {Variable} variable
+ */
+TabManager.deleteVariable = function(variable) {
+	TabManager.passRecursively("deleteVariable", variable);
+};
+/**
+ * @param {List} list
+ */
+TabManager.renameList = function(list) {
+	TabManager.passRecursively("renameList", list);
+};
+/**
+ * @param {List} list
+ */
+TabManager.deleteList = function(list) {
+	TabManager.passRecursively("deleteList", list);
+};
+
+/* Recursive functions that return true if any tab returns true */
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+TabManager.checkBroadcastRunning = function(message) {
+	if (this.isRunning) {
+		for (let i = 0; i < TabManager.tabList.length; i++) {
+			if (TabManager.tabList[i].checkBroadcastRunning(message)) {
 				return true;
 			}
 		}
 	}
 	return false;
 };
-TabManager.checkBroadcastMessageAvailable=function(message){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkBroadcastMessageAvailable(message)){
+/**
+ * @param {Variable} variable
+ * @return {boolean}
+ */
+TabManager.checkVariableUsed = function(variable) {
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		if (TabManager.tabList[i].checkVariableUsed(variable)) {
 			return true;
 		}
 	}
 	return false;
 };
-TabManager.updateAvailableMessages=function(){
-	TabManager.passRecursively("updateAvailableMessages");
-};
-TabManager.updateRun=function(){	
-	if(!this.isRunning){
-		return false;
-	}
-	var rVal=false;
-	for(var i=0;i<TabManager.tabList.length;i++){
-		rVal=TabManager.tabList[i].updateRun()||rVal;
-	}
-	this.isRunning=rVal;
-	return this.isRunning;
-}
-TabManager.stop=function(){
-	TabManager.passRecursively("stop");
-	this.isRunning=false;
-}
-TabManager.stopAllButStack=function(stack){
-	TabManager.passRecursively("stopAllButStack",stack);
-};
-TabManager.startRun=function(){
-	TabManager.isRunning=true;
-	CodeManager.startUpdateTimer();
-}
-TabManager.startScoll=function(x,y){
-	var TM=TabManager;
-	if(!TM.scrolling){
-		TM.scrolling=true;
-		TM.activeTab.startScroll(x,y);
-	}
-};
-TabManager.updateScroll=function (x,y){
-	var TM=TabManager;
-	if(TM.scrolling){
-		TM.activeTab.updateScroll(x,y);
-	}
-};
-TabManager.endScroll=function(){
-	var TM=TabManager;
-	if(TM.scrolling){
-		TM.scrolling=false;
-		TM.activeTab.endScroll();
-	}
-};
-TabManager.createXml=function(xmlDoc){
-	var TM=TabManager;
-	var tabs=XmlWriter.createElement(xmlDoc,"tabs");
-	XmlWriter.setAttribute(tabs,"active",TM.activeTab.name);
-	for(var i=0;i<TM.tabList.length;i++){
-		tabs.appendChild(TM.tabList[i].createXml(xmlDoc));
-	}
-	return tabs;
-};
-TabManager.importXml=function(tabsNode){
-	var TM=TabManager;
-	if(tabsNode!=null) {
-		var tabNodes = XmlWriter.findSubElements(tabsNode, "tab");
-		var active = XmlWriter.getAttribute(tabsNode, "active");
-		for (var i = 0; i < tabNodes.length; i++) {
-			Tab.importXml(tabNodes[i]);
-		}
-	}
-	TM.updatePositions();
-	if(TM.tabList.length==0){
-		TM.createInitialTab();
-	}
-	else if(active==null){
-		TM.activateTab(TM.tabList[0]);
-	}
-	else{
-		for(i=0;i<TM.tabList.length;i++){
-			if(TM.tabList[i].name==active){
-				TM.activateTab(TM.tabList[i]);
-				return;
-			}
-		}
-		TM.activateTab(TM.tabList[0]);
-	}
-};
-TabManager.deleteAll=function(){
-	var TM=TabManager;
-	for(var i=0;i<TM.tabList.length;i++){
-		TM.tabList[i].delete();
-	}
-	TM.tabList=new Array();
-	TM.activeTab=null;
-	TM.isRunning=false;
-	TM.scrolling=false;
-};
-TabManager.renameVariable=function(variable){
-	TabManager.passRecursively("renameVariable",variable);
-};
-TabManager.deleteVariable=function(variable){
-	TabManager.passRecursively("deleteVariable",variable);
-};
-TabManager.renameList=function(list){
-	TabManager.passRecursively("renameList",list);
-};
-TabManager.deleteList=function(list){
-	TabManager.passRecursively("deleteList",list);
-};
-TabManager.checkVariableUsed=function(variable){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkVariableUsed(variable)){
+/**
+ * @param {List} list
+ * @return {boolean}
+ */
+TabManager.checkListUsed = function(list) {
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		if (TabManager.tabList[i].checkListUsed(list)) {
 			return true;
 		}
 	}
 	return false;
 };
-TabManager.checkListUsed=function(list){
-	for(var i=0;i<TabManager.tabList.length;i++){
-		if(TabManager.tabList[i].checkListUsed(list)){
-			return true;
-		}
-	}
-	return false;
-};
-TabManager.hideHBDropDowns=function(){
-	TabManager.passRecursively("hideHBDropDowns");
-};
-TabManager.showHBDropDowns=function(){
-	TabManager.passRecursively("showHBDropDowns");
-};
-TabManager.countHBsInUse=function(){
-	var largest=1;
-	for(var i=0;i<TabManager.tabList.length;i++){
-		largest=Math.max(largest,TabManager.tabList[i].countHBsInUse());
+
+/**
+ * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device
+ * @param deviceClass - Subclass of device
+ * @return {number}
+ */
+TabManager.countDevicesInUse = function(deviceClass) {
+	let largest = 0;
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		largest = Math.max(largest, TabManager.tabList[i].countDevicesInUse(deviceClass));
 	}
 	return largest;
 };
-TabManager.passRecursively=function(functionName){
-	var args = Array.prototype.slice.call(arguments, 1);
-	for(var i=0;i<TabManager.tabList.length;i++){
-		var currentList=TabManager.tabList[i];
-		currentList[functionName].apply(currentList,args);
+
+/**
+ * Passes a message down to the Blocks/Slots in the TabManager
+ * @param {string} message - The message to send.  Probably a function in the target object
+ */
+TabManager.passRecursivelyDown = function(message) {
+	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+	TabManager.passRecursively.apply(TabManager, arguments);
+};
+
+/**
+ * Calls the function on all Tabs in this TabManager
+ * @param {function} functionName - The name of the function to call
+ */
+TabManager.passRecursively = function(functionName) {
+	const args = Array.prototype.slice.call(arguments, 1);
+	for (let i = 0; i < TabManager.tabList.length; i++) {
+		const currentList = TabManager.tabList[i];
+		currentList[functionName].apply(currentList, args);
 	}
 };
-TabManager.updateZoom=function(){
-	var TM=TabManager;
-	TM.bgWidth=GuiElements.width;
-	TM.tabAreaWidth=GuiElements.width-BlockPalette.width;
-	TM.tabSpaceWidth=GuiElements.width-TM.tabSpaceX;
-	TM.tabSpaceHeight=GuiElements.height-TM.tabSpaceY;
-	GuiElements.update.rect(TM.tabBgRect,0,0,TM.bgWidth,TM.bgHeight);
-	GuiElements.update.rect(TM.bgRect,TM.tabSpaceX,TM.tabSpaceY,TM.tabSpaceWidth,TM.tabSpaceHeight);
+
+/**
+ * Updates the background rectangle and tells children to update dimensions
+ */
+TabManager.updateZoom = function() {
+	const TM = TabManager;
+	TM.setGraphics();
+	GuiElements.update.rect(TM.bgRect, TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight);
+	TabManager.passRecursively("updateZoom");
+};
+
+/**
+ * Gets the zoom level of the active tab
+ * @return {number}
+ */
+TabManager.getActiveZoom = function() {
+	if (TabManager.activeTab == null) {
+		return 1;
+	}
+	return TabManager.activeTab.getZoom();
 };

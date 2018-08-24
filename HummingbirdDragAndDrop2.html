@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hummingbird Drag And Drop</title>
+        <link href="MyCSS.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="version.js"></script>
+		<script type="text/javascript" src="DebugOptions.js"></script>
+		<script type="text/javascript" src="Data/Data.js"></script>
+		<script type="text/javascript" src="Data/NumData.js"></script>
+		<script type="text/javascript" src="Data/BoolData.js"></script>
+		<script type="text/javascript" src="Data/StringData.js"></script>
+		<script type="text/javascript" src="Data/ListData.js"></script>
+		<script type="text/javascript" src="Data/SelectionData.js"></script>
+		<script type="text/javascript" src="ExecutionStatus/ExecutionStatus.js"></script>
+		<script type="text/javascript" src="ExecutionStatus/ExecutionStatusResult.js"></script>
+		<script type="text/javascript" src="ExecutionStatus/ExecutionStatusError.js"></script>
+		<script type="text/javascript" src="ExecutionStatus/ExecutionStatusDone.js"></script>
+		<script type="text/javascript" src="ExecutionStatus/ExecutionStatusRunning.js"></script>
+		<script type="text/javascript" src="Timer.js"></script>
+		<script type="text/javascript" src="Variable.js"></script>
+		<script type="text/javascript" src="List.js"></script>
+		<script type="text/javascript" src="Language.js"></script>
+		<script type="text/javascript" src="Device/Device.js"></script>
+		<script type="text/javascript" src="Device/DeviceWithPorts.js"></script>
+		<script type="text/javascript" src="Device/DeviceManager.js"></script>
+		<script type="text/javascript" src="Device/DeviceHummingbird.js"></script>
+    <script type="text/javascript" src="Device/DeviceHummingbirdBit.js"></script>
+    <script type="text/javascript" src="Device/DeviceMicroBit.js"></script>
+		<script type="text/javascript" src="Device/DeviceFlutter.js"></script>
+		<script type="text/javascript" src="Device/DeviceFinch.js"></script>
+		<script type="text/javascript" src="TabletSensors.js"></script>
+
+
+		<script type="text/javascript" src="GuiElements.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockList.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/Colors.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/Font.js"></script>
+		<script type="text/javascript" src="SVGIcons/VectorPaths.js"></script>
+		<script type="text/javascript" src="Images/ImageList.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/BlockGraphics.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/Sound.js"></script>
+		<script type="text/javascript" src="TouchReceiver.js"></script>
+		<script type="text/javascript" src="UIParts/TitleBar.js"></script>
+		<script type="text/javascript" src="UIParts/BlockPalette/BlockPalette.js"></script>
+		<script type="text/javascript" src="BlockContainers/DisplayStack.js"></script>
+		<script type="text/javascript" src="UIParts/BlockPalette/CategoryBN.js"></script>
+		<script type="text/javascript" src="UIParts/BlockPalette/Category.js"></script>
+		<script type="text/javascript" src="UIParts/BlockPalette/CollapsibleSet.js"></script>
+		<script type="text/javascript" src="UIParts/BlockPalette/CollapsibleItem.js"></script>
+		<script type="text/javascript" src="UIParts/Button.js"></script>
+		<script type="text/javascript" src="UIParts/ShowHideButton.js"></script>
+		<script type="text/javascript" src="UIParts/DeviceStatusLight.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Overlay.js"></script>
+		<script type="text/javascript" src="UIParts/TabRow/TabRow.js"></script>
+		<script type="text/javascript" src="UIParts/TabRow/CloseButton.js"></script>
+
+		<script type="text/javascript" src="UIParts/InputSystem/InputSystem.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputDialog.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/InputPad.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/InputWidget.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/LabelWidget.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/NumPadWidget.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/DisplayNum.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/SelectPadWidget.js"></script>
+		<script type="text/javascript" src="UIParts/InputSystem/InputPad/SoundInputPad.js"></script>
+
+
+		<script type="text/javascript" src="UIParts/Overlay/BubbleOverlay.js"></script>
+		<script type="text/javascript" src="UIParts/ResultBubble.js"></script>
+		<script type="text/javascript" src="UIParts/MenuBnList/SmoothScrollBox.js"></script>
+		<script type="text/javascript" src="UIParts/MenuBnList/SmoothMenuBnList.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/Menu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/BatteryMenu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/FileMenu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/DebugMenu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/ViewMenu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/SettingsMenu.js"></script>
+		<script type="text/javascript" src="UIParts/Overlay/Menu/DeviceMenu.js"></script>
+		<script type="text/javascript" src="UIParts/BlockContextMenu.js"></script>
+		<script type="text/javascript" src="SVGIcons/VectorIcon.js"></script>
+		<script type="text/javascript" src="UIParts/Highlighter.js"></script>
+		<script type="text/javascript" src="UIParts/DisplayBox/DisplayBoxManager.js"></script>
+		<script type="text/javascript" src="UIParts/DisplayBox/DisplayBox.js"></script>
+		<script type="text/javascript" src="CodeManager.js"></script>
+		<script type="text/javascript" src="UIParts/TabManager/TabManager.js"></script>
+		<script type="text/javascript" src="UIParts/TabManager/Tab.js"></script>
+		<script type="text/javascript" src="RecordingManager.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/RowDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/OpenDialog/OpenDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/OpenDialog/OpenCloudDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/OpenDialog/FileList.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/ConnectMultipleDialog/ConnectMultipleDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/RecordingDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/ConnectMultipleDialog/RobotConnectionList.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/DiscoverDialog.js"></script>
+		<script type="text/javascript" src="UIParts/Dialogs/OpenDialog/FileContextMenu.js"></script>
+
+		<script type="text/javascript" src="UIParts/TabManager/OverflowArrows.js"></script>
+		<script type="text/javascript" src="BlockContainers/BlockStack.js"></script>
+		<script type="text/javascript" src="HttpRequestBuilder.js"></script>
+		<script type="text/javascript" src="Setting.js"></script>
+		<script type="text/javascript" src="SettingsManager.js"></script>
+		<script type="text/javascript" src="HtmlServer.js"></script>
+		<script type="text/javascript" src="DialogManager.js"></script>
+		<script type="text/javascript" src="CallbackManager.js"></script>
+		<script type="text/javascript" src="XmlWriter.js"></script>
+		<script type="text/javascript" src="SaveManager.js"></script>
+		<script type="text/javascript" src="UndoManager.js"></script>
+
+		<script type="text/javascript" src="Block/Block.js"></script>
+		<script type="text/javascript" src="Block/CommandBlock.js"></script>
+		<script type="text/javascript" src="Block/ReporterBlock.js"></script>
+		<script type="text/javascript" src="Block/PredicateBlock.js"></script>
+		<script type="text/javascript" src="Block/HatBlock.js"></script>
+		<script type="text/javascript" src="Block/LoopBlock.js"></script>
+		<script type="text/javascript" src="Block/DoubleLoopBlock.js"></script>
+		<script type="text/javascript" src="Block/CalibrateBlock.js"></script>
+
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/SlotShape.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/EditableSlotShape.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/RectSlotShape.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/HexSlotShape.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/RoundSlotShape.js"></script>
+		<script type="text/javascript" src="ColorsGraphicsAndValues/SlotShape/DropSlotShape.js"></script>
+
+		<script type="text/javascript" src="BlockParts/BlockPart.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/Slot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/HexSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/EditableSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/RectSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/RoundSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/DropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/VarDropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/ListDropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/PortSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/BroadcastDropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/DeviceDropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/DropSlot/SoundDropSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/BoolSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/NumSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/StringSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/NumOrStringSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/Slot/EditableSlot/IndexSlot.js"></script>
+    <script type="text/javascript" src="BlockParts/Slot/EditableSlot/ToggleSlot.js"></script>
+
+		<script type="text/javascript" src="BlockParts/Slot/BlockSlot.js"></script>
+		<script type="text/javascript" src="BlockParts/LabelText.js"></script>
+		<script type="text/javascript" src="BlockParts/BlockIcon.js"></script>
+
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_deviceWithPorts.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_hummingbird.js"></script>
+    <script type="text/javascript" src="BlockDefsAndList/BlockDefs_microbit.js"></script>
+    <script type="text/javascript" src="BlockDefsAndList/BlockDefs_hummingbirdbit.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_flutter.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_finch.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_control.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_sensing.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_operators.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_tablet.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_sound.js"></script>
+		<script type="text/javascript" src="BlockDefsAndList/BlockDefs_variables.js"></script>
+
+		<!--Prevents webview from scrolling/zooming.  From: http://stackoverflow.com/questions/7733703/how-do-i-disable-scrolling-on-an-ipad-webapp-->
+		<meta name="viewport" content="user-scalable=1.0,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<link rel="apple-touch-icon" href="AppIcon.png"/>
+    </head>
+    <body style="padding:0px;margin:0px;" class = "mainBody">
+
+		<!--<span id="debug2" class="noselect">hi</span>-->
+		<!--<img src="layout.png" style="width:100%;display:none;" id="testImage"/>-->
+        <svg id="backSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+			<defs id="SvgDefs">
+			</defs>
+			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
+		</svg>
+		<div id="paletteScrollDiv" class="divLayer">
+		</div>
+		<svg id="middleSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+			<!--<image xlink:href="Screenshot.png" x="0" y="0" height="356px" width="259px"/>-->
+		</svg>
+		<div id="frontScrollDiv" class="divLayer">
+		</div>
+		<svg id="frontSvg" class="mainSvg" xmlns:xlink="http://www.w3.org/2000/xlink">
+		</svg>
+		<div id="overlayOverlayScrollDiv" class="divLayer">
+		</div>
+		<span id="debug" class="noselect" style="color:#fff; position:absolute; margin-left:300px;"></span>
+    </body>
+</html>
