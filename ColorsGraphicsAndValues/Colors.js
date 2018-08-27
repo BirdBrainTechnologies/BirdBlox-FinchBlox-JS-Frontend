@@ -41,7 +41,7 @@ Colors.setCategory = function() {
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 1;
+	Colors.gradEnd = 0.75;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };

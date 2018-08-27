@@ -2,7 +2,7 @@
  * A key UI element that creates a button.  Buttons can trigger a function when they are pressed/released and
  * can contain an icon, image, text, or combination.  They are drawn as soon as the constructor is called, and
  * can ten have text and callbacks added on.
- * 
+ *
  * @param {number} x - The x coord the button should appear at
  * @param {number} y - The y coord the button should appear at
  * @param {number} width - The width of the button
@@ -81,7 +81,7 @@ Button.prototype.addText = function(text, font) {
 	this.textE = GuiElements.draw.text(0, 0, "", font, Button.foreground);
 	GuiElements.update.textLimitWidth(this.textE, text, this.width);
 	this.group.appendChild(this.textE);
-	
+
 	// Text is centered
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = (this.width - textW) / 2;
@@ -95,17 +95,21 @@ Button.prototype.addText = function(text, font) {
  * Adds an icon to the button
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height the icon should have in the button
+ * @param {number} xOffset - Distance from center to place icon. Default 0.
  */
-Button.prototype.addIcon = function(pathId, height) {
+Button.prototype.addIcon = function(pathId, height, xOffset) {
 	if (height == null) {
 		height = Button.defaultIconH;
+	}
+	if (xOffset == null) {
+		xOffset = 0;
 	}
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = true;
 	// Icon is centered vertiacally and horizontally.
 	const iconW = VectorIcon.computeWidth(pathId, height);
-	const iconX = (this.width - iconW) / 2;
+	const iconX = xOffset + (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
 	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);

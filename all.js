@@ -4698,7 +4698,7 @@ Colors.setCategory = function() {
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 1;
+	Colors.gradEnd = 0.75;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };
@@ -6994,13 +6994,13 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - TB.buttonMargin;
 	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
-	TB.debugX = TB.batteryBnX - TB.longButtonW - 3 * TB.buttonMargin;
+	TB.debugX = TB.batteryBnX - TB.longButtonW - TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
-	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
+	TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
@@ -7010,7 +7010,7 @@ TitleBar.setGraphicsPart2 = function() {
 	if (TB.undoBnX < suggestedUndoBnX) {
 		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
 	}
-	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
+	TB.statusX = TB.hummingbirdBnX + 2 * TB.buttonMargin;
 };
 
 /**
@@ -7035,12 +7035,14 @@ TitleBar.makeButtons = function() {
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
-	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
-	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
+  TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+  TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+
+	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+	const hbBnIconOffset = 2 * TB.buttonMargin;
+	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
@@ -8522,7 +8524,7 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
  * A key UI element that creates a button.  Buttons can trigger a function when they are pressed/released and
  * can contain an icon, image, text, or combination.  They are drawn as soon as the constructor is called, and
  * can ten have text and callbacks added on.
- * 
+ *
  * @param {number} x - The x coord the button should appear at
  * @param {number} y - The y coord the button should appear at
  * @param {number} width - The width of the button
@@ -8601,7 +8603,7 @@ Button.prototype.addText = function(text, font) {
 	this.textE = GuiElements.draw.text(0, 0, "", font, Button.foreground);
 	GuiElements.update.textLimitWidth(this.textE, text, this.width);
 	this.group.appendChild(this.textE);
-	
+
 	// Text is centered
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = (this.width - textW) / 2;
@@ -8615,17 +8617,21 @@ Button.prototype.addText = function(text, font) {
  * Adds an icon to the button
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height the icon should have in the button
+ * @param {number} xOffset - Distance from center to place icon. Default 0.
  */
-Button.prototype.addIcon = function(pathId, height) {
+Button.prototype.addIcon = function(pathId, height, xOffset) {
 	if (height == null) {
 		height = Button.defaultIconH;
+	}
+	if (xOffset == null) {
+		xOffset = 0;
 	}
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = true;
 	// Icon is centered vertiacally and horizontally.
 	const iconW = VectorIcon.computeWidth(pathId, height);
-	const iconX = (this.width - iconW) / 2;
+	const iconX = xOffset + (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
 	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
@@ -9041,6 +9047,7 @@ Button.prototype.markAsOverlayPart = function(overlay) {
 Button.prototype.unmarkAsOverlayPart = function() {
 	this.partOfOverlay = null;
 };
+
 /**
  * A button with an arrow that shows/hides something.  Currently, this is just used for showing/hiding the palette on
  * small screens.  The button is not created until build() is called
