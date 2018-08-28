@@ -54,7 +54,7 @@ RoundSlotShape.prototype.updateDim = function() {
  */
 RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE, 0, 3, this.width, this.height, 1, true); //Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
 };
 
 /**

@@ -5144,7 +5144,7 @@ BlockGraphics.SetLoop = function() {
 
 	// Minimum width of loop blocks
 	BlockGraphics.loop.width = 40;
-	
+
 	BlockGraphics.loop.bottomH = 7;
 	BlockGraphics.loop.side = 7;
 };
@@ -5347,7 +5347,7 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
 	var radius = height / 2;
 	var flatWidth = width - height;
 	var path = "";
-	path += "m " + (x + radius) + "," + (y + height - 2);
+	path += "m " + (x + radius) + "," + (y + height);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;
@@ -5785,6 +5785,7 @@ BlockGraphics.bringToFront = function(obj, layer) {
 	obj.remove();
 	layer.appendChild(obj);
 };
+
 /* Recordings and sound effects are cached by static properties in the Sound class.  An instance of the sound class
  * represents a single sound or recording.  Sound playback is handled by static functions.  Note that sound recording
  * is handled by the RecordingManager, not in the Sound class
@@ -19672,10 +19673,10 @@ Block.prototype.updateDim = function() {
 		                lineHeight[currentLine] = this.parts[i].height + 12;
                         break;
 		            case 1:
-		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 2:
-		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 7:
 		                 lineHeight[currentLine] = this.parts[i].height + 7;
@@ -19687,7 +19688,7 @@ Block.prototype.updateDim = function() {
 		     } else {
 		        switch (this.type) {
 		            case 1:
-			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            lineHeight[currentLine] = this.parts[i].height;
 			            break;
 			        default:
 			            lineHeight[currentLine] = this.parts[i].height;
@@ -21092,7 +21093,7 @@ RoundSlotShape.prototype.updateDim = function() {
  */
 RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE, 0, 3, this.width, this.height, 1, true); //Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
 };
 
 /**
@@ -21112,6 +21113,7 @@ RoundSlotShape.prototype.deselect = function() {
 	EditableSlotShape.prototype.deselect.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
+
 /**
  * Controls the DropDown graphic for a DropSlot
  * @param {Slot} slot
