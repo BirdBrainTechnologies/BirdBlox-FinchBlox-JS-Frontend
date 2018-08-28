@@ -6631,18 +6631,17 @@ TouchReceiver.touchend = function(e) {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
 		    // tapping a block in the display stack runs the block once
-		    var x = TR.target.stack.getAbsX();
-            var y = TR.target.stack.getAbsY();
-            TR.targetType = "block";
-            TR.target.updateRun();
+        var execStatus = TR.target.updateRun();
+				if (!execStatus.isRunning) {
             // start the execution of a block
             TR.target.startAction();
-            setTimeout(function(){
-                // wait for the response before trying to fetch the response and display the result
-                TR.target.displayResult(TR.target.updateAction().getResult());
-            }, 100);
-            // set the block to inactive state after running it.
-            TR.target.running = 0;
+				}
+
+        setTimeout(function(){
+            // wait for the response before trying to fetch the response and display the result
+						execStatus = TR.target.updateRun();
+            TR.target.displayResult(execStatus.getResult());
+        }, 100);
 		}
 	} else {
 		TR.touchDown = false;
@@ -11335,7 +11334,7 @@ SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, colo
 		}
 	}
 	if (icon != null && color != null) {
-	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
+	    bn.addColorIcon(icon, TitleBar.bnIconH * 0.7, color);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
@@ -11641,7 +11640,7 @@ Menu.prototype.updateZoom = function() {
 	}
 };
 /**
- * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * Top bar menu used to view battery statuses for all connected devices
  * @param {Button} button
  * @constructor
  */
@@ -11687,6 +11686,7 @@ BatteryMenu.getColorForBatteryStatus = function(status) {
         return Colors.lightGray;
     }
 }
+
 /**
  * Deprecated class that used to be used as a file menu
  * @param {Button} button
@@ -24185,7 +24185,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
  * @constructor
  */
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
-									 minVal, maxVal, displayUnits){
+									 minVal, maxVal, displayUnits, defaultVal){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
@@ -24196,10 +24196,15 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
 	this.displayUnits = displayUnits;
+	if (defaultVal == null){
+		this.defaultValue = 0;
+	} else {
+		this.defaultValue = defaultVal;
+	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	var numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	var numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
 }
@@ -24987,16 +24992,16 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
  */
 
  //MARK: hummingbird bit outputs
-function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
     B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
-        minVal, maxVal, displayUnits);
+        minVal, maxVal, displayUnits, defaultVal);
 }
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle", 90);
 
     this.addPart(new LabelText(this,'\xBA'));
 }

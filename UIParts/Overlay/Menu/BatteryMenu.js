@@ -1,5 +1,5 @@
 /**
- * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * Top bar menu used to view battery statuses for all connected devices
  * @param {Button} button
  * @constructor
  */

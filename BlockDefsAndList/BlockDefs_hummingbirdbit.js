@@ -2,16 +2,16 @@
  */
 
  //MARK: hummingbird bit outputs
-function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
     B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
-        minVal, maxVal, displayUnits);
+        minVal, maxVal, displayUnits, defaultVal);
 }
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle", 90);
 
     this.addPart(new LabelText(this,'\xBA'));
 }
