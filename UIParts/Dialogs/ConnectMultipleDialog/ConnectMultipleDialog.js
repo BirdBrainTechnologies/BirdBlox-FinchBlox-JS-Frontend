@@ -120,7 +120,7 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
     //let connectionX = this.x + this.width / 2;
-    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         let upperY = this.contentRelToAbsY(y);

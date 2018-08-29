@@ -15,9 +15,15 @@
 function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
-	// Added this line
 	this.RSSI = RSSI;
 	this.device = device;
+
+	const nameWords = name.split(" ");
+	var shortName = "";
+	for (var i = 0; i < nameWords.length; i++) {
+		shortName += nameWords[i][0];
+	}
+	this.listLabel = shortName + " - " + name + " (" + device + ")";
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices

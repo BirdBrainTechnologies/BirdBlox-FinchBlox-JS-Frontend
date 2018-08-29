@@ -1924,9 +1924,15 @@ Language.getStr = function(str) {
 function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
-	// Added this line
 	this.RSSI = RSSI;
 	this.device = device;
+
+	var nameWords = name.split(" ");
+	var shortName = "";
+	for (var i = 0; i < nameWords.length; i++) {
+		shortName += nameWords[i][0];
+	}
+	this.listLabel = shortName + " - " + name + " (" + device + ")";
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -15634,7 +15640,7 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
     //var connectionX = this.x + this.width / 2;
-    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         var upperY = this.contentRelToAbsY(y);
@@ -16406,12 +16412,7 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	var me = this;
-	var words = robot.name.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
+	this.menuBnList.addOption(robot.listLabel, function() {
 		me.close();
 		if (me.index == null) {
 		    me.deviceClass = DeviceManager.getDeviceClass(robot);
@@ -16507,7 +16508,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
  * or is touching the screen
  * @param {string} deviceList - A string representing a JSON array of devices
  */
- 
+
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
@@ -16529,11 +16530,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
-	
+
 	//if ((updateDeviceListCounter % 40) == 0){
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	//};
-	
+
 //	this.reloadRows(this.discoveredDevices.length);
 };
 
@@ -16548,14 +16549,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-    var deviceName = this.discoveredDevices[index].name;
-    var words = deviceName.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-
-	button.addText(newName + " - " + this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
+	button.addText(this.discoveredDevices[index].listLabel)
 	var me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
@@ -16581,6 +16575,7 @@ DiscoverDialog.prototype.closeDialog = function() {
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
+
 /**
  * Displays a list of buttons for file manipulation.  Accessed by tapping the dots next to a file in an open dialog
  * @param {RowDialog} dialog - The dialog to reload when the files are changed
@@ -27081,7 +27076,8 @@ B_DeviceRelativeAltitude.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			var result = Number(status.result);
-			return new ExecutionStatusResult(new NumData(result, true));
+			var num = Math.round(result * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
