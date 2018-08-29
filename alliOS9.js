@@ -1928,11 +1928,11 @@ function Device(name, id, RSSI, device) {
 	this.device = device;
 
 	var nameWords = name.split(" ");
-	var shortName = "";
+	this.shortName = "";
 	for (var i = 0; i < nameWords.length; i++) {
-		shortName += nameWords[i][0];
+		this.shortName += nameWords[i][0];
 	}
-	this.listLabel = shortName + " - " + name + " (" + device + ")";
+	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -11653,6 +11653,7 @@ Menu.prototype.updateZoom = function() {
 function BatteryMenu(button) {
     this.offsetX = button.x + BatteryMenu.iconX + TitleBar.buttonMargin;
 	Menu.call(this, button, BatteryMenu.width);
+  this.addAlternateFn(function() {});
 }
 BatteryMenu.prototype = Object.create(Menu.prototype);
 BatteryMenu.prototype.constructor = BatteryMenu;
@@ -11665,13 +11666,7 @@ BatteryMenu.prototype.loadOptions = function() {
            var curBatteryStatus = "3";
            for (var j = 0; j < manager.getDeviceCount(); j++) {
                var robot = manager.connectedDevices[j];
-               var words = robot.name.split(" ");
-               var newName = "";
-               var color = Colors.lightGray;
-               for (var k = 0; k < words.length; k++) {
-                   newName += words[k][0];
-               };
-               this.addOption(newName, null);
+               this.addOption(robot.shortName, null);
            }
     }
 };
@@ -11692,6 +11687,19 @@ BatteryMenu.getColorForBatteryStatus = function(status) {
         return Colors.lightGray;
     }
 }
+
+/**
+ * Determines whether multiple devices are connected, in which case the menu should be opened.
+ * @inheritDoc
+ * @return {boolean}
+ */
+BatteryMenu.prototype.previewOpen = function() {
+	var connectionCount = 0;
+	Device.getTypeList().forEach(function(deviceClass) {
+		connectionCount += deviceClass.getManager().getDeviceCount();
+	});
+	return (connectionCount > 1);
+};
 
 /**
  * Deprecated class that used to be used as a file menu
