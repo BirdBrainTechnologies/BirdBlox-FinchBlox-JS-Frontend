@@ -68,15 +68,6 @@ B_MicroBitLedArray.prototype.startAction = function() {
 B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
 
 
-
-
-
-// Try #3 at micro:bit blocks
-
-
-
-
-
 function B_MBPrint(x, y){
     CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
@@ -87,7 +78,6 @@ function B_MBPrint(x, y){
     this.addPart(new LabelText(this,this.displayName));
     // StrS_1 refers to the first string slot.
     this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-
 }
 
 B_MBPrint.prototype = Object.create(CommandBlock.prototype);
@@ -198,11 +188,6 @@ B_MBMagnetometer.prototype.startAction=function(){
     }
 };
 
-
-
-//B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
 B_MBMagnetometer.prototype.updateAction = function(){
 
     const status = this.runMem.requestStatus;
@@ -220,13 +205,6 @@ B_MBMagnetometer.prototype.updateAction = function(){
         return new ExecutionStatusRunning(); // Still running
 
 };
-
-
-
-
-
-
-
 
 // Here is the block for B_MBButton.
 
@@ -248,12 +226,8 @@ function B_MBButton(x, y){
 
 };
 
-
-//B_MBButton.prototype = Object.create(ReporterBlock.prototype);
 B_MBButton.prototype = Object.create(PredicateBlock.prototype);
 B_MBButton.prototype.constructor = B_MBButton;
-
-
 
 B_MBButton.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
@@ -262,7 +236,7 @@ B_MBButton.prototype.startAction=function(){
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
+        return new ExecutionStatusError();
     }
     let mem = this.runMem;
     let port = 1;
@@ -279,13 +253,7 @@ B_MBButton.prototype.startAction=function(){
     }
 };
 
-
-
-//B_MBButton.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
 B_MBButton.prototype.updateAction = function() {
-
-
     const mem = this.runMem;
     const status = mem.requestStatus;
     if (status.finished === true) {
@@ -327,14 +295,8 @@ function B_MBOrientation(x, y){
     this.addPart(orientation);
 
 };
-
-
-//B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_MBOrientation.prototype = Object.create(PredicateBlock.prototype);
 B_MBOrientation.prototype.constructor = B_MBOrientation;
-
-
-
 
 B_MBOrientation.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
@@ -360,13 +322,7 @@ B_MBOrientation.prototype.startAction=function(){
     }
 };
 
-
-
-//B_MBOrientation.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
 B_MBOrientation.prototype.updateAction = function() {
-
     const mem = this.runMem;
     const status = mem.requestStatus;
     if (status.finished === true) {
@@ -383,19 +339,10 @@ B_MBOrientation.prototype.updateAction = function() {
     } else {
         return new ExecutionStatusRunning(); // Still running
     }
-
-
-
-
 };
 
 
-
-
-
 // Block for the compass
-
-
 function B_MBCompass(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
@@ -404,12 +351,9 @@ function B_MBCompass(x, y){
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
-
 }
 B_MBCompass.prototype = Object.create(ReporterBlock.prototype);
 B_MBCompass.prototype.constructor = B_MBCompass;
-
-
 
 B_MBCompass.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
@@ -433,10 +377,7 @@ B_MBCompass.prototype.startAction=function(){
     }
 };
 
-
-
 B_MBCompass.prototype.updateAction = function(){
-
     const status = this.runMem.requestStatus;
         if (status.finished) {
             if(status.error){
@@ -450,9 +391,7 @@ B_MBCompass.prototype.updateAction = function(){
             }
         }
         return new ExecutionStatusRunning(); // Still running
-
 };
-
 Block.setDisplaySuffix(B_MBCompass, String.fromCharCode(176));
 
 
@@ -491,8 +430,6 @@ B_MBCompassCalibrate.prototype.startAction=function(){
     }
 };
 
-
-
 B_MBCompassCalibrate.prototype.updateAction = function(){
     const status = this.runMem.requestStatus;
     if (status.finished) {
@@ -506,3 +443,111 @@ B_MBCompassCalibrate.prototype.updateAction = function(){
     return new ExecutionStatusRunning(); // Still running
 
 };
+
+function B_MBReadPin(x, y){
+    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.displayName = Language.getStr("read");
+    this.draggable = true;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+    this.addPart(new LabelText(this,this.displayName));
+
+    const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData("Pin 1", "1"));
+    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 0", "1"));
+    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 1", "2"));
+    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 2", "3"));
+    this.addPart(pickPin);
+}
+B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
+B_MBReadPin.prototype.constructor = B_MBReadPin;
+/* Sends the request for the sensor data. */
+B_MBReadPin.prototype.startAction=function(){
+    let deviceIndex = this.slots[0].getData().getValue();
+    let pinSelection = this.slots[1].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+    let mem = this.runMem;
+
+    mem.requestStatus = {};
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
+    device.readSensor(mem.requestStatus, "pin", pinSelection);
+    return new ExecutionStatusRunning();
+};
+
+B_MBReadPin.prototype.updateAction = function(){
+    const status = this.runMem.requestStatus;
+    if (status.finished) {
+        if(status.error){
+            this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+            return new ExecutionStatusError();
+        } else {
+            const result = new StringData(status.result);
+            const num = Math.round(result.asNum().getValue() * 100) / 100;
+            return new ExecutionStatusResult(new NumData(num));
+        }
+    }
+    return new ExecutionStatusRunning(); // Still running
+};
+
+function B_MBWriteToPin(x, y) {
+
+  CommandBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+  this.draggable = true;
+  this.deviceClass = DeviceMicroBit;
+  this.outputType = "write";
+  this.displayName = Language.getStr("write");
+
+  this.minVal = 0;
+  this.maxVal = 100;
+  this.positive = true;
+  this.valueKey = "percent";
+  this.displayUnits = Language.getStr("Percent");
+  this.defaultValue = 0;
+
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new LabelText(this, this.displayName));
+  const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData("Pin 1", "1"));
+  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 0", "1"));
+  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 1", "2"));
+  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 2", "3"));
+  this.addPart(pickPin);
+  const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
+  numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);
+  this.addPart(numSlot);
+  this.addPart(new LabelText(this,"%"));
+}
+B_MBWriteToPin.prototype = Object.create(CommandBlock.prototype);
+B_MBWriteToPin.prototype.constructor = B_MBWriteToPin;
+
+/* Sends the request */
+B_MBWriteToPin.prototype.startAction = function() {
+  let deviceIndex = this.slots[0].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // Flutter was invalid, exit early
+  }
+  let mem = this.runMem;
+  let pin = this.slots[1].getData().getValue();
+  let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.setOutput(mem.requestStatus, this.outputType, pin, value, this.valueKey);
+  return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_MBWriteToPin.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+
+function B_MBBuzzer(x, y){
+  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceMicroBit);
+}
+B_MBBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
+B_MBBuzzer.prototype.constructor = B_MBBuzzer;

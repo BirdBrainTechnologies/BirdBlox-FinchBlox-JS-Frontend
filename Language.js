@@ -160,7 +160,11 @@ Language.EN = {
     "to_connect":"to connect",
     "Cancel":"Cancel",
     "Scanning_for_devices":"Scanning for devices",
-    "Sign_in":"Sign_in"
+    "Sign_in":"Sign_in",
+    "read":"Read",
+    "write":"Write",
+    "pin":"Pin",
+    "Percent":"Percent"
 };
 
 /* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
@@ -629,4 +633,3 @@ Language.getStr = function(str) {
         return "No Translation";
     }
 }
-

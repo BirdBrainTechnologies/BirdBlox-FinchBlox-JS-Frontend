@@ -43,85 +43,15 @@ function B_BBTriLed(x, y) {
 B_BBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_BBTriLed.prototype.constructor = B_BBTriLed;
 
-
-
 function B_BBBuzzer(x, y){
-  CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-  this.deviceClass = DeviceHummingbirdBit;
-  this.displayName = Language.getStr("Play_Note");
-  this.draggable = true;
-  this.minNote = 32
-  this.maxNote = 135
-  this.minBeat = 0
-  this.maxBeat = 16
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
-  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
-  noteSlot.addLimits(this.minNote, this.maxNote, "Note");
-  this.addPart(noteSlot);
-  this.addPart(new LabelText(this, Language.getStr("for")));
-  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
-  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
-  this.addPart(beatsSlot);
-  this.addPart(new LabelText(this,Language.getStr("Beats")));
+  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHummingbirdBit);
 }
-B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_BBBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
 B_BBBuzzer.prototype.constructor = B_BBBuzzer;
-/* Sends the request */
-B_BBBuzzer.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    //let mem = this.runMem;
-    //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-    //let soundDuration = CodeManager.beatsToMs(beats);
-
-    const mem = this.runMem;
-    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-    mem.soundDuration = CodeManager.beatsToMs(beats);
-    let soundDuration = CodeManager.beatsToMs(beats);
-    mem.timerStarted = false;
-
-    mem.requestStatus = {};
-    mem.requestStatus.finished = false;
-    mem.requestStatus.error = false;
-    mem.requestStatus.result = null;
-    device.setBuzzer(mem.requestStatus, note, soundDuration);
-    return new ExecutionStatusRunning();
-};
-/* Waits until the request completes */
-//B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
-
-B_BBBuzzer.prototype.updateAction = function() {
-    const mem = this.runMem;
-    if (!mem.timerStarted) {
-        const status = mem.requestStatus;
-        if (status.finished === true) {
-            mem.startTime = new Date().getTime();
-            mem.timerStarted = true;
-        } else {
-            return new ExecutionStatusRunning(); // Still running
-        }
-    }
-    if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
-        return new ExecutionStatusDone(); // Done running
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-};
-
-
 
 
 
 //MARK: microbit outputs
-
-
 
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
