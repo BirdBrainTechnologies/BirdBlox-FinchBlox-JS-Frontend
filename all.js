@@ -1286,17 +1286,17 @@ function Language() {
 };
 
 //The default language for the app is english
-Language.lang = "EN";
+Language.lang = "en";
 
 /* The list of languages that are currently supported by birdblox. Any new language should be added
 to this list */
-Language.langs = ["EN", "ZH", "FR", "ES"];
+Language.langs = ["en", "zh", "fr", "es", "nl"];
 
 
 /* The disctionary for English, an underscore is necessary to separate the words in keys.
    If translation for a word is not found in the dictionary.
    No translation will be shown for the block.*/
-Language.EN = {
+Language.en = {
     "CompassCalibrate":"Compass Calibrate",
     "Compass": "Compass",
     "Screen_Up": "Screen Up",
@@ -1446,7 +1446,7 @@ Language.EN = {
 };
 
 /* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
-Language.ZH = {
+Language.zh = {
     "CompassCalibrate":"CN",
     "Compass": "CN",
     "Screen_Up": "CN",
@@ -1593,7 +1593,7 @@ Language.ZH = {
 
 
 /* The disctionary for Spanish, an underscore is necessary to separate the words in keys.*/
-Language.ES = {
+Language.es = {
     "CompassCalibrate":"ESP",
     "Compass": "ESP",
     "Screen_Up": "ESP",
@@ -1739,149 +1739,451 @@ Language.ES = {
 }
 
 /* The disctionary for French, an underscore is necessary to separate the words in keys.*/
-Language.FR = {
-    "Calibrate":"French",
-    "Compass": "French",
-    "Screen_Up": "French",
-    "Screen_Down": "French",
-    "Tilt_Left": "French",
-    "Tilt_Right": "French",
-    "Logo_Up": "French",
-    "Logo_Down": "French",
-    "Shake": "French",
-    "Button": "French",
-    "Magnetometer": "French",
-    "Accelerometer": "French",
-    "Print": "French",
-    "Display": "French",
-    "Distance": "French",
-    "Dial": "French",
-    "Light": "French",
-    "Sound": "French",
-    "Other": "French",
-    "Play_Note": "French",
-    "for": "French",
-    "Beats": "French",
-    "Position_Servo": "French",
-    "Rotation_Servo": "French",
-    "LED": "French",
-    "Tri_LED": "French",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "French",
-    "Vibration":"French",
-    "Motor":"French",
-    "Temperature_C":"French",
-    "Temperature_F":"French",
-    "Knob": "French",
-    "Device_Shaken":"French",
-    "Device_SSID":"French",
-    "Device_Pressure":"French",
-    "Device_Relative_Altitude":"French",
-    "Device_Orientation":"French",
-    "Device":"French",
-    "Acceleration":"French",
-    "Latitude":"French",
-    "Longitude":"French",
-    "when":"French",
-    "tapped":"French",
-    "when_I_receive":"French",
-    "wait_until":"French",
-    "repeat_forever":"French",
-    "repeat":"French",
-    "repeat_until":"French",
-    "if":"French",
-    "broadcast":"French",
-    "and_wait":"French",
-    "stop":"French",
-    "all":"French",
-    "this_script":"French",
-    "all_but_this_script":"French",
-    "message":"French",
-    "wait":"French",
-    "secs":"French",
-    "else":"French",
-    "item":"French",
-    "of":"French",
-    "length":"French",
-    "contains":"French",
-    "play_sound":"French",
-    "play_sound_until_done":"French",
-    "play_recording":"French",
-    "play_recording_until_done":"French",
-    "stop_all_sounds":"French",
-    "rest_for":"French",
-    "for":"French",
-    "play_note":"French",
-    "change_tempo_by":"French",
-    "set_tempo_to":"French",
-    "tempo":"French",
-    "round":"French",
-    "mod":"French",
-    "pick_random":"French",
-    "to":"French",
-    "and":"French",
-    "or":"French",
-    "not":"French",
-    "true":"French",
-    "false":"French",
-    "letter":"French",
-    "join":"French",
-    "split":"French",
-    "by":"French",
-    "whitespace":"French",
-    "number":"French",
-    "text":"French",
-    "boolean":"French",
-    "list":"French",
-    "invalid_number":"French",
-    "Edit_Text":"French",
-    "is":"French",
-    "a":"French",
-    "reset_timer":"French",
-    "and_wait":"French",
-    "ask": "French",
-    "at":"French",
-    "Position":"French",
-    "current":"French",
-    "year":"French",
-    "month":"French",
-    "date":"French",
-    "hour":"French",
-    "minute":"French",
-    "second":"French",
-    "day_of_the_week":"French",
-    "time_in_milliseconds":"French",
-    "answer":"French",
-    "timer":"French",
-    "Record_Sounds":"French",
-    "Create_Variable":"French",
-    "Create_List":"French",
-    "Zoom_in":"French",
-    "Zoom_out":"French",
-    "Reset_zoom":"French",
-    "Disable_snap_noise":"French",
-    "Enable_snap_noise":"French",
-    "Send_debug_log":"French",
-    "Show_debug_menu":"French",
-    "Disconnect_Device":"French",
-    "Connect_Device":"French",
-    "Connect_Multiple":"French Connect Multiple",
-    "New":"French",
-    "Open":"French",
-    "No_saved_programs":"French",
-    "On_Device":"French",
-    "Cloud":"French",
-    "Device limit reached":"French",
-    "Tap_record_to_start":"French",
-    "Done":"French",
-    "Loading":"French",
-    "Tap":"French",
-    "to_connect":"French",
-    "Cancel":"French",
-    "Scanning_for_devices":"French",
-    "Sign_in": "French"
+Language.fr = {
+    "Delete_recording_question":"Supprimer l'enregistrement?",
+    "Name_error_blank":"Le nom ne peut pas être vide. Entrez un nom de fichier",
+    "Name_error_invalid_characters":"Les caractères suivants ne peuvent pas être inclus dans les noms de fichiers: \n",
+    "Name_error_already_exists":"\" existe déjà. Entrez un nom différent.",
+    "Confirm_delete_question":"Supprimer le fichier?",
+    "Name_duplicate_file":"Entrez le nom du fichier en double",
+    "Disconnect_account_question":"Déconnecter le compte?",
+    "Grant_permission":"Accorder une autorisation d'enregistrement à BirdBlox dans les Paramètres",
+    "List_delete_question":"Supprimer la liste?",
+    "Variable_delete_question":"Supprimer la variable?",
+    "Device_firmware:":"Version du firmware du périphérique:",
+    "Required_firmware:":"Version du firmware requise:",
+    "CompassCalibrate":"Calibrer le compas",
+    "Compass":"Compas",
+    "Screen_Up":"Écran vers le haut",
+    "Screen_Down":"Écran vers le bas",
+    "Tilt_Left":"Incliner à gauche",
+    "Tilt_Right":"Incliner à droite",
+    "Logo_Up":"Logo vers le haut",
+    "Logo_Down":"Logo vers le bas",
+    "Shake":"Secouer",
+    "Button":"Bouton",
+    "Magnetometer":"Magnétomètre",
+    "Accelerometer":"Accéléromètre",
+    "Print":"Imprimer",
+    "Display":"Display",
+    "Distance":"Distance",
+    "Dial":"Cadran",
+    "Light":"Lumière",
+    "Sound":"Son",
+    "Other":"Autre",
+    "Play_Note":"Jouer la note",
+    "for":"pour",
+    "Beats":"Battement",
+    "Position_Servo":"Position Servo",
+    "Rotation_Servo":"Rotation Servo",
+    "LED":"LED",
+    "Tri_LED":"Tri-LED",
+    "R":"R",
+    "G":"G",
+    "B":"B",
+    "Servo":"Servo",
+    "Vibration":"Vibration",
+    "Motor":"Moteur",
+    "Temperature_C":"Température C",
+    "Temperature_F":"Température F",
+    "Knob":"Bouton",
+    "Device_Shaken":"Tablette secouée",
+    "Device_SSID":"Tablette SSID",
+    "Device_Pressure":"Tablette Pression",
+    "Device_Relative_Altitude":"Tablette Altitude Relative ",
+    "Device_Orientation":"Tablette Orientation",
+    "Device":"Tablette",
+    "Acceleration":"Accélération",
+    "Latitude":"Latitude",
+    "Longitude":"Longitude",
+    "when":"quand",
+    "tapped":"tapoter",
+    "when_I_receive":"quand je reçois",
+    "wait_until":"attend jusqu'à",
+    "repeat_forever":"répéter pour toujours",
+    "repeat":"répéter ",
+    "repeat_until":"répéter jusqu'à",
+    "if":"si ",
+    "broadcast":"transmettre",
+    "and_wait":"et attendez",
+    "stop":"stop",
+    "all":"tout",
+    "this_script":"ce script",
+    "all_but_this_script":"tout sauf ce script",
+    "message":"message",
+    "wait":"attendez",
+    "secs":"secondes",
+    "else":"autre",
+    "item":"item",
+    "of":"ou",
+    "length":"longueur",
+    "contains":"contient",
+    "play_sound":"jouer le son",
+    "play_sound_until_done":"jouer le son jusqu'à la fin",
+    "play_recording":"jouer l' enregistrement",
+    "play_recording_until_done":"jouer l' enregistrement jusqu'à la fin",
+    "stop_all_sounds":"arrêter tous les sons",
+    "rest_for":"reposez pour",
+    "for":"pour",
+    "play_note":"jouer la note",
+    "change_tempo_by":"changer le tempo de",
+    "set_tempo_to":"régler le tempo sur",
+    "tempo":"tempo",
+    "round":"round",
+    "mod":"modulo",
+    "pick_random":"choisir au hasard",
+    "to":"à",
+    "and":"et",
+    "or":"ou",
+    "not":"non",
+    "true":"vrai",
+    "false":"faux",
+    "letter":"lettre",
+    "join":"joindre",
+    "split":"diviser",
+    "by":"avec",
+    "whitespace":"espace blanc",
+    "number":"numéro",
+    "text":"texte",
+    "boolean":"booléen",
+    "list":"liste",
+    "invalid_number":"numéro invalide",
+    "Edit_text":"Éditer le texte",
+    "is":"est",
+    "a":"a",
+    "reset_timer":"réinitialiser la minuterie",
+    "and_wait":"et attendez",
+    "ask":"demande",
+    "at":"à",
+    "Position":"Position",
+    "current":"actuel",
+    "year":"année",
+    "month":"mois",
+    "date":"date",
+    "hour":"heure",
+    "minute":"minute",
+    "second":"seconde",
+    "day_of_the_week":"jour de la semaine",
+    "time_in_milliseconds":"temps en millisecondes",
+    "answer":"réponse",
+    "timer":"minuterie",
+    "Record_Sounds":"Enregistrer le son",
+    "Create_Variable":"Créer une variable",
+    "Create_List":"Créer une liste",
+    "Zoom_in":"Agrandir",
+    "Zoom_out":"Dézoomer",
+    "Reset_zoom":"Réinitialiser le zoom",
+    "Disable_snap_noise":"Désactiver le bruit d'accrochage",
+    "Enable_snap_noise":"Activer le bruit d'accrochage",
+    "Send_debug_log":"Envoyer un journal de débogage",
+    "Show_debug_menu":"Afficher le menu de débogage",
+    "Disconnect_Device":"Déconnecter le périphérique",
+    "Connect_Device":"Connecter le périphérique",
+    "Connect_Multiple":"Connecter plusieurs",
+    "New":"Neuf",
+    "Open":"Ouvrir",
+    "No_saved_programs":"Aucun programme sauvé",
+    "On_Device":"Sur le périphérique",
+    "Cloud":"Cloud",
+    "Tap_record_to_start":"Tapotez pour commencer l' enregistrement ",
+    "Done":"Fini",
+    "Loading":"Chargement",
+    "Tap":"Tapoter",
+    "to_connect":"pour connecter",
+    "Cancel":"Annuler",
+    "Scanning_for_devices":"Recherche de périphériques",
+    "Sign_in":"Se connecter",
+    "world":"monde",
+    "hello":"bonjour",
+    "what_your_name":"Quel est ton nom?",
+    "Question":"Question",
+    "bpm":"bpm",
+    "Total":"Total",
+    "set":"fixer",
+    "change":"changer",
+    "add":"ajouter",
+    "thing":"chose",
+    "delete":"supprimer",
+    "insert":"insérer",
+    "at":"à",
+    "replace_item":"remplacer l'article",
+    "with":"avec",
+    "copy":"copier",
+    "Robots":"Robots",
+    "Operators":"Opérateurs",
+    "Tablet":"Tablette",
+    "Control":"Contrôle",
+    "Variables":"Variables",
+    "any_message":"N'importe quel message",
+    "port":"Connecteur",
+    "last":"Dernier",
+    "random":"Au hasard",
+    "Enter_text":"Entrez un texte",
+    "Connection_Failure":"Échec de connexion",
+    "Dismiss":"Rejeter",
+    "Connection_failed_try_again":"La connexion a échoué, veuillez réessayer.",
+    "Enter_variable_name":"Entrez le nom de la variable",
+    "Enter_list_name":"Entrez le nom de la liste",
+    "not_a_valid_number":"numéro invalide",
+    "not_connected":"pas connecté",
+    "Firmware_incompatible":"Firmware incompatible",
+    "Update_firmware":"Mettez à jour le firmware",
+    "Rename_list":"Renommer la liste",
+    "Delete_list":"Supprimer la liste ",
+    "Dont_delete":"Ne pas supprimer",
+    "Delete":"Supprimer",
+    "Permission_denied":"Permission refusée",
+    "Continue_recording":"Continuer l' enregistrement",
+    "Record_sounds":"Enregistrer les sons",
+    "New_program":"Nouveau programme",
+    "Enter_file_name":"Entrez le nom du fichier",
+    "Saving":"Sauvegarde",
+    "Name":"Nom",
+    "Rename":"Renommer  ",
+    "Duplicate":"Dupliquer",
+    "Disconnect_account":"Déconnecter le compte",
+    "Dont_disconnect":"Ne pas déconnecter",
+    "Disconnect":"Déconnecter  ",
+    "Recordings":"Les enregistrements",
+    "Record":"Enregistrer  ",
+    "Discard":"Jeter",
+    "Stop":"Stop",
+    "Pause":"Faire une pause",
+    "remaining":"restant",
+    "No_project_open":"Pas de projet actif",
+    "OK":"OK",
+    "Share":"Partager",
+    "Rename_variable":"Renommez la variable",
+    "Delete_variable":"Supprimez la variable",
+    "read":"Lire",
+    "write":"Écrire",
+    "pin":"Broche"
+}
+
+Language.nl = {
+    "Delete_recording_question":"Opname verwijderen?",
+    "Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
+    "Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
+    "Name_error_already_exists":"\" bestaat al. Voer een andere naam in.",
+    "Confirm_delete_question":"Bestand verwijderen?",
+    "Name_duplicate_file":"Voer een naam in voor het gekopieerde bestand",
+    "Disconnect_account_question":"Account loskoppelen?",
+    "Grant_permission":"Geef toestemming tot opnames aan BirdBlox in Instellingen",
+    "List_delete_question":"Lijst verwijderen?",
+    "Variable_delete_question":"Variabele verwijderen?",
+    "Device_firmware:":"Apparaat firmware versie:",
+    "Required_firmware:":"Vereiste firmware versie:",
+    "CompassCalibrate":"Kompas Kalibreren",
+    "Compass":"Kompas",
+    "Screen_Up":"Scherm Omhoog",
+    "Screen_Down":"Scherm Omlaag",
+    "Tilt_Left":"Naar Links Kantelen",
+    "Tilt_Right":"Naar Rechts Kantelen",
+    "Logo_Up":"Logo Omhoog",
+    "Logo_Down":"Logo Omlaag",
+    "Shake":"Schudden",
+    "Button":"Knop",
+    "Magnetometer":"Magnetometer",
+    "Accelerometer":"Accelerometer",
+    "Print":"Afdrukken",
+    "Display":"Tonen",
+    "Distance":"Afstand",
+    "Dial":"Draaiknop",
+    "Light":"Licht",
+    "Sound":"Geluid",
+    "Other":"Ander",
+    "Play_Note":"Speel Noot",
+    "for":"voor",
+    "Beats":"Beats",
+    "Position_Servo":"Positie Servo",
+    "Rotation_Servo":"Rotatie Servo",
+    "LED":"LED",
+    "Tri_LED":"Tri-LED",
+    "R":"R",
+    "G":"G",
+    "B":"B",
+    "Servo":"Servo",
+    "Vibration":"Vibratie",
+    "Motor":"Motor",
+    "Temperature_C":"Temperatuur C",
+    "Temperature_F":"Temperatuur F",
+    "Knob":"Draaiknop",
+    "Device_Shaken":"Tablet Geschud",
+    "Device_SSID":"Tablet SSID",
+    "Device_Pressure":"Tablet Druk",
+    "Device_Relative_Altitude":"Tablet Relatieve Hoogte",
+    "Device_Orientation":"Tablet Orientatie",
+    "Device":"Tablet",
+    "Acceleration":"Acceleratie",
+    "Latitude":"Breedtegraad",
+    "Longitude":"Lengtegraad",
+    "when":"wanneer",
+    "tapped":"tikte",
+    "when_I_receive":"wanneer ik ontvang",
+    "wait_until":"wacht tot",
+    "repeat_forever":"herhaal altijd",
+    "repeat":"herhaal",
+    "repeat_until":"herhaal tot",
+    "if":"als",
+    "broadcast":"zend uit",
+    "and_wait":"en wacht",
+    "stop":"stop",
+    "all":"alles",
+    "this_script":"dit script",
+    "all_but_this_script":"alles behalve dit script",
+    "message":"signaal",
+    "wait":"wacht",
+    "secs":"sec.",
+    "else":"anders",
+    "item":"item",
+    "of":"van",
+    "length":"lengte",
+    "contains":"bevat",
+    "play_sound":"speel geluid",
+    "play_sound_until_done":"speel geluid tot het einde",
+    "play_recording":"speel opname",
+    "play_recording_until_done":"speel opname tot het einde",
+    "stop_all_sounds":"stop alle geluiden",
+    "rest_for":"rust voor",
+    "for":"voor",
+    "play_note":"speel noot",
+    "change_tempo_by":"verander tempo met ",
+    "set_tempo_to":"stel tempo in op",
+    "tempo":"tempo",
+    "round":"afgerond",
+    "mod":"modulo",
+    "pick_random":"willekeurig getal tussen",
+    "to":"tot ",
+    "and":"en",
+    "or":"of",
+    "not":"niet",
+    "true":"waar",
+    "false":"onwaar",
+    "letter":"letter",
+    "join":"voeg samen",
+    "split":"splits",
+    "by":"bij",
+    "whitespace":"spatie",
+    "number":"getal",
+    "text":"tekst",
+    "boolean":"booleaans",
+    "list":"lijst",
+    "invalid_number":"ongeldig getal",
+    "Edit_Text":"Bewerk Tekst",
+    "is":"is",
+    "a":"een",
+    "reset_timer":"zet tijd op nul",
+    "and_wait":"en wacht",
+    "ask":"vraag",
+    "at":"op",
+    "Position":"Positie",
+    "current":"huidig",
+    "year":"jaar",
+    "month":"maand",
+    "date":"datum",
+    "hour":"uur",
+    "minute":"minuut",
+    "second":"seconde",
+    "day_of_the_week":"dag van de week",
+    "time_in_milliseconds":"tijd in milliseconden",
+    "answer":"antwoord",
+    "timer":"tijd",
+    "Record_Sounds":"Neem Geluid Op",
+    "Create_Variable":"Maak een Variabele",
+    "Create_List":"Maak een Lijst",
+    "Zoom_in":"Inzoomen",
+    "Zoom_out":"Uitzoomen",
+    "Reset_zoom":"Reset zoom",
+    "Disable_snap_noise":"Klikgeluid Uitschakelen",
+    "Enable_snap_noise":"Klikgeluid Inschakelen",
+    "Send_debug_log":"Stuur foutopsporingslog",
+    "Show_debug_menu":"Toon debug-menu",
+    "Disconnect_Device":"Ontkoppel Apparaat",
+    "Connect_Device":"Verbind Apparaat",
+    "Connect_Multiple":"Verbind Meerdere",
+    "New":"Nieuw",
+    "Open":"Open",
+    "No_saved_programs":"Geen opgeslagen programmas",
+    "On_Device":"In Apparaat",
+    "Cloud":"Cloud",
+    "Tap_record_to_start":"Tik om opnemen te starten",
+    "Done":"Klaar",
+    "Loading":"Laden",
+    "Tap":"Tik",
+    "to_connect":"verbinden",
+    "Cancel":"Annuleer",
+    "Scanning_for_devices":"Scannen van apparaten",
+    "Sign_in":"Inloggen",
+    "world":"wereld",
+    "hello":"hallo",
+    "what_your_name":"Wat is jouw naam?",
+    "Question":"Vraag",
+    "bpm":"bpm",
+    "Total":"Totaal",
+    "set":"maak",
+    "change":"verander",
+    "add":"voeg toe",
+    "thing":"ding",
+    "delete":"verwijder",
+    "insert":"voeg in",
+    "at":"op",
+    "replace_item":"vervang item",
+    "with":"door",
+    "copy":"kopieer",
+    "Robots":"Robots",
+    "Operators":"Operatoren",
+    "Tablet":"Tablet",
+    "Control":"Controle",
+    "Variables":"Variabelen",
+    "any_message":"enige signaal",
+    "new":"nieuw",
+    "Port":"Poort",
+    "last":"laatste",
+    "random":"willekeurig",
+    "Enter_text":"Tekst invoeren",
+    "Connection_Failure":"Verbindingsfout",
+    "Dismiss":"Ontslaan",
+    "Connection_failed_try_again":"Verbindingsfout, probeer opnieuw",
+    "Enter_variable_name":"Voer naam van de variabele in",
+    "Enter_list_name":"Voer lijst naam in",
+    "not_a_valid_number":"geen geldig getal",
+    "not_connected":"niet verbonden",
+    "Firmware_incompatible":"Onverenigbare Firmware",
+    "Update_firmware":"Update firmware",
+    "Rename_list":"Lijst hernoemen",
+    "Enter_list_name":"Voer lijst naam in",
+    "Delete_list":"Lijst verwijderen",
+    "Dont_delete":"Niet verwijderen",
+    "Delete":"Verwijderen",
+    "Permission_denied":"Geen toestemming",
+    "Dismiss":"Ontslaan",
+    "Continue_recording":"Doorgaan met opnemen",
+    "Record_sounds":"Geluiden opnemen",
+    "New_program":"Nieuw programma",
+    "Enter_file_name":"Voor een bestandsnaam in",
+    "Saving":"Opslaan",
+    "Name":"Naam",
+    "Rename":"Hernoemen",
+    "Duplicate":"Kopiëren",
+    "Disconnect_account":"Account Loskoppelen",
+    "Dont_disconnect":"Niet Loskoppelen",
+    "Disconnect":"Loskoppelen",
+    "Recordings":"Opnames",
+    "Record":"Opnemen",
+    "Discard":"Verwijder",
+    "Stop":"Stop",
+    "Pause":"Pauze",
+    "remaining":"overblijvende",
+    "No_project_open":"Geen project open",
+    "OK":"OK",
+    "Edit_text":"Tekst bewerken",
+    "Share":"Share",
+    "Rename_variable":"Variabele hernoemen",
+    "Enter_variable_name":"Voer variabele naam in",
+    "Delete_variable":"Variabele verwijderen",
+    "read":"Lees",
+    "write":"Schrijf",
+    "pin":"Pin"
 }
 
 /* The Callback manager receives a request from the backend to set the default language to be
@@ -1897,6 +2199,10 @@ Language.setLanguage = function(lang) {
 
 /* getLanguage returns the language that is currently being used by the birdblox.*/
 Language.getLanguage = function () {
+    const userSelectedLang = sessionStorage.getItem("language");
+    if (userSelectedLang != undefined && userSelectedLang != null){
+      Language.lang = userSelectedLang;
+    }
     return "Language." + Language.lang + ".";
 }
 
@@ -4683,6 +4989,13 @@ Colors.setCommon = function() {
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
 	Colors.red = "#FF0000";
+	//BBT Style guide colors
+	Colors.easternBlue = "#089BAB";
+	Colors.neonCarrot = "#FF9922";
+	Colors.fountainBlue = "#62BCC7";
+	Colors.seance = "#881199";
+	Colors.bbtDarkGrey = "#535353";
+	Colors.iron = "#CACACA";
 };
 
 Colors.setCategory = function() {
@@ -4850,6 +5163,10 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	const VP=VectorPaths;
+	VP.language={};
+	VP.language.path="M11.99,2C6.47,2,2,6.48,2,12s4.47,10,9.99,10C17.52,22,22,17.52,22,12S17.52,2,11.99,2z M18.92,8h-2.95 c-0.32-1.25-0.78-2.45-1.38-3.56C16.43,5.07,17.96,6.35,18.92,8z M12,4.04c0.83,1.2,1.48,2.53,1.91,3.96h-3.82 C10.52,6.57,11.17,5.24,12,4.04z M4.26,14C4.1,13.36,4,12.69,4,12s0.1-1.36,0.26-2h3.38c-0.08,0.66-0.14,1.32-0.14,2 s0.06,1.34,0.14,2H4.26z M5.08,16h2.95c0.32,1.25,0.78,2.45,1.38,3.56C7.57,18.93,6.04,17.66,5.08,16z M8.03,8H5.08 c0.96-1.66,2.49-2.93,4.33-3.56C8.81,5.55,8.35,6.75,8.03,8z M12,19.96c-0.83-1.2-1.48-2.53-1.91-3.96h3.82 C13.48,17.43,12.83,18.76,12,19.96z M14.34,14H9.66c-0.09-0.66-0.16-1.32-0.16-2s0.07-1.35,0.16-2h4.68c0.09,0.65,0.16,1.32,0.16,2 S14.43,13.34,14.34,14z M14.59,19.56c0.6-1.11,1.06-2.31,1.38-3.56h2.95C17.96,17.65,16.43,18.93,14.59,19.56z M16.36,14 c0.08-0.66,0.14-1.32,0.14-2s-0.06-1.34-0.14-2h3.38C19.9,10.64,20,11.31,20,12s-0.1,1.36-0.26,2H16.36z";
+	VP.language.width=24;
+	VP.language.height=24;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -4860,16 +5177,12 @@ function VectorPaths(){
 	VP.checkmark.height=6;
 	VP.flag={};
 	VP.flag.path="m 0,0 11.2202,0 0,5.69439 c 0,3.1469 7.23037,5.69439 16.16532,5.69439 8.91622,0 16.14659,-2.54749 16.14659,-5.69439 0,-3.12817 7.24911,-5.69439 16.16533,-5.69439 8.93494,0 16.16532,2.56622 16.16532,5.69439 l 0,45.53639 c 0,-3.1469 -7.23038,-5.69439 -16.16532,-5.69439 -8.91622,0 -16.16533,2.54749 -16.16533,5.69439 0,3.1469 -7.23037,5.69439 -16.14659,5.69439 -8.93495,0 -16.16532,-2.54749 -16.16532,-5.69439 l 0,53.04774 -11.2202,0 z";
-
 	VP.flag.width=75.863;
 	VP.flag.height=104.279;
-
 	VP.battery={};
 	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 80 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,105 70,101 70,97 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
 	VP.battery.width=75.863;
-    VP.battery.height=104.279;
-
-
+  VP.battery.height=104.279;
 	VP.stage={};
 	VP.stage.path="m 80.789,36.957 12.02565,0 0,14.16105 0,0 0,8.82256 -28.99643,0 z m -80.78916,0 11.96946,0 16.97078,22.98361 -28.94024,0 z m 92.81481,-30.08286 0,27.79761 -12.13804,0 -16.0342,-21.69113 3.42787,-0.33716 c 9.96518,-1.18009 18.45057,-3.1469 24.44467,-5.61947 z m -92.81481,-0.0187 0.37463,0.16858 c 5.9941,2.47257 14.47949,4.43938 24.44467,5.61947 l 3.29675,0.33716 -16.0342,21.69113 -12.08185,0 z m 0,-6.85575 92.88974,0 0,4.28953 -1.49853,0.76799 c -5.60073,2.54749 -14.3109,4.5705 -24.78183,5.71312 l -3.35295,0.33717 -1.40486,0.13112 -6.66843,0.39336 -1.70458,0.0749 -7.02432,0.13112 -7.04307,-0.13112 -1.70457,-0.0749 -6.66843,-0.39336 -1.53598,-0.14985 -3.22183,-0.31844 c -10.47093,-1.14262 -19.16237,-3.16563 -24.78183,-5.71312 l -1.49853,-0.76799 z";
 	VP.stage.width=92.890;
@@ -11581,7 +11894,11 @@ Menu.prototype.open = function() {
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			this.addOverlayAndCloseOthers();
+			if (this.isSubMenu){
+				Overlay.addOverlay(this);
+			} else {
+				this.addOverlayAndCloseOthers();
+			}
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate = false;
 		} else {
@@ -11648,6 +11965,7 @@ Menu.prototype.updateZoom = function() {
 		this.menuBnList.updateZoom();
 	}
 };
+
 /**
  * Top bar menu used to view battery statuses for all connected devices
  * @param {Button} button
@@ -11885,6 +12203,44 @@ ViewMenu.prototype.optionResetZoom = function() {
 	GuiElements.updateZoom();
 };
 /**
+ * Provides a menu choosing the language used.
+ * @param {Button} button
+ * @constructor
+ */
+function LanguageMenu(button, parentMenu) {
+  this.isSubMenu = true;
+  this.parentMenu = parentMenu
+	Menu.call(this, button);
+}
+LanguageMenu.prototype = Object.create(Menu.prototype);
+LanguageMenu.prototype.constructor = LanguageMenu;
+
+/**
+ * @inheritDoc
+ */
+LanguageMenu.prototype.loadOptions = function() {
+  const langMenu = this;
+  Language.langs.forEach( function(lang) {
+    langMenu.addOption(lang, function() {
+      sessionStorage.setItem("language", lang);
+      window.location.reload(false);
+    });
+  })
+};
+
+/**
+ * Recomputes the Menu's location based on the location of the Button
+ */
+LanguageMenu.prototype.move = function() {
+	this.x = this.button.x + this.button.width + Menu.bnMargin + this.parentMenu.x;
+	this.y = this.button.y + this.button.height + this.parentMenu.y;
+	GuiElements.move.group(this.group, this.x, this.y);
+	if (this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
+};
+
+/**
  * Provides a menu for adjusting the zoom and other settings
  * @param {Button} button
  * @constructor
@@ -11909,6 +12265,13 @@ SettingsMenu.prototype.loadOptions = function() {
 		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
 	if (this.showAdvanced) {
+		const icon = VectorPaths.language;
+		const me = this;
+		this.addOption("", null, false, function(bn) {
+			bn.addIcon(icon)
+			me.languageMenu = new LanguageMenu(bn, me);
+			me.languageMenu.move();
+		});
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}
@@ -11992,6 +12355,7 @@ SettingsMenu.prototype.enableDebug = function() {
 	DebugOptions.enabled = true;
 	TitleBar.enableDebug();
 }
+
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
  * devices

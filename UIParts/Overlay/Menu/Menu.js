@@ -131,7 +131,11 @@ Menu.prototype.open = function() {
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			this.addOverlayAndCloseOthers();
+			if (this.isSubMenu){
+				Overlay.addOverlay(this);
+			} else {
+				this.addOverlayAndCloseOthers();
+			}
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate = false;
 		} else {

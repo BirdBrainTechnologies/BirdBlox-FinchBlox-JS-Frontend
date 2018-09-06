@@ -18,6 +18,13 @@ Colors.setCommon = function() {
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
 	Colors.red = "#FF0000";
+	//BBT Style guide colors
+	Colors.easternBlue = "#089BAB";
+	Colors.neonCarrot = "#FF9922";
+	Colors.fountainBlue = "#62BCC7";
+	Colors.seance = "#881199";
+	Colors.bbtDarkGrey = "#535353";
+	Colors.iron = "#CACACA";
 };
 
 Colors.setCategory = function() {
