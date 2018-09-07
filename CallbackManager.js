@@ -318,3 +318,15 @@ CallbackManager.httpResponse = function(id, status, body) {
 	}
 	HtmlServer.responseFromIosCall(id, status, body);
 };
+
+/**
+ * Sets the name of the file that should be opened if tapping out of the
+ * open dialog. Whereas CallbackManager.tablet.setFile sets a file to open
+ * instead of opening the open dialog, this function mearly sets which file
+ * will be opened in the event that the user taps out of the open dialog.
+ * @param {string} fileName - The name of the file prefered
+ */
+CallbackManager.setFilePreference = function(fileName) {
+		GuiElements.alert("Setting default file to " + fileName);
+		OpenDialog.lastOpenFile = fileName;
+};

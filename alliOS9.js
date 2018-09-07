@@ -2190,7 +2190,7 @@ Language.nl = {
    not supported, english, the default language will be used..*/
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
-        Language.lang = "EN";
+        Language.lang = "en";
     } else {
         Language.lang = lang;
     }
@@ -12208,7 +12208,7 @@ ViewMenu.prototype.optionResetZoom = function() {
  */
 function LanguageMenu(button, parentMenu) {
   this.isSubMenu = true;
-  this.parentMenu = parentMenu
+  this.parentMenu = parentMenu;
 	Menu.call(this, button);
 }
 LanguageMenu.prototype = Object.create(Menu.prototype);
@@ -12224,7 +12224,7 @@ LanguageMenu.prototype.loadOptions = function() {
       sessionStorage.setItem("language", lang);
       window.location.reload(false);
     });
-  })
+  });
 };
 
 /**
@@ -12267,7 +12267,7 @@ SettingsMenu.prototype.loadOptions = function() {
 		var icon = VectorPaths.language;
 		var me = this;
 		this.addOption("", null, false, function(bn) {
-			bn.addIcon(icon)
+			bn.addIcon(icon);
 			me.languageMenu = new LanguageMenu(bn, me);
 			me.languageMenu.move();
 		});
@@ -18761,6 +18761,19 @@ CallbackManager.httpResponse = function(id, status, body) {
 	}
 	HtmlServer.responseFromIosCall(id, status, body);
 };
+
+/**
+ * Sets the name of the file that should be opened if tapping out of the
+ * open dialog. Whereas CallbackManager.tablet.setFile sets a file to open
+ * instead of opening the open dialog, this function mearly sets which file
+ * will be opened in the event that the user taps out of the open dialog.
+ * @param {string} fileName - The name of the file prefered
+ */
+CallbackManager.setFilePreference = function(fileName) {
+		GuiElements.alert("Setting default file to " + fileName);
+		OpenDialog.lastOpenFile = fileName;
+};
+
 /**
  * Static class that helps parse and write XML files
  */

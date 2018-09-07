@@ -5,7 +5,7 @@
  */
 function LanguageMenu(button, parentMenu) {
   this.isSubMenu = true;
-  this.parentMenu = parentMenu
+  this.parentMenu = parentMenu;
 	Menu.call(this, button);
 }
 LanguageMenu.prototype = Object.create(Menu.prototype);
@@ -21,7 +21,7 @@ LanguageMenu.prototype.loadOptions = function() {
       sessionStorage.setItem("language", lang);
       window.location.reload(false);
     });
-  })
+  });
 };
 
 /**

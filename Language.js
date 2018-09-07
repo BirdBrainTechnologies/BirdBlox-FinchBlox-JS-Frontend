@@ -913,7 +913,7 @@ Language.nl = {
    not supported, english, the default language will be used..*/
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
-        Language.lang = "EN";
+        Language.lang = "en";
     } else {
         Language.lang = lang;
     }

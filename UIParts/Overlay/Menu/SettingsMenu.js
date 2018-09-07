@@ -26,7 +26,7 @@ SettingsMenu.prototype.loadOptions = function() {
 		const icon = VectorPaths.language;
 		const me = this;
 		this.addOption("", null, false, function(bn) {
-			bn.addIcon(icon)
+			bn.addIcon(icon);
 			me.languageMenu = new LanguageMenu(bn, me);
 			me.languageMenu.move();
 		});
