@@ -301,7 +301,6 @@ CallbackManager.httpResponse = function(id, status, body) {
 	HtmlServer.responseFromIosCall(id, status, body);
 };
 
-+
 /**
  * Sets the name of the file that should be opened if tapping out of the
  * open dialog. Whereas CallbackManager.tablet.setFile sets a file to open

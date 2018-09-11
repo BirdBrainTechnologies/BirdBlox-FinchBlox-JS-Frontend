@@ -481,7 +481,7 @@ NumData.prototype.asString = function() {
 		num = +num.toFixed(10);
 		return new StringData(num + "", true);
 	} else {
-		return new StringData("not a valid number");
+		return new StringData(Language.getStr("not_a_valid_number"));
 	}
 };
 
@@ -555,6 +555,7 @@ NumData.importXml = function(dataNode) {
 		return null;
 	}
 };
+
 /**
  * Data that contains a boolean value
  * @param {boolean} value
@@ -591,9 +592,9 @@ BoolData.prototype.asBool = function() {
  */
 BoolData.prototype.asString = function() {
 	if (this.getValue()) {
-		return new StringData("true", true);
+		return new StringData(Language.getStr("true"), true);
 	} else {
-		return new StringData("false", true);
+		return new StringData(Language.getStr("false"), true);
 	}
 };
 
@@ -606,6 +607,7 @@ BoolData.importXml = function(dataNode) {
 	if (value == null) return null;
 	return new BoolData(value === "true");
 };
+
 /**
  * Data that contains a string.
  * @param {string} value
@@ -1129,7 +1131,7 @@ Variable.prototype.rename = function() {
 		}
 	};
 	callbackFn.variable = this;
-	DialogManager.showPromptDialog("Rename variable", "Enter variable name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename_variable"), Language.getStr("Enter_variable_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1144,14 +1146,14 @@ Variable.prototype.delete = function() {
 			}
 		};
 		callbackFn.variable = this;
-		var question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+		var question = Language.getStr("Variable_delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete_variable"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);
 	}
 };
+
 /**
  * Represents a user-created List that is part of the current project.  A list holds ListData, which in turn contains
  * an array.  Lists can be edited, while the ListData they pass should not be butated while another object is using it.
@@ -1252,7 +1254,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_list_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1267,9 +1269,8 @@ List.prototype.delete = function() {
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		var question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+		var question = Language.getStr("List_delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete_list"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteList(this);
@@ -1277,25 +1278,34 @@ List.prototype.delete = function() {
 };
 
 
+
 /**
- * Language is a static class that provides translation for blocks.
+ * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
+ * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
  */
 function Language() {
 
 };
 
-//The default language for the app is english
+
 Language.lang = "en";
+Language.langs = ["en", "nl", "fr"];
 
-/* The list of languages that are currently supported by birdblox. Any new language should be added
-to this list */
-Language.langs = ["en", "zh", "fr", "es", "nl"];
-
-
-/* The disctionary for English, an underscore is necessary to separate the words in keys.
-   If translation for a word is not found in the dictionary.
-   No translation will be shown for the block.*/
 Language.en = {
+    "Delete_recording_question":"Are you sure you would like to delete the current recording?",
+    "Name_error_blank": "Name cannot be blank. Enter a file name.",
+    "Name_error_invalid_characters": "The following characters cannot be included in file names: \n",
+    "Name_error_already_exists": "\" already exists.  Enter a different name.",
+    "Confirm_delete_question": "Are you sure you want to delete this file?",
+    "Name_duplicate_file": "Enter name for duplicate file",
+    "Disconnect_account_question": "Disconnect account?",
+    "Files_will_remain": "Downloaded files will remain on this device.",
+    "Open_before_recording": "Please open a project before recording",
+    "Grant_permission": "Please grant recording permissions to the BirdBlox app in settings",
+    "List_delete_question": "Are you sure you want to delete this list?",
+    "Variable_delete_question": "Are you sure you want to delete this variable?",
+    "Device_firmware:": "\nDevice firmware version: ",
+    "Required_firmware:": "\nRequired firmware version: ",
     "CompassCalibrate":"Compass Calibrate",
     "Compass": "Compass",
     "Screen_Up": "Screen Up",
@@ -1437,757 +1447,524 @@ Language.en = {
     "to_connect":"to connect",
     "Cancel":"Cancel",
     "Scanning_for_devices":"Scanning for devices",
-    "Sign_in":"Sign_in",
-    "read":"Read",
-    "write":"Write",
-    "pin":"Pin",
-    "Percent":"Percent"
-};
-
-/* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
-Language.zh = {
-    "CompassCalibrate":"CN",
-    "Compass": "CN",
-    "Screen_Up": "CN",
-    "Screen_Down": "CN",
-    "Tilt_Left": "CN",
-    "Tilt_Right": "CN",
-    "Logo_Up": "CN",
-    "Logo_Down": "CN",
-    "Shake": "CN",
-    "Button": "CN",
-    "Magnetometer": "CN",
-    "Accelerometer": "CN",
-    "Print": "CN",
-    "Display": "CN",
-    "Distance": "CN",
-    "Dial": "CN",
-    "Light": "CN",
-    "Sound": "CN",
-    "Other": "CN",
-    "Play_Note": "CN",
-    "for": "CN",
-    "Beats": "CN",
-    "Position_Servo": "CN",
-    "Rotation_Servo": "CN",
-    "LED": "CN",
-    "Tri_LED": "CN",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "CN",
-    "Vibration":"CN",
-    "Motor":"CN",
-    "Temperature_C":"CN",
-    "Temperature_F":"CN",
-    "Knob": "CN",
-    "Device_Shaken":"CN",
-    "Device_SSID":"CN",
-    "Device_Pressure":"CN",
-    "Device_Relative_Altitude":"CN",
-    "Device_Orientation":"CN",
-    "Device":"CN",
-    "Acceleration":"CN",
-    "Latitude":"CN",
-    "Longitude":"CN",
-    "when":"CN",
-    "tapped":"CN",
-    "when_I_receive":"CN",
-    "wait_until":"CN",
-    "repeat_forever":"CN",
-    "repeat":"CN",
-    "repeat_until":"CN",
-    "if":"CN",
-    "broadcast":"CN",
-    "and_wait":"CN",
-    "stop":"CN",
-    "all":"CN",
-    "this_script":"CN",
-    "all_but_this_script":"CN",
-    "message":"CN",
-    "wait":"CN",
-    "secs":"CN",
-    "else":"CN",
-    "item":"CN",
-    "of":"CN",
-    "length":"CN",
-    "contains":"CN",
-    "play_sound":"CN",
-    "play_sound_until_done":"CN",
-    "play_recording":"CN",
-    "play_recording_until_done":"CN",
-    "stop_all_sounds":"CN",
-    "rest_for":"CN",
-    "for":"CN",
-    "play_note":"CN",
-    "change_tempo_by":"CN",
-    "set_tempo_to":"CN",
-    "tempo":"CN",
-    "round":"CN",
-    "mod":"CN",
-    "pick_random":"CN",
-    "to":"CN",
-    "and":"CN",
-    "or":"CN",
-    "not":"CN",
-    "true":"CN",
-    "false":"CN",
-    "letter":"CN",
-    "join":"CN",
-    "split":"CN",
-    "by":"CN",
-    "whitespace":"CN",
-    "number":"CN",
-    "text":"CN",
-    "boolean":"CN",
-    "list":"CN",
-    "invalid_number":"CN",
-    "Edit_Text":"CN",
-    "is":"CN",
-    "a":"CN",
-    "reset_timer":"CN",
-    "and_wait":"CN",
-    "ask": "CN",
-    "at":"CN",
-    "Position":"CN",
-    "current":"CN",
-    "year":"CN",
-    "month":"CN",
-    "date":"CN",
-    "hour":"CN",
-    "minute":"CN",
-    "second":"CN",
-    "day_of_the_week":"CN",
-    "time_in_milliseconds":"CN",
-    "answer":"CN",
-    "timer":"CN",
-    "Record_Sounds":"CN",
-    "Create_Variable":"CN",
-    "Create_List":"CN",
-    "Zoom_in":"CN",
-    "Zoom_out":"CN",
-    "Reset_zoom":"CN",
-    "Disable_snap_noise":"CN",
-    "Enable_snap_noise":"CN",
-    "Send_debug_log":"CN",
-    "Show_debug_menu":"CN",
-    "Disconnect_Device":"CN",
-    "Connect_Device":"CN",
-    "Connect_Multiple":"CN Connect Multiple",
-    "New":"CN",
-    "Open":"CN",
-    "No_saved_programs":"CN",
-    "On_Device":"CN",
-    "Cloud":"CN",
-    "Device limit reached":"CN",
-    "Tap_record_to_start":"CN",
-    "Done":"CN",
-    "Loading":"CN",
-    "Tap":"CN",
-    "to_connect":"CN",
-    "Cancel":"CN",
-    "Scanning_for_devices":"CN",
-    "Sign_in":"CN"
-}
-
-
-/* The disctionary for Spanish, an underscore is necessary to separate the words in keys.*/
-Language.es = {
-    "CompassCalibrate":"ESP",
-    "Compass": "ESP",
-    "Screen_Up": "ESP",
-    "Screen_Down": "ESP",
-    "Tilt_Left": "ESP",
-    "Tilt_Right": "ESP",
-    "Logo_Up": "ESP",
-    "Logo_Down": "ESP",
-    "Shake": "ESP",
-    "Button": "ESP",
-    "Magnetometer": "ESP",
-    "Accelerometer": "ESP",
-    "Print": "ESP",
-    "Display": "ESP",
-    "Distance": "ESP",
-    "Dial": "ESP",
-    "Light": "ESP",
-    "Sound": "ESP",
-    "Other": "ESP",
-    "Play_Note": "ESP",
-    "for": "ESP",
-    "Beats": "ESP",
-    "Position_Servo": "ESP",
-    "Rotation_Servo": "ESP",
-    "LED": "ESP",
-    "Tri_LED": "ESP",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "ESP",
-    "Vibration":"ESP",
-    "Motor":"ESP",
-    "Temperature_C":"ESP",
-    "Temperature_F":"ESP",
-    "Knob": "ESP",
-    "Device_Shaken":"ESP",
-    "Device_SSID":"ESP",
-    "Device_Pressure":"ESP",
-    "Device_Relative_Altitude":"ESP",
-    "Device_Orientation":"ESP",
-    "Device":"ESP",
-    "Acceleration":"ESP",
-    "Latitude":"ESP",
-    "Longitude":"ESP",
-    "when":"ESP",
-    "tapped":"ESP",
-    "when_I_receive":"ESP",
-    "wait_until":"ESP",
-    "repeat_forever":"ESP",
-    "repeat":"ESP",
-    "repeat_until":"ESP",
-    "if":"ESP",
-    "broadcast":"ESP",
-    "and_wait":"ESP",
-    "stop":"ESP",
-    "all":"ESP",
-    "this_script":"ESP",
-    "all_but_this_script":"ESP",
-    "message":"ESP",
-    "wait":"ESP",
-    "secs":"ESP",
-    "else":"ESP",
-    "item":"ESP",
-    "of":"ESP",
-    "length":"ESP",
-    "contains":"ESP",
-    "play_sound":"ESP",
-    "play_sound_until_done":"ESP",
-    "play_recording":"ESP",
-    "play_recording_until_done":"ESP",
-    "stop_all_sounds":"ESP",
-    "rest_for":"ESP",
-    "for":"ESP",
-    "play_note":"ESP",
-    "change_tempo_by":"ESP",
-    "set_tempo_to":"ESP",
-    "tempo":"ESP",
-    "round":"ESP",
-    "mod":"ESP",
-    "pick_random":"ESP",
-    "to":"ESP",
-    "and":"ESP",
-    "or":"ESP",
-    "not":"ESP",
-    "true":"ESP",
-    "false":"ESP",
-    "letter":"ESP",
-    "join":"ESP",
-    "split":"ESP",
-    "by":"ESP",
-    "whitespace":"ESP",
-    "number":"ESP",
-    "text":"ESP",
-    "boolean":"ESP",
-    "list":"ESP",
-    "invalid_number":"ESP",
-    "Edit_Text":"ESP",
-    "is":"ESP",
-    "a":"ESP",
-    "reset_timer":"ESP",
-    "and_wait":"ESP",
-    "ask": "ESP",
-    "at":"ESP",
-    "Position":"ESP",
-    "current":"ESP",
-    "year":"ESP",
-    "month":"ESP",
-    "date":"ESP",
-    "hour":"ESP",
-    "minute":"ESP",
-    "second":"ESP",
-    "day_of_the_week":"ESP",
-    "time_in_milliseconds":"ESP",
-    "answer":"ESP",
-    "timer":"ESP",
-    "Record_Sounds":"ESP",
-    "Create_Variable":"ESP",
-    "Create_List":"ESP",
-    "Zoom_in":"ESP",
-    "Zoom_out":"ESP",
-    "Reset_zoom":"ESP",
-    "Disable_snap_noise":"ESP",
-    "Enable_snap_noise":"ESP",
-    "Send_debug_log":"ESP",
-    "Show_debug_menu":"ESP",
-    "Disconnect_Device":"ESP",
-    "Connect_Device":"ESP",
-    "Connect_Multiple":"ESP Connect Multiple",
-    "New":"ESP",
-    "Open":"ESP",
-    "No_saved_programs":"ESP",
-    "On_Device":"ESP",
-    "Cloud":"ESP",
-    "Device limit reached":"ESP",
-    "Tap_record_to_start":"ESP",
-    "Done":"ESP",
-    "Loading":"ESP",
-    "Tap":"ESP",
-    "to_connect":"ESP",
-    "Cancel":"ESP",
-    "Scanning_for_devices":"ESP",
-    "Sign_in":"ESP"
-}
-
-/* The disctionary for French, an underscore is necessary to separate the words in keys.*/
-Language.fr = {
-    "Delete_recording_question":"Supprimer l'enregistrement?",
-    "Name_error_blank":"Le nom ne peut pas être vide. Entrez un nom de fichier",
-    "Name_error_invalid_characters":"Les caractères suivants ne peuvent pas être inclus dans les noms de fichiers: \n",
-    "Name_error_already_exists":"\" existe déjà. Entrez un nom différent.",
-    "Confirm_delete_question":"Supprimer le fichier?",
-    "Name_duplicate_file":"Entrez le nom du fichier en double",
-    "Disconnect_account_question":"Déconnecter le compte?",
-    "Grant_permission":"Accorder une autorisation d'enregistrement à BirdBlox dans les Paramètres",
-    "List_delete_question":"Supprimer la liste?",
-    "Variable_delete_question":"Supprimer la variable?",
-    "Device_firmware:":"Version du firmware du périphérique:",
-    "Required_firmware:":"Version du firmware requise:",
-    "CompassCalibrate":"Calibrer le compas",
-    "Compass":"Compas",
-    "Screen_Up":"Écran vers le haut",
-    "Screen_Down":"Écran vers le bas",
-    "Tilt_Left":"Incliner à gauche",
-    "Tilt_Right":"Incliner à droite",
-    "Logo_Up":"Logo vers le haut",
-    "Logo_Down":"Logo vers le bas",
-    "Shake":"Secouer",
-    "Button":"Bouton",
-    "Magnetometer":"Magnétomètre",
-    "Accelerometer":"Accéléromètre",
-    "Print":"Imprimer",
-    "Display":"Display",
-    "Distance":"Distance",
-    "Dial":"Cadran",
-    "Light":"Lumière",
-    "Sound":"Son",
-    "Other":"Autre",
-    "Play_Note":"Jouer la note",
-    "for":"pour",
-    "Beats":"Battement",
-    "Position_Servo":"Position Servo",
-    "Rotation_Servo":"Rotation Servo",
-    "LED":"LED",
-    "Tri_LED":"Tri-LED",
-    "R":"R",
-    "G":"G",
-    "B":"B",
-    "Servo":"Servo",
-    "Vibration":"Vibration",
-    "Motor":"Moteur",
-    "Temperature_C":"Température C",
-    "Temperature_F":"Température F",
-    "Knob":"Bouton",
-    "Device_Shaken":"Tablette secouée",
-    "Device_SSID":"Tablette SSID",
-    "Device_Pressure":"Tablette Pression",
-    "Device_Relative_Altitude":"Tablette Altitude Relative ",
-    "Device_Orientation":"Tablette Orientation",
-    "Device":"Tablette",
-    "Acceleration":"Accélération",
-    "Latitude":"Latitude",
-    "Longitude":"Longitude",
-    "when":"quand",
-    "tapped":"tapoter",
-    "when_I_receive":"quand je reçois",
-    "wait_until":"attend jusqu'à",
-    "repeat_forever":"répéter pour toujours",
-    "repeat":"répéter ",
-    "repeat_until":"répéter jusqu'à",
-    "if":"si ",
-    "broadcast":"transmettre",
-    "and_wait":"et attendez",
-    "stop":"stop",
-    "all":"tout",
-    "this_script":"ce script",
-    "all_but_this_script":"tout sauf ce script",
-    "message":"message",
-    "wait":"attendez",
-    "secs":"secondes",
-    "else":"autre",
-    "item":"item",
-    "of":"ou",
-    "length":"longueur",
-    "contains":"contient",
-    "play_sound":"jouer le son",
-    "play_sound_until_done":"jouer le son jusqu'à la fin",
-    "play_recording":"jouer l' enregistrement",
-    "play_recording_until_done":"jouer l' enregistrement jusqu'à la fin",
-    "stop_all_sounds":"arrêter tous les sons",
-    "rest_for":"reposez pour",
-    "for":"pour",
-    "play_note":"jouer la note",
-    "change_tempo_by":"changer le tempo de",
-    "set_tempo_to":"régler le tempo sur",
-    "tempo":"tempo",
-    "round":"round",
-    "mod":"modulo",
-    "pick_random":"choisir au hasard",
-    "to":"à",
-    "and":"et",
-    "or":"ou",
-    "not":"non",
-    "true":"vrai",
-    "false":"faux",
-    "letter":"lettre",
-    "join":"joindre",
-    "split":"diviser",
-    "by":"avec",
-    "whitespace":"espace blanc",
-    "number":"numéro",
-    "text":"texte",
-    "boolean":"booléen",
-    "list":"liste",
-    "invalid_number":"numéro invalide",
-    "Edit_text":"Éditer le texte",
-    "is":"est",
-    "a":"a",
-    "reset_timer":"réinitialiser la minuterie",
-    "and_wait":"et attendez",
-    "ask":"demande",
-    "at":"à",
-    "Position":"Position",
-    "current":"actuel",
-    "year":"année",
-    "month":"mois",
-    "date":"date",
-    "hour":"heure",
-    "minute":"minute",
-    "second":"seconde",
-    "day_of_the_week":"jour de la semaine",
-    "time_in_milliseconds":"temps en millisecondes",
-    "answer":"réponse",
-    "timer":"minuterie",
-    "Record_Sounds":"Enregistrer le son",
-    "Create_Variable":"Créer une variable",
-    "Create_List":"Créer une liste",
-    "Zoom_in":"Agrandir",
-    "Zoom_out":"Dézoomer",
-    "Reset_zoom":"Réinitialiser le zoom",
-    "Disable_snap_noise":"Désactiver le bruit d'accrochage",
-    "Enable_snap_noise":"Activer le bruit d'accrochage",
-    "Send_debug_log":"Envoyer un journal de débogage",
-    "Show_debug_menu":"Afficher le menu de débogage",
-    "Disconnect_Device":"Déconnecter le périphérique",
-    "Connect_Device":"Connecter le périphérique",
-    "Connect_Multiple":"Connecter plusieurs",
-    "New":"Neuf",
-    "Open":"Ouvrir",
-    "No_saved_programs":"Aucun programme sauvé",
-    "On_Device":"Sur le périphérique",
-    "Cloud":"Cloud",
-    "Tap_record_to_start":"Tapotez pour commencer l' enregistrement ",
-    "Done":"Fini",
-    "Loading":"Chargement",
-    "Tap":"Tapoter",
-    "to_connect":"pour connecter",
-    "Cancel":"Annuler",
-    "Scanning_for_devices":"Recherche de périphériques",
-    "Sign_in":"Se connecter",
-    "world":"monde",
-    "hello":"bonjour",
-    "what_your_name":"Quel est ton nom?",
+    "Sign_in":"Sign in",
+    "world":"world",
+    "hello":"hello",
+    "what_your_name":"What's your name?",
     "Question":"Question",
     "bpm":"bpm",
-    "Total":"Total",
-    "set":"fixer",
-    "change":"changer",
-    "add":"ajouter",
-    "thing":"chose",
-    "delete":"supprimer",
-    "insert":"insérer",
-    "at":"à",
-    "replace_item":"remplacer l'article",
-    "with":"avec",
-    "copy":"copier",
+    "Total": "Total",
+    "set":"set",
+    "change":"change",
+    "add":"add",
+    "thing":"thing",
+    "delete":"delete",
+    "insert":"insert",
+    "at":"at",
+    "replace_item":"replace item",
+    "with":"with",
+    "copy":"copy",
     "Robots":"Robots",
-    "Operators":"Opérateurs",
-    "Tablet":"Tablette",
-    "Control":"Contrôle",
+    "Operators":"Operators",
+    "Tablet":"Tablet",
+    "Control":"Control",
     "Variables":"Variables",
-    "any_message":"N'importe quel message",
-    "port":"Connecteur",
-    "last":"Dernier",
-    "random":"Au hasard",
-    "Enter_text":"Entrez un texte",
-    "Connection_Failure":"Échec de connexion",
-    "Dismiss":"Rejeter",
-    "Connection_failed_try_again":"La connexion a échoué, veuillez réessayer.",
-    "Enter_variable_name":"Entrez le nom de la variable",
-    "Enter_list_name":"Entrez le nom de la liste",
-    "not_a_valid_number":"numéro invalide",
-    "not_connected":"pas connecté",
+    "any_message":"any message",
+    "new":"new",
+    "Port":"Port",
+    "last":"last",
+    "random":"random",
+    "Enter_text":"Enter text",
+    "Connection_Failure": "Connection Failure",
+    "Dismiss":"Dismiss",
+    "Connection_failed_try_again":"Connection failed, please try again.",
+    "Enter_variable_name":"Enter variable name",
+    "Enter_list_name":"Enter list name",
+    "not_a_valid_number":"not a valid number",
+    "not_connected":"not connected",
     "Firmware_incompatible":"Firmware incompatible",
-    "Update_firmware":"Mettez à jour le firmware",
-    "Rename_list":"Renommer la liste",
-    "Delete_list":"Supprimer la liste ",
-    "Dont_delete":"Ne pas supprimer",
-    "Delete":"Supprimer",
-    "Permission_denied":"Permission refusée",
-    "Continue_recording":"Continuer l' enregistrement",
-    "Record_sounds":"Enregistrer les sons",
-    "New_program":"Nouveau programme",
-    "Enter_file_name":"Entrez le nom du fichier",
-    "Saving":"Sauvegarde",
-    "Name":"Nom",
-    "Rename":"Renommer  ",
-    "Duplicate":"Dupliquer",
-    "Disconnect_account":"Déconnecter le compte",
-    "Dont_disconnect":"Ne pas déconnecter",
-    "Disconnect":"Déconnecter  ",
-    "Recordings":"Les enregistrements",
-    "Record":"Enregistrer  ",
-    "Discard":"Jeter",
+    "Update_firmware":"Update firmware",
+    "Rename_list":"Rename list",
+    "Enter_list_name":"Enter list name",
+    "Delete_list":"Delete list",
+    "Dont_delete":"Don't delete",
+    "Delete":"Delete",
+    "Permission_denied":"Permission denied",
+    "Dismiss":"Dismiss",
+    "Continue_recording": "Continue recording",
+    "Record_sounds":"Record sounds",
+    "New_program":"New program",
+    "Enter_file_name":"Enter file name",
+    "Saving":"Saving",
+    "Name":"Name",
+    "Rename":"Rename",
+    "Duplicate":"Duplicate",
+    "Disconnect_account":"Disconnect account",
+    "Dont_disconnect":"Don't disconnect",
+    "Disconnect":"Disconnect",
+    "Recordings":"Recordings",
+    "Record":"Record",
+    "Discard":"Discard",
     "Stop":"Stop",
-    "Pause":"Faire une pause",
-    "remaining":"restant",
-    "No_project_open":"Pas de projet actif",
+    "Pause":"Pause",
+    "remaining":"remaining",
+    "No_project_open":"No project open",
     "OK":"OK",
-    "Share":"Partager",
-    "Rename_variable":"Renommez la variable",
-    "Delete_variable":"Supprimez la variable",
-    "read":"Lire",
-    "write":"Écrire",
-    "pin":"Broche"
-}
+    "Edit_text":"Edit text",
+    "Share":"Share",
+    "Rename_variable":"Rename variable",
+    "Enter_variable_name":"Enter variable name",
+    "Delete_variable":"Delete variable"
+};
+
 
 Language.nl = {
-    "Delete_recording_question":"Opname verwijderen?",
-    "Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
-    "Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
-    "Name_error_already_exists":"\" bestaat al. Voer een andere naam in.",
-    "Confirm_delete_question":"Bestand verwijderen?",
-    "Name_duplicate_file":"Voer een naam in voor het gekopieerde bestand",
-    "Disconnect_account_question":"Account loskoppelen?",
-    "Grant_permission":"Geef toestemming tot opnames aan BirdBlox in Instellingen",
-    "List_delete_question":"Lijst verwijderen?",
-    "Variable_delete_question":"Variabele verwijderen?",
-    "Device_firmware:":"Apparaat firmware versie:",
-    "Required_firmware:":"Vereiste firmware versie:",
-    "CompassCalibrate":"Kompas Kalibreren",
-    "Compass":"Kompas",
-    "Screen_Up":"Scherm Omhoog",
-    "Screen_Down":"Scherm Omlaag",
-    "Tilt_Left":"Naar Links Kantelen",
-    "Tilt_Right":"Naar Rechts Kantelen",
-    "Logo_Up":"Logo Omhoog",
-    "Logo_Down":"Logo Omlaag",
-    "Shake":"Schudden",
-    "Button":"Knop",
-    "Magnetometer":"Magnetometer",
-    "Accelerometer":"Accelerometer",
-    "Print":"Afdrukken",
-    "Display":"Tonen",
-    "Distance":"Afstand",
-    "Dial":"Draaiknop",
-    "Light":"Licht",
-    "Sound":"Geluid",
-    "Other":"Ander",
-    "Play_Note":"Speel Noot",
-    "for":"voor",
-    "Beats":"Beats",
-    "Position_Servo":"Positie Servo",
-    "Rotation_Servo":"Rotatie Servo",
-    "LED":"LED",
-    "Tri_LED":"Tri-LED",
-    "R":"R",
-    "G":"G",
-    "B":"B",
-    "Servo":"Servo",
-    "Vibration":"Vibratie",
-    "Motor":"Motor",
-    "Temperature_C":"Temperatuur C",
-    "Temperature_F":"Temperatuur F",
-    "Knob":"Draaiknop",
-    "Device_Shaken":"Tablet Geschud",
-    "Device_SSID":"Tablet SSID",
-    "Device_Pressure":"Tablet Druk",
-    "Device_Relative_Altitude":"Tablet Relatieve Hoogte",
-    "Device_Orientation":"Tablet Orientatie",
-    "Device":"Tablet",
-    "Acceleration":"Acceleratie",
-    "Latitude":"Breedtegraad",
-    "Longitude":"Lengtegraad",
-    "when":"wanneer",
-    "tapped":"tikte",
-    "when_I_receive":"wanneer ik ontvang",
-    "wait_until":"wacht tot",
-    "repeat_forever":"herhaal altijd",
-    "repeat":"herhaal",
-    "repeat_until":"herhaal tot",
-    "if":"als",
-    "broadcast":"zend uit",
-    "and_wait":"en wacht",
-    "stop":"stop",
-    "all":"alles",
-    "this_script":"dit script",
-    "all_but_this_script":"alles behalve dit script",
-    "message":"signaal",
-    "wait":"wacht",
-    "secs":"sec.",
-    "else":"anders",
-    "item":"item",
-    "of":"van",
-    "length":"lengte",
-    "contains":"bevat",
-    "play_sound":"speel geluid",
-    "play_sound_until_done":"speel geluid tot het einde",
-    "play_recording":"speel opname",
-    "play_recording_until_done":"speel opname tot het einde",
-    "stop_all_sounds":"stop alle geluiden",
-    "rest_for":"rust voor",
-    "for":"voor",
-    "play_note":"speel noot",
-    "change_tempo_by":"verander tempo met ",
-    "set_tempo_to":"stel tempo in op",
-    "tempo":"tempo",
-    "round":"afgerond",
-    "mod":"modulo",
-    "pick_random":"willekeurig getal tussen",
-    "to":"tot ",
-    "and":"en",
-    "or":"of",
-    "not":"niet",
-    "true":"waar",
-    "false":"onwaar",
-    "letter":"letter",
-    "join":"voeg samen",
-    "split":"splits",
-    "by":"bij",
-    "whitespace":"spatie",
-    "number":"getal",
-    "text":"tekst",
-    "boolean":"booleaans",
-    "list":"lijst",
-    "invalid_number":"ongeldig getal",
-    "Edit_Text":"Bewerk Tekst",
-    "is":"is",
-    "a":"een",
-    "reset_timer":"zet tijd op nul",
-    "and_wait":"en wacht",
-    "ask":"vraag",
-    "at":"op",
-    "Position":"Positie",
-    "current":"huidig",
-    "year":"jaar",
-    "month":"maand",
-    "date":"datum",
-    "hour":"uur",
-    "minute":"minuut",
-    "second":"seconde",
-    "day_of_the_week":"dag van de week",
-    "time_in_milliseconds":"tijd in milliseconden",
-    "answer":"antwoord",
-    "timer":"tijd",
-    "Record_Sounds":"Neem Geluid Op",
-    "Create_Variable":"Maak een Variabele",
-    "Create_List":"Maak een Lijst",
-    "Zoom_in":"Inzoomen",
-    "Zoom_out":"Uitzoomen",
-    "Reset_zoom":"Reset zoom",
-    "Disable_snap_noise":"Klikgeluid Uitschakelen",
-    "Enable_snap_noise":"Klikgeluid Inschakelen",
-    "Send_debug_log":"Stuur foutopsporingslog",
-    "Show_debug_menu":"Toon debug-menu",
-    "Disconnect_Device":"Ontkoppel Apparaat",
-    "Connect_Device":"Verbind Apparaat",
-    "Connect_Multiple":"Verbind Meerdere",
-    "New":"Nieuw",
-    "Open":"Open",
-    "No_saved_programs":"Geen opgeslagen programmas",
-    "On_Device":"In Apparaat",
-    "Cloud":"Cloud",
-    "Tap_record_to_start":"Tik om opnemen te starten",
-    "Done":"Klaar",
-    "Loading":"Laden",
-    "Tap":"Tik",
-    "to_connect":"verbinden",
-    "Cancel":"Annuleer",
-    "Scanning_for_devices":"Scannen van apparaten",
-    "Sign_in":"Inloggen",
-    "world":"wereld",
-    "hello":"hallo",
-    "what_your_name":"Wat is jouw naam?",
-    "Question":"Vraag",
-    "bpm":"bpm",
-    "Total":"Totaal",
-    "set":"maak",
-    "change":"verander",
-    "add":"voeg toe",
-    "thing":"ding",
-    "delete":"verwijder",
-    "insert":"voeg in",
-    "at":"op",
-    "replace_item":"vervang item",
-    "with":"door",
-    "copy":"kopieer",
-    "Robots":"Robots",
-    "Operators":"Operatoren",
-    "Tablet":"Tablet",
-    "Control":"Controle",
-    "Variables":"Variabelen",
-    "any_message":"enige signaal",
-    "new":"nieuw",
-    "Port":"Poort",
-    "last":"laatste",
-    "random":"willekeurig",
-    "Enter_text":"Tekst invoeren",
-    "Connection_Failure":"Verbindingsfout",
-    "Dismiss":"Ontslaan",
-    "Connection_failed_try_again":"Verbindingsfout, probeer opnieuw",
-    "Enter_variable_name":"Voer naam van de variabele in",
-    "Enter_list_name":"Voer lijst naam in",
-    "not_a_valid_number":"geen geldig getal",
-    "not_connected":"niet verbonden",
-    "Firmware_incompatible":"Onverenigbare Firmware",
-    "Update_firmware":"Update firmware",
-    "Rename_list":"Lijst hernoemen",
-    "Enter_list_name":"Voer lijst naam in",
-    "Delete_list":"Lijst verwijderen",
-    "Dont_delete":"Niet verwijderen",
-    "Delete":"Verwijderen",
-    "Permission_denied":"Geen toestemming",
-    "Dismiss":"Ontslaan",
-    "Continue_recording":"Doorgaan met opnemen",
-    "Record_sounds":"Geluiden opnemen",
-    "New_program":"Nieuw programma",
-    "Enter_file_name":"Voor een bestandsnaam in",
-    "Saving":"Opslaan",
-    "Name":"Naam",
-    "Rename":"Hernoemen",
-    "Duplicate":"Kopiëren",
-    "Disconnect_account":"Account Loskoppelen",
-    "Dont_disconnect":"Niet Loskoppelen",
-    "Disconnect":"Loskoppelen",
-    "Recordings":"Opnames",
-    "Record":"Opnemen",
-    "Discard":"Verwijder",
-    "Stop":"Stop",
-    "Pause":"Pauze",
-    "remaining":"overblijvende",
-    "No_project_open":"Geen project open",
-    "OK":"OK",
-    "Edit_text":"Tekst bewerken",
-    "Share":"Share",
-    "Rename_variable":"Variabele hernoemen",
-    "Enter_variable_name":"Voer variabele naam in",
-    "Delete_variable":"Variabele verwijderen",
-    "read":"Lees",
-    "write":"Schrijf",
-    "pin":"Pin"
-}
+  "Delete_recording_question":"Opname verwijderen?",
+  "Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
+  "Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
+  "Name_error_already_exists":"\" bestaat al. Voer een andere naam in.",
+  "Confirm_delete_question":"Bestand verwijderen?",
+  "Name_duplicate_file":"Voer een naam in voor het gekopieerde bestand",
+  "Disconnect_account_question":"Account loskoppelen?",
+  "Grant_permission":"Geef toestemming tot opnames aan BirdBlox in Instellingen",
+  "List_delete_question":"Lijst verwijderen?",
+  "Variable_delete_question":"Variabele verwijderen?",
+  "Device_firmware:":"Apparaat firmware versie:",
+  "Required_firmware:":"Vereiste firmware versie:",
+  "CompassCalibrate":"Kompas Kalibreren",
+  "Compass":"Kompas",
+  "Screen_Up":"Scherm Omhoog",
+  "Screen_Down":"Scherm Omlaag",
+  "Tilt_Left":"Naar Links Kantelen",
+  "Tilt_Right":"Naar Rechts Kantelen",
+  "Logo_Up":"Logo Omhoog",
+  "Logo_Down":"Logo Omlaag",
+  "Shake":"Schudden",
+  "Button":"Knop",
+  "Magnetometer":"Magnetometer",
+  "Accelerometer":"Accelerometer",
+  "Print":"Afdrukken",
+  "Display":"Tonen",
+  "Distance":"Afstand",
+  "Dial":"Draaiknop",
+  "Light":"Licht",
+  "Sound":"Geluid",
+  "Other":"Ander",
+  "Play_Note":"Speel Noot",
+  "for":"voor",
+  "Beats":"Beats",
+  "Position_Servo":"Positie Servo",
+  "Rotation_Servo":"Rotatie Servo",
+  "LED":"LED",
+  "Tri_LED":"Tri-LED",
+  "R":"R",
+  "G":"G",
+  "B":"B",
+  "Servo":"Servo",
+  "Vibration":"Vibratie",
+  "Motor":"Motor",
+  "Temperature_C":"Temperatuur C",
+  "Temperature_F":"Temperatuur F",
+  "Knob":"Draaiknop",
+  "Device_Shaken":"Tablet Geschud",
+  "Device_SSID":"Tablet SSID",
+  "Device_Pressure":"Tablet Druk",
+  "Device_Relative_Altitude":"Tablet Relatieve Hoogte",
+  "Device_Orientation":"Tablet Orientatie",
+  "Device":"Tablet",
+  "Acceleration":"Acceleratie",
+  "Latitude":"Breedtegraad",
+  "Longitude":"Lengtegraad",
+  "when":"wanneer",
+  "tapped":"tikte",
+  "when_I_receive":"wanneer ik ontvang",
+  "wait_until":"wacht tot",
+  "repeat_forever":"herhaal altijd",
+  "repeat":"herhaal",
+  "repeat_until":"herhaal tot",
+  "if":"als",
+  "broadcast":"zend uit",
+  "and_wait":"en wacht",
+  "stop":"stop",
+  "all":"alles",
+  "this_script":"dit script",
+  "all_but_this_script":"alles behalve dit script",
+  "message":"signaal",
+  "wait":"wacht",
+  "secs":"sec.",
+  "else":"anders",
+  "item":"item",
+  "of":"van",
+  "length":"lengte",
+  "contains":"bevat",
+  "play_sound":"speel geluid",
+  "play_sound_until_done":"speel geluid tot het einde",
+  "play_recording":"speel opname",
+  "play_recording_until_done":"speel opname tot het einde",
+  "stop_all_sounds":"stop alle geluiden",
+  "rest_for":"rust voor",
+  "for":"voor",
+  "play_note":"speel noot",
+  "change_tempo_by":"verander tempo met ",
+  "set_tempo_to":"stel tempo in op",
+  "tempo":"tempo",
+  "round":"afgerond",
+  "mod":"modulo",
+  "pick_random":"willekeurig getal tussen",
+  "to":"tot ",
+  "and":"en",
+  "or":"of",
+  "not":"niet",
+  "true":"waar",
+  "false":"onwaar",
+  "letter":"letter",
+  "join":"voeg samen",
+  "split":"splits",
+  "by":"bij",
+  "whitespace":"spatie",
+  "number":"getal",
+  "text":"tekst",
+  "boolean":"booleaans",
+  "list":"lijst",
+  "invalid_number":"ongeldig getal",
+  "Edit_Text":"Bewerk Tekst",
+  "is":"is",
+  "a":"een",
+  "reset_timer":"zet tijd op nul",
+  "and_wait":"en wacht",
+  "ask":"vraag",
+  "at":"op",
+  "Position":"Positie",
+  "current":"huidig",
+  "year":"jaar",
+  "month":"maand",
+  "date":"datum",
+  "hour":"uur",
+  "minute":"minuut",
+  "second":"seconde",
+  "day_of_the_week":"dag van de week",
+  "time_in_milliseconds":"tijd in milliseconden",
+  "answer":"antwoord",
+  "timer":"tijd",
+  "Record_Sounds":"Neem Geluid Op",
+  "Create_Variable":"Maak een Variabele",
+  "Create_List":"Maak een Lijst",
+  "Zoom_in":"Inzoomen",
+  "Zoom_out":"Uitzoomen",
+  "Reset_zoom":"Reset zoom",
+  "Disable_snap_noise":"Klikgeluid Uitschakelen",
+  "Enable_snap_noise":"Klikgeluid Inschakelen",
+  "Send_debug_log":"Stuur foutopsporingslog",
+  "Show_debug_menu":"Toon debug-menu",
+  "Disconnect_Device":"Ontkoppel Apparaat",
+  "Connect_Device":"Verbind Apparaat",
+  "Connect_Multiple":"Verbind Meerdere",
+  "New":"Nieuw",
+  "Open":"Open",
+  "No_saved_programs":"Geen opgeslagen programmas",
+  "On_Device":"In Apparaat",
+  "Cloud":"Cloud",
+  "Tap_record_to_start":"Tik om opnemen te starten",
+  "Done":"Klaar",
+  "Loading":"Laden",
+  "Tap":"Tik",
+  "to_connect":"verbinden",
+  "Cancel":"Annuleer",
+  "Scanning_for_devices":"Scannen van apparaten",
+  "Sign_in":"Inloggen",
+  "world":"wereld",
+  "hello":"hallo",
+  "what_your_name":"Wat is jouw naam?",
+  "Question":"Vraag",
+  "bpm":"bpm",
+  "Total":"Totaal",
+  "set":"maak",
+  "change":"verander",
+  "add":"voeg toe",
+  "thing":"ding",
+  "delete":"verwijder",
+  "insert":"voeg in",
+  "at":"op",
+  "replace_item":"vervang item",
+  "with":"door",
+  "copy":"kopieer",
+  "Robots":"Robots",
+  "Operators":"Operatoren",
+  "Tablet":"Tablet",
+  "Control":"Controle",
+  "Variables":"Variabelen",
+  "any_message":"enige signaal",
+  "new":"nieuw",
+  "Port":"Poort",
+  "last":"laatste",
+  "random":"willekeurig",
+  "Enter_text":"Tekst invoeren",
+  "Connection_Failure":"Verbindingsfout",
+  "Dismiss":"Ontslaan",
+  "Connection_failed_try_again":"Verbindingsfout, probeer opnieuw",
+  "Enter_variable_name":"Voer naam van de variabele in",
+  "Enter_list_name":"Voer lijst naam in",
+  "not_a_valid_number":"geen geldig getal",
+  "not_connected":"niet verbonden",
+  "Firmware_incompatible":"Onverenigbare Firmware",
+  "Update_firmware":"Update firmware",
+  "Rename_list":"Lijst hernoemen",
+  "Enter_list_name":"Voer lijst naam in",
+  "Delete_list":"Lijst verwijderen",
+  "Dont_delete":"Niet verwijderen",
+  "Delete":"Verwijderen",
+  "Permission_denied":"Geen toestemming",
+  "Dismiss":"Ontslaan",
+  "Continue_recording":"Doorgaan met opnemen",
+  "Record_sounds":"Geluiden opnemen",
+  "New_program":"Nieuw programma",
+  "Enter_file_name":"Voor een bestandsnaam in",
+  "Saving":"Opslaan",
+  "Name":"Naam",
+  "Rename":"Hernoemen",
+  "Duplicate":"Kopiëren",
+  "Disconnect_account":"Account Loskoppelen",
+  "Dont_disconnect":"Niet Loskoppelen",
+  "Disconnect":"Loskoppelen",
+  "Recordings":"Opnames",
+  "Record":"Opnemen",
+  "Discard":"Verwijder",
+  "Stop":"Stop",
+  "Pause":"Pauze",
+  "remaining":"overblijvende",
+  "No_project_open":"Geen project open",
+  "OK":"OK",
+  "Edit_text":"Tekst bewerken",
+  "Share":"Share",
+  "Rename_variable":"Variabele hernoemen",
+  "Enter_variable_name":"Voer variabele naam in",
+  "Delete_variable":"Variabele verwijderen",
+  "read":"Lees",
+  "write":"Schrijf",
+  "pin":"Pin"
+};
 
-/* The Callback manager receives a request from the backend to set the default language to be
-   displayed in the frontend based on the system language preference. If the language is currently
-   not supported, english, the default language will be used..*/
+Language.fr = {
+  "Delete_recording_question":"Supprimer l'enregistrement?",
+  "Name_error_blank":"Le nom ne peut pas être vide. Entrez un nom de fichier",
+  "Name_error_invalid_characters":"Les caractères suivants ne peuvent pas être inclus dans les noms de fichiers: \n",
+  "Name_error_already_exists":"\" existe déjà. Entrez un nom différent.",
+  "Confirm_delete_question":"Supprimer le fichier?",
+  "Name_duplicate_file":"Entrez le nom du fichier en double",
+  "Disconnect_account_question":"Déconnecter le compte?",
+  "Grant_permission":"Accorder une autorisation d'enregistrement à BirdBlox dans les Paramètres",
+  "List_delete_question":"Supprimer la liste?",
+  "Variable_delete_question":"Supprimer la variable?",
+  "Device_firmware:":"Version du firmware du périphérique:",
+  "Required_firmware:":"Version du firmware requise:",
+  "CompassCalibrate":"Calibrer le compas",
+  "Compass":"Compas",
+  "Screen_Up":"Écran vers le haut",
+  "Screen_Down":"Écran vers le bas",
+  "Tilt_Left":"Incliner à gauche",
+  "Tilt_Right":"Incliner à droite",
+  "Logo_Up":"Logo vers le haut",
+  "Logo_Down":"Logo vers le bas",
+  "Shake":"Secouer",
+  "Button":"Bouton",
+  "Magnetometer":"Magnétomètre",
+  "Accelerometer":"Accéléromètre",
+  "Print":"Imprimer",
+  "Display":"Display",
+  "Distance":"Distance",
+  "Dial":"Cadran",
+  "Light":"Lumière",
+  "Sound":"Son",
+  "Other":"Autre",
+  "Play_Note":"Jouer la note",
+  "for":"pour",
+  "Beats":"Battement",
+  "Position_Servo":"Position Servo",
+  "Rotation_Servo":"Rotation Servo",
+  "LED":"LED",
+  "Tri_LED":"Tri-LED",
+  "R":"R",
+  "G":"G",
+  "B":"B",
+  "Servo":"Servo",
+  "Vibration":"Vibration",
+  "Motor":"Moteur",
+  "Temperature_C":"Température C",
+  "Temperature_F":"Température F",
+  "Knob":"Bouton",
+  "Device_Shaken":"Tablette secouée",
+  "Device_SSID":"Tablette SSID",
+  "Device_Pressure":"Tablette Pression",
+  "Device_Relative_Altitude":"Tablette Altitude Relative ",
+  "Device_Orientation":"Tablette Orientation",
+  "Device":"Tablette",
+  "Acceleration":"Accélération",
+  "Latitude":"Latitude",
+  "Longitude":"Longitude",
+  "when":"quand",
+  "tapped":"tapoter",
+  "when_I_receive":"quand je reçois",
+  "wait_until":"attend jusqu'à",
+  "repeat_forever":"répéter pour toujours",
+  "repeat":"répéter ",
+  "repeat_until":"répéter jusqu'à",
+  "if":"si ",
+  "broadcast":"transmettre",
+  "and_wait":"et attendez",
+  "stop":"stop",
+  "all":"tout",
+  "this_script":"ce script",
+  "all_but_this_script":"tout sauf ce script",
+  "message":"message",
+  "wait":"attendez",
+  "secs":"secondes",
+  "else":"autre",
+  "item":"item",
+  "of":"ou",
+  "length":"longueur",
+  "contains":"contient",
+  "play_sound":"jouer le son",
+  "play_sound_until_done":"jouer le son jusqu'à la fin",
+  "play_recording":"jouer l' enregistrement",
+  "play_recording_until_done":"jouer l' enregistrement jusqu'à la fin",
+  "stop_all_sounds":"arrêter tous les sons",
+  "rest_for":"reposez pour",
+  "for":"pour",
+  "play_note":"jouer la note",
+  "change_tempo_by":"changer le tempo de",
+  "set_tempo_to":"régler le tempo sur",
+  "tempo":"tempo",
+  "round":"round",
+  "mod":"modulo",
+  "pick_random":"choisir au hasard",
+  "to":"à",
+  "and":"et",
+  "or":"ou",
+  "not":"non",
+  "true":"vrai",
+  "false":"faux",
+  "letter":"lettre",
+  "join":"joindre",
+  "split":"diviser",
+  "by":"avec",
+  "whitespace":"espace blanc",
+  "number":"numéro",
+  "text":"texte",
+  "boolean":"booléen",
+  "list":"liste",
+  "invalid_number":"numéro invalide",
+  "Edit_text":"Éditer le texte",
+  "is":"est",
+  "a":"a",
+  "reset_timer":"réinitialiser la minuterie",
+  "and_wait":"et attendez",
+  "ask":"demande",
+  "at":"à",
+  "Position":"Position",
+  "current":"actuel",
+  "year":"année",
+  "month":"mois",
+  "date":"date",
+  "hour":"heure",
+  "minute":"minute",
+  "second":"seconde",
+  "day_of_the_week":"jour de la semaine",
+  "time_in_milliseconds":"temps en millisecondes",
+  "answer":"réponse",
+  "timer":"minuterie",
+  "Record_Sounds":"Enregistrer le son",
+  "Create_Variable":"Créer une variable",
+  "Create_List":"Créer une liste",
+  "Zoom_in":"Agrandir",
+  "Zoom_out":"Dézoomer",
+  "Reset_zoom":"Réinitialiser le zoom",
+  "Disable_snap_noise":"Désactiver le bruit d'accrochage",
+  "Enable_snap_noise":"Activer le bruit d'accrochage",
+  "Send_debug_log":"Envoyer un journal de débogage",
+  "Show_debug_menu":"Afficher le menu de débogage",
+  "Disconnect_Device":"Déconnecter le périphérique",
+  "Connect_Device":"Connecter le périphérique",
+  "Connect_Multiple":"Connecter plusieurs",
+  "New":"Neuf",
+  "Open":"Ouvrir",
+  "No_saved_programs":"Aucun programme sauvé",
+  "On_Device":"Sur le périphérique",
+  "Cloud":"Cloud",
+  "Tap_record_to_start":"Tapotez pour commencer l' enregistrement ",
+  "Done":"Fini",
+  "Loading":"Chargement",
+  "Tap":"Tapoter",
+  "to_connect":"pour connecter",
+  "Cancel":"Annuler",
+  "Scanning_for_devices":"Recherche de périphériques",
+  "Sign_in":"Se connecter",
+  "world":"monde",
+  "hello":"bonjour",
+  "what_your_name":"Quel est ton nom?",
+  "Question":"Question",
+  "bpm":"bpm",
+  "Total":"Total",
+  "set":"fixer",
+  "change":"changer",
+  "add":"ajouter",
+  "thing":"chose",
+  "delete":"supprimer",
+  "insert":"insérer",
+  "at":"à",
+  "replace_item":"remplacer l'article",
+  "with":"avec",
+  "copy":"copier",
+  "Robots":"Robots",
+  "Operators":"Opérateurs",
+  "Tablet":"Tablette",
+  "Control":"Contrôle",
+  "Variables":"Variables",
+  "any_message":"N'importe quel message",
+  "port":"Connecteur",
+  "last":"Dernier",
+  "random":"Au hasard",
+  "Enter_text":"Entrez un texte",
+  "Connection_Failure":"Échec de connexion",
+  "Dismiss":"Rejeter",
+  "Connection_failed_try_again":"La connexion a échoué, veuillez réessayer.",
+  "Enter_variable_name":"Entrez le nom de la variable",
+  "Enter_list_name":"Entrez le nom de la liste",
+  "not_a_valid_number":"numéro invalide",
+  "not_connected":"pas connecté",
+  "Firmware_incompatible":"Firmware incompatible",
+  "Update_firmware":"Mettez à jour le firmware",
+  "Rename_list":"Renommer la liste",
+  "Delete_list":"Supprimer la liste ",
+  "Dont_delete":"Ne pas supprimer",
+  "Delete":"Supprimer",
+  "Permission_denied":"Permission refusée",
+  "Continue_recording":"Continuer l' enregistrement",
+  "Record_sounds":"Enregistrer les sons",
+  "New_program":"Nouveau programme",
+  "Enter_file_name":"Entrez le nom du fichier",
+  "Saving":"Sauvegarde",
+  "Name":"Nom",
+  "Rename":"Renommer  ",
+  "Duplicate":"Dupliquer",
+  "Disconnect_account":"Déconnecter le compte",
+  "Dont_disconnect":"Ne pas déconnecter",
+  "Disconnect":"Déconnecter  ",
+  "Recordings":"Les enregistrements",
+  "Record":"Enregistrer  ",
+  "Discard":"Jeter",
+  "Stop":"Stop",
+  "Pause":"Faire une pause",
+  "remaining":"restant",
+  "No_project_open":"Pas de projet actif",
+  "OK":"OK",
+  "Share":"Partager",
+  "Rename_variable":"Renommez la variable",
+  "Delete_variable":"Supprimez la variable",
+  "read":"Lire",
+  "write":"Écrire",
+  "pin":"Broche"
+};
+
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "en";
@@ -2196,24 +1973,20 @@ Language.setLanguage = function(lang) {
     }
 }
 
-/* getLanguage returns the language that is currently being used by the birdblox.*/
 Language.getLanguage = function () {
-    var userSelectedLang = sessionStorage.getItem("language");
-    if (userSelectedLang != undefined && userSelectedLang != null){
-      Language.lang = userSelectedLang;
-    }
-    return "Language." + Language.lang + ".";
+  var userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+  }
+  return "Language." + Language.lang + ".";
 }
 
-/* getStr returns the translation for the given string based on the language of the app and
-   translation provided in the dictionary for that language. If no translation is provided,
-   No Translation will be shown*/
 Language.getStr = function(str) {
     var translatedStr = eval(Language.getLanguage() + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
-        return "No Translation";
+        return "Translation required";
     }
 }
 
@@ -2308,7 +2081,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " not connected";
+			return typeName + " " + Language.getStr("not_connected");
 		} else {
 			return errorResult;
 		}
@@ -2470,10 +2243,10 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	var msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
-	msg += "\nDevice firmware version: " + oldFirmware;
-	msg += "\nRequired firmware version: " + minFirmware;
-	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+	var msg = Language.getStr("Firmware_Error") + " " + this.name ;
+	msg += Language.getStr("Device_firmware") + oldFirmware;
+	msg += Language.getStr("Required_firmware") + minFirmware;
+	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {
 			var request = new HttpRequestBuilder("robot/showUpdateInstructions");
 			request.addParam("type", this.getDeviceTypeId());
@@ -4679,7 +4452,7 @@ BlockList.getCatId = function(index) {
  * @return {string} - The category's name.
  */
 BlockList.getCatName = function(index) {
-	return BlockList.categories[index];
+	return Language.getStr(BlockList.categories[index]);
 };
 
 /**
@@ -9926,7 +9699,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	var oldVal = data.asString().getValue();
 	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
 	var shouldPrefill = data.type === Data.types.string;
-	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Edit_text"), this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
 		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
 			// Set the data
 			this.currentData = new StringData(response);
@@ -9938,6 +9711,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 		InputSystem.prototype.close.call(this);
 	}.bind(this));
 };
+
 /**
  * An InputSystem for editing NumSlots and DropSlots, provides a set of controls (InputWidgets) in an OverlayBubble
  * which edit the Data in the Slot.
@@ -10845,7 +10619,7 @@ SoundInputPad.prototype.createRow = function(sound, y) {
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	var SIP = SoundInputPad;
 	var button = new Button(x, y, width, SIP.rowHeight, this.group);
-	button.addText("Record sounds");
+	button.addText(Language.getStr("Record_sounds"));
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
@@ -10917,6 +10691,7 @@ SoundInputPad.prototype.close = function() {
 	this.bubbleOverlay.close();
 	Sound.stopAllSounds();
 };
+
 /**
  * A BubbleOverlay is a type of Overlay that places its content in a speech bubble shaped background that always
  * is on screen.  The bubble appears above, below, left, or right of a rectangular region specified in the display()
@@ -12510,12 +12285,12 @@ BlockContextMenu.prototype.addOptions = function() {
 	if (this.block.stack.isDisplayStack) {
 		if (this.block.constructor === B_Variable) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameVar();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteVar();
 				this.close();
 			}.bind(this));
@@ -12523,12 +12298,12 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 		if (this.block.constructor === B_List) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameLi();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteLi();
 				this.close();
 			}.bind(this));
@@ -12536,11 +12311,11 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 	} else {
 
-		this.menuBnList.addOption("Duplicate", function() {
+		this.menuBnList.addOption(Language.getStr("Duplicate"), function() {
 			this.duplicate();
 		}.bind(this));
 
-		this.menuBnList.addOption("Delete", function() {
+		this.menuBnList.addOption(Language.getStr("Delete"), function() {
 			// Delete the stack and add it to the UndoManager
 			UndoManager.deleteStack(this.block.unsnap());
 			this.close();
@@ -12571,6 +12346,7 @@ BlockContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide();
 };
+
 /**
  * A VectorIcon controls an SVG path element. It draws the information for the path from VectorPaths.js and rescales
  * the path appropriately.
@@ -12930,7 +12706,7 @@ CodeManager.move.start = function(block, x, y) {
 	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
 		Overlay.closeOverlays();   // Close any visible overlays.
 		move.moving = true;   // Record that a Block is now moving.
-		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
+		/* Disconnect the Block from its current BlockStack to form a new BlockStack
 		containing only the Block and the Blocks below it. */
 		var stack = block.unsnap();
 		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
@@ -13118,7 +12894,7 @@ CodeManager.stop = function() {
 	CodeManager.stopUpdateTimer();   // Stop the update timer.
 	DisplayBoxManager.hide();   // Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
-	// Note: Tones are not allowed to be async, so they 
+	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
 };
 
@@ -13176,7 +12952,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create variable", "Enter variable name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_variable_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
 			var variable = new Variable(result);
@@ -13246,7 +13022,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create list", "Enter list name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_list_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
 			var list = new List(result);
@@ -13654,6 +13430,7 @@ CodeManager.dragRelToAbsX = function(x) {
 CodeManager.dragRelToAbsY = function(y) {
 	return y * TabManager.getActiveZoom();
 };
+
 /**
  * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
  * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
@@ -14595,8 +14372,8 @@ RecordingManager.startRecording = function() {
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
 		} else if (result === "Permission denied") {
-			var message = "Please grant recording permissions to the BirdBlox app in settings";
-			DialogManager.showAlertDialog("Permission denied", message, "Dismiss");
+			var message = "Grant_permission";
+			DialogManager.showAlertDialog(Language.getStr("Permission_denied"), message, Language.getStr("Dismiss"));
 		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
@@ -14651,8 +14428,8 @@ RecordingManager.discardRecording = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	var message = "Are you sure you would like to delete the current recording?";
-	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result) {
+	var message = Language.getStr("Delete_recording_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Continue_recording"), Language.getStr("Delete"), true, function(result) {
 		if (result === "2") {
 			var request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
@@ -14743,6 +14520,7 @@ RecordingManager.permissionGranted = function() {
 		}
 	}
 };
+
 /**
  * Abstract class that controls a dialog with a scrollable region containing a number of rows. Each row normally
  * contains buttons but can also have other types of content. Only one dialog can be visible at any time.
@@ -15240,6 +15018,7 @@ RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackF
 	button.addIcon(pathId, RD.iconH);
 	return button;
 };
+
 /**
  * A dialog for opening and managing local files.  On iOS, a cloud button is included for opening cloud files, and
  * on Android an additional tab opens an OpenCloudDialog for managing cloud files.
@@ -15730,7 +15509,7 @@ OpenCloudDialog.prototype.createTabRow = function() {
 	var y = this.getExtraTopY();
 	var tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
 
-	tabRow.addTab("On Device", "device");
+	tabRow.addTab(Language.getStr("On_Device"), "device");
 	var signOutFn = null;
 	// If signed in, an X appears in the tab which signs the user out
 	if (this.fileList.signedIn) {
@@ -15804,10 +15583,10 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
  */
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
-	var message = "Disconnect account " + this.fileList.account + "?\n";
-	message += "Downloaded files will remain on this device.";
+	var message = Language.getStr("Disconnect_account_question");
+	message += Language.getStr("Files_will_remain");
 	var me = this;
-	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result) {
+	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
 		if (result === "2") {
 			me.signOut();
 		}
@@ -15860,6 +15639,7 @@ OpenCloudDialog.filesChanged = function(jsonString) {
 		OpenDialog.currentDialog.reloadDialog(jsonString);
 	}
 };
+
 /**
  * Holds all the data necessary to show an OpenDialog, which includes a list of local files and the cloud account the
  * user is signed into (if any}.  A list of cloud files is downloaded later.
@@ -16191,7 +15971,7 @@ function RecordingDialog(listOfRecordings) {
 		return x.id;
 	});
 	// Extra space at the bottom is needed for the recording controls
-	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	RowDialog.call(this, true, Language.getStr("Recordings"), this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 	this.addHintText(Language.getStr("Tap_record_to_start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
@@ -16360,7 +16140,7 @@ RecordingDialog.prototype.createRecordButton = function() {
 	var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", RecD.recordFont, RecD.recordColor);
+		Language.getStr("Record"), RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
@@ -16393,7 +16173,7 @@ RecordingDialog.prototype.createDiscardButton = function() {
 	var button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, Language.getStr("Discard"));
 	return button;
 };
 
@@ -16408,7 +16188,7 @@ RecordingDialog.prototype.createSaveButton = function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Stop");
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, Language.getStr("Stop"));
 	return button;
 };
 
@@ -16423,7 +16203,7 @@ RecordingDialog.prototype.createPauseButton = function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, Language.getStr("Pause"));
 	return button;
 };
 
@@ -16438,7 +16218,7 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, Language.getStr("Record"));
 	return button;
 };
 
@@ -16639,7 +16419,7 @@ RecordingDialog.prototype.updateCounter = function(time) {
 
 	var remainingMs = Math.max(0, RD.recordingLimit - time + 999);
 	if (remainingMs < RD.remainingThreshold) {
-		var remainingString = this.timeToString(remainingMs) + " remaining";
+		var remainingString = this.timeToString(remainingMs) + " " + Language.getStr("remaining");
 		GuiElements.update.text(this.remaingingText, remainingString);
 		var remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
 		var remainingX = this.x + this.width / 2 - remainingWidth / 2;
@@ -16664,9 +16444,10 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
-	var message = "Please open a project before recording";
-	DialogManager.showAlertDialog("No project open", message, "OK");
+	var message = Language.getStr("Open_before_recording");
+	DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
 };
+
 /**
  * Provides a list of Robots of a certain type to connect to in a BubbleOverlay.  Updates as new robots are found.
  * The list might be associated with a specific slot of the ConnectMultipleDialog, in which case it will not list
@@ -18616,8 +18397,8 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
-    var msg = "Connection to \"" + robotId + "\" failed, please try again later.";
-    DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
+    var msg = Language.getStr("Connection_failed_try_again");
+    DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
     		return;
     	}.bind(this));
 }
@@ -18703,37 +18484,19 @@ CallbackManager.tablet.removeSensor = function(sensor){
 
 /**
  * Tells the frontend that the language of the system
- * @param {string} lang - A non percent encoded string representing the language
+ * @param {string} sensor - A non percent encoded string representing the unsupported sensor
+ * @return {boolean} - Whether the sensor string was valid
  */
 
 CallbackManager.tablet.getLanguage = function(lang){
     Language.setLanguage(lang);
 };
-
-/**
- * Opens the file based on the directory on app starts.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
-
-/**
- * Opens the file based on the directory when the user does not close the app before attempting to
-   open a file.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
-}
-
-/**
- * Changes the device limit that is supported based on the request from the backend.
- * @param {string} numOfDevice - The number of devices to be supported.
- */
-CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
-    ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
 
 /**
@@ -19045,7 +18808,7 @@ SaveManager.setConstants = function() {
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 60;
-	SaveManager.newProgName = "New program";
+	SaveManager.newProgName = Language.getStr("New_program");
 	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
 
@@ -19110,7 +18873,7 @@ SaveManager.backendClose = function() {
  */
 SaveManager.backendMarkLoading = function() {
 	OpenDialog.closeDialog();
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 };
 
 /**
@@ -19136,7 +18899,7 @@ SaveManager.userClose = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.userNew = function(nextAction) {
-	SaveManager.promptNewFile("Enter file name", nextAction);
+	SaveManager.promptNewFile(Language.getStr("Enter_file_name"), nextAction);
 };
 
 /**
@@ -19157,7 +18920,7 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeNew(response.trim(), nextAction);
 		}
@@ -19171,7 +18934,7 @@ SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction
  */
 SaveManager.sanitizeNew = function(proposedName, nextAction) {
 	if (proposedName === "") {
-		var message = "Name cannot be blank. Enter a file name.";
+		var message = Language.getStr("Name_error_blank");
 		SaveManager.promptNewFile(message, nextAction);
 	} else {
 		GuiElements.alert("getting name");
@@ -19181,11 +18944,11 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
 				SaveManager.newSoft(availableName, nextAction);
 			} else if (!alreadySanitized) {
 				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-				var message = "The following characters cannot be included in file names: \n";
+				var message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			}
 		});
@@ -19201,7 +18964,7 @@ SaveManager.newSoft = function(filename, nextAction) {
 	var request = new HttpRequestBuilder("data/new");
 	request.addParam("filename", filename);
 	SaveManager.loadBlank();
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	// If the saving fails, we show the open dialog so the user can try again.
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
 };
@@ -19228,7 +18991,7 @@ SaveManager.userOpenFile = function(fileName) {
     SaveManager.fileName = fileName;
 	var request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {
@@ -19245,7 +19008,7 @@ SaveManager.userOpenFile = function(fileName) {
  */
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
 	// We use the default message with the title "Name"
-	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
+	SaveManager.promptRename(isRecording, oldFilename, Language.getStr("Name"), null, nextAction);
 };
 
 /**
@@ -19272,7 +19035,7 @@ SaveManager.promptRename = function(isRecording, oldFilename, title, message, ne
  */
 SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
 	if (message == null) {
-		message = "Enter a file name";
+		message = Language.getStr("Enter_file_name");
 	}
 	// We ask for a new name
 	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
@@ -19293,7 +19056,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
 	if (proposedName === "") {
-		var message = "Name cannot be blank. Enter a file name.";
+		var message = Language.getStr("Name_error_blank");
 		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
 	} else if (proposedName === oldFilename) {
 		if (!isRecording && SaveManager.fileName === oldFilename) {
@@ -19307,11 +19070,11 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				var message = "The following characters cannot be included in file names: \n";
+				var message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
@@ -19350,8 +19113,8 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	var question = "Are you sure you want to delete \"" + filename + "\"?";
-	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
+	var question = Language.getStr("Confirm_delete_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
 				OpenDialog.lastOpenFile = null;
@@ -19421,7 +19184,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
  * @param {function} nextAction - The name of the function to call after successful duplication
  */
 SaveManager.userDuplicateFile = function(filename, nextAction) {
-	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
+	SaveManager.promptDuplicate(Language.getStr("Name_duplicate_file"), filename, nextAction);
 };
 
 /**
@@ -19444,7 +19207,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
-	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Duplicate"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
@@ -19459,17 +19222,17 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 	if (proposedName === "") {
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
+		SaveManager.promptDuplicate(Language.getStr(Name_error_blank), filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				var message = "The following characters cannot be included in file names: \n";
+				var message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				var message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				var message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
@@ -19528,7 +19291,7 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
 SaveManager.saveAsNew = function() {
 	var request = new HttpRequestBuilder("data/new");
 	var xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {
@@ -23131,7 +22894,7 @@ VarDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(variable.getSelectionData());
 	});
 	// Add the Create variable option
-	selectPad.addAction("Create variable", function(callback) {
+	selectPad.addAction(Language.getStr("Create_Variable"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a variable
 		CodeManager.newVariable(function(variable) {
 			// If successful, save the newly created variable as the value
@@ -23194,6 +22957,7 @@ VarDropSlot.prototype.checkVariableUsed = function(variable) {
 	// Returns that this variable is in use if it matches this Slot's value
 	return this.enteredData != null && this.enteredData.getValue() === variable;
 };
+
 /**
  * ListDropSlot are used to select a List.  They also provide an option to create a new List.
  * @param {Block} parent
@@ -23227,7 +22991,7 @@ ListDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(list.getSelectionData());
 	});
 	// Add the Create list option
-	selectPad.addAction("Create list", function(callback) {
+	selectPad.addAction(Language.getStr("Create_List"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a list
 		CodeManager.newList(function(list) {
 			// If successful, save the newly created variable as the value
@@ -23292,6 +23056,7 @@ ListDropSlot.prototype.checkListUsed = function(list) {
 	return false;
 };
 
+
 /**
  * PortSlots select a port for Robot input/output Blocks.  They store the Data as NumData (not SelectionData)
  * for legacy support
@@ -23304,7 +23069,7 @@ function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
 	for (var portNum = 1; portNum <= this.maxPorts; portNum++) {
-		this.addOption(new NumData(portNum), "Port " + portNum.toString());
+		this.addOption(new NumData(portNum), Language.getStr("Port") + " " + portNum.toString());
 	}
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
@@ -23321,6 +23086,7 @@ PortSlot.prototype.sanitizeData = function(data) {
 	var value = data.asNum().getValueInR(1, this.maxPorts, true, true);
 	return new NumData(value, data.isValid);
 };
+
 /**
  * A DropSlot which lists available broadcasts (obtained from CodeManager.broadcastList) and allows the creation
  * of new broadcasts (through an Enter Text option). Reporter blocks that return strings can e attached to the Slot
@@ -23340,7 +23106,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
 	}
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
 	if (isHatBlock) {
-		this.addOption(new SelectionData("any message", "any_message"));
+		this.addOption(new SelectionData(Language.getStr("any_message"), "any_message"));
 	}
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
@@ -23362,7 +23128,7 @@ BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(new StringData(message), '"' + message + '"');
 	});
 	// Add an Edit Text option
-	selectPad.addAction("new", function(callbackFn) {
+	selectPad.addAction(Language.getStr("new"), function(callbackFn) {
 		// When the option is selected, show a dialog
 		var inputDialog = new InputDialog(this.parent.textSummary(this), false);
 		inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
@@ -23407,6 +23173,7 @@ BroadcastDropSlot.prototype.dataToString = function(data) {
 	}
 	return result;
 };
+
 /**
  * DeviceDropSlots appear on Blocks that control robots.  When only one robot is connected, they appear as an ordinary
  * label, but when multiple robots are connected, tey act as a DropSlot, displaying options for each connected robot.
@@ -23791,7 +23558,7 @@ NumOrStringSlot.prototype.constructor = NumOrStringSlot;
  * @param {InputWidget.SelectPad} selectPad
  */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
-	selectPad.addAction("Enter text", function(callbackFn){
+	selectPad.addAction(Language.getStr("Enter_text"), function(callbackFn){
 		// When "Enter text" is selected, create a new inputDialog
 		var inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
@@ -23801,6 +23568,7 @@ NumOrStringSlot.prototype.populatePad = function(selectPad){
 		}, this.enteredData);
 	}.bind(this)); //TODO: clean up edit text options
 };
+
 /**
  * IndexSlots are used to select indexes in Lists. They have special options for "last" "random" and "all"
  * @param {Block} parent
@@ -23818,10 +23586,10 @@ function IndexSlot(parent, key, includeAll) {
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 
 	// Add selectable options
-	this.addOption(new SelectionData("last", "last"));
-	this.addOption(new SelectionData("random", "random"));
+	this.addOption(new SelectionData(Language.getStr("last"), "last"));
+	this.addOption(new SelectionData(Language.getStr("random"), "random"));
 	if (includeAll) {
-		this.addOption(new SelectionData("all", "all"));
+		this.addOption(new SelectionData(Language.getStr("all"), "all"));
 	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
@@ -23846,6 +23614,7 @@ IndexSlot.prototype.sanitizeData = function(data) {
 	}
 	return data;
 };
+
 /**
  * ToggleSlot is a subclass of BoolSlot. Though not a subclass of EditableSlot,
  * it is editable in that you can toggle the boolean value.
@@ -24872,21 +24641,36 @@ B_MicroBitPrint.prototype.startAction = function() {
   var printString = this.slots[1].getData().getValue();
   mem.blockDuration = (printString.length * 600);
   mem.timerStarted = false;
+  mem.requestSent = false;
+  mem.printString = printString;
+  mem.device = device;
 
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
   mem.requestStatus.result = null;
-  device.readPrintBlock(mem.requestStatus, printString);
+
 
   return new ExecutionStatusRunning();
 };
-/* Waits until the request completes */
+/* Sends requests of 18 characters until full string is printed */
 B_MicroBitPrint.prototype.updateAction = function() {
   var mem = this.runMem;
   if (!mem.timerStarted) {
     var status = mem.requestStatus;
-    if (status.finished === true) {
+    if (!mem.requestSent) {
+      var ps = mem.printString;
+      var psSubstring = ps.substring(0,18);
+      mem.device.readPrintBlock(mem.requestStatus, psSubstring);
+      mem.blockDuration = (psSubstring.length * 600);
+      mem.requestSent = true;
+      if (ps.length > 18) {
+        mem.printString = ps.substring(18);
+      } else {
+        mem.printString = null;
+      }
+      return new ExecutionStatusRunning();
+    } else if (status.finished === true) {
       mem.startTime = new Date().getTime();
       mem.timerStarted = true;
     } else {
@@ -24894,7 +24678,14 @@ B_MicroBitPrint.prototype.updateAction = function() {
     }
   }
   if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
-    return new ExecutionStatusDone(); // Done running
+    if (mem.printString != null) {
+      mem.requestSent = false;
+      mem.timerStarted = false;
+      mem.requestStatus.finish = false;
+      return new ExecutionStatusRunning();
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
   } else {
     return new ExecutionStatusRunning(); // Still running
   }
@@ -25279,7 +25070,7 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 function B_HBKnob(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Knob"));
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Dial"));
 }
 B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
@@ -25352,6 +25143,7 @@ B_HBDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");
+
 /* This file contains the implementations of MicroBit blocks
  */
 
@@ -26331,7 +26123,7 @@ B_When.prototype.startAction = function() {
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, Language.getStr("ask")));
-	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
+	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
 	this.addPart(new LabelText(this, Language.getStr("and_wait")));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
@@ -26380,7 +26172,7 @@ B_Ask.prototype.showQuestion = function() {
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
 		mem.finished = true;   // Done waiting.
 	};
-	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog(Language.getStr("Question"), mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
@@ -26478,7 +26270,7 @@ B_CurrentTime.prototype.startAction = function() {
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
 	this.addPart(new LabelText(this, Language.getStr("Display")));
-	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
+	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
 	this.addPart(new LabelText(this, Language.getStr("at")));
 	var dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
 	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
@@ -26495,6 +26287,7 @@ B_Display.prototype.startAction = function() {
 	DisplayBoxManager.displayText(message, position);
 	return new ExecutionStatusDone(); // Done running
 };
+
 /* This file contains the implementations for Blocks in the operators category. */
 function B_Add(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
@@ -26787,7 +26580,7 @@ function B_LetterOf(x, y) {
 	nS.addLimits(1);
 	this.addPart(nS);
 	this.addPart(new LabelText(this, Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -26807,7 +26600,7 @@ B_LetterOf.prototype.startAction = function() {
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -26822,9 +26615,9 @@ B_LengthOf.prototype.startAction = function() {
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
 	this.addPart(new LabelText(this, Language.getStr("join")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello "));
+	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
 	this.addPart(new LabelText(this, Language.getStr("and")));
-	this.addPart(new StringSlot(this, "StrS_2", "world"));
+	this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -26840,7 +26633,7 @@ B_join.prototype.startAction = function() {
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
 	this.addPart(new LabelText(this, Language.getStr("split")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
+	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
 	this.addPart(new LabelText(this, Language.getStr("by")));
 
 	var inputType = EditableSlot.inputTypes.any;
@@ -27009,6 +26802,7 @@ B_mathOfNumber.prototype.startAction = function() {
 	}
 	return new ExecutionStatusResult(new NumData(value, isValid));
 };
+
 /* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
@@ -27231,7 +27025,7 @@ function B_DeviceAcceleration(x, y) {
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
-	dS.addOption(new SelectionData("Total", "total"));
+	dS.addOption(new SelectionData(Language.getStr("Total"), "total"));
 	this.addPart(dS);
 	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
 }
@@ -27533,7 +27327,7 @@ function B_SetTempoTo(x, y) {
 	var nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, "bpm"));
+	this.addPart(new LabelText(this, Language.getStr("bpm")));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
@@ -27559,6 +27353,7 @@ B_Tempo.prototype.constructor = B_Tempo;
 B_Tempo.prototype.startAction = function() {
 	return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
 };
+
 /* Implementation of blocks that deal with variables and lists.  Most of these blocks have a DropSlot to select
  * the list to read/modify.  Some of the List Blocks allow this Slot to be given either an existing List
  * or a ListData, such as returned from the Split block.
@@ -27659,9 +27454,9 @@ B_Variable.importXml = function(blockNode) {
 
 function B_SetTo(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "set"));
+	this.addPart(new LabelText(this, Language.getStr("set")));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
@@ -27690,9 +27485,9 @@ B_SetTo.prototype.startAction = function() {
 
 function B_ChangeBy(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "change"));
+	this.addPart(new LabelText(this, Language.getStr("change")));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "by"));
+	this.addPart(new LabelText(this, Language.getStr("by")));
 	this.addPart(new NumSlot(this, "NumS_val", 1));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
@@ -27803,12 +27598,12 @@ B_List.prototype.checkListUsed = function(list) {
 
 function B_AddToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "add"));
+	this.addPart(new LabelText(this, Language.getStr("add")));
 	/* Any type can be added to a list */
 	var snapType = Slot.snapTypes.numStrBool;
 	var inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
+	this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
@@ -27838,9 +27633,9 @@ B_AddToList.prototype.startAction = function() {
 
 function B_DeleteItemOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "delete"));
+	this.addPart(new LabelText(this, Language.getStr("delete")));
 	this.addPart(new IndexSlot(this, "NumS_idx", true));
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
@@ -27871,11 +27666,11 @@ B_DeleteItemOfList.prototype.startAction = function() {
 
 function B_InsertItemAtOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "insert"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
-	this.addPart(new LabelText(this, "at"));
+	this.addPart(new LabelText(this, Language.getStr("insert")));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
+	this.addPart(new LabelText(this, Language.getStr("at")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
@@ -27918,12 +27713,12 @@ B_InsertItemAtOfList.prototype.startAction = function() {
 
 function B_ReplaceItemOfListWith(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "replace item"));
+	this.addPart(new LabelText(this, Language.getStr("replace_item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
+	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
-	this.addPart(new LabelText(this, "with"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
+	this.addPart(new LabelText(this, Language.getStr("with")));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
@@ -27955,10 +27750,10 @@ B_ReplaceItemOfListWith.prototype.startAction = function() {
 
 function B_CopyListToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "copy"));
+	this.addPart(new LabelText(this, Language.getStr("copy")));
 	/* This Slot also accepts ListData, such as data from the Split block */
 	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new LabelText(this, Language.getStr("to")));
 	/* This Slot must have an already existing List, not a ListData */
 	this.addPart(new ListDropSlot(this, "LDS_to"));
 }
@@ -28070,7 +27865,7 @@ function B_ListContainsItem(x, y) {
 	this.addPart(new LabelText(this, Language.getStr("contains")));
 	var snapType = Slot.snapTypes.numStrBool;
 	var inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
@@ -28104,3 +27899,4 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
 	}
 	return new BoolData(false, true);
 };
+

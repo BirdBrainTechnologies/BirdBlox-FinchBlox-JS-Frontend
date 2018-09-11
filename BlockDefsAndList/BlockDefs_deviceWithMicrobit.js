@@ -97,21 +97,36 @@ B_MicroBitPrint.prototype.startAction = function() {
   let printString = this.slots[1].getData().getValue();
   mem.blockDuration = (printString.length * 600);
   mem.timerStarted = false;
+  mem.requestSent = false;
+  mem.printString = printString;
+  mem.device = device;
 
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
   mem.requestStatus.result = null;
-  device.readPrintBlock(mem.requestStatus, printString);
+
 
   return new ExecutionStatusRunning();
 };
-/* Waits until the request completes */
+/* Sends requests of 18 characters until full string is printed */
 B_MicroBitPrint.prototype.updateAction = function() {
   const mem = this.runMem;
   if (!mem.timerStarted) {
     const status = mem.requestStatus;
-    if (status.finished === true) {
+    if (!mem.requestSent) {
+      const ps = mem.printString;
+      const psSubstring = ps.substring(0,18);
+      mem.device.readPrintBlock(mem.requestStatus, psSubstring);
+      mem.blockDuration = (psSubstring.length * 600);
+      mem.requestSent = true;
+      if (ps.length > 18) {
+        mem.printString = ps.substring(18);
+      } else {
+        mem.printString = null;
+      }
+      return new ExecutionStatusRunning();
+    } else if (status.finished === true) {
       mem.startTime = new Date().getTime();
       mem.timerStarted = true;
     } else {
@@ -119,7 +134,14 @@ B_MicroBitPrint.prototype.updateAction = function() {
     }
   }
   if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
-    return new ExecutionStatusDone(); // Done running
+    if (mem.printString != null) {
+      mem.requestSent = false;
+      mem.timerStarted = false;
+      mem.requestStatus.finish = false;
+      return new ExecutionStatusRunning();
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
   } else {
     return new ExecutionStatusRunning(); // Still running
   }

@@ -89,7 +89,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " " + Language.getStr(("not_connected");
+			return typeName + " " + Language.getStr("not_connected");
 		} else {
 			return errorResult;
 		}
