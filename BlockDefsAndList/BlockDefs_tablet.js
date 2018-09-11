@@ -111,7 +111,8 @@ B_DevicePressure.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			const result = Number(status.result);
-			return new ExecutionStatusResult(new NumData(result, true));
+			const num = Math.round(result * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
@@ -152,7 +153,8 @@ B_DeviceRelativeAltitude.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			const result = Number(status.result);
-			return new ExecutionStatusResult(new NumData(result, true));
+			const num = Math.round(result * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
@@ -294,8 +296,9 @@ B_DeviceLocation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const result = status.result.split(" ")[mem.axis];
-			return new ExecutionStatusResult(new NumData(Number(result), true));
+			const result = new StringData( status.result.split(" ")[mem.axis] );
+			const num = Math.round(result.asNum().getValue() * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);

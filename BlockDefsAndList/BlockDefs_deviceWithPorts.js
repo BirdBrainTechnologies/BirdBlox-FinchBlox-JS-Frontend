@@ -79,7 +79,7 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
  * @constructor
  */
 function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
-									 minVal, maxVal, displayUnits){
+									 minVal, maxVal, displayUnits, defaultVal){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
@@ -90,10 +90,15 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
 	this.displayUnits = displayUnits;
+	if (defaultVal == null){
+		this.defaultValue = 0;
+	} else {
+		this.defaultValue = defaultVal;
+	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
 	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
 }
@@ -206,4 +211,75 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	else{
 		return new ExecutionStatusRunning();
 	}
+};
+
+/**
+ * Block that sets a Buzzer
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_DeviceWithPortsBuzzer(x, y, deviceClass){
+  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.displayName = Language.getStr("Play_Note");
+  this.draggable = true;
+  this.minNote = 32
+  this.maxNote = 135
+  this.minBeat = 0
+  this.maxBeat = 16
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new LabelText(this,this.displayName));
+  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  noteSlot.addLimits(this.minNote, this.maxNote, "Note");
+  this.addPart(noteSlot);
+  this.addPart(new LabelText(this, Language.getStr("for")));
+  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
+  this.addPart(beatsSlot);
+  this.addPart(new LabelText(this,Language.getStr("Beats")));
+}
+B_DeviceWithPortsBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_DeviceWithPortsBuzzer.prototype.constructor = B_DeviceWithPortsBuzzer;
+/* Sends the request */
+B_DeviceWithPortsBuzzer.prototype.startAction = function() {
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+
+    const mem = this.runMem;
+    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    mem.soundDuration = CodeManager.beatsToMs(beats);
+    let soundDuration = CodeManager.beatsToMs(beats);
+    mem.timerStarted = false;
+
+    mem.requestStatus = {};
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
+    device.setBuzzer(mem.requestStatus, note, soundDuration);
+    return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_DeviceWithPortsBuzzer.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
 };

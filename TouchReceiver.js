@@ -388,6 +388,22 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 	}
 };
 
+TouchReceiver.touchStartDialogBlock = function(e) {
+	if (SaveManager.fileName == null)  {
+		if (OpenDialog.lastOpenFile != null) {
+			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
+			OpenDialog.lastOpenFile = null;
+			RowDialog.currentDialog.closeDialog();
+		} else {
+			SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+				SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());
+			});
+		}
+	} else {
+		RowDialog.currentDialog.closeDialog();
+	}
+}
+
 /**
  * Handles touch movement events.  Tells stacks, Blocks, Buttons, etc. how to respond.
  * @param {event} e - passed event arguments.
@@ -558,18 +574,17 @@ TouchReceiver.touchend = function(e) {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
 		    // tapping a block in the display stack runs the block once
-		    const x = TR.target.stack.getAbsX();
-            const y = TR.target.stack.getAbsY();
-            TR.targetType = "block";
-            TR.target.updateRun();
+        let execStatus = TR.target.updateRun();
+				if (!execStatus.isRunning) {
             // start the execution of a block
             TR.target.startAction();
-            setTimeout(function(){
-                // wait for the response before trying to fetch the response and display the result
-                TR.target.displayResult(TR.target.updateAction().getResult());
-            }, 100);
-            // set the block to inactive state after running it.
-            TR.target.running = 0;
+				}
+
+        setTimeout(function(){
+            // wait for the response before trying to fetch the response and display the result
+						execStatus = TR.target.updateRun();
+            TR.target.displayResult(execStatus.getResult());
+        }, 100);
 		}
 	} else {
 		TR.touchDown = false;
@@ -781,6 +796,15 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
 	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		TouchReceiver.touchStartCollapsibleItem(item, e);
+	}, false);
+};
+/**
+ * @param {Element} element
+ */
+TouchReceiver.addListenersDialogBlock = function(element) {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
+		TouchReceiver.touchStartDialogBlock(e);
 	}, false);
 };
 

@@ -306,6 +306,8 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
 			CodeManager.renameRecording(oldFilename, newName);
 			if (nextAction != null) nextAction();
 		}
+	} else if (OpenDialog.lastOpenFile == oldFilename) {
+		OpenDialog.lastOpenFile = newName
 	}
 	HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
@@ -320,6 +322,9 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
 	const question = Language.getStr("Confirm_delete_question");
 	DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
+			if (OpenDialog.lastOpenFile == filename){
+				OpenDialog.lastOpenFile = null;
+			}
 			SaveManager.delete(isRecording, filename, nextAction);
 		}
 	}, null);

@@ -1,11 +1,12 @@
 /**
- * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * Top bar menu used to view battery statuses for all connected devices
  * @param {Button} button
  * @constructor
  */
 function BatteryMenu(button) {
     this.offsetX = button.x + BatteryMenu.iconX + TitleBar.buttonMargin;
 	Menu.call(this, button, BatteryMenu.width);
+  this.addAlternateFn(function() {});
 }
 BatteryMenu.prototype = Object.create(Menu.prototype);
 BatteryMenu.prototype.constructor = BatteryMenu;
@@ -18,13 +19,7 @@ BatteryMenu.prototype.loadOptions = function() {
            var curBatteryStatus = "3";
            for (var j = 0; j < manager.getDeviceCount(); j++) {
                let robot = manager.connectedDevices[j];
-               var words = robot.name.split(" ");
-               var newName = "";
-               var color = Colors.lightGray;
-               for (var k = 0; k < words.length; k++) {
-                   newName += words[k][0];
-               };
-               this.addOption(newName, null);
+               this.addOption(robot.shortName, null);
            }
     }
 };
@@ -45,3 +40,16 @@ BatteryMenu.getColorForBatteryStatus = function(status) {
         return Colors.lightGray;
     }
 }
+
+/**
+ * Determines whether multiple devices are connected, in which case the menu should be opened.
+ * @inheritDoc
+ * @return {boolean}
+ */
+BatteryMenu.prototype.previewOpen = function() {
+	let connectionCount = 0;
+	Device.getTypeList().forEach(function(deviceClass) {
+		connectionCount += deviceClass.getManager().getDeviceCount();
+	});
+	return (connectionCount > 1);
+};

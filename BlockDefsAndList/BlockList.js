@@ -279,8 +279,11 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBPrint");
+	collapsibleItem.addBlockByName("B_MBWriteToPin");
+	collapsibleItem.addBlockByName("B_MBBuzzer");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
+	collapsibleItem.addBlockByName("B_MBReadPin");
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");

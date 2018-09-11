@@ -56,7 +56,9 @@ DeviceManager.setStatics = function() {
 };
 DeviceManager.setStatics();
 
-
+/**
+ * Retrieves the number of devices in this.connectedDevices
+ */
 DeviceManager.checkBattery = function() {
     var worstBatteryStatus = "3";
     var curBatteryStatus = "";
@@ -155,6 +157,9 @@ DeviceManager.prototype.removeDevice = function(robotName) {
 	for (let index = 0; index < this.getDeviceCount(); index++) {
 	    if (this.connectedDevices[index].name === robotName) {
 	        this.connectedDevices[index].disconnect();
+	        if (this.scanning) {
+	            this.markStoppedDiscover();
+	        }
 	        removedIndex = index;
 	        break;
 	    }
@@ -221,6 +226,9 @@ DeviceManager.prototype.setOrSwapDevice = function(index, newDevice) {
  * Disconnects from all the devices, making the list empty
  */
 DeviceManager.prototype.removeAllDevices = function() {
+    if (this.scanning) {
+        this.markStoppedDiscover();
+    }
 	this.connectedDevices.forEach(function(device) {
 		device.disconnect();
 	});
@@ -238,7 +246,6 @@ DeviceManager.prototype.deviceIsConnected = function(index) {
 		return false;
 	} else {
 		const deviceStatus = this.connectedDevices[index].getStatus();
-
 		const statuses = DeviceManager.statuses;
 		return deviceStatus === statuses.connected || deviceStatus === statuses.oldFirmware;
 	}
@@ -302,7 +309,6 @@ DeviceManager.prototype.startDiscover = function(renewDiscoverFn) {
 	if(!this.scanning) {
 		this.scanning = true;
 		this.discoverCache = null;
-
 		let request = new HttpRequestBuilder("robot/startDiscover");
 		HtmlServer.sendRequestWithCallback(request.toString());
 	}
@@ -432,7 +438,10 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 		const wasConnected = robot.getConnected();
 		robot.setConnected(isConnected);
 		if (wasConnected && !isConnected && !this.scanning) {
-			this.startDiscover();
+			this.startDiscover(function() { return true;});
+		}
+		if (isConnected && !wasConnected && this.scanning) {
+		    this.markStoppedDiscover();
 		}
 	}
 };

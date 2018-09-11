@@ -43,9 +43,6 @@ DeviceWithPorts.prototype.readMagnetometerSensor = function(status, sensorType, 
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
-
-
-
 /**
  * Issues a request to read the button sensor on micro:bit.
  * Stores the result in the status object, so the executing Block can access it
@@ -160,5 +157,3 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
 	request.addParam("id", this.id);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
-
-

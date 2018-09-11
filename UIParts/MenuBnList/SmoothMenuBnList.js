@@ -235,7 +235,7 @@ SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, colo
 		}
 	}
 	if (icon != null && color != null) {
-	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
+	    bn.addColorIcon(icon, TitleBar.bnIconH * 0.7, color);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();

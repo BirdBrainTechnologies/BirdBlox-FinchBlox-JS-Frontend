@@ -142,7 +142,7 @@ BlockGraphics.SetLoop = function() {
 
 	// Minimum width of loop blocks
 	BlockGraphics.loop.width = 40;
-	
+
 	BlockGraphics.loop.bottomH = 7;
 	BlockGraphics.loop.side = 7;
 };
@@ -345,7 +345,7 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
 	const radius = height / 2;
 	const flatWidth = width - height;
 	let path = "";
-	path += "m " + (x + radius) + "," + (y + height - 2);
+	path += "m " + (x + radius) + "," + (y + height);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;

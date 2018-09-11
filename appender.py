@@ -45,11 +45,25 @@ def concat_js():
     for path in paths:
         target.write(clean_file(open(path, "r").read()))
         target.write("\n")
+    alliOS9_path = path_prefix + "alliOS9.js"
+    if os.path.exists(alliOS9_path):
+        os.remove(alliOS9_path)
+    targetiOS9 = open(alliOS9_path, 'w')
+    for path in paths:
+        targetiOS9.write(clean_file_iOS9(open(path, "r").read()))
+        targetiOS9.write("\n")
         
 def clean_file(file):
     use_strict = "\"use strict\";"
     file = file.replace(use_strict, "")
     file = file.replace("DO.mouse = true;", "DO.mouse = false;")
+    return file
+
+def clean_file_iOS9(file):
+    file = clean_file(file)
+    file = file.replace("let ", "var ")
+    file = file.replace("bvar", "blet")
+    file = file.replace("const ", "var ")
     return file
 
 concat_js()

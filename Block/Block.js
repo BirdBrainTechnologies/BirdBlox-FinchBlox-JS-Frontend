@@ -390,10 +390,10 @@ Block.prototype.updateDim = function() {
 		                lineHeight[currentLine] = this.parts[i].height + 12;
                         break;
 		            case 1:
-		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 2:
-		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 7:
 		                 lineHeight[currentLine] = this.parts[i].height + 7;
@@ -405,7 +405,7 @@ Block.prototype.updateDim = function() {
 		     } else {
 		        switch (this.type) {
 		            case 1:
-			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            lineHeight[currentLine] = this.parts[i].height;
 			            break;
 			        default:
 			            lineHeight[currentLine] = this.parts[i].height;
@@ -1254,6 +1254,11 @@ Block.setDisplaySuffix = function(Class, suffix) {
 		return suffix;
 	});
 };
+Block.removeDisplaySuffix = function(Class) {
+	Class.prototype.displayResult = function(data) {
+			this.displayValue(data.asString().getValue(), false);
+	};
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to append a suffix, determined from a function

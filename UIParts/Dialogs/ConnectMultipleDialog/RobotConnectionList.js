@@ -88,8 +88,11 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
 	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
 	 * Robots to swap places. */
 	const includeConnected = this.index !== null;
-	const robotArray = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+	const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
 
+	const robotArray = robotArrayUnsorted.sort(function(a,b) {
+		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
+	});
 	// We perform the update and try to keep the scrolling the same
 	let oldScroll = null;
 	if (this.menuBnList != null) {
@@ -115,12 +118,7 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
-	var words = robot.name.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
+	this.menuBnList.addOption(robot.listLabel, function() {
 		me.close();
 		if (me.index == null) {
 		    me.deviceClass = DeviceManager.getDeviceClass(robot);
