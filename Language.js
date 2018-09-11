@@ -9,10 +9,10 @@ function Language() {
 };
 
 
-Language.lang = "US";
-Language.langs = ["US", "ES"];
+Language.lang = "en";
+Language.langs = ["en", "es"];
 
-Language.US = {
+Language.en = {
     "Delete_recording_question":"Are you sure you would like to delete the current recording?",
     "Name_error_blank": "Name cannot be blank. Enter a file name.",
     "Name_error_invalid_characters": "The following characters cannot be included in file names: \n",
@@ -239,7 +239,7 @@ Language.US = {
 };
 
 
-Language.ES = {
+Language.es = {
     "Delete_recording_question":"ESP",
     "Name_error_blank": "ESP",
     "Name_error_invalid_characters": "ESP",
@@ -468,14 +468,18 @@ Language.ES = {
 
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
-        Language.lang = "US";
+        Language.lang = "en";
     } else {
         Language.lang = lang;
     }
 }
 
 Language.getLanguage = function () {
-    return "Language." + Language.lang + ".";
+  const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+  }
+  return "Language." + Language.lang + ".";
 }
 
 Language.getStr = function(str) {
