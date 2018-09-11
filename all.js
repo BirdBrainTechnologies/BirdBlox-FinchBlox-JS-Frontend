@@ -1515,7 +1515,10 @@ Language.en = {
     "Share":"Share",
     "Rename_variable":"Rename variable",
     "Enter_variable_name":"Enter variable name",
-    "Delete_variable":"Delete variable"
+    "Delete_variable":"Delete variable",
+    "read":"Read",
+    "write":"Write",
+    "pin":"Pin"
 };
 
 
@@ -11999,6 +12002,7 @@ LanguageMenu.prototype.loadOptions = function() {
   Language.langs.forEach( function(lang) {
     langMenu.addOption(lang, function() {
       sessionStorage.setItem("language", lang);
+      SaveManager.userClose();
       window.location.reload(false);
     });
   });
@@ -25213,10 +25217,11 @@ function B_MBReadPin(x, y){
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
     this.addPart(new LabelText(this,this.displayName));
 
-    const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData("Pin 1", "1"));
-    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 0", "1"));
-    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 1", "2"));
-    pickPin.addOption(new SelectionData(Language.getStr("pin") + " 2", "3"));
+    const pin = Language.getStr("pin");
+    const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
+    pickPin.addOption(new SelectionData(pin + " 0", "1"));
+    pickPin.addOption(new SelectionData(pin + " 1", "2"));
+    pickPin.addOption(new SelectionData(pin + " 2", "3"));
     this.addPart(pickPin);
 }
 B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
@@ -25272,10 +25277,12 @@ function B_MBWriteToPin(x, y) {
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this, this.displayName));
-  const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData("Pin 1", "1"));
-  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 0", "1"));
-  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 1", "2"));
-  pickPin.addOption(new SelectionData(Language.getStr("pin") + " 2", "3"));
+
+  const pin = Language.getStr("pin");
+  const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
+  pickPin.addOption(new SelectionData(pin + " 0", "1"));
+  pickPin.addOption(new SelectionData(pin + " 1", "2"));
+  pickPin.addOption(new SelectionData(pin + " 2", "3"));
   this.addPart(pickPin);
   const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
   numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);

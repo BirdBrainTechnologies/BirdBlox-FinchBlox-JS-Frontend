@@ -235,7 +235,10 @@ Language.en = {
     "Share":"Share",
     "Rename_variable":"Rename variable",
     "Enter_variable_name":"Enter variable name",
-    "Delete_variable":"Delete variable"
+    "Delete_variable":"Delete variable",
+    "read":"Read",
+    "write":"Write",
+    "pin":"Pin"
 };
 
 

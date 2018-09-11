@@ -19,6 +19,7 @@ LanguageMenu.prototype.loadOptions = function() {
   Language.langs.forEach( function(lang) {
     langMenu.addOption(lang, function() {
       sessionStorage.setItem("language", lang);
+      SaveManager.userClose();
       window.location.reload(false);
     });
   });
