@@ -83,7 +83,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " not connected";
+			return typeName + " " + Language.getStr(("not_connected");
 		} else {
 			return errorResult;
 		}
@@ -245,10 +245,10 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
-	msg += "\nDevice firmware version: " + oldFirmware;
-	msg += "\nRequired firmware version: " + minFirmware;
-	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+	let msg = Language.getStr("Firmware_Error") + " " + this.name ;
+	msg += Language.getStr("Device_firmware") + oldFirmware;
+	msg += Language.getStr("Required_firmware") + minFirmware;
+	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {
 			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
 			request.addParam("type", this.getDeviceTypeId());

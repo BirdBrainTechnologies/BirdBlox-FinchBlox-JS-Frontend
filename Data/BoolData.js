@@ -34,9 +34,9 @@ BoolData.prototype.asBool = function() {
  */
 BoolData.prototype.asString = function() {
 	if (this.getValue()) {
-		return new StringData("true", true);
+		return new StringData(Language.getStr("true"), true);
 	} else {
-		return new StringData("false", true);
+		return new StringData(Language.getStr("false"), true);
 	}
 };
 

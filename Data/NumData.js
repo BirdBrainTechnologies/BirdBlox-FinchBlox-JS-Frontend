@@ -45,7 +45,7 @@ NumData.prototype.asString = function() {
 		num = +num.toFixed(10);
 		return new StringData(num + "", true);
 	} else {
-		return new StringData("not a valid number");
+		return new StringData(Language.getStr("not_a_valid_number"));
 	}
 };
 

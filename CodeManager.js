@@ -63,7 +63,7 @@ CodeManager.move.start = function(block, x, y) {
 	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
 		Overlay.closeOverlays();   // Close any visible overlays.
 		move.moving = true;   // Record that a Block is now moving.
-		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
+		/* Disconnect the Block from its current BlockStack to form a new BlockStack
 		containing only the Block and the Blocks below it. */
 		const stack = block.unsnap();
 		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
@@ -251,7 +251,7 @@ CodeManager.stop = function() {
 	CodeManager.stopUpdateTimer();   // Stop the update timer.
 	DisplayBoxManager.hide();   // Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
-	// Note: Tones are not allowed to be async, so they 
+	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
 };
 
@@ -309,7 +309,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create variable", "Enter variable name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_variable_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
 			const variable = new Variable(result);
@@ -379,7 +379,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create list", "Enter list name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_list_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
 			const list = new List(result);

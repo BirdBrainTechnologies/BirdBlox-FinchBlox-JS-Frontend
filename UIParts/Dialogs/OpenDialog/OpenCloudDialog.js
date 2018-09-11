@@ -155,7 +155,7 @@ OpenCloudDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
 
-	tabRow.addTab("On Device", "device");
+	tabRow.addTab(Language.getStr("On_Device"), "device");
 	let signOutFn = null;
 	// If signed in, an X appears in the tab which signs the user out
 	if (this.fileList.signedIn) {
@@ -229,10 +229,10 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
  */
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
-	let message = "Disconnect account " + this.fileList.account + "?\n";
-	message += "Downloaded files will remain on this device.";
+	let message = Language.getStr("Disconnect_account_question");
+	message += Language.getStr("Files_will_remain");
 	const me = this;
-	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result) {
+	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
 		if (result === "2") {
 			me.signOut();
 		}

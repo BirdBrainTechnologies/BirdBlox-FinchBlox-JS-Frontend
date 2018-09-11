@@ -188,7 +188,7 @@ RowDialog.prototype.createContent = function() {
 	let y = 0;
 	const rowGroup = GuiElements.create.group(0, 0);
 	if (this.rowCount > 0) {
-	    if (this.title === "Connect Multiple") {
+	    if (this.title === Language.getStr("Connect_Multiple")) {
                 this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
 	    } else {
             for (let i = 0; i < this.rowCount; i++) {

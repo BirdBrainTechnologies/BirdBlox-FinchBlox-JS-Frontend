@@ -98,7 +98,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_list_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -113,9 +113,8 @@ List.prototype.delete = function() {
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+		let question = Language.getStr("List_delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete_list"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteList(this);
