@@ -3772,6 +3772,31 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.appendChild(textNode);
 	return textElement;
 };
+/**
+ * Creates a video with the given dimensions and name
+ * @param {string} videoName - The name of the mp4 video file
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {Element} [parent]
+ * @return {Element}
+ */
+GuiElements.draw.video = function(videoName, x, y, width, height, parent) {
+	DebugOptions.validateNumbers(x, y, width, height);
+	var videoElement = document.createElement('video');
+	videoElement.setAttribute("x", x);
+	videoElement.setAttribute("y", y);
+	videoElement.setAttribute("width", width);
+	videoElement.setAttribute("height", height);
+	videoElement.setAttribute('visibility', 'visible');
+	videoElement.src = videoName;
+	videoElement.autoplay = true;
+	if (parent != null) {
+		parent.appendChild(videoElement);
+	}
+	return videoElement;
+};
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */
@@ -18183,6 +18208,8 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 			request.addParam("placeholder", prefill);
 		}
 		request.addParam("selectAll", "true");
+		request.addParam("okText", Language.getStr("OK"));
+		request.addParam("cancelText", Language.getStr("Cancel"));
 		var onDialogPresented = function(result) {
 			DM.promptCallback = callbackFn;
 		};
@@ -18227,6 +18254,7 @@ DialogManager.showAlertDialog = function(title, message, button, callbackFn, cal
 	}
 	DialogManager.showChoiceDialog(title, message, button, null, true, callbackFn, callbackErr);
 };
+
 /**
  * The CallBackManager is a static classes that allows the backend to initiate JS actions.  All string parameters
  * sent through callbacks must be percent encoded for safely, as the backend run these methods using string
