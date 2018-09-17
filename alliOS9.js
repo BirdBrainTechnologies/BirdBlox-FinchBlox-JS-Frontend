@@ -3774,6 +3774,9 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 };
 /**
  * Creates a video with the given dimensions and name
+ * Note: if you want to embed the video in an existing svg element, you can do
+ * so by putting it inside a foreignObject element (which you insert into the svg
+ * element). However, the video does not tend to appear to be properly contained.
  * @param {string} videoName - The name of the mp4 video file
  * @param {number} x
  * @param {number} y
@@ -3782,19 +3785,26 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
  * @param {Element} [parent]
  * @return {Element}
  */
-GuiElements.draw.video = function(videoName, x, y, width, height, parent) {
-	DebugOptions.validateNumbers(x, y, width, height);
+GuiElements.draw.video = function(videoName) {
+	//DebugOptions.validateNumbers(x, y, width, height);
+
+	var container = document.createElement('div');
+	container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+
 	var videoElement = document.createElement('video');
-	videoElement.setAttribute("x", x);
-	videoElement.setAttribute("y", y);
-	videoElement.setAttribute("width", width);
-	videoElement.setAttribute("height", height);
-	videoElement.setAttribute('visibility', 'visible');
+	videoElement.setAttribute("controls", "controls");
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 75%; padding: 70px 0;")
 	videoElement.src = videoName;
 	videoElement.autoplay = true;
-	if (parent != null) {
-		parent.appendChild(videoElement);
-	}
+
+	container.appendChild(videoElement);
+	document.body.appendChild(container);
+
+	videoElement.addEventListener('ended',myHandler,false);
+  function myHandler(e) {
+    document.body.removeChild(container);
+  }
+
 	return videoElement;
 };
 
@@ -4701,6 +4711,12 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+
+	collapsibleItem.addSpace();
+	var calibrateDialog = new CalibrateCompassDialog(DeviceHummingbirdBit);
+	var button = collapsibleItem.addButton(Language.getStr("CompassCalibrate"), calibrateDialog.showDialog);
+	collapsibleItem.addSpace();
+
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
 	collapsibleItem.addBlockByName("B_BBPositionServo");
@@ -8198,6 +8214,7 @@ Category.prototype.setSuggestedCollapse = function(id, collapsed) {
 		set.setSuggestedCollapse(id, collapsed);
 	});
 };
+
 /**
  * Represents a set of items that can be collapsed/expanded and each contain Blocks.  Meant for use in the BlockPalette
  * @param {number} y - The y coordinate the set should appear at
@@ -8411,6 +8428,7 @@ CollapsibleItem.prototype.prepareToFill = function() {
 	this.displayStacks = [];
 	this.lastHadStud = false;
 	this.finalized = false;
+	this.buttons = [];
 };
 
 /**
@@ -8461,6 +8479,26 @@ CollapsibleItem.prototype.addBlock = function(block) {
 CollapsibleItem.prototype.addSpace = function() {
 	DebugOptions.assert(!this.finalized);
 	this.currentBlockY += BlockPalette.sectionMargin;
+};
+
+CollapsibleItem.prototype.addButton = function(text, callback) {
+	DebugOptions.assert(!this.finalized);
+
+	var width = BlockPalette.insideBnW;
+	var height = BlockPalette.insideBnH;
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+
+	var button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.innerGroup);
+	var BP = BlockPalette;
+	button.addText(text);
+	button.setCallbackFunction(callback, true);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.buttons.push(button);
+	this.lastHadStud = false;
+	return button;
 };
 
 /**
@@ -8641,6 +8679,7 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
 		stack[functionName].apply(stack, args);
 	});
 };
+
 /**
  * A key UI element that creates a button.  Buttons can trigger a function when they are pressed/released and
  * can contain an icon, image, text, or combination.  They are drawn as soon as the constructor is called, and
@@ -9704,6 +9743,7 @@ InputSystem.prototype.close = function(){
 };
 /**
  * A dialog used to edit the value of the Slot
+ * Presentation of the dialog is handled by the backend.
  * @param {string} textSummary - The textSummary of the Slot
  * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
  * @constructor
@@ -16872,6 +16912,54 @@ FileContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide()
 };
+/**
+ * A dialog for calibrating the compass. A video will give instructions and
+ * the user will have the option to play the video again, calibrate the selected
+ * compass, or cancel.
+ * @param device - The device to be calibrated
+ * @constructor
+ */
+function CalibrateCompassDialog(deviceClass) {
+  this.deviceClass = deviceClass;
+
+	var title = Language.getStr("CompassCalibrate");
+  var curDeviceCnt = this.deviceClass.getManager().getDeviceCount();
+	RowDialog.call(this, false, title, curDeviceCnt, 0, 0);
+  this.addCenteredButton("Instructions", this.showVideo.bind(this));
+	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+
+}
+CalibrateCompassDialog.prototype = Object.create(RowDialog.prototype);
+CalibrateCompassDialog.prototype.constructor = CalibrateCompassDialog;
+
+/**
+ * Creates a row for each device that could be calibrated.
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGroup) {
+  var robot = this.deviceClass.getManager().getDevice(index);
+  RowDialog.createMainBnWithText(robot.name, width, 0, y, contentGroup, function () {
+    robot.calibrateCompass();
+  });
+};
+
+/**
+ * Shows the instructional video appropriate to the device type.
+ */
+CalibrateCompassDialog.prototype.showVideo = function() {
+  var fileName = "Videos/MicroBit_Calibration.mp4";
+
+  if (this.deviceClass == DeviceHummingbirdBit) {
+    fileName = "Videos/HummBit_Calibration.mp4";
+  }
+
+  var video = GuiElements.draw.video(fileName);
+};
+
 /**
  * A set of four arrows around the edges of the canvas that show off screen Blocks
  * @constructor
@@ -24987,18 +25075,23 @@ B_MicroBitCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
 B_MicroBitCompassCalibrate.prototype.constructor = B_MicroBitCompassCalibrate;
 
 B_MicroBitCompassCalibrate.prototype.startAction=function(){
+
    var deviceIndex = this.slots[0].getData().getValue();
    var device = this.deviceClass.getManager().getDevice(deviceIndex);
    if (device == null) {
        this.displayError(this.deviceClass.getNotConnectedMessage());
-       return new ExecutionStatusError(); // Flutter was invalid, exit early
+       return new ExecutionStatusError(); // no device or device was invalid, exit early
    }
+
+   var dialog = new CalibrateCompassDialog(this.deviceClass);
+   dialog.show();
+
    var mem = this.runMem;
    mem.requestStatus = {};
-   mem.requestStatus.finished = false;
+   mem.requestStatus.finished = true;
    mem.requestStatus.error = false;
    mem.requestStatus.result = null;
-   device.calibrateCompass(mem.requestStatus);
+   //device.calibrateCompass(mem.requestStatus);
    return new ExecutionStatusRunning();
 };
 

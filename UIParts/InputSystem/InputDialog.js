@@ -1,5 +1,6 @@
 /**
  * A dialog used to edit the value of the Slot
+ * Presentation of the dialog is handled by the backend.
  * @param {string} textSummary - The textSummary of the Slot
  * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
  * @constructor

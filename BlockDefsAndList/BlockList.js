@@ -253,6 +253,12 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+
+	collapsibleItem.addSpace();
+	const calibrateDialog = new CalibrateCompassDialog(DeviceHummingbirdBit);
+	const button = collapsibleItem.addButton(Language.getStr("CompassCalibrate"), calibrateDialog.showDialog);
+	collapsibleItem.addSpace();
+
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
 	collapsibleItem.addBlockByName("B_BBPositionServo");

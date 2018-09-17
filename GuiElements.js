@@ -494,6 +494,41 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.appendChild(textNode);
 	return textElement;
 };
+/**
+ * Creates a video with the given dimensions and name
+ * Note: if you want to embed the video in an existing svg element, you can do
+ * so by putting it inside a foreignObject element (which you insert into the svg
+ * element). However, the video does not tend to appear to be properly contained.
+ * @param {string} videoName - The name of the mp4 video file
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {Element} [parent]
+ * @return {Element}
+ */
+GuiElements.draw.video = function(videoName) {
+	//DebugOptions.validateNumbers(x, y, width, height);
+
+	const container = document.createElement('div');
+	container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+
+	const videoElement = document.createElement('video');
+	videoElement.setAttribute("controls", "controls");
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 75%; padding: 70px 0;")
+	videoElement.src = videoName;
+	videoElement.autoplay = true;
+
+	container.appendChild(videoElement);
+	document.body.appendChild(container);
+
+	videoElement.addEventListener('ended',myHandler,false);
+  function myHandler(e) {
+    document.body.removeChild(container);
+  }
+
+	return videoElement;
+};
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */

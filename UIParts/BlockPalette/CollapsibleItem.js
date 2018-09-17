@@ -84,6 +84,7 @@ CollapsibleItem.prototype.prepareToFill = function() {
 	this.displayStacks = [];
 	this.lastHadStud = false;
 	this.finalized = false;
+	this.buttons = [];
 };
 
 /**
@@ -134,6 +135,26 @@ CollapsibleItem.prototype.addBlock = function(block) {
 CollapsibleItem.prototype.addSpace = function() {
 	DebugOptions.assert(!this.finalized);
 	this.currentBlockY += BlockPalette.sectionMargin;
+};
+
+CollapsibleItem.prototype.addButton = function(text, callback) {
+	DebugOptions.assert(!this.finalized);
+
+	const width = BlockPalette.insideBnW;
+	const height = BlockPalette.insideBnH;
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+
+	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.innerGroup);
+	const BP = BlockPalette;
+	button.addText(text);
+	button.setCallbackFunction(callback, true);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.buttons.push(button);
+	this.lastHadStud = false;
+	return button;
 };
 
 /**

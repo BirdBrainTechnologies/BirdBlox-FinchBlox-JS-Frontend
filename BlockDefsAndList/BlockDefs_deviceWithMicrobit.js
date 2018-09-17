@@ -411,18 +411,23 @@ B_MicroBitCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
 B_MicroBitCompassCalibrate.prototype.constructor = B_MicroBitCompassCalibrate;
 
 B_MicroBitCompassCalibrate.prototype.startAction=function(){
+
    let deviceIndex = this.slots[0].getData().getValue();
    let device = this.deviceClass.getManager().getDevice(deviceIndex);
    if (device == null) {
        this.displayError(this.deviceClass.getNotConnectedMessage());
-       return new ExecutionStatusError(); // Flutter was invalid, exit early
+       return new ExecutionStatusError(); // no device or device was invalid, exit early
    }
+
+   const dialog = new CalibrateCompassDialog(this.deviceClass);
+   dialog.show();
+
    let mem = this.runMem;
    mem.requestStatus = {};
-   mem.requestStatus.finished = false;
+   mem.requestStatus.finished = true;
    mem.requestStatus.error = false;
    mem.requestStatus.result = null;
-   device.calibrateCompass(mem.requestStatus);
+   //device.calibrateCompass(mem.requestStatus);
    return new ExecutionStatusRunning();
 };
 
