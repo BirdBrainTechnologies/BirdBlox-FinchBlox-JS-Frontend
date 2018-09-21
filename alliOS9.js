@@ -11713,8 +11713,11 @@ Menu.prototype.createMenuBnList = function() {
 		this.menuBnList.hide();
 	}
 	var bnM = Menu.bnMargin;
-	//this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
-	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
+	if (this.constructor.name === "BatteryMenu") {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+	} else {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
+	}
 	this.menuBnList.markAsOverlayPart(this);
 	var maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
