@@ -2164,6 +2164,10 @@ Device.prototype.setBatteryStatus = function(batteryStatus) {
 Device.prototype.getBatteryStatus = function() {
     return this.batteryState;
 }
+
+Device.prototype.setCompassCalibrationStatus = function(success){
+		this.compassCalibrated = (success == "true");
+}
 /**
  * @return {boolean}
  */
@@ -2941,6 +2945,14 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
         robot.setBatteryStatus(batteryStatus);
     }
 };
+
+DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, success) {
+	var index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		var robot = this.connectedDevices[index];
+		robot.setCompassCalibrationStatus(success);
+	}
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -3018,6 +3030,11 @@ DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
 	});
 };
 
+DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
+	DeviceManager.forEach(function(manager) {
+		manager.updateCompassCalibrationStatus(robotId, success);
+	});
+}
 /**
  * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes
  * @param {string} deviceId
@@ -3105,6 +3122,7 @@ DeviceManager.possiblyRescan = function() {
 		manager.possiblyRescan();
 	});
 };
+
 /**
  * Manages communication with a Hummingbird
  * @param {string} name
@@ -3778,24 +3796,29 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
  * so by putting it inside a foreignObject element (which you insert into the svg
  * element). However, the video does not tend to appear to be properly contained.
  * @param {string} videoName - The name of the mp4 video file
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @param {Element} [parent]
+ * @param {string} robotId - ID of the robot this video is for if applicable
  * @return {Element}
  */
-GuiElements.draw.video = function(videoName) {
-	//DebugOptions.validateNumbers(x, y, width, height);
+GuiElements.draw.video = function(videoName, robotId) {
 
 	var container = document.createElement('div');
-	container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	//container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	container.setAttribute("style", "position: relative; height: 100%; width: 100%; pointer-events: none;")
 
 	var videoElement = document.createElement('video');
-	videoElement.setAttribute("controls", "controls");
-	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 75%; padding: 70px 0;")
+	if (robotId != null) {
+		//If we are showing a video for a specific robot (as in compass calibration)
+		// tag with the robot's id and have it loop. Removal of video is handled by
+		// CallBackManager in this case.
+		videoElement.setAttribute("id", "video" + robotId);
+		videoElement.setAttribute("loop", "loop");
+	}
+	//videoElement.setAttribute("controls", "controls");
+	//videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; padding: 3% 0;")
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; top: 50%; transform: translateY(-50%);")
 	videoElement.src = videoName;
 	videoElement.autoplay = true;
+	videoElement.muted = true; //video must be muted to autoplay on Android.
 
 	container.appendChild(videoElement);
 	document.body.appendChild(container);
@@ -4456,6 +4479,25 @@ GuiElements.checkSmallMode = function() {
 	}
 };
 
+/**
+ * Removes any videos that are currently playing
+ */
+GuiElements.removeVideos = function() {
+	var videosOpen = document.getElementsByTagName("video").length;
+	if (videosOpen > 0){
+		for (var i = 0; i < videosOpen; i++) {
+			var videoElement = document.getElementsByTagName("video")[i];
+			GuiElements.removeVideo(videoElement);
+		}
+	}
+};
+GuiElements.removeVideo = function(videoElement) {
+	//each video is presented inside a div element. This is what must
+	// be removed. See GuiElements.draw.video.
+	var container = videoElement.parentNode;
+	container.parentNode.removeChild(container);
+};
+
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
@@ -4712,10 +4754,10 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 
-	collapsibleItem.addSpace();
-	var calibrateDialog = new CalibrateCompassDialog(DeviceHummingbirdBit);
-	var button = collapsibleItem.addButton(Language.getStr("CompassCalibrate"), calibrateDialog.showDialog);
-	collapsibleItem.addSpace();
+	//collapsibleItem.addSpace();
+	//var calibrateDialog = new CalibrateCompassDialog(DeviceHummingbirdBit);
+	//var button = collapsibleItem.addButton(Language.getStr("CompassCalibrate"), calibrateDialog.showDialog);
+	//collapsibleItem.addSpace();
 
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
@@ -4730,8 +4772,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
-	collapsibleItem.addBlockByName("B_BBCompassCalibrate");
-
+	//collapsibleItem.addBlockByName("B_BBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -4751,7 +4792,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
-	collapsibleItem.addBlockByName("B_MBCompassCalibrate");
+	//collapsibleItem.addBlockByName("B_MBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -4805,6 +4846,7 @@ Colors.setCommon = function() {
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
 	Colors.red = "#FF0000";
+	Colors.green = "#00FF00";
 	//BBT Style guide colors
 	Colors.easternBlue = "#089BAB";
 	Colors.neonCarrot = "#FF9922";
@@ -6584,6 +6626,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 };
 
 TouchReceiver.touchStartDialogBlock = function(e) {
+	GuiElements.removeVideos();
 	if (SaveManager.fileName == null)  {
 		if (OpenDialog.lastOpenFile != null) {
 			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
@@ -12108,6 +12151,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	this.addOption(Language.getStr("CompassCalibrate"), function() {
+			(new CalibrateCompassDialog()).show();
+	});
 	if (this.showAdvanced) {
 		var icon = VectorPaths.language;
 		var me = this;
@@ -16919,15 +16965,15 @@ FileContextMenu.prototype.close = function() {
  * @param device - The device to be calibrated
  * @constructor
  */
-function CalibrateCompassDialog(deviceClass) {
-  this.deviceClass = deviceClass;
-
+function CalibrateCompassDialog() {
 	var title = Language.getStr("CompassCalibrate");
-  var curDeviceCnt = this.deviceClass.getManager().getDeviceCount();
-	RowDialog.call(this, false, title, curDeviceCnt, 0, 0);
-  this.addCenteredButton("Instructions", this.showVideo.bind(this));
-	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 
+  this.bits = DeviceHummingbirdBit.getManager().getDeviceCount();
+  this.microbits = DeviceMicroBit.getManager().getDeviceCount();
+  var count = this.bits + this.microbits;
+
+	RowDialog.call(this, false, title, count, 0, 0);
+	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 }
 CalibrateCompassDialog.prototype = Object.create(RowDialog.prototype);
 CalibrateCompassDialog.prototype.constructor = CalibrateCompassDialog;
@@ -16941,23 +16987,44 @@ CalibrateCompassDialog.prototype.constructor = CalibrateCompassDialog;
  * @param {Element} contentGroup
  */
 CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGroup) {
-  var robot = this.deviceClass.getManager().getDevice(index);
-  RowDialog.createMainBnWithText(robot.name, width, 0, y, contentGroup, function () {
-    robot.calibrateCompass();
-  });
+  var robot;
+  if (index < this.bits) {
+    robot = DeviceHummingbirdBit.getManager().getDevice(index);
+  } else {
+    robot = DeviceMicroBit.getManager().getDevice(index - this.bits);
+  }
+	GuiElements.alert("Loading rows for the compass calibration dialog.");
+  if (robot != null) {
+		GuiElements.alert("Found a robot. " + robot.compassCalibrated);
+    var button = RowDialog.createMainBnWithText(robot.listLabel, width, 0, y, contentGroup, function () {
+      CalibrateCompassDialog.showVideo(robot);
+      robot.calibrateCompass();
+    });
+		if (robot.compassCalibrated){
+			GuiElements.alert("Adding checkmark");
+			button.addSideTextAndIcon(VectorPaths.checkmark, null, robot.listLabel, null, null, Colors.green, false, false);
+		} else if (robot.compassCalibrated == false) {
+			button.addSideTextAndIcon(VectorPaths.letterX, null, robot.listLabel, null, null, Colors.red, false, false);
+		}
+  }
 };
+
+CalibrateCompassDialog.prototype.closeDialog = function() {
+	RowDialog.prototype.closeDialog.call(this);
+	GuiElements.removeVideos();
+}
 
 /**
  * Shows the instructional video appropriate to the device type.
  */
-CalibrateCompassDialog.prototype.showVideo = function() {
+CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-  if (this.deviceClass == DeviceHummingbirdBit) {
+  if (robot.deviceClass == DeviceHummingbirdBit) {
     fileName = "Videos/HummBit_Calibration.mp4";
   }
 
-  var video = GuiElements.draw.video(fileName);
+  var video = GuiElements.draw.video(fileName, robot.id);
 };
 
 /**
@@ -18495,13 +18562,39 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
-
+/**
+ * Updates the status of the battery for display in the battery menu.
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {number} batteryStatus - New battery status. red = 0; yellow = 1; green = 2
+ * @return {boolean}
+ */
 CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
     robotId = HtmlServer.decodeHtml(robotId);
     DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
     return true;
-}
-
+};
+/**
+ * While the micro:bit compass is being calibrated, we will play the instructional
+ * video on a loop. Once calibration is complete, the backend must notify the
+ * frontend to remove the video.
+ * @param {string} robotId - Id of the robot being calibrated.
+ * @param {boolean} success - True if the compass was successfully calibrated
+ * @return {boolean} - true if a video element was found for the robot id.
+ */
+CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
+	DeviceManager.updateCompassCalibrationStatus(robotId, success);
+	var dialog = RowDialog.currentDialog;
+	if (dialog.constructor === CalibrateCompassDialog) {
+		var rows = dialog.rowCount;
+		dialog.reloadRows(rows);
+	}
+	var videoElement = document.getElementById("video" + robotId);
+	if (videoElement != null) {
+		GuiElements.removeVideo(videoElement);
+		return true;
+	}
+	return false;
+};
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -19688,6 +19781,64 @@ Block.prototype.generatePath = function() {
 	TouchReceiver.addListenersChild(pathE, this);
 	return pathE;
 };
+
+/**
+ * Parses the translated text and adds block parts in the correct order.
+ * @param {string} text - The translated text to be used.
+ */
+Block.prototype.parseTranslation = function(text) {
+	//var pieces = text.split(/[()]/);
+	var text1 = text.replace(/\(/g, "xxxxx(");
+	var text2 = text1.replace(/\)/g, ")xxxxx");
+	var pieces = text2.split("xxxxx");
+	var newParts = [];
+	var slotsInserted = [];
+	var slotOffset = -1;
+	//Will have problems if there are blocks that have a device drop slot that is
+	// not the first part of the block.
+	if (this.slots[0].constructor === DeviceDropSlot) {
+		newParts.push(this.parts[0]);
+		slotOffset += 1;
+		slotsInserted.push(0);
+	}
+	for (var i = 0; i < pieces.length; i++){
+		var piece = pieces[i];
+		if (piece.startsWith("(Slot ") && piece.endsWith(")")) {
+			var r = /\d+/;
+			var slotNum = parseInt(piece.match(r));
+			slotNum += slotOffset;
+			if (slotNum < this.slots.length) {
+				var slot = this.slots[slotNum];
+				var slotTexts = piece.split("=");
+				if (slotTexts.length > 1) {
+					var defaultText = slotTexts[1];
+					var dt = defaultText.replace(/\s+/, "").replace(")", "");
+					slot.setData(new StringData(dt), true, false); //should updateDim = true?
+				}
+				newParts.push(slot);
+				slotsInserted.push(slotNum);
+			} // else error?
+		} else if (piece.startsWith("(Icon)")) {
+			//This will cause problems if we ever have more than one icon in a block.
+			this.parts.forEach( function(part) {
+				if (part.constructor === BlockIcon) {
+					newParts.push(part);
+				}
+			});
+		} else {
+			var label = new LabelText(this, piece);
+			newParts.push(label);
+			label.setActive(this.active);
+		}
+	}
+	//Check to make sure all slots got added, and add any that were missed.
+	for (var i = 0; i < this.slots.length; i++){
+		if (!slotsInserted.includes(i)) {
+			newParts.push(this.slots[i]);
+		}
+	}
+	this.parts = newParts;
+}
 
 /**
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.

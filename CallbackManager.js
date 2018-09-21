@@ -150,13 +150,39 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
-
+/**
+ * Updates the status of the battery for display in the battery menu.
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {number} batteryStatus - New battery status. red = 0; yellow = 1; green = 2
+ * @return {boolean}
+ */
 CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
     robotId = HtmlServer.decodeHtml(robotId);
     DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
     return true;
-}
-
+};
+/**
+ * While the micro:bit compass is being calibrated, we will play the instructional
+ * video on a loop. Once calibration is complete, the backend must notify the
+ * frontend to remove the video.
+ * @param {string} robotId - Id of the robot being calibrated.
+ * @param {boolean} success - True if the compass was successfully calibrated
+ * @return {boolean} - true if a video element was found for the robot id.
+ */
+CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
+	DeviceManager.updateCompassCalibrationStatus(robotId, success);
+	const dialog = RowDialog.currentDialog;
+	if (dialog.constructor === CalibrateCompassDialog) {
+		const rows = dialog.rowCount;
+		dialog.reloadRows(rows);
+	}
+	const videoElement = document.getElementById("video" + robotId);
+	if (videoElement != null) {
+		GuiElements.removeVideo(videoElement);
+		return true;
+	}
+	return false;
+};
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot

@@ -169,6 +169,10 @@ Device.prototype.setBatteryStatus = function(batteryStatus) {
 Device.prototype.getBatteryStatus = function() {
     return this.batteryState;
 }
+
+Device.prototype.setCompassCalibrationStatus = function(success){
+		this.compassCalibrated = (success == "true");
+}
 /**
  * @return {boolean}
  */

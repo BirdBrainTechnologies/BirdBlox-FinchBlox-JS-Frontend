@@ -22,6 +22,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	this.addOption(Language.getStr("CompassCalibrate"), function() {
+			(new CalibrateCompassDialog()).show();
+	});
 	if (this.showAdvanced) {
 		const icon = VectorPaths.language;
 		const me = this;

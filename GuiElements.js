@@ -500,24 +500,29 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
  * so by putting it inside a foreignObject element (which you insert into the svg
  * element). However, the video does not tend to appear to be properly contained.
  * @param {string} videoName - The name of the mp4 video file
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @param {Element} [parent]
+ * @param {string} robotId - ID of the robot this video is for if applicable
  * @return {Element}
  */
-GuiElements.draw.video = function(videoName) {
-	//DebugOptions.validateNumbers(x, y, width, height);
+GuiElements.draw.video = function(videoName, robotId) {
 
 	const container = document.createElement('div');
-	container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	//container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	container.setAttribute("style", "position: relative; height: 100%; width: 100%; pointer-events: none;")
 
 	const videoElement = document.createElement('video');
-	videoElement.setAttribute("controls", "controls");
-	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 75%; padding: 70px 0;")
+	if (robotId != null) {
+		//If we are showing a video for a specific robot (as in compass calibration)
+		// tag with the robot's id and have it loop. Removal of video is handled by
+		// CallBackManager in this case.
+		videoElement.setAttribute("id", "video" + robotId);
+		videoElement.setAttribute("loop", "loop");
+	}
+	//videoElement.setAttribute("controls", "controls");
+	//videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; padding: 3% 0;")
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; top: 50%; transform: translateY(-50%);")
 	videoElement.src = videoName;
 	videoElement.autoplay = true;
+	videoElement.muted = true; //video must be muted to autoplay on Android.
 
 	container.appendChild(videoElement);
 	document.body.appendChild(container);
@@ -1176,4 +1181,23 @@ GuiElements.checkSmallMode = function() {
 	if (!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
 		SettingsManager.sideBarVisible.writeValue("true");
 	}
+};
+
+/**
+ * Removes any videos that are currently playing
+ */
+GuiElements.removeVideos = function() {
+	const videosOpen = document.getElementsByTagName("video").length;
+	if (videosOpen > 0){
+		for (var i = 0; i < videosOpen; i++) {
+			const videoElement = document.getElementsByTagName("video")[i];
+			GuiElements.removeVideo(videoElement);
+		}
+	}
+};
+GuiElements.removeVideo = function(videoElement) {
+	//each video is presented inside a div element. This is what must
+	// be removed. See GuiElements.draw.video.
+	const container = videoElement.parentNode;
+	container.parentNode.removeChild(container);
 };

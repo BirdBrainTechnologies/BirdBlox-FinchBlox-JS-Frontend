@@ -18,6 +18,7 @@ Colors.setCommon = function() {
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
 	Colors.red = "#FF0000";
+	Colors.green = "#00FF00";
 	//BBT Style guide colors
 	Colors.easternBlue = "#089BAB";
 	Colors.neonCarrot = "#FF9922";

@@ -457,6 +457,14 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
         robot.setBatteryStatus(batteryStatus);
     }
 };
+
+DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, success) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		let robot = this.connectedDevices[index];
+		robot.setCompassCalibrationStatus(success);
+	}
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -534,6 +542,11 @@ DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
 	});
 };
 
+DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
+	DeviceManager.forEach(function(manager) {
+		manager.updateCompassCalibrationStatus(robotId, success);
+	});
+}
 /**
  * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes
  * @param {string} deviceId
