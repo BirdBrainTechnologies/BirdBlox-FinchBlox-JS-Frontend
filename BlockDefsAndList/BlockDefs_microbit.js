@@ -121,7 +121,7 @@ function B_MBWriteToPin(x, y) {
   this.maxVal = 100;
   this.positive = true;
   this.valueKey = "percent";
-  this.displayUnits = Language.getStr("Percent");
+  this.displayUnits = "Intensity";
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));

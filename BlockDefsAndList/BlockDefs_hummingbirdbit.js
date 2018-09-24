@@ -20,7 +20,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Percent");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Speed");
 
     this.addPart(new LabelText(this,"%"));
 }

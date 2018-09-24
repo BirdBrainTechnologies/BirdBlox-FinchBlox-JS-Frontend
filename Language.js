@@ -10,7 +10,7 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en", "nl", "fr"];
+Language.langs = ["en"];
 
 Language.en = {
     "Delete_recording_question":"Are you sure you would like to delete the current recording?",
@@ -62,12 +62,12 @@ Language.en = {
     "Temperature_C":"Temperature C",
     "Temperature_F":"Temperature F",
     "Knob": "Knob",
-    "Device_Shaken":"Device Shaken",
-    "Device_SSID":"Device SSID",
-    "Device_Pressure":"Device Pressure",
-    "Device_Relative_Altitude":"Device Relative Altitude",
-    "Device_Orientation":"Device Orientation",
-    "Device":"Device",
+    "Device_Shaken":"Tablet Shaken",
+    "Device_SSID":"Tablet SSID",
+    "Device_Pressure":"Tablet Pressure",
+    "Device_Relative_Altitude":"Tablet Relative Altitude",
+    "Device_Orientation":"Tablet Orientation",
+    "Device":"Tablet",
     "Acceleration":"Acceleration",
     "Latitude":"Latitude",
     "Longitude":"Longitude",
@@ -238,7 +238,14 @@ Language.en = {
     "Delete_variable":"Delete variable",
     "read":"Read",
     "write":"Write",
-    "pin":"Pin"
+    "pin":"Pin",
+    "faceup":"Faceup",
+    "facedown":"Facedown",
+    "portrait_bottom":"Portrait: Home button on bottom",
+    "portrait_top":"Portrait: Home button on top",
+    "landscape_left":"Lanscape: Home button on left",
+    "landscape_right":"Landscape: Home button on right",
+    "other":"Other"
 };
 
 

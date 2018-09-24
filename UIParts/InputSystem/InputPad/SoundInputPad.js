@@ -122,7 +122,7 @@ SoundInputPad.prototype.createRow = function(sound, y) {
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
-	button.addText(Language.getStr("Record_sounds"));
+	button.addText(Language.getStr("Record_Sounds"));
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();

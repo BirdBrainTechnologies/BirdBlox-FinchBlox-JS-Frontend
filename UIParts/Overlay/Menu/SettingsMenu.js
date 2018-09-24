@@ -28,11 +28,11 @@ SettingsMenu.prototype.loadOptions = function() {
 	if (this.showAdvanced) {
 		const icon = VectorPaths.language;
 		const me = this;
-		this.addOption("", null, false, function(bn) {
-			bn.addIcon(icon);
-			me.languageMenu = new LanguageMenu(bn, me);
-			me.languageMenu.move();
-		});
+		//this.addOption("", null, false, function(bn) {
+		//	bn.addIcon(icon);
+		//	me.languageMenu = new LanguageMenu(bn, me);
+		//	me.languageMenu.move();
+		//});
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}

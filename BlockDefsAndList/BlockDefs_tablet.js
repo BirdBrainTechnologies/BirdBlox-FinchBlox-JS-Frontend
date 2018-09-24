@@ -194,7 +194,8 @@ B_DeviceOrientation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			return new ExecutionStatusResult(new StringData(status.result, true));
+			const res = new StringData(Language.getStr(status.result), true);
+			return new ExecutionStatusResult(res);
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);

@@ -8,7 +8,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
 	var DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -1289,7 +1289,7 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en", "nl", "fr"];
+Language.langs = ["en"];
 
 Language.en = {
     "Delete_recording_question":"Are you sure you would like to delete the current recording?",
@@ -1341,12 +1341,12 @@ Language.en = {
     "Temperature_C":"Temperature C",
     "Temperature_F":"Temperature F",
     "Knob": "Knob",
-    "Device_Shaken":"Device Shaken",
-    "Device_SSID":"Device SSID",
-    "Device_Pressure":"Device Pressure",
-    "Device_Relative_Altitude":"Device Relative Altitude",
-    "Device_Orientation":"Device Orientation",
-    "Device":"Device",
+    "Device_Shaken":"Tablet Shaken",
+    "Device_SSID":"Tablet SSID",
+    "Device_Pressure":"Tablet Pressure",
+    "Device_Relative_Altitude":"Tablet Relative Altitude",
+    "Device_Orientation":"Tablet Orientation",
+    "Device":"Tablet",
     "Acceleration":"Acceleration",
     "Latitude":"Latitude",
     "Longitude":"Longitude",
@@ -1517,7 +1517,14 @@ Language.en = {
     "Delete_variable":"Delete variable",
     "read":"Read",
     "write":"Write",
-    "pin":"Pin"
+    "pin":"Pin",
+    "faceup":"Faceup",
+    "facedown":"Facedown",
+    "portrait_bottom":"Portrait: Home button on bottom",
+    "portrait_top":"Portrait: Home button on top",
+    "landscape_left":"Lanscape: Home button on left",
+    "landscape_right":"Landscape: Home button on right",
+    "other":"Other"
 };
 
 
@@ -10730,7 +10737,7 @@ SoundInputPad.prototype.createRow = function(sound, y) {
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	var SIP = SoundInputPad;
 	var button = new Button(x, y, width, SIP.rowHeight, this.group);
-	button.addText(Language.getStr("Record_sounds"));
+	button.addText(Language.getStr("Record_Sounds"));
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
@@ -12160,11 +12167,11 @@ SettingsMenu.prototype.loadOptions = function() {
 	if (this.showAdvanced) {
 		var icon = VectorPaths.language;
 		var me = this;
-		this.addOption("", null, false, function(bn) {
-			bn.addIcon(icon);
-			me.languageMenu = new LanguageMenu(bn, me);
-			me.languageMenu.move();
-		});
+		//this.addOption("", null, false, function(bn) {
+		//	bn.addIcon(icon);
+		//	me.languageMenu = new LanguageMenu(bn, me);
+		//	me.languageMenu.move();
+		//});
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}
@@ -25546,7 +25553,7 @@ function B_MBWriteToPin(x, y) {
   this.maxVal = 100;
   this.positive = true;
   this.valueKey = "percent";
-  this.displayUnits = Language.getStr("Percent");
+  this.displayUnits = "Intensity";
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -25616,7 +25623,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Percent");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Speed");
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -27281,7 +27288,8 @@ B_DeviceOrientation.prototype.updateAction = function() {
 	var status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			return new ExecutionStatusResult(new StringData(status.result, true));
+			var res = new StringData(Language.getStr(status.result), true);
+			return new ExecutionStatusResult(res);
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
