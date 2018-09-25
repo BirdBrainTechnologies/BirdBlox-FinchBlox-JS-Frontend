@@ -11,7 +11,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 function B_HBServo(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, "Angle");
+	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, Language.getStr("Angle"));
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -20,7 +20,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 function B_HBMotor(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, "Speed");
+	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, Language.getStr("Speed"));
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -29,7 +29,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 function B_HBVibration(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -38,7 +38,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;

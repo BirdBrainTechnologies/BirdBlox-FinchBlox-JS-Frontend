@@ -11,7 +11,7 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle", 90);
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, Language.getStr("Angle"), 90);
 
     this.addPart(new LabelText(this,'\xBA'));
 }
@@ -20,7 +20,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Speed");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, Language.getStr("Speed"));
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -29,7 +29,7 @@ B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, "Intensity");
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, Language.getStr("Intensity"));
 
     this.addPart(new LabelText(this,"%"));
 }

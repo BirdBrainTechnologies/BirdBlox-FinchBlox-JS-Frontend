@@ -1521,11 +1521,16 @@ Language.en = {
     "pin":"Pin",
     "faceup":"Faceup",
     "facedown":"Facedown",
-    "portrait_bottom":"Portrait: Home button on bottom",
-    "portrait_top":"Portrait: Home button on top",
-    "landscape_left":"Lanscape: Home button on left",
-    "landscape_right":"Landscape: Home button on right",
-    "other":"Other"
+    "other":"Other",
+    "Intensity":"Intensity",
+    "Angle":"Angle",
+    "Speed":"Speed",
+    "Note":"Note",
+    "Beats":"Beats",
+    "portrait_bottom":"Portrait: Camera on bottom",
+    "portrait_top":"Portrait: Camera on top",
+    "landscape_left":"Lanscape: Camera on left",
+    "landscape_right":"Landscape: Camera on right"
 };
 
 
@@ -24700,17 +24705,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
-	ledSlot1.addLimits(0, 100, "Intensity");
+	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
-	ledSlot2.addLimits(0, 100, "Intensity");
+	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
-	ledSlot3.addLimits(0, 100, "Intensity");
+	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
 	this.addPart(new LabelText(this, "%"));
 }
@@ -24772,11 +24777,11 @@ function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
   const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
-  noteSlot.addLimits(this.minNote, this.maxNote, "Note");
+  noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
   this.addPart(new LabelText(this, Language.getStr("for")));
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
-  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
   this.addPart(beatsSlot);
   this.addPart(new LabelText(this,Language.getStr("Beats")));
 }
@@ -25283,7 +25288,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 function B_HBServo(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, "Angle");
+	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, Language.getStr("Angle"));
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -25292,7 +25297,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 function B_HBMotor(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, "Speed");
+	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, Language.getStr("Speed"));
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -25301,7 +25306,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 function B_HBVibration(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -25310,7 +25315,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -25554,7 +25559,7 @@ function B_MBWriteToPin(x, y) {
   this.maxVal = 100;
   this.positive = true;
   this.valueKey = "percent";
-  this.displayUnits = "Intensity";
+  this.displayUnits = Language.getStr("Intensity");
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
@@ -25615,7 +25620,7 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle", 90);
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, Language.getStr("Angle"), 90);
 
     this.addPart(new LabelText(this,'\xBA'));
 }
@@ -25624,7 +25629,7 @@ B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Speed");
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, Language.getStr("Speed"));
 
     this.addPart(new LabelText(this,"%"));
 }
@@ -25633,7 +25638,7 @@ B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, "Intensity");
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, Language.getStr("Intensity"));
 
     this.addPart(new LabelText(this,"%"));
 }

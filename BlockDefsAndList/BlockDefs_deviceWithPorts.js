@@ -160,17 +160,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
 	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
-	ledSlot1.addLimits(0, 100, "Intensity");
+	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
-	ledSlot2.addLimits(0, 100, "Intensity");
+	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
 	this.addPart(new LabelText(this, "%"));
 	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
-	ledSlot3.addLimits(0, 100, "Intensity");
+	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
 	this.addPart(new LabelText(this, "%"));
 }
@@ -232,11 +232,11 @@ function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   this.addPart(new LabelText(this,this.displayName));
   const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
-  noteSlot.addLimits(this.minNote, this.maxNote, "Note");
+  noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
   this.addPart(new LabelText(this, Language.getStr("for")));
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
-  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
   this.addPart(beatsSlot);
   this.addPart(new LabelText(this,Language.getStr("Beats")));
 }

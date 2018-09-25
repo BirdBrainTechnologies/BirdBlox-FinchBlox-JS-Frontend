@@ -241,11 +241,16 @@ Language.en = {
     "pin":"Pin",
     "faceup":"Faceup",
     "facedown":"Facedown",
-    "portrait_bottom":"Portrait: Home button on bottom",
-    "portrait_top":"Portrait: Home button on top",
-    "landscape_left":"Lanscape: Home button on left",
-    "landscape_right":"Landscape: Home button on right",
-    "other":"Other"
+    "other":"Other",
+    "Intensity":"Intensity",
+    "Angle":"Angle",
+    "Speed":"Speed",
+    "Note":"Note",
+    "Beats":"Beats",
+    "portrait_bottom":"Portrait: Camera on bottom",
+    "portrait_top":"Portrait: Camera on top",
+    "landscape_left":"Lanscape: Camera on left",
+    "landscape_right":"Landscape: Camera on right"
 };
 
 
