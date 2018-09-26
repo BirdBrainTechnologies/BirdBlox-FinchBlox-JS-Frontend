@@ -98,7 +98,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_list_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**

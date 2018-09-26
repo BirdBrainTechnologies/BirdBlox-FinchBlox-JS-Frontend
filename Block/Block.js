@@ -141,6 +141,66 @@ Block.prototype.generatePath = function() {
 };
 
 /**
+ * Parses the translated text and adds block parts in the correct order.
+ * @param {string} text - The translated text to be used.
+ */
+Block.prototype.parseTranslation = function(text) {
+	//const pieces = text.split(/[()]/);
+	const text1 = text.replace(/\(/g, "xxxxx(");
+	const text2 = text1.replace(/\)/g, ")xxxxx");
+	const pieces = text2.split("xxxxx");
+	var newParts = [];
+	var slotsInserted = [];
+	var slotOffset = -1;
+	//Will have problems if there are blocks that have a device drop slot that is
+	// not the first part of the block.
+	if (this.slots[0] != null){
+		if (this.slots[0].constructor === DeviceDropSlot) {
+			newParts.push(this.parts[0]);
+			slotOffset += 1;
+			slotsInserted.push(0);
+		}
+	}
+	for (var i = 0; i < pieces.length; i++){
+		const piece = pieces[i];
+		if (piece.startsWith("(Slot ") && piece.endsWith(")")) {
+			var r = /\d+/;
+			var slotNum = parseInt(piece.match(r));
+			slotNum += slotOffset;
+			if (slotNum < this.slots.length) {
+				const slot = this.slots[slotNum];
+				const slotTexts = piece.split("=");
+				if (slotTexts.length > 1) {
+					const defaultText = slotTexts[1];
+					const dt = defaultText.replace(/\s+/, "").replace(")", "");
+					slot.setData(new StringData(dt), true, false); //should updateDim = true?
+				}
+				newParts.push(slot);
+				slotsInserted.push(slotNum);
+			} // else error?
+		} else if (piece.startsWith("(Icon)")) {
+			//This will cause problems if we ever have more than one icon in a block.
+			this.parts.forEach( function(part) {
+				if (part.constructor === BlockIcon) {
+					newParts.push(part);
+				}
+			});
+		} else {
+			const label = new LabelText(this, piece);
+			newParts.push(label);
+			label.setActive(this.active);
+		}
+	}
+	//Check to make sure all slots got added, and add any that were missed.
+	for (var i = 0; i < this.slots.length; i++){
+		if (!slotsInserted.includes(i)) {
+			newParts.push(this.slots[i]);
+		}
+	}
+	this.parts = newParts;
+}
+
+/**
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
  * @param {LabelText|BlockIcon|Slot} part - part to add.
  */

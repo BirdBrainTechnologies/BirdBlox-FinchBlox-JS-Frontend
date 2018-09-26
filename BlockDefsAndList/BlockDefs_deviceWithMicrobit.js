@@ -14,10 +14,9 @@
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Display");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  const label = new LabelText(this,this.displayName);
+  const label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
   this.addPart(label);
 
@@ -74,13 +73,14 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MicroBitPrint(x, y, deviceClass){
   CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Print");
+  //this.displayName = Language.getStr("Print");
   this.draggable = true;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+  this.parseTranslation(Language.getStr("block_Print"));
 }
 B_MicroBitPrint.prototype = Object.create(CommandBlock.prototype);
 B_MicroBitPrint.prototype.constructor = B_MicroBitPrint;
@@ -158,15 +158,16 @@ B_MicroBitPrint.prototype.updateAction = function() {
 function B_MicroBitButton(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Button");
+  //this.displayName = Language.getStr("Button");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
 
   const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
   this.addPart(choice);
+  this.parseTranslation(Language.getStr("block_Button"));
 };
 B_MicroBitButton.prototype = Object.create(PredicateBlock.prototype);
 B_MicroBitButton.prototype.constructor = B_MicroBitButton;
@@ -218,10 +219,10 @@ B_MicroBitButton.prototype.updateAction = function() {
 function B_MicroBitOrientation(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = "";
+  //this.displayName = "";
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
 
   const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
   orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
@@ -283,10 +284,10 @@ B_MicroBitOrientation.prototype.updateAction = function() {
 function B_MicroBitMagnetometer(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = "";
+   //this.displayName = "";
    this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   //this.addPart(new LabelText(this,this.displayName));
 
    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
@@ -352,10 +353,9 @@ B_MicroBitMagnetometer.prototype.updateAction = function(){
 function B_MicroBitCompass(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = Language.getStr("Compass");
    this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   this.addPart(new LabelText(this, Language.getStr("block_Compass")));
 }
 B_MicroBitCompass.prototype = Object.create(ReporterBlock.prototype);
 B_MicroBitCompass.prototype.constructor = B_MicroBitCompass;
@@ -402,10 +402,9 @@ Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
 function B_MicroBitCompassCalibrate(x, y, deviceClass){
    CalibrateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = Language.getStr("CompassCalibrate");
    this.draggable = false;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   this.addPart(new LabelText(this, Language.getStr("CompassCalibrate")));
 }
 B_MicroBitCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
 B_MicroBitCompassCalibrate.prototype.constructor = B_MicroBitCompassCalibrate;

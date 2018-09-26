@@ -379,7 +379,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_list_name"), "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
 			const list = new List(result);

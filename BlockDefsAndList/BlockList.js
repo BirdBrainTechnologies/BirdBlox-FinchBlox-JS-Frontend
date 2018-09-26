@@ -139,7 +139,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
+	const button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");

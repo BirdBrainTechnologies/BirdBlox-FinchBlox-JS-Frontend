@@ -1,7 +1,7 @@
 /* This file contains the implementations of hummingbird blocks
  */
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey,
+function B_HummingbirdOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, blockTranslationKey, numberOfPorts, valueKey,
 		minVal, maxVal, displayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
@@ -11,7 +11,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 function B_HBServo(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, Language.getStr("Angle"));
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "block_Servo", 4, "angle", 0, 180, Language.getStr("Angle"));
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -20,7 +20,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 function B_HBMotor(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, Language.getStr("Speed"));
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "block_Motor", 2, "speed", -100, 100, Language.getStr("Speed"));
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -29,7 +29,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 function B_HBVibration(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, Language.getStr("Intensity"));
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "block_Vibration", 2, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -38,7 +38,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, Language.getStr("Intensity"));
+	B_HummingbirdOutputBase.call(this, x, y, "led", "block_LED", 4, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -65,7 +65,8 @@ B_HBLight.prototype.constructor = B_HBLight;
 
 function B_HBTempC(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_C"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_C"));
 }
 B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
@@ -113,7 +114,8 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 
 function B_HBTempF(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_F"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_F"));
 }
 B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;

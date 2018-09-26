@@ -84,8 +84,9 @@ B_Divide.prototype.startAction = function() {
 function B_Mod(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 17));
-	this.addPart(new LabelText(this, Language.getStr("mod")));
+	//this.addPart(new LabelText(this, Language.getStr("mod")));
 	this.addPart(new NumSlot(this, "NumS_2", 10));
+	this.parseTranslation(Language.getStr("block_mod"));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
@@ -108,8 +109,9 @@ B_Mod.prototype.startAction = function() {
 
 function B_Round(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("round")));
+	//this.addPart(new LabelText(this, Language.getStr("round")));
 	this.addPart(new NumSlot(this, "NumS_1", 0.5));
+	this.parseTranslation(Language.getStr("block_round"));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
@@ -125,10 +127,11 @@ B_Round.prototype.startAction = function() {
 
 function B_PickRandom(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("pick_random")));
+	//this.addPart(new LabelText(this, Language.getStr("pick_random")));
 	this.addPart(new NumSlot(this, "NumS_min", 1));
-	this.addPart(new LabelText(this, Language.getStr("to")));
+	//this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumSlot(this, "NumS_max", 10));
+	this.parseTranslation(Language.getStr("block_pick_random"));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
@@ -211,8 +214,9 @@ B_GreaterThan.prototype.startAction = function() {
 function B_And(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("and")));
+	//this.addPart(new LabelText(this, Language.getStr("and")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_and"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
@@ -228,8 +232,9 @@ B_And.prototype.startAction = function() {
 function B_Or(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("or")));
+	//this.addPart(new LabelText(this, Language.getStr("or")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_or"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
@@ -244,8 +249,9 @@ B_Or.prototype.startAction = function() {
 
 function B_Not(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("not")));
+	//this.addPart(new LabelText(this, Language.getStr("not")));
 	this.addPart(new BoolSlot(this, "BoolS_1"));
+	this.parseTranslation(Language.getStr("block_not"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
@@ -285,12 +291,14 @@ B_False.prototype.startAction = function() {
 
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("letter")));
+	//this.addPart(new LabelText(this, Language.getStr("letter")));
 	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
 	nS.addLimits(1);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_letter"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -309,8 +317,10 @@ B_LetterOf.prototype.startAction = function() {
 
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
+	//this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_length"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -324,10 +334,13 @@ B_LengthOf.prototype.startAction = function() {
 
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("join")));
-	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
-	this.addPart(new LabelText(this, Language.getStr("and")));
-	this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("join")));
+	//this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
+	//this.addPart(new LabelText(this, Language.getStr("and")));
+	//this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
+	this.addPart(new StringSlot(this, "StrS_2", ""));
+	this.parseTranslation(Language.getStr("block_join"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -342,18 +355,21 @@ B_join.prototype.startAction = function() {
 
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
-	this.addPart(new LabelText(this, Language.getStr("split")));
-	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
-	this.addPart(new LabelText(this, Language.getStr("by")));
+	//this.addPart(new LabelText(this, Language.getStr("split")));
+	//this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
+	//this.addPart(new LabelText(this, Language.getStr("by")));
 
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const data = new SelectionData(Language.getStr("whitespace"), "whitespace");
 	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-	dS.addEnterText(Language.getStr("Edit_Text"));
+	//dS.addEnterText(Language.getStr("Edit_Text"));
+	dS.addEnterText(Language.getStr("Edit_text"));
 	dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
 	dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_split"));
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
@@ -386,9 +402,9 @@ B_Split.prototype.startAction = function() {
 
 function B_IsAType(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("is")));
+	//this.addPart(new LabelText(this, Language.getStr("is")));
 	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
-	this.addPart(new LabelText(this, Language.getStr("a")));
+	//this.addPart(new LabelText(this, Language.getStr("a")));
 	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("text"), "text"));
@@ -396,7 +412,8 @@ function B_IsAType(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("list"), "list"));
 	dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "?"));
+	//this.addPart(new LabelText(this, "?"));
+	this.parseTranslation(Language.getStr("block_validate"));
 }
 B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
@@ -459,7 +476,7 @@ function B_mathOfNumber(x, y) {
 	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
 	this.addPart(dS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);

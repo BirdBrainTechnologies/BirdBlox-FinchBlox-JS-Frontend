@@ -2,8 +2,8 @@
  */
 
  //MARK: hummingbird bit outputs
-function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
-    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
+function B_HummingbirdBitOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
+    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, blockTranslationKey, numberOfPorts, valueKey,
         minVal, maxVal, displayUnits, defaultVal);
 }
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
@@ -11,27 +11,27 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, Language.getStr("Angle"), 90);
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Position_Servo", 4, "angle", 0, 180, Language.getStr("Angle"), 90);
 
-    this.addPart(new LabelText(this,'\xBA'));
+    //this.addPart(new LabelText(this,'\xBA'));
 }
 B_BBPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, Language.getStr("Speed"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Rotation_Servo", 4, "percent", -100, 100, Language.getStr("Speed"));
 
-    this.addPart(new LabelText(this,"%"));
+    //this.addPart(new LabelText(this,"%"));
 }
 B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, Language.getStr("Intensity"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", "block_LED", 3, "intensity", 0, 100, Language.getStr("Intensity"));
 
-    this.addPart(new LabelText(this,"%"));
+    //this.addPart(new LabelText(this,"%"));
 }
 B_BBLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBLed.prototype.constructor = B_BBLed;
@@ -61,22 +61,10 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 
 //MARK: hummingbird bit sensors
-function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
-}
-B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
-
-function B_BBKnob(x, y) {
-    B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
-}
-B_BBKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
-B_BBKnob.prototype.constructor = B_BBKnob;
-
 function B_BBSensors(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; //TODO: perhapse remove this
+    //this.displayName = ""; //TODO: perhapse remove this
     this.draggable = true;
     this.numberOfPorts = 3;
 
@@ -90,7 +78,7 @@ function B_BBSensors(x, y){
   dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
   this.addPart(dS);
   this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }

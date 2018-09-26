@@ -8,7 +8,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -1254,7 +1254,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_list_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1292,6 +1292,210 @@ Language.lang = "en";
 Language.langs = ["en"];
 
 Language.en = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
+"port":"Port",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
+"block_Play_Note":"Play Note (Slot 1) for (Slot 2) Beats",
+"Light":"Light",
+"Distance":"Distance",
+"Dial":"Dial",
+"Other":"Other",
+"Accelerometer":"Accelerometer",
+"Magnetometer":"Magnetometer",
+"block_LED_Display":"Display",
+"block_Print":"Print (Slot 1 = Hello)",
+"block_Button":"Button (Slot 1)",
+"Screen_Up":"Screen Up",
+"Screen_Down":"Screen Down",
+"Tilt_Left":"Tilt Left",
+"Tilt_Right":"Tilt Right",
+"Logo_Up":"Logo Up",
+"Logo_Down":"Logo Down",
+"Shake":"Shake",
+"block_Compass":"Compass",
+"block_Servo":"Servo (Slot 1) (Slot 2)",
+"block_Vibration":"Vibration (Slot 1) (Slot 2)",
+"block_Motor":"Motor (Slot 1) (Slot 2)",
+"block_Temperature_C":"Temperature C (Slot 1)",
+"block_Temperature_F":"Temperature F (Slot 1)",
+"block_write":"Write (Slot 1) (Slot 2) %",
+"pin":"Pin",
+"block_read":"Read (Slot 1)",
+"block_Device_Shaken":"Tablet Shaken",
+"block_Device_LatLong":"Tablet (Slot 1)",
+"Latitude":"Latitude",
+"Longitude":"Longitude",
+"block_Device_SSID":"Tablet SSID",
+"block_Device_Pressure":"Tablet Pressure",
+"block_Device_Relative_Altitude":"Tablet Relative Altitude",
+"block_Acceleration":"Tablet (Slot 1) Acceleration",
+"Total":"Total",
+"block_Device_Orientation":"Tablet Orientation",
+"faceup":"Faceup",
+"facedown":"Facedown",
+"portrait_bottom":"Portrait: Camera on bottom",
+"portrait_top":"Portrait: Camera on top",
+"landscape_left":"Lanscape: Camera on left",
+"landscape_right":"Landscape: Camera on right",
+"block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
+"position":"Position",
+"block_ask":"ask (Slot 1 = What's your name?) and wait",
+"block_answer":"answer",
+"block_reset_timer":"reset timer",
+"block_timer":"timer",
+"block_current":"current (Slot 1)",
+"date":"date",
+"year":"year",
+"month":"month",
+"hour":"hour",
+"minute":"minute",
+"second":"second",
+"day_of_the_week":"day of the week",
+"time_in_milliseconds":"time in milliseconds",
+"block_mod":"(Slot 1) mod (Slot 2)",
+"block_round":"round (Slot 1)",
+"block_pick_random":"pick random (Slot 1) to (Slot 2)",
+"block_and":"(Slot 1) and (Slot 2)",
+"block_or":"(Slot 1) or (Slot 2)",
+"block_not":"not (Slot 1)",
+"true":"true",
+"false":"false",
+"block_letter":"letter (Slot 1) of (Slot 2 = world)",
+"block_length":"length of (Slot 1 = world)",
+"block_join":"join (Slot 1 = hello) and (Slot 2 = world)",
+"block_split":"split (Slot 1 = hello world) by (Slot 2)",
+"letter":"letter",
+"whitespace":"whitespace",
+"block_validate":"is (Slot 1 = 5) a (Slot 2)?",
+"number":"number",
+"text":"text",
+"boolean":"boolean",
+"list":"list",
+"invalid_number":"invalid number",
+"block_when_flag_tapped":"when (Icon) tapped",
+"block_when_I_receive":"when I receive",
+"any_message":"any message",
+"new":"new",
+"block_when":"when (Slot 1)",
+"block_broadcast":"broadcast (Slot 1)",
+"block_broadcast_and_wait":"broadcast (Slot 1) and wait",
+"block_message":"message",
+"block_wait":"wait (Slot 1) secs",
+"block_wait_until":"wait until (Slot 1)",
+"block_repeat_forever":"repeat forever",
+"block_repeat":"repeat (Slot 1)",
+"block_repeat_until":"repeat until (Slot 1)",
+"block_if":"if (Slot 1)",
+"block_if_else":"if (Slot 1)",
+"else":"else",
+"block_stop":"stop (Slot 1)",
+"all":"all",
+"this_script":"this script",
+"all_but_this_script":"all but this script",
+"Record_sound":"Record Sound",
+"block_play_recording":"play recording (Slot 1)",
+"block_play_recording_until_done":"play recording until done (Slot 1)",
+"block_play_sound":"play sound (Slot 1)",
+"block_play_sound_until_done":"play sound until done (Slot 1)",
+"block_stop_all_sounds":"stop all sounds",
+"block_rest_for":"rest for (Slot 1) Beats",
+"block_change_tempo_by":"change tempo by (Slot 1)",
+"block_set_tempo_to":"set tempo to (Slot 1) bpm",
+"block_tempo":"tempo",
+"block_set_variable":"set (Slot 1) to (Slot 2)",
+"Create_Variable":"Create Variable",
+"block_change_variable":"change (Slot 1) by (Slot 2)",
+"Rename":"Rename",
+"Delete":"Delete",
+"block_add_to_list":"add (Slot 1 = thing) to (Slot 2)",
+"Create_List":"Create List",
+"block_delete_from_list":"delete (Slot 1) of (Slot 2)",
+"block_insert_into_list":"insert (Slot 1 = thing) at (Slot 2) of (Slot 3)",
+"block_replace_list_item":"replace item (Slot 1) of (Slot 2) with (Slot 3 = thing)",
+"block_copy_list":"copy (Slot 1) to (Slot 2)",
+"block_list_item":"item (Slot 1) of (Slot 2)",
+"block_list_length":"length of (Slot 1)",
+"block_list_contains":"(Slot 1) contains (Slot 2 = thing)",
+"last":"Last",
+"random":"Random",
+"Robots":"Robots",
+"Operators":"Operators",
+"Sound":"Sound",
+"Tablet":"Tablet",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Zoom in",
+"Zoom_out":"Zoom out",
+"Reset_zoom":"Reset zoom",
+"Disable_snap_noise":"Disable snap noise",
+"Enable_snap_noise":"Enable snap noise",
+"CompassCalibrate":"Calibrate Compass",
+"Send_debug_log":"Send debug log",
+"Show_debug_menu":"Show debug menu",
+"Connect_Device":"Connect Device",
+"Connect_Multiple":"Connect Multiple",
+"Disconnect_Device":"Disconnect Device",
+"Tap":"Tap + to connect",
+"Scanning_for_devices":"Scanning for devices",
+"Open":"Open",
+"No_saved_programs":"No saved programs",
+"Saving":"Saving",
+"On_Device":"On Device",
+"Cloud":"Cloud",
+"Loading":"Loading",
+"Sign_in":"Sign in",
+"New_program":"New program",
+"Share":"Share",
+"Recordings":"Recordings",
+"Discard":"Discard",
+"Stop":"Stop",
+"Pause":"Pause",
+"remaining":"remaining",
+"Record":"Record",
+"Tap_record_to_start":"Tap record to start",
+"Done":"Done",
+"Delete":"Delete",
+"Delete_question":"Are you sure you want to delete this?",
+"Cancel":"Cancel",
+"OK":"OK",
+"Dont_delete":"Don't delete",
+"Rename":"Rename",
+"Enter_new_name":"Enter new name",
+"Duplicate":"Duplicate",
+"Name_duplicate_file":"Enter name for duplicate file",
+"Name_error_invalid_characters":"The following characters cannot be included in file names: \n",
+"Name_error_already_exists":"\" already exists.  Enter a different name.",
+"Permission_denied":"Permission denied",
+"Grant_permission":"Grant recording permission to BirdBlox in Settings",
+"Dismiss":"Dismiss",
+"Name":"Name",
+"Enter_file_name":"Enter file name",
+"Name_error_blank":"Name cannot be blank. Enter a file name.",
+"Edit_text":"Edit text",
+"Question":"Question",
+"Connection_Failure":"Connection Failure",
+"Connection_failed_try_again":"Connection failed, please try again.",
+"Disconnect_account":"Disconnect account",
+"Disconnect_account_question":"Disconnect account?",
+"Dont_disconnect":"Don't disconnect",
+"Disconnect":"Disconnect",
+"not_connected":"(Device) not connected",
+"not_a_valid_number":"not a valid number",
+"Intensity":"Intensity",
+"Angle":"Angle ",
+"Speed":"Speed ",
+"Note":"Note",
+"Beats":"Beats",
+"Firmware_incompatible":"Firmware incompatible",
+"Update_firmware":"Update firmware",
+"Device_firmware:":"Device firmware version:",
+"Required_firmware:":"Required firmware version:",
+"New":"New"
+}
+
+Language.en_old = {
     "Delete_recording_question":"Are you sure you would like to delete the current recording?",
     "Name_error_blank": "Name cannot be blank. Enter a file name.",
     "Name_error_invalid_characters": "The following characters cannot be included in file names: \n",
@@ -2001,6 +2205,7 @@ Language.getStr = function(str) {
     if (translatedStr != null) {
         return translatedStr;
     } else {
+        console.log("Translation? " + str);
         return "Translation required";
     }
 }
@@ -2096,7 +2301,10 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " " + Language.getStr("not_connected");
+			//return typeName + " " + Language.getStr("not_connected");
+			var translatedText = Language.getStr("not_connected");
+			var returnText = translatedText.replace("(Device)", typeName);
+			return returnText;
 		} else {
 			return errorResult;
 		}
@@ -4651,7 +4859,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	var button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
+	var button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -10742,7 +10950,7 @@ SoundInputPad.prototype.createRow = function(sound, y) {
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	var SIP = SoundInputPad;
 	var button = new Button(x, y, width, SIP.rowHeight, this.group);
-	button.addText(Language.getStr("Record_Sounds"));
+	button.addText(Language.getStr("Record_sound"));
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
@@ -13152,7 +13360,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_list_name"), "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
 			var list = new List(result);
@@ -19811,10 +20019,12 @@ Block.prototype.parseTranslation = function(text) {
 	var slotOffset = -1;
 	//Will have problems if there are blocks that have a device drop slot that is
 	// not the first part of the block.
-	if (this.slots[0].constructor === DeviceDropSlot) {
-		newParts.push(this.parts[0]);
-		slotOffset += 1;
-		slotsInserted.push(0);
+	if (this.slots[0] != null){
+		if (this.slots[0].constructor === DeviceDropSlot) {
+			newParts.push(this.parts[0]);
+			slotOffset += 1;
+			slotsInserted.push(0);
+		}
 	}
 	for (var i = 0; i < pieces.length; i++){
 		var piece = pieces[i];
@@ -23355,7 +23565,7 @@ function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
 	for (var portNum = 1; portNum <= this.maxPorts; portNum++) {
-		this.addOption(new NumData(portNum), Language.getStr("Port") + " " + portNum.toString());
+		this.addOption(new NumData(portNum), Language.getStr("port") + " " + portNum.toString());
 	}
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
@@ -24622,12 +24832,12 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
  * @param {string} displayUnits - The units to display on the inputPad
  * @constructor
  */
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, blockTranslationKey, numberOfPorts, valueKey,
 									 minVal, maxVal, displayUnits, defaultVal){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
-	this.displayName = displayName;
+	//this.displayName = displayName;
 	this.numberOfPorts = numberOfPorts;
 	this.minVal = minVal;
 	this.maxVal = maxVal;
@@ -24640,11 +24850,12 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName,
 		this.defaultValue = defaultVal;
 	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
-	this.addPart(new LabelText(this,displayName));
+	//this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
 	var numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
+	this.parseTranslation(Language.getStr(blockTranslationKey));
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
@@ -24700,23 +24911,24 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
+	//this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	this.addPart(new LabelText(this, Language.getStr("R")));
+	//this.addPart(new LabelText(this, Language.getStr("R")));
 	var ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("G")));
+	//this.addPart(new LabelText(this, "%"));
+	//this.addPart(new LabelText(this, Language.getStr("G")));
 	var ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("B")));
+	//this.addPart(new LabelText(this, "%"));
+	//this.addPart(new LabelText(this, Language.getStr("B")));
 	var ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
-	this.addPart(new LabelText(this, "%"));
+	//this.addPart(new LabelText(this, "%"));
+	this.parseTranslation(Language.getStr("block_Tri_LED"));
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
@@ -24767,22 +24979,23 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Play_Note");
+  //this.displayName = Language.getStr("Play_Note");
   this.draggable = true;
   this.minNote = 32
   this.maxNote = 135
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
   var noteSlot = new NumSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
-  this.addPart(new LabelText(this, Language.getStr("for")));
+  //this.addPart(new LabelText(this, Language.getStr("for")));
   var beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
   beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
   this.addPart(beatsSlot);
-  this.addPart(new LabelText(this,Language.getStr("Beats")));
+  //this.addPart(new LabelText(this,Language.getStr("Beats")));
+	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_DeviceWithPortsBuzzer.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsBuzzer.prototype.constructor = B_DeviceWithPortsBuzzer;
@@ -24844,10 +25057,9 @@ B_DeviceWithPortsBuzzer.prototype.updateAction = function() {
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Display");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  var label = new LabelText(this,this.displayName);
+  var label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
   this.addPart(label);
 
@@ -24904,13 +25116,14 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MicroBitPrint(x, y, deviceClass){
   CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Print");
+  //this.displayName = Language.getStr("Print");
   this.draggable = true;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+  this.parseTranslation(Language.getStr("block_Print"));
 }
 B_MicroBitPrint.prototype = Object.create(CommandBlock.prototype);
 B_MicroBitPrint.prototype.constructor = B_MicroBitPrint;
@@ -24988,15 +25201,16 @@ B_MicroBitPrint.prototype.updateAction = function() {
 function B_MicroBitButton(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Button");
+  //this.displayName = Language.getStr("Button");
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
 
   var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
   this.addPart(choice);
+  this.parseTranslation(Language.getStr("block_Button"));
 };
 B_MicroBitButton.prototype = Object.create(PredicateBlock.prototype);
 B_MicroBitButton.prototype.constructor = B_MicroBitButton;
@@ -25048,10 +25262,10 @@ B_MicroBitButton.prototype.updateAction = function() {
 function B_MicroBitOrientation(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.displayName = "";
+  //this.displayName = "";
   this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
 
   var orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
   orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
@@ -25113,10 +25327,10 @@ B_MicroBitOrientation.prototype.updateAction = function() {
 function B_MicroBitMagnetometer(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = "";
+   //this.displayName = "";
    this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   //this.addPart(new LabelText(this,this.displayName));
 
    var pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
@@ -25182,10 +25396,9 @@ B_MicroBitMagnetometer.prototype.updateAction = function(){
 function B_MicroBitCompass(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = Language.getStr("Compass");
    this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   this.addPart(new LabelText(this, Language.getStr("block_Compass")));
 }
 B_MicroBitCompass.prototype = Object.create(ReporterBlock.prototype);
 B_MicroBitCompass.prototype.constructor = B_MicroBitCompass;
@@ -25232,10 +25445,9 @@ Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
 function B_MicroBitCompassCalibrate(x, y, deviceClass){
    CalibrateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.displayName = Language.getStr("CompassCalibrate");
    this.draggable = false;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this,this.displayName));
+   this.addPart(new LabelText(this, Language.getStr("CompassCalibrate")));
 }
 B_MicroBitCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
 B_MicroBitCompassCalibrate.prototype.constructor = B_MicroBitCompassCalibrate;
@@ -25276,8 +25488,8 @@ B_MicroBitCompassCalibrate.prototype.updateAction = function(){
 
 /* This file contains the implementations of hummingbird blocks
  */
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey,
+function B_HummingbirdOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, blockTranslationKey, numberOfPorts, valueKey,
 		minVal, maxVal, displayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
@@ -25287,7 +25499,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 function B_HBServo(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, Language.getStr("Angle"));
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "block_Servo", 4, "angle", 0, 180, Language.getStr("Angle"));
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -25296,7 +25508,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 function B_HBMotor(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, Language.getStr("Speed"));
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "block_Motor", 2, "speed", -100, 100, Language.getStr("Speed"));
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -25305,7 +25517,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 function B_HBVibration(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, Language.getStr("Intensity"));
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "block_Vibration", 2, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -25314,7 +25526,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 function B_HBLed(x, y) {
     this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, Language.getStr("Intensity"));
+	B_HummingbirdOutputBase.call(this, x, y, "led", "block_LED", 4, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -25341,7 +25553,8 @@ B_HBLight.prototype.constructor = B_HBLight;
 
 function B_HBTempC(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_C"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_C"));
 }
 B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
@@ -25389,7 +25602,8 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 
 function B_HBTempF(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_F"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_F"));
 }
 B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
@@ -25498,10 +25712,10 @@ B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
 function B_MBReadPin(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("read");
+    //this.displayName = Language.getStr("read");
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
+    //this.addPart(new LabelText(this,this.displayName));
 
     var pin = Language.getStr("pin");
     var pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -25509,6 +25723,7 @@ function B_MBReadPin(x, y){
     pickPin.addOption(new SelectionData(pin + " 1", "2"));
     pickPin.addOption(new SelectionData(pin + " 2", "3"));
     this.addPart(pickPin);
+    this.parseTranslation(Language.getStr("block_read"));
 }
 B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
 B_MBReadPin.prototype.constructor = B_MBReadPin;
@@ -25552,7 +25767,7 @@ function B_MBWriteToPin(x, y) {
   this.draggable = true;
   this.deviceClass = DeviceMicroBit;
   this.outputType = "write";
-  this.displayName = Language.getStr("write");
+  //this.displayName = Language.getStr("write");
 
   this.minVal = 0;
   this.maxVal = 100;
@@ -25562,7 +25777,7 @@ function B_MBWriteToPin(x, y) {
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this, this.displayName));
+  //this.addPart(new LabelText(this, this.displayName));
 
   var pin = Language.getStr("pin");
   var pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -25573,7 +25788,8 @@ function B_MBWriteToPin(x, y) {
   var numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
   numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);
   this.addPart(numSlot);
-  this.addPart(new LabelText(this,"%"));
+  //this.addPart(new LabelText(this,"%"));
+  this.parseTranslation(Language.getStr("block_write"));
 }
 B_MBWriteToPin.prototype = Object.create(CommandBlock.prototype);
 B_MBWriteToPin.prototype.constructor = B_MBWriteToPin;
@@ -25610,8 +25826,8 @@ B_MBBuzzer.prototype.constructor = B_MBBuzzer;
  */
 
  //MARK: hummingbird bit outputs
-function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
-    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
+function B_HummingbirdBitOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
+    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, blockTranslationKey, numberOfPorts, valueKey,
         minVal, maxVal, displayUnits, defaultVal);
 }
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
@@ -25619,27 +25835,27 @@ B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, Language.getStr("Angle"), 90);
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Position_Servo", 4, "angle", 0, 180, Language.getStr("Angle"), 90);
 
-    this.addPart(new LabelText(this,'\xBA'));
+    //this.addPart(new LabelText(this,'\xBA'));
 }
 B_BBPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, Language.getStr("Speed"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Rotation_Servo", 4, "percent", -100, 100, Language.getStr("Speed"));
 
-    this.addPart(new LabelText(this,"%"));
+    //this.addPart(new LabelText(this,"%"));
 }
 B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
     this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, Language.getStr("Intensity"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", "block_LED", 3, "intensity", 0, 100, Language.getStr("Intensity"));
 
-    this.addPart(new LabelText(this,"%"));
+    //this.addPart(new LabelText(this,"%"));
 }
 B_BBLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBLed.prototype.constructor = B_BBLed;
@@ -25669,22 +25885,10 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 
 //MARK: hummingbird bit sensors
-function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
-}
-B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
-
-function B_BBKnob(x, y) {
-    B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
-}
-B_BBKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
-B_BBKnob.prototype.constructor = B_BBKnob;
-
 function B_BBSensors(x, y){
     ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
     this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; //TODO: perhapse remove this
+    //this.displayName = ""; //TODO: perhapse remove this
     this.draggable = true;
     this.numberOfPorts = 3;
 
@@ -25698,7 +25902,7 @@ function B_BBSensors(x, y){
   dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
+  //this.addPart(new LabelText(this,this.displayName));
   this.addPart(dS);
   this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
@@ -26020,10 +26224,11 @@ B_FinchSetAll.prototype.updateAction = function() {
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when")));
+	//this.addPart(new LabelText(this, Language.getStr("when")));
 	// Add flag icon with height 15
 	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.addPart(new LabelText(this, Language.getStr("tapped")));
+	//this.addPart(new LabelText(this, Language.getStr("tapped")));
+	this.parseTranslation(Language.getStr("block_when_flag_tapped"));
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
@@ -26040,9 +26245,10 @@ B_WhenFlagTapped.prototype.startAction = function() {
 
 function B_WhenIReceive(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when_I_receive")));
+	//this.addPart(new LabelText(this, Language.getStr("when_I_receive")));
 	// Creates a BroadcastDropSlot that does nt allow snapping
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", true));
+	this.parseTranslation(Language.getStr("block_when_I_receive"));
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
@@ -26075,9 +26281,10 @@ function B_Wait(x, y) {
 	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
 	// Build Block out of things found in the BlockParts folder
-	this.addPart(new LabelText(this, Language.getStr("wait")));
+	//this.addPart(new LabelText(this, Language.getStr("wait")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.addPart(new LabelText(this, Language.getStr("secs")));
+	//this.addPart(new LabelText(this, Language.getStr("secs")));
+	this.parseTranslation(Language.getStr("block_wait"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -26104,8 +26311,9 @@ B_Wait.prototype.updateAction = function() {
 
 function B_WaitUntil(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("wait_until")));
+	//this.addPart(new LabelText(this, Language.getStr("wait_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_wait_until"));
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
@@ -26125,7 +26333,7 @@ B_WaitUntil.prototype.startAction = function() {
 
 function B_Forever(x, y) {
 	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
-	this.addPart(new LabelText(this, Language.getStr("repeat_forever")));
+	this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
@@ -26151,8 +26359,9 @@ B_Forever.prototype.updateAction = function() {
 
 function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("repeat")));
+	//this.addPart(new LabelText(this, Language.getStr("repeat")));
 	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
+	this.parseTranslation(Language.getStr("block_repeat"));
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
@@ -26192,8 +26401,9 @@ B_Repeat.prototype.updateAction = function() {
 
 function B_RepeatUntil(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("repeat_until")));
+	//this.addPart(new LabelText(this, Language.getStr("repeat_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_repeat_until"));
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
@@ -26225,8 +26435,9 @@ B_RepeatUntil.prototype.updateAction = function() {
 
 function B_If(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("if")));
+	//this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_if"));
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
@@ -26249,8 +26460,9 @@ B_If.prototype.updateAction = function() {
 
 function B_IfElse(x, y) {
 	DoubleLoopBlock.call(this, x, y, "control", Language.getStr("else"));
-	this.addPart(new LabelText(this, Language.getStr("if")));
+	//this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_if_else"));
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
 B_IfElse.prototype.constructor = B_IfElse;
@@ -26278,8 +26490,9 @@ B_IfElse.prototype.updateAction = function() {
 
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("broadcast")));
+	//this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
+	this.parseTranslation(Language.getStr("block_broadcast"));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
@@ -26316,9 +26529,10 @@ B_Broadcast.prototype.updateAction = function() {
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("broadcast")));
+	//this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
-	this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	//this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	this.parseTranslation(Language.getStr("block_broadcast_and_wait"));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
@@ -26345,7 +26559,7 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("message")));
+	this.addPart(new LabelText(this, Language.getStr("block_message")));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
@@ -26358,7 +26572,7 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
-	this.addPart(new LabelText(this, Language.getStr("stop")));
+	//this.addPart(new LabelText(this, Language.getStr("stop")));
 	var dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
@@ -26366,6 +26580,7 @@ function B_Stop(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
 	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_stop"));
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
@@ -26390,8 +26605,9 @@ B_Stop.prototype.startAction = function() {
 
 function B_When(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when")));
+	//this.addPart(new LabelText(this, Language.getStr("when")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_when"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
@@ -26416,9 +26632,11 @@ B_When.prototype.startAction = function() {
 /* TODO: make sure dialogs don't show while a save dialog is up */
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("ask")));
-	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
-	this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	//this.addPart(new LabelText(this, Language.getStr("ask")));
+	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	//this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	this.parseTranslation(Language.getStr("block_ask"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
@@ -26474,7 +26692,7 @@ B_Ask.prototype.showQuestion = function() {
 
 function B_Answer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("answer")));
+	this.addPart(new LabelText(this, Language.getStr("block_answer")));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
@@ -26487,7 +26705,7 @@ B_Answer.prototype.startAction = function() {
 
 function B_ResetTimer(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("reset_timer")));
+	this.addPart(new LabelText(this, Language.getStr("block_reset_timer")));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
@@ -26501,7 +26719,7 @@ B_ResetTimer.prototype.startAction = function() {
 
 function B_Timer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this,  Language.getStr("timer")));
+	this.addPart(new LabelText(this,  Language.getStr("block_timer")));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
@@ -26518,7 +26736,7 @@ Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("current")));
+	//this.addPart(new LabelText(this, Language.getStr("current")));
 	var dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
 	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
 	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
@@ -26529,6 +26747,7 @@ function B_CurrentTime(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("second"), "second"));
 	dS.addOption(new SelectionData(Language.getStr("time_in_milliseconds"), "time in milliseconds"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_current"));
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
@@ -26563,14 +26782,16 @@ B_CurrentTime.prototype.startAction = function() {
 
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Display")));
-	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
-	this.addPart(new LabelText(this, Language.getStr("at")));
-	var dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 2", "position2"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 3", "position3"));
+	//this.addPart(new LabelText(this, Language.getStr("Display")));
+	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	//this.addPart(new LabelText(this, Language.getStr("at")));
+	var dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("position") +" 3", "position3"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 1", "position1"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 2", "position2"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 3", "position3"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_Display"));
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;
@@ -26668,8 +26889,9 @@ B_Divide.prototype.startAction = function() {
 function B_Mod(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 17));
-	this.addPart(new LabelText(this, Language.getStr("mod")));
+	//this.addPart(new LabelText(this, Language.getStr("mod")));
 	this.addPart(new NumSlot(this, "NumS_2", 10));
+	this.parseTranslation(Language.getStr("block_mod"));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
@@ -26692,8 +26914,9 @@ B_Mod.prototype.startAction = function() {
 
 function B_Round(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("round")));
+	//this.addPart(new LabelText(this, Language.getStr("round")));
 	this.addPart(new NumSlot(this, "NumS_1", 0.5));
+	this.parseTranslation(Language.getStr("block_round"));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
@@ -26709,10 +26932,11 @@ B_Round.prototype.startAction = function() {
 
 function B_PickRandom(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("pick_random")));
+	//this.addPart(new LabelText(this, Language.getStr("pick_random")));
 	this.addPart(new NumSlot(this, "NumS_min", 1));
-	this.addPart(new LabelText(this, Language.getStr("to")));
+	//this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumSlot(this, "NumS_max", 10));
+	this.parseTranslation(Language.getStr("block_pick_random"));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
@@ -26795,8 +27019,9 @@ B_GreaterThan.prototype.startAction = function() {
 function B_And(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("and")));
+	//this.addPart(new LabelText(this, Language.getStr("and")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_and"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
@@ -26812,8 +27037,9 @@ B_And.prototype.startAction = function() {
 function B_Or(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("or")));
+	//this.addPart(new LabelText(this, Language.getStr("or")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_or"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
@@ -26828,8 +27054,9 @@ B_Or.prototype.startAction = function() {
 
 function B_Not(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("not")));
+	//this.addPart(new LabelText(this, Language.getStr("not")));
 	this.addPart(new BoolSlot(this, "BoolS_1"));
+	this.parseTranslation(Language.getStr("block_not"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
@@ -26869,12 +27096,14 @@ B_False.prototype.startAction = function() {
 
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("letter")));
+	//this.addPart(new LabelText(this, Language.getStr("letter")));
 	var nS = new NumSlot(this, "NumS_idx", 1, true, true);
 	nS.addLimits(1);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_letter"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -26893,8 +27122,10 @@ B_LetterOf.prototype.startAction = function() {
 
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
+	//this.addPart(new StringSlot(this, "StrS_text", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_length"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -26908,10 +27139,13 @@ B_LengthOf.prototype.startAction = function() {
 
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("join")));
-	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
-	this.addPart(new LabelText(this, Language.getStr("and")));
-	this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
+	//this.addPart(new LabelText(this, Language.getStr("join")));
+	//this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello ")));
+	//this.addPart(new LabelText(this, Language.getStr("and")));
+	//this.addPart(new StringSlot(this, "StrS_2", Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
+	this.addPart(new StringSlot(this, "StrS_2", ""));
+	this.parseTranslation(Language.getStr("block_join"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -26926,18 +27160,21 @@ B_join.prototype.startAction = function() {
 
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
-	this.addPart(new LabelText(this, Language.getStr("split")));
-	this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
-	this.addPart(new LabelText(this, Language.getStr("by")));
+	//this.addPart(new LabelText(this, Language.getStr("split")));
+	//this.addPart(new StringSlot(this, "StrS_1", Language.getStr("hello")+" "+Language.getStr("world")));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
+	//this.addPart(new LabelText(this, Language.getStr("by")));
 
 	var inputType = EditableSlot.inputTypes.any;
 	var snapType = Slot.snapTypes.numStrBool;
 	var data = new SelectionData(Language.getStr("whitespace"), "whitespace");
 	var dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-	dS.addEnterText(Language.getStr("Edit_Text"));
+	//dS.addEnterText(Language.getStr("Edit_Text"));
+	dS.addEnterText(Language.getStr("Edit_text"));
 	dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
 	dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_split"));
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
@@ -26970,9 +27207,9 @@ B_Split.prototype.startAction = function() {
 
 function B_IsAType(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("is")));
+	//this.addPart(new LabelText(this, Language.getStr("is")));
 	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
-	this.addPart(new LabelText(this, Language.getStr("a")));
+	//this.addPart(new LabelText(this, Language.getStr("a")));
 	var dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("text"), "text"));
@@ -26980,7 +27217,8 @@ function B_IsAType(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("list"), "list"));
 	dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "?"));
+	//this.addPart(new LabelText(this, "?"));
+	this.parseTranslation(Language.getStr("block_validate"));
 }
 B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
@@ -27043,7 +27281,7 @@ function B_mathOfNumber(x, y) {
 	dS.addOption(new SelectionData("sqrt", "sqrt"));
 
 	this.addPart(dS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
@@ -27116,7 +27354,7 @@ B_ThrowError.prototype.startAction = function() {
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Device_Shaken")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Shaken")));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
@@ -27155,7 +27393,7 @@ B_DeviceShaken.prototype.checkActive = function() {
 
 function B_DeviceSSID(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("Device_SSID")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_SSID")));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
@@ -27191,7 +27429,7 @@ B_DeviceSSID.prototype.updateAction = function() {
 
 function B_DevicePressure(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Device_Pressure")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Pressure")));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
@@ -27233,7 +27471,7 @@ Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 function B_DeviceRelativeAltitude(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this,  Language.getStr("Device_Relative_Altitude")));
+	this.addPart(new LabelText(this,  Language.getStr("block_Device_Relative_Altitude")));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
@@ -27275,7 +27513,7 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 function B_DeviceOrientation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("Device_Orientation")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
@@ -27315,14 +27553,15 @@ B_DeviceOrientation.prototype.checkActive = function() {
 
 function B_DeviceAcceleration(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this,  Language.getStr("Device")));
+	//this.addPart(new LabelText(this,  Language.getStr("Device")));
 	var dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
 	dS.addOption(new SelectionData(Language.getStr("Total"), "total"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
+	//this.addPart(new LabelText(this, Language.getStr("Acceleration")));
+	this.parseTranslation(Language.getStr("block_Acceleration"));
 }
 B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
@@ -27373,11 +27612,12 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 function B_DeviceLocation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, Language.getStr("Device")));
+	//this.addPart(new LabelText(this, Language.getStr("Device")));
 	var dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Longitude"), 1));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_Device_LatLong"));
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceLocation.prototype.constructor = B_DeviceLocation;
@@ -27432,9 +27672,10 @@ function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	CommandBlock.call(this, x, y, "sound");
 	this.isRecording = isRecording;
 	this.waitUntilDone = waitUntilDone;
-	this.addPart(new LabelText(this, label));
+	//this.addPart(new LabelText(this, label));
 	var dS = new SoundDropSlot(this, "SDS_1", isRecording);
 	this.addPart(dS);
+	this.parseTranslation(label);
 }
 B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
 B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
@@ -27471,7 +27712,7 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 
 
 function B_PlaySound(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound"), false, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_sound"), false, false);
 }
 B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySound.prototype.constructor = B_PlaySound;
@@ -27479,7 +27720,7 @@ B_PlaySound.prototype.constructor = B_PlaySound;
 
 
 function B_PlaySoundUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound_until_done"), false, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_sound_until_done"), false, true);
 }
 B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
@@ -27487,7 +27728,7 @@ B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 
 
 function B_PlayRecording(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording"), true, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_recording"), true, false);
 }
 B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecording.prototype.constructor = B_PlayRecording;
@@ -27495,7 +27736,7 @@ B_PlayRecording.prototype.constructor = B_PlayRecording;
 
 
 function B_PlayRecordingUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording_until_done"), true, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_recording_until_done"), true, true);
 }
 B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
@@ -27504,7 +27745,7 @@ B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
 
 function B_StopAllSounds(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("stop_all_sounds")));
+	this.addPart(new LabelText(this, Language.getStr("block_stop_all_sounds")));
 }
 B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
@@ -27528,9 +27769,10 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("rest_for")));
+	//this.addPart(new LabelText(this, Language.getStr("rest_for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
-	this.addPart(new LabelText(this, Language.getStr("Beats")));
+	//this.addPart(new LabelText(this, Language.getStr("Beats")));
+	this.parseTranslation(Language.getStr("block_rest_for"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
@@ -27556,11 +27798,12 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("play_note")));
+	//this.addPart(new LabelText(this, Language.getStr("play_note")));
 	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new LabelText(this, Language.getStr("for")));
+	//this.addPart(new LabelText(this, Language.getStr("for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
-	this.addPart(new LabelText(this, Language.getStr("Beats")));
+	//this.addPart(new LabelText(this, Language.getStr("Beats")));
+	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
@@ -27599,8 +27842,9 @@ B_PlayNoteForBeats.prototype.updateAction = function() {
 
 function B_ChangeTempoBy(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
+	//this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
 	this.addPart(new NumSlot(this, "NumS_amt", 20));
+	this.parseTranslation(Language.getStr("block_change_tempo_by"));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
@@ -27618,11 +27862,12 @@ B_ChangeTempoBy.prototype.startAction = function() {
 
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
+	//this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
 	var nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, Language.getStr("bpm")));
+	//this.addPart(new LabelText(this, Language.getStr("bpm")));
+	this.parseTranslation("block_set_tempo_to");
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
@@ -27640,7 +27885,7 @@ B_SetTempoTo.prototype.startAction = function() {
 
 function B_Tempo(x, y) {
 	ReporterBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("tempo")));
+	this.addPart(new LabelText(this, Language.getStr("block_tempo")));
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
@@ -27749,10 +27994,11 @@ B_Variable.importXml = function(blockNode) {
 
 function B_SetTo(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, Language.getStr("set")));
+	//this.addPart(new LabelText(this, Language.getStr("set")));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, Language.getStr("to")));
+	//this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
+	this.parseTranslation(Language.getStr("block_set_variable"));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
@@ -27780,10 +28026,11 @@ B_SetTo.prototype.startAction = function() {
 
 function B_ChangeBy(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, Language.getStr("change")));
+	//this.addPart(new LabelText(this, Language.getStr("change")));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, Language.getStr("by")));
+	//this.addPart(new LabelText(this, Language.getStr("by")));
 	this.addPart(new NumSlot(this, "NumS_val", 1));
+	this.parseTranslation(Language.getStr("block_change_variable"));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
@@ -27893,13 +28140,15 @@ B_List.prototype.checkListUsed = function(list) {
 
 function B_AddToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, Language.getStr("add")));
+	//this.addPart(new LabelText(this, Language.getStr("add")));
 	/* Any type can be added to a list */
 	var snapType = Slot.snapTypes.numStrBool;
 	var inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
-	this.addPart(new LabelText(this, Language.getStr("to")));
+	//this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+	//this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_add_to_list"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
@@ -27928,10 +28177,11 @@ B_AddToList.prototype.startAction = function() {
 
 function B_DeleteItemOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, Language.getStr("delete")));
+	//this.addPart(new LabelText(this, Language.getStr("delete")));
 	this.addPart(new IndexSlot(this, "NumS_idx", true));
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_delete_from_list"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
@@ -27961,12 +28211,14 @@ B_DeleteItemOfList.prototype.startAction = function() {
 
 function B_InsertItemAtOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, Language.getStr("insert")));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
-	this.addPart(new LabelText(this, Language.getStr("at")));
+	//this.addPart(new LabelText(this, Language.getStr("insert")));
+	//this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
+	//this.addPart(new LabelText(this, Language.getStr("at")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_insert_into_list"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
@@ -28008,12 +28260,14 @@ B_InsertItemAtOfList.prototype.startAction = function() {
 
 function B_ReplaceItemOfListWith(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, Language.getStr("replace_item")));
+	//this.addPart(new LabelText(this, Language.getStr("replace_item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	// this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
-	this.addPart(new LabelText(this, Language.getStr("with")));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
+	// this.addPart(new LabelText(this, Language.getStr("with")));
+	//this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData(Language.getStr("thing"))));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
+	this.parseTranslation(Language.getStr("block_replace_list_item"));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
@@ -28045,12 +28299,13 @@ B_ReplaceItemOfListWith.prototype.startAction = function() {
 
 function B_CopyListToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, Language.getStr("copy")));
+	//this.addPart(new LabelText(this, Language.getStr("copy")));
 	/* This Slot also accepts ListData, such as data from the Split block */
 	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, Language.getStr("to")));
+	//this.addPart(new LabelText(this, Language.getStr("to")));
 	/* This Slot must have an already existing List, not a ListData */
 	this.addPart(new ListDropSlot(this, "LDS_to"));
+	this.parseTranslation(Language.getStr("block_copy_list"));
 }
 B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
@@ -28083,11 +28338,12 @@ B_CopyListToList.prototype.startAction = function() {
 
 function B_ItemOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("item")));
+	//this.addPart(new LabelText(this, Language.getStr("item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, Language.getStr("of")));
+	// this.addPart(new LabelText(this, Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_item"));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
@@ -28132,9 +28388,10 @@ B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
 
 function B_LengthOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
+	// this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_length"));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
@@ -28157,10 +28414,12 @@ B_LengthOfList.prototype.startAction = function() {
 function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, Language.getStr("contains")));
+	// this.addPart(new LabelText(this, Language.getStr("contains")));
 	var snapType = Slot.snapTypes.numStrBool;
 	var inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
+	// this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData(Language.getStr("thing"))));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+	this.parseTranslation(Language.getStr("block_list_contains"));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;

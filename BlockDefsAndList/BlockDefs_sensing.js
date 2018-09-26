@@ -7,9 +7,11 @@
 /* TODO: make sure dialogs don't show while a save dialog is up */
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("ask")));
-	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
-	this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	//this.addPart(new LabelText(this, Language.getStr("ask")));
+	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	//this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	this.parseTranslation(Language.getStr("block_ask"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
@@ -65,7 +67,7 @@ B_Ask.prototype.showQuestion = function() {
 
 function B_Answer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("answer")));
+	this.addPart(new LabelText(this, Language.getStr("block_answer")));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
@@ -78,7 +80,7 @@ B_Answer.prototype.startAction = function() {
 
 function B_ResetTimer(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("reset_timer")));
+	this.addPart(new LabelText(this, Language.getStr("block_reset_timer")));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
@@ -92,7 +94,7 @@ B_ResetTimer.prototype.startAction = function() {
 
 function B_Timer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this,  Language.getStr("timer")));
+	this.addPart(new LabelText(this,  Language.getStr("block_timer")));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
@@ -109,7 +111,7 @@ Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("current")));
+	//this.addPart(new LabelText(this, Language.getStr("current")));
 	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
 	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
 	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
@@ -120,6 +122,7 @@ function B_CurrentTime(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("second"), "second"));
 	dS.addOption(new SelectionData(Language.getStr("time_in_milliseconds"), "time in milliseconds"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_current"));
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
@@ -154,14 +157,16 @@ B_CurrentTime.prototype.startAction = function() {
 
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Display")));
-	this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
-	this.addPart(new LabelText(this, Language.getStr("at")));
-	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 2", "position2"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 3", "position3"));
+	//this.addPart(new LabelText(this, Language.getStr("Display")));
+	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	//this.addPart(new LabelText(this, Language.getStr("at")));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("position") +" 3", "position3"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 1", "position1"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 2", "position2"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 3", "position3"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_Display"));
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;

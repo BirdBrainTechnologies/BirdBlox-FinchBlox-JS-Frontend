@@ -61,10 +61,10 @@ B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
 function B_MBReadPin(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("read");
+    //this.displayName = Language.getStr("read");
     this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
+    //this.addPart(new LabelText(this,this.displayName));
 
     const pin = Language.getStr("pin");
     const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -72,6 +72,7 @@ function B_MBReadPin(x, y){
     pickPin.addOption(new SelectionData(pin + " 1", "2"));
     pickPin.addOption(new SelectionData(pin + " 2", "3"));
     this.addPart(pickPin);
+    this.parseTranslation(Language.getStr("block_read"));
 }
 B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
 B_MBReadPin.prototype.constructor = B_MBReadPin;
@@ -115,7 +116,7 @@ function B_MBWriteToPin(x, y) {
   this.draggable = true;
   this.deviceClass = DeviceMicroBit;
   this.outputType = "write";
-  this.displayName = Language.getStr("write");
+  //this.displayName = Language.getStr("write");
 
   this.minVal = 0;
   this.maxVal = 100;
@@ -125,7 +126,7 @@ function B_MBWriteToPin(x, y) {
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this, this.displayName));
+  //this.addPart(new LabelText(this, this.displayName));
 
   const pin = Language.getStr("pin");
   const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -136,7 +137,8 @@ function B_MBWriteToPin(x, y) {
   const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
   numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);
   this.addPart(numSlot);
-  this.addPart(new LabelText(this,"%"));
+  //this.addPart(new LabelText(this,"%"));
+  this.parseTranslation(Language.getStr("block_write"));
 }
 B_MBWriteToPin.prototype = Object.create(CommandBlock.prototype);
 B_MBWriteToPin.prototype.constructor = B_MBWriteToPin;
