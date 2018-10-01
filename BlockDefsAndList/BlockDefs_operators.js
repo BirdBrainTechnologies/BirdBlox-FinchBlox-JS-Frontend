@@ -455,7 +455,7 @@ B_IsAType.prototype.startAction = function() {
 
 function B_mathOfNumber(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData(Language.getStr("sqrt"), "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));
@@ -466,18 +466,19 @@ function B_mathOfNumber(x, y) {
 
 	dS.addOption(new SelectionData("ln", "ln"));
 	dS.addOption(new SelectionData("e^", "e^"));
-	dS.addOption(new SelectionData("ceiling", "ceiling"));
+	dS.addOption(new SelectionData(Language.getStr("ceiling"), "ceiling"));
 
 	dS.addOption(new SelectionData("log", "log"));
 	dS.addOption(new SelectionData("10^", "10^"));
-	dS.addOption(new SelectionData("floor", "floor"));
+	dS.addOption(new SelectionData(Language.getStr("floor"), "floor"));
 
-	dS.addOption(new SelectionData("abs", "abs"));
-	dS.addOption(new SelectionData("sqrt", "sqrt"));
+	dS.addOption(new SelectionData(Language.getStr("abs"), "abs"));
+	dS.addOption(new SelectionData(Language.getStr("sqrt"), "sqrt"));
 
 	this.addPart(dS);
 	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
+	this.parseTranslation(Language.getStr("block_math_of_number"))
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;

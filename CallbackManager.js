@@ -197,6 +197,7 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
+	//TODO: make sure this id is not in the device list anymore?
     robotId = HtmlServer.decodeHtml(robotId);
     let msg = Language.getStr("Connection_failed_try_again");
     DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {

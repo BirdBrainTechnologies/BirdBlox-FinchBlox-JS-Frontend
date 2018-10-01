@@ -43,7 +43,23 @@ function DebugOptions() {
 DebugOptions.applyConstants = function() {
 	const DO = DebugOptions;
 	if (!DO.enabled) return;
-	// Currently nothing happens here.
+
+	// Check that all language files are complete (contain all keys from english)
+	const englishKeys = Object.keys(Language.en);
+	for (var i = 0; i < Language.langs.length; i++){
+		const lang = Language.langs[i];
+		console.log("Checking language " + lang + " for completeness...");
+
+		var missingCount = 0;
+		for (var j = 0; j < englishKeys.length; j++) {
+			let translation = eval("Language." + lang + "." + englishKeys[j]);
+			if (translation == null) {
+				console.log(lang + " is missing the key " + englishKeys[j]);
+				missingCount++;
+			}
+		}
+		console.log(lang + " check finished. " + missingCount + " missing keys.")
+	}
 };
 
 /**
@@ -1290,211 +1306,9 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en"];
+Language.langs = ["en", "ko"];
 
-Language.en = {
-  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
-"port":"Port",
-"block_LED":"LED (Slot 1) (Slot 2) %",
-"block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
-"block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
-"block_Play_Note":"Play Note (Slot 1) for (Slot 2) Beats",
-"Light":"Light",
-"Distance":"Distance",
-"Dial":"Dial",
-"Other":"Other",
-"Accelerometer":"Accelerometer",
-"Magnetometer":"Magnetometer",
-"block_LED_Display":"Display",
-"block_Print":"Print (Slot 1 = Hello)",
-"block_Button":"Button (Slot 1)",
-"Screen_Up":"Screen Up",
-"Screen_Down":"Screen Down",
-"Tilt_Left":"Tilt Left",
-"Tilt_Right":"Tilt Right",
-"Logo_Up":"Logo Up",
-"Logo_Down":"Logo Down",
-"Shake":"Shake",
-"block_Compass":"Compass",
-"block_Servo":"Servo (Slot 1) (Slot 2)",
-"block_Vibration":"Vibration (Slot 1) (Slot 2)",
-"block_Motor":"Motor (Slot 1) (Slot 2)",
-"block_Temperature_C":"Temperature C (Slot 1)",
-"block_Temperature_F":"Temperature F (Slot 1)",
-"block_write":"Write (Slot 1) (Slot 2) %",
-"pin":"Pin",
-"block_read":"Read (Slot 1)",
-"block_Device_Shaken":"Tablet Shaken",
-"block_Device_LatLong":"Tablet (Slot 1)",
-"Latitude":"Latitude",
-"Longitude":"Longitude",
-"block_Device_SSID":"Tablet SSID",
-"block_Device_Pressure":"Tablet Pressure",
-"block_Device_Relative_Altitude":"Tablet Relative Altitude",
-"block_Acceleration":"Tablet (Slot 1) Acceleration",
-"Total":"Total",
-"block_Device_Orientation":"Tablet Orientation",
-"faceup":"Faceup",
-"facedown":"Facedown",
-"portrait_bottom":"Portrait: Camera on bottom",
-"portrait_top":"Portrait: Camera on top",
-"landscape_left":"Lanscape: Camera on left",
-"landscape_right":"Landscape: Camera on right",
-"block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
-"position":"Position",
-"block_ask":"ask (Slot 1 = What's your name?) and wait",
-"block_answer":"answer",
-"block_reset_timer":"reset timer",
-"block_timer":"timer",
-"block_current":"current (Slot 1)",
-"date":"date",
-"year":"year",
-"month":"month",
-"hour":"hour",
-"minute":"minute",
-"second":"second",
-"day_of_the_week":"day of the week",
-"time_in_milliseconds":"time in milliseconds",
-"block_mod":"(Slot 1) mod (Slot 2)",
-"block_round":"round (Slot 1)",
-"block_pick_random":"pick random (Slot 1) to (Slot 2)",
-"block_and":"(Slot 1) and (Slot 2)",
-"block_or":"(Slot 1) or (Slot 2)",
-"block_not":"not (Slot 1)",
-"true":"true",
-"false":"false",
-"block_letter":"letter (Slot 1) of (Slot 2 = world)",
-"block_length":"length of (Slot 1 = world)",
-"block_join":"join (Slot 1 = hello) and (Slot 2 = world)",
-"block_split":"split (Slot 1 = hello world) by (Slot 2)",
-"letter":"letter",
-"whitespace":"whitespace",
-"block_validate":"is (Slot 1 = 5) a (Slot 2)?",
-"number":"number",
-"text":"text",
-"boolean":"boolean",
-"list":"list",
-"invalid_number":"invalid number",
-"block_when_flag_tapped":"when (Icon) tapped",
-"block_when_I_receive":"when I receive",
-"any_message":"any message",
-"new":"new",
-"block_when":"when (Slot 1)",
-"block_broadcast":"broadcast (Slot 1)",
-"block_broadcast_and_wait":"broadcast (Slot 1) and wait",
-"block_message":"message",
-"block_wait":"wait (Slot 1) secs",
-"block_wait_until":"wait until (Slot 1)",
-"block_repeat_forever":"repeat forever",
-"block_repeat":"repeat (Slot 1)",
-"block_repeat_until":"repeat until (Slot 1)",
-"block_if":"if (Slot 1)",
-"block_if_else":"if (Slot 1)",
-"else":"else",
-"block_stop":"stop (Slot 1)",
-"all":"all",
-"this_script":"this script",
-"all_but_this_script":"all but this script",
-"Record_sound":"Record Sound",
-"block_play_recording":"play recording (Slot 1)",
-"block_play_recording_until_done":"play recording until done (Slot 1)",
-"block_play_sound":"play sound (Slot 1)",
-"block_play_sound_until_done":"play sound until done (Slot 1)",
-"block_stop_all_sounds":"stop all sounds",
-"block_rest_for":"rest for (Slot 1) Beats",
-"block_change_tempo_by":"change tempo by (Slot 1)",
-"block_set_tempo_to":"set tempo to (Slot 1) bpm",
-"block_tempo":"tempo",
-"block_set_variable":"set (Slot 1) to (Slot 2)",
-"Create_Variable":"Create Variable",
-"block_change_variable":"change (Slot 1) by (Slot 2)",
-"Rename":"Rename",
-"Delete":"Delete",
-"block_add_to_list":"add (Slot 1 = thing) to (Slot 2)",
-"Create_List":"Create List",
-"block_delete_from_list":"delete (Slot 1) of (Slot 2)",
-"block_insert_into_list":"insert (Slot 1 = thing) at (Slot 2) of (Slot 3)",
-"block_replace_list_item":"replace item (Slot 1) of (Slot 2) with (Slot 3 = thing)",
-"block_copy_list":"copy (Slot 1) to (Slot 2)",
-"block_list_item":"item (Slot 1) of (Slot 2)",
-"block_list_length":"length of (Slot 1)",
-"block_list_contains":"(Slot 1) contains (Slot 2 = thing)",
-"last":"Last",
-"random":"Random",
-"Robots":"Robots",
-"Operators":"Operators",
-"Sound":"Sound",
-"Tablet":"Tablet",
-"Control":"Control",
-"Variables":"Variables",
-"Zoom_in":"Zoom in",
-"Zoom_out":"Zoom out",
-"Reset_zoom":"Reset zoom",
-"Disable_snap_noise":"Disable snap noise",
-"Enable_snap_noise":"Enable snap noise",
-"CompassCalibrate":"Calibrate Compass",
-"Send_debug_log":"Send debug log",
-"Show_debug_menu":"Show debug menu",
-"Connect_Device":"Connect Device",
-"Connect_Multiple":"Connect Multiple",
-"Disconnect_Device":"Disconnect Device",
-"Tap":"Tap + to connect",
-"Scanning_for_devices":"Scanning for devices",
-"Open":"Open",
-"No_saved_programs":"No saved programs",
-"Saving":"Saving",
-"On_Device":"On Device",
-"Cloud":"Cloud",
-"Loading":"Loading",
-"Sign_in":"Sign in",
-"New_program":"New program",
-"Share":"Share",
-"Recordings":"Recordings",
-"Discard":"Discard",
-"Stop":"Stop",
-"Pause":"Pause",
-"remaining":"remaining",
-"Record":"Record",
-"Tap_record_to_start":"Tap record to start",
-"Done":"Done",
-"Delete":"Delete",
-"Delete_question":"Are you sure you want to delete this?",
-"Cancel":"Cancel",
-"OK":"OK",
-"Dont_delete":"Don't delete",
-"Rename":"Rename",
-"Enter_new_name":"Enter new name",
-"Duplicate":"Duplicate",
-"Name_duplicate_file":"Enter name for duplicate file",
-"Name_error_invalid_characters":"The following characters cannot be included in file names: \n",
-"Name_error_already_exists":"\" already exists.  Enter a different name.",
-"Permission_denied":"Permission denied",
-"Grant_permission":"Grant recording permission to BirdBlox in Settings",
-"Dismiss":"Dismiss",
-"Name":"Name",
-"Enter_file_name":"Enter file name",
-"Name_error_blank":"Name cannot be blank. Enter a file name.",
-"Edit_text":"Edit text",
-"Question":"Question",
-"Connection_Failure":"Connection Failure",
-"Connection_failed_try_again":"Connection failed, please try again.",
-"Disconnect_account":"Disconnect account",
-"Disconnect_account_question":"Disconnect account?",
-"Dont_disconnect":"Don't disconnect",
-"Disconnect":"Disconnect",
-"not_connected":"(Device) not connected",
-"not_a_valid_number":"not a valid number",
-"Intensity":"Intensity",
-"Angle":"Angle ",
-"Speed":"Speed ",
-"Note":"Note",
-"Beats":"Beats",
-"Firmware_incompatible":"Firmware incompatible",
-"Update_firmware":"Update firmware",
-"Device_firmware:":"Device firmware version:",
-"Required_firmware:":"Required firmware version:",
-"New":"New"
-}
+
 
 Language.en_old = {
     "Delete_recording_question":"Are you sure you would like to delete the current recording?",
@@ -1738,7 +1552,7 @@ Language.en_old = {
 };
 
 
-Language.nl = {
+Language.nl_old = {
   "Delete_recording_question":"Opname verwijderen?",
   "Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
   "Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
@@ -1964,7 +1778,7 @@ Language.nl = {
   "pin":"Pin"
 };
 
-Language.fr = {
+Language.fr_old = {
   "Delete_recording_question":"Supprimer l'enregistrement?",
   "Name_error_blank":"Le nom ne peut pas être vide. Entrez un nom de fichier",
   "Name_error_invalid_characters":"Les caractères suivants ne peuvent pas être inclus dans les noms de fichiers: \n",
@@ -2209,6 +2023,428 @@ Language.getStr = function(str) {
         console.log("Translation? " + str);
         return "Translation required";
     }
+}
+
+Language.en = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
+"port":"Port",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
+"block_Play_Note":"Play Note (Slot 1) for (Slot 2) Beats",
+"Light":"Light",
+"Distance":"Distance",
+"Dial":"Dial",
+"Other":"Other",
+"Accelerometer":"Accelerometer",
+"Magnetometer":"Magnetometer",
+"block_LED_Display":"Display",
+"block_Print":"Print (Slot 1 = Hello)",
+"block_Button":"Button (Slot 1)",
+"Screen_Up":"Screen Up",
+"Screen_Down":"Screen Down",
+"Tilt_Left":"Tilt Left",
+"Tilt_Right":"Tilt Right",
+"Logo_Up":"Logo Up",
+"Logo_Down":"Logo Down",
+"Shake":"Shake",
+"block_Compass":"Compass",
+"block_Servo":"Servo (Slot 1) (Slot 2)",
+"block_Vibration":"Vibration (Slot 1) (Slot 2)",
+"block_Motor":"Motor (Slot 1) (Slot 2)",
+"block_Temperature_C":"Temperature C (Slot 1)",
+"block_Temperature_F":"Temperature F (Slot 1)",
+"block_write":"Write (Slot 1) (Slot 2) %",
+"pin":"Pin",
+"block_read":"Read (Slot 1)",
+"block_Device_Shaken":"Tablet Shaken",
+"block_Device_LatLong":"Tablet (Slot 1)",
+"Latitude":"Latitude",
+"Longitude":"Longitude",
+"block_Device_SSID":"Tablet SSID",
+"block_Device_Pressure":"Tablet Pressure",
+"block_Device_Relative_Altitude":"Tablet Relative Altitude",
+"block_Acceleration":"Tablet (Slot 1) Acceleration",
+"Total":"Total",
+"block_Device_Orientation":"Tablet Orientation",
+"faceup":"Faceup",
+"facedown":"Facedown",
+"portrait_bottom":"Portrait: Camera on bottom",
+"portrait_top":"Portrait: Camera on top",
+"landscape_left":"Lanscape: Camera on left",
+"landscape_right":"Landscape: Camera on right",
+"block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
+"position":"Position",
+"block_ask":"ask (Slot 1 = What's your name?) and wait",
+"block_answer":"answer",
+"block_reset_timer":"reset timer",
+"block_timer":"timer",
+"block_current":"current (Slot 1)",
+"date":"date",
+"year":"year",
+"month":"month",
+"hour":"hour",
+"minute":"minute",
+"second":"second",
+"day_of_the_week":"day of the week",
+"time_in_milliseconds":"time in milliseconds",
+"block_mod":"(Slot 1) mod (Slot 2)",
+"block_round":"round (Slot 1)",
+"block_pick_random":"pick random (Slot 1) to (Slot 2)",
+"block_and":"(Slot 1) and (Slot 2)",
+"block_or":"(Slot 1) or (Slot 2)",
+"block_not":"not (Slot 1)",
+"true":"true",
+"false":"false",
+"block_letter":"letter (Slot 1) of (Slot 2 = world)",
+"block_length":"length of (Slot 1 = world)",
+"block_join":"join (Slot 1 = hello) and (Slot 2 = world)",
+"block_split":"split (Slot 1 = hello world) by (Slot 2)",
+"letter":"letter",
+"whitespace":"whitespace",
+"block_validate":"is (Slot 1 = 5) a (Slot 2)?",
+"number":"number",
+"text":"text",
+"boolean":"boolean",
+"list":"list",
+"invalid_number":"invalid number",
+"block_when_flag_tapped":"when (Icon) tapped",
+"block_when_I_receive":"when I receive",
+"any_message":"any message",
+"new":"new",
+"block_when":"when (Slot 1)",
+"block_broadcast":"broadcast (Slot 1)",
+"block_broadcast_and_wait":"broadcast (Slot 1) and wait",
+"block_message":"message",
+"block_wait":"wait (Slot 1) secs",
+"block_wait_until":"wait until (Slot 1)",
+"block_repeat_forever":"repeat forever",
+"block_repeat":"repeat (Slot 1)",
+"block_repeat_until":"repeat until (Slot 1)",
+"block_if":"if (Slot 1)",
+"block_if_else":"if (Slot 1)",
+"else":"else",
+"block_stop":"stop (Slot 1)",
+"all":"all",
+"this_script":"this script",
+"all_but_this_script":"all but this script",
+"Record_sound":"Record Sound",
+"block_play_recording":"play recording (Slot 1)",
+"block_play_recording_until_done":"play recording until done (Slot 1)",
+"block_play_sound":"play sound (Slot 1)",
+"block_play_sound_until_done":"play sound until done (Slot 1)",
+"block_stop_all_sounds":"stop all sounds",
+"block_rest_for":"rest for (Slot 1) Beats",
+"block_change_tempo_by":"change tempo by (Slot 1)",
+"block_set_tempo_to":"set tempo to (Slot 1) bpm",
+"block_tempo":"tempo",
+"block_set_variable":"set (Slot 1) to (Slot 2)",
+"Create_Variable":"Create Variable",
+"block_change_variable":"change (Slot 1) by (Slot 2)",
+"Rename":"Rename",
+"Delete":"Delete",
+"block_add_to_list":"add (Slot 1 = thing) to (Slot 2)",
+"Create_List":"Create List",
+"block_delete_from_list":"delete (Slot 1) of (Slot 2)",
+"block_insert_into_list":"insert (Slot 1 = thing) at (Slot 2) of (Slot 3)",
+"block_replace_list_item":"replace item (Slot 1) of (Slot 2) with (Slot 3 = thing)",
+"block_copy_list":"copy (Slot 1) to (Slot 2)",
+"block_list_item":"item (Slot 1) of (Slot 2)",
+"block_list_length":"length of (Slot 1)",
+"block_list_contains":"(Slot 1) contains (Slot 2 = thing)",
+"last":"Last",
+"random":"Random",
+"Robots":"Robots",
+"Operators":"Operators",
+"Sound":"Sound",
+"Tablet":"Tablet",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Zoom in",
+"Zoom_out":"Zoom out",
+"Reset_zoom":"Reset zoom",
+"Disable_snap_noise":"Disable snap noise",
+"Enable_snap_noise":"Enable snap noise",
+"CompassCalibrate":"Calibrate Compass",
+"Send_debug_log":"Send debug log",
+"Show_debug_menu":"Show debug menu",
+"Connect_Device":"Connect Device",
+"Connect_Multiple":"Connect Multiple",
+"Disconnect_Device":"Disconnect Device",
+"Tap":"Tap + to connect",
+"Scanning_for_devices":"Scanning for devices",
+"Open":"Open",
+"No_saved_programs":"No saved programs",
+"Saving":"Saving",
+"On_Device":"On Device",
+"Cloud":"Cloud",
+"Loading":"Loading",
+"Sign_in":"Sign in",
+"New_program":"New program",
+"Share":"Share",
+"Recordings":"Recordings",
+"Discard":"Discard",
+"Stop":"Stop",
+"Pause":"Pause",
+"remaining":"remaining",
+"Record":"Record",
+"Tap_record_to_start":"Tap record to start",
+"Done":"Done",
+"Delete":"Delete",
+"Delete_question":"Are you sure you want to delete this?",
+"Cancel":"Cancel",
+"OK":"OK",
+"Dont_delete":"Don't delete",
+"Rename":"Rename",
+"Enter_new_name":"Enter new name",
+"Duplicate":"Duplicate",
+"Name_duplicate_file":"Enter name for duplicate file",
+"Name_error_invalid_characters":"The following characters cannot be included in file names: \n",
+"Name_error_already_exists":"\" already exists.  Enter a different name.",
+"Permission_denied":"Permission denied",
+"Grant_permission":"Grant recording permission to BirdBlox in Settings",
+"Dismiss":"Dismiss",
+"Name":"Name",
+"Enter_file_name":"Enter file name",
+"Name_error_blank":"Name cannot be blank. Enter a file name.",
+"Edit_text":"Edit text",
+"Question":"Question",
+"Connection_Failure":"Connection Failure",
+"Connection_failed_try_again":"Connection failed, please try again.",
+"Disconnect_account":"Disconnect account",
+"Disconnect_account_question":"Disconnect account?",
+"Dont_disconnect":"Don't disconnect",
+"Disconnect":"Disconnect",
+"not_connected":"(Device) not connected",
+"not_a_valid_number":"not a valid number",
+"Intensity":"Intensity",
+"Angle":"Angle ",
+"Speed":"Speed ",
+"Note":"Note",
+"Beats":"Beats",
+"Firmware_incompatible":"Firmware incompatible",
+"Update_firmware":"Update firmware",
+"Device_firmware":"Device firmware version:",
+"Required_firmware":"Required firmware version:",
+"New":"New",
+"block_math_of_number":"(Slot 1) of (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt"
+}
+
+Language.ko = {
+  "block_Tri_LED":"삼색 LED (Slot 1) 빨강 (Slot 2) % 초록 (Slot 3) % 파랑 (Slot 4) %",
+  "port":"포트",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"위치 제어 서보 (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"회전속도 제어 서보 (Slot 1) (Slot 2) %",
+  "block_Play_Note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
+  "Light":"빛 센서",
+  "Distance":"거리 센서",
+  "Dial":"가변 저항",
+  "Other":"다른 센서",
+  "Accelerometer":"가속도 센서",
+  "Magnetometer":"자기력 센서",
+  "block_LED_Display":"보이기",
+  "block_Print":"출력 (Slot 1 = 안녕)",
+  "block_Button":"버튼 (Slot 1)",
+  "Screen_Up":"화면 하늘 방향",
+  "Screen_Down":"화면 땅 방향",
+  "Tilt_Left":"왼쪽 기울임",
+  "Tilt_Right":"오른쪽 기울임",
+  "Logo_Up":"로고 하늘 방향",
+  "Logo_Down":"로고 땅 방향",
+  "Shake":"흔들림",
+  "block_Compass":"나침반 센서",
+  "block_Servo":"서보 (Slot 1) (Slot 2)",
+  "block_Vibration":"진동 (Slot 1) (Slot 2)",
+  "block_Motor":"기어 모터 (Slot 1) (Slot 2)",
+  "block_Temperature_C":"온도(섭씨) 센서 (Slot 1) ",
+  "block_Temperature_F":"온도(화씨) 센서 (Slot 1) ",
+  "block_write":"출력 (Slot 1) 값 (Slot 2) %",
+  "pin":"핀",
+  "block_read":"입력 (Slot 1)",
+  "block_Device_Shaken":"태블릿이 흔들렸는가?",
+  "block_Device_LatLong":"태블릿 (Slot 1)",
+  "Latitude":"위도",
+  "Longitude":"경도",
+  "block_Device_SSID":"태블릿 SSID(네트워크 이름)",
+  "block_Device_Pressure":"태블릿 기압",
+  "block_Device_Relative_Altitude":"태블릿 고도",
+  "block_Acceleration":"태블릿 (Slot 1) 가속도",
+  "Total":"전체",
+  "block_Device_Orientation":"태블릿 방위",
+  "faceup":"화면 하늘 방향",
+  "facedown":"화면 땅 방향",
+  "portrait_bottom":"세로모드: 카메라 아래쪽 보기",
+  "portrait_top":"세로모드: 카메라 위쪽 보기",
+  "landscape_left":"가로모드: 카메라 왼쪽 보기",
+  "landscape_right":"가로모드: 카메라 오른쪽 보기",
+  "block_Display":"(Slot 1 = 안녕) 보이기 위치: (Slot 2)",
+  "position":"위치",
+  "block_ask":"(Slot 1 = 이름이 무엇이니?) 묻고 기다리기",
+  "block_answer":"대답",
+  "block_reset_timer":"타이머 초기화",
+  "block_timer":"타이머",
+  "block_current":"현재 (Slot 1)",
+  "date":"일",
+  "year":"년",
+  "month":"월",
+  "hour":"시간",
+  "minute":"분",
+  "second":"초",
+  "day_of_the_week":"요일",
+  "time_in_milliseconds":"밀리초",
+  "block_mod":"(Slot 1) 나누기 (Slot 2) 의 나머지",
+  "block_round":"(Slot 1) 의 반올림",
+  "block_math_of_number":"(Slot 2 = 10) 의 (Slot 1)",
+  "ceiling":"올림",
+  "floor":"버림",
+  "abs":"절대값",
+  "sqrt":"제곱근",
+  "block_pick_random":"(Slot 1) 부터 (Slot 2) 사이의 임의의 수",
+  "block_and":"(Slot 1) 그리고 (Slot 2)",
+  "block_or":"(Slot 1) 또는 (Slot 2)",
+  "block_not":"(Slot 1) 이/가 아니다",
+  "true":"참",
+  "false":"거짓",
+  "block_letter":"(Slot 2 = 친구들) 의 (Slot 1) 번째 글자",
+  "block_length":"(Slot 1 = 친구들) 의 글자 수",
+  "block_join":"(Slot 1 = 안녕) 와/과 (Slot 2 = 친구들) 합치기",
+  "block_split":"(Slot 1 = 안녕 친구들) 을/를 (Slot 2) (으)로 나누기",
+  "letter":"글자",
+  "whitespace":"여백",
+  "block_validate":"(Slot 1 = 5) 이/가 (Slot 2) 인가?",
+  "number":"숫자",
+  "text":"문자",
+  "boolean":"부울",
+  "list":"리스트",
+  "invalid_number":"부적절한 값",
+  "block_when_flag_tapped":"(Icon) 을 눌렀을 때",
+  "block_when_I_receive":"(Slot 1) 을/를 받았을 때",
+  "any_message":"어떤 메시지든",
+  "new":"새 메시지",
+  "block_when":"(Slot 1) 일 때",
+  "block_broadcast":"(Slot 1) 방송하기",
+  "block_broadcast_and_wait":"(Slot 1) 방송하고 기다리기",
+  "block_message":"메시지",
+  "block_wait":"(Slot 1) 초 기다리기",
+  "block_wait_until":"(Slot 1) 까지 기다리기",
+  "block_repeat_forever":"무한 반복하기",
+  "block_repeat":"(Slot 1) 번 반복하기",
+  "block_repeat_until":"(Slot 1) 까지 반복하기",
+  "block_if":"만약 (Slot 1) (이)라면",
+  "block_if_else":"만약 (Slot 1) (이)라면",
+  "else":"아니면",
+  "block_stop":"(Slot 1) 멈추기",
+  "all":"모두",
+  "this_script":"이 스크립트",
+  "all_but_this_script":"이 스크립트를 제외한 다른 스크립트",
+  "Record_sound":"소리 녹음하기",
+  "block_play_recording":"녹음 재생하기 (Slot 1) ",
+  "block_play_recording_until_done":"녹음 끝까지 재생하기 (Slot 1) ",
+  "block_play_sound":"(Slot 1) 재생하기",
+  "block_play_sound_until_done":"(Slot 1) 끝까지 재생하기",
+  "block_stop_all_sounds":"모든 소리 멈추기",
+  "block_rest_for":"(Slot 1) 박자 쉬기",
+  "block_change_tempo_by":"빠르기를 (Slot 1) 만큼 바꾸기",
+  "block_set_tempo_to":"빠르기를 (Slot 1) bpm으로 정하기",
+  "block_tempo":"박자",
+  "block_set_variable":"(Slot 1) 을/를 (Slot 2) 으로 정하기",
+  "Create_Variable":"변수 만들기",
+  "block_change_variable":"(Slot 1) 을/를 (Slot 2) 만큼 바꾸기",
+  "Rename":"이름 바꾸기",
+  "Delete":"삭제하기",
+  "block_add_to_list":"(Slot 1 =어떤 것) 항목을 (Slot 2) 에 추가하기",
+  "Create_List":"리스트 만들기",
+  "block_delete_from_list":"(Slot 1) 번째 항목을 (Slot 2) 에서 삭제하기",
+  "block_insert_into_list":"(Slot 1 = 어떤 것) 을/를 (Slot 3) 의 (Slot 2) 번째에 넣기",
+  "block_replace_list_item":"(Slot 3 = 어떤 것) 의 (Slot 1) 번째 항목을 (Slot 2) (으)로 바꾸기",
+  "block_copy_list":"(Slot 1) 을/를 (Slot 2)으로 복사하기",
+  "block_list_item":"(Slot 2) 의 (Slot 1) 번째 항목",
+  "block_list_length":"(Slot 1) 항목 수",
+  "block_list_contains":"(Slot 1) 이/가 (Slot 2 = 어떤 것) 을/를 포함하는가?",
+  "last":"마지막",
+  "random":"임의의 수",
+  "Robots":"로봇",
+"Operators":"연산자",
+"Sound":"소리",
+"Tablet":"태블릿",
+"Control":"제어",
+"Variables":"변수",
+"Zoom_in":"더 크게보기",
+"Zoom_out":"더 작게보기",
+"Reset_zoom":"원래 크기로 보기",
+"Disable_snap_noise":"딸깍소리 내기",
+"Enable_snap_noise":"딸깍소리 없애기",
+"CompassCalibrate":"나침반 센서 보정",
+"Send_debug_log":"디버그 기록 보내기",
+"Show_debug_menu":"디버그 메뉴 보기",
+"Connect_Device":"기기 연결하기",
+"Connect_Multiple":"여러 기기 연결하기",
+"Disconnect_Device":"장치 연결 끊기",
+"Tap":" + 를 눌러 연결하기",
+"Scanning_for_devices":"기기 검색 중",
+"Open":"열기",
+"No_saved_programs":"저장된 프로그램 없음",
+"New":"새로 만들기",
+"Saving":"저장하기",
+"On_Device":"이 기기",
+"Cloud":"클라우드",
+"Loading":"로드 중",
+"Sign_in":"로그인 하기",
+"New_program":"새 프로그램",
+"Share":"공유하기",
+"Recordings":"녹음파일",
+"Discard":"삭제",
+"Stop":"멈춤",
+"Pause":"일시정지",
+"remaining":"남음 시간",
+"Record":"녹음",
+"Tap_record_to_start":"녹음 버튼 눌러 시작하기",
+"Done":"완료",
+"Delete":"삭제하기",
+"Delete_question":"정말로 this를 삭제하시겠습니까?",
+"Cancel":"취소",
+"OK":"확인",
+"Dont_delete":"삭제하지 않기",
+"Rename":"이름 바꾸기",
+"Enter_new_name":"새 이름을 입력하세요.",
+"Duplicate":"복사하기",
+"Name_duplicate_file":"복사할 파일 이름을 입력하세요.",
+"Name_error_invalid_characters":"파일 이름에는 다음 문자를 사용할 수 없습니다. \n ",
+"Name_error_already_exists":"\"이미 존재하는 이름입니다. 다른 이름을 입력하세요.",
+"Permission_denied":"권한 허용 불가",
+"Grant_permission":"설정에서 BirdBlox에 대한 마이크 권한을 허용해주세요.",
+"Dismiss":"취소",
+"Name":"파일 이름",
+"Enter_file_name":"파일 이름을 입력하세요.",
+"Name_error_blank":"이름은 빈칸으로 남겨둘 수 없습니다. 파일 이름을 입력하세요.",
+"Edit_text":"텍스트 편집하기",
+"Question":"질문",
+"Connection_Failure":"연결 실패",
+"Connection_failed_try_again":"연결 실패, 다시 시도해주세요.",
+"Disconnect_account":"계정 연결 끊기",
+"Disconnect_account_question":"계정 연결을 끊으시겠습니까?",
+"Dont_disconnect":"취소",
+"Disconnect":"연결 끊기",
+"not_connected":"(Device) 연결 안 됨",
+"not_a_valid_number":"부적절한 값입니다.",
+"Intensity":"세기",
+"Angle":"각도",
+"Speed":"속도",
+"Note":"음",
+"Beats":"박자",
+"Firmware_incompatible":"펌웨어 호환불가",
+"Update_firmware":"펌웨어 업데이트",
+"Device_firmware":"기기 펌웨어 버전:",
+"Required_firmware":"필요한 펌웨어 버전:"
+}
+
+Language.nl = {
+
 }
 
 /**
@@ -12381,11 +12617,11 @@ SettingsMenu.prototype.loadOptions = function() {
 	if (this.showAdvanced) {
 		const icon = VectorPaths.language;
 		const me = this;
-		//this.addOption("", null, false, function(bn) {
-		//	bn.addIcon(icon);
-		//	me.languageMenu = new LanguageMenu(bn, me);
-		//	me.languageMenu.move();
-		//});
+		this.addOption("", null, false, function(bn) {
+			bn.addIcon(icon);
+			me.languageMenu = new LanguageMenu(bn, me);
+			me.languageMenu.move();
+		});
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}
@@ -15923,7 +16159,7 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
 	let message = Language.getStr("Disconnect_account_question");
-	message += Language.getStr("Files_will_remain");
+	//message += Language.getStr("Files_will_remain");
 	const me = this;
 	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
 		if (result === "2") {
@@ -16783,8 +17019,10 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
-	let message = Language.getStr("Open_before_recording");
-	DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
+	//let message = Language.getStr("Open_before_recording");
+	//DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
+	let message = "Please open a project before recording";
+	DialogManager.showAlertDialog("No project open", message, Language.getStr("OK"));
 };
 
 /**
@@ -18441,6 +18679,7 @@ HtmlServer.responseFromIosCall = function(id, status, body) {
 		}
 	}
 };
+
 /**
  * Sends requests to show dialogs and keeps track of open dialogs
  */
@@ -18833,6 +19072,7 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
+	//TODO: make sure this id is not in the device list anymore?
     robotId = HtmlServer.decodeHtml(robotId);
     let msg = Language.getStr("Connection_failed_try_again");
     DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
@@ -24055,7 +24295,7 @@ NumOrStringSlot.prototype.constructor = NumOrStringSlot;
  * @param {InputWidget.SelectPad} selectPad
  */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
-	selectPad.addAction(Language.getStr("Enter_text"), function(callbackFn){
+	selectPad.addAction(Language.getStr("Edit_text"), function(callbackFn){
 		// When "Enter text" is selected, create a new inputDialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
@@ -25013,14 +25253,19 @@ B_DeviceWithPortsBuzzer.prototype.startAction = function() {
     const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     mem.soundDuration = CodeManager.beatsToMs(beats);
-    let soundDuration = CodeManager.beatsToMs(beats);
     mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
     mem.requestStatus.error = false;
     mem.requestStatus.result = null;
-    device.setBuzzer(mem.requestStatus, note, soundDuration);
+		//Setting a buzzer with a duration of 0 has strange results on the micro:bit.
+		if (mem.soundDuration > 0) {
+			device.setBuzzer(mem.requestStatus, note, mem.soundDuration);
+		} else {
+			mem.requestStatus.finished = true;
+		}
+
     return new ExecutionStatusRunning();
 };
 /* Waits until the request completes */
@@ -27261,7 +27506,7 @@ B_IsAType.prototype.startAction = function() {
 
 function B_mathOfNumber(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData(Language.getStr("sqrt"), "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));
@@ -27272,18 +27517,19 @@ function B_mathOfNumber(x, y) {
 
 	dS.addOption(new SelectionData("ln", "ln"));
 	dS.addOption(new SelectionData("e^", "e^"));
-	dS.addOption(new SelectionData("ceiling", "ceiling"));
+	dS.addOption(new SelectionData(Language.getStr("ceiling"), "ceiling"));
 
 	dS.addOption(new SelectionData("log", "log"));
 	dS.addOption(new SelectionData("10^", "10^"));
-	dS.addOption(new SelectionData("floor", "floor"));
+	dS.addOption(new SelectionData(Language.getStr("floor"), "floor"));
 
-	dS.addOption(new SelectionData("abs", "abs"));
-	dS.addOption(new SelectionData("sqrt", "sqrt"));
+	dS.addOption(new SelectionData(Language.getStr("abs"), "abs"));
+	dS.addOption(new SelectionData(Language.getStr("sqrt"), "sqrt"));
 
 	this.addPart(dS);
 	//this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
+	this.parseTranslation(Language.getStr("block_math_of_number"))
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;

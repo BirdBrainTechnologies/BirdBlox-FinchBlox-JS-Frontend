@@ -484,6 +484,8 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
-	let message = Language.getStr("Open_before_recording");
-	DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
+	//let message = Language.getStr("Open_before_recording");
+	//DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
+	let message = "Please open a project before recording";
+	DialogManager.showAlertDialog("No project open", message, Language.getStr("OK"));
 };

@@ -230,7 +230,7 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
 	let message = Language.getStr("Disconnect_account_question");
-	message += Language.getStr("Files_will_remain");
+	//message += Language.getStr("Files_will_remain");
 	const me = this;
 	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
 		if (result === "2") {

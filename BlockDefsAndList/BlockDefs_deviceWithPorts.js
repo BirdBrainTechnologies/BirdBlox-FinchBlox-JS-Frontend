@@ -258,14 +258,19 @@ B_DeviceWithPortsBuzzer.prototype.startAction = function() {
     const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
     const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
     mem.soundDuration = CodeManager.beatsToMs(beats);
-    let soundDuration = CodeManager.beatsToMs(beats);
     mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
     mem.requestStatus.error = false;
     mem.requestStatus.result = null;
-    device.setBuzzer(mem.requestStatus, note, soundDuration);
+		//Setting a buzzer with a duration of 0 has strange results on the micro:bit.
+		if (mem.soundDuration > 0) {
+			device.setBuzzer(mem.requestStatus, note, mem.soundDuration);
+		} else {
+			mem.requestStatus.finished = true;
+		}
+
     return new ExecutionStatusRunning();
 };
 /* Waits until the request completes */
