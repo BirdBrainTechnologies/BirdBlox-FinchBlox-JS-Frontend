@@ -1,3 +1,4 @@
+//English Translation
 Language.en = {
   "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
 "port":"Port",
@@ -200,7 +201,7 @@ Language.en = {
 "Device_firmware":"Device firmware version:",
 "Required_firmware":"Required firmware version:",
 "New":"New",
-"block_math_of_number":"(Slot 1) of (Slot 2 = 10)",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",

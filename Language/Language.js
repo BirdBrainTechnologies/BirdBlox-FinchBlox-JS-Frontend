@@ -10,7 +10,7 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en", "ko"];
+Language.langs = ["en", "ko", "da"];
 
 
 

@@ -1,3 +1,4 @@
+//Korean Translation
 Language.ko = {
   "block_Tri_LED":"삼색 LED (Slot 1) 빨강 (Slot 2) % 초록 (Slot 3) % 파랑 (Slot 4) %",
   "port":"포트",
@@ -12,7 +13,7 @@ Language.ko = {
   "Accelerometer":"가속도 센서",
   "Magnetometer":"자기력 센서",
   "block_LED_Display":"보이기",
-  "block_Print":"출력 (Slot 1 = 안녕)",
+  "block_Print":"출력 (Slot 1 = Hello)",
   "block_Button":"버튼 (Slot 1)",
   "Screen_Up":"화면 하늘 방향",
   "Screen_Down":"화면 땅 방향",

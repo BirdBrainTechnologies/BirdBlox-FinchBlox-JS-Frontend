@@ -210,7 +210,7 @@ function B_SetTempoTo(x, y) {
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
 	//this.addPart(new LabelText(this, Language.getStr("bpm")));
-	this.parseTranslation("block_set_tempo_to");
+	this.parseTranslation(Language.getStr("block_set_tempo_to"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;

@@ -72,7 +72,7 @@ FileContextMenu.prototype.addOptions = function() {
 				dialog.reloadDialog();
 			});
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, Language.getStr("Duplicate")));
 	}
 	this.menuBnList.addOption("", function() {
 		if (this.type === FCM.types.cloud) {
@@ -87,7 +87,7 @@ FileContextMenu.prototype.addOptions = function() {
 			});
 			this.close();
 		}
-	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, Language.getStr("Delete")));
 };
 
 /**
