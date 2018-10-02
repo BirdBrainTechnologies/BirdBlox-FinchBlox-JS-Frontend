@@ -2437,7 +2437,7 @@ Language.en = {
 "Device_firmware":"Device firmware version:",
 "Required_firmware":"Required firmware version:",
 "New":"New",
-"block_math_of_number":"(Slot 1) of (Slot 2 = 10)",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
@@ -2459,7 +2459,7 @@ Language.ko = {
   "Accelerometer":"가속도 센서",
   "Magnetometer":"자기력 센서",
   "block_LED_Display":"보이기",
-  "block_Print":"출력 (Slot 1 = 안녕)",
+  "block_Print":"출력 (Slot 1 = Hello)",
   "block_Button":"버튼 (Slot 1)",
   "Screen_Up":"화면 하늘 방향",
   "Screen_Down":"화면 땅 방향",
@@ -12988,7 +12988,8 @@ DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.redColor;
 	}
-	this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	//this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	this.addOption("", null, false, this.createAddIconToBnFn(icon, device.name, color));
 };
 
 /**
@@ -13021,6 +13022,7 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
 		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
 	}
 };
+
 /**
  * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
  * Also used to give a rename option to variables and lists
@@ -16581,7 +16583,8 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
     //var connectionX = this.x + this.width / 2;
-    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    //return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, null);
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         var upperY = this.contentRelToAbsY(y);

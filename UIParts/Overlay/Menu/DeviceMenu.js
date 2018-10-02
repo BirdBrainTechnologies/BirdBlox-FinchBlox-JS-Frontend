@@ -69,7 +69,8 @@ DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.redColor;
 	}
-	this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	//this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	this.addOption("", null, false, this.createAddIconToBnFn(icon, device.name, color));
 };
 
 /**
