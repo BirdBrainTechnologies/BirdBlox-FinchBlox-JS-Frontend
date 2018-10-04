@@ -164,7 +164,6 @@ Language.en = {
 "Record":"Record",
 "Tap_record_to_start":"Tap record to start",
 "Done":"Done",
-"Delete":"Delete",
 "Delete_question":"Are you sure you want to delete this?",
 "Cancel":"Cancel",
 "OK":"OK",

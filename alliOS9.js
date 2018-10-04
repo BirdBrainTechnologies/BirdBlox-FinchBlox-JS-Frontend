@@ -25888,8 +25888,9 @@ B_MicroBitCompass.prototype.updateAction = function(){
                return new ExecutionStatusError();
            } else {
                var result = new StringData(status.result);
-               var num = Math.round(result.asNum().getValue());
-               return new ExecutionStatusResult(new NumData(num));
+               var numResult = result.asNum();
+               var num = Math.round(numResult.getValue());
+               return new ExecutionStatusResult(new NumData(num, numResult.isValid));
            }
        }
        return new ExecutionStatusRunning(); // Still running

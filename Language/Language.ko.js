@@ -170,7 +170,6 @@ Language.ko = {
 "Record":"녹음",
 "Tap_record_to_start":"녹음 버튼 눌러 시작하기",
 "Done":"완료",
-"Delete":"삭제하기",
 "Delete_question":"정말로 this를 삭제하시겠습니까?",
 "Cancel":"취소",
 "OK":"확인",

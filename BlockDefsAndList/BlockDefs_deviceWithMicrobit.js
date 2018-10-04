@@ -384,8 +384,9 @@ B_MicroBitCompass.prototype.updateAction = function(){
                return new ExecutionStatusError();
            } else {
                const result = new StringData(status.result);
-               const num = Math.round(result.asNum().getValue());
-               return new ExecutionStatusResult(new NumData(num));
+               const numResult = result.asNum();
+               const num = Math.round(numResult.getValue());
+               return new ExecutionStatusResult(new NumData(num, numResult.isValid));
            }
        }
        return new ExecutionStatusRunning(); // Still running

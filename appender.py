@@ -3,6 +3,7 @@
 # including that line only once, at the top of the file.  They turn off mouse mode by replacing "DO.mouse = true;" with
 # "DO.mouse = false;".  All these modifications are performed with simple string.replace functions, so be careful not
 # to use these strings anywhere the script does not expect them to appear.
+# This script now also creates the alliOS9.js file needed to run on iOS9.
 
 import re
 import os
