@@ -1,6 +1,6 @@
 //English Translation
 Language.en = {
-  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
 "port":"Port",
 "block_LED":"LED (Slot 1) (Slot 2) %",
 "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
@@ -168,7 +168,6 @@ Language.en = {
 "Cancel":"Cancel",
 "OK":"OK",
 "Dont_delete":"Don't delete",
-"Rename":"Rename",
 "Enter_new_name":"Enter new name",
 "Duplicate":"Duplicate",
 "Name_duplicate_file":"Enter name for duplicate file",

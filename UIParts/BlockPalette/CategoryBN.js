@@ -30,6 +30,9 @@ CategoryBN.setGraphics = function() {
 	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
 	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
+	if (Language.isRTL) {
+		CBN.labelX = -CBN.labelX;
+	}
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };
 

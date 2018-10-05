@@ -37,6 +37,12 @@ LabelText.prototype.updateDim = function() {
 	if (this.width === 0) {
 		GuiElements.layers.temp.appendChild(this.textE);
 		this.width = GuiElements.measure.textWidth(this.textE);
+
+		if (Language.isRTL) {
+			//textElement.setAttributeNS(null, "dir", "rtl");
+			//textElement.setAttributeNS(null, "class", "mirror");
+			this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
+		}
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}

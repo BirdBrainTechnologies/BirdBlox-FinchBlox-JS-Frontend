@@ -174,7 +174,6 @@ Language.ko = {
 "Cancel":"취소",
 "OK":"확인",
 "Dont_delete":"삭제하지 않기",
-"Rename":"이름 바꾸기",
 "Enter_new_name":"새 이름을 입력하세요.",
 "Duplicate":"복사하기",
 "Name_duplicate_file":"복사할 파일 이름을 입력하세요.",

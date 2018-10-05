@@ -60,6 +60,20 @@ DebugOptions.applyConstants = function() {
 		}
 		console.log(lang + " check finished. " + missingCount + " missing keys.")
 	}
+
+	//Check that all calls to Language.getStr produce results
+	/*
+	var scripts = document.getElementsByTagName("script");
+	for (var i = 0; i < scripts.length; i++) {
+  	if (scripts[i].src) {
+			console.log(i, scripts[i].src)
+			sourceDoc = app.open(scripts[i]);
+			console.log(sourceDoc);
+		} else {
+			console.log(i, "Filename not found!")
+		}
+	}*/
+
 };
 
 /**
@@ -1306,8 +1320,10 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en", "ko", "da"];
-
+Language.langs = ["ar", "da", "en", "he", "ko"];
+Language.rtlLangs = [];
+//Language.rtlLangs = ["ar", "he"];
+Language.isRTL = false;
 
 
 Language.en_old = {
@@ -2007,22 +2023,233 @@ Language.setLanguage = function(lang) {
     }
 }
 
+/*
 Language.getLanguage = function () {
   const userSelectedLang = sessionStorage.getItem("language");
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
   }
   return "Language." + Language.lang + ".";
-}
+}*/
 
 Language.getStr = function(str) {
-    let translatedStr = eval(Language.getLanguage() + str);
+    let translatedStr = eval("Language." + Language.lang + "." + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
         console.log("Translation? " + str);
         return "Translation required";
     }
+}
+
+//Arabic Translation
+Language.ar = {
+  "block_Tri_LED":"(Slot 4) (Slot 3) (Slot 2) (Slot 1) ضوء الصمام الثلاثي",
+  "port":"",
+  "block_LED":"(Slot 2) (Slot 1) ضوء",
+  "block_Position_Servo":"(Slot 2) (Slot 1) موقف محرك سيرفو المؤازر",
+  "block_Rotation_Servo":"(Slot 2) (Slot 1) فتحة دوران المحرك المؤازر ",
+  "block_Play_Note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
+  "Light":"ضوء",
+  "Distance":"مسافه",
+  "Dial":"دوار",
+  "Other":"أخرى",
+  "Accelerometer":"التسارع",
+  "Magnetometer":"مقياس المغنطيسية",
+  "block_LED_Display":"عرض",
+  "block_Print":"(Slot 1 = Hello) طباعة",
+  "block_Button":"(Slot 1) زر",
+  "Screen_Up":"شاشة للأعلى",
+  "Screen_Down":"الشاشة لأسفل",
+  "Tilt_Left":"الميل اليسار",
+  "Tilt_Right":"دور إلى اليمين",
+  "Logo_Up":"الشعار لأعلى",
+  "Logo_Down":"الشعار إلى الأسفل",
+  "Shake":"هزه",
+  "block_Compass":"بوصلة",
+  "block_Servo":"(Slot 2) (Slot 1) محرك سيرفو",
+  "block_Vibration":"(Slot 2) (Slot 1) اهتزاز",
+  "block_Motor":"(Slot 2) (Slot 1) المحرك",
+  "block_Temperature_C":"مؤشر الحرارة (C) (Slot 1)",
+  "block_Temperature_F":"مؤشر الحرارة (F) (Slot 1)",
+  "block_write":"% (Slot 2) (Slot 1) اكتب",
+  "pin":"",
+  "block_read":"(Slot 1) اقرأ",
+  "block_Device_Shaken":"اهتزاز فر القرص",
+  "block_Device_LatLong":"(Slot 1) الجهاز اللوحي",
+  "Latitude":"خط عرضي",
+  "Longitude":"خط طولي",
+  "block_Device_SSID":"قرص معرف مجموعه الخدمة",
+  "block_Device_Pressure":"قرص الضغط",
+  "block_Device_Relative_Altitude":"ارتفاع نسبي للجهاز اللوحي",
+  "block_Acceleration":"التسارع (Slot 1) الجهاز اللوحي",
+  "Total":"المجموع",
+  "block_Device_Orientation":"معاينة الجهاز",
+  "faceup":"الوجه للأسفل",
+  "facedown":"الوجه للأعلى",
+  "portrait_bottom":"عمودي: الكاميرا  للأسفل",
+  "portrait_top":"عمودي: الكاميرا للأعلى",
+  "landscape_left":"أفقي الكاميرا لليسار",
+  "landscape_right":"أفقي الكاميرا لليمين",
+  "block_Display":"(Slot 2) في (Slot 1 = مرحبًا) عرض",
+  "position":"الوضع",
+  "block_ask":"ثم انتظر (Slot 1 = ما اسمك؟) اسأل",
+  "block_answer":"أجب",
+  "block_reset_timer":"إعادة ضبط المؤقت",
+  "block_timer":"المؤقت",
+  "block_current":"(Slot 1) حالي",
+  "date":"التاريخ",
+  "year":"السنة",
+  "month":"الشهر",
+  "hour":"الساعة",
+  "minute":"الدقيقة",
+  "second":"الثانية",
+  "day_of_the_week":"اليوم في الأسبوع",
+  "time_in_milliseconds":"الوقت في جزء من الثانية",
+  "block_mod":"(Slot 2) تغير (Slot 1)",
+  "block_round":"(Slot 1) دوران",
+  "block_pick_random":"(Slot 2) ل (Slot 1) اختيار عشوائي",
+  "block_and":"(Slot 2) و (Slot 1)",
+  "block_or":"(Slot 2) أو (Slot 1)",
+  "block_not":"(Slot 1) غير",
+  "true":"صحيح",
+  "false":"خطأ",
+  "block_letter":"(Slot 2 = بالعالم) من (Slot 1) رسالة",
+  "block_length":"(Slot 1 = بالعالم) الوزن ل",
+  "block_join":"(Slot 2 = كلمة) و (Slot 1 =  مرحبًا) انضم",
+  "block_split":"(Slot 2) بواسطة (Slot 1 = مرحبًا بالعالم) تقسيم",
+  "letter":"رسالة ",
+  "whitespace":"فراغ",
+  "block_validate":"؟(Slot 2)  يكون (Slot 1 = 5) هل",
+  "number":"رقم",
+  "text":"نص",
+  "boolean":"منطقية",
+  "list":"قائمة",
+  "invalid_number":"رقم غير صحيح",
+  "block_when_flag_tapped":" يستخدم (Icon) عندما",
+  "block_when_I_receive":"عندما استقبل ",
+  "any_message":"أي رسالة",
+  "new":"جديدة",
+  "block_when":"(Slot 1) عندما",
+  "block_broadcast":"(Slot 1) بث",
+  "block_broadcast_and_wait":"وانتظر (Slot 1) بث",
+  "block_message":"رسالة",
+  "block_wait":"ثم انتظر (Slot 1) انتظر", //Wait 1 then wait??
+  "block_wait_until":"(Slot 1) انتظر حتى",
+  "block_repeat_forever":"تكرار دائم",
+  "block_repeat":"(Slot 1) تكرار",
+  "block_repeat_until":"(Slot 1) تكرار حتى",
+  "block_if":"(Slot 1) لو",
+  "block_if_else":"(Slot 1) لو",
+  "else":"أو",
+  "block_stop":"(Slot 1) توقف",
+  "all":"الكل",
+  "this_script":"هذا النص",
+  "all_but_this_script":"الجميع ماعدا هذا النص",
+  "Record_sound":"تسجيل الصوت",
+  "block_play_recording":"(Slot 1) تشغيل التسجيل",
+  "block_play_recording_until_done":"(Slot 1) تسجيل التسجيل حتى النهاية",
+  "block_play_sound":"(Slot 1) تشغيل الصوت",
+  "block_play_sound_until_done":"(Slot 1) تشغيل التسجيل حتى نهايته",
+  "block_stop_all_sounds":"إنهاء جميع الأصوات",
+  "block_rest_for":"دقات (Slot 1) توقف لمدة",
+  "block_change_tempo_by":"(Slot 1) تغيير الإيقاع لـ",
+  "block_set_tempo_to":"(Slot 1) ضبط الإيقاع لـ",
+  "block_tempo":"الإيقاع",
+  "block_set_variable":"(Slot 2) لـــ (Slot 1) ضبط",
+  "Create_Variable":"تصميم  تنوع",
+  "block_change_variable":"(Slot 2) بواسطة (Slot 1) تغيير",
+  "Rename":"تغيير الاسم",
+  "Delete":"مسح",
+  "block_add_to_list":"(Slot 2) لـ (Slot 1 =  شيء) إضافة",
+  "Create_List":"إنشاء قائمة",
+  "block_delete_from_list":"(Slot 2) من (Slot 1) مسح",
+  "block_insert_into_list":"(Slot 3) من (Slot 2) في (Slot 1 = شيء) إضافة",
+  "block_replace_list_item":"(Slot 3 = شيء) لـ (Slot 2) من (Slot 1) تبديل عنصر",
+  "block_copy_list":"(Slot 2) لــ (Slot 1) نسخ",
+  "block_list_item":"(Slot 2) لـ (Slot 1) عنصر",
+  "block_list_length":"(Slot 1) وزن الــ",
+  "block_list_contains":"(Slot 2 = شيء) تتضمن (Slot 1)",
+  "last":"آخر",
+  "random":"عشوائي",
+  "Robots":"الروبوت",
+  "Operators":"العاملين",
+  "Sound":"الصوت",
+  "Tablet":"الجهاز اللوحي",
+  "Control":"التحكم",
+  "Variables":"المتغيرات",
+  "Zoom_in":"تكبير ",
+  "Zoom_out":"تصغير",
+  "Reset_zoom":"إعادة ضبط ",
+  "Disable_snap_noise":"تعطيل الضجيج المفاجئ",
+  "Enable_snap_noise":"تفعيل الضجيج المفاجئ",
+  "CompassCalibrate":"معايرة البوصلة",
+  "Send_debug_log":"إرسال سجل تصحيح الأخطء",
+  "Show_debug_menu":"عرض قائمة التصحيح",
+  "Connect_Device":"الاتصال بالجهاز",
+  "Connect_Multiple":"الاتصال بأكثر من جهاز",
+  "Disconnect_Device":"قطع الاتصال",
+  "Tap":"اضغط + للاتصال",
+  "Scanning_for_devices":"البحث عن أجهزة",
+  "Open":"افتح",
+  "No_saved_programs":"لا يوجد برامج محفوظة",
+  "New":"جديد",
+  "Saving":"يتم الحفظ",
+  "On_Device":"على الجهاز",
+  "Cloud":"على cloud",
+  "Loading":"يتم التحميل",
+  "Sign_in":"تسجيل الدخول",
+  "New_program":"برنامج جديد",
+  "Share":"مشاركة",
+  "Recordings":"تسجيل",
+  "Discard":"إلغاء",
+  "Stop":"إيقاف",
+  "Pause":"تعليق",
+  "remaining":"متبقي",
+  "Record":"سجّل",
+  "Tap_record_to_start":"اضغط سجّل لبدء التسجيل",
+  "Done":"تم",
+  "Delete":"حذف",
+  "Delete_question":"هل أنت متأكد من أنك تريد حذف هذا؟",
+  "Cancel":"إلغاء",
+  "OK":"نعم",
+  "Dont_delete":"عدم المسح",
+  "Rename":"إعادة تسمية",
+  "Enter_new_name":"أدخل اسم جديد",
+  "Duplicate":"عمل نسخة طبق الأصل",
+  "Name_duplicate_file":"أدخل اسم النسخة الجديدة",
+  "Name_error_invalid_characters":"هذه الحروف لا يمكن أن يتضمنها اسم الملف \n",
+  "Name_error_already_exists":"\" هذا الاسم موجود بالفعل، من فضلك أدخل اسم مختلف",
+  "Permission_denied":"إذن الدخول مرفوض",
+  "Grant_permission":"من إذن تسجيل لبرنامج بيردبوكس في الإعدادات",
+  "Dismiss":"إخفاء",
+  "Name":"الاسم",
+  "Enter_file_name":"أدخل اسم الملف",
+  "Name_error_blank":"لا يمكن إضافة مسافة أو فراغ كاسم، من فضلك أدخل اسم للملف",
+  "Edit_text":"تعديل النص",
+  "Question":"سؤال",
+  "Connection_Failure":"فشل الاتصال",
+  "Connection_failed_try_again":"فشل الاتصال، من فضلك حاول مرة أخرى",
+  "Disconnect_account":"الخروج من الحساب",
+  "Disconnect_account_question":"الخروج من الحساب  الحساب؟",
+  "Dont_disconnect":"عد الخروج من الحساب",
+  "Disconnect":"الخروج",
+  "not_connected":"غير متصل (Device)",
+  "not_a_valid_number":"رقم غير متاح",
+  "Intensity":"شدة الإضاءة",
+  "Angle":"زاوية",
+  "Speed":"السرعة",
+  "Note":"ملاحظة",
+  "Beats":"الومضات",
+  "Firmware_incompatible":"البرامج الثابتة غير متوافقة",
+  "Update_firmware":"تحديث البرامج الثابتة",
+  "Device_firmware":"إصدار البرنامج الثابت للجهاز:",
+  "Required_firmware":"مطلوب إصدارالبرنامج:",
+  "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+  "ceiling":"ceiling",
+  "floor":"floor",
+  "abs":"abs",
+  "sqrt":"sqrt"
 }
 
 //Danish Translation
@@ -2097,7 +2324,7 @@ Language.da = {
   "block_not":"ikke (Slot 1)",
   "true":"sandt",
   "false":"falsk",
-  "block_letter":"bogstav (Slot 1) á (Slot 2)",
+  "block_letter":"bogstav (Slot 1) á (Slot 2 = Verden)",
   "block_length":"længde af (Slot 1 = Verden)",
   "block_join":"forbind (Slot 1 = hej) og (Slot 2 = Verden)",
   "block_split":"opdel (Slot 1 = hej Verden) med (Slot 2)",
@@ -2192,12 +2419,10 @@ Language.da = {
 "Record":"Optag",
 "Tap_record_to_start":"Tryk optag for at starte",
 "Done":"Færdig",
-"Delete":"Slet",
 "Delete_question":"Er du sikker på, du vil slette dette?",
 "Cancel":"Annullér",
 "OK":"OK",
 "Dont_delete":"Slet ikke",
-"Rename":"Omdøb",
 "Enter_new_name":"Indtast nyt navn",
 "Duplicate":"Duplikér",
 "Name_duplicate_file":"Indtast navn på duplikeret fil",
@@ -2217,7 +2442,7 @@ Language.da = {
 "Disconnect_account_question":"Afbryd forbindelse til bruger?",
 "Dont_disconnect":"Afbryd ikke",
 "Disconnect":"Afbryd",
-"not_connected":"(Enhed) ikke tilsluttet",
+"not_connected":"(Device) ikke tilsluttet",
 "not_a_valid_number":"ikke et gyldigt tal",
 "Intensity":"Intensitet",
 "Angle":"Vinkel",
@@ -2237,7 +2462,7 @@ Language.da = {
 
 //English Translation
 Language.en = {
-  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) %\xa0\xa0\xa0G (Slot 3) % B (Slot 4) %",
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
 "port":"Port",
 "block_LED":"LED (Slot 1) (Slot 2) %",
 "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
@@ -2401,12 +2626,10 @@ Language.en = {
 "Record":"Record",
 "Tap_record_to_start":"Tap record to start",
 "Done":"Done",
-"Delete":"Delete",
 "Delete_question":"Are you sure you want to delete this?",
 "Cancel":"Cancel",
 "OK":"OK",
 "Dont_delete":"Don't delete",
-"Rename":"Rename",
 "Enter_new_name":"Enter new name",
 "Duplicate":"Duplicate",
 "Name_duplicate_file":"Enter name for duplicate file",
@@ -2443,6 +2666,214 @@ Language.en = {
 "floor":"floor",
 "abs":"abs",
 "sqrt":"sqrt"
+}
+
+//Hebrew Translation
+Language.he = {
+  "block_Tri_LED":"R (Slot 2) % G (Slot 3) % B (Slot 4) % (Slot 1) לד שלושה צבעים",
+  "port":"יציאה",
+  "block_LED":"% (Slot 2) (Slot 1) לד",
+  "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",
+  "block_Rotation_Servo":"% (Slot 2) (Slot 1) סרוו סיבובים",
+  "block_Play_Note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
+  "Light":"אור",
+  "Distance":"מרחק",
+  "Dial":"חיוג",
+  "Other":"אחר",
+  "Accelerometer":"חיישן תאוצה",
+  "Magnetometer":"חישן מגנטי",
+  "block_LED_Display":"מסך",
+  "block_Print":"(Slot 1 = Hello) הדפס",
+  "block_Button":"(Slot 1) לחצן",
+  "Screen_Up":"לעלות מסך",
+  "Screen_Down":"להוריד מסך",
+  "Tilt_Left":"הטייה לשמאל ",
+  "Tilt_Right":"הטייה לימין",
+  "Logo_Up":"לוגו למעלה",
+  "Logo_Down":"לוגו למטה",
+  "Shake":"לנער",
+  "block_Compass":"מצפן",
+  "block_Servo":"(Slot 2) (Slot 1) סרוו",
+  "block_Vibration":"(Slot 2) (Slot 1) רטט",
+  "block_Motor":"(Slot 2) (Slot 1) מנוע",
+  "block_Temperature_C":"(Slot 1) C טמפרטורה",
+  "block_Temperature_F":"(Slot 1) F טמפרטורה",
+  "block_write":"% (Slot 2) (Slot 1) כתוב",
+  "pin":"סיכה",
+  "block_read":"(Slot 1) קורא",
+  "block_Device_Shaken":"טאבלט מנער",
+  "block_Device_LatLong":"(Slot 1) טאבלט",
+  "Latitude":"קו רוחב",
+  "Longitude":"קו אורך",
+  "block_Device_SSID":"SSID טאבלט",
+  "block_Device_Pressure":"לחץ על הטאבלט",
+  "block_Device_Relative_Altitude":"גובה יחסית של הטאבלט",
+  "block_Acceleration":"(Slot 1) תאוצע של הטאבלט",
+  "Total":"סה''כ",
+  "block_Device_Orientation":"כיוון הטאבלט",
+  "faceup":"פנים כלפי מעלה",
+  "facedown":"פנים כלפי מטה",
+  "portrait_bottom":"פורטרט: מצלמה בתחתית",
+  "portrait_top":"פורטרט: מצלמה עליונית",
+  "landscape_left":"נוף: מצלמה בשמאל",
+  "landscape_right":"נוף: מצלמה בימין",
+  "block_Display":"(Slot 2) ב (Slot 1 = שלום) להציג ",
+  "position":"כיוון",
+  "block_ask":"ולחכות (Slot 1 = מה שמך?) לשאול",
+  "block_answer":"לענות",
+  "block_reset_timer":"איפוס טיימר",
+  "block_timer":"טיימר",
+  "block_current":"(Slot 1) נוכחי",
+  "date":"תאריך",
+  "year":"שנה",
+  "month":"חודש",
+  "hour":"שעה",
+  "minute":"דקה",
+  "second":"שניה",
+  "day_of_the_week":"יום",
+  "time_in_milliseconds":"זמן במילישניות ",
+  "block_mod":"(Slot 1) מוד (Slot 2)",
+  "block_round":"(Slot 1) סיבוב",
+  "block_pick_random":"(Slot 2) (Slot 1) בחירה אקראי",
+  "block_and":"(Slot 2) ו (Slot 1)",
+  "block_or":"(Slot 2) או (Slot 1)",
+  "block_not":"(Slot 1) לא",
+  "true":"אמת",
+  "false":"שקר",
+  "block_letter":"(Slot 2 = עולם) ב (Slot 1) אות",
+  "block_length":"(Slot 1 = עולם) אורך",
+  "block_join":"(Slot 2 = עולם) ו (Slot 1 = שלום) חיבור",
+  "block_split":"(Slot 2) ב (Slot 1 = שלום עולם) פירוק",
+  "letter":"אות",
+  "whitespace":"רווח",
+  "block_validate":"(Slot 2) (Slot 1 = 5) זה",
+  "number":"מספר",
+  "text":"טקסט",
+  "boolean":"בוליאן",
+  "list":"רשימה",
+  "invalid_number":"מספר לא חוקי",
+  "block_when_flag_tapped":"הוקש (Icon) כאשר",
+  "block_when_I_receive":"כאשר אני מקבל",
+  "any_message":"הודעה",
+  "new":"חדש",
+  "block_when":"(Slot 1) כאשר",
+  "block_broadcast":"(Slot 1) משדר",
+  "block_broadcast_and_wait":"ולחכות (Slot 1) משדר",
+  "block_message":"הודעה",
+  "block_wait":"שניות (Slot 1) חכה",
+  "block_wait_until":"(Slot 1) חכה עד",
+  "block_repeat_forever":"חזור לעולמים",
+  "block_repeat":"(Slot 1) חזור",
+  "block_repeat_until":"(Slot 1) חזור עד ש",
+  "block_if":"(Slot 1) אם",
+  "block_if_else":"(Slot 1) אם",
+  "else":"אז",
+  "block_stop":"(Slot 1) עזור",
+  "all":"הכל",
+  "this_script":"תסריט זה",
+  "all_but_this_script":"הכל מלבד תסריט זה",
+  "Record_sound":"הקלט קול",
+  "block_play_recording":"(Slot 1) להפעיל הקלטה",
+  "block_play_recording_until_done":"(Slot 1) להפעיל הקלטה עד סיום התסריט",
+  "block_play_sound":"(Slot 1) להפעיל קול",
+  "block_play_sound_until_done":"(Slot 1) להפעיל קול עד סיום התסריט",
+  "block_stop_all_sounds":"לעזור את כל הצלילים",
+  "block_rest_for":"פעימות (Slot 1) לחכות",
+  "block_change_tempo_by":"(Slot 1) שנה זמן ב",
+  "block_set_tempo_to":"bpm (Slot 1) תגדיר זמן ב",
+  "block_tempo":"זמן",
+  "block_set_variable":"(Slot 2) ל (Slot 1) תגדיר",
+  "Create_Variable":"יצירת משתנה",
+  "block_change_variable":"(Slot 2) ב (Slot 1) שינוי",
+  "Rename":"שם חדש",
+  "Delete":"מחק",
+  "block_add_to_list":"(Slot 2) ב (Slot 1 = אובייקט) הוסף",
+  "Create_List":"צור רשימה",
+  "block_delete_from_list":"(Slot 2) של (Slot 1) מחק",
+  "block_insert_into_list":"(Slot 3) של (Slot 2) ב (Slot 1 = אובייקט) הוסף",
+  "block_replace_list_item":"(Slot 3 = אובייקט) עם (Slot 2) של (Slot 1) החלף פריט",
+  "block_copy_list":"(Slot 2) ל (Slot 1) עתק",
+  "block_list_item":"(Slot 2) של (Slot 1) פריט",
+  "block_list_length":"(Slot 1) אורך של",
+  "block_list_contains":"(Slot 2 = אובייקט)  מכיל (Slot 1)",
+  "last":"אחרון",
+  "random":"אקראי",
+  "Robots":"רובוטים",
+  "Operators":"מעפילים",
+  "Sound":"קול",
+  "Tablet":"טבלט",
+  "Control":"בקרה",
+  "Variables":"משתנים",
+  "Zoom_in":" זום פנימה",
+  "Zoom_out":"זום החוצה",
+  "Reset_zoom":"אתחול זום",
+  "Disable_snap_noise":"לבטל כל הצלילים",
+  "Enable_snap_noise":"לאפשר צלילים",
+  "CompassCalibrate":"כיול מצפן",
+  "Send_debug_log":"שלח תוצאות  בדיקה",
+  "Show_debug_menu":"תפתח תפריט בדיקה",
+  "Connect_Device":"חיבר התקן ",
+  "Connect_Multiple":"חיבר רב התקנים",
+  "Disconnect_Device":"נתק התקן",
+  "Tap":"הקש + לחיבור",
+  "Scanning_for_devices":"חיפוש התקנים",
+  "Open":"פתוח",
+  "No_saved_programs":"תוכניות לא שמורות",
+  "New":"חדש",
+  "Saving":"שמירה",
+  "On_Device":"בהתקן",
+  "Cloud":"ענן",
+  "Loading":"טוען",
+  "Sign_in":"כניסה",
+  "New_program":"תכנית חדשה",
+  "Share":"שתף",
+  "Recordings":"הקלטות",
+  "Discard":"בטל",
+  "Stop":"עזור",
+  "Pause":"השהייה",
+  "remaining":"נותר",
+  "Record":"להקליט",
+  "Tap_record_to_start":"הקש הקלטה כדי להתחיל",
+  "Done":"מוכן",
+  "Delete_question":"אתה בטוח שרוצה למחוק?",
+  "Cancel":"בטל",
+  "OK":"אישור",
+  "Dont_delete":"לא למחוק",
+  "Enter_new_name":"הכנס שם חדש",
+  "Duplicate":"שכפל",
+  "Name_duplicate_file":"הכנס שם לקובץ המשוכפל",
+  "Name_error_invalid_characters":"אין להכניס סימנים אלו בשמות הקבצים :  \n",
+  "Name_error_already_exists":"\" כבר קיים. כתוב שם שונה",
+  "Permission_denied":"אישור נדחת",
+  "Grant_permission":"אישור הקלטה מיוחד לבירדבלוקס בהגדרות ",
+  "Dismiss":"התעלם",
+  "Name":"שם",
+  "Enter_file_name":"כתוב שם לקובץ",
+  "Name_error_blank":"שם לא יכול להיות ריק. כתוב שם לקובץ",
+  "Edit_text":"עריכת טקסט",
+  "Question":"שאלה",
+  "Connection_Failure":"החיבור נכשל",
+  "Connection_failed_try_again":"החיבור נכשל, נסה שוב בבקשה",
+  "Disconnect_account":"נתק חשבון",
+  "Disconnect_account_question":"לנתק חשבון?",
+  "Dont_disconnect":"לא לנתק",
+  "Disconnect":"נתק",
+  "not_connected":"לא מחובר (Device)",
+  "not_a_valid_number":"מספר לא חוקי",
+  "Intensity":"עצמה",
+  "Angle":"זווית",
+  "Speed":"מהירות",
+  "Note":"הערה",
+  "Beats":"פעימות",
+  "Firmware_incompatible":"הקשוחה אינה תואמת",
+  "Update_firmware":"עדכון קשוחה",
+  "Device_firmware":"גירסה קשוחה בהתקן",
+  "Required_firmware":"נידרשת קשוחה  גירסה: ",
+  "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+  "ceiling":"ceiling",
+  "floor":"floor",
+  "abs":"abs",
+  "sqrt":"sqrt"
 }
 
 //Korean Translation
@@ -2617,12 +3048,10 @@ Language.ko = {
 "Record":"녹음",
 "Tap_record_to_start":"녹음 버튼 눌러 시작하기",
 "Done":"완료",
-"Delete":"삭제하기",
 "Delete_question":"정말로 this를 삭제하시겠습니까?",
 "Cancel":"취소",
 "OK":"확인",
 "Dont_delete":"삭제하지 않기",
-"Rename":"이름 바꾸기",
 "Enter_new_name":"새 이름을 입력하세요.",
 "Duplicate":"복사하기",
 "Name_duplicate_file":"복사할 파일 이름을 입력하세요.",
@@ -3985,6 +4414,7 @@ function GuiElements() {
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
+		GuiElements.setLanguage();
 		GuiElements.setConstants();
 		GuiElements.createLayers();
 		GuiElements.dialogBlock = null;
@@ -4006,6 +4436,26 @@ window.onresize = function() {
 		GuiElements.updateDims();
 	}
 };
+
+GuiElements.setLanguage = function() {
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+  }
+
+	var lnk = document.createElement('link');
+  lnk.type='text/css';
+  lnk.rel='stylesheet';
+	if (Language.rtlLangs.indexOf(Language.lang) === -1) {
+  	lnk.href='MyCSS.css';
+	} else {
+		lnk.href='MyCSS_rtl.css';
+		Language.isRTL = true;
+		var html = document.getElementsByTagName('html')[0];
+		html.setAttribute("dir", "rtl");
+	}
+	document.getElementsByTagName('head')[0].appendChild(lnk);
+}
 
 /** Sets constants relating to screen dimensions and the Operating System */
 GuiElements.setGuiConstants = function() {
@@ -4457,6 +4907,9 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	const textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
+	if (Language.isRTL){
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
 	return textElement;
 };
 /**
@@ -4545,6 +4998,12 @@ GuiElements.update.text = function(textE, newText) {
 	const textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
+
+	if (Language.isRTL) {
+		const w = GuiElements.measure.textWidth(textE);
+		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
+		textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -4742,6 +5201,9 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
+	if (Language.isRTL){
+		x = -x;
+	}
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {
@@ -8468,6 +8930,9 @@ CategoryBN.setGraphics = function() {
 	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
 	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
+	if (Language.isRTL) {
+		CBN.labelX = -CBN.labelX;
+	}
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };
 
@@ -19376,14 +19841,18 @@ CallbackManager.tablet.removeSensor = function(sensor){
 };
 
 /**
- * Tells the frontend that the language of the system
- * @param {string} sensor - A non percent encoded string representing the unsupported sensor
- * @return {boolean} - Whether the sensor string was valid
+ * Tells the frontend the current system language
+ * Only use the system language if no language has been selected by the user
+ * @param {string} lang - current system language 2 letter code
  */
-
 CallbackManager.tablet.getLanguage = function(lang){
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang == undefined || userSelectedLang == null){
     Language.setLanguage(lang);
+	}
 };
+
+
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
@@ -20006,7 +20475,7 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	const question = Language.getStr("Confirm_delete_question");
+	const question = Language.getStr("Delete_question");
 	DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
@@ -25076,6 +25545,12 @@ LabelText.prototype.updateDim = function() {
 	if (this.width === 0) {
 		GuiElements.layers.temp.appendChild(this.textE);
 		this.width = GuiElements.measure.textWidth(this.textE);
+
+		if (Language.isRTL) {
+			//textElement.setAttributeNS(null, "dir", "rtl");
+			//textElement.setAttributeNS(null, "class", "mirror");
+			this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
+		}
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}
@@ -25145,6 +25620,7 @@ LabelText.prototype.makeActive = function() {
 LabelText.prototype.makeInactive = function() {
 	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
 };
+
 /**
  * Adds a colored icon that can be used as part of a Block. Used in the "when flag tapped" Block
  * @param {Block} parent - The Block this icon is a part of

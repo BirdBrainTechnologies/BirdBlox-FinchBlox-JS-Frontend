@@ -285,14 +285,18 @@ CallbackManager.tablet.removeSensor = function(sensor){
 };
 
 /**
- * Tells the frontend that the language of the system
- * @param {string} sensor - A non percent encoded string representing the unsupported sensor
- * @return {boolean} - Whether the sensor string was valid
+ * Tells the frontend the current system language
+ * Only use the system language if no language has been selected by the user
+ * @param {string} lang - current system language 2 letter code
  */
-
 CallbackManager.tablet.getLanguage = function(lang){
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang == undefined || userSelectedLang == null){
     Language.setLanguage(lang);
+	}
 };
+
+
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }

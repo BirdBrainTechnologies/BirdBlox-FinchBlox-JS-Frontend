@@ -20,6 +20,7 @@ function GuiElements() {
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
+		GuiElements.setLanguage();
 		GuiElements.setConstants();
 		GuiElements.createLayers();
 		GuiElements.dialogBlock = null;
@@ -41,6 +42,26 @@ window.onresize = function() {
 		GuiElements.updateDims();
 	}
 };
+
+GuiElements.setLanguage = function() {
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+  }
+
+	var lnk = document.createElement('link');
+  lnk.type='text/css';
+  lnk.rel='stylesheet';
+	if (Language.rtlLangs.indexOf(Language.lang) === -1) {
+  	lnk.href='MyCSS.css';
+	} else {
+		lnk.href='MyCSS_rtl.css';
+		Language.isRTL = true;
+		var html = document.getElementsByTagName('html')[0];
+		html.setAttribute("dir", "rtl");
+	}
+	document.getElementsByTagName('head')[0].appendChild(lnk);
+}
 
 /** Sets constants relating to screen dimensions and the Operating System */
 GuiElements.setGuiConstants = function() {
@@ -492,6 +513,9 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	const textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
+	if (Language.isRTL){
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
 	return textElement;
 };
 /**
@@ -580,6 +604,12 @@ GuiElements.update.text = function(textE, newText) {
 	const textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
+
+	if (Language.isRTL) {
+		const w = GuiElements.measure.textWidth(textE);
+		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
+		textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -777,6 +807,9 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
+	if (Language.isRTL){
+		x = -x;
+	}
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {

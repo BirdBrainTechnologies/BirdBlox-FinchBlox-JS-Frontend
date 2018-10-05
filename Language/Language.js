@@ -10,8 +10,10 @@ function Language() {
 
 
 Language.lang = "en";
-Language.langs = ["en", "ko", "da"];
-
+Language.langs = ["ar", "da", "en", "he", "ko"];
+Language.rtlLangs = [];
+//Language.rtlLangs = ["ar", "he"];
+Language.isRTL = false;
 
 
 Language.en_old = {
@@ -711,16 +713,17 @@ Language.setLanguage = function(lang) {
     }
 }
 
+/*
 Language.getLanguage = function () {
   const userSelectedLang = sessionStorage.getItem("language");
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
   }
   return "Language." + Language.lang + ".";
-}
+}*/
 
 Language.getStr = function(str) {
-    let translatedStr = eval(Language.getLanguage() + str);
+    let translatedStr = eval("Language." + Language.lang + "." + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
