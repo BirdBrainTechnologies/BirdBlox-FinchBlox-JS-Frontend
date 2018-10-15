@@ -428,7 +428,7 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 	if (proposedName === "") {
-		SaveManager.promptDuplicate(Language.getStr(Name_error_blank), filename, nextAction);
+		SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
 			if (alreadySanitized && alreadyAvailable) {

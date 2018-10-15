@@ -47,7 +47,6 @@ DebugOptions.applyConstants = function() {
 	var englishKeys = Object.keys(Language.en);
 	for (var i = 0; i < Language.langs.length; i++){
 		var lang = Language.langs[i];
-		console.log("Checking language " + lang + " for completeness...");
 
 		var missingCount = 0;
 		for (var j = 0; j < englishKeys.length; j++) {
@@ -57,22 +56,8 @@ DebugOptions.applyConstants = function() {
 				missingCount++;
 			}
 		}
-		console.log(lang + " check finished. " + missingCount + " missing keys.")
+		console.log(lang + " completeness check finished. " + missingCount + " missing keys.")
 	}
-
-	//Check that all calls to Language.getStr produce results
-	/*
-	var scripts = document.getElementsByTagName("script");
-	for (var i = 0; i < scripts.length; i++) {
-  	if (scripts[i].src) {
-			console.log(i, scripts[i].src)
-			sourceDoc = app.open(scripts[i]);
-			console.log(sourceDoc);
-		} else {
-			console.log(i, "Filename not found!")
-		}
-	}*/
-
 };
 
 /**
@@ -1161,7 +1146,7 @@ Variable.prototype.rename = function() {
 		}
 	};
 	callbackFn.variable = this;
-	DialogManager.showPromptDialog(Language.getStr("Rename_variable"), Language.getStr("Enter_variable_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1176,8 +1161,8 @@ Variable.prototype.delete = function() {
 			}
 		};
 		callbackFn.variable = this;
-		var question = Language.getStr("Variable_delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete_variable"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+		var question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);
@@ -1284,7 +1269,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1299,30 +1284,37 @@ List.prototype.delete = function() {
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		var question = Language.getStr("List_delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete_list"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+		var question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteList(this);
 	}
 };
 
-
-
 /**
- * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
- * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
+ * The Language class controls all text displayed by the frontend. On startup,
+ *  the frontend provides the system language. This language will be used if
+ *  available. Otherwise, English is used.
  */
-function Language() {
+function Language() {};
 
-};
-
-
-Language.lang = "en";
-Language.langs = ["ar", "da", "en", "he", "ko"];
+Language.lang = "en"; //The current language. English by default.
+Language.langs = ["ar", "da", "de", "en", "he", "ko", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
+
+Language.names = {
+  "ar":"العربية",  //Arabic
+  "da":"Dansk",  //Danish
+  "de":"Deutsch",  //German
+  "en":"English",  //English
+  "he":"עברית",  //Hebrew
+  "ko":"한국어",  //Korean
+  "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
+  "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
+}
 
 
 Language.en_old = {
@@ -2014,6 +2006,11 @@ Language.fr_old = {
   "pin":"Broche"
 };
 
+/**
+ * Set the language to a given language if available. Used when a system Language
+ *  is returned by the backend.
+ * @param {string} lang - Two letter language code of the language requested.
+ */
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "en";
@@ -2031,6 +2028,11 @@ Language.getLanguage = function () {
   return "Language." + Language.lang + ".";
 }*/
 
+/**
+ * Get the translation for the given key.
+ * @param {string} str - The language dictionary key.
+ * @return {string} - The text entry for the given key in the current language.
+ */
 Language.getStr = function(str) {
     var translatedStr = eval("Language." + Language.lang + "." + str);
     if (translatedStr != null) {
@@ -2457,6 +2459,11 @@ Language.da = {
 "floor":"floor",
 "abs":"abs",
 "sqrt":"sqrt"
+}
+
+//German Translation
+Language.de = {
+
 }
 
 //English Translation
@@ -3087,6 +3094,425 @@ Language.nl = {
 
 }
 
+//Simplified Chinese Translation (zh-Hans)
+Language.zhs = {
+  "block_Tri_LED":"三色LED (Slot 1) 红 (Slot 2) % 绿 (Slot 3) % 蓝 (Slot 4) %",
+"port":"端",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"旋转伺服 (Slot 1) (Slot 2) %",
+"block_Play_Note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
+"Light":"灯光",
+"Distance":"距离",
+"Dial":"拨号",
+"Other":"其他",
+"Accelerometer":"加速计",
+"Magnetometer":"磁力仪",
+"block_LED_Display":"显示",
+"block_Print":"打印 (Slot 1 = Hello)",
+"block_Button":"按钮 (Slot 1)",
+"Screen_Up":"正面朝上",
+"Screen_Down":"背面朝上",
+"Tilt_Left":"向左倾斜",
+"Tilt_Right":"向右倾斜",
+"Logo_Up":"下则偏低",
+"Logo_Down":"上则偏低",
+"Shake":"晃动",
+"block_Compass":"指南针",
+"block_Servo":"伺服 (Slot 1) (Slot 2)",
+"block_Vibration":"震动 (Slot 1) (Slot 2)",
+"block_Motor":"马达 (Slot 1) (Slot 2)",
+"block_Temperature_C":"温度 摄氏 (Slot 1)",
+"block_Temperature_F":"温度 华氏 (Slot 1)",
+"block_write":"写入 (Slot 1) (Slot 2) %",
+"pin":"引脚",
+"block_read":"读取 (Slot 1)",
+"block_Device_Shaken":"平板电脑摇动了",
+"block_Device_LatLong":"平板电脑 (Slot 1)",
+"Latitude":"纬度",
+"Longitude":"经度",
+"block_Device_SSID":"平板电脑的服务设定识别码",
+"block_Device_Pressure":"平板电脑的大气压力",
+"block_Device_Relative_Altitude":"平板电脑的相对高度",
+"block_Acceleration":"平板电脑 (Slot 1) 加速度",
+"Total":"总和",
+"block_Device_Orientation":"平板电脑的方向",
+"faceup":"屏幕向上",
+"facedown":"屏幕向下",
+"portrait_bottom":"人像: 下边的镜头",
+"portrait_top":"人像: 上边的镜头",
+"landscape_left":"风景：左边的镜头",
+"landscape_right":"风景：右边的镜头",
+"block_Display":"(Slot 2) 显示 (Slot 1 = 你好)",
+"position":"位置",
+"block_ask":"问 (Slot 1 = 你的名字是什么？) 并等待",
+"block_answer":"回答",
+"block_reset_timer":"重置计时器",
+"block_timer":"计时器",
+"block_current":"当前时间 (Slot 1)",
+"date":"日",
+"year":"年",
+"month":"月",
+"hour":"时",
+"minute":"分",
+"second":"秒",
+"day_of_the_week":"一周中的日",
+"time_in_milliseconds":"时间(毫秒)",
+"block_mod":"(Slot 1) 和 (Slot 2) 的余",
+"block_round":"四舍五入 (Slot 1)",
+"block_pick_random":"选取由 (Slot 1) 至 (Slot 2) 的一个随机数",
+"block_and":"(Slot 1) 和 (Slot 2)",
+"block_or":"(Slot 1) 或 (Slot 2)",
+"block_not":"不成立 (Slot 1)",
+"true":"真确",
+"false":"不真确",
+"block_letter":"(Slot 2 = 世界)的字母(Slot 1)",
+"block_length":"(Slot 1 = 世界) 的字长",
+"block_join":"结合 (Slot 1 = 你好) 和 (Slot 2 = 世界)",
+"block_split":"透过(Slot 2) 拆分 (Slot 1 = 你好世界)",
+"letter":"字母",
+"whitespace":"空白",
+"block_validate":"(Slot 1 = 5) 是否 (Slot 2)?",
+"number":"数字",
+"text":"文字",
+"boolean":"布尔",
+"list":"名单",
+"invalid_number":"无效号码",
+"block_when_flag_tapped":"当 (Icon) 点击时",
+"block_when_I_receive":"当我收到",
+"any_message":"任何讯息",
+"new":"新",
+"block_when":"当(Slot 1)",
+"block_broadcast":"广播 (Slot 1)",
+"block_broadcast_and_wait":"广播 (Slot 1) 并等待",
+"block_message":"讯息",
+"block_wait":"等待 (Slot 1) 秒",
+"block_wait_until":"等待直至(Slot 1)",
+"block_repeat_forever":"重复无限次",
+"block_repeat":"重复(Slot 1)",
+"block_repeat_until":"重复直至(Slot 1)",
+"block_if":"如果(Slot 1)",
+"block_if_else":"如果(Slot 1)",
+"else":" 否则",
+"block_stop":"停止(Slot 1)",
+"all":"全部",
+"this_script":"这个脚本",
+"all_but_this_script":"除了这个脚本之外",
+"Record_sound":"录制声音",
+"block_play_recording":"播放录音 (Slot 1)",
+"block_play_recording_until_done":"播放录音直到完成 (Slot 1)",
+"block_play_sound":"播放声音 (Slot 1)",
+"block_play_sound_until_done":"播放声音直到完成 (Slot 1)",
+"block_stop_all_sounds":"停止所有声音",
+"block_rest_for":"休息 (Slot 1) 拍",
+"block_change_tempo_by":"改变拍子 (Slot 1)",
+"block_set_tempo_to":"将速度设定为 (Slot 1) bpm",
+"block_tempo":"拍子",
+"block_set_variable":"设置 (Slot 1) 到 (Slot 2)",
+"Create_Variable":"创建变数",
+"block_change_variable":"(Slot 1) 改变 (Slot 2)",
+"Rename":"改名",
+"Delete":"删除",
+"block_add_to_list":"添加 (Slot 1 = 物件) 到 (Slot 2)",
+"Create_List":"创建列表",
+"block_delete_from_list":"从 (Slot 2) 删除 (Slot 1)",
+"block_insert_into_list":"从 (Slot 3) 插入 (Slot 1 = 物件) 位于 (Slot 2)",
+"block_replace_list_item":"用 (Slot 3 = 物件) 替换 (Slot 2) 的 物件 (Slot 1)",
+"block_copy_list":"复制 (Slot 1) 到 (Slot 2)",
+"block_list_item":"(Slot 2) 的物件 (Slot 1)",
+"block_list_length":"(Slot 1) 的长度",
+"block_list_contains":"(Slot 1) 包含 (Slot 2 = thing)",
+"last":"最后",
+"random":"随机",
+"Robots":"机器人",
+"Operators":"算子",
+"Sound":"声音",
+"Tablet":"平板电脑",
+"Control":"控制",
+"Variables":"变数",
+"Zoom_in":"放大",
+"Zoom_out":"缩小",
+"Reset_zoom":"重置缩放",
+"Disable_snap_noise":"禁用拍照声音",
+"Enable_snap_noise":"启用拍照声音",
+"CompassCalibrate":"校准指南针",
+"Send_debug_log":"发送调试日志",
+"Show_debug_menu":"显示调试画面",
+"Connect_Device":"连接设备",
+"Connect_Multiple":"连接多个设备",
+"Disconnect_Device":"断开设备",
+"Tap":"点按+即可连接",
+"Scanning_for_devices":"扫描设备",
+"Open":"开启",
+"No_saved_programs":"没有保存的程式",
+"New":"新",
+"Saving":"保存中",
+"On_Device":"在设备上",
+"Cloud":"云端",
+"Loading":"载入中",
+"Sign_in":"登入",
+"New_program":"新程式",
+"Share":"分享",
+"Recordings":"录音",
+"Discard":"丢弃",
+"Stop":"停止",
+"Pause":"暂停",
+"remaining":"其余",
+"Record":"录制",
+"Tap_record_to_start":"点击录制开始",
+"Done":"完成",
+"Delete_question":"你确定要删除这个吗？",
+"Cancel":"取消",
+"OK":"好",
+"Dont_delete":"不要删除",
+"Rename":"重新命名",
+"Enter_new_name":"输入新名称",
+"Duplicate":"复制",
+"Name_duplicate_file":"输入重复文件的名称",
+"Name_error_invalid_characters":"文件名中不能包含以下字符：\n",
+"Name_error_already_exists":"\“已经存在。请输入其他名称。",
+"Permission_denied":"没有权限",
+"Grant_permission":"在“设置”中为BirdBlox授予录制权限",
+"Dismiss":"撤",
+"Name":"名称",
+"Enter_file_name":"输入文件名",
+"Name_error_blank":"名称不能为空。输入文件名。",
+"Edit_text":"编辑文字",
+"Question":"问题",
+"Connection_Failure":"连接失败",
+"Connection_failed_try_again":"连接失败，请再试一次。",
+"Disconnect_account":"帐户连接断开",
+"Disconnect_account_question":"帐户连接断开?",
+"Dont_disconnect":"不要断开连接",
+"Disconnect":"连接",
+"not_connected":"(Device) 未连接",
+"not_a_valid_number":"不是有效的号码",
+"Intensity":"强度",
+"Angle":"角度",
+"Speed":"速度",
+"Note":"音符",
+"Beats":"拍子",
+"Firmware_incompatible":"固件不兼容",
+"Update_firmware":"更新固件",
+"Device_firmware":"设备固件版本：",
+"Required_firmware":"所需的固件版本：",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt"
+}
+
+//Traditional Chinese Translation (zh-Hant)
+Language.zht = {
+  "block_Tri_LED":"三色LED (Slot 1) 紅 (Slot 2) % 綠 (Slot 3) % 藍 (Slot 4) %",
+  "port":"端",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"旋轉伺服 (Slot 1) (Slot 2) %",
+  "block_Play_Note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
+  "Light":"燈光",
+  "Distance":"距離",
+  "Dial":"撥號",
+  "Other":"其他",
+  "Accelerometer":"加速計",
+  "Magnetometer":"磁力儀",
+  "block_LED_Display":"顯示",
+  "block_Print":"打印 (Slot 1 = Hello)",
+  "block_Button":"按鈕 (Slot 1)",
+  "Screen_Up":"正面朝上",
+  "Screen_Down":"背面朝上",
+  "Tilt_Left":"向左傾斜",
+  "Tilt_Right":"向右傾斜",
+  "Logo_Up":"下則偏低",
+  "Logo_Down":"上則偏低",
+  "Shake":"晃動",
+  "block_Compass":"指南針",
+  "block_Servo":"伺服 (Slot 1) (Slot 2)",
+  "block_Vibration":"震動 (Slot 1) (Slot 2)",
+  "block_Motor":"摩打 (Slot 1) (Slot 2)",
+  "block_Temperature_C":"溫度 攝氏 (Slot 1)",
+  "block_Temperature_F":"溫度 華氏 (Slot 1)",
+  "block_write":"寫入 (Slot 1) (Slot 2) %",
+  "pin":"引腳",
+  "block_read":"讀取 (Slot 1)",
+  "block_Device_Shaken":"平板電腦搖動了",
+  "block_Device_LatLong":"平板電腦 (Slot 1)",
+  "Latitude":"緯度",
+  "Longitude":"經度",
+  "block_Device_SSID":"平板電腦的服務設定識別碼",
+  "block_Device_Pressure":"平板電腦的大氣壓力",
+  "block_Device_Relative_Altitude":"平板電腦的相對高度",
+  "block_Acceleration":"平板電腦 (Slot 1) 加速度",
+  "Total":"總和",
+  "block_Device_Orientation":"平板電腦的方向",
+  "faceup":"屏幕向上",
+  "facedown":"屏幕向下",
+  "portrait_bottom":"人像: 下邊的鏡頭",
+  "portrait_top":"人像: 上邊的鏡頭",
+  "landscape_left":"風景：左邊的鏡頭",
+  "landscape_right":"風景：右邊的鏡頭",
+  "block_Display":"(Slot 2) 顯示 (Slot 1 = 你好)",
+  "position":"位置",
+  "block_ask":"問 (Slot 1 = 你的名字是什麼？) 並等待",
+  "block_answer":"回答",
+  "block_reset_timer":"重置計時器",
+  "block_timer":"計時器",
+  "block_current":"當前時間 (Slot 1)",
+  "date":"日",
+  "year":"年",
+  "month":"月",
+  "hour":"時",
+  "minute":"分",
+  "second":"秒",
+  "day_of_the_week":"一周中的日",
+  "time_in_milliseconds":"時間(毫秒)",
+  "block_mod":"(Slot 1) 和 (Slot 2) 的餘",
+  "block_round":"四捨五入 (Slot 1)",
+  "block_pick_random":"選取由 (Slot 1) 至 (Slot 2) 的一個隨機數",
+  "block_and":"(Slot 1) 和 (Slot 2)",
+  "block_or":"(Slot 1) 或 (Slot 2)",
+  "block_not":"不成立 (Slot 1)",
+  "true":"真確",
+  "false":"不真確",
+  "block_letter":"(Slot 2 = 世界)的字母(Slot 1)",
+  "block_length":"(Slot 1 = 世界) 的字長",
+  "block_join":"結合 (Slot 1 = 你好) 和 (Slot 2 = 世界)",
+  "block_split":"透過(Slot 2) 拆分 (Slot 1 = 你好世界) ",
+  "letter":"字母",
+  "whitespace":"空白",
+  "block_validate":"(Slot 1 = 5) 是否 (Slot 2)?",
+  "number":"數字",
+  "text":"文字",
+  "boolean":"布爾",
+  "list":"名單",
+  "invalid_number":"無效號碼",
+  "block_when_flag_tapped":"當 (Icon) 點擊時",
+  "block_when_I_receive":"當我收到",
+  "any_message":"任何訊息",
+  "new":"新",
+  "block_when":"當(Slot 1)",
+  "block_broadcast":"廣播 (Slot 1)",
+  "block_broadcast_and_wait":"廣播 (Slot 1) 並等待",
+  "block_message":"訊息",
+  "block_wait":"等待 (Slot 1) 秒",
+  "block_wait_until":"等待直至(Slot 1) ",
+  "block_repeat_forever":"重複無限次",
+  "block_repeat":"重複(Slot 1)",
+  "block_repeat_until":"重複直至(Slot 1)",
+  "block_if":"如果(Slot 1)",
+  "block_if_else":"如果(Slot 1)",
+  "else":"否則",
+  "block_stop":"停止(Slot 1)",
+  "all":"全部",
+  "this_script":"這個腳本",
+  "all_but_this_script":"除了這個腳本之外",
+  "Record_sound":"錄製聲音",
+  "block_play_recording":"播放錄音 (Slot 1)",
+  "block_play_recording_until_done":"播放錄音直到完成 (Slot 1)",
+  "block_play_sound":"播放聲音 (Slot 1)",
+  "block_play_sound_until_done":"播放聲音直到完成 (Slot 1)",
+  "block_stop_all_sounds":"停止所有聲音",
+  "block_rest_for":"休息 (Slot 1)拍",
+  "block_change_tempo_by":"改變拍子 (Slot 1)",
+  "block_set_tempo_to":"將速度設定為 (Slot 1) bpm",
+  "block_tempo":"拍子",
+  "block_set_variable":"設置 (Slot 1) 到 (Slot 2)",
+  "Create_Variable":"創建變數",
+  "block_change_variable":"(Slot 1) 改變 (Slot 2)",
+  "Rename":"改名",
+  "Delete":"刪除",
+  "block_add_to_list":"添加 (Slot 1 = thing) 到 (Slot 2)",
+  "Create_List":"創建列表",
+  "block_delete_from_list":"從 (Slot 2) 刪除 (Slot 1)",
+  "block_insert_into_list":"從 (Slot 3) 插入 (Slot 1 = 物件) 位於 (Slot 2)",
+  "block_replace_list_item":"用 (Slot 3 = 物件) 替換 (Slot 2) 的 物件 (Slot 1)",
+  "block_copy_list":"複製 (Slot 1) 到 (Slot 2)",
+  "block_list_item":"(Slot 2) 的物件 (Slot 1)",
+  "block_list_length":"(Slot 1)的長度",
+  "block_list_contains":"(Slot 1) 包含 (Slot 2 = 物件)",
+  "last":"最後",
+  "random":"隨機",
+  "Robots":"機器人",
+"Operators":"算子",
+"Sound":"聲音",
+"Tablet":"平板電腦",
+"Control":"控制",
+"Variables":"變數",
+"Zoom_in":"放大",
+"Zoom_out":"縮小",
+"Reset_zoom":"重置縮放",
+"Disable_snap_noise":"禁用拍照聲音",
+"Enable_snap_noise":"啟用拍照聲音",
+"CompassCalibrate":"校準指南針",
+"Send_debug_log":"發送調試日誌",
+"Show_debug_menu":"顯示調試畫面",
+"Connect_Device":"連接設備",
+"Connect_Multiple":"連接多個設備",
+"Disconnect_Device":"斷開設備",
+"Tap":"點按+即可連接",
+"Scanning_for_devices":"掃描設備",
+"Open":"開啟",
+"No_saved_programs":"沒有保存的程式",
+"New":"新",
+"Saving":"保存中",
+"On_Device":"在設備上",
+"Cloud":"雲端",
+"Loading":"載入中",
+"Sign_in":"登入",
+"New_program":"新程式",
+"Share":"分享",
+"Recordings":"錄音",
+"Discard":"丟棄",
+"Stop":"停止",
+"Pause":"暫停",
+"remaining":"其餘",
+"Record":"錄製",
+"Tap_record_to_start":"點擊錄製開始",
+"Done":"完成",
+"Delete":"刪除",
+"Delete_question":"你確定要刪除這個嗎？",
+"Cancel":"取消",
+"OK":"好",
+"Dont_delete":"不要刪除",
+"Rename":"重新命名",
+"Enter_new_name":"輸入新名稱",
+"Duplicate":"複製",
+"Name_duplicate_file":"輸入重複文件的名稱",
+"Name_error_invalid_characters":"文件名中不能包含以下字符：\n",
+"Name_error_already_exists":"\“已經存在。請輸入其他名稱。",
+"Permission_denied":"沒有權限",
+"Grant_permission":"在“設置”中為BirdBlox授予錄製權限",
+"Dismiss":"撤",
+"Name":"名稱",
+"Enter_file_name":"輸入文件名",
+"Name_error_blank":"名稱不能為空。 輸入文件名。",
+"Edit_text":"編輯文字",
+"Question":"問題",
+"Connection_Failure":"連接失敗",
+"Connection_failed_try_again":"連接失敗，請再試一次。",
+"Disconnect_account":"帳戶連接斷開",
+"Disconnect_account_question":"帳戶連接斷開?",
+"Dont_disconnect":"不要斷開連接",
+"Disconnect":"連接",
+"not_connected":"(Device) 未連接",
+"not_a_valid_number":"不是有效的號碼",
+"Intensity":"強度",
+"Angle":"角度",
+"Speed":"速度",
+"Note":"音符",
+"Beats":"拍子",
+"Firmware_incompatible":"固件不兼容",
+"Update_firmware":"更新固件",
+"Device_firmware":"設備固件版本：",
+"Required_firmware":"所需的固件版本：",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt"
+}
+
 /**
  * Device is an abstract class.  Each subclass (DeviceHummingbird, DeviceFlutter) represents a specific type of
  * robot.  Instances of the Device class have functions to to issue Bluetooth commands for connecting, disconnecting,
@@ -3347,8 +3773,8 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	var msg = Language.getStr("Firmware_Error") + " " + this.name ;
-	msg += Language.getStr("Device_firmware") + oldFirmware;
+	var msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
+	msg += Language.getStr("Device_firmware") + oldFirmware + " ";
 	msg += Language.getStr("Required_firmware") + minFirmware;
 	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {
@@ -4437,11 +4863,12 @@ window.onresize = function() {
 };
 
 GuiElements.setLanguage = function() {
+	//Check the session storage for a user selected language
 	var userSelectedLang = sessionStorage.getItem("language");
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
-  }
-
+	}
+	
 	var lnk = document.createElement('link');
   lnk.type='text/css';
   lnk.rel='stylesheet';
@@ -13243,7 +13670,9 @@ LanguageMenu.prototype.constructor = LanguageMenu;
 LanguageMenu.prototype.loadOptions = function() {
   var langMenu = this;
   Language.langs.forEach( function(lang) {
-    langMenu.addOption(lang, function() {
+    var name = eval("Language.names." + lang);
+    if (name == null) { name = lang; }
+    langMenu.addOption(name, function() {
       sessionStorage.setItem("language", lang);
       SaveManager.userClose();
       window.location.reload(false);
@@ -14205,7 +14634,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_variable_name"), "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
 			var variable = new Variable(result);
@@ -15681,8 +16110,8 @@ RecordingManager.discardRecording = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	var message = Language.getStr("Delete_recording_question");
-	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Continue_recording"), Language.getStr("Delete"), true, function(result) {
+	var message = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(result) {
 		if (result === "2") {
 			var request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
@@ -16946,7 +17375,8 @@ function ConnectMultipleDialog(deviceClass) {
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 
-    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    //this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    this.addHintText(Language.getStr("Tap"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -20583,7 +21013,7 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 	if (proposedName === "") {
-		SaveManager.promptDuplicate(Language.getStr(Name_error_blank), filename, nextAction);
+		SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
 			if (alreadySanitized && alreadyAvailable) {

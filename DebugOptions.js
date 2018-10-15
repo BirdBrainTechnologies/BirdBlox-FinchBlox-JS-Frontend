@@ -46,7 +46,6 @@ DebugOptions.applyConstants = function() {
 	const englishKeys = Object.keys(Language.en);
 	for (var i = 0; i < Language.langs.length; i++){
 		const lang = Language.langs[i];
-		console.log("Checking language " + lang + " for completeness...");
 
 		var missingCount = 0;
 		for (var j = 0; j < englishKeys.length; j++) {
@@ -56,7 +55,7 @@ DebugOptions.applyConstants = function() {
 				missingCount++;
 			}
 		}
-		console.log(lang + " check finished. " + missingCount + " missing keys.")
+		console.log(lang + " completeness check finished. " + missingCount + " missing keys.")
 	}
 };
 

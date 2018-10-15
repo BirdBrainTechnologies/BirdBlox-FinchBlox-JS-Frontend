@@ -1,19 +1,26 @@
-"use strict";
-
 /**
- * CodeManager is a static class that controls block execution. It also moves the BlockStack that the user is dragging,
- * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
+ * The Language class controls all text displayed by the frontend. On startup,
+ *  the frontend provides the system language. This language will be used if
+ *  available. Otherwise, English is used.
  */
-function Language() {
+function Language() {};
 
-};
-
-
-Language.lang = "en";
-Language.langs = ["ar", "da", "en", "he", "ko"];
+Language.lang = "en"; //The current language. English by default.
+Language.langs = ["ar", "da", "de", "en", "he", "ko", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
+
+Language.names = {
+  "ar":"العربية",  //Arabic
+  "da":"Dansk",  //Danish
+  "de":"Deutsch",  //German
+  "en":"English",  //English
+  "he":"עברית",  //Hebrew
+  "ko":"한국어",  //Korean
+  "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
+  "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
+}
 
 
 Language.en_old = {
@@ -705,6 +712,11 @@ Language.fr_old = {
   "pin":"Broche"
 };
 
+/**
+ * Set the language to a given language if available. Used when a system Language
+ *  is returned by the backend.
+ * @param {string} lang - Two letter language code of the language requested.
+ */
 Language.setLanguage = function(lang) {
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "en";
@@ -722,6 +734,11 @@ Language.getLanguage = function () {
   return "Language." + Language.lang + ".";
 }*/
 
+/**
+ * Get the translation for the given key.
+ * @param {string} str - The language dictionary key.
+ * @return {string} - The text entry for the given key in the current language.
+ */
 Language.getStr = function(str) {
     let translatedStr = eval("Language." + Language.lang + "." + str);
     if (translatedStr != null) {

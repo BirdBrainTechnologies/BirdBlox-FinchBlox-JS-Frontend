@@ -309,7 +309,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_variable_name"), "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
 			const variable = new Variable(result);

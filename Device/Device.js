@@ -258,8 +258,8 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = Language.getStr("Firmware_Error") + " " + this.name ;
-	msg += Language.getStr("Device_firmware") + oldFirmware;
+	let msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
+	msg += Language.getStr("Device_firmware") + oldFirmware + " ";
 	msg += Language.getStr("Required_firmware") + minFirmware;
 	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {

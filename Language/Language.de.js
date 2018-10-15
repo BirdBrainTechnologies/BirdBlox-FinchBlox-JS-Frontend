@@ -1,0 +1,4 @@
+//German Translation
+Language.de = {
+
+}

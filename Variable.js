@@ -98,7 +98,7 @@ Variable.prototype.rename = function() {
 		}
 	};
 	callbackFn.variable = this;
-	DialogManager.showPromptDialog(Language.getStr("Rename_variable"), Language.getStr("Enter_variable_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -113,8 +113,8 @@ Variable.prototype.delete = function() {
 			}
 		};
 		callbackFn.variable = this;
-		let question = Language.getStr("Variable_delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete_variable"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+		let question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);

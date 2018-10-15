@@ -17,7 +17,9 @@ LanguageMenu.prototype.constructor = LanguageMenu;
 LanguageMenu.prototype.loadOptions = function() {
   const langMenu = this;
   Language.langs.forEach( function(lang) {
-    langMenu.addOption(lang, function() {
+    var name = eval("Language.names." + lang);
+    if (name == null) { name = lang; }
+    langMenu.addOption(name, function() {
       sessionStorage.setItem("language", lang);
       SaveManager.userClose();
       window.location.reload(false);

@@ -104,8 +104,8 @@ RecordingManager.discardRecording = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let message = Language.getStr("Delete_recording_question");
-	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Continue_recording"), Language.getStr("Delete"), true, function(result) {
+	let message = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(result) {
 		if (result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);

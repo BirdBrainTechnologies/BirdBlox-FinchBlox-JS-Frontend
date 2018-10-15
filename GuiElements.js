@@ -44,11 +44,12 @@ window.onresize = function() {
 };
 
 GuiElements.setLanguage = function() {
+	//Check the session storage for a user selected language
 	const userSelectedLang = sessionStorage.getItem("language");
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
-  }
-
+	}
+	
 	var lnk = document.createElement('link');
   lnk.type='text/css';
   lnk.rel='stylesheet';

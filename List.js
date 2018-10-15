@@ -98,7 +98,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog(Language.getStr("Rename_list"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -113,8 +113,8 @@ List.prototype.delete = function() {
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		let question = Language.getStr("List_delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete_list"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+		let question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteList(this);
