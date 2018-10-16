@@ -6,7 +6,7 @@
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "da", "de", "en", "he", "ko", "zhs", "zht"];
+Language.langs = ["ar", "da", "en", "he", "ko", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
@@ -17,6 +17,7 @@ Language.names = {
   "de":"Deutsch",  //German
   "en":"English",  //English
   "he":"עברית",  //Hebrew
+  "ja":"日本語",  //Japanese
   "ko":"한국어",  //Korean
   "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
   "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
@@ -715,14 +716,34 @@ Language.fr_old = {
 /**
  * Set the language to a given language if available. Used when a system Language
  *  is returned by the backend.
- * @param {string} lang - Two letter language code of the language requested.
+ * @param {string} lang - Language code of the language requested.
  */
 Language.setLanguage = function(lang) {
+    const code = lang.substring(0, 2);
+    if (Language.langs.indexOf(code) != -1) {
+      Language.lang = code;
+    } else if (code == "zh") {
+      if (lang.substring(0, 7) == "zh-Hans") { //iOS Simplified Chinese
+        Language.lang = "zhs";
+      } else if (lang.substring(0, 7) == "zh-Hant") { //iOS Traditional Chinese
+        Language.lang = "zht";
+      } else if (lang.substring(0, 5) == "zh_CN") { //Android Simplified Chinese
+        Language.lang = "zhs";
+      } else if (lang.substring(0, 5) == "zh_TW") { //Android Traditional Chinese
+        Language.lang = "zht";
+      } else {
+        Language.lang = "zhs";
+      }
+    } else {
+      Language.lang = "en";
+    }
+
+    /*
     if (Language.langs.indexOf(lang) === -1) {
         Language.lang = "en";
     } else {
         Language.lang = lang;
-    }
+    }*/
 }
 
 /*
