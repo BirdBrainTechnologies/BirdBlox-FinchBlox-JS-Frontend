@@ -25,6 +25,7 @@ LabelText.prototype.constructor = LabelText;
  * @return {number} - The width of the text, indicating how much the next item should be shifted over.
  */
 LabelText.prototype.updateAlign = function(x, y) {
+//	if (Language.isRTL) { x = -x; }
 	this.move(x, y + this.height / 2);
 	return this.width;
 };
@@ -38,11 +39,12 @@ LabelText.prototype.updateDim = function() {
 		GuiElements.layers.temp.appendChild(this.textE);
 		this.width = GuiElements.measure.textWidth(this.textE);
 
-		if (Language.isRTL) {
+	//	if (Language.isRTL) {
 			//textElement.setAttributeNS(null, "dir", "rtl");
 			//textElement.setAttributeNS(null, "class", "mirror");
-			this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
-		}
+			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
+			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+	//	}
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}

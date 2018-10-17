@@ -680,6 +680,7 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
  * @param {number} y
  */
 BlockGraphics.update.text = function(text, x, y) {
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };

@@ -21,6 +21,7 @@ LanguageMenu.prototype.loadOptions = function() {
     if (name == null) { name = lang; }
     langMenu.addOption(name, function() {
       sessionStorage.setItem("language", lang);
+      DeviceManager.removeAllDevices();
       SaveManager.userClose();
       window.location.reload(false);
     });

@@ -634,3 +634,12 @@ DeviceManager.possiblyRescan = function() {
 		manager.possiblyRescan();
 	});
 };
+
+/**
+ * Removes all connected devices of every type.
+ */
+DeviceManager.removeAllDevices = function() {
+	DeviceManager.forEach(function(manager) {
+		manager.removeAllDevices();
+	});
+}

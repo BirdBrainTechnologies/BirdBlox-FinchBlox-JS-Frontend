@@ -49,7 +49,7 @@ GuiElements.setLanguage = function() {
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
 	}
-	
+
 	var lnk = document.createElement('link');
   lnk.type='text/css';
   lnk.rel='stylesheet';
@@ -316,7 +316,11 @@ GuiElements.create.path = function(group) {
  * @return {Element} - The text which was created.
  */
 GuiElements.create.text = function() {
-	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	if (Language.isRTL) {
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
+	return textElement;
 };
 /**
  * Creates an SVG image element and returns it.
@@ -502,6 +506,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	const textElement = GuiElements.create.text();
+	if (Language.isRTL){ x = -x; }
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -514,9 +519,6 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	const textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
-	if (Language.isRTL){
-		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
-	}
 	return textElement;
 };
 /**
@@ -606,11 +608,11 @@ GuiElements.update.text = function(textE, newText) {
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
 
-	if (Language.isRTL) {
-		const w = GuiElements.measure.textWidth(textE);
+//	if (Language.isRTL) {
+//		const w = GuiElements.measure.textWidth(textE);
 		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
-		textE.setAttributeNS(null, "transform", "scale(-1, 1)");
-	}
+		//textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+//	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -808,9 +810,7 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL){
-		x = -x;
-	}
+	if (Language.isRTL){ x = -x; }
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {
@@ -825,6 +825,7 @@ GuiElements.move.group = function(group, x, y, zoom) {
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };

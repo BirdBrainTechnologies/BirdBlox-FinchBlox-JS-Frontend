@@ -1300,7 +1300,7 @@ List.prototype.delete = function() {
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "da", "en", "he", "ko", "zhs", "zht"];
+Language.langs = ["ar", "da", "en", "he", "ko", "nl", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
@@ -1313,6 +1313,7 @@ Language.names = {
   "he":"עברית",  //Hebrew
   "ja":"日本語",  //Japanese
   "ko":"한국어",  //Korean
+  "nl":"Nederlands",  //Dutch
   "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
   "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
 }
@@ -3111,8 +3112,214 @@ Language.ko = {
 "Required_firmware":"필요한 펌웨어 버전:"
 }
 
+//Dutch Translation
 Language.nl = {
-
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Poort",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Positie-Servo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Draai-Servo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Speel Noot (Slot 1) voor (Slot 2) Beats",
+  "Light":"Licht",
+  "Distance":"Afstand",
+  "Dial":"Draaiknop",
+  "Other":"Ander",
+  "Accelerometer":"Accelerometer",
+  "Magnetometer":"Magnetometer",
+  "block_LED_Display":"Scherm",
+  "block_Print":"Schrijf (Slot 1 = Hello)",
+  "block_Button":"Knop (Slot 1)",
+  "Screen_Up":"Scherm Omhoog",
+  "Screen_Down":"Scherm Omlaag",
+  "Tilt_Left":"Naar Links Kantelen",
+  "Tilt_Right":"Naar Rechts Kantelen",
+  "Logo_Up":"Logo Omhoog",
+  "Logo_Down":"Logo Omlaag",
+  "Shake":"Schudden",
+  "block_Compass":"Kompas",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibratie (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatuur C (Slot 1)",
+  "block_Temperature_F":"Temperatuur F (Slot 1)",
+  "block_write":"Schrijf (Slot 1) (Slot 2) %",
+  "pin":"Pin",
+  "block_read":"Lees (Slot 1)",
+  "block_Device_Shaken":"Tablet Geschud",
+  "block_Device_LatLong":"Tablet (Slot 1)",
+  "Latitude":"Breedtegraad",
+  "Longitude":"Lengtegraad",
+  "block_Device_SSID":"Tablet SSID",
+  "block_Device_Pressure":"Tablet Druk",
+  "block_Device_Relative_Altitude":"Tablet Relatieve Hoogte",
+  "block_Acceleration":"Tablet (Slot 1) Acceleratie",
+  "Total":"Totaal",
+  "block_Device_Orientation":"Tablet Orientatie",
+  "faceup":"Omhoog",
+  "facedown":"Omlaag",
+  "portrait_bottom":"Staand: Camera onderaan",
+  "portrait_top":"Staand: Camera bovenaan",
+  "landscape_left":"Liggend: Camera links",
+  "landscape_right":"Liggend: Camera rechts",
+  "block_Display":"Scrijf (Slot 1 = Hello) in (Slot 2)",
+  "position":"Positie",
+  "block_ask":"Vraag (Slot 1 = Was is uw naam?) en wacht",
+  "block_answer":"antwoord",
+  "block_reset_timer":"zet tijd op nul",
+  "block_timer":"tijd",
+  "block_current":"huidig",
+  "date":"datum",
+  "year":"jaar",
+  "month":"maand",
+  "hour":"uur",
+  "minute":"minuut",
+  "second":"seconde",
+  "day_of_the_week":"dag van de week",
+  "time_in_milliseconds":"tijd in milliseconden",
+  "block_mod":"(Slot 1) modulo (Slot 2)",
+  "block_round":"afgerond (Slot 1)",
+  "block_pick_random":"willekeurig getal (Slot 1) to (Slot 2)",
+  "block_and":"(Slot 1) en (Slot 2)",
+  "block_or":"(Slot 1) of (Slot 2)",
+  "block_not":"niet (Slot 1)",
+  "true":"waar",
+  "false":"onwaar",
+  "block_letter":"letter (Slot 1) van (Slot 2 = world)",
+  "block_length":"lengte van (Slot 1 = world)",
+  "block_join":"voeg (Slot 1 = hello) en (Slot 2 = world) samen",
+  "block_split":"splits (Slot 1 = hello world) bij (Slot 2)",
+  "letter":"letter",
+  "whitespace":"spatie",
+  "block_validate":"is (Slot 1 = 5) een (Slot 2)?",
+  "number":"getal",
+  "text":"tekst",
+  "boolean":"booleaans",
+  "list":"lijst",
+  "invalid_number":"ongeldig getal",
+  "block_when_flag_tapped":"wanneer (Icon) wordt aangeklikt",
+  "block_when_I_receive":"wanneer ik ontvang (Slot 1)",
+  "any_message":"elk signaal",
+  "new":"nieuw",
+  "block_when":"wanneer (Slot 1)",
+  "block_broadcast":"zend signaal (Slot 1)",
+  "block_broadcast_and_wait":"zend signaal (Slot 1) en wacht",
+  "block_message":"signaal",
+  "block_wait":"wacht (Slot 1) secs",
+  "block_wait_until":"wacht tot (Slot 1)",
+  "block_repeat_forever":"herhaal",
+  "block_repeat":"herhaal (Slot 1) keer",
+  "block_repeat_until":"herhaal tot (Slot 1)",
+  "block_if":"als (Slot 1)",
+  "block_if_else":"als (Slot 1)",
+  "else":"anders",
+  "block_stop":"stop (Slot 1)",
+  "all":"alle",
+  "this_script":"dit Script",
+  "all_but_this_script":"alle scripts behalve deze",
+  "Record_sound":"Geluid Opnemen",
+  "block_play_recording":"speel opname (Slot 1)",
+  "block_play_recording_until_done":"speel opname tot het einde (Slot 1)",
+  "block_play_sound":"speel geluid (Slot 1)",
+  "block_play_sound_until_done":"speel geluid tot het einde (Slot 1)",
+  "block_stop_all_sounds":"stop alle geluiden",
+  "block_rest_for":"rust voor (Slot 1) Beats",
+  "block_change_tempo_by":"verander tempo met (Slot 1)",
+  "block_set_tempo_to":"maak tempo (Slot 1) bpm",
+  "block_tempo":"tempo",
+  "block_set_variable":"maak (Slot 1) (Slot 2)",
+  "Create_Variable":"Maak een Variabele",
+  "block_change_variable":"verander (Slot 1) met (Slot 2)",
+  "Rename":"Hernoemen",
+  "Delete":"Verwijder",
+  "block_add_to_list":"voeg (Slot 1 = ding) in op (Slot 2)",
+  "Create_List":"Maak een Lijst",
+  "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",
+  "block_insert_into_list":"voeg (Slot 1 = ding) op (Slot 2) aan (Slot 3) toe",
+  "block_replace_list_item":"vervang item (Slot 1) van (Slot 2) door (Slot 3 = ding)",
+  "block_copy_list":"kopieer (Slot 1) in op (Slot 2)",
+  "block_list_item":"item (Slot 1) van (Slot 2)",
+  "block_list_length":"lengte van (Slot 1)",
+  "block_list_contains":"(Slot 1) bevat (Slot 2 = ding)",
+  "last":"laatste",
+  "random":"willekeurig",
+  "Robots":"Robots",
+"Operators":"Operatoren",
+"Sound":"Geluid",
+"Tablet":"Tablet",
+"Control":"Controle",
+"Variables":"Variabelen",
+"Zoom_in":"Inzoomen",
+"Zoom_out":"Uitzoomen",
+"Reset_zoom":"Reset zoom",
+"Disable_snap_noise":"Klikgeluid Uitschakelen",
+"Enable_snap_noise":"Klikgeluid Inschakelen",
+"CompassCalibrate":"Kompas Kalibreren",
+"Send_debug_log":"Stuur foutopsporingslog",
+"Show_debug_menu":"Toon debug-menu",
+"Connect_Device":"Verbind Apparaat",
+"Connect_Multiple":"Verbind Meerdere",
+"Disconnect_Device":"Ontkoppel Apparaat",
+"Tap":"Tik + verbinden",
+"Scanning_for_devices":"Scannen van apparaten",
+"Open":"Open",
+"No_saved_programs":"Geen opgeslagen programmas",
+"New":"Nieuw",
+"Saving":"Opslaan",
+"On_Device":"In Apparaat",
+"Cloud":"Cloud",
+"Loading":"Laden",
+"Sign_in":"Inloggen",
+"New_program":"Nieuw programma",
+"Share":"Share",
+"Recordings":"Opnames",
+"Discard":"Verwijder",
+"Stop":"Stop",
+"Pause":"Pauze",
+"remaining":"overblijvende",
+"Record":"Opnemen",
+"Tap_record_to_start":"Tik om opnemen te starten",
+"Done":"Klaar",
+"Delete":"Verwijder",
+"Delete_question":"Ben je zeker dat je dit wilt verwijderen?",
+"Cancel":"Annuleer",
+"OK":"OK",
+"Dont_delete":"Niet verwijderen",
+"Rename":"Hernoemen",
+"Enter_new_name":"Voer een nieuwe naam in",
+"Duplicate":"Kopiëren",
+"Name_duplicate_file":"Voer een naam in voor het gekopieerde bestand",
+"Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
+"Name_error_already_exists":"\" bestaat al. Voer een andere naam in.",
+"Permission_denied":"Geen toestemming",
+"Grant_permission":"Geef toestemming tot opnames aan BirdBlox in Instellingen",
+"Dismiss":"Ontslaan",
+"Name":"Naam",
+"Enter_file_name":"Voor een bestandsnaam in",
+"Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
+"Edit_text":"Tekst bewerken",
+"Question":"Vraag",
+"Connection_Failure":"Verbindingsfout",
+"Connection_failed_try_again":"Verbindingsfout, probeer opnieuw.",
+"Disconnect_account":"Account Loskoppelen",
+"Disconnect_account_question":"Account Loskoppelen?",
+"Dont_disconnect":"Niet Loskoppelen",
+"Disconnect":"Loskoppelen",
+"not_connected":"(Device) niet verbonden",
+"not_a_valid_number":"geen geldig getal",
+"Intensity":"Percent",
+"Angle":"Graad",
+"Speed":"Snelheid",
+"Note":"Noot",
+"Beats":"Beats",
+"Firmware_incompatible":"Onverenigbare Firmware",
+"Update_firmware":"Update firmware",
+"Device_firmware":"Apparaat firmware versie:",
+"Required_firmware":"Vereiste firmware versie:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt"
 }
 
 //Simplified Chinese Translation (zh-Hans)
@@ -4668,6 +4875,15 @@ DeviceManager.possiblyRescan = function() {
 };
 
 /**
+ * Removes all connected devices of every type.
+ */
+DeviceManager.removeAllDevices = function() {
+	DeviceManager.forEach(function(manager) {
+		manager.removeAllDevices();
+	});
+}
+
+/**
  * Manages communication with a Hummingbird
  * @param {string} name
  * @param {string} id
@@ -4889,7 +5105,7 @@ GuiElements.setLanguage = function() {
   if (userSelectedLang != undefined && userSelectedLang != null){
     Language.lang = userSelectedLang;
 	}
-	
+
 	var lnk = document.createElement('link');
   lnk.type='text/css';
   lnk.rel='stylesheet';
@@ -5156,7 +5372,11 @@ GuiElements.create.path = function(group) {
  * @return {Element} - The text which was created.
  */
 GuiElements.create.text = function() {
-	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	if (Language.isRTL) {
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
+	return textElement;
 };
 /**
  * Creates an SVG image element and returns it.
@@ -5342,6 +5562,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	var textElement = GuiElements.create.text();
+	if (Language.isRTL){ x = -x; }
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -5354,9 +5575,6 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	var textNode = document.createTextNode(text);
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
-	if (Language.isRTL){
-		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
-	}
 	return textElement;
 };
 /**
@@ -5446,11 +5664,11 @@ GuiElements.update.text = function(textE, newText) {
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
 
-	if (Language.isRTL) {
-		var w = GuiElements.measure.textWidth(textE);
+//	if (Language.isRTL) {
+//		var w = GuiElements.measure.textWidth(textE);
 		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
-		textE.setAttributeNS(null, "transform", "scale(-1, 1)");
-	}
+		//textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+//	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -5648,9 +5866,7 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL){
-		x = -x;
-	}
+	if (Language.isRTL){ x = -x; }
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {
@@ -5665,6 +5881,7 @@ GuiElements.move.group = function(group, x, y, zoom) {
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
@@ -7440,6 +7657,7 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
  * @param {number} y
  */
 BlockGraphics.update.text = function(text, x, y) {
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
@@ -9377,9 +9595,9 @@ CategoryBN.setGraphics = function() {
 	var numberOfRows = Math.ceil(BlockList.catCount() / 2);
 	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
-	if (Language.isRTL) {
-		CBN.labelX = -CBN.labelX;
-	}
+//	if (Language.isRTL) {
+		//CBN.labelX = -CBN.labelX;
+//	}
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };
 
@@ -12609,6 +12827,7 @@ BubbleOverlay.prototype.relToAbsX = function(x) {
 BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
+
 /**
  * A bubble-shaped element that holds text containing the result of executing a block that was tapped.
  * Becomes visible as soon as it is constructed.
@@ -13695,6 +13914,7 @@ LanguageMenu.prototype.loadOptions = function() {
     if (name == null) { name = lang; }
     langMenu.addOption(name, function() {
       sessionStorage.setItem("language", lang);
+      DeviceManager.removeAllDevices();
       SaveManager.userClose();
       window.location.reload(false);
     });
@@ -23402,6 +23622,7 @@ Slot.prototype.updateDim = function(){
  */
 Slot.prototype.updateAlign = function(x, y){
 	DebugOptions.validateNumbers(x, y);
+	if (Language.isRTL) { x = -x; }
 	if(this.hasChild){
 		//The x and y coords the child should have.
 		//TODO: Use relToAbs for this
@@ -23958,6 +24179,7 @@ Slot.prototype.onTap = function() {
 Slot.prototype.isEditable = function() {
 	return false;
 };
+
 /**
  * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
  * It creates a hexagonal Slot that can hold Blocks but not be edited via InputPad or dialog.
@@ -25822,6 +26044,7 @@ LabelText.prototype.constructor = LabelText;
  * @return {number} - The width of the text, indicating how much the next item should be shifted over.
  */
 LabelText.prototype.updateAlign = function(x, y) {
+//	if (Language.isRTL) { x = -x; }
 	this.move(x, y + this.height / 2);
 	return this.width;
 };
@@ -25835,11 +26058,12 @@ LabelText.prototype.updateDim = function() {
 		GuiElements.layers.temp.appendChild(this.textE);
 		this.width = GuiElements.measure.textWidth(this.textE);
 
-		if (Language.isRTL) {
+	//	if (Language.isRTL) {
 			//textElement.setAttributeNS(null, "dir", "rtl");
 			//textElement.setAttributeNS(null, "class", "mirror");
-			this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
-		}
+			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
+			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1)");
+	//	}
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}
