@@ -6,13 +6,14 @@
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "da", "en", "he", "ko", "nl", "zhs", "zht"];
+Language.langs = ["ar", "ca", "da", "en", "he", "ko", "nl", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
 
 Language.names = {
   "ar":"العربية",  //Arabic
+  "ca":"Català", //Catalan
   "da":"Dansk",  //Danish
   "de":"Deutsch",  //German
   "en":"English",  //English

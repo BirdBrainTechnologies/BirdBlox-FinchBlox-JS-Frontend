@@ -2,6 +2,7 @@
 1. [Overview (for backend developers)](#overview-for-backend-developers)
 2. [Request list](#request-list)
 3. [Overview (for frontend developers)](#overview-for-frontend-developers)
+4. [Translating BirdBlox](#translating-BirdBlox)
 
 ## Overview (for backend developers)
 
@@ -1163,3 +1164,40 @@ BlockList.js to reflect the new ordering.
 
 To change the color of a category, check out the `Colors.setCategory()`
 function in Colors.js
+
+
+## Translating BirdBlox
+1. [Translations Overview](#translations-Overview)
+2. [Adding a New Language](#adding-a-New-Language)
+
+### Translations Overview
+
+Birdblox has been translated into a number of different languages. The bulk of
+the work is contained in Language/Language.js, but each language translation is
+kept in its own file in the Language folder. The backend is responsible for
+sending the system language once the frontend has loaded. If no language is set
+through the language menu, the system language is used. If the system language
+is not available, English is used.
+
+### Adding a New Language
+
+There are several steps to adding a new language:
+1. Find the 2 letter language code for the new language (example resource: https://www.w3schools.com/tags/ref_language_codes.asp)
+2. Create a new file in the Language folder for the translation and add
+translated text.
+3. Add this file to HummingbirdDragAndDrop2.html.
+4. Add the 2 letter code to the Language.langs array and the name of this
+language to the Language.names array.
+5. Run the project in a web browser with DO.enabled=true and the JavaScript
+console open. This will check your translation for missing keys (results appear
+in the console).
+
+Details to keep in mind when creating a new translation:
+1. The default string text in the block_Print translation is for printing to
+the micro:bit display and should not contain characters that cannot be printed
+there. Default to 'Hello' if no reasonable translation can be made.
+2. Some translators may mistakenly translate the words in () such as Slot, Icon,
+and Device. These words are placeholders and must remain as is. Especially check
+the keys not_connected and block_when_flag_tapped.
+3. Name_error keys have some formatting that must be maintained and should be
+checked after translating.

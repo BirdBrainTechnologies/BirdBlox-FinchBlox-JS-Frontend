@@ -48,7 +48,7 @@ RecordingManager.startRecording = function() {
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
 		} else if (result === "Permission denied") {
-			let message = "Grant_permission";
+			let message = Language.getStr("Grant_permission");
 			DialogManager.showAlertDialog(Language.getStr("Permission_denied"), message, Language.getStr("Dismiss"));
 		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
