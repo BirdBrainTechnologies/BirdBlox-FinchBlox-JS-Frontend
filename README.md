@@ -2,7 +2,7 @@
 1. [Overview (for backend developers)](#overview-for-backend-developers)
 2. [Request list](#request-list)
 3. [Overview (for frontend developers)](#overview-for-frontend-developers)
-4. [Translating BirdBlox](#translating-BirdBlox)
+4. [BirdBlox translations](#birdblox-translations)
 
 ## Overview (for backend developers)
 
@@ -1166,7 +1166,7 @@ To change the color of a category, check out the `Colors.setCategory()`
 function in Colors.js
 
 
-## Translating BirdBlox
+## BirdBlox translations
 1. [Translations overview](#translations-overview)
 2. [Adding a new language](#adding-a-new-language)
 
