@@ -6,7 +6,7 @@
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "ca", "da", "en", "he", "ko", "nl", "zhs", "zht"];
+Language.langs = ["ar", "ca", "da", "de", "en", "he", "ko", "nl", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
