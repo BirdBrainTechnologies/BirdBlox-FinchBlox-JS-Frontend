@@ -1167,10 +1167,10 @@ function in Colors.js
 
 
 ## Translating BirdBlox
-1. [Translations Overview](#translations-Overview)
-2. [Adding a New Language](#adding-a-New-Language)
+1. [Translations overview](#translations-overview)
+2. [Adding a new language](#adding-a-new-language)
 
-### Translations Overview
+### Translations overview
 
 Birdblox has been translated into a number of different languages. The bulk of
 the work is contained in Language/Language.js, but each language translation is
@@ -1179,7 +1179,7 @@ sending the system language once the frontend has loaded. If no language is set
 through the language menu, the system language is used. If the system language
 is not available, English is used.
 
-### Adding a New Language
+### Adding a new language
 
 There are several steps to adding a new language:
 1. Find the 2 letter language code for the new language (example resource: https://www.w3schools.com/tags/ref_language_codes.asp)
