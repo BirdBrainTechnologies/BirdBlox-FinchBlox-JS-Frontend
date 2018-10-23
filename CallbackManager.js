@@ -172,9 +172,11 @@ CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
 CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
 	DeviceManager.updateCompassCalibrationStatus(robotId, success);
 	const dialog = RowDialog.currentDialog;
-	if (dialog.constructor === CalibrateCompassDialog) {
-		const rows = dialog.rowCount;
-		dialog.reloadRows(rows);
+	if (dialog != null) {
+		if (dialog.constructor === CalibrateCompassDialog) {
+			const rows = dialog.rowCount;
+			dialog.reloadRows(rows);
+		}
 	}
 	const videoElement = document.getElementById("video" + robotId);
 	if (videoElement != null) {
