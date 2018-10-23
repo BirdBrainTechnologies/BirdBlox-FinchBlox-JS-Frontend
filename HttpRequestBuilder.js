@@ -23,7 +23,8 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	}
 	this.request += key;
 	this.request += "=";
-	this.request += HtmlServer.encodeHtml(value);
+	//this.request += HtmlServer.encodeHtml(value);
+	this.request += value;
 };
 
 /**
@@ -33,4 +34,3 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 HttpRequestBuilder.prototype.toString = function(){
 	return this.request;
 };
-

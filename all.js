@@ -9,7 +9,7 @@ const FrontendVersion = 393;
  */
 function DebugOptions() {
 	const DO = DebugOptions;
-	DO.enabled = true;
+	DO.enabled = false;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -14787,6 +14787,13 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  * @inheritDoc
  */
 SettingsMenu.prototype.loadOptions = function() {
+	const icon = VectorPaths.language;
+	const me = this;
+	this.addOption("", null, false, function(bn) {
+		bn.addIcon(icon, 25);
+		me.languageMenu = new LanguageMenu(bn, me);
+		me.languageMenu.move();
+	});
 	// Used to have icons, but they didn't work two well and have been disabled
 	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
 	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
@@ -14800,13 +14807,6 @@ SettingsMenu.prototype.loadOptions = function() {
 			(new CalibrateCompassDialog()).show();
 	});
 	if (this.showAdvanced) {
-		const icon = VectorPaths.language;
-		const me = this;
-		this.addOption("", null, false, function(bn) {
-			bn.addIcon(icon);
-			me.languageMenu = new LanguageMenu(bn, me);
-			me.languageMenu.move();
-		});
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
 	}
@@ -20495,7 +20495,8 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	}
 	this.request += key;
 	this.request += "=";
-	this.request += HtmlServer.encodeHtml(value);
+	//this.request += HtmlServer.encodeHtml(value);
+	this.request += value;
 };
 
 /**
@@ -20505,7 +20506,6 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 HttpRequestBuilder.prototype.toString = function(){
 	return this.request;
 };
-
 
 /**
  * Represents a setting stored on the backend.  Automatically edits and caches the backend value
