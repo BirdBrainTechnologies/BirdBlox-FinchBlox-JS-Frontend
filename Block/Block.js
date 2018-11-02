@@ -6,7 +6,7 @@
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * TODO: remove the type parameter and use blockShape and instead.
- * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop, 7 = Calibrate.
+ * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop.
  * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.

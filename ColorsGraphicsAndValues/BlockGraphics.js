@@ -16,7 +16,6 @@ function BlockGraphics() {
 	BlockGraphics.SetString();
 	BlockGraphics.SetHat();
 	BlockGraphics.SetLoop();
-	BlockGraphics.SetCalibrate();
 
 	// Set constants for block parts
 	BlockGraphics.SetLabelText();
@@ -147,16 +146,7 @@ BlockGraphics.SetLoop = function() {
 	BlockGraphics.loop.side = 7;
 };
 
-BlockGraphics.SetCalibrate = function() {
-	BlockGraphics.calibrate = {};
 
-    // Minimum dimensions
-    BlockGraphics.calibrate.height = 30;
-    BlockGraphics.calibrate.width = 27;
-
-    BlockGraphics.calibrate.vMargin = 6;
-    BlockGraphics.calibrate.hMargin = 10;
-};
 
 
 /* LabelText constants */
@@ -287,8 +277,6 @@ BlockGraphics.getType = function(type) {
 			return BlockGraphics.loop;
 		case 6:
 			return BlockGraphics.loop;
-		case 7:
-            return BlockGraphics.calibrate;
 	}
 };
 
@@ -511,31 +499,7 @@ BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1,
 	return path;
 };
 
-/**
- * Creates the hexagonal path of a Slot/Block/highlight
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @param {boolean} isSlot
- * @param {boolean} isHighlight
- * @return {string}
- */
-BlockGraphics.buildPath.calibrate = function(x, y, width, height) {
-	let halfHeight = height / 2;
-	let bG = BlockGraphics.calibrate;
-	let flatWidth = width;
-	let path = "";
-	path += "m " + x + "," + (y + halfHeight);
-	path += " " + 0 + "," + (0 - halfHeight);
-	path += " " + flatWidth + ",0";
-	path += " " + 0 + "," + halfHeight;
-	path += " " + 0 + "," + halfHeight;
-	path += " " + (0 - flatWidth) + ",0";
-	path += " " + 0 + "," + (0 - halfHeight);
-	path += " z";
-	return path;
-};
+
 /* Group of functions that create the SVG elements for Blocks/Slots */
 BlockGraphics.create = {};
 
@@ -665,9 +629,6 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
 		case 6:
 			pathD = BlockGraphics.buildPath.doubleLoop(x, y, width, height, innerHeight1, innerHeight2, midHeight);
 			break;
-        case 7:
-            pathD = BlockGraphics.buildPath.calibrate(x, y, width, height);
-            break;
 	}
 	path.setAttributeNS(null, "d", pathD);
 	return path;

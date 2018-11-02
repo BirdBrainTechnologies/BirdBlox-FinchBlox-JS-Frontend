@@ -14,7 +14,6 @@
 function B_MicroBitLedArray(x, y, deviceClass) {
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
   const label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
@@ -73,11 +72,7 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
 function B_MicroBitPrint(x, y, deviceClass){
   CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  //this.displayName = Language.getStr("Print");
-  this.draggable = true;
-
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this,this.displayName));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
   this.parseTranslation(Language.getStr("block_Print"));
@@ -158,10 +153,7 @@ B_MicroBitPrint.prototype.updateAction = function() {
 function B_MicroBitButton(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  //this.displayName = Language.getStr("Button");
-  this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this,this.displayName));
 
   const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
@@ -219,10 +211,7 @@ B_MicroBitButton.prototype.updateAction = function() {
 function B_MicroBitOrientation(x, y, deviceClass){
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  //this.displayName = "";
-  this.draggable = true;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this,this.displayName));
 
   const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
   orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
@@ -284,10 +273,7 @@ B_MicroBitOrientation.prototype.updateAction = function() {
 function B_MicroBitMagnetometer(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   //this.displayName = "";
-   this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   //this.addPart(new LabelText(this,this.displayName));
 
    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
@@ -353,7 +339,6 @@ B_MicroBitMagnetometer.prototype.updateAction = function(){
 function B_MicroBitCompass(x, y, deviceClass){
    ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
    this.deviceClass = deviceClass;
-   this.draggable = true;
    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
    this.addPart(new LabelText(this, Language.getStr("block_Compass")));
 }
@@ -392,54 +377,3 @@ B_MicroBitCompass.prototype.updateAction = function(){
        return new ExecutionStatusRunning(); // Still running
 };
 Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
-
-/**
-* A Block to trigger compass calibration
-* @param {number} x
-* @param {number} y
-* @param deviceClass - A subclass of Device indicating the type of robot
-* @constructor
-*/
-function B_MicroBitCompassCalibrate(x, y, deviceClass){
-   CalibrateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
-   this.deviceClass = deviceClass;
-   this.draggable = false;
-   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this, Language.getStr("CompassCalibrate")));
-}
-B_MicroBitCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
-B_MicroBitCompassCalibrate.prototype.constructor = B_MicroBitCompassCalibrate;
-
-B_MicroBitCompassCalibrate.prototype.startAction=function(){
-
-   let deviceIndex = this.slots[0].getData().getValue();
-   let device = this.deviceClass.getManager().getDevice(deviceIndex);
-   if (device == null) {
-       this.displayError(this.deviceClass.getNotConnectedMessage());
-       return new ExecutionStatusError(); // no device or device was invalid, exit early
-   }
-
-   const dialog = new CalibrateCompassDialog(this.deviceClass);
-   dialog.show();
-
-   let mem = this.runMem;
-   mem.requestStatus = {};
-   mem.requestStatus.finished = true;
-   mem.requestStatus.error = false;
-   mem.requestStatus.result = null;
-   //device.calibrateCompass(mem.requestStatus);
-   return new ExecutionStatusRunning();
-};
-
-B_MicroBitCompassCalibrate.prototype.updateAction = function(){
-   const status = this.runMem.requestStatus;
-   if (status.finished) {
-       if(status.error){
-           this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-           return new ExecutionStatusError();
-       } else {
-           return new ExecutionStatusDone();
-       }
-   }
-   return new ExecutionStatusRunning(); // Still running
-};

@@ -83,7 +83,6 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, blockTransla
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
-	//this.displayName = displayName;
 	this.numberOfPorts = numberOfPorts;
 	this.minVal = minVal;
 	this.maxVal = maxVal;
@@ -96,7 +95,6 @@ function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, blockTransla
 		this.defaultValue = defaultVal;
 	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
-	//this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
 	const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
@@ -157,23 +155,16 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	//this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	//this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
 	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
-	//this.addPart(new LabelText(this, "%"));
-	//this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
 	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
-	//this.addPart(new LabelText(this, "%"));
-	//this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
 	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
-	//this.addPart(new LabelText(this, "%"));
 	this.parseTranslation(Language.getStr("block_Tri_LED"));
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
@@ -225,22 +216,17 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  //this.displayName = Language.getStr("Play_Note");
-  this.draggable = true;
   this.minNote = 32
   this.maxNote = 135
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this,this.displayName));
   const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
-  //this.addPart(new LabelText(this, Language.getStr("for")));
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
   beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
   this.addPart(beatsSlot);
-  //this.addPart(new LabelText(this,Language.getStr("Beats")));
 	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_DeviceWithPortsBuzzer.prototype = Object.create(CommandBlock.prototype);

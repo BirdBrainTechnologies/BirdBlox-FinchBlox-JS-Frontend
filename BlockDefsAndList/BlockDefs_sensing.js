@@ -7,10 +7,7 @@
 /* TODO: make sure dialogs don't show while a save dialog is up */
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	//this.addPart(new LabelText(this, Language.getStr("ask")));
-	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("what_your_name")));
 	this.addPart(new StringSlot(this, "StrS_msg", ""));
-	//this.addPart(new LabelText(this, Language.getStr("and_wait")));
 	this.parseTranslation(Language.getStr("block_ask"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
@@ -111,7 +108,6 @@ Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	//this.addPart(new LabelText(this, Language.getStr("current")));
 	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
 	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
 	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
@@ -157,10 +153,7 @@ B_CurrentTime.prototype.startAction = function() {
 
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	//this.addPart(new LabelText(this, Language.getStr("Display")));
-	//this.addPart(new StringSlot(this, "StrS_msg", Language.getStr("hello")));
 	this.addPart(new StringSlot(this, "StrS_msg", ""));
-	//this.addPart(new LabelText(this, Language.getStr("at")));
 	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("position") +" 3", "position3"));
 	dS.addOption(new SelectionData(Language.getStr("position") +" 1", "position1"));
 	dS.addOption(new SelectionData(Language.getStr("position") +" 2", "position2"));

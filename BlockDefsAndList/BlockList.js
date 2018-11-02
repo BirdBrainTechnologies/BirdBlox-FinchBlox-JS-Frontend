@@ -254,11 +254,6 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 
-	//collapsibleItem.addSpace();
-	//const calibrateDialog = new CalibrateCompassDialog(DeviceHummingbirdBit);
-	//const button = collapsibleItem.addButton(Language.getStr("CompassCalibrate"), calibrateDialog.showDialog);
-	//collapsibleItem.addSpace();
-
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
 	collapsibleItem.addBlockByName("B_BBPositionServo");
@@ -272,7 +267,6 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
-	//collapsibleItem.addBlockByName("B_BBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -292,7 +286,6 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
-	//collapsibleItem.addBlockByName("B_MBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };

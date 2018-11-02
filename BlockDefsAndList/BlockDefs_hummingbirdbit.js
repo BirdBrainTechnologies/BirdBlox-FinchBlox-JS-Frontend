@@ -10,34 +10,24 @@ B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
-    this.draggable = true;
     B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Position_Servo", 4, "angle", 0, 180, Language.getStr("Angle"), 90);
-
-    //this.addPart(new LabelText(this,'\xBA'));
 }
 B_BBPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
-    this.draggable = true;
     B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Rotation_Servo", 4, "percent", -100, 100, Language.getStr("Speed"));
-
-    //this.addPart(new LabelText(this,"%"));
 }
 B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
-    this.draggable = true;
     B_HummingbirdBitOutputBase.call(this, x, y, "led", "block_LED", 3, "intensity", 0, 100, Language.getStr("Intensity"));
-
-    //this.addPart(new LabelText(this,"%"));
 }
 B_BBLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBLed.prototype.constructor = B_BBLed;
 
 function B_BBTriLed(x, y) {
-    this.draggable = true;
     B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbirdBit, 2);
 }
 B_BBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
@@ -62,11 +52,9 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 //MARK: hummingbird bit sensors
 function B_BBSensors(x, y){
-    ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    //this.displayName = ""; //TODO: perhapse remove this
-    this.draggable = true;
-    this.numberOfPorts = 3;
+  ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+  this.deviceClass = DeviceHummingbirdBit;
+  this.numberOfPorts = 3;
 
   // Default option for sensor is Light.
   const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
@@ -78,7 +66,6 @@ function B_BBSensors(x, y){
   dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this,this.displayName));
   this.addPart(dS);
   this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
@@ -182,10 +169,3 @@ function B_BBCompass(x, y){
 }
 B_BBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_BBCompass.prototype.constructor = B_BBCompass;
-
-
-function B_BBCompassCalibrate(x, y){
-  B_MicroBitCompassCalibrate.call(this, x, y, DeviceHummingbirdBit);
-}
-B_BBCompassCalibrate.prototype = Object.create(B_MicroBitCompassCalibrate.prototype);
-B_BBCompassCalibrate.prototype.constructor = B_BBCompassCalibrate;

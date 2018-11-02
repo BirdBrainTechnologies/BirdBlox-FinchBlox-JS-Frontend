@@ -15,7 +15,6 @@ function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	CommandBlock.call(this, x, y, "sound");
 	this.isRecording = isRecording;
 	this.waitUntilDone = waitUntilDone;
-	//this.addPart(new LabelText(this, label));
 	let dS = new SoundDropSlot(this, "SDS_1", isRecording);
 	this.addPart(dS);
 	this.parseTranslation(label);
@@ -112,9 +111,7 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	//this.addPart(new LabelText(this, Language.getStr("rest_for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
-	//this.addPart(new LabelText(this, Language.getStr("Beats")));
 	this.parseTranslation(Language.getStr("block_rest_for"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -141,11 +138,8 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	//this.addPart(new LabelText(this, Language.getStr("play_note")));
 	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	//this.addPart(new LabelText(this, Language.getStr("for")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
-	//this.addPart(new LabelText(this, Language.getStr("Beats")));
 	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -185,7 +179,6 @@ B_PlayNoteForBeats.prototype.updateAction = function() {
 
 function B_ChangeTempoBy(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	//this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
 	this.addPart(new NumSlot(this, "NumS_amt", 20));
 	this.parseTranslation(Language.getStr("block_change_tempo_by"));
 }
@@ -205,11 +198,9 @@ B_ChangeTempoBy.prototype.startAction = function() {
 
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	//this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
 	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	//this.addPart(new LabelText(this, Language.getStr("bpm")));
 	this.parseTranslation(Language.getStr("block_set_tempo_to"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);

@@ -448,14 +448,11 @@ TouchReceiver.touchmove = function(e) {
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType === "displayStack") {
-			    if (typeof TR.target.draggable == "undefined" || TR.target.draggable) {
-			        const x = TR.target.stack.getAbsX();
-                    const y = TR.target.stack.getAbsY();
-                    // The first block of the duplicated BlockStack is the new target.
-                    TR.target = TR.target.stack.duplicate(x, y).firstBlock;
-                    TR.targetType = "block";
-			    }
-
+	        const x = TR.target.stack.getAbsX();
+          const y = TR.target.stack.getAbsY();
+          // The first block of the duplicated BlockStack is the new target.
+          TR.target = TR.target.stack.duplicate(x, y).firstBlock;
+          TR.targetType = "block";
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
 			 then the BlockStack should move. */

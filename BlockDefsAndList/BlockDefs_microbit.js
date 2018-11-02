@@ -6,15 +6,14 @@
 
 function B_MBPrint(x, y){
     B_MicroBitPrint.call(this, x, y, DeviceMicroBit);
-}
-
+};
 B_MBPrint.prototype = Object.create(B_MicroBitPrint.prototype);
 B_MBPrint.prototype.constructor = B_MBPrint;
 
 
 function B_MBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
-}
+};
 B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_MBLedArray.prototype.constructor = B_MBLedArray;
 
@@ -23,7 +22,7 @@ B_MBLedArray.prototype.constructor = B_MBLedArray;
 
 function B_MBMagnetometer(x, y){
   B_MicroBitMagnetometer.call(this, x, y, DeviceMicroBit);
-}
+};
 B_MBMagnetometer.prototype = Object.create(B_MicroBitMagnetometer.prototype);
 B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
 
@@ -44,16 +43,9 @@ B_MBOrientation.prototype.constructor = B_MBOrientation;
 
 function B_MBCompass(x, y){
     B_MicroBitCompass.call(this, x, y, DeviceMicroBit);
-}
+};
 B_MBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_MBCompass.prototype.constructor = B_MBCompass;
-
-
-function B_MBCompassCalibrate(x, y){
-  B_MicroBitCompassCalibrate.call(this, x, y, DeviceMicroBit);
-}
-B_MBCompassCalibrate.prototype = Object.create(B_MicroBitCompassCalibrate.prototype);
-B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
 
 
 //MARK: Blocks specific to the stand alone micro:bit
@@ -61,10 +53,7 @@ B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
 function B_MBReadPin(x, y){
     ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
     this.deviceClass = DeviceMicroBit;
-    //this.displayName = Language.getStr("read");
-    this.draggable = true;
     this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    //this.addPart(new LabelText(this,this.displayName));
 
     const pin = Language.getStr("pin");
     const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -73,7 +62,7 @@ function B_MBReadPin(x, y){
     pickPin.addOption(new SelectionData(pin + " 2", "3"));
     this.addPart(pickPin);
     this.parseTranslation(Language.getStr("block_read"));
-}
+};
 B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
 B_MBReadPin.prototype.constructor = B_MBReadPin;
 /* Sends the request for the sensor data. */
@@ -113,10 +102,8 @@ B_MBReadPin.prototype.updateAction = function(){
 function B_MBWriteToPin(x, y) {
 
   CommandBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-  this.draggable = true;
   this.deviceClass = DeviceMicroBit;
   this.outputType = "write";
-  //this.displayName = Language.getStr("write");
 
   this.minVal = 0;
   this.maxVal = 100;
@@ -126,7 +113,6 @@ function B_MBWriteToPin(x, y) {
   this.defaultValue = 0;
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  //this.addPart(new LabelText(this, this.displayName));
 
   const pin = Language.getStr("pin");
   const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
@@ -137,9 +123,8 @@ function B_MBWriteToPin(x, y) {
   const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
   numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);
   this.addPart(numSlot);
-  //this.addPart(new LabelText(this,"%"));
   this.parseTranslation(Language.getStr("block_write"));
-}
+};
 B_MBWriteToPin.prototype = Object.create(CommandBlock.prototype);
 B_MBWriteToPin.prototype.constructor = B_MBWriteToPin;
 
@@ -167,6 +152,6 @@ B_MBWriteToPin.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.up
 
 function B_MBBuzzer(x, y){
   B_DeviceWithPortsBuzzer.call(this, x, y, DeviceMicroBit);
-}
+};
 B_MBBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
 B_MBBuzzer.prototype.constructor = B_MBBuzzer;
