@@ -202,8 +202,10 @@ Language.ca = {
 "Device_firmware":"Versió del firmware del dispositiu:",
 "Required_firmware":"Versió del firmware requerida:",
 "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
-"ceiling":"ceiling",
-"floor":"floor",
+"ceiling":"sostre",
+"floor":"part entera",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"arrel quadrada",
+"CM":"cm",
+"Inch":"polzades"
 }

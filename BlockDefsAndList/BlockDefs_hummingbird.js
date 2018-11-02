@@ -76,7 +76,7 @@ Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 function B_HBDistCM(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " CM");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("CM"));
 }
 B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -140,7 +140,7 @@ Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 function B_HBDistInch(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") +" Inch");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("Inch"));
 }
 B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;

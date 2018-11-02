@@ -1,7 +1,7 @@
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
  * all the connected devices in an array, which can be accessed through the getDevice function, which is how
- * robot Blocks get an instance of Device to send their request.  The DeviceManger is also used by the
+ * robot Blocks get an instance of Device to send their request.  The DeviceManager is also used by the
  * ConnectMultipleDialog and the CallbackManger to lookup information.  THe DeviceManager notifies CodeManger when
  * the connected devices change, so Blocks on the canvas can update their appearance.
  *
@@ -481,13 +481,19 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 	}
 };
 
-DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+/**
+  * Removes a disconnected robot from the list. Used if the backend has given
+  * up on the connection. If the firmware is incompatible, notify user.
+  */
+DeviceManager.prototype.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	const index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
 		const robot = this.connectedDevices[index];
 		this.connectedDevices.splice(index, 1);
-		this.devicesChanged(null, false);
-		robot.notifyIncompatible(oldFirmware, minFirmware);
+		this.devicesChanged(null, true);
+		if (oldFirmware != null && minFirmware != null){
+			robot.notifyIncompatible(oldFirmware, minFirmware);
+		}
 	}
 };
 
@@ -614,14 +620,16 @@ DeviceManager.backendDiscovered = function(robotList) {
 };
 
 /**
- * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * Notifies all DeviceManagers that the specified device will not be connected
+ * and should be removed. If incompatible firmware is specified, the user will
+ * be notified.
  * @param {string} robotId - The id of the robot to disconnect
  * @param {string} oldFirmware - The firmware on the robot
  * @param {string} minFirmware - The minimum firmware required to be compatible
  */
-DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+DeviceManager.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	DeviceManager.forEach(function(manager) {
-		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+		manager.removeDisconnected(robotId, oldFirmware, minFirmware);
 	});
 };
 

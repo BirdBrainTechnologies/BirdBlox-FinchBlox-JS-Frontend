@@ -76,7 +76,7 @@ Language.fr = {
 "block_split":"divisez (Slot 1 = boujour monde) avec (Slot 2)",
 "letter":"lettre",
 "whitespace":"espace blanc",
-"block_validate":"est (Slot 1 = 5) a (Slot 2)?",
+"block_validate":"est (Slot 1 = 5) un (Slot 2)?",
 "number":"numéro",
 "text":"texte",
 "boolean":"booléen",
@@ -119,11 +119,11 @@ Language.fr = {
 "Delete":"Supprimez",
 "block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
 "Create_List":"Créez une liste",
-"block_delete_from_list":"supprimez (Slot 1) ou (Slot 2)",
-"block_insert_into_list":"insérez (Slot 1 = chose) à (Slot 2) ou (Slot 3)",
-"block_replace_list_item":"remplacez l'article (Slot 1) ou (Slot 2) avec (Slot 3 = chose)",
+"block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",
+"block_insert_into_list":"insérez (Slot 1 = chose) à (Slot 2) dans (Slot 3)",
+"block_replace_list_item":"remplacez l'article (Slot 1) dans (Slot 2) avec (Slot 3 = chose)",
 "block_copy_list":"copiez (Slot 1) à (Slot 2)",
-"block_list_item":"item (Slot 1) ou (Slot 2)",
+"block_list_item":"item (Slot 1) de (Slot 2)",
 "block_list_length":"longueur de (Slot 1)",
 "block_list_contains":"(Slot 1) contient (Slot 2 = chose)",
 "last":"Dernier",
@@ -205,5 +205,7 @@ Language.fr = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }

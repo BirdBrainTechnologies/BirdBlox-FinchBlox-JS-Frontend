@@ -8,7 +8,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -1300,7 +1300,7 @@ List.prototype.delete = function() {
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "ca", "da", "de", "en", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
+Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
 Language.rtlLangs = [];
 //Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
@@ -1311,6 +1311,7 @@ Language.names = {
   "da":"Dansk",  //Danish
   "de":"Deutsch",  //German
   "en":"English",  //English
+  "es":"Español",  //Spanish
   "fr":"Français",  //French
   "he":"עברית",  //Hebrew
   "ja":"日本語",  //Japanese
@@ -2275,7 +2276,9 @@ Language.ar = {
   "ceiling":"ceiling",
   "floor":"floor",
   "abs":"abs",
-  "sqrt":"sqrt"
+  "sqrt":"sqrt",
+  "CM":"CM",
+  "Inch":"Inch"
 }
 
 //Catalan Translation
@@ -2482,10 +2485,12 @@ Language.ca = {
 "Device_firmware":"Versió del firmware del dispositiu:",
 "Required_firmware":"Versió del firmware requerida:",
 "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
-"ceiling":"ceiling",
-"floor":"floor",
+"ceiling":"sostre",
+"floor":"part entera",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"arrel quadrada",
+"CM":"cm",
+"Inch":"polzades"
 }
 
 //Danish Translation
@@ -2693,7 +2698,9 @@ Language.da = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //German Translation
@@ -2903,7 +2910,9 @@ Language.de = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //English Translation
@@ -3111,7 +3120,221 @@ Language.en = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
+}
+
+//Spanish Translation
+Language.es = {
+  "block_Tri_LED":"Led tricolor (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Puerto",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Servo de posicion (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Servo de rotacion (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Emitir un sonido (Slot 1) por (Slot 2) pulsos",
+  "Light":"Luz",
+  "Distance":"Distancia",
+  "Dial":"Dial",
+  "Other":"Otro",
+  "Accelerometer":"Acelerometro",
+  "Magnetometer":"Magnetometro",
+  "block_LED_Display":"Monitor",
+  "block_Print":"Imprimir (Slot 1 = Hola)",
+  "block_Button":"Pulsador (Slot 1)",
+  "Screen_Up":"Subir la pantalla",
+  "Screen_Down":"Bajar la pantalla",
+  "Tilt_Left":"Ladear hacia la izquierda",
+  "Tilt_Right":"Ladear hacia la derecha",
+  "Logo_Up":"Logo arriba",
+  "Logo_Down":"Logo abajo",
+  "Shake":"Sacudir",
+  "block_Compass":"Brujula",
+  "block_Servo":"Servo (Slot 1)(Slot 2)",
+  "block_Vibration":"Vibracion (Slot 1)(Slot 2)",
+  "block_Motor":"Motor (Slot 1)(Slot 2)",
+  "block_Temperature_C":"Temperatura C (Slot 1)",
+  "block_Temperature_F":"Temperatura F (Slot 1)",
+  "block_write":"Escribir (Slot 1) (Slot 2) %",
+  "pin":"Pinche",
+  "block_read":"Leer (Slot 1)",
+  "block_Device_Shaken":"Sacudir la tableta",
+  "block_Device_LatLong":"Tableta (Slot 1)",
+  "Latitude":"Latitud",
+  "Longitude":"Longitudd",
+  "block_Device_SSID":"SSID de la tableta",
+  "block_Device_Pressure":"Presion de la tableta",
+  "block_Device_Relative_Altitude":"Altitud relativa de la tableta",
+  "block_Acceleration":"Tableta (Slot 1) aceleracion",
+  "Total":"Total",
+  "block_Device_Orientation":"Orientacion de la tableta",
+  "faceup":"Cara arriba",
+  "facedown":"Cara abajo",
+  "portrait_bottom":"Portaretrato: Camara inferior",
+  "portrait_top":"Portaretrato: Camara superior",
+  "landscape_left":"Paisaje: Camara en la izquierda",
+  "landscape_right":"Paisaje: Camara en la derecha",
+  "block_Display":"Monitor (Slot 1 = Hola) en (Slot 2)",
+  "position":"Posicion",
+  "block_ask":"Preguntar (Slot 1 = Cual es tu nombre?) Y esperar",
+  "block_answer":"Responder",
+  "block_reset_timer":"Reiniciar el temporizador",
+  "block_timer":"Temporizador",
+  "block_current":"Actual (Slot 1)",
+  "date":"Fecha",
+  "year":"Año",
+  "month":"Mes",
+  "hour":"Hora",
+  "minute":"Minuto",
+  "second":"Segundo",
+  "day_of_the_week":"Dia de la semana",
+  "time_in_milliseconds":"Tiempo en milisegundos",
+  "block_mod":"(Slot 1) modo (Slot 2)",
+  "block_round":"Vuelta (Slot 1)",
+  "block_pick_random":" Eleccion aleatoria (Slot 1) a (Slot 2)",
+  "block_and":"(Slot 1) y (Slot 2)",
+  "block_or":"(Slot 1) o (Slot 2)",
+  "block_not":"No (Slot 1)",
+  "true":"Verdadero",
+  "false":"Falso",
+  "block_letter":"Letra (Slot 1) de (Slot 2 = mundo)",
+  "block_length":"Longitud de (Slot 1 = mundo)",
+  "block_join":"Unir (Slot 1 =  hola) y (Slot 1 = mundo)",
+  "block_split":"Dividir (Slot 1 = Hola mundo) en (Slot 2)",
+  "letter":"Letra",
+  "whitespace":"Espacio en blanco",
+  "block_validate":"Es (Slot 1 = 5) un (Slot 2)?",
+  "number":"Numero",
+  "text":"Texto",
+  "boolean":"Booleano",
+  "list":"Lista",
+  "invalid_number":"Numero invalido",
+  "block_when_flag_tapped":"Cuando (Icon) es presionado",
+  "block_when_I_receive":"Cuando recibo (Slot 1)",
+  "any_message":"Cualquier mensaje",
+  "new":"nuevo",
+  "block_when":"Cuando (Slot 1)",
+  "block_broadcast":"Transmitir (Slot 1)",
+  "block_broadcast_and_wait":"Transmitir (Slot 1) y esperar",
+  "block_message":"mensaje",
+  "block_wait":"esperar (Slot 1) segundos",
+  "block_wait_until":"esperar hasta (Slot 1)",
+  "block_repeat_forever":"Repetir por siempre",
+  "block_repeat":"repetir (Slot 1)",
+  "block_repeat_until":"repetir hasta (Slot !)",
+  "block_if":"si (Slot 1)",
+  "block_if_else":"Si (Slot 1)",
+  "else":"caso contrario",
+  "block_stop":"detener (Slot 1)",
+  "all":"todo",
+  "this_script":"este esquema",
+  "all_but_this_script":"todo menos este esquema",
+  "Record_sound":"Grabar sonido",
+  "block_play_recording":"Reproducir grabacion (Slot 1)",
+  "block_play_recording_until_done":"Reproducir grabacion hasta el final (Slot 1)",
+  "block_play_sound":"Reproducir sonido (Slot 1)",
+  "block_play_sound_until_done":"Reproducir sonido hasta el final (Slot 1)",
+  "block_stop_all_sounds":"Finalizar todos los sonidos",
+  "block_rest_for":"descansar por (Slot 1) pulsos",
+  "block_change_tempo_by":"cambiar el temporizador en (Slot 1)",
+  "block_set_tempo_to":"configurar el temporizador a (Slot 1)",
+  "block_tempo":"Temporizador",
+  "block_set_variable":"configurar (Slot 1) a (Slot 2)",
+  "Create_Variable":"Crear Variable",
+  "block_change_variable":"cambiar (Slot 1) en (Slot 2)",
+  "Rename":"Cambiar nombre",
+  "Delete":"Borrar",
+  "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
+  "Create_List":"Crear lista",
+  "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",
+  "block_insert_into_list":"insertar (Slot 1 = objeto) en (Slot 2) de (Slot 3)",
+  "block_replace_list_item":"reemplazar item (Slot 1) de (Slot 2) con (Slot 3 = objeto)",
+  "block_copy_list":"copiar (Slot 1) a (Slot 2)",
+  "block_list_item":"item (Slot 1) a (Slot 2)",
+  "block_list_length":"Longitud de (Slot 1)",
+  "block_list_contains":"(Slot 1) contiene (Slot 2 = objeto)",
+  "last":"Ultimo",
+  "random":"Aleatorio",
+  "Robots":"Robots",
+"Operators":"Operadores",
+"Sound":"Sonido",
+"Tablet":"Tableta",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Acercar zoom",
+"Zoom_out":"Alejar zoom",
+"Reset_zoom":"Reiniciar zoom",
+"Disable_snap_noise":"Deshabilitar sonido snap",
+"Enable_snap_noise":"Habilitar sonido snap",
+"CompassCalibrate":"Calibrar la brujula",
+"Send_debug_log":"Enviar registro del debug",
+"Show_debug_menu":"Mostrar resultados del debug",
+"Connect_Device":"Conectar dispositivo",
+"Connect_Multiple":"Coneccion multiple",
+"Disconnect_Device":"Desconectar dispositivo",
+"Tap":"Presionar + para conectar",
+"Scanning_for_devices":"Escaneando dispositivos",
+"Open":"Abrir",
+"No_saved_programs":"Programas no guardados",
+"New":"Nuevo",
+"Saving":"Guardando",
+"On_Device":"En el dispositivo",
+"Cloud":"Nube",
+"Loading":"Cargando",
+"Sign_in":"Ingresar",
+"New_program":"Programa nuevo",
+"Share":"Compartir",
+"Recordings":"Grabaciones",
+"Discard":"Descartar",
+"Stop":"Detener",
+"Pause":"Pausa",
+"remaining":"restante",
+"Record":"Grabar",
+"Tap_record_to_start":"Presionar grabar para iniciar",
+"Done":"Hecho",
+"Delete":"Borrar",
+"Delete_question":"Esta seguro que quiere borrar esto?",
+"Cancel":"Cancelar",
+"OK":"Aceptar",
+"Dont_delete":"No borrar",
+"Rename":"Cambiar nombre",
+"Enter_new_name":"Ingrese un nombre nuevo",
+"Duplicate":"Duplicar",
+"Name_duplicate_file":"Ingrese un nombre para el archivo duplicado",
+"Name_error_invalid_characters":"Los siguientes caracteres no pueden ser utilizados en los nombres de los archivos: \n",
+"Name_error_already_exists":"\" ya existe. Entre un nombre diferente",
+"Permission_denied":"Permiso denegado",
+"Grant_permission":"Permiso especial de grabacion en la configuracion del BirdBlox",
+"Dismiss":"Descartar",
+"Name":"Nombre",
+"Enter_file_name":"Ingresar el nombre del archivo",
+"Name_error_blank":"El nombre no puede estar vacio. Ingrese un nombre para el archivo",
+"Edit_text":"Editar texto",
+"Question":"Pregunta",
+"Connection_Failure":"Coneccion fallada",
+"Connection_failed_try_again":"Coneccion fallada, por favor intente de nuevo",
+"Disconnect_account":"Desconectar la cuenta",
+"Disconnect_account_question":"Desconectar la cuenta?",
+"Dont_disconnect":"No desconectar",
+"Disconnect":"Desconectar",
+"not_connected":"(Device) no conectado",
+"not_a_valid_number":"Este numero no es valido",
+"Intensity":"Intensidad",
+"Angle":"Angulo",
+"Speed":"Velocidad",
+"Note":"Nota",
+"Beats":"Pulsos",
+"Firmware_incompatible":"El firmware es incompatible",
+"Update_firmware":"Actualizar firmware",
+"Device_firmware":"Version del firmware del dispositivo:",
+"Required_firmware":"Version del firmware requerida:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 // French translation
@@ -3192,7 +3415,7 @@ Language.fr = {
 "block_split":"divisez (Slot 1 = boujour monde) avec (Slot 2)",
 "letter":"lettre",
 "whitespace":"espace blanc",
-"block_validate":"est (Slot 1 = 5) a (Slot 2)?",
+"block_validate":"est (Slot 1 = 5) un (Slot 2)?",
 "number":"numéro",
 "text":"texte",
 "boolean":"booléen",
@@ -3235,11 +3458,11 @@ Language.fr = {
 "Delete":"Supprimez",
 "block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
 "Create_List":"Créez une liste",
-"block_delete_from_list":"supprimez (Slot 1) ou (Slot 2)",
-"block_insert_into_list":"insérez (Slot 1 = chose) à (Slot 2) ou (Slot 3)",
-"block_replace_list_item":"remplacez l'article (Slot 1) ou (Slot 2) avec (Slot 3 = chose)",
+"block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",
+"block_insert_into_list":"insérez (Slot 1 = chose) à (Slot 2) dans (Slot 3)",
+"block_replace_list_item":"remplacez l'article (Slot 1) dans (Slot 2) avec (Slot 3 = chose)",
 "block_copy_list":"copiez (Slot 1) à (Slot 2)",
-"block_list_item":"item (Slot 1) ou (Slot 2)",
+"block_list_item":"item (Slot 1) de (Slot 2)",
 "block_list_length":"longueur de (Slot 1)",
 "block_list_contains":"(Slot 1) contient (Slot 2 = chose)",
 "last":"Dernier",
@@ -3321,7 +3544,9 @@ Language.fr = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //Hebrew Translation
@@ -3529,7 +3754,9 @@ Language.he = {
   "ceiling":"ceiling",
   "floor":"floor",
   "abs":"abs",
-  "sqrt":"sqrt"
+  "sqrt":"sqrt",
+  "CM":"CM",
+  "Inch":"Inch"
 }
 
 //Korean Translation
@@ -3737,7 +3964,9 @@ Language.ko = {
 "Firmware_incompatible":"펌웨어 호환불가",
 "Update_firmware":"펌웨어 업데이트",
 "Device_firmware":"기기 펌웨어 버전:",
-"Required_firmware":"필요한 펌웨어 버전:"
+"Required_firmware":"필요한 펌웨어 버전:",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //Dutch Translation
@@ -3747,7 +3976,7 @@ Language.nl = {
   "block_LED":"LED (Slot 1) (Slot 2) %",
   "block_Position_Servo":"Positie-Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Draai-Servo (Slot 1) (Slot 2) %",
-  "block_Play_Note":"Speel Noot (Slot 1) voor (Slot 2) Beats",
+  "block_Play_Note":"speel noot (Slot 1) voor (Slot 2) Beats",
   "Light":"Licht",
   "Distance":"Afstand",
   "Dial":"Draaiknop",
@@ -3789,9 +4018,9 @@ Language.nl = {
   "portrait_top":"Staand: Camera bovenaan",
   "landscape_left":"Liggend: Camera links",
   "landscape_right":"Liggend: Camera rechts",
-  "block_Display":"Scrijf (Slot 1 = Hello) in (Slot 2)",
+  "block_Display":"Schrijf (Slot 1 = Hello) in (Slot 2)",
   "position":"Positie",
-  "block_ask":"Vraag (Slot 1 = Was is uw naam?) en wacht",
+  "block_ask":"Vraag (Slot 1 = Wat is uw naam?) en wacht",
   "block_answer":"antwoord",
   "block_reset_timer":"zet tijd op nul",
   "block_timer":"tijd",
@@ -3821,7 +4050,7 @@ Language.nl = {
   "block_validate":"is (Slot 1 = 5) een (Slot 2)?",
   "number":"getal",
   "text":"tekst",
-  "boolean":"booleaans",
+  "boolean":"boolean",
   "list":"lijst",
   "invalid_number":"ongeldig getal",
   "block_when_flag_tapped":"wanneer (Icon) wordt aangeklikt",
@@ -3859,7 +4088,7 @@ Language.nl = {
   "block_change_variable":"verander (Slot 1) met (Slot 2)",
   "Rename":"Hernoemen",
   "Delete":"Verwijder",
-  "block_add_to_list":"voeg (Slot 1 = ding) in op (Slot 2)",
+  "block_add_to_list":"voeg (Slot 1 = ding) toe aan (Slot 2)",
   "Create_List":"Maak een Lijst",
   "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",
   "block_insert_into_list":"voeg (Slot 1 = ding) op (Slot 2) aan (Slot 3) toe",
@@ -3947,7 +4176,9 @@ Language.nl = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //Portuguese Translation
@@ -4157,7 +4388,9 @@ Language.pt = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //Simplified Chinese Translation (zh-Hans)
@@ -4366,7 +4599,9 @@ Language.zhs = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 //Traditional Chinese Translation (zh-Hant)
@@ -4576,7 +4811,9 @@ Language.zht = {
 "ceiling":"ceiling",
 "floor":"floor",
 "abs":"abs",
-"sqrt":"sqrt"
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch"
 }
 
 /**
@@ -5078,7 +5315,7 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
  * all the connected devices in an array, which can be accessed through the getDevice function, which is how
- * robot Blocks get an instance of Device to send their request.  The DeviceManger is also used by the
+ * robot Blocks get an instance of Device to send their request.  The DeviceManager is also used by the
  * ConnectMultipleDialog and the CallbackManger to lookup information.  THe DeviceManager notifies CodeManger when
  * the connected devices change, so Blocks on the canvas can update their appearance.
  *
@@ -5558,13 +5795,19 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 	}
 };
 
-DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+/**
+  * Removes a disconnected robot from the list. Used if the backend has given
+  * up on the connection. If the firmware is incompatible, notify user.
+  */
+DeviceManager.prototype.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	var index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
 		var robot = this.connectedDevices[index];
 		this.connectedDevices.splice(index, 1);
-		this.devicesChanged(null, false);
-		robot.notifyIncompatible(oldFirmware, minFirmware);
+		this.devicesChanged(null, true);
+		if (oldFirmware != null && minFirmware != null){
+			robot.notifyIncompatible(oldFirmware, minFirmware);
+		}
 	}
 };
 
@@ -5691,14 +5934,16 @@ DeviceManager.backendDiscovered = function(robotList) {
 };
 
 /**
- * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * Notifies all DeviceManagers that the specified device will not be connected
+ * and should be removed. If incompatible firmware is specified, the user will
+ * be notified.
  * @param {string} robotId - The id of the robot to disconnect
  * @param {string} oldFirmware - The firmware on the robot
  * @param {string} minFirmware - The minimum firmware required to be compatible
  */
-DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+DeviceManager.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	DeviceManager.forEach(function(manager) {
-		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+		manager.removeDisconnected(robotId, oldFirmware, minFirmware);
 	});
 };
 
@@ -18705,7 +18950,9 @@ ConnectMultipleDialog.prototype.closeDialog = function() {
  */
 ConnectMultipleDialog.reloadDialog = function(deviceClass) {
     var curDialog = ConnectMultipleDialog.currentDialog;
-    curDialog.reloadDialog(deviceClass);
+    if (curDialog != null) {
+      curDialog.reloadDialog(deviceClass);
+    }
 };
 
 /**
@@ -19406,7 +19653,7 @@ DiscoverDialog.prototype.show = function() {
  */
 DiscoverDialog.prototype.discoverDevices = function() {
 	var me = this;
-	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
+	// Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
 		// Tell the device manager that it should scan again if the dialog is still open
 		return this.visible;
@@ -19848,6 +20095,10 @@ function BlockStack(firstBlock, tab) {
 	this.move(this.x, this.y);
 	this.flying = false; // BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 	this.tab.updateArrows();
+
+	if (this.firstBlock.autoExecute) {
+		this.startRun();
+	}
 }
 
 /**
@@ -20011,8 +20262,12 @@ BlockStack.prototype.updateRun = function() {
 		if (this.returnType === Block.returnTypes.none) {
 			// If the current Block has been removed, don't run it.
 			if (this.currentBlock.stack !== this) {
-				this.endRun(); // Stop execution.
-				return new ExecutionStatusDone();
+				if (this.firstBlock.autoExecute) {
+					this.currentBlock = this.firstBlock;
+				} else {
+					this.endRun(); // Stop execution.
+					return new ExecutionStatusDone();
+				}
 			}
 			// Update the current Block.
 			var execStatus = this.currentBlock.updateRun();
@@ -20026,8 +20281,12 @@ BlockStack.prototype.updateRun = function() {
 					this.currentBlock = this.currentBlock.nextBlock;
 				}
 			}
-			// If the end of the BlockStack has been reached, end execution.
+			// If the end of the BlockStack has been reached, end execution, unless
+			// the first block is set to autoExecute. Then start over.
 			if (this.currentBlock != null) {
+				return new ExecutionStatusRunning();
+			} else if (this.firstBlock.autoExecute) {
+				this.currentBlock = this.firstBlock;
 				return new ExecutionStatusRunning();
 			} else {
 				this.endRun();
@@ -20469,6 +20728,7 @@ BlockStack.prototype.getWidth = function() {
 BlockStack.prototype.getHeight = function() {
 	return this.dim.rh;
 };
+
 /**
  * Represents a request to be used with HtmlServer
  * @param url {String} - The beginning of the request
@@ -21259,12 +21519,18 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 	robotId = HtmlServer.decodeHtml(robotId);
 	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
 	minFirmware = HtmlServer.decodeHtml(minFirmware);
-	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+	//DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
+
+	//November 2018 - for now, while there is really no old firmware
+	// out there, the incompatible message comes up incorrectly more
+	// often than correctly. Just report it as a connection failure
+	// (which is what it usually is).
+	CallBackManager.robot.connectionFailure(robotId);
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
-	//TODO: make sure this id is not in the device list anymore?
     robotId = HtmlServer.decodeHtml(robotId);
+		DeviceManager.removeDisconnected(robotId);
     var msg = Language.getStr("Connection_failed_try_again");
     DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
     		return;
@@ -22312,8 +22578,9 @@ UndoManager.clearUndos = function() {
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.
  * @param {string} category - The Block's category in string form.
+ * @param {boolean} autoExecute - If true, this block start running automatically
  */
-function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
+function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
 	this.x = x; //Store coords
 	this.y = y;
@@ -22357,6 +22624,9 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midHeight = 0;
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
+	}
+	if (autoExecute === true) {
+		this.autoExecute = true;
 	}
 }
 
@@ -23689,11 +23959,12 @@ PredicateBlock.prototype.constructor = PredicateBlock;
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.
  */
-function HatBlock(x, y, category) {
-	Block.call(this, 4, Block.returnTypes.none, x, y, category); //Call constructor.
+function HatBlock(x, y, category, autoExecute) {
+	Block.call(this, 4, Block.returnTypes.none, x, y, category, autoExecute); //Call constructor.
 }
 HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
 HatBlock.prototype.constructor = HatBlock;
+
 /**
  * Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with a space for additional Blocks
  * @constructor
@@ -27856,7 +28127,7 @@ Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 function B_HBDistCM(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " CM");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("CM"));
 }
 B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -27920,7 +28191,7 @@ Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 function B_HBDistInch(x, y) {
     this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") +" Inch");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("Inch"));
 }
 B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;
@@ -28891,18 +29162,18 @@ B_Stop.prototype.startAction = function() {
 
 
 
-
-
-
-
 function B_When(x, y) {
-	HatBlock.call(this, x, y, "control");
+	HatBlock.call(this, x, y, "control", true);
 	//this.addPart(new LabelText(this, Language.getStr("when")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 	this.parseTranslation(Language.getStr("block_when"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
+// The flag should trigger this block as well
+B_When.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+}
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
 	var stopWaiting = this.slots[0].getData().getValue();

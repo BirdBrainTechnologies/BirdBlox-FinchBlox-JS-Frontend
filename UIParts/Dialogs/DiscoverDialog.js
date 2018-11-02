@@ -39,7 +39,7 @@ DiscoverDialog.prototype.show = function() {
  */
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
+	// Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
 		// Tell the device manager that it should scan again if the dialog is still open
 		return this.visible;

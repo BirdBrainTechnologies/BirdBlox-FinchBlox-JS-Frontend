@@ -203,5 +203,7 @@ Language.ko = {
 "Firmware_incompatible":"펌웨어 호환불가",
 "Update_firmware":"펌웨어 업데이트",
 "Device_firmware":"기기 펌웨어 버전:",
-"Required_firmware":"필요한 펌웨어 버전:"
+"Required_firmware":"필요한 펌웨어 버전:",
+"CM":"CM",
+"Inch":"Inch"
 }

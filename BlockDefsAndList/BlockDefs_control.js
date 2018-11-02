@@ -378,18 +378,18 @@ B_Stop.prototype.startAction = function() {
 
 
 
-
-
-
-
 function B_When(x, y) {
-	HatBlock.call(this, x, y, "control");
+	HatBlock.call(this, x, y, "control", true);
 	//this.addPart(new LabelText(this, Language.getStr("when")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
 	this.parseTranslation(Language.getStr("block_when"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
+// The flag should trigger this block as well
+B_When.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+}
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
 	const stopWaiting = this.slots[0].getData().getValue();

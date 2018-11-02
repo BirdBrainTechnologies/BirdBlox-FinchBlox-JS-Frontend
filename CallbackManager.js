@@ -195,12 +195,18 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 	robotId = HtmlServer.decodeHtml(robotId);
 	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
 	minFirmware = HtmlServer.decodeHtml(minFirmware);
-	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+	//DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
+
+	//November 2018 - for now, while there is really no old firmware
+	// out there, the incompatible message comes up incorrectly more
+	// often than correctly. Just report it as a connection failure
+	// (which is what it usually is).
+	CallBackManager.robot.connectionFailure(robotId);
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
-	//TODO: make sure this id is not in the device list anymore?
     robotId = HtmlServer.decodeHtml(robotId);
+		DeviceManager.removeDisconnected(robotId);
     let msg = Language.getStr("Connection_failed_try_again");
     DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
     		return;

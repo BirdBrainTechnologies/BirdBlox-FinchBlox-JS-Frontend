@@ -269,7 +269,9 @@ ConnectMultipleDialog.prototype.closeDialog = function() {
  */
 ConnectMultipleDialog.reloadDialog = function(deviceClass) {
     let curDialog = ConnectMultipleDialog.currentDialog;
-    curDialog.reloadDialog(deviceClass);
+    if (curDialog != null) {
+      curDialog.reloadDialog(deviceClass);
+    }
 };
 
 /**

@@ -205,5 +205,7 @@ Language.ar = {
   "ceiling":"ceiling",
   "floor":"floor",
   "abs":"abs",
-  "sqrt":"sqrt"
+  "sqrt":"sqrt",
+  "CM":"CM",
+  "Inch":"Inch"
 }

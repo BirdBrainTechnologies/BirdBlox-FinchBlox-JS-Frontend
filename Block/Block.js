@@ -11,8 +11,9 @@
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.
  * @param {string} category - The Block's category in string form.
+ * @param {boolean} autoExecute - If true, this block start running automatically
  */
-function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
+function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
 	this.x = x; //Store coords
 	this.y = y;
@@ -56,6 +57,9 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midHeight = 0;
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
+	}
+	if (autoExecute === true) {
+		this.autoExecute = true;
 	}
 }
 
