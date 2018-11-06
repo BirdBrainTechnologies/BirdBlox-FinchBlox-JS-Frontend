@@ -201,6 +201,12 @@ Block.prototype.parseTranslation = function(text) {
 			newParts.push(this.slots[i]);
 		}
 	}
+	if (Language.isRTL) {
+		if (newParts[0].constructor === DeviceDropSlot) {
+			newParts.push(newParts.shift());
+		}
+		newParts = newParts.reverse();
+	}
 	this.parts = newParts;
 }
 

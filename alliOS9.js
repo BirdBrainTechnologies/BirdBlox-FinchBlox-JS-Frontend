@@ -2874,14 +2874,14 @@ Language.he = {
   "block_write":"% (Slot 2) (Slot 1) כתוב",
   "pin":"סיכה",
   "block_read":"(Slot 1) קורא",
-  "block_Device_Shaken":"טאבלט מנער",
+  "block_Device_Shaken":"טאבלט מנוער",
   "block_Device_LatLong":"(Slot 1) טאבלט",
   "Latitude":"קו רוחב",
   "Longitude":"קו אורך",
   "block_Device_SSID":"SSID טאבלט",
   "block_Device_Pressure":"לחץ על הטאבלט",
   "block_Device_Relative_Altitude":"גובה יחסית של הטאבלט",
-  "block_Acceleration":"(Slot 1) תאוצע של הטאבלט",
+  "block_Acceleration":"(Slot 1) תאוצה של הטאבלט",
   "Total":"סה''כ",
   "block_Device_Orientation":"כיוון הטאבלט",
   "faceup":"פנים כלפי מעלה",
@@ -2922,7 +2922,7 @@ Language.he = {
   "block_validate":"(Slot 2) (Slot 1 = 5) זה",
   "number":"מספר",
   "text":"טקסט",
-  "boolean":"בוליאן",
+  "boolean":"בוליאני",
   "list":"רשימה",
   "invalid_number":"מספר לא חוקי",
   "block_when_flag_tapped":"הוקש (Icon) כאשר",
@@ -2930,8 +2930,8 @@ Language.he = {
   "any_message":"הודעה",
   "new":"חדש",
   "block_when":"(Slot 1) כאשר",
-  "block_broadcast":"(Slot 1) משדר",
-  "block_broadcast_and_wait":"ולחכות (Slot 1) משדר",
+  "block_broadcast":"(Slot 1) לשדר",
+  "block_broadcast_and_wait":"ולחכות (Slot 1) לשדר",
   "block_message":"הודעה",
   "block_wait":"שניות (Slot 1) חכה",
   "block_wait_until":"(Slot 1) חכה עד",
@@ -2941,7 +2941,7 @@ Language.he = {
   "block_if":"(Slot 1) אם",
   "block_if_else":"(Slot 1) אם",
   "else":"אז",
-  "block_stop":"(Slot 1) עזור",
+  "block_stop":"(Slot 1) להפסיק",
   "all":"הכל",
   "this_script":"תסריט זה",
   "all_but_this_script":"הכל מלבד תסריט זה",
@@ -2950,13 +2950,13 @@ Language.he = {
   "block_play_recording_until_done":"(Slot 1) להפעיל הקלטה עד סיום התסריט",
   "block_play_sound":"(Slot 1) להפעיל קול",
   "block_play_sound_until_done":"(Slot 1) להפעיל קול עד סיום התסריט",
-  "block_stop_all_sounds":"לעזור את כל הצלילים",
+  "block_stop_all_sounds":"להפסיק  כל הצליליםם",
   "block_rest_for":"פעימות (Slot 1) לחכות",
   "block_change_tempo_by":"(Slot 1) שנה זמן ב",
-  "block_set_tempo_to":"bpm (Slot 1) תגדיר זמן ב",
+  "block_set_tempo_to":"bpm (Slot 1) להגדיר זמן ב",
   "block_tempo":"זמן",
-  "block_set_variable":"(Slot 2) ל (Slot 1) תגדיר",
-  "Create_Variable":"יצירת משתנה",
+  "block_set_variable":"(Slot 2) ל (Slot 1) להגדיר",
+  "Create_Variable":"צור משתנה",
   "block_change_variable":"(Slot 2) ב (Slot 1) שינוי",
   "Rename":"שם חדש",
   "Delete":"מחק",
@@ -2968,41 +2968,41 @@ Language.he = {
   "block_copy_list":"(Slot 2) ל (Slot 1) עתק",
   "block_list_item":"(Slot 2) של (Slot 1) פריט",
   "block_list_length":"(Slot 1) אורך של",
-  "block_list_contains":"(Slot 2 = אובייקט)  מכיל (Slot 1)",
+  "block_list_contains":"(Slot 2 = אובייקט)    מכיל (Slot 1)",
   "last":"אחרון",
   "random":"אקראי",
   "Robots":"רובוטים",
-  "Operators":"מעפילים",
+  "Operators":"מפעילים",
   "Sound":"קול",
-  "Tablet":"טבלט",
+  "Tablet":"טאבלט",
   "Control":"בקרה",
   "Variables":"משתנים",
-  "Zoom_in":" זום פנימה",
-  "Zoom_out":"זום החוצה",
+  "Zoom_in":"לקרב זום",
+  "Zoom_out":"להרחיק זום",
   "Reset_zoom":"אתחול זום",
   "Disable_snap_noise":"לבטל כל הצלילים",
   "Enable_snap_noise":"לאפשר צלילים",
   "CompassCalibrate":"כיול מצפן",
   "Send_debug_log":"שלח תוצאות  בדיקה",
-  "Show_debug_menu":"תפתח תפריט בדיקה",
+  "Show_debug_menu":"פתח תפריט בדיקה",
   "Connect_Device":"חיבר התקן ",
   "Connect_Multiple":"חיבר רב התקנים",
   "Disconnect_Device":"נתק התקן",
   "Tap":"הקש + לחיבור",
   "Scanning_for_devices":"חיפוש התקנים",
-  "Open":"פתוח",
+  "Open":"פתח",
   "No_saved_programs":"תוכניות לא שמורות",
   "New":"חדש",
   "Saving":"שמירה",
-  "On_Device":"בהתקן",
+  "On_Device":"התקן",
   "Cloud":"ענן",
   "Loading":"טוען",
   "Sign_in":"כניסה",
   "New_program":"תכנית חדשה",
   "Share":"שתף",
   "Recordings":"הקלטות",
-  "Discard":"בטל",
-  "Stop":"עזור",
+  "Discard":"לבטל",
+  "Stop":"להפסיק",
   "Pause":"השהייה",
   "remaining":"נותר",
   "Record":"להקליט",
@@ -3017,16 +3017,16 @@ Language.he = {
   "Name_duplicate_file":"הכנס שם לקובץ המשוכפל",
   "Name_error_invalid_characters":"אין להכניס סימנים אלו בשמות הקבצים :  \n",
   "Name_error_already_exists":"\" כבר קיים. כתוב שם שונה",
-  "Permission_denied":"אישור נדחת",
+  "Permission_denied":"ההרשאה נדחתה",
   "Grant_permission":"אישור הקלטה מיוחד לבירדבלוקס בהגדרות ",
-  "Dismiss":"התעלם",
+  "Dismiss":"לבטל",
   "Name":"שם",
   "Enter_file_name":"כתוב שם לקובץ",
   "Name_error_blank":"שם לא יכול להיות ריק. כתוב שם לקובץ",
   "Edit_text":"עריכת טקסט",
   "Question":"שאלה",
-  "Connection_Failure":"החיבור נכשל",
-  "Connection_failed_try_again":"החיבור נכשל, נסה שוב בבקשה",
+  "Connection_Failure":"חיבור נכשל",
+  "Connection_failed_try_again":"חיבור נכשל, נסה שוב בבקשה",
   "Disconnect_account":"נתק חשבון",
   "Disconnect_account_question":"לנתק חשבון?",
   "Dont_disconnect":"לא לנתק",
@@ -3047,8 +3047,8 @@ Language.he = {
   "floor":"floor",
   "abs":"abs",
   "sqrt":"sqrt",
-  "CM":"CM",
-  "Inch":"Inch"
+  "CM":"סיימ",
+  "Inch":"אינץ"
 }
 
 //Korean Translation
@@ -3219,7 +3219,7 @@ Language.ko = {
 "Discard":"삭제",
 "Stop":"멈춤",
 "Pause":"일시정지",
-"remaining":"남음 시간",
+"remaining":"남은 시간",
 "Record":"녹음",
 "Tap_record_to_start":"녹음 버튼 눌러 시작하기",
 "Done":"완료",
@@ -6912,7 +6912,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HBTempC");
 	collapsibleItem.addBlockByName("B_HBTempF");
 	collapsibleItem.addBlockByName("B_HBDistCM");
-	collapsibleItem.addBlockByName("B_HBDistInch");
+	//collapsibleItem.addBlockByName("B_HBDistInch");
 	collapsibleItem.addBlockByName("B_HBKnob");
 	collapsibleItem.addBlockByName("B_HBSound");
 	collapsibleItem.trimBottom();
@@ -9538,6 +9538,10 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.black;
+
+	if (Language.isRTL) {
+		BlockPalette.mainHMargin = -BlockPalette.mainHMargin;
+	}
 };
 
 /**
@@ -9710,6 +9714,7 @@ BlockPalette.refresh = function() {
 		category.refreshGroup();
 	})
 };
+
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
@@ -22010,6 +22015,12 @@ Block.prototype.parseTranslation = function(text) {
 		if (!slotsInserted.includes(i)) {
 			newParts.push(this.slots[i]);
 		}
+	}
+	if (Language.isRTL) {
+		if (newParts[0].constructor === DeviceDropSlot) {
+			newParts.push(newParts.shift());
+		}
+		newParts = newParts.reverse();
 	}
 	this.parts = newParts;
 }

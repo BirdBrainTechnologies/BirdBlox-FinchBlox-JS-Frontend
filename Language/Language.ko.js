@@ -166,7 +166,7 @@ Language.ko = {
 "Discard":"삭제",
 "Stop":"멈춤",
 "Pause":"일시정지",
-"remaining":"남음 시간",
+"remaining":"남은 시간",
 "Record":"녹음",
 "Tap_record_to_start":"녹음 버튼 눌러 시작하기",
 "Done":"완료",

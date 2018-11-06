@@ -242,7 +242,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HBTempC");
 	collapsibleItem.addBlockByName("B_HBTempF");
 	collapsibleItem.addBlockByName("B_HBDistCM");
-	collapsibleItem.addBlockByName("B_HBDistInch");
+	//collapsibleItem.addBlockByName("B_HBDistInch");
 	collapsibleItem.addBlockByName("B_HBKnob");
 	collapsibleItem.addBlockByName("B_HBSound");
 	collapsibleItem.trimBottom();
