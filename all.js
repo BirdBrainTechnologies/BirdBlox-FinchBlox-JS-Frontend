@@ -1302,8 +1302,8 @@ function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
 Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
-Language.rtlLangs = [];
-//Language.rtlLangs = ["ar", "he"];
+//Language.rtlLangs = [];
+Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
 
 Language.names = {
@@ -6039,12 +6039,6 @@ GuiElements.update.text = function(textE, newText) {
 	const textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
-
-//	if (Language.isRTL) {
-//		const w = GuiElements.measure.textWidth(textE);
-		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
-		//textE.setAttributeNS(null, "transform", "scale(-1, 1)");
-//	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -6219,6 +6213,8 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 
 	svg.setAttribute('width', innerWidth * zoom);
 	svg.setAttribute('height', innerHeight * zoom);
+	svg.setAttribute('style', 'position: absolute; left: 0px;');
+
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
@@ -6242,7 +6238,6 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL){ x = -x; }
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {
@@ -6251,12 +6246,15 @@ GuiElements.move.group = function(group, x, y, zoom) {
 };
 /**
  * Moves an SVG text element.
- * @param {string} text - The text to move.
+ * Position is relative to its container.
+ * @param {string} text - The text element to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	//For rtl, the text elements are flipped (scale(-1,1)) and so must move in the
+	// other direction to be positioned correctly.
 	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
@@ -8470,9 +8468,16 @@ TouchReceiver.enableInteraction = function() {
  */
 TouchReceiver.getX = function(e) {
 	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
-		return e.clientX / GuiElements.zoomFactor;
+		var x = e.clientX / GuiElements.zoomFactor;
+	} else {
+		var x = e.touches[0].pageX / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -8494,7 +8499,13 @@ TouchReceiver.getY = function(e) {
  * @return {number}
  */
 TouchReceiver.getTouchX = function(e, i) {
-	return e.touches[i].pageX / GuiElements.zoomFactor;
+	var x = e.touches[i].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -9539,10 +9550,6 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.black;
-
-	if (Language.isRTL) {
-		BlockPalette.mainHMargin = -BlockPalette.mainHMargin;
-	}
 };
 
 /**
@@ -9927,9 +9934,6 @@ CategoryBN.setGraphics = function() {
 	const numberOfRows = Math.ceil(BlockList.catCount() / 2);
 	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
 	CBN.labelX = CBN.colorW + CBN.labelLMargin;
-//	if (Language.isRTL) {
-		//CBN.labelX = -CBN.labelX;
-//	}
 	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
 };
 
@@ -10952,8 +10956,9 @@ Button.prototype.addText = function(text, font) {
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height the icon should have in the button
  * @param {number} xOffset - Distance from center to place icon. Default 0.
+ * @param {boolean} mirror - True if the icon should be mirrored for rtl languages
  */
-Button.prototype.addIcon = function(pathId, height, xOffset) {
+Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
 	if (height == null) {
 		height = Button.defaultIconH;
 	}
@@ -10967,7 +10972,7 @@ Button.prototype.addIcon = function(pathId, height, xOffset) {
 	const iconW = VectorIcon.computeWidth(pathId, height);
 	const iconX = xOffset + (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
-	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
+	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 
@@ -14611,15 +14616,17 @@ BlockContextMenu.prototype.close = function() {
  * @param {string} color - Color in hex
  * @param {number} height - The height the path should be.  Width is computed from this
  * @param {Element} parent - An SVG group element the path should go inside
+ * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
  * @constructor
  */
-function VectorIcon(x, y, pathId, color, height, parent) {
+function VectorIcon(x, y, pathId, color, height, parent, mirror) {
 	this.x = x;
 	this.y = y;
 	this.color = color;
 	this.height = height;
 	this.pathId = pathId;
 	this.parent = parent;
+	this.mirror = mirror;
 	this.pathE = null;
 	this.draw();
 }
@@ -14639,10 +14646,20 @@ VectorIcon.computeWidth = function(pathId, height) {
  * Creates the SVG pathE and the group to contain it
  */
 VectorIcon.prototype.draw = function() {
-	this.scale = this.height / this.pathId.height;
-	this.width = this.scale * this.pathId.width;
+	this.scaleX = this.height / this.pathId.height;
+	this.scaleY = this.scaleX;
+	this.width = this.scaleY * this.pathId.width;
+
+	//If the icon should not be mirrored, it will need to be flipped for rtl
+	// languages. The negative scale flips the icon along the horizontal axis, but
+	// it then also needs to be translated by the width to pisition it correctly.
+	if (Language.isRTL && !this.mirror) {
+		this.scaleX = -this.scaleX;
+		this.x += this.width;
+	}
+
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
@@ -14664,15 +14681,17 @@ VectorIcon.prototype.setColor = function(color) {
  * @param{number} y
  */
 VectorIcon.prototype.move = function(x, y) {
+	if (Language.isRTL && !this.mirror) { x += this.width; }
 	this.x = x;
 	this.y = y;
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 };
 
 /* Deletes the icon and removes the path from its parent group. */
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
+
 /**
  * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
  * white (or black if Blocks are running) path element which it moves around and reshapes
@@ -23973,7 +23992,6 @@ Slot.prototype.updateDim = function(){
  */
 Slot.prototype.updateAlign = function(x, y){
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL) { x = -x; }
 	if(this.hasChild){
 		//The x and y coords the child should have.
 		//TODO: Use relToAbs for this
@@ -26395,7 +26413,6 @@ LabelText.prototype.constructor = LabelText;
  * @return {number} - The width of the text, indicating how much the next item should be shifted over.
  */
 LabelText.prototype.updateAlign = function(x, y) {
-//	if (Language.isRTL) { x = -x; }
 	this.move(x, y + this.height / 2);
 	return this.width;
 };
@@ -26408,13 +26425,6 @@ LabelText.prototype.updateDim = function() {
 	if (this.width === 0) {
 		GuiElements.layers.temp.appendChild(this.textE);
 		this.width = GuiElements.measure.textWidth(this.textE);
-
-	//	if (Language.isRTL) {
-			//textElement.setAttributeNS(null, "dir", "rtl");
-			//textElement.setAttributeNS(null, "class", "mirror");
-			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1) translate(-" + (2 * this.width) + ", 0)");
-			//this.textE.setAttributeNS(null, "transform", "scale(-1, 1)");
-	//	}
 		this.textE.remove();
 		this.parent.group.appendChild(this.textE);
 	}

@@ -107,9 +107,16 @@ TouchReceiver.enableInteraction = function() {
  */
 TouchReceiver.getX = function(e) {
 	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
-		return e.clientX / GuiElements.zoomFactor;
+		var x = e.clientX / GuiElements.zoomFactor;
+	} else {
+		var x = e.touches[0].pageX / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -131,7 +138,13 @@ TouchReceiver.getY = function(e) {
  * @return {number}
  */
 TouchReceiver.getTouchX = function(e, i) {
-	return e.touches[i].pageX / GuiElements.zoomFactor;
+	var x = e.touches[i].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**

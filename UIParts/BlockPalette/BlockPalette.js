@@ -47,10 +47,6 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.trashOpacity = 0.8;
 	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.black;
-
-	if (Language.isRTL) {
-		BlockPalette.mainHMargin = -BlockPalette.mainHMargin;
-	}
 };
 
 /**

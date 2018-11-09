@@ -82,7 +82,6 @@ Slot.prototype.updateDim = function(){
  */
 Slot.prototype.updateAlign = function(x, y){
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL) { x = -x; }
 	if(this.hasChild){
 		//The x and y coords the child should have.
 		//TODO: Use relToAbs for this

@@ -7,8 +7,8 @@ function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
 Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
-Language.rtlLangs = [];
-//Language.rtlLangs = ["ar", "he"];
+//Language.rtlLangs = [];
+Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
 
 Language.names = {

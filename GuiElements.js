@@ -607,12 +607,6 @@ GuiElements.update.text = function(textE, newText) {
 	const textNode = document.createTextNode(newText); //Create new text.
 	textE.textNode = textNode; //Adds a reference for easy removal.
 	textE.appendChild(textNode); //Adds text to element.
-
-//	if (Language.isRTL) {
-//		const w = GuiElements.measure.textWidth(textE);
-		//textE.setAttributeNS(null, "transform", "translate(" + (2*w) + ", 0) scale(-1, 1)");
-		//textE.setAttributeNS(null, "transform", "scale(-1, 1)");
-//	}
 };
 /**
  * Changes the text of an SVG text element and removes ending characters until the width is less that a max width.
@@ -787,6 +781,8 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 
 	svg.setAttribute('width', innerWidth * zoom);
 	svg.setAttribute('height', innerHeight * zoom);
+	svg.setAttribute('style', 'position: absolute; left: 0px;');
+
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
@@ -810,7 +806,6 @@ GuiElements.move = {};
  */
 GuiElements.move.group = function(group, x, y, zoom) {
 	DebugOptions.validateNumbers(x, y);
-	if (Language.isRTL){ x = -x; }
 	if (zoom == null) {
 		group.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")");
 	} else {
@@ -819,12 +814,15 @@ GuiElements.move.group = function(group, x, y, zoom) {
 };
 /**
  * Moves an SVG text element.
- * @param {string} text - The text to move.
+ * Position is relative to its container.
+ * @param {string} text - The text element to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	//For rtl, the text elements are flipped (scale(-1,1)) and so must move in the
+	// other direction to be positioned correctly.
 	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
