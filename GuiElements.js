@@ -36,10 +36,22 @@ document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 
-/* Redraws UI if screen dimensions change */
+/** Redraws UI if screen dimensions change
+  *  In iOS, this function is called before the new sizes are set. Still, it is
+	*  the most reliable way of getting the correct screen size. iOS calls
+	*  GuiElements.updateDimsPreview with approximate dimensions, then this
+	*  function will add true dimensions after a moment.
+  */
 window.onresize = function() {
-	if (GuiElements.loaded && !GuiElements.isIos) {
-		GuiElements.updateDims();
+	//if (GuiElements.loaded && !GuiElements.isIos) {
+		//GuiElements.updateDims();
+	//}
+	if (GuiElements.loaded) {
+		if (GuiElements.isIos) {
+	    setTimeout(function() { GuiElements.updateDims(); }, 500);
+		} else {
+			GuiElements.updateDims();
+		}
 	}
 };
 

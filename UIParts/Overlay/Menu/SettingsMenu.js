@@ -20,7 +20,7 @@ SettingsMenu.prototype.loadOptions = function() {
 		me.languageMenu = new LanguageMenu(bn, me);
 		me.languageMenu.move();
 	});
-	// Used to have icons, but they didn't work two well and have been disabled
+	// Used to have icons, but they didn't work too well and have been disabled
 	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
 	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
 	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
