@@ -522,6 +522,8 @@ Block.prototype.updateDim = function() {
 			this.midHeight = bG.height;
 		}
 		height += this.midHeight; //Add the midHeight to the total.
+		var midWidth = this.midLabel.width + 2 * bG.hMargin;
+		if (midWidth > width) { width = midWidth;}
 		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
 		height += this.blockSlot2.height; //Add its height to the total.
 	}
