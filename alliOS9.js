@@ -2002,7 +2002,7 @@ Language.de = {
   "block_LED":"LED (Slot 1) (Slot 2) %",
   "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Drehung Servo (Slot 1) (Slot 2) %",
-  "block_Play_Note":"Spiele Note (Slot 1) für (Slot 2) Schläge",
+  "block_Play_Note":"spiele Note (Slot 1) für (Slot 2) Schläge",
   "Light":"Licht",
   "Distance":"Entfernung",
   "Dial":"Drehknopf",
@@ -2044,7 +2044,7 @@ Language.de = {
   "portrait_top":"Hochformat: Kamera unten",
   "landscape_left":"Querformat: Kamera links",
   "landscape_right":"Querformat: Kamera rechts",
-  "block_Display":"Zeige (Slot 1 = Hallo) an (Slot 2) an",
+  "block_Display":"zeige (Slot 1 = Hallo) an (Slot 2) an",
   "position":"Position",
   "block_ask":"frage (Slot 1 = Wie heißt du?) und warte",
   "block_answer":"Antwort",
@@ -2085,11 +2085,11 @@ Language.de = {
   "new":"neu",
   "block_when":"Wenn (Slot 1)",
   "block_broadcast":"sende (Slot 1) an alle",
-  "block_broadcast_and_wait":"sende (Slot1) an alle und warte",
+  "block_broadcast_and_wait":"sende (Slot 1) an alle und warte",
   "block_message":"Nachricht",
   "block_wait":"warte (Slot 1) Sek.",
   "block_wait_until":"warte bis (Slot 1)",
-  "block_repeat_forever":"wiederhole fortlaufend",
+  "block_repeat_forever":"fortlaufend",
   "block_repeat":"wiederhole (Slot 1)",
   "block_repeat_until":"wiederhole bis (Slot 1)",
   "block_if":"falls (Slot 1)",
@@ -2110,7 +2110,7 @@ Language.de = {
   "block_set_tempo_to":"setze Tempo auf (Slot 1) Schläge/Minute",
   "block_tempo":"Tempo",
   "block_set_variable":"setze (Slot 1) auf (Slot 2)",
-  "Create_Variable":"neue Variable",
+  "Create_Variable":"Neue Variable",
   "block_change_variable":"ändere (Slot 1) um (Slot 2)",
   "Rename":"Umbenennen",
   "Delete":"Löschen",
@@ -2491,7 +2491,7 @@ Language.es = {
   "false":"Falso",
   "block_letter":"Letra (Slot 1) de (Slot 2 = mundo)",
   "block_length":"Longitud de (Slot 1 = mundo)",
-  "block_join":"Unir (Slot 1 =  hola) y (Slot 1 = mundo)",
+  "block_join":"Unir (Slot 1 = hola) y (Slot 2 = mundo)",
   "block_split":"Dividir (Slot 1 = Hola mundo) en (Slot 2)",
   "letter":"Letra",
   "whitespace":"Espacio en blanco",
@@ -2513,9 +2513,9 @@ Language.es = {
   "block_wait_until":"esperar hasta (Slot 1)",
   "block_repeat_forever":"Repetir por siempre",
   "block_repeat":"repetir (Slot 1)",
-  "block_repeat_until":"repetir hasta (Slot !)",
+  "block_repeat_until":"repetir hasta (Slot 1)",
   "block_if":"si (Slot 1)",
-  "block_if_else":"Si (Slot 1)",
+  "block_if_else":"si (Slot 1)",
   "else":"caso contrario",
   "block_stop":"detener (Slot 1)",
   "all":"todo",
@@ -2537,7 +2537,7 @@ Language.es = {
   "Rename":"Cambiar nombre",
   "Delete":"Borrar",
   "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
-  "Create_List":"Crear lista",
+  "Create_List":"Crear Lista",
   "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",
   "block_insert_into_list":"insertar (Slot 1 = objeto) en (Slot 2) de (Slot 3)",
   "block_replace_list_item":"reemplazar item (Slot 1) de (Slot 2) con (Slot 3 = objeto)",
@@ -2858,12 +2858,12 @@ Language.he = {
   "block_LED_Display":"מסך",
   "block_Print":"(Slot 1 = Hello) הדפס",
   "block_Button":"(Slot 1) לחצן",
-  "Screen_Up":"לעלות מסך",
+  "Screen_Up":"להעלות מסך",
   "Screen_Down":"להוריד מסך",
   "Tilt_Left":"הטייה לשמאל ",
   "Tilt_Right":"הטייה לימין",
-  "Logo_Up":"לוגו למעלה",
-  "Logo_Down":"לוגו למטה",
+  "Logo_Up":"להעלות  לוגו",
+  "Logo_Down":"להוריד לוגו",
   "Shake":"לנער",
   "block_Compass":"מצפן",
   "block_Servo":"(Slot 2) (Slot 1) סרוו",
@@ -2880,7 +2880,7 @@ Language.he = {
   "Longitude":"קו אורך",
   "block_Device_SSID":"SSID טאבלט",
   "block_Device_Pressure":"לחץ על הטאבלט",
-  "block_Device_Relative_Altitude":"גובה יחסית של הטאבלט",
+  "block_Device_Relative_Altitude":"גובה יחסי של הטאבלט",
   "block_Acceleration":"(Slot 1) תאוצה של הטאבלט",
   "Total":"סה''כ",
   "block_Device_Orientation":"כיוון הטאבלט",
@@ -2905,9 +2905,9 @@ Language.he = {
   "second":"שניה",
   "day_of_the_week":"יום",
   "time_in_milliseconds":"זמן במילישניות ",
-  "block_mod":"(Slot 1) מוד (Slot 2)",
+  "block_mod":"(Slot 1) מצב (Slot 2)",
   "block_round":"(Slot 1) סיבוב",
-  "block_pick_random":"(Slot 2) (Slot 1) בחירה אקראי",
+  "block_pick_random":"(Slot 2) (Slot 1) בחירה אקראית",
   "block_and":"(Slot 2) ו (Slot 1)",
   "block_or":"(Slot 2) או (Slot 1)",
   "block_not":"(Slot 1) לא",
@@ -2970,7 +2970,7 @@ Language.he = {
   "block_list_length":"(Slot 1) אורך של",
   "block_list_contains":"(Slot 2 = אובייקט)    מכיל (Slot 1)",
   "last":"אחרון",
-  "random":"אקראי",
+  "random":"אקראית",
   "Robots":"רובוטים",
   "Operators":"מפעילים",
   "Sound":"קול",
@@ -5500,6 +5500,7 @@ GuiElements.setLanguage = function() {
   	lnk.href='MyCSS.css';
 	} else {
 		lnk.href='MyCSS_rtl.css';
+		//lnk.href='MyCSS.css';
 		Language.isRTL = true;
 		var html = document.getElementsByTagName('html')[0];
 		html.setAttribute("dir", "rtl");
@@ -22368,6 +22369,8 @@ Block.prototype.updateDim = function() {
 			this.midHeight = bG.height;
 		}
 		height += this.midHeight; //Add the midHeight to the total.
+		var midWidth = this.midLabel.width + 2 * bG.hMargin;
+		if (midWidth > width) { width = midWidth;}
 		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
 		height += this.blockSlot2.height; //Add its height to the total.
 	}
