@@ -38,11 +38,11 @@ function Button(x, y, width, height, parent) {
 }
 
 Button.setGraphics = function() {
-	Button.bg = "#209BA9";
+	Button.bg = Colors.bbt;
 	Button.foreground = Colors.white;
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
-	Button.highlightFore = "#209BA9";
+	Button.highlightFore = Colors.bbt;
 	Button.disabledBg = Colors.darkGray;
 	Button.disabledFore = Colors.black;
 

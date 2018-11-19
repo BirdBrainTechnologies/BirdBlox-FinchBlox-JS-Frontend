@@ -195,7 +195,18 @@ HtmlServer.getUrlForRequest = function(request) {
  * Tells the backend that the frontend is done loading the UI
  */
 HtmlServer.sendFinishedLoadingRequest = function() {
-	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded");
+
+	let request = new HttpRequestBuilder("ui/translatedStrings");
+	request.addParam("Name_error_already_exists", Language.getStr("Name_error_already_exists"));
+	request.addParam("Cancel", Language.getStr("Cancel"));
+	request.addParam("Rename", Language.getStr("Rename"));
+	request.addParam("OK", Language.getStr("OK"));
+	request.addParam("Enter_new_name", Language.getStr("Enter_new_name"));
+	request.addParam("Delete", Language.getStr("Delete"));
+	request.addParam("Delete_question", Language.getStr("Delete_question"));
+	request.addParam("Loading", Language.getStr("Loading"));
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**

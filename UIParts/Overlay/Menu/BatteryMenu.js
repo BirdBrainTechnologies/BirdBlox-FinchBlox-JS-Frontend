@@ -31,11 +31,11 @@ BatteryMenu.setGraphics = function() {
 
 BatteryMenu.getColorForBatteryStatus = function(status) {
     if (status === "2") {
-        return "#0f0";
+        return Colors.green;
     } else if (status === "1") {
-        return "#ff0";
+        return Colors.yellow;
     } else if (status === "0") {
-        return "#f00";
+        return Colors.red;
     } else {
         return Colors.lightGray;
     }

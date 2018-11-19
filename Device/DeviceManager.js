@@ -73,11 +73,11 @@ DeviceManager.checkBattery = function() {
         }
     });
     if (worstBatteryStatus === "2") {
-        color = "#0f0";
+        color = Colors.green;
     } else if (worstBatteryStatus === "1") {
-        color = "#ff0";
+        color = Colors.yellow;
     } else if (worstBatteryStatus === "0"){
-        color = "#f00";
+        color = Colors.red;
     }
     TitleBar.batteryBn.icon.setColor(color);
 }

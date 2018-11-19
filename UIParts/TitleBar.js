@@ -37,9 +37,9 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.bnIconMargin = 3;
 
 	TB.bg = Colors.lightGray;
-	TB.flagFill = "#0f0";
+	TB.flagFill = Colors.green;
 	TB.batteryFill = Colors.lightGray;
-	TB.stopFill = "#f00";
+	TB.stopFill = Colors.red;
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
 

@@ -2173,9 +2173,9 @@ Language.de = {
 "Duplicate":"Duplizieren",
 "Name_duplicate_file":"Namen für duplizierte Datei eingeben",
 "Name_error_invalid_characters":"Die folgenden Zeichen können nicht in Dateinamen verwendet werden: \n",
-"Name_error_already_exists":"\" ist schon vergeben. Bitte gib einen anderen Namen ein",
+"Name_error_already_exists":"\" ist schon vergeben. Bitte gib einen anderen Namen ein.",
 "Permission_denied":"Zugriff verweigert",
-"Grant_permission":"Gewähre Birdblox in den Einstellungen Zugriff auf dein Mikrofon, um Aufnahmen zu machen",
+"Grant_permission":"Gewähre Birdblox in den Einstellungen Zugriff auf dein Mikrofon, um Aufnahmen zu machen.",
 "Dismiss":"Ausblenden",
 "Name":"Name",
 "Enter_file_name":"Gib einen Dateinamen ein",
@@ -4680,11 +4680,11 @@ DeviceManager.checkBattery = function() {
         }
     });
     if (worstBatteryStatus === "2") {
-        color = "#0f0";
+        color = Colors.green;
     } else if (worstBatteryStatus === "1") {
-        color = "#ff0";
+        color = Colors.yellow;
     } else if (worstBatteryStatus === "0"){
-        color = "#f00";
+        color = Colors.red;
     }
     TitleBar.batteryBn.icon.setColor(color);
 }
@@ -7013,39 +7013,52 @@ function Colors() {
 }
 
 Colors.setCommon = function() {
+	//Gray scale...
 	Colors.white = "#fff";
+  Colors.lightLightGray = "#CDCDCD";
+  Colors.windowColor = "#CCC";
+	Colors.mediumLightGray = "#999";
 	Colors.lightGray = "#7B7B7B";
-    Colors.lightLightGray = "#CDCDCD";
-    Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
+	//Basic colors
 	Colors.red = "#FF0000";
 	Colors.green = "#00FF00";
+	Colors.yellow = "#FFFF00";
+	Colors.darkRed = "#c00000";
+	//Current BBT colors
+	Colors.bbt = "#209BA9";
+	Colors.tabletOrange = "#FAA525";
+	Colors.operatorsGreen = "#8EC449";
+	Colors.soundPurple = "#EE00FF";
+	Colors.controlYellow = "#FFCC00";
+	Colors.variablesDkOrange = "#FF5B00";
+	Colors.inactiveGray = "#a3a3a3";
 	//BBT Style guide colors
 	Colors.easternBlue = "#089BAB";
 	Colors.neonCarrot = "#FF9922";
 	Colors.fountainBlue = "#62BCC7";
 	Colors.seance = "#881199";
-	Colors.bbtDarkGrey = "#535353";
+	Colors.bbtDarkGray = "#535353";
 	Colors.iron = "#CACACA";
 };
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		"robots": "#209BA9",
-        "hummingbird": "#209BA9",
-        "hummingbirdbit": "#209BA9",
-        "microbit": "#209BA9",
-        "flutter": "#209BA9",
-        "finch": "#209BA9",
-        "tablet": "#FAA525",
-        "operators": "#8EC449",
-		"sound": "#EE00FF",
-		"control": "#FFCC00",
-		"variables": "#FF5B00",
-		"lists": "#FF0000",
-		"inactive": "#a3a3a3"
+		"robots": Colors.bbt,
+    "hummingbird": Colors.bbt,
+    "hummingbirdbit": Colors.bbt,
+    "microbit": Colors.bbt,
+    "flutter": Colors.bbt,
+    "finch": Colors.bbt,
+    "tablet": Colors.tabletOrange,
+    "operators": Colors.operatorsGreen,
+		"sound": Colors.soundPurple,
+		"control": Colors.controlYellow,
+		"variables": Colors.variablesDkOrange,
+		"lists": Colors.red,
+		"inactive": Colors.inactiveGray
 	};
 };
 
@@ -9301,9 +9314,9 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.bnIconMargin = 3;
 
 	TB.bg = Colors.lightGray;
-	TB.flagFill = "#0f0";
+	TB.flagFill = Colors.green;
 	TB.batteryFill = Colors.lightGray;
-	TB.stopFill = "#f00";
+	TB.stopFill = Colors.red;
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
 
@@ -9937,7 +9950,7 @@ CategoryBN.setGraphics = function() {
 	const CBN = CategoryBN;
 	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
-	CBN.foreground = "#000";
+	CBN.foreground = Colors.black;
 	CBN.height = 30;
 	CBN.colorW = 8;   // The width of the band of color on the left
 	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
@@ -9971,7 +9984,7 @@ CategoryBN.prototype.buildGraphics = function() {
  */
 CategoryBN.prototype.select = function() {
 	this.bgRect.setAttributeNS(null, "fill", this.fill);
-	this.label.setAttributeNS(null, "fill", "#fff");
+	this.label.setAttributeNS(null, "fill", Colors.white);
 };
 
 /**
@@ -9979,7 +9992,7 @@ CategoryBN.prototype.select = function() {
  */
 CategoryBN.prototype.deselect = function() {
 	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
-	this.label.setAttributeNS(null, "fill", "#000");
+	this.label.setAttributeNS(null, "fill", Colors.black);
 };
 
 /**
@@ -10911,11 +10924,11 @@ function Button(x, y, width, height, parent) {
 }
 
 Button.setGraphics = function() {
-	Button.bg = "#209BA9";
+	Button.bg = Colors.bbt;
 	Button.foreground = Colors.white;
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
-	Button.highlightFore = "#209BA9";
+	Button.highlightFore = Colors.bbt;
 	Button.disabledBg = Colors.darkGray;
 	Button.disabledFore = Colors.black;
 
@@ -11514,9 +11527,9 @@ function DeviceStatusLight(x, centerY, parent, statusProvider) {
 
 DeviceStatusLight.setConstants = function() {
 	const DSL = DeviceStatusLight;
-	DSL.greenColor = "#0f0";
-	DSL.redColor = "#f00";
-	DSL.yellowColor = "#ff0";
+	DSL.greenColor = Colors.green;
+	DSL.redColor = Colors.red;
+	DSL.yellowColor = Colors.yellow;
 	DSL.startColor = Colors.black;
 	DSL.offColor = Colors.darkGray;
 	DSL.radius = 6;
@@ -11557,6 +11570,7 @@ DeviceStatusLight.prototype.updateStatus = function(status) {
 DeviceStatusLight.prototype.remove = function() {
 	this.circleE.remove();
 };
+
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
  * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
 function Overlay(type){
@@ -11672,7 +11686,7 @@ function TabRow(x, y, width, height, parent, initialTab) {
 TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
-	TR.deselectedColor = "#999";
+	TR.deselectedColor = Colors.mediumLightGray;
 	TR.selectedColor = Colors.lightLightGray;
 	TR.foregroundColor = Colors.white;
 
@@ -11811,6 +11825,7 @@ TabRow.prototype.setCallbackFunction = function(callback) {
 TabRow.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
+
 /**
  * A round button with an x that calls the specified function when tapped
  * @param {number} cx - The x coord of the center of the button
@@ -13217,7 +13232,7 @@ ResultBubble.setConstants = function() {
 	RB.fontColor = Colors.black;
 	RB.errorFontColor = Colors.white;
 	RB.bgColor = Colors.white;
-	RB.errorBgColor = "#c00000";
+	RB.errorBgColor = Colors.darkRed;
 	RB.font = Font.uiFont(16);
 	RB.margin = 4;
 	/*RB.lifetime=3000;*/
@@ -13250,6 +13265,7 @@ ResultBubble.displayValue = function(value, x, y, width, height, error) {
 	const lowerY = y + height;
 	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
 };
+
 /**
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
@@ -14038,11 +14054,11 @@ BatteryMenu.setGraphics = function() {
 
 BatteryMenu.getColorForBatteryStatus = function(status) {
     if (status === "2") {
-        return "#0f0";
+        return Colors.green;
     } else if (status === "1") {
-        return "#ff0";
+        return Colors.yellow;
     } else if (status === "0") {
-        return "#f00";
+        return Colors.red;
     } else {
         return Colors.lightGray;
     }
@@ -18282,7 +18298,7 @@ RecordingDialog.setConstants = function() {
 	RecD.remainingFont = Font.uiFont(16);
 	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
-	RecD.recordColor = "#f00";
+	RecD.recordColor = Colors.red;
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
@@ -19090,7 +19106,7 @@ FileContextMenu.prototype.addOptions = function() {
 		this.menuBnList.addOption("", function() {
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, Language.getStr("Share")));
 	}
 	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
 		this.menuBnList.addOption("", function() {
@@ -20343,7 +20359,18 @@ HtmlServer.getUrlForRequest = function(request) {
  * Tells the backend that the frontend is done loading the UI
  */
 HtmlServer.sendFinishedLoadingRequest = function() {
-	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded");
+
+	let request = new HttpRequestBuilder("ui/translatedStrings");
+	request.addParam("Name_error_already_exists", Language.getStr("Name_error_already_exists"));
+	request.addParam("Cancel", Language.getStr("Cancel"));
+	request.addParam("Rename", Language.getStr("Rename"));
+	request.addParam("OK", Language.getStr("OK"));
+	request.addParam("Enter_new_name", Language.getStr("Enter_new_name"));
+	request.addParam("Delete", Language.getStr("Delete"));
+	request.addParam("Delete_question", Language.getStr("Delete_question"));
+	request.addParam("Loading", Language.getStr("Loading"));
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**

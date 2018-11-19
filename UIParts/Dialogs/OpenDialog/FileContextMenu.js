@@ -63,7 +63,7 @@ FileContextMenu.prototype.addOptions = function() {
 		this.menuBnList.addOption("", function() {
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, Language.getStr("Share")));
 	}
 	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
 		this.menuBnList.addOption("", function() {
