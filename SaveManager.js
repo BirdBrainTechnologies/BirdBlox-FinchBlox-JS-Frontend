@@ -319,8 +319,9 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
+	const title = Language.getStr("Delete") + " '" + filename + "'";
 	const question = Language.getStr("Delete_question");
-	DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
+	DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
 				OpenDialog.lastOpenFile = null;

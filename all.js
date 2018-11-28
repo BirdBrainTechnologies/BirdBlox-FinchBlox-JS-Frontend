@@ -1390,8 +1390,8 @@ Language.ar = {
   "block_Servo":"(Slot 2) (Slot 1) محرك سيرفو",
   "block_Vibration":"(Slot 2) (Slot 1) اهتزاز",
   "block_Motor":"(Slot 2) (Slot 1) المحرك",
-  "block_Temperature_C":"مؤشر الحرارة (C) (Slot 1)",
-  "block_Temperature_F":"مؤشر الحرارة (F) (Slot 1)",
+  "block_Temperature_C":"C مؤشر الحرارة (Slot 1)",
+  "block_Temperature_F":"F مؤشر الحرارة (Slot 1)",
   "block_write":"% (Slot 2) (Slot 1) اكتب",
   "pin":"",
   "block_read":"(Slot 1) اقرأ",
@@ -2844,7 +2844,7 @@ Language.fr = {
 
 //Hebrew Translation
 Language.he = {
-  "block_Tri_LED":"R (Slot 2) % G (Slot 3) % B (Slot 4) % (Slot 1) לד שלושה צבעים",
+  "block_Tri_LED":"R (Slot 2) G % (Slot 3) B % (Slot 4) % (Slot 1) לד שלושה צבעים",
   "port":"יציאה",
   "block_LED":"% (Slot 2) (Slot 1) לד",
   "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",
@@ -4135,6 +4135,9 @@ function Device(name, id, RSSI, device) {
 		this.shortName += nameWords[i][0];
 	}
 	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
+	if (Language.isRTL) {
+		this.listLabel =  "(" + this.shortName + " - " + name + " (" + device;
+	}
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -5501,7 +5504,6 @@ GuiElements.setLanguage = function() {
   	lnk.href='MyCSS.css';
 	} else {
 		lnk.href='MyCSS_rtl.css';
-		//lnk.href='MyCSS.css';
 		Language.isRTL = true;
 		var html = document.getElementsByTagName('html')[0];
 		html.setAttribute("dir", "rtl");
@@ -21559,8 +21561,9 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
+	const title = Language.getStr("Delete") + " '" + filename + "'";
 	const question = Language.getStr("Delete_question");
-	DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
+	DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
 				OpenDialog.lastOpenFile = null;
@@ -29449,7 +29452,9 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
+	const beatSlot = new NumSlot(this, "NumS_dur", 0.2, true); // Positive
+	beatSlot.addLimits(0, 16, Language.getStr("Beats"));
+	this.addPart(beatSlot);
 	this.parseTranslation(Language.getStr("block_rest_for"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -29476,8 +29481,12 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
+	const noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	noteSlot.addLimits(32, 135, Language.getStr("Note"));
+	this.addPart(noteSlot);
+	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive 
+	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
+	this.addPart(beatsSlot);
 	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);

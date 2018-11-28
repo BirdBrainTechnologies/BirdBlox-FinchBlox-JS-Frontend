@@ -1,6 +1,6 @@
 //Hebrew Translation
 Language.he = {
-  "block_Tri_LED":"R (Slot 2) % G (Slot 3) % B (Slot 4) % (Slot 1) לד שלושה צבעים",
+  "block_Tri_LED":"R (Slot 2) G % (Slot 3) B % (Slot 4) % (Slot 1) לד שלושה צבעים",
   "port":"יציאה",
   "block_LED":"% (Slot 2) (Slot 1) לד",
   "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",

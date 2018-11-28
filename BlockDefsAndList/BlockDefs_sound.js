@@ -111,7 +111,9 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
+	const beatSlot = new NumSlot(this, "NumS_dur", 0.2, true); // Positive
+	beatSlot.addLimits(0, 16, Language.getStr("Beats"));
+	this.addPart(beatSlot);
 	this.parseTranslation(Language.getStr("block_rest_for"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
@@ -138,8 +140,12 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
+	const noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	noteSlot.addLimits(32, 135, Language.getStr("Note"));
+	this.addPart(noteSlot);
+	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive 
+	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
+	this.addPart(beatsSlot);
 	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
