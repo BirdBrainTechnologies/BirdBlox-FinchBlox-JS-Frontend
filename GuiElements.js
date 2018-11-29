@@ -793,8 +793,6 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 
 	svg.setAttribute('width', innerWidth * zoom);
 	svg.setAttribute('height', innerHeight * zoom);
-	svg.setAttribute('style', 'position: absolute; left: 0px;');
-
 
 	GuiElements.update.zoom(zoomG, zoom);
 };

@@ -1188,7 +1188,9 @@ translated text.
 3. Add this file to HummingbirdDragAndDrop2.html.
 4. Add the 2 letter code to the Language.langs array and the name of this
 language to the Language.names array.
-5. Run the project in a web browser with DO.enabled=true and the JavaScript
+5. If the language is read from right to left, also add the 2 letter code to
+the Language.rtlLangs array.
+6. Run the project in a web browser with DO.enabled=true and the JavaScript
 console open. This will check your translation for missing keys (results appear
 in the console).
 

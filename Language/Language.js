@@ -11,6 +11,10 @@ Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "p
 Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
 
+//The char below forces the chars following it to be displayed ltr. Useful for
+// correctly displaying negative numbers and parentheses. The char itself is invisible.
+Language.forceLTR = String.fromCharCode(8206);
+
 Language.names = {
   "ar":"العربية",  //Arabic
   "ca":"Català", //Catalan

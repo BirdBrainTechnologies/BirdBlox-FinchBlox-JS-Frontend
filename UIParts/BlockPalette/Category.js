@@ -24,6 +24,10 @@ function Category(buttonX, buttonY, name, id) {
 		BlockPalette.width, BlockPalette.height, 0, 0);
 	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
+	if (Language.isRTL) {
+		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
+	}
+
 	this.prepareToFill();
 	this.fillGroup();
 }

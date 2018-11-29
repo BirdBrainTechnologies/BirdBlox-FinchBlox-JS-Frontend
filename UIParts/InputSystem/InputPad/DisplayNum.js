@@ -112,6 +112,7 @@ DisplayNum.prototype.getString = function() {
 	}
 	let rVal = "";
 	if (this.isNegative) {
+		if (Language.isRTL) { rVal += Language.forceLTR; }
 		rVal += "-";
 	}
 	rVal += this.integerPart;

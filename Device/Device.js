@@ -24,9 +24,7 @@ function Device(name, id, RSSI, device) {
 		this.shortName += nameWords[i][0];
 	}
 	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
-	if (Language.isRTL) {
-		this.listLabel =  "(" + this.shortName + " - " + name + " (" + device;
-	}
+	if (Language.isRTL) { this.listLabel += Language.forceLTR; }
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices

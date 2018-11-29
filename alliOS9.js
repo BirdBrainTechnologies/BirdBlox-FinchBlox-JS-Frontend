@@ -494,6 +494,9 @@ NumData.prototype.asString = function() {
 	if (this.isValid) {
 		var num = this.getValue();
 		num = +num.toFixed(10);
+		if (num < 0 && Language.isRTL) {
+			return new StringData(Language.forceLTR + num, true);
+		}
 		return new StringData(num + "", true);
 	} else {
 		return new StringData(Language.getStr("not_a_valid_number"));
@@ -1304,6 +1307,10 @@ Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "p
 //Language.rtlLangs = [];
 Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
+
+//The char below forces the chars following it to be displayed ltr. Useful for
+// correctly displaying negative numbers and parentheses. The char itself is invisible.
+Language.forceLTR = String.fromCharCode(8206);
 
 Language.names = {
   "ar":"العربية",  //Arabic
@@ -4134,9 +4141,7 @@ function Device(name, id, RSSI, device) {
 		this.shortName += nameWords[i][0];
 	}
 	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
-	if (Language.isRTL) {
-		this.listLabel =  "(" + this.shortName + " - " + name + " (" + device;
-	}
+	if (Language.isRTL) { this.listLabel += Language.forceLTR; }
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -6227,8 +6232,6 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
 
 	svg.setAttribute('width', innerWidth * zoom);
 	svg.setAttribute('height', innerHeight * zoom);
-	svg.setAttribute('style', 'position: absolute; left: 0px;');
-
 
 	GuiElements.update.zoom(zoomG, zoom);
 };
@@ -10033,6 +10036,10 @@ function Category(buttonX, buttonY, name, id) {
 		BlockPalette.width, BlockPalette.height, 0, 0);
 	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
+	if (Language.isRTL) {
+		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
+	}
+
 	this.prepareToFill();
 	this.fillGroup();
 }
@@ -12663,6 +12670,7 @@ DisplayNum.prototype.getString = function() {
 	}
 	var rVal = "";
 	if (this.isNegative) {
+		if (Language.isRTL) { rVal += Language.forceLTR; }
 		rVal += "-";
 	}
 	rVal += this.integerPart;
@@ -12692,6 +12700,7 @@ DisplayNum.prototype.getData = function() {
 	}
 	return new NumData(rVal);
 };
+
 /**
  * Created by Tom on 7/3/2017.
  */
