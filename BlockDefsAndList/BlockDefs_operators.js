@@ -21,8 +21,9 @@ B_Add.prototype.startAction = function() {
 function B_Subtract(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, String.fromCharCode(8211)));
+	//this.addPart(new LabelText(this, String.fromCharCode(8211)));
 	this.addPart(new NumSlot(this, "NumS_2", 0));
+	this.parseTranslation(Language.getStr("block_subtract"));
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
@@ -59,8 +60,9 @@ B_Multiply.prototype.startAction = function() {
 function B_Divide(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, "/"));
+	//this.addPart(new LabelText(this, "/"));
 	this.addPart(new NumSlot(this, "NumS_2", 1));
+	this.parseTranslation(Language.getStr("block_divide"));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;

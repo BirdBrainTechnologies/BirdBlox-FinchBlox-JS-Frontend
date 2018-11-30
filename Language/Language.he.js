@@ -205,5 +205,7 @@ Language.he = {
   "abs":"abs",
   "sqrt":"sqrt",
   "CM":"סיימ",
-  "Inch":"אינץ"
+  "Inch":"אינץ",
+  "block_subtract":"(Slot 1) – (Slot 2)",
+  "block_divide":"(Slot 1) / (Slot 2)"
 }

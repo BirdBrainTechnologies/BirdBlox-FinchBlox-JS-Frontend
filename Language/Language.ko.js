@@ -205,5 +205,7 @@ Language.ko = {
 "Device_firmware":"기기 펌웨어 버전:",
 "Required_firmware":"필요한 펌웨어 버전:",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }

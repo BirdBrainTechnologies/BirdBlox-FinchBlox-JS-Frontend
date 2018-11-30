@@ -1577,7 +1577,9 @@ Language.ar = {
   "abs":"abs",
   "sqrt":"sqrt",
   "CM":"CM",
-  "Inch":"Inch"
+  "Inch":"Inch",
+  "block_subtract":"(Slot 1) – (Slot 2)",
+  "block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Catalan Translation
@@ -1789,7 +1791,9 @@ Language.ca = {
 "abs":"abs",
 "sqrt":"arrel quadrada",
 "CM":"cm",
-"Inch":"polzades"
+"Inch":"polzades",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Danish Translation
@@ -1999,7 +2003,9 @@ Language.da = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //German Translation
@@ -2211,7 +2217,9 @@ Language.de = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //English Translation
@@ -2421,7 +2429,9 @@ Language.en = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Spanish Translation
@@ -2633,7 +2643,9 @@ Language.es = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 // French translation
@@ -2845,7 +2857,9 @@ Language.fr = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Hebrew Translation
@@ -3055,7 +3069,9 @@ Language.he = {
   "abs":"abs",
   "sqrt":"sqrt",
   "CM":"סיימ",
-  "Inch":"אינץ"
+  "Inch":"אינץ",
+  "block_subtract":"(Slot 1) – (Slot 2)",
+  "block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Korean Translation
@@ -3265,7 +3281,9 @@ Language.ko = {
 "Device_firmware":"기기 펌웨어 버전:",
 "Required_firmware":"필요한 펌웨어 버전:",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Dutch Translation
@@ -3477,7 +3495,9 @@ Language.nl = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Portuguese Translation
@@ -3689,7 +3709,9 @@ Language.pt = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Simplified Chinese Translation (zh-Hans)
@@ -3900,7 +3922,9 @@ Language.zhs = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 //Traditional Chinese Translation (zh-Hant)
@@ -4112,7 +4136,9 @@ Language.zht = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }
 
 /**
@@ -10036,6 +10062,9 @@ function Category(buttonX, buttonY, name, id) {
 		BlockPalette.width, BlockPalette.height, 0, 0);
 	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
+	//When the screen is flipped for right to left languages, the categories will
+	// still appear left justified (so that long blocks push the rest off the
+	// screen) unless this value is set. TODO: find a more logical solution to this problem
 	if (Language.isRTL) {
 		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
 	}
@@ -22075,7 +22104,7 @@ Block.prototype.parseTranslation = function(text) {
 					newParts.push(part);
 				}
 			});
-		} else {
+		} else if (piece != "") {
 			var label = new LabelText(this, piece);
 			newParts.push(label);
 			label.setActive(this.active);
@@ -28542,8 +28571,9 @@ B_Add.prototype.startAction = function() {
 function B_Subtract(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, String.fromCharCode(8211)));
+	//this.addPart(new LabelText(this, String.fromCharCode(8211)));
 	this.addPart(new NumSlot(this, "NumS_2", 0));
+	this.parseTranslation(Language.getStr("block_subtract"));
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
@@ -28580,8 +28610,9 @@ B_Multiply.prototype.startAction = function() {
 function B_Divide(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, "/"));
+	//this.addPart(new LabelText(this, "/"));
 	this.addPart(new NumSlot(this, "NumS_2", 1));
+	this.parseTranslation(Language.getStr("block_divide"));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;

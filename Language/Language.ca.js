@@ -207,5 +207,7 @@ Language.ca = {
 "abs":"abs",
 "sqrt":"arrel quadrada",
 "CM":"cm",
-"Inch":"polzades"
+"Inch":"polzades",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }

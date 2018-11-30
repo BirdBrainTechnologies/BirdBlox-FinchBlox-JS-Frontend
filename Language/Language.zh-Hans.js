@@ -206,5 +206,7 @@ Language.zhs = {
 "abs":"abs",
 "sqrt":"sqrt",
 "CM":"CM",
-"Inch":"Inch"
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
 }

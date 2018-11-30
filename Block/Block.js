@@ -189,7 +189,7 @@ Block.prototype.parseTranslation = function(text) {
 					newParts.push(part);
 				}
 			});
-		} else {
+		} else if (piece != "") {
 			const label = new LabelText(this, piece);
 			newParts.push(label);
 			label.setActive(this.active);
