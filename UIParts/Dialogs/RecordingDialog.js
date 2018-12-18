@@ -11,7 +11,7 @@ function RecordingDialog(listOfRecordings) {
 		return x.id;
 	});
 	// Extra space at the bottom is needed for the recording controls
-	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	RowDialog.call(this, true, Language.getStr("Recordings"), this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 	this.addHintText(Language.getStr("Tap_record_to_start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
@@ -31,7 +31,7 @@ RecordingDialog.setConstants = function() {
 	RecD.remainingFont = Font.uiFont(16);
 	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
-	RecD.recordColor = "#f00";
+	RecD.recordColor = Colors.red;
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
@@ -180,7 +180,7 @@ RecordingDialog.prototype.createRecordButton = function() {
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", RecD.recordFont, RecD.recordColor);
+		Language.getStr("Record"), RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
@@ -213,7 +213,7 @@ RecordingDialog.prototype.createDiscardButton = function() {
 	let button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, Language.getStr("Discard"));
 	return button;
 };
 
@@ -228,7 +228,7 @@ RecordingDialog.prototype.createSaveButton = function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Stop");
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, Language.getStr("Stop"));
 	return button;
 };
 
@@ -243,7 +243,7 @@ RecordingDialog.prototype.createPauseButton = function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, Language.getStr("Pause"));
 	return button;
 };
 
@@ -258,7 +258,7 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, Language.getStr("Record"));
 	return button;
 };
 
@@ -459,7 +459,7 @@ RecordingDialog.prototype.updateCounter = function(time) {
 
 	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
 	if (remainingMs < RD.remainingThreshold) {
-		const remainingString = this.timeToString(remainingMs) + " remaining";
+		const remainingString = this.timeToString(remainingMs) + " " + Language.getStr("remaining");
 		GuiElements.update.text(this.remaingingText, remainingString);
 		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
 		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
@@ -484,6 +484,8 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
+	//let message = Language.getStr("Open_before_recording");
+	//DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
 	let message = "Please open a project before recording";
-	DialogManager.showAlertDialog("No project open", message, "OK");
+	DialogManager.showAlertDialog("No project open", message, Language.getStr("OK"));
 };

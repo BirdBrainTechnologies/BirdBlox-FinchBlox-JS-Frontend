@@ -127,7 +127,7 @@ DropSlot.prototype.createInputSystem = function() {
 DropSlot.prototype.selectionDataFromValue = function(value) {
 	for (let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if (!option.isAction && option.data.getValue() === value) {
+		if (!option.isAction && option.data.getValue() == value) {
 			return option.data;
 		}
 	}

@@ -18,7 +18,8 @@ function ConnectMultipleDialog(deviceClass) {
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 
-    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    //this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    this.addHintText(Language.getStr("Tap"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -120,7 +121,8 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
     //let connectionX = this.x + this.width / 2;
-    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    //return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, null);
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         let upperY = this.contentRelToAbsY(y);
@@ -267,7 +269,9 @@ ConnectMultipleDialog.prototype.closeDialog = function() {
  */
 ConnectMultipleDialog.reloadDialog = function(deviceClass) {
     let curDialog = ConnectMultipleDialog.currentDialog;
-    curDialog.reloadDialog(deviceClass);
+    if (curDialog != null) {
+      curDialog.reloadDialog(deviceClass);
+    }
 };
 
 /**

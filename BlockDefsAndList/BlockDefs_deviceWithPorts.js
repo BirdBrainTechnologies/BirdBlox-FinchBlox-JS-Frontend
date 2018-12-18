@@ -78,24 +78,28 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
  * @param {string} displayUnits - The units to display on the inputPad
  * @constructor
  */
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
-									 minVal, maxVal, displayUnits){
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, blockTranslationKey, numberOfPorts, valueKey,
+									 minVal, maxVal, displayUnits, defaultVal){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
-	this.displayName = displayName;
 	this.numberOfPorts = numberOfPorts;
 	this.minVal = minVal;
 	this.maxVal = maxVal;
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
 	this.displayUnits = displayUnits;
+	if (defaultVal == null){
+		this.defaultValue = 0;
+	} else {
+		this.defaultValue = defaultVal;
+	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
-	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
+	this.parseTranslation(Language.getStr(blockTranslationKey));
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
@@ -151,23 +155,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
-	ledSlot1.addLimits(0, 100, "Intensity");
+	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
-	ledSlot2.addLimits(0, 100, "Intensity");
+	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
-	ledSlot3.addLimits(0, 100, "Intensity");
+	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
-	this.addPart(new LabelText(this, "%"));
+	this.parseTranslation(Language.getStr("block_Tri_LED"));
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
@@ -206,4 +204,76 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	else{
 		return new ExecutionStatusRunning();
 	}
+};
+
+/**
+ * Block that sets a Buzzer
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_DeviceWithPortsBuzzer(x, y, deviceClass){
+  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.minNote = 32
+  this.maxNote = 135
+  this.minBeat = 0
+  this.maxBeat = 16
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
+  this.addPart(noteSlot);
+  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
+  this.addPart(beatsSlot);
+	this.parseTranslation(Language.getStr("block_Play_Note"));
+}
+B_DeviceWithPortsBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_DeviceWithPortsBuzzer.prototype.constructor = B_DeviceWithPortsBuzzer;
+/* Sends the request */
+B_DeviceWithPortsBuzzer.prototype.startAction = function() {
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+
+    const mem = this.runMem;
+    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    mem.soundDuration = CodeManager.beatsToMs(beats);
+    mem.timerStarted = false;
+
+    mem.requestStatus = {};
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
+		//Setting a buzzer with a duration of 0 has strange results on the micro:bit.
+		if (mem.soundDuration > 0) {
+			device.setBuzzer(mem.requestStatus, note, mem.soundDuration);
+		} else {
+			mem.requestStatus.finished = true;
+		}
+
+    return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_DeviceWithPortsBuzzer.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
 };

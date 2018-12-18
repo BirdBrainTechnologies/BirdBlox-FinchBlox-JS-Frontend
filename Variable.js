@@ -98,7 +98,7 @@ Variable.prototype.rename = function() {
 		}
 	};
 	callbackFn.variable = this;
-	DialogManager.showPromptDialog("Rename variable", "Enter variable name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -113,9 +113,8 @@ Variable.prototype.delete = function() {
 			}
 		};
 		callbackFn.variable = this;
-		let question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+		let question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);

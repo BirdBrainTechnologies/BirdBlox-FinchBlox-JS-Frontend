@@ -65,7 +65,11 @@ Menu.prototype.createMenuBnList = function() {
 		this.menuBnList.hide();
 	}
 	const bnM = Menu.bnMargin;
-	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+	if (this.constructor.name === "BatteryMenu") {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+	} else {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
+	}
 	this.menuBnList.markAsOverlayPart(this);
 	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
@@ -131,7 +135,11 @@ Menu.prototype.open = function() {
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			this.addOverlayAndCloseOthers();
+			if (this.isSubMenu){
+				Overlay.addOverlay(this);
+			} else {
+				this.addOverlayAndCloseOthers();
+			}
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate = false;
 		} else {

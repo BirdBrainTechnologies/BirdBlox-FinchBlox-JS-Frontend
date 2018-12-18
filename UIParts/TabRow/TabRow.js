@@ -28,7 +28,7 @@ function TabRow(x, y, width, height, parent, initialTab) {
 TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
-	TR.deselectedColor = "#999";
+	TR.deselectedColor = Colors.mediumLightGray;
 	TR.selectedColor = Colors.lightLightGray;
 	TR.foregroundColor = Colors.white;
 

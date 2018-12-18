@@ -15,9 +15,16 @@
 function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
-	// Added this line
 	this.RSSI = RSSI;
 	this.device = device;
+
+	const nameWords = name.split(" ");
+	this.shortName = "";
+	for (var i = 0; i < nameWords.length; i++) {
+		this.shortName += nameWords[i][0];
+	}
+	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
+	if (Language.isRTL) { this.listLabel += Language.forceLTR; }
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -83,7 +90,10 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " not connected";
+			//return typeName + " " + Language.getStr("not_connected");
+			const translatedText = Language.getStr("not_connected");
+			const returnText = translatedText.replace("(Device)", typeName);
+			return returnText;
 		} else {
 			return errorResult;
 		}
@@ -162,6 +172,10 @@ Device.prototype.setBatteryStatus = function(batteryStatus) {
 
 Device.prototype.getBatteryStatus = function() {
     return this.batteryState;
+}
+
+Device.prototype.setCompassCalibrationStatus = function(success){
+		this.compassCalibrated = (success == "true");
 }
 /**
  * @return {boolean}
@@ -245,10 +259,10 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
-	msg += "\nDevice firmware version: " + oldFirmware;
-	msg += "\nRequired firmware version: " + minFirmware;
-	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+	let msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
+	msg += Language.getStr("Device_firmware") + oldFirmware + " ";
+	msg += Language.getStr("Required_firmware") + minFirmware;
+	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {
 			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
 			request.addParam("type", this.getDeviceTypeId());

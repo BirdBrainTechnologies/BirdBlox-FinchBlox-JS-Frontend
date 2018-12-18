@@ -6,13 +6,14 @@
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * TODO: remove the type parameter and use blockShape and instead.
- * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop, 7 = Calibrate.
+ * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop.
  * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.
  * @param {string} category - The Block's category in string form.
+ * @param {boolean} autoExecute - If true, this block start running automatically
  */
-function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
+function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
 	this.x = x; //Store coords
 	this.y = y;
@@ -56,6 +57,9 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midHeight = 0;
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
+	}
+	if (autoExecute === true) {
+		this.autoExecute = true;
 	}
 }
 
@@ -139,6 +143,72 @@ Block.prototype.generatePath = function() {
 	TouchReceiver.addListenersChild(pathE, this);
 	return pathE;
 };
+
+/**
+ * Parses the translated text and adds block parts in the correct order.
+ * @param {string} text - The translated text to be used.
+ */
+Block.prototype.parseTranslation = function(text) {
+	//const pieces = text.split(/[()]/);
+	const text1 = text.replace(/\(/g, "xxxxx(");
+	const text2 = text1.replace(/\)/g, ")xxxxx");
+	const pieces = text2.split("xxxxx");
+	var newParts = [];
+	var slotsInserted = [];
+	var slotOffset = -1;
+	//Will have problems if there are blocks that have a device drop slot that is
+	// not the first part of the block.
+	if (this.slots[0] != null){
+		if (this.slots[0].constructor === DeviceDropSlot) {
+			newParts.push(this.parts[0]);
+			slotOffset += 1;
+			slotsInserted.push(0);
+		}
+	}
+	for (var i = 0; i < pieces.length; i++){
+		const piece = pieces[i];
+		if (piece.startsWith("(Slot ") && piece.endsWith(")")) {
+			var r = /\d+/;
+			var slotNum = parseInt(piece.match(r));
+			slotNum += slotOffset;
+			if (slotNum < this.slots.length) {
+				const slot = this.slots[slotNum];
+				const slotTexts = piece.split("=");
+				if (slotTexts.length > 1) {
+					const defaultText = slotTexts[1];
+					const dt = defaultText.replace(/\s+/, "").replace(")", "");
+					slot.setData(new StringData(dt), true, false); //should updateDim = true?
+				}
+				newParts.push(slot);
+				slotsInserted.push(slotNum);
+			} // else error?
+		} else if (piece.startsWith("(Icon)")) {
+			//This will cause problems if we ever have more than one icon in a block.
+			this.parts.forEach( function(part) {
+				if (part.constructor === BlockIcon) {
+					newParts.push(part);
+				}
+			});
+		} else if (piece != "") {
+			const label = new LabelText(this, piece);
+			newParts.push(label);
+			label.setActive(this.active);
+		}
+	}
+	//Check to make sure all slots got added, and add any that were missed.
+	for (var i = 0; i < this.slots.length; i++){
+		if (!slotsInserted.includes(i)) {
+			newParts.push(this.slots[i]);
+		}
+	}
+	if (Language.isRTL) {
+		if (newParts[0].constructor === DeviceDropSlot) {
+			newParts.push(newParts.shift());
+		}
+		newParts = newParts.reverse();
+	}
+	this.parts = newParts;
+}
 
 /**
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
@@ -390,10 +460,10 @@ Block.prototype.updateDim = function() {
 		                lineHeight[currentLine] = this.parts[i].height + 12;
                         break;
 		            case 1:
-		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 2:
-		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 7:
 		                 lineHeight[currentLine] = this.parts[i].height + 7;
@@ -405,7 +475,7 @@ Block.prototype.updateDim = function() {
 		     } else {
 		        switch (this.type) {
 		            case 1:
-			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            lineHeight[currentLine] = this.parts[i].height;
 			            break;
 			        default:
 			            lineHeight[currentLine] = this.parts[i].height;
@@ -452,6 +522,8 @@ Block.prototype.updateDim = function() {
 			this.midHeight = bG.height;
 		}
 		height += this.midHeight; //Add the midHeight to the total.
+		var midWidth = this.midLabel.width + 2 * bG.hMargin;
+		if (midWidth > width) { width = midWidth;}
 		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
 		height += this.blockSlot2.height; //Add its height to the total.
 	}

@@ -1,5 +1,6 @@
 /**
  * A dialog used to edit the value of the Slot
+ * Presentation of the dialog is handled by the backend.
  * @param {string} textSummary - The textSummary of the Slot
  * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
  * @constructor
@@ -23,7 +24,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const oldVal = data.asString().getValue();
 	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
 	const shouldPrefill = data.type === Data.types.string;
-	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Edit_text"), this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
 		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
 			// Set the data
 			this.currentData = new StringData(response);

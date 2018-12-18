@@ -107,9 +107,16 @@ TouchReceiver.enableInteraction = function() {
  */
 TouchReceiver.getX = function(e) {
 	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
-		return e.clientX / GuiElements.zoomFactor;
+		var x = e.clientX / GuiElements.zoomFactor;
+	} else {
+		var x = e.touches[0].pageX / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -131,7 +138,13 @@ TouchReceiver.getY = function(e) {
  * @return {number}
  */
 TouchReceiver.getTouchX = function(e, i) {
-	return e.touches[i].pageX / GuiElements.zoomFactor;
+	var x = e.touches[i].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -389,6 +402,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 };
 
 TouchReceiver.touchStartDialogBlock = function(e) {
+	GuiElements.removeVideos();
 	if (SaveManager.fileName == null)  {
 		if (OpenDialog.lastOpenFile != null) {
 			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
@@ -447,14 +461,11 @@ TouchReceiver.touchmove = function(e) {
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType === "displayStack") {
-			    if (typeof TR.target.draggable == "undefined" || TR.target.draggable) {
-			        const x = TR.target.stack.getAbsX();
-                    const y = TR.target.stack.getAbsY();
-                    // The first block of the duplicated BlockStack is the new target.
-                    TR.target = TR.target.stack.duplicate(x, y).firstBlock;
-                    TR.targetType = "block";
-			    }
-
+	        const x = TR.target.stack.getAbsX();
+          const y = TR.target.stack.getAbsY();
+          // The first block of the duplicated BlockStack is the new target.
+          TR.target = TR.target.stack.duplicate(x, y).firstBlock;
+          TR.targetType = "block";
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
 			 then the BlockStack should move. */
@@ -574,18 +585,17 @@ TouchReceiver.touchend = function(e) {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
 		    // tapping a block in the display stack runs the block once
-		    const x = TR.target.stack.getAbsX();
-            const y = TR.target.stack.getAbsY();
-            TR.targetType = "block";
-            TR.target.updateRun();
+        let execStatus = TR.target.updateRun();
+				if (!execStatus.isRunning) {
             // start the execution of a block
             TR.target.startAction();
-            setTimeout(function(){
-                // wait for the response before trying to fetch the response and display the result
-                TR.target.displayResult(TR.target.updateAction().getResult());
-            }, 100);
-            // set the block to inactive state after running it.
-            TR.target.running = 0;
+				}
+
+        setTimeout(function(){
+            // wait for the response before trying to fetch the response and display the result
+						execStatus = TR.target.updateRun();
+            TR.target.displayResult(execStatus.getResult());
+        }, 100);
 		}
 	} else {
 		TR.touchDown = false;

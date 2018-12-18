@@ -19,7 +19,7 @@ NumOrStringSlot.prototype.constructor = NumOrStringSlot;
  * @param {InputWidget.SelectPad} selectPad
  */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
-	selectPad.addAction("Enter text", function(callbackFn){
+	selectPad.addAction(Language.getStr("Edit_text"), function(callbackFn){
 		// When "Enter text" is selected, create a new inputDialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){

@@ -2,16 +2,17 @@
 1. [Overview (for backend developers)](#overview-for-backend-developers)
 2. [Request list](#request-list)
 3. [Overview (for frontend developers)](#overview-for-frontend-developers)
+4. [BirdBlox translations](#birdblox-translations)
 
 ## Overview (for backend developers)
 
 This is the code for the BirdBlox JavaScript frontend.
 It is responsible for handling all the UI, block execution,
 etc. for the BirdBlox application.  It is designed to run
-inside of a containing application (iOS or Android apps, 
-for example).  Anything the js code can't do by itself 
-(issuing bluetooth commands, showing dialogs, saving files) is 
-passed on to the containing application (backend) in the 
+inside of a containing application (iOS or Android apps,
+for example).  Anything the js code can't do by itself
+(issuing bluetooth commands, showing dialogs, saving files) is
+passed on to the containing application (backend) in the
 form of get/post requests.  To ensure the backend always has
 an updated version of the frontend, clone the frontend's
 git repo into the backend and to a pull when changes are made.
@@ -66,14 +67,14 @@ This enabled us to remove the server from the iOS backend.
 
 ### Bluetooth scanning
 
-The backend and frontend communicate about specific Bluetooth robots 
+The backend and frontend communicate about specific Bluetooth robots
 using the robots' ids.  On Android, Mac Addresses are used as ids while
-iOS provides its own unique Bluetooth ids.  All requests mentioning a 
+iOS provides its own unique Bluetooth ids.  All requests mentioning a
 specific robot will have an `id=[device_id]` parameter.
 
 The frontend will initialize bluetooth scans using the `robot/startDiscover`
 request.  These scans last for a reasonable amount of time as
-to not drain the battery.  The backend then calls 
+to not drain the battery.  The backend then calls
 `CallbackManager.robot.discovered` with the list of discovered devices every
 time a new device is found.  The frontend will call `robot/stopDiscover` to
 request that a scan be ended.  If the scan times out before `stopDiscover` is
@@ -86,7 +87,7 @@ is called.
 
     Request format:
         http://localhost:22179/robot/startDiscover?type=[robotType]
-    Example request: 
+    Example request:
         http://localhost:22179/robot/startDiscover?type=hummingbird
 
 When received, the backend begins a scan of unpaired devices of the specified
@@ -119,7 +120,7 @@ Called any time a new device is discovered during a scan
     Example call:
         CallbackManager.robot.discoverTimeOut("hummingbird");
 
-Tells the frontend that the discover timed out so the frontend has a chance to 
+Tells the frontend that the discover timed out so the frontend has a chance to
 start the discover again.
 
 #### CallbackManager.robot.stopDiscover
@@ -129,13 +130,13 @@ start the discover again.
     Example call:
         CallbackManager.robot.stopDiscover("hummingbird");
 
-Tells the frontend that the discover stopped so the frontend has a chance to 
+Tells the frontend that the discover stopped so the frontend has a chance to
 start the discover again.  Called any time a scan stops unless it timed out.
 
 ### Robot connection/disconnection
 
 The frontend will tell the backend when to connect to or disconnect from a robot using the
-`/robot/connect` and `robot/disconnect` requests. 
+`/robot/connect` and `robot/disconnect` requests.
 The backend maintains a list of devices the frontend wants to connect to, and
 devices are instantaneously added or removed from that list as the frontend
 requests.  The frontend has a similar list (visible to the user in the ConnectMultipleDialog)
@@ -159,10 +160,10 @@ backend removes something from the list without the frontend making a request.
 
     Request format:
         http://localhost:22179/robot/connect?id=[robotId]&type=[robotType]
-    Example request: 
+    Example request:
         http://localhost:22179/robot/connect?id=SomeMacAddress&type=flutter
 
-Tells the backend to connect to a device.  If the device is on the devices found during the 
+Tells the backend to connect to a device.  If the device is on the devices found during the
 last scan, the backend adds it to the connection list and tries to connect to it. Otherwise
 it returns a 404.
 
@@ -170,7 +171,7 @@ it returns a 404.
 
     Request format:
         http://localhost:22179/robot/disconnect?id=[robotId]&type=[robotType]
-    Example request: 
+    Example request:
         http://localhost:22179/robot/disconnect?id=SomeMacAddress&type=flutter
 
 Tells the backend to disconnect from a device.  If the device is on the connection list, it
@@ -206,7 +207,7 @@ should be used instead.
 #### CallbackManager.robot.disconnectIncompatible
 
     Callback signature:
-        CallbackManager.robot.disconnectIncompatible(robotId: string, 
+        CallbackManager.robot.disconnectIncompatible(robotId: string,
             oldFirmware: string, minFirmware: string) -> boolean
         oldFirmware - percent encoded version of firmware that was on the robot
         minFirmware - percent encoded minimum version of firmware the backend requires
@@ -222,12 +223,12 @@ to view instructions to update the firmware.
 
     Request format:
         http://localhost:22179/robot/showUpdateInstructions?type=[robotTypeId]
-    Example request: 
+    Example request:
         http://localhost:22179/robot/showUpdateInstructions?type=hummingbird
-        
+
 When received, the backend redirects the user to a website containing instructions
 to update the firmware of their device. The website may depend on the type of robot.
-Currently this website is 
+Currently this website is
 http://www.hummingbirdkit.com/learning/installing-birdblox#BurnFirmware
 
 #### /robot/showInfo
@@ -243,7 +244,7 @@ the text and a single option "Dismiss":
     Bluetooth Name: [actual gap name]
     Hardware Version: [hardware version]
     Firmware Version: [firmware version]
-    
+
 If the firmware isn't up to date, an additional line, `Firmware update available` is
 included with options "Dismiss" and "Update firmware", which links to the update page.
 
@@ -281,7 +282,7 @@ direct call system, also empties the queue of unprocessed robot block requests.
     Request format:
         http://localhost:22179/robot/in?sensor=[s]&type=[t]&id=[id]&port=[p]
         type - ["sensor"|"temperature"|"distance"|"sound"|"light"|"soil"]
-    Example request: 
+    Example request:
         http://localhost:22179/robot/in?sensor=distance&type=flutter&id=robotid&port=2
     Example response:
         3.6
@@ -300,19 +301,19 @@ type of sensor
     Request format:
         http://localhost:22179/robot/out/motor?speed=[s]&type=[t]&id=[id]&port=[p]
         angle - int from -100 to 100
-        
+
 #### /robot/out/vibration
 
     Request format:
         http://localhost:22179/robot/out/vibration?intensity=[i]&type=[t]&id=[id]&port=[p]
         intensity - int from 0 to 100
-        
+
 #### /robot/out/led
 
     Request format:
         http://localhost:22179/robot/out/led?intensity=[i]&type=[t]&id=[id]&port=[p]
         intensity - int from 0 to 100
-        
+
 #### /robot/out/triled
 
     Request format:
@@ -320,7 +321,7 @@ type of sensor
         red - int from 0 to 100
         green - int from 0 to 100
         blue - int from 0 to 100
-        
+
 #### /robot/out/buzzer
 
     Request format:
@@ -342,7 +343,7 @@ to the user.
         http://localhost:22179/tablet/availableSensors
     Example response:
         "accelerometer\nbarometer\nmicrophone\ngps"
-        
+
 Returns a `"\n"` separated list of sensors the device supports.  For technical reasons,
 iOS always returns `""` to this request and uses the callback functions to give this
 information instead.
@@ -379,7 +380,7 @@ Tells the frontend to remove the sensor from the list of supported sensors.
     Example responses:
         true
         false
-        
+
 Returns whether the tablet was shaken.  After returning true, it returns false on
 subsequent calls until the tablet is shaken again.
 
@@ -390,7 +391,7 @@ subsequent calls until the tablet is shaken again.
     Example responses:
         My WiFi
         null
-        
+
 Returns the name of the WiFi the tablet is connected to or `null` if it is not connected
 to anything.
 
@@ -400,7 +401,7 @@ to anything.
         http://localhost:22179/tablet/pressure
     Example responses:
         104.3
-        
+
 Returns the a pressure in kilopascals
 
 #### /tablet/altitude
@@ -409,8 +410,8 @@ Returns the a pressure in kilopascals
         http://localhost:22179/tablet/altitude
     Example responses:
         -1.245
-        
-Returns the change in the device's altitude (in meters) since the app was opened. 
+
+Returns the change in the device's altitude (in meters) since the app was opened.
 This is determined using the device's barometer
 
 #### /tablet/orientation
@@ -425,7 +426,7 @@ This is determined using the device's barometer
         Portrait: home button on top
         Facedown
         In between
-        
+
 Returns a string indicating the device's orientation.
 
 #### /tablet/acceleration
@@ -434,7 +435,7 @@ Returns a string indicating the device's orientation.
         http://localhost:22179/tablet/acceleration
     Example response:
         7.432 4.295 -1.568
-        
+
 Returns the change in the device's acceleration in the x, y, and z directions, separated
 by spaces. This should be the total acceleration (including gravity)
 
@@ -444,7 +445,7 @@ by spaces. This should be the total acceleration (including gravity)
         http://localhost:22179/tablet/location
     Example response:
         100.456 70.823
-        
+
 Returns the latitude and longitude separated by spaces. Prompts for location permission
 if not granted yet.
 
@@ -478,9 +479,9 @@ Shows a dialog and calls `CallbackManager.dialog.promptResponded` when it is res
         title - The text to show in the top of the dialog
         question - The text to show in the body of the dialog
         button1 - The text to show on the first button
-        button2 - (optional) The text to show on the second button 
-        
-Shows a choice dialog, or an alert dialog (if only one button is provided). Calls 
+        button2 - (optional) The text to show on the second button
+
+Shows a choice dialog, or an alert dialog (if only one button is provided). Calls
 `CallbackManager.dialog.choiceResponded` when it is responded to.
 
 #### CallbackManager.dialog.promptResponded
@@ -491,7 +492,7 @@ Shows a choice dialog, or an alert dialog (if only one button is provided). Call
         response - (optional) Percent encoded response to the dialog. Included iff !canceled
     Example call:
         CallbackManager.dialog.promptResponded(true, "Hello");
-        
+
 #### CallbackManager.dialog.choiceResponded
 
     Callback signature:
@@ -500,7 +501,7 @@ Shows a choice dialog, or an alert dialog (if only one button is provided). Call
         firstSelected - Whether the first option was selected
     Example call:
         CallbackManager.dialog.choiceResponded(false, true);
-        
+
 If the dialog is an alert, the values of the booleans doesn't matter, but the most sensible
 selection is `canceled = false` and `firstSelected = true`
 
@@ -512,18 +513,18 @@ Settings provide a way for the frontend to store and read from a key/value setti
 
     Request format:
         http://localhost:22179/settings/get?key=[key]
-    Example request: 
+    Example request:
         http://localhost:22179/settings/get?key=zoom
     Example response:
         1.5999999999999999
-    
+
 A 404 response is generated if the key does not have an assigned value.
-    
+
 #### /settings/set
 
     Request format:
         http://localhost:22179/settings/set?key=[key]&value=[value]
-    Example request: 
+    Example request:
         http://localhost:22179/settings/set?key=zoom&value=1
 
 ### File management
@@ -551,12 +552,12 @@ the same restrictions for valid names.
 Tells the frontend to load up the data from a file.  Called during imports,
 on app startup (if the project was left open in the background), op when requested
 using `/data/open`.
-        
+
 #### CallbackManager.data.filesChanged
 
     Callback signature:
         CallbackManager.data.filesChanged() -> boolean
-        
+
 Tells the frontend that the list of locally stored files has changed. Refreshes the
 UI's list of files.
 
@@ -567,7 +568,7 @@ UI's list of files.
 
 Tells the frontend to close the open dialog and show "Loading..." in the title
 bar.  Called when the frontend is in the process of opening a file.
-        
+
 #### /data/files
 
     Request format:
@@ -603,7 +604,7 @@ opens the OpenDialog
 
     Request format:
         http://localhost:22179/data/new?filename=[fn]
-        
+
 Tells the backend to create a new file with the specified name. If the name is in use
 or invalid, the backend should respond with an error.
 
@@ -612,7 +613,7 @@ or invalid, the backend should respond with an error.
     Request format:
         http://localhost:22179/data/rename?oldFilename=[of]&newFilename=[nf]&type=[t]
         type - ["file"|"recording"]
-        
+
 Tells the backend to rename the file. If the file does not exist, an error should
 be returned.  If `oldFilename` equals `newFilename`, no action should be performed.
 If `newFilename` is in use or invalid, the backend should signal an error.
@@ -631,7 +632,7 @@ exist.
 
     Request format:
         http://localhost:22179/data/duplicate?filename=[fn]&newFilename[nf]
-        
+
 Creates a copy of the file with the specified name. Throws an error if `newFilename`
 is in use or invalid
 
@@ -654,7 +655,7 @@ Exports the specified file. On iOS, coords are used to determine sheet location.
         type - ["file"|"recording"]
     Example response:
         {"availableName":"my file (2)", "alreadySanitized":true, "alreadyAvailable":false
-        
+
 Checks if the provided file name would be valid for a new file/recording. Returns a JSON
 object with a close (or identical) name that is valid (key="availableName"), and
 booleans indicating if the initial name contained no illegal characters and was not in
@@ -666,7 +667,7 @@ are true iff the available name equals the initial name.
     POST Request format:
         http://localhost:22179/data/autoSave
     POST request body includes XML data
-        
+
 Sends the data from the currently open file to the backend so it can be saved.  Called
 once every 15 seconds and whenever an edit is made.
 
@@ -688,14 +689,14 @@ is selected from the UI, it should be opened with `/data/open`.
 
     Request format:
         http://localhost:22179/cloud/signIn
-        
+
 Begins Dropbox authentication
 
 #### /cloud/signOut
 
     Request format:
         http://localhost:22179/cloud/signIn
-        
+
 Signs out of Dropbox account
 
 #### /cloud/list
@@ -704,7 +705,7 @@ Signs out of Dropbox account
         http://localhost:22179/cloud/list
     Example response:
         {"files":["project1","project2"]}
-        
+
 Returns a JSON object with “files” = a JSON array of filenames on the user's cloud storage
 
 #### /cloud/download
@@ -712,13 +713,13 @@ Returns a JSON object with “files” = a JSON array of filenames on the user's
     Request format:
         http://localhost:22179/cloud/download?filename=[fn]
 
-Attempts to download the given file.  If there is a name conflict, presents the user 
-with three options: cancel, rename, and overwrite.  If they choose rename and enter 
-a conflicting name, shows the same dialog again.  If the download is not canceled, 
-shows a dialog box with a cancel option and a loading bar. If an error occurs, change 
-the text of the dialog to notify the user of the error.  They will then have to 
-select “cancel” to continue.  If the file specified does not exist, or there is no 
-internet connection, presents a dialog indicating this.  This command 
+Attempts to download the given file.  If there is a name conflict, presents the user
+with three options: cancel, rename, and overwrite.  If they choose rename and enter
+a conflicting name, shows the same dialog again.  If the download is not canceled,
+shows a dialog box with a cancel option and a loading bar. If an error occurs, change
+the text of the dialog to notify the user of the error.  They will then have to
+select “cancel” to continue.  If the file specified does not exist, or there is no
+internet connection, presents a dialog indicating this.  This command
 only returns a response when there is no cloud account connected.
 
 #### CallbackManager.cloud.downloadComplete
@@ -728,7 +729,7 @@ only returns a response when there is no cloud account connected.
         filename - percent encoded name of the file that downloaded
 
 Tells the frontend that a file just finished downloading
-        
+
 #### CallbackManager.cloud.signIn
 
     Callback signature:
@@ -736,7 +737,7 @@ Tells the frontend that a file just finished downloading
 
 Tells the frontend that the user added a Dropbox account.  Called only once the account
 name is known, so it can be requested and displayed.
-        
+
 #### CallbackManager.cloud.filesChanged
 
     Callback signature:
@@ -746,26 +747,26 @@ name is known, so it can be requested and displayed.
         CallbackManager.cloud.filesChanged(newList)
         where newList is the percent encoded form of: {"files":["project1","project2"]}
 
-Notifies the frontend that the files in the cloud list have changed 
+Notifies the frontend that the files in the cloud list have changed
 (when an upload completes, for example) and includes a JSON object with the new files    
-        
+
 #### /cloud/upload
 
     Request format:
         http://localhost:22179/cloud/upload?filename=[fn]
 
-Uploads a file from the user’s device to the cloud.  Similarly to download, 
-it prompts for name conflicts and display a loading bar for upload, 
-providing the user with an option to cancel.  Calls 
+Uploads a file from the user’s device to the cloud.  Similarly to download,
+it prompts for name conflicts and display a loading bar for upload,
+providing the user with an option to cancel.  Calls
 CallbackManager.cloud.filesChanged() when complete
 
 #### /cloud/rename
 
     Request format:
         http://localhost:22179/cloud/rename?filename=[fn]
-        
-Presents a dialog for the user to input a name.  Re-prompts the user if the name is 
-invalid or taken.  Calls CallbackManager.cloud.filesChanged() if the file is 
+
+Presents a dialog for the user to input a name.  Re-prompts the user if the name is
+invalid or taken.  Calls CallbackManager.cloud.filesChanged() if the file is
 ultimately renamed.
 
 #### /cloud/delete
@@ -778,7 +779,7 @@ Calls CallbackManager.cloud.filesChanged() if the file is ultimately deleted
 
 ### Sounds
 
-There are 3 main types of sounds: UI sounds (the snap noise when blocks connect), 
+There are 3 main types of sounds: UI sounds (the snap noise when blocks connect),
 sound effects (the built in sounds controlled by the sound block), and recordings
 (sounds created by the user).  These commands handle sound playback.
 File management for recordings is handled by /data commands, while recording
@@ -948,7 +949,7 @@ Returns the width and height of the screen in cm, separated by spaces
         http://localhost:22179/ui/contentLoaded
 
 Tells the backend that the frontend's UI has loaded, so it can do any additional
-setup.  No callbacks should be called until the content is laoded. This is a good
+setup.  No callbacks should be called until the content is loaded. This is a good
 time to call `CallbackManager.data.open`.
 
 #### CallbackManager.echo
@@ -972,8 +973,8 @@ The request should contain everything that would normally follow `http://localho
 4. [Data types](#data-types)
 5. [Categories](#categories)
 
-Before reading this section, you may want to read the [overview for 
-backend developers](#overview-for-backend-developers) and the 
+Before reading this section, you may want to read the [overview for
+backend developers](#overview-for-backend-developers) and the
 [Bluetooth pairing system](#bluetooth-pairing-system) to understand
 how the backend will be interacting with the application.
 
@@ -981,7 +982,7 @@ how the backend will be interacting with the application.
 
 All the UI for the frontend is generated dynamically when the application
 is loaded.  In fact, the only HTML file in the project consists primarily
-of script tags linking to the .js files, and a single SVG tag, which 
+of script tags linking to the .js files, and a single SVG tag, which
 the rest of the UI is housed within.  Using an SVG instead of a canvas
 or other html elements means that the interface is sharp on high-resolution
 screens and looks the same on all devices.
@@ -1003,9 +1004,9 @@ drawn.  This means that constants set in the first phase (for example
 the width of the sidebar) can be used by other classes during the drawing
 phase, even if they appear before the class where the constant was set.
 Since classes in JS are essentially functions, the constant setting
-phase of most classes is triggered by running a sub-function called 
-setGraphics or setConstants, then the drawing phase is triggered 
-by running the class's function itself.  See BlockPalette.js for an 
+phase of most classes is triggered by running a sub-function called
+setGraphics or setConstants, then the drawing phase is triggered
+by running the class's function itself.  See BlockPalette.js for an
 example of this.  All constant values used in the UI (block dimensions,
 colors, fonts, etc.) are stored in a SetConstants or a similar function.
 No values are hardcoded into the main code.
@@ -1019,10 +1020,10 @@ It then passes the message to all its tabs.  Each tab calls functions
 in that tab's BlockStacks.  Each BlockStack in turn tells the first Block
 in that stack, which tells the next block, etc.  At the same time, Blocks
 pass messages to their Slots and BlockSlots (found in loops and if statements).
-Slots pass messages to the Blocks connected to them, and BlockSlots to the 
+Slots pass messages to the Blocks connected to them, and BlockSlots to the
 first Block within them.
 
-Block execution occurs similarly, with a timer (housed in CodeManager) 
+Block execution occurs similarly, with a timer (housed in CodeManager)
 firing repeatedly and triggering updates in each Tab, BlockStack, and
 whichever block is currently executing within that stack.  Each BlockStack has a
 pointer to the currently executing Block within it.  When a Block's execution
@@ -1118,22 +1119,22 @@ In summary, `this.slots[i].getData()` is used to access data from Slots,
 `this.runMem` is temporary storage that persists during a Block's execution,
 and `ExecutionStatusResult` is used to return a value.
 
-Global variables (like `tempo` for sounds) are all stored in 
+Global variables (like `tempo` for sounds) are all stored in
 CodeManager.js.
 
 ### Data types
 
 Data in BirdBlox is automatically cast to strings, numbers, or booleans
 as the connections between blocks require.  For example, if the string
-"3" is stored in a variable and the number 1 is added to it with the 
+"3" is stored in a variable and the number 1 is added to it with the
 addition block, "3" is automatically converted to 3, which one is added
 to, returning 4.  To enable this, a number of Data classes are used including
-StringData, NumData, BoolData, ListData (for arrays), and SelectionData 
+StringData, NumData, BoolData, ListData (for arrays), and SelectionData
 (used internally when picking from DropSlots).  
 
 Each Data class has functions
 `.asNum()`, `.asString()`, `.asList()`.  So in theory, a ListData
-could be converted into a BoolData, for example.  However, while all conversions 
+could be converted into a BoolData, for example.  However, while all conversions
 will successfully execute, conversions that make no sense are marked as
 invalid by setting `.isValid` to false.
 
@@ -1143,9 +1144,9 @@ you are not sure that the data is the correct type (a NumData, for example),
 you can call `data.AsNum().getValue()` to be sure that a valid number
 will be returned.  
 
-NumData also has special functions 
+NumData also has special functions
 `.getValueInR(num min, num max, bool positive, bool integer)` and
-`.getValueWithC(bool positive, bool integer)` to get a number in a 
+`.getValueWithC(bool positive, bool integer)` to get a number in a
 certain range or with specific constraints, respectively.  Note that
 slots such as NumSlots and BoolSlots automatically take care of running
 `.asNum()` or `.asBool()` when `slots[i].getData()` is called.  However,
@@ -1158,8 +1159,47 @@ To add a new Block to a category, simply open BlockList.js and add
 an entry in the corresponding `BlockList.populateCat_[category name]()`
 function.  Blocks will appear in order.
 
-To reorder categories, adjust the code in the `BlockList()` function in 
+To reorder categories, adjust the code in the `BlockList()` function in
 BlockList.js to reflect the new ordering.
 
 To change the color of a category, check out the `Colors.setCategory()`
-function in Colors.js 
+function in Colors.js
+
+
+## BirdBlox translations
+1. [Translations overview](#translations-overview)
+2. [Adding a new language](#adding-a-new-language)
+
+### Translations overview
+
+Birdblox has been translated into a number of different languages. The bulk of
+the work is contained in Language/Language.js, but each language translation is
+kept in its own file in the Language folder. The backend is responsible for
+sending the system language once the frontend has loaded. If no language is set
+through the language menu, the system language is used. If the system language
+is not available, English is used.
+
+### Adding a new language
+
+There are several steps to adding a new language:
+1. Find the 2 letter language code for the new language (example resource: https://www.w3schools.com/tags/ref_language_codes.asp)
+2. Create a new file in the Language folder for the translation and add
+translated text.
+3. Add this file to HummingbirdDragAndDrop2.html.
+4. Add the 2 letter code to the Language.langs array and the name of this
+language to the Language.names array.
+5. If the language is read from right to left, also add the 2 letter code to
+the Language.rtlLangs array.
+6. Run the project in a web browser with DO.enabled=true and the JavaScript
+console open. This will check your translation for missing keys (results appear
+in the console).
+
+Details to keep in mind when creating a new translation:
+1. The default string text in the block_Print translation is for printing to
+the micro:bit display and should not contain characters that cannot be printed
+there. Default to 'Hello' if no reasonable translation can be made.
+2. Some translators may mistakenly translate the words in () such as Slot, Icon,
+and Device. These words are placeholders and must remain as is. Especially check
+the keys not_connected and block_when_flag_tapped.
+3. Name_error keys have some formatting that must be maintained and should be
+checked after translating.

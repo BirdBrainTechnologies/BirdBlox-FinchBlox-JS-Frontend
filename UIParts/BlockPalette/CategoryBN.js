@@ -20,7 +20,7 @@ CategoryBN.setGraphics = function() {
 	const CBN = CategoryBN;
 	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
-	CBN.foreground = "#000";
+	CBN.foreground = Colors.black;
 	CBN.height = 30;
 	CBN.colorW = 8;   // The width of the band of color on the left
 	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
@@ -54,7 +54,7 @@ CategoryBN.prototype.buildGraphics = function() {
  */
 CategoryBN.prototype.select = function() {
 	this.bgRect.setAttributeNS(null, "fill", this.fill);
-	this.label.setAttributeNS(null, "fill", "#fff");
+	this.label.setAttributeNS(null, "fill", Colors.white);
 };
 
 /**
@@ -62,7 +62,7 @@ CategoryBN.prototype.select = function() {
  */
 CategoryBN.prototype.deselect = function() {
 	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
-	this.label.setAttributeNS(null, "fill", "#000");
+	this.label.setAttributeNS(null, "fill", Colors.black);
 };
 
 /**

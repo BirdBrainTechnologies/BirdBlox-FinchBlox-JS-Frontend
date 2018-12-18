@@ -14,7 +14,7 @@ SaveManager.setConstants = function() {
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 60;
-	SaveManager.newProgName = "New program";
+	SaveManager.newProgName = Language.getStr("New_program");
 	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
 
@@ -79,7 +79,7 @@ SaveManager.backendClose = function() {
  */
 SaveManager.backendMarkLoading = function() {
 	OpenDialog.closeDialog();
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 };
 
 /**
@@ -105,7 +105,7 @@ SaveManager.userClose = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.userNew = function(nextAction) {
-	SaveManager.promptNewFile("Enter file name", nextAction);
+	SaveManager.promptNewFile(Language.getStr("Enter_file_name"), nextAction);
 };
 
 /**
@@ -126,7 +126,7 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeNew(response.trim(), nextAction);
 		}
@@ -140,7 +140,7 @@ SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction
  */
 SaveManager.sanitizeNew = function(proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		const message = Language.getStr("Name_error_blank");
 		SaveManager.promptNewFile(message, nextAction);
 	} else {
 		GuiElements.alert("getting name");
@@ -150,11 +150,11 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
 				SaveManager.newSoft(availableName, nextAction);
 			} else if (!alreadySanitized) {
 				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			}
 		});
@@ -170,7 +170,7 @@ SaveManager.newSoft = function(filename, nextAction) {
 	const request = new HttpRequestBuilder("data/new");
 	request.addParam("filename", filename);
 	SaveManager.loadBlank();
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	// If the saving fails, we show the open dialog so the user can try again.
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
 };
@@ -197,7 +197,7 @@ SaveManager.userOpenFile = function(fileName) {
     SaveManager.fileName = fileName;
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {
@@ -214,7 +214,7 @@ SaveManager.userOpenFile = function(fileName) {
  */
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
 	// We use the default message with the title "Name"
-	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
+	SaveManager.promptRename(isRecording, oldFilename, Language.getStr("Name"), null, nextAction);
 };
 
 /**
@@ -241,7 +241,7 @@ SaveManager.promptRename = function(isRecording, oldFilename, title, message, ne
  */
 SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
 	if (message == null) {
-		message = "Enter a file name";
+		message = Language.getStr("Enter_file_name");
 	}
 	// We ask for a new name
 	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
@@ -262,7 +262,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		const message = Language.getStr("Name_error_blank");
 		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
 	} else if (proposedName === oldFilename) {
 		if (!isRecording && SaveManager.fileName === oldFilename) {
@@ -276,11 +276,11 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
@@ -319,8 +319,9 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
+	const title = Language.getStr("Delete") + " '" + filename + "'";
+	const question = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
 				OpenDialog.lastOpenFile = null;
@@ -390,7 +391,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
  * @param {function} nextAction - The name of the function to call after successful duplication
  */
 SaveManager.userDuplicateFile = function(filename, nextAction) {
-	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
+	SaveManager.promptDuplicate(Language.getStr("Name_duplicate_file"), filename, nextAction);
 };
 
 /**
@@ -413,7 +414,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
-	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Duplicate"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
@@ -428,17 +429,17 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 	if (proposedName === "") {
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
+		SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
@@ -497,7 +498,7 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
 SaveManager.saveAsNew = function() {
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {

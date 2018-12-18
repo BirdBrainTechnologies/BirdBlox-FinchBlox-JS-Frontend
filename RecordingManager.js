@@ -48,8 +48,8 @@ RecordingManager.startRecording = function() {
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
 		} else if (result === "Permission denied") {
-			let message = "Please grant recording permissions to the BirdBlox app in settings";
-			DialogManager.showAlertDialog("Permission denied", message, "Dismiss");
+			let message = Language.getStr("Grant_permission");
+			DialogManager.showAlertDialog(Language.getStr("Permission_denied"), message, Language.getStr("Dismiss"));
 		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
@@ -104,8 +104,8 @@ RecordingManager.discardRecording = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let message = "Are you sure you would like to delete the current recording?";
-	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result) {
+	let message = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(result) {
 		if (result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);

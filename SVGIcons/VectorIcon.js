@@ -7,15 +7,17 @@
  * @param {string} color - Color in hex
  * @param {number} height - The height the path should be.  Width is computed from this
  * @param {Element} parent - An SVG group element the path should go inside
+ * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
  * @constructor
  */
-function VectorIcon(x, y, pathId, color, height, parent) {
+function VectorIcon(x, y, pathId, color, height, parent, mirror) {
 	this.x = x;
 	this.y = y;
 	this.color = color;
 	this.height = height;
 	this.pathId = pathId;
 	this.parent = parent;
+	this.mirror = mirror;
 	this.pathE = null;
 	this.draw();
 }
@@ -35,10 +37,20 @@ VectorIcon.computeWidth = function(pathId, height) {
  * Creates the SVG pathE and the group to contain it
  */
 VectorIcon.prototype.draw = function() {
-	this.scale = this.height / this.pathId.height;
-	this.width = this.scale * this.pathId.width;
+	this.scaleX = this.height / this.pathId.height;
+	this.scaleY = this.scaleX;
+	this.width = this.scaleY * this.pathId.width;
+
+	//If the icon should not be mirrored, it will need to be flipped for rtl
+	// languages. The negative scale flips the icon along the horizontal axis, but
+	// it then also needs to be translated by the width to pisition it correctly.
+	if (Language.isRTL && !this.mirror) {
+		this.scaleX = -this.scaleX;
+		this.x += this.width;
+	}
+
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
@@ -60,9 +72,10 @@ VectorIcon.prototype.setColor = function(color) {
  * @param{number} y
  */
 VectorIcon.prototype.move = function(x, y) {
+	if (Language.isRTL && !this.mirror) { x += this.width; }
 	this.x = x;
 	this.y = y;
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 };
 
 /* Deletes the icon and removes the path from its parent group. */

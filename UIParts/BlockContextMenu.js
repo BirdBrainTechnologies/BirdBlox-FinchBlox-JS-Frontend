@@ -48,12 +48,12 @@ BlockContextMenu.prototype.addOptions = function() {
 	if (this.block.stack.isDisplayStack) {
 		if (this.block.constructor === B_Variable) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameVar();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteVar();
 				this.close();
 			}.bind(this));
@@ -61,12 +61,12 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 		if (this.block.constructor === B_List) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameLi();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteLi();
 				this.close();
 			}.bind(this));
@@ -74,11 +74,11 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 	} else {
 
-		this.menuBnList.addOption("Duplicate", function() {
+		this.menuBnList.addOption(Language.getStr("Duplicate"), function() {
 			this.duplicate();
 		}.bind(this));
 
-		this.menuBnList.addOption("Delete", function() {
+		this.menuBnList.addOption(Language.getStr("Delete"), function() {
 			// Delete the stack and add it to the UndoManager
 			UndoManager.deleteStack(this.block.unsnap());
 			this.close();

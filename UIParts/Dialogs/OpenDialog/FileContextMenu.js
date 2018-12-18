@@ -63,7 +63,7 @@ FileContextMenu.prototype.addOptions = function() {
 		this.menuBnList.addOption("", function() {
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, Language.getStr("Share")));
 	}
 	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
 		this.menuBnList.addOption("", function() {
@@ -72,7 +72,7 @@ FileContextMenu.prototype.addOptions = function() {
 				dialog.reloadDialog();
 			});
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, Language.getStr("Duplicate")));
 	}
 	this.menuBnList.addOption("", function() {
 		if (this.type === FCM.types.cloud) {
@@ -87,7 +87,7 @@ FileContextMenu.prototype.addOptions = function() {
 			});
 			this.close();
 		}
-	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, Language.getStr("Delete")));
 };
 
 /**

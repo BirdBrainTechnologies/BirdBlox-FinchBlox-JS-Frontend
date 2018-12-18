@@ -144,6 +144,8 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 			request.addParam("placeholder", prefill);
 		}
 		request.addParam("selectAll", "true");
+		request.addParam("okText", Language.getStr("OK"));
+		request.addParam("cancelText", Language.getStr("Cancel"));
 		const onDialogPresented = function(result) {
 			DM.promptCallback = callbackFn;
 		};

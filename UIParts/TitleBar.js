@@ -37,9 +37,9 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.bnIconMargin = 3;
 
 	TB.bg = Colors.lightGray;
-	TB.flagFill = "#0f0";
+	TB.flagFill = Colors.green;
 	TB.batteryFill = Colors.lightGray;
-	TB.stopFill = "#f00";
+	TB.stopFill = Colors.red;
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
 
@@ -57,13 +57,13 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - TB.buttonMargin;
 	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
-	TB.debugX = TB.batteryBnX - TB.longButtonW - 3 * TB.buttonMargin;
+	TB.debugX = TB.batteryBnX - TB.longButtonW - TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
-	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
+	TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
@@ -73,7 +73,7 @@ TitleBar.setGraphicsPart2 = function() {
 	if (TB.undoBnX < suggestedUndoBnX) {
 		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
 	}
-	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
+	TB.statusX = TB.hummingbirdBnX + 2 * TB.buttonMargin;
 };
 
 /**
@@ -98,12 +98,14 @@ TitleBar.makeButtons = function() {
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
-	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
-	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
+  TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+  TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+
+	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+	const hbBnIconOffset = 2 * TB.buttonMargin;
+	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);

@@ -10,38 +10,59 @@ function Colors() {
 }
 
 Colors.setCommon = function() {
+	//Gray scale...
 	Colors.white = "#fff";
+  Colors.lightLightGray = "#CDCDCD";
+  Colors.windowColor = "#CCC";
+	Colors.mediumLightGray = "#999";
 	Colors.lightGray = "#7B7B7B";
-    Colors.lightLightGray = "#CDCDCD";
-    Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
+	//Basic colors
 	Colors.red = "#FF0000";
+	Colors.green = "#00FF00";
+	Colors.yellow = "#FFFF00";
+	Colors.darkRed = "#c00000";
+	//Current BBT colors
+	Colors.bbt = "#209BA9";
+	Colors.tabletOrange = "#FAA525";
+	Colors.operatorsGreen = "#8EC449";
+	Colors.soundPurple = "#EE00FF";
+	Colors.controlYellow = "#FFCC00";
+	Colors.variablesDkOrange = "#FF5B00";
+	Colors.inactiveGray = "#a3a3a3";
+	//BBT Style guide colors
+	Colors.easternBlue = "#089BAB";
+	Colors.neonCarrot = "#FF9922";
+	Colors.fountainBlue = "#62BCC7";
+	Colors.seance = "#881199";
+	Colors.bbtDarkGray = "#535353";
+	Colors.iron = "#CACACA";
 };
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		"robots": "#209BA9",
-        "hummingbird": "#209BA9",
-        "hummingbirdbit": "#209BA9",
-        "microbit": "#209BA9",
-        "flutter": "#209BA9",
-        "finch": "#209BA9",
-        "tablet": "#FAA525",
-        "operators": "#8EC449",
-		"sound": "#EE00FF",
-		"control": "#FFCC00",
-		"variables": "#FF5B00",
-		"lists": "#FF0000",
-		"inactive": "#a3a3a3"
+		"robots": Colors.bbt,
+    "hummingbird": Colors.bbt,
+    "hummingbirdbit": Colors.bbt,
+    "microbit": Colors.bbt,
+    "flutter": Colors.bbt,
+    "finch": Colors.bbt,
+    "tablet": Colors.tabletOrange,
+    "operators": Colors.operatorsGreen,
+		"sound": Colors.soundPurple,
+		"control": Colors.controlYellow,
+		"variables": Colors.variablesDkOrange,
+		"lists": Colors.red,
+		"inactive": Colors.inactiveGray
 	};
 };
 
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 1;
+	Colors.gradEnd = 0.75;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };

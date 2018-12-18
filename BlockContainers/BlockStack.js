@@ -41,6 +41,10 @@ function BlockStack(firstBlock, tab) {
 	this.move(this.x, this.y);
 	this.flying = false; // BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 	this.tab.updateArrows();
+
+	if (this.firstBlock.autoExecute) {
+		this.startRun();
+	}
 }
 
 /**
@@ -204,8 +208,12 @@ BlockStack.prototype.updateRun = function() {
 		if (this.returnType === Block.returnTypes.none) {
 			// If the current Block has been removed, don't run it.
 			if (this.currentBlock.stack !== this) {
-				this.endRun(); // Stop execution.
-				return new ExecutionStatusDone();
+				if (this.firstBlock.autoExecute) {
+					this.currentBlock = this.firstBlock;
+				} else {
+					this.endRun(); // Stop execution.
+					return new ExecutionStatusDone();
+				}
 			}
 			// Update the current Block.
 			let execStatus = this.currentBlock.updateRun();
@@ -219,8 +227,12 @@ BlockStack.prototype.updateRun = function() {
 					this.currentBlock = this.currentBlock.nextBlock;
 				}
 			}
-			// If the end of the BlockStack has been reached, end execution.
+			// If the end of the BlockStack has been reached, end execution, unless
+			// the first block is set to autoExecute. Then start over.
 			if (this.currentBlock != null) {
+				return new ExecutionStatusRunning();
+			} else if (this.firstBlock.autoExecute) {
+				this.currentBlock = this.firstBlock;
 				return new ExecutionStatusRunning();
 			} else {
 				this.endRun();

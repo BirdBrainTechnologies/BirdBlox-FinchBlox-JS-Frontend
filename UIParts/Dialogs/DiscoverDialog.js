@@ -39,7 +39,7 @@ DiscoverDialog.prototype.show = function() {
  */
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
+	// Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
 		// Tell the device manager that it should scan again if the dialog is still open
 		return this.visible;
@@ -62,7 +62,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
  * or is touching the screen
  * @param {string} deviceList - A string representing a JSON array of devices
  */
- 
+
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
@@ -84,11 +84,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
-	
+
 	//if ((updateDeviceListCounter % 40) == 0){
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	//};
-	
+
 //	this.reloadRows(this.discoveredDevices.length);
 };
 
@@ -103,14 +103,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-    var deviceName = this.discoveredDevices[index].name;
-    var words = deviceName.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-
-	button.addText(newName + " - " + this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
+	button.addText(this.discoveredDevices[index].listLabel)
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);

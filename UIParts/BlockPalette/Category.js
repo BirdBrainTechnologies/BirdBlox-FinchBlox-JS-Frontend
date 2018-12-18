@@ -24,6 +24,13 @@ function Category(buttonX, buttonY, name, id) {
 		BlockPalette.width, BlockPalette.height, 0, 0);
 	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
+	//When the screen is flipped for right to left languages, the categories will
+	// still appear left justified (so that long blocks push the rest off the
+	// screen) unless this value is set. TODO: find a more logical solution to this problem
+	if (Language.isRTL) {
+		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
+	}
+
 	this.prepareToFill();
 	this.fillGroup();
 }

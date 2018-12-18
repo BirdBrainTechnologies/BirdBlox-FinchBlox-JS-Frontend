@@ -43,7 +43,22 @@ function DebugOptions() {
 DebugOptions.applyConstants = function() {
 	const DO = DebugOptions;
 	if (!DO.enabled) return;
-	// Currently nothing happens here.
+
+	// Check that all language files are complete (contain all keys from english)
+	const englishKeys = Object.keys(Language.en);
+	for (var i = 0; i < Language.langs.length; i++){
+		const lang = Language.langs[i];
+
+		var missingCount = 0;
+		for (var j = 0; j < englishKeys.length; j++) {
+			let translation = eval("Language." + lang + "." + englishKeys[j]);
+			if (translation == null) {
+				console.log(lang + " is missing the key " + englishKeys[j]);
+				missingCount++;
+			}
+		}
+		console.log(lang + " completeness check finished. " + missingCount + " missing keys.")
+	}
 };
 
 /**
@@ -235,6 +250,7 @@ function UserException(message) {
 	this.name = 'UserException';
 	this.stack = (new Error()).stack;   // Get the call stack
 }
+
 /**
  * Data is used hold type information about values passed between executing Blocks.  It creates a sort of type system
  * for the values obtained during Block execution.  For example, when an addition Block is run, it accepts two
@@ -479,9 +495,12 @@ NumData.prototype.asString = function() {
 	if (this.isValid) {
 		let num = this.getValue();
 		num = +num.toFixed(10);
+		if (num < 0 && Language.isRTL) {
+			return new StringData(Language.forceLTR + num, true);
+		}
 		return new StringData(num + "", true);
 	} else {
-		return new StringData("not a valid number");
+		return new StringData(Language.getStr("not_a_valid_number"));
 	}
 };
 
@@ -555,6 +574,7 @@ NumData.importXml = function(dataNode) {
 		return null;
 	}
 };
+
 /**
  * Data that contains a boolean value
  * @param {boolean} value
@@ -591,9 +611,9 @@ BoolData.prototype.asBool = function() {
  */
 BoolData.prototype.asString = function() {
 	if (this.getValue()) {
-		return new StringData("true", true);
+		return new StringData(Language.getStr("true"), true);
 	} else {
-		return new StringData("false", true);
+		return new StringData(Language.getStr("false"), true);
 	}
 };
 
@@ -606,6 +626,7 @@ BoolData.importXml = function(dataNode) {
 	if (value == null) return null;
 	return new BoolData(value === "true");
 };
+
 /**
  * Data that contains a string.
  * @param {string} value
@@ -1129,7 +1150,7 @@ Variable.prototype.rename = function() {
 		}
 	};
 	callbackFn.variable = this;
-	DialogManager.showPromptDialog("Rename variable", "Enter variable name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1144,14 +1165,14 @@ Variable.prototype.delete = function() {
 			}
 		};
 		callbackFn.variable = this;
-		let question = "Are you sure you would like to delete the variable \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete variable", question, "Don't delete", "Delete", true, callbackFn);
+		let question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteVariable(this);
 	}
 };
+
 /**
  * Represents a user-created List that is part of the current project.  A list holds ListData, which in turn contains
  * an array.  Lists can be edited, while the ListData they pass should not be butated while another object is using it.
@@ -1252,7 +1273,7 @@ List.prototype.rename = function() {
 			CodeManager.renameList(this);
 		}
 	}.bind(this);
-	DialogManager.showPromptDialog("Rename list", "Enter list name", this.name, true, callbackFn);
+	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
@@ -1267,646 +1288,2859 @@ List.prototype.delete = function() {
 			}
 		}.bind(this);
 		callbackFn.list = this;
-		let question = "Are you sure you would like to delete the list \"" + this.name + "\"? ";
-		question += "This will delete all copies of this block.";
-		DialogManager.showChoiceDialog("Delete list", question, "Don't delete", "Delete", true, callbackFn);
+		let question = Language.getStr("Delete_question");
+		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
 	} else {
 		this.remove();
 		CodeManager.deleteList(this);
 	}
 };
 
-
 /**
- * Language is a static class that provides translation for blocks.
+ * The Language class controls all text displayed by the frontend. On startup,
+ *  the frontend provides the system language. This language will be used if
+ *  available. Otherwise, English is used.
  */
-function Language() {
+function Language() {};
 
-};
+Language.lang = "en"; //The current language. English by default.
+Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
+//Language.rtlLangs = [];
+Language.rtlLangs = ["ar", "he"];
+Language.isRTL = false;
 
-//The default language for the app is english
-Language.lang = "EN";
+//The char below forces the chars following it to be displayed ltr. Useful for
+// correctly displaying negative numbers and parentheses. The char itself is invisible.
+Language.forceLTR = String.fromCharCode(8206);
 
-/* The list of languages that are currently supported by birdblox. Any new language should be added
-to this list */
-Language.langs = ["EN", "ZH", "FR", "ES"];
-
-
-/* The disctionary for English, an underscore is necessary to separate the words in keys.
-   If translation for a word is not found in the dictionary.
-   No translation will be shown for the block.*/
-Language.EN = {
-    "CompassCalibrate":"Compass Calibrate",
-    "Compass": "Compass",
-    "Screen_Up": "Screen Up",
-    "Screen_Down": "Screen Down",
-    "Tilt_Left": "Tilt Left",
-    "Tilt_Right": "Tilt Right",
-    "Logo_Up": "Logo Up",
-    "Logo_Down": "Logo Down",
-    "Shake": "Shake",
-    "Button": "Button",
-    "Magnetometer": "Magnetometer",
-    "Accelerometer": "Accelerometer",
-    "Print": "Print",
-    "Display": "Display",
-    "Distance": "Distance",
-    "Dial": "Dial",
-    "Light": "Light",
-    "Sound": "Sound",
-    "Other": "Other",
-    "Play_Note": "Play Note",
-    "for": "for",
-    "Beats": "Beats",
-    "Position_Servo": "Position Servo",
-    "Rotation_Servo": "Rotation Servo",
-    "LED": "LED",
-    "Tri_LED": "Tri-LED",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "Servo",
-    "Vibration":"Vibration",
-    "Motor":"Motor",
-    "Temperature_C":"Temperature C",
-    "Temperature_F":"Temperature F",
-    "Knob": "Knob",
-    "Device_Shaken":"Device Shaken",
-    "Device_SSID":"Device SSID",
-    "Device_Pressure":"Device Pressure",
-    "Device_Relative_Altitude":"Device Relative Altitude",
-    "Device_Orientation":"Device Orientation",
-    "Device":"Device",
-    "Acceleration":"Acceleration",
-    "Latitude":"Latitude",
-    "Longitude":"Longitude",
-    "when":"when",
-    "tapped":"tapped",
-    "when_I_receive":"when I receive",
-    "wait_until":"wait until",
-    "repeat_forever":"repeat forever",
-    "repeat":"repeat",
-    "repeat_until":"repeat until",
-    "if":"if",
-    "broadcast":"broadcast",
-    "and_wait":"and wait",
-    "stop":"stop",
-    "all":"all",
-    "this_script":"this script",
-    "all_but_this_script":"all but this script",
-    "message":"message",
-    "wait":"wait",
-    "secs":"secs",
-    "else":"else",
-    "item":"item",
-    "of":"of",
-    "length":"length",
-    "contains":"contains",
-    "play_sound":"play sound",
-    "play_sound_until_done":"play sound until done",
-    "play_recording":"play recording",
-    "play_recording_until_done":"play recording until done",
-    "stop_all_sounds":"stop all sounds",
-    "rest_for":"rest for",
-    "for":"for",
-    "play_note":"play note",
-    "change_tempo_by":"change tempo by",
-    "set_tempo_to":"set tempo to",
-    "tempo":"tempo",
-    "round":"round",
-    "mod":"mod",
-    "pick_random":"pick random",
-    "to":"to",
-    "and":"and",
-    "or":"or",
-    "not":"not",
-    "true":"true",
-    "false":"false",
-    "letter":"letter",
-    "join":"join",
-    "split":"split",
-    "by":"by",
-    "whitespace":"whitespace",
-    "number":"number",
-    "text":"text",
-    "boolean":"boolean",
-    "list":"list",
-    "invalid_number":"invalid number",
-    "Edit_Text":"Edit Text",
-    "is":"is",
-    "a":"a",
-    "reset_timer":"reset timer",
-    "and_wait":"and wait",
-    "ask": "ask",
-    "at":"at",
-    "Position":"Position",
-    "current":"current",
-    "year":"year",
-    "month":"month",
-    "date":"date",
-    "hour":"hour",
-    "minute":"minute",
-    "second":"second",
-    "day_of_the_week":"day of the week",
-    "time_in_milliseconds":"time in milliseconds",
-    "answer":"answer",
-    "timer":"timer",
-    "Record_Sounds":"Record Sound",
-    "Create_Variable":"Create Variable",
-    "Create_List":"Create List",
-    "Zoom_in":"Zoom in",
-    "Zoom_out":"Zoom out",
-    "Reset_zoom":"Reset zoom",
-    "Disable_snap_noise":"Disable snap noise",
-    "Enable_snap_noise":"Enable snap noise",
-    "Send_debug_log":"Send debug log",
-    "Show_debug_menu":"Show debug menu",
-    "Disconnect_Device":"Disconnect Device",
-    "Connect_Device":"Connect Device",
-    "Connect_Multiple":"Connect Multiple",
-    "New":"New",
-    "Open":"Open",
-    "No_saved_programs":"No saved programs",
-    "On_Device":"On Device",
-    "Cloud":"Cloud",
-    "Device limit reached":"Device limit reached",
-    "Tap_record_to_start":"Tap record to start",
-    "Done":"Done",
-    "Loading":"Loading",
-    "Tap":"Tap",
-    "to_connect":"to connect",
-    "Cancel":"Cancel",
-    "Scanning_for_devices":"Scanning for devices",
-    "Sign_in":"Sign_in"
-};
-
-/* The disctionary for Chinese, an underscore is necessary to separate the words in keys.*/
-Language.ZH = {
-    "CompassCalibrate":"CN",
-    "Compass": "CN",
-    "Screen_Up": "CN",
-    "Screen_Down": "CN",
-    "Tilt_Left": "CN",
-    "Tilt_Right": "CN",
-    "Logo_Up": "CN",
-    "Logo_Down": "CN",
-    "Shake": "CN",
-    "Button": "CN",
-    "Magnetometer": "CN",
-    "Accelerometer": "CN",
-    "Print": "CN",
-    "Display": "CN",
-    "Distance": "CN",
-    "Dial": "CN",
-    "Light": "CN",
-    "Sound": "CN",
-    "Other": "CN",
-    "Play_Note": "CN",
-    "for": "CN",
-    "Beats": "CN",
-    "Position_Servo": "CN",
-    "Rotation_Servo": "CN",
-    "LED": "CN",
-    "Tri_LED": "CN",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "CN",
-    "Vibration":"CN",
-    "Motor":"CN",
-    "Temperature_C":"CN",
-    "Temperature_F":"CN",
-    "Knob": "CN",
-    "Device_Shaken":"CN",
-    "Device_SSID":"CN",
-    "Device_Pressure":"CN",
-    "Device_Relative_Altitude":"CN",
-    "Device_Orientation":"CN",
-    "Device":"CN",
-    "Acceleration":"CN",
-    "Latitude":"CN",
-    "Longitude":"CN",
-    "when":"CN",
-    "tapped":"CN",
-    "when_I_receive":"CN",
-    "wait_until":"CN",
-    "repeat_forever":"CN",
-    "repeat":"CN",
-    "repeat_until":"CN",
-    "if":"CN",
-    "broadcast":"CN",
-    "and_wait":"CN",
-    "stop":"CN",
-    "all":"CN",
-    "this_script":"CN",
-    "all_but_this_script":"CN",
-    "message":"CN",
-    "wait":"CN",
-    "secs":"CN",
-    "else":"CN",
-    "item":"CN",
-    "of":"CN",
-    "length":"CN",
-    "contains":"CN",
-    "play_sound":"CN",
-    "play_sound_until_done":"CN",
-    "play_recording":"CN",
-    "play_recording_until_done":"CN",
-    "stop_all_sounds":"CN",
-    "rest_for":"CN",
-    "for":"CN",
-    "play_note":"CN",
-    "change_tempo_by":"CN",
-    "set_tempo_to":"CN",
-    "tempo":"CN",
-    "round":"CN",
-    "mod":"CN",
-    "pick_random":"CN",
-    "to":"CN",
-    "and":"CN",
-    "or":"CN",
-    "not":"CN",
-    "true":"CN",
-    "false":"CN",
-    "letter":"CN",
-    "join":"CN",
-    "split":"CN",
-    "by":"CN",
-    "whitespace":"CN",
-    "number":"CN",
-    "text":"CN",
-    "boolean":"CN",
-    "list":"CN",
-    "invalid_number":"CN",
-    "Edit_Text":"CN",
-    "is":"CN",
-    "a":"CN",
-    "reset_timer":"CN",
-    "and_wait":"CN",
-    "ask": "CN",
-    "at":"CN",
-    "Position":"CN",
-    "current":"CN",
-    "year":"CN",
-    "month":"CN",
-    "date":"CN",
-    "hour":"CN",
-    "minute":"CN",
-    "second":"CN",
-    "day_of_the_week":"CN",
-    "time_in_milliseconds":"CN",
-    "answer":"CN",
-    "timer":"CN",
-    "Record_Sounds":"CN",
-    "Create_Variable":"CN",
-    "Create_List":"CN",
-    "Zoom_in":"CN",
-    "Zoom_out":"CN",
-    "Reset_zoom":"CN",
-    "Disable_snap_noise":"CN",
-    "Enable_snap_noise":"CN",
-    "Send_debug_log":"CN",
-    "Show_debug_menu":"CN",
-    "Disconnect_Device":"CN",
-    "Connect_Device":"CN",
-    "Connect_Multiple":"CN Connect Multiple",
-    "New":"CN",
-    "Open":"CN",
-    "No_saved_programs":"CN",
-    "On_Device":"CN",
-    "Cloud":"CN",
-    "Device limit reached":"CN",
-    "Tap_record_to_start":"CN",
-    "Done":"CN",
-    "Loading":"CN",
-    "Tap":"CN",
-    "to_connect":"CN",
-    "Cancel":"CN",
-    "Scanning_for_devices":"CN",
-    "Sign_in":"CN"
+Language.names = {
+  "ar":"العربية",  //Arabic
+  "ca":"Català", //Catalan
+  "da":"Dansk",  //Danish
+  "de":"Deutsch",  //German
+  "en":"English",  //English
+  "es":"Español",  //Spanish
+  "fr":"Français",  //French
+  "he":"עברית",  //Hebrew
+  "ja":"日本語",  //Japanese
+  "ko":"한국어",  //Korean
+  "nl":"Nederlands",  //Dutch
+  "pt":"Português",  //Portuguese
+  "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
+  "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
 }
-
-
-/* The disctionary for Spanish, an underscore is necessary to separate the words in keys.*/
-Language.ES = {
-    "CompassCalibrate":"ESP",
-    "Compass": "ESP",
-    "Screen_Up": "ESP",
-    "Screen_Down": "ESP",
-    "Tilt_Left": "ESP",
-    "Tilt_Right": "ESP",
-    "Logo_Up": "ESP",
-    "Logo_Down": "ESP",
-    "Shake": "ESP",
-    "Button": "ESP",
-    "Magnetometer": "ESP",
-    "Accelerometer": "ESP",
-    "Print": "ESP",
-    "Display": "ESP",
-    "Distance": "ESP",
-    "Dial": "ESP",
-    "Light": "ESP",
-    "Sound": "ESP",
-    "Other": "ESP",
-    "Play_Note": "ESP",
-    "for": "ESP",
-    "Beats": "ESP",
-    "Position_Servo": "ESP",
-    "Rotation_Servo": "ESP",
-    "LED": "ESP",
-    "Tri_LED": "ESP",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "ESP",
-    "Vibration":"ESP",
-    "Motor":"ESP",
-    "Temperature_C":"ESP",
-    "Temperature_F":"ESP",
-    "Knob": "ESP",
-    "Device_Shaken":"ESP",
-    "Device_SSID":"ESP",
-    "Device_Pressure":"ESP",
-    "Device_Relative_Altitude":"ESP",
-    "Device_Orientation":"ESP",
-    "Device":"ESP",
-    "Acceleration":"ESP",
-    "Latitude":"ESP",
-    "Longitude":"ESP",
-    "when":"ESP",
-    "tapped":"ESP",
-    "when_I_receive":"ESP",
-    "wait_until":"ESP",
-    "repeat_forever":"ESP",
-    "repeat":"ESP",
-    "repeat_until":"ESP",
-    "if":"ESP",
-    "broadcast":"ESP",
-    "and_wait":"ESP",
-    "stop":"ESP",
-    "all":"ESP",
-    "this_script":"ESP",
-    "all_but_this_script":"ESP",
-    "message":"ESP",
-    "wait":"ESP",
-    "secs":"ESP",
-    "else":"ESP",
-    "item":"ESP",
-    "of":"ESP",
-    "length":"ESP",
-    "contains":"ESP",
-    "play_sound":"ESP",
-    "play_sound_until_done":"ESP",
-    "play_recording":"ESP",
-    "play_recording_until_done":"ESP",
-    "stop_all_sounds":"ESP",
-    "rest_for":"ESP",
-    "for":"ESP",
-    "play_note":"ESP",
-    "change_tempo_by":"ESP",
-    "set_tempo_to":"ESP",
-    "tempo":"ESP",
-    "round":"ESP",
-    "mod":"ESP",
-    "pick_random":"ESP",
-    "to":"ESP",
-    "and":"ESP",
-    "or":"ESP",
-    "not":"ESP",
-    "true":"ESP",
-    "false":"ESP",
-    "letter":"ESP",
-    "join":"ESP",
-    "split":"ESP",
-    "by":"ESP",
-    "whitespace":"ESP",
-    "number":"ESP",
-    "text":"ESP",
-    "boolean":"ESP",
-    "list":"ESP",
-    "invalid_number":"ESP",
-    "Edit_Text":"ESP",
-    "is":"ESP",
-    "a":"ESP",
-    "reset_timer":"ESP",
-    "and_wait":"ESP",
-    "ask": "ESP",
-    "at":"ESP",
-    "Position":"ESP",
-    "current":"ESP",
-    "year":"ESP",
-    "month":"ESP",
-    "date":"ESP",
-    "hour":"ESP",
-    "minute":"ESP",
-    "second":"ESP",
-    "day_of_the_week":"ESP",
-    "time_in_milliseconds":"ESP",
-    "answer":"ESP",
-    "timer":"ESP",
-    "Record_Sounds":"ESP",
-    "Create_Variable":"ESP",
-    "Create_List":"ESP",
-    "Zoom_in":"ESP",
-    "Zoom_out":"ESP",
-    "Reset_zoom":"ESP",
-    "Disable_snap_noise":"ESP",
-    "Enable_snap_noise":"ESP",
-    "Send_debug_log":"ESP",
-    "Show_debug_menu":"ESP",
-    "Disconnect_Device":"ESP",
-    "Connect_Device":"ESP",
-    "Connect_Multiple":"ESP Connect Multiple",
-    "New":"ESP",
-    "Open":"ESP",
-    "No_saved_programs":"ESP",
-    "On_Device":"ESP",
-    "Cloud":"ESP",
-    "Device limit reached":"ESP",
-    "Tap_record_to_start":"ESP",
-    "Done":"ESP",
-    "Loading":"ESP",
-    "Tap":"ESP",
-    "to_connect":"ESP",
-    "Cancel":"ESP",
-    "Scanning_for_devices":"ESP",
-    "Sign_in":"ESP"
-}
-
-/* The disctionary for French, an underscore is necessary to separate the words in keys.*/
-Language.FR = {
-    "Calibrate":"French",
-    "Compass": "French",
-    "Screen_Up": "French",
-    "Screen_Down": "French",
-    "Tilt_Left": "French",
-    "Tilt_Right": "French",
-    "Logo_Up": "French",
-    "Logo_Down": "French",
-    "Shake": "French",
-    "Button": "French",
-    "Magnetometer": "French",
-    "Accelerometer": "French",
-    "Print": "French",
-    "Display": "French",
-    "Distance": "French",
-    "Dial": "French",
-    "Light": "French",
-    "Sound": "French",
-    "Other": "French",
-    "Play_Note": "French",
-    "for": "French",
-    "Beats": "French",
-    "Position_Servo": "French",
-    "Rotation_Servo": "French",
-    "LED": "French",
-    "Tri_LED": "French",
-    "R": "R",
-    "G": "G",
-    "B": "B",
-    "Servo": "French",
-    "Vibration":"French",
-    "Motor":"French",
-    "Temperature_C":"French",
-    "Temperature_F":"French",
-    "Knob": "French",
-    "Device_Shaken":"French",
-    "Device_SSID":"French",
-    "Device_Pressure":"French",
-    "Device_Relative_Altitude":"French",
-    "Device_Orientation":"French",
-    "Device":"French",
-    "Acceleration":"French",
-    "Latitude":"French",
-    "Longitude":"French",
-    "when":"French",
-    "tapped":"French",
-    "when_I_receive":"French",
-    "wait_until":"French",
-    "repeat_forever":"French",
-    "repeat":"French",
-    "repeat_until":"French",
-    "if":"French",
-    "broadcast":"French",
-    "and_wait":"French",
-    "stop":"French",
-    "all":"French",
-    "this_script":"French",
-    "all_but_this_script":"French",
-    "message":"French",
-    "wait":"French",
-    "secs":"French",
-    "else":"French",
-    "item":"French",
-    "of":"French",
-    "length":"French",
-    "contains":"French",
-    "play_sound":"French",
-    "play_sound_until_done":"French",
-    "play_recording":"French",
-    "play_recording_until_done":"French",
-    "stop_all_sounds":"French",
-    "rest_for":"French",
-    "for":"French",
-    "play_note":"French",
-    "change_tempo_by":"French",
-    "set_tempo_to":"French",
-    "tempo":"French",
-    "round":"French",
-    "mod":"French",
-    "pick_random":"French",
-    "to":"French",
-    "and":"French",
-    "or":"French",
-    "not":"French",
-    "true":"French",
-    "false":"French",
-    "letter":"French",
-    "join":"French",
-    "split":"French",
-    "by":"French",
-    "whitespace":"French",
-    "number":"French",
-    "text":"French",
-    "boolean":"French",
-    "list":"French",
-    "invalid_number":"French",
-    "Edit_Text":"French",
-    "is":"French",
-    "a":"French",
-    "reset_timer":"French",
-    "and_wait":"French",
-    "ask": "French",
-    "at":"French",
-    "Position":"French",
-    "current":"French",
-    "year":"French",
-    "month":"French",
-    "date":"French",
-    "hour":"French",
-    "minute":"French",
-    "second":"French",
-    "day_of_the_week":"French",
-    "time_in_milliseconds":"French",
-    "answer":"French",
-    "timer":"French",
-    "Record_Sounds":"French",
-    "Create_Variable":"French",
-    "Create_List":"French",
-    "Zoom_in":"French",
-    "Zoom_out":"French",
-    "Reset_zoom":"French",
-    "Disable_snap_noise":"French",
-    "Enable_snap_noise":"French",
-    "Send_debug_log":"French",
-    "Show_debug_menu":"French",
-    "Disconnect_Device":"French",
-    "Connect_Device":"French",
-    "Connect_Multiple":"French Connect Multiple",
-    "New":"French",
-    "Open":"French",
-    "No_saved_programs":"French",
-    "On_Device":"French",
-    "Cloud":"French",
-    "Device limit reached":"French",
-    "Tap_record_to_start":"French",
-    "Done":"French",
-    "Loading":"French",
-    "Tap":"French",
-    "to_connect":"French",
-    "Cancel":"French",
-    "Scanning_for_devices":"French",
-    "Sign_in": "French"
-}
-
-/* The Callback manager receives a request from the backend to set the default language to be
-   displayed in the frontend based on the system language preference. If the language is currently
-   not supported, english, the default language will be used..*/
+/**
+ * Set the language to a given language if available. Used when a system Language
+ *  is returned by the backend.
+ * @param {string} lang - Language code of the language requested.
+ */
 Language.setLanguage = function(lang) {
-    if (Language.langs.indexOf(lang) === -1) {
-        Language.lang = "EN";
+    const code = lang.substring(0, 2);
+    if (Language.langs.indexOf(code) != -1) {
+      Language.lang = code;
+    } else if (code == "zh") {
+      if (lang.substring(0, 7) == "zh-Hans") { //iOS Simplified Chinese
+        Language.lang = "zhs";
+      } else if (lang.substring(0, 7) == "zh-Hant") { //iOS Traditional Chinese
+        Language.lang = "zht";
+      } else if (lang.substring(0, 5) == "zh_CN") { //Android Simplified Chinese
+        Language.lang = "zhs";
+      } else if (lang.substring(0, 5) == "zh_TW") { //Android Traditional Chinese
+        Language.lang = "zht";
+      } else {
+        Language.lang = "zhs";
+      }
     } else {
-        Language.lang = lang;
+      Language.lang = "en";
     }
 }
-
-/* getLanguage returns the language that is currently being used by the birdblox.*/
-Language.getLanguage = function () {
-    return "Language." + Language.lang + ".";
-}
-
-/* getStr returns the translation for the given string based on the language of the app and
-   translation provided in the dictionary for that language. If no translation is provided,
-   No Translation will be shown*/
+/**
+ * Get the translation for the given key.
+ * @param {string} str - The language dictionary key.
+ * @return {string} - The text entry for the given key in the current language.
+ */
 Language.getStr = function(str) {
-    let translatedStr = eval(Language.getLanguage() + str);
+    let translatedStr = eval("Language." + Language.lang + "." + str);
     if (translatedStr != null) {
         return translatedStr;
     } else {
-        return "No Translation";
+        console.log("Translation? " + str);
+        return "Translation required";
     }
 }
 
+//Arabic Translation
+Language.ar = {
+  "block_Tri_LED":"(Slot 4) (Slot 3) (Slot 2) (Slot 1) ضوء الصمام الثلاثي",
+  "port":"",
+  "block_LED":"(Slot 2) (Slot 1) ضوء",
+  "block_Position_Servo":"(Slot 2) (Slot 1) موقف محرك سيرفو المؤازر",
+  "block_Rotation_Servo":"(Slot 2) (Slot 1) فتحة دوران المحرك المؤازر ",
+  "block_Play_Note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
+  "Light":"ضوء",
+  "Distance":"مسافه",
+  "Dial":"دوار",
+  "Other":"أخرى",
+  "Accelerometer":"التسارع",
+  "Magnetometer":"مقياس المغنطيسية",
+  "block_LED_Display":"عرض",
+  "block_Print":"(Slot 1 = Hello) طباعة",
+  "block_Button":"(Slot 1) زر",
+  "Screen_Up":"شاشة للأعلى",
+  "Screen_Down":"الشاشة لأسفل",
+  "Tilt_Left":"الميل اليسار",
+  "Tilt_Right":"دور إلى اليمين",
+  "Logo_Up":"الشعار لأعلى",
+  "Logo_Down":"الشعار إلى الأسفل",
+  "Shake":"هزه",
+  "block_Compass":"بوصلة",
+  "block_Servo":"(Slot 2) (Slot 1) محرك سيرفو",
+  "block_Vibration":"(Slot 2) (Slot 1) اهتزاز",
+  "block_Motor":"(Slot 2) (Slot 1) المحرك",
+  "block_Temperature_C":"C مؤشر الحرارة (Slot 1)",
+  "block_Temperature_F":"F مؤشر الحرارة (Slot 1)",
+  "block_write":"% (Slot 2) (Slot 1) اكتب",
+  "pin":"",
+  "block_read":"(Slot 1) اقرأ",
+  "block_Device_Shaken":"اهتزاز فر القرص",
+  "block_Device_LatLong":"(Slot 1) الجهاز اللوحي",
+  "Latitude":"خط عرضي",
+  "Longitude":"خط طولي",
+  "block_Device_SSID":"قرص معرف مجموعه الخدمة",
+  "block_Device_Pressure":"قرص الضغط",
+  "block_Device_Relative_Altitude":"ارتفاع نسبي للجهاز اللوحي",
+  "block_Acceleration":"التسارع (Slot 1) الجهاز اللوحي",
+  "Total":"المجموع",
+  "block_Device_Orientation":"معاينة الجهاز",
+  "faceup":"الوجه للأسفل",
+  "facedown":"الوجه للأعلى",
+  "portrait_bottom":"عمودي: الكاميرا  للأسفل",
+  "portrait_top":"عمودي: الكاميرا للأعلى",
+  "landscape_left":"أفقي الكاميرا لليسار",
+  "landscape_right":"أفقي الكاميرا لليمين",
+  "block_Display":"(Slot 2) في (Slot 1 = مرحبًا) عرض",
+  "position":"الوضع",
+  "block_ask":"ثم انتظر (Slot 1 = ما اسمك؟) اسأل",
+  "block_answer":"أجب",
+  "block_reset_timer":"إعادة ضبط المؤقت",
+  "block_timer":"المؤقت",
+  "block_current":"(Slot 1) حالي",
+  "date":"التاريخ",
+  "year":"السنة",
+  "month":"الشهر",
+  "hour":"الساعة",
+  "minute":"الدقيقة",
+  "second":"الثانية",
+  "day_of_the_week":"اليوم في الأسبوع",
+  "time_in_milliseconds":"الوقت في جزء من الثانية",
+  "block_mod":"(Slot 2) تغير (Slot 1)",
+  "block_round":"(Slot 1) دوران",
+  "block_pick_random":"(Slot 2) ل (Slot 1) اختيار عشوائي",
+  "block_and":"(Slot 2) و (Slot 1)",
+  "block_or":"(Slot 2) أو (Slot 1)",
+  "block_not":"(Slot 1) غير",
+  "true":"صحيح",
+  "false":"خطأ",
+  "block_letter":"(Slot 2 = بالعالم) من (Slot 1) رسالة",
+  "block_length":"(Slot 1 = بالعالم) الوزن ل",
+  "block_join":"(Slot 2 = كلمة) و (Slot 1 =  مرحبًا) انضم",
+  "block_split":"(Slot 2) بواسطة (Slot 1 = مرحبًا بالعالم) تقسيم",
+  "letter":"رسالة ",
+  "whitespace":"فراغ",
+  "block_validate":"؟(Slot 2)  يكون (Slot 1 = 5) هل",
+  "number":"رقم",
+  "text":"نص",
+  "boolean":"منطقية",
+  "list":"قائمة",
+  "invalid_number":"رقم غير صحيح",
+  "block_when_flag_tapped":" يستخدم (Icon) عندما",
+  "block_when_I_receive":"عندما استقبل ",
+  "any_message":"أي رسالة",
+  "new":"جديدة",
+  "block_when":"(Slot 1) عندما",
+  "block_broadcast":"(Slot 1) بث",
+  "block_broadcast_and_wait":"وانتظر (Slot 1) بث",
+  "block_message":"رسالة",
+  "block_wait":"ثم انتظر (Slot 1) انتظر", //Wait 1 then wait??
+  "block_wait_until":"(Slot 1) انتظر حتى",
+  "block_repeat_forever":"تكرار دائم",
+  "block_repeat":"(Slot 1) تكرار",
+  "block_repeat_until":"(Slot 1) تكرار حتى",
+  "block_if":"(Slot 1) لو",
+  "block_if_else":"(Slot 1) لو",
+  "else":"أو",
+  "block_stop":"(Slot 1) توقف",
+  "all":"الكل",
+  "this_script":"هذا النص",
+  "all_but_this_script":"الجميع ماعدا هذا النص",
+  "Record_sound":"تسجيل الصوت",
+  "block_play_recording":"(Slot 1) تشغيل التسجيل",
+  "block_play_recording_until_done":"(Slot 1) تسجيل التسجيل حتى النهاية",
+  "block_play_sound":"(Slot 1) تشغيل الصوت",
+  "block_play_sound_until_done":"(Slot 1) تشغيل التسجيل حتى نهايته",
+  "block_stop_all_sounds":"إنهاء جميع الأصوات",
+  "block_rest_for":"دقات (Slot 1) توقف لمدة",
+  "block_change_tempo_by":"(Slot 1) تغيير الإيقاع لـ",
+  "block_set_tempo_to":"(Slot 1) ضبط الإيقاع لـ",
+  "block_tempo":"الإيقاع",
+  "block_set_variable":"(Slot 2) لـــ (Slot 1) ضبط",
+  "Create_Variable":"تصميم  تنوع",
+  "block_change_variable":"(Slot 2) بواسطة (Slot 1) تغيير",
+  "Rename":"تغيير الاسم",
+  "Delete":"مسح",
+  "block_add_to_list":"(Slot 2) لـ (Slot 1 =  شيء) إضافة",
+  "Create_List":"إنشاء قائمة",
+  "block_delete_from_list":"(Slot 2) من (Slot 1) مسح",
+  "block_insert_into_list":"(Slot 3) من (Slot 2) في (Slot 1 = شيء) إضافة",
+  "block_replace_list_item":"(Slot 3 = شيء) لـ (Slot 2) من (Slot 1) تبديل عنصر",
+  "block_copy_list":"(Slot 2) لــ (Slot 1) نسخ",
+  "block_list_item":"(Slot 2) لـ (Slot 1) عنصر",
+  "block_list_length":"(Slot 1) وزن الــ",
+  "block_list_contains":"(Slot 2 = شيء) تتضمن (Slot 1)",
+  "last":"آخر",
+  "random":"عشوائي",
+  "Robots":"الروبوت",
+  "Operators":"العاملين",
+  "Sound":"الصوت",
+  "Tablet":"الجهاز اللوحي",
+  "Control":"التحكم",
+  "Variables":"المتغيرات",
+  "Zoom_in":"تكبير ",
+  "Zoom_out":"تصغير",
+  "Reset_zoom":"إعادة ضبط ",
+  "Disable_snap_noise":"تعطيل الضجيج المفاجئ",
+  "Enable_snap_noise":"تفعيل الضجيج المفاجئ",
+  "CompassCalibrate":"معايرة البوصلة",
+  "Send_debug_log":"إرسال سجل تصحيح الأخطء",
+  "Show_debug_menu":"عرض قائمة التصحيح",
+  "Connect_Device":"الاتصال بالجهاز",
+  "Connect_Multiple":"الاتصال بأكثر من جهاز",
+  "Disconnect_Device":"قطع الاتصال",
+  "Tap":"اضغط + للاتصال",
+  "Scanning_for_devices":"البحث عن أجهزة",
+  "Open":"افتح",
+  "No_saved_programs":"لا يوجد برامج محفوظة",
+  "New":"جديد",
+  "Saving":"يتم الحفظ",
+  "On_Device":"على الجهاز",
+  "Cloud":"على cloud",
+  "Loading":"يتم التحميل",
+  "Sign_in":"تسجيل الدخول",
+  "New_program":"برنامج جديد",
+  "Share":"مشاركة",
+  "Recordings":"تسجيل",
+  "Discard":"إلغاء",
+  "Stop":"إيقاف",
+  "Pause":"تعليق",
+  "remaining":"متبقي",
+  "Record":"سجّل",
+  "Tap_record_to_start":"اضغط سجّل لبدء التسجيل",
+  "Done":"تم",
+  "Delete":"حذف",
+  "Delete_question":"هل أنت متأكد من أنك تريد حذف هذا؟",
+  "Cancel":"إلغاء",
+  "OK":"نعم",
+  "Dont_delete":"عدم المسح",
+  "Rename":"إعادة تسمية",
+  "Enter_new_name":"أدخل اسم جديد",
+  "Duplicate":"عمل نسخة طبق الأصل",
+  "Name_duplicate_file":"أدخل اسم النسخة الجديدة",
+  "Name_error_invalid_characters":"هذه الحروف لا يمكن أن يتضمنها اسم الملف \n",
+  "Name_error_already_exists":"\" هذا الاسم موجود بالفعل، من فضلك أدخل اسم مختلف",
+  "Permission_denied":"إذن الدخول مرفوض",
+  "Grant_permission":"من إذن تسجيل لبرنامج بيردبوكس في الإعدادات",
+  "Dismiss":"إخفاء",
+  "Name":"الاسم",
+  "Enter_file_name":"أدخل اسم الملف",
+  "Name_error_blank":"لا يمكن إضافة مسافة أو فراغ كاسم، من فضلك أدخل اسم للملف",
+  "Edit_text":"تعديل النص",
+  "Question":"سؤال",
+  "Connection_Failure":"فشل الاتصال",
+  "Connection_failed_try_again":"فشل الاتصال، من فضلك حاول مرة أخرى",
+  "Disconnect_account":"الخروج من الحساب",
+  "Disconnect_account_question":"الخروج من الحساب  الحساب؟",
+  "Dont_disconnect":"عد الخروج من الحساب",
+  "Disconnect":"الخروج",
+  "not_connected":"غير متصل (Device)",
+  "not_a_valid_number":"رقم غير متاح",
+  "Intensity":"شدة الإضاءة",
+  "Angle":"زاوية",
+  "Speed":"السرعة",
+  "Note":"ملاحظة",
+  "Beats":"الومضات",
+  "Firmware_incompatible":"البرامج الثابتة غير متوافقة",
+  "Update_firmware":"تحديث البرامج الثابتة",
+  "Device_firmware":"إصدار البرنامج الثابت للجهاز:",
+  "Required_firmware":"مطلوب إصدارالبرنامج:",
+  "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+  "ceiling":"ceiling",
+  "floor":"floor",
+  "abs":"abs",
+  "sqrt":"sqrt",
+  "CM":"CM",
+  "Inch":"Inch",
+  "block_subtract":"(Slot 1) – (Slot 2)",
+  "block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Catalan Translation
+Language.ca = {
+  "block_Tri_LED":"Tri-LED (Slot 1) vermell (Slot 2) % verd (Slot 3) % blau (Slot 4) %",
+  "port":"Port",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Servo posicional (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Servo rotacional (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Toca nota (Slot 1) durant (Slot 2) temps",
+  "Light":"Llum",
+  "Distance":"Distància",
+  "Dial":"Rodeta",
+  "Other":"Altres",
+  "Accelerometer":"Acceleròmetre",
+  "Magnetometer":"Magnetòmetre",
+  "block_LED_Display":"Pantalla",
+  "block_Print":"Escriu (Slot 1 = Hola)",
+  "block_Button":"Botó (Slot 1)",
+  "Screen_Up":"Pantalla cap per amunt",
+  "Screen_Down":"Pantalla cap per avall",
+  "Tilt_Left":"Inclinada a l'esquerra",
+  "Tilt_Right":"Inclinada a la dreta",
+  "Logo_Up":"Logo cap per amunt",
+  "Logo_Down":"Logo cap per avall",
+  "Shake":"Sacsejada",
+  "block_Compass":"Brúixola",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibració (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatura en °C (Slot 1)",
+  "block_Temperature_F":"Temperatura en °F (Slot 1)",
+  "block_write":"Escriu (Slot 1) (Slot 2) %",
+  "pin":"Pin",
+  "block_read":"Llegeix (Slot 1)",
+  "block_Device_Shaken":"Tauleta Sacsejada",
+  "block_Device_LatLong":"(Slot 1) de la tauleta",
+  "Latitude":"Latitud",
+  "Longitude":"Longitud",
+  "block_Device_SSID":"SSID de la tauleta",
+  "block_Device_Pressure":"Pressió de la tauleta",
+  "block_Device_Relative_Altitude":"Altitud relativa de la tauleta",
+  "block_Acceleration":"Acceleració (Slot 1) de la tauleta",
+  "Total":"Total",
+  "block_Device_Orientation":"Orientació de la tauleta",
+  "faceup":"De cara amunt",
+  "facedown":"De cara avall",
+  "portrait_bottom":"Vertical: Càmera a dalt",
+  "portrait_top":"Vertical: Càmera a baix",
+  "landscape_left":"Apaïsat: Càmera a l'esquerra",
+  "landscape_right":"Apaïsat: Càmera a la dreta",
+  "block_Display":"Escriu (Slot 1 = Hola) a (Slot 2)",
+  "position":"Posició",
+  "block_ask":"pregunta (Slot 1 = Com et dius?) i espera",
+  "block_answer":"resposta",
+  "block_reset_timer":"reinicia el cronòmetre",
+  "block_timer":"cronòmetre",
+  "block_current":"(Slot 1) actual",
+  "date":"data",
+  "year":"any",
+  "month":"mes",
+  "hour":"hora",
+  "minute":"minut",
+  "second":"segon",
+  "day_of_the_week":"dia de la setmana",
+  "time_in_milliseconds":"temps en mil·lisegons",
+  "block_mod":"residu de dividir (Slot 1) entre (Slot 2)",
+  "block_round":"arrodoneix (Slot 1)",
+  "block_pick_random":"nombre a l'atzar entre (Slot 1) i (Slot 2)",
+  "block_and":"(Slot 1) i (Slot 2)",
+  "block_or":"(Slot 1) o (Slot 2)",
+  "block_not":"no (Slot 1)",
+  "true":"cert",
+  "false":"fals",
+  "block_letter":"lletra (Slot 1) de (Slot 2 = món)",
+  "block_length":"llargada de (Slot 1 = món)",
+  "block_join":"uneix (Slot 1 = hola) i (Slot 2 = món)",
+  "block_split":"divideix (Slot 1 = hola món) per (Slot 2)",
+  "letter":"lletra",
+  "whitespace":"espai en blanc",
+  "block_validate":"és (Slot 1 = 5) un (Slot 2)?",
+  "number":"nombre",
+  "text":"text",
+  "boolean":"booleà",
+  "list":"llista",
+  "invalid_number":"nombre invàlid",
+  "block_when_flag_tapped":"quan (Icon) es toqui",
+  "block_when_I_receive":"quan rebi (Slot 1)",
+  "any_message":"qualsevol missatge",
+  "new":"nou",
+  "block_when":"quan (Slot 1)",
+  "block_broadcast":"envia a tots (Slot 1)",
+  "block_broadcast_and_wait":"envia a tots (Slot 1) i espera",
+  "block_message":"missatge",
+  "block_wait":"espera (Slot 1) segons",
+  "block_wait_until":"espera fins (Slot 1)",
+  "block_repeat_forever":"repeteix per sempre",
+  "block_repeat":"repeteix (Slot 1) vegades",
+  "block_repeat_until":"repeteix fins (Slot 1)",
+  "block_if":"si (Slot 1)",
+  "block_if_else":"si (Slot 1)",
+  "else":"si no",
+  "block_stop":"atura (Slot 1)",
+  "all":"tot",
+  "this_script":"aquest programa",
+  "all_but_this_script":"tot excepte aquest programa",
+  "Record_sound":"Grava un so",
+  "block_play_recording":"toca la gravació (Slot 1)",
+  "block_play_recording_until_done":"toca la gravació (Slot 1) fins que acabi",
+  "block_play_sound":"toca el so (Slot 1)",
+  "block_play_sound_until_done":"toca el so (Slot 1) fins que acabi",
+  "block_stop_all_sounds":"atura tots els sons",
+  "block_rest_for":"fes silenci durant (Slot 1) temps",
+  "block_change_tempo_by":"canvia el tempo en (Slot 1)",
+  "block_set_tempo_to":"fixa el tempo a (Slot 1)",
+  "block_tempo":"tempo",
+  "block_set_variable":"fixa (Slot 1) a (Slot 2)",
+  "Create_Variable":"Crea una variable",
+  "block_change_variable":"canvia (Slot 1) en (Slot 2)",
+  "Rename":"Reanomena",
+  "Delete":"Elimina",
+  "block_add_to_list":"afegeix (Slot 1 = cosa) a (Slot 2)",
+  "Create_List":"Crea una llista",
+  "block_delete_from_list":"elimina (Slot 1) de (Slot 2)",
+  "block_insert_into_list":"insereix (Slot 1 = cosa) a la posició (Slot 2) de (Slot 3)",
+  "block_replace_list_item":"substitueix l'element (Slot 1) de (Slot 2) per (Slot 3 = cosa)",
+  "block_copy_list":"copia (Slot 1) a (Slot 2)",
+  "block_list_item":"element (Slot 1) de (Slot 2)",
+  "block_list_length":"llargada de (Slot 1)",
+  "block_list_contains":"(Slot 1) conté (Slot 2 = cosa)",
+  "last":"Últim",
+  "random":"A l'atzar",
+  "Robots":"Robots",
+"Operators":"Operadors",
+"Sound":"So",
+"Tablet":"Tauleta",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Amplia el zoom",
+"Zoom_out":"Redueix el zoom",
+"Reset_zoom":"Restableix el zoom",
+"Disable_snap_noise":"Deshabilita el so en encaixar blocs",
+"Enable_snap_noise":"Habilita el so en encaixar blocs",
+"CompassCalibrate":"Calibratge de la brúixola",
+"Send_debug_log":"Envia un informe de depuració",
+"Show_debug_menu":"Mostra el menú de depuració",
+"Connect_Device":"Connecta un dispositiu",
+"Connect_Multiple":"Connecta múltiples dispositius",
+"Disconnect_Device":"Desconnecta el dispositiu",
+"Tap":"Toca + per connectar",
+"Scanning_for_devices":"Cercant dispositius",
+"Open":"Obre",
+"No_saved_programs":"No hi ha cap programa desat",
+"New":"Nou",
+"Saving":"Desant",
+"On_Device":"Al dispositiu",
+"Cloud":"Al núvol",
+"Loading":"Carregant",
+"Sign_in":"Registra't",
+"New_program":"Programa nou",
+"Share":"Comparteix",
+"Recordings":"Gravacions",
+"Discard":"Descarta",
+"Stop":"Atura",
+"Pause":"Pausa",
+"remaining":"restant",
+"Record":"Grava",
+"Tap_record_to_start":"Toca \"gravar\" per començar",
+"Done":"Fet",
+"Delete":"Elimina",
+"Delete_question":"Segur que ho vols eliminar?",
+"Cancel":"Cancel·la",
+"OK":"D'acord",
+"Dont_delete":"No ho eliminis",
+"Rename":"Reanomena",
+"Enter_new_name":"Introdueix un nom nou",
+"Duplicate":"Duplica",
+"Name_duplicate_file":"Introdueix un nom per al fitxer duplicat",
+"Name_error_invalid_characters":"Aquests caràcters no poden formar part d’un nom d'arxiu: \n",
+"Name_error_already_exists":"\" ja existeix. Introdueix un nom diferent.",
+"Permission_denied":"Permís denegat",
+"Grant_permission":"Atorga permisos a BirdBlox des de Configuració",
+"Dismiss":"Descarta",
+"Name":"Nom",
+"Enter_file_name":"Introdueix el nom de l'arxiu",
+"Name_error_blank":"El nom no pot quedar en blanc. Introdueix un nom d'arxiu.",
+"Edit_text":"Edita el text",
+"Question":"Pregunta",
+"Connection_Failure":"Error de connexió",
+"Connection_failed_try_again":"La connexió ha fallat. Torna-ho a provar, si us plau.",
+"Disconnect_account":"Desconnecta el compte",
+"Disconnect_account_question":"Vols desconnectar el teu compte?",
+"Dont_disconnect":"No desconnectis",
+"Disconnect":"Desconnecta",
+"not_connected":"(Device) no connectat",
+"not_a_valid_number":"no és un nombre vàlid",
+"Intensity":"Intensitat",
+"Angle":"Angle",
+"Speed":"Velocitat",
+"Note":"Nota",
+"Beats":"Tempo",
+"Firmware_incompatible":"Firmware incompatible",
+"Update_firmware":"Actualitza el firmware",
+"Device_firmware":"Versió del firmware del dispositiu:",
+"Required_firmware":"Versió del firmware requerida:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"sostre",
+"floor":"part entera",
+"abs":"abs",
+"sqrt":"arrel quadrada",
+"CM":"cm",
+"Inch":"polzades",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Danish Translation
+Language.da = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Indgang",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Positionsservo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Rotationsservo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Spil tone (Slot 1) i (Slot 2) slag",
+  "Light":"Lys",
+  "Distance":"Afstand",
+  "Dial":"Ring til",
+  "Other":"Andet",
+  "Accelerometer":"Accelerometer",
+  "Magnetometer":"Magnetometer",
+  "block_LED_Display":"Display",
+  "block_Print":"Vis (Slot 1 = Hej)",
+  "block_Button":"Knap (Slot 1)",
+  "Screen_Up":"Skærm op",
+  "Screen_Down":"Skærm ned",
+  "Tilt_Left":"Vip til venstre",
+  "Tilt_Right":"Vip til højre",
+  "Logo_Up":"Logo op",
+  "Logo_Down":"Logo ned",
+  "Shake":"Ryst",
+  "block_Compass":"Kompas",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibrator (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatur C (Slot 1)",
+  "block_Temperature_F":"Temperatur F (Slot 1)",
+  "block_write":"Skriv (Slot 1) (Slot 2) %",
+  "pin":"Pin",
+  "block_read":"Aflæs (Slot 1)",
+  "block_Device_Shaken":"Enhed rystet",
+  "block_Device_LatLong":"Enhed (Slot 1)",
+  "Latitude":"Breddegrad",
+  "Longitude":"Længdegrad",
+  "block_Device_SSID":"Enhed SSID",
+  "block_Device_Pressure":"Enhed lufttryk",
+  "block_Device_Relative_Altitude":"Enhed relativ højde",
+  "block_Acceleration":"Enhed (Slot 1) acceleration",
+  "Total":"Total",
+  "block_Device_Orientation":"Enhed orientering",
+  "faceup":"Skærm opad",
+  "facedown":"Skærm nedad",
+  "portrait_bottom":"Portræt: Kamera nederst",
+  "portrait_top":"Portræt: Kamera øverst",
+  "landscape_left":"Landskab: Kamera til venstre",
+  "landscape_right":"Landskab: Kamera til højre",
+  "block_Display":"Vis (Slot 1 = Hej) på (Slot 2)",
+  "position":"Position",
+  "block_ask":"spørg (Slot 1 = Hvad er dit navn?) og vent",
+  "block_answer":"svar",
+  "block_reset_timer":"nulstil timer",
+  "block_timer":"timer",
+  "block_current":"nuværende (Slot 1)",
+  "date":"dato",
+  "year":"år",
+  "month":"måned",
+  "hour":"timer",
+  "minute":"minut",
+  "second":"sekund",
+  "day_of_the_week":"ugedag",
+  "time_in_milliseconds":"tid i millisekunder",
+  "block_mod":"(Slot 1) absolut værdi (Slot 2)",
+  "block_round":"afrund",
+  "block_pick_random":"vælg tilfældigt (Slot 1) til (Slot 2)",
+  "block_and":"(Slot 1) og (Slot 2)",
+  "block_or":"(Slot 1) eller (Slot 2)",
+  "block_not":"ikke (Slot 1)",
+  "true":"sandt",
+  "false":"falsk",
+  "block_letter":"bogstav (Slot 1) á (Slot 2 = Verden)",
+  "block_length":"længde af (Slot 1 = Verden)",
+  "block_join":"forbind (Slot 1 = hej) og (Slot 2 = Verden)",
+  "block_split":"opdel (Slot 1 = hej Verden) med (Slot 2)",
+  "letter":"bogstav",
+  "whitespace":"mellemrum",
+  "block_validate":"er (Slot 1 = 5) et/en (Slot 2)?",
+  "number":"nummer",
+  "text":"tekst",
+  "boolean":"boolesk",
+  "list":"liste",
+  "invalid_number":"ugyldigt nummer",
+  "block_when_flag_tapped":"når du klikker på (Icon)",
+  "block_when_I_receive":"når jeg modtager",
+  "any_message":"en besked",
+  "new":"ny",
+  "block_when":"når (Slot 1)",
+  "block_broadcast":"send (Slot 1) til alle",
+  "block_broadcast_and_wait":"send (Slot 1) til alle og vent",
+  "block_message":"besked",
+  "block_wait":"vent (Slot 1) sek.",
+  "block_wait_until":"vent indtil (Slot 1)",
+  "block_repeat_forever":"gentag for evigt",
+  "block_repeat":"gentag (Slot 1)",
+  "block_repeat_until":"gentag indtil (Slot 1)",
+  "block_if":"hvis (Slot 1)",
+  "block_if_else":"hvis (Slot 1)",
+  "else":"ellers",
+  "block_stop":"stop (Slot 1)",
+  "all":"alle",
+  "this_script":"dette script",
+  "all_but_this_script":"alle andre end dette script",
+  "Record_sound":"Optag lyd",
+  "block_play_recording":"afspil optagelse (Slot 1)",
+  "block_play_recording_until_done":"afspil optagelse indtil færdig (Slot 1)",
+  "block_play_sound":"afspil lyd (Slot 1)",
+  "block_play_sound_until_done":"afspil lyd indtil færdig (Slot 1)",
+  "block_stop_all_sounds":"stop alle lyde",
+  "block_rest_for":"pause i (Slot 1) slag",
+  "block_change_tempo_by":"ændr tempo med (Slot 1)",
+  "block_set_tempo_to":"sæt tempo til (Slot 1) slag/min",
+  "block_tempo":"tempo",
+  "block_set_variable":"sæt (Slot 1) til (Slot 2)",
+  "Create_Variable":"Opret variabel",
+  "block_change_variable":"ændr (Slot 1) med (Slot 2)",
+  "Rename":"Omdøb",
+  "Delete":"Slet",
+  "block_add_to_list":"tilføj (Slot 1 = ting) til (Slot 2)",
+  "Create_List":"Opret liste",
+  "block_delete_from_list":"slet (Slot 1) af (Slot 2)",
+  "block_insert_into_list":"indsæt (Slot 1 = ting) på (Slot 2) af (Slot 3)",
+  "block_replace_list_item":"erstat element (Slot 1) af (Slot 2) med (Slot 3 = ting)",
+  "block_copy_list":"kopiér (Slot 1) til (Slot 2)",
+  "block_list_item":"element (Slot 1) af (Slot 2)",
+  "block_list_length":"længde på (Slot 1)",
+  "block_list_contains":"(Slot 1) indeholder (Slot 2 = ting)",
+  "last":"Sidste",
+  "random":"Tilfældig",
+  "Robots":"Robotter",
+"Operators":"Operatorer",
+"Sound":"Lyd",
+"Tablet":"Enhed",
+"Control":"Styring",
+"Variables":"Variabler",
+"Zoom_in":"Zoom ind",
+"Zoom_out":"Zoom ud",
+"Reset_zoom":"Nulstil zoom",
+"Disable_snap_noise":"Deaktivér kameralyd",
+"Enable_snap_noise":"Aktivér kameralyd",
+"CompassCalibrate":"Kalibrér kompas",
+"Send_debug_log":"Send fejlrapport",
+"Show_debug_menu":"Vis fejlmenu",
+"Connect_Device":"Forbind enhed",
+"Connect_Multiple":"Forbind flere enheder",
+"Disconnect_Device":"Afbryd enhed",
+"Tap":"Tryk + for at forbinde",
+"Scanning_for_devices":"Scanner for enheder",
+"Open":"Åbn",
+"No_saved_programs":"Ingen gemte programmer",
+"New":"Ny",
+"Saving":"Gemmer",
+"On_Device":"På enhed",
+"Cloud":"I skyen",
+"Loading":"Indlæser",
+"Sign_in":"Log ind",
+"New_program":"Nyt program",
+"Share":"Del",
+"Recordings":"Optagelser",
+"Discard":"Kassér",
+"Stop":"Stop",
+"Pause":"Pause",
+"remaining":"resterende",
+"Record":"Optag",
+"Tap_record_to_start":"Tryk optag for at starte",
+"Done":"Færdig",
+"Delete_question":"Er du sikker på, du vil slette dette?",
+"Cancel":"Annullér",
+"OK":"OK",
+"Dont_delete":"Slet ikke",
+"Enter_new_name":"Indtast nyt navn",
+"Duplicate":"Duplikér",
+"Name_duplicate_file":"Indtast navn på duplikeret fil",
+"Name_error_invalid_characters":"Følgende tegn kan ikke inkluderes i filnavnet: \n",
+"Name_error_already_exists":"\" eksisterer allerede. Indtast et andet navn.",
+"Permission_denied":"Adgang nægtet",
+"Grant_permission":"Tillad Birdblox at bruge din mikrofon under Indstillinger",
+"Dismiss":"Afbryd",
+"Name":"Navn",
+"Enter_file_name":"Indtast filnavn",
+"Name_error_blank":"Navn kan ikke være tomt. Indtast et filnavn.",
+"Edit_text":"Redigér tekst",
+"Question":"Spørgsmål",
+"Connection_Failure":"Forbindelse mislykket",
+"Connection_failed_try_again":"Forbindelse mislykket, prøv venligst igen.",
+"Disconnect_account":"Afbryd forbindelse til bruger",
+"Disconnect_account_question":"Afbryd forbindelse til bruger?",
+"Dont_disconnect":"Afbryd ikke",
+"Disconnect":"Afbryd",
+"not_connected":"(Device) ikke tilsluttet",
+"not_a_valid_number":"ikke et gyldigt tal",
+"Intensity":"Intensitet",
+"Angle":"Vinkel",
+"Speed":"Hastighed",
+"Note":"Tone",
+"Beats":"Slag",
+"Firmware_incompatible":"Ukompatibel firmware",
+"Update_firmware":"Opdatér firmware",
+"Device_firmware":"Enhedens firmware version:",
+"Required_firmware":"Påkrævet firmware version:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//German Translation
+Language.de = {
+  "block_Tri_LED":"Dreifarben-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Anschluss",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Drehung Servo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"spiele Note (Slot 1) für (Slot 2) Schläge",
+  "Light":"Licht",
+  "Distance":"Entfernung",
+  "Dial":"Drehknopf",
+  "Other":"Sonstige",
+  "Accelerometer":"Beschleunigungssensor",
+  "Magnetometer":"Magnetsensor",
+  "block_LED_Display":"LED Anzeige",
+  "block_Print":"Drucke (Slot 1 = HALLO)",
+  "block_Button":"Knopf (Slot 1)",
+  "Screen_Up":"Anzeige Oben",
+  "Screen_Down":"Anzeige Unten",
+  "Tilt_Left":"Neigung Links",
+  "Tilt_Right":"Neigung Rechts",
+  "Logo_Up":"Logo Oben",
+  "Logo_Down":"Logo Unten",
+  "Shake":"Schütteln",
+  "block_Compass":"Kompass",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibration (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatur °C (Slot 1)",
+  "block_Temperature_F":"Temperatur °F (Slot 1)",
+  "block_write":"Setze (Slot 1) auf (Slot 2) %",
+  "pin":"Pin",
+  "block_read":"Lies (Slot 1)",
+  "block_Device_Shaken":"Gerät Geschüttelt?",
+  "block_Device_LatLong":"Gerät (Slot 1)",
+  "Latitude":"Breitengrad",
+  "Longitude":"Längengrad",
+  "block_Device_SSID":"Gerät SSID",
+  "block_Device_Pressure":"Gerät Luftdruck",
+  "block_Device_Relative_Altitude":"Gerät Relative Höhe",
+  "block_Acceleration":"Gerät (Slot 1) Beschleunigung",
+  "Total":"Gesamt",
+  "block_Device_Orientation":"Gerät-Ausrichtung",
+  "faceup":"Nach Oben",
+  "facedown":"Nach Unten",
+  "portrait_bottom":"Hochformat: Kamera oben",
+  "portrait_top":"Hochformat: Kamera unten",
+  "landscape_left":"Querformat: Kamera links",
+  "landscape_right":"Querformat: Kamera rechts",
+  "block_Display":"zeige (Slot 1 = Hallo) an (Slot 2) an",
+  "position":"Position",
+  "block_ask":"frage (Slot 1 = Wie heißt du?) und warte",
+  "block_answer":"Antwort",
+  "block_reset_timer":"starte Stoppuhr neu",
+  "block_timer":"Stoppuhr",
+  "block_current":"Kalender (Slot 1)",
+  "date":"Datum",
+  "year":"Jahr",
+  "month":"Monat",
+  "hour":"Stunde",
+  "minute":"Minute",
+  "second":"Sekunde",
+  "day_of_the_week":"Wochentag",
+  "time_in_milliseconds":"Zeit in Millisekunden",
+  "block_mod":"(Slot 1) mod (Slot 2)",
+  "block_round":"(Slot 1) gerundet",
+  "block_pick_random":"Zufallszahl von (Slot 1) bis (Slot 2)",
+  "block_and":"(Slot 1) und (Slot 2)",
+  "block_or":"(Slot 1) oder (Slot 2)",
+  "block_not":"nicht (Slot 1)",
+  "true":"wahr",
+  "false":"falsch",
+  "block_letter":"Zeichen (Slot 1) von (Slot 2 = Welt)",
+  "block_length":"Länge von (Slot 1 = Welt)",
+  "block_join":"verbinde (Slot 1 = Hallo) und (Slot 2 = Welt)",
+  "block_split":"trenne (Slot 1 = Hallo Welt) nach (Slot 2)",
+  "letter":"Buchstabe",
+  "whitespace":"Leerzeichen",
+  "block_validate":"ist (Slot 1 = 5) ein(e) (Slot 2)",
+  "number":"Zahl",
+  "text":"Text",
+  "boolean":"Boole'scher Wert",
+  "list":"Liste",
+  "invalid_number":"ungültige Zahl",
+  "block_when_flag_tapped":"Wenn (Icon) angeklickt",
+  "block_when_I_receive":"Wenn ich (Slot 1) empfange",
+  "any_message":"eine beliebige Nachricht",
+  "new":"neu",
+  "block_when":"Wenn (Slot 1)",
+  "block_broadcast":"sende (Slot 1) an alle",
+  "block_broadcast_and_wait":"sende (Slot 1) an alle und warte",
+  "block_message":"Nachricht",
+  "block_wait":"warte (Slot 1) Sek.",
+  "block_wait_until":"warte bis (Slot 1)",
+  "block_repeat_forever":"fortlaufend",
+  "block_repeat":"wiederhole (Slot 1)",
+  "block_repeat_until":"wiederhole bis (Slot 1)",
+  "block_if":"falls (Slot 1)",
+  "block_if_else":"falls (Slot 1)",
+  "else":"sonst",
+  "block_stop":"stoppe (Slot 1)",
+  "all":"alles",
+  "this_script":"dieses Skript",
+  "all_but_this_script":"alles außer diesem Skript",
+  "Record_sound":"nimm einen Klang auf",
+  "block_play_recording":"spiele Aufnahme (Slot 1)",
+  "block_play_recording_until_done":"spiele Aufnahme (Slot 1) ganz",
+  "block_play_sound":"spiele Klang (Slot 1)",
+  "block_play_sound_until_done":"spiele Klang (Slot 1) ganz",
+  "block_stop_all_sounds":"stoppe alle Klänge",
+  "block_rest_for":"spiele Pause für (Slot 1) Schläge",
+  "block_change_tempo_by":"ändere Tempo um (Slot 1)",
+  "block_set_tempo_to":"setze Tempo auf (Slot 1) Schläge/Minute",
+  "block_tempo":"Tempo",
+  "block_set_variable":"setze (Slot 1) auf (Slot 2)",
+  "Create_Variable":"Neue Variable",
+  "block_change_variable":"ändere (Slot 1) um (Slot 2)",
+  "Rename":"Umbenennen",
+  "Delete":"Löschen",
+  "block_add_to_list":"füge (Slot 1 = etwas) zu (Slot 2) hinzu",
+  "Create_List":"Erstelle Liste",
+  "block_delete_from_list":"entferne (Slot 1) aus (Slot 2)",
+  "block_insert_into_list":"füge (Slot 1 = etwas) als (Slot 2) in (Slot 3) ein ",
+  "block_replace_list_item":"ersetze Element (Slot 1) in (Slot 2) durch (Slot 3 = etwas)",
+  "block_copy_list":"kopiere (Slot 1) in (Slot 2)",
+  "block_list_item":"Element (Slot 1) von (Slot 2)",
+  "block_list_length":"Länge von (Slot 1)",
+  "block_list_contains":"(Slot 1) enthält (Slot 2 = etwas)",
+  "last":"letzte",
+  "random":"beliebig",
+  "Robots":"Roboter",
+"Operators":"Operatoren",
+"Sound":"Klang",
+"Tablet":"Tablet",
+"Control":"Steuerung",
+"Variables":"Variablen",
+"Zoom_in":"Vergrößern",
+"Zoom_out":"Verkleinern",
+"Reset_zoom":"Größenveränderung zurücksetzen",
+"Disable_snap_noise":"Akustisches Klicken ausschalten",
+"Enable_snap_noise":"Akustisches Klicken einschalten",
+"CompassCalibrate":"Kompass kalibrieren",
+"Send_debug_log":"Fehlermeldung senden",
+"Show_debug_menu":"Fehlermenü anzeigen",
+"Connect_Device":"Gerät verbinden",
+"Connect_Multiple":"Mehrere verbinden",
+"Disconnect_Device":"Gerät trennen",
+"Tap":"Drücke + um zu verbinden",
+"Scanning_for_devices":"Nach Geräten suchen",
+"Open":"Öffnen",
+"No_saved_programs":"Keine gespeicherten Programme",
+"New":"Neu",
+"Saving":"Speichert",
+"On_Device":"Auf dem Gerät",
+"Cloud":"Cloud",
+"Loading":"Lädt",
+"Sign_in":"Anmelden",
+"New_program":"Neues Programm",
+"Share":"Teilen",
+"Recordings":"Aufnahmen",
+"Discard":"Verwerfen",
+"Stop":"Stop",
+"Pause":"Pause",
+"remaining":"verblieben",
+"Record":"Aufnehmen",
+"Tap_record_to_start":"Drücke auf Aufnehmen um zu beginnen",
+"Done":"Fertig",
+"Delete":"Löschen",
+"Delete_question":"Bist du sicher, dass du das löschen möchtest?",
+"Cancel":"Abbrechen",
+"OK":"OK",
+"Dont_delete":"Nicht löschen",
+"Rename":"Umbenennen",
+"Enter_new_name":"Neuen Namen eingeben",
+"Duplicate":"Duplizieren",
+"Name_duplicate_file":"Namen für duplizierte Datei eingeben",
+"Name_error_invalid_characters":"Die folgenden Zeichen können nicht in Dateinamen verwendet werden: \n",
+"Name_error_already_exists":"\" ist schon vergeben. Bitte gib einen anderen Namen ein.",
+"Permission_denied":"Zugriff verweigert",
+"Grant_permission":"Gewähre Birdblox in den Einstellungen Zugriff auf dein Mikrofon, um Aufnahmen zu machen.",
+"Dismiss":"Ausblenden",
+"Name":"Name",
+"Enter_file_name":"Gib einen Dateinamen ein",
+"Name_error_blank":"Name kann nicht leer sein. Gib einen Dateinamen an.",
+"Edit_text":"Text bearbeiten",
+"Question":"Frage",
+"Connection_Failure":"Verbindung fehlgeschlagen",
+"Connection_failed_try_again":"Verbindung fehlgeschlagen, bitte versuche es noch einmal",
+"Disconnect_account":"Benutzerkonto trennen",
+"Disconnect_account_question":"Benutzerkonto trennen?",
+"Dont_disconnect":"Nicht trennen",
+"Disconnect":"Trennen",
+"not_connected":"(Device) nicht verbunden",
+"not_a_valid_number":"keine gültige Zahl",
+"Intensity":"Intensität",
+"Angle":"Winkel",
+"Speed":"Geschwindigkeit",
+"Note":"Note",
+"Beats":"Schläge",
+"Firmware_incompatible":"Inkompatible Firmware",
+"Update_firmware":"Firmware updaten",
+"Device_firmware":"Firmware-Version des Geräts:",
+"Required_firmware":"Benötigte Firmware-Version:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//English Translation
+Language.en = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"port":"Port",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
+"block_Play_Note":"Play Note (Slot 1) for (Slot 2) Beats",
+"Light":"Light",
+"Distance":"Distance",
+"Dial":"Dial",
+"Other":"Other",
+"Accelerometer":"Accelerometer",
+"Magnetometer":"Magnetometer",
+"block_LED_Display":"Display",
+"block_Print":"Print (Slot 1 = Hello)",
+"block_Button":"Button (Slot 1)",
+"Screen_Up":"Screen Up",
+"Screen_Down":"Screen Down",
+"Tilt_Left":"Tilt Left",
+"Tilt_Right":"Tilt Right",
+"Logo_Up":"Logo Up",
+"Logo_Down":"Logo Down",
+"Shake":"Shake",
+"block_Compass":"Compass",
+"block_Servo":"Servo (Slot 1) (Slot 2)",
+"block_Vibration":"Vibration (Slot 1) (Slot 2)",
+"block_Motor":"Motor (Slot 1) (Slot 2)",
+"block_Temperature_C":"Temperature C (Slot 1)",
+"block_Temperature_F":"Temperature F (Slot 1)",
+"block_write":"Write (Slot 1) (Slot 2) %",
+"pin":"Pin",
+"block_read":"Read (Slot 1)",
+"block_Device_Shaken":"Tablet Shaken",
+"block_Device_LatLong":"Tablet (Slot 1)",
+"Latitude":"Latitude",
+"Longitude":"Longitude",
+"block_Device_SSID":"Tablet SSID",
+"block_Device_Pressure":"Tablet Pressure",
+"block_Device_Relative_Altitude":"Tablet Relative Altitude",
+"block_Acceleration":"Tablet (Slot 1) Acceleration",
+"Total":"Total",
+"block_Device_Orientation":"Tablet Orientation",
+"faceup":"Faceup",
+"facedown":"Facedown",
+"portrait_bottom":"Portrait: Camera on bottom",
+"portrait_top":"Portrait: Camera on top",
+"landscape_left":"Lanscape: Camera on left",
+"landscape_right":"Landscape: Camera on right",
+"block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
+"position":"Position",
+"block_ask":"ask (Slot 1 = What's your name?) and wait",
+"block_answer":"answer",
+"block_reset_timer":"reset timer",
+"block_timer":"timer",
+"block_current":"current (Slot 1)",
+"date":"date",
+"year":"year",
+"month":"month",
+"hour":"hour",
+"minute":"minute",
+"second":"second",
+"day_of_the_week":"day of the week",
+"time_in_milliseconds":"time in milliseconds",
+"block_mod":"(Slot 1) mod (Slot 2)",
+"block_round":"round (Slot 1)",
+"block_pick_random":"pick random (Slot 1) to (Slot 2)",
+"block_and":"(Slot 1) and (Slot 2)",
+"block_or":"(Slot 1) or (Slot 2)",
+"block_not":"not (Slot 1)",
+"true":"true",
+"false":"false",
+"block_letter":"letter (Slot 1) of (Slot 2 = world)",
+"block_length":"length of (Slot 1 = world)",
+"block_join":"join (Slot 1 = hello) and (Slot 2 = world)",
+"block_split":"split (Slot 1 = hello world) by (Slot 2)",
+"letter":"letter",
+"whitespace":"whitespace",
+"block_validate":"is (Slot 1 = 5) a (Slot 2)?",
+"number":"number",
+"text":"text",
+"boolean":"boolean",
+"list":"list",
+"invalid_number":"invalid number",
+"block_when_flag_tapped":"when (Icon) tapped",
+"block_when_I_receive":"when I receive",
+"any_message":"any message",
+"new":"new",
+"block_when":"when (Slot 1)",
+"block_broadcast":"broadcast (Slot 1)",
+"block_broadcast_and_wait":"broadcast (Slot 1) and wait",
+"block_message":"message",
+"block_wait":"wait (Slot 1) secs",
+"block_wait_until":"wait until (Slot 1)",
+"block_repeat_forever":"repeat forever",
+"block_repeat":"repeat (Slot 1)",
+"block_repeat_until":"repeat until (Slot 1)",
+"block_if":"if (Slot 1)",
+"block_if_else":"if (Slot 1)",
+"else":"else",
+"block_stop":"stop (Slot 1)",
+"all":"all",
+"this_script":"this script",
+"all_but_this_script":"all but this script",
+"Record_sound":"Record Sound",
+"block_play_recording":"play recording (Slot 1)",
+"block_play_recording_until_done":"play recording until done (Slot 1)",
+"block_play_sound":"play sound (Slot 1)",
+"block_play_sound_until_done":"play sound until done (Slot 1)",
+"block_stop_all_sounds":"stop all sounds",
+"block_rest_for":"rest for (Slot 1) Beats",
+"block_change_tempo_by":"change tempo by (Slot 1)",
+"block_set_tempo_to":"set tempo to (Slot 1) bpm",
+"block_tempo":"tempo",
+"block_set_variable":"set (Slot 1) to (Slot 2)",
+"Create_Variable":"Create Variable",
+"block_change_variable":"change (Slot 1) by (Slot 2)",
+"Rename":"Rename",
+"Delete":"Delete",
+"block_add_to_list":"add (Slot 1 = thing) to (Slot 2)",
+"Create_List":"Create List",
+"block_delete_from_list":"delete (Slot 1) of (Slot 2)",
+"block_insert_into_list":"insert (Slot 1 = thing) at (Slot 2) of (Slot 3)",
+"block_replace_list_item":"replace item (Slot 1) of (Slot 2) with (Slot 3 = thing)",
+"block_copy_list":"copy (Slot 1) to (Slot 2)",
+"block_list_item":"item (Slot 1) of (Slot 2)",
+"block_list_length":"length of (Slot 1)",
+"block_list_contains":"(Slot 1) contains (Slot 2 = thing)",
+"last":"Last",
+"random":"Random",
+"Robots":"Robots",
+"Operators":"Operators",
+"Sound":"Sound",
+"Tablet":"Tablet",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Zoom in",
+"Zoom_out":"Zoom out",
+"Reset_zoom":"Reset zoom",
+"Disable_snap_noise":"Disable snap noise",
+"Enable_snap_noise":"Enable snap noise",
+"CompassCalibrate":"Calibrate Compass",
+"Send_debug_log":"Send debug log",
+"Show_debug_menu":"Show debug menu",
+"Connect_Device":"Connect Device",
+"Connect_Multiple":"Connect Multiple",
+"Disconnect_Device":"Disconnect Device",
+"Tap":"Tap + to connect",
+"Scanning_for_devices":"Scanning for devices",
+"Open":"Open",
+"No_saved_programs":"No saved programs",
+"Saving":"Saving",
+"On_Device":"On Device",
+"Cloud":"Cloud",
+"Loading":"Loading",
+"Sign_in":"Sign in",
+"New_program":"New program",
+"Share":"Share",
+"Recordings":"Recordings",
+"Discard":"Discard",
+"Stop":"Stop",
+"Pause":"Pause",
+"remaining":"remaining",
+"Record":"Record",
+"Tap_record_to_start":"Tap record to start",
+"Done":"Done",
+"Delete_question":"Are you sure you want to delete this?",
+"Cancel":"Cancel",
+"OK":"OK",
+"Dont_delete":"Don't delete",
+"Enter_new_name":"Enter new name",
+"Duplicate":"Duplicate",
+"Name_duplicate_file":"Enter name for duplicate file",
+"Name_error_invalid_characters":"The following characters cannot be included in file names: \n",
+"Name_error_already_exists":"\" already exists.  Enter a different name.",
+"Permission_denied":"Permission denied",
+"Grant_permission":"Grant recording permission to BirdBlox in Settings",
+"Dismiss":"Dismiss",
+"Name":"Name",
+"Enter_file_name":"Enter file name",
+"Name_error_blank":"Name cannot be blank. Enter a file name.",
+"Edit_text":"Edit text",
+"Question":"Question",
+"Connection_Failure":"Connection Failure",
+"Connection_failed_try_again":"Connection failed, please try again.",
+"Disconnect_account":"Disconnect account",
+"Disconnect_account_question":"Disconnect account?",
+"Dont_disconnect":"Don't disconnect",
+"Disconnect":"Disconnect",
+"not_connected":"(Device) not connected",
+"not_a_valid_number":"not a valid number",
+"Intensity":"Intensity",
+"Angle":"Angle ",
+"Speed":"Speed ",
+"Note":"Note",
+"Beats":"Beats",
+"Firmware_incompatible":"Firmware incompatible",
+"Update_firmware":"Update firmware",
+"Device_firmware":"Device firmware version:",
+"Required_firmware":"Required firmware version:",
+"New":"New",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Spanish Translation
+Language.es = {
+  "block_Tri_LED":"Led tricolor (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Puerto",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Servo de posicion (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Servo de rotacion (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Emitir un sonido (Slot 1) por (Slot 2) pulsos",
+  "Light":"Luz",
+  "Distance":"Distancia",
+  "Dial":"Dial",
+  "Other":"Otro",
+  "Accelerometer":"Acelerometro",
+  "Magnetometer":"Magnetometro",
+  "block_LED_Display":"Monitor",
+  "block_Print":"Imprimir (Slot 1 = Hola)",
+  "block_Button":"Pulsador (Slot 1)",
+  "Screen_Up":"Subir la pantalla",
+  "Screen_Down":"Bajar la pantalla",
+  "Tilt_Left":"Ladear hacia la izquierda",
+  "Tilt_Right":"Ladear hacia la derecha",
+  "Logo_Up":"Logo arriba",
+  "Logo_Down":"Logo abajo",
+  "Shake":"Sacudir",
+  "block_Compass":"Brujula",
+  "block_Servo":"Servo (Slot 1)(Slot 2)",
+  "block_Vibration":"Vibracion (Slot 1)(Slot 2)",
+  "block_Motor":"Motor (Slot 1)(Slot 2)",
+  "block_Temperature_C":"Temperatura C (Slot 1)",
+  "block_Temperature_F":"Temperatura F (Slot 1)",
+  "block_write":"Escribir (Slot 1) (Slot 2) %",
+  "pin":"Pinche",
+  "block_read":"Leer (Slot 1)",
+  "block_Device_Shaken":"Sacudir la tableta",
+  "block_Device_LatLong":"Tableta (Slot 1)",
+  "Latitude":"Latitud",
+  "Longitude":"Longitudd",
+  "block_Device_SSID":"SSID de la tableta",
+  "block_Device_Pressure":"Presion de la tableta",
+  "block_Device_Relative_Altitude":"Altitud relativa de la tableta",
+  "block_Acceleration":"Tableta (Slot 1) aceleracion",
+  "Total":"Total",
+  "block_Device_Orientation":"Orientacion de la tableta",
+  "faceup":"Cara arriba",
+  "facedown":"Cara abajo",
+  "portrait_bottom":"Portaretrato: Camara inferior",
+  "portrait_top":"Portaretrato: Camara superior",
+  "landscape_left":"Paisaje: Camara en la izquierda",
+  "landscape_right":"Paisaje: Camara en la derecha",
+  "block_Display":"Monitor (Slot 1 = Hola) en (Slot 2)",
+  "position":"Posicion",
+  "block_ask":"Preguntar (Slot 1 = Cual es tu nombre?) Y esperar",
+  "block_answer":"Responder",
+  "block_reset_timer":"Reiniciar el temporizador",
+  "block_timer":"Temporizador",
+  "block_current":"Actual (Slot 1)",
+  "date":"Fecha",
+  "year":"Año",
+  "month":"Mes",
+  "hour":"Hora",
+  "minute":"Minuto",
+  "second":"Segundo",
+  "day_of_the_week":"Dia de la semana",
+  "time_in_milliseconds":"Tiempo en milisegundos",
+  "block_mod":"(Slot 1) modo (Slot 2)",
+  "block_round":"Vuelta (Slot 1)",
+  "block_pick_random":" Eleccion aleatoria (Slot 1) a (Slot 2)",
+  "block_and":"(Slot 1) y (Slot 2)",
+  "block_or":"(Slot 1) o (Slot 2)",
+  "block_not":"No (Slot 1)",
+  "true":"Verdadero",
+  "false":"Falso",
+  "block_letter":"Letra (Slot 1) de (Slot 2 = mundo)",
+  "block_length":"Longitud de (Slot 1 = mundo)",
+  "block_join":"Unir (Slot 1 = hola) y (Slot 2 = mundo)",
+  "block_split":"Dividir (Slot 1 = Hola mundo) en (Slot 2)",
+  "letter":"Letra",
+  "whitespace":"Espacio en blanco",
+  "block_validate":"Es (Slot 1 = 5) un (Slot 2)?",
+  "number":"Numero",
+  "text":"Texto",
+  "boolean":"Booleano",
+  "list":"Lista",
+  "invalid_number":"Numero invalido",
+  "block_when_flag_tapped":"Cuando (Icon) es presionado",
+  "block_when_I_receive":"Cuando recibo (Slot 1)",
+  "any_message":"Cualquier mensaje",
+  "new":"nuevo",
+  "block_when":"Cuando (Slot 1)",
+  "block_broadcast":"Transmitir (Slot 1)",
+  "block_broadcast_and_wait":"Transmitir (Slot 1) y esperar",
+  "block_message":"mensaje",
+  "block_wait":"esperar (Slot 1) segundos",
+  "block_wait_until":"esperar hasta (Slot 1)",
+  "block_repeat_forever":"Repetir por siempre",
+  "block_repeat":"repetir (Slot 1)",
+  "block_repeat_until":"repetir hasta (Slot 1)",
+  "block_if":"si (Slot 1)",
+  "block_if_else":"si (Slot 1)",
+  "else":"caso contrario",
+  "block_stop":"detener (Slot 1)",
+  "all":"todo",
+  "this_script":"este esquema",
+  "all_but_this_script":"todo menos este esquema",
+  "Record_sound":"Grabar sonido",
+  "block_play_recording":"Reproducir grabacion (Slot 1)",
+  "block_play_recording_until_done":"Reproducir grabacion hasta el final (Slot 1)",
+  "block_play_sound":"Reproducir sonido (Slot 1)",
+  "block_play_sound_until_done":"Reproducir sonido hasta el final (Slot 1)",
+  "block_stop_all_sounds":"Finalizar todos los sonidos",
+  "block_rest_for":"descansar por (Slot 1) pulsos",
+  "block_change_tempo_by":"cambiar el temporizador en (Slot 1)",
+  "block_set_tempo_to":"configurar el temporizador a (Slot 1)",
+  "block_tempo":"Temporizador",
+  "block_set_variable":"configurar (Slot 1) a (Slot 2)",
+  "Create_Variable":"Crear Variable",
+  "block_change_variable":"cambiar (Slot 1) en (Slot 2)",
+  "Rename":"Cambiar nombre",
+  "Delete":"Borrar",
+  "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
+  "Create_List":"Crear Lista",
+  "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",
+  "block_insert_into_list":"insertar (Slot 1 = objeto) en (Slot 2) de (Slot 3)",
+  "block_replace_list_item":"reemplazar item (Slot 1) de (Slot 2) con (Slot 3 = objeto)",
+  "block_copy_list":"copiar (Slot 1) a (Slot 2)",
+  "block_list_item":"item (Slot 1) a (Slot 2)",
+  "block_list_length":"Longitud de (Slot 1)",
+  "block_list_contains":"(Slot 1) contiene (Slot 2 = objeto)",
+  "last":"Ultimo",
+  "random":"Aleatorio",
+  "Robots":"Robots",
+"Operators":"Operadores",
+"Sound":"Sonido",
+"Tablet":"Tableta",
+"Control":"Control",
+"Variables":"Variables",
+"Zoom_in":"Acercar zoom",
+"Zoom_out":"Alejar zoom",
+"Reset_zoom":"Reiniciar zoom",
+"Disable_snap_noise":"Deshabilitar sonido snap",
+"Enable_snap_noise":"Habilitar sonido snap",
+"CompassCalibrate":"Calibrar la brujula",
+"Send_debug_log":"Enviar registro del debug",
+"Show_debug_menu":"Mostrar resultados del debug",
+"Connect_Device":"Conectar dispositivo",
+"Connect_Multiple":"Coneccion multiple",
+"Disconnect_Device":"Desconectar dispositivo",
+"Tap":"Presionar + para conectar",
+"Scanning_for_devices":"Escaneando dispositivos",
+"Open":"Abrir",
+"No_saved_programs":"Programas no guardados",
+"New":"Nuevo",
+"Saving":"Guardando",
+"On_Device":"En el dispositivo",
+"Cloud":"Nube",
+"Loading":"Cargando",
+"Sign_in":"Ingresar",
+"New_program":"Programa nuevo",
+"Share":"Compartir",
+"Recordings":"Grabaciones",
+"Discard":"Descartar",
+"Stop":"Detener",
+"Pause":"Pausa",
+"remaining":"restante",
+"Record":"Grabar",
+"Tap_record_to_start":"Presionar grabar para iniciar",
+"Done":"Hecho",
+"Delete":"Borrar",
+"Delete_question":"Esta seguro que quiere borrar esto?",
+"Cancel":"Cancelar",
+"OK":"Aceptar",
+"Dont_delete":"No borrar",
+"Rename":"Cambiar nombre",
+"Enter_new_name":"Ingrese un nombre nuevo",
+"Duplicate":"Duplicar",
+"Name_duplicate_file":"Ingrese un nombre para el archivo duplicado",
+"Name_error_invalid_characters":"Los siguientes caracteres no pueden ser utilizados en los nombres de los archivos: \n",
+"Name_error_already_exists":"\" ya existe. Entre un nombre diferente",
+"Permission_denied":"Permiso denegado",
+"Grant_permission":"Permiso especial de grabacion en la configuracion del BirdBlox",
+"Dismiss":"Descartar",
+"Name":"Nombre",
+"Enter_file_name":"Ingresar el nombre del archivo",
+"Name_error_blank":"El nombre no puede estar vacio. Ingrese un nombre para el archivo",
+"Edit_text":"Editar texto",
+"Question":"Pregunta",
+"Connection_Failure":"Coneccion fallada",
+"Connection_failed_try_again":"Coneccion fallada, por favor intente de nuevo",
+"Disconnect_account":"Desconectar la cuenta",
+"Disconnect_account_question":"Desconectar la cuenta?",
+"Dont_disconnect":"No desconectar",
+"Disconnect":"Desconectar",
+"not_connected":"(Device) no conectado",
+"not_a_valid_number":"Este numero no es valido",
+"Intensity":"Intensidad",
+"Angle":"Angulo",
+"Speed":"Velocidad",
+"Note":"Nota",
+"Beats":"Pulsos",
+"Firmware_incompatible":"El firmware es incompatible",
+"Update_firmware":"Actualizar firmware",
+"Device_firmware":"Version del firmware del dispositivo:",
+"Required_firmware":"Version del firmware requerida:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+// French translation
+Language.fr = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"port":"Connecteur",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
+"block_Play_Note":"Jouer la note (Slot 1) pour (Slot 2) battement(s)",
+"Light":"Lumière",
+"Distance":"Distance",
+"Dial":"Cadran",
+"Other":"Autre",
+"Accelerometer":"Accéléromètre",
+"Magnetometer":"Magnétomètre",
+"block_LED_Display":"Display",
+"block_Print":"Imprimer (Slot 1 = Bonjour)",
+"block_Button":"Bouton (Slot 1)",
+"Screen_Up":"Écran vers le haut",
+"Screen_Down":"Écran vers le bas",
+"Tilt_Left":"Incliner à gauche",
+"Tilt_Right":"Incliner à droite",
+"Logo_Up":"Logo vers le haut",
+"Logo_Down":"Logo vers le bas",
+"Shake":"Secouer",
+"block_Compass":"Compas",
+"block_Servo":"Servo (Slot 1) (Slot 2)",
+"block_Vibration":"Vibration (Slot 1) (Slot 2)",
+"block_Motor":"Moteur (Slot 1) (Slot 2)",
+"block_Temperature_C":"Température C (Slot 1)",
+"block_Temperature_F":"Température F (Slot 1)",
+"block_write":"Écrire (Slot 1) (Slot 2) %",
+"pin":"Broche",
+"block_read":"Lire (Slot 1)",
+"block_Device_Shaken":"Tablette secouée",
+"block_Device_LatLong":"Tablette (Slot 1)",
+"Latitude":"Latitude",
+"Longitude":"Longitude",
+"block_Device_SSID":"Tablette SSID",
+"block_Device_Pressure":"Tablette Pression",
+"block_Device_Relative_Altitude":"Tablette Altitude Relative",
+"block_Acceleration":"Tablette (Slot 1) Accélération",
+"Total":"Total",
+"block_Device_Orientation":"Orientation de la tablette",
+"faceup":"Face vers le haut",
+"facedown":"Face vers le bas",
+"portrait_bottom":"Vertical: Caméra en bas",
+"portrait_top":"Vertical: Caméra en haut",
+"landscape_left":"Horizontal: Caméra à gauche",
+"landscape_right":"Horizontal: Caméra à droite",
+"block_Display":"Display (Slot 1 = Bonjour) à (Slot 2)",
+"position":"Position",
+"block_ask":"demande (Slot 1 = Quel est ton nom?) et attendez",
+"block_answer":"répond",
+"block_reset_timer":"réinitialisez la minuterie",
+"block_timer":"minuterie",
+"block_current":"actuel (Slot 1)",
+"date":"date",
+"year":"année",
+"month":"mois",
+"hour":"heure",
+"minute":"minute",
+"second":"seconde",
+"day_of_the_week":"jour de la semaine",
+"time_in_milliseconds":"temps en millisecondes",
+"block_mod":"(Slot 1) modulo (Slot 2)",
+"block_round":"round (Slot 1)",
+"block_pick_random":"choisir au hasard (Slot 1) à (Slot 2)",
+"block_and":"(Slot 1) et (Slot 2)",
+"block_or":"(Slot 1) ou (Slot 2)",
+"block_not":"pas (Slot 1)",
+"true":"vrai",
+"false":"faux",
+"block_letter":"lettre (Slot 1) ou (Slot 2 = monde)",
+"block_length":"longueur (Slot 1 = monde)",
+"block_join":"joignez (Slot 1 = bonjour) et (Slot 2 = monde)",
+"block_split":"divisez (Slot 1 = boujour monde) avec (Slot 2)",
+"letter":"lettre",
+"whitespace":"espace blanc",
+"block_validate":"est (Slot 1 = 5) un (Slot 2)?",
+"number":"numéro",
+"text":"texte",
+"boolean":"booléen",
+"list":"liste",
+"invalid_number":"numéro invalide",
+"block_when_flag_tapped":"quand (Icon) est tapoté",
+"block_when_I_receive":"quand je reçois (Slot 1)",
+"any_message":"N'importe quel message",
+"new":"neuf",
+"block_when":"quand (Slot 1)",
+"block_broadcast":"transmettre (Slot 1)",
+"block_broadcast_and_wait":"transmettre (Slot 1) et attendez",
+"block_message":"message",
+"block_wait":"attendez (Slot 1) secondes",
+"block_wait_until":"attend jusqu'à (Slot 1)",
+"block_repeat_forever":"répétez pour toujours",
+"block_repeat":"répétez (Slot 1)",
+"block_repeat_until":"répétez jusqu'à (Slot 1)",
+"block_if":"si (Slot 1)",
+"block_if_else":"si (Slot 1)",
+"else":"autrement",
+"block_stop":"stop (Slot 1)",
+"all":"tout",
+"this_script":"ce script",
+"all_but_this_script":"tout sauf ce script",
+"Record_sound":"Enregistrez le son",
+"block_play_recording":"jouez l' enregistrement (Slot 1)",
+"block_play_recording_until_done":"jouez l' enregistrement jusqu'à la fin (Slot 1)",
+"block_play_sound":"jouez le son (Slot 1)",
+"block_play_sound_until_done":"jouez le son jusqu'à la fin (Slot 1)",
+"block_stop_all_sounds":"arrêtez tous les sons",
+"block_rest_for":"reposez pour (Slot 1) Battement(s)",
+"block_change_tempo_by":"changez le tempo de (Slot 1)",
+"block_set_tempo_to":"réglez le tempo sur (Slot 1) bpm",
+"block_tempo":"tempo",
+"block_set_variable":"fixez (Slot 1) à (Slot 2)",
+"Create_Variable":"Crée une variable",
+"block_change_variable":"changez (Slot 1) avec (Slot 2)",
+"Rename":"Renommez",
+"Delete":"Supprimez",
+"block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
+"Create_List":"Créez une liste",
+"block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",
+"block_insert_into_list":"insérez (Slot 1 = chose) à (Slot 2) dans (Slot 3)",
+"block_replace_list_item":"remplacez l'article (Slot 1) dans (Slot 2) avec (Slot 3 = chose)",
+"block_copy_list":"copiez (Slot 1) à (Slot 2)",
+"block_list_item":"item (Slot 1) de (Slot 2)",
+"block_list_length":"longueur de (Slot 1)",
+"block_list_contains":"(Slot 1) contient (Slot 2 = chose)",
+"last":"Dernier",
+"random":"Au hasard",
+"Robots":"Robots",
+"Operators":"Opérateurs",
+"Sound":"Son",
+"Tablet":"Tablette",
+"Control":"Contrôle",
+"Variables":"Variables",
+"Zoom_in":"Agrandir",
+"Zoom_out":"Dézoomer",
+"Reset_zoom":"Réinitialiser le zoom",
+"Disable_snap_noise":"Désactiver le bruit d'accrochage",
+"Enable_snap_noise":"Activer le bruit d'accrochage",
+"CompassCalibrate":"Calibrer le compas",
+"Send_debug_log":"Envoyer un journal de débogage",
+"Show_debug_menu":"Afficher le menu de débogage",
+"Connect_Device":"Connecter le périphérique",
+"Connect_Multiple":"Connecter plusieurs",
+"Disconnect_Device":"Déconnecter le périphérique",
+"Tap":"Tapoter + pour connecter",
+"Scanning_for_devices":"Recherche de périphériques",
+"Open":"Ouvrir",
+"No_saved_programs":"Aucun programme sauvé",
+"New":"Neuf",
+"Saving":"Sauvegarde",
+"On_Device":"Sur le périphérique",
+"Cloud":"Cloud",
+"Loading":"Chargement",
+"Sign_in":"Se connecter",
+"New_program":"Nouveau programme",
+"Share":"Partager",
+"Recordings":"Les enregistrements",
+"Discard":"Jeter",
+"Stop":"Stop",
+"Pause":"Faire une pause",
+"remaining":"restant",
+"Record":"Enregistrer",
+"Tap_record_to_start":"Tapotez pour commencer l' enregistrement",
+"Done":"Fini",
+"Delete":"Supprimer",
+"Delete_question":"Supprimer vraiment?",
+"Cancel":"Annuler",
+"OK":"OK",
+"Dont_delete":"Ne pas supprimer",
+"Rename":"Renommer",
+"Enter_new_name":"Entrez un nouveau nom",
+"Duplicate":"Nom en double",
+"Name_duplicate_file":"Entrez le nom du fichier en double",
+"Name_error_invalid_characters":"Les caractères suivants ne peuvent pas être inclus dans les noms de fichiers: \n",
+"Name_error_already_exists":"\" existe déjà. Entrez un nom différent.",
+"Permission_denied":"Permission refusée",
+"Grant_permission":"Accorder une autorisation d'enregistrement à BirdBlox dans les Paramètres",
+"Dismiss":"Rejeter",
+"Name":"Nom",
+"Enter_file_name":"Entrez le nom du fichier",
+"Name_error_blank":"Le nom ne peut pas être vide. Entrez un nom de fichier",
+"Edit_text":"Éditer le texte",
+"Question":"Question",
+"Connection_Failure":"Échec de connexion",
+"Connection_failed_try_again":"La connexion a échoué, veuillez réessayer.",
+"Disconnect_account":"Déconnecter le compte",
+"Disconnect_account_question":"",
+"Dont_disconnect":"Ne pas déconnecter",
+"Disconnect":"Déconnecter",
+"not_connected":"(Device) pas connecté",
+"not_a_valid_number":"numéro invalide",
+"Intensity":"Intensité",
+"Angle":"Angle",
+"Speed":"Vitesse",
+"Note":"Note",
+"Beats":"Battements",
+"Firmware_incompatible":"Firmware incompatible",
+"Update_firmware":"Mettez à jour le firmware",
+"Device_firmware":"Version du firmware du périphérique:",
+"Required_firmware":"Version du firmware requise:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Hebrew Translation
+Language.he = {
+  "block_Tri_LED":"R (Slot 2) G % (Slot 3) B % (Slot 4) % (Slot 1) לד שלושה צבעים",
+  "port":"יציאה",
+  "block_LED":"% (Slot 2) (Slot 1) לד",
+  "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",
+  "block_Rotation_Servo":"% (Slot 2) (Slot 1) סרוו סיבובים",
+  "block_Play_Note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
+  "Light":"אור",
+  "Distance":"מרחק",
+  "Dial":"חיוג",
+  "Other":"אחר",
+  "Accelerometer":"חיישן תאוצה",
+  "Magnetometer":"חישן מגנטי",
+  "block_LED_Display":"מסך",
+  "block_Print":"(Slot 1 = Hello) הדפס",
+  "block_Button":"(Slot 1) לחצן",
+  "Screen_Up":"להעלות מסך",
+  "Screen_Down":"להוריד מסך",
+  "Tilt_Left":"הטייה לשמאל ",
+  "Tilt_Right":"הטייה לימין",
+  "Logo_Up":"להעלות  לוגו",
+  "Logo_Down":"להוריד לוגו",
+  "Shake":"לנער",
+  "block_Compass":"מצפן",
+  "block_Servo":"(Slot 2) (Slot 1) סרוו",
+  "block_Vibration":"(Slot 2) (Slot 1) רטט",
+  "block_Motor":"(Slot 2) (Slot 1) מנוע",
+  "block_Temperature_C":"(Slot 1) C טמפרטורה",
+  "block_Temperature_F":"(Slot 1) F טמפרטורה",
+  "block_write":"% (Slot 2) (Slot 1) כתוב",
+  "pin":"סיכה",
+  "block_read":"(Slot 1) קורא",
+  "block_Device_Shaken":"טאבלט מנוער",
+  "block_Device_LatLong":"(Slot 1) טאבלט",
+  "Latitude":"קו רוחב",
+  "Longitude":"קו אורך",
+  "block_Device_SSID":"SSID טאבלט",
+  "block_Device_Pressure":"לחץ על הטאבלט",
+  "block_Device_Relative_Altitude":"גובה יחסי של הטאבלט",
+  "block_Acceleration":"(Slot 1) תאוצה של הטאבלט",
+  "Total":"סה''כ",
+  "block_Device_Orientation":"כיוון הטאבלט",
+  "faceup":"פנים כלפי מעלה",
+  "facedown":"פנים כלפי מטה",
+  "portrait_bottom":"פורטרט: מצלמה בתחתית",
+  "portrait_top":"פורטרט: מצלמה עליונית",
+  "landscape_left":"נוף: מצלמה בשמאל",
+  "landscape_right":"נוף: מצלמה בימין",
+  "block_Display":"(Slot 2) ב (Slot 1 = שלום) להציג ",
+  "position":"כיוון",
+  "block_ask":"ולחכות (Slot 1 = מה שמך?) לשאול",
+  "block_answer":"לענות",
+  "block_reset_timer":"איפוס טיימר",
+  "block_timer":"טיימר",
+  "block_current":"(Slot 1) נוכחי",
+  "date":"תאריך",
+  "year":"שנה",
+  "month":"חודש",
+  "hour":"שעה",
+  "minute":"דקה",
+  "second":"שניה",
+  "day_of_the_week":"יום",
+  "time_in_milliseconds":"זמן במילישניות ",
+  "block_mod":"(Slot 1) מצב (Slot 2)",
+  "block_round":"(Slot 1) סיבוב",
+  "block_pick_random":"(Slot 2) (Slot 1) בחירה אקראית",
+  "block_and":"(Slot 2) ו (Slot 1)",
+  "block_or":"(Slot 2) או (Slot 1)",
+  "block_not":"(Slot 1) לא",
+  "true":"אמת",
+  "false":"שקר",
+  "block_letter":"(Slot 2 = עולם) ב (Slot 1) אות",
+  "block_length":"(Slot 1 = עולם) אורך",
+  "block_join":"(Slot 2 = עולם) ו (Slot 1 = שלום) חיבור",
+  "block_split":"(Slot 2) ב (Slot 1 = שלום עולם) פירוק",
+  "letter":"אות",
+  "whitespace":"רווח",
+  "block_validate":"(Slot 2) (Slot 1 = 5) זה",
+  "number":"מספר",
+  "text":"טקסט",
+  "boolean":"בוליאני",
+  "list":"רשימה",
+  "invalid_number":"מספר לא חוקי",
+  "block_when_flag_tapped":"הוקש (Icon) כאשר",
+  "block_when_I_receive":"כאשר אני מקבל",
+  "any_message":"הודעה",
+  "new":"חדש",
+  "block_when":"(Slot 1) כאשר",
+  "block_broadcast":"(Slot 1) לשדר",
+  "block_broadcast_and_wait":"ולחכות (Slot 1) לשדר",
+  "block_message":"הודעה",
+  "block_wait":"שניות (Slot 1) חכה",
+  "block_wait_until":"(Slot 1) חכה עד",
+  "block_repeat_forever":"חזור לעולמים",
+  "block_repeat":"(Slot 1) חזור",
+  "block_repeat_until":"(Slot 1) חזור עד ש",
+  "block_if":"(Slot 1) אם",
+  "block_if_else":"(Slot 1) אם",
+  "else":"אז",
+  "block_stop":"(Slot 1) להפסיק",
+  "all":"הכל",
+  "this_script":"תסריט זה",
+  "all_but_this_script":"הכל מלבד תסריט זה",
+  "Record_sound":"הקלט קול",
+  "block_play_recording":"(Slot 1) להפעיל הקלטה",
+  "block_play_recording_until_done":"(Slot 1) להפעיל הקלטה עד סיום התסריט",
+  "block_play_sound":"(Slot 1) להפעיל קול",
+  "block_play_sound_until_done":"(Slot 1) להפעיל קול עד סיום התסריט",
+  "block_stop_all_sounds":"להפסיק  כל הצליליםם",
+  "block_rest_for":"פעימות (Slot 1) לחכות",
+  "block_change_tempo_by":"(Slot 1) שנה זמן ב",
+  "block_set_tempo_to":"bpm (Slot 1) להגדיר זמן ב",
+  "block_tempo":"זמן",
+  "block_set_variable":"(Slot 2) ל (Slot 1) להגדיר",
+  "Create_Variable":"צור משתנה",
+  "block_change_variable":"(Slot 2) ב (Slot 1) שינוי",
+  "Rename":"שם חדש",
+  "Delete":"מחק",
+  "block_add_to_list":"(Slot 2) ב (Slot 1 = אובייקט) הוסף",
+  "Create_List":"צור רשימה",
+  "block_delete_from_list":"(Slot 2) של (Slot 1) מחק",
+  "block_insert_into_list":"(Slot 3) של (Slot 2) ב (Slot 1 = אובייקט) הוסף",
+  "block_replace_list_item":"(Slot 3 = אובייקט) עם (Slot 2) של (Slot 1) החלף פריט",
+  "block_copy_list":"(Slot 2) ל (Slot 1) עתק",
+  "block_list_item":"(Slot 2) של (Slot 1) פריט",
+  "block_list_length":"(Slot 1) אורך של",
+  "block_list_contains":"(Slot 2 = אובייקט)    מכיל (Slot 1)",
+  "last":"אחרון",
+  "random":"אקראית",
+  "Robots":"רובוטים",
+  "Operators":"מפעילים",
+  "Sound":"קול",
+  "Tablet":"טאבלט",
+  "Control":"בקרה",
+  "Variables":"משתנים",
+  "Zoom_in":"לקרב זום",
+  "Zoom_out":"להרחיק זום",
+  "Reset_zoom":"אתחול זום",
+  "Disable_snap_noise":"לבטל כל הצלילים",
+  "Enable_snap_noise":"לאפשר צלילים",
+  "CompassCalibrate":"כיול מצפן",
+  "Send_debug_log":"שלח תוצאות  בדיקה",
+  "Show_debug_menu":"פתח תפריט בדיקה",
+  "Connect_Device":"חיבר התקן ",
+  "Connect_Multiple":"חיבר רב התקנים",
+  "Disconnect_Device":"נתק התקן",
+  "Tap":"הקש + לחיבור",
+  "Scanning_for_devices":"חיפוש התקנים",
+  "Open":"פתח",
+  "No_saved_programs":"תוכניות לא שמורות",
+  "New":"חדש",
+  "Saving":"שמירה",
+  "On_Device":"התקן",
+  "Cloud":"ענן",
+  "Loading":"טוען",
+  "Sign_in":"כניסה",
+  "New_program":"תכנית חדשה",
+  "Share":"שתף",
+  "Recordings":"הקלטות",
+  "Discard":"לבטל",
+  "Stop":"להפסיק",
+  "Pause":"השהייה",
+  "remaining":"נותר",
+  "Record":"להקליט",
+  "Tap_record_to_start":"הקש הקלטה כדי להתחיל",
+  "Done":"מוכן",
+  "Delete_question":"אתה בטוח שרוצה למחוק?",
+  "Cancel":"בטל",
+  "OK":"אישור",
+  "Dont_delete":"לא למחוק",
+  "Enter_new_name":"הכנס שם חדש",
+  "Duplicate":"שכפל",
+  "Name_duplicate_file":"הכנס שם לקובץ המשוכפל",
+  "Name_error_invalid_characters":"אין להכניס סימנים אלו בשמות הקבצים :  \n",
+  "Name_error_already_exists":"\" כבר קיים. כתוב שם שונה",
+  "Permission_denied":"ההרשאה נדחתה",
+  "Grant_permission":"אישור הקלטה מיוחד לבירדבלוקס בהגדרות ",
+  "Dismiss":"לבטל",
+  "Name":"שם",
+  "Enter_file_name":"כתוב שם לקובץ",
+  "Name_error_blank":"שם לא יכול להיות ריק. כתוב שם לקובץ",
+  "Edit_text":"עריכת טקסט",
+  "Question":"שאלה",
+  "Connection_Failure":"חיבור נכשל",
+  "Connection_failed_try_again":"חיבור נכשל, נסה שוב בבקשה",
+  "Disconnect_account":"נתק חשבון",
+  "Disconnect_account_question":"לנתק חשבון?",
+  "Dont_disconnect":"לא לנתק",
+  "Disconnect":"נתק",
+  "not_connected":"לא מחובר (Device)",
+  "not_a_valid_number":"מספר לא חוקי",
+  "Intensity":"עצמה",
+  "Angle":"זווית",
+  "Speed":"מהירות",
+  "Note":"הערה",
+  "Beats":"פעימות",
+  "Firmware_incompatible":"הקשוחה אינה תואמת",
+  "Update_firmware":"עדכון קשוחה",
+  "Device_firmware":"גירסה קשוחה בהתקן",
+  "Required_firmware":"נידרשת קשוחה  גירסה: ",
+  "block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+  "ceiling":"ceiling",
+  "floor":"floor",
+  "abs":"abs",
+  "sqrt":"sqrt",
+  "CM":"סיימ",
+  "Inch":"אינץ",
+  "block_subtract":"(Slot 1) – (Slot 2)",
+  "block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Korean Translation
+Language.ko = {
+  "block_Tri_LED":"삼색 LED (Slot 1) 빨강 (Slot 2) % 초록 (Slot 3) % 파랑 (Slot 4) %",
+  "port":"포트",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"위치 제어 서보 (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"회전속도 제어 서보 (Slot 1) (Slot 2) %",
+  "block_Play_Note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
+  "Light":"빛 센서",
+  "Distance":"거리 센서",
+  "Dial":"가변 저항",
+  "Other":"다른 센서",
+  "Accelerometer":"가속도 센서",
+  "Magnetometer":"자기력 센서",
+  "block_LED_Display":"보이기",
+  "block_Print":"출력 (Slot 1 = Hello)",
+  "block_Button":"버튼 (Slot 1)",
+  "Screen_Up":"화면 하늘 방향",
+  "Screen_Down":"화면 땅 방향",
+  "Tilt_Left":"왼쪽 기울임",
+  "Tilt_Right":"오른쪽 기울임",
+  "Logo_Up":"로고 하늘 방향",
+  "Logo_Down":"로고 땅 방향",
+  "Shake":"흔들림",
+  "block_Compass":"나침반 센서",
+  "block_Servo":"서보 (Slot 1) (Slot 2)",
+  "block_Vibration":"진동 (Slot 1) (Slot 2)",
+  "block_Motor":"기어 모터 (Slot 1) (Slot 2)",
+  "block_Temperature_C":"온도(섭씨) 센서 (Slot 1) ",
+  "block_Temperature_F":"온도(화씨) 센서 (Slot 1) ",
+  "block_write":"출력 (Slot 1) 값 (Slot 2) %",
+  "pin":"핀",
+  "block_read":"입력 (Slot 1)",
+  "block_Device_Shaken":"태블릿이 흔들렸는가?",
+  "block_Device_LatLong":"태블릿 (Slot 1)",
+  "Latitude":"위도",
+  "Longitude":"경도",
+  "block_Device_SSID":"태블릿 SSID(네트워크 이름)",
+  "block_Device_Pressure":"태블릿 기압",
+  "block_Device_Relative_Altitude":"태블릿 고도",
+  "block_Acceleration":"태블릿 (Slot 1) 가속도",
+  "Total":"전체",
+  "block_Device_Orientation":"태블릿 방위",
+  "faceup":"화면 하늘 방향",
+  "facedown":"화면 땅 방향",
+  "portrait_bottom":"세로모드: 카메라 아래쪽 보기",
+  "portrait_top":"세로모드: 카메라 위쪽 보기",
+  "landscape_left":"가로모드: 카메라 왼쪽 보기",
+  "landscape_right":"가로모드: 카메라 오른쪽 보기",
+  "block_Display":"(Slot 1 = 안녕) 보이기 위치: (Slot 2)",
+  "position":"위치",
+  "block_ask":"(Slot 1 = 이름이 무엇이니?) 묻고 기다리기",
+  "block_answer":"대답",
+  "block_reset_timer":"타이머 초기화",
+  "block_timer":"타이머",
+  "block_current":"현재 (Slot 1)",
+  "date":"일",
+  "year":"년",
+  "month":"월",
+  "hour":"시간",
+  "minute":"분",
+  "second":"초",
+  "day_of_the_week":"요일",
+  "time_in_milliseconds":"밀리초",
+  "block_mod":"(Slot 1) 나누기 (Slot 2) 의 나머지",
+  "block_round":"(Slot 1) 의 반올림",
+  "block_math_of_number":"(Slot 2 = 10) 의 (Slot 1)",
+  "ceiling":"올림",
+  "floor":"버림",
+  "abs":"절대값",
+  "sqrt":"제곱근",
+  "block_pick_random":"(Slot 1) 부터 (Slot 2) 사이의 임의의 수",
+  "block_and":"(Slot 1) 그리고 (Slot 2)",
+  "block_or":"(Slot 1) 또는 (Slot 2)",
+  "block_not":"(Slot 1) 이/가 아니다",
+  "true":"참",
+  "false":"거짓",
+  "block_letter":"(Slot 2 = 친구들) 의 (Slot 1) 번째 글자",
+  "block_length":"(Slot 1 = 친구들) 의 글자 수",
+  "block_join":"(Slot 1 = 안녕) 와/과 (Slot 2 = 친구들) 합치기",
+  "block_split":"(Slot 1 = 안녕 친구들) 을/를 (Slot 2) (으)로 나누기",
+  "letter":"글자",
+  "whitespace":"여백",
+  "block_validate":"(Slot 1 = 5) 이/가 (Slot 2) 인가?",
+  "number":"숫자",
+  "text":"문자",
+  "boolean":"부울",
+  "list":"리스트",
+  "invalid_number":"부적절한 값",
+  "block_when_flag_tapped":"(Icon) 을 눌렀을 때",
+  "block_when_I_receive":"(Slot 1) 을/를 받았을 때",
+  "any_message":"어떤 메시지든",
+  "new":"새 메시지",
+  "block_when":"(Slot 1) 일 때",
+  "block_broadcast":"(Slot 1) 방송하기",
+  "block_broadcast_and_wait":"(Slot 1) 방송하고 기다리기",
+  "block_message":"메시지",
+  "block_wait":"(Slot 1) 초 기다리기",
+  "block_wait_until":"(Slot 1) 까지 기다리기",
+  "block_repeat_forever":"무한 반복하기",
+  "block_repeat":"(Slot 1) 번 반복하기",
+  "block_repeat_until":"(Slot 1) 까지 반복하기",
+  "block_if":"만약 (Slot 1) (이)라면",
+  "block_if_else":"만약 (Slot 1) (이)라면",
+  "else":"아니면",
+  "block_stop":"(Slot 1) 멈추기",
+  "all":"모두",
+  "this_script":"이 스크립트",
+  "all_but_this_script":"이 스크립트를 제외한 다른 스크립트",
+  "Record_sound":"소리 녹음하기",
+  "block_play_recording":"녹음 재생하기 (Slot 1) ",
+  "block_play_recording_until_done":"녹음 끝까지 재생하기 (Slot 1) ",
+  "block_play_sound":"(Slot 1) 재생하기",
+  "block_play_sound_until_done":"(Slot 1) 끝까지 재생하기",
+  "block_stop_all_sounds":"모든 소리 멈추기",
+  "block_rest_for":"(Slot 1) 박자 쉬기",
+  "block_change_tempo_by":"빠르기를 (Slot 1) 만큼 바꾸기",
+  "block_set_tempo_to":"빠르기를 (Slot 1) bpm으로 정하기",
+  "block_tempo":"박자",
+  "block_set_variable":"(Slot 1) 을/를 (Slot 2) 으로 정하기",
+  "Create_Variable":"변수 만들기",
+  "block_change_variable":"(Slot 1) 을/를 (Slot 2) 만큼 바꾸기",
+  "Rename":"이름 바꾸기",
+  "Delete":"삭제하기",
+  "block_add_to_list":"(Slot 1 =어떤 것) 항목을 (Slot 2) 에 추가하기",
+  "Create_List":"리스트 만들기",
+  "block_delete_from_list":"(Slot 1) 번째 항목을 (Slot 2) 에서 삭제하기",
+  "block_insert_into_list":"(Slot 1 = 어떤 것) 을/를 (Slot 3) 의 (Slot 2) 번째에 넣기",
+  "block_replace_list_item":"(Slot 3 = 어떤 것) 의 (Slot 1) 번째 항목을 (Slot 2) (으)로 바꾸기",
+  "block_copy_list":"(Slot 1) 을/를 (Slot 2)으로 복사하기",
+  "block_list_item":"(Slot 2) 의 (Slot 1) 번째 항목",
+  "block_list_length":"(Slot 1) 항목 수",
+  "block_list_contains":"(Slot 1) 이/가 (Slot 2 = 어떤 것) 을/를 포함하는가?",
+  "last":"마지막",
+  "random":"임의의 수",
+  "Robots":"로봇",
+"Operators":"연산자",
+"Sound":"소리",
+"Tablet":"태블릿",
+"Control":"제어",
+"Variables":"변수",
+"Zoom_in":"더 크게보기",
+"Zoom_out":"더 작게보기",
+"Reset_zoom":"원래 크기로 보기",
+"Disable_snap_noise":"딸깍소리 내기",
+"Enable_snap_noise":"딸깍소리 없애기",
+"CompassCalibrate":"나침반 센서 보정",
+"Send_debug_log":"디버그 기록 보내기",
+"Show_debug_menu":"디버그 메뉴 보기",
+"Connect_Device":"기기 연결하기",
+"Connect_Multiple":"여러 기기 연결하기",
+"Disconnect_Device":"장치 연결 끊기",
+"Tap":" + 를 눌러 연결하기",
+"Scanning_for_devices":"기기 검색 중",
+"Open":"열기",
+"No_saved_programs":"저장된 프로그램 없음",
+"New":"새로 만들기",
+"Saving":"저장하기",
+"On_Device":"이 기기",
+"Cloud":"클라우드",
+"Loading":"로드 중",
+"Sign_in":"로그인 하기",
+"New_program":"새 프로그램",
+"Share":"공유하기",
+"Recordings":"녹음파일",
+"Discard":"삭제",
+"Stop":"멈춤",
+"Pause":"일시정지",
+"remaining":"남은 시간",
+"Record":"녹음",
+"Tap_record_to_start":"녹음 버튼 눌러 시작하기",
+"Done":"완료",
+"Delete_question":"정말로 this를 삭제하시겠습니까?",
+"Cancel":"취소",
+"OK":"확인",
+"Dont_delete":"삭제하지 않기",
+"Enter_new_name":"새 이름을 입력하세요.",
+"Duplicate":"복사하기",
+"Name_duplicate_file":"복사할 파일 이름을 입력하세요.",
+"Name_error_invalid_characters":"파일 이름에는 다음 문자를 사용할 수 없습니다. \n ",
+"Name_error_already_exists":"\"이미 존재하는 이름입니다. 다른 이름을 입력하세요.",
+"Permission_denied":"권한 허용 불가",
+"Grant_permission":"설정에서 BirdBlox에 대한 마이크 권한을 허용해주세요.",
+"Dismiss":"취소",
+"Name":"파일 이름",
+"Enter_file_name":"파일 이름을 입력하세요.",
+"Name_error_blank":"이름은 빈칸으로 남겨둘 수 없습니다. 파일 이름을 입력하세요.",
+"Edit_text":"텍스트 편집하기",
+"Question":"질문",
+"Connection_Failure":"연결 실패",
+"Connection_failed_try_again":"연결 실패, 다시 시도해주세요.",
+"Disconnect_account":"계정 연결 끊기",
+"Disconnect_account_question":"계정 연결을 끊으시겠습니까?",
+"Dont_disconnect":"취소",
+"Disconnect":"연결 끊기",
+"not_connected":"(Device) 연결 안 됨",
+"not_a_valid_number":"부적절한 값입니다.",
+"Intensity":"세기",
+"Angle":"각도",
+"Speed":"속도",
+"Note":"음",
+"Beats":"박자",
+"Firmware_incompatible":"펌웨어 호환불가",
+"Update_firmware":"펌웨어 업데이트",
+"Device_firmware":"기기 펌웨어 버전:",
+"Required_firmware":"필요한 펌웨어 버전:",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Dutch Translation
+Language.nl = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Poort",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Positie-Servo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Draai-Servo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"speel noot (Slot 1) voor (Slot 2) Beats",
+  "Light":"Licht",
+  "Distance":"Afstand",
+  "Dial":"Draaiknop",
+  "Other":"Ander",
+  "Accelerometer":"Accelerometer",
+  "Magnetometer":"Magnetometer",
+  "block_LED_Display":"Scherm",
+  "block_Print":"Schrijf (Slot 1 = Hello)",
+  "block_Button":"Knop (Slot 1)",
+  "Screen_Up":"Scherm Omhoog",
+  "Screen_Down":"Scherm Omlaag",
+  "Tilt_Left":"Naar Links Kantelen",
+  "Tilt_Right":"Naar Rechts Kantelen",
+  "Logo_Up":"Logo Omhoog",
+  "Logo_Down":"Logo Omlaag",
+  "Shake":"Schudden",
+  "block_Compass":"Kompas",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibratie (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatuur C (Slot 1)",
+  "block_Temperature_F":"Temperatuur F (Slot 1)",
+  "block_write":"Schrijf (Slot 1) (Slot 2) %",
+  "pin":"Pin",
+  "block_read":"Lees (Slot 1)",
+  "block_Device_Shaken":"Tablet Geschud",
+  "block_Device_LatLong":"Tablet (Slot 1)",
+  "Latitude":"Breedtegraad",
+  "Longitude":"Lengtegraad",
+  "block_Device_SSID":"Tablet SSID",
+  "block_Device_Pressure":"Tablet Druk",
+  "block_Device_Relative_Altitude":"Tablet Relatieve Hoogte",
+  "block_Acceleration":"Tablet (Slot 1) Acceleratie",
+  "Total":"Totaal",
+  "block_Device_Orientation":"Tablet Orientatie",
+  "faceup":"Omhoog",
+  "facedown":"Omlaag",
+  "portrait_bottom":"Staand: Camera onderaan",
+  "portrait_top":"Staand: Camera bovenaan",
+  "landscape_left":"Liggend: Camera links",
+  "landscape_right":"Liggend: Camera rechts",
+  "block_Display":"Schrijf (Slot 1 = Hello) in (Slot 2)",
+  "position":"Positie",
+  "block_ask":"Vraag (Slot 1 = Wat is uw naam?) en wacht",
+  "block_answer":"antwoord",
+  "block_reset_timer":"zet tijd op nul",
+  "block_timer":"tijd",
+  "block_current":"huidig",
+  "date":"datum",
+  "year":"jaar",
+  "month":"maand",
+  "hour":"uur",
+  "minute":"minuut",
+  "second":"seconde",
+  "day_of_the_week":"dag van de week",
+  "time_in_milliseconds":"tijd in milliseconden",
+  "block_mod":"(Slot 1) modulo (Slot 2)",
+  "block_round":"afgerond (Slot 1)",
+  "block_pick_random":"willekeurig getal (Slot 1) to (Slot 2)",
+  "block_and":"(Slot 1) en (Slot 2)",
+  "block_or":"(Slot 1) of (Slot 2)",
+  "block_not":"niet (Slot 1)",
+  "true":"waar",
+  "false":"onwaar",
+  "block_letter":"letter (Slot 1) van (Slot 2 = world)",
+  "block_length":"lengte van (Slot 1 = world)",
+  "block_join":"voeg (Slot 1 = hello) en (Slot 2 = world) samen",
+  "block_split":"splits (Slot 1 = hello world) bij (Slot 2)",
+  "letter":"letter",
+  "whitespace":"spatie",
+  "block_validate":"is (Slot 1 = 5) een (Slot 2)?",
+  "number":"getal",
+  "text":"tekst",
+  "boolean":"boolean",
+  "list":"lijst",
+  "invalid_number":"ongeldig getal",
+  "block_when_flag_tapped":"wanneer (Icon) wordt aangeklikt",
+  "block_when_I_receive":"wanneer ik ontvang (Slot 1)",
+  "any_message":"elk signaal",
+  "new":"nieuw",
+  "block_when":"wanneer (Slot 1)",
+  "block_broadcast":"zend signaal (Slot 1)",
+  "block_broadcast_and_wait":"zend signaal (Slot 1) en wacht",
+  "block_message":"signaal",
+  "block_wait":"wacht (Slot 1) secs",
+  "block_wait_until":"wacht tot (Slot 1)",
+  "block_repeat_forever":"herhaal",
+  "block_repeat":"herhaal (Slot 1) keer",
+  "block_repeat_until":"herhaal tot (Slot 1)",
+  "block_if":"als (Slot 1)",
+  "block_if_else":"als (Slot 1)",
+  "else":"anders",
+  "block_stop":"stop (Slot 1)",
+  "all":"alle",
+  "this_script":"dit Script",
+  "all_but_this_script":"alle scripts behalve deze",
+  "Record_sound":"Geluid Opnemen",
+  "block_play_recording":"speel opname (Slot 1)",
+  "block_play_recording_until_done":"speel opname tot het einde (Slot 1)",
+  "block_play_sound":"speel geluid (Slot 1)",
+  "block_play_sound_until_done":"speel geluid tot het einde (Slot 1)",
+  "block_stop_all_sounds":"stop alle geluiden",
+  "block_rest_for":"rust voor (Slot 1) Beats",
+  "block_change_tempo_by":"verander tempo met (Slot 1)",
+  "block_set_tempo_to":"maak tempo (Slot 1) bpm",
+  "block_tempo":"tempo",
+  "block_set_variable":"maak (Slot 1) (Slot 2)",
+  "Create_Variable":"Maak een Variabele",
+  "block_change_variable":"verander (Slot 1) met (Slot 2)",
+  "Rename":"Hernoemen",
+  "Delete":"Verwijder",
+  "block_add_to_list":"voeg (Slot 1 = ding) toe aan (Slot 2)",
+  "Create_List":"Maak een Lijst",
+  "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",
+  "block_insert_into_list":"voeg (Slot 1 = ding) op (Slot 2) aan (Slot 3) toe",
+  "block_replace_list_item":"vervang item (Slot 1) van (Slot 2) door (Slot 3 = ding)",
+  "block_copy_list":"kopieer (Slot 1) in op (Slot 2)",
+  "block_list_item":"item (Slot 1) van (Slot 2)",
+  "block_list_length":"lengte van (Slot 1)",
+  "block_list_contains":"(Slot 1) bevat (Slot 2 = ding)",
+  "last":"laatste",
+  "random":"willekeurig",
+  "Robots":"Robots",
+"Operators":"Operatoren",
+"Sound":"Geluid",
+"Tablet":"Tablet",
+"Control":"Controle",
+"Variables":"Variabelen",
+"Zoom_in":"Inzoomen",
+"Zoom_out":"Uitzoomen",
+"Reset_zoom":"Reset zoom",
+"Disable_snap_noise":"Klikgeluid Uitschakelen",
+"Enable_snap_noise":"Klikgeluid Inschakelen",
+"CompassCalibrate":"Kompas Kalibreren",
+"Send_debug_log":"Stuur foutopsporingslog",
+"Show_debug_menu":"Toon debug-menu",
+"Connect_Device":"Verbind Apparaat",
+"Connect_Multiple":"Verbind Meerdere",
+"Disconnect_Device":"Ontkoppel Apparaat",
+"Tap":"Tik + verbinden",
+"Scanning_for_devices":"Scannen van apparaten",
+"Open":"Open",
+"No_saved_programs":"Geen opgeslagen programmas",
+"New":"Nieuw",
+"Saving":"Opslaan",
+"On_Device":"In Apparaat",
+"Cloud":"Cloud",
+"Loading":"Laden",
+"Sign_in":"Inloggen",
+"New_program":"Nieuw programma",
+"Share":"Share",
+"Recordings":"Opnames",
+"Discard":"Verwijder",
+"Stop":"Stop",
+"Pause":"Pauze",
+"remaining":"overblijvende",
+"Record":"Opnemen",
+"Tap_record_to_start":"Tik om opnemen te starten",
+"Done":"Klaar",
+"Delete":"Verwijder",
+"Delete_question":"Ben je zeker dat je dit wilt verwijderen?",
+"Cancel":"Annuleer",
+"OK":"OK",
+"Dont_delete":"Niet verwijderen",
+"Rename":"Hernoemen",
+"Enter_new_name":"Voer een nieuwe naam in",
+"Duplicate":"Kopiëren",
+"Name_duplicate_file":"Voer een naam in voor het gekopieerde bestand",
+"Name_error_invalid_characters":"De volgende lettertekens mogen niet gebruikt worden in bestandsnamen: \n",
+"Name_error_already_exists":"\" bestaat al. Voer een andere naam in.",
+"Permission_denied":"Geen toestemming",
+"Grant_permission":"Geef toestemming tot opnames aan BirdBlox in Instellingen",
+"Dismiss":"Ontslaan",
+"Name":"Naam",
+"Enter_file_name":"Voor een bestandsnaam in",
+"Name_error_blank":"Naam moet ingevuld zijn. Voer een bestandsnaam in.",
+"Edit_text":"Tekst bewerken",
+"Question":"Vraag",
+"Connection_Failure":"Verbindingsfout",
+"Connection_failed_try_again":"Verbindingsfout, probeer opnieuw.",
+"Disconnect_account":"Account Loskoppelen",
+"Disconnect_account_question":"Account Loskoppelen?",
+"Dont_disconnect":"Niet Loskoppelen",
+"Disconnect":"Loskoppelen",
+"not_connected":"(Device) niet verbonden",
+"not_a_valid_number":"geen geldig getal",
+"Intensity":"Percent",
+"Angle":"Graad",
+"Speed":"Snelheid",
+"Note":"Noot",
+"Beats":"Beats",
+"Firmware_incompatible":"Onverenigbare Firmware",
+"Update_firmware":"Update firmware",
+"Device_firmware":"Apparaat firmware versie:",
+"Required_firmware":"Vereiste firmware versie:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Portuguese Translation
+Language.pt = {
+  "block_Tri_LED":"LED Tricolor (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Porta",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Posição do Servo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Rotação do Servo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Toque Notas (Slot 1) por (Slot 2) Batidas",
+  "Light":"Luz",
+  "Distance":"Distância",
+  "Dial":"Discar",
+  "Other":"Outro",
+  "Accelerometer":"Acelerômetro",
+  "Magnetometer":"Magnetômetro",
+  "block_LED_Display":"Visor",
+  "block_Print":"Imprimir (Slot 1 = Olá)",
+  "block_Button":"Tecla (Slot 1) ",
+  "Screen_Up":"Tela para cima",
+  "Screen_Down":"Tela para baixo",
+  "Tilt_Left":"Incline para a esquerda",
+  "Tilt_Right":"Incline para a direita",
+  "Logo_Up":"Logo para cima",
+  "Logo_Down":"Logo para baixo",
+  "Shake":"Agitar",
+  "block_Compass":"Bússola ",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Vibrador (Slot 1) (Slot 2)",
+  "block_Motor":"Motor (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Temperatura C (Slot 1)",
+  "block_Temperature_F":"Temperatura F (Slot 1)",
+  "block_write":"Escrever (Slot 1) (Slot 2) %",
+  "pin":"Pino",
+  "block_read":"Ler (slot 1)",
+  "block_Device_Shaken":"Tablet Agitado",
+  "block_Device_LatLong":"Tablet (Slot 1)",
+  "Latitude":"Latitude",
+  "Longitude":"Longitude",
+  "block_Device_SSID":"Tablet SSID",
+  "block_Device_Pressure":"Tablet Pressão",
+  "block_Device_Relative_Altitude":"Tablet Altitude Relativa",
+  "block_Acceleration":"Tablet (Slot 1) Aceleração",
+  "Total":"Total",
+  "block_Device_Orientation":"Tablet Orientação ",
+  "faceup":"Virado para cima",
+  "facedown":"Virado para baixo",
+  "portrait_bottom":"Retrato: Câmera na parte inferior",
+  "portrait_top":"Retrato: Câmera na parte superior",
+  "landscape_left":"Paisagem: Câmera à esquerda",
+  "landscape_right":"Paisagem: Câmera à direita",
+  "block_Display":"Visor (Slot 1 = Olá) a (Slot 2)",
+  "position":"Posiçao",
+  "block_ask":"Perguntar (Slot 1 = Qual o seu nome?) e esperar",
+  "block_answer":"Responder ",
+  "block_reset_timer":"Redefinir tempo",
+  "block_timer":"tempo",
+  "block_current":"atual",
+  "date":"data",
+  "year":"ano",
+  "month":"mês",
+  "hour":"hora",
+  "minute":"minuto",
+  "second":"segundo",
+  "day_of_the_week":"dia da semana",
+  "time_in_milliseconds":"tempo em milissegundos",
+  "block_mod":"(Slot 1) módulo (Slot 2)",
+  "block_round":"arredondamento de (Slot 1)",
+  "block_pick_random":"seleção aleatória (Slot 1) para (Slot 2)",
+  "block_and":"(Slot 1) e (Slot 2)",
+  "block_or":"(Slot 1) ou (Slot 2)",
+  "block_not":"não (Slot 1)",
+  "true":"verdadeiro",
+  "false":"falso",
+  "block_letter":"letra (Slot 1) de (Slot 2 = mundo)",
+  "block_length":"tamanho de (Slot 1 = mundo)",
+  "block_join":"junte (Slot 1 = olá) e (Slot 2 = mundo)",
+  "block_split":"separe (Slot 1 = olá mundo) por (Slot 2)",
+  "letter":"letra",
+  "whitespace":"espaço em branco",
+  "block_validate":"é (Slot 1 = 5) a (Slot 2)?",
+  "number":"número",
+  "text":"texto",
+  "boolean":"booleano",
+  "list":"lista",
+  "invalid_number":"número inválido",
+  "block_when_flag_tapped":"quando (Icon) clicado",
+  "block_when_I_receive":"quando receber (Slot 1)",
+  "any_message":"qualquer mensagem",
+  "new":"nova",
+  "block_when":"quando (Slot 1)",
+  "block_broadcast":"envie (Slot 1)",
+  "block_broadcast_and_wait":"envie (Slot 1) e espere",
+  "block_message":"mensagem ",
+  "block_wait":"espere (Slot 1) seg",
+  "block_wait_until":"espere até (Slot 1)",
+  "block_repeat_forever":"repita sempre",
+  "block_repeat":"repita (Slot 1)",
+  "block_repeat_until":"repita até (Slot 1)",
+  "block_if":"se (Slot 1)",
+  "block_if_else":"se (Slot 1)",
+  "else":"senão",
+  "block_stop":"pare (Slot 1)",
+  "all":"todos ",
+  "this_script":"este script",
+  "all_but_this_script":"todos menos este script",
+  "Record_sound":"Gravar som",
+  "block_play_recording":"toque a gravação (Slot 1)",
+  "block_play_recording_until_done":"toque a gravação até o fim (Slot 1)",
+  "block_play_sound":"toque o som (Slot 1)",
+  "block_play_sound_until_done":"toque o som até o fim (Slot 1)",
+  "block_stop_all_sounds":"pare todos os sons",
+  "block_rest_for":"silêncio por (Slot 1) batidas",
+  "block_change_tempo_by":"mude o tempo para (Slot 1)",
+  "block_set_tempo_to":"adicione o tempo para (Slot 1) bmp",
+  "block_tempo":"tempo",
+  "block_set_variable":"adcione (Slot 1) para (Slot 2)",
+  "Create_Variable":"Criar uma variável",
+  "block_change_variable":"mude (Slot 1) por (Slot 2)",
+  "Rename":"Renomear",
+  "Delete":"Apagar",
+  "block_add_to_list":"adicionar (Slot 1 = objeto) para (Slot 2)",
+  "Create_List":"Criar uma lista",
+  "block_delete_from_list":"apague (Slot 1) de (Slot 2)",
+  "block_insert_into_list":"insira (Slot 1 = objeto) na posição (Slot 2) de (Slot 3)",
+  "block_replace_list_item":"substitua o item (Slot 1) de (Slot 2) por (Slot 3 = objeto)",
+  "block_copy_list":"copiar (Slot 1) para (Slot 2)",
+  "block_list_item":"item (Slot 1) de (Slot 2)",
+  "block_list_length":"tamanho de (Slot 1)",
+  "block_list_contains":"(Slot 1) contém (Slot 2 = objeto)",
+  "last":"Último",
+  "random":"Aleatório",
+  "Robots":"Robôs",
+"Operators":"Operadores",
+"Sound":"Som",
+"Tablet":"Tablet",
+"Control":"Controle",
+"Variables":"Variáveis",
+"Zoom_in":"Mais zoom",
+"Zoom_out":"Menos zoom",
+"Reset_zoom":"Redefinir zoom",
+"Disable_snap_noise":"Desativar o ruído de encaixe",
+"Enable_snap_noise":"Ativar o ruído de encaixe",
+"CompassCalibrate":"Calibrar Bússola",
+"Send_debug_log":"Enviar debug log",
+"Show_debug_menu":"Mostrar manual do debug ",
+"Connect_Device":"Conectar Dispositivo",
+"Connect_Multiple":"Conectar Vários",
+"Disconnect_Device":"Desconectar Dispositivo",
+"Tap":"Toque + para conectar",
+"Scanning_for_devices":"Verificando dispositivos",
+"Open":"Abrir",
+"No_saved_programs":"Nenhum programa salvo",
+"New":"Novo",
+"Saving":"Salvando",
+"On_Device":"No Dispositivo",
+"Cloud":"Nuvem",
+"Loading":"Carregando ",
+"Sign_in":"Autenticar",
+"New_program":"Programa Novo",
+"Share":"Compartilhe",
+"Recordings":"Gravações",
+"Discard":"Descartar",
+"Stop":"Parar",
+"Pause":"Pausar",
+"remaining":"restante",
+"Record":"Gravar",
+"Tap_record_to_start":"Toque gravar para começar",
+"Done":"Feito",
+"Delete":"Excluir",
+"Delete_question":"Você tem certeza que quer excluir?",
+"Cancel":"Cancelar",
+"OK":"OK",
+"Dont_delete":"Não excluir",
+"Rename":"Renomear",
+"Enter_new_name":"Digite um nome novo",
+"Duplicate":"Duplicar",
+"Name_duplicate_file":"Digite o nome do aquivo duplicado",
+"Name_error_invalid_characters":"Os seguintes caracteres não podem ser incluídos nos nomes de arquivos: \n",
+"Name_error_already_exists":"\" já existe. Digite um nome diferente.",
+"Permission_denied":"Permissão negada",
+"Grant_permission":"Conceda permissão de gravação para o BirdBlox em Configurações",
+"Dismiss":"Dispensar",
+"Name":"Nome",
+"Enter_file_name":"Digite nome do arquivo",
+"Name_error_blank":"Nome não pode estar em branco. Digite um nome do arquivo.",
+"Edit_text":"Editar texto",
+"Question":"Pergunta",
+"Connection_Failure":"Falha na Conexão ",
+"Connection_failed_try_again":"Falha na conexão, por favor tentar novamente. ",
+"Disconnect_account":"Desconectar conta",
+"Disconnect_account_question":"Desconectar conta?",
+"Dont_disconnect":"Não desconectar",
+"Disconnect":"Desconectado",
+"not_connected":"(Device) não conectado",
+"not_a_valid_number":"Não é um número válido",
+"Intensity":"Intensidade",
+"Angle":"Ângulo",
+"Speed":"Velocidade",
+"Note":"Nota",
+"Beats":"Batidas",
+"Firmware_incompatible":"Firmware incompatível",
+"Update_firmware":"Atualizar firmware",
+"Device_firmware":"Versão de firmware do dispositivo:",
+"Required_firmware":"Versão de firmware necessária:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Simplified Chinese Translation (zh-Hans)
+Language.zhs = {
+  "block_Tri_LED":"三色LED (Slot 1) 红 (Slot 2) % 绿 (Slot 3) % 蓝 (Slot 4) %",
+"port":"端",
+"block_LED":"LED (Slot 1) (Slot 2) %",
+"block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
+"block_Rotation_Servo":"旋转伺服 (Slot 1) (Slot 2) %",
+"block_Play_Note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
+"Light":"灯光",
+"Distance":"距离",
+"Dial":"拨号",
+"Other":"其他",
+"Accelerometer":"加速计",
+"Magnetometer":"磁力仪",
+"block_LED_Display":"显示",
+"block_Print":"打印 (Slot 1 = Hello)",
+"block_Button":"按钮 (Slot 1)",
+"Screen_Up":"正面朝上",
+"Screen_Down":"背面朝上",
+"Tilt_Left":"向左倾斜",
+"Tilt_Right":"向右倾斜",
+"Logo_Up":"下则偏低",
+"Logo_Down":"上则偏低",
+"Shake":"晃动",
+"block_Compass":"指南针",
+"block_Servo":"伺服 (Slot 1) (Slot 2)",
+"block_Vibration":"震动 (Slot 1) (Slot 2)",
+"block_Motor":"马达 (Slot 1) (Slot 2)",
+"block_Temperature_C":"温度 摄氏 (Slot 1)",
+"block_Temperature_F":"温度 华氏 (Slot 1)",
+"block_write":"写入 (Slot 1) (Slot 2) %",
+"pin":"引脚",
+"block_read":"读取 (Slot 1)",
+"block_Device_Shaken":"平板电脑摇动了",
+"block_Device_LatLong":"平板电脑 (Slot 1)",
+"Latitude":"纬度",
+"Longitude":"经度",
+"block_Device_SSID":"平板电脑的服务设定识别码",
+"block_Device_Pressure":"平板电脑的大气压力",
+"block_Device_Relative_Altitude":"平板电脑的相对高度",
+"block_Acceleration":"平板电脑 (Slot 1) 加速度",
+"Total":"总和",
+"block_Device_Orientation":"平板电脑的方向",
+"faceup":"屏幕向上",
+"facedown":"屏幕向下",
+"portrait_bottom":"人像: 下边的镜头",
+"portrait_top":"人像: 上边的镜头",
+"landscape_left":"风景：左边的镜头",
+"landscape_right":"风景：右边的镜头",
+"block_Display":"(Slot 2) 显示 (Slot 1 = 你好)",
+"position":"位置",
+"block_ask":"问 (Slot 1 = 你的名字是什么？) 并等待",
+"block_answer":"回答",
+"block_reset_timer":"重置计时器",
+"block_timer":"计时器",
+"block_current":"当前时间 (Slot 1)",
+"date":"日",
+"year":"年",
+"month":"月",
+"hour":"时",
+"minute":"分",
+"second":"秒",
+"day_of_the_week":"一周中的日",
+"time_in_milliseconds":"时间(毫秒)",
+"block_mod":"(Slot 1) 和 (Slot 2) 的余",
+"block_round":"四舍五入 (Slot 1)",
+"block_pick_random":"选取由 (Slot 1) 至 (Slot 2) 的一个随机数",
+"block_and":"(Slot 1) 和 (Slot 2)",
+"block_or":"(Slot 1) 或 (Slot 2)",
+"block_not":"不成立 (Slot 1)",
+"true":"真确",
+"false":"不真确",
+"block_letter":"(Slot 2 = 世界)的字母(Slot 1)",
+"block_length":"(Slot 1 = 世界) 的字长",
+"block_join":"结合 (Slot 1 = 你好) 和 (Slot 2 = 世界)",
+"block_split":"透过(Slot 2) 拆分 (Slot 1 = 你好世界)",
+"letter":"字母",
+"whitespace":"空白",
+"block_validate":"(Slot 1 = 5) 是否 (Slot 2)?",
+"number":"数字",
+"text":"文字",
+"boolean":"布尔",
+"list":"名单",
+"invalid_number":"无效号码",
+"block_when_flag_tapped":"当 (Icon) 点击时",
+"block_when_I_receive":"当我收到",
+"any_message":"任何讯息",
+"new":"新",
+"block_when":"当(Slot 1)",
+"block_broadcast":"广播 (Slot 1)",
+"block_broadcast_and_wait":"广播 (Slot 1) 并等待",
+"block_message":"讯息",
+"block_wait":"等待 (Slot 1) 秒",
+"block_wait_until":"等待直至(Slot 1)",
+"block_repeat_forever":"重复无限次",
+"block_repeat":"重复(Slot 1)",
+"block_repeat_until":"重复直至(Slot 1)",
+"block_if":"如果(Slot 1)",
+"block_if_else":"如果(Slot 1)",
+"else":" 否则",
+"block_stop":"停止(Slot 1)",
+"all":"全部",
+"this_script":"这个脚本",
+"all_but_this_script":"除了这个脚本之外",
+"Record_sound":"录制声音",
+"block_play_recording":"播放录音 (Slot 1)",
+"block_play_recording_until_done":"播放录音直到完成 (Slot 1)",
+"block_play_sound":"播放声音 (Slot 1)",
+"block_play_sound_until_done":"播放声音直到完成 (Slot 1)",
+"block_stop_all_sounds":"停止所有声音",
+"block_rest_for":"休息 (Slot 1) 拍",
+"block_change_tempo_by":"改变拍子 (Slot 1)",
+"block_set_tempo_to":"将速度设定为 (Slot 1) bpm",
+"block_tempo":"拍子",
+"block_set_variable":"设置 (Slot 1) 到 (Slot 2)",
+"Create_Variable":"创建变数",
+"block_change_variable":"(Slot 1) 改变 (Slot 2)",
+"Rename":"改名",
+"Delete":"删除",
+"block_add_to_list":"添加 (Slot 1 = 物件) 到 (Slot 2)",
+"Create_List":"创建列表",
+"block_delete_from_list":"从 (Slot 2) 删除 (Slot 1)",
+"block_insert_into_list":"从 (Slot 3) 插入 (Slot 1 = 物件) 位于 (Slot 2)",
+"block_replace_list_item":"用 (Slot 3 = 物件) 替换 (Slot 2) 的 物件 (Slot 1)",
+"block_copy_list":"复制 (Slot 1) 到 (Slot 2)",
+"block_list_item":"(Slot 2) 的物件 (Slot 1)",
+"block_list_length":"(Slot 1) 的长度",
+"block_list_contains":"(Slot 1) 包含 (Slot 2 = thing)",
+"last":"最后",
+"random":"随机",
+"Robots":"机器人",
+"Operators":"算子",
+"Sound":"声音",
+"Tablet":"平板电脑",
+"Control":"控制",
+"Variables":"变数",
+"Zoom_in":"放大",
+"Zoom_out":"缩小",
+"Reset_zoom":"重置缩放",
+"Disable_snap_noise":"禁用拍照声音",
+"Enable_snap_noise":"启用拍照声音",
+"CompassCalibrate":"校准指南针",
+"Send_debug_log":"发送调试日志",
+"Show_debug_menu":"显示调试画面",
+"Connect_Device":"连接设备",
+"Connect_Multiple":"连接多个设备",
+"Disconnect_Device":"断开设备",
+"Tap":"点按+即可连接",
+"Scanning_for_devices":"扫描设备",
+"Open":"开启",
+"No_saved_programs":"没有保存的程式",
+"New":"新",
+"Saving":"保存中",
+"On_Device":"在设备上",
+"Cloud":"云端",
+"Loading":"载入中",
+"Sign_in":"登入",
+"New_program":"新程式",
+"Share":"分享",
+"Recordings":"录音",
+"Discard":"丢弃",
+"Stop":"停止",
+"Pause":"暂停",
+"remaining":"其余",
+"Record":"录制",
+"Tap_record_to_start":"点击录制开始",
+"Done":"完成",
+"Delete_question":"你确定要删除这个吗？",
+"Cancel":"取消",
+"OK":"好",
+"Dont_delete":"不要删除",
+"Rename":"重新命名",
+"Enter_new_name":"输入新名称",
+"Duplicate":"复制",
+"Name_duplicate_file":"输入重复文件的名称",
+"Name_error_invalid_characters":"文件名中不能包含以下字符：\n",
+"Name_error_already_exists":"\“已经存在。请输入其他名称。",
+"Permission_denied":"没有权限",
+"Grant_permission":"在“设置”中为BirdBlox授予录制权限",
+"Dismiss":"撤",
+"Name":"名称",
+"Enter_file_name":"输入文件名",
+"Name_error_blank":"名称不能为空。输入文件名。",
+"Edit_text":"编辑文字",
+"Question":"问题",
+"Connection_Failure":"连接失败",
+"Connection_failed_try_again":"连接失败，请再试一次。",
+"Disconnect_account":"帐户连接断开",
+"Disconnect_account_question":"帐户连接断开?",
+"Dont_disconnect":"不要断开连接",
+"Disconnect":"连接",
+"not_connected":"(Device) 未连接",
+"not_a_valid_number":"不是有效的号码",
+"Intensity":"强度",
+"Angle":"角度",
+"Speed":"速度",
+"Note":"音符",
+"Beats":"拍子",
+"Firmware_incompatible":"固件不兼容",
+"Update_firmware":"更新固件",
+"Device_firmware":"设备固件版本：",
+"Required_firmware":"所需的固件版本：",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
+
+//Traditional Chinese Translation (zh-Hant)
+Language.zht = {
+  "block_Tri_LED":"三色LED (Slot 1) 紅 (Slot 2) % 綠 (Slot 3) % 藍 (Slot 4) %",
+  "port":"端",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"旋轉伺服 (Slot 1) (Slot 2) %",
+  "block_Play_Note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
+  "Light":"燈光",
+  "Distance":"距離",
+  "Dial":"撥號",
+  "Other":"其他",
+  "Accelerometer":"加速計",
+  "Magnetometer":"磁力儀",
+  "block_LED_Display":"顯示",
+  "block_Print":"打印 (Slot 1 = Hello)",
+  "block_Button":"按鈕 (Slot 1)",
+  "Screen_Up":"正面朝上",
+  "Screen_Down":"背面朝上",
+  "Tilt_Left":"向左傾斜",
+  "Tilt_Right":"向右傾斜",
+  "Logo_Up":"下則偏低",
+  "Logo_Down":"上則偏低",
+  "Shake":"晃動",
+  "block_Compass":"指南針",
+  "block_Servo":"伺服 (Slot 1) (Slot 2)",
+  "block_Vibration":"震動 (Slot 1) (Slot 2)",
+  "block_Motor":"摩打 (Slot 1) (Slot 2)",
+  "block_Temperature_C":"溫度 攝氏 (Slot 1)",
+  "block_Temperature_F":"溫度 華氏 (Slot 1)",
+  "block_write":"寫入 (Slot 1) (Slot 2) %",
+  "pin":"引腳",
+  "block_read":"讀取 (Slot 1)",
+  "block_Device_Shaken":"平板電腦搖動了",
+  "block_Device_LatLong":"平板電腦 (Slot 1)",
+  "Latitude":"緯度",
+  "Longitude":"經度",
+  "block_Device_SSID":"平板電腦的服務設定識別碼",
+  "block_Device_Pressure":"平板電腦的大氣壓力",
+  "block_Device_Relative_Altitude":"平板電腦的相對高度",
+  "block_Acceleration":"平板電腦 (Slot 1) 加速度",
+  "Total":"總和",
+  "block_Device_Orientation":"平板電腦的方向",
+  "faceup":"屏幕向上",
+  "facedown":"屏幕向下",
+  "portrait_bottom":"人像: 下邊的鏡頭",
+  "portrait_top":"人像: 上邊的鏡頭",
+  "landscape_left":"風景：左邊的鏡頭",
+  "landscape_right":"風景：右邊的鏡頭",
+  "block_Display":"(Slot 2) 顯示 (Slot 1 = 你好)",
+  "position":"位置",
+  "block_ask":"問 (Slot 1 = 你的名字是什麼？) 並等待",
+  "block_answer":"回答",
+  "block_reset_timer":"重置計時器",
+  "block_timer":"計時器",
+  "block_current":"當前時間 (Slot 1)",
+  "date":"日",
+  "year":"年",
+  "month":"月",
+  "hour":"時",
+  "minute":"分",
+  "second":"秒",
+  "day_of_the_week":"一周中的日",
+  "time_in_milliseconds":"時間(毫秒)",
+  "block_mod":"(Slot 1) 和 (Slot 2) 的餘",
+  "block_round":"四捨五入 (Slot 1)",
+  "block_pick_random":"選取由 (Slot 1) 至 (Slot 2) 的一個隨機數",
+  "block_and":"(Slot 1) 和 (Slot 2)",
+  "block_or":"(Slot 1) 或 (Slot 2)",
+  "block_not":"不成立 (Slot 1)",
+  "true":"真確",
+  "false":"不真確",
+  "block_letter":"(Slot 2 = 世界)的字母(Slot 1)",
+  "block_length":"(Slot 1 = 世界) 的字長",
+  "block_join":"結合 (Slot 1 = 你好) 和 (Slot 2 = 世界)",
+  "block_split":"透過(Slot 2) 拆分 (Slot 1 = 你好世界) ",
+  "letter":"字母",
+  "whitespace":"空白",
+  "block_validate":"(Slot 1 = 5) 是否 (Slot 2)?",
+  "number":"數字",
+  "text":"文字",
+  "boolean":"布爾",
+  "list":"名單",
+  "invalid_number":"無效號碼",
+  "block_when_flag_tapped":"當 (Icon) 點擊時",
+  "block_when_I_receive":"當我收到",
+  "any_message":"任何訊息",
+  "new":"新",
+  "block_when":"當(Slot 1)",
+  "block_broadcast":"廣播 (Slot 1)",
+  "block_broadcast_and_wait":"廣播 (Slot 1) 並等待",
+  "block_message":"訊息",
+  "block_wait":"等待 (Slot 1) 秒",
+  "block_wait_until":"等待直至(Slot 1) ",
+  "block_repeat_forever":"重複無限次",
+  "block_repeat":"重複(Slot 1)",
+  "block_repeat_until":"重複直至(Slot 1)",
+  "block_if":"如果(Slot 1)",
+  "block_if_else":"如果(Slot 1)",
+  "else":"否則",
+  "block_stop":"停止(Slot 1)",
+  "all":"全部",
+  "this_script":"這個腳本",
+  "all_but_this_script":"除了這個腳本之外",
+  "Record_sound":"錄製聲音",
+  "block_play_recording":"播放錄音 (Slot 1)",
+  "block_play_recording_until_done":"播放錄音直到完成 (Slot 1)",
+  "block_play_sound":"播放聲音 (Slot 1)",
+  "block_play_sound_until_done":"播放聲音直到完成 (Slot 1)",
+  "block_stop_all_sounds":"停止所有聲音",
+  "block_rest_for":"休息 (Slot 1)拍",
+  "block_change_tempo_by":"改變拍子 (Slot 1)",
+  "block_set_tempo_to":"將速度設定為 (Slot 1) bpm",
+  "block_tempo":"拍子",
+  "block_set_variable":"設置 (Slot 1) 到 (Slot 2)",
+  "Create_Variable":"創建變數",
+  "block_change_variable":"(Slot 1) 改變 (Slot 2)",
+  "Rename":"改名",
+  "Delete":"刪除",
+  "block_add_to_list":"添加 (Slot 1 = thing) 到 (Slot 2)",
+  "Create_List":"創建列表",
+  "block_delete_from_list":"從 (Slot 2) 刪除 (Slot 1)",
+  "block_insert_into_list":"從 (Slot 3) 插入 (Slot 1 = 物件) 位於 (Slot 2)",
+  "block_replace_list_item":"用 (Slot 3 = 物件) 替換 (Slot 2) 的 物件 (Slot 1)",
+  "block_copy_list":"複製 (Slot 1) 到 (Slot 2)",
+  "block_list_item":"(Slot 2) 的物件 (Slot 1)",
+  "block_list_length":"(Slot 1)的長度",
+  "block_list_contains":"(Slot 1) 包含 (Slot 2 = 物件)",
+  "last":"最後",
+  "random":"隨機",
+  "Robots":"機器人",
+"Operators":"算子",
+"Sound":"聲音",
+"Tablet":"平板電腦",
+"Control":"控制",
+"Variables":"變數",
+"Zoom_in":"放大",
+"Zoom_out":"縮小",
+"Reset_zoom":"重置縮放",
+"Disable_snap_noise":"禁用拍照聲音",
+"Enable_snap_noise":"啟用拍照聲音",
+"CompassCalibrate":"校準指南針",
+"Send_debug_log":"發送調試日誌",
+"Show_debug_menu":"顯示調試畫面",
+"Connect_Device":"連接設備",
+"Connect_Multiple":"連接多個設備",
+"Disconnect_Device":"斷開設備",
+"Tap":"點按+即可連接",
+"Scanning_for_devices":"掃描設備",
+"Open":"開啟",
+"No_saved_programs":"沒有保存的程式",
+"New":"新",
+"Saving":"保存中",
+"On_Device":"在設備上",
+"Cloud":"雲端",
+"Loading":"載入中",
+"Sign_in":"登入",
+"New_program":"新程式",
+"Share":"分享",
+"Recordings":"錄音",
+"Discard":"丟棄",
+"Stop":"停止",
+"Pause":"暫停",
+"remaining":"其餘",
+"Record":"錄製",
+"Tap_record_to_start":"點擊錄製開始",
+"Done":"完成",
+"Delete":"刪除",
+"Delete_question":"你確定要刪除這個嗎？",
+"Cancel":"取消",
+"OK":"好",
+"Dont_delete":"不要刪除",
+"Rename":"重新命名",
+"Enter_new_name":"輸入新名稱",
+"Duplicate":"複製",
+"Name_duplicate_file":"輸入重複文件的名稱",
+"Name_error_invalid_characters":"文件名中不能包含以下字符：\n",
+"Name_error_already_exists":"\“已經存在。請輸入其他名稱。",
+"Permission_denied":"沒有權限",
+"Grant_permission":"在“設置”中為BirdBlox授予錄製權限",
+"Dismiss":"撤",
+"Name":"名稱",
+"Enter_file_name":"輸入文件名",
+"Name_error_blank":"名稱不能為空。 輸入文件名。",
+"Edit_text":"編輯文字",
+"Question":"問題",
+"Connection_Failure":"連接失敗",
+"Connection_failed_try_again":"連接失敗，請再試一次。",
+"Disconnect_account":"帳戶連接斷開",
+"Disconnect_account_question":"帳戶連接斷開?",
+"Dont_disconnect":"不要斷開連接",
+"Disconnect":"連接",
+"not_connected":"(Device) 未連接",
+"not_a_valid_number":"不是有效的號碼",
+"Intensity":"強度",
+"Angle":"角度",
+"Speed":"速度",
+"Note":"音符",
+"Beats":"拍子",
+"Firmware_incompatible":"固件不兼容",
+"Update_firmware":"更新固件",
+"Device_firmware":"設備固件版本：",
+"Required_firmware":"所需的固件版本：",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+}
 
 /**
  * Device is an abstract class.  Each subclass (DeviceHummingbird, DeviceFlutter) represents a specific type of
@@ -1925,9 +4159,16 @@ Language.getStr = function(str) {
 function Device(name, id, RSSI, device) {
 	this.name = name;
 	this.id = id;
-	// Added this line
 	this.RSSI = RSSI;
 	this.device = device;
+
+	const nameWords = name.split(" ");
+	this.shortName = "";
+	for (var i = 0; i < nameWords.length; i++) {
+		this.shortName += nameWords[i][0];
+	}
+	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
+	if (Language.isRTL) { this.listLabel += Language.forceLTR; }
 
 	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
 	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
@@ -1993,7 +4234,10 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
 	 */
 	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
 		if (errorResult == null || true) {
-			return typeName + " not connected";
+			//return typeName + " " + Language.getStr("not_connected");
+			const translatedText = Language.getStr("not_connected");
+			const returnText = translatedText.replace("(Device)", typeName);
+			return returnText;
 		} else {
 			return errorResult;
 		}
@@ -2072,6 +4316,10 @@ Device.prototype.setBatteryStatus = function(batteryStatus) {
 
 Device.prototype.getBatteryStatus = function() {
     return this.batteryState;
+}
+
+Device.prototype.setCompassCalibrationStatus = function(success){
+		this.compassCalibrated = (success == "true");
 }
 /**
  * @return {boolean}
@@ -2155,10 +4403,10 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = "The device \"" + this.name + "\" has old firmware and needs to be updated.";
-	msg += "\nDevice firmware version: " + oldFirmware;
-	msg += "\nRequired firmware version: " + minFirmware;
-	DialogManager.showChoiceDialog("Firmware incompatible", msg, "Dismiss", "Update firmware", true, function (result) {
+	let msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
+	msg += Language.getStr("Device_firmware") + oldFirmware + " ";
+	msg += Language.getStr("Required_firmware") + minFirmware;
+	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
 		if (result === "2") {
 			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
 			request.addParam("type", this.getDeviceTypeId());
@@ -2276,9 +4524,6 @@ DeviceWithPorts.prototype.readMagnetometerSensor = function(status, sensorType, 
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
-
-
-
 /**
  * Issues a request to read the button sensor on micro:bit.
  * Stores the result in the status object, so the executing Block can access it
@@ -2394,12 +4639,10 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
-
-
 /**
  * Each Device subclass has a DeviceManager to manage connections with robots of that type.  The DeviceManager stores
  * all the connected devices in an array, which can be accessed through the getDevice function, which is how
- * robot Blocks get an instance of Device to send their request.  The DeviceManger is also used by the
+ * robot Blocks get an instance of Device to send their request.  The DeviceManager is also used by the
  * ConnectMultipleDialog and the CallbackManger to lookup information.  THe DeviceManager notifies CodeManger when
  * the connected devices change, so Blocks on the canvas can update their appearance.
  *
@@ -2471,11 +4714,11 @@ DeviceManager.checkBattery = function() {
         }
     });
     if (worstBatteryStatus === "2") {
-        color = "#0f0";
+        color = Colors.green;
     } else if (worstBatteryStatus === "1") {
-        color = "#ff0";
+        color = Colors.yellow;
     } else if (worstBatteryStatus === "0"){
-        color = "#f00";
+        color = Colors.red;
     }
     TitleBar.batteryBn.icon.setColor(color);
 }
@@ -2855,6 +5098,14 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
         robot.setBatteryStatus(batteryStatus);
     }
 };
+
+DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, success) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		let robot = this.connectedDevices[index];
+		robot.setCompassCalibrationStatus(success);
+	}
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -2871,13 +5122,19 @@ DeviceManager.prototype.updateFirmwareStatus = function(deviceId, status) {
 	}
 };
 
-DeviceManager.prototype.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+/**
+  * Removes a disconnected robot from the list. Used if the backend has given
+  * up on the connection. If the firmware is incompatible, notify user.
+  */
+DeviceManager.prototype.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	const index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
 		const robot = this.connectedDevices[index];
 		this.connectedDevices.splice(index, 1);
-		this.devicesChanged(null, false);
-		robot.notifyIncompatible(oldFirmware, minFirmware);
+		this.devicesChanged(null, true);
+		if (oldFirmware != null && minFirmware != null){
+			robot.notifyIncompatible(oldFirmware, minFirmware);
+		}
 	}
 };
 
@@ -2932,6 +5189,11 @@ DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
 	});
 };
 
+DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
+	DeviceManager.forEach(function(manager) {
+		manager.updateCompassCalibrationStatus(robotId, success);
+	});
+}
 /**
  * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes
  * @param {string} deviceId
@@ -2999,14 +5261,16 @@ DeviceManager.backendDiscovered = function(robotList) {
 };
 
 /**
- * Notifies all DeviceManagers that the specified device is incompatible and should be removed.
+ * Notifies all DeviceManagers that the specified device will not be connected
+ * and should be removed. If incompatible firmware is specified, the user will
+ * be notified.
  * @param {string} robotId - The id of the robot to disconnect
  * @param {string} oldFirmware - The firmware on the robot
  * @param {string} minFirmware - The minimum firmware required to be compatible
  */
-DeviceManager.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
+DeviceManager.removeDisconnected = function(robotId, oldFirmware, minFirmware) {
 	DeviceManager.forEach(function(manager) {
-		manager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+		manager.removeDisconnected(robotId, oldFirmware, minFirmware);
 	});
 };
 
@@ -3019,6 +5283,16 @@ DeviceManager.possiblyRescan = function() {
 		manager.possiblyRescan();
 	});
 };
+
+/**
+ * Removes all connected devices of every type.
+ */
+DeviceManager.removeAllDevices = function() {
+	DeviceManager.forEach(function(manager) {
+		manager.removeAllDevices();
+	});
+}
+
 /**
  * Manages communication with a Hummingbird
  * @param {string} name
@@ -3212,6 +5486,7 @@ function GuiElements() {
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
+		GuiElements.setLanguage();
 		GuiElements.setConstants();
 		GuiElements.createLayers();
 		GuiElements.dialogBlock = null;
@@ -3227,12 +5502,45 @@ document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 
-/* Redraws UI if screen dimensions change */
+/** Redraws UI if screen dimensions change
+  *  In iOS, this function is called before the new sizes are set. Still, it is
+	*  the most reliable way of getting the correct screen size. iOS calls
+	*  GuiElements.updateDimsPreview with approximate dimensions, then this
+	*  function will add true dimensions after a moment.
+  */
 window.onresize = function() {
-	if (GuiElements.loaded && !GuiElements.isIos) {
-		GuiElements.updateDims();
+	//if (GuiElements.loaded && !GuiElements.isIos) {
+		//GuiElements.updateDims();
+	//}
+	if (GuiElements.loaded) {
+		if (GuiElements.isIos) {
+	    setTimeout(function() { GuiElements.updateDims(); }, 500);
+		} else {
+			GuiElements.updateDims();
+		}
 	}
 };
+
+GuiElements.setLanguage = function() {
+	//Check the session storage for a user selected language
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+	}
+
+	var lnk = document.createElement('link');
+  lnk.type='text/css';
+  lnk.rel='stylesheet';
+	if (Language.rtlLangs.indexOf(Language.lang) === -1) {
+  	lnk.href='MyCSS.css';
+	} else {
+		lnk.href='MyCSS_rtl.css';
+		Language.isRTL = true;
+		var html = document.getElementsByTagName('html')[0];
+		html.setAttribute("dir", "rtl");
+	}
+	document.getElementsByTagName('head')[0].appendChild(lnk);
+}
 
 /** Sets constants relating to screen dimensions and the Operating System */
 GuiElements.setGuiConstants = function() {
@@ -3486,7 +5794,11 @@ GuiElements.create.path = function(group) {
  * @return {Element} - The text which was created.
  */
 GuiElements.create.text = function() {
-	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	if (Language.isRTL) {
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
+	return textElement;
 };
 /**
  * Creates an SVG image element and returns it.
@@ -3672,6 +5984,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	const textElement = GuiElements.create.text();
+	if (Language.isRTL){ x = -x; }
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -3685,6 +5998,46 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
+};
+/**
+ * Creates a video with the given dimensions and name
+ * Note: if you want to embed the video in an existing svg element, you can do
+ * so by putting it inside a foreignObject element (which you insert into the svg
+ * element). However, the video does not tend to appear to be properly contained.
+ * @param {string} videoName - The name of the mp4 video file
+ * @param {string} robotId - ID of the robot this video is for if applicable
+ * @return {Element}
+ */
+GuiElements.draw.video = function(videoName, robotId) {
+
+	const container = document.createElement('div');
+	//container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	container.setAttribute("style", "position: relative; height: 100%; width: 100%; pointer-events: none;")
+
+	const videoElement = document.createElement('video');
+	if (robotId != null) {
+		//If we are showing a video for a specific robot (as in compass calibration)
+		// tag with the robot's id and have it loop. Removal of video is handled by
+		// CallBackManager in this case.
+		videoElement.setAttribute("id", "video" + robotId);
+		videoElement.setAttribute("loop", "loop");
+	}
+	//videoElement.setAttribute("controls", "controls");
+	//videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; padding: 3% 0;")
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; top: 50%; transform: translateY(-50%);")
+	videoElement.src = videoName;
+	videoElement.autoplay = true;
+	videoElement.muted = true; //video must be muted to autoplay on Android.
+
+	container.appendChild(videoElement);
+	document.body.appendChild(container);
+
+	videoElement.addEventListener('ended',myHandler,false);
+  function myHandler(e) {
+    document.body.removeChild(container);
+  }
+
+	return videoElement;
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -3937,12 +6290,16 @@ GuiElements.move.group = function(group, x, y, zoom) {
 };
 /**
  * Moves an SVG text element.
- * @param {string} text - The text to move.
+ * Position is relative to its container.
+ * @param {string} text - The text element to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	//For rtl, the text elements are flipped (scale(-1,1)) and so must move in the
+	// other direction to be positioned correctly.
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
@@ -4335,6 +6692,25 @@ GuiElements.checkSmallMode = function() {
 	}
 };
 
+/**
+ * Removes any videos that are currently playing
+ */
+GuiElements.removeVideos = function() {
+	const videosOpen = document.getElementsByTagName("video").length;
+	if (videosOpen > 0){
+		for (var i = 0; i < videosOpen; i++) {
+			const videoElement = document.getElementsByTagName("video")[i];
+			GuiElements.removeVideo(videoElement);
+		}
+	}
+};
+GuiElements.removeVideo = function(videoElement) {
+	//each video is presented inside a div element. This is what must
+	// be removed. See GuiElements.draw.video.
+	const container = videoElement.parentNode;
+	container.parentNode.removeChild(container);
+};
+
 /* BlockList is a static class that holds a list of blocks and categories.
  * It is in charge of populating the BlockPalette by helping to create Category objects.
  */
@@ -4369,7 +6745,7 @@ BlockList.getCatId = function(index) {
  * @return {string} - The category's name.
  */
 BlockList.getCatName = function(index) {
-	return BlockList.categories[index];
+	return Language.getStr(BlockList.categories[index]);
 };
 
 /**
@@ -4476,7 +6852,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
+	const button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -4579,7 +6955,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HBTempC");
 	collapsibleItem.addBlockByName("B_HBTempF");
 	collapsibleItem.addBlockByName("B_HBDistCM");
-	collapsibleItem.addBlockByName("B_HBDistInch");
+	//collapsibleItem.addBlockByName("B_HBDistInch");
 	collapsibleItem.addBlockByName("B_HBKnob");
 	collapsibleItem.addBlockByName("B_HBSound");
 	collapsibleItem.trimBottom();
@@ -4590,6 +6966,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
 	collapsibleItem.addBlockByName("B_BBPositionServo");
@@ -4603,8 +6980,6 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
-	collapsibleItem.addBlockByName("B_BBCompassCalibrate");
-
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -4616,12 +6991,14 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBPrint");
+	collapsibleItem.addBlockByName("B_MBWriteToPin");
+	collapsibleItem.addBlockByName("B_MBBuzzer");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
+	collapsibleItem.addBlockByName("B_MBReadPin");
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
-	collapsibleItem.addBlockByName("B_MBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -4667,38 +7044,59 @@ function Colors() {
 }
 
 Colors.setCommon = function() {
+	//Gray scale...
 	Colors.white = "#fff";
+  Colors.lightLightGray = "#CDCDCD";
+  Colors.windowColor = "#CCC";
+	Colors.mediumLightGray = "#999";
 	Colors.lightGray = "#7B7B7B";
-    Colors.lightLightGray = "#CDCDCD";
-    Colors.windowColor = "#CCC";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
 	Colors.black = "#000";
+	//Basic colors
 	Colors.red = "#FF0000";
+	Colors.green = "#00FF00";
+	Colors.yellow = "#FFFF00";
+	Colors.darkRed = "#c00000";
+	//Current BBT colors
+	Colors.bbt = "#209BA9";
+	Colors.tabletOrange = "#FAA525";
+	Colors.operatorsGreen = "#8EC449";
+	Colors.soundPurple = "#EE00FF";
+	Colors.controlYellow = "#FFCC00";
+	Colors.variablesDkOrange = "#FF5B00";
+	Colors.inactiveGray = "#a3a3a3";
+	//BBT Style guide colors
+	Colors.easternBlue = "#089BAB";
+	Colors.neonCarrot = "#FF9922";
+	Colors.fountainBlue = "#62BCC7";
+	Colors.seance = "#881199";
+	Colors.bbtDarkGray = "#535353";
+	Colors.iron = "#CACACA";
 };
 
 Colors.setCategory = function() {
 	Colors.categoryColors = {
-		"robots": "#209BA9",
-        "hummingbird": "#209BA9",
-        "hummingbirdbit": "#209BA9",
-        "microbit": "#209BA9",
-        "flutter": "#209BA9",
-        "finch": "#209BA9",
-        "tablet": "#FAA525",
-        "operators": "#8EC449",
-		"sound": "#EE00FF",
-		"control": "#FFCC00",
-		"variables": "#FF5B00",
-		"lists": "#FF0000",
-		"inactive": "#a3a3a3"
+		"robots": Colors.bbt,
+    "hummingbird": Colors.bbt,
+    "hummingbirdbit": Colors.bbt,
+    "microbit": Colors.bbt,
+    "flutter": Colors.bbt,
+    "finch": Colors.bbt,
+    "tablet": Colors.tabletOrange,
+    "operators": Colors.operatorsGreen,
+		"sound": Colors.soundPurple,
+		"control": Colors.controlYellow,
+		"variables": Colors.variablesDkOrange,
+		"lists": Colors.red,
+		"inactive": Colors.inactiveGray
 	};
 };
 
 Colors.setMultipliers = function() {
 	// Used for gradients
 	Colors.gradStart = 1;
-	Colors.gradEnd = 1;
+	Colors.gradEnd = 0.75;
 	Colors.gradDarkStart = 0.25;
 	Colors.gradDarkEnd = 0.5;
 };
@@ -4842,6 +7240,10 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	const VP=VectorPaths;
+	VP.language={};
+	VP.language.path="M11.99,2C6.47,2,2,6.48,2,12s4.47,10,9.99,10C17.52,22,22,17.52,22,12S17.52,2,11.99,2z M18.92,8h-2.95 c-0.32-1.25-0.78-2.45-1.38-3.56C16.43,5.07,17.96,6.35,18.92,8z M12,4.04c0.83,1.2,1.48,2.53,1.91,3.96h-3.82 C10.52,6.57,11.17,5.24,12,4.04z M4.26,14C4.1,13.36,4,12.69,4,12s0.1-1.36,0.26-2h3.38c-0.08,0.66-0.14,1.32-0.14,2 s0.06,1.34,0.14,2H4.26z M5.08,16h2.95c0.32,1.25,0.78,2.45,1.38,3.56C7.57,18.93,6.04,17.66,5.08,16z M8.03,8H5.08 c0.96-1.66,2.49-2.93,4.33-3.56C8.81,5.55,8.35,6.75,8.03,8z M12,19.96c-0.83-1.2-1.48-2.53-1.91-3.96h3.82 C13.48,17.43,12.83,18.76,12,19.96z M14.34,14H9.66c-0.09-0.66-0.16-1.32-0.16-2s0.07-1.35,0.16-2h4.68c0.09,0.65,0.16,1.32,0.16,2 S14.43,13.34,14.34,14z M14.59,19.56c0.6-1.11,1.06-2.31,1.38-3.56h2.95C17.96,17.65,16.43,18.93,14.59,19.56z M16.36,14 c0.08-0.66,0.14-1.32,0.14-2s-0.06-1.34-0.14-2h3.38C19.9,10.64,20,11.31,20,12s-0.1,1.36-0.26,2H16.36z";
+	VP.language.width=24;
+	VP.language.height=24;
 	VP.backspace={};
 	VP.backspace.path="m 13.7,2.96 -1.9326,1.91387 3.4149,3.37741 -3.4149,3.39614 1.9326,1.9139 3.415,-3.3962 3.4149,3.3962 1.9139,-1.9139 -3.3962,-3.39614 3.3962,-3.37741 -1.9139,-1.91387 -3.4149,3.39618 -3.415,-3.39618 z m -8.1433,-2.83328 23.1165,0 0,16.2679 -23.1165,0 -5.4976,-8.14334 5.4976,-8.12456 z";
 	VP.backspace.width=28.614;
@@ -4852,16 +7254,12 @@ function VectorPaths(){
 	VP.checkmark.height=6;
 	VP.flag={};
 	VP.flag.path="m 0,0 11.2202,0 0,5.69439 c 0,3.1469 7.23037,5.69439 16.16532,5.69439 8.91622,0 16.14659,-2.54749 16.14659,-5.69439 0,-3.12817 7.24911,-5.69439 16.16533,-5.69439 8.93494,0 16.16532,2.56622 16.16532,5.69439 l 0,45.53639 c 0,-3.1469 -7.23038,-5.69439 -16.16532,-5.69439 -8.91622,0 -16.16533,2.54749 -16.16533,5.69439 0,3.1469 -7.23037,5.69439 -16.14659,5.69439 -8.93495,0 -16.16532,-2.54749 -16.16532,-5.69439 l 0,53.04774 -11.2202,0 z";
-
 	VP.flag.width=75.863;
 	VP.flag.height=104.279;
-
 	VP.battery={};
 	VP.battery.path="M 62.02,9 H 52 V -3 H 28 V 9 H 17.98 C 13.6,9 10,12.6 10,16.98 v 80 c 0,4.44 3.6,8.04 7.98,8.04 H 61.96 C 66.4,105 70,101 70,97 V 16.98 C 70,12.6 66.4,9 62.02,9 Z";
 	VP.battery.width=75.863;
-    VP.battery.height=104.279;
-
-
+  VP.battery.height=104.279;
 	VP.stage={};
 	VP.stage.path="m 80.789,36.957 12.02565,0 0,14.16105 0,0 0,8.82256 -28.99643,0 z m -80.78916,0 11.96946,0 16.97078,22.98361 -28.94024,0 z m 92.81481,-30.08286 0,27.79761 -12.13804,0 -16.0342,-21.69113 3.42787,-0.33716 c 9.96518,-1.18009 18.45057,-3.1469 24.44467,-5.61947 z m -92.81481,-0.0187 0.37463,0.16858 c 5.9941,2.47257 14.47949,4.43938 24.44467,5.61947 l 3.29675,0.33716 -16.0342,21.69113 -12.08185,0 z m 0,-6.85575 92.88974,0 0,4.28953 -1.49853,0.76799 c -5.60073,2.54749 -14.3109,4.5705 -24.78183,5.71312 l -3.35295,0.33717 -1.40486,0.13112 -6.66843,0.39336 -1.70458,0.0749 -7.02432,0.13112 -7.04307,-0.13112 -1.70457,-0.0749 -6.66843,-0.39336 -1.53598,-0.14985 -3.22183,-0.31844 c -10.47093,-1.14262 -19.16237,-3.16563 -24.78183,-5.71312 l -1.49853,-0.76799 z";
 	VP.stage.width=92.890;
@@ -5019,7 +7417,6 @@ function BlockGraphics() {
 	BlockGraphics.SetString();
 	BlockGraphics.SetHat();
 	BlockGraphics.SetLoop();
-	BlockGraphics.SetCalibrate();
 
 	// Set constants for block parts
 	BlockGraphics.SetLabelText();
@@ -5145,21 +7542,12 @@ BlockGraphics.SetLoop = function() {
 
 	// Minimum width of loop blocks
 	BlockGraphics.loop.width = 40;
-	
+
 	BlockGraphics.loop.bottomH = 7;
 	BlockGraphics.loop.side = 7;
 };
 
-BlockGraphics.SetCalibrate = function() {
-	BlockGraphics.calibrate = {};
 
-    // Minimum dimensions
-    BlockGraphics.calibrate.height = 30;
-    BlockGraphics.calibrate.width = 27;
-
-    BlockGraphics.calibrate.vMargin = 6;
-    BlockGraphics.calibrate.hMargin = 10;
-};
 
 
 /* LabelText constants */
@@ -5290,8 +7678,6 @@ BlockGraphics.getType = function(type) {
 			return BlockGraphics.loop;
 		case 6:
 			return BlockGraphics.loop;
-		case 7:
-            return BlockGraphics.calibrate;
 	}
 };
 
@@ -5348,7 +7734,7 @@ BlockGraphics.buildPath.reporter = function(x, y, width, height) {
 	const radius = height / 2;
 	const flatWidth = width - height;
 	let path = "";
-	path += "m " + (x + radius) + "," + (y + height - 2);
+	path += "m " + (x + radius) + "," + (y + height);
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + (0 - height);
 	path += " l " + flatWidth + ",0";
 	path += " a " + radius + " " + radius + " 0 0 1 0 " + height;
@@ -5514,31 +7900,7 @@ BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1,
 	return path;
 };
 
-/**
- * Creates the hexagonal path of a Slot/Block/highlight
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @param {boolean} isSlot
- * @param {boolean} isHighlight
- * @return {string}
- */
-BlockGraphics.buildPath.calibrate = function(x, y, width, height) {
-	let halfHeight = height / 2;
-	let bG = BlockGraphics.calibrate;
-	let flatWidth = width;
-	let path = "";
-	path += "m " + x + "," + (y + halfHeight);
-	path += " " + 0 + "," + (0 - halfHeight);
-	path += " " + flatWidth + ",0";
-	path += " " + 0 + "," + halfHeight;
-	path += " " + 0 + "," + halfHeight;
-	path += " " + (0 - flatWidth) + ",0";
-	path += " " + 0 + "," + (0 - halfHeight);
-	path += " z";
-	return path;
-};
+
 /* Group of functions that create the SVG elements for Blocks/Slots */
 BlockGraphics.create = {};
 
@@ -5668,9 +8030,6 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
 		case 6:
 			pathD = BlockGraphics.buildPath.doubleLoop(x, y, width, height, innerHeight1, innerHeight2, midHeight);
 			break;
-        case 7:
-            pathD = BlockGraphics.buildPath.calibrate(x, y, width, height);
-            break;
 	}
 	path.setAttributeNS(null, "d", pathD);
 	return path;
@@ -5683,6 +8042,7 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
  * @param {number} y
  */
 BlockGraphics.update.text = function(text, x, y) {
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
@@ -5786,6 +8146,7 @@ BlockGraphics.bringToFront = function(obj, layer) {
 	obj.remove();
 	layer.appendChild(obj);
 };
+
 /* Recordings and sound effects are cached by static properties in the Sound class.  An instance of the sound class
  * represents a single sound or recording.  Sound playback is handled by static functions.  Note that sound recording
  * is handled by the RecordingManager, not in the Sound class
@@ -6164,9 +8525,16 @@ TouchReceiver.enableInteraction = function() {
  */
 TouchReceiver.getX = function(e) {
 	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
-		return e.clientX / GuiElements.zoomFactor;
+		var x = e.clientX / GuiElements.zoomFactor;
+	} else {
+		var x = e.touches[0].pageX / GuiElements.zoomFactor;
 	}
-	return e.touches[0].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -6188,7 +8556,13 @@ TouchReceiver.getY = function(e) {
  * @return {number}
  */
 TouchReceiver.getTouchX = function(e, i) {
-	return e.touches[i].pageX / GuiElements.zoomFactor;
+	var x = e.touches[i].pageX / GuiElements.zoomFactor;
+
+	//For rtl languages, the interface is flipped along the horizontal axis. This
+	// puts the touch coordinate into the correct corrdinate system.
+	if (Language.isRTL) { x = GuiElements.width - x; }
+
+	return x;
 };
 
 /**
@@ -6446,6 +8820,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 };
 
 TouchReceiver.touchStartDialogBlock = function(e) {
+	GuiElements.removeVideos();
 	if (SaveManager.fileName == null)  {
 		if (OpenDialog.lastOpenFile != null) {
 			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
@@ -6504,14 +8879,11 @@ TouchReceiver.touchmove = function(e) {
 			/* If the user drags a Block that is in a DisplayStack,
 			 the DisplayStack copies to a new BlockStack, which can be dragged. */
 			if (TR.targetType === "displayStack") {
-			    if (typeof TR.target.draggable == "undefined" || TR.target.draggable) {
-			        const x = TR.target.stack.getAbsX();
-                    const y = TR.target.stack.getAbsY();
-                    // The first block of the duplicated BlockStack is the new target.
-                    TR.target = TR.target.stack.duplicate(x, y).firstBlock;
-                    TR.targetType = "block";
-			    }
-
+	        const x = TR.target.stack.getAbsX();
+          const y = TR.target.stack.getAbsY();
+          // The first block of the duplicated BlockStack is the new target.
+          TR.target = TR.target.stack.duplicate(x, y).firstBlock;
+          TR.targetType = "block";
 			}
 			/* If the user drags a Block that is a member of a BlockStack,
 			 then the BlockStack should move. */
@@ -6631,18 +9003,17 @@ TouchReceiver.touchend = function(e) {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
 		    // tapping a block in the display stack runs the block once
-		    const x = TR.target.stack.getAbsX();
-            const y = TR.target.stack.getAbsY();
-            TR.targetType = "block";
-            TR.target.updateRun();
+        let execStatus = TR.target.updateRun();
+				if (!execStatus.isRunning) {
             // start the execution of a block
             TR.target.startAction();
-            setTimeout(function(){
-                // wait for the response before trying to fetch the response and display the result
-                TR.target.displayResult(TR.target.updateAction().getResult());
-            }, 100);
-            // set the block to inactive state after running it.
-            TR.target.running = 0;
+				}
+
+        setTimeout(function(){
+            // wait for the response before trying to fetch the response and display the result
+						execStatus = TR.target.updateRun();
+            TR.target.displayResult(execStatus.getResult());
+        }, 100);
 		}
 	} else {
 		TR.touchDown = false;
@@ -6974,9 +9345,9 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.bnIconMargin = 3;
 
 	TB.bg = Colors.lightGray;
-	TB.flagFill = "#0f0";
+	TB.flagFill = Colors.green;
 	TB.batteryFill = Colors.lightGray;
-	TB.stopFill = "#f00";
+	TB.stopFill = Colors.red;
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
 
@@ -6994,13 +9365,13 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar;
 	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
 	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - 3 * TB.buttonMargin;
+	TB.undoBnX = TB.flagBnX - TB.buttonW - TB.buttonMargin;
 	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
-	TB.debugX = TB.batteryBnX - TB.longButtonW - 3 * TB.buttonMargin;
+	TB.debugX = TB.batteryBnX - TB.longButtonW - TB.buttonMargin;
 
 	TB.fileBnX = TB.buttonMargin;
 	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
-	TB.hummingbirdBnX = BlockPalette.width - Button.defaultMargin - TB.buttonW;
+	TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
@@ -7010,7 +9381,7 @@ TitleBar.setGraphicsPart2 = function() {
 	if (TB.undoBnX < suggestedUndoBnX) {
 		TB.hummingbirdBnX = TB.undoBnX - TB.buttonW - TB.buttonMargin;
 	}
-	TB.statusX = TB.hummingbirdBnX - TB.buttonMargin - DeviceStatusLight.radius * 2;
+	TB.statusX = TB.hummingbirdBnX + 2 * TB.buttonMargin;
 };
 
 /**
@@ -7035,12 +9406,14 @@ TitleBar.makeButtons = function() {
 	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
 	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
-	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
-	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8);
+  TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+  TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+
+	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+	const hbBnIconOffset = 2 * TB.buttonMargin;
+	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
 	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
 
 	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
 	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
@@ -7406,6 +9779,7 @@ BlockPalette.refresh = function() {
 		category.refreshGroup();
 	})
 };
+
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
  * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
@@ -7607,7 +9981,7 @@ CategoryBN.setGraphics = function() {
 	const CBN = CategoryBN;
 	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
-	CBN.foreground = "#000";
+	CBN.foreground = Colors.black;
 	CBN.height = 30;
 	CBN.colorW = 8;   // The width of the band of color on the left
 	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
@@ -7641,7 +10015,7 @@ CategoryBN.prototype.buildGraphics = function() {
  */
 CategoryBN.prototype.select = function() {
 	this.bgRect.setAttributeNS(null, "fill", this.fill);
-	this.label.setAttributeNS(null, "fill", "#fff");
+	this.label.setAttributeNS(null, "fill", Colors.white);
 };
 
 /**
@@ -7649,7 +10023,7 @@ CategoryBN.prototype.select = function() {
  */
 CategoryBN.prototype.deselect = function() {
 	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
-	this.label.setAttributeNS(null, "fill", "#000");
+	this.label.setAttributeNS(null, "fill", Colors.black);
 };
 
 /**
@@ -7688,6 +10062,13 @@ function Category(buttonX, buttonY, name, id) {
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
 		BlockPalette.width, BlockPalette.height, 0, 0);
 	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
+
+	//When the screen is flipped for right to left languages, the categories will
+	// still appear left justified (so that long blocks push the rest off the
+	// screen) unless this value is set. TODO: find a more logical solution to this problem
+	if (Language.isRTL) {
+		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
+	}
 
 	this.prepareToFill();
 	this.fillGroup();
@@ -8075,6 +10456,7 @@ Category.prototype.setSuggestedCollapse = function(id, collapsed) {
 		set.setSuggestedCollapse(id, collapsed);
 	});
 };
+
 /**
  * Represents a set of items that can be collapsed/expanded and each contain Blocks.  Meant for use in the BlockPalette
  * @param {number} y - The y coordinate the set should appear at
@@ -8288,6 +10670,7 @@ CollapsibleItem.prototype.prepareToFill = function() {
 	this.displayStacks = [];
 	this.lastHadStud = false;
 	this.finalized = false;
+	this.buttons = [];
 };
 
 /**
@@ -8338,6 +10721,26 @@ CollapsibleItem.prototype.addBlock = function(block) {
 CollapsibleItem.prototype.addSpace = function() {
 	DebugOptions.assert(!this.finalized);
 	this.currentBlockY += BlockPalette.sectionMargin;
+};
+
+CollapsibleItem.prototype.addButton = function(text, callback) {
+	DebugOptions.assert(!this.finalized);
+
+	const width = BlockPalette.insideBnW;
+	const height = BlockPalette.insideBnH;
+	if (this.lastHadStud) {
+		this.currentBlockY += BlockGraphics.command.bumpDepth;
+	}
+
+	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.innerGroup);
+	const BP = BlockPalette;
+	button.addText(text);
+	button.setCallbackFunction(callback, true);
+	this.currentBlockY += height;
+	this.currentBlockY += BlockPalette.blockMargin;
+	this.buttons.push(button);
+	this.lastHadStud = false;
+	return button;
 };
 
 /**
@@ -8518,11 +10921,12 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
 		stack[functionName].apply(stack, args);
 	});
 };
+
 /**
  * A key UI element that creates a button.  Buttons can trigger a function when they are pressed/released and
  * can contain an icon, image, text, or combination.  They are drawn as soon as the constructor is called, and
  * can ten have text and callbacks added on.
- * 
+ *
  * @param {number} x - The x coord the button should appear at
  * @param {number} y - The y coord the button should appear at
  * @param {number} width - The width of the button
@@ -8558,11 +10962,11 @@ function Button(x, y, width, height, parent) {
 }
 
 Button.setGraphics = function() {
-	Button.bg = "#209BA9";
+	Button.bg = Colors.bbt;
 	Button.foreground = Colors.white;
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
-	Button.highlightFore = "#209BA9";
+	Button.highlightFore = Colors.bbt;
 	Button.disabledBg = Colors.darkGray;
 	Button.disabledFore = Colors.black;
 
@@ -8601,7 +11005,7 @@ Button.prototype.addText = function(text, font) {
 	this.textE = GuiElements.draw.text(0, 0, "", font, Button.foreground);
 	GuiElements.update.textLimitWidth(this.textE, text, this.width);
 	this.group.appendChild(this.textE);
-	
+
 	// Text is centered
 	const textW = GuiElements.measure.textWidth(this.textE);
 	const textX = (this.width - textW) / 2;
@@ -8615,19 +11019,24 @@ Button.prototype.addText = function(text, font) {
  * Adds an icon to the button
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height the icon should have in the button
+ * @param {number} xOffset - Distance from center to place icon. Default 0.
+ * @param {boolean} mirror - True if the icon should be mirrored for rtl languages
  */
-Button.prototype.addIcon = function(pathId, height) {
+Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
 	if (height == null) {
 		height = Button.defaultIconH;
+	}
+	if (xOffset == null) {
+		xOffset = 0;
 	}
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = true;
 	// Icon is centered vertiacally and horizontally.
 	const iconW = VectorIcon.computeWidth(pathId, height);
-	const iconX = (this.width - iconW) / 2;
+	const iconX = xOffset + (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
-	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group);
+	this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 
@@ -9041,6 +11450,7 @@ Button.prototype.markAsOverlayPart = function(overlay) {
 Button.prototype.unmarkAsOverlayPart = function() {
 	this.partOfOverlay = null;
 };
+
 /**
  * A button with an arrow that shows/hides something.  Currently, this is just used for showing/hiding the palette on
  * small screens.  The button is not created until build() is called
@@ -9155,9 +11565,9 @@ function DeviceStatusLight(x, centerY, parent, statusProvider) {
 
 DeviceStatusLight.setConstants = function() {
 	const DSL = DeviceStatusLight;
-	DSL.greenColor = "#0f0";
-	DSL.redColor = "#f00";
-	DSL.yellowColor = "#ff0";
+	DSL.greenColor = Colors.green;
+	DSL.redColor = Colors.red;
+	DSL.yellowColor = Colors.yellow;
 	DSL.startColor = Colors.black;
 	DSL.offColor = Colors.darkGray;
 	DSL.radius = 6;
@@ -9198,6 +11608,7 @@ DeviceStatusLight.prototype.updateStatus = function(status) {
 DeviceStatusLight.prototype.remove = function() {
 	this.circleE.remove();
 };
+
 /* Overlay is an abstract class representing UI elements that appear over other elements and should disappear when other
  * elements are tapped.  Only one overlay of each type can exist on the screen at once. */
 function Overlay(type){
@@ -9313,7 +11724,7 @@ function TabRow(x, y, width, height, parent, initialTab) {
 TabRow.setConstants = function() {
 	const TR = TabRow;
 	TR.slantW = 5;
-	TR.deselectedColor = "#999";
+	TR.deselectedColor = Colors.mediumLightGray;
 	TR.selectedColor = Colors.lightLightGray;
 	TR.foregroundColor = Colors.white;
 
@@ -9452,6 +11863,7 @@ TabRow.prototype.setCallbackFunction = function(callback) {
 TabRow.prototype.markAsOverlayPart = function(overlay) {
 	this.partOfOverlay = overlay;
 };
+
 /**
  * A round button with an x that calls the specified function when tapped
  * @param {number} cx - The x coord of the center of the button
@@ -9576,6 +11988,7 @@ InputSystem.prototype.close = function(){
 };
 /**
  * A dialog used to edit the value of the Slot
+ * Presentation of the dialog is handled by the backend.
  * @param {string} textSummary - The textSummary of the Slot
  * @param {boolean} acceptsEmptyString - Whether the empty string is considered valid for this Slot
  * @constructor
@@ -9599,7 +12012,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 	const oldVal = data.asString().getValue();
 	// Only prefill if the data is a string.  Otherwise, display it grayed out in the background.
 	const shouldPrefill = data.type === Data.types.string;
-	DialogManager.showPromptDialog("Edit text", this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Edit_text"), this.textSummary, oldVal, shouldPrefill, function(cancelled, response) {
 		if (!cancelled && (response !== "" || this.acceptsEmptyString)) {
 			// Set the data
 			this.currentData = new StringData(response);
@@ -9611,6 +12024,7 @@ InputDialog.prototype.show = function(slotShape, updateFn, finishFn, data) {
 		InputSystem.prototype.close.call(this);
 	}.bind(this));
 };
+
 /**
  * An InputSystem for editing NumSlots and DropSlots, provides a set of controls (InputWidgets) in an OverlayBubble
  * which edit the Data in the Slot.
@@ -10286,6 +12700,7 @@ DisplayNum.prototype.getString = function() {
 	}
 	let rVal = "";
 	if (this.isNegative) {
+		if (Language.isRTL) { rVal += Language.forceLTR; }
 		rVal += "-";
 	}
 	rVal += this.integerPart;
@@ -10315,6 +12730,7 @@ DisplayNum.prototype.getData = function() {
 	}
 	return new NumData(rVal);
 };
+
 /**
  * Created by Tom on 7/3/2017.
  */
@@ -10518,7 +12934,7 @@ SoundInputPad.prototype.createRow = function(sound, y) {
 SoundInputPad.prototype.createRecordBn = function(x, y, width) {
 	const SIP = SoundInputPad;
 	const button = new Button(x, y, width, SIP.rowHeight, this.group);
-	button.addText("Record sounds");
+	button.addText(Language.getStr("Record_sound"));
 	button.markAsOverlayPart(this.bubbleOverlay);
 	button.setCallbackFunction(function() {
 		RecordingDialog.showDialog();
@@ -10590,6 +13006,7 @@ SoundInputPad.prototype.close = function() {
 	this.bubbleOverlay.close();
 	Sound.stopAllSounds();
 };
+
 /**
  * A BubbleOverlay is a type of Overlay that places its content in a speech bubble shaped background that always
  * is on screen.  The bubble appears above, below, left, or right of a rectangular region specified in the display()
@@ -10815,6 +13232,7 @@ BubbleOverlay.prototype.relToAbsX = function(x) {
 BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
+
 /**
  * A bubble-shaped element that holds text containing the result of executing a block that was tapped.
  * Becomes visible as soon as it is constructed.
@@ -10854,7 +13272,7 @@ ResultBubble.setConstants = function() {
 	RB.fontColor = Colors.black;
 	RB.errorFontColor = Colors.white;
 	RB.bgColor = Colors.white;
-	RB.errorBgColor = "#c00000";
+	RB.errorBgColor = Colors.darkRed;
 	RB.font = Font.uiFont(16);
 	RB.margin = 4;
 	/*RB.lifetime=3000;*/
@@ -10887,6 +13305,7 @@ ResultBubble.displayValue = function(value, x, y, width, height, error) {
 	const lowerY = y + height;
 	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
 };
+
 /**
  * Creates a UI element that is in a div layer and contains a scrollDiv with the content from the group.  The group
  * can change size, as long as it calls updateDims with the new innerHeight and innerWidth.
@@ -11328,7 +13747,7 @@ SmoothMenuBnList.prototype.generateBn = function(x, y, width, option, icon, colo
 		}
 	}
 	if (icon != null && color != null) {
-	    bn.addColorIcon(icon, TitleBar.bnIconH, color);
+	    bn.addColorIcon(icon, TitleBar.bnIconH * 0.7, color);
 	}
 	bn.partOfOverlay = this.partOfOverlay;
 	bn.makeScrollable();
@@ -11500,7 +13919,11 @@ Menu.prototype.createMenuBnList = function() {
 		this.menuBnList.hide();
 	}
 	const bnM = Menu.bnMargin;
-	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+	if (this.constructor.name === "BatteryMenu") {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+	} else {
+		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
+	}
 	this.menuBnList.markAsOverlayPart(this);
 	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
 	this.menuBnList.setMaxHeight(maxH);
@@ -11566,7 +13989,11 @@ Menu.prototype.open = function() {
 			GuiElements.layers.overlay.appendChild(this.group);
 			this.menuBnList.show();
 			this.visible = true;
-			this.addOverlayAndCloseOthers();
+			if (this.isSubMenu){
+				Overlay.addOverlay(this);
+			} else {
+				this.addOverlayAndCloseOthers();
+			}
 			this.button.markAsOverlayPart(this);
 			this.scheduleAlternate = false;
 		} else {
@@ -11633,14 +14060,16 @@ Menu.prototype.updateZoom = function() {
 		this.menuBnList.updateZoom();
 	}
 };
+
 /**
- * Deprecated menu that used to control zoom.  Replaced with SettingsMenu
+ * Top bar menu used to view battery statuses for all connected devices
  * @param {Button} button
  * @constructor
  */
 function BatteryMenu(button) {
     this.offsetX = button.x + BatteryMenu.iconX + TitleBar.buttonMargin;
 	Menu.call(this, button, BatteryMenu.width);
+  this.addAlternateFn(function() {});
 }
 BatteryMenu.prototype = Object.create(Menu.prototype);
 BatteryMenu.prototype.constructor = BatteryMenu;
@@ -11653,13 +14082,7 @@ BatteryMenu.prototype.loadOptions = function() {
            var curBatteryStatus = "3";
            for (var j = 0; j < manager.getDeviceCount(); j++) {
                let robot = manager.connectedDevices[j];
-               var words = robot.name.split(" ");
-               var newName = "";
-               var color = Colors.lightGray;
-               for (var k = 0; k < words.length; k++) {
-                   newName += words[k][0];
-               };
-               this.addOption(newName, null);
+               this.addOption(robot.shortName, null);
            }
     }
 };
@@ -11671,15 +14094,29 @@ BatteryMenu.setGraphics = function() {
 
 BatteryMenu.getColorForBatteryStatus = function(status) {
     if (status === "2") {
-        return "#0f0";
+        return Colors.green;
     } else if (status === "1") {
-        return "#ff0";
+        return Colors.yellow;
     } else if (status === "0") {
-        return "#f00";
+        return Colors.red;
     } else {
         return Colors.lightGray;
     }
 }
+
+/**
+ * Determines whether multiple devices are connected, in which case the menu should be opened.
+ * @inheritDoc
+ * @return {boolean}
+ */
+BatteryMenu.prototype.previewOpen = function() {
+	let connectionCount = 0;
+	Device.getTypeList().forEach(function(deviceClass) {
+		connectionCount += deviceClass.getManager().getDeviceCount();
+	});
+	return (connectionCount > 1);
+};
+
 /**
  * Deprecated class that used to be used as a file menu
  * @param {Button} button
@@ -11861,6 +14298,48 @@ ViewMenu.prototype.optionResetZoom = function() {
 	GuiElements.updateZoom();
 };
 /**
+ * Provides a menu choosing the language used.
+ * @param {Button} button
+ * @constructor
+ */
+function LanguageMenu(button, parentMenu) {
+  this.isSubMenu = true;
+  this.parentMenu = parentMenu;
+	Menu.call(this, button);
+}
+LanguageMenu.prototype = Object.create(Menu.prototype);
+LanguageMenu.prototype.constructor = LanguageMenu;
+
+/**
+ * @inheritDoc
+ */
+LanguageMenu.prototype.loadOptions = function() {
+  const langMenu = this;
+  Language.langs.forEach( function(lang) {
+    var name = eval("Language.names." + lang);
+    if (name == null) { name = lang; }
+    langMenu.addOption(name, function() {
+      sessionStorage.setItem("language", lang);
+      DeviceManager.removeAllDevices();
+      SaveManager.userClose();
+      window.location.reload(false);
+    });
+  });
+};
+
+/**
+ * Recomputes the Menu's location based on the location of the Button
+ */
+LanguageMenu.prototype.move = function() {
+	this.x = this.button.x + this.button.width + Menu.bnMargin + this.parentMenu.x;
+	this.y = this.button.y + this.button.height + this.parentMenu.y;
+	GuiElements.move.group(this.group, this.x, this.y);
+	if (this.menuBnList != null) {
+		this.menuBnList.updatePosition();
+	}
+};
+
+/**
  * Provides a menu for adjusting the zoom and other settings
  * @param {Button} button
  * @constructor
@@ -11875,7 +14354,14 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  * @inheritDoc
  */
 SettingsMenu.prototype.loadOptions = function() {
-	// Used to have icons, but they didn't work two well and have been disabled
+	const icon = VectorPaths.language;
+	const me = this;
+	this.addOption("", null, false, function(bn) {
+		bn.addIcon(icon, 25);
+		me.languageMenu = new LanguageMenu(bn, me);
+		me.languageMenu.move();
+	});
+	// Used to have icons, but they didn't work too well and have been disabled
 	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
 	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
 	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
@@ -11884,6 +14370,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	this.addOption(Language.getStr("CompassCalibrate"), function() {
+			(new CalibrateCompassDialog()).show();
+	});
 	if (this.showAdvanced) {
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);
@@ -11968,6 +14457,7 @@ SettingsMenu.prototype.enableDebug = function() {
 	DebugOptions.enabled = true;
 	TitleBar.enableDebug();
 }
+
 /**
  * A menu which displays information about the connected device and provides options to connect to/disconnect from
  * devices
@@ -12039,7 +14529,8 @@ DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
 		icon = VectorPaths.warning;
 		color = DeviceStatusLight.redColor;
 	}
-	this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	//this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+	this.addOption("", null, false, this.createAddIconToBnFn(icon, device.name, color));
 };
 
 /**
@@ -12072,6 +14563,7 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
 		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
 	}
 };
+
 /**
  * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
  * Also used to give a rename option to variables and lists
@@ -12122,12 +14614,12 @@ BlockContextMenu.prototype.addOptions = function() {
 	if (this.block.stack.isDisplayStack) {
 		if (this.block.constructor === B_Variable) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameVar();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteVar();
 				this.close();
 			}.bind(this));
@@ -12135,12 +14627,12 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 		if (this.block.constructor === B_List) {
 
-			this.menuBnList.addOption("Rename", function() {
+			this.menuBnList.addOption(Language.getStr("Rename"), function() {
 				this.block.renameLi();
 				this.close();
 			}.bind(this));
 
-			this.menuBnList.addOption("Delete", function() {
+			this.menuBnList.addOption(Language.getStr("Delete"), function() {
 				this.block.deleteLi();
 				this.close();
 			}.bind(this));
@@ -12148,11 +14640,11 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 	} else {
 
-		this.menuBnList.addOption("Duplicate", function() {
+		this.menuBnList.addOption(Language.getStr("Duplicate"), function() {
 			this.duplicate();
 		}.bind(this));
 
-		this.menuBnList.addOption("Delete", function() {
+		this.menuBnList.addOption(Language.getStr("Delete"), function() {
 			// Delete the stack and add it to the UndoManager
 			UndoManager.deleteStack(this.block.unsnap());
 			this.close();
@@ -12183,6 +14675,7 @@ BlockContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide();
 };
+
 /**
  * A VectorIcon controls an SVG path element. It draws the information for the path from VectorPaths.js and rescales
  * the path appropriately.
@@ -12192,15 +14685,17 @@ BlockContextMenu.prototype.close = function() {
  * @param {string} color - Color in hex
  * @param {number} height - The height the path should be.  Width is computed from this
  * @param {Element} parent - An SVG group element the path should go inside
+ * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
  * @constructor
  */
-function VectorIcon(x, y, pathId, color, height, parent) {
+function VectorIcon(x, y, pathId, color, height, parent, mirror) {
 	this.x = x;
 	this.y = y;
 	this.color = color;
 	this.height = height;
 	this.pathId = pathId;
 	this.parent = parent;
+	this.mirror = mirror;
 	this.pathE = null;
 	this.draw();
 }
@@ -12220,10 +14715,20 @@ VectorIcon.computeWidth = function(pathId, height) {
  * Creates the SVG pathE and the group to contain it
  */
 VectorIcon.prototype.draw = function() {
-	this.scale = this.height / this.pathId.height;
-	this.width = this.scale * this.pathId.width;
+	this.scaleX = this.height / this.pathId.height;
+	this.scaleY = this.scaleX;
+	this.width = this.scaleY * this.pathId.width;
+
+	//If the icon should not be mirrored, it will need to be flipped for rtl
+	// languages. The negative scale flips the icon along the horizontal axis, but
+	// it then also needs to be translated by the width to pisition it correctly.
+	if (Language.isRTL && !this.mirror) {
+		this.scaleX = -this.scaleX;
+		this.x += this.width;
+	}
+
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
@@ -12245,15 +14750,17 @@ VectorIcon.prototype.setColor = function(color) {
  * @param{number} y
  */
 VectorIcon.prototype.move = function(x, y) {
+	if (Language.isRTL && !this.mirror) { x += this.width; }
 	this.x = x;
 	this.y = y;
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scale + ")");
+	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
 };
 
 /* Deletes the icon and removes the path from its parent group. */
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
+
 /**
  * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
  * white (or black if Blocks are running) path element which it moves around and reshapes
@@ -12542,7 +15049,7 @@ CodeManager.move.start = function(block, x, y) {
 	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
 		Overlay.closeOverlays();   // Close any visible overlays.
 		move.moving = true;   // Record that a Block is now moving.
-		/* Disconnect the Block from its current BlockStack to form a new BlockStack 
+		/* Disconnect the Block from its current BlockStack to form a new BlockStack
 		containing only the Block and the Blocks below it. */
 		const stack = block.unsnap();
 		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
@@ -12730,7 +15237,7 @@ CodeManager.stop = function() {
 	CodeManager.stopUpdateTimer();   // Stop the update timer.
 	DisplayBoxManager.hide();   // Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
-	// Note: Tones are not allowed to be async, so they 
+	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
 };
 
@@ -12788,7 +15295,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create variable", "Enter variable name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkVarName(result)) {
 			result = result.trim();
 			const variable = new Variable(result);
@@ -12858,7 +15365,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog("Create list", "Enter list name", "", true, function(cancelled, result) {
+	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
 		if (!cancelled && CodeManager.checkListName(result)) {
 			result = result.trim();
 			const list = new List(result);
@@ -13266,6 +15773,7 @@ CodeManager.dragRelToAbsX = function(x) {
 CodeManager.dragRelToAbsY = function(y) {
 	return y * TabManager.getActiveZoom();
 };
+
 /**
  * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
  * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
@@ -14207,8 +16715,8 @@ RecordingManager.startRecording = function() {
 			RM.setState(RM.recordingStates.recording);
 			RecordingDialog.startedRecording();
 		} else if (result === "Permission denied") {
-			let message = "Please grant recording permissions to the BirdBlox app in settings";
-			DialogManager.showAlertDialog("Permission denied", message, "Dismiss");
+			let message = Language.getStr("Grant_permission");
+			DialogManager.showAlertDialog(Language.getStr("Permission_denied"), message, Language.getStr("Dismiss"));
 		} else if (result === "Requesting permission") {
 			RM.awaitingPermission = true;
 		}
@@ -14263,8 +16771,8 @@ RecordingManager.discardRecording = function() {
 		RM.setState(RM.recordingStates.stopped);
 		RecordingDialog.stoppedRecording();
 	};
-	let message = "Are you sure you would like to delete the current recording?";
-	DialogManager.showChoiceDialog("Delete", message, "Continue recording", "Delete", true, function(result) {
+	let message = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(Language.getStr("Delete"), message, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(result) {
 		if (result === "2") {
 			let request = new HttpRequestBuilder("sound/recording/discard");
 			HtmlServer.sendRequestWithCallback(request.toString(), stopRec, stopRec);
@@ -14355,6 +16863,7 @@ RecordingManager.permissionGranted = function() {
 		}
 	}
 };
+
 /**
  * Abstract class that controls a dialog with a scrollable region containing a number of rows. Each row normally
  * contains buttons but can also have other types of content. Only one dialog can be visible at any time.
@@ -14852,6 +17361,7 @@ RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackF
 	button.addIcon(pathId, RD.iconH);
 	return button;
 };
+
 /**
  * A dialog for opening and managing local files.  On iOS, a cloud button is included for opening cloud files, and
  * on Android an additional tab opens an OpenCloudDialog for managing cloud files.
@@ -15342,7 +17852,7 @@ OpenCloudDialog.prototype.createTabRow = function() {
 	let y = this.getExtraTopY();
 	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
 
-	tabRow.addTab("On Device", "device");
+	tabRow.addTab(Language.getStr("On_Device"), "device");
 	let signOutFn = null;
 	// If signed in, an X appears in the tab which signs the user out
 	if (this.fileList.signedIn) {
@@ -15416,10 +17926,10 @@ OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
  */
 OpenCloudDialog.prototype.userSignOut = function() {
 	DebugOptions.assert(this.fileList.account != null);
-	let message = "Disconnect account " + this.fileList.account + "?\n";
-	message += "Downloaded files will remain on this device.";
+	let message = Language.getStr("Disconnect_account_question");
+	//message += Language.getStr("Files_will_remain");
 	const me = this;
-	DialogManager.showChoiceDialog("Disconnect account", message, "Don't disconnect", "disconnect", true, function(result) {
+	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
 		if (result === "2") {
 			me.signOut();
 		}
@@ -15472,6 +17982,7 @@ OpenCloudDialog.filesChanged = function(jsonString) {
 		OpenDialog.currentDialog.reloadDialog(jsonString);
 	}
 };
+
 /**
  * Holds all the data necessary to show an OpenDialog, which includes a list of local files and the cloud account the
  * user is signed into (if any}.  A list of cloud files is downloaded later.
@@ -15525,7 +18036,8 @@ function ConnectMultipleDialog(deviceClass) {
     RowDialog.call(this, false, title, count, CMD.tabRowHeight, CMD.extraBottomSpace, CMD.tabRowHeight - 1);
     this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 
-    this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    //this.addHintText(Language.getStr("Tap") + " + " + Language.getStr("to_connect"));
+    this.addHintText(Language.getStr("Tap"));
 }
 ConnectMultipleDialog.prototype = Object.create(RowDialog.prototype);
 ConnectMultipleDialog.prototype.constructor = ConnectMultipleDialog;
@@ -15627,7 +18139,8 @@ ConnectMultipleDialog.prototype.createNumberText = function(index, x, y, content
  */
 ConnectMultipleDialog.prototype.createMainBn = function(robot, index, bnWidth, x, y, contentGroup) {
     //let connectionX = this.x + this.width / 2;
-    return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    //return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, robot.showFirmwareInfo.bind(robot));
+    return RowDialog.createMainBnWithText(robot.listLabel, bnWidth, x, y, contentGroup, null);
 /*
     return RowDialog.createMainBnWithText(robot.name, bnWidth, x, y, contentGroup, function() {
         let upperY = this.contentRelToAbsY(y);
@@ -15774,7 +18287,9 @@ ConnectMultipleDialog.prototype.closeDialog = function() {
  */
 ConnectMultipleDialog.reloadDialog = function(deviceClass) {
     let curDialog = ConnectMultipleDialog.currentDialog;
-    curDialog.reloadDialog(deviceClass);
+    if (curDialog != null) {
+      curDialog.reloadDialog(deviceClass);
+    }
 };
 
 /**
@@ -15803,7 +18318,7 @@ function RecordingDialog(listOfRecordings) {
 		return x.id;
 	});
 	// Extra space at the bottom is needed for the recording controls
-	RowDialog.call(this, true, "Recordings", this.recordings.length, 0, RecordingDialog.extraBottomSpace);
+	RowDialog.call(this, true, Language.getStr("Recordings"), this.recordings.length, 0, RecordingDialog.extraBottomSpace);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 	this.addHintText(Language.getStr("Tap_record_to_start"));
 	/** @type {RecordingManager.recordingStates} - Whether the dialog is currently recording */
@@ -15823,7 +18338,7 @@ RecordingDialog.setConstants = function() {
 	RecD.remainingFont = Font.uiFont(16);
 	RecD.remainingMargin = 10;
 	RecD.counterBottomMargin = 50;
-	RecD.recordColor = "#f00";
+	RecD.recordColor = Colors.red;
 	RecD.recordFont = Font.uiFont(25);
 	RecD.recordIconH = RecD.recordFont.charHeight;
 	RecD.iconSidemargin = 10;
@@ -15972,7 +18487,7 @@ RecordingDialog.prototype.createRecordButton = function() {
 	let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
 	// The button has slightly larger text in red with a circle icon next to it (centered)
 	button.addCenteredTextAndIcon(VectorPaths.circle, RecD.recordIconH, RecD.iconSidemargin,
-		"Record", RecD.recordFont, RecD.recordColor);
+		Language.getStr("Record"), RecD.recordFont, RecD.recordColor);
 	button.setCallbackFunction(function() {
 		RecordingManager.startRecording();
 	}, true);
@@ -16005,7 +18520,7 @@ RecordingDialog.prototype.createDiscardButton = function() {
 	let button = this.createOneThirdBn(0, function() {
 		RecordingManager.discardRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, "Discard");
+	button.addCenteredTextAndIcon(VectorPaths.trash, RD.iconH, RecD.iconSidemargin, Language.getStr("Discard"));
 	return button;
 };
 
@@ -16020,7 +18535,7 @@ RecordingDialog.prototype.createSaveButton = function() {
 		this.goToState(RecordingManager.recordingStates.stopped);
 		RecordingManager.stopRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, "Stop");
+	button.addCenteredTextAndIcon(VectorPaths.square, RD.iconH, RecD.iconSidemargin, Language.getStr("Stop"));
 	return button;
 };
 
@@ -16035,7 +18550,7 @@ RecordingDialog.prototype.createPauseButton = function() {
 		this.goToState(RecordingManager.recordingStates.paused);
 		RecordingManager.pauseRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, "Pause");
+	button.addCenteredTextAndIcon(VectorPaths.pause, RD.iconH, RecD.iconSidemargin, Language.getStr("Pause"));
 	return button;
 };
 
@@ -16050,7 +18565,7 @@ RecordingDialog.prototype.createResumeRecordingBn = function() {
 		this.goToState(RecordingManager.recordingStates.recording);
 		RecordingManager.resumeRecording();
 	}.bind(this));
-	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, "Record");
+	button.addCenteredTextAndIcon(VectorPaths.circle, RD.iconH, RecD.iconSidemargin, Language.getStr("Record"));
 	return button;
 };
 
@@ -16251,7 +18766,7 @@ RecordingDialog.prototype.updateCounter = function(time) {
 
 	const remainingMs = Math.max(0, RD.recordingLimit - time + 999);
 	if (remainingMs < RD.remainingThreshold) {
-		const remainingString = this.timeToString(remainingMs) + " remaining";
+		const remainingString = this.timeToString(remainingMs) + " " + Language.getStr("remaining");
 		GuiElements.update.text(this.remaingingText, remainingString);
 		let remainingWidth = GuiElements.measure.textWidth(this.remaingingText);
 		let remainingX = this.x + this.width / 2 - remainingWidth / 2;
@@ -16276,9 +18791,12 @@ RecordingDialog.recordingsChanged = function() {
 }
 
 RecordingDialog.alertNotInProject = function() {
+	//let message = Language.getStr("Open_before_recording");
+	//DialogManager.showAlertDialog(Language.getStr("No_project_open"), message, Language.getStr("OK"));
 	let message = "Please open a project before recording";
-	DialogManager.showAlertDialog("No project open", message, "OK");
+	DialogManager.showAlertDialog("No project open", message, Language.getStr("OK"));
 };
+
 /**
  * Provides a list of Robots of a certain type to connect to in a BubbleOverlay.  Updates as new robots are found.
  * The list might be associated with a specific slot of the ConnectMultipleDialog, in which case it will not list
@@ -16399,12 +18917,7 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
 	let me = this;
-	var words = robot.name.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-	this.menuBnList.addOption(newName + " - " + robot.name + " (" + robot.device + ")", function() {
+	this.menuBnList.addOption(robot.listLabel, function() {
 		me.close();
 		if (me.index == null) {
 		    me.deviceClass = DeviceManager.getDeviceClass(robot);
@@ -16477,7 +18990,7 @@ DiscoverDialog.prototype.show = function() {
  */
 DiscoverDialog.prototype.discoverDevices = function() {
 	let me = this;
-	// Start the discover, and if the DeviceManger wants to know if it should ever restart a scan...
+	// Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
 	this.deviceClass.getManager().startDiscover(function() {
 		// Tell the device manager that it should scan again if the dialog is still open
 		return this.visible;
@@ -16500,7 +19013,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
  * or is touching the screen
  * @param {string} deviceList - A string representing a JSON array of devices
  */
- 
+
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
@@ -16522,11 +19035,11 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 	this.discoveredDevicesRSSISorted = this.discoveredDevices.sort(function(a,b) {
 		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
 	});
-	
+
 	//if ((updateDeviceListCounter % 40) == 0){
 	this.reloadRows(this.discoveredDevicesRSSISorted.length);
 	//};
-	
+
 //	this.reloadRows(this.discoveredDevices.length);
 };
 
@@ -16541,14 +19054,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-    var deviceName = this.discoveredDevices[index].name;
-    var words = deviceName.split(" ");
-    var newName = "";
-    for (var i = 0; i < words.length; i++) {
-        newName += words[i][0];
-    };
-
-	button.addText(newName + " - " + this.discoveredDevices[index].name + " (" + this.discoveredDevices[index].device + ")");
+	button.addText(this.discoveredDevices[index].listLabel)
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
@@ -16574,6 +19080,7 @@ DiscoverDialog.prototype.closeDialog = function() {
 	this.updateTimer.stop();
 	this.deviceClass.getManager().stopDiscover();
 };
+
 /**
  * Displays a list of buttons for file manipulation.  Accessed by tapping the dots next to a file in an open dialog
  * @param {RowDialog} dialog - The dialog to reload when the files are changed
@@ -16639,7 +19146,7 @@ FileContextMenu.prototype.addOptions = function() {
 		this.menuBnList.addOption("", function() {
 			SaveManager.userExportFile(this.file);
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, "Share"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.share, Language.getStr("Share")));
 	}
 	if (this.type === FCM.types.localSignedIn || this.type === FCM.types.localSignedOut) {
 		this.menuBnList.addOption("", function() {
@@ -16648,7 +19155,7 @@ FileContextMenu.prototype.addOptions = function() {
 				dialog.reloadDialog();
 			});
 			this.close();
-		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, "Duplicate"));
+		}.bind(this), this.createAddIconToBnFn(VectorPaths.copy, Language.getStr("Duplicate")));
 	}
 	this.menuBnList.addOption("", function() {
 		if (this.type === FCM.types.cloud) {
@@ -16663,7 +19170,7 @@ FileContextMenu.prototype.addOptions = function() {
 			});
 			this.close();
 		}
-	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, "Delete"));
+	}.bind(this), this.createAddIconToBnFn(VectorPaths.trash, Language.getStr("Delete")));
 };
 
 /**
@@ -16685,6 +19192,76 @@ FileContextMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide()
 };
+
+/**
+ * A dialog for calibrating the compass. A video will give instructions and
+ * the user will have the option to play the video again, calibrate the selected
+ * compass, or cancel.
+ * @param device - The device to be calibrated
+ * @constructor
+ */
+function CalibrateCompassDialog() {
+	let title = Language.getStr("CompassCalibrate");
+
+  this.bits = DeviceHummingbirdBit.getManager().getDeviceCount();
+  this.microbits = DeviceMicroBit.getManager().getDeviceCount();
+  let count = this.bits + this.microbits;
+
+	RowDialog.call(this, false, title, count, 0, 0);
+	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+}
+CalibrateCompassDialog.prototype = Object.create(RowDialog.prototype);
+CalibrateCompassDialog.prototype.constructor = CalibrateCompassDialog;
+
+/**
+ * Creates a row for each device that could be calibrated.
+ * @inheritDoc
+ * @param {number} index
+ * @param {number} y
+ * @param {number} width
+ * @param {Element} contentGroup
+ */
+CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGroup) {
+  var robot;
+  if (index < this.bits) {
+    robot = DeviceHummingbirdBit.getManager().getDevice(index);
+  } else {
+    robot = DeviceMicroBit.getManager().getDevice(index - this.bits);
+  }
+	GuiElements.alert("Loading rows for the compass calibration dialog.");
+  if (robot != null) {
+		GuiElements.alert("Found a robot. " + robot.compassCalibrated);
+    const button = RowDialog.createMainBnWithText(robot.listLabel, width, 0, y, contentGroup, function () {
+      CalibrateCompassDialog.showVideo(robot);
+      robot.calibrateCompass();
+    });
+		if (robot.compassCalibrated){
+			GuiElements.alert("Adding checkmark");
+			button.addSideTextAndIcon(VectorPaths.checkmark, null, robot.listLabel, null, null, Colors.green, false, false);
+		} else if (robot.compassCalibrated == false) {
+			button.addSideTextAndIcon(VectorPaths.letterX, null, robot.listLabel, null, null, Colors.red, false, false);
+		}
+  }
+};
+
+CalibrateCompassDialog.prototype.closeDialog = function() {
+	RowDialog.prototype.closeDialog.call(this);
+	GuiElements.removeVideos();
+}
+
+/**
+ * Shows the instructional video appropriate to the device type.
+ */
+CalibrateCompassDialog.showVideo = function(robot) {
+  var fileName = "Videos/MicroBit_Calibration.mp4";
+
+  if (robot.deviceClass == DeviceHummingbirdBit) {
+    fileName = "Videos/HummBit_Calibration.mp4";
+  }
+
+  const video = GuiElements.draw.video(fileName, robot.id);
+};
+
 /**
  * A set of four arrows around the edges of the canvas that show off screen Blocks
  * @constructor
@@ -16855,6 +19432,10 @@ function BlockStack(firstBlock, tab) {
 	this.move(this.x, this.y);
 	this.flying = false; // BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 	this.tab.updateArrows();
+
+	if (this.firstBlock.autoExecute) {
+		this.startRun();
+	}
 }
 
 /**
@@ -17018,8 +19599,12 @@ BlockStack.prototype.updateRun = function() {
 		if (this.returnType === Block.returnTypes.none) {
 			// If the current Block has been removed, don't run it.
 			if (this.currentBlock.stack !== this) {
-				this.endRun(); // Stop execution.
-				return new ExecutionStatusDone();
+				if (this.firstBlock.autoExecute) {
+					this.currentBlock = this.firstBlock;
+				} else {
+					this.endRun(); // Stop execution.
+					return new ExecutionStatusDone();
+				}
 			}
 			// Update the current Block.
 			let execStatus = this.currentBlock.updateRun();
@@ -17033,8 +19618,12 @@ BlockStack.prototype.updateRun = function() {
 					this.currentBlock = this.currentBlock.nextBlock;
 				}
 			}
-			// If the end of the BlockStack has been reached, end execution.
+			// If the end of the BlockStack has been reached, end execution, unless
+			// the first block is set to autoExecute. Then start over.
 			if (this.currentBlock != null) {
+				return new ExecutionStatusRunning();
+			} else if (this.firstBlock.autoExecute) {
+				this.currentBlock = this.firstBlock;
 				return new ExecutionStatusRunning();
 			} else {
 				this.endRun();
@@ -17476,6 +20065,7 @@ BlockStack.prototype.getWidth = function() {
 BlockStack.prototype.getHeight = function() {
 	return this.dim.rh;
 };
+
 /**
  * Represents a request to be used with HtmlServer
  * @param url {String} - The beginning of the request
@@ -17501,7 +20091,8 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 	}
 	this.request += key;
 	this.request += "=";
-	this.request += HtmlServer.encodeHtml(value);
+	//this.request += HtmlServer.encodeHtml(value);
+	this.request += value;
 };
 
 /**
@@ -17511,7 +20102,6 @@ HttpRequestBuilder.prototype.addParam = function(key, value){
 HttpRequestBuilder.prototype.toString = function(){
 	return this.request;
 };
-
 
 /**
  * Represents a setting stored on the backend.  Automatically edits and caches the backend value
@@ -17809,7 +20399,18 @@ HtmlServer.getUrlForRequest = function(request) {
  * Tells the backend that the frontend is done loading the UI
  */
 HtmlServer.sendFinishedLoadingRequest = function() {
-	HtmlServer.sendRequestWithCallback("ui/contentLoaded")
+	HtmlServer.sendRequestWithCallback("ui/contentLoaded");
+
+	let request = new HttpRequestBuilder("ui/translatedStrings");
+	request.addParam("Name_error_already_exists", Language.getStr("Name_error_already_exists"));
+	request.addParam("Cancel", Language.getStr("Cancel"));
+	request.addParam("Rename", Language.getStr("Rename"));
+	request.addParam("OK", Language.getStr("OK"));
+	request.addParam("Enter_new_name", Language.getStr("Enter_new_name"));
+	request.addParam("Delete", Language.getStr("Delete"));
+	request.addParam("Delete_question", Language.getStr("Delete_question"));
+	request.addParam("Loading", Language.getStr("Loading"));
+	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**
@@ -17875,6 +20476,7 @@ HtmlServer.responseFromIosCall = function(id, status, body) {
 		}
 	}
 };
+
 /**
  * Sends requests to show dialogs and keeps track of open dialogs
  */
@@ -18021,6 +20623,8 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
 			request.addParam("placeholder", prefill);
 		}
 		request.addParam("selectAll", "true");
+		request.addParam("okText", Language.getStr("OK"));
+		request.addParam("cancelText", Language.getStr("Cancel"));
 		const onDialogPresented = function(result) {
 			DM.promptCallback = callbackFn;
 		};
@@ -18065,6 +20669,7 @@ DialogManager.showAlertDialog = function(title, message, button, callbackFn, cal
 	}
 	DialogManager.showChoiceDialog(title, message, button, null, true, callbackFn, callbackErr);
 };
+
 /**
  * The CallBackManager is a static classes that allows the backend to initiate JS actions.  All string parameters
  * sent through callbacks must be percent encoded for safely, as the backend run these methods using string
@@ -18217,13 +20822,41 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
-
+/**
+ * Updates the status of the battery for display in the battery menu.
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {number} batteryStatus - New battery status. red = 0; yellow = 1; green = 2
+ * @return {boolean}
+ */
 CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
     robotId = HtmlServer.decodeHtml(robotId);
     DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
     return true;
-}
-
+};
+/**
+ * While the micro:bit compass is being calibrated, we will play the instructional
+ * video on a loop. Once calibration is complete, the backend must notify the
+ * frontend to remove the video.
+ * @param {string} robotId - Id of the robot being calibrated.
+ * @param {boolean} success - True if the compass was successfully calibrated
+ * @return {boolean} - true if a video element was found for the robot id.
+ */
+CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
+	DeviceManager.updateCompassCalibrationStatus(robotId, success);
+	const dialog = RowDialog.currentDialog;
+	if (dialog != null) {
+		if (dialog.constructor === CalibrateCompassDialog) {
+			const rows = dialog.rowCount;
+			dialog.reloadRows(rows);
+		}
+	}
+	const videoElement = document.getElementById("video" + robotId);
+	if (videoElement != null) {
+		GuiElements.removeVideo(videoElement);
+		return true;
+	}
+	return false;
+};
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -18234,13 +20867,20 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 	robotId = HtmlServer.decodeHtml(robotId);
 	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
 	minFirmware = HtmlServer.decodeHtml(minFirmware);
-	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+	//DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
+
+	//November 2018 - for now, while there is really no old firmware
+	// out there, the incompatible message comes up incorrectly more
+	// often than correctly. Just report it as a connection failure
+	// (which is what it usually is).
+	CallBackManager.robot.connectionFailure(robotId);
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
-    let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
-    DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
+		DeviceManager.removeDisconnected(robotId);
+    let msg = Language.getStr("Connection_failed_try_again");
+    DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
     		return;
     	}.bind(this));
 }
@@ -18325,38 +20965,24 @@ CallbackManager.tablet.removeSensor = function(sensor){
 };
 
 /**
- * Tells the frontend that the language of the system
- * @param {string} lang - A non percent encoded string representing the language
+ * Tells the frontend the current system language
+ * Only use the system language if no language has been selected by the user
+ * @param {string} lang - current system language 2 letter code
  */
-
 CallbackManager.tablet.getLanguage = function(lang){
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang == undefined || userSelectedLang == null){
     Language.setLanguage(lang);
+	}
 };
 
-/**
- * Opens the file based on the directory on app starts.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
+
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
-
-/**
- * Opens the file based on the directory when the user does not close the app before attempting to
-   open a file.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
-}
-
-/**
- * Changes the device limit that is supported based on the request from the backend.
- * @param {string} numOfDevice - The number of devices to be supported.
- */
-CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
-    ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
 
 /**
@@ -18385,6 +21011,19 @@ CallbackManager.httpResponse = function(id, status, body) {
 	}
 	HtmlServer.responseFromIosCall(id, status, body);
 };
+
+/**
+ * Sets the name of the file that should be opened if tapping out of the
+ * open dialog. Whereas CallbackManager.tablet.setFile sets a file to open
+ * instead of opening the open dialog, this function mearly sets which file
+ * will be opened in the event that the user taps out of the open dialog.
+ * @param {string} fileName - The name of the file prefered
+ */
+CallbackManager.setFilePreference = function(fileName) {
+		GuiElements.alert("Setting default file to " + fileName);
+		OpenDialog.lastOpenFile = fileName;
+};
+
 /**
  * Static class that helps parse and write XML files
  */
@@ -18655,7 +21294,7 @@ SaveManager.setConstants = function() {
 	// These characters can't be used in file names
 	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
 	SaveManager.autoSaveInterval = 1000 * 60;
-	SaveManager.newProgName = "New program";
+	SaveManager.newProgName = Language.getStr("New_program");
 	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
 
@@ -18720,7 +21359,7 @@ SaveManager.backendClose = function() {
  */
 SaveManager.backendMarkLoading = function() {
 	OpenDialog.closeDialog();
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 };
 
 /**
@@ -18746,7 +21385,7 @@ SaveManager.userClose = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.userNew = function(nextAction) {
-	SaveManager.promptNewFile("Enter file name", nextAction);
+	SaveManager.promptNewFile(Language.getStr("Enter_file_name"), nextAction);
 };
 
 /**
@@ -18767,7 +21406,7 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog("New", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeNew(response.trim(), nextAction);
 		}
@@ -18781,7 +21420,7 @@ SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction
  */
 SaveManager.sanitizeNew = function(proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		const message = Language.getStr("Name_error_blank");
 		SaveManager.promptNewFile(message, nextAction);
 	} else {
 		GuiElements.alert("getting name");
@@ -18791,11 +21430,11 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
 				SaveManager.newSoft(availableName, nextAction);
 			} else if (!alreadySanitized) {
 				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
 			}
 		});
@@ -18811,7 +21450,7 @@ SaveManager.newSoft = function(filename, nextAction) {
 	const request = new HttpRequestBuilder("data/new");
 	request.addParam("filename", filename);
 	SaveManager.loadBlank();
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	// If the saving fails, we show the open dialog so the user can try again.
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
 };
@@ -18838,7 +21477,7 @@ SaveManager.userOpenFile = function(fileName) {
     SaveManager.fileName = fileName;
 	const request = new HttpRequestBuilder("data/open");
 	request.addParam("filename", fileName);
-	CodeManager.markLoading("Loading...");
+	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {
@@ -18855,7 +21494,7 @@ SaveManager.userOpenFile = function(fileName) {
  */
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
 	// We use the default message with the title "Name"
-	SaveManager.promptRename(isRecording, oldFilename, "Name", null, nextAction);
+	SaveManager.promptRename(isRecording, oldFilename, Language.getStr("Name"), null, nextAction);
 };
 
 /**
@@ -18882,7 +21521,7 @@ SaveManager.promptRename = function(isRecording, oldFilename, title, message, ne
  */
 SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
 	if (message == null) {
-		message = "Enter a file name";
+		message = Language.getStr("Enter_file_name");
 	}
 	// We ask for a new name
 	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
@@ -18903,7 +21542,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
 	if (proposedName === "") {
-		const message = "Name cannot be blank. Enter a file name.";
+		const message = Language.getStr("Name_error_blank");
 		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
 	} else if (proposedName === oldFilename) {
 		if (!isRecording && SaveManager.fileName === oldFilename) {
@@ -18917,11 +21556,11 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
 			}
 		}, isRecording);
@@ -18960,8 +21599,9 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	const question = "Are you sure you want to delete \"" + filename + "\"?";
-	DialogManager.showChoiceDialog("Delete", question, "Cancel", "Delete", true, function(response) {
+	const title = Language.getStr("Delete") + " '" + filename + "'";
+	const question = Language.getStr("Delete_question");
+	DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
 		if (response === "2") {
 			if (OpenDialog.lastOpenFile == filename){
 				OpenDialog.lastOpenFile = null;
@@ -19031,7 +21671,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
  * @param {function} nextAction - The name of the function to call after successful duplication
  */
 SaveManager.userDuplicateFile = function(filename, nextAction) {
-	SaveManager.promptDuplicate("Enter name for duplicate file", filename, nextAction);
+	SaveManager.promptDuplicate(Language.getStr("Name_duplicate_file"), filename, nextAction);
 };
 
 /**
@@ -19054,7 +21694,7 @@ SaveManager.promptDuplicate = function(message, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
-	DialogManager.showPromptDialog("Duplicate", message, defaultName, true, function(cancelled, response) {
+	DialogManager.showPromptDialog(Language.getStr("Duplicate"), message, defaultName, true, function(cancelled, response) {
 		if (!cancelled) {
 			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
 		}
@@ -19069,17 +21709,17 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
 	if (proposedName === "") {
-		SaveManager.promptDuplicate("Name cannot be blank. Enter a file name.", filename, nextAction);
+		SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
 	} else {
 		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
 			if (alreadySanitized && alreadyAvailable) {
 				SaveManager.duplicate(filename, availableName, nextAction);
 			} else if (!alreadySanitized) {
-				let message = "The following characters cannot be included in file names: \n";
+				let message = Language.getStr("Name_error_invalid_characters");
 				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + "\" already exists.  Enter a different name.";
+				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
 				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
 			}
 		});
@@ -19138,7 +21778,7 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
 SaveManager.saveAsNew = function() {
 	const request = new HttpRequestBuilder("data/new");
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	CodeManager.markLoading("Saving...");
+	CodeManager.markLoading(Language.getStr("Saving"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
 	}, function() {
@@ -19282,13 +21922,14 @@ UndoManager.clearUndos = function() {
  * This is because BlockStacks must always contain at least one Block, so the Block must be created first.
  * @constructor
  * TODO: remove the type parameter and use blockShape and instead.
- * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop, 7 = Calibrate.
+ * @param {number} type - The shape of the Block.  0 = Command, 1 = Reporter, 2 = Predicate, 4 = Hat, 5 = Loop, 6 = DoubleLoop.
  * @param {number} returnType - The type of data the Block returns.  Possible values stored in Block.returnTypes.
  * @param {number} x - The x coord of the Block (relative to the Tab/BlockStack/DisplayStack it is in).
  * @param {number} y - The y coord of the Block.
  * @param {string} category - The Block's category in string form.
+ * @param {boolean} autoExecute - If true, this block start running automatically
  */
-function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
+function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Command, 1 = Reporter, 2 = Predicate Fix! BG
 	this.blockTypeName = this.constructor.name; //Keeps track of what type of Block this is.
 	this.x = x; //Store coords
 	this.y = y;
@@ -19332,6 +21973,9 @@ function Block(type, returnType, x, y, category) { //Type: 0 = Command, 1 = Repo
 		this.midHeight = 0;
 		this.midLabel = new LabelText(this, this.midLabelText); //The text to appear in the middle section (i.e. "else");
 		this.blockSlot2 = new BlockSlot(this);
+	}
+	if (autoExecute === true) {
+		this.autoExecute = true;
 	}
 }
 
@@ -19415,6 +22059,72 @@ Block.prototype.generatePath = function() {
 	TouchReceiver.addListenersChild(pathE, this);
 	return pathE;
 };
+
+/**
+ * Parses the translated text and adds block parts in the correct order.
+ * @param {string} text - The translated text to be used.
+ */
+Block.prototype.parseTranslation = function(text) {
+	//const pieces = text.split(/[()]/);
+	const text1 = text.replace(/\(/g, "xxxxx(");
+	const text2 = text1.replace(/\)/g, ")xxxxx");
+	const pieces = text2.split("xxxxx");
+	var newParts = [];
+	var slotsInserted = [];
+	var slotOffset = -1;
+	//Will have problems if there are blocks that have a device drop slot that is
+	// not the first part of the block.
+	if (this.slots[0] != null){
+		if (this.slots[0].constructor === DeviceDropSlot) {
+			newParts.push(this.parts[0]);
+			slotOffset += 1;
+			slotsInserted.push(0);
+		}
+	}
+	for (var i = 0; i < pieces.length; i++){
+		const piece = pieces[i];
+		if (piece.startsWith("(Slot ") && piece.endsWith(")")) {
+			var r = /\d+/;
+			var slotNum = parseInt(piece.match(r));
+			slotNum += slotOffset;
+			if (slotNum < this.slots.length) {
+				const slot = this.slots[slotNum];
+				const slotTexts = piece.split("=");
+				if (slotTexts.length > 1) {
+					const defaultText = slotTexts[1];
+					const dt = defaultText.replace(/\s+/, "").replace(")", "");
+					slot.setData(new StringData(dt), true, false); //should updateDim = true?
+				}
+				newParts.push(slot);
+				slotsInserted.push(slotNum);
+			} // else error?
+		} else if (piece.startsWith("(Icon)")) {
+			//This will cause problems if we ever have more than one icon in a block.
+			this.parts.forEach( function(part) {
+				if (part.constructor === BlockIcon) {
+					newParts.push(part);
+				}
+			});
+		} else if (piece != "") {
+			const label = new LabelText(this, piece);
+			newParts.push(label);
+			label.setActive(this.active);
+		}
+	}
+	//Check to make sure all slots got added, and add any that were missed.
+	for (var i = 0; i < this.slots.length; i++){
+		if (!slotsInserted.includes(i)) {
+			newParts.push(this.slots[i]);
+		}
+	}
+	if (Language.isRTL) {
+		if (newParts[0].constructor === DeviceDropSlot) {
+			newParts.push(newParts.shift());
+		}
+		newParts = newParts.reverse();
+	}
+	this.parts = newParts;
+}
 
 /**
  * Adds a part (LabelText, BlockIcon, or Slot) to the Block.
@@ -19666,10 +22376,10 @@ Block.prototype.updateDim = function() {
 		                lineHeight[currentLine] = this.parts[i].height + 12;
                         break;
 		            case 1:
-		                lineHeight[currentLine] = this.parts[i].height + 2;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 2:
-		                lineHeight[currentLine] = this.parts[i].height + 4;
+		                lineHeight[currentLine] = this.parts[i].height + 8;
 		                break;
 		            case 7:
 		                 lineHeight[currentLine] = this.parts[i].height + 7;
@@ -19681,7 +22391,7 @@ Block.prototype.updateDim = function() {
 		     } else {
 		        switch (this.type) {
 		            case 1:
-			            lineHeight[currentLine] = this.parts[i].height - 10;
+			            lineHeight[currentLine] = this.parts[i].height;
 			            break;
 			        default:
 			            lineHeight[currentLine] = this.parts[i].height;
@@ -19728,6 +22438,8 @@ Block.prototype.updateDim = function() {
 			this.midHeight = bG.height;
 		}
 		height += this.midHeight; //Add the midHeight to the total.
+		var midWidth = this.midLabel.width + 2 * bG.hMargin;
+		if (midWidth > width) { width = midWidth;}
 		this.blockSlot2.updateDim(); //Update the secodn BlockSlot.
 		height += this.blockSlot2.height; //Add its height to the total.
 	}
@@ -20604,11 +23316,12 @@ PredicateBlock.prototype.constructor = PredicateBlock;
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.
  */
-function HatBlock(x, y, category) {
-	Block.call(this, 4, Block.returnTypes.none, x, y, category); //Call constructor.
+function HatBlock(x, y, category, autoExecute) {
+	Block.call(this, 4, Block.returnTypes.none, x, y, category, autoExecute); //Call constructor.
 }
 HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
 HatBlock.prototype.constructor = HatBlock;
+
 /**
  * Child of Block. The DoubleLoopBlock is for Blocks like CommandBlock but with a space for additional Blocks
  * @constructor
@@ -20639,21 +23352,6 @@ function DoubleLoopBlock(x, y, category, midLabelText) {
 }
 DoubleLoopBlock.prototype = Object.create(Block.prototype);
 DoubleLoopBlock.prototype.constructor = DoubleLoopBlock;
-/**
- * Child of Block. The Calibrate is for Blocks that return no value but have no BlockSlots.
- * @constructor
- * @param {number} x - The x coord for the Block.
- * @param {number} y - The y coord for the Block.
- * @param {string} category - The Block's category in string form. Used mainly to color it.
- */
-function CalibrateBlock(x, y, category) {
-    Block.call(this, 7, Block.returnTypes.none, x, y, category);
-}
-
-
-CalibrateBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
-CalibrateBlock.prototype.constructor = CalibrateBlock;
-
 /**
  * Controls the visual aspects of a Slot.
  * Abstract class, subclasses correspond to different types of Slots.
@@ -21086,7 +23784,7 @@ RoundSlotShape.prototype.updateDim = function() {
  */
 RoundSlotShape.prototype.updateAlign = function() {
 	EditableSlotShape.prototype.updateAlign.call(this);
-	BlockGraphics.update.path(this.slotE, 0, 3, this.width, this.height, 1, true); //Fix! BG
+	BlockGraphics.update.path(this.slotE, 0, 0, this.width, this.height, 1, true); //Fix! BG
 };
 
 /**
@@ -21106,6 +23804,7 @@ RoundSlotShape.prototype.deselect = function() {
 	EditableSlotShape.prototype.deselect.call(this);
 	GuiElements.update.color(this.slotE, RSS.slotFill);
 };
+
 /**
  * Controls the DropDown graphic for a DropSlot
  * @param {Slot} slot
@@ -21932,6 +24631,7 @@ Slot.prototype.onTap = function() {
 Slot.prototype.isEditable = function() {
 	return false;
 };
+
 /**
  * HexSlot is a subclass of Slot. Unlike Slot, it can actually be instantiated.
  * It creates a hexagonal Slot that can hold Blocks but not be edited via InputPad or dialog.
@@ -22515,7 +25215,7 @@ DropSlot.prototype.createInputSystem = function() {
 DropSlot.prototype.selectionDataFromValue = function(value) {
 	for (let i = 0; i < this.optionsList.length; i++) {
 		const option = this.optionsList[i];
-		if (!option.isAction && option.data.getValue() === value) {
+		if (!option.isAction && option.data.getValue() == value) {
 			return option.data;
 		}
 	}
@@ -22548,168 +25248,7 @@ DropSlot.prototype.sanitizeData = function(data) {
 	}
 	return this.sanitizeNonSelectionData(data);
 };
-/**
- * DropSlots have their data selected using the InputPad and often hold SelectionData
- * TODO: reduce redundancy with RoundSlot
- * @param {Block} parent
- * @param {string} key
- * @param {number|null} [inputType=select]
- * @param {number|null} [snapType=none]
- * @param {Data} [data=SelectionData.empty()] - The initial Data
- * @param {boolean} [nullable] - Whether empty SelectionData be allowed. By default, is true iff Data == null
- * @constructor
- */
-function DropSlot(parent, key, inputType, snapType, data, nullable) {
-	if (inputType == null) {
-		inputType = EditableSlot.inputTypes.select;
-	}
-	if (snapType == null) {
-		snapType = Slot.snapTypes.none;
-	}
-	if (data == null) {
-		// If no Data was provided, it must be nullable
-		DebugOptions.assert(nullable !== false);
-		nullable = true;
-		data = SelectionData.empty();
-	} else if (nullable == null) {
-		// If data was provided and nullable is not defined, set it to false
-		nullable = false;
-	}
-	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
-	this.slotShape = new DropSlotShape(this, this.dataToString(data));
-	this.slotShape.show();
-	this.optionsList = [];
-	this.nullable = nullable;
-}
-DropSlot.prototype = Object.create(EditableSlot.prototype);
-DropSlot.prototype.constructor = DropSlot;
 
-/**
- * @inheritDoc
- * TODO: fix BlockGraphics
- */
-DropSlot.prototype.highlight = function() {
-	const isSlot = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
-};
-
-/**
- * @inheritDoc
- * @param {string} textSummary
- * @return {string}
- */
-DropSlot.prototype.formatTextSummary = function(textSummary) {
-	return "[" + textSummary + "]";
-};
-
-/**
- * Adds an option that opens a dialog so the user can enter text
- * @param {string} displayText - The text used to display the option
- */
-DropSlot.prototype.addEnterText = function(displayText) {
-	const option = {};
-	option.displayText = displayText;
-	option.isAction = true;
-	this.optionsList.push(option);
-};
-
-/**
- * Adds an option, that when selected set the Slot to the provided value
- * @param {Data} data
- * @param {string} [displayText=null]
- */
-DropSlot.prototype.addOption = function(data, displayText) {
-	if (displayText == null) {
-		displayText = null;
-	}
-	const option = {};
-	option.displayText = displayText;
-	option.data = data;
-	option.isAction = false;
-	this.optionsList.push(option);
-};
-
-/**
- * Adds the options to the InputPad's SelectPad
- * @param {InputWidget.SelectPad} selectPad - The pad to add the options to
- */
-DropSlot.prototype.populatePad = function(selectPad) {
-	this.optionsList.forEach(function(option) {
-		// All actions are Edit Text actions
-		if (option.isAction) {
-			selectPad.addAction(option.displayText, function(callbackFn) {
-				// When selected, the item shows a text entry dialog
-				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
-				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
-					// When the dialog is closed, the item runns the callback with the data the user entered
-					callbackFn(data, !cancelled);
-				}, this.enteredData);
-			}.bind(this)); //TODO: clean up edit text options
-		} else {
-			selectPad.addOption(option.data, option.displayText);
-		}
-	}.bind(this));
-};
-
-/**
- * Creates an InputPad with a SelectPad with this Slot's options
- * @return {InputPad}
- */
-DropSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
-
-	const selectPad = new InputWidget.SelectPad();
-	this.populatePad(selectPad);
-	inputPad.addWidget(selectPad);
-
-	return inputPad;
-};
-
-/**
- * Creates SelectionData from the provided value, if that value is a valid option. Otherwise returns null
- * @param {number|boolean|string} value
- * @return {SelectionData|null}
- */
-DropSlot.prototype.selectionDataFromValue = function(value) {
-	for (let i = 0; i < this.optionsList.length; i++) {
-		const option = this.optionsList[i];
-		if (!option.isAction && option.data.getValue() === value) {
-			return option.data;
-		}
-	}
-	return null;
-};
-
-/**
- * Overrided by subclasses to sanitize other types of Data. By default, all non-selection Data is valid
- * @param {Data} data
- * @return {Data|null}
- */
-DropSlot.prototype.sanitizeNonSelectionData = function(data) {
-	return data;
-};
-
-/**
- * @inheritDoc
- * @param {Data} data
- * @return {Data|null}
- */
-DropSlot.prototype.sanitizeData = function(data) {
-	data = EditableSlot.prototype.sanitizeData.call(this, data);
-	if (data == null) return null;
-	if (data.isSelection()) {
-		const value = data.getValue();
-		if (value === "" && this.nullable) {
-			return SelectionData.empty();
-		}
-		return this.selectionDataFromValue(value);
-	}
-	return this.sanitizeNonSelectionData(data);
-};
 /**
  * VarDropSlot are used to select a variable from a list.  They also provide an option to create a new variable.
  * @param {string} key
@@ -22740,7 +25279,7 @@ VarDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(variable.getSelectionData());
 	});
 	// Add the Create variable option
-	selectPad.addAction("Create variable", function(callback) {
+	selectPad.addAction(Language.getStr("Create_Variable"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a variable
 		CodeManager.newVariable(function(variable) {
 			// If successful, save the newly created variable as the value
@@ -22803,6 +25342,7 @@ VarDropSlot.prototype.checkVariableUsed = function(variable) {
 	// Returns that this variable is in use if it matches this Slot's value
 	return this.enteredData != null && this.enteredData.getValue() === variable;
 };
+
 /**
  * ListDropSlot are used to select a List.  They also provide an option to create a new List.
  * @param {Block} parent
@@ -22836,7 +25376,7 @@ ListDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(list.getSelectionData());
 	});
 	// Add the Create list option
-	selectPad.addAction("Create list", function(callback) {
+	selectPad.addAction(Language.getStr("Create_List"), function(callback) {
 		// When selected, tell the CodeManager to open a dialog to create a list
 		CodeManager.newList(function(list) {
 			// If successful, save the newly created variable as the value
@@ -22901,6 +25441,7 @@ ListDropSlot.prototype.checkListUsed = function(list) {
 	return false;
 };
 
+
 /**
  * PortSlots select a port for Robot input/output Blocks.  They store the Data as NumData (not SelectionData)
  * for legacy support
@@ -22913,7 +25454,7 @@ function PortSlot(parent, key, maxPorts) {
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, Slot.snapTypes.none, new NumData(1));
 	this.maxPorts = maxPorts;
 	for (let portNum = 1; portNum <= this.maxPorts; portNum++) {
-		this.addOption(new NumData(portNum), "Port " + portNum.toString());
+		this.addOption(new NumData(portNum), Language.getStr("port") + " " + portNum.toString());
 	}
 }
 PortSlot.prototype = Object.create(DropSlot.prototype);
@@ -22930,6 +25471,7 @@ PortSlot.prototype.sanitizeData = function(data) {
 	const value = data.asNum().getValueInR(1, this.maxPorts, true, true);
 	return new NumData(value, data.isValid);
 };
+
 /**
  * A DropSlot which lists available broadcasts (obtained from CodeManager.broadcastList) and allows the creation
  * of new broadcasts (through an Enter Text option). Reporter blocks that return strings can e attached to the Slot
@@ -22949,7 +25491,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
 	}
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
 	if (isHatBlock) {
-		this.addOption(new SelectionData("any message", "any_message"));
+		this.addOption(new SelectionData(Language.getStr("any_message"), "any_message"));
 	}
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
@@ -22971,7 +25513,7 @@ BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(new StringData(message), '"' + message + '"');
 	});
 	// Add an Edit Text option
-	selectPad.addAction("new", function(callbackFn) {
+	selectPad.addAction(Language.getStr("new"), function(callbackFn) {
 		// When the option is selected, show a dialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), false);
 		inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
@@ -23016,6 +25558,7 @@ BroadcastDropSlot.prototype.dataToString = function(data) {
 	}
 	return result;
 };
+
 /**
  * DeviceDropSlots appear on Blocks that control robots.  When only one robot is connected, they appear as an ordinary
  * label, but when multiple robots are connected, tey act as a DropSlot, displaying options for each connected robot.
@@ -23400,7 +25943,7 @@ NumOrStringSlot.prototype.constructor = NumOrStringSlot;
  * @param {InputWidget.SelectPad} selectPad
  */
 NumOrStringSlot.prototype.populatePad = function(selectPad){
-	selectPad.addAction("Enter text", function(callbackFn){
+	selectPad.addAction(Language.getStr("Edit_text"), function(callbackFn){
 		// When "Enter text" is selected, create a new inputDialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), true);
 		inputDialog.show(this.slotShape, function(){}, function(data, cancelled){
@@ -23410,6 +25953,7 @@ NumOrStringSlot.prototype.populatePad = function(selectPad){
 		}, this.enteredData);
 	}.bind(this)); //TODO: clean up edit text options
 };
+
 /**
  * IndexSlots are used to select indexes in Lists. They have special options for "last" "random" and "all"
  * @param {Block} parent
@@ -23427,10 +25971,10 @@ function IndexSlot(parent, key, includeAll) {
 	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(1), true, true);
 
 	// Add selectable options
-	this.addOption(new SelectionData("last", "last"));
-	this.addOption(new SelectionData("random", "random"));
+	this.addOption(new SelectionData(Language.getStr("last"), "last"));
+	this.addOption(new SelectionData(Language.getStr("random"), "random"));
 	if (includeAll) {
-		this.addOption(new SelectionData("all", "all"));
+		this.addOption(new SelectionData(Language.getStr("all"), "all"));
 	}
 }
 IndexSlot.prototype = Object.create(RoundSlot.prototype);
@@ -23455,6 +25999,7 @@ IndexSlot.prototype.sanitizeData = function(data) {
 	}
 	return data;
 };
+
 /**
  * ToggleSlot is a subclass of BoolSlot. Though not a subclass of EditableSlot,
  * it is editable in that you can toggle the boolean value.
@@ -24032,6 +26577,7 @@ LabelText.prototype.makeActive = function() {
 LabelText.prototype.makeInactive = function() {
 	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
 };
+
 /**
  * Adds a colored icon that can be used as part of a Block. Used in the "when flag tapped" Block
  * @param {Block} parent - The Block this icon is a part of
@@ -24176,24 +26722,28 @@ B_DeviceWithPortsSensorBase.prototype.updateAction=function(){
  * @param {string} displayUnits - The units to display on the inputPad
  * @constructor
  */
-function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, displayName, numberOfPorts, valueKey,
-									 minVal, maxVal, displayUnits){
+function B_DeviceWithPortsOutputBase(x, y, deviceClass, outputType, blockTranslationKey, numberOfPorts, valueKey,
+									 minVal, maxVal, displayUnits, defaultVal){
 	CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
 	this.deviceClass = deviceClass;
 	this.outputType = outputType;
-	this.displayName = displayName;
 	this.numberOfPorts = numberOfPorts;
 	this.minVal = minVal;
 	this.maxVal = maxVal;
 	this.positive = minVal >= 0;
 	this.valueKey = valueKey;
 	this.displayUnits = displayUnits;
+	if (defaultVal == null){
+		this.defaultValue = 0;
+	} else {
+		this.defaultValue = defaultVal;
+	}
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass));
-	this.addPart(new LabelText(this,displayName));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Four sensor ports.
-	const numSlot = new NumSlot(this,"NumS_out", 0, this.positive, true);
+	const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
 	numSlot.addLimits(this.minVal, this.maxVal, displayUnits);
 	this.addPart(numSlot);
+	this.parseTranslation(Language.getStr(blockTranslationKey));
 }
 B_DeviceWithPortsOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsOutputBase.prototype.constructor = B_DeviceWithPortsOutputBase;
@@ -24249,23 +26799,17 @@ function B_DeviceWithPortsTriLed(x, y, deviceClass, numberOfPorts) {
 	this.deviceClass = deviceClass;
 	this.numberOfPorts = numberOfPorts;
 	this.addPart(new DeviceDropSlot(this,"DDS_1", deviceClass, true));
-	this.addPart(new LabelText(this, Language.getStr("Tri_LED")));
 	this.addPart(new PortSlot(this,"PortS_1", numberOfPorts)); //Positive integer.
-	this.addPart(new LabelText(this, Language.getStr("R")));
 	const ledSlot1 = new NumSlot(this,"NumS_r", 0, true, true); //Positive integer.
-	ledSlot1.addLimits(0, 100, "Intensity");
+	ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot1);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("G")));
 	const ledSlot2 = new NumSlot(this,"NumS_g", 0, true, true); //Positive integer.
-	ledSlot2.addLimits(0, 100, "Intensity");
+	ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot2);
-	this.addPart(new LabelText(this, "%"));
-	this.addPart(new LabelText(this, Language.getStr("B")));
 	const ledSlot3 = new NumSlot(this,"NumS_b", 0, true, true); //Positive integer.
-	ledSlot3.addLimits(0, 100, "Intensity");
+	ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
 	this.addPart(ledSlot3);
-	this.addPart(new LabelText(this, "%"));
+	this.parseTranslation(Language.getStr("block_Tri_LED"));
 }
 B_DeviceWithPortsTriLed.prototype = Object.create(CommandBlock.prototype);
 B_DeviceWithPortsTriLed.prototype.constructor = B_DeviceWithPortsTriLed;
@@ -24306,10 +26850,462 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
 	}
 };
 
+/**
+ * Block that sets a Buzzer
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_DeviceWithPortsBuzzer(x, y, deviceClass){
+  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.minNote = 32
+  this.maxNote = 135
+  this.minBeat = 0
+  this.maxBeat = 16
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
+  this.addPart(noteSlot);
+  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
+  beatsSlot.addLimits(this.minBeat, this.maxBeat, Language.getStr("Beats"));
+  this.addPart(beatsSlot);
+	this.parseTranslation(Language.getStr("block_Play_Note"));
+}
+B_DeviceWithPortsBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_DeviceWithPortsBuzzer.prototype.constructor = B_DeviceWithPortsBuzzer;
+/* Sends the request */
+B_DeviceWithPortsBuzzer.prototype.startAction = function() {
+    let deviceIndex = this.slots[0].getData().getValue();
+    let device = this.deviceClass.getManager().getDevice(deviceIndex);
+    if (device == null) {
+        this.displayError(this.deviceClass.getNotConnectedMessage());
+        return new ExecutionStatusError(); // Flutter was invalid, exit early
+    }
+
+    const mem = this.runMem;
+    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
+    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
+    mem.soundDuration = CodeManager.beatsToMs(beats);
+    mem.timerStarted = false;
+
+    mem.requestStatus = {};
+    mem.requestStatus.finished = false;
+    mem.requestStatus.error = false;
+    mem.requestStatus.result = null;
+		//Setting a buzzer with a duration of 0 has strange results on the micro:bit.
+		if (mem.soundDuration > 0) {
+			device.setBuzzer(mem.requestStatus, note, mem.soundDuration);
+		} else {
+			mem.requestStatus.finished = true;
+		}
+
+    return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_DeviceWithPortsBuzzer.prototype.updateAction = function() {
+    const mem = this.runMem;
+    if (!mem.timerStarted) {
+        const status = mem.requestStatus;
+        if (status.finished === true) {
+            mem.startTime = new Date().getTime();
+            mem.timerStarted = true;
+        } else {
+            return new ExecutionStatusRunning(); // Still running
+        }
+    }
+    if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
+        return new ExecutionStatusDone(); // Done running
+    } else {
+        return new ExecutionStatusRunning(); // Still running
+    }
+};
+
+/* This file contains templates for Blocks common to robots that have an
+ * attached micro:bit. Each robot has its own BlockDefs file, but many
+ * of the defined Blocks are just subclasses of the Blocks here.
+ */
+
+
+/**
+ * A Block that defines the symbol to display on the led array
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitLedArray(x, y, deviceClass) {
+  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  const label = new LabelText(this, Language.getStr("block_LED_Display"));
+  label.isEndOfLine = true;
+  this.addPart(label);
+
+  for (let i = 0; i < 5; i++ ){
+    this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
+    this.addPart(new ToggleSlot(this, "Toggle_led4" + i, false));
+    const lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
+    lastLed.isEndOfLine = true;
+    this.addPart(lastLed);
+  }
+}
+B_MicroBitLedArray.prototype = Object.create(CommandBlock.prototype);
+B_MicroBitLedArray.prototype.constructor = B_MicroBitLedArray;
+/* Sends the request */
+B_MicroBitLedArray.prototype.startAction = function() {
+  let deviceIndex = this.slots[0].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+     this.displayError(this.deviceClass.getNotConnectedMessage());
+     return new ExecutionStatusError(); // device was invalid, exit early
+  }
+
+  let ledStatusString = "";
+  for (let i = 0; i < 25; i++){
+    if (this.slots[i + 1].getData().getValue()){
+      ledStatusString += "1";
+    } else {
+      ledStatusString += "0";
+    }
+  }
+
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+
+  device.setLedArray(mem.requestStatus, ledStatusString);
+  return new ExecutionStatusRunning();
+}
+/* Waits until the request completes */
+B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
+
+
+/**
+ * A Block that defines the text to display on the led array
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitPrint(x, y, deviceClass){
+  CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  // StrS_1 refers to the first string slot.
+  this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+  this.parseTranslation(Language.getStr("block_Print"));
+}
+B_MicroBitPrint.prototype = Object.create(CommandBlock.prototype);
+B_MicroBitPrint.prototype.constructor = B_MicroBitPrint;
+/* Sends the request */
+B_MicroBitPrint.prototype.startAction = function() {
+  let deviceIndex = this.slots[0].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // device was invalid, exit early
+  }
+
+  let mem = this.runMem;
+  let printString = this.slots[1].getData().getValue();
+  mem.blockDuration = (printString.length * 600);
+  mem.timerStarted = false;
+  mem.requestSent = false;
+  mem.printString = printString;
+  mem.device = device;
+
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+
+
+  return new ExecutionStatusRunning();
+};
+/* Sends requests of 18 characters until full string is printed */
+B_MicroBitPrint.prototype.updateAction = function() {
+  const mem = this.runMem;
+  if (!mem.timerStarted) {
+    const status = mem.requestStatus;
+    if (!mem.requestSent) {
+      const ps = mem.printString;
+      const psSubstring = ps.substring(0,18);
+      mem.device.readPrintBlock(mem.requestStatus, psSubstring);
+      mem.blockDuration = (psSubstring.length * 600);
+      mem.requestSent = true;
+      if (ps.length > 18) {
+        mem.printString = ps.substring(18);
+      } else {
+        mem.printString = null;
+      }
+      return new ExecutionStatusRunning();
+    } else if (status.finished === true) {
+      mem.startTime = new Date().getTime();
+      mem.timerStarted = true;
+    } else {
+      return new ExecutionStatusRunning(); // Still running
+    }
+  }
+  if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
+    if (mem.printString != null) {
+      mem.requestSent = false;
+      mem.timerStarted = false;
+      mem.requestStatus.finish = false;
+      return new ExecutionStatusRunning();
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
+  } else {
+    return new ExecutionStatusRunning(); // Still running
+  }
+};
+
+
+/**
+ * A Block to ask if a button was pressed
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitButton(x, y, deviceClass){
+  PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+  const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
+  choice.addOption(new SelectionData("A", "buttonA"));
+  choice.addOption(new SelectionData("B", "buttonB"));
+  this.addPart(choice);
+  this.parseTranslation(Language.getStr("block_Button"));
+};
+B_MicroBitButton.prototype = Object.create(PredicateBlock.prototype);
+B_MicroBitButton.prototype.constructor = B_MicroBitButton;
+
+B_MicroBitButton.prototype.startAction=function(){
+  let deviceIndex = this.slots[0].getData().getValue();
+  let sensorSelection = this.slots[1].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // Device was invalid, exit early
+  }
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readButtonSensor(mem.requestStatus, sensorSelection);
+  return new ExecutionStatusRunning();
+};
+
+B_MicroBitButton.prototype.updateAction = function() {
+  const mem = this.runMem;
+  const status = mem.requestStatus;
+  if (status.finished === true) {
+    if (status.error === false) {
+      return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+    } else {
+      if (status.result.length > 0) {
+          this.displayError(status.result);
+          return new ExecutionStatusError();
+      } else {
+          return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+      }
+    }
+  } else {
+    return new ExecutionStatusRunning(); // Still running
+  }
+};
+
+
+/**
+ * A Block to ask about the orientation of the micro:bit
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitOrientation(x, y, deviceClass){
+  PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+  const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+  orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
+  orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
+  orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
+  orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
+  orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
+  orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
+  orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
+  this.addPart(orientation);
+};
+B_MicroBitOrientation.prototype = Object.create(PredicateBlock.prototype);
+B_MicroBitOrientation.prototype.constructor = B_MicroBitOrientation;
+
+B_MicroBitOrientation.prototype.startAction=function(){
+  let deviceIndex = this.slots[0].getData().getValue();
+  let sensorSelection = this.slots[1].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // device was invalid, exit early
+  }
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readButtonSensor(mem.requestStatus, sensorSelection);
+  return new ExecutionStatusRunning();
+};
+
+B_MicroBitOrientation.prototype.updateAction = function() {
+  const mem = this.runMem;
+  const status = mem.requestStatus;
+  if (status.finished === true) {
+    if (status.error === false) {
+      return new ExecutionStatusResult(new BoolData(status.result === "1", true));
+    } else {
+      if (status.result.length > 0) {
+        this.displayError(status.result);
+        return new ExecutionStatusError();
+      } else {
+        return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+      }
+    }
+  } else {
+    return new ExecutionStatusRunning(); // Still running
+  }
+};
+
+
+/**
+ * A Block to ask for the values of the magnetometer or accelerometer
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitMagnetometer(x, y, deviceClass){
+   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+   this.deviceClass = deviceClass;
+   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+   const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+   this.addPart(pickBlock);
+
+   const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+   pickAxis.addOption(new SelectionData("X", "x"));
+   pickAxis.addOption(new SelectionData("Y", "y"));
+   pickAxis.addOption(new SelectionData("Z", "z"));
+   this.addPart(pickAxis);
+}
+B_MicroBitMagnetometer.prototype = Object.create(ReporterBlock.prototype);
+B_MicroBitMagnetometer.prototype.constructor = B_MicroBitMagnetometer;
+/* Sends the request for the sensor data. */
+B_MicroBitMagnetometer.prototype.startAction=function(){
+  let deviceIndex = this.slots[0].getData().getValue();
+  let sensorSelection = this.slots[1].getData().getValue();
+  if (sensorSelection == "accelerometer") {
+     Block.setDisplaySuffix(B_MicroBitMagnetometer, "m/s" + String.fromCharCode(178));
+  } else {
+     Block.setDisplaySuffix(B_MicroBitMagnetometer, String.fromCharCode(956) + "T");
+  }
+  let axisSelection = this.slots[2].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+     this.displayError(this.deviceClass.getNotConnectedMessage());
+     return new ExecutionStatusError(); // device was invalid, exit early
+  }
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
+  return new ExecutionStatusRunning();
+};
+
+B_MicroBitMagnetometer.prototype.updateAction = function(){
+  const status = this.runMem.requestStatus;
+  if (status.finished) {
+     if(status.error){
+         this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+         return new ExecutionStatusError();
+     } else {
+         const result = new StringData(status.result);
+         const num = Math.round(result.asNum().getValue() * 100) / 100;
+
+         return new ExecutionStatusResult(new NumData(num));
+     }
+  }
+  return new ExecutionStatusRunning(); // Still running
+};
+
+
+/**
+ * A Block to ask for the compass value
+ * @param {number} x
+ * @param {number} y
+ * @param deviceClass - A subclass of Device indicating the type of robot
+ * @constructor
+ */
+function B_MicroBitCompass(x, y, deviceClass){
+   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+   this.deviceClass = deviceClass;
+   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+   this.addPart(new LabelText(this, Language.getStr("block_Compass")));
+}
+B_MicroBitCompass.prototype = Object.create(ReporterBlock.prototype);
+B_MicroBitCompass.prototype.constructor = B_MicroBitCompass;
+
+B_MicroBitCompass.prototype.startAction=function(){
+   let deviceIndex = this.slots[0].getData().getValue();
+   let device = this.deviceClass.getManager().getDevice(deviceIndex);
+   if (device == null) {
+       this.displayError(this.deviceClass.getNotConnectedMessage());
+       return new ExecutionStatusError(); // Flutter was invalid, exit early
+   }
+   let mem = this.runMem;
+   mem.requestStatus = {};
+   mem.requestStatus.finished = false;
+   mem.requestStatus.error = false;
+   mem.requestStatus.result = null;
+   device.readCompass(mem.requestStatus);
+   return new ExecutionStatusRunning();
+};
+
+B_MicroBitCompass.prototype.updateAction = function(){
+   const status = this.runMem.requestStatus;
+       if (status.finished) {
+           if(status.error){
+               this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+               return new ExecutionStatusError();
+           } else {
+               const result = new StringData(status.result);
+               const numResult = result.asNum();
+               const num = Math.round(numResult.getValue());
+               return new ExecutionStatusResult(new NumData(num, numResult.isValid));
+           }
+       }
+       return new ExecutionStatusRunning(); // Still running
+};
+Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
+
 /* This file contains the implementations of hummingbird blocks
  */
-function B_HummingbirdOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, displayName, numberOfPorts, valueKey,
+function B_HummingbirdOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
+	B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbird, outputType, blockTranslationKey, numberOfPorts, valueKey,
 		minVal, maxVal, displayUnits);
 }
 B_HummingbirdOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
@@ -24318,8 +27314,7 @@ B_HummingbirdOutputBase.prototype.constructor = B_HummingbirdOutputBase;
 
 
 function B_HBServo(x, y) {
-    this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "servo", Language.getStr("Servo"), 4, "angle", 0, 180, "Angle");
+	B_HummingbirdOutputBase.call(this, x, y, "servo", "block_Servo", 4, "angle", 0, 180, Language.getStr("Angle"));
 }
 B_HBServo.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBServo.prototype.constructor = B_HBServo;
@@ -24327,8 +27322,7 @@ B_HBServo.prototype.constructor = B_HBServo;
 
 
 function B_HBMotor(x, y) {
-    this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "motor", Language.getStr("Motor"), 2, "speed", -100, 100, "Speed");
+	B_HummingbirdOutputBase.call(this, x, y, "motor", "block_Motor", 2, "speed", -100, 100, Language.getStr("Speed"));
 }
 B_HBMotor.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBMotor.prototype.constructor = B_HBMotor;
@@ -24336,8 +27330,7 @@ B_HBMotor.prototype.constructor = B_HBMotor;
 
 
 function B_HBVibration(x, y) {
-    this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "vibration", Language.getStr("Vibration"), 2, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "vibration", "block_Vibration", 2, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBVibration.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBVibration.prototype.constructor = B_HBVibration;
@@ -24345,8 +27338,7 @@ B_HBVibration.prototype.constructor = B_HBVibration;
 
 
 function B_HBLed(x, y) {
-    this.draggable = true;
-	B_HummingbirdOutputBase.call(this, x, y, "led", Language.getStr("LED"), 4, "intensity", 0, 100, "Intensity");
+	B_HummingbirdOutputBase.call(this, x, y, "led", "block_LED", 4, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_HBLed.prototype = Object.create(B_HummingbirdOutputBase.prototype);
 B_HBLed.prototype.constructor = B_HBLed;
@@ -24354,7 +27346,6 @@ B_HBLed.prototype.constructor = B_HBLed;
 
 
 function B_HummingbirdSensorBase(x, y, sensorType, displayName) {
-    this.draggable = true;
 	B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbird, sensorType, displayName, 4);
 }
 B_HummingbirdSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
@@ -24363,7 +27354,6 @@ B_HummingbirdSensorBase.prototype.constructor = B_HummingbirdSensorBase;
 
 
 function B_HBLight(x, y) {
-    this.draggable = true;
 	B_HummingbirdSensorBase.call(this, x, y, "light", Language.getStr("Light"));
 }
 B_HBLight.prototype = Object.create(B_HummingbirdSensorBase.prototype);
@@ -24372,8 +27362,8 @@ B_HBLight.prototype.constructor = B_HBLight;
 
 
 function B_HBTempC(x, y) {
-    this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_C"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_C"));
 }
 B_HBTempC.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempC.prototype.constructor = B_HBTempC;
@@ -24382,8 +27372,7 @@ Block.setDisplaySuffix(B_HBTempC, String.fromCharCode(176) + "C");
 
 
 function B_HBDistCM(x, y) {
-    this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " CM");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("CM"));
 }
 B_HBDistCM.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistCM.prototype.constructor = B_HBDistCM;
@@ -24392,8 +27381,7 @@ Block.setDisplaySuffix(B_HBDistCM, "cm");
 
 
 function B_HBKnob(x, y) {
-    this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Knob"));
+	B_HummingbirdSensorBase.call(this, x, y, "sensor", Language.getStr("Dial"));
 }
 B_HBKnob.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBKnob.prototype.constructor = B_HBKnob;
@@ -24401,7 +27389,6 @@ B_HBKnob.prototype.constructor = B_HBKnob;
 
 
 function B_HBSound(x, y) {
-    this.draggable = true;
 	B_HummingbirdSensorBase.call(this, x, y, "sound", Language.getStr("Sound"));
 }
 B_HBSound.prototype = Object.create(B_HummingbirdSensorBase.prototype);
@@ -24409,7 +27396,6 @@ B_HBSound.prototype.constructor = B_HBSound;
 
 
 function B_HBTriLed(x, y) {
-    this.draggable = true;
 	B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbird, 2);
 }
 B_HBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
@@ -24420,8 +27406,8 @@ B_HBTriLed.prototype.constructor = B_HBTriLed;
 
 
 function B_HBTempF(x, y) {
-    this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "temperature", Language.getStr("Temperature_F"));
+	B_HummingbirdSensorBase.call(this, x, y, "temperature", "");
+	this.parseTranslation(Language.getStr("block_Temperature_F"));
 }
 B_HBTempF.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBTempF.prototype.constructor = B_HBTempF;
@@ -24445,8 +27431,7 @@ Block.setDisplaySuffix(B_HBTempF, String.fromCharCode(176) + "F");
 
 
 function B_HBDistInch(x, y) {
-    this.draggable = true;
-	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") +" Inch");
+	B_HummingbirdSensorBase.call(this, x, y, "distance", Language.getStr("Distance") + " " + Language.getStr("Inch"));
 }
 B_HBDistInch.prototype = Object.create(B_HummingbirdSensorBase.prototype);
 B_HBDistInch.prototype.constructor = B_HBDistInch;
@@ -24466,639 +27451,209 @@ B_HBDistInch.prototype.updateAction = function() {
 	}
 };
 Block.setDisplaySuffix(B_HBDistInch, "inches");
+
 /* This file contains the implementations of MicroBit blocks
  */
 
-//MARK: micro:bit outputs in case they're needed later.
 
-function B_MicroBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceMicroBit, outputType, displayName, numberOfPorts, valueKey,
-        minVal, maxVal, displayUnits);
-}
-B_MicroBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
-B_MicroBitOutputBase.prototype.constructor = B_MicroBitOutputBase;
-
-
-
-//MARK: outputs
-function B_MicroBitLedArray(x, y, deviceClass) {
-  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-  this.deviceClass = deviceClass;
-  this.displayName = Language.getStr("Display");
-  this.draggable = true;
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  const label = new LabelText(this,this.displayName);
-  label.isEndOfLine = true;
-  this.addPart(label);
-
-  for (let i = 0; i < 5; i++ ){
-    this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
-    this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
-    this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
-    this.addPart(new ToggleSlot(this, "Toggle_led4" + i, false));
-    const lastLed = new ToggleSlot(this, "Toggle_led5" + i, false);
-    lastLed.isEndOfLine = true;
-    this.addPart(lastLed);
-  }
-
-
-}
-B_MicroBitLedArray.prototype = Object.create(CommandBlock.prototype);
-B_MicroBitLedArray.prototype.constructor = B_MicroBitLedArray;
-/* Sends the request */
-B_MicroBitLedArray.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-
-  let ledStatusString = "";
-  for (let i = 0; i < 25; i++){
-    if (this.slots[i + 1].getData().getValue()){
-      ledStatusString += "1";
-    } else {
-      ledStatusString += "0";
-    }
-  }
-
-    let mem = this.runMem;
-  mem.requestStatus = {};
-    mem.requestStatus.finished = false;
-    mem.requestStatus.error = false;
-    mem.requestStatus.result = null;
-
-    device.setLedArray(mem.requestStatus, ledStatusString);
-    return new ExecutionStatusRunning();
-}
-/* Waits until the request completes */
-B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
-
-
-
-
-
-// Try #3 at micro:bit blocks
-
-
-
-
+//MARK: standard micro:bit outputs
 
 function B_MBPrint(x, y){
-    CommandBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("Print");
-    this.draggable = true;
-
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-    // StrS_1 refers to the first string slot.
-    this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-
-}
-
-B_MBPrint.prototype = Object.create(CommandBlock.prototype);
+    B_MicroBitPrint.call(this, x, y, DeviceMicroBit);
+};
+B_MBPrint.prototype = Object.create(B_MicroBitPrint.prototype);
 B_MBPrint.prototype.constructor = B_MBPrint;
 
-/* Sends the request */
-B_MBPrint.prototype.startAction = function() {
+
+function B_MBLedArray(x,y){
+  B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
+};
+B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_MBLedArray.prototype.constructor = B_MBLedArray;
+
+
+//MARK: standard micro:bit inputs
+
+function B_MBMagnetometer(x, y){
+  B_MicroBitMagnetometer.call(this, x, y, DeviceMicroBit);
+};
+B_MBMagnetometer.prototype = Object.create(B_MicroBitMagnetometer.prototype);
+B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
+
+
+function B_MBButton(x, y){
+    B_MicroBitButton.call(this, x, y, DeviceMicroBit);
+};
+B_MBButton.prototype = Object.create(B_MicroBitButton.prototype);
+B_MBButton.prototype.constructor = B_MBButton;
+
+
+function B_MBOrientation(x, y){
+  B_MicroBitOrientation.call(this, x, y, DeviceMicroBit);
+};
+B_MBOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
+B_MBOrientation.prototype.constructor = B_MBOrientation;
+
+
+function B_MBCompass(x, y){
+    B_MicroBitCompass.call(this, x, y, DeviceMicroBit);
+};
+B_MBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
+B_MBCompass.prototype.constructor = B_MBCompass;
+
+
+//MARK: Blocks specific to the stand alone micro:bit
+
+function B_MBReadPin(x, y){
+    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+    this.deviceClass = DeviceMicroBit;
+    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+    const pin = Language.getStr("pin");
+    const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
+    pickPin.addOption(new SelectionData(pin + " 0", "1"));
+    pickPin.addOption(new SelectionData(pin + " 1", "2"));
+    pickPin.addOption(new SelectionData(pin + " 2", "3"));
+    this.addPart(pickPin);
+    this.parseTranslation(Language.getStr("block_read"));
+};
+B_MBReadPin.prototype = Object.create(ReporterBlock.prototype);
+B_MBReadPin.prototype.constructor = B_MBReadPin;
+/* Sends the request for the sensor data. */
+B_MBReadPin.prototype.startAction=function(){
     let deviceIndex = this.slots[0].getData().getValue();
+    let pinSelection = this.slots[1].getData().getValue();
     let device = this.deviceClass.getManager().getDevice(deviceIndex);
     if (device == null) {
         this.displayError(this.deviceClass.getNotConnectedMessage());
         return new ExecutionStatusError(); // Flutter was invalid, exit early
     }
-
     let mem = this.runMem;
-    let printString = this.slots[1].getData().getValue();
-    mem.blockDuration = (printString.length * 600);
-    mem.timerStarted = false;
 
     mem.requestStatus = {};
     mem.requestStatus.finished = false;
     mem.requestStatus.error = false;
     mem.requestStatus.result = null;
-    device.readPrintBlock(mem.requestStatus, printString);
-
+    device.readSensor(mem.requestStatus, "pin", pinSelection);
     return new ExecutionStatusRunning();
 };
 
-/* Waits until the request completes */
-B_MBPrint.prototype.updateAction = function() {
-    const mem = this.runMem;
-    if (!mem.timerStarted) {
-        const status = mem.requestStatus;
-        if (status.finished === true) {
-            mem.startTime = new Date().getTime();
-            mem.timerStarted = true;
-        } else {
-            return new ExecutionStatusRunning(); // Still running
-        }
-    }
-    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
-        return new ExecutionStatusDone(); // Done running
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-};
-
-function B_MBLedArray(x,y){
-  B_MicroBitLedArray.call(this, x, y, DeviceMicroBit);
-}
-B_MBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
-B_MBLedArray.prototype.constructor = B_MBLedArray;
-
-function B_MBMagnetometer(x, y){
-    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = "";
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-    //this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
-}
-B_MBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
-B_MBMagnetometer.prototype.constructor = B_MBMagnetometer;
-/* Sends the request for the sensor data. */
-B_MBMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    if (sensorSelection == "accelerometer") {
-        Block.setDisplaySuffix(B_MBMagnetometer, "m/s" + String.fromCharCode(178));
-    } else {
-        Block.setDisplaySuffix(B_MBMagnetometer, String.fromCharCode(956) + "T");
-    }
-
-    let axisSelection = this.slots[2].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-//B_MBMagnetometer.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
-B_MBMagnetometer.prototype.updateAction = function(){
-
-    const status = this.runMem.requestStatus;
-        if (status.finished) {
-            if(status.error){
-                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-                return new ExecutionStatusError();
-            } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue() * 100) / 100;
-
-                return new ExecutionStatusResult(new NumData(num));
-            }
-        }
-        return new ExecutionStatusRunning(); // Still running
-
-};
-
-
-
-
-
-
-
-
-// Here is the block for B_MBButton.
-
-function B_MBButton(x, y){
-    //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-    PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("Button");
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-
-    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
-    choice.addOption(new SelectionData("A", "buttonA"));
-    choice.addOption(new SelectionData("B", "buttonB"));
-    this.addPart(choice);
-
-};
-
-
-//B_MBButton.prototype = Object.create(ReporterBlock.prototype);
-B_MBButton.prototype = Object.create(PredicateBlock.prototype);
-B_MBButton.prototype.constructor = B_MBButton;
-
-
-
-B_MBButton.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readButtonSensor(mem.requestStatus, sensorSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-//B_MBButton.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-B_MBButton.prototype.updateAction = function() {
-
-
-    const mem = this.runMem;
-    const status = mem.requestStatus;
-    if (status.finished === true) {
-        if (status.error === false) {
-            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-        } else {
-            if (status.result.length > 0) {
-                this.displayError(status.result);
-                return new ExecutionStatusError();
-            } else {
-                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-            }
-        }
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-
-};
-
-function B_MBOrientation(x, y){
-    //ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-    PredicateBlock.call(this, x, y, DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = "";
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
-    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
-    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
-    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
-    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
-    this.addPart(orientation);
-
-};
-
-
-//B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
-B_MBOrientation.prototype = Object.create(PredicateBlock.prototype);
-B_MBOrientation.prototype.constructor = B_MBOrientation;
-
-
-
-
-B_MBOrientation.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readButtonSensor(mem.requestStatus, sensorSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-//B_MBOrientation.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
-B_MBOrientation.prototype.updateAction = function() {
-
-    const mem = this.runMem;
-    const status = mem.requestStatus;
-    if (status.finished === true) {
-        if (status.error === false) {
-            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-        } else {
-            if (status.result.length > 0) {
-                this.displayError(status.result);
-                return new ExecutionStatusError();
-            } else {
-                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-            }
-        }
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-
-
-
-
-};
-
-
-
-
-
-// Block for the compass
-
-
-function B_MBCompass(x, y){
-    ReporterBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("Compass");
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-}
-B_MBCompass.prototype = Object.create(ReporterBlock.prototype);
-B_MBCompass.prototype.constructor = B_MBCompass;
-
-
-
-B_MBCompass.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readCompass(mem.requestStatus);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-B_MBCompass.prototype.updateAction = function(){
-
-    const status = this.runMem.requestStatus;
-        if (status.finished) {
-            if(status.error){
-                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-                return new ExecutionStatusError();
-            } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue());
-
-                return new ExecutionStatusResult(new NumData(num));
-            }
-        }
-        return new ExecutionStatusRunning(); // Still running
-
-};
-
-Block.setDisplaySuffix(B_MBCompass, String.fromCharCode(176));
-
-
-function B_MBCompassCalibrate(x, y){
-    CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceMicroBit;
-    this.displayName = Language.getStr("CompassCalibrate");
-    this.numberOfPorts = 1;
-    this.draggable = false;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-}
-B_MBCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
-B_MBCompassCalibrate.prototype.constructor = B_MBCompassCalibrate;
-
-B_MBCompassCalibrate.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.calibrateCompass(mem.requestStatus);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-B_MBCompassCalibrate.prototype.updateAction = function(){
+B_MBReadPin.prototype.updateAction = function(){
     const status = this.runMem.requestStatus;
     if (status.finished) {
         if(status.error){
             this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
             return new ExecutionStatusError();
         } else {
-            return new ExecutionStatusDone();
+            const result = new StringData(status.result);
+            const num = Math.round(result.asNum().getValue() * 100) / 100;
+            return new ExecutionStatusResult(new NumData(num));
         }
     }
     return new ExecutionStatusRunning(); // Still running
-
 };
+
+function B_MBWriteToPin(x, y) {
+
+  CommandBlock.call(this,x,y,DeviceMicroBit.getDeviceTypeId());
+  this.deviceClass = DeviceMicroBit;
+  this.outputType = "write";
+
+  this.minVal = 0;
+  this.maxVal = 100;
+  this.positive = true;
+  this.valueKey = "percent";
+  this.displayUnits = Language.getStr("Intensity");
+  this.defaultValue = 0;
+
+  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+  const pin = Language.getStr("pin");
+  const pickPin = new DropSlot(this, "SDS_1", null, null, new SelectionData(pin + " 0", "1"));
+  pickPin.addOption(new SelectionData(pin + " 0", "1"));
+  pickPin.addOption(new SelectionData(pin + " 1", "2"));
+  pickPin.addOption(new SelectionData(pin + " 2", "3"));
+  this.addPart(pickPin);
+  const numSlot = new NumSlot(this, "NumS_out", this.defaultValue, this.positive, true);
+  numSlot.addLimits(this.minVal, this.maxVal, this.displayUnits);
+  this.addPart(numSlot);
+  this.parseTranslation(Language.getStr("block_write"));
+};
+B_MBWriteToPin.prototype = Object.create(CommandBlock.prototype);
+B_MBWriteToPin.prototype.constructor = B_MBWriteToPin;
+
+/* Sends the request */
+B_MBWriteToPin.prototype.startAction = function() {
+  let deviceIndex = this.slots[0].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // Flutter was invalid, exit early
+  }
+  let mem = this.runMem;
+  let pin = this.slots[1].getData().getValue();
+  let value = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.setOutput(mem.requestStatus, this.outputType, pin, value, this.valueKey);
+  return new ExecutionStatusRunning();
+};
+/* Waits until the request completes */
+B_MBWriteToPin.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction;
+
+function B_MBBuzzer(x, y){
+  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceMicroBit);
+};
+B_MBBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
+B_MBBuzzer.prototype.constructor = B_MBBuzzer;
 
 /* This file contains the implementations of hummingbird bit blocks
  */
 
  //MARK: hummingbird bit outputs
-function B_HummingbirdBitOutputBase(x, y, outputType, displayName, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
-    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, displayName, numberOfPorts, valueKey,
-        minVal, maxVal, displayUnits);
+function B_HummingbirdBitOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits, defaultVal) {
+    B_DeviceWithPortsOutputBase.call(this, x, y, DeviceHummingbirdBit, outputType, blockTranslationKey, numberOfPorts, valueKey,
+        minVal, maxVal, displayUnits, defaultVal);
 }
 B_HummingbirdBitOutputBase.prototype = Object.create(B_DeviceWithPortsOutputBase.prototype);
 B_HummingbirdBitOutputBase.prototype.constructor = B_HummingbirdBitOutputBase;
 
 function B_BBPositionServo(x, y) {
-    this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Position_Servo"), 4, "angle", 0, 180, "Angle");
-
-    this.addPart(new LabelText(this,'\xBA'));
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Position_Servo", 4, "angle", 0, 180, Language.getStr("Angle"), 90);
 }
 B_BBPositionServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBPositionServo.prototype.constructor = B_BBPositionServo;
 
 function B_BBRotationServo(x, y) {
-    this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "servo", Language.getStr("Rotation_Servo"), 4, "percent", -100, 100, "Percent");
-
-    this.addPart(new LabelText(this,"%"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "servo", "block_Rotation_Servo", 4, "percent", -100, 100, Language.getStr("Speed"));
 }
 B_BBRotationServo.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBRotationServo.prototype.constructor = B_BBRotationServo;
 
 function B_BBLed(x, y) {
-    this.draggable = true;
-    B_HummingbirdBitOutputBase.call(this, x, y, "led", Language.getStr("LED"), 3, "intensity", 0, 100, "Intensity");
-
-    this.addPart(new LabelText(this,"%"));
+    B_HummingbirdBitOutputBase.call(this, x, y, "led", "block_LED", 3, "intensity", 0, 100, Language.getStr("Intensity"));
 }
 B_BBLed.prototype = Object.create(B_HummingbirdBitOutputBase.prototype);
 B_BBLed.prototype.constructor = B_BBLed;
 
 function B_BBTriLed(x, y) {
-    this.draggable = true;
     B_DeviceWithPortsTriLed.call(this, x, y, DeviceHummingbirdBit, 2);
 }
 B_BBTriLed.prototype = Object.create(B_DeviceWithPortsTriLed.prototype);
 B_BBTriLed.prototype.constructor = B_BBTriLed;
 
-
-
 function B_BBBuzzer(x, y){
-  CommandBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-  this.deviceClass = DeviceHummingbirdBit;
-  this.displayName = Language.getStr("Play_Note");
-  this.draggable = true;
-  this.minNote = 32
-  this.maxNote = 135
-  this.minBeat = 0
-  this.maxBeat = 16
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
-  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
-  noteSlot.addLimits(this.minNote, this.maxNote, "Note");
-  this.addPart(noteSlot);
-  this.addPart(new LabelText(this, Language.getStr("for")));
-  const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
-  beatsSlot.addLimits(this.minBeat, this.maxBeat, "Beats");
-  this.addPart(beatsSlot);
-  this.addPart(new LabelText(this,Language.getStr("Beats")));
+  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHummingbirdBit);
 }
-B_BBBuzzer.prototype = Object.create(CommandBlock.prototype);
+B_BBBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
 B_BBBuzzer.prototype.constructor = B_BBBuzzer;
-/* Sends the request */
-B_BBBuzzer.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    //let mem = this.runMem;
-    //let note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    //let beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-    //let soundDuration = CodeManager.beatsToMs(beats);
-
-    const mem = this.runMem;
-    const note = this.slots[1].getData().getValueInR(this.minNote, this.maxNote, true, true)
-    const beats = this.slots[2].getData().getValueInR(this.minBeat, this.maxBeat, true, false);
-    mem.soundDuration = CodeManager.beatsToMs(beats);
-    let soundDuration = CodeManager.beatsToMs(beats);
-    mem.timerStarted = false;
-
-    mem.requestStatus = {};
-    mem.requestStatus.finished = false;
-    mem.requestStatus.error = false;
-    mem.requestStatus.result = null;
-    device.setBuzzer(mem.requestStatus, note, soundDuration);
-    return new ExecutionStatusRunning();
-};
-/* Waits until the request completes */
-//B_BBBuzzer.prototype.updateAction = B_DeviceWithPortsOutputBase.prototype.updateAction
-
-B_BBBuzzer.prototype.updateAction = function() {
-    const mem = this.runMem;
-    if (!mem.timerStarted) {
-        const status = mem.requestStatus;
-        if (status.finished === true) {
-            mem.startTime = new Date().getTime();
-            mem.timerStarted = true;
-        } else {
-            return new ExecutionStatusRunning(); // Still running
-        }
-    }
-    if (new Date().getTime() >= mem.startTime + mem.soundDuration) {
-        return new ExecutionStatusDone(); // Done running
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-};
-
-
 
 
 
 //MARK: microbit outputs
-
-
 
 function B_BBLedArray(x,y){
   B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
@@ -25108,24 +27663,10 @@ B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 
 //MARK: hummingbird bit sensors
-function B_HummingbirdBitSensorBase(x, y, sensorType, displayName) {
-    B_DeviceWithPortsSensorBase.call(this, x, y, DeviceHummingbirdBit, sensorType, displayName, 4);
-}
-B_HummingbirdBitSensorBase.prototype = Object.create(B_DeviceWithPortsSensorBase.prototype);
-B_HummingbirdBitSensorBase.prototype.constructor = B_HummingbirdBitSensorBase;
-
-function B_BBKnob(x, y) {
-    B_HummingbirdBitSensorBase.call(this, x, y, "sensor", "Knob");
-}
-B_BBKnob.prototype = Object.create(B_HummingbirdBitSensorBase.prototype);
-B_BBKnob.prototype.constructor = B_BBKnob;
-
 function B_BBSensors(x, y){
-    ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; //TODO: perhapse remove this
-    this.draggable = true;
-    this.numberOfPorts = 3;
+  ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
+  this.deviceClass = DeviceHummingbirdBit;
+  this.numberOfPorts = 3;
 
   // Default option for sensor is Light.
   const dS = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Light"), "light"));
@@ -25137,7 +27678,6 @@ function B_BBSensors(x, y){
   dS.addOption(new SelectionData(Language.getStr("Other"), "other"));
 
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  this.addPart(new LabelText(this,this.displayName));
   this.addPart(dS);
   this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
 }
@@ -25195,438 +27735,52 @@ B_BBSensors.prototype.updateAction = function(){
 	return new ExecutionStatusRunning(); // Still running
 };
 
-function B_BBMagnetometer(x, y){
-    ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = ""; //TODO: perhaps remove this
-    this.draggable = true;
-    this.numberOfPorts = 1;
-
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-    const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-
-    pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
-    pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-
-    this.addPart(pickBlock);
-
-    const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("X", "x"));
-    pickAxis.addOption(new SelectionData("Y", "y"));
-    pickAxis.addOption(new SelectionData("Z", "z"));
-    this.addPart(pickAxis);
-
-    //this.addPart(new PortSlot(this,"PortS_1", this.numberOfPorts));
-}
-B_BBMagnetometer.prototype = Object.create(ReporterBlock.prototype);
-B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
-/* Sends the request for the sensor data. */
-B_BBMagnetometer.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    if (sensorSelection == "accelerometer") {
-        Block.setDisplaySuffix(B_BBMagnetometer, "m/s" + String.fromCharCode(178));
-    } else {
-        Block.setDisplaySuffix(B_BBMagnetometer, String.fromCharCode(956) + "T");
-    }
-
-    let axisSelection = this.slots[2].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readMagnetometerSensor(mem.requestStatus, sensorSelection, axisSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
 
 
-B_BBMagnetometer.prototype.updateAction = function(){
-    const status = this.runMem.requestStatus;
-        if (status.finished) {
-            if(status.error){
-                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-                return new ExecutionStatusError();
-            } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue() * 100) / 100;
-
-                return new ExecutionStatusResult(new NumData(num));
-            }
-        }
-        return new ExecutionStatusRunning(); // Still running
-
-}
-
-// micro:bit LED block that has been added to the HummingbirdBit menu
+//MARK: micro:bit outputs
 
 function B_BBLedArray(x,y){
-    B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
+  B_MicroBitLedArray.call(this, x, y, DeviceHummingbirdBit);
 }
 B_BBLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_BBLedArray.prototype.constructor = B_BBLedArray;
 
 
-
-// Hummingbird print block
-
-
-
-
-
 function B_BBPrint(x, y){
-    CommandBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = Language.getStr("Print");
-    this.draggable = true;
-
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-    // StrS_1 refers to the first string slot.
-    this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-
+  B_MicroBitPrint.call(this, x, y, DeviceHummingbirdBit);
 }
-
-B_BBPrint.prototype = Object.create(CommandBlock.prototype);
+B_BBPrint.prototype = Object.create(B_MicroBitPrint.prototype);
 B_BBPrint.prototype.constructor = B_BBPrint;
 
-/* Sends the request */
-B_BBPrint.prototype.startAction = function() {
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
 
-    let mem = this.runMem;
-    let printString = this.slots[1].getData().getValue().substring(0,18);
-    mem.blockDuration = (printString.length * 600);
-    mem.timerStarted = false;
-
-    mem.requestStatus = {};
-    mem.requestStatus.finished = false;
-    mem.requestStatus.error = false;
-    mem.requestStatus.result = null;
-    device.readPrintBlock(mem.requestStatus, printString);
-
-    return new ExecutionStatusRunning();
-};
-
-/* Waits until the request completes */
-B_BBPrint.prototype.updateAction = function() {
-    const mem = this.runMem;
-    if (!mem.timerStarted) {
-        const status = mem.requestStatus;
-        if (status.finished === true) {
-            mem.startTime = new Date().getTime();
-            mem.timerStarted = true;
-        } else {
-            return new ExecutionStatusRunning(); // Still running
-        }
-    }
-    if (new Date().getTime() >= mem.startTime + mem.blockDuration) {
-        return new ExecutionStatusDone(); // Done running
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-};
-
-
-
-// Here is the block for B_BBButton.
+//MARK: micro:bit inputs
 
 function B_BBButton(x, y){
-
-    PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = Language.getStr("Button");
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-
-    const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
-    choice.addOption(new SelectionData("A", "buttonA"));
-    choice.addOption(new SelectionData("B", "buttonB"));
-    this.addPart(choice);
-
+  B_MicroBitButton.call(this, x, y, DeviceHummingbirdBit);
 };
-
-
-
-B_BBButton.prototype = Object.create(PredicateBlock.prototype);
+B_BBButton.prototype = Object.create(B_MicroBitButton.prototype);
 B_BBButton.prototype.constructor = B_BBButton;
 
 
-
-B_BBButton.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readButtonSensor(mem.requestStatus, sensorSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-
-B_BBButton.prototype.updateAction = function() {
-
-
-    const mem = this.runMem;
-    const status = mem.requestStatus;
-    if (status.finished === true) {
-        if (status.error === false) {
-            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-        } else {
-            if (status.result.length > 0) {
-                this.displayError(status.result);
-                return new ExecutionStatusError();
-            } else {
-                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-            }
-        }
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-
-};
-
-
-/*
-
-
-
-*/
-
 function B_BBOrientation(x, y){
-    PredicateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = "";
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-    const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
-    orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
-    orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
-    orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
-    orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
-    orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
-    this.addPart(orientation);
-
+  B_MicroBitOrientation.call(this, x, y, DeviceHummingbirdBit);
 };
-
-
-//B_MBOrientation.prototype = Object.create(ReporterBlock.prototype);
-B_BBOrientation.prototype = Object.create(PredicateBlock.prototype);
+B_BBOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
 B_BBOrientation.prototype.constructor = B_BBOrientation;
 
 
-
-
-B_BBOrientation.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let sensorSelection = this.slots[1].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readButtonSensor(mem.requestStatus, sensorSelection);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-//B_MBOrientation.prototype.updateAction = B_DeviceWithPortsSensorBase.prototype.updateAction;
-
-
-B_BBOrientation.prototype.updateAction = function() {
-
-    const mem = this.runMem;
-    const status = mem.requestStatus;
-    if (status.finished === true) {
-        if (status.error === false) {
-            return new ExecutionStatusResult(new BoolData(status.result === "1", true));
-        } else {
-            if (status.result.length > 0) {
-                this.displayError(status.result);
-                return new ExecutionStatusError();
-            } else {
-                return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
-            }
-        }
-    } else {
-        return new ExecutionStatusRunning(); // Still running
-    }
-
-
-
-
-};
-
-
-
-
-
-
-// Block for the compass
+function B_BBMagnetometer(x, y){
+  B_MicroBitMagnetometer.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBMagnetometer.prototype = Object.create(B_MicroBitMagnetometer.prototype);
+B_BBMagnetometer.prototype.constructor = B_BBMagnetometer;
 
 
 function B_BBCompass(x, y){
-    ReporterBlock.call(this,x,y,DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = Language.getStr("Compass");
-    this.numberOfPorts = 1;
-    this.draggable = true;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
+  B_MicroBitCompass.call(this, x, y, DeviceHummingbirdBit);
 }
-B_BBCompass.prototype = Object.create(ReporterBlock.prototype);
+B_BBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_BBCompass.prototype.constructor = B_BBCompass;
-
-B_BBCompass.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.readCompass(mem.requestStatus);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-B_BBCompass.prototype.updateAction = function(){
-
-    const status = this.runMem.requestStatus;
-        if (status.finished) {
-            if(status.error){
-                this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-                return new ExecutionStatusError();
-            } else {
-                const result = new StringData(status.result);
-                const num = Math.round(result.asNum().getValue());
-
-                return new ExecutionStatusResult(new NumData(num));
-            }
-        }
-        return new ExecutionStatusRunning(); // Still running
-
-};
-
-Block.setDisplaySuffix(B_BBCompass, String.fromCharCode(176));
-
-
-
-function B_BBCompassCalibrate(x, y){
-    CalibrateBlock.call(this, x, y, DeviceHummingbirdBit.getDeviceTypeId());
-    this.deviceClass = DeviceHummingbirdBit;
-    this.displayName = Language.getStr("CompassCalibrate");
-    this.draggable = false;
-    this.numberOfPorts = 1;
-    this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-    this.addPart(new LabelText(this,this.displayName));
-
-}
-B_BBCompassCalibrate.prototype = Object.create(CalibrateBlock.prototype);
-B_BBCompassCalibrate.prototype.constructor = B_BBCompassCalibrate;
-
-
-B_BBCompassCalibrate.prototype.startAction=function(){
-    let deviceIndex = this.slots[0].getData().getValue();
-    let device = this.deviceClass.getManager().getDevice(deviceIndex);
-    if (device == null) {
-        this.displayError(this.deviceClass.getNotConnectedMessage());
-        return new ExecutionStatusError(); // Flutter was invalid, exit early
-    }
-    let mem = this.runMem;
-    let port = 1;
-    if (port != null && port > 0 && port <= this.numberOfPorts) {
-        mem.requestStatus = {};
-        mem.requestStatus.finished = false;
-        mem.requestStatus.error = false;
-        mem.requestStatus.result = null;
-        device.calibrateCompass(mem.requestStatus);
-        return new ExecutionStatusRunning();
-    } else {
-        this.displayError("Invalid port number");
-        return new ExecutionStatusError(); // Invalid port, exit early
-    }
-};
-
-
-
-B_BBCompassCalibrate.prototype.updateAction = function(){
-    const status = this.runMem.requestStatus;
-    if (status.finished) {
-        if(status.error){
-            this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-            return new ExecutionStatusError();
-        } else {
-            return new ExecutionStatusDone();
-        }
-    }
-    return new ExecutionStatusRunning(); // Still running
-
-};
 
 
 
@@ -25838,10 +27992,9 @@ B_FinchSetAll.prototype.updateAction = function() {
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when")));
 	// Add flag icon with height 15
 	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.addPart(new LabelText(this, Language.getStr("tapped")));
+	this.parseTranslation(Language.getStr("block_when_flag_tapped"));
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
@@ -25858,9 +28011,9 @@ B_WhenFlagTapped.prototype.startAction = function() {
 
 function B_WhenIReceive(x, y) {
 	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when_I_receive")));
 	// Creates a BroadcastDropSlot that does nt allow snapping
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", true));
+	this.parseTranslation(Language.getStr("block_when_I_receive"));
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
@@ -25893,9 +28046,8 @@ function B_Wait(x, y) {
 	// Category ("control") determines colors
 	CommandBlock.call(this, x, y, "control");
 	// Build Block out of things found in the BlockParts folder
-	this.addPart(new LabelText(this, Language.getStr("wait")));
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.addPart(new LabelText(this, Language.getStr("secs")));
+	this.parseTranslation(Language.getStr("block_wait"));
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -25922,8 +28074,8 @@ B_Wait.prototype.updateAction = function() {
 
 function B_WaitUntil(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("wait_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_wait_until"));
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
@@ -25943,7 +28095,7 @@ B_WaitUntil.prototype.startAction = function() {
 
 function B_Forever(x, y) {
 	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
-	this.addPart(new LabelText(this, Language.getStr("repeat_forever")));
+	this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
@@ -25969,8 +28121,8 @@ B_Forever.prototype.updateAction = function() {
 
 function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("repeat")));
 	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
+	this.parseTranslation(Language.getStr("block_repeat"));
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
@@ -26010,8 +28162,8 @@ B_Repeat.prototype.updateAction = function() {
 
 function B_RepeatUntil(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("repeat_until")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_repeat_until"));
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
@@ -26043,8 +28195,8 @@ B_RepeatUntil.prototype.updateAction = function() {
 
 function B_If(x, y) {
 	LoopBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_if"));
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
@@ -26067,8 +28219,8 @@ B_If.prototype.updateAction = function() {
 
 function B_IfElse(x, y) {
 	DoubleLoopBlock.call(this, x, y, "control", Language.getStr("else"));
-	this.addPart(new LabelText(this, Language.getStr("if")));
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_if_else"));
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
 B_IfElse.prototype.constructor = B_IfElse;
@@ -26096,8 +28248,8 @@ B_IfElse.prototype.updateAction = function() {
 
 function B_Broadcast(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
+	this.parseTranslation(Language.getStr("block_broadcast"));
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
@@ -26134,9 +28286,8 @@ B_Broadcast.prototype.updateAction = function() {
 
 function B_BroadcastAndWait(x, y) {
 	CommandBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("broadcast")));
 	this.addPart(new BroadcastDropSlot(this, "BDS_msg", false));
-	this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	this.parseTranslation(Language.getStr("block_broadcast_and_wait"));
 }
 B_BroadcastAndWait.prototype = Object.create(CommandBlock.prototype);
 B_BroadcastAndWait.prototype.constructor = B_BroadcastAndWait;
@@ -26163,7 +28314,7 @@ B_BroadcastAndWait.prototype.updateAction = function() {
 
 function B_Message(x, y) {
 	ReporterBlock.call(this, x, y, "control", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("message")));
+	this.addPart(new LabelText(this, Language.getStr("block_message")));
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
@@ -26176,7 +28327,6 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 	CommandBlock.call(this, x, y, "control", true);
-	this.addPart(new LabelText(this, Language.getStr("stop")));
 	const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("all"), "all"));
 	dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
@@ -26184,6 +28334,7 @@ function B_Stop(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
 	//dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_stop"));
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
@@ -26202,17 +28353,17 @@ B_Stop.prototype.startAction = function() {
 
 
 
-
-
-
-
 function B_When(x, y) {
-	HatBlock.call(this, x, y, "control");
-	this.addPart(new LabelText(this, Language.getStr("when")));
+	HatBlock.call(this, x, y, "control", true);
 	this.addPart(new BoolSlot(this, "BoolS_cond"));
+	this.parseTranslation(Language.getStr("block_when"));
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
+// The flag should trigger this block as well
+B_When.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+}
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
 	const stopWaiting = this.slots[0].getData().getValue();
@@ -26234,9 +28385,8 @@ B_When.prototype.startAction = function() {
 /* TODO: make sure dialogs don't show while a save dialog is up */
 function B_Ask(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("ask")));
-	this.addPart(new StringSlot(this, "StrS_msg", "what's your name?"));
-	this.addPart(new LabelText(this, Language.getStr("and_wait")));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	this.parseTranslation(Language.getStr("block_ask"));
 }
 B_Ask.prototype = Object.create(CommandBlock.prototype);
 B_Ask.prototype.constructor = B_Ask;
@@ -26284,7 +28434,7 @@ B_Ask.prototype.showQuestion = function() {
 		CodeManager.answer = new StringData("", true);   //"" is the default answer.
 		mem.finished = true;   // Done waiting.
 	};
-	DialogManager.showPromptDialog("Question", mem.question, "", true, callbackFn, callbackErr);   // Make the request.
+	DialogManager.showPromptDialog(Language.getStr("Question"), mem.question, "", true, callbackFn, callbackErr);   // Make the request.
 	mem.questionDisplayed = true;   // Prevents displaying twice.
 };
 
@@ -26292,7 +28442,7 @@ B_Ask.prototype.showQuestion = function() {
 
 function B_Answer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("answer")));
+	this.addPart(new LabelText(this, Language.getStr("block_answer")));
 }
 B_Answer.prototype = Object.create(ReporterBlock.prototype);
 /* Result is whatever is stored in CodeManager. */
@@ -26305,7 +28455,7 @@ B_Answer.prototype.startAction = function() {
 
 function B_ResetTimer(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("reset_timer")));
+	this.addPart(new LabelText(this, Language.getStr("block_reset_timer")));
 }
 B_ResetTimer.prototype = Object.create(CommandBlock.prototype);
 B_ResetTimer.prototype.constructor = B_ResetTimer;
@@ -26319,7 +28469,7 @@ B_ResetTimer.prototype.startAction = function() {
 
 function B_Timer(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this,  Language.getStr("timer")));
+	this.addPart(new LabelText(this,  Language.getStr("block_timer")));
 }
 B_Timer.prototype = Object.create(ReporterBlock.prototype);
 B_Timer.prototype.constructor = B_Timer;
@@ -26336,7 +28486,6 @@ Block.setDisplaySuffix(B_Timer, "s");
 
 function B_CurrentTime(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("current")));
 	const dS = new DropSlot(this, "DS_interval", null, null, new SelectionData(Language.getStr("date"), "date"));
 	dS.addOption(new SelectionData(Language.getStr("year"), "year"));
 	dS.addOption(new SelectionData(Language.getStr("month"), "month"));
@@ -26347,6 +28496,7 @@ function B_CurrentTime(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("second"), "second"));
 	dS.addOption(new SelectionData(Language.getStr("time_in_milliseconds"), "time in milliseconds"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_current"));
 }
 B_CurrentTime.prototype = Object.create(ReporterBlock.prototype);
 B_CurrentTime.prototype.constructor = B_CurrentTime;
@@ -26381,14 +28531,13 @@ B_CurrentTime.prototype.startAction = function() {
 
 function B_Display(x, y) {
 	CommandBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Display")));
-	this.addPart(new StringSlot(this, "StrS_msg", "Hello"));
-	this.addPart(new LabelText(this, Language.getStr("at")));
-	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("Position") +" 3", "position3"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 1", "position1"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 2", "position2"));
-	dS.addOption(new SelectionData(Language.getStr("Position") +" 3", "position3"));
+	this.addPart(new StringSlot(this, "StrS_msg", ""));
+	const dS = new DropSlot(this, "DS_pos", null, null, new SelectionData(Language.getStr("position") +" 3", "position3"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 1", "position1"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 2", "position2"));
+	dS.addOption(new SelectionData(Language.getStr("position") +" 3", "position3"));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_Display"));
 }
 B_Display.prototype = Object.create(CommandBlock.prototype);
 B_Display.prototype.constructor = B_Display;
@@ -26399,6 +28548,7 @@ B_Display.prototype.startAction = function() {
 	DisplayBoxManager.displayText(message, position);
 	return new ExecutionStatusDone(); // Done running
 };
+
 /* This file contains the implementations for Blocks in the operators category. */
 function B_Add(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
@@ -26422,8 +28572,9 @@ B_Add.prototype.startAction = function() {
 function B_Subtract(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, String.fromCharCode(8211)));
+	//this.addPart(new LabelText(this, String.fromCharCode(8211)));
 	this.addPart(new NumSlot(this, "NumS_2", 0));
+	this.parseTranslation(Language.getStr("block_subtract"));
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
@@ -26460,8 +28611,9 @@ B_Multiply.prototype.startAction = function() {
 function B_Divide(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 0));
-	this.addPart(new LabelText(this, "/"));
+	//this.addPart(new LabelText(this, "/"));
 	this.addPart(new NumSlot(this, "NumS_2", 1));
+	this.parseTranslation(Language.getStr("block_divide"));
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
@@ -26485,8 +28637,8 @@ B_Divide.prototype.startAction = function() {
 function B_Mod(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
 	this.addPart(new NumSlot(this, "NumS_1", 17));
-	this.addPart(new LabelText(this, Language.getStr("mod")));
 	this.addPart(new NumSlot(this, "NumS_2", 10));
+	this.parseTranslation(Language.getStr("block_mod"));
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
@@ -26509,8 +28661,8 @@ B_Mod.prototype.startAction = function() {
 
 function B_Round(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("round")));
 	this.addPart(new NumSlot(this, "NumS_1", 0.5));
+	this.parseTranslation(Language.getStr("block_round"));
 }
 B_Round.prototype = Object.create(ReporterBlock.prototype);
 B_Round.prototype.constructor = B_Round;
@@ -26526,10 +28678,9 @@ B_Round.prototype.startAction = function() {
 
 function B_PickRandom(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("pick_random")));
 	this.addPart(new NumSlot(this, "NumS_min", 1));
-	this.addPart(new LabelText(this, Language.getStr("to")));
 	this.addPart(new NumSlot(this, "NumS_max", 10));
+	this.parseTranslation(Language.getStr("block_pick_random"));
 }
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
@@ -26612,8 +28763,8 @@ B_GreaterThan.prototype.startAction = function() {
 function B_And(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("and")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_and"));
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
@@ -26629,8 +28780,8 @@ B_And.prototype.startAction = function() {
 function B_Or(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
 	this.addPart(new BoolSlot(this, "BoolS_1"));
-	this.addPart(new LabelText(this, Language.getStr("or")));
 	this.addPart(new BoolSlot(this, "BoolS_2"));
+	this.parseTranslation(Language.getStr("block_or"));
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
@@ -26645,8 +28796,8 @@ B_Or.prototype.startAction = function() {
 
 function B_Not(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("not")));
 	this.addPart(new BoolSlot(this, "BoolS_1"));
+	this.parseTranslation(Language.getStr("block_not"));
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
@@ -26686,12 +28837,11 @@ B_False.prototype.startAction = function() {
 
 function B_LetterOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("letter")));
 	const nS = new NumSlot(this, "NumS_idx", 1, true, true);
 	nS.addLimits(1);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_letter"));
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
@@ -26710,8 +28860,8 @@ B_LetterOf.prototype.startAction = function() {
 
 function B_LengthOf(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
-	this.addPart(new StringSlot(this, "StrS_text", "world"));
+	this.addPart(new StringSlot(this, "StrS_text", ""));
+	this.parseTranslation(Language.getStr("block_length"));
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
@@ -26725,10 +28875,9 @@ B_LengthOf.prototype.startAction = function() {
 
 function B_join(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("join")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello "));
-	this.addPart(new LabelText(this, Language.getStr("and")));
-	this.addPart(new StringSlot(this, "StrS_2", "world"));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
+	this.addPart(new StringSlot(this, "StrS_2", ""));
+	this.parseTranslation(Language.getStr("block_join"));
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
@@ -26743,18 +28892,18 @@ B_join.prototype.startAction = function() {
 
 function B_Split(x, y) {
 	ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
-	this.addPart(new LabelText(this, Language.getStr("split")));
-	this.addPart(new StringSlot(this, "StrS_1", "hello world"));
-	this.addPart(new LabelText(this, Language.getStr("by")));
+	this.addPart(new StringSlot(this, "StrS_1", ""));
 
 	const inputType = EditableSlot.inputTypes.any;
 	const snapType = Slot.snapTypes.numStrBool;
 	const data = new SelectionData(Language.getStr("whitespace"), "whitespace");
 	const dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-	dS.addEnterText(Language.getStr("Edit_Text"));
+	dS.addEnterText(Language.getStr("Edit_text"));
 	dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
 	dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
 	this.addPart(dS);
+
+	this.parseTranslation(Language.getStr("block_split"));
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
@@ -26787,9 +28936,7 @@ B_Split.prototype.startAction = function() {
 
 function B_IsAType(x, y) {
 	PredicateBlock.call(this, x, y, "operators");
-	this.addPart(new LabelText(this, Language.getStr("is")));
 	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
-	this.addPart(new LabelText(this, Language.getStr("a")));
 	const dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("number"), "number"));
 	dS.addOption(new SelectionData(Language.getStr("text"), "text"));
@@ -26797,7 +28944,8 @@ function B_IsAType(x, y) {
 	dS.addOption(new SelectionData(Language.getStr("list"), "list"));
 	dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, "?"));
+
+	this.parseTranslation(Language.getStr("block_validate"));
 }
 B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
@@ -26839,7 +28987,7 @@ B_IsAType.prototype.startAction = function() {
 
 function B_mathOfNumber(x, y) {
 	ReporterBlock.call(this, x, y, "operators");
-	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData("sqrt", "sqrt"));
+	const dS = new DropSlot(this, "DS_operation", null, null, new SelectionData(Language.getStr("sqrt"), "sqrt"));
 	dS.addOption(new SelectionData("sin", "sin"));
 	dS.addOption(new SelectionData("cos", "cos"));
 	dS.addOption(new SelectionData("tan", "tan"));
@@ -26850,18 +28998,18 @@ function B_mathOfNumber(x, y) {
 
 	dS.addOption(new SelectionData("ln", "ln"));
 	dS.addOption(new SelectionData("e^", "e^"));
-	dS.addOption(new SelectionData("ceiling", "ceiling"));
+	dS.addOption(new SelectionData(Language.getStr("ceiling"), "ceiling"));
 
 	dS.addOption(new SelectionData("log", "log"));
 	dS.addOption(new SelectionData("10^", "10^"));
-	dS.addOption(new SelectionData("floor", "floor"));
+	dS.addOption(new SelectionData(Language.getStr("floor"), "floor"));
 
-	dS.addOption(new SelectionData("abs", "abs"));
-	dS.addOption(new SelectionData("sqrt", "sqrt"));
+	dS.addOption(new SelectionData(Language.getStr("abs"), "abs"));
+	dS.addOption(new SelectionData(Language.getStr("sqrt"), "sqrt"));
 
 	this.addPart(dS);
-	this.addPart(new LabelText(this, Language.getStr("of")));
 	this.addPart(new NumSlot(this, "NumS_val", 10));
+	this.parseTranslation(Language.getStr("block_math_of_number"))
 }
 B_mathOfNumber.prototype = Object.create(ReporterBlock.prototype);
 B_mathOfNumber.prototype.constructor = B_mathOfNumber;
@@ -26913,6 +29061,7 @@ B_mathOfNumber.prototype.startAction = function() {
 	}
 	return new ExecutionStatusResult(new NumData(value, isValid));
 };
+
 /* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
 
@@ -26932,7 +29081,7 @@ B_ThrowError.prototype.startAction = function() {
 
 function B_DeviceShaken(x, y) {
 	PredicateBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Device_Shaken")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Shaken")));
 }
 B_DeviceShaken.prototype = Object.create(PredicateBlock.prototype);
 B_DeviceShaken.prototype.constructor = B_DeviceShaken;
@@ -26971,7 +29120,7 @@ B_DeviceShaken.prototype.checkActive = function() {
 
 function B_DeviceSSID(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("Device_SSID")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_SSID")));
 }
 B_DeviceSSID.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceSSID.prototype.constructor = B_DeviceSSID;
@@ -27007,7 +29156,7 @@ B_DeviceSSID.prototype.updateAction = function() {
 
 function B_DevicePressure(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this, Language.getStr("Device_Pressure")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Pressure")));
 }
 B_DevicePressure.prototype = Object.create(ReporterBlock.prototype);
 B_DevicePressure.prototype.constructor = B_DevicePressure;
@@ -27049,7 +29198,7 @@ Block.setDisplaySuffix(B_DevicePressure, "kPa");
 
 function B_DeviceRelativeAltitude(x, y) {
 	ReporterBlock.call(this, x, y, "tablet");
-	this.addPart(new LabelText(this,  Language.getStr("Device_Relative_Altitude")));
+	this.addPart(new LabelText(this,  Language.getStr("block_Device_Relative_Altitude")));
 }
 B_DeviceRelativeAltitude.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceRelativeAltitude.prototype.constructor = B_DeviceRelativeAltitude;
@@ -27068,7 +29217,8 @@ B_DeviceRelativeAltitude.prototype.updateAction = function() {
 	if (status.finished === true) {
 		if (status.error === false) {
 			const result = Number(status.result);
-			return new ExecutionStatusResult(new NumData(result, true));
+			const num = Math.round(result * 100) / 100;
+			return new ExecutionStatusResult(new NumData(num, true));
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
@@ -27090,7 +29240,7 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 function B_DeviceOrientation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("Device_Orientation")));
+	this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
@@ -27108,7 +29258,8 @@ B_DeviceOrientation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			return new ExecutionStatusResult(new StringData(status.result, true));
+			const res = new StringData(Language.getStr(status.result), true);
+			return new ExecutionStatusResult(res);
 		} else {
 			if (status.result.length > 0) {
 				this.displayError(status.result);
@@ -27129,14 +29280,13 @@ B_DeviceOrientation.prototype.checkActive = function() {
 
 function B_DeviceAcceleration(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this,  Language.getStr("Device")));
 	const dS = new DropSlot(this, "DS_axis", null, null, new SelectionData("X", 0));
 	dS.addOption(new SelectionData("X", 0));
 	dS.addOption(new SelectionData("Y", 1));
 	dS.addOption(new SelectionData("Z", 2));
-	dS.addOption(new SelectionData("Total", "total"));
+	dS.addOption(new SelectionData(Language.getStr("Total"), "total"));
 	this.addPart(dS);
-	this.addPart(new LabelText(this, Language.getStr("Acceleration")));
+	this.parseTranslation(Language.getStr("block_Acceleration"));
 }
 B_DeviceAcceleration.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceAcceleration.prototype.constructor = B_DeviceAcceleration;
@@ -27187,11 +29337,11 @@ Block.setDisplaySuffix(B_DeviceAcceleration, "m/s" + String.fromCharCode(178));
 
 function B_DeviceLocation(x, y) {
 	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.num);
-	this.addPart(new LabelText(this, Language.getStr("Device")));
 	const dS = new DropSlot(this, "DS_dir", null, null, new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Latitude"), 0));
 	dS.addOption(new SelectionData(Language.getStr("Longitude"), 1));
 	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_Device_LatLong"));
 }
 B_DeviceLocation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceLocation.prototype.constructor = B_DeviceLocation;
@@ -27246,9 +29396,9 @@ function B_PlaySoundOrRecording(x, y, label, isRecording, waitUntilDone) {
 	CommandBlock.call(this, x, y, "sound");
 	this.isRecording = isRecording;
 	this.waitUntilDone = waitUntilDone;
-	this.addPart(new LabelText(this, label));
 	let dS = new SoundDropSlot(this, "SDS_1", isRecording);
 	this.addPart(dS);
+	this.parseTranslation(label);
 }
 B_PlaySoundOrRecording.prototype = Object.create(CommandBlock.prototype);
 B_PlaySoundOrRecording.prototype.constructor = B_PlaySoundOrRecording;
@@ -27285,7 +29435,7 @@ B_PlaySoundOrRecording.prototype.updateAction = function() {
 
 
 function B_PlaySound(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound"), false, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_sound"), false, false);
 }
 B_PlaySound.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySound.prototype.constructor = B_PlaySound;
@@ -27293,7 +29443,7 @@ B_PlaySound.prototype.constructor = B_PlaySound;
 
 
 function B_PlaySoundUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_sound_until_done"), false, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_sound_until_done"), false, true);
 }
 B_PlaySoundUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
@@ -27301,7 +29451,7 @@ B_PlaySoundUntilDone.prototype.constructor = B_PlaySoundUntilDone;
 
 
 function B_PlayRecording(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording"), true, false);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_recording"), true, false);
 }
 B_PlayRecording.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecording.prototype.constructor = B_PlayRecording;
@@ -27309,7 +29459,7 @@ B_PlayRecording.prototype.constructor = B_PlayRecording;
 
 
 function B_PlayRecordingUntilDone(x, y) {
-	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("play_recording_until_done"), true, true);
+	B_PlaySoundOrRecording.call(this, x, y, Language.getStr("block_play_recording_until_done"), true, true);
 }
 B_PlayRecordingUntilDone.prototype = Object.create(B_PlaySoundOrRecording.prototype);
 B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
@@ -27318,7 +29468,7 @@ B_PlayRecordingUntilDone.prototype.constructor = B_PlayRecordingUntilDone;
 
 function B_StopAllSounds(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("stop_all_sounds")));
+	this.addPart(new LabelText(this, Language.getStr("block_stop_all_sounds")));
 }
 B_StopAllSounds.prototype = Object.create(CommandBlock.prototype);
 B_StopAllSounds.prototype.constructor = B_StopAllSounds;
@@ -27342,9 +29492,10 @@ B_StopAllSounds.prototype.updateAction = function() {
 
 function B_RestForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("rest_for")));
-	this.addPart(new NumSlot(this, "NumS_dur", 0.2, true)); // Positive
-	this.addPart(new LabelText(this, Language.getStr("Beats")));
+	const beatSlot = new NumSlot(this, "NumS_dur", 0.2, true); // Positive
+	beatSlot.addLimits(0, 16, Language.getStr("Beats"));
+	this.addPart(beatSlot);
+	this.parseTranslation(Language.getStr("block_rest_for"));
 }
 B_RestForBeats.prototype = Object.create(CommandBlock.prototype);
 B_RestForBeats.prototype.constructor = B_RestForBeats;
@@ -27370,11 +29521,13 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("play_note")));
-	this.addPart(new NumSlot(this, "NumS_note", 60, true, true)); // Positive integer
-	this.addPart(new LabelText(this, Language.getStr("for")));
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Positive
-	this.addPart(new LabelText(this, Language.getStr("Beats")));
+	const noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	noteSlot.addLimits(32, 135, Language.getStr("Note"));
+	this.addPart(noteSlot);
+	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive 
+	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
+	this.addPart(beatsSlot);
+	this.parseTranslation(Language.getStr("block_Play_Note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;
@@ -27413,8 +29566,8 @@ B_PlayNoteForBeats.prototype.updateAction = function() {
 
 function B_ChangeTempoBy(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("change_tempo_by")));
 	this.addPart(new NumSlot(this, "NumS_amt", 20));
+	this.parseTranslation(Language.getStr("block_change_tempo_by"));
 }
 B_ChangeTempoBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeTempoBy.prototype.constructor = B_ChangeTempoBy;
@@ -27432,11 +29585,10 @@ B_ChangeTempoBy.prototype.startAction = function() {
 
 function B_SetTempoTo(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("set_tempo_to")));
 	const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
 	nS.addLimits(20, 500, null);
 	this.addPart(nS);
-	this.addPart(new LabelText(this, "bpm"));
+	this.parseTranslation(Language.getStr("block_set_tempo_to"));
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
@@ -27454,7 +29606,7 @@ B_SetTempoTo.prototype.startAction = function() {
 
 function B_Tempo(x, y) {
 	ReporterBlock.call(this, x, y, "sound");
-	this.addPart(new LabelText(this, Language.getStr("tempo")));
+	this.addPart(new LabelText(this, Language.getStr("block_tempo")));
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
@@ -27462,6 +29614,7 @@ B_Tempo.prototype.constructor = B_Tempo;
 B_Tempo.prototype.startAction = function() {
 	return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
 };
+
 /* Implementation of blocks that deal with variables and lists.  Most of these blocks have a DropSlot to select
  * the list to read/modify.  Some of the List Blocks allow this Slot to be given either an existing List
  * or a ListData, such as returned from the Split block.
@@ -27562,10 +29715,9 @@ B_Variable.importXml = function(blockNode) {
 
 function B_SetTo(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "set"));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "to"));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
+	this.parseTranslation(Language.getStr("block_set_variable"));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
@@ -27593,10 +29745,9 @@ B_SetTo.prototype.startAction = function() {
 
 function B_ChangeBy(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "change"));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "by"));
 	this.addPart(new NumSlot(this, "NumS_val", 1));
+	this.parseTranslation(Language.getStr("block_change_variable"));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
@@ -27706,13 +29857,12 @@ B_List.prototype.checkListUsed = function(list) {
 
 function B_AddToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "add"));
 	/* Any type can be added to a list */
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_add_to_list"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
@@ -27741,10 +29891,9 @@ B_AddToList.prototype.startAction = function() {
 
 function B_DeleteItemOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "delete"));
 	this.addPart(new IndexSlot(this, "NumS_idx", true));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_delete_from_list"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
@@ -27774,12 +29923,10 @@ B_DeleteItemOfList.prototype.startAction = function() {
 
 function B_InsertItemAtOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "insert"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
-	this.addPart(new LabelText(this, "at"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_insert_into_list"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
@@ -27821,12 +29968,10 @@ B_InsertItemAtOfList.prototype.startAction = function() {
 
 function B_ReplaceItemOfListWith(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "replace item"));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
-	this.addPart(new LabelText(this, "with"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
+	this.parseTranslation(Language.getStr("block_replace_list_item"));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
@@ -27858,12 +30003,11 @@ B_ReplaceItemOfListWith.prototype.startAction = function() {
 
 function B_CopyListToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "copy"));
 	/* This Slot also accepts ListData, such as data from the Split block */
 	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, "to"));
 	/* This Slot must have an already existing List, not a ListData */
 	this.addPart(new ListDropSlot(this, "LDS_to"));
+	this.parseTranslation(Language.getStr("block_copy_list"));
 }
 B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
@@ -27896,11 +30040,10 @@ B_CopyListToList.prototype.startAction = function() {
 
 function B_ItemOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_item"));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
@@ -27945,9 +30088,9 @@ B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
 
 function B_LengthOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_length"));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
@@ -27970,10 +30113,10 @@ B_LengthOfList.prototype.startAction = function() {
 function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, Language.getStr("contains")));
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+	this.parseTranslation(Language.getStr("block_list_contains"));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;
@@ -28007,3 +30150,4 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
 	}
 	return new BoolData(false, true);
 };
+

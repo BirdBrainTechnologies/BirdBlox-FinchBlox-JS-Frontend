@@ -20,6 +20,7 @@ function GuiElements() {
 	// Load settings from backend
 	GuiElements.loadInitialSettings(function() {
 		// Build the UI
+		GuiElements.setLanguage();
 		GuiElements.setConstants();
 		GuiElements.createLayers();
 		GuiElements.dialogBlock = null;
@@ -35,12 +36,45 @@ document.addEventListener('DOMContentLoaded', function() {
 	(DebugOptions.safeFunc(GuiElements))();
 }, false);
 
-/* Redraws UI if screen dimensions change */
+/** Redraws UI if screen dimensions change
+  *  In iOS, this function is called before the new sizes are set. Still, it is
+	*  the most reliable way of getting the correct screen size. iOS calls
+	*  GuiElements.updateDimsPreview with approximate dimensions, then this
+	*  function will add true dimensions after a moment.
+  */
 window.onresize = function() {
-	if (GuiElements.loaded && !GuiElements.isIos) {
-		GuiElements.updateDims();
+	//if (GuiElements.loaded && !GuiElements.isIos) {
+		//GuiElements.updateDims();
+	//}
+	if (GuiElements.loaded) {
+		if (GuiElements.isIos) {
+	    setTimeout(function() { GuiElements.updateDims(); }, 500);
+		} else {
+			GuiElements.updateDims();
+		}
 	}
 };
+
+GuiElements.setLanguage = function() {
+	//Check the session storage for a user selected language
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang != undefined && userSelectedLang != null){
+    Language.lang = userSelectedLang;
+	}
+
+	var lnk = document.createElement('link');
+  lnk.type='text/css';
+  lnk.rel='stylesheet';
+	if (Language.rtlLangs.indexOf(Language.lang) === -1) {
+  	lnk.href='MyCSS.css';
+	} else {
+		lnk.href='MyCSS_rtl.css';
+		Language.isRTL = true;
+		var html = document.getElementsByTagName('html')[0];
+		html.setAttribute("dir", "rtl");
+	}
+	document.getElementsByTagName('head')[0].appendChild(lnk);
+}
 
 /** Sets constants relating to screen dimensions and the Operating System */
 GuiElements.setGuiConstants = function() {
@@ -294,7 +328,11 @@ GuiElements.create.path = function(group) {
  * @return {Element} - The text which was created.
  */
 GuiElements.create.text = function() {
-	return document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+	if (Language.isRTL) {
+		textElement.setAttributeNS(null, "transform", "scale(-1, 1)");
+	}
+	return textElement;
 };
 /**
  * Creates an SVG image element and returns it.
@@ -480,6 +518,7 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y);
 	const textElement = GuiElements.create.text();
+	if (Language.isRTL){ x = -x; }
 	textElement.setAttributeNS(null, "x", x);
 	textElement.setAttributeNS(null, "y", y);
 	textElement.setAttributeNS(null, "font-family", font.fontFamily);
@@ -493,6 +532,46 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
 	textElement.textNode = textNode;
 	textElement.appendChild(textNode);
 	return textElement;
+};
+/**
+ * Creates a video with the given dimensions and name
+ * Note: if you want to embed the video in an existing svg element, you can do
+ * so by putting it inside a foreignObject element (which you insert into the svg
+ * element). However, the video does not tend to appear to be properly contained.
+ * @param {string} videoName - The name of the mp4 video file
+ * @param {string} robotId - ID of the robot this video is for if applicable
+ * @return {Element}
+ */
+GuiElements.draw.video = function(videoName, robotId) {
+
+	const container = document.createElement('div');
+	//container.setAttribute("style", "position: relative; height: 0; width: 100%; padding-bottom:56.25%;")
+	container.setAttribute("style", "position: relative; height: 100%; width: 100%; pointer-events: none;")
+
+	const videoElement = document.createElement('video');
+	if (robotId != null) {
+		//If we are showing a video for a specific robot (as in compass calibration)
+		// tag with the robot's id and have it loop. Removal of video is handled by
+		// CallBackManager in this case.
+		videoElement.setAttribute("id", "video" + robotId);
+		videoElement.setAttribute("loop", "loop");
+	}
+	//videoElement.setAttribute("controls", "controls");
+	//videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; padding: 3% 0;")
+	videoElement.setAttribute("style", "position: relative; display: block; margin: 0 auto; height: auto; width: 95%; top: 50%; transform: translateY(-50%);")
+	videoElement.src = videoName;
+	videoElement.autoplay = true;
+	videoElement.muted = true; //video must be muted to autoplay on Android.
+
+	container.appendChild(videoElement);
+	document.body.appendChild(container);
+
+	videoElement.addEventListener('ended',myHandler,false);
+  function myHandler(e) {
+    document.body.removeChild(container);
+  }
+
+	return videoElement;
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -745,12 +824,16 @@ GuiElements.move.group = function(group, x, y, zoom) {
 };
 /**
  * Moves an SVG text element.
- * @param {string} text - The text to move.
+ * Position is relative to its container.
+ * @param {string} text - The text element to move.
  * @param {number} x - The new x coord of the text.
  * @param {number} y - The new y coord of the text.
  */
 GuiElements.move.text = function(text, x, y) {
 	DebugOptions.validateNumbers(x, y);
+	//For rtl, the text elements are flipped (scale(-1,1)) and so must move in the
+	// other direction to be positioned correctly.
+	if (Language.isRTL){ x = -x; }
 	text.setAttributeNS(null, "x", x);
 	text.setAttributeNS(null, "y", y);
 };
@@ -1141,4 +1224,23 @@ GuiElements.checkSmallMode = function() {
 	if (!GE.smallMode && SettingsManager.sideBarVisible.getValue() !== "true") {
 		SettingsManager.sideBarVisible.writeValue("true");
 	}
+};
+
+/**
+ * Removes any videos that are currently playing
+ */
+GuiElements.removeVideos = function() {
+	const videosOpen = document.getElementsByTagName("video").length;
+	if (videosOpen > 0){
+		for (var i = 0; i < videosOpen; i++) {
+			const videoElement = document.getElementsByTagName("video")[i];
+			GuiElements.removeVideo(videoElement);
+		}
+	}
+};
+GuiElements.removeVideo = function(videoElement) {
+	//each video is presented inside a div element. This is what must
+	// be removed. See GuiElements.draw.video.
+	const container = videoElement.parentNode;
+	container.parentNode.removeChild(container);
 };

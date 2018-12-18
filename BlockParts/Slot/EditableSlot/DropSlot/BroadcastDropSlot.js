@@ -17,7 +17,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
 	}
 	DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
 	if (isHatBlock) {
-		this.addOption(new SelectionData("any message", "any_message"));
+		this.addOption(new SelectionData(Language.getStr("any_message"), "any_message"));
 	}
 }
 BroadcastDropSlot.prototype = Object.create(DropSlot.prototype);
@@ -39,7 +39,7 @@ BroadcastDropSlot.prototype.populatePad = function(selectPad) {
 		selectPad.addOption(new StringData(message), '"' + message + '"');
 	});
 	// Add an Edit Text option
-	selectPad.addAction("new", function(callbackFn) {
+	selectPad.addAction(Language.getStr("new"), function(callbackFn) {
 		// When the option is selected, show a dialog
 		const inputDialog = new InputDialog(this.parent.textSummary(this), false);
 		inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {

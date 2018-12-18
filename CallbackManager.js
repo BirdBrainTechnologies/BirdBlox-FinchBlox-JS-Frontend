@@ -150,13 +150,41 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
 	DeviceManager.updateConnectionStatus(robotId, isConnected);
 	return true;
 };
-
+/**
+ * Updates the status of the battery for display in the battery menu.
+ * @param {string} robotId - The percent encoded id of the robot
+ * @param {number} batteryStatus - New battery status. red = 0; yellow = 1; green = 2
+ * @return {boolean}
+ */
 CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
     robotId = HtmlServer.decodeHtml(robotId);
     DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
     return true;
-}
-
+};
+/**
+ * While the micro:bit compass is being calibrated, we will play the instructional
+ * video on a loop. Once calibration is complete, the backend must notify the
+ * frontend to remove the video.
+ * @param {string} robotId - Id of the robot being calibrated.
+ * @param {boolean} success - True if the compass was successfully calibrated
+ * @return {boolean} - true if a video element was found for the robot id.
+ */
+CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
+	DeviceManager.updateCompassCalibrationStatus(robotId, success);
+	const dialog = RowDialog.currentDialog;
+	if (dialog != null) {
+		if (dialog.constructor === CalibrateCompassDialog) {
+			const rows = dialog.rowCount;
+			dialog.reloadRows(rows);
+		}
+	}
+	const videoElement = document.getElementById("video" + robotId);
+	if (videoElement != null) {
+		GuiElements.removeVideo(videoElement);
+		return true;
+	}
+	return false;
+};
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
  * @param {string} robotId - The percent encoded id of the robot
@@ -167,13 +195,20 @@ CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, mi
 	robotId = HtmlServer.decodeHtml(robotId);
 	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
 	minFirmware = HtmlServer.decodeHtml(minFirmware);
-	DeviceManager.disconnectIncompatible(robotId, oldFirmware, minFirmware);
+	//DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
+
+	//November 2018 - for now, while there is really no old firmware
+	// out there, the incompatible message comes up incorrectly more
+	// often than correctly. Just report it as a connection failure
+	// (which is what it usually is).
+	CallBackManager.robot.connectionFailure(robotId);
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
     robotId = HtmlServer.decodeHtml(robotId);
-    let msg = "Connection to \"" + robotId + "\" failed, please try again later.";
-    DialogManager.showChoiceDialog("Connection Failure", msg, "", "Dismiss", true, function (result) {
+		DeviceManager.removeDisconnected(robotId);
+    let msg = Language.getStr("Connection_failed_try_again");
+    DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
     		return;
     	}.bind(this));
 }
@@ -258,38 +293,24 @@ CallbackManager.tablet.removeSensor = function(sensor){
 };
 
 /**
- * Tells the frontend that the language of the system
- * @param {string} lang - A non percent encoded string representing the language
+ * Tells the frontend the current system language
+ * Only use the system language if no language has been selected by the user
+ * @param {string} lang - current system language 2 letter code
  */
-
 CallbackManager.tablet.getLanguage = function(lang){
+	const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang == undefined || userSelectedLang == null){
     Language.setLanguage(lang);
+	}
 };
 
-/**
- * Opens the file based on the directory on app starts.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
+
 CallbackManager.tablet.setFile = function(fileName) {
     OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
-
-/**
- * Opens the file based on the directory when the user does not close the app before attempting to
-   open a file.
- * @param {string} fileName - The directory of the file(stored locally) that user attempts to open.
- */
 CallbackManager.tablet.runFile = function(fileName) {
     SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
-}
-
-/**
- * Changes the device limit that is supported based on the request from the backend.
- * @param {string} numOfDevice - The number of devices to be supported.
- */
-CallbackManager.tablet.changeDeviceLimit = function(numOfDevice) {
-    ConnectMultipleDialog.deviceLimit = parseInt(HtmlServer.decodeHtml(numOfDevice), 10) ;
 }
 
 /**
@@ -317,4 +338,16 @@ CallbackManager.httpResponse = function(id, status, body) {
 		body = HtmlServer.decodeHtml(body);
 	}
 	HtmlServer.responseFromIosCall(id, status, body);
+};
+
+/**
+ * Sets the name of the file that should be opened if tapping out of the
+ * open dialog. Whereas CallbackManager.tablet.setFile sets a file to open
+ * instead of opening the open dialog, this function mearly sets which file
+ * will be opened in the event that the user taps out of the open dialog.
+ * @param {string} fileName - The name of the file prefered
+ */
+CallbackManager.setFilePreference = function(fileName) {
+		GuiElements.alert("Setting default file to " + fileName);
+		OpenDialog.lastOpenFile = fileName;
 };

@@ -43,9 +43,12 @@ NumData.prototype.asString = function() {
 	if (this.isValid) {
 		let num = this.getValue();
 		num = +num.toFixed(10);
+		if (num < 0 && Language.isRTL) {
+			return new StringData(Language.forceLTR + num, true);
+		}
 		return new StringData(num + "", true);
 	} else {
-		return new StringData("not a valid number");
+		return new StringData(Language.getStr("not_a_valid_number"));
 	}
 };
 

@@ -24,9 +24,9 @@ function DeviceStatusLight(x, centerY, parent, statusProvider) {
 
 DeviceStatusLight.setConstants = function() {
 	const DSL = DeviceStatusLight;
-	DSL.greenColor = "#0f0";
-	DSL.redColor = "#f00";
-	DSL.yellowColor = "#ff0";
+	DSL.greenColor = Colors.green;
+	DSL.redColor = Colors.red;
+	DSL.yellowColor = Colors.yellow;
 	DSL.startColor = Colors.black;
 	DSL.offColor = Colors.darkGray;
 	DSL.radius = 6;

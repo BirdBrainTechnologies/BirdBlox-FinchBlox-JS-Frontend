@@ -32,7 +32,7 @@ BlockList.getCatId = function(index) {
  * @return {string} - The category's name.
  */
 BlockList.getCatName = function(index) {
-	return BlockList.categories[index];
+	return Language.getStr(BlockList.categories[index]);
 };
 
 /**
@@ -139,7 +139,7 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
-	const button = category.addButton(Language.getStr("Record_Sounds"), RecordingDialog.showDialog, true);
+	const button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
 	button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
 	category.addSpace();
 	category.addBlockByName("B_PlayRecording");
@@ -242,7 +242,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_HBTempC");
 	collapsibleItem.addBlockByName("B_HBTempF");
 	collapsibleItem.addBlockByName("B_HBDistCM");
-	collapsibleItem.addBlockByName("B_HBDistInch");
+	//collapsibleItem.addBlockByName("B_HBDistInch");
 	collapsibleItem.addBlockByName("B_HBKnob");
 	collapsibleItem.addBlockByName("B_HBSound");
 	collapsibleItem.trimBottom();
@@ -253,6 +253,7 @@ BlockList.populateItem_hummingbird = function(collapsibleItem) {
  * @param {CollapsibleItem} collapsibleItem
  */
 BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
+
 	collapsibleItem.addBlockByName("B_BBTriLed");
 	collapsibleItem.addBlockByName("B_BBLed")
 	collapsibleItem.addBlockByName("B_BBPositionServo");
@@ -266,8 +267,6 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
-	collapsibleItem.addBlockByName("B_BBCompassCalibrate");
-
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -279,12 +278,14 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBLedArray");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBPrint");
+	collapsibleItem.addBlockByName("B_MBWriteToPin");
+	collapsibleItem.addBlockByName("B_MBBuzzer");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_MBMagnetometer");
+	collapsibleItem.addBlockByName("B_MBReadPin");
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
-	collapsibleItem.addBlockByName("B_MBCompassCalibrate");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };

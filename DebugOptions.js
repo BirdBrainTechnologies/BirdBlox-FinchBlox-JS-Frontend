@@ -41,7 +41,22 @@ function DebugOptions() {
 DebugOptions.applyConstants = function() {
 	const DO = DebugOptions;
 	if (!DO.enabled) return;
-	// Currently nothing happens here.
+
+	// Check that all language files are complete (contain all keys from english)
+	const englishKeys = Object.keys(Language.en);
+	for (var i = 0; i < Language.langs.length; i++){
+		const lang = Language.langs[i];
+
+		var missingCount = 0;
+		for (var j = 0; j < englishKeys.length; j++) {
+			let translation = eval("Language." + lang + "." + englishKeys[j]);
+			if (translation == null) {
+				console.log(lang + " is missing the key " + englishKeys[j]);
+				missingCount++;
+			}
+		}
+		console.log(lang + " completeness check finished. " + missingCount + " missing keys.")
+	}
 };
 
 /**

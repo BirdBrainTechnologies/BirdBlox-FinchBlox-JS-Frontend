@@ -13,7 +13,14 @@ SettingsMenu.prototype.constructor = SettingsMenu;
  * @inheritDoc
  */
 SettingsMenu.prototype.loadOptions = function() {
-	// Used to have icons, but they didn't work two well and have been disabled
+	const icon = VectorPaths.language;
+	const me = this;
+	this.addOption("", null, false, function(bn) {
+		bn.addIcon(icon, 25);
+		me.languageMenu = new LanguageMenu(bn, me);
+		me.languageMenu.move();
+	});
+	// Used to have icons, but they didn't work too well and have been disabled
 	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
 	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
 	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true); //, VectorPaths.resetZoom);
@@ -22,6 +29,9 @@ SettingsMenu.prototype.loadOptions = function() {
 	} else {
 		this.addOption(Language.getStr("Enable_snap_noise"), this.enableSnapping, true); //, VectorPaths.volumeUp);
 	}
+	this.addOption(Language.getStr("CompassCalibrate"), function() {
+			(new CalibrateCompassDialog()).show();
+	});
 	if (this.showAdvanced) {
 		this.addOption(Language.getStr("Send_debug_log"), this.optionSendDebugLog, true);
 		this.addOption(Language.getStr("Show_debug_menu"), this.enableDebug, true);

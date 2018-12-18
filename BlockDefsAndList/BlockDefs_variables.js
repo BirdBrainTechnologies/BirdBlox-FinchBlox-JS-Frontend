@@ -98,10 +98,9 @@ B_Variable.importXml = function(blockNode) {
 
 function B_SetTo(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "set"));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "to"));
 	this.addPart(new NumOrStringSlot(this, "RndS_val", new NumData(0)));
+	this.parseTranslation(Language.getStr("block_set_variable"));
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
@@ -129,10 +128,9 @@ B_SetTo.prototype.startAction = function() {
 
 function B_ChangeBy(x, y) {
 	CommandBlock.call(this, x, y, "variables");
-	this.addPart(new LabelText(this, "change"));
 	this.addPart(new VarDropSlot(this, "VDS_1"));
-	this.addPart(new LabelText(this, "by"));
 	this.addPart(new NumSlot(this, "NumS_val", 1));
+	this.parseTranslation(Language.getStr("block_change_variable"));
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
@@ -242,13 +240,12 @@ B_List.prototype.checkListUsed = function(list) {
 
 function B_AddToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "add"));
 	/* Any type can be added to a list */
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
-	this.addPart(new LabelText(this, "to"));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_add_to_list"));
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
@@ -277,10 +274,9 @@ B_AddToList.prototype.startAction = function() {
 
 function B_DeleteItemOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "delete"));
 	this.addPart(new IndexSlot(this, "NumS_idx", true));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_delete_from_list"));
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
@@ -310,12 +306,10 @@ B_DeleteItemOfList.prototype.startAction = function() {
 
 function B_InsertItemAtOfList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "insert"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
-	this.addPart(new LabelText(this, "at"));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
+	this.parseTranslation(Language.getStr("block_insert_into_list"));
 }
 B_InsertItemAtOfList.prototype = Object.create(CommandBlock.prototype);
 B_InsertItemAtOfList.prototype.constructor = B_InsertItemAtOfList;
@@ -357,12 +351,10 @@ B_InsertItemAtOfList.prototype.startAction = function() {
 
 function B_ReplaceItemOfListWith(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "replace item"));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, "of"));
 	this.addPart(new ListDropSlot(this, "LDS_1"));
-	this.addPart(new LabelText(this, "with"));
-	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("thing")));
+	this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.numStrBool, Slot.outputTypes.any, new StringData("")));
+	this.parseTranslation(Language.getStr("block_replace_list_item"));
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
@@ -394,12 +386,11 @@ B_ReplaceItemOfListWith.prototype.startAction = function() {
 
 function B_CopyListToList(x, y) {
 	CommandBlock.call(this, x, y, "lists");
-	this.addPart(new LabelText(this, "copy"));
 	/* This Slot also accepts ListData, such as data from the Split block */
 	this.addPart(new ListDropSlot(this, "LDS_from", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, "to"));
 	/* This Slot must have an already existing List, not a ListData */
 	this.addPart(new ListDropSlot(this, "LDS_to"));
+	this.parseTranslation(Language.getStr("block_copy_list"));
 }
 B_CopyListToList.prototype = Object.create(CommandBlock.prototype);
 B_CopyListToList.prototype.constructor = B_CopyListToList;
@@ -432,11 +423,10 @@ B_CopyListToList.prototype.startAction = function() {
 
 function B_ItemOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("item")));
 	this.addPart(new IndexSlot(this, "NumS_idx", false));
-	this.addPart(new LabelText(this, Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_item"));
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
@@ -481,9 +471,9 @@ B_ItemOfList.prototype.getItemOfList = function(listData, indexD) {
 
 function B_LengthOfList(x, y) {
 	ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
-	this.addPart(new LabelText(this, Language.getStr("length") + " " + Language.getStr("of")));
 	// Accepts both Lists and ListData
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+	this.parseTranslation(Language.getStr("block_list_length"));
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
@@ -506,10 +496,10 @@ B_LengthOfList.prototype.startAction = function() {
 function B_ListContainsItem(x, y) {
 	PredicateBlock.call(this, x, y, "lists");
 	this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
-	this.addPart(new LabelText(this, Language.getStr("contains")));
 	const snapType = Slot.snapTypes.numStrBool;
 	const inputType = Slot.outputTypes.any;
-	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("thing")));
+	this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+	this.parseTranslation(Language.getStr("block_list_contains"));
 }
 B_ListContainsItem.prototype = Object.create(PredicateBlock.prototype);
 B_ListContainsItem.prototype.constructor = B_ListContainsItem;

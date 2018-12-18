@@ -5,8 +5,8 @@
  * @param {number} y - The y coord for the Block.
  * @param {string} category - The Block's category in string form. Used mainly to color it.
  */
-function HatBlock(x, y, category) {
-	Block.call(this, 4, Block.returnTypes.none, x, y, category); //Call constructor.
+function HatBlock(x, y, category, autoExecute) {
+	Block.call(this, 4, Block.returnTypes.none, x, y, category, autoExecute); //Call constructor.
 }
 HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
 HatBlock.prototype.constructor = HatBlock;
