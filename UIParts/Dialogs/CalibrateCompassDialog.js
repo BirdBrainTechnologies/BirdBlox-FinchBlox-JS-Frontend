@@ -60,7 +60,7 @@ CalibrateCompassDialog.prototype.closeDialog = function() {
 CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-  if (robot.deviceClass == DeviceHummingbirdBit) {
+  if (robot.getDeviceTypeId() == "hummingbirdbit") {
     fileName = "Videos/HummBit_Calibration.mp4";
   }
 

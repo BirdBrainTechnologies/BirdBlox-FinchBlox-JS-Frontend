@@ -6,10 +6,14 @@
  */
 function FileList(jsonString) {
 	const object = JSON.parse(jsonString);
-	this.localFiles = object.files;
-	if (this.localFiles == null) {
-		this.localFiles = []
-	}
+
+  this.localFiles = FileList.getSortedList(object.files);
+
+	//this.localFiles = object.files;
+	//if (this.localFiles == null) {
+	//	this.localFiles = []
+	//}
+
 	this.signedIn = object.signedIn === true;
 	if (!GuiElements.isAndroid) {
 		// We only show this information on Android
@@ -31,3 +35,16 @@ FileList.prototype.getCloudTitle = function(){
 	}
 	return Language.getStr("Cloud");
 };
+
+/**
+ * Sort file names for display
+ */
+FileList.getSortedList = function(list){
+  var unsortedList = list;
+	if (unsortedList == null) { unsortedList = []; }
+	return unsortedList.sort(function(a, b) {
+		//Sort case insensitive.
+		//TODO: make this specific to language setting - must use correct language codes.
+		return a.localeCompare(b, 'en', {'sensitivity': 'base', 'numeric' : 'true'});
+	});
+}

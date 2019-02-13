@@ -8,7 +8,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -7647,12 +7647,12 @@ BlockGraphics.CalcPaths = function() {
 	var path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
-	com.path1 = path1;
-	com.path2 = path2;
-	com.path3 = path3;
-	com.path4 = path4;
+	com.path1 = path1; //Top edge
+	com.path2 = path2; //top right corner
+	com.path3 = path3; //bottom right corner
+	com.path4 = path4; //Bottom edge and bottom left corner
 	com.path4NoBump = path4NoBump;
-	com.path5 = path5;
+	com.path5 = path5; //top left corner
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */
@@ -17953,7 +17953,8 @@ OpenCloudDialog.prototype.loadFiles = function() {
 	HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
 		if (OpenDialog.currentDialog === me) {
 			var object = JSON.parse(response);
-			var files = object.files;
+			//var files = object.files;
+			var files = FileList.getSortedList(object.files);
 			if (files != null) {
 				me.closeDialog();
 				var cloudDialog = new OpenCloudDialog(me.fileList, files);
@@ -17990,10 +17991,14 @@ OpenCloudDialog.filesChanged = function(jsonString) {
  */
 function FileList(jsonString) {
 	var object = JSON.parse(jsonString);
-	this.localFiles = object.files;
-	if (this.localFiles == null) {
-		this.localFiles = []
-	}
+
+  this.localFiles = FileList.getSortedList(object.files);
+
+	//this.localFiles = object.files;
+	//if (this.localFiles == null) {
+	//	this.localFiles = []
+	//}
+
 	this.signedIn = object.signedIn === true;
 	if (!GuiElements.isAndroid) {
 		// We only show this information on Android
@@ -18015,6 +18020,20 @@ FileList.prototype.getCloudTitle = function(){
 	}
 	return Language.getStr("Cloud");
 };
+
+/**
+ * Sort file names for display
+ */
+FileList.getSortedList = function(list){
+  var unsortedList = list;
+	if (unsortedList == null) { unsortedList = []; }
+	return unsortedList.sort(function(a, b) {
+		//Sort case insensitive.
+		//TODO: make this specific to language setting - must use correct language codes.
+		return a.localeCompare(b, 'en', {'sensitivity': 'base', 'numeric' : 'true'});
+	});
+}
+
 /**
  * A tabbed dialog for connecting multiple devices.  Each type of device has a tab in which devices can be reordered,
  * added, and removed.  A status light for each device indicates if it is connected and an info button shows
@@ -19254,7 +19273,7 @@ CalibrateCompassDialog.prototype.closeDialog = function() {
 CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-  if (robot.deviceClass == DeviceHummingbirdBit) {
+  if (robot.getDeviceTypeId() == "hummingbirdbit") {
     fileName = "Videos/HummBit_Calibration.mp4";
   }
 
