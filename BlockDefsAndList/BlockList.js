@@ -9,12 +9,19 @@ function BlockList() {
 
 	// List only includes categories that will appear in the BlockPalette in order.
 	// Category names should be capitalized in the way they should be displayed on screen.
-	cat.push("Robots");
-	cat.push("Operators");
-	cat.push("Sound");
-	cat.push("Tablet");
-	cat.push("Control");
-	cat.push("Variables");
+	if (FinchBlox) {
+		cat.push("M");
+		cat.push("C");
+		cat.push("S")
+	} else {
+		cat.push("Robots");
+		cat.push("Operators");
+		cat.push("Sound");
+		cat.push("Tablet");
+		cat.push("Control");
+		cat.push("Variables");
+	}
+
 }
 
 /**
@@ -50,6 +57,29 @@ BlockList.catCount = function() {
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 
+// FINCHBLOX CATEGORIES
+/**
+* @param {Category} category
+*/
+BlockList.populateCat_m = function(category) {
+	category.addBlockByName("B_FBForward");
+	category.addBlockByName("B_FBBackward");
+	category.addSpace();
+	category.trimBottom();
+}
+BlockList.populateCat_c = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+}
+BlockList.populateCat_s = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+}
+
+// BIRDBLOX CATEGORIES
 /**
  * @param {Category} category
  */

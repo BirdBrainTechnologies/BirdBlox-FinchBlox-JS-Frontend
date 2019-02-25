@@ -25,22 +25,37 @@ BlockPalette.setGraphics = function() {
 	// Dimensions used within a category
 	BlockPalette.mainVMargin = 10;   // The space before the first Block in a Category
 	BlockPalette.mainHMargin = Button.defaultMargin;   // The space between the Blocks and the left side of the screen
-	BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
 	BlockPalette.sectionMargin = 10;   // The additional space added between sections
 	BlockPalette.insideBnH = 38;   // Height of buttons within a category (such as Create Variable button)
 	BlockPalette.insideBnW = 150;   // Width of buttons within a category
 
-	// Dimensions for the region with CategoryBNs
-	BlockPalette.width = 253;
-	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
+  BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
 	BlockPalette.catHMargin = Button.defaultMargin;
-	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
-	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
-	BlockPalette.catY = TitleBar.height;
-	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.white;
-	BlockPalette.catBg = Colors.white;
 
+	// Dimensions for the region with CategoryBNs
+  if (FinchBlox){
+    BlockPalette.width = GuiElements.width;
+    BlockPalette.height = 100;
+    BlockPalette.y = GuiElements.height - BlockPalette.height;
+    BlockPalette.bg = Colors.blockPalette;
+    BlockPalette.catW = 220;
+    BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
+    BlockPalette.catH = 50;
+    BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
+    BlockPalette.blockMargin = 20;   // The horizontal spacing between Blocks
+  } else {
+    BlockPalette.width = 253;
+    BlockPalette.catY = TitleBar.height;
+    BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
+    BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
+    BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
+    BlockPalette.bg = Colors.white;
+    BlockPalette.catW = BlockPalette.width;
+    BlockPalette.catX = 0;
+    BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
+  }
+
+	BlockPalette.catBg = Colors.white;
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.black;
 
@@ -56,8 +71,15 @@ BlockPalette.updateZoom = function() {
 	let BP = BlockPalette;
 	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
-	GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
-	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  if (FinchBlox) {
+    BP.updatePath(BP.leftShape);
+    BP.updatePath(BP.rightShape);
+    GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
+  } else {
+    GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
+  }
+	//GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
 	for (let i = 0; i < BlockPalette.categories.length; i++) {
 		BlockPalette.categories[i].updateZoom();
 	}
@@ -67,10 +89,18 @@ BlockPalette.updateZoom = function() {
  * Creates the gray rectangle below the CategoryBNs
  */
 BlockPalette.createCatBg = function() {
-	let BP = BlockPalette;
-	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
-	GuiElements.layers.catBg.appendChild(BP.catRect);
-	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  //if(!FinchBlox){
+  	let BP = BlockPalette;
+    let bgW = BP.catW;
+    if (FinchBlox) { bgW = 0; }
+  	//BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
+    //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
+    BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
+  	GuiElements.layers.catBg.appendChild(BP.catRect);
+  	//GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  //}
+
 };
 
 /**
@@ -80,34 +110,81 @@ BlockPalette.createPalBg = function() {
 	let BP = BlockPalette;
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
+  if (FinchBlox) {
+    BP.leftShape = GuiElements.create.path(GuiElements.layers.paletteBG);
+    BP.rightShape = GuiElements.create.path(GuiElements.layers.paletteBG);
+    BP.leftShape.setAttributeNS(null, "fill", BP.bg);
+    BP.rightShape.setAttributeNS(null, "fill", BP.bg);
+    BlockPalette.updatePath(BP.leftShape);
+    BlockPalette.updatePath(BP.rightShape);
+  }
 };
+BlockPalette.updatePath = function(pathE) {
+  let BP = BlockPalette;
+  const shapeH = 20;
+  const r = shapeH/2;
+  const shapeW = (BP.width - BP.catW)/2 - 2*BP.catHMargin - 2*r;
+  var path = "";
+  switch(pathE){
+    case BP.leftShape:
+      path += "m 0," + (BP.y - shapeH);
+      path += " l " + shapeW + ",0 ";
+      path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+      path += " l " + (-shapeW-2*r) + ",0 ";
+      path += " z";
+      break;
+    case BP.rightShape:
+      path += "m " + BP.width + "," + (BP.y - shapeH);
+      path += " l " + (-shapeW) + ",0 ";
+      path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+      path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+      path += " l " + (shapeW + 2*r) + ",0 ";
+      path += " z";
+      break;
+  }
+  pathE.setAttributeNS(null, "d", path);
+}
 
 /**
  * Creates the categories listed in the BlockList
  */
 BlockPalette.createCategories = function() {
 	const catCount = BlockList.catCount();
-	const numberOfRows = Math.ceil(catCount / 2);
 
-	// Automatically alternates between two columns while adding categories
-	const col1X = BlockPalette.catHMargin;
-	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+  if (FinchBlox){
+    let currentY = 0;
+    let currentX = 0;
+    for (let i = 0; i < catCount; i++) {
+      const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+  		BlockPalette.categories.push(currentCat);
+      currentX += CategoryBN.width + CategoryBN.vMargin;
+    }
+  } else {
+    const numberOfRows = Math.ceil(catCount / 2);
 
-	let firstColumn = true;
-	let currentY = BlockPalette.catVMargin;
-	let currentX = col1X;
-	let usedRows = 0;
-	for (let i = 0; i < catCount; i++) {
-		if (firstColumn && usedRows >= numberOfRows) {
-			currentX = col2X;
-			firstColumn = false;
-			currentY = BlockPalette.catVMargin;
-		}
-		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
-		BlockPalette.categories.push(currentCat);
-		usedRows++;
-		currentY += CategoryBN.height + CategoryBN.vMargin;
-	}
+  	// Automatically alternates between two columns while adding categories
+  	const col1X = BlockPalette.catHMargin;
+  	const col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+
+  	let firstColumn = true;
+  	let currentY = BlockPalette.catVMargin;
+  	let currentX = col1X;
+  	let usedRows = 0;
+  	for (let i = 0; i < catCount; i++) {
+  		if (firstColumn && usedRows >= numberOfRows) {
+  			currentX = col2X;
+  			firstColumn = false;
+  			currentY = BlockPalette.catVMargin;
+  		}
+  		const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+  		BlockPalette.categories.push(currentCat);
+  		usedRows++;
+  		currentY += CategoryBN.height + CategoryBN.vMargin;
+  	}
+  }
+
+
 };
 
 /**

@@ -16,8 +16,10 @@ function Category(buttonX, buttonY, name, id) {
 	this.id = id;
 	this.name = name;
 
-	this.x = 0;
-	this.y = TitleBar.height + BlockPalette.catH;
+	//this.x = 0;
+	//this.y = TitleBar.height + BlockPalette.catH;
+  this.x = BlockPalette.catX;
+  this.y = BlockPalette.catY + BlockPalette.catH;
 
 	this.group = GuiElements.create.group(0, 0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
@@ -98,7 +100,11 @@ Category.prototype.refreshGroup = function() {
 Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
-	this.height = this.currentBlockY;
+  if (FinchBlox) {
+    this.height = this.maxBlockHeight + 2*BlockPalette.mainVMargin;
+  } else {
+    this.height = this.currentBlockY;
+  }
 	this.updateWidth();
 };
 
@@ -153,9 +159,18 @@ Category.prototype.addBlock = function(block) {
 	const displayStack = new DisplayStack(block, this.group, this);
 	this.displayStacks.push(displayStack);
 	// Update the coords for the next Block
-	this.currentBlockY += displayStack.firstBlock.height;
-	this.currentBlockY += BlockPalette.blockMargin;
-	this.lastHadStud = block.bottomOpen;
+  if (FinchBlox){
+    this.currentBlockX += displayStack.firstBlock.width;
+    this.currentBlockX += BlockPalette.blockMargin;
+    if (this.maxBlockHeight == null ||
+      this.maxBlockHeight < displayStack.firstBlock.height) {
+      this.maxBlockHeight = displayStack.firstBlock.height;
+    }
+  } else {
+    this.currentBlockY += displayStack.firstBlock.height;
+  	this.currentBlockY += BlockPalette.blockMargin;
+  	this.lastHadStud = block.bottomOpen;
+  }
 };
 
 /**

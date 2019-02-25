@@ -186,8 +186,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-	GuiElements.blockInteraction();
-	OpenDialog.showDialog();
+	if (!FinchBlox){
+		GuiElements.blockInteraction();
+		OpenDialog.showDialog();
+	}
 	DebugOptions.applyActions();
 };
 /**
@@ -391,9 +393,11 @@ GuiElements.draw = {};
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
  * @param {string} [color] - (optional) The rect's fill color in the form "#fff".
+ * @param {number} rx - (optional) Corner rounding parameter
+ * @param {number} ry - (optional) Corner rounding parameter
  * @return {Element} - The rect which was created.
  */
-GuiElements.draw.rect = function(x, y, width, height, color) {
+GuiElements.draw.rect = function(x, y, width, height, color, rx, ry) {
 	DebugOptions.validateNumbers(x, y, width, height);
 	const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	rect.setAttributeNS(null, "x", x); //Set its attributes.
@@ -402,6 +406,10 @@ GuiElements.draw.rect = function(x, y, width, height, color) {
 	rect.setAttributeNS(null, "height", height);
 	if (color != null) {
 		rect.setAttributeNS(null, "fill", color);
+	}
+	if (rx != null && ry != null){
+		rect.setAttributeNS(null, "rx", rx);
+		rect.setAttributeNS(null, "ry", ry);
 	}
 	return rect; //Return the rect.
 };
@@ -572,6 +580,24 @@ GuiElements.draw.video = function(videoName, robotId) {
   }
 
 	return videoElement;
+};
+/**
+ * Creates a filled, SVG path element with two rounded corners and the specified
+ * dimensions and returns it. Used for FinchBlox category buttons.
+ * @param {number} x - The path's x coord.
+ * @param {number} y - The path's y coord.
+ * @param {number} width - The path's width. (it is an isosceles triangle)
+ * @param {number} height - The path's height. (negative will make it point down)
+ * @param {string} color - The path's fill color in the form "#fff".
+ * @return {Element} - The path which was created.
+ */
+GuiElements.draw.tabBN = function(x, y, width, height, color) {
+	DebugOptions.validateNonNull(color);
+	DebugOptions.validateNumbers(x, y, width, height);
+	const tabBN = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.tabBN(tabBN, x, y, width, height); //Set its path description (points).
+	tabBN.setAttributeNS(null, "fill", color); //Set the fill.
+	return tabBN; //Return the finished button shape.
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -802,6 +828,28 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
  */
 GuiElements.update.makeClickThrough = function(svgE) {
 	svgE.style.pointerEvents = "none";
+};
+/**
+ * Changes the path description of an SVG path object to make it a rectangle
+ * with two rounded corners.
+ * @param {Element} pathE - The path element to be modified.
+ * @param {number} x - The path's new x coord.
+ * @param {number} y - The path's new y coord.
+ * @param {number} width - The path's new width. (it is an isosceles triangle)
+ * @param {number} height - The path's new height. (negative will make it point down)
+ */
+GuiElements.update.tabBN = function(pathE, x, y, width, height) {
+	DebugOptions.validateNumbers(x, y, width, height);
+  const cornerRadius = 8;
+	let path = "";
+	path += "m " + (x + cornerRadius) + "," + y;
+	path += " l " + (width - 2*cornerRadius) + ",0";
+	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + cornerRadius;
+	path += " l 0," + (height - cornerRadius) + " " + (-width) + ",0 0,";
+	path += (cornerRadius - height);
+	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + (0 - cornerRadius);
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
 
 /* GuiElements.move contains functions that move existing SVG elements.

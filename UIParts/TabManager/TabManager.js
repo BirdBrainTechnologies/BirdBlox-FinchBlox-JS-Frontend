@@ -24,7 +24,7 @@ TabManager.setGraphics = function() {
 	TM.maxZoom = 3;
 
 	TM.tabAreaX = BlockPalette.width;
-	if (GuiElements.smallMode) {
+	if (GuiElements.smallMode || FinchBlox) {
 		TM.tabAreaX = 0;
 	}
 	TM.tabAreaY = TitleBar.height;
@@ -45,7 +45,9 @@ TabManager.setGraphics = function() {
  */
 TabManager.createTabSpaceBg = function() {
 	const TM = TabManager;
-	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
+  var canvasColor = Colors.canvasGray;
+  if (FinchBlox) { canvasColor = Colors.white; }
+	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, canvasColor);
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };

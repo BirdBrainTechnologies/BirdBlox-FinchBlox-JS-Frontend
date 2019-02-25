@@ -43,17 +43,26 @@ BlockGraphics.SetCommand = function() {
 	BlockGraphics.command = {};
 
 	// Minimum dimensions
-	BlockGraphics.command.height = 34;
-	BlockGraphics.command.width = 40;
+	if (FinchBlox) {
+		BlockGraphics.command.height = 76;
+		BlockGraphics.command.width = 96;
+		BlockGraphics.command.cornerRadius = 10;
+		BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
+		BlockGraphics.command.hMargin = 25; // The margin to the left and right of the content
+	} else {
+		BlockGraphics.command.height = 34;
+		BlockGraphics.command.width = 40;
+		BlockGraphics.command.cornerRadius = 3;
+		BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
+		BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
+	}
 
-	BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
-	BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
 
 	BlockGraphics.command.bumpOffset = 7;
 	BlockGraphics.command.bumpDepth = 4;
 	BlockGraphics.command.bumpTopWidth = 15;
 	BlockGraphics.command.bumpBottomWidth = 7;
-	BlockGraphics.command.cornerRadius = 3;
+
 
 	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
 	BlockGraphics.command.snap = {};
@@ -84,7 +93,7 @@ BlockGraphics.SetReporter = function() {
 	BlockGraphics.reporter.slotHMargin = 10; // Space to sides of content
 
 	BlockGraphics.reporter.strokeW = 1;
-	BlockGraphics.reporter.slotFill = "#fff";
+	BlockGraphics.reporter.slotFill = Colors.white;
 	BlockGraphics.reporter.slotSelectedFill = Colors.lightGray;
 };
 
@@ -153,17 +162,17 @@ BlockGraphics.SetLoop = function() {
 BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
 	BlockGraphics.labelText.font = Font.uiFont(12).bold();
-	BlockGraphics.labelText.fill = "#ffffff";
-	BlockGraphics.labelText.disabledFill = "#e4e4e4";
+	BlockGraphics.labelText.fill = Colors.white;
+	BlockGraphics.labelText.disabledFill = Colors.labelTextDisabled;
 };
 
 /* Constants for text in Slots */
 BlockGraphics.SetValueText = function() {
 	BlockGraphics.valueText = {};
 	BlockGraphics.valueText.font = Font.uiFont(12);
-	BlockGraphics.valueText.fill = "#000000";
-	BlockGraphics.valueText.selectedFill = "#fff";
-	BlockGraphics.valueText.grayedFill = "#aaa";
+	BlockGraphics.valueText.fill = Colors.black;
+	BlockGraphics.valueText.selectedFill = Colors.white;
+	BlockGraphics.valueText.grayedFill = Colors.valueTextGrayed;
 };
 
 /* Constants for DropSlots */
@@ -176,11 +185,11 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.triW = 8;
 	BlockGraphics.dropSlot.bg = Colors.lightGray;
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
-	BlockGraphics.dropSlot.selectedBg = "#fff";
+	BlockGraphics.dropSlot.selectedBg = Colors.white;
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
-	BlockGraphics.dropSlot.triColor = "#fff";
-	BlockGraphics.dropSlot.textFill = "#fff";
-	BlockGraphics.dropSlot.selectedTriColor = "#fff";
+	BlockGraphics.dropSlot.triColor = Colors.white;
+	BlockGraphics.dropSlot.textFill = Colors.white;
+	BlockGraphics.dropSlot.selectedTriColor = Colors.white;
 };
 
 /* Constants for indicator that shows where Blocks will be snapped */
@@ -189,8 +198,12 @@ BlockGraphics.SetHighlight = function() {
 	BlockGraphics.highlight.margin = 5;
 	BlockGraphics.highlight.hexEndL = 15;
 	BlockGraphics.highlight.slotHexEndL = 10;
-	BlockGraphics.highlight.strokeC = "#fff";
-	BlockGraphics.highlight.strokeDarkC = "#000";
+	if (FinchBlox) {
+		BlockGraphics.highlight.strokeC = Colors.fbHighlight;
+	} else {
+		BlockGraphics.highlight.strokeC = Colors.white;
+	}
+	BlockGraphics.highlight.strokeDarkC = Colors.black;
 	BlockGraphics.highlight.strokeW = 3;
 	BlockGraphics.highlight.commandL = 10;
 };
@@ -205,7 +218,7 @@ BlockGraphics.SetHitBox = function() {
 /* Constants for outline on running Blocks */
 BlockGraphics.SetGlow = function() {
 	BlockGraphics.glow = function() {};
-	BlockGraphics.glow.color = "#fff";
+	BlockGraphics.glow.color = Colors.white;
 	BlockGraphics.glow.strokeW = 2;
 };
 
@@ -247,12 +260,16 @@ BlockGraphics.CalcPaths = function() {
 	let path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
+	let fbBumpOut = " 5,0 0,-5 10,0 0,36 -10,0 0,-5 -5,0 ";
+	let fbBumpIn = " 5,0 0,5 10,0 0,-36 -10,0 0,5 -5,0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
 	com.path4 = path4; //Bottom edge and bottom left corner
 	com.path4NoBump = path4NoBump;
 	com.path5 = path5; //top left corner
+	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
+	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */
@@ -303,6 +320,30 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	path += BlockGraphics.command.path4 + "l 0,";
 	path += BlockGraphics.command.extraHeight - height;
 	path += BlockGraphics.command.path5;
+	if (FinchBlox){
+		let com = BlockGraphics.command;
+		let straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		path = "";
+		path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y + " l ";
+		//path += BlockGraphics.command.path1;
+		path += width - 2*BlockGraphics.command.cornerRadius;
+		path += BlockGraphics.command.path2;
+		//path += height - BlockGraphics.command.extraHeight;
+		path += straightHeight;
+		path += BlockGraphics.command.fbBumpOut;
+		path += "0," + straightHeight;
+
+		path += BlockGraphics.command.path3;
+		path += 2*BlockGraphics.command.cornerRadius - width + ",0";
+		path += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+		path += " l 0,";
+		//path += BlockGraphics.command.extraHeight - height;
+		path += -straightHeight;
+		path += BlockGraphics.command.fbBumpIn;
+		path += "0," + (-straightHeight);
+
+		path += BlockGraphics.command.path5;
+	}
 	return path;
 };
 
@@ -312,12 +353,23 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
  * @param {number} y
  * @return {string}
  */
-BlockGraphics.buildPath.highlightCommand = function(x, y) {
+BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
 	let path = "";
-	path += "m " + x + "," + y;
-	path += "l " + BlockGraphics.command.cornerRadius + ",0";
-	path += BlockGraphics.command.path1;
-	path += BlockGraphics.highlight.commandL + ",0";
+	if (FinchBlox) {
+		var lineLength = 5;
+		if (height != null){
+			lineLength = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		}
+		path += "m " + x + "," + (y + BlockGraphics.command.cornerRadius);
+		path += "l 0," + lineLength;
+		path += BlockGraphics.command.fbBumpOut;
+		path += "0," + lineLength;
+	} else {
+		path += "m " + x + "," + y;
+		path += "l " + BlockGraphics.command.cornerRadius + ",0";
+		path += BlockGraphics.command.path1;
+		path += BlockGraphics.highlight.commandL + ",0";
+	}
 	return path;
 };
 
@@ -393,17 +445,30 @@ BlockGraphics.buildPath.string = function(x, y, width, height) {
 BlockGraphics.buildPath.hat = function(x, y, width, height) {
 	let path = "";
 	let hat = BlockGraphics.hat;
-	let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
-	let flatHeight = height - BlockGraphics.command.cornerRadius * 2;
-	path += "m " + x + "," + y;
-	path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
-	path += " l " + flatWidth;
-	path += BlockGraphics.command.path2;
-	path += flatHeight;
-	path += BlockGraphics.command.path3;
-	path += BlockGraphics.command.extraWidth - width;
-	path += BlockGraphics.command.path4;
-	path += "z";
+	let com = BlockGraphics.command;
+	if (FinchBlox) {
+		let straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		path += "m " + x + "," + y + " l ";
+		path += width - com.cornerRadius;
+		path += com.path2 + straightHeight;
+		path += com.fbBumpOut;
+		path += "0," + straightHeight;
+		path += com.path3 + (com.cornerRadius - width) + ",0";
+		path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
+		path += " z ";
+	} else {
+		let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
+		let flatHeight = height - BlockGraphics.command.cornerRadius * 2;
+		path += "m " + x + "," + y;
+		path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
+		path += " l " + flatWidth;
+		path += BlockGraphics.command.path2;
+		path += flatHeight;
+		path += BlockGraphics.command.path3;
+		path += BlockGraphics.command.extraWidth - width;
+		path += BlockGraphics.command.path4;
+		path += "z";
+	}
 	return path;
 };
 
@@ -514,7 +579,8 @@ BlockGraphics.create = {};
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
 	if (!active) category = "inactive";
 	const path = GuiElements.create.path(group);
-	const fill = Colors.getGradient(category);
+	var fill = Colors.getGradient(category);
+	if (FinchBlox) { fill = Colors.getColor(category) }
 	path.setAttributeNS(null, "fill", fill);
 	BlockGraphics.update.stroke(path, category, returnsValue, active);
 	return path;
@@ -545,7 +611,7 @@ BlockGraphics.create.slot = function(group, type, category, active) {
  */
 BlockGraphics.create.slotHitBox = function(group) {
 	const rectE = GuiElements.create.rect(group);
-	rectE.setAttributeNS(null, "fill", "#000");
+	rectE.setAttributeNS(null, "fill", Colors.black);
 	GuiElements.update.opacity(rectE, 0);
 	return rectE;
 };
@@ -665,8 +731,9 @@ BlockGraphics.update.glow = function(path) {
  */
 BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
 	if (!active) category = "inactive";
-	if (returnsValue) {
-		const outline = Colors.getColor(category);
+	if (returnsValue || FinchBlox) {
+		var outline = Colors.getColor(category);
+		if (FinchBlox) { outline = Colors.darkenColor(outline, 0.75); }
 		path.setAttributeNS(null, "stroke", outline);
 		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
 	} else {
@@ -721,7 +788,7 @@ BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) 
 	const hHeight = height + 2 * bG.margin;
 	switch (type) {
 		case 0:
-			pathD = BlockGraphics.buildPath.highlightCommand(x, y);
+			pathD = BlockGraphics.buildPath.highlightCommand(x, y, height);
 			break;
 		case 1:
 			pathD = BlockGraphics.buildPath.reporter(hX, hY, hWidth, hHeight);

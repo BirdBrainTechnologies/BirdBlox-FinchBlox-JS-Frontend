@@ -12,8 +12,11 @@ function Colors() {
 Colors.setCommon = function() {
 	//Gray scale...
 	Colors.white = "#fff";
+	Colors.labelTextDisabled = "#e4e4e4";
   Colors.lightLightGray = "#CDCDCD";
   Colors.windowColor = "#CCC";
+	Colors.canvasGray = "#C1C1C1";
+	Colors.valueTextGrayed = "#aaa";
 	Colors.mediumLightGray = "#999";
 	Colors.lightGray = "#7B7B7B";
 	Colors.darkGray = "#282828";
@@ -33,12 +36,18 @@ Colors.setCommon = function() {
 	Colors.variablesDkOrange = "#FF5B00";
 	Colors.inactiveGray = "#a3a3a3";
 	//BBT Style guide colors
-	Colors.easternBlue = "#089BAB";
+	Colors.easternBlue = "#089BAB"; //bbt blue
 	Colors.neonCarrot = "#FF9922";
-	Colors.fountainBlue = "#62BCC7";
-	Colors.seance = "#881199";
+	Colors.fountainBlue = "#62BCC7"; //lighter blue
+	Colors.seance = "#881199"; //dark purple
 	Colors.bbtDarkGray = "#535353";
 	Colors.iron = "#CACACA";
+	//FinchBlox
+	Colors.blockPalette = "#BAD8DC";
+	Colors.flagGreen = "#5FBE3A";
+	Colors.stopRed = "#DB4825";
+	Colors.finchGreen = "#C0E7B0";
+	Colors.fbHighlight = "#ffff00";
 };
 
 Colors.setCategory = function() {
@@ -55,7 +64,10 @@ Colors.setCategory = function() {
 		"control": Colors.controlYellow,
 		"variables": Colors.variablesDkOrange,
 		"lists": Colors.red,
-		"inactive": Colors.inactiveGray
+		"inactive": Colors.inactiveGray,
+		"m": Colors.easternBlue,
+		"c": Colors.neonCarrot,
+		"s": Colors.seance
 	};
 };
 

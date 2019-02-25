@@ -401,6 +401,12 @@ Block.prototype.updateStackDimO = function() {
 		let cy1 = this.y - snap.top;
 		let cx2 = this.x + snap.right;
 		let cy2 = this.y + this.height + snap.bottom;
+    if (FinchBlox) { //Because FinchBlox blocks connect horizontally...
+      cx1 = this.x - snap.left;
+  		cy1 = this.y - snap.top;
+  		cx2 = this.x + this.width + snap.right;
+  		cy2 = this.y + snap.bottom;
+    }
 		if (cx1 < sDim.cx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1 = cx1;
 		}
@@ -557,7 +563,11 @@ Block.prototype.updateAlign = function(x, y) {
 		this.midLabel.updateAlign(bG.loop.side, this.topHeight + this.blockSlot1.height + this.midHeight / 2);
 	}
 	if (this.nextBlock != null) {
-		this.nextBlock.updateAlign(this.x, this.y + this.height);
+    if (FinchBlox) { //these blocks link horizontally rather than vertically
+      this.nextBlock.updateAlign(this.x + this.width, this.y);
+    } else {
+      this.nextBlock.updateAlign(this.x, this.y + this.height);
+    }
 	}
 	return this.width;
 };
@@ -576,6 +586,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 	}
 	let currentLine = 0;
 	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
+  if (FinchBlox) { yCoord = this.height / 2; }
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
 		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
@@ -631,6 +642,7 @@ Block.prototype.findBestFit = function() {
 	let x = this.getAbsX(); //Get coords to compare.
 	let y = this.getAbsY();
 	let height = this.relToAbsY(this.height) - y;
+  let width = this.relToAbsX(this.width) - x;
 	let hasMatch = false;
 
 	if (move.returnsValue) { //If a connection between the stack and block are possible...
@@ -641,14 +653,27 @@ Block.prototype.findBestFit = function() {
 	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
 		let snap = BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
+    //TODO: use c box here?
 		let snapBLeft = x - snap.left;
 		let snapBTop = y - snap.top;
 		let snapBWidth = snap.left + snap.right;
 		let snapBHeight = snap.top + height + snap.bottom;
+    const snapFWidth = snap.left + width + snap.right;
+    const snapFHeight = snap.top + snap.bottom;
 		//Check if point falls in a rectangular range.
-		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
+    let success = false;
+    if (FinchBlox) {
+      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+    } else {
+      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+    }
+		if (success) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
 			let yDist = move.topY - (y + height);
+      if (FinchBlox){
+        xDist = move.topX - (x + width);
+        yDist = move.topY - y;
+      }
 			let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
@@ -675,7 +700,11 @@ Block.prototype.findBestFit = function() {
  */
 Block.prototype.highlight = function() {
 	if (this.bottomOpen) {
-		Highlighter.highlight(this.getAbsX(), this.relToAbsY(this.height), this.width, this.height, 0, false, this.isGlowing);
+    if (FinchBlox) {
+      Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing);
+    } else {
+      Highlighter.highlight(this.getAbsX(), this.relToAbsY(this.height), this.width, this.height, 0, false, this.isGlowing);
+    }
 	} else { //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
 		DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
 	}

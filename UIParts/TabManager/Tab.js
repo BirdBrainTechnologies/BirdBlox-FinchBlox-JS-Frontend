@@ -47,6 +47,7 @@ function Tab() {
 Tab.prototype.activate = function() {
 	GuiElements.layers.activeTab.appendChild(this.mainG);
 	this.overFlowArr.show();
+  if (FinchBlox) { this.addStartBlock(); }
 };
 
 /**
@@ -65,6 +66,23 @@ Tab.prototype.removeStack = function(stack) {
 	const index = this.stackList.indexOf(stack);
 	this.stackList.splice(index, 1);
 };
+
+/**
+ * Removes all the stacks on this tab. Used in FinchBlox.
+ */
+Tab.prototype.clear = function() {
+  let oldList = this.stackList.slice();
+  oldList.forEach(function(stack) { stack.remove(); });
+  this.addStartBlock();
+};
+
+/**
+ * Adds a new start block to the tab. Used in FinchBlox.
+ */
+Tab.prototype.addStartBlock = function() {
+  let blockY = GuiElements.height/2 - BlockPalette.height;
+  let stack = new BlockStack(new B_WhenFlagTapped(50, blockY), this);
+}
 
 /* Convert between screen coords and coords within the Tab */
 /**

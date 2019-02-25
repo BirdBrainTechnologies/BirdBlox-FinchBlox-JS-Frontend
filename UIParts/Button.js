@@ -8,9 +8,12 @@
  * @param {number} width - The width of the button
  * @param {number} height - The height of the button
  * @param {Element} [parent] - The group the button should append itself to
+ * @param {string} color - (optional) background color for the button
+ * @param {number} rx - (optional) Corner rounding parameter
+ * @param {number} ry - (optional) Corner rounding parameter
  * @constructor
  */
-function Button(x, y, width, height, parent) {
+function Button(x, y, width, height, parent, color, rx, ry) {
 	DebugOptions.validateNumbers(x, y, width, height);
 	this.x = x;
 	this.y = y;
@@ -18,6 +21,14 @@ function Button(x, y, width, height, parent) {
 	this.height = height;
 	this.parentGroup = parent;
 	this.group = GuiElements.create.group(x, y, parent);
+  //color for the background of the button
+  if (color != null){
+    this.bg = color;
+  } else {
+    this.bg = Button.bg;
+  }
+  this.rx = rx;
+  this.ry = ry;
 	this.buildBg();
 	this.pressed = false;
 	this.enabled = true;
@@ -47,7 +58,11 @@ Button.setGraphics = function() {
 	Button.disabledFore = Colors.black;
 
 	// The suggested margin between adjacent margins
-	Button.defaultMargin = 5;
+  if (FinchBlox){
+    Button.defaultMargin = 10;
+  } else {
+    Button.defaultMargin = 5;
+  }
 
 	// The suggested font for the forground of buttons
 	Button.defaultFont = Font.uiFont(16);
@@ -60,7 +75,7 @@ Button.setGraphics = function() {
  * Creates the rectangle that is the background of the button
  */
 Button.prototype.buildBg = function() {
-	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, Button.bg);
+	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
 	this.group.appendChild(this.bgRect);
 	TouchReceiver.addListenersBN(this.bgRect, this);
 };
@@ -108,7 +123,7 @@ Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = true;
-	// Icon is centered vertiacally and horizontally.
+	// Icon is centered vertically and horizontally.
 	const iconW = VectorIcon.computeWidth(pathId, height);
 	const iconX = xOffset + (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
@@ -477,7 +492,7 @@ Button.prototype.setColor = function(isPressed) {
 			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
 	} else {
-		this.bgRect.setAttributeNS(null, "fill", Button.bg);
+		this.bgRect.setAttributeNS(null, "fill", this.bg);
 		if (this.hasText && this.textInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}

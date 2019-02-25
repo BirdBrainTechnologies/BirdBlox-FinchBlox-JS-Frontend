@@ -300,20 +300,36 @@ BlockStack.prototype.findBestFitTop = function() {
 	const x = this.firstBlock.getAbsX(); // Uses screen coordinates.
 	const y = this.firstBlock.getAbsY();
 	const height = this.relToAbsY(this.firstBlock.height) - y;
+  const width = this.relToAbsX(this.firstBlock.width) - x;
 	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
 	 * the snap bounding box of the first Block in the BlockStack. */
 	// Gets the bottom-left corner of the moving BlockStack.
 	const moveBottomLeftX = move.topX;
 	const moveBottomLeftY = move.bottomY;
+  const moveTopRightX = move.bottomX;
+  const moveTopRightY = move.topY;
 	// Gets the snap bounding box of the first Block.
+  //TODO: Use the c box here?
 	const snapBLeft = x - snap.left;
 	const snapBTop = y - snap.top;
 	const snapBWidth = snap.left + snap.right;
 	const snapBHeight = snap.top + height + snap.bottom;
+  const snapFWidth = snap.left + width + snap.right;
+  const snapFHeight = snap.top + snap.bottom;
 	// Checks if the point falls in the box.
-	if (move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
-		const xDist = move.topX - x;
-		const yDist = move.bottomY - y;
+  let success = false;
+  if (FinchBlox) { //because these blocks connect horizontally, check the top right corner
+    success = move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+  } else {
+    success = move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+  }
+	if (success) {
+		let xDist = move.topX - x;
+		let yDist = move.bottomY - y;
+    if (FinchBlox) {
+      xDist = move.bottomX - x;
+      yDist = move.topY - y;
+    }
 		const dist = xDist * xDist + yDist * yDist; // Computes the distance.
 		if (!fit.found || dist < fit.dist) { // Compares it to existing fit.
 			fit.found = true;
@@ -335,7 +351,11 @@ BlockStack.prototype.snap = function(block) {
 	}
 	/* Move this BlockStack up by the height of the of the stack the Block belongs to.
 	 * This compensates for the amount existing Blocks will be shifted down by the newly-added Blocks. */
-	this.move(this.x, this.y - block.stack.getHeight());
+  if (FinchBlox) { //Move over by width in the case of FinchBlox
+    this.move(this.x - block.stack.getWidth(), this.y);
+  } else {
+    this.move(this.x, this.y - block.stack.getHeight());
+  }
 
 	// The new top Block.
 	const topStackBlock = block;
@@ -362,7 +382,7 @@ BlockStack.prototype.snap = function(block) {
  * Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
  */
 BlockStack.prototype.highlight = function() {
-	Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.isRunning);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
 };
 
 /**

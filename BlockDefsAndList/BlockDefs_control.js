@@ -3,9 +3,13 @@
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	// Add flag icon with height 15
-	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.parseTranslation(Language.getStr("block_when_flag_tapped"));
+	if (FinchBlox){
+		this.addPart(new BlockIcon(this, VectorPaths.flag, Colors.flagGreen, "flag", 50));
+	} else {
+		// Add flag icon with height 15
+		this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
+		this.parseTranslation(Language.getStr("block_when_flag_tapped"));
+	}
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
