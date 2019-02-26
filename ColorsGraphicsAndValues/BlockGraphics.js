@@ -247,12 +247,12 @@ BlockGraphics.CalcPaths = function() {
 	let path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
-	com.path1 = path1;
-	com.path2 = path2;
-	com.path3 = path3;
-	com.path4 = path4;
+	com.path1 = path1; //Top edge
+	com.path2 = path2; //top right corner
+	com.path3 = path3; //bottom right corner
+	com.path4 = path4; //Bottom edge and bottom left corner
 	com.path4NoBump = path4NoBump;
-	com.path5 = path5;
+	com.path5 = path5; //top left corner
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */

@@ -257,7 +257,8 @@ OpenCloudDialog.prototype.loadFiles = function() {
 	HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
 		if (OpenDialog.currentDialog === me) {
 			const object = JSON.parse(response);
-			let files = object.files;
+			//let files = object.files;
+			let files = FileList.getSortedList(object.files);
 			if (files != null) {
 				me.closeDialog();
 				const cloudDialog = new OpenCloudDialog(me.fileList, files);
