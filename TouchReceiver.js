@@ -326,6 +326,18 @@ TouchReceiver.touchStartScrollBox = function(target, e) {
 	}
 };
 /**
+ * @param {SliderWidget} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartSlider = function(target, e) {
+	const TR = TouchReceiver;
+	if (TR.touchstart(e, false)) {
+		TR.targetType = "slider";
+		TR.target = target;
+		e.stopPropagation();
+	}
+};
+/**
  * @param {event} e
  */
 TouchReceiver.touchStartTabSpace = function(e) {
@@ -481,6 +493,10 @@ TouchReceiver.touchmove = function(e) {
 					TR.blocksMoving = true;
 				}
 			}
+      // Drag the slider of the slider widget
+      if (TR.targetType === "slider") {
+        TR.target.drag(TR.getX(e));
+      }
 			// If the user drags the palette, it should scroll.
 			if (TR.targetType === "scrollBox") {
 				shouldPreventDefault = false;
@@ -741,6 +757,17 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver.
 		TouchReceiver.touchStartScrollBox(parent, e);
+	}, false);
+};
+/**
+ * @param {Element} element
+ * @param {SliderWidget} parent
+ */
+TouchReceiver.addListenersSlider = function(element, parent) {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartSlider(parent, e);
 	}, false);
 };
 /**

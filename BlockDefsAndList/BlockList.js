@@ -64,7 +64,7 @@ BlockList.catCount = function() {
 BlockList.populateCat_m = function(category) {
 	category.addBlockByName("B_FBForward");
 	category.addBlockByName("B_FBBackward");
-	category.addSpace();
+	category.addBlockByName("B_FBRightL2");
 	category.trimBottom();
 }
 BlockList.populateCat_c = function(category) {

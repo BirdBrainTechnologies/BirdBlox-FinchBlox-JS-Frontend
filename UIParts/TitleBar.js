@@ -33,7 +33,6 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.buttonMargin = Button.defaultMargin;
 	}
 	TB.width = GuiElements.width;
-  console.log("setGraphicsPart1 width=" + TB.width);
 
   if (FinchBlox) {
     TB.buttonW = TB.height * 2/3;

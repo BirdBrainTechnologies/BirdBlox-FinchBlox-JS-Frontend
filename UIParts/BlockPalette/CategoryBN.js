@@ -68,7 +68,6 @@ CategoryBN.prototype.buildGraphics = function() {
 		let iconW = VectorIcon.computeWidth(iconPath, iconH);
 		let iconX = (CBN.width - iconW)/2;
 		let iconY = (CBN.height - iconH)/2;
-		console.log("vector icon " + iconX + " " + iconY + " " + iconH);
 		this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
 		this.label = this.icon.pathE;
 	} else {
