@@ -21,6 +21,10 @@ function Category(buttonX, buttonY, name, id) {
   this.x = BlockPalette.catX;
   this.y = BlockPalette.catY + BlockPalette.catH;
 
+  this.level = 4;
+  const l = parseInt(this.id.split("_").pop());
+  if (!isNaN(l)) { this.level = l; }
+
 	this.group = GuiElements.create.group(0, 0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
 		BlockPalette.width, BlockPalette.height, 0, 0);

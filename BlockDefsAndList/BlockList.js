@@ -10,9 +10,17 @@ function BlockList() {
 	// List only includes categories that will appear in the BlockPalette in order.
 	// Category names should be capitalized in the way they should be displayed on screen.
 	if (FinchBlox) {
-		cat.push("M");
-		cat.push("C");
-		cat.push("S")
+		cat.push("Motion_1");
+		cat.push("Color_1");
+		cat.push("Sound_1");
+		cat.push("Motion_2");
+		cat.push("Color_2");
+		cat.push("Sound_2");
+		cat.push("Motion_3");
+		cat.push("Color_3");
+		cat.push("Sound_3");
+		cat.push("Control_3");
+		cat.push("Sensor_3");
 	} else {
 		cat.push("Robots");
 		cat.push("Operators");
@@ -61,23 +69,72 @@ BlockList.catCount = function() {
 /**
 * @param {Category} category
 */
-BlockList.populateCat_m = function(category) {
+BlockList.populateCat_motion_1 = function(category) {
 	category.addBlockByName("B_FBForward");
 	category.addBlockByName("B_FBBackward");
-	category.addBlockByName("B_FBRightL2");
+	category.addBlockByName("B_FBRight");
+	category.addBlockByName("B_FBLeft");
 	category.trimBottom();
 }
-BlockList.populateCat_c = function(category) {
+BlockList.populateCat_color_1 = function(category) {
 	category.addBlockByName("B_Ask");
 	category.addBlockByName("B_Display");
 	category.trimBottom();
 }
-BlockList.populateCat_s = function(category) {
+BlockList.populateCat_sound_1 = function(category) {
 	category.addBlockByName("B_StopAllSounds");
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlayNoteForBeats");
 	category.trimBottom();
 }
+BlockList.populateCat_motion_2 = function(category) {
+	category.addBlockByName("B_FBForwardL2");
+	category.addBlockByName("B_FBBackwardL2");
+	category.addBlockByName("B_FBRightL2");
+	category.addBlockByName("B_FBLeftL2");
+	category.trimBottom();
+}
+BlockList.populateCat_color_2 = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+}
+BlockList.populateCat_sound_2 = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+}
+BlockList.populateCat_motion_3 = function(category) {
+	category.addBlockByName("B_FBForwardL3");
+	category.addBlockByName("B_FBBackwardL3");
+	category.addBlockByName("B_FBRightL3");
+	category.addBlockByName("B_FBLeftL3");
+	category.trimBottom();
+}
+BlockList.populateCat_color_3 = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+}
+BlockList.populateCat_sound_3 = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+}
+BlockList.populateCat_control_3 = function(category) {
+	category.addBlockByName("B_WhenFlagTapped");
+	category.addBlockByName("B_WaitUntil");
+	category.addBlockByName("B_Forever");
+	category.addBlockByName("B_Repeat");
+	category.trimBottom();
+}
+BlockList.populateCat_sensor_3 = function(category) {
+	category.addBlockByName("B_When");
+	category.trimBottom();
+}
+
 
 // BIRDBLOX CATEGORIES
 /**

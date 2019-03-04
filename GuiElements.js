@@ -155,6 +155,7 @@ GuiElements.setConstants = function() {
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
+	LevelMenu.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();

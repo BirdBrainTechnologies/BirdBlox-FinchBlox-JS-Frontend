@@ -65,9 +65,17 @@ Colors.setCategory = function() {
 		"variables": Colors.variablesDkOrange,
 		"lists": Colors.red,
 		"inactive": Colors.inactiveGray,
-		"m": Colors.easternBlue,
-		"c": Colors.neonCarrot,
-		"s": Colors.seance
+		"motion_1": Colors.easternBlue,
+		"color_1": Colors.neonCarrot,
+		"sound_1": Colors.seance,
+		"motion_2": Colors.easternBlue,
+		"color_2": Colors.neonCarrot,
+		"sound_2": Colors.seance,
+		"motion_3": Colors.easternBlue,
+		"color_3": Colors.neonCarrot,
+		"sound_3": Colors.seance,
+		"control_3": Colors.controlYellow,
+		"sensor_3": Colors.finchGreen
 	};
 };
 

@@ -38,11 +38,12 @@ BlockPalette.setGraphics = function() {
     BlockPalette.height = 100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
     BlockPalette.bg = Colors.blockPalette;
-    BlockPalette.catW = 220;
+    BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 50;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
     BlockPalette.blockMargin = 20;   // The horizontal spacing between Blocks
+    BlockPalette.trashHeight = BlockPalette.height * 0.75;
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
@@ -53,6 +54,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.catW = BlockPalette.width;
     BlockPalette.catX = 0;
     BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
+    BlockPalette.trashHeight = 120;
   }
 
 	BlockPalette.catBg = Colors.white;
@@ -60,7 +62,6 @@ BlockPalette.setGraphics = function() {
 	BlockPalette.labelColor = Colors.black;
 
 	BlockPalette.trashOpacity = 0.8;
-	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.black;
 };
 
@@ -154,12 +155,19 @@ BlockPalette.createCategories = function() {
 
   if (FinchBlox){
     let currentY = 0;
-    let currentX = 0;
+    let currentX = BlockPalette.catW/2 - 1.5*CategoryBN.width - CategoryBN.hMargin;
     for (let i = 0; i < catCount; i++) {
       const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
   		BlockPalette.categories.push(currentCat);
-      currentX += CategoryBN.width + CategoryBN.vMargin;
+      if (i == 2) {
+        currentX = BlockPalette.catW/2 - 1.5*CategoryBN.width - CategoryBN.hMargin;
+      } else if (i == 5) {
+        currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
+      } else {
+        currentX += CategoryBN.width + CategoryBN.hMargin;
+      }
     }
+
   } else {
     const numberOfRows = Math.ceil(catCount / 2);
 
@@ -296,3 +304,23 @@ BlockPalette.refresh = function() {
 		category.refreshGroup();
 	})
 };
+
+/**
+ * For FinchBlox. Shows/hides appropriate categories for selected level.
+ */
+BlockPalette.setLevel = function() {
+  BlockPalette.categories.forEach(function(category) {
+		category.button.setHidden();
+	})
+  switch (LevelMenu.currentLevel){
+    case 1:
+      BlockPalette.getCategory("motion_1").select();
+      break;
+    case 2:
+      BlockPalette.getCategory("motion_2").select();
+      break;
+    case 3:
+      BlockPalette.getCategory("motion_3").select();
+      break;
+  }
+}

@@ -103,7 +103,9 @@ CodeManager.move.update = function(x, y) {
 		// Move the BlockStack to the correct location.
 		move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
 		// If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+    var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+    if (FinchBlox) { wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+		if (wouldDelete) {
 			Highlighter.hide();   // Hide any existing highlight.
 			if (!move.startedFromPalette) {
 				BlockPalette.showTrash();
@@ -133,7 +135,9 @@ CodeManager.move.end = function() {
 		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
 		// If the BlockStack overlaps with the BlockPalette, delete it.
-		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+    var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+    if (FinchBlox) { shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+		if (shouldDelete) {
 			if (move.startedFromPalette) {
 				move.stack.remove();
 			} else {

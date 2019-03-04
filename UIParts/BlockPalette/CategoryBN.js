@@ -17,6 +17,7 @@ function CategoryBN(x, y, category) {
 		this.fill = Colors.getGradient(this.catId);
 	}
 	this.buildGraphics();
+	if (FinchBlox) { this.setHidden(); }
 }
 
 CategoryBN.setGraphics = function() {
@@ -119,3 +120,17 @@ CategoryBN.prototype.addListeners = function() {
 	if (!FinchBlox) { TouchReceiver.addListenersCat(this.colorRect, cat); }
 	TouchReceiver.addListenersCat(this.label, cat);
 };
+
+/**
+ * For FinchBlox only. Show or Hide this button based on the currently selected
+ * difficulty level.
+ */
+ CategoryBN.prototype.setHidden = function() {
+	 const level = this.category.level;
+	 if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+		 this.group.parentNode.removeChild(this.group);
+	 } else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+		 GuiElements.layers.categories.appendChild(this.group);
+	 }
+	 console.log("setHidden " + this.catId + " " + level + " " + this.category.level);
+ };

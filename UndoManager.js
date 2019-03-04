@@ -1,5 +1,5 @@
 /**
- * The UndoManager is a static class that keeps a stack (as in the data structure) or recently deleted BlockStacks
+ * The UndoManager is a static class that keeps a stack (as in the data structure) of recently deleted BlockStacks
  * so they can be undeleted.  It can be assigned an undo button, which it will then enable/disable as necessary.
  * The UndoManager stores the deleted BlockStacks as XML nodes.
  */

@@ -1,5 +1,5 @@
 /**
- * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
+ * A menu that appears when a Block is long pressed. Provides options to delete or duplicate the block.
  * Also used to give a rename option to variables and lists
  *
  * @param {Block} block

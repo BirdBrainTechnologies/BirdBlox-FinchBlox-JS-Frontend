@@ -76,6 +76,7 @@ TitleBar.setGraphicsPart2 = function() {
   if (FinchBlox) {
     TB.finchBnX = 2*TB.buttonMargin;
     TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
+    TB.levelBnY = (TB.height/2) - (TB.buttonH/2);
     TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
     TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
@@ -157,7 +158,10 @@ TitleBar.makeButtons = function() {
     TB.trashButton.addIcon(VectorPaths.trash, TB.bnIconH);
     TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
-    TB.levelButton = new Button(TB.levelBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.lightGray, r, r);
+    TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.lightGray, r, r);
+    TB.levelButton.setCallbackFunction(function(){
+      new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
+    },false);
 
     TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
     TB.finchButton.setCallbackFunction(function(){(new DiscoverDialog(DeviceFinch)).show();}, false);
@@ -331,3 +335,15 @@ TitleBar.updateZoomPart2 = function() {
 	}
 	TB.updateText();
 };
+
+/**
+ * Determines whether the specified point is over the TitleBar.  Used for
+ * determining if Blocks should be deleted in FinchBlox.
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
+ */
+ TitleBar.isStackOverTitleBar = function(x, y){
+   const TB = TitleBar;
+   return CodeManager.move.pInRange(x, y, 0, 0, TB.width, TB.height);
+ }

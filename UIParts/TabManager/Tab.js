@@ -425,7 +425,8 @@ Tab.prototype.undoDelete = function(stackNode) {
 	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 
-	const x = this.absToRelX(xMargin + BlockPalette.width);
+	var x = this.absToRelX(xMargin + BlockPalette.width);
+  if (FinchBlox) { x = this.absToRelX(xMargin); }
 	const y = this.absToRelY(yMargin + TitleBar.height);
 	const stack = BlockStack.importXml(stackNode, this);
 	if (stack == null) {
