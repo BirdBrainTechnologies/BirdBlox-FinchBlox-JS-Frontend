@@ -75,17 +75,20 @@ BlockList.populateCat_motion_1 = function(category) {
 	category.addBlockByName("B_FBRight");
 	category.addBlockByName("B_FBLeft");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_color_1 = function(category) {
-	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_FBColorL1");
 	category.addBlockByName("B_Display");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_sound_1 = function(category) {
-	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_FBSoundL1");
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlayNoteForBeats");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_motion_2 = function(category) {
 	category.addBlockByName("B_FBForwardL2");
@@ -93,17 +96,20 @@ BlockList.populateCat_motion_2 = function(category) {
 	category.addBlockByName("B_FBRightL2");
 	category.addBlockByName("B_FBLeftL2");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_color_2 = function(category) {
 	category.addBlockByName("B_Ask");
 	category.addBlockByName("B_Display");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_sound_2 = function(category) {
 	category.addBlockByName("B_StopAllSounds");
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlayNoteForBeats");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_motion_3 = function(category) {
 	category.addBlockByName("B_FBForwardL3");
@@ -111,17 +117,20 @@ BlockList.populateCat_motion_3 = function(category) {
 	category.addBlockByName("B_FBRightL3");
 	category.addBlockByName("B_FBLeftL3");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_color_3 = function(category) {
 	category.addBlockByName("B_Ask");
 	category.addBlockByName("B_Display");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_sound_3 = function(category) {
 	category.addBlockByName("B_StopAllSounds");
 	category.addBlockByName("B_PlaySound");
 	category.addBlockByName("B_PlayNoteForBeats");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_WhenFlagTapped");
@@ -129,10 +138,12 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.trimBottom();
+	category.centerBlocks();
 }
 BlockList.populateCat_sensor_3 = function(category) {
 	category.addBlockByName("B_When");
 	category.trimBottom();
+	category.centerBlocks();
 }
 
 

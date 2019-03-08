@@ -42,8 +42,9 @@ BlockPalette.setGraphics = function() {
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 50;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
-    BlockPalette.blockMargin = 20;   // The horizontal spacing between Blocks
+    BlockPalette.blockMargin = 25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
+    BlockPalette.trashIconVP = VectorPaths.faTrash;
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
@@ -55,6 +56,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.catX = 0;
     BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
     BlockPalette.trashHeight = 120;
+    BlockPalette.trashIconVP = VectorPaths.trash;
   }
 
 	BlockPalette.catBg = Colors.white;
@@ -239,10 +241,10 @@ BlockPalette.showTrash = function() {
 		GuiElements.update.opacity(trashBg, BP.trashOpacity);
 		BP.trash.appendChild(trashBg);
 
-		let trashWidth = VectorIcon.computeWidth(VectorPaths.trash, BP.trashHeight);
+		let trashWidth = VectorIcon.computeWidth(BP.trashIconVP, BP.trashHeight);
 		let imgX = BP.width / 2 - trashWidth / 2; // Center X
 		let imgY = BP.y + BP.height / 2 - BP.trashHeight / 2; // Center Y
-		let trashIcon = new VectorIcon(imgX, imgY, VectorPaths.trash, BP.trashColor, BP.trashHeight, BP.trash);
+		let trashIcon = new VectorIcon(imgX, imgY, BP.trashIconVP, BP.trashColor, BP.trashHeight, BP.trash);
 
 		// Add to group
 		GuiElements.layers.trash.appendChild(BP.trash);

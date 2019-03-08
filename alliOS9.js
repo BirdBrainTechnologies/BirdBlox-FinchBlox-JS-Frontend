@@ -1,4 +1,6 @@
+var FinchBlox = true;
 var FrontendVersion = 393;
+
 
 
 /**
@@ -8,7 +10,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
 	var DO = DebugOptions;
-	DO.enabled = false;
+	DO.enabled = true;
 
 	/* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
 	 * DO is not enabled */
@@ -5620,11 +5622,13 @@ GuiElements.setConstants = function() {
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
+	LevelMenu.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
 	InputWidget.NumPad.setConstants();
 	InputWidget.Label.setConstants();
+	InputWidget.Slider.setConstants();
 
 	ConnectMultipleDialog.setConstants();
 	RobotConnectionList.setConstants();
@@ -5651,8 +5655,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-	GuiElements.blockInteraction();
-	OpenDialog.showDialog();
+	if (!FinchBlox){
+		GuiElements.blockInteraction();
+		OpenDialog.showDialog();
+	}
 	DebugOptions.applyActions();
 };
 /**
@@ -5856,9 +5862,11 @@ GuiElements.draw = {};
  * @param {number} width - The rect's width.
  * @param {number} height - The rect's height.
  * @param {string} [color] - (optional) The rect's fill color in the form "#fff".
+ * @param {number} rx - (optional) Corner rounding parameter
+ * @param {number} ry - (optional) Corner rounding parameter
  * @return {Element} - The rect which was created.
  */
-GuiElements.draw.rect = function(x, y, width, height, color) {
+GuiElements.draw.rect = function(x, y, width, height, color, rx, ry) {
 	DebugOptions.validateNumbers(x, y, width, height);
 	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
 	rect.setAttributeNS(null, "x", x); //Set its attributes.
@@ -5867,6 +5875,10 @@ GuiElements.draw.rect = function(x, y, width, height, color) {
 	rect.setAttributeNS(null, "height", height);
 	if (color != null) {
 		rect.setAttributeNS(null, "fill", color);
+	}
+	if (rx != null && ry != null){
+		rect.setAttributeNS(null, "rx", rx);
+		rect.setAttributeNS(null, "ry", ry);
 	}
 	return rect; //Return the rect.
 };
@@ -6037,6 +6049,24 @@ GuiElements.draw.video = function(videoName, robotId) {
   }
 
 	return videoElement;
+};
+/**
+ * Creates a filled, SVG path element with two rounded corners and the specified
+ * dimensions and returns it. Used for FinchBlox category buttons.
+ * @param {number} x - The path's x coord.
+ * @param {number} y - The path's y coord.
+ * @param {number} width - The path's width. (it is an isosceles triangle)
+ * @param {number} height - The path's height. (negative will make it point down)
+ * @param {string} color - The path's fill color in the form "#fff".
+ * @return {Element} - The path which was created.
+ */
+GuiElements.draw.tabBN = function(x, y, width, height, color) {
+	DebugOptions.validateNonNull(color);
+	DebugOptions.validateNumbers(x, y, width, height);
+	var tabBN = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.tabBN(tabBN, x, y, width, height); //Set its path description (points).
+	tabBN.setAttributeNS(null, "fill", color); //Set the fill.
+	return tabBN; //Return the finished button shape.
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -6267,6 +6297,28 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
  */
 GuiElements.update.makeClickThrough = function(svgE) {
 	svgE.style.pointerEvents = "none";
+};
+/**
+ * Changes the path description of an SVG path object to make it a rectangle
+ * with two rounded corners.
+ * @param {Element} pathE - The path element to be modified.
+ * @param {number} x - The path's new x coord.
+ * @param {number} y - The path's new y coord.
+ * @param {number} width - The path's new width. (it is an isosceles triangle)
+ * @param {number} height - The path's new height. (negative will make it point down)
+ */
+GuiElements.update.tabBN = function(pathE, x, y, width, height) {
+	DebugOptions.validateNumbers(x, y, width, height);
+  var cornerRadius = 8;
+	var path = "";
+	path += "m " + (x + cornerRadius) + "," + y;
+	path += " l " + (width - 2*cornerRadius) + ",0";
+	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + cornerRadius;
+	path += " l 0," + (height - cornerRadius) + " " + (-width) + ",0 0,";
+	path += (cornerRadius - height);
+	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + (0 - cornerRadius);
+	path += " z"; //Closes path.
+	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
 
 /* GuiElements.move contains functions that move existing SVG elements.
@@ -6721,12 +6773,27 @@ function BlockList() {
 
 	// List only includes categories that will appear in the BlockPalette in order.
 	// Category names should be capitalized in the way they should be displayed on screen.
-	cat.push("Robots");
-	cat.push("Operators");
-	cat.push("Sound");
-	cat.push("Tablet");
-	cat.push("Control");
-	cat.push("Variables");
+	if (FinchBlox) {
+		cat.push("Motion_1");
+		cat.push("Color_1");
+		cat.push("Sound_1");
+		cat.push("Motion_2");
+		cat.push("Color_2");
+		cat.push("Sound_2");
+		cat.push("Motion_3");
+		cat.push("Color_3");
+		cat.push("Sound_3");
+		cat.push("Control_3");
+		cat.push("Sensor_3");
+	} else {
+		cat.push("Robots");
+		cat.push("Operators");
+		cat.push("Sound");
+		cat.push("Tablet");
+		cat.push("Control");
+		cat.push("Variables");
+	}
+
 }
 
 /**
@@ -6762,6 +6829,89 @@ BlockList.catCount = function() {
  * category.trimBottom() is used to remove any extra space at the bottom of the category.
  */
 
+// FINCHBLOX CATEGORIES
+/**
+* @param {Category} category
+*/
+BlockList.populateCat_motion_1 = function(category) {
+	category.addBlockByName("B_FBForward");
+	category.addBlockByName("B_FBBackward");
+	category.addBlockByName("B_FBRight");
+	category.addBlockByName("B_FBLeft");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_color_1 = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_sound_1 = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_motion_2 = function(category) {
+	category.addBlockByName("B_FBForwardL2");
+	category.addBlockByName("B_FBBackwardL2");
+	category.addBlockByName("B_FBRightL2");
+	category.addBlockByName("B_FBLeftL2");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_color_2 = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_sound_2 = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_motion_3 = function(category) {
+	category.addBlockByName("B_FBForwardL3");
+	category.addBlockByName("B_FBBackwardL3");
+	category.addBlockByName("B_FBRightL3");
+	category.addBlockByName("B_FBLeftL3");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_color_3 = function(category) {
+	category.addBlockByName("B_Ask");
+	category.addBlockByName("B_Display");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_sound_3 = function(category) {
+	category.addBlockByName("B_StopAllSounds");
+	category.addBlockByName("B_PlaySound");
+	category.addBlockByName("B_PlayNoteForBeats");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_control_3 = function(category) {
+	category.addBlockByName("B_WhenFlagTapped");
+	category.addBlockByName("B_WaitUntil");
+	category.addBlockByName("B_Forever");
+	category.addBlockByName("B_Repeat");
+	category.trimBottom();
+	category.centerBlocks();
+}
+BlockList.populateCat_sensor_3 = function(category) {
+	category.addBlockByName("B_When");
+	category.trimBottom();
+	category.centerBlocks();
+}
+
+
+// BIRDBLOX CATEGORIES
 /**
  * @param {Category} category
  */
@@ -7045,8 +7195,11 @@ function Colors() {
 Colors.setCommon = function() {
 	//Gray scale...
 	Colors.white = "#fff";
+	Colors.labelTextDisabled = "#e4e4e4";
   Colors.lightLightGray = "#CDCDCD";
   Colors.windowColor = "#CCC";
+	Colors.canvasGray = "#C1C1C1";
+	Colors.valueTextGrayed = "#aaa";
 	Colors.mediumLightGray = "#999";
 	Colors.lightGray = "#7B7B7B";
 	Colors.darkGray = "#282828";
@@ -7066,12 +7219,18 @@ Colors.setCommon = function() {
 	Colors.variablesDkOrange = "#FF5B00";
 	Colors.inactiveGray = "#a3a3a3";
 	//BBT Style guide colors
-	Colors.easternBlue = "#089BAB";
+	Colors.easternBlue = "#089BAB"; //bbt blue
 	Colors.neonCarrot = "#FF9922";
-	Colors.fountainBlue = "#62BCC7";
-	Colors.seance = "#881199";
+	Colors.fountainBlue = "#62BCC7"; //lighter blue
+	Colors.seance = "#881199"; //dark purple
 	Colors.bbtDarkGray = "#535353";
 	Colors.iron = "#CACACA";
+	//FinchBlox
+	Colors.blockPalette = "#BAD8DC";
+	Colors.flagGreen = "#5FBE3A";
+	Colors.stopRed = "#DB4825";
+	Colors.finchGreen = "#C0E7B0";
+	Colors.fbHighlight = "#ffff00";
 };
 
 Colors.setCategory = function() {
@@ -7088,7 +7247,18 @@ Colors.setCategory = function() {
 		"control": Colors.controlYellow,
 		"variables": Colors.variablesDkOrange,
 		"lists": Colors.red,
-		"inactive": Colors.inactiveGray
+		"inactive": Colors.inactiveGray,
+		"motion_1": Colors.easternBlue,
+		"color_1": Colors.neonCarrot,
+		"sound_1": Colors.seance,
+		"motion_2": Colors.easternBlue,
+		"color_2": Colors.neonCarrot,
+		"sound_2": Colors.seance,
+		"motion_3": Colors.easternBlue,
+		"color_3": Colors.neonCarrot,
+		"sound_3": Colors.seance,
+		"control_3": Colors.controlYellow,
+		"sensor_3": Colors.finchGreen
 	};
 };
 
@@ -7443,17 +7613,27 @@ BlockGraphics.SetCommand = function() {
 	BlockGraphics.command = {};
 
 	// Minimum dimensions
-	BlockGraphics.command.height = 34;
-	BlockGraphics.command.width = 40;
+	if (FinchBlox) {
+		BlockGraphics.command.height = 76;
+		BlockGraphics.command.width = 96;
+		BlockGraphics.command.cornerRadius = 10;
+		BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
+		BlockGraphics.command.hMargin = 25; // The margin to the left and right of the content
+//		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out 
+	} else {
+		BlockGraphics.command.height = 34;
+		BlockGraphics.command.width = 40;
+		BlockGraphics.command.cornerRadius = 3;
+		BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
+		BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
+	}
 
-	BlockGraphics.command.vMargin = 5; // The margin above and below the content (BlockParts) of the Block
-	BlockGraphics.command.hMargin = 7; // The margin to the left and right of the content
 
 	BlockGraphics.command.bumpOffset = 7;
 	BlockGraphics.command.bumpDepth = 4;
 	BlockGraphics.command.bumpTopWidth = 15;
 	BlockGraphics.command.bumpBottomWidth = 7;
-	BlockGraphics.command.cornerRadius = 3;
+
 
 	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
 	BlockGraphics.command.snap = {};
@@ -7484,7 +7664,7 @@ BlockGraphics.SetReporter = function() {
 	BlockGraphics.reporter.slotHMargin = 10; // Space to sides of content
 
 	BlockGraphics.reporter.strokeW = 1;
-	BlockGraphics.reporter.slotFill = "#fff";
+	BlockGraphics.reporter.slotFill = Colors.white;
 	BlockGraphics.reporter.slotSelectedFill = Colors.lightGray;
 };
 
@@ -7553,17 +7733,17 @@ BlockGraphics.SetLoop = function() {
 BlockGraphics.SetLabelText = function() {
 	BlockGraphics.labelText = {};
 	BlockGraphics.labelText.font = Font.uiFont(12).bold();
-	BlockGraphics.labelText.fill = "#ffffff";
-	BlockGraphics.labelText.disabledFill = "#e4e4e4";
+	BlockGraphics.labelText.fill = Colors.white;
+	BlockGraphics.labelText.disabledFill = Colors.labelTextDisabled;
 };
 
 /* Constants for text in Slots */
 BlockGraphics.SetValueText = function() {
 	BlockGraphics.valueText = {};
 	BlockGraphics.valueText.font = Font.uiFont(12);
-	BlockGraphics.valueText.fill = "#000000";
-	BlockGraphics.valueText.selectedFill = "#fff";
-	BlockGraphics.valueText.grayedFill = "#aaa";
+	BlockGraphics.valueText.fill = Colors.black;
+	BlockGraphics.valueText.selectedFill = Colors.white;
+	BlockGraphics.valueText.grayedFill = Colors.valueTextGrayed;
 };
 
 /* Constants for DropSlots */
@@ -7576,11 +7756,11 @@ BlockGraphics.SetDropSlot = function() {
 	BlockGraphics.dropSlot.triW = 8;
 	BlockGraphics.dropSlot.bg = Colors.lightGray;
 	BlockGraphics.dropSlot.bgOpacity = 0.25;
-	BlockGraphics.dropSlot.selectedBg = "#fff";
+	BlockGraphics.dropSlot.selectedBg = Colors.white;
 	BlockGraphics.dropSlot.selectedBgOpacity = 1;
-	BlockGraphics.dropSlot.triColor = "#fff";
-	BlockGraphics.dropSlot.textFill = "#fff";
-	BlockGraphics.dropSlot.selectedTriColor = "#fff";
+	BlockGraphics.dropSlot.triColor = Colors.white;
+	BlockGraphics.dropSlot.textFill = Colors.white;
+	BlockGraphics.dropSlot.selectedTriColor = Colors.white;
 };
 
 /* Constants for indicator that shows where Blocks will be snapped */
@@ -7589,8 +7769,12 @@ BlockGraphics.SetHighlight = function() {
 	BlockGraphics.highlight.margin = 5;
 	BlockGraphics.highlight.hexEndL = 15;
 	BlockGraphics.highlight.slotHexEndL = 10;
-	BlockGraphics.highlight.strokeC = "#fff";
-	BlockGraphics.highlight.strokeDarkC = "#000";
+	if (FinchBlox) {
+		BlockGraphics.highlight.strokeC = Colors.fbHighlight;
+	} else {
+		BlockGraphics.highlight.strokeC = Colors.white;
+	}
+	BlockGraphics.highlight.strokeDarkC = Colors.black;
 	BlockGraphics.highlight.strokeW = 3;
 	BlockGraphics.highlight.commandL = 10;
 };
@@ -7605,7 +7789,7 @@ BlockGraphics.SetHitBox = function() {
 /* Constants for outline on running Blocks */
 BlockGraphics.SetGlow = function() {
 	BlockGraphics.glow = function() {};
-	BlockGraphics.glow.color = "#fff";
+	BlockGraphics.glow.color = Colors.white;
 	BlockGraphics.glow.strokeW = 2;
 };
 
@@ -7647,12 +7831,16 @@ BlockGraphics.CalcPaths = function() {
 	var path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
+	var fbBumpOut = " 5,0 0,-5 10,0 0,36 -10,0 0,-5 -5,0 ";
+	var fbBumpIn = " 5,0 0,5 10,0 0,-36 -10,0 0,5 -5,0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
 	com.path4 = path4; //Bottom edge and bottom left corner
 	com.path4NoBump = path4NoBump;
 	com.path5 = path5; //top left corner
+	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
+	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */
@@ -7703,6 +7891,30 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	path += BlockGraphics.command.path4 + "l 0,";
 	path += BlockGraphics.command.extraHeight - height;
 	path += BlockGraphics.command.path5;
+	if (FinchBlox){
+		var com = BlockGraphics.command;
+		var straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		path = "";
+		path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y + " l ";
+		//path += BlockGraphics.command.path1;
+		path += width - 2*BlockGraphics.command.cornerRadius;
+		path += BlockGraphics.command.path2;
+		//path += height - BlockGraphics.command.extraHeight;
+		path += straightHeight;
+		path += BlockGraphics.command.fbBumpOut;
+		path += "0," + straightHeight;
+
+		path += BlockGraphics.command.path3;
+		path += 2*BlockGraphics.command.cornerRadius - width + ",0";
+		path += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+		path += " l 0,";
+		//path += BlockGraphics.command.extraHeight - height;
+		path += -straightHeight;
+		path += BlockGraphics.command.fbBumpIn;
+		path += "0," + (-straightHeight);
+
+		path += BlockGraphics.command.path5;
+	}
 	return path;
 };
 
@@ -7712,12 +7924,23 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
  * @param {number} y
  * @return {string}
  */
-BlockGraphics.buildPath.highlightCommand = function(x, y) {
+BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
 	var path = "";
-	path += "m " + x + "," + y;
-	path += "l " + BlockGraphics.command.cornerRadius + ",0";
-	path += BlockGraphics.command.path1;
-	path += BlockGraphics.highlight.commandL + ",0";
+	if (FinchBlox) {
+		var lineLength = 5;
+		if (height != null){
+			lineLength = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		}
+		path += "m " + x + "," + (y + BlockGraphics.command.cornerRadius);
+		path += "l 0," + lineLength;
+		path += BlockGraphics.command.fbBumpOut;
+		path += "0," + lineLength;
+	} else {
+		path += "m " + x + "," + y;
+		path += "l " + BlockGraphics.command.cornerRadius + ",0";
+		path += BlockGraphics.command.path1;
+		path += BlockGraphics.highlight.commandL + ",0";
+	}
 	return path;
 };
 
@@ -7793,17 +8016,30 @@ BlockGraphics.buildPath.string = function(x, y, width, height) {
 BlockGraphics.buildPath.hat = function(x, y, width, height) {
 	var path = "";
 	var hat = BlockGraphics.hat;
-	var flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
-	var flatHeight = height - BlockGraphics.command.cornerRadius * 2;
-	path += "m " + x + "," + y;
-	path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
-	path += " l " + flatWidth;
-	path += BlockGraphics.command.path2;
-	path += flatHeight;
-	path += BlockGraphics.command.path3;
-	path += BlockGraphics.command.extraWidth - width;
-	path += BlockGraphics.command.path4;
-	path += "z";
+	var com = BlockGraphics.command;
+	if (FinchBlox) {
+		var straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		path += "m " + x + "," + y + " l ";
+		path += width - com.cornerRadius;
+		path += com.path2 + straightHeight;
+		path += com.fbBumpOut;
+		path += "0," + straightHeight;
+		path += com.path3 + (com.cornerRadius - width) + ",0";
+		path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
+		path += " z ";
+	} else {
+		var flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
+		var flatHeight = height - BlockGraphics.command.cornerRadius * 2;
+		path += "m " + x + "," + y;
+		path += " a " + hat.hRadius + " " + hat.vRadius + " 0 0 1 " + hat.topW + " 0";
+		path += " l " + flatWidth;
+		path += BlockGraphics.command.path2;
+		path += flatHeight;
+		path += BlockGraphics.command.path3;
+		path += BlockGraphics.command.extraWidth - width;
+		path += BlockGraphics.command.path4;
+		path += "z";
+	}
 	return path;
 };
 
@@ -7915,6 +8151,7 @@ BlockGraphics.create.block = function(category, group, returnsValue, active) {
 	if (!active) category = "inactive";
 	var path = GuiElements.create.path(group);
 	var fill = Colors.getGradient(category);
+	if (FinchBlox) { fill = Colors.getColor(category) }
 	path.setAttributeNS(null, "fill", fill);
 	BlockGraphics.update.stroke(path, category, returnsValue, active);
 	return path;
@@ -7945,7 +8182,7 @@ BlockGraphics.create.slot = function(group, type, category, active) {
  */
 BlockGraphics.create.slotHitBox = function(group) {
 	var rectE = GuiElements.create.rect(group);
-	rectE.setAttributeNS(null, "fill", "#000");
+	rectE.setAttributeNS(null, "fill", Colors.black);
 	GuiElements.update.opacity(rectE, 0);
 	return rectE;
 };
@@ -8065,8 +8302,9 @@ BlockGraphics.update.glow = function(path) {
  */
 BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
 	if (!active) category = "inactive";
-	if (returnsValue) {
+	if (returnsValue || FinchBlox) {
 		var outline = Colors.getColor(category);
+		if (FinchBlox) { outline = Colors.darkenColor(outline, 0.75); }
 		path.setAttributeNS(null, "stroke", outline);
 		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
 	} else {
@@ -8121,7 +8359,7 @@ BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) 
 	var hHeight = height + 2 * bG.margin;
 	switch (type) {
 		case 0:
-			pathD = BlockGraphics.buildPath.highlightCommand(x, y);
+			pathD = BlockGraphics.buildPath.highlightCommand(x, y, height);
 			break;
 		case 1:
 			pathD = BlockGraphics.buildPath.reporter(hX, hY, hWidth, hHeight);
@@ -8743,6 +8981,18 @@ TouchReceiver.touchStartScrollBox = function(target, e) {
 	}
 };
 /**
+ * @param {SliderWidget} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartSlider = function(target, e) {
+	var TR = TouchReceiver;
+	if (TR.touchstart(e, false)) {
+		TR.targetType = "slider";
+		TR.target = target;
+		e.stopPropagation();
+	}
+};
+/**
  * @param {event} e
  */
 TouchReceiver.touchStartTabSpace = function(e) {
@@ -8898,6 +9148,10 @@ TouchReceiver.touchmove = function(e) {
 					TR.blocksMoving = true;
 				}
 			}
+      // Drag the slider of the slider widget
+      if (TR.targetType === "slider") {
+        TR.target.drag(TR.getX(e));
+      }
 			// If the user drags the palette, it should scroll.
 			if (TR.targetType === "scrollBox") {
 				shouldPreventDefault = false;
@@ -9161,6 +9415,17 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
 	}, false);
 };
 /**
+ * @param {Element} element
+ * @param {SliderWidget} parent
+ */
+TouchReceiver.addListenersSlider = function(element, parent) {
+	var TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartSlider(parent, e);
+	}, false);
+};
+/**
  * Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
  * @param {Element} element
  */
@@ -9329,48 +9594,77 @@ TitleBar.setGraphicsPart1 = function() {
 	var TB = TitleBar;
 	if (GuiElements.smallMode) {
 		TB.height = 35;
+    //TODO: Add FinchBlox option here
 		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
-		TB.height = 54;
+    if (FinchBlox) {
+      TB.height = 100;
+    } else {
+      TB.height = 54;
+    }
 		TB.buttonMargin = Button.defaultMargin;
 	}
 	TB.width = GuiElements.width;
-	TB.buttonW = TB.height * 64 / 54;
 
-	var maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
-	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
-
-	TB.longButtonW = 85;
-	TB.bnIconMargin = 3;
-
-	TB.bg = Colors.lightGray;
+  if (FinchBlox) {
+    TB.buttonW = TB.height * 2/3;
+    var maxBnWidth = (TB.width - 9 * TB.buttonMargin) / 12;
+    TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+    TB.longButtonW = 2.5 * TB.buttonW;
+    TB.finchBnW = 1.5 * TB.buttonW;
+  	TB.bnIconMargin = 3;
+    TB.bg = Colors.easternBlue;
+    TB.buttonH = TB.height/2;
+  	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+  	var maxIconHeight = maxBnWidth * 0.7;
+  	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
+    TB.tallButtonH = TB.buttonH * 1.25;
+    TB.defaultCornerRounding = 10;
+  } else {
+    TB.buttonW = TB.height * 64 / 54;
+  	var maxBnWidth = (TB.width - 11 * TB.buttonMargin - DeviceStatusLight.radius * 2) / 7;
+  	TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
+    TB.longButtonW = 85;
+  	TB.bnIconMargin = 3;
+    TB.bg = Colors.lightGray;
+    TB.buttonH = TB.height - 2 * TB.buttonMargin;
+  	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
+  	var maxIconHeight = maxBnWidth * 0.7;
+  	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
+  }
 	TB.flagFill = Colors.green;
 	TB.batteryFill = Colors.lightGray;
 	TB.stopFill = Colors.red;
 	TB.titleColor = Colors.white;
 	TB.font = Font.uiFont(16).bold();
 
-	TB.buttonH = TB.height - 2 * TB.buttonMargin;
-	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
-	var maxIconHeight = maxBnWidth * 0.7;
-	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
 	TB.shortButtonW = TB.buttonH;
 	TB.shortButtonW = TB.buttonW;
-
 };
 
 TitleBar.setGraphicsPart2 = function() {
 	/* Compute the locations of all the buttons */
-	var TB = TitleBar;
-	TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
-	TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
-	TB.undoBnX = TB.flagBnX - TB.buttonW - TB.buttonMargin;
-	TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
-	TB.debugX = TB.batteryBnX - TB.longButtonW - TB.buttonMargin;
+	var TB = TitleBar
+  if (FinchBlox) {
+    TB.finchBnX = 2*TB.buttonMargin;
+    TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
+    TB.levelBnY = (TB.height/2) - (TB.buttonH/2);
+    TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
+    TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
+    TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
+    TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
+  } else {
+    TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
+    TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
+    TB.undoBnX = TB.flagBnX - TB.buttonW - TB.buttonMargin;
+  }
 
-	TB.fileBnX = TB.buttonMargin;
-	TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
-	TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
+  TB.batteryBnX  = TB.undoBnX - TB.buttonW - TB.buttonMargin;
+  TB.debugX = TB.batteryBnX - TB.longButtonW - TB.buttonMargin;
+
+  TB.fileBnX = TB.buttonMargin;
+  TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
+  TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
 
 	TB.titleLeftX = BlockPalette.width;
 	TB.titleRightX = TB.undoBnX - TB.buttonMargin;
@@ -9390,7 +9684,28 @@ TitleBar.createBar = function() {
 	var TB = TitleBar;
 	TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
+  if (FinchBlox) {
+    TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    TB.bgShape.setAttributeNS(null, "fill", Colors.white);
+    TB.updateShapePath();
+  }
 };
+TitleBar.updateShapePath = function() {
+  var TB = TitleBar;
+  var shapeW = 2*TB.longButtonW;
+  var shapeH = TB.height - TB.buttonMargin;
+  var r = shapeH/2;
+  var path = " m " + (TB.width - shapeW)/2 + "," + TB.buttonMargin;
+  path += " l " + shapeW + ",0";
+  path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+  path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+  path += " l " + (-shapeW-4*r) + ",0";
+  path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
+  path += " a " + r + " " + r + " 0 0 1 " + r + " " + (-r);
+  path += " z ";
+
+  TB.bgShape.setAttributeNS(null, "d", path);
+}
 
 /**
  * Creates all the buttons and menus
@@ -9398,38 +9713,64 @@ TitleBar.createBar = function() {
 TitleBar.makeButtons = function() {
 	var TB = TitleBar;
 	var TBLayer = GuiElements.layers.titlebar;
-	TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
-	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
-	TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
-	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
-	TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-  TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-  TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+  if (FinchBlox) {
+    var r = TB.defaultCornerRounding
+  	TB.flagBn = new Button(TB.flagBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.flagGreen, r, r);
+    TB.flagBn.addIcon(VectorPaths.flag, TB.bnIconH);
+  	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
+    TB.stopBn = new Button(TB.stopBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.stopRed, r, r);
+  	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH);
+  	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-	TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
-	var hbBnIconOffset = 2 * TB.buttonMargin;
-	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
-	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
+    TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
+  	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+  	UndoManager.setUndoButton(TB.undoButton);
 
-	TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
-	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+    TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
+    TB.trashButton.addIcon(VectorPaths.trash, TB.bnIconH);
+    TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
-	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
-	TB.viewMenu = new SettingsMenu(TB.viewBn);
-	TB.viewBn.setLongTouchFunction(function() {
-		//DialogManager.showAlertDialog("Test", "Test", "Test");
-		GuiElements.alert("Long touch");
-		TB.viewMenu.reloadAdvanced();
-	});
+    TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.lightGray, r, r);
+    TB.levelButton.setCallbackFunction(function(){
+      new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
+    },false);
 
-	TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
-	UndoManager.setUndoButton(TB.undoButton);
+    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
+    TB.finchButton.setCallbackFunction(function(){(new DiscoverDialog(DeviceFinch)).show();}, false);
+  } else {
+    TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
+  	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
+    TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+  	TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
+  	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
+    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+
+    TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+  	var hbBnIconOffset = 2 * TB.buttonMargin;
+  	TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
+  	TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+  	TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
+
+    TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+  	TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
+  	TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
+
+  	TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+  	TB.viewBn.addIcon(VectorPaths.settings, TB.bnIconH);
+  	TB.viewMenu = new SettingsMenu(TB.viewBn);
+  	TB.viewBn.setLongTouchFunction(function() {
+  		//DialogManager.showAlertDialog("Test", "Test", "Test");
+  		GuiElements.alert("Long touch");
+  		TB.viewMenu.reloadAdvanced();
+  	});
+
+    TB.undoButton = new Button(TB.undoBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+  	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+  	UndoManager.setUndoButton(TB.undoButton);
+  }
 
 	TB.debugBn = null;
 	if (TB.debugEnabled) {
@@ -9442,16 +9783,25 @@ TitleBar.makeButtons = function() {
  */
 TitleBar.removeButtons = function() {
 	var TB = TitleBar;
-	TB.flagBn.remove();
-	TB.stopBn.remove();
-	TB.fileBn.remove();
-	TB.viewBn.remove();
-	TB.undoButton.remove();
-	TB.hummingbirdBn.remove();
-	TB.batteryBn.remove();
+  if (FinchBlox) {
+    TB.flagBn.remove();
+  	TB.stopBn.remove();
+    TB.undoButton.remove();
+    TB.finchButton.remove();
+    TB.levelButton.remove();
+    TB.trashButton.remove();
+  } else {
+    TB.flagBn.remove();
+  	TB.stopBn.remove();
+    TB.fileBn.remove();
+  	TB.viewBn.remove();
+    TB.undoButton.remove();
+    TB.hummingbirdBn.remove();
+  	TB.batteryBn.remove();
+    TB.deviceStatusLight.remove();
+  }
 	if (TB.debugBn != null) TB.debugBn.remove();
 	if (TB.showHideBn != null) TB.showHideBn.remove();
-	TB.deviceStatusLight.remove();
 };
 
 /**
@@ -9543,12 +9893,13 @@ TitleBar.updateZoomPart1 = function() {
  */
 TitleBar.updateZoomPart2 = function() {
 	var TB = TitleBar;
-	var viewShowing = TB.viewBn.toggled;
+	if (!FinchBlox) {var viewShowing = TB.viewBn.toggled;}
 	TB.setGraphicsPart2();
 	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
+  TB.updateShapePath();
 	TitleBar.removeButtons();
 	TitleBar.makeButtons();
-	if (viewShowing) {
+	if (!FinchBlox && viewShowing) {
 		// This menu must stay open even while resizing
 		TB.viewBn.press();
 		TB.viewBn.release();
@@ -9556,6 +9907,18 @@ TitleBar.updateZoomPart2 = function() {
 	}
 	TB.updateText();
 };
+
+/**
+ * Determines whether the specified point is over the TitleBar.  Used for
+ * determining if Blocks should be deleted in FinchBlox.
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
+ */
+ TitleBar.isStackOverTitleBar = function(x, y){
+   var TB = TitleBar;
+   return CodeManager.move.pInRange(x, y, 0, 0, TB.width, TB.height);
+ }
 
 
 
@@ -9584,27 +9947,43 @@ BlockPalette.setGraphics = function() {
 	// Dimensions used within a category
 	BlockPalette.mainVMargin = 10;   // The space before the first Block in a Category
 	BlockPalette.mainHMargin = Button.defaultMargin;   // The space between the Blocks and the left side of the screen
-	BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
 	BlockPalette.sectionMargin = 10;   // The additional space added between sections
 	BlockPalette.insideBnH = 38;   // Height of buttons within a category (such as Create Variable button)
 	BlockPalette.insideBnW = 150;   // Width of buttons within a category
 
-	// Dimensions for the region with CategoryBNs
-	BlockPalette.width = 253;
-	BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
+  BlockPalette.catVMargin = Button.defaultMargin;   // Margins between buttons
 	BlockPalette.catHMargin = Button.defaultMargin;
-	BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
-	BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
-	BlockPalette.catY = TitleBar.height;
-	BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
-	BlockPalette.bg = Colors.white;
-	BlockPalette.catBg = Colors.white;
 
+	// Dimensions for the region with CategoryBNs
+  if (FinchBlox){
+    BlockPalette.width = GuiElements.width;
+    BlockPalette.height = 100;
+    BlockPalette.y = GuiElements.height - BlockPalette.height;
+    BlockPalette.bg = Colors.blockPalette;
+    BlockPalette.catW = 300;
+    BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
+    BlockPalette.catH = 50;
+    BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
+    BlockPalette.blockMargin = 25;   // The horizontal spacing between Blocks
+    BlockPalette.trashHeight = BlockPalette.height * 0.75;
+  } else {
+    BlockPalette.width = 253;
+    BlockPalette.catY = TitleBar.height;
+    BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3;   // 3 rows of BNs, 3 margins, 30 = height per BN
+    BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
+    BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
+    BlockPalette.bg = Colors.white;
+    BlockPalette.catW = BlockPalette.width;
+    BlockPalette.catX = 0;
+    BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
+    BlockPalette.trashHeight = 120;
+  }
+
+	BlockPalette.catBg = Colors.white;
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.black;
 
 	BlockPalette.trashOpacity = 0.8;
-	BlockPalette.trashHeight = 120;
 	BlockPalette.trashColor = Colors.black;
 };
 
@@ -9615,8 +9994,15 @@ BlockPalette.updateZoom = function() {
 	var BP = BlockPalette;
 	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
-	GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
-	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  if (FinchBlox) {
+    BP.updatePath(BP.leftShape);
+    BP.updatePath(BP.rightShape);
+    GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
+  } else {
+    GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
+  }
+	//GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
 	for (var i = 0; i < BlockPalette.categories.length; i++) {
 		BlockPalette.categories[i].updateZoom();
 	}
@@ -9626,10 +10012,18 @@ BlockPalette.updateZoom = function() {
  * Creates the gray rectangle below the CategoryBNs
  */
 BlockPalette.createCatBg = function() {
-	var BP = BlockPalette;
-	BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
-	GuiElements.layers.catBg.appendChild(BP.catRect);
-	GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+  //if(!FinchBlox){
+  	var BP = BlockPalette;
+    var bgW = BP.catW;
+    if (FinchBlox) { bgW = 0; }
+  	//BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
+    //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
+    BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
+  	GuiElements.layers.catBg.appendChild(BP.catRect);
+  	//GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  //}
+
 };
 
 /**
@@ -9639,34 +10033,88 @@ BlockPalette.createPalBg = function() {
 	var BP = BlockPalette;
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
+  if (FinchBlox) {
+    BP.leftShape = GuiElements.create.path(GuiElements.layers.paletteBG);
+    BP.rightShape = GuiElements.create.path(GuiElements.layers.paletteBG);
+    BP.leftShape.setAttributeNS(null, "fill", BP.bg);
+    BP.rightShape.setAttributeNS(null, "fill", BP.bg);
+    BlockPalette.updatePath(BP.leftShape);
+    BlockPalette.updatePath(BP.rightShape);
+  }
 };
+BlockPalette.updatePath = function(pathE) {
+  var BP = BlockPalette;
+  var shapeH = 20;
+  var r = shapeH/2;
+  var shapeW = (BP.width - BP.catW)/2 - 2*BP.catHMargin - 2*r;
+  var path = "";
+  switch(pathE){
+    case BP.leftShape:
+      path += "m 0," + (BP.y - shapeH);
+      path += " l " + shapeW + ",0 ";
+      path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+      path += " l " + (-shapeW-2*r) + ",0 ";
+      path += " z";
+      break;
+    case BP.rightShape:
+      path += "m " + BP.width + "," + (BP.y - shapeH);
+      path += " l " + (-shapeW) + ",0 ";
+      path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+      path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+      path += " l " + (shapeW + 2*r) + ",0 ";
+      path += " z";
+      break;
+  }
+  pathE.setAttributeNS(null, "d", path);
+}
 
 /**
  * Creates the categories listed in the BlockList
  */
 BlockPalette.createCategories = function() {
 	var catCount = BlockList.catCount();
-	var numberOfRows = Math.ceil(catCount / 2);
 
-	// Automatically alternates between two columns while adding categories
-	var col1X = BlockPalette.catHMargin;
-	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+  if (FinchBlox){
+    var currentY = 0;
+    var currentX = BlockPalette.catW/2 - 1.5*CategoryBN.width - CategoryBN.hMargin;
+    for (var i = 0; i < catCount; i++) {
+      var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+  		BlockPalette.categories.push(currentCat);
+      if (i == 2) {
+        currentX = BlockPalette.catW/2 - 1.5*CategoryBN.width - CategoryBN.hMargin;
+      } else if (i == 5) {
+        currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
+      } else {
+        currentX += CategoryBN.width + CategoryBN.hMargin;
+      }
+    }
 
-	var firstColumn = true;
-	var currentY = BlockPalette.catVMargin;
-	var currentX = col1X;
-	var usedRows = 0;
-	for (var i = 0; i < catCount; i++) {
-		if (firstColumn && usedRows >= numberOfRows) {
-			currentX = col2X;
-			firstColumn = false;
-			currentY = BlockPalette.catVMargin;
-		}
-		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
-		BlockPalette.categories.push(currentCat);
-		usedRows++;
-		currentY += CategoryBN.height + CategoryBN.vMargin;
-	}
+  } else {
+    var numberOfRows = Math.ceil(catCount / 2);
+
+  	// Automatically alternates between two columns while adding categories
+  	var col1X = BlockPalette.catHMargin;
+  	var col2X = BlockPalette.catHMargin + CategoryBN.hMargin + CategoryBN.width;
+
+  	var firstColumn = true;
+  	var currentY = BlockPalette.catVMargin;
+  	var currentX = col1X;
+  	var usedRows = 0;
+  	for (var i = 0; i < catCount; i++) {
+  		if (firstColumn && usedRows >= numberOfRows) {
+  			currentX = col2X;
+  			firstColumn = false;
+  			currentY = BlockPalette.catVMargin;
+  		}
+  		var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
+  		BlockPalette.categories.push(currentCat);
+  		usedRows++;
+  		currentY += CategoryBN.height + CategoryBN.vMargin;
+  	}
+  }
+
+
 };
 
 /**
@@ -9778,6 +10226,26 @@ BlockPalette.refresh = function() {
 		category.refreshGroup();
 	})
 };
+
+/**
+ * For FinchBlox. Shows/hides appropriate categories for selected level.
+ */
+BlockPalette.setLevel = function() {
+  BlockPalette.categories.forEach(function(category) {
+		category.button.setHidden();
+	})
+  switch (LevelMenu.currentLevel){
+    case 1:
+      BlockPalette.getCategory("motion_1").select();
+      break;
+    case 2:
+      BlockPalette.getCategory("motion_2").select();
+      break;
+    case 3:
+      BlockPalette.getCategory("motion_3").select();
+      break;
+  }
+}
 
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
@@ -9971,8 +10439,13 @@ function CategoryBN(x, y, category) {
 	this.category = category;
 	this.text = this.category.name;
 	this.catId = this.category.id;
-	this.fill = Colors.getGradient(this.catId);
+	if (FinchBlox) {
+		this.fill = Colors.getColor(this.catId);
+	} else {
+		this.fill = Colors.getGradient(this.catId);
+	}
 	this.buildGraphics();
+	if (FinchBlox) { this.setHidden(); }
 }
 
 CategoryBN.setGraphics = function() {
@@ -9981,16 +10454,27 @@ CategoryBN.setGraphics = function() {
 	CBN.bg = Colors.white;
 	CBN.font = Font.uiFont(15);
 	CBN.foreground = Colors.black;
-	CBN.height = 30;
 	CBN.colorW = 8;   // The width of the band of color on the left
 	CBN.labelLMargin = 6;   // The amount of space between the text of the button and the band of color
 
-	CBN.hMargin = BP.catHMargin;
-	CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
-	var numberOfRows = Math.ceil(BlockList.catCount() / 2);
-	CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
-	CBN.labelX = CBN.colorW + CBN.labelLMargin;
-	CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+	if (FinchBlox) {
+		CBN.hMargin = BP.catHMargin;
+		CBN.height = 50;
+		CBN.selectedH = 60;
+		CBN.width = 60;
+		CBN.vMargin = 15;
+		CBN.labelX = CBN.colorW + CBN.labelLMargin;
+		CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+	} else {
+		CBN.hMargin = BP.catHMargin;
+		CBN.height = 30;
+		CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
+		var numberOfRows = Math.ceil(BlockList.catCount() / 2);
+		CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+		CBN.labelX = CBN.colorW + CBN.labelLMargin;
+		CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+	}
+
 };
 
 /**
@@ -9999,12 +10483,30 @@ CategoryBN.setGraphics = function() {
 CategoryBN.prototype.buildGraphics = function() {
 	var CBN = CategoryBN;
 	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
-	this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
-	this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
-	this.label = GuiElements.draw.text(CBN.labelX, CBN.labelY, this.text, CBN.font, CBN.foreground);
+	if (FinchBlox){
+		//this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, this.fill);
+		this.bgRect = GuiElements.draw.tabBN(0, 0, CBN.width, CBN.height, this.fill);
+	} else {
+		this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
+	}
+
 	this.group.appendChild(this.bgRect);
-	this.group.appendChild(this.colorRect);
-	this.group.appendChild(this.label);
+	if (FinchBlox) {
+		var iconPath = VectorPaths.language;
+		var iconH = CBN.height * 0.75;
+		var iconW = VectorIcon.computeWidth(iconPath, iconH);
+		var iconX = (CBN.width - iconW)/2;
+		var iconY = (CBN.height - iconH)/2;
+		this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
+		this.label = this.icon.pathE;
+	} else {
+		this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
+		this.label = GuiElements.draw.text(CBN.labelX, CBN.labelY, this.text, CBN.font, CBN.foreground);
+	}
+	if (!FinchBlox) {
+		this.group.appendChild(this.colorRect);
+		this.group.appendChild(this.label);
+	}
 	GuiElements.layers.categories.appendChild(this.group);
 	this.addListeners();
 };
@@ -10013,16 +10515,27 @@ CategoryBN.prototype.buildGraphics = function() {
  * Makes the button appear selected
  */
 CategoryBN.prototype.select = function() {
-	this.bgRect.setAttributeNS(null, "fill", this.fill);
-	this.label.setAttributeNS(null, "fill", Colors.white);
+	if (FinchBlox){
+		var pop = CategoryBN.height - CategoryBN.selectedH;
+		GuiElements.move.group(this.group, this.x, this.y + pop);
+		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH);
+	} else {
+		this.bgRect.setAttributeNS(null, "fill", this.fill);
+		this.label.setAttributeNS(null, "fill", Colors.white);
+	}
 };
 
 /**
  * Makes the button appear deselected
  */
 CategoryBN.prototype.deselect = function() {
-	this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
-	this.label.setAttributeNS(null, "fill", Colors.black);
+	if (FinchBlox) {
+		GuiElements.move.group(this.group, this.x, this.y);
+		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height);
+	} else {
+		this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
+		this.label.setAttributeNS(null, "fill", Colors.black);
+	}
 };
 
 /**
@@ -10032,9 +10545,22 @@ CategoryBN.prototype.addListeners = function() {
 	var TR = TouchReceiver;
 	var cat = this.category;
 	TouchReceiver.addListenersCat(this.bgRect, cat);
-	TouchReceiver.addListenersCat(this.colorRect, cat);
+	if (!FinchBlox) { TouchReceiver.addListenersCat(this.colorRect, cat); }
 	TouchReceiver.addListenersCat(this.label, cat);
 };
+
+/**
+ * For FinchBlox only. Show or Hide this button based on the currently selected
+ * difficulty level.
+ */
+ CategoryBN.prototype.setHidden = function() {
+	 var level = this.category.level;
+	 if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+		 this.group.parentNode.removeChild(this.group);
+	 } else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+		 GuiElements.layers.categories.appendChild(this.group);
+	 }
+ };
 
 /**
  * Represents a selection of Blocks available in the BlockPalette.  Each Category has a button which, when pressed,
@@ -10054,8 +10580,14 @@ function Category(buttonX, buttonY, name, id) {
 	this.id = id;
 	this.name = name;
 
-	this.x = 0;
-	this.y = TitleBar.height + BlockPalette.catH;
+	//this.x = 0;
+	//this.y = TitleBar.height + BlockPalette.catH;
+  this.x = BlockPalette.catX;
+  this.y = BlockPalette.catY + BlockPalette.catH;
+
+  this.level = 4;
+  var l = parseInt(this.id.split("_").pop());
+  if (!isNaN(l)) { this.level = l; }
 
 	this.group = GuiElements.create.group(0, 0);
 	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
@@ -10136,7 +10668,11 @@ Category.prototype.refreshGroup = function() {
 Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
-	this.height = this.currentBlockY;
+  if (FinchBlox) {
+    this.height = this.maxBlockHeight + 2*BlockPalette.mainVMargin;
+  } else {
+    this.height = this.currentBlockY;
+  }
 	this.updateWidth();
 };
 
@@ -10183,7 +10719,7 @@ Category.prototype.addBlock = function(block) {
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
 	// If this Block is a hat block, we make room for the hat
-	if (block.hasHat) {
+	if (block.hasHat && !FinchBlox) {
 		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
@@ -10191,9 +10727,18 @@ Category.prototype.addBlock = function(block) {
 	var displayStack = new DisplayStack(block, this.group, this);
 	this.displayStacks.push(displayStack);
 	// Update the coords for the next Block
-	this.currentBlockY += displayStack.firstBlock.height;
-	this.currentBlockY += BlockPalette.blockMargin;
-	this.lastHadStud = block.bottomOpen;
+  if (FinchBlox){
+    this.currentBlockX += displayStack.firstBlock.width;
+    this.currentBlockX += BlockPalette.blockMargin;
+    if (this.maxBlockHeight == null ||
+      this.maxBlockHeight < displayStack.firstBlock.height) {
+      this.maxBlockHeight = displayStack.firstBlock.height;
+    }
+  } else {
+    this.currentBlockY += displayStack.firstBlock.height;
+  	this.currentBlockY += BlockPalette.blockMargin;
+  	this.lastHadStud = block.bottomOpen;
+  }
 };
 
 /**
@@ -10290,6 +10835,16 @@ Category.prototype.trimBottom = function() {
 };
 
 /**
+ * Centers the blocks horizontally in the block palette. For FinchBlox.
+ */
+Category.prototype.centerBlocks = function() {
+  this.computeWidth();
+  console.log("centerBlocks " + this.width);
+  var newX = (BlockPalette.width - this.width)/2;
+  this.smoothScrollBox.move(newX, BlockPalette.y);
+}
+
+/**
  * Brings the category to the foreground and marks it as selected in the BlockPalette
  */
 Category.prototype.select = function() {
@@ -10317,19 +10872,29 @@ Category.prototype.deselect = function() {
  * Computes the width of the Category and stores it in this.width
  */
 Category.prototype.computeWidth = function() {
-	var currentWidth = 0;
-	// The width is the maximum width across DisplayStacks and CollapsibleSets
-	for (var i = 0; i < this.blocks.length; i++) {
-		var blockW = this.blocks[i].width;
-		if (blockW > currentWidth) {
-			currentWidth = blockW;
-		}
-	}
-	this.collapsibleSets.forEach(function(set) {
-		var width = set.width;
-		currentWidth = Math.max(width, currentWidth);
-	});
-	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
+  if (FinchBlox) {
+    var totalW = BlockPalette.blockMargin * (this.blocks.length - 1);
+    for (var i = 0; i < this.blocks.length; i++) {
+  		totalW += this.blocks[i].width;
+    }
+    totalW += 15; //Add for the extra bump on the last block
+    totalW += 2 * BlockPalette.mainHMargin;
+    this.width = totalW;
+  } else {
+    var currentWidth = 0;
+  	// The width is the maximum width across DisplayStacks and CollapsibleSets
+  	for (var i = 0; i < this.blocks.length; i++) {
+  		var blockW = this.blocks[i].width;
+  		if (blockW > currentWidth) {
+  			currentWidth = blockW;
+  		}
+  	}
+  	this.collapsibleSets.forEach(function(set) {
+  		var width = set.width;
+  		currentWidth = Math.max(width, currentWidth);
+  	});
+  	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
+  }
 };
 
 /**
@@ -10440,7 +11005,12 @@ Category.prototype.passRecursively = function(functionName) {
  */
 Category.prototype.updateZoom = function() {
 	if (!this.finalized) return;
-	this.smoothScrollBox.move(0, BlockPalette.y);
+  if (FinchBlox) {
+    var newX = (BlockPalette.width - this.width)/2;
+    this.smoothScrollBox.move(newX, BlockPalette.y);
+  } else {
+    this.smoothScrollBox.move(0, BlockPalette.y);
+  }
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
@@ -10931,9 +11501,12 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
  * @param {number} width - The width of the button
  * @param {number} height - The height of the button
  * @param {Element} [parent] - The group the button should append itself to
+ * @param {string} color - (optional) background color for the button
+ * @param {number} rx - (optional) Corner rounding parameter
+ * @param {number} ry - (optional) Corner rounding parameter
  * @constructor
  */
-function Button(x, y, width, height, parent) {
+function Button(x, y, width, height, parent, color, rx, ry) {
 	DebugOptions.validateNumbers(x, y, width, height);
 	this.x = x;
 	this.y = y;
@@ -10941,6 +11514,14 @@ function Button(x, y, width, height, parent) {
 	this.height = height;
 	this.parentGroup = parent;
 	this.group = GuiElements.create.group(x, y, parent);
+  //color for the background of the button
+  if (color != null){
+    this.bg = color;
+  } else {
+    this.bg = Button.bg;
+  }
+  this.rx = rx;
+  this.ry = ry;
 	this.buildBg();
 	this.pressed = false;
 	this.enabled = true;
@@ -10970,7 +11551,11 @@ Button.setGraphics = function() {
 	Button.disabledFore = Colors.black;
 
 	// The suggested margin between adjacent margins
-	Button.defaultMargin = 5;
+  if (FinchBlox){
+    Button.defaultMargin = 10;
+  } else {
+    Button.defaultMargin = 5;
+  }
 
 	// The suggested font for the forground of buttons
 	Button.defaultFont = Font.uiFont(16);
@@ -10983,7 +11568,7 @@ Button.setGraphics = function() {
  * Creates the rectangle that is the background of the button
  */
 Button.prototype.buildBg = function() {
-	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, Button.bg);
+	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
 	this.group.appendChild(this.bgRect);
 	TouchReceiver.addListenersBN(this.bgRect, this);
 };
@@ -11031,7 +11616,7 @@ Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = true;
-	// Icon is centered vertiacally and horizontally.
+	// Icon is centered vertically and horizontally.
 	var iconW = VectorIcon.computeWidth(pathId, height);
 	var iconX = xOffset + (this.width - iconW) / 2;
 	var iconY = (this.height - height) / 2;
@@ -11400,7 +11985,7 @@ Button.prototype.setColor = function(isPressed) {
 			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
 	} else {
-		this.bgRect.setAttributeNS(null, "fill", Button.bg);
+		this.bgRect.setAttributeNS(null, "fill", this.bg);
 		if (this.hasText && this.textInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
@@ -12166,6 +12751,7 @@ InputPad.prototype.finishEdit = function(newData) {
 	this.currentData = newData;
 	this.close();
 };
+
 /**
  * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
  * is responsible for drawing its own graphics and controlling the data in the Slot being edited.  The Widget is only
@@ -12585,6 +13171,7 @@ InputWidget.NumPad.prototype.okPressed = function() {
 InputWidget.NumPad.prototype.sendUpdate = function() {
 	this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 };
+
 /**
  * Handles displaying numbers entered using the NumPadWidget.  Properties of the number are divided into a number of
  * fields to make modification easier and, avoid rounding errors, and allow for trailing 0s.  They are recombined into
@@ -12809,6 +13396,87 @@ InputWidget.SelectPad.prototype.getAbsX = function(){
 InputWidget.SelectPad.prototype.getAbsY = function(){
 	return this.relToAbsY(0);
 };
+/**
+ * Displays a slider for selecting values
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @param {number} startVal - Value to start the slider at
+ */
+InputWidget.Slider = function (min, max, startVal) {
+  this.min = min;
+  this.max = max;
+  this.value = startVal;
+};
+InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
+InputWidget.Slider.prototype.constructor = InputWidget.Slider;
+
+InputWidget.Slider.setConstants = function() {
+  var S = InputWidget.Slider;
+  S.width = InputPad.width;
+  S.height = 40;
+  S.hMargin = 20;
+  S.barHeight = 2;
+};
+
+/**
+ * @inheritDoc
+ */
+InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+	this.group = GuiElements.create.group(x, y, parentGroup);
+  this.parentGroup = parentGroup;
+  this.makeSlider();
+};
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ */
+InputWidget.Slider.prototype.updateDim = function(x, y) {
+  var S = InputWidget.Slider;
+  this.height = S.height;
+  this.width = S.width;
+}
+
+InputWidget.Slider.prototype.makeSlider = function() {
+  var S = InputWidget.Slider;
+  var font = InputWidget.Label.font;
+  var labelY = (S.height + font.charHeight)/2;
+  this.barX = S.hMargin;
+  this.barY = (S.height - S.barHeight)/2;
+  this.barW = S.width - 2 * S.hMargin;
+  this.sliderH = S.barHeight * 5;
+  this.sliderW = 10
+  this.sliderY = (S.height - this.sliderH)/2;
+  //var sliderX = this.barX + (this.barW - this.sliderW)/2;
+  var sliderX = this.barX + (this.value/(this.max - this.min)) * (this.barW - this.sliderW);
+
+  var minLabel = GuiElements.draw.text(5, labelY, this.min, font, Colors.white);
+  this.group.appendChild(minLabel);
+  var maxLabel = GuiElements.draw.text(this.width - 20, labelY, this.max, font, Colors.white);
+  this.group.appendChild(maxLabel);
+
+  var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, Colors.black);
+  this.group.appendChild(sliderBar);
+
+  this.slider = GuiElements.draw.rect(sliderX, this.sliderY, this.sliderW, this.sliderH, Colors.easternBlue);
+  this.group.appendChild(this.slider);
+  TouchReceiver.addListenersSlider(this.slider, this);
+}
+
+InputWidget.Slider.prototype.drag = function(x) {
+  var relX = x - this.overlay.x - this.overlay.margin;
+
+  if (relX > this.barX && relX < (this.barX + this.barW - this.sliderW)) {
+    this.sliderX = relX;
+    this.value = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.max - this.min));
+    GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
+    this.updateFn(this.value);
+    //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
+  }
+}
+
 /**
  * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
  * @param {number} x1
@@ -14564,7 +15232,68 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
 };
 
 /**
- * An menu that appears when a BLock is long pressed. Provides options to delete or duplicate the block.
+ * Menu for changing difficulty level in FinchBlox. Since this menu appears as
+ * a BubbleOverlay, it is not a direct subclass of Menu.
+ */
+function LevelMenu(x, y){
+  this.x = x;
+  this.y = y;
+  this.open();
+};
+
+LevelMenu.setConstants = function() {
+	var LM = LevelMenu;
+	LM.bnMargin = Button.defaultMargin;
+	LM.bgColor = Colors.lightLightGray;
+
+  LM.currentLevel = 1;
+};
+
+LevelMenu.prototype.open = function() {
+  var LM = LevelMenu;
+  this.group = GuiElements.create.group(0, 0);
+
+	var layer = GuiElements.layers.inputPad;
+	var overlayType = Overlay.types.inputPad;
+	this.bubbleOverlay = new BubbleOverlay(overlayType, LM.bgColor, LM.bnMargin, this.group, this, layer);
+	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
+	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+	this.addOptions();
+	var height = this.menuBnList.previewHeight();
+	var width = this.menuBnList.previewWidth();
+	this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
+	this.menuBnList.show();
+};
+
+LevelMenu.prototype.addOptions = function() {
+  var f = function(level, menu) {
+    LevelMenu.setLevel(level);
+    menu.close();
+  }
+
+  this.menuBnList.addOption("1", function(){ f(1, this); }.bind(this));
+
+  this.menuBnList.addOption("2", function(){ f(2, this); }.bind(this));
+
+  this.menuBnList.addOption("3", function(){ f(3, this); }.bind(this));
+};
+
+LevelMenu.setLevel = function(level) {
+  var LM = LevelMenu;
+  if (LM.currentLevel != level) {
+    LM.currentLevel = level;
+    BlockPalette.setLevel();
+    TabManager.activeTab.clear();
+  }
+}
+
+LevelMenu.prototype.close = function() {
+	this.bubbleOverlay.hide();
+	this.menuBnList.hide();
+};
+
+/**
+ * A menu that appears when a Block is long pressed. Provides options to delete or duplicate the block.
  * Also used to give a rename option to variables and lists
  *
  * @param {Block} block
@@ -15088,7 +15817,9 @@ CodeManager.move.update = function(x, y) {
 		// Move the BlockStack to the correct location.
 		move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
 		// If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
-		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+    var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+    if (FinchBlox) { wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+		if (wouldDelete) {
 			Highlighter.hide();   // Hide any existing highlight.
 			if (!move.startedFromPalette) {
 				BlockPalette.showTrash();
@@ -15118,7 +15849,9 @@ CodeManager.move.end = function() {
 		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
 		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
 		// If the BlockStack overlaps with the BlockPalette, delete it.
-		if (BlockPalette.isStackOverPalette(move.touchX, move.touchY)) {
+    var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+    if (FinchBlox) { shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+		if (shouldDelete) {
 			if (move.startedFromPalette) {
 				move.stack.remove();
 			} else {
@@ -15799,7 +16532,7 @@ TabManager.setGraphics = function() {
 	TM.maxZoom = 3;
 
 	TM.tabAreaX = BlockPalette.width;
-	if (GuiElements.smallMode) {
+	if (GuiElements.smallMode || FinchBlox) {
 		TM.tabAreaX = 0;
 	}
 	TM.tabAreaY = TitleBar.height;
@@ -15820,7 +16553,9 @@ TabManager.setGraphics = function() {
  */
 TabManager.createTabSpaceBg = function() {
 	var TM = TabManager;
-	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, "#C1C1C1");
+  var canvasColor = Colors.canvasGray;
+  if (FinchBlox) { canvasColor = Colors.white; }
+	TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, canvasColor);
 	TouchReceiver.addListenersTabSpace(TM.bgRect);
 	GuiElements.layers.aTabBg.appendChild(TM.bgRect);
 };
@@ -16165,6 +16900,7 @@ TabManager.getActiveZoom = function() {
 	}
 	return TabManager.activeTab.getZoom();
 };
+
 /**
  * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
  * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
@@ -16214,6 +16950,7 @@ function Tab() {
 Tab.prototype.activate = function() {
 	GuiElements.layers.activeTab.appendChild(this.mainG);
 	this.overFlowArr.show();
+  if (FinchBlox) { this.addStartBlock(); }
 };
 
 /**
@@ -16232,6 +16969,23 @@ Tab.prototype.removeStack = function(stack) {
 	var index = this.stackList.indexOf(stack);
 	this.stackList.splice(index, 1);
 };
+
+/**
+ * Removes all the stacks on this tab. Used in FinchBlox.
+ */
+Tab.prototype.clear = function() {
+  var oldList = this.stackList.slice();
+  oldList.forEach(function(stack) { stack.remove(); });
+  this.addStartBlock();
+};
+
+/**
+ * Adds a new start block to the tab. Used in FinchBlox.
+ */
+Tab.prototype.addStartBlock = function() {
+  var blockY = GuiElements.height/2 - BlockPalette.height;
+  var stack = new BlockStack(new B_WhenFlagTapped(50, blockY), this);
+}
 
 /* Convert between screen coords and coords within the Tab */
 /**
@@ -16575,6 +17329,7 @@ Tab.prototype.undoDelete = function(stackNode) {
 	var yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 
 	var x = this.absToRelX(xMargin + BlockPalette.width);
+  if (FinchBlox) { x = this.absToRelX(xMargin); }
 	var y = this.absToRelY(yMargin + TitleBar.height);
 	var stack = BlockStack.importXml(stackNode, this);
 	if (stack == null) {
@@ -16664,6 +17419,7 @@ Tab.prototype.updateArrowsShift = function() {
 	var y2 = this.relToAbsY(this.dim.y2);
 	this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
+
 /**
  * A static class that manages making recordings
  */
@@ -19709,20 +20465,36 @@ BlockStack.prototype.findBestFitTop = function() {
 	var x = this.firstBlock.getAbsX(); // Uses screen coordinates.
 	var y = this.firstBlock.getAbsY();
 	var height = this.relToAbsY(this.firstBlock.height) - y;
+  var width = this.relToAbsX(this.firstBlock.width) - x;
 	/* Now the BlockStack will check if the bottom-left corner of the moving BlockStack falls within
 	 * the snap bounding box of the first Block in the BlockStack. */
 	// Gets the bottom-left corner of the moving BlockStack.
 	var moveBottomLeftX = move.topX;
 	var moveBottomLeftY = move.bottomY;
+  var moveTopRightX = move.bottomX;
+  var moveTopRightY = move.topY;
 	// Gets the snap bounding box of the first Block.
+  //TODO: Use the c box here?
 	var snapBLeft = x - snap.left;
 	var snapBTop = y - snap.top;
 	var snapBWidth = snap.left + snap.right;
 	var snapBHeight = snap.top + height + snap.bottom;
+  var snapFWidth = snap.left + width + snap.right;
+  var snapFHeight = snap.top + snap.bottom;
 	// Checks if the point falls in the box.
-	if (move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
+  var success = false;
+  if (FinchBlox) { //because these blocks connect horizontally, check the top right corner
+    success = move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+  } else {
+    success = move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+  }
+	if (success) {
 		var xDist = move.topX - x;
 		var yDist = move.bottomY - y;
+    if (FinchBlox) {
+      xDist = move.bottomX - x;
+      yDist = move.topY - y;
+    }
 		var dist = xDist * xDist + yDist * yDist; // Computes the distance.
 		if (!fit.found || dist < fit.dist) { // Compares it to existing fit.
 			fit.found = true;
@@ -19744,7 +20516,11 @@ BlockStack.prototype.snap = function(block) {
 	}
 	/* Move this BlockStack up by the height of the of the stack the Block belongs to.
 	 * This compensates for the amount existing Blocks will be shifted down by the newly-added Blocks. */
-	this.move(this.x, this.y - block.stack.getHeight());
+  if (FinchBlox) { //Move over by width in the case of FinchBlox
+    this.move(this.x - block.stack.getWidth(), this.y);
+  } else {
+    this.move(this.x, this.y - block.stack.getHeight());
+  }
 
 	// The new top Block.
 	var topStackBlock = block;
@@ -19771,7 +20547,7 @@ BlockStack.prototype.snap = function(block) {
  * Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
  */
 BlockStack.prototype.highlight = function() {
-	Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.isRunning);
+	Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
 };
 
 /**
@@ -21857,7 +22633,7 @@ SaveManager.fileIsOpen = function() {
 };
 
 /**
- * The UndoManager is a static class that keeps a stack (as in the data structure) or recently deleted BlockStacks
+ * The UndoManager is a static class that keeps a stack (as in the data structure) of recently deleted BlockStacks
  * so they can be undeleted.  It can be assigned an undo button, which it will then enable/disable as necessary.
  * The UndoManager stores the deleted BlockStacks as XML nodes.
  */
@@ -21932,6 +22708,7 @@ UndoManager.clearUndos = function() {
 	UM.undoStack = [];
 	UM.updateButtonEnabled();
 };
+
 
 /**
  * Block is an abstract class that represents an executable block.
@@ -22335,6 +23112,12 @@ Block.prototype.updateStackDimO = function() {
 		var cy1 = this.y - snap.top;
 		var cx2 = this.x + snap.right;
 		var cy2 = this.y + this.height + snap.bottom;
+    if (FinchBlox) { //Because FinchBlox blocks connect horizontally...
+      cx1 = this.x - snap.left;
+  		cy1 = this.y - snap.top;
+  		cx2 = this.x + this.width + snap.right;
+  		cy2 = this.y + snap.bottom;
+    }
 		if (cx1 < sDim.cx1) { //If the edge of the Block is outside the stack, adjust the stack's dims.
 			sDim.cx1 = cx1;
 		}
@@ -22429,7 +23212,7 @@ Block.prototype.updateDim = function() {
 			if ( (lineHeight[currentLine] + 2 * bG.vMargin) < bG.height){//If the height is less than the min height, fix it.
 				lineHeight[currentLine] = bG.height - 2 * bG.vMargin;
 			}
-			height += lineHeight[currentLine] + bG.vMargin;
+			if(!FinchBlox) { height += lineHeight[currentLine] + bG.vMargin; }
 			currentLine += 1;
 			lineHeight[currentLine] = 0;
 			lineWidth = bG.hMargin;
@@ -22491,7 +23274,11 @@ Block.prototype.updateAlign = function(x, y) {
 		this.midLabel.updateAlign(bG.loop.side, this.topHeight + this.blockSlot1.height + this.midHeight / 2);
 	}
 	if (this.nextBlock != null) {
-		this.nextBlock.updateAlign(this.x, this.y + this.height);
+    if (FinchBlox) { //these blocks link horizontally rather than vertically
+      this.nextBlock.updateAlign(this.x + this.width, this.y);
+    } else {
+      this.nextBlock.updateAlign(this.x, this.y + this.height);
+    }
 	}
 	return this.width;
 };
@@ -22510,6 +23297,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 	}
 	var currentLine = 0;
 	var yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
+  if (FinchBlox) { yCoord = this.height / 2; }
 	var xCoord = 0;
 	if (this.hasBlockSlot1) {
 		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
@@ -22565,6 +23353,7 @@ Block.prototype.findBestFit = function() {
 	var x = this.getAbsX(); //Get coords to compare.
 	var y = this.getAbsY();
 	var height = this.relToAbsY(this.height) - y;
+  var width = this.relToAbsX(this.width) - x;
 	var hasMatch = false;
 
 	if (move.returnsValue) { //If a connection between the stack and block are possible...
@@ -22575,14 +23364,27 @@ Block.prototype.findBestFit = function() {
 	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
 		var snap = BlockGraphics.command.snap; //Load snap bounding box
 		//see if corner of moving block falls within the snap bounding box.
+    //TODO: use c box here?
 		var snapBLeft = x - snap.left;
 		var snapBTop = y - snap.top;
 		var snapBWidth = snap.left + snap.right;
 		var snapBHeight = snap.top + height + snap.bottom;
+    var snapFWidth = snap.left + width + snap.right;
+    var snapFHeight = snap.top + snap.bottom;
 		//Check if point falls in a rectangular range.
-		if (move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight)) {
+    var success = false;
+    if (FinchBlox) {
+      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+    } else {
+      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+    }
+		if (success) {
 			var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
 			var yDist = move.topY - (y + height);
+      if (FinchBlox){
+        xDist = move.topX - (x + width);
+        yDist = move.topY - y;
+      }
 			var dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
 			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
 				fit.found = true; //If so, save it and other helpful infromation.
@@ -22609,7 +23411,11 @@ Block.prototype.findBestFit = function() {
  */
 Block.prototype.highlight = function() {
 	if (this.bottomOpen) {
-		Highlighter.highlight(this.getAbsX(), this.relToAbsY(this.height), this.width, this.height, 0, false, this.isGlowing);
+    if (FinchBlox) {
+      Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing);
+    } else {
+      Highlighter.highlight(this.getAbsX(), this.relToAbsY(this.height), this.width, this.height, 0, false, this.isGlowing);
+    }
 	} else { //If a block returns a value, the BlockStack can only attach to one of its slots, not the Block itself.
 		DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
 	}
@@ -26660,6 +27466,138 @@ BlockIcon.prototype.move = function(x, y) {
 BlockIcon.prototype.textSummary = function() {
 	return this.altText;
 };
+/**
+ * Adds a button to the block. Used in FinchBlox.
+ * @param {Block} parent - The Block this icon is a part of
+ * @param {number} startingValue - The initial value to display
+ */
+function BlockButton(parent, startingValue){
+ this.parent = parent;
+ this.value = startingValue;
+ this.height = 15;
+ this.width = 40;
+ this.cornerRadius = 2;
+ this.x = (parent.width - this.width)/2;
+ this.y = parent.height - this.height;
+
+ var me = this;
+ this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.lightGray, this.cornerRadius, this.cornerRadius);
+ this.button.addText(this.value);
+ this.button.setCallbackFunction(function() {
+   var inputSys = me.createInputSystem();
+   inputSys.show(null, me.updateValue.bind(me), function(){}, null);
+ }, true);
+
+ this.isSlot = false;
+};
+BlockButton.prototype = Object.create(BlockPart.prototype);
+BlockButton.prototype.constructor = BlockButton;
+
+/**
+* @param {number} x - The x coord the icon should have relative to the Block it is in
+* @param {number} y - The y coord ths icon should have measured from the center of the icon
+* @return {number} - The width of the icon, indicating how much the next item should be shifted over.
+*/
+BlockButton.prototype.updateAlign = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.move(x, y);
+	return this.width;
+};
+
+/**
+* BlockButtons are of constant size, so updateDim does nothing
+*/
+BlockButton.prototype.updateDim = function() {
+
+};
+
+/**
+ * Moves the button and sets this.x and this.y to the specified coordinates
+ * @param {number} x
+ * @param {number} y
+ */
+BlockButton.prototype.move = function(x, y) {
+	DebugOptions.validateNumbers(x, y);
+	this.x = x;
+	this.y = y;
+	this.button.move(x, y);
+};
+
+BlockButton.prototype.updateValue = function(newValue) {
+  this.value = newValue;
+  this.button.addText(newValue.toString());
+};
+
+BlockButton.prototype.createInputSystem = function() {
+  var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
+	var inputPad = new InputPad(x1, x2, y1, y2);
+
+  inputPad.addWidget(new InputWidget.Slider(0, 100, this.value));
+
+  return inputPad;
+};
+
+
+// These functions convert between screen (absolute) coordinates and local (relative) coordinates.
+//TODO: These functions are copied from Slot. Move to BlockPart?
+/**
+ * @param {number} x
+ * @returns {number}
+ */
+BlockButton.prototype.relToAbsX = function(x){
+	return this.parent.relToAbsX(x + this.x);
+};
+/**
+ * @param {number} y
+ * @returns {number}
+ */
+BlockButton.prototype.relToAbsY = function(y){
+	return this.parent.relToAbsY(y + this.y);
+};
+/**
+ * @param {number} x
+ * @returns {number}
+ */
+BlockButton.prototype.absToRelX = function(x){
+	return this.parent.absToRelX(x) - this.x;
+};
+/**
+ * @param {number} y
+ * @returns {number}
+ */
+BlockButton.prototype.absToRelY = function(y){
+	return this.parent.absToRelY(y) - this.y;
+};
+/**
+ * Returns the x coord of the Slot relative to the screen (not the group it is contained in).
+ * @return {number} - The x coord of the Slot relative to the screen.
+ */
+BlockButton.prototype.getAbsX = function(){
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the Slot relative to the screen (not the group it is contained in).
+ * @return {number} - The y coord of the Slot relative to the screen.
+ */
+BlockButton.prototype.getAbsY = function(){//Fix for tabs
+	return this.relToAbsY(0);
+};
+/**
+ * @returns {number}
+ */
+BlockButton.prototype.getAbsWidth = function(){
+	return this.relToAbsX(this.width) - this.getAbsX();
+};
+/**
+ * @returns {number}
+ */
+BlockButton.prototype.getAbsHeight = function(){
+	return this.relToAbsY(this.height) - this.getAbsY();
+};
+
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
  * of the defined Blocks are just subclasses of the Blocks here.
  */
@@ -28005,14 +28943,132 @@ B_FinchSetAll.prototype.updateAction = function() {
 		return new ExecutionStatusRunning();
 	}
 };
+
+
+function B_FBMotion(x, y, direction) {
+  this.deviceClass = DeviceHummingbirdBit;//DeviceFinch;
+  this.direction = direction;
+  CommandBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
+
+  var icon;
+  switch (direction) {
+    case "forward":
+      icon = VectorPaths.play;
+      break;
+    case "backward":
+      icon = VectorPaths.backspace;
+      break;
+    case "right":
+      icon = VectorPaths.share;
+      break;
+    case "left":
+      icon = VectorPaths.checkmark;
+      break;
+    default:
+      icon = VectorPaths.trash;
+  }
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+}
+B_FBMotion.prototype = Object.create(CommandBlock.prototype);
+B_FBMotion.prototype.constructor = B_FBMotion;
+
+function B_FBForward(x, y) {
+  B_FBMotion.call(this, x, y, "forward");
+}
+B_FBForward.prototype = Object.create(B_FBMotion.prototype);
+B_FBForward.prototype.constructor = B_FBForward;
+function B_FBBackward(x, y) {
+  B_FBMotion.call(this, x, y, "backward");
+}
+B_FBBackward.prototype = Object.create(B_FBMotion.prototype);
+B_FBBackward.prototype.constructor = B_FBBackward;
+function B_FBRight(x, y) {
+  B_FBMotion.call(this, x, y, "right");
+}
+B_FBRight.prototype = Object.create(B_FBMotion.prototype);
+B_FBRight.prototype.constructor = B_FBRight;
+function B_FBLeft(x, y) {
+  B_FBMotion.call(this, x, y, "left");
+}
+B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
+B_FBLeft.prototype.constructor = B_FBLeft;
+
+//Level 2 motion blocks
+function B_FBMotionL2(x, y, direction, defaultValue){
+  B_FBMotion.call(this, x, y, direction);
+
+  var blockButton = new BlockButton(this, defaultValue);
+  this.addPart(blockButton);
+}
+B_FBMotionL2.prototype = Object.create(B_FBMotion.prototype);
+B_FBMotionL2.prototype.constructor = B_FBMotionL2;
+
+function B_FBForwardL2(x, y) {
+  B_FBMotionL2.call(this, x, y, "forward", 10);
+}
+B_FBForwardL2.prototype = Object.create(B_FBMotionL2.prototype);
+B_FBForwardL2.prototype.constructor = B_FBForwardL2;
+function B_FBBackwardL2(x, y) {
+  B_FBMotionL2.call(this, x, y, "backward", 10);
+}
+B_FBBackwardL2.prototype = Object.create(B_FBMotionL2.prototype);
+B_FBBackwardL2.prototype.constructor = B_FBBackwardL2;
+function B_FBRightL2(x, y) {
+  B_FBMotionL2.call(this, x, y, "right", 90);
+}
+B_FBRightL2.prototype = Object.create(B_FBMotionL2.prototype);
+B_FBRightL2.prototype.constructor = B_FBRightL2;
+function B_FBLeftL2(x, y) {
+  B_FBMotionL2.call(this, x, y, "left", 90);
+}
+B_FBLeftL2.prototype = Object.create(B_FBMotionL2.prototype);
+B_FBLeftL2.prototype.constructor = B_FBLeftL2;
+
+//Level 3 motion blocks
+function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
+  B_FBMotionL2.call(this, x, y, direction, defaultValue);
+
+  var blockButton = new BlockButton(this, defaultSpeed);
+  this.addPart(blockButton);
+}
+B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
+B_FBMotionL3.prototype.constructor = B_FBMotionL3;
+
+function B_FBForwardL3(x, y) {
+  B_FBMotionL3.call(this, x, y, "forward", 10, 50);
+}
+B_FBForwardL3.prototype = Object.create(B_FBMotionL3.prototype);
+B_FBForwardL3.prototype.constructor = B_FBForwardL3;
+function B_FBBackwardL3(x, y) {
+  B_FBMotionL3.call(this, x, y, "backward", 10, 50);
+}
+B_FBBackwardL3.prototype = Object.create(B_FBMotionL3.prototype);
+B_FBBackwardL3.prototype.constructor = B_FBBackwardL3;
+function B_FBRightL3(x, y) {
+  B_FBMotionL3.call(this, x, y, "right", 90, 50);
+}
+B_FBRightL3.prototype = Object.create(B_FBMotionL3.prototype);
+B_FBRightL3.prototype.constructor = B_FBRightL3;
+function B_FBLeftL3(x, y) {
+  B_FBMotionL3.call(this, x, y, "left", 90, 50);
+}
+B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
+B_FBLeftL3.prototype.constructor = B_FBLeftL3;
+
 /* This file contains the implementations for Blocks in the control category.
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
-	// Add flag icon with height 15
-	this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
-	this.parseTranslation(Language.getStr("block_when_flag_tapped"));
+	if (FinchBlox){
+		this.addPart(new BlockIcon(this, VectorPaths.flag, Colors.flagGreen, "flag", 50));
+	} else {
+		// Add flag icon with height 15
+		this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
+		this.parseTranslation(Language.getStr("block_when_flag_tapped"));
+	}
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;

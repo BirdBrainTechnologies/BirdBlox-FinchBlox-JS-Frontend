@@ -501,7 +501,7 @@ Block.prototype.updateDim = function() {
 			if ( (lineHeight[currentLine] + 2 * bG.vMargin) < bG.height){//If the height is less than the min height, fix it.
 				lineHeight[currentLine] = bG.height - 2 * bG.vMargin;
 			}
-			height += lineHeight[currentLine] + bG.vMargin;
+			if(!FinchBlox) { height += lineHeight[currentLine] + bG.vMargin; }
 			currentLine += 1;
 			lineHeight[currentLine] = 0;
 			lineWidth = bG.hMargin;

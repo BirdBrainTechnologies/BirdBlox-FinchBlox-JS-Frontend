@@ -155,7 +155,7 @@ Category.prototype.addBlock = function(block) {
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
 	// If this Block is a hat block, we make room for the hat
-	if (block.hasHat) {
+	if (block.hasHat && !FinchBlox) {
 		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
 		block.move(this.currentBlockX, this.currentBlockY);
 	}
@@ -271,6 +271,16 @@ Category.prototype.trimBottom = function() {
 };
 
 /**
+ * Centers the blocks horizontally in the block palette. For FinchBlox.
+ */
+Category.prototype.centerBlocks = function() {
+  this.computeWidth();
+  console.log("centerBlocks " + this.width);
+  const newX = (BlockPalette.width - this.width)/2;
+  this.smoothScrollBox.move(newX, BlockPalette.y);
+}
+
+/**
  * Brings the category to the foreground and marks it as selected in the BlockPalette
  */
 Category.prototype.select = function() {
@@ -298,19 +308,29 @@ Category.prototype.deselect = function() {
  * Computes the width of the Category and stores it in this.width
  */
 Category.prototype.computeWidth = function() {
-	let currentWidth = 0;
-	// The width is the maximum width across DisplayStacks and CollapsibleSets
-	for (let i = 0; i < this.blocks.length; i++) {
-		const blockW = this.blocks[i].width;
-		if (blockW > currentWidth) {
-			currentWidth = blockW;
-		}
-	}
-	this.collapsibleSets.forEach(function(set) {
-		const width = set.width;
-		currentWidth = Math.max(width, currentWidth);
-	});
-	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
+  if (FinchBlox) {
+    let totalW = BlockPalette.blockMargin * (this.blocks.length - 1);
+    for (let i = 0; i < this.blocks.length; i++) {
+  		totalW += this.blocks[i].width;
+    }
+    totalW += 15; //Add for the extra bump on the last block
+    totalW += 2 * BlockPalette.mainHMargin;
+    this.width = totalW;
+  } else {
+    let currentWidth = 0;
+  	// The width is the maximum width across DisplayStacks and CollapsibleSets
+  	for (let i = 0; i < this.blocks.length; i++) {
+  		const blockW = this.blocks[i].width;
+  		if (blockW > currentWidth) {
+  			currentWidth = blockW;
+  		}
+  	}
+  	this.collapsibleSets.forEach(function(set) {
+  		const width = set.width;
+  		currentWidth = Math.max(width, currentWidth);
+  	});
+  	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
+  }
 };
 
 /**
@@ -421,7 +441,12 @@ Category.prototype.passRecursively = function(functionName) {
  */
 Category.prototype.updateZoom = function() {
 	if (!this.finalized) return;
-	this.smoothScrollBox.move(0, BlockPalette.y);
+  if (FinchBlox) {
+    const newX = (BlockPalette.width - this.width)/2;
+    this.smoothScrollBox.move(newX, BlockPalette.y);
+  } else {
+    this.smoothScrollBox.move(0, BlockPalette.y);
+  }
 	this.smoothScrollBox.updateZoom();
 	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };

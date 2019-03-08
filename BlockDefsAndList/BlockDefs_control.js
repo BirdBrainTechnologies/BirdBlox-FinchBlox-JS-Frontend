@@ -4,7 +4,7 @@
 function B_WhenFlagTapped(x, y) {
 	HatBlock.call(this, x, y, "control");
 	if (FinchBlox){
-		this.addPart(new BlockIcon(this, VectorPaths.flag, Colors.flagGreen, "flag", 50));
+		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 50));
 	} else {
 		// Add flag icon with height 15
 		this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));

@@ -144,18 +144,18 @@ TitleBar.makeButtons = function() {
   if (FinchBlox) {
     const r = TB.defaultCornerRounding
   	TB.flagBn = new Button(TB.flagBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.flagGreen, r, r);
-    TB.flagBn.addIcon(VectorPaths.flag, TB.bnIconH);
+    TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
   	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
     TB.stopBn = new Button(TB.stopBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.stopRed, r, r);
   	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH);
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
     TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
-  	TB.undoButton.addIcon(VectorPaths.undoDelete, TB.bnIconH * 0.9);
+  	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
     TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
-    TB.trashButton.addIcon(VectorPaths.trash, TB.bnIconH);
+    TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
     TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
     TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.lightGray, r, r);

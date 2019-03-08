@@ -1,27 +1,14 @@
+/**
+ * This file contains the implementations for the blocks specific to the FinchBlox
+ * motion category.
+ */
 
-
-function B_FBMotion(x, y, direction) {
-  this.deviceClass = DeviceHummingbirdBit;//DeviceFinch;
+function B_FBMotion(x, y, direction, level) {
   this.direction = direction;
-  CommandBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
+  this.level = level;
+  CommandBlock.call(this,x,y,"motion_"+level);
 
-  var icon;
-  switch (direction) {
-    case "forward":
-      icon = VectorPaths.play;
-      break;
-    case "backward":
-      icon = VectorPaths.backspace;
-      break;
-    case "right":
-      icon = VectorPaths.share;
-      break;
-    case "left":
-      icon = VectorPaths.checkmark;
-      break;
-    default:
-      icon = VectorPaths.trash;
-  }
+  const icon = VectorPaths.blockIcons["motion_" + direction];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
@@ -29,30 +16,58 @@ function B_FBMotion(x, y, direction) {
 B_FBMotion.prototype = Object.create(CommandBlock.prototype);
 B_FBMotion.prototype.constructor = B_FBMotion;
 
+B_FBMotion.prototype.startAction = function () {
+  const mem = this.runMem;
+  mem.timerStarted = false;
+  mem.duration = 1000;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = true; //change when sending actual request
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  return new ExecutionStatusRunning();
+}
+B_FBMotion.prototype.updateAction = function () {
+  const mem = this.runMem;
+  if (!mem.timerStarted) {
+      const status = mem.requestStatus;
+      if (status.finished === true) {
+          mem.startTime = new Date().getTime();
+          mem.timerStarted = true;
+      } else {
+          return new ExecutionStatusRunning(); // Still running
+      }
+  }
+  if (new Date().getTime() >= mem.startTime + mem.duration) {
+      return new ExecutionStatusDone(); // Done running
+  } else {
+      return new ExecutionStatusRunning(); // Still running
+  }
+}
+
 function B_FBForward(x, y) {
-  B_FBMotion.call(this, x, y, "forward");
+  B_FBMotion.call(this, x, y, "forward", 1);
 }
 B_FBForward.prototype = Object.create(B_FBMotion.prototype);
 B_FBForward.prototype.constructor = B_FBForward;
 function B_FBBackward(x, y) {
-  B_FBMotion.call(this, x, y, "backward");
+  B_FBMotion.call(this, x, y, "backward", 1);
 }
 B_FBBackward.prototype = Object.create(B_FBMotion.prototype);
 B_FBBackward.prototype.constructor = B_FBBackward;
 function B_FBRight(x, y) {
-  B_FBMotion.call(this, x, y, "right");
+  B_FBMotion.call(this, x, y, "right", 1);
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
 function B_FBLeft(x, y) {
-  B_FBMotion.call(this, x, y, "left");
+  B_FBMotion.call(this, x, y, "left", 1);
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;
 
 //Level 2 motion blocks
 function B_FBMotionL2(x, y, direction, defaultValue){
-  B_FBMotion.call(this, x, y, direction);
+  B_FBMotion.call(this, x, y, direction, 2);
 
   let blockButton = new BlockButton(this, defaultValue);
   this.addPart(blockButton);
@@ -83,10 +98,13 @@ B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 
 //Level 3 motion blocks
 function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
-  B_FBMotionL2.call(this, x, y, direction, defaultValue);
+  B_FBMotion.call(this, x, y, direction, 3);
 
-  let blockButton = new BlockButton(this, defaultSpeed);
+  let blockButton = new BlockButton(this, defaultValue);
   this.addPart(blockButton);
+
+  let speedButton = new BlockButton(this, defaultSpeed);
+  this.addPart(speedButton);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;

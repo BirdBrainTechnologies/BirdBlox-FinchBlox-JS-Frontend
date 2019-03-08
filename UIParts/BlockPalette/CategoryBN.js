@@ -64,8 +64,8 @@ CategoryBN.prototype.buildGraphics = function() {
 
 	this.group.appendChild(this.bgRect);
 	if (FinchBlox) {
-		let iconPath = VectorPaths.language;
-		let iconH = CBN.height * 0.75;
+		let iconPath = VectorPaths.categoryIcons[this.catId];
+		let iconH = CBN.height * 0.6;
 		let iconW = VectorIcon.computeWidth(iconPath, iconH);
 		let iconX = (CBN.width - iconW)/2;
 		let iconY = (CBN.height - iconH)/2;
@@ -132,5 +132,4 @@ CategoryBN.prototype.addListeners = function() {
 	 } else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
 		 GuiElements.layers.categories.appendChild(this.group);
 	 }
-	 console.log("setHidden " + this.catId + " " + level + " " + this.category.level);
  };
