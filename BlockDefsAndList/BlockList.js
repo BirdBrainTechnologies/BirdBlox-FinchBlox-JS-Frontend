@@ -78,8 +78,12 @@ BlockList.populateCat_motion_1 = function(category) {
 	category.centerBlocks();
 }
 BlockList.populateCat_color_1 = function(category) {
-	category.addBlockByName("B_FBColorL1");
-	category.addBlockByName("B_Display");
+	category.addBlockByName("B_FBBeakRed");
+	category.addBlockByName("B_FBTailRed");
+	category.addBlockByName("B_FBBeakGreen");
+	category.addBlockByName("B_FBTailGreen");
+	category.addBlockByName("B_FBBeakBlue");
+	category.addBlockByName("B_FBTailBlue");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -99,8 +103,8 @@ BlockList.populateCat_motion_2 = function(category) {
 	category.centerBlocks();
 }
 BlockList.populateCat_color_2 = function(category) {
-	category.addBlockByName("B_Ask");
-	category.addBlockByName("B_Display");
+	category.addBlockByName("B_FBBeakL2");
+	category.addBlockByName("B_FBTailL2");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -134,7 +138,7 @@ BlockList.populateCat_sound_3 = function(category) {
 }
 BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_WhenFlagTapped");
-	category.addBlockByName("B_WaitUntil");
+	category.addBlockByName("B_Wait");
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.trimBottom();

@@ -110,16 +110,47 @@ TitleBar.setGraphicsPart2 = function() {
  */
 TitleBar.createBar = function() {
 	const TB = TitleBar;
-	TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
+  if (FinchBlox) {
+    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.buttonMargin, TB.bg);
+  } else {
+    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
+  }
+
 	GuiElements.layers.titleBg.appendChild(TB.bgRect);
   if (FinchBlox) {
-    TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    TB.bgShape.setAttributeNS(null, "fill", Colors.white);
+    //TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    //TB.bgShape.setAttributeNS(null, "fill", Colors.white);
+    TB.leftShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    TB.rightShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    TB.leftShape.setAttributeNS(null, "fill", TB.bg);
+    TB.rightShape.setAttributeNS(null, "fill", TB.bg);
     TB.updateShapePath();
   }
 };
 TitleBar.updateShapePath = function() {
   const TB = TitleBar;
+  const shapeW = TB.width/2 - TB.longButtonW;
+  const shapeH = TB.height - TB.buttonMargin;
+  const r = shapeH/2;
+
+  var pathL = " m 0," + TB.buttonMargin;
+  pathL += " l " + shapeW + ",0";
+  pathL += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+  pathL += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+  pathL += " l " + (-shapeW-2*r) + ",0";
+  pathL += " z ";
+
+  var pathR = " m " + TB.width + "," + TB.buttonMargin;
+  pathR += " l " + (-shapeW) + ",0";
+  pathR += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+  pathR += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+  pathR += " l " + (shapeW+2*r) + ",0";
+  pathR += " z ";
+
+  TB.leftShape.setAttributeNS(null, "d", pathL);
+  TB.rightShape.setAttributeNS(null, "d", pathR);
+
+  /*
   const shapeW = 2*TB.longButtonW;
   const shapeH = TB.height - TB.buttonMargin;
   const r = shapeH/2;
@@ -132,7 +163,7 @@ TitleBar.updateShapePath = function() {
   path += " a " + r + " " + r + " 0 0 1 " + r + " " + (-r);
   path += " z ";
 
-  TB.bgShape.setAttributeNS(null, "d", path);
+  TB.bgShape.setAttributeNS(null, "d", path);*/
 }
 
 /**

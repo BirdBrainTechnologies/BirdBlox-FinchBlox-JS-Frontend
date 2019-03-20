@@ -43,6 +43,9 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusRunning(); // Still running
   }
 }
+B_FBMotion.prototype.updateValues = function () {
+  
+}
 
 function B_FBForward(x, y) {
   B_FBMotion.call(this, x, y, "forward", 1);

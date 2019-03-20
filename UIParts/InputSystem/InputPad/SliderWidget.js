@@ -2,12 +2,19 @@
  * Displays a slider for selecting values
  * @param {number} min - Minimum value
  * @param {number} max - Maximum value
- * @param {number} startVal - Value to start the slider at
+ * @param {number | object} startVal - Value to start the slider at. May be an
+ *                                     object in the case of an rgb slider.
  */
 InputWidget.Slider = function (min, max, startVal) {
   this.min = min;
   this.max = max;
+  this.range = max - min;
   this.value = startVal;
+  if (typeof startVal == 'object') {
+    this.position = 5;
+  } else {
+    this.position = startVal;
+  }
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
@@ -52,7 +59,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.sliderW = 10
   this.sliderY = (S.height - this.sliderH)/2;
   //const sliderX = this.barX + (this.barW - this.sliderW)/2;
-  const sliderX = this.barX + (this.value/(this.max - this.min)) * (this.barW - this.sliderW);
+  const sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
 
   const minLabel = GuiElements.draw.text(5, labelY, this.min, font, Colors.white);
   this.group.appendChild(minLabel);
@@ -72,8 +79,43 @@ InputWidget.Slider.prototype.drag = function(x) {
 
   if (relX > this.barX && relX < (this.barX + this.barW - this.sliderW)) {
     this.sliderX = relX;
-    this.value = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.max - this.min));
+    this.position = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.range));
     GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
+
+    if (typeof this.value == 'number') {
+      this.value = this.position;
+    } else {
+      //if it is an rgb color object
+      if (this.value.r != null) {
+        const p = this.position / this.range;
+        if (p < 0.17) {
+          this.value.r = 255;
+          this.value.g = Math.round(255*p/0.17);
+          this.value.b = 0;
+        } else if (p < 0.33) {
+          this.value.r = Math.round(255 - (255 * (p - 0.17)/0.17));
+          this.value.g = 255;
+          this.value.b = 0;
+        } else if (p < 0.5) {
+          this.value.r = 0;
+          this.value.g = 255;
+          this.value.b = Math.round(255 * (p - 0.33)/0.17);
+        } else if (p < 0.67) {
+          this.value.r = 0;
+          this.value.g = Math.round(255 - (255 * (p - 0.5)/0.17));
+          this.value.b = 255;
+        } else if (p < 0.83) {
+          this.value.r = Math.round(255 * (p - 0.67)/0.17);
+          this.value.g = 0;
+          this.value.b = 255;
+        } else {
+          this.value.r = 255;
+          this.value.g = 0;
+          this.value.b = Math.round(255 - (255 * (p - 0.83)/0.17));
+        }
+
+      }
+    }
     this.updateFn(this.value);
     //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }

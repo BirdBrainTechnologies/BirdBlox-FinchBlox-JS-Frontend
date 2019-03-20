@@ -228,6 +228,7 @@ function VectorPaths(){
     "motion_right": VP.faArrowRight,
     "motion_left": VP.faArrowLeft,
     "motion_forward": VP.faArrowUp,
-    "motion_backward": VP.faArrowDown
+    "motion_backward": VP.faArrowDown,
+    "control_forever": VP.faUndoAlt
   }
 }

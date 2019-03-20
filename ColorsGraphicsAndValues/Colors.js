@@ -157,3 +157,10 @@ Colors.getColor = function(category) {
 Colors.getGradient = function(category) {
 	return "url(#gradient_" + category + ")";
 };
+
+/**
+ * Returns the hex value for a given RGB value
+ */
+Colors.rgbToHex = function(r, g, b) {
+	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}

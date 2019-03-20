@@ -151,9 +151,12 @@ BlockGraphics.SetLoop = function() {
 
 	// Minimum width of loop blocks
 	BlockGraphics.loop.width = 40;
-
-	BlockGraphics.loop.bottomH = 7;
-	BlockGraphics.loop.side = 7;
+	//BirdBlox
+	BlockGraphics.loop.bottomH = 7; //Height of the bottom arm
+	BlockGraphics.loop.side = 7; //width of the bit that connects the main block to the bottom arm.
+	//FinchBlox
+	BlockGraphics.loop.armW = 10; //Width of the loop arm.
+	BlockGraphics.loop.loopH = 10; //height of the bit connecting the main block to the arm.
 };
 
 
@@ -490,32 +493,74 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 	let path = "";
 	const loop = BlockGraphics.loop;
 	const comm = BlockGraphics.command;
-	path += "m " + (x + comm.cornerRadius) + "," + y;
-	path += comm.path1;
-	path += width - comm.extraWidth;
-	path += comm.path2;
-	path += height - innerHeight - 2 * comm.cornerRadius - loop.bottomH;
-	path += comm.path3;
-	path += (comm.extraWidth - width + loop.side) + ",0";
-	path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
-	path += " " + (0 - comm.bumpBottomWidth) + ",0";
-	path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
-	path += " " + (0 - comm.bumpOffset) + ",0";
-	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
-	path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
-	path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
-	path += " l " + (width - 2 * comm.cornerRadius - loop.side);
-	path += comm.path2;
-	path += loop.bottomH - 2 * comm.cornerRadius;
-	path += comm.path3;
-	path += (comm.extraWidth - width);
-	if (bottomOpen) {
-		path += comm.path4 + "l 0,";
+	if (FinchBlox) {
+		let straightHeight = (height - comm.extraHeight)/2 - 13;
+		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
+		path += width - 2*comm.cornerRadius + loop.armW + innerHeight;
+		path += comm.path2;
+		if (bottomOpen) {
+			path += straightHeight;
+			path += comm.fbBumpOut;
+			path += "0," + straightHeight;
+		} else {
+			path += height - 2*comm.cornerRadius;
+		}
+		path += comm.path3; //bottom right corner
+
+		//path += 2*comm.cornerRadius - width + ",0";
+		//arm
+		path += (-loop.armW) + ",0";
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
+		path += " l 0,";
+		path += -straightHeight;
+		path += comm.fbBumpIn;
+		path += "0," + (-straightHeight+loop.loopH);
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
+
+		path += " l " + (-innerHeight) + ",0";
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		path += " l 0," + (straightHeight-loop.loopH);
+		path += comm.fbBumpOut;
+		path += "0," + straightHeight;
+		path += comm.path3;
+		path += (-width + innerHeight + loop.armW + 4*comm.cornerRadius) + ",0";
+
+		//bottom left corner
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
+		path += " l 0,";
+		path += -straightHeight;
+		path += comm.fbBumpIn;
+		path += "0," + (-straightHeight);
+		path += comm.path5;
+
 	} else {
-		path += comm.path4NoBump + "l 0,";
+		path += "m " + (x + comm.cornerRadius) + "," + y;
+		path += comm.path1;
+		path += width - comm.extraWidth;
+		path += comm.path2;
+		path += height - innerHeight - 2 * comm.cornerRadius - loop.bottomH;
+		path += comm.path3;
+		path += (comm.extraWidth - width + loop.side) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+		path += " " + (0 - comm.bumpBottomWidth) + ",0";
+		path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+		path += " " + (0 - comm.bumpOffset) + ",0";
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
+		path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+		path += comm.path2;
+		path += loop.bottomH - 2 * comm.cornerRadius;
+		path += comm.path3;
+		path += (comm.extraWidth - width);
+		if (bottomOpen) {
+			path += comm.path4 + "l 0,";
+		} else {
+			path += comm.path4NoBump + "l 0,";
+		}
+		path += (0 - height + 2 * comm.cornerRadius);
+		path += comm.path5;
 	}
-	path += (0 - height + 2 * comm.cornerRadius);
-	path += comm.path5;
 	return path;
 };
 

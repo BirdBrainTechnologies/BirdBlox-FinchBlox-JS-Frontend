@@ -14,7 +14,7 @@ function BlockButton(parent, startingValue){
 
  const me = this;
  this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.lightGray, this.cornerRadius, this.cornerRadius);
- this.button.addText(this.value);
+ this.updateValue(startingValue);
  this.button.setCallbackFunction(function() {
    const inputSys = me.createInputSystem();
    inputSys.show(null, me.updateValue.bind(me), function(){}, null);
@@ -57,7 +57,14 @@ BlockButton.prototype.move = function(x, y) {
 
 BlockButton.prototype.updateValue = function(newValue) {
   this.value = newValue;
-  this.button.addText(newValue.toString());
+  if (typeof this.value == 'object' && this.value.r != null){
+    const color = Colors.rgbToHex(this.value.r, this.value.g, this.value.b);
+    GuiElements.update.color(this.button.bgRect, color);
+  } else {
+    this.button.addText(this.value.toString());
+  }
+
+  this.parent.updateValues();
 };
 
 BlockButton.prototype.createInputSystem = function() {

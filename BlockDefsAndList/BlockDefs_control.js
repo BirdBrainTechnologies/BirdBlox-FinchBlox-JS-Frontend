@@ -110,7 +110,11 @@ B_WaitUntil.prototype.startAction = function() {
 
 function B_Forever(x, y) {
 	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
-	this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
+	if (FinchBlox) {
+		this.addPart(new BlockIcon(this, VectorPaths.blockIcons["control_forever"], Colors.white, "repeat", 50));
+	} else {
+		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
+	}
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
