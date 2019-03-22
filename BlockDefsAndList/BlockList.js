@@ -394,12 +394,33 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 
 /**
  * @param {CollapsibleItem} collapsibleItem
- *//*
+ */
 BlockList.populateItem_finch = function(collapsibleItem) {
-	collapsibleItem.addBlockByName("B_FinchSetAll");
+	collapsibleItem.addBlockByName("B_FinchMove");
+	collapsibleItem.addBlockByName("B_FinchTurn");
+	collapsibleItem.addBlockByName("B_FinchMotors");
+	collapsibleItem.addBlockByName("B_FinchStop");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FinchBeak");
+	collapsibleItem.addBlockByName("B_FinchTail");
+	collapsibleItem.addBlockByName("B_FNLedArray");
+	collapsibleItem.addBlockByName("B_FNPrint");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FNBuzzer");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FinchResetEncoders");
+	collapsibleItem.addBlockByName("B_FinchEncoder");
+	collapsibleItem.addBlockByName("B_FinchDistance");
+	collapsibleItem.addBlockByName("B_FinchLight");
+	collapsibleItem.addBlockByName("B_FinchLine");
+	collapsibleItem.addBlockByName("B_FinchBattery");
+	collapsibleItem.addBlockByName("B_FNMagnetometer");
+	collapsibleItem.addBlockByName("B_FNButton");
+	collapsibleItem.addBlockByName("B_FNCompass");
+	collapsibleItem.addBlockByName("B_FNOrientation");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
-};*/
+};
 
 /**
  * @param {CollapsibleItem} collapsibleItem

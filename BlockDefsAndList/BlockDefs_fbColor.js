@@ -64,7 +64,6 @@ B_FBColor.prototype.updateColor = function () {
 }
 B_FBColor.prototype.updateValues = function () {
   if (this.colorButton != null) {
-    console.log("color button update.");
     this.red = this.colorButton.value.r;
     this.green = this.colorButton.value.g;
     this.blue = this.colorButton.value.b;

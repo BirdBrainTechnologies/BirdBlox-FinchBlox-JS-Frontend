@@ -275,7 +275,6 @@ Category.prototype.trimBottom = function() {
  */
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
-  console.log("centerBlocks " + this.width);
   const newX = (BlockPalette.width - this.width)/2;
   this.smoothScrollBox.move(newX, BlockPalette.y);
 }

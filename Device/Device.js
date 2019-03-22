@@ -284,6 +284,10 @@ Device.fromJson = function(json) {
         return new DeviceHummingbirdBit(json.name, json.id, json.RSSI, json.device);
     } else if (json.device === "Duo") {
         return new DeviceHummingbird(json.name, json.id, json.RSSI, json.device);
+    } else if (json.device === "Finch") {
+        return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
+    } else {
+        return null;
     }
 };
 
@@ -296,7 +300,10 @@ Device.fromJson = function(json) {
 Device.fromJsonArray = function(json) {
 	let res = [];
 	for (let i = 0; i < json.length; i++) {
-		res.push(Device.fromJson(json[i]));
+    const device = Device.fromJson(json[i]);
+    if (device != null){
+      res.push(device);
+    }
 	}
 	return res;
 };
@@ -324,7 +331,7 @@ Device.fromJsonArrayString = function(deviceList) {
  */
 Device.getTypeList = function() {
 	//return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit];
+	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
 };
 
 /**

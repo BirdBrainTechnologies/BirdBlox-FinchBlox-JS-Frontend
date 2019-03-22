@@ -207,5 +207,18 @@ Language.en = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Move (Slot 1) at (Slot 2) % for (Slot 3) cm",
+"block_finch_turn":"Turn (Slot 1) at (Slot 2) % for (Slot 3) °",
+"block_finch_motors":"Move L (Slot 1) % R (Slot 2) %",
+"block_finch_beak":"Beak R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Tail (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Reset Encoders",
+"block_encoder":"(Slot 1) Encoder",
+"Line":"Line",
+"Forward":"Forward",
+"Backward":"Backward",
+"Right":"Right",
+"Left":"Left",
+"Battery":"Battery"
 }
