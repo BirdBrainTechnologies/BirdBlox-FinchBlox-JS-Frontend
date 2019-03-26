@@ -10,6 +10,9 @@ function B_FBSound(x, y, level) {
   let blockIcon = new BlockIcon(this, VectorPaths.faMusic, Colors.white, "finchSound", 30);
   //blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
+
+  this.midiNote = 60;
+  this.beats = 1;
 }
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
@@ -17,11 +20,22 @@ B_FBSound.prototype.constructor = B_FBSound;
 B_FBSound.prototype.startAction = function () {
   const mem = this.runMem;
   mem.timerStarted = false;
-  mem.duration = 1000;
+  mem.duration = CodeManager.beatsToMs(this.beats);
   mem.requestStatus = {};
   mem.requestStatus.finished = true; //change when sending actual request
   mem.requestStatus.error = false;
   mem.requestStatus.result = null;
+
+  let device = DeviceFinch.getManager().getDevice(0);
+  if (device != null) {
+    //Setting a buzzer with a duration of 0 has strange results on the micro:bit.
+		if (mem.duration > 0) {
+			device.setBuzzer(mem.requestStatus, note, mem.duration);
+		} else {
+			mem.requestStatus.finished = true;
+		}
+  }
+
   return new ExecutionStatusRunning();
 }
 B_FBSound.prototype.updateAction = function () {
@@ -42,7 +56,14 @@ B_FBSound.prototype.updateAction = function () {
   }
 }
 B_FBSound.prototype.updateValues = function () {
-  
+  if (this.noteButton != null) {
+    this.midiNote = this.noteButton.value;
+  }
+  if (this.beatsButton != null) {
+    this.beats = this.beatsButton.value;
+  }
+
+  console.log("Update sound values " + this.midiNote + " " + this.beats);
 }
 
 //********* Level 1 blocks *********
@@ -91,9 +112,9 @@ B_FBG.prototype.constructor = B_FBG;
 function B_FBSoundL2(x, y) {
   B_FBSound.call(this, x, y, 2);
 
-  this.midiNote = 60;
-  const noteButton = new BlockButton(this, this.midiNote);
-  this.addPart(noteButton);
+  this.noteButton = new BlockButton(this, this.midiNote);
+  this.noteButton.addPiano();
+  this.addPart(this.noteButton);
 }
 B_FBSoundL2.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL2.prototype.constructor = B_FBSoundL2;
@@ -103,13 +124,14 @@ B_FBSoundL2.prototype.constructor = B_FBSoundL2;
 function B_FBSoundL3(x, y) {
   B_FBSound.call(this, x, y, 3);
 
-  this.midiNote = 60;
-  const noteButton = new BlockButton(this, this.midiNote);
-  this.addPart(noteButton);
+  this.noteButton = new BlockButton(this, this.midiNote);
+  this.noteButton.addPiano();
+  this.addPart(this.noteButton);
 
-  this.duration = 1;
-  const durationButton = new BlockButton(this, this.duration);
-  this.addPart(durationButton);
+
+  this.beatsButton = new BlockButton(this, this.beats);
+  this.beatsButton.addSlider();
+  this.addPart(this.beatsButton);
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL3.prototype.constructor = B_FBSoundL3;

@@ -162,6 +162,7 @@ GuiElements.setConstants = function() {
 	InputWidget.NumPad.setConstants();
 	InputWidget.Label.setConstants();
 	InputWidget.Slider.setConstants();
+	InputWidget.Piano.setConstants();
 
 	ConnectMultipleDialog.setConstants();
 	RobotConnectionList.setConstants();
