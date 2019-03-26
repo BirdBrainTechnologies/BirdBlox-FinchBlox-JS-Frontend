@@ -88,9 +88,11 @@ BlockList.populateCat_color_1 = function(category) {
 	category.centerBlocks();
 }
 BlockList.populateCat_sound_1 = function(category) {
-	category.addBlockByName("B_FBSoundL1");
-	category.addBlockByName("B_PlaySound");
-	category.addBlockByName("B_PlayNoteForBeats");
+	category.addBlockByName("B_FBC");
+	category.addBlockByName("B_FBD");
+	category.addBlockByName("B_FBE");
+	category.addBlockByName("B_FBF");
+	category.addBlockByName("B_FBG");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -109,9 +111,7 @@ BlockList.populateCat_color_2 = function(category) {
 	category.centerBlocks();
 }
 BlockList.populateCat_sound_2 = function(category) {
-	category.addBlockByName("B_StopAllSounds");
-	category.addBlockByName("B_PlaySound");
-	category.addBlockByName("B_PlayNoteForBeats");
+	category.addBlockByName("B_FBSoundL2");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -124,15 +124,13 @@ BlockList.populateCat_motion_3 = function(category) {
 	category.centerBlocks();
 }
 BlockList.populateCat_color_3 = function(category) {
-	category.addBlockByName("B_Ask");
-	category.addBlockByName("B_Display");
+	category.addBlockByName("B_FBBeakL3");
+	category.addBlockByName("B_FBTailL3");
 	category.trimBottom();
 	category.centerBlocks();
 }
 BlockList.populateCat_sound_3 = function(category) {
-	category.addBlockByName("B_StopAllSounds");
-	category.addBlockByName("B_PlaySound");
-	category.addBlockByName("B_PlayNoteForBeats");
+	category.addBlockByName("B_FBSoundL3");
 	category.trimBottom();
 	category.centerBlocks();
 }

@@ -50,6 +50,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
 	}
 	if (this.hasBlockSlot1) {
 		this.topHeight = 0; //The height of just the top of the Block (where the LabelText and Slots are)
+    this.topWidth = 0; //Same as topHeight, but for FinchBlox
 		this.blockSlot1 = new BlockSlot(this);
 	}
 	if (this.hasBlockSlot2) {
@@ -516,9 +517,15 @@ Block.prototype.updateDim = function() {
 	}
 	if (this.hasBlockSlot1) { //If it has a BlockSlot update that.
 		this.topHeight = height; //The topHeight is the height of everything avove the BlockSlot.
+    this.topWidth = width;
 		this.blockSlot1.updateDim(); //Update the BlockSlot.
-		height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
-		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
+    if (FinchBlox) {
+  		width += this.blockSlot1.width;
+      width += BlockGraphics.loop.armW;
+    } else {
+      height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
+  		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
+    }
 	}
 	if (this.hasBlockSlot2) { //If the Block has a second BlockSlot...
 		this.midLabel.updateDim(); //Update the label in between the two BlockSlots.
@@ -556,7 +563,11 @@ Block.prototype.updateAlign = function(x, y) {
 	let bG = BlockGraphics;
 	this.updateAlignRI(x, y); //Update recursively within the block.
 	if (this.hasBlockSlot1) { //Then tell all susequent blocks to align.
-		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
+    if (FinchBlox) {
+      this.blockSlot1.updateAlign(this.x + this.topWidth, this.y + bG.loop.loopH);
+    } else {
+  		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
+    }
 	}
 	if (this.hasBlockSlot2) {
 		this.blockSlot2.updateAlign(this.x + bG.loop.side, this.y + this.topHeight + this.blockSlot1.height + this.midHeight);
@@ -589,7 +600,7 @@ Block.prototype.updateAlignRI = function(x, y) {
   if (FinchBlox) { yCoord = this.height / 2; }
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
-		yCoord = this.topHeight / 2; //Internal parts measure their y coords from the center of the block.
+    if (!FinchBlox) { yCoord = this.topHeight / 2; } //Internal parts measure their y coords from the center of the block.
 	}
 	xCoord += bG.hMargin;
 	for (let i = 0; i < this.parts.length; i++) {
@@ -620,7 +631,11 @@ Block.prototype.resize = function(width, height) {
 	let innerHeight2 = 0;
 	let midHeight = 0;
 	if (this.hasBlockSlot1) {
-		innerHeight1 = this.blockSlot1.height;
+    if (FinchBlox) {
+      innerHeight1 = this.blockSlot1.width;
+    } else {
+		  innerHeight1 = this.blockSlot1.height;
+    }
 	}
 	if (this.hasBlockSlot2) {
 		innerHeight2 = this.blockSlot2.height;
@@ -807,6 +822,19 @@ Block.prototype.addHeights = function() {
 		return this.height + this.nextBlock.addHeights(); //Return this Block's height plus those below it.
 	} else {
 		return this.height; //This is the last Block. Return its height.
+	}
+};
+
+/**
+ * Recursively returns the width of this Block and all subsequent Blocks. Used
+ * by FinchBlox BlockSlots to determine width.
+ * @return {number} - The width of this Block and all subsequent Blocks.
+ */
+Block.prototype.addWidths = function() {
+	if (this.nextBlock != null) {
+		return this.width + this.nextBlock.addWidths(); //Return this Block's width plus those next to it.
+	} else {
+		return this.width; //This is the last Block. Return its height.
 	}
 };
 

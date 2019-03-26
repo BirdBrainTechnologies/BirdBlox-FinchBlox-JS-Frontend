@@ -131,6 +131,9 @@ BlockGraphics.SetString = function() {
 BlockGraphics.SetHat = function() {
 	BlockGraphics.hat = {};
 
+	//Hat radius for FinchBlox
+	BlockGraphics.hat.r = 30;
+
 	// Radius of ellipse at top of Block
 	BlockGraphics.hat.hRadius = 60;
 	BlockGraphics.hat.vRadius = 40;
@@ -155,7 +158,7 @@ BlockGraphics.SetLoop = function() {
 	BlockGraphics.loop.bottomH = 7; //Height of the bottom arm
 	BlockGraphics.loop.side = 7; //width of the bit that connects the main block to the bottom arm.
 	//FinchBlox
-	BlockGraphics.loop.armW = 10; //Width of the loop arm.
+	BlockGraphics.loop.armW = 5 + 2*BlockGraphics.command.cornerRadius; //Width of the loop arm.
 	BlockGraphics.loop.loopH = 10; //height of the bit connecting the main block to the arm.
 };
 
@@ -264,8 +267,24 @@ BlockGraphics.CalcPaths = function() {
 	let path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
-	let fbBumpOut = " 5,0 0,-5 10,0 0,36 -10,0 0,-5 -5,0 ";
-	let fbBumpIn = " 5,0 0,5 10,0 0,-36 -10,0 0,5 -5,0 ";
+	let fbBumpOut = " 5,0 0,-3 ";
+	fbBumpOut += "a 2 2 0 0 1 2 -2 ";
+	fbBumpOut += "l 4,0 ";
+	fbBumpOut += "a 2 2 0 0 1 2 2 ";
+	fbBumpOut += "l 0,32 ";
+	fbBumpOut += "a 2 2 0 0 1 -2 2 ";
+	fbBumpOut += "l -4,0 ";
+	fbBumpOut += "a 2 2 0 0 1 -2 -2 ";
+	fbBumpOut += "l 0,-3 -5,0 ";
+	let fbBumpIn = " 5,0 0,3 ";
+	fbBumpIn += "a 2 2 0 0 0 2 2 ";
+	fbBumpIn += "l 4,0 ";
+	fbBumpIn += "a 2 2 0 0 0 2 -2 ";
+	fbBumpIn += "l 0,-32 ";
+	fbBumpIn += "a 2 2 0 0 0 -2 -2 ";
+	fbBumpIn += "l -4,0 ";
+	fbBumpIn += "a 2 2 0 0 0 -2 2 ";
+	fbBumpIn += "l 0,3 -5,0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
@@ -451,14 +470,17 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
 	let hat = BlockGraphics.hat;
 	let com = BlockGraphics.command;
 	if (FinchBlox) {
-		let straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
-		path += "m " + x + "," + y + " l ";
-		path += width - com.cornerRadius;
+		let straightHeight = (height - com.extraHeight)/2 - 13;
+		path += "m " + (x+hat.r) + "," + y + " l ";
+		path += width - com.cornerRadius - hat.r;
 		path += com.path2 + straightHeight;
 		path += com.fbBumpOut;
 		path += "0," + straightHeight;
-		path += com.path3 + (com.cornerRadius - width) + ",0";
-		path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
+		path += com.path3 + (com.cornerRadius + hat.r - width) + ",0";
+		//path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
+		path += " a " + hat.r + " " + hat.r + " 0 0 1 " + (-hat.r) + " " + (-hat.r);
+		path += " l 0," + (- height + 2*hat.r);
+		path += " a " + hat.r + " " + hat.r + " 0 0 1 " + hat.r + " " + (-hat.r);
 		path += " z ";
 	} else {
 		let flatWidth = width - hat.topW - BlockGraphics.command.cornerRadius;
@@ -482,11 +504,11 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @param {number} innerHeight - The height of the space in the middle of the loop
+ * @param {number} innerDim - The height (or width for FinchBlox) of the space in the middle of the loop
  * @param {boolean} [bottomOpen=true] - Whether a bump should be placed on the bottom of the path
  * @return {string}
  */
-BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottomOpen) {
+BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpen) {
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}
@@ -496,7 +518,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 	if (FinchBlox) {
 		let straightHeight = (height - comm.extraHeight)/2 - 13;
 		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
-		path += width - 2*comm.cornerRadius + loop.armW + innerHeight;
+		path += width - 2*comm.cornerRadius;
 		path += comm.path2;
 		if (bottomOpen) {
 			path += straightHeight;
@@ -509,7 +531,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 
 		//path += 2*comm.cornerRadius - width + ",0";
 		//arm
-		path += (-loop.armW) + ",0";
+		path += (-loop.armW+2*comm.cornerRadius) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
@@ -517,13 +539,13 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 		path += "0," + (-straightHeight+loop.loopH);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 
-		path += " l " + (-innerHeight) + ",0";
+		path += " l " + (-innerDim+2*comm.cornerRadius) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
 		path += " l 0," + (straightHeight-loop.loopH);
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
 		path += comm.path3;
-		path += (-width + innerHeight + loop.armW + 4*comm.cornerRadius) + ",0";
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
@@ -538,7 +560,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 		path += comm.path1;
 		path += width - comm.extraWidth;
 		path += comm.path2;
-		path += height - innerHeight - 2 * comm.cornerRadius - loop.bottomH;
+		path += height - innerDim - 2 * comm.cornerRadius - loop.bottomH;
 		path += comm.path3;
 		path += (comm.extraWidth - width + loop.side) + ",0";
 		path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
@@ -546,7 +568,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerHeight, bottom
 		path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
 		path += " " + (0 - comm.bumpOffset) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
-		path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
+		path += " l 0," + (innerDim - 2 * comm.cornerRadius);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
 		path += " l " + (width - 2 * comm.cornerRadius - loop.side);
 		path += comm.path2;
@@ -779,7 +801,8 @@ BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
 	if (!active) category = "inactive";
 	if (returnsValue || FinchBlox) {
 		var outline = Colors.getColor(category);
-		if (FinchBlox) { outline = Colors.darkenColor(outline, 0.75); }
+		//if (FinchBlox) { outline = Colors.darkenColor(outline, 0.75); }
+		if (FinchBlox) { outline = Colors.blockOutline[category]; }
 		path.setAttributeNS(null, "stroke", outline);
 		path.setAttributeNS(null, "stroke-width", BlockGraphics.reporter.strokeW);
 	} else {

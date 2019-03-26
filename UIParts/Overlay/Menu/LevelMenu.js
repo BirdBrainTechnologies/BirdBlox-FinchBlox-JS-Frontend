@@ -51,6 +51,7 @@ LevelMenu.setLevel = function(level) {
     LM.currentLevel = level;
     BlockPalette.setLevel();
     TabManager.activeTab.clear();
+    TitleBar.levelButton.addText(level, Font.uiFont(24).bold(), Colors.bbtDarkGray);
   }
 }
 

@@ -10,7 +10,7 @@
  * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
  * @constructor
  */
-function VectorIcon(x, y, pathId, color, height, parent, mirror) {
+function VectorIcon(x, y, pathId, color, height, parent, mirror, rotation) {
 	this.x = x;
 	this.y = y;
 	this.color = color;
@@ -18,6 +18,7 @@ function VectorIcon(x, y, pathId, color, height, parent, mirror) {
 	this.pathId = pathId;
 	this.parent = parent;
 	this.mirror = mirror;
+  this.rotation = rotation;
 	this.pathE = null;
 	this.draw();
 }
@@ -50,12 +51,28 @@ VectorIcon.prototype.draw = function() {
 	}
 
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  if (this.rotation != null) {
+    this.group.setAttributeNS(null, "transform", "rotate(" + this.rotation + ", " + (this.x+(this.width/2)) + ", " + (this.y+(this.height/2)) + ") translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  } else {
+    this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  }
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
 	this.group.appendChild(this.pathE);
 };
+
+VectorIcon.prototype.update = function(x, y, height) {
+  this.x = x;
+  this.y = y;
+  if (height != null) {
+    this.height = height;
+    this.scaleX = this.height / this.pathId.height;
+    this.scaleY = this.scaleX;
+  	this.width = this.scaleY * this.pathId.width;
+  }
+  this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+}
 
 /**
  * Changes the color of the icon

@@ -79,7 +79,11 @@ DeviceManager.checkBattery = function() {
     } else if (worstBatteryStatus === "0"){
         color = Colors.red;
     }
-    TitleBar.batteryBn.icon.setColor(color);
+    if (FinchBlox) {
+      TitleBar.finchButton.icon2.setColor(color);
+    } else {
+      TitleBar.batteryBn.icon.setColor(color);
+    }
 }
 /**
  * Retrieves the number of devices in this.connectedDevices

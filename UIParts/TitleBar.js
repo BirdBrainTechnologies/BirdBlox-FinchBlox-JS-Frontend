@@ -189,12 +189,16 @@ TitleBar.makeButtons = function() {
     TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
     TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
-    TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.lightGray, r, r);
+    TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
+    TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
     TB.levelButton.setCallbackFunction(function(){
       new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     },false);
 
-    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
+    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
+    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.finchGreen, r, r);
+    TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
+    TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
     TB.finchButton.setCallbackFunction(function(){(new DiscoverDialog(DeviceFinch)).show();}, false);
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -354,7 +358,11 @@ TitleBar.updateZoomPart2 = function() {
 	let TB = TitleBar;
 	if (!FinchBlox) {let viewShowing = TB.viewBn.toggled;}
 	TB.setGraphicsPart2();
-	GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
+  if (FinchBlox) {
+     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.buttonMargin);
+  } else {
+	   GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
+  }
   TB.updateShapePath();
 	TitleBar.removeButtons();
 	TitleBar.makeButtons();

@@ -163,6 +163,28 @@ B_FBTailL2.prototype.constructor = B_FBTailL2;
 
 function B_FBColorL3(x, y, beak) {
  B_FBColor.call(this, x, y, 3, beak);
+
+ this.blue = 255;
+ const color = {r: this.red, g: this.green, b: this.blue};
+ this.colorButton = new BlockButton(this, color);
+ this.addPart(this.colorButton);
+
+ let durationButton = new BlockButton(this, 10);
+ this.addPart(durationButton);
+
+ this.updateColor();
 }
 B_FBColorL3.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL3.prototype.constructor = B_FBColorL3;
+
+function B_FBBeakL3(x, y) {
+ B_FBColorL3.call(this, x, y, true);
+}
+B_FBBeakL3.prototype = Object.create(B_FBColorL3.prototype);
+B_FBBeakL3.prototype.constructor = B_FBBeakL3;
+
+function B_FBTailL3(x, y) {
+ B_FBColorL3.call(this, x, y, false);
+}
+B_FBTailL3.prototype = Object.create(B_FBColorL3.prototype);
+B_FBTailL3.prototype.constructor = B_FBTailL3;

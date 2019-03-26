@@ -2,10 +2,12 @@
  * Each has a constructor which adds the parts specific to the Block and overrides methods relating to execution.
  */
 function B_WhenFlagTapped(x, y) {
-	HatBlock.call(this, x, y, "control");
+
 	if (FinchBlox){
-		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 50));
+		HatBlock.call(this, x, y, "control_3");
+		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 40));
 	} else {
+		HatBlock.call(this, x, y, "control");
 		// Add flag icon with height 15
 		this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
 		this.parseTranslation(Language.getStr("block_when_flag_tapped"));
@@ -59,7 +61,9 @@ B_WhenIReceive.prototype.startAction = function() {
 function B_Wait(x, y) {
 	// Derived from CommandBlock
 	// Category ("control") determines colors
-	CommandBlock.call(this, x, y, "control");
+	let category = "control";
+	if (FinchBlox) { category = "control_3"; }
+	CommandBlock.call(this, x, y, category);
 	// Build Block out of things found in the BlockParts folder
 	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
 	this.parseTranslation(Language.getStr("block_wait"));
@@ -109,9 +113,11 @@ B_WaitUntil.prototype.startAction = function() {
 
 
 function B_Forever(x, y) {
-	LoopBlock.call(this, x, y, "control", false); //Bottom is not open.
+	let category = "control";
+	if (FinchBlox) { category = "control_3"; }
+	LoopBlock.call(this, x, y, category, false); //Bottom is not open.
 	if (FinchBlox) {
-		this.addPart(new BlockIcon(this, VectorPaths.blockIcons["control_forever"], Colors.white, "repeat", 50));
+		this.addPart(new BlockIcon(this, VectorPaths.blockIcons["control_forever"], Colors.white, "repeat", 40));
 	} else {
 		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 	}
@@ -139,7 +145,9 @@ B_Forever.prototype.updateAction = function() {
 
 
 function B_Repeat(x, y) {
-	LoopBlock.call(this, x, y, "control");
+	let category = "control";
+	if (FinchBlox) { category = "control_3"; }
+	LoopBlock.call(this, x, y, category);
 	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
 	this.parseTranslation(Language.getStr("block_repeat"));
 }

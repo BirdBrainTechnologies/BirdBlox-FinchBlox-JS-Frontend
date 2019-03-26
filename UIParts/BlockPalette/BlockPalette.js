@@ -40,7 +40,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.bg = Colors.blockPalette;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
-    BlockPalette.catH = 50;
+    BlockPalette.catH = 40;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
     BlockPalette.blockMargin = 25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
@@ -147,6 +147,11 @@ BlockPalette.updatePath = function(pathE) {
       break;
   }
   pathE.setAttributeNS(null, "d", path);
+}
+BlockPalette.updatePaletteColor = function(color){
+  GuiElements.update.color(BlockPalette.palRect, color);
+  GuiElements.update.color(BlockPalette.leftShape, color);
+  GuiElements.update.color(BlockPalette.rightShape, color);
 }
 
 /**

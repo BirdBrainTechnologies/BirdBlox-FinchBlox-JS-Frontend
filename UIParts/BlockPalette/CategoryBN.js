@@ -31,8 +31,9 @@ CategoryBN.setGraphics = function() {
 
 	if (FinchBlox) {
 		CBN.hMargin = BP.catHMargin;
-		CBN.height = 50;
-		CBN.selectedH = 60;
+		CBN.height = BP.catH;
+		CBN.selectedH = BP.catH + 10;
+		CBN.iconScale = 0.65;
 		CBN.width = 60;
 		CBN.vMargin = 15;
 		CBN.labelX = CBN.colorW + CBN.labelLMargin;
@@ -65,7 +66,7 @@ CategoryBN.prototype.buildGraphics = function() {
 	this.group.appendChild(this.bgRect);
 	if (FinchBlox) {
 		let iconPath = VectorPaths.categoryIcons[this.catId];
-		let iconH = CBN.height * 0.6;
+		let iconH = CBN.height * CBN.iconScale;
 		let iconW = VectorIcon.computeWidth(iconPath, iconH);
 		let iconX = (CBN.width - iconW)/2;
 		let iconY = (CBN.height - iconH)/2;
@@ -91,6 +92,16 @@ CategoryBN.prototype.select = function() {
 		let pop = CategoryBN.height - CategoryBN.selectedH;
 		GuiElements.move.group(this.group, this.x, this.y + pop);
 		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH);
+
+		//let palColor = Colors.pSBC(0.5, this.fill);
+		BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
+
+		let iconPath = VectorPaths.categoryIcons[this.catId];
+		let iconH = CategoryBN.selectedH * CategoryBN.iconScale;
+		let iconW = VectorIcon.computeWidth(iconPath, iconH);
+		let iconX = (CategoryBN.width - iconW)/2;
+		let iconY = (CategoryBN.selectedH - iconH)/2;
+		this.icon.update(iconX, iconY, iconH);
 	} else {
 		this.bgRect.setAttributeNS(null, "fill", this.fill);
 		this.label.setAttributeNS(null, "fill", Colors.white);
@@ -104,6 +115,13 @@ CategoryBN.prototype.deselect = function() {
 	if (FinchBlox) {
 		GuiElements.move.group(this.group, this.x, this.y);
 		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height);
+
+		let iconPath = VectorPaths.categoryIcons[this.catId];
+		let iconH = CategoryBN.height * CategoryBN.iconScale;
+		let iconW = VectorIcon.computeWidth(iconPath, iconH);
+		let iconX = (CategoryBN.width - iconW)/2;
+		let iconY = (CategoryBN.height - iconH)/2;
+		this.icon.update(iconX, iconY, iconH);
 	} else {
 		this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
 		this.label.setAttributeNS(null, "fill", Colors.black);

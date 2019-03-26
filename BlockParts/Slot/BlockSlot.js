@@ -10,6 +10,7 @@ function BlockSlot(parent) {
 	this.child = null;
 	this.hasChild = false;
 	this.height = 0;
+  this.width = 0;
 	this.x = 0;
 	this.y = 0;
 	this.isBlockSlot = true;   // Used so Blocks can identify if their parent is a BlockSlot
@@ -37,8 +38,10 @@ BlockSlot.prototype.updateDim = function() {
 	if (this.hasChild) {
 		this.child.updateDim();
 		this.height = this.child.addHeights();
+    this.width = this.child.addWidths();
 	} else {
 		this.height = BlockGraphics.loop.bottomH;
+    this.width = BlockGraphics.loop.armW;
 	}
 };
 
@@ -134,6 +137,7 @@ BlockSlot.prototype.findBestFit = function() {
 	const fit = CodeManager.fit;
 	const x = this.getAbsX();
 	const y = this.getAbsY();
+  console.log("find best fit blockslot " + x + " " + y + " " + move.topX + " " + move.topY);
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
 		const snap = BlockGraphics.command.snap;

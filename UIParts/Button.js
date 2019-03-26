@@ -84,16 +84,20 @@ Button.prototype.buildBg = function() {
  * Adds text to the button
  * @param {string} text - The text to add
  * @param {Font} [font] - The font to use (defaultFont if unspecified)
+ * @param {string} color - (optional) Color for the text. Use Button.foreground if unspecified
  */
-Button.prototype.addText = function(text, font) {
+Button.prototype.addText = function(text, font, color) {
 	DebugOptions.validateNonNull(text);
 	this.removeContent();
 	if (font == null) {
 		font = Button.defaultFont;
 	}
+  if (color == null) {
+    color = Button.foreground;
+  }
 	this.textInverts = true;
 
-	this.textE = GuiElements.draw.text(0, 0, "", font, Button.foreground);
+	this.textE = GuiElements.draw.text(0, 0, "", font, color);
 	GuiElements.update.textLimitWidth(this.textE, text, this.width);
 	this.group.appendChild(this.textE);
 
@@ -289,6 +293,14 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 
+Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
+  const iconW = VectorIcon.computeWidth(pathId, height);
+	const iconX = (this.width - iconW) / 2;
+	const iconY = (this.height - height) / 2;
+	this.icon2 = new VectorIcon(iconX, iconY, pathId, color, height, this.group, null, rotation);
+	TouchReceiver.addListenersBN(this.icon2.pathE, this);
+};
+
 /**
  * Removes all icons/images/text in the button so it can be replaced
  */
@@ -480,7 +492,10 @@ Button.prototype.move = function(x, y) {
  * @param {boolean} isPressed - Whether the button is pressed
  */
 Button.prototype.setColor = function(isPressed) {
-	if (isPressed) {
+  if (isPressed && FinchBlox) {
+    let darkColor = Colors.darkenColor(this.bg, 0.8);
+    this.bgRect.setAttributeNS(null, "fill", darkColor);
+	} else if (isPressed) {
 		this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
 		if (this.hasText && this.textInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.highlightFore);
@@ -491,7 +506,10 @@ Button.prototype.setColor = function(isPressed) {
 		if (this.hasImage) {
 			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
-	} else {
+	} else if (FinchBlox) {
+    this.bgRect.setAttributeNS(null, "fill", this.bg);
+    if (this.hasIcon) { this.icon.setColor(Button.foreground); }
+  } else {
 		this.bgRect.setAttributeNS(null, "fill", this.bg);
 		if (this.hasText && this.textInverts) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
