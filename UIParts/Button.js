@@ -524,6 +524,21 @@ Button.prototype.setColor = function(isPressed) {
 };
 
 /**
+ * Updates the button's background color
+ */
+Button.prototype.updateBgColor = function(color) {
+  this.bg = color;
+  this.setColor(false);
+}
+
+Button.prototype.flash = function() {
+  this.bgRect.setAttributeNS(null, "fill", Colors.white);
+  setTimeout(function(){ this.bgRect.setAttributeNS(null, "fill", this.bg); }.bind(this), 100);
+  setTimeout(function(){ this.bgRect.setAttributeNS(null, "fill", Colors.white); }.bind(this), 200);
+  setTimeout(function(){ this.bgRect.setAttributeNS(null, "fill", this.bg); }.bind(this), 300);
+}
+
+/**
  * Marks that the Button is part of something that scrolls so it doesn't stop scrolling when it is tapped
  * (using preventDefault in TouchReceiver)
  */

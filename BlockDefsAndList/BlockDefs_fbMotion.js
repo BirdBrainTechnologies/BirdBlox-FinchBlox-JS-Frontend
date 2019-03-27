@@ -25,13 +25,17 @@ B_FBMotion.prototype.startAction = function () {
   mem.timerStarted = false;
   mem.duration = 1000;
   mem.requestStatus = {};
-  mem.requestStatus.finished = true; //change when sending actual request
+  mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
   mem.requestStatus.result = null;
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     device.setMotor(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+  } else {
+    mem.requestStatus.finished = true;
+    mem.duration = 0;
+    TitleBar.flashFinchButton();
   }
 
   return new ExecutionStatusRunning();

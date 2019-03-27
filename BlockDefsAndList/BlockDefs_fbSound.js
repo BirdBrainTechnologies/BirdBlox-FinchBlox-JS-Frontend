@@ -34,6 +34,10 @@ B_FBSound.prototype.startAction = function () {
 		} else {
 			mem.requestStatus.finished = true;
 		}
+  } else {
+    mem.requestStatus.finished = true;
+    mem.duration = 0;
+    TitleBar.flashFinchButton();
   }
 
   return new ExecutionStatusRunning();

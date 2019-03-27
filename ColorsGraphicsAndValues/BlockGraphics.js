@@ -44,11 +44,11 @@ BlockGraphics.SetCommand = function() {
 
 	// Minimum dimensions
 	if (FinchBlox) {
-		BlockGraphics.command.height = 76;
-		BlockGraphics.command.width = 76;
+		BlockGraphics.command.height = 66;//76;
+		BlockGraphics.command.width = 66;//76;
 		BlockGraphics.command.cornerRadius = 10;
 		BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
-		BlockGraphics.command.hMargin = 25; // The margin to the left and right of the content
+		BlockGraphics.command.hMargin = 20;//25; // The margin to the left and right of the content
 //		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out
 	} else {
 		BlockGraphics.command.height = 34;

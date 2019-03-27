@@ -386,3 +386,14 @@ TitleBar.updateZoomPart2 = function() {
    const TB = TitleBar;
    return CodeManager.move.pInRange(x, y, 0, 0, TB.width, TB.height);
  }
+
+/**
+ * Used in FinchBlox. Flashes the finch button if the user tries to run blocks
+ * without a finch connected.
+ */
+TitleBar.flashFinchButton = function() {
+  const finchBn = TitleBar.finchButton;
+  if (finchBn != null) {
+    finchBn.flash();
+  }
+}

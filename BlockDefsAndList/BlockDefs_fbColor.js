@@ -12,9 +12,11 @@
  */
 function B_FBColor(x, y, level, beak) {
  this.level = level;
+ this.isBeak = beak;
  this.red = 0;
  this.green = 0;
  this.blue = 0;
+ this.duration = 10;
  CommandBlock.call(this,x,y,"color_"+level);
 
  const blockIcon = new BlockIcon(this, VectorPaths.faLightbulb, Colors.white, "finchColor", 30);
@@ -34,11 +36,26 @@ B_FBColor.prototype.constructor = B_FBColor;
 B_FBColor.prototype.startAction = function () {
  const mem = this.runMem;
  mem.timerStarted = false;
- mem.duration = 1000;
+ mem.duration = 100 * this.duration;
+ mem.offSent = false; //when the block is finished executing, turn off led(s)
  mem.requestStatus = {};
- mem.requestStatus.finished = true; //change when sending actual request
+ mem.requestStatus.finished = false;
  mem.requestStatus.error = false;
  mem.requestStatus.result = null;
+
+ let device = DeviceFinch.getManager().getDevice(0);
+ if (device != null) {
+   if (this.isBeak) {
+     device.setBeak(mem.requestStatus, this.red, this.green, this.blue);
+   } else {
+     device.setTail(mem.requestStatus, 5, this.red, this.green, this.blue);
+   }
+ } else {
+   mem.requestStatus.finished = true;
+   mem.duration = 0;
+   TitleBar.flashFinchButton();
+ }
+
  return new ExecutionStatusRunning();
 }
 B_FBColor.prototype.updateAction = function () {
@@ -53,7 +70,26 @@ B_FBColor.prototype.updateAction = function () {
      }
  }
  if (new Date().getTime() >= mem.startTime + mem.duration) {
-     return new ExecutionStatusDone(); // Done running
+    if (!mem.offSent){
+      console.log("sending led off");
+      mem.offSent = true;
+      mem.timerStarted = false;
+      mem.duration = 0;
+      mem.requestStatus.finished = false;
+      let device = DeviceFinch.getManager().getDevice(0);
+      if (device != null) {
+        if (this.isBeak) {
+          device.setBeak(mem.requestStatus, 0, 0, 0);
+        } else {
+          device.setTail(mem.requestStatus, 5, 0, 0, 0);
+        }
+      } else {
+        mem.requestStatus.finished = true;
+      }
+      return new ExecutionStatusRunning(); // Still running
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
  } else {
      return new ExecutionStatusRunning(); // Still running
  }
@@ -69,6 +105,17 @@ B_FBColor.prototype.updateValues = function () {
     this.blue = this.colorButton.value.b;
     this.updateColor();
   }
+  if (this.durationButton != null) {
+    this.duration = this.durationButton.value;
+  }
+}
+B_FBColor.prototype.addL2Button = function () {
+  this.blue = 255;
+  const color = {r: this.red, g: this.green, b: this.blue};
+  this.colorButton = new BlockButton(this, color);
+  this.colorButton.addSlider();
+  this.addPart(this.colorButton);
+  this.updateColor();
 }
 
 //********* Level 1 blocks *********
@@ -138,11 +185,7 @@ B_FBTailBlue.prototype.constructor = B_FBTailBlue;
 function B_FBColorL2(x, y, beak) {
  B_FBColor.call(this, x, y, 2, beak);
 
- this.blue = 255;
- const color = {r: this.red, g: this.green, b: this.blue};
- this.colorButton = new BlockButton(this, color);
- this.addPart(this.colorButton);
- this.updateColor();
+ this.addL2Button();
 }
 B_FBColorL2.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL2.prototype.constructor = B_FBColorL2;
@@ -164,15 +207,11 @@ B_FBTailL2.prototype.constructor = B_FBTailL2;
 function B_FBColorL3(x, y, beak) {
  B_FBColor.call(this, x, y, 3, beak);
 
- this.blue = 255;
- const color = {r: this.red, g: this.green, b: this.blue};
- this.colorButton = new BlockButton(this, color);
- this.addPart(this.colorButton);
+ this.addL2Button();
 
- let durationButton = new BlockButton(this, 10);
- this.addPart(durationButton);
-
- this.updateColor();
+ this.durationButton = new BlockButton(this, this.duration);
+ this.durationButton.addSlider();
+ this.addPart(this.durationButton);
 }
 B_FBColorL3.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL3.prototype.constructor = B_FBColorL3;

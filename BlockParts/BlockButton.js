@@ -60,7 +60,8 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
   this.value = newValue;
   if (typeof this.value == 'object' && this.value.r != null){
     const color = Colors.rgbToHex(this.value.r, this.value.g, this.value.b);
-    GuiElements.update.color(this.button.bgRect, color);
+    //GuiElements.update.color(this.button.bgRect, color);
+    this.button.updateBgColor(color);
   } else if (displayString != null) {
     this.button.addText(displayString);
   } else {
