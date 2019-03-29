@@ -600,6 +600,8 @@ TouchReceiver.touchend = function(e) {
 		} else if (TR.targetType === "collapsibleItem") {
 			TR.target.toggle();
 		} else if (TR.targetType == "displayStack") {
+      TR.target.stack.startRun();
+      /*
 		    // tapping a block in the display stack runs the block once
         let execStatus = TR.target.updateRun();
 				if (!execStatus.isRunning) {
@@ -611,7 +613,7 @@ TouchReceiver.touchend = function(e) {
             // wait for the response before trying to fetch the response and display the result
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
-        }, 100);
+        }, 100);*/
 		}
 	} else {
 		TR.touchDown = false;

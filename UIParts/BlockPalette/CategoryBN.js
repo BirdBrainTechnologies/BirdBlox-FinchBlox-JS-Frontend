@@ -93,7 +93,6 @@ CategoryBN.prototype.select = function() {
 		GuiElements.move.group(this.group, this.x, this.y + pop);
 		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH);
 
-		//let palColor = Colors.pSBC(0.5, this.fill);
 		BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
 
 		let iconPath = VectorPaths.categoryIcons[this.catId];

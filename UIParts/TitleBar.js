@@ -120,15 +120,33 @@ TitleBar.createBar = function() {
   if (FinchBlox) {
     //TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
     //TB.bgShape.setAttributeNS(null, "fill", Colors.white);
-    TB.leftShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    TB.rightShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    TB.leftShape.setAttributeNS(null, "fill", TB.bg);
-    TB.rightShape.setAttributeNS(null, "fill", TB.bg);
+    //TB.leftShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    //TB.rightShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    //TB.leftShape.setAttributeNS(null, "fill", TB.bg);
+    //TB.rightShape.setAttributeNS(null, "fill", TB.bg);
+    TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
+    TB.bgShape.setAttributeNS(null, "fill", TB.bg);
     TB.updateShapePath();
   }
 };
 TitleBar.updateShapePath = function() {
   const TB = TitleBar;
+  const r = (TB.height - TB.buttonMargin)/2;
+  const shapeW = TB.width/2 - TB.longButtonW - 2*r;
+
+  var path = " m 0,0";
+  path += " l " + TB.width + ",0 0," + TB.height + " " + (-shapeW) + ",0";
+  path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+  path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + (-r);
+  path += " l " + (-2*TB.longButtonW) + ",0";
+  path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+  path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+  path += " l " + (-shapeW) + ",0";
+  path += " z ";
+
+  TB.bgShape.setAttributeNS(null, "d", path);
+
+  /*
   const shapeW = TB.width/2 - TB.longButtonW;
   const shapeH = TB.height - TB.buttonMargin;
   const r = shapeH/2;
@@ -149,6 +167,7 @@ TitleBar.updateShapePath = function() {
 
   TB.leftShape.setAttributeNS(null, "d", pathL);
   TB.rightShape.setAttributeNS(null, "d", pathR);
+  */
 
   /*
   const shapeW = 2*TB.longButtonW;

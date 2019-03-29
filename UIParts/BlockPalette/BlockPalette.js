@@ -75,8 +75,9 @@ BlockPalette.updateZoom = function() {
 	BP.setGraphics();
 	GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
   if (FinchBlox) {
-    BP.updatePath(BP.leftShape);
-    BP.updatePath(BP.rightShape);
+    //BP.updatePath(BP.leftShape);
+    //BP.updatePath(BP.rightShape);
+    BP.updatePath();
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
@@ -114,14 +115,39 @@ BlockPalette.createPalBg = function() {
 	BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
 	GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
+    BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
+    BP.shape.setAttributeNS(null, "fill", BP.bg);
+    BlockPalette.updatePath();
+    /*
     BP.leftShape = GuiElements.create.path(GuiElements.layers.paletteBG);
     BP.rightShape = GuiElements.create.path(GuiElements.layers.paletteBG);
     BP.leftShape.setAttributeNS(null, "fill", BP.bg);
     BP.rightShape.setAttributeNS(null, "fill", BP.bg);
     BlockPalette.updatePath(BP.leftShape);
-    BlockPalette.updatePath(BP.rightShape);
+    BlockPalette.updatePath(BP.rightShape);*/
   }
 };
+
+BlockPalette.updatePath = function(){
+  let BP = BlockPalette;
+  const shapeH = 20;
+  const r = shapeH/2;
+  const shapeW = (BP.width - BP.catW)/2 - 2*BP.catHMargin - 2*r;
+  const catTabW = BP.catW + 4*BP.catHMargin;
+
+  var path = "m 0," + (BP.y - shapeH);
+  path += " l " + shapeW + ",0 ";
+  path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+  path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+  path += " l " + (catTabW) + ",0 ";
+  path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
+  path += " a " + r + " " + r + " 0 0 1 " + r + " " + (-r);
+  path += " l " + shapeW + ",0 0," + (shapeH+BP.height) + " " + (-BP.width) + ",0";
+  path += " z";
+
+  BP.shape.setAttributeNS(null, "d", path);
+}
+/*
 BlockPalette.updatePath = function(pathE) {
   let BP = BlockPalette;
   const shapeH = 20;
@@ -147,11 +173,12 @@ BlockPalette.updatePath = function(pathE) {
       break;
   }
   pathE.setAttributeNS(null, "d", path);
-}
+}*/
 BlockPalette.updatePaletteColor = function(color){
   GuiElements.update.color(BlockPalette.palRect, color);
-  GuiElements.update.color(BlockPalette.leftShape, color);
-  GuiElements.update.color(BlockPalette.rightShape, color);
+  //GuiElements.update.color(BlockPalette.leftShape, color);
+  //GuiElements.update.color(BlockPalette.rightShape, color);
+  GuiElements.update.color(BlockPalette.shape, color);
 }
 
 /**

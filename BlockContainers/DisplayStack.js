@@ -1,7 +1,8 @@
 /**
  * DisplayStacks are used for holding Blocks in the BlockPalette.
- * DisplayStacks are similar to BlockStacks but cannot run the Blocks inside them.  When a Block in a DisplayStack
- * is dragged, it is duplicated into a BlockStack.  Like BlockStacks, they require a Block to be created
+ * DisplayStacks are similar to BlockStacks but cannot snap other blocks in.
+ * When a Block in a DisplayStack is dragged, it is duplicated into a BlockStack.
+ * Like BlockStacks, they require a Block to be created
  * @param {Block} firstBlock - The first Block in the DisplayStack
  * @param {Element} group - The group the DisplayStack should be inside
  * @param {Category} category - The category the DisplayStack is a member of
@@ -9,6 +10,7 @@
  */
 function DisplayStack(firstBlock, group, category) {
 	this.firstBlock = firstBlock;
+  this.returnType = firstBlock.returnType; // The DisplayStack returns the same type of value as its Block.
 	// Location determined by first Block
 	this.x = firstBlock.getAbsX();
 	this.y = firstBlock.getAbsY();
@@ -24,9 +26,11 @@ function DisplayStack(firstBlock, group, category) {
 	this.dim.rh = 0;
 	this.updateDim();
 	this.isRunning = false;
-	this.currentBlock = null;
+	//this.currentBlock = null;
 	this.isDisplayStack = true;
 	this.move(this.x, this.y);
+
+  this.updateTimer = null;
 }
 
 /**
@@ -116,6 +120,75 @@ DisplayStack.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
 	GuiElements.move.group(this.group, x, y);
+};
+
+/**
+ * Stops the execution of the DisplayStack and its contents. Removes the glow as well.
+ */
+DisplayStack.prototype.stop = function() {
+	if (this.isRunning) {
+		this.firstBlock.stop();
+		this.endRun(); // Removes glow and sets isRunning.
+	}
+};
+
+/**
+ * Updates the execution of the DisplayStack and its contents. Returns boolean
+ * to indicate if still running.
+ * @return {ExecutionStatus}
+ */
+DisplayStack.prototype.updateRun = function() {
+	if (this.isRunning) {
+		// Different procedures are used if the Block returns a value.
+		if (this.returnType === Block.returnTypes.none) {
+			// Update the current Block.
+			let execStatus = this.firstBlock.updateRun();
+			if (!execStatus.isRunning()) {
+					this.endRun();
+					return new ExecutionStatusDone();
+			} else {
+          return new ExecutionStatusRunning();
+      }
+		} else {
+			// Procedure for Blocks that return a value.
+			let execStatus = this.firstBlock.updateRun();
+			if (execStatus.isRunning()) {
+				return new ExecutionStatusRunning();
+			} else if (execStatus.hasError()) {
+				this.endRun();
+				return new ExecutionStatusDone();
+			} else {
+				// When it is done running, display the result.
+				this.firstBlock.displayResult(execStatus.getResult());
+				this.endRun(); // Execution is done.
+				return new ExecutionStatusDone();
+			}
+		}
+	} else {
+		// It's not running, so we are done
+		return new ExecutionStatusDone();
+	}
+};
+
+/**
+ * Starts execution of the DisplayStack. Makes BlockStack glow, too.
+ */
+DisplayStack.prototype.startRun = function() {
+	if (!this.isRunning) { // Only start if not already running.
+		this.isRunning = true;
+		this.firstBlock.glow();
+    this.updateTimer = self.setInterval(function(){ this.updateRun(); }.bind(this), CodeManager.updateInterval);
+	}
+};
+
+/**
+ * Ends execution and removes glow. Does not call stop() function on Blocks;
+ * assumes they have stopped already.
+ */
+DisplayStack.prototype.endRun = function() {
+	this.isRunning = false;
+	this.firstBlock.stopGlow();
+  window.clearInterval(this.updateTimer);
 };
 
 /**
