@@ -45,5 +45,6 @@ Font.prototype.unBold = function(){
  * @return {Font}
  */
 Font.uiFont = function(fontSize){
+	if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };

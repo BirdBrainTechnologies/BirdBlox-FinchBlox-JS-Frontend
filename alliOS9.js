@@ -1305,7 +1305,7 @@ List.prototype.delete = function() {
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
+Language.langs = ["ar", "ca", "da", "de", "en", "es", "fi", "fr", "he", "ko", "nl", "pt", "sv", "zhs", "zht"];
 //Language.rtlLangs = [];
 Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
@@ -1321,12 +1321,14 @@ Language.names = {
   "de":"Deutsch",  //German
   "en":"English",  //English
   "es":"Español",  //Spanish
+  "fi":"suomi",  //Finnish - language names not capitalized in Finnish
   "fr":"Français",  //French
   "he":"עברית",  //Hebrew
   "ja":"日本語",  //Japanese
   "ko":"한국어",  //Korean
   "nl":"Nederlands",  //Dutch
   "pt":"Português",  //Portuguese
+  "sv":"svenska",  //Swedish - language names not capitalized in Swedish
   "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
   "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
 }
@@ -2663,6 +2665,220 @@ Language.es = {
 "block_divide":"(Slot 1) / (Slot 2)"
 }
 
+//Finnish Translation
+Language.fi = {
+  "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+  "port":"Liitäntä",
+  "block_LED":"LED (Slot 1) (Slot 2) %",
+  "block_Position_Servo":"Asentoservo (Slot 1) (Slot 2) °",
+  "block_Rotation_Servo":"Kiertoservo (Slot 1) (Slot 2) %",
+  "block_Play_Note":"Soita sävel (Slot 1)  (Slot 2) iskun ajan",
+  "Light":"Valo",
+  "Distance":"Etäisyys",
+  "Dial":"Säädin",
+  "Other":"Muu",
+  "Accelerometer":"Kiihtyvyysanturi",
+  "Magnetometer":"Magnetometri",
+  "block_LED_Display":"Näytä",
+  "block_Print":"Näytä teksti (Slot 1 = Hello)",
+  "block_Button":"Painike",
+  "Screen_Up":"Näyttö ylös",
+  "Screen_Down":"Näyttö alas",
+  "Tilt_Left":"Kallista vasempaan",
+  "Tilt_Right":"Kallista oikeaan",
+  "Logo_Up":"Logo ylös",
+  "Logo_Down":"Logo alas",
+  "Shake":"Ravista",
+  "block_Compass":"Kompassi ",
+  "block_Servo":"Servo (Slot 1) (Slot 2)",
+  "block_Vibration":"Värinä (Slot 1) (Slot 2)",
+  "block_Motor":"Moottori (Slot 1) (Slot 2)",
+  "block_Temperature_C":"Lämpötila C (Slot 1)",
+  "block_Temperature_F":"Lämpötila F (Slot 1)",
+  "block_write":"Kirjoita (Slot 1) (Slot 2) %",
+  "pin":"Pinni",
+  "block_read":"Lue (Slot 1)",
+  "block_Device_Shaken":"Tablettia ravistetaan",
+  "block_Device_LatLong":"Tabletti (Slot 1)",
+  "Latitude":"Leveysaste",
+  "Longitude":"Pituusaste",
+  "block_Device_SSID":"Tabletti SSID",
+  "block_Device_Pressure":"Tabletti ilmanpaine",
+  "block_Device_Relative_Altitude":"Tabletti suhteellinen korkeus",
+  "block_Acceleration":"Tabletti (Slot 1) Kiihtyvyys",
+  "Total":"Kokonais-",
+  "block_Device_Orientation":"Tabletti asento",
+  "faceup":"Näyttö ylös",
+  "facedown":"Näyttö alas",
+  "portrait_bottom":"Pystykuva: kamera alhaalla",
+  "portrait_top":"Pystykuva: kamera ylhäällä",
+  "landscape_left":"Vaakakuva: kamera vasemmalla",
+  "landscape_right":"Vaakakuva: kamera oikealla",
+  "block_Display":"Näytä teksti (Slot 1 = Hello) (Slot 2)",
+  "position":"Sijainti",
+  "block_ask":"kysy (Slot 1 = Mikä on nimesi?) ja odota",
+  "block_answer":"vastaus",
+  "block_reset_timer":"nollaa ajastin",
+  "block_timer":"ajastin",
+  "block_current":"nykyinen (Slot 1)",
+  "date":"päivämäärä",
+  "year":"vuosi",
+  "month":"kuukausi",
+  "hour":"tunti",
+  "minute":"minuutti",
+  "second":"sekunti",
+  "day_of_the_week":"viikonpäivä",
+  "time_in_milliseconds":"aika millisekunteina",
+  "block_mod":"(Slot 1) moduli (Slot 2)",
+  "block_round":"pyöristä (Slot 1)",
+  "block_pick_random":"valitse satunnainen väliltä (Slot 1) - (Slot 2)",
+  "block_and":"(Slot 1) ja (Slot 2)",
+  "block_or":"(Slot 1) tai (Slot 2)",
+  "block_not":"ei (Slot 1)",
+  "true":"tosi",
+  "false":"epätosi",
+  "block_letter":"kirjain (Slot 1) sanasta (Slot 2 = world)",
+  "block_length":"sanan (Slot 1 = world) pituus",
+  "block_join":"yhdistä (Slot 1 = hello) ja (Slot 2 = world)",
+  "block_split":"erota (Slot 1 = hello world) (Slot 2)",
+  "letter":"kirjain ",
+  "whitespace":"tyhjämerkki",
+  "block_validate":"onko (Slot 1 = 5) (Slot 2)?",
+  "number":"numero",
+  "text":"teksti",
+  "boolean":"totuusarvo",
+  "list":"lista",
+  "invalid_number":"epäkelpo numero",
+  "block_when_flag_tapped":"kun (Icon) napautetaan",
+  "block_when_I_receive":"kun vastaanotan (Slot 1)",
+  "any_message":"mikä tahansa viesti",
+  "new":"uusi",
+  "block_when":"kun (Slot 1)",
+  "block_broadcast":"lähetä (Slot 1)",
+  "block_broadcast_and_wait":"lähetä (Slot 1) ja odota",
+  "block_message":"viesti",
+  "block_wait":"odota (Slot 1) sekuntia",
+  "block_wait_until":"odota kunnes",
+  "block_repeat_forever":"toista ikuisesti",
+  "block_repeat":"toista (Slot 1) kertaa",
+  "block_repeat_until":"toista kunnes",
+  "block_if":"jos (Slot 1)",
+  "block_if_else":"jos (Slot 1)",
+  "else":"muuten",
+  "block_stop":"pysäytä (Slot 1)",
+  "all":"kaikki",
+  "this_script":"tämä komentosarja",
+  "all_but_this_script":"kaikki paitsi tämä komentosarja",
+  "Record_sound":"Tallenna ääntä",
+  "block_play_recording":"soita äänitys (Slot 1)",
+  "block_play_recording_until_done":"soita äänitys kunnes valmis (Slot 1)",
+  "block_play_sound":"soita ääni (Slot 1)",
+  "block_play_sound_until_done":"soita ääni kunnes valmis (Slot 1)",
+  "block_stop_all_sounds":"pysäytä kaikki äänet",
+  "block_rest_for":"taukoa (Slot 1) iskun ajan",
+  "block_change_tempo_by":"muuta tempoa (Slot 1)",
+  "block_set_tempo_to":"aseta tempo (Slot 1) bpm",
+  "block_tempo":"tempo",
+  "block_set_variable":"aseta (Slot 1) arvoon (Slot 2)",
+  "Create_Variable":"Luo Muuttuja",
+  "block_change_variable":"muuta (Slot 1) (Slot 2)",
+  "Rename":"Nimeä uudelleen",
+  "Delete":"Poista",
+  "block_add_to_list":"lisää (Slot 1 = thing) listaan (Slot 2)",
+  "Create_List":"Luo lista",
+  "block_delete_from_list":"poista (Slot 1) listasta (Slot 2)",
+  "block_insert_into_list":"lisää (Slot 1) paikkaan (Slot 2) listaan (Slot 3)",
+  "block_replace_list_item":"korvaa listan (Slot 2) alkio (Slot 1) (Slot 3 = thing)",
+  "block_copy_list":"kopioi (Slot 1) listaan (Slot 2)",
+  "block_list_item":"alkio (Slot 1) listalla (Slot 2)",
+  "block_list_length":"(Slot 1) pituus",
+  "block_list_contains":"(Slot 1) sisältää (Slot 2 = thing)",
+  "last":"Viimeinen",
+  "random":"Satunnainen",
+  "Robots":"Robotit",
+"Operators":"Toiminnot",
+"Sound":"Ääni",
+"Tablet":"Tabletti",
+"Control":"Ohjaus",
+"Variables":"Muuttujat",
+"Zoom_in":"Lähennä ",
+"Zoom_out":"Loitonna ",
+"Reset_zoom":"Palauta ",
+"Disable_snap_noise":"Estä napsausääni",
+"Enable_snap_noise":"Salli napsausääni",
+"CompassCalibrate":"Kalibroi kompassi",
+"Send_debug_log":"Lähetä vianpoistoloki",
+"Show_debug_menu":"Näytä vianpoistovalikko",
+"Connect_Device":"Yhdistä laite",
+"Connect_Multiple":"Yhdistä useita ",
+"Disconnect_Device":"Katkaise yhteys",
+"Tap":"Napauta + yhdistääksesi",
+"Scanning_for_devices":"Etsii laitteita",
+"Open":"Avaa",
+"No_saved_programs":"Ei tallennettuja ohjelmia",
+"New":"Uusi",
+"Saving":"Tallentaa",
+"On_Device":"Laitteella",
+"Cloud":"Pilvi",
+"Loading":"Lataa",
+"Sign_in":"Kirjaudu sisään",
+"New_program":"Uusi ohjelma",
+"Share":"Jaa",
+"Recordings":"Tallennukset",
+"Discard":"Hylkää",
+"Stop":"Pysäytä",
+"Pause":"Keskeytä",
+"remaining":"jäljellä",
+"Record":"Äänitä",
+"Tap_record_to_start":"Napauta äänitä aloittaaksesi",
+"Done":"Valmis",
+"Delete":"Poista",
+"Delete_question":"Haluatko varmasti poistaa tämän?",
+"Cancel":"Peru",
+"OK":"OK",
+"Dont_delete":"Älä poista",
+"Rename":"Nimeä uudelleen",
+"Enter_new_name":"Syötä uusi nimi",
+"Duplicate":"Tiedoston kopio",
+"Name_duplicate_file":"Anna tiedoston kopiolle nimi.",
+"Name_error_invalid_characters":"Tiedoston nimessä ei voi olla seruaavia merkkejä: \n",
+"Name_error_already_exists":"\" on jo olemassa. Anna uusi nimi.",
+"Permission_denied":"Lupaa ei ole annettu",
+"Grant_permission":"Anna BirdBloxille lupa käyttää mikrofonia asetuksissa",
+"Dismiss":"Hylkää",
+"Name":"Nimi",
+"Enter_file_name":"Syötä tiedoston nimi.",
+"Name_error_blank":"Nimeä ei voi jättää tyhjäksi. Syötä tiedoston nimi.",
+"Edit_text":"Muokkaa tekstiä",
+"Question":"Kysymys",
+"Connection_Failure":"Virhe yhdistettäessä",
+"Connection_failed_try_again":"Virhe yhdistettäessä, yritä uudelleen",
+"Disconnect_account":"Poista tili laitteelta",
+"Disconnect_account_question":"Poistetaanko tili laitteelta?",
+"Dont_disconnect":"Älä poista",
+"Disconnect":"Poista ",
+"not_connected":"(Device) ei yhdistetty",
+"not_a_valid_number":"epäkelpo numero",
+"Intensity":"Voimakkuus",
+"Angle":"Kulma",
+"Speed":"Nopeus",
+"Note":"Sävel",
+"Beats":"Iskua",
+"Firmware_incompatible":"Yhteensopimaton laiteohjelma",
+"Update_firmware":"Päivitä laiteohjelma",
+"Device_firmware":"Laiteohjelman versio:",
+"Required_firmware":"Vaadittu laiteohjelman versio:",
+"block_math_of_number":"(Slot 1) (Slot 2 = 10)",
+"ceiling":"ceiling",
+"floor":"floor",
+"abs":"abs",
+"sqrt":"sqrt",
+"CM":"CM",
+"Inch":"Inch",
+"block_subtract":"(Slot 1) – (Slot 2)",
+"block_divide":"(Slot 1) / (Slot 2)"
+};
+
 // French translation
 Language.fr = {
   "block_Tri_LED":"Tri-LED (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
@@ -3729,6 +3945,11 @@ Language.pt = {
 "block_divide":"(Slot 1) / (Slot 2)"
 }
 
+//Swedish Translation
+Language.sv = {
+
+};
+
 //Simplified Chinese Translation (zh-Hans)
 Language.zhs = {
   "block_Tri_LED":"三色LED (Slot 1) 红 (Slot 2) % 绿 (Slot 3) % 蓝 (Slot 4) %",
@@ -4710,15 +4931,19 @@ DeviceManager.setStatics = function() {
     DM.batteryCheckInterval = 1000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
-	DM.batteryChecker = self.setInterval(function() {
+
+/*	DM.batteryChecker = self.setInterval(function() {
     		DeviceManager.checkBattery();
-    }, DM.batteryCheckInterval);
+    }, DM.batteryCheckInterval);*/
+
 	/* The maximum number of devices that can be connected at one time */
 	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
 /**
+ * Checks the battery levels on all connected devices and sets the TitleBar battery
+ * icon color to show the state of the worst battery connected.
  * Retrieves the number of devices in this.connectedDevices
  */
 DeviceManager.checkBattery = function() {
@@ -4903,7 +5128,8 @@ DeviceManager.prototype.removeAllDevices = function() {
 };
 
 /**
- * Determines whether the device at the specified exists and is in good communication with the backend
+ * Determines whether the device at the specified index exists and is in good
+ * communication with the backend.
  * @param {number} index
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
@@ -4964,6 +5190,7 @@ DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
 	this.updateSelectableDevices();
 	DeviceManager.updateStatus();
 	CodeManager.updateConnectionStatus();
+  DeviceManager.checkBattery();
 };
 
 /**
@@ -5112,7 +5339,11 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 	}
 };
 
-
+/**
+ * Looks for the specified device and, if found, sets its battery level.
+ * @param {string} deviceId
+ * @param {number} batteryStatus - the robot's battery level.
+ */
 DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
     var index = this.lookupRobotIndexById(deviceId);
     var robot = null;
@@ -5124,6 +5355,11 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
     }
 };
 
+/**
+ * Looks for the specified device and, if found, sets calibration success/failure.
+ * @param {string} deviceId
+ * @param {boolean} success - true if calibration was successful
+ */
 DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, success) {
 	var index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
@@ -5208,10 +5444,17 @@ DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
 	CodeManager.updateConnectionStatus();
 };
 
+/**
+ * Finds the robot with the given robotId and sets its battery status, then
+ * updates the UI to reflect any changes.
+ * @param {string} robotId
+ * @param {number} batteryStatus - the robot's battery level
+ */
 DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
-    DeviceManager.forEach(function(manager) {
+  DeviceManager.forEach(function(manager) {
 		manager.updateRobotBatteryStatus(robotId, batteryStatus);
 	});
+  DeviceManager.checkBattery();
 };
 
 DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
@@ -5725,7 +5968,8 @@ GuiElements.setConstants = function() {
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
-	LevelMenu.setConstants();
+	//LevelMenu.setConstants();
+	LevelDialog.setGlobals();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -6156,21 +6400,22 @@ GuiElements.draw.video = function(videoName, robotId) {
 };
 /**
  * Creates a filled, SVG path element with two rounded corners and the specified
- * dimensions and returns it. Used for FinchBlox category buttons.
+ * dimensions and returns it. Used for FinchBlox category buttons and discover dialog
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles triangle)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
+ * @param {number} r - Corner radius for top left and right corners.
  * @return {Element} - The path which was created.
  */
-GuiElements.draw.tabBN = function(x, y, width, height, color) {
+GuiElements.draw.tab = function(x, y, width, height, color, r) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	var tabBN = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.tabBN(tabBN, x, y, width, height); //Set its path description (points).
-	tabBN.setAttributeNS(null, "fill", color); //Set the fill.
-	return tabBN; //Return the finished button shape.
+	var tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
+	tab.setAttributeNS(null, "fill", color); //Set the fill.
+	return tab; //Return the finished button shape.
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -6410,17 +6655,17 @@ GuiElements.update.makeClickThrough = function(svgE) {
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
+ * @param {number} r - Corner radius for top corners.
  */
-GuiElements.update.tabBN = function(pathE, x, y, width, height) {
-	DebugOptions.validateNumbers(x, y, width, height);
-  var cornerRadius = 8;
+GuiElements.update.tab = function(pathE, x, y, width, height, r) {
+	DebugOptions.validateNumbers(x, y, width, height, r);
 	var path = "";
-	path += "m " + (x + cornerRadius) + "," + y;
-	path += " l " + (width - 2*cornerRadius) + ",0";
-	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + cornerRadius;
-	path += " l 0," + (height - cornerRadius) + " " + (-width) + ",0 0,";
-	path += (cornerRadius - height);
-	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + (0 - cornerRadius);
+	path += "m " + (x + r) + "," + y;
+	path += " l " + (width - 2*r) + ",0";
+	path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+	path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+	path += (r - height);
+	path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
@@ -7361,6 +7606,7 @@ Colors.setCommon = function() {
 	Colors.finchGreen = "#B6E9A9";
 	Colors.fbYellow = "#F1CA07";
 	Colors.fbHighlight = "#ffff00";
+	Colors.fbGray = "#E8E8E8";
 	Colors.levelBN = "#E8E8E8";
 	Colors.fbYellowBorder = "#BD9F0D";
 	Colors.fbBlueBorder = "#097F8A";
@@ -7558,8 +7804,10 @@ Font.prototype.unBold = function(){
  * @return {Font}
  */
 Font.uiFont = function(fontSize){
+	if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };
+
 /**
  * This static class hold objects which encode path information for icons.  Each entry contains information about
  * the width, height and path of the icon.  To add a new icon:
@@ -7582,6 +7830,10 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+	VP.faPlusCircle={};
+	VP.faPlusCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z";
+	VP.faPlusCircle.width=512;
+	VP.faPlusCircle.height=512;
   VP.faArrowDown={};
   VP.faArrowDown.path="M413.1 222.5l22.2 22.2c9.4 9.4 9.4 24.6 0 33.9L241 473c-9.4 9.4-24.6 9.4-33.9 0L12.7 278.6c-9.4-9.4-9.4-24.6 0-33.9l22.2-22.2c9.5-9.5 25-9.3 34.3.4L184 343.4V56c0-13.3 10.7-24 24-24h32c13.3 0 24 10.7 24 24v287.4l114.8-120.5c9.3-9.8 24.8-10 34.3-.4z";
   VP.faArrowDown.width=448;
@@ -9378,7 +9630,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 
 TouchReceiver.touchStartDialogBlock = function(e) {
 	GuiElements.removeVideos();
-	if (SaveManager.fileName == null)  {
+	if (SaveManager.fileName == null && !FinchBlox)  {
 		if (OpenDialog.lastOpenFile != null) {
 			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
 			OpenDialog.lastOpenFile = null;
@@ -10092,15 +10344,37 @@ TitleBar.makeButtons = function() {
 
     TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
     TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-    TB.levelButton.setCallbackFunction(function(){
-      new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
-    },false);
+    //TB.levelButton.setCallbackFunction(function(){
+    //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
+    //},false);
+		TB.levelButton.setCallbackFunction(function() {(new LevelDialog()).show();}, true);
 
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
-    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.finchGreen, r, r);
+    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
     TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
     TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
-    TB.finchButton.setCallbackFunction(function(){(new DiscoverDialog(DeviceFinch)).show();}, false);
+    TB.finchButton.setCallbackFunction(function(){
+			switch (DeviceManager.getStatus()){
+				case DeviceManager.statuses.noDevices:
+					(new DiscoverDialog(DeviceFinch)).show();
+					break;
+				case DeviceManager.statuses.connected:
+					DeviceManager.removeAllDevices();
+					break;
+				default:
+					DeviceManager.removeAllDevices();
+					(new DiscoverDialog(DeviceFinch)).show();
+			}
+		}, true);
+		TB.updateStatus = function(status) {
+			var color = Colors.fbGray;
+			if (status === DeviceManager.statuses.connected) {
+				color = Colors.finchGreen;
+			}
+			GuiElements.update.color(TitleBar.finchButton.bgRect, color);
+		}
+		DeviceManager.setStatusListener(TB.updateStatus);
+
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
     TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
@@ -10257,16 +10531,17 @@ TitleBar.updateZoomPart1 = function() {
  */
 TitleBar.updateZoomPart2 = function() {
 	var TB = TitleBar;
-	if (!FinchBlox) {var viewShowing = TB.viewBn.toggled;}
+	var viewShowing = false;
+	if (!FinchBlox) { viewShowing = TB.viewBn.toggled; }
 	TB.setGraphicsPart2();
   if (FinchBlox) {
      GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.buttonMargin);
+		 TB.updateShapePath();
   } else {
 	   GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
   }
-  TB.updateShapePath();
-	TitleBar.removeButtons();
-	TitleBar.makeButtons();
+	TB.removeButtons();
+	TB.makeButtons();
 	if (!FinchBlox && viewShowing) {
 		// This menu must stay open even while resizing
 		TB.viewBn.press();
@@ -10647,7 +10922,8 @@ BlockPalette.setLevel = function() {
   BlockPalette.categories.forEach(function(category) {
 		category.button.setHidden();
 	})
-  switch (LevelMenu.currentLevel){
+//  switch (LevelMenu.currentLevel){
+	switch(LevelDialog.currentLevel){
     case 1:
       BlockPalette.getCategory("motion_1").select();
       break;
@@ -10953,6 +11229,7 @@ CategoryBN.setGraphics = function() {
 		CBN.vMargin = 15;
 		CBN.labelX = CBN.colorW + CBN.labelLMargin;
 		CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+		CBN.cornerRadius = 8;
 	} else {
 		CBN.hMargin = BP.catHMargin;
 		CBN.height = 30;
@@ -10973,7 +11250,7 @@ CategoryBN.prototype.buildGraphics = function() {
 	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
 	if (FinchBlox){
 		//this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, this.fill);
-		this.bgRect = GuiElements.draw.tabBN(0, 0, CBN.width, CBN.height, this.fill);
+		this.bgRect = GuiElements.draw.tab(0, 0, CBN.width, CBN.height, this.fill, CBN.cornerRadius);
 	} else {
 		this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
 	}
@@ -11006,7 +11283,7 @@ CategoryBN.prototype.select = function() {
 	if (FinchBlox){
 		var pop = CategoryBN.height - CategoryBN.selectedH;
 		GuiElements.move.group(this.group, this.x, this.y + pop);
-		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH);
+		GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH, CategoryBN.cornerRadius);
 
 		BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
 
@@ -11028,7 +11305,7 @@ CategoryBN.prototype.select = function() {
 CategoryBN.prototype.deselect = function() {
 	if (FinchBlox) {
 		GuiElements.move.group(this.group, this.x, this.y);
-		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height);
+		GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height, CategoryBN.cornerRadius);
 
 		var iconPath = VectorPaths.categoryIcons[this.catId];
 		var iconH = CategoryBN.height * CategoryBN.iconScale;
@@ -11059,9 +11336,11 @@ CategoryBN.prototype.addListeners = function() {
  */
  CategoryBN.prototype.setHidden = function() {
 	 var level = this.category.level;
-	 if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+	 //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+	 if (level != LevelDialog.currentLevel && this.group.parentNode != null) {
 		 this.group.parentNode.removeChild(this.group);
-	 } else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+	 //} else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+	 } else if (level == LevelDialog.currentLevel && this.group.parentNode == null) {
 		 GuiElements.layers.categories.appendChild(this.group);
 	 }
  };
@@ -12253,6 +12532,38 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
 	this.icon = new VectorIcon(iconX, iconY, pathId, iconColor, iconHeight, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
+
+/**
+ * Adds the device info formatted for FinchBlox
+ * @param device
+ */
+Button.prototype.addDeviceInfo = function(device) {
+	var color = Colors.flagGreen;
+  var font = Button.defaultFont;
+	var pathId = VectorPaths.faPlusCircle;
+	var iconH = this.height*0.6;
+	var iconW = VectorIcon.computeWidth(pathId, iconH);
+	var margin = (this.height - iconH) / 2;
+	var iconX = this.width - iconW - margin;
+	var iconY = margin;
+	var textY = (this.height + font.charHeight) / 2;
+	var textX = textY;
+	this.removeContent();
+
+	this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+	this.group.appendChild(this.textE);
+	//var shortW = GuiElements.measure.textWidth(this.textE);
+
+	var text2X = 3*this.height;
+	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, Colors.black);
+	this.group.appendChild(this.textE2);
+
+	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
+
+	TouchReceiver.addListenersBN(this.textE, this);
+	TouchReceiver.addListenersBN(this.textE2, this);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+}
 
 /**
  * Adds an image to the button.  Use of images is discouraged since they can take time to load.  No images are used
@@ -15971,68 +16282,6 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
 };
 
 /**
- * Menu for changing difficulty level in FinchBlox. Since this menu appears as
- * a BubbleOverlay, it is not a direct subclass of Menu.
- */
-function LevelMenu(x, y){
-  this.x = x;
-  this.y = y;
-  this.open();
-};
-
-LevelMenu.setConstants = function() {
-	var LM = LevelMenu;
-	LM.bnMargin = Button.defaultMargin;
-	LM.bgColor = Colors.lightLightGray;
-
-  LM.currentLevel = 1;
-};
-
-LevelMenu.prototype.open = function() {
-  var LM = LevelMenu;
-  this.group = GuiElements.create.group(0, 0);
-
-	var layer = GuiElements.layers.inputPad;
-	var overlayType = Overlay.types.inputPad;
-	this.bubbleOverlay = new BubbleOverlay(overlayType, LM.bgColor, LM.bnMargin, this.group, this, layer);
-	this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
-	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
-	this.addOptions();
-	var height = this.menuBnList.previewHeight();
-	var width = this.menuBnList.previewWidth();
-	this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
-	this.menuBnList.show();
-};
-
-LevelMenu.prototype.addOptions = function() {
-  var f = function(level, menu) {
-    LevelMenu.setLevel(level);
-    menu.close();
-  }
-
-  this.menuBnList.addOption("1", function(){ f(1, this); }.bind(this));
-
-  this.menuBnList.addOption("2", function(){ f(2, this); }.bind(this));
-
-  this.menuBnList.addOption("3", function(){ f(3, this); }.bind(this));
-};
-
-LevelMenu.setLevel = function(level) {
-  var LM = LevelMenu;
-  if (LM.currentLevel != level) {
-    LM.currentLevel = level;
-    BlockPalette.setLevel();
-    TabManager.activeTab.clear();
-    TitleBar.levelButton.addText(level, Font.uiFont(24).bold(), Colors.bbtDarkGray);
-  }
-}
-
-LevelMenu.prototype.close = function() {
-	this.bubbleOverlay.hide();
-	this.menuBnList.hide();
-};
-
-/**
  * A menu that appears when a Block is long pressed. Provides options to delete or duplicate the block.
  * Also used to give a rename option to variables and lists
  *
@@ -18383,16 +18632,17 @@ RecordingManager.permissionGranted = function() {
  * The constructor does not draw anything, rather show() must be called.  Calling hide() then show() is used to reload
  * the dialog.  When show() is called, createRow is automatically called to generate each row, which must be implemented
  * by the subclass
- * @param {boolean} autoHeight - Whether the dialog should get taller as number of row increase. Discouraged for
+ * @param {boolean} autoHeight - Whether the dialog should get taller as number of rows increase. Discouraged for
  *                               dialogs that reload frequently
  * @param {string} title - The test to display in the title bar
  * @param {number} rowCount - The number of row to load. Determines how many times createRow is called
  * @param {number} extraTop - The amount of additional space to put between the title bar and the rows (for extra ui)
  * @param {number} extraBottom - The amount of extra space to put below the rows
  * @param {number} [extendTitleBar=0] - The amount the title bar's background should be extended
+ * @param {boolean} noTitleBar - Set to true for a dialog that does not have a title bar.
  * @constructor
  */
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar, noTitleBar) {
 	if (extendTitleBar == null) {
 		extendTitleBar = 0;
 	}
@@ -18409,27 +18659,52 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTit
 	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
 	this.hintText = "";
 	this.visible = false;
+
+	this.hasTitleBar = true;
+	if (noTitleBar) { this.hasTitleBar = false; }
 }
 
 RowDialog.setConstants = function() {
 	//TODO: This really should be in a separate "setStatics" function, since it isn't a constant
 	RowDialog.currentDialog = null;
 
-	RowDialog.titleBarColor = Colors.lightGray;
+	if (FinchBlox){
+		RowDialog.titleBarColor = Colors.finchGreen;
+		RowDialog.bgColor = Colors.white;
+		RowDialog.bnMargin = 0;
+		RowDialog.cornerR = 5;
+		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+		RowDialog.titleBarH = RowDialog.bnHeight*2;
+		RowDialog.outlineColor = Colors.flagGreen;
+	} else {
+		RowDialog.titleBarColor = Colors.lightGray;
+		RowDialog.bgColor = Colors.lightLightGray;
+		RowDialog.bnMargin = 5;
+		RowDialog.cornerR = 0;
+		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+		RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+	}
 	RowDialog.titleBarFontC = Colors.white;
-	RowDialog.bgColor = Colors.lightLightGray;
 	RowDialog.centeredBnWidth = 100;
-	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
-	RowDialog.bnMargin = 5;
-	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+
 
 	// The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-	RowDialog.widthRatio = 0.7;
-	RowDialog.heightRatio = 0.75;
+	if (FinchBlox) {
+		RowDialog.widthRatio = 0.7;
+		RowDialog.heightRatio = 0.2;
+	} else {
+		RowDialog.widthRatio = 0.7;
+		RowDialog.heightRatio = 0.75;
+	}
 
 	// But if that is too small, it uses the min dimensions
-	RowDialog.minWidth = 400;
-	RowDialog.minHeight = 400;
+	if (FinchBlox) {
+		RowDialog.minWidth = 400;
+		RowDialog.minHeight = 200;
+	} else {
+		RowDialog.minWidth = 400;
+		RowDialog.minHeight = 400;
+	}
 
 	RowDialog.hintMargin = 5;
 	RowDialog.titleBarFont = Font.uiFont(16).bold();
@@ -18469,8 +18744,15 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-		this.titleRect = this.createTitleRect();
-		this.titleText = this.createTitleLabel(this.title);
+
+		if (this.hasTitleBar) {
+			this.titleRect = this.createTitleRect();
+			if (FinchBlox){
+				this.icon = this.createTitleIcon(VectorPaths.language);
+			} else {
+				this.titleText = this.createTitleLabel(this.title);
+			}
+		}
 
 		// All the rows go in this group, which is scrollable
 		this.rowGroup = this.createContent();
@@ -18492,8 +18774,9 @@ RowDialog.prototype.show = function() {
 RowDialog.prototype.calcHeights = function() {
 	var RD = RowDialog;
 	var centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
-	var nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
+	var nonScrollHeight = centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+	if (this.hasTitleBar) { nonScrollHeight += RD.titleBarH; }
 	var shorterDim = Math.min(GuiElements.height, GuiElements.width);
 	var minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
 	var ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
@@ -18503,8 +18786,13 @@ RowDialog.prototype.calcHeights = function() {
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
-	this.extraTopY = RD.titleBarH;
+	if (this.hasTitleBar){
+		this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+		this.extraTopY = RD.titleBarH;
+	} else {
+		this.scrollBoxY = RD.bnMargin + this.extraTopSpace;
+		this.extraTopY = 0;
+	}
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 
@@ -18526,7 +18814,8 @@ RowDialog.prototype.calcWidths = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.drawBackground = function() {
-	var rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
+	var RD = RowDialog;
+	var rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -18537,7 +18826,13 @@ RowDialog.prototype.drawBackground = function() {
  */
 RowDialog.prototype.createTitleRect = function() {
 	var RD = RowDialog;
-	var rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+	var rect;
+	if (FinchBlox) {
+		rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
+		GuiElements.update.stroke(rect, RD.outlineColor, 2);
+	} else {
+		rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+	}
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -18555,6 +18850,22 @@ RowDialog.prototype.createTitleLabel = function(title) {
 	GuiElements.move.text(textE, x, y);
 	this.group.appendChild(textE);
 	return textE;
+};
+
+/**
+ * Draws the title icon
+ * @param {object} pathId - Entry from VectorPaths
+ * @return {Element} - The SVG element
+ */
+RowDialog.prototype.createTitleIcon = function(pathId) {
+	var RD = RowDialog;
+
+	var iconH = RD.titleBarH * 0.75;
+	var iconW = VectorIcon.computeWidth(pathId, iconH);
+	var iconX = (this.width - iconW) / 2;
+	var iconY = (RD.titleBarH - iconH) / 2;
+
+	return new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
 };
 
 /**
@@ -20490,11 +20801,16 @@ RobotConnectionList.prototype.relToAbsY = function(y) {
  */
 function DiscoverDialog(deviceClass) {
 	var DD = DiscoverDialog;
-	var title = Language.getStr("Connect_Device");
-	RowDialog.call(this, false, title, 0, 0, 0);
-	this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
-	this.addHintText(deviceClass.getConnectionInstructions());
+
+	if (FinchBlox) {
+		RowDialog.call(this, false, null, 0, 0, 0);
+	} else {
+		var title = Language.getStr("Connect_Device");
+		RowDialog.call(this, false, title, 0, 0, 0);
+		this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+		this.addHintText(deviceClass.getConnectionInstructions());
+	}
 
 	/** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
 	this.discoveredDevices = [];
@@ -20584,9 +20900,23 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
+
+	var color = Button.bg;
+	if (FinchBlox) {
+		if (index % 2 == 0) {
+			color = Colors.white;
+		} else {
+			color = Colors.fbGray;
+		}
+	}
+
 	// TODO: use RowDialog.createMainBnWithText instead
-	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	button.addText(this.discoveredDevices[index].listLabel)
+	var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color);
+	if (FinchBlox) {
+		button.addDeviceInfo(this.discoveredDevices[index]);
+	} else {
+		button.addText(this.discoveredDevices[index].listLabel);
+	}
 	var me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
@@ -20793,6 +21123,79 @@ CalibrateCompassDialog.showVideo = function(robot) {
 
   var video = GuiElements.draw.video(fileName, robot.id);
 };
+
+/**
+ * A dialog for changing the difficulty level. Used in FinchBlox.
+ */
+function LevelDialog() {
+  RowDialog.call(this, true, null, 5, 0, 0, 0, true);
+
+  this.buttons = [];
+}
+LevelDialog.prototype = Object.create(RowDialog.prototype);
+LevelDialog.prototype.constructor = LevelDialog;
+
+LevelDialog.setGlobals = function() {
+  var LD = LevelDialog;
+  LD.color = Colors.seance;
+  LD.strokeW = 2;
+  LD.bnR = 10;
+
+  LD.totalLevels = 3;
+  LD.currentLevel = 1;
+}
+
+LevelDialog.prototype.createContent = function() {
+  var LD = LevelDialog;
+  var rowGroup = GuiElements.create.group(0, 0);
+
+  var margin = this.width/16;
+  var bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
+
+  var y = margin;
+  var x = margin;
+
+  for (var i = 1; i <= LD.totalLevels; i++) {
+    var button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
+    GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
+    button.addText(i, Font.uiFont(100).bold(), LD.color);
+    button.setCallbackFunction(function(){LevelDialog.setLevel(i);}, false);
+    button.setCallbackFunction(function(){RowDialog.currentDialog.closeDialog();}, true);
+
+    this.buttons.push(button);
+    x+= bnDim + 1.5*margin;
+  }
+
+  this.highlightSelected();
+
+  return rowGroup;
+}
+
+LevelDialog.setLevel = function(level) {
+  var LD = LevelDialog;
+  if (LD.currentLevel != level) {
+    LD.currentLevel = level;
+    BlockPalette.setLevel();
+    TabManager.activeTab.clear();
+    TitleBar.levelButton.addText(level, Font.uiFont(24).bold(), Colors.bbtDarkGray);
+  }
+  RowDialog.currentDialog.highlightSelected();
+}
+
+LevelDialog.prototype.highlightSelected = function() {
+  var LD = LevelDialog;
+  for (var i = 0; i < LD.totalLevels; i++){
+    var bn = this.buttons[i];
+    if (LD.currentLevel == i + 1){
+      GuiElements.update.color(bn.bgRect, LD.color);
+      GuiElements.update.color(bn.textE, Colors.white);
+    } else {
+      GuiElements.update.color(bn.bgRect, Colors.white);
+      GuiElements.update.color(bn.textE, LD.color);
+    }
+  }
+
+}
 
 /**
  * A set of four arrows around the edges of the canvas that show off screen Blocks
@@ -29818,8 +30221,19 @@ B_FinchTurn.prototype.startAction = function() {
 	var speed = this.slots[2].getData().getValue();
 	var angle = this.slots[3].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, speed, 0, speed, 0);
-	return new ExecutionStatusRunning();
+	//TODO: change to convert from angle to distance
+	var distance = angle;
+
+	if (direction == "right") {
+		device.setMotor(this.runMem.requestStatus, speed, distance, -speed, distance);
+		return new ExecutionStatusRunning();
+	} else if (direction == "left") {
+		device.setMotor(this.runMem.requestStatus, -speed, distance, speed, distance);
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusError();
+	}
+
 };
 
 function B_FinchMotors(x, y) {
@@ -30431,8 +30845,8 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusRunning(); // Still running
   }
 }
-B_FBMotion.prototype.addL2Button = function(direction, defaultValue) {
-  switch (direction) {
+B_FBMotion.prototype.addL2Button = function(defaultValue) {
+  switch (this.direction) {
     case "forward":
       this.leftSpeed = 50;
       this.rightSpeed = 50;
@@ -30453,26 +30867,57 @@ B_FBMotion.prototype.addL2Button = function(direction, defaultValue) {
       break;
     case "right":
       this.leftSpeed = 50;
-      this.rightSpeed = 0;
+      this.rightSpeed = -50;
       this.leftDist = 10;
-      this.rightDist = 0;
-      this.angleBN = new BlockButton(this, defaultValue);
-      this.angleBN.addSlider();
-      this.addPart(this.angleBN);
-      break;
-    case "left":
-      this.leftSpeed = 0;
-      this.rightSpeed = 50;
-      this.leftDist = 0;
       this.rightDist = 10;
       this.angleBN = new BlockButton(this, defaultValue);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
+    case "left":
+      this.leftSpeed = -50;
+      this.rightSpeed = 50;
+      this.leftDist = 10;
+      this.rightDist = 10;
+      this.angleBN = new BlockButton(this, defaultValue);
+      this.angleBN.addSlider();
+      this.addPart(this.angleBN);
+      break;
+    default:
+      GuiElements.alert("unknown direction in motion block add l2 bn");
     }
 }
 B_FBMotion.prototype.updateValues = function () {
+  if (this.distanceBN != null) {
+    this.leftDist = this.distanceBN.value;
+    this.rightDist = this.distanceBN.value;
+  }
+  if (this.angleBN != null) {
 
+  }
+  if (this.speedBN != null) {
+    switch (this.direction) {
+      case "forward":
+        this.leftSpeed = this.speedBN.value;
+        this.rightSpeed = this.speedBN.value;
+        break;
+      case "backward":
+        this.leftSpeed = -this.speedBN.value;
+        this.rightSpeed = -this.speedBN.value;
+        break;
+      case "right":
+        this.leftSpeed = this.speedBN.value;
+        this.rightSpeed = -this.speedBN.value;
+        break;
+      case "left":
+        this.leftSpeed = -this.speedBN.value;
+        this.rightSpeed = this.speedBN.value;
+        break;
+      default:
+        GuiElements.alert("unknown direction in motion block update values");
+    }
+  }
+  console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
 
 function B_FBForward(x, y) {
@@ -30499,18 +30944,18 @@ function B_FBRight(x, y) {
   B_FBMotion.call(this, x, y, "right", 1);
 
   this.leftSpeed = 50;
-  this.rightSpeed = 0;
+  this.rightSpeed = -50;
   this.leftDist = 10;
-  this.rightDist = 0;
+  this.rightDist = 10;
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
 function B_FBLeft(x, y) {
   B_FBMotion.call(this, x, y, "left", 1);
 
-  this.leftSpeed = 0;
+  this.leftSpeed = -50;
   this.rightSpeed = 50;
-  this.leftDist = 0;
+  this.leftDist = 10;
   this.rightDist = 10;
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
@@ -30520,7 +30965,7 @@ B_FBLeft.prototype.constructor = B_FBLeft;
 function B_FBMotionL2(x, y, direction, defaultValue){
   B_FBMotion.call(this, x, y, direction, 2);
 
-  this.addL2Button(direction, defaultValue);
+  this.addL2Button(defaultValue);
 }
 B_FBMotionL2.prototype = Object.create(B_FBMotion.prototype);
 B_FBMotionL2.prototype.constructor = B_FBMotionL2;
@@ -30550,7 +30995,7 @@ B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
   B_FBMotion.call(this, x, y, direction, 3);
 
-  this.addL2Button(direction, defaultValue);
+  this.addL2Button(defaultValue);
 
   this.speedBN = new BlockButton(this, defaultSpeed);
   this.speedBN.addSlider();

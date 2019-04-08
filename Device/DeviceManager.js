@@ -48,15 +48,19 @@ DeviceManager.setStatics = function() {
     DM.batteryCheckInterval = 1000;
 	/* Stores a function that is called every time the totalStatus changes */
 	DM.statusListener = null;
-	DM.batteryChecker = self.setInterval(function() {
+
+/*	DM.batteryChecker = self.setInterval(function() {
     		DeviceManager.checkBattery();
-    }, DM.batteryCheckInterval);
+    }, DM.batteryCheckInterval);*/
+
 	/* The maximum number of devices that can be connected at one time */
 	DM.maxDevices = 4;
 };
 DeviceManager.setStatics();
 
 /**
+ * Checks the battery levels on all connected devices and sets the TitleBar battery
+ * icon color to show the state of the worst battery connected.
  * Retrieves the number of devices in this.connectedDevices
  */
 DeviceManager.checkBattery = function() {
@@ -241,7 +245,8 @@ DeviceManager.prototype.removeAllDevices = function() {
 };
 
 /**
- * Determines whether the device at the specified exists and is in good communication with the backend
+ * Determines whether the device at the specified index exists and is in good
+ * communication with the backend.
  * @param {number} index
  * @return {boolean} - true iff the index is valid and the device has usable firmware and is connected
  */
@@ -302,6 +307,7 @@ DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
 	this.updateSelectableDevices();
 	DeviceManager.updateStatus();
 	CodeManager.updateConnectionStatus();
+  DeviceManager.checkBattery();
 };
 
 /**
@@ -450,7 +456,11 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
 	}
 };
 
-
+/**
+ * Looks for the specified device and, if found, sets its battery level.
+ * @param {string} deviceId
+ * @param {number} batteryStatus - the robot's battery level.
+ */
 DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batteryStatus) {
     const index = this.lookupRobotIndexById(deviceId);
     let robot = null;
@@ -462,6 +472,11 @@ DeviceManager.prototype.updateRobotBatteryStatus = function(deviceId, batterySta
     }
 };
 
+/**
+ * Looks for the specified device and, if found, sets calibration success/failure.
+ * @param {string} deviceId
+ * @param {boolean} success - true if calibration was successful
+ */
 DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, success) {
 	const index = this.lookupRobotIndexById(robotId);
 	if (index >= 0) {
@@ -546,10 +561,17 @@ DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
 	CodeManager.updateConnectionStatus();
 };
 
+/**
+ * Finds the robot with the given robotId and sets its battery status, then
+ * updates the UI to reflect any changes.
+ * @param {string} robotId
+ * @param {number} batteryStatus - the robot's battery level
+ */
 DeviceManager.updateRobotBatteryStatus = function(robotId, batteryStatus) {
-    DeviceManager.forEach(function(manager) {
+  DeviceManager.forEach(function(manager) {
 		manager.updateRobotBatteryStatus(robotId, batteryStatus);
 	});
+  DeviceManager.checkBattery();
 };
 
 DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {

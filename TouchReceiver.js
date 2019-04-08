@@ -415,7 +415,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 
 TouchReceiver.touchStartDialogBlock = function(e) {
 	GuiElements.removeVideos();
-	if (SaveManager.fileName == null)  {
+	if (SaveManager.fileName == null && !FinchBlox)  {
 		if (OpenDialog.lastOpenFile != null) {
 			SaveManager.userOpenFile(OpenDialog.lastOpenFile);
 			OpenDialog.lastOpenFile = null;

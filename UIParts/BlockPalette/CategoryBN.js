@@ -38,6 +38,7 @@ CategoryBN.setGraphics = function() {
 		CBN.vMargin = 15;
 		CBN.labelX = CBN.colorW + CBN.labelLMargin;
 		CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
+		CBN.cornerRadius = 8;
 	} else {
 		CBN.hMargin = BP.catHMargin;
 		CBN.height = 30;
@@ -58,7 +59,7 @@ CategoryBN.prototype.buildGraphics = function() {
 	this.group = GuiElements.create.group(this.x, this.y, GuiElements.layers.categories);
 	if (FinchBlox){
 		//this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, this.fill);
-		this.bgRect = GuiElements.draw.tabBN(0, 0, CBN.width, CBN.height, this.fill);
+		this.bgRect = GuiElements.draw.tab(0, 0, CBN.width, CBN.height, this.fill, CBN.cornerRadius);
 	} else {
 		this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
 	}
@@ -91,7 +92,7 @@ CategoryBN.prototype.select = function() {
 	if (FinchBlox){
 		let pop = CategoryBN.height - CategoryBN.selectedH;
 		GuiElements.move.group(this.group, this.x, this.y + pop);
-		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH);
+		GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH, CategoryBN.cornerRadius);
 
 		BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
 
@@ -113,7 +114,7 @@ CategoryBN.prototype.select = function() {
 CategoryBN.prototype.deselect = function() {
 	if (FinchBlox) {
 		GuiElements.move.group(this.group, this.x, this.y);
-		GuiElements.update.tabBN(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height);
+		GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height, CategoryBN.cornerRadius);
 
 		let iconPath = VectorPaths.categoryIcons[this.catId];
 		let iconH = CategoryBN.height * CategoryBN.iconScale;
@@ -144,9 +145,11 @@ CategoryBN.prototype.addListeners = function() {
  */
  CategoryBN.prototype.setHidden = function() {
 	 const level = this.category.level;
-	 if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+	 //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
+	 if (level != LevelDialog.currentLevel && this.group.parentNode != null) {
 		 this.group.parentNode.removeChild(this.group);
-	 } else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+	 //} else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
+	 } else if (level == LevelDialog.currentLevel && this.group.parentNode == null) {
 		 GuiElements.layers.categories.appendChild(this.group);
 	 }
  };

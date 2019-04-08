@@ -1,0 +1,4 @@
+//Swedish Translation
+Language.sv = {
+
+};

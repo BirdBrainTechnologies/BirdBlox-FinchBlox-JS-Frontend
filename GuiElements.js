@@ -155,7 +155,8 @@ GuiElements.setConstants = function() {
 	RowDialog.setConstants();
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
-	LevelMenu.setConstants();
+	//LevelMenu.setConstants();
+	LevelDialog.setGlobals();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -586,21 +587,22 @@ GuiElements.draw.video = function(videoName, robotId) {
 };
 /**
  * Creates a filled, SVG path element with two rounded corners and the specified
- * dimensions and returns it. Used for FinchBlox category buttons.
+ * dimensions and returns it. Used for FinchBlox category buttons and discover dialog
  * @param {number} x - The path's x coord.
  * @param {number} y - The path's y coord.
  * @param {number} width - The path's width. (it is an isosceles triangle)
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
+ * @param {number} r - Corner radius for top left and right corners.
  * @return {Element} - The path which was created.
  */
-GuiElements.draw.tabBN = function(x, y, width, height, color) {
+GuiElements.draw.tab = function(x, y, width, height, color, r) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
-	const tabBN = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.tabBN(tabBN, x, y, width, height); //Set its path description (points).
-	tabBN.setAttributeNS(null, "fill", color); //Set the fill.
-	return tabBN; //Return the finished button shape.
+	const tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
+	tab.setAttributeNS(null, "fill", color); //Set the fill.
+	return tab; //Return the finished button shape.
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -840,17 +842,17 @@ GuiElements.update.makeClickThrough = function(svgE) {
  * @param {number} y - The path's new y coord.
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
+ * @param {number} r - Corner radius for top corners.
  */
-GuiElements.update.tabBN = function(pathE, x, y, width, height) {
-	DebugOptions.validateNumbers(x, y, width, height);
-  const cornerRadius = 8;
+GuiElements.update.tab = function(pathE, x, y, width, height, r) {
+	DebugOptions.validateNumbers(x, y, width, height, r);
 	let path = "";
-	path += "m " + (x + cornerRadius) + "," + y;
-	path += " l " + (width - 2*cornerRadius) + ",0";
-	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + cornerRadius;
-	path += " l 0," + (height - cornerRadius) + " " + (-width) + ",0 0,";
-	path += (cornerRadius - height);
-	path += " a " + cornerRadius + " " + cornerRadius + " 0 0 1 " + cornerRadius + " " + (0 - cornerRadius);
+	path += "m " + (x + r) + "," + y;
+	path += " l " + (width - 2*r) + ",0";
+	path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+	path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+	path += (r - height);
+	path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };

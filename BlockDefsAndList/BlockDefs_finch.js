@@ -106,8 +106,19 @@ B_FinchTurn.prototype.startAction = function() {
 	let speed = this.slots[2].getData().getValue();
 	let angle = this.slots[3].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, speed, 0, speed, 0);
-	return new ExecutionStatusRunning();
+	//TODO: change to convert from angle to distance
+	let distance = angle;
+
+	if (direction == "right") {
+		device.setMotor(this.runMem.requestStatus, speed, distance, -speed, distance);
+		return new ExecutionStatusRunning();
+	} else if (direction == "left") {
+		device.setMotor(this.runMem.requestStatus, -speed, distance, speed, distance);
+		return new ExecutionStatusRunning();
+	} else {
+		return new ExecutionStatusError();
+	}
+
 };
 
 function B_FinchMotors(x, y) {

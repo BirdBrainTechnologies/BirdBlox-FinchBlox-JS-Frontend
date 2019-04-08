@@ -23,7 +23,8 @@ UndoManager.setUndoButton = function(button) {
 };
 
 /**
- * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger than the limit, the last item it removed.
+ * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger
+ * than the limit, the last item is removed.
  * @param stack
  */
 UndoManager.deleteStack = function(stack) {
@@ -36,6 +37,14 @@ UndoManager.deleteStack = function(stack) {
 		UM.undoStack.shift();
 	}
 	UM.updateButtonEnabled();
+
+	if(FinchBlox){
+		if(LevelDialog.currentLevel != 3){
+			if(stack.firstBlock.isStartBlock){
+				TabManager.activeTab.addStartBlock();
+			}
+		}
+	}
 };
 
 /**

@@ -57,8 +57,8 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusRunning(); // Still running
   }
 }
-B_FBMotion.prototype.addL2Button = function(direction, defaultValue) {
-  switch (direction) {
+B_FBMotion.prototype.addL2Button = function(defaultValue) {
+  switch (this.direction) {
     case "forward":
       this.leftSpeed = 50;
       this.rightSpeed = 50;
@@ -79,26 +79,57 @@ B_FBMotion.prototype.addL2Button = function(direction, defaultValue) {
       break;
     case "right":
       this.leftSpeed = 50;
-      this.rightSpeed = 0;
+      this.rightSpeed = -50;
       this.leftDist = 10;
-      this.rightDist = 0;
-      this.angleBN = new BlockButton(this, defaultValue);
-      this.angleBN.addSlider();
-      this.addPart(this.angleBN);
-      break;
-    case "left":
-      this.leftSpeed = 0;
-      this.rightSpeed = 50;
-      this.leftDist = 0;
       this.rightDist = 10;
       this.angleBN = new BlockButton(this, defaultValue);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
+    case "left":
+      this.leftSpeed = -50;
+      this.rightSpeed = 50;
+      this.leftDist = 10;
+      this.rightDist = 10;
+      this.angleBN = new BlockButton(this, defaultValue);
+      this.angleBN.addSlider();
+      this.addPart(this.angleBN);
+      break;
+    default:
+      GuiElements.alert("unknown direction in motion block add l2 bn");
     }
 }
 B_FBMotion.prototype.updateValues = function () {
+  if (this.distanceBN != null) {
+    this.leftDist = this.distanceBN.value;
+    this.rightDist = this.distanceBN.value;
+  }
+  if (this.angleBN != null) {
 
+  }
+  if (this.speedBN != null) {
+    switch (this.direction) {
+      case "forward":
+        this.leftSpeed = this.speedBN.value;
+        this.rightSpeed = this.speedBN.value;
+        break;
+      case "backward":
+        this.leftSpeed = -this.speedBN.value;
+        this.rightSpeed = -this.speedBN.value;
+        break;
+      case "right":
+        this.leftSpeed = this.speedBN.value;
+        this.rightSpeed = -this.speedBN.value;
+        break;
+      case "left":
+        this.leftSpeed = -this.speedBN.value;
+        this.rightSpeed = this.speedBN.value;
+        break;
+      default:
+        GuiElements.alert("unknown direction in motion block update values");
+    }
+  }
+  console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
 
 function B_FBForward(x, y) {
@@ -125,18 +156,18 @@ function B_FBRight(x, y) {
   B_FBMotion.call(this, x, y, "right", 1);
 
   this.leftSpeed = 50;
-  this.rightSpeed = 0;
+  this.rightSpeed = -50;
   this.leftDist = 10;
-  this.rightDist = 0;
+  this.rightDist = 10;
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
 function B_FBLeft(x, y) {
   B_FBMotion.call(this, x, y, "left", 1);
 
-  this.leftSpeed = 0;
+  this.leftSpeed = -50;
   this.rightSpeed = 50;
-  this.leftDist = 0;
+  this.leftDist = 10;
   this.rightDist = 10;
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
@@ -146,7 +177,7 @@ B_FBLeft.prototype.constructor = B_FBLeft;
 function B_FBMotionL2(x, y, direction, defaultValue){
   B_FBMotion.call(this, x, y, direction, 2);
 
-  this.addL2Button(direction, defaultValue);
+  this.addL2Button(defaultValue);
 }
 B_FBMotionL2.prototype = Object.create(B_FBMotion.prototype);
 B_FBMotionL2.prototype.constructor = B_FBMotionL2;
@@ -176,7 +207,7 @@ B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
   B_FBMotion.call(this, x, y, direction, 3);
 
-  this.addL2Button(direction, defaultValue);
+  this.addL2Button(defaultValue);
 
   this.speedBN = new BlockButton(this, defaultSpeed);
   this.speedBN.addSlider();

@@ -210,15 +210,37 @@ TitleBar.makeButtons = function() {
 
     TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
     TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-    TB.levelButton.setCallbackFunction(function(){
-      new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
-    },false);
+    //TB.levelButton.setCallbackFunction(function(){
+    //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
+    //},false);
+		TB.levelButton.setCallbackFunction(function() {(new LevelDialog()).show();}, true);
 
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
-    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.finchGreen, r, r);
+    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
     TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
     TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
-    TB.finchButton.setCallbackFunction(function(){(new DiscoverDialog(DeviceFinch)).show();}, false);
+    TB.finchButton.setCallbackFunction(function(){
+			switch (DeviceManager.getStatus()){
+				case DeviceManager.statuses.noDevices:
+					(new DiscoverDialog(DeviceFinch)).show();
+					break;
+				case DeviceManager.statuses.connected:
+					DeviceManager.removeAllDevices();
+					break;
+				default:
+					DeviceManager.removeAllDevices();
+					(new DiscoverDialog(DeviceFinch)).show();
+			}
+		}, true);
+		TB.updateStatus = function(status) {
+			let color = Colors.fbGray;
+			if (status === DeviceManager.statuses.connected) {
+				color = Colors.finchGreen;
+			}
+			GuiElements.update.color(TitleBar.finchButton.bgRect, color);
+		}
+		DeviceManager.setStatusListener(TB.updateStatus);
+
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
     TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
@@ -375,16 +397,17 @@ TitleBar.updateZoomPart1 = function() {
  */
 TitleBar.updateZoomPart2 = function() {
 	let TB = TitleBar;
-	if (!FinchBlox) {let viewShowing = TB.viewBn.toggled;}
+	var viewShowing = false;
+	if (!FinchBlox) { viewShowing = TB.viewBn.toggled; }
 	TB.setGraphicsPart2();
   if (FinchBlox) {
      GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.buttonMargin);
+		 TB.updateShapePath();
   } else {
 	   GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
   }
-  TB.updateShapePath();
-	TitleBar.removeButtons();
-	TitleBar.makeButtons();
+	TB.removeButtons();
+	TB.makeButtons();
 	if (!FinchBlox && viewShowing) {
 		// This menu must stay open even while resizing
 		TB.viewBn.press();

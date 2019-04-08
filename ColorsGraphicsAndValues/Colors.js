@@ -51,6 +51,7 @@ Colors.setCommon = function() {
 	Colors.finchGreen = "#B6E9A9";
 	Colors.fbYellow = "#F1CA07";
 	Colors.fbHighlight = "#ffff00";
+	Colors.fbGray = "#E8E8E8";
 	Colors.levelBN = "#E8E8E8";
 	Colors.fbYellowBorder = "#BD9F0D";
 	Colors.fbBlueBorder = "#097F8A";

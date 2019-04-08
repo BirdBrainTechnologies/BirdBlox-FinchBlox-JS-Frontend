@@ -86,3 +86,8 @@ path{
 .divLayer div {
     pointer-events: auto;
 }
+
+@font-face {
+  font-family: AvenirHeavy;
+  src: url(Fonts/AEH.ttf);
+}

@@ -259,6 +259,38 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
 };
 
 /**
+ * Adds the device info formatted for FinchBlox
+ * @param device
+ */
+Button.prototype.addDeviceInfo = function(device) {
+	const color = Colors.flagGreen;
+  const font = Button.defaultFont;
+	const pathId = VectorPaths.faPlusCircle;
+	const iconH = this.height*0.6;
+	const iconW = VectorIcon.computeWidth(pathId, iconH);
+	const margin = (this.height - iconH) / 2;
+	const iconX = this.width - iconW - margin;
+	const iconY = margin;
+	const textY = (this.height + font.charHeight) / 2;
+	const textX = textY;
+	this.removeContent();
+
+	this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+	this.group.appendChild(this.textE);
+	//let shortW = GuiElements.measure.textWidth(this.textE);
+
+	const text2X = 3*this.height;
+	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, Colors.black);
+	this.group.appendChild(this.textE2);
+
+	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
+
+	TouchReceiver.addListenersBN(this.textE, this);
+	TouchReceiver.addListenersBN(this.textE2, this);
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+}
+
+/**
  * Adds an image to the button.  Use of images is discouraged since they can take time to load.  No images are used
  * as of right now.
  * @param {object} imageData - has entries for width, height, lightName, darkName.

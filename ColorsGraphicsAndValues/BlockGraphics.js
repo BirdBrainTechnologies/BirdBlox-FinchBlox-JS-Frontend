@@ -721,6 +721,29 @@ BlockGraphics.create.valueText = function(text, group) {
 	return textElement;
 };
 
+/**
+ * Creates a flat grey version of the stack. Used in FinchBlox to indicate
+ * where a stack will snap in. Adds the shadow to the specified position in the
+ * active tab.
+ * @param stack
+ * @return {Element} group
+ */
+BlockGraphics.create.shadowStack = function(stack, x, y) {
+	const color = Colors.iron;
+	const group = GuiElements.create.group(x, y, TabManager.activeTab.mainG);
+	let block = stack.firstBlock;
+	while(block != null){
+		let pathE = GuiElements.create.path(group);
+		GuiElements.update.color(pathE, color);
+		GuiElements.move.element(pathE, block.x, block.y);
+		let pathD = block.path.getAttribute("d");
+		pathE.setAttributeNS(null, "d", pathD);
+		block = block.nextBlock;
+	}
+
+	return group;
+}
+
 /* Group of functions used for modifying existing SVG elements */
 BlockGraphics.update = {};
 

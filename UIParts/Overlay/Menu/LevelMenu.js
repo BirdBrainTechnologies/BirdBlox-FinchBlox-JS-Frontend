@@ -2,6 +2,8 @@
  * Menu for changing difficulty level in FinchBlox. Since this menu appears as
  * a BubbleOverlay, it is not a direct subclass of Menu.
  */
+
+/**
 function LevelMenu(x, y){
   this.x = x;
   this.y = y;
@@ -59,3 +61,4 @@ LevelMenu.prototype.close = function() {
 	this.bubbleOverlay.hide();
 	this.menuBnList.hide();
 };
+*/

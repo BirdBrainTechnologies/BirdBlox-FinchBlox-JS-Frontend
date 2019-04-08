@@ -4,16 +4,17 @@
  * The constructor does not draw anything, rather show() must be called.  Calling hide() then show() is used to reload
  * the dialog.  When show() is called, createRow is automatically called to generate each row, which must be implemented
  * by the subclass
- * @param {boolean} autoHeight - Whether the dialog should get taller as number of row increase. Discouraged for
+ * @param {boolean} autoHeight - Whether the dialog should get taller as number of rows increase. Discouraged for
  *                               dialogs that reload frequently
  * @param {string} title - The test to display in the title bar
  * @param {number} rowCount - The number of row to load. Determines how many times createRow is called
  * @param {number} extraTop - The amount of additional space to put between the title bar and the rows (for extra ui)
  * @param {number} extraBottom - The amount of extra space to put below the rows
  * @param {number} [extendTitleBar=0] - The amount the title bar's background should be extended
+ * @param {boolean} noTitleBar - Set to true for a dialog that does not have a title bar.
  * @constructor
  */
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar, noTitleBar) {
 	if (extendTitleBar == null) {
 		extendTitleBar = 0;
 	}
@@ -30,27 +31,52 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTit
 	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
 	this.hintText = "";
 	this.visible = false;
+
+	this.hasTitleBar = true;
+	if (noTitleBar) { this.hasTitleBar = false; }
 }
 
 RowDialog.setConstants = function() {
 	//TODO: This really should be in a separate "setStatics" function, since it isn't a constant
 	RowDialog.currentDialog = null;
 
-	RowDialog.titleBarColor = Colors.lightGray;
+	if (FinchBlox){
+		RowDialog.titleBarColor = Colors.finchGreen;
+		RowDialog.bgColor = Colors.white;
+		RowDialog.bnMargin = 0;
+		RowDialog.cornerR = 5;
+		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+		RowDialog.titleBarH = RowDialog.bnHeight*2;
+		RowDialog.outlineColor = Colors.flagGreen;
+	} else {
+		RowDialog.titleBarColor = Colors.lightGray;
+		RowDialog.bgColor = Colors.lightLightGray;
+		RowDialog.bnMargin = 5;
+		RowDialog.cornerR = 0;
+		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+		RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+	}
 	RowDialog.titleBarFontC = Colors.white;
-	RowDialog.bgColor = Colors.lightLightGray;
 	RowDialog.centeredBnWidth = 100;
-	RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
-	RowDialog.bnMargin = 5;
-	RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+
 
 	// The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-	RowDialog.widthRatio = 0.7;
-	RowDialog.heightRatio = 0.75;
+	if (FinchBlox) {
+		RowDialog.widthRatio = 0.7;
+		RowDialog.heightRatio = 0.2;
+	} else {
+		RowDialog.widthRatio = 0.7;
+		RowDialog.heightRatio = 0.75;
+	}
 
 	// But if that is too small, it uses the min dimensions
-	RowDialog.minWidth = 400;
-	RowDialog.minHeight = 400;
+	if (FinchBlox) {
+		RowDialog.minWidth = 400;
+		RowDialog.minHeight = 200;
+	} else {
+		RowDialog.minWidth = 400;
+		RowDialog.minHeight = 400;
+	}
 
 	RowDialog.hintMargin = 5;
 	RowDialog.titleBarFont = Font.uiFont(16).bold();
@@ -90,8 +116,15 @@ RowDialog.prototype.show = function() {
 		this.y = GuiElements.height / 2 - this.height / 2;
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
-		this.titleRect = this.createTitleRect();
-		this.titleText = this.createTitleLabel(this.title);
+
+		if (this.hasTitleBar) {
+			this.titleRect = this.createTitleRect();
+			if (FinchBlox){
+				this.icon = this.createTitleIcon(VectorPaths.stop);
+			} else {
+				this.titleText = this.createTitleLabel(this.title);
+			}
+		}
 
 		// All the rows go in this group, which is scrollable
 		this.rowGroup = this.createContent();
@@ -113,8 +146,9 @@ RowDialog.prototype.show = function() {
 RowDialog.prototype.calcHeights = function() {
 	const RD = RowDialog;
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
-	let nonScrollHeight = RD.titleBarH + centeredBnHeight + RD.bnMargin;
+	let nonScrollHeight = centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+	if (this.hasTitleBar) { nonScrollHeight += RD.titleBarH; }
 	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
 	let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
@@ -124,8 +158,13 @@ RowDialog.prototype.calcHeights = function() {
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
-	this.extraTopY = RD.titleBarH;
+	if (this.hasTitleBar){
+		this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+		this.extraTopY = RD.titleBarH;
+	} else {
+		this.scrollBoxY = RD.bnMargin + this.extraTopSpace;
+		this.extraTopY = 0;
+	}
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 
@@ -147,7 +186,8 @@ RowDialog.prototype.calcWidths = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.drawBackground = function() {
-	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RowDialog.bgColor);
+	const RD = RowDialog;
+	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -158,7 +198,13 @@ RowDialog.prototype.drawBackground = function() {
  */
 RowDialog.prototype.createTitleRect = function() {
 	const RD = RowDialog;
-	const rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+	var rect;
+	if (FinchBlox) {
+		rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
+		GuiElements.update.stroke(rect, RD.outlineColor, 2);
+	} else {
+		rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+	}
 	this.group.appendChild(rect);
 	return rect;
 };
@@ -176,6 +222,24 @@ RowDialog.prototype.createTitleLabel = function(title) {
 	GuiElements.move.text(textE, x, y);
 	this.group.appendChild(textE);
 	return textE;
+};
+
+/**
+ * Draws the title icon
+ * @param {object} pathId - Entry from VectorPaths
+ * @return {Element} - The SVG element
+ */
+RowDialog.prototype.createTitleIcon = function(pathId) {
+	var RD = RowDialog;
+
+	const iconH = RD.titleBarH * 0.75;
+	const iconW = VectorIcon.computeWidth(pathId, iconH);
+	const iconX = (this.width - iconW) / 2;
+	const iconY = (RD.titleBarH - iconH) / 2;
+
+	const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
+	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
+	return icon;
 };
 
 /**

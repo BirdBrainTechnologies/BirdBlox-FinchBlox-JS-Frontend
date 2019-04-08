@@ -7,11 +7,16 @@
  */
 function DiscoverDialog(deviceClass) {
 	let DD = DiscoverDialog;
-	let title = Language.getStr("Connect_Device");
-	RowDialog.call(this, false, title, 0, 0, 0);
-	this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
 	this.deviceClass = deviceClass;
-	this.addHintText(deviceClass.getConnectionInstructions());
+
+	if (FinchBlox) {
+		RowDialog.call(this, false, null, 0, 0, 0);
+	} else {
+		let title = Language.getStr("Connect_Device");
+		RowDialog.call(this, false, title, 0, 0, 0);
+		this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+		this.addHintText(deviceClass.getConnectionInstructions());
+	}
 
 	/** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
 	this.discoveredDevices = [];
@@ -101,9 +106,23 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
+
+	var color = Button.bg;
+	if (FinchBlox) {
+		if (index % 2 == 0) {
+			color = Colors.white;
+		} else {
+			color = Colors.fbGray;
+		}
+	}
+
 	// TODO: use RowDialog.createMainBnWithText instead
-	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup);
-	button.addText(this.discoveredDevices[index].listLabel)
+	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color);
+	if (FinchBlox) {
+		button.addDeviceInfo(this.discoveredDevices[index]);
+	} else {
+		button.addText(this.discoveredDevices[index].listLabel);
+	}
 	const me = this;
 	button.setCallbackFunction(function() {
 		me.selectDevice(me.discoveredDevices[index]);
