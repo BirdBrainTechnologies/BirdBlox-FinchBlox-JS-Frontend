@@ -76,16 +76,23 @@ DeviceManager.checkBattery = function() {
             }
         }
     });
-    if (worstBatteryStatus === "2") {
-        color = Colors.green;
-    } else if (worstBatteryStatus === "1") {
-        color = Colors.yellow;
-    } else if (worstBatteryStatus === "0"){
-        color = Colors.red;
-    }
     if (FinchBlox) {
+			if (worstBatteryStatus === "2") {
+	        color = Colors.flagGreen;
+	    } else if (worstBatteryStatus === "1") {
+	        color = Colors.fbYellow;
+	    } else if (worstBatteryStatus === "0"){
+	        color = Colors.stopRed;
+	    }
       TitleBar.finchButton.icon2.setColor(color);
     } else {
+			if (worstBatteryStatus === "2") {
+	        color = Colors.green;
+	    } else if (worstBatteryStatus === "1") {
+	        color = Colors.yellow;
+	    } else if (worstBatteryStatus === "0"){
+	        color = Colors.red;
+	    }
       TitleBar.batteryBn.icon.setColor(color);
     }
 }
@@ -136,6 +143,7 @@ DeviceManager.prototype.setDevice = function(index, newDevice) {
 	this.devicesChanged(this.getDeviceClass(newDevice), true);
 };
 
+//TODO: Remove this function. redundant.
 DeviceManager.prototype.getDeviceClass = function(robot) {
    if (robot.device === "micro:bit") {
        return DeviceMicroBit;
@@ -143,6 +151,8 @@ DeviceManager.prototype.getDeviceClass = function(robot) {
        return DeviceHummingbirdBit;
    } else if (robot.device === "Duo") {
        return DeviceHummingbird;
+   } else if (robot.device === "Finch") {
+       return DeviceFinch;
    }
 };
 
@@ -153,6 +163,8 @@ DeviceManager.getDeviceClass = function(robot) {
         return DeviceHummingbirdBit;
     } else if (robot.device === "Duo") {
         return DeviceHummingbird;
+    } else if (robot.device === "Finch") {
+        return DeviceFinch;
     }
 }
 

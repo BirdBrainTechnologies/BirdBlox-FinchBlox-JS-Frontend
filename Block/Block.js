@@ -257,6 +257,7 @@ Block.prototype.stop = function() {
 
 /**
  * Updates this currently executing Block and returns if the Block is still running
+ * Running: 0 = Not started, 1 = Waiting for slots to finish, 2 = Running, 3 = Completed.
  * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun = function() {
@@ -296,8 +297,20 @@ Block.prototype.updateRun = function() {
 		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
+	if (FinchBlox) { this.updateRunColor(); }
 	return myExecStatus; //Return a boolean indicating if this Block is done.
 };
+
+/**
+ * In FinchBlox, update the color of the block to green while running.
+ */
+Block.prototype.updateRunColor = function() {
+	if (this.running === 1 || this.running === 2) {
+		GuiElements.update.color(this.path, Colors.flagGreen);
+	} else {
+		GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+	}
+}
 
 /**
  * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
@@ -972,6 +985,9 @@ Block.prototype.getResultData = function() {
  * Recursively adds a white outline to indicate that the BlockStack is running.
  */
 Block.prototype.glow = function() {
+	//We will not make the whole stack glow for FinchBlox
+	if (FinchBlox) { return; }
+
 	BlockGraphics.update.glow(this.path);
 	this.isGlowing = true; //Used by other classes to determine things like highlight color.
 	if (this.blockSlot1 != null) {

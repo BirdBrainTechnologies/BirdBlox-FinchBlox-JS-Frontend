@@ -4,6 +4,7 @@
  */
 function Highlighter() {
 	Highlighter.path = Highlighter.createPath();
+	Highlighter.shadowGroup = GuiElements.create.group(0, 0);
 	Highlighter.visible = false;
 }
 
@@ -49,11 +50,61 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
 };
 
 /**
+ * Creates a flat grey version of the stack. Used in FinchBlox instead of a
+ * highlight line.
+ * @param x
+ * @param y
+ * @param stack
+ */
+Highlighter.showShadow = function(fit, stack) {
+	let myX = 0;
+	let myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+	let snapFront = false;
+	if (fit instanceof BlockStack) {
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+		snapFront = true;
+	} else if (fit instanceof BlockSlot) {
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+	} else {
+	 	myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+	}
+	const color = Colors.iron;
+
+	let block = stack.firstBlock;
+	let shadowW = 0;
+	while(block != null){
+		let group = GuiElements.create.group(0, 0, this.shadowGroup);
+		let pathE = GuiElements.create.path(group);
+		GuiElements.update.color(pathE, color);
+		GuiElements.move.group(group, block.x, block.y);
+		let pathD = block.path.getAttribute("d");
+		pathE.setAttributeNS(null, "d", pathD);
+		shadowW += block.width;
+		block = block.nextBlock;
+	}
+	if (snapFront) { myX -= shadowW; }
+
+	GuiElements.move.group(this.shadowGroup, myX, myY);
+
+	if (!Highlighter.visible) {
+		//GuiElements.layers.highlight.appendChild(Highlighter.shadowGroup);
+		GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+		Highlighter.visible = true;
+	}
+
+}
+
+
+/**
  * Removes the highlighter from view
  */
 Highlighter.hide = function() {
 	if (Highlighter.visible) {
 		Highlighter.path.remove();
+		while (this.shadowGroup.firstChild) {
+		    this.shadowGroup.removeChild(this.shadowGroup.firstChild);
+		}
+		Highlighter.shadowGroup.remove();
 		Highlighter.visible = false;
 	}
 };

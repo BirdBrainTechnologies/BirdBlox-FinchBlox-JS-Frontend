@@ -4959,16 +4959,23 @@ DeviceManager.checkBattery = function() {
             }
         }
     });
-    if (worstBatteryStatus === "2") {
-        color = Colors.green;
-    } else if (worstBatteryStatus === "1") {
-        color = Colors.yellow;
-    } else if (worstBatteryStatus === "0"){
-        color = Colors.red;
-    }
     if (FinchBlox) {
+			if (worstBatteryStatus === "2") {
+	        color = Colors.flagGreen;
+	    } else if (worstBatteryStatus === "1") {
+	        color = Colors.fbYellow;
+	    } else if (worstBatteryStatus === "0"){
+	        color = Colors.stopRed;
+	    }
       TitleBar.finchButton.icon2.setColor(color);
     } else {
+			if (worstBatteryStatus === "2") {
+	        color = Colors.green;
+	    } else if (worstBatteryStatus === "1") {
+	        color = Colors.yellow;
+	    } else if (worstBatteryStatus === "0"){
+	        color = Colors.red;
+	    }
       TitleBar.batteryBn.icon.setColor(color);
     }
 }
@@ -5019,6 +5026,7 @@ DeviceManager.prototype.setDevice = function(index, newDevice) {
 	this.devicesChanged(this.getDeviceClass(newDevice), true);
 };
 
+//TODO: Remove this function. redundant.
 DeviceManager.prototype.getDeviceClass = function(robot) {
    if (robot.device === "micro:bit") {
        return DeviceMicroBit;
@@ -5026,6 +5034,8 @@ DeviceManager.prototype.getDeviceClass = function(robot) {
        return DeviceHummingbirdBit;
    } else if (robot.device === "Duo") {
        return DeviceHummingbird;
+   } else if (robot.device === "Finch") {
+       return DeviceFinch;
    }
 };
 
@@ -5036,6 +5046,8 @@ DeviceManager.getDeviceClass = function(robot) {
         return DeviceHummingbirdBit;
     } else if (robot.device === "Duo") {
         return DeviceHummingbird;
+    } else if (robot.device === "Finch") {
+        return DeviceFinch;
     }
 }
 
@@ -8129,10 +8141,17 @@ BlockGraphics.SetCommand = function() {
 
 	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
 	BlockGraphics.command.snap = {};
-	BlockGraphics.command.snap.left = 20;
-	BlockGraphics.command.snap.right = 20;
-	BlockGraphics.command.snap.top = 20;
-	BlockGraphics.command.snap.bottom = 20;
+	if (FinchBlox){
+		BlockGraphics.command.snap.left = 40;
+		BlockGraphics.command.snap.right = 40;
+		BlockGraphics.command.snap.top = 40;
+		BlockGraphics.command.snap.bottom = 40;
+	} else {
+		BlockGraphics.command.snap.left = 20;
+		BlockGraphics.command.snap.right = 20;
+		BlockGraphics.command.snap.top = 20;
+		BlockGraphics.command.snap.bottom = 20;
+	}
 
 	// How much Blocks are shifted down and to the right when they are bumped out of position by another Block
 	BlockGraphics.command.shiftX = 20;
@@ -8782,6 +8801,7 @@ BlockGraphics.create.valueText = function(text, group) {
 	group.appendChild(textElement);
 	return textElement;
 };
+
 
 /* Group of functions used for modifying existing SVG elements */
 BlockGraphics.update = {};
@@ -10280,6 +10300,8 @@ TitleBar.updateShapePath = function() {
 
   TB.bgShape.setAttributeNS(null, "d", path);
 
+	TB.sideWidth = shapeW + r;
+
   /*
   var shapeW = TB.width/2 - TB.longButtonW;
   var shapeH = TB.height - TB.buttonMargin;
@@ -10334,26 +10356,31 @@ TitleBar.makeButtons = function() {
   	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH);
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
+    //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
+		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
   	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
-    TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
-    TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
-    TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
+    //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
+    //TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
+    //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
-    TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
-    TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
+    //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
+		TB.levelButton = new Button(TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW, TB.levelBnY, TB.buttonW, TB.tallButtonH, TBLayer, Colors.seance, r, r);
+    //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
+		TB.levelButton.addText("1", Font.uiFont(30), Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
 		TB.levelButton.setCallbackFunction(function() {(new LevelDialog()).show();}, true);
 
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
-    TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
-    TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
-    TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
-    TB.finchButton.setCallbackFunction(function(){
+    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
+		TB.finchButton = new Button((TB.sideWidth - TB.longButtonW)/2, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
+    //TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
+    //TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
+		TB.finchButton.addFinchBnIcons();
+		TB.finchButton.setCallbackFunction(function(){
 			switch (DeviceManager.getStatus()){
 				case DeviceManager.statuses.noDevices:
 					(new DiscoverDialog(DeviceFinch)).show();
@@ -10368,10 +10395,17 @@ TitleBar.makeButtons = function() {
 		}, true);
 		TB.updateStatus = function(status) {
 			var color = Colors.fbGray;
+			var outlineColor = Colors.iron;
+			var shortName = "";
 			if (status === DeviceManager.statuses.connected) {
 				color = Colors.finchGreen;
+				outlineColor = Colors.flagGreen;
+				var sn = DeviceHummingbirdBit.getManager().connectedDevices[0].shortName;
+				if (sn != null) { shortName = sn; }
 			}
-			GuiElements.update.color(TitleBar.finchButton.bgRect, color);
+			TitleBar.finchButton.updateBgColor(color);
+			GuiElements.update.stroke(TitleBar.finchButton.icon.pathE, outlineColor, 2);
+			GuiElements.update.text(TitleBar.finchButton.textE, shortName);
 		}
 		DeviceManager.setStatusListener(TB.updateStatus);
 
@@ -10427,7 +10461,7 @@ TitleBar.removeButtons = function() {
     TB.undoButton.remove();
     TB.finchButton.remove();
     TB.levelButton.remove();
-    TB.trashButton.remove();
+  //  TB.trashButton.remove();
   } else {
     TB.flagBn.remove();
   	TB.stopBn.remove();
@@ -12560,6 +12594,7 @@ Button.prototype.addDeviceInfo = function(device) {
 
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
 
+	this.hasText = true;
 	TouchReceiver.addListenersBN(this.textE, this);
 	TouchReceiver.addListenersBN(this.textE2, this);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
@@ -12599,14 +12634,46 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
-
+/*
 Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
   var iconW = VectorIcon.computeWidth(pathId, height);
 	var iconX = (this.width - iconW) / 2;
 	var iconY = (this.height - height) / 2;
 	this.icon2 = new VectorIcon(iconX, iconY, pathId, color, height, this.group, null, rotation);
 	TouchReceiver.addListenersBN(this.icon2.pathE, this);
-};
+};*/
+
+/**
+ * Function specific to the finch button of FinchBlox
+ */
+Button.prototype.addFinchBnIcons = function() {
+	var finchPathId = VectorPaths.stop;
+	var battPathId = VectorPaths.battery;
+
+	var finchH = TitleBar.bnIconH;
+	var battH = TitleBar.bnIconH*0.75;
+	var finchW = VectorIcon.computeWidth(finchPathId, finchH);
+	var battW = VectorIcon.computeWidth(battPathId, battH);
+	var finchX = (this.width - finchW - battW) / 3;
+	var battX = finchW + 2*finchX;
+	var finchY = (this.height - finchH) / 2;
+	var battY = (this.height - battH) / 2;
+
+	this.removeContent();
+	this.hasIcon = true;
+	this.iconInverts = false;
+	this.hasText = true;
+
+	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group);
+	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
+	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
+	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);
+	this.group.appendChild(this.textE);
+
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+	TouchReceiver.addListenersBN(this.icon2.pathE, this);
+	TouchReceiver.addListenersBN(this.textE, this);
+}
 
 /**
  * Removes all icons/images/text in the button so it can be replaced
@@ -16501,6 +16568,7 @@ VectorIcon.prototype.remove = function() {
  */
 function Highlighter() {
 	Highlighter.path = Highlighter.createPath();
+	Highlighter.shadowGroup = GuiElements.create.group(0, 0);
 	Highlighter.visible = false;
 }
 
@@ -16546,14 +16614,65 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
 };
 
 /**
+ * Creates a flat grey version of the stack. Used in FinchBlox instead of a
+ * highlight line.
+ * @param x
+ * @param y
+ * @param stack
+ */
+Highlighter.showShadow = function(fit, stack) {
+	var myX = 0;
+	var myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+	var snapFront = false;
+	if (fit instanceof BlockStack) {
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+		snapFront = true;
+	} else if (fit instanceof BlockSlot) {
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+	} else {
+	 	myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+	}
+	var color = Colors.iron;
+
+	var block = stack.firstBlock;
+	var shadowW = 0;
+	while(block != null){
+		var group = GuiElements.create.group(0, 0, this.shadowGroup);
+		var pathE = GuiElements.create.path(group);
+		GuiElements.update.color(pathE, color);
+		GuiElements.move.group(group, block.x, block.y);
+		var pathD = block.path.getAttribute("d");
+		pathE.setAttributeNS(null, "d", pathD);
+		shadowW += block.width;
+		block = block.nextBlock;
+	}
+	if (snapFront) { myX -= shadowW; }
+
+	GuiElements.move.group(this.shadowGroup, myX, myY);
+
+	if (!Highlighter.visible) {
+		//GuiElements.layers.highlight.appendChild(Highlighter.shadowGroup);
+		GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+		Highlighter.visible = true;
+	}
+
+}
+
+
+/**
  * Removes the highlighter from view
  */
 Highlighter.hide = function() {
 	if (Highlighter.visible) {
 		Highlighter.path.remove();
+		while (this.shadowGroup.firstChild) {
+		    this.shadowGroup.removeChild(this.shadowGroup.firstChild);
+		}
+		Highlighter.shadowGroup.remove();
 		Highlighter.visible = false;
 	}
 };
+
 /**
  * Manages three DisplayBoxes on the bottom of the screen.  DisplayBoxes are triggered by the display block and
  * which box is shown depends on the position parameter of the block
@@ -16835,7 +16954,12 @@ CodeManager.move.update = function(x, y) {
 			// The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if (CodeManager.fit.found) {
-				CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+				if (FinchBlox) {
+					var fit = CodeManager.fit.bestFit;
+					Highlighter.showShadow(fit, move.stack);
+				} else {
+					CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+				}
 			} else {
 				Highlighter.hide();   // If not, hide any existing highlight.
 			}
@@ -18748,7 +18872,7 @@ RowDialog.prototype.show = function() {
 		if (this.hasTitleBar) {
 			this.titleRect = this.createTitleRect();
 			if (FinchBlox){
-				this.icon = this.createTitleIcon(VectorPaths.language);
+				this.icon = this.createTitleIcon(VectorPaths.stop);
 			} else {
 				this.titleText = this.createTitleLabel(this.title);
 			}
@@ -18865,7 +18989,9 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
 	var iconX = (this.width - iconW) / 2;
 	var iconY = (RD.titleBarH - iconH) / 2;
 
-	return new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
+	var icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
+	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
+	return icon;
 };
 
 /**
@@ -21177,7 +21303,7 @@ LevelDialog.setLevel = function(level) {
     LD.currentLevel = level;
     BlockPalette.setLevel();
     TabManager.activeTab.clear();
-    TitleBar.levelButton.addText(level, Font.uiFont(24).bold(), Colors.bbtDarkGray);
+    TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
   }
   RowDialog.currentDialog.highlightSelected();
 }
@@ -23818,7 +23944,8 @@ UndoManager.setUndoButton = function(button) {
 };
 
 /**
- * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger than the limit, the last item it removed.
+ * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger
+ * than the limit, the last item is removed.
  * @param stack
  */
 UndoManager.deleteStack = function(stack) {
@@ -23831,6 +23958,14 @@ UndoManager.deleteStack = function(stack) {
 		UM.undoStack.shift();
 	}
 	UM.updateButtonEnabled();
+
+	if(FinchBlox){
+		if(LevelDialog.currentLevel != 3){
+			if(stack.firstBlock.isStartBlock){
+				TabManager.activeTab.addStartBlock();
+			}
+		}
+	}
 };
 
 /**
@@ -24129,6 +24264,7 @@ Block.prototype.stop = function() {
 
 /**
  * Updates this currently executing Block and returns if the Block is still running
+ * Running: 0 = Not started, 1 = Waiting for slots to finish, 2 = Running, 3 = Completed.
  * @return {ExecutionStatus} - Indicates if the Block is still running and should be updated again.
  */
 Block.prototype.updateRun = function() {
@@ -24168,8 +24304,20 @@ Block.prototype.updateRun = function() {
 		}
 		this.clearMem(); //Clear its runMem to prevent its computations from leaking into subsequent executions.
 	}
+	if (FinchBlox) { this.updateRunColor(); }
 	return myExecStatus; //Return a boolean indicating if this Block is done.
 };
+
+/**
+ * In FinchBlox, update the color of the block to green while running.
+ */
+Block.prototype.updateRunColor = function() {
+	if (this.running === 1 || this.running === 2) {
+		GuiElements.update.color(this.path, Colors.flagGreen);
+	} else {
+		GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+	}
+}
 
 /**
  * Will be overridden. Is triggered once when the Block is first executed. Contains the Block's actual behavior.
@@ -24844,6 +24992,9 @@ Block.prototype.getResultData = function() {
  * Recursively adds a white outline to indicate that the BlockStack is running.
  */
 Block.prototype.glow = function() {
+	//We will not make the whole stack glow for FinchBlox
+	if (FinchBlox) { return; }
+
 	BlockGraphics.update.glow(this.path);
 	this.isGlowing = true; //Used by other classes to determine things like highlight color.
 	if (this.blockSlot1 != null) {
@@ -28244,7 +28395,7 @@ BlockSlot.prototype.findBestFit = function() {
 	var fit = CodeManager.fit;
 	var x = this.getAbsX();
 	var y = this.getAbsY();
-  console.log("find best fit blockslot " + x + " " + y + " " + move.topX + " " + move.topY);
+
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
 		var snap = BlockGraphics.command.snap;
@@ -31057,7 +31208,7 @@ B_FBSound.prototype.startAction = function () {
   if (device != null) {
     //Setting a buzzer with a duration of 0 has strange results on the micro:bit.
 		if (mem.duration > 0) {
-			device.setBuzzer(mem.requestStatus, note, mem.duration);
+			device.setBuzzer(mem.requestStatus, this.midiNote, mem.duration);
 		} else {
 			mem.requestStatus.finished = true;
 		}
@@ -31175,6 +31326,7 @@ function B_WhenFlagTapped(x, y) {
 	if (FinchBlox){
 		HatBlock.call(this, x, y, "control_3");
 		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 40));
+		this.isStartBlock = true;
 	} else {
 		HatBlock.call(this, x, y, "control");
 		// Add flag icon with height 15

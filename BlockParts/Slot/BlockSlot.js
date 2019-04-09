@@ -137,7 +137,7 @@ BlockSlot.prototype.findBestFit = function() {
 	const fit = CodeManager.fit;
 	const x = this.getAbsX();
 	const y = this.getAbsY();
-  console.log("find best fit blockslot " + x + " " + y + " " + move.topX + " " + move.topY);
+
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
 		const snap = BlockGraphics.command.snap;

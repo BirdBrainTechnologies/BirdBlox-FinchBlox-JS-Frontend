@@ -51,7 +51,7 @@ LevelDialog.setLevel = function(level) {
     LD.currentLevel = level;
     BlockPalette.setLevel();
     TabManager.activeTab.clear();
-    TitleBar.levelButton.addText(level, Font.uiFont(24).bold(), Colors.bbtDarkGray);
+    TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
   }
   RowDialog.currentDialog.highlightSelected();
 }

@@ -285,6 +285,7 @@ Button.prototype.addDeviceInfo = function(device) {
 
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
 
+	this.hasText = true;
 	TouchReceiver.addListenersBN(this.textE, this);
 	TouchReceiver.addListenersBN(this.textE2, this);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
@@ -324,14 +325,46 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
-
+/*
 Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
   const iconW = VectorIcon.computeWidth(pathId, height);
 	const iconX = (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
 	this.icon2 = new VectorIcon(iconX, iconY, pathId, color, height, this.group, null, rotation);
 	TouchReceiver.addListenersBN(this.icon2.pathE, this);
-};
+};*/
+
+/**
+ * Function specific to the finch button of FinchBlox
+ */
+Button.prototype.addFinchBnIcons = function() {
+	const finchPathId = VectorPaths.stop;
+	const battPathId = VectorPaths.battery;
+
+	const finchH = TitleBar.bnIconH;
+	const battH = TitleBar.bnIconH*0.75;
+	const finchW = VectorIcon.computeWidth(finchPathId, finchH);
+	const battW = VectorIcon.computeWidth(battPathId, battH);
+	const finchX = (this.width - finchW - battW) / 3;
+	const battX = finchW + 2*finchX;
+	const finchY = (this.height - finchH) / 2;
+	const battY = (this.height - battH) / 2;
+
+	this.removeContent();
+	this.hasIcon = true;
+	this.iconInverts = false;
+	this.hasText = true;
+
+	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group);
+	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
+	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
+	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);
+	this.group.appendChild(this.textE);
+
+	TouchReceiver.addListenersBN(this.icon.pathE, this);
+	TouchReceiver.addListenersBN(this.icon2.pathE, this);
+	TouchReceiver.addListenersBN(this.textE, this);
+}
 
 /**
  * Removes all icons/images/text in the button so it can be replaced

@@ -30,7 +30,7 @@ B_FBSound.prototype.startAction = function () {
   if (device != null) {
     //Setting a buzzer with a duration of 0 has strange results on the micro:bit.
 		if (mem.duration > 0) {
-			device.setBuzzer(mem.requestStatus, note, mem.duration);
+			device.setBuzzer(mem.requestStatus, this.midiNote, mem.duration);
 		} else {
 			mem.requestStatus.finished = true;
 		}

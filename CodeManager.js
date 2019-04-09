@@ -115,7 +115,12 @@ CodeManager.move.update = function(x, y) {
 			// The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
 			CodeManager.findBestFit();
 			if (CodeManager.fit.found) {
-				CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+				if (FinchBlox) {
+					let fit = CodeManager.fit.bestFit;
+					Highlighter.showShadow(fit, move.stack);
+				} else {
+					CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+				}
 			} else {
 				Highlighter.hide();   // If not, hide any existing highlight.
 			}

@@ -67,10 +67,17 @@ BlockGraphics.SetCommand = function() {
 
 	// Define the size of the snap bounding box (how close the Block being dragged must be to snap)
 	BlockGraphics.command.snap = {};
-	BlockGraphics.command.snap.left = 20;
-	BlockGraphics.command.snap.right = 20;
-	BlockGraphics.command.snap.top = 20;
-	BlockGraphics.command.snap.bottom = 20;
+	if (FinchBlox){
+		BlockGraphics.command.snap.left = 40;
+		BlockGraphics.command.snap.right = 40;
+		BlockGraphics.command.snap.top = 40;
+		BlockGraphics.command.snap.bottom = 40;
+	} else {
+		BlockGraphics.command.snap.left = 20;
+		BlockGraphics.command.snap.right = 20;
+		BlockGraphics.command.snap.top = 20;
+		BlockGraphics.command.snap.bottom = 20;
+	}
 
 	// How much Blocks are shifted down and to the right when they are bumped out of position by another Block
 	BlockGraphics.command.shiftX = 20;
@@ -721,28 +728,6 @@ BlockGraphics.create.valueText = function(text, group) {
 	return textElement;
 };
 
-/**
- * Creates a flat grey version of the stack. Used in FinchBlox to indicate
- * where a stack will snap in. Adds the shadow to the specified position in the
- * active tab.
- * @param stack
- * @return {Element} group
- */
-BlockGraphics.create.shadowStack = function(stack, x, y) {
-	const color = Colors.iron;
-	const group = GuiElements.create.group(x, y, TabManager.activeTab.mainG);
-	let block = stack.firstBlock;
-	while(block != null){
-		let pathE = GuiElements.create.path(group);
-		GuiElements.update.color(pathE, color);
-		GuiElements.move.element(pathE, block.x, block.y);
-		let pathD = block.path.getAttribute("d");
-		pathE.setAttributeNS(null, "d", pathD);
-		block = block.nextBlock;
-	}
-
-	return group;
-}
 
 /* Group of functions used for modifying existing SVG elements */
 BlockGraphics.update = {};
