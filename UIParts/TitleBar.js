@@ -214,7 +214,7 @@ TitleBar.makeButtons = function() {
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW, TB.levelBnY, TB.buttonW, TB.tallButtonH, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText("1", Font.uiFont(30), Colors.white);
+		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(30), Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);

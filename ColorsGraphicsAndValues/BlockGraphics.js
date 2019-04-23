@@ -148,8 +148,12 @@ BlockGraphics.SetHat = function() {
 	// Width of ellipse
 	BlockGraphics.hat.topW = 80;
 
-	// Minimum width is larger than CommandBlocks to leave room for ellipse
-	BlockGraphics.hat.width = 90;
+	if (FinchBlox) {
+		BlockGraphics.hat.width = 40;
+	} else {
+		// Minimum width is larger than CommandBlocks to leave room for ellipse
+		BlockGraphics.hat.width = 90;
+	}
 
 	// Additional height added by ellipse.  Used for spacing Blocks in the Palette
 	BlockGraphics.hat.hatHEstimate = 10;
