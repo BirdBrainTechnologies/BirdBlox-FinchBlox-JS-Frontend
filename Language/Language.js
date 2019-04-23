@@ -6,7 +6,7 @@
 function Language() {};
 
 Language.lang = "en"; //The current language. English by default.
-Language.langs = ["ar", "ca", "da", "de", "en", "es", "fr", "he", "ko", "nl", "pt", "zhs", "zht"];
+Language.langs = ["ar", "ca", "da", "de", "en", "es", "fi", "fr", "he", "ko", "nl", "pt", "sv", "zhs", "zht"];
 //Language.rtlLangs = [];
 Language.rtlLangs = ["ar", "he"];
 Language.isRTL = false;
@@ -22,12 +22,14 @@ Language.names = {
   "de":"Deutsch",  //German
   "en":"English",  //English
   "es":"Español",  //Spanish
+  "fi":"suomi",  //Finnish - language names not capitalized in Finnish
   "fr":"Français",  //French
   "he":"עברית",  //Hebrew
   "ja":"日本語",  //Japanese
   "ko":"한국어",  //Korean
   "nl":"Nederlands",  //Dutch
   "pt":"Português",  //Portuguese
+  "sv":"svenska",  //Swedish - language names not capitalized in Swedish
   "zhs":"简体中文",  //Simplified Chinese (zh-Hans)
   "zht":"繁體中文"  //Traditional Chinese (zh-Hant)
 }
