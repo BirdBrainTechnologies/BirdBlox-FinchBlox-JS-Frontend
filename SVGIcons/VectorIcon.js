@@ -59,6 +59,9 @@ VectorIcon.prototype.draw = function() {
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
+  if (this.pathId.transform != null) {
+    this.pathE.setAttributeNS(null, "transform", this.pathId.transform);
+  }
 	this.group.appendChild(this.pathE);
 };
 
@@ -99,3 +102,21 @@ VectorIcon.prototype.move = function(x, y) {
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
+
+/**
+ *  Add a second path to this icon. Shares the same group and transforms
+ * @param pathId - VectorPaths entry
+ * @param color - fill color hex value
+ */
+VectorIcon.prototype.addSecondPath = function(pathId, color){
+  this.pathId2 = pathId;
+  this.color2 = color;
+
+  this.pathE2 = GuiElements.create.path(this.group);
+	this.pathE2.setAttributeNS(null, "d", this.pathId2.path);
+	this.pathE2.setAttributeNS(null, "fill", this.color2);
+  if (this.pathId2.transform != null) {
+    this.pathE2.setAttributeNS(null, "transform", this.pathId2.transform);
+  }
+	this.group.appendChild(this.pathE2);
+}

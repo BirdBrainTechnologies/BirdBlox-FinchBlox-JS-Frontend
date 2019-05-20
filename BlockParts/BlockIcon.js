@@ -62,3 +62,13 @@ BlockIcon.prototype.move = function(x, y) {
 BlockIcon.prototype.textSummary = function() {
 	return this.altText;
 };
+
+/**
+ * Adds a second icon on top of the first and returns a reference to it.
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ * @param {string} color - Hex representation of the color to use
+ */
+BlockIcon.prototype.addSecondIcon = function(pathId, color){
+	this.icon.addSecondPath(pathId, color);
+	TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+}

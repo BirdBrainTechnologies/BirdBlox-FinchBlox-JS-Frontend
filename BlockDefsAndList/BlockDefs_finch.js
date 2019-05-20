@@ -69,7 +69,9 @@ B_FinchMove.prototype.startAction = function() {
 	let speed = this.slots[2].getData().getValue();
 	let distance = this.slots[3].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, speed, distance, speed, distance);
+	if (direction == "backward") { speed = -speed; }
+
+	device.setMotors(this.runMem.requestStatus, speed, distance, speed, distance);
 	return new ExecutionStatusRunning();
 };
 
@@ -107,13 +109,13 @@ B_FinchTurn.prototype.startAction = function() {
 	let angle = this.slots[3].getData().getValue();
 
 	//TODO: change to convert from angle to distance
-	let distance = angle;
+	let distance = angle * 0.087;
 
 	if (direction == "right") {
-		device.setMotor(this.runMem.requestStatus, speed, distance, -speed, distance);
+		device.setMotors(this.runMem.requestStatus, speed, distance, -speed, distance);
 		return new ExecutionStatusRunning();
 	} else if (direction == "left") {
-		device.setMotor(this.runMem.requestStatus, -speed, distance, speed, distance);
+		device.setMotors(this.runMem.requestStatus, -speed, distance, speed, distance);
 		return new ExecutionStatusRunning();
 	} else {
 		return new ExecutionStatusError();
@@ -124,12 +126,12 @@ B_FinchTurn.prototype.startAction = function() {
 function B_FinchMotors(x, y) {
 	B_FinchCommand.call(this, x, y);
 
-	const leftSlot = new NumSlot(this, "Num_speed_l", 50, true, true);
-	leftSlot.addLimits(0, 100);
+	const leftSlot = new NumSlot(this, "Num_speed_l", 50, false, true);
+	leftSlot.addLimits(-100, 100);
 	this.addPart(leftSlot);
 
-	const rightSlot = new NumSlot(this, "Num_speed_r", 50, true, true);
-	rightSlot.addLimits(0, 100);
+	const rightSlot = new NumSlot(this, "Num_speed_r", 50, false, true);
+	rightSlot.addLimits(-100, 100);
 	this.addPart(rightSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_motors"));
@@ -145,7 +147,7 @@ B_FinchMotors.prototype.startAction = function() {
 	let leftSpeed = this.slots[1].getData().getValue();
 	let rightSpeed = this.slots[2].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
+	device.setMotors(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
 	return new ExecutionStatusRunning();
 };
 
@@ -161,7 +163,7 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	device.setMotor(this.runMem.requestStatus, 0, 0, 0, 0);
+	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
 	return new ExecutionStatusRunning();
 };
 

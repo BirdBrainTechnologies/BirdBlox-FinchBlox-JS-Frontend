@@ -50,22 +50,29 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
 /**
  * Issues a request to set the motors.
  * @param {object} status - An object provided by the caller to track the progress of the request
- * @param {number} speedL - speed of the left motor
+ * @param {number} speedL - speed of the left motor (%)
  * @param {number} distL - distance for left motor to travel (set to 0 for continuous motion)
- * @param {number} speedR - speed of the right motor
+ * @param {number} speedR - speed of the right motor (%)
  * @param {number} distR - distance for rigth motor to travel (set to 0 for continuous motion)
  */
-DeviceFinch.prototype.setMotor = function(status, speedL, distL, speedR, distR) {
-	//TODO: convert distance to ticks
+DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
+
+	// Convert from distance in cm to encoder ticks.
+	const ticksPerCM = 100;
+
+	//Make sure speeds do not exceed 100%
+	if (speedL > 100) { speedL = 100; }
+	if (speedL < -100) { speedL = -100; }
+	if (speedR > 100) { speedR = 100; }
+	if (speedR < -100) { speedR = -100; }
+
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", speedL);
-	request.addParam("lTicksMSB", 0);
-	request.addParam("lTicksLSB", 0);
-	request.addParam("speedR", speedR);
-	request.addParam("rTicksMSB", 0);
-	request.addParam("rTicksLSB", 0);
+	request.addParam("speedL", Math.round(speedL * 127/100));
+	request.addParam("ticksL", Math.round(distL * ticksPerCM));
+	request.addParam("speedR", Math.round(speedR * 127/100));
+	request.addParam("ticksR", Math.round(distR * ticksPerCM));
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 

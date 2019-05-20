@@ -623,6 +623,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			currentLine += 1;
 			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
 			yCoord += bG.vMargin;
+      if (FinchBlox) { yCoord -= 2.5*bG.vMargin; }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}

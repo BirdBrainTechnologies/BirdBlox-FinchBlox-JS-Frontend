@@ -338,7 +338,7 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  * Function specific to the finch button of FinchBlox
  */
 Button.prototype.addFinchBnIcons = function() {
-	const finchPathId = VectorPaths.stop;
+	const finchPathId = VectorPaths.mvFinch;
 	const battPathId = VectorPaths.battery;
 
 	const finchH = TitleBar.bnIconH;
@@ -355,7 +355,7 @@ Button.prototype.addFinchBnIcons = function() {
 	this.iconInverts = false;
 	this.hasText = true;
 
-	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group);
+	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
 	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
 	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);

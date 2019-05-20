@@ -10,7 +10,8 @@ function CalibrateCompassDialog() {
 
   this.bits = DeviceHummingbirdBit.getManager().getDeviceCount();
   this.microbits = DeviceMicroBit.getManager().getDeviceCount();
-  let count = this.bits + this.microbits;
+  this.finches = DeviceFinch.getManager().getDeviceCount()
+  let count = this.bits + this.microbits + this.finches;
 
 	RowDialog.call(this, false, title, count, 0, 0);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
@@ -30,8 +31,10 @@ CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGr
   var robot;
   if (index < this.bits) {
     robot = DeviceHummingbirdBit.getManager().getDevice(index);
-  } else {
+  } else if (index < this.bits + this.microbits) {
     robot = DeviceMicroBit.getManager().getDevice(index - this.bits);
+  } else {
+    robot = DeviceFinch.getManager().getDevice(index - this.bits - this.microbits);
   }
 	GuiElements.alert("Loading rows for the compass calibration dialog.");
   if (robot != null) {

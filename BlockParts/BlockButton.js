@@ -3,22 +3,33 @@
  * @param {Block} parent - The Block this button is a part of
  * @param {number} startingValue - The initial value to display
  */
-function BlockButton(parent, startingValue){
+function BlockButton(parent, startingValue, startingValue2){
+  this.height = 25;
+  this.width = 75;
+  this.cornerRadius = this.height/2;
+  this.textColor = Colors.black;
+  this.font = Font.uiFont(12);
+  this.outlineStroke = 1;
+
  this.parent = parent;
  this.value = startingValue;
- this.height = 15;
- this.width = 40;
- this.cornerRadius = 2;
+ this.value2 = startingValue2;
  this.x = (parent.width - this.width)/2;
  this.y = parent.height - this.height;
  this.widgets = [];
 
+ this.outlineColor = Colors.blockOutline[parent.category];
+ if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
+ if (this.outlineColor == null) { this.outlineColor = Colors.iron; }
+
  const me = this;
- this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.lightGray, this.cornerRadius, this.cornerRadius);
+ this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
+ GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
  this.updateValue(startingValue);
  this.button.setCallbackFunction(function() {
    const inputSys = me.createInputSystem();
-   inputSys.show(null, me.updateValue.bind(me), function(){}, null);
+   inputSys.show(null, me.updateValue.bind(me), function(){}, null, me.outlineColor, parent);
+//   GuiElements.blockInteraction();
  }, true);
 
  this.isSlot = false;
@@ -63,9 +74,9 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
-    this.button.addText(displayString);
+    this.button.addText(displayString, this.font, this.textColor);
   } else {
-    this.button.addText(this.value.toString());
+    this.button.addText(this.value.toString(), this.font, this.textColor);
   }
 
   this.parent.updateValues();

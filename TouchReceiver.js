@@ -426,7 +426,9 @@ TouchReceiver.touchStartDialogBlock = function(e) {
 			});
 		}
 	} else {
-		RowDialog.currentDialog.closeDialog();
+    if (RowDialog.currentDialog != null) {
+      RowDialog.currentDialog.closeDialog();
+    }
 	}
 }
 

@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = false;
+var FinchBlox = true;
 const FrontendVersion = 393;
 
 
@@ -5908,22 +5908,29 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
 /**
  * Issues a request to set the motors.
  * @param {object} status - An object provided by the caller to track the progress of the request
- * @param {number} speedL - speed of the left motor
+ * @param {number} speedL - speed of the left motor (%)
  * @param {number} distL - distance for left motor to travel (set to 0 for continuous motion)
- * @param {number} speedR - speed of the right motor
+ * @param {number} speedR - speed of the right motor (%)
  * @param {number} distR - distance for rigth motor to travel (set to 0 for continuous motion)
  */
-DeviceFinch.prototype.setMotor = function(status, speedL, distL, speedR, distR) {
-	//TODO: convert distance to ticks
+DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
+
+	// Convert from distance in cm to encoder ticks.
+	const ticksPerCM = 100;
+
+	//Make sure speeds do not exceed 100%
+	if (speedL > 100) { speedL = 100; }
+	if (speedL < -100) { speedL = -100; }
+	if (speedR > 100) { speedR = 100; }
+	if (speedR < -100) { speedR = -100; }
+
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", speedL);
-	request.addParam("lTicksMSB", 0);
-	request.addParam("lTicksLSB", 0);
-	request.addParam("speedR", speedR);
-	request.addParam("rTicksMSB", 0);
-	request.addParam("rTicksLSB", 0);
+	request.addParam("speedL", Math.round(speedL * 127/100));
+	request.addParam("ticksL", Math.round(distL * ticksPerCM));
+	request.addParam("speedR", Math.round(speedR * 127/100));
+	request.addParam("ticksR", Math.round(distR * ticksPerCM));
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
 
@@ -7028,7 +7035,8 @@ GuiElements.measure.stringWidth = function(text, font) {
 };
 
 /**
- * Creates a black rectangle to block interaction with the main screen.  Used for dialogs.
+ * Creates a black rectangle to block interaction with the main screen.  Used for
+ * dialogs and for FinchBlox popups.
  */
 GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
@@ -8048,10 +8056,32 @@ Font.uiFont = function(fontSize){
  *
  * Another option is to get svg icons from Font Awesome. Icons from this source
  * should have names starting with fa.
+ *
+ * Icons with names starting with mv come from Michael Verner
  * @static
  */
 function VectorPaths(){
 	const VP=VectorPaths;
+  VP.mvFinch={};
+  VP.mvFinch.path="M84.252,64.003C84.414,64.112 84.619,64.248 84.861,64.411C88.011,65.999 97.563,70.893 103.995,75.04L103.995,75.006C105.955,76.233 108.363,76.957 110.964,76.957C111.74,76.957 112.78,76.796 113.392,76.715C113.76,76.578 114.133,76.504 114.511,76.499C116.111,76.11 117.625,75.603 119.069,74.879C132.915,67.946 161.819,53.125 173.276,53.813C173.762,53.793 174.251,53.786 174.741,53.791L174.807,53.791C175.86,53.794 176.903,53.854 177.936,53.97C213.322,57.538 232.395,112.567 232.395,112.567C232.395,112.567 232.383,112.6 232.36,112.664C232.383,112.728 232.395,112.76 232.395,112.76C232.395,112.76 213.322,167.79 177.936,171.357C176.903,171.473 175.86,171.534 174.807,171.536L174.741,171.536C174.251,171.542 173.762,171.535 173.276,171.515C161.819,172.203 132.915,157.381 119.069,150.448C117.625,149.725 116.111,149.217 114.511,148.829C114.133,148.823 113.76,148.75 113.392,148.613C112.78,148.532 111.74,148.371 110.964,148.371C108.363,148.371 105.955,149.095 103.995,150.322L103.995,150.288C97.563,154.435 88.011,159.329 84.861,160.917C84.191,161.366 83.811,161.618 83.811,161.618C83.766,161.618 83.72,161.617 83.674,161.615C83.429,161.715 83.162,161.77 82.881,161.77C82.112,161.77 81.439,161.356 81.073,160.739L80.502,159.921C77.779,156.789 74.964,148.251 74.155,126.059C74.007,122.127 73.926,117.769 73.926,112.94C73.926,112.848 73.926,112.756 73.926,112.664C73.926,112.572 73.926,112.48 73.926,112.388C73.926,107.559 74.007,103.201 74.155,99.269C74.934,77.9 77.572,69.191 80.198,65.778L81.073,64.525C81.439,63.908 82.112,63.494 82.881,63.494C83.214,63.494 83.53,63.572 83.81,63.71L83.811,63.71L83.816,63.713C83.973,63.791 84.12,63.889 84.252,64.003Z";
+  VP.mvFinch.width=69;
+  VP.mvFinch.height=92;
+  VP.mvFinch.transform="matrix(3.54006e-17,-0.578136,0.578136,3.54006e-17,-31.0976,134.356)";
+  VP.mvFinchBeak={};
+  VP.mvFinchBeak.path="M451.214,1395.13C461.108,1386.64 473.944,1382.19 473.944,1382.19C473.944,1382.19 473.963,1382.2 474,1382.21C474.037,1382.2 474.056,1382.19 474.056,1382.19C474.056,1382.19 486.892,1386.64 496.786,1395.13L451.214,1395.13Z";
+  VP.mvFinchBeak.width=69;
+  VP.mvFinchBeak.height=92;
+  VP.mvFinchBeak.transform="matrix(1,-1.2326e-32,0,1,-439.963,-1379.19)";
+  VP.mvFinchTail={};
+  VP.mvFinchTail.path="M724.005,1430.54C721.339,1436.85 717.958,1443.49 715.844,1447.71C715.554,1448.29 715.323,1448.89 715.135,1449.51L672.865,1449.51C672.677,1448.89 672.446,1448.29 672.156,1447.71C670.042,1443.49 666.661,1436.85 663.995,1430.54L724.005,1430.54Z";
+  VP.mvFinchTail.width=69;
+  VP.mvFinchTail.height=92;
+  VP.mvFinchTail.transform="matrix(0.902588,0,-1.2326e-32,0.902588,-592.282,-1242.84)";
+  VP.mvArrow={};
+  VP.mvArrow.path="M249,543.15L249,522.85L275.1,522.85L275.1,504L307,533L275.1,562L275.1,543.15L249,543.15Z";
+  VP.mvArrow.width=83;
+  VP.mvArrow.height=83;
+  VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
 	VP.faPlusCircle={};
 	VP.faPlusCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z";
 	VP.faPlusCircle.width=512;
@@ -8263,7 +8293,8 @@ function VectorPaths(){
   VP.blockIcons = {
     "motion_right": VP.faArrowRight,
     "motion_left": VP.faArrowLeft,
-    "motion_forward": VP.faArrowUp,
+    //"motion_forward": VP.faArrowUp,
+    "motion_forward": VP.mvArrow,
     "motion_backward": VP.faArrowDown,
     "control_forever": VP.faUndoAlt
   }
@@ -9875,7 +9906,9 @@ TouchReceiver.touchStartDialogBlock = function(e) {
 			});
 		}
 	} else {
-		RowDialog.currentDialog.closeDialog();
+    if (RowDialog.currentDialog != null) {
+      RowDialog.currentDialog.closeDialog();
+    }
 	}
 }
 
@@ -12861,7 +12894,7 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  * Function specific to the finch button of FinchBlox
  */
 Button.prototype.addFinchBnIcons = function() {
-	const finchPathId = VectorPaths.stop;
+	const finchPathId = VectorPaths.mvFinch;
 	const battPathId = VectorPaths.battery;
 
 	const finchH = TitleBar.bnIconH;
@@ -12878,7 +12911,7 @@ Button.prototype.addFinchBnIcons = function() {
 	this.iconInverts = false;
 	this.hasText = true;
 
-	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group);
+	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
 	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
 	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);
@@ -13765,9 +13798,15 @@ InputPad.prototype.constructor = InputPad;
 
 InputPad.setConstants = function() {
 	const IP = InputPad;
-	IP.background = Colors.lightGray;
-	IP.margin = Button.defaultMargin;
-	IP.width = 160;
+  if (FinchBlox) {
+    IP.background = Colors.white;
+  	IP.margin = Button.defaultMargin;
+  	IP.width = GuiElements.width * 19/20;
+  } else {
+    IP.background = Colors.lightGray;
+  	IP.margin = Button.defaultMargin;
+  	IP.width = 160;
+  }
 };
 
 /**
@@ -13785,16 +13824,22 @@ InputPad.prototype.addWidget = function(widget) {
  * @param {function} updateFn
  * @param {function} finishFn
  * @param {Data} data
+ * @param color - the outline color for the input pad
  */
-InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
+InputPad.prototype.show = function(slotShape, updateFn, finishFn, data, color, block) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const IP = InputPad;
 	this.group = GuiElements.create.group(0, 0);
 	this.updateDim();
 	const type = Overlay.types.inputPad;
-	const layer = GuiElements.layers.inputPad;
+	var layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
-	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
+  if (FinchBlox) {
+    this.bubbleOverlay = new FBBubbleOverlay(type, IP.margin, this.group, this, color, block);
+  } else {
+    this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
+
+  }
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };
@@ -15230,6 +15275,85 @@ BubbleOverlay.prototype.relToAbsX = function(x) {
 BubbleOverlay.prototype.relToAbsY = function(y) {
 	return y + this.y + this.margin;
 };
+
+/**
+ * Special BubbleOverlay for FinchBlox
+ */
+function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, block) {
+  this.width = GuiElements.width * 19/20;
+  this.outlineColor = outlineColor;
+  this.block = block;
+  BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
+}
+FBBubbleOverlay.prototype = Object.create(BubbleOverlay.prototype);
+FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
+
+/**
+ * Override the makeBg function to give FinchBlox look.
+ */
+FBBubbleOverlay.prototype.makeBg = function() {
+  this.bgRect = GuiElements.draw.rect(0, 0, this.width, 0, this.bgColor, 10, 10);
+  this.bgGroup.appendChild(this.bgRect);
+  GuiElements.update.stroke(this.bgRect, this.outlineColor, 2);
+ 	this.triangle = GuiElements.create.path(this.bgGroup);
+ 	GuiElements.update.color(this.triangle, this.outlineColor);
+}
+
+FBBubbleOverlay.prototype.show = function () {
+  if (!this.visible) {
+    BubbleOverlay.prototype.show.call(this);
+    this.layerG.appendChild(this.block.group);
+    let absX = this.block.stack.relToAbsX(this.block.x);
+    let absY = this.block.stack.relToAbsY(this.block.y);
+    GuiElements.move.group(this.block.group, absX, absY);
+    GuiElements.blockInteraction();
+  }
+}
+
+FBBubbleOverlay.prototype.hide = function () {
+  BubbleOverlay.prototype.hide.call(this);
+  this.block.group.remove();
+  this.block.stack.group.appendChild(this.block.group);
+  GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+  GuiElements.unblockInteraction();
+}
+
+FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerHeight) {
+	DebugOptions.validateNumbers(x1, x2, y1, y2, innerWidth, innerHeight);
+	const BO = BubbleOverlay;
+
+  const height = innerHeight + 2 * this.margin;
+
+  /* Center the content in the bubble */
+	GuiElements.move.group(this.innerGroup, this.margin, this.margin);
+
+  //Determine whether the overlay should go on the bottom or top
+  const longH = height + BO.triangleH;
+  const attemptB = Math.max(0, y2 + longH - GuiElements.height);
+	const attemptT = Math.max(0, longH - y1);
+  const triangleX = (x1 + x2) / 2;
+  let triangleY = NaN;
+  let triangleDir = 1;
+  if (attemptB <= attemptT){
+    this.y = y2 + BO.triangleH;
+    triangleY = y2;
+  } else {
+    this.y = y1 - longH;
+    triangleY = y1;
+    triangleDir = -1;
+  }
+  // Convert the triangle's coords from abs to rel coords
+  this.x = (GuiElements.width - this.width)/2;
+	const triX = triangleX - this.x;
+	const triY = triangleY - this.y;
+	const triH = (BO.triangleH + BO.overlap) * triangleDir;
+
+	// Move the elements using the results
+  GuiElements.move.group(this.group, this.x, this.y);
+	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, true);
+	GuiElements.update.rect(this.bgRect, 0, 0, this.width, height);
+	this.show();
+}
 
 /**
  * A bubble-shaped element that holds text containing the result of executing a block that was tapped.
@@ -16735,6 +16859,9 @@ VectorIcon.prototype.draw = function() {
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
+  if (this.pathId.transform != null) {
+    this.pathE.setAttributeNS(null, "transform", this.pathId.transform);
+  }
 	this.group.appendChild(this.pathE);
 };
 
@@ -16775,6 +16902,24 @@ VectorIcon.prototype.move = function(x, y) {
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
 };
+
+/**
+ *  Add a second path to this icon. Shares the same group and transforms
+ * @param pathId - VectorPaths entry
+ * @param color - fill color hex value
+ */
+VectorIcon.prototype.addSecondPath = function(pathId, color){
+  this.pathId2 = pathId;
+  this.color2 = color;
+
+  this.pathE2 = GuiElements.create.path(this.group);
+	this.pathE2.setAttributeNS(null, "d", this.pathId2.path);
+	this.pathE2.setAttributeNS(null, "fill", this.color2);
+  if (this.pathId2.transform != null) {
+    this.pathE2.setAttributeNS(null, "transform", this.pathId2.transform);
+  }
+	this.group.appendChild(this.pathE2);
+}
 
 /**
  * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
@@ -21407,7 +21552,8 @@ function CalibrateCompassDialog() {
 
   this.bits = DeviceHummingbirdBit.getManager().getDeviceCount();
   this.microbits = DeviceMicroBit.getManager().getDeviceCount();
-  let count = this.bits + this.microbits;
+  this.finches = DeviceFinch.getManager().getDeviceCount()
+  let count = this.bits + this.microbits + this.finches;
 
 	RowDialog.call(this, false, title, count, 0, 0);
 	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
@@ -21427,8 +21573,10 @@ CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGr
   var robot;
   if (index < this.bits) {
     robot = DeviceHummingbirdBit.getManager().getDevice(index);
-  } else {
+  } else if (index < this.bits + this.microbits) {
     robot = DeviceMicroBit.getManager().getDevice(index - this.bits);
+  } else {
+    robot = DeviceFinch.getManager().getDevice(index - this.bits - this.microbits);
   }
 	GuiElements.alert("Loading rows for the compass calibration dialog.");
   if (robot != null) {
@@ -24844,6 +24992,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			currentLine += 1;
 			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
 			yCoord += bG.vMargin;
+      if (FinchBlox) { yCoord -= 2.5*bG.vMargin; }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}
@@ -29025,27 +29174,49 @@ BlockIcon.prototype.move = function(x, y) {
 BlockIcon.prototype.textSummary = function() {
 	return this.altText;
 };
+
+/**
+ * Adds a second icon on top of the first and returns a reference to it.
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ * @param {string} color - Hex representation of the color to use
+ */
+BlockIcon.prototype.addSecondIcon = function(pathId, color){
+	this.icon.addSecondPath(pathId, color);
+	TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+}
+
 /**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
  * @param {number} startingValue - The initial value to display
  */
-function BlockButton(parent, startingValue){
+function BlockButton(parent, startingValue, startingValue2){
+  this.height = 25;
+  this.width = 75;
+  this.cornerRadius = this.height/2;
+  this.textColor = Colors.black;
+  this.font = Font.uiFont(12);
+  this.outlineStroke = 1;
+
  this.parent = parent;
  this.value = startingValue;
- this.height = 15;
- this.width = 40;
- this.cornerRadius = 2;
+ this.value2 = startingValue2;
  this.x = (parent.width - this.width)/2;
  this.y = parent.height - this.height;
  this.widgets = [];
 
+ this.outlineColor = Colors.blockOutline[parent.category];
+ if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
+ if (this.outlineColor == null) { this.outlineColor = Colors.iron; }
+
  const me = this;
- this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.lightGray, this.cornerRadius, this.cornerRadius);
+ this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
+ GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
  this.updateValue(startingValue);
  this.button.setCallbackFunction(function() {
    const inputSys = me.createInputSystem();
-   inputSys.show(null, me.updateValue.bind(me), function(){}, null);
+   inputSys.show(null, me.updateValue.bind(me), function(){}, null, me.outlineColor, parent);
+//   GuiElements.blockInteraction();
  }, true);
 
  this.isSlot = false;
@@ -29090,9 +29261,9 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
-    this.button.addText(displayString);
+    this.button.addText(displayString, this.font, this.textColor);
   } else {
-    this.button.addText(this.value.toString());
+    this.button.addText(this.value.toString(), this.font, this.textColor);
   }
 
   this.parent.updateValues();
@@ -30549,7 +30720,9 @@ B_FinchMove.prototype.startAction = function() {
 	let speed = this.slots[2].getData().getValue();
 	let distance = this.slots[3].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, speed, distance, speed, distance);
+	if (direction == "backward") { speed = -speed; }
+
+	device.setMotors(this.runMem.requestStatus, speed, distance, speed, distance);
 	return new ExecutionStatusRunning();
 };
 
@@ -30587,13 +30760,13 @@ B_FinchTurn.prototype.startAction = function() {
 	let angle = this.slots[3].getData().getValue();
 
 	//TODO: change to convert from angle to distance
-	let distance = angle;
+	let distance = angle * 0.087;
 
 	if (direction == "right") {
-		device.setMotor(this.runMem.requestStatus, speed, distance, -speed, distance);
+		device.setMotors(this.runMem.requestStatus, speed, distance, -speed, distance);
 		return new ExecutionStatusRunning();
 	} else if (direction == "left") {
-		device.setMotor(this.runMem.requestStatus, -speed, distance, speed, distance);
+		device.setMotors(this.runMem.requestStatus, -speed, distance, speed, distance);
 		return new ExecutionStatusRunning();
 	} else {
 		return new ExecutionStatusError();
@@ -30604,12 +30777,12 @@ B_FinchTurn.prototype.startAction = function() {
 function B_FinchMotors(x, y) {
 	B_FinchCommand.call(this, x, y);
 
-	const leftSlot = new NumSlot(this, "Num_speed_l", 50, true, true);
-	leftSlot.addLimits(0, 100);
+	const leftSlot = new NumSlot(this, "Num_speed_l", 50, false, true);
+	leftSlot.addLimits(-100, 100);
 	this.addPart(leftSlot);
 
-	const rightSlot = new NumSlot(this, "Num_speed_r", 50, true, true);
-	rightSlot.addLimits(0, 100);
+	const rightSlot = new NumSlot(this, "Num_speed_r", 50, false, true);
+	rightSlot.addLimits(-100, 100);
 	this.addPart(rightSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_motors"));
@@ -30625,7 +30798,7 @@ B_FinchMotors.prototype.startAction = function() {
 	let leftSpeed = this.slots[1].getData().getValue();
 	let rightSpeed = this.slots[2].getData().getValue();
 
-	device.setMotor(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
+	device.setMotors(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
 	return new ExecutionStatusRunning();
 };
 
@@ -30641,7 +30814,7 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	device.setMotor(this.runMem.requestStatus, 0, 0, 0, 0);
+	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
 	return new ExecutionStatusRunning();
 };
 
@@ -30942,16 +31115,21 @@ function B_FBColor(x, y, level, beak) {
  this.duration = 10;
  CommandBlock.call(this,x,y,"color_"+level);
 
- const blockIcon = new BlockIcon(this, VectorPaths.faLightbulb, Colors.white, "finchColor", 30);
+ const blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 30);
  blockIcon.isEndOfLine = true;
  this.addPart(blockIcon);
 
  if (beak) {
-   this.ledIcon = GuiElements.draw.triangle(30, 30, 15, 15, Colors.white);
+   //this.ledIcon = GuiElements.draw.triangle(30, 30, 15, 15, Colors.white);
+   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
+   blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
  } else {
-   this.ledIcon = GuiElements.draw.rect(30, 50, 15, 5, Colors.white, 2, 2);
+   //this.ledIcon = GuiElements.draw.rect(30, 50, 15, 5, Colors.white, 2, 2);
+   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
+   blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
  }
- this.group.appendChild(this.ledIcon); //TODO: append to block icon somehow instead.
+ this.ledIcon = blockIcon.icon.pathE2;
+// this.group.appendChild(this.ledIcon); //TODO: append to block icon somehow instead.
 }
 B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;
@@ -31184,7 +31362,7 @@ B_FBMotion.prototype.startAction = function () {
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
-    device.setMotor(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+    device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
   } else {
     mem.requestStatus.finished = true;
     mem.duration = 0;

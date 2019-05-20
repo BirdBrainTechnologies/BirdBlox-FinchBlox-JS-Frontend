@@ -19,16 +19,21 @@ function B_FBColor(x, y, level, beak) {
  this.duration = 10;
  CommandBlock.call(this,x,y,"color_"+level);
 
- const blockIcon = new BlockIcon(this, VectorPaths.faLightbulb, Colors.white, "finchColor", 30);
+ const blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 30);
  blockIcon.isEndOfLine = true;
  this.addPart(blockIcon);
 
  if (beak) {
-   this.ledIcon = GuiElements.draw.triangle(30, 30, 15, 15, Colors.white);
+   //this.ledIcon = GuiElements.draw.triangle(30, 30, 15, 15, Colors.white);
+   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
+   blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
  } else {
-   this.ledIcon = GuiElements.draw.rect(30, 50, 15, 5, Colors.white, 2, 2);
+   //this.ledIcon = GuiElements.draw.rect(30, 50, 15, 5, Colors.white, 2, 2);
+   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
+   blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
  }
- this.group.appendChild(this.ledIcon); //TODO: append to block icon somehow instead.
+ this.ledIcon = blockIcon.icon.pathE2;
+// this.group.appendChild(this.ledIcon); //TODO: append to block icon somehow instead.
 }
 B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;

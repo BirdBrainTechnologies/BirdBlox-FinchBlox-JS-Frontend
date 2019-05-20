@@ -31,7 +31,7 @@ B_FBMotion.prototype.startAction = function () {
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
-    device.setMotor(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+    device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
   } else {
     mem.requestStatus.finished = true;
     mem.duration = 0;

@@ -26,9 +26,15 @@ InputPad.prototype.constructor = InputPad;
 
 InputPad.setConstants = function() {
 	const IP = InputPad;
-	IP.background = Colors.lightGray;
-	IP.margin = Button.defaultMargin;
-	IP.width = 160;
+  if (FinchBlox) {
+    IP.background = Colors.white;
+  	IP.margin = Button.defaultMargin;
+  	IP.width = GuiElements.width * 19/20;
+  } else {
+    IP.background = Colors.lightGray;
+  	IP.margin = Button.defaultMargin;
+  	IP.width = 160;
+  }
 };
 
 /**
@@ -46,16 +52,22 @@ InputPad.prototype.addWidget = function(widget) {
  * @param {function} updateFn
  * @param {function} finishFn
  * @param {Data} data
+ * @param color - the outline color for the input pad
  */
-InputPad.prototype.show = function(slotShape, updateFn, finishFn, data) {
+InputPad.prototype.show = function(slotShape, updateFn, finishFn, data, color, block) {
 	InputSystem.prototype.show.call(this, slotShape, updateFn, finishFn, data);
 	const IP = InputPad;
 	this.group = GuiElements.create.group(0, 0);
 	this.updateDim();
 	const type = Overlay.types.inputPad;
-	const layer = GuiElements.layers.inputPad;
+	var layer = GuiElements.layers.inputPad;
 	const coords = this.coords;
-	this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
+  if (FinchBlox) {
+    this.bubbleOverlay = new FBBubbleOverlay(type, IP.margin, this.group, this, color, block);
+  } else {
+    this.bubbleOverlay = new BubbleOverlay(type, IP.background, IP.margin, this.group, this, layer);
+
+  }
 	this.bubbleOverlay.display(coords.x1, coords.x2, coords.y1, coords.y2, this.width, this.height);
 	this.showWidgets(this.bubbleOverlay);
 };

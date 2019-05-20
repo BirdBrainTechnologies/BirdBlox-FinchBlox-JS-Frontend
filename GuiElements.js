@@ -993,7 +993,8 @@ GuiElements.measure.stringWidth = function(text, font) {
 };
 
 /**
- * Creates a black rectangle to block interaction with the main screen.  Used for dialogs.
+ * Creates a black rectangle to block interaction with the main screen.  Used for
+ * dialogs and for FinchBlox popups.
  */
 GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
