@@ -30814,7 +30814,9 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+	//Setting motors with ticks = 1 is a special stop command. Command with speed
+	// and ticks = 0 is a do nothing command.
+	device.setMotors(this.runMem.requestStatus, 0, 1, 0, 1);
 	return new ExecutionStatusRunning();
 };
 
@@ -30931,6 +30933,8 @@ function B_FinchSensorBase(x, y) {
 	this.deviceClass = DeviceFinch;
 	ReporterBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.scalingFactor = 1
+	this.displayDecimalPlaces = 0
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -30956,8 +30960,9 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			const num = result.asNum().getValue();
-			var rounded = Math.round(num);
+			const num = (result.asNum().getValue()) * this.scalingFactor;
+			const fact = Math.pow(10, this.displayDecimalPlaces)
+			var rounded = Math.round(num * fact) / fact;
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -30990,6 +30995,7 @@ B_FinchEncoder.prototype.startAction = function() {
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.scalingFactor = 0.0919;
 
 	this.addPart(new LabelText(this, Language.getStr("Distance")));
 };
@@ -31004,6 +31010,7 @@ B_FinchDistance.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "distance");
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchDistance, "cm");
 
 function B_FinchLight(x, y) {
 	B_FinchSensorBase.call(this, x, y);
@@ -31055,6 +31062,7 @@ B_FinchLine.prototype.startAction = function() {
 
 function B_FinchBattery(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.displayDecimalPlaces = 2;
 
 	this.addPart(new LabelText(this, Language.getStr("Battery")));
 };
@@ -31149,7 +31157,7 @@ B_FBColor.prototype.startAction = function () {
    if (this.isBeak) {
      device.setBeak(mem.requestStatus, this.red, this.green, this.blue);
    } else {
-     device.setTail(mem.requestStatus, 5, this.red, this.green, this.blue);
+     device.setTail(mem.requestStatus, "all", this.red, this.green, this.blue);
    }
  } else {
    mem.requestStatus.finished = true;
@@ -31182,7 +31190,7 @@ B_FBColor.prototype.updateAction = function () {
         if (this.isBeak) {
           device.setBeak(mem.requestStatus, 0, 0, 0);
         } else {
-          device.setTail(mem.requestStatus, 5, 0, 0, 0);
+          device.setTail(mem.requestStatus, "all", 0, 0, 0);
         }
       } else {
         mem.requestStatus.finished = true;
@@ -31211,7 +31219,7 @@ B_FBColor.prototype.updateValues = function () {
   }
 }
 B_FBColor.prototype.addL2Button = function () {
-  this.blue = 255;
+  this.blue = 100;
   const color = {r: this.red, g: this.green, b: this.blue};
   this.colorButton = new BlockButton(this, color);
   this.colorButton.addSlider();
@@ -31230,7 +31238,7 @@ B_FBColorL1.prototype.constructor = B_FBColorL1;
 function B_FBBeakRed(x, y) {
  B_FBColorL1.call(this, x, y, true);
 
- this.red = 255;
+ this.red = 100;
  this.updateColor();
 }
 B_FBBeakRed.prototype = Object.create(B_FBColorL1.prototype);
@@ -31239,7 +31247,7 @@ B_FBBeakRed.prototype.constructor = B_FBBeakRed;
 function B_FBTailRed(x, y) {
  B_FBColorL1.call(this, x, y, false);
 
- this.red = 255;
+ this.red = 100;
  this.updateColor();
 }
 B_FBTailRed.prototype = Object.create(B_FBColorL1.prototype);
@@ -31248,7 +31256,7 @@ B_FBTailRed.prototype.constructor = B_FBTailRed;
 function B_FBBeakGreen(x, y) {
  B_FBColorL1.call(this, x, y, true);
 
- this.green = 255;
+ this.green = 100;
  this.updateColor();
 }
 B_FBBeakGreen.prototype = Object.create(B_FBColorL1.prototype);
@@ -31257,7 +31265,7 @@ B_FBBeakGreen.prototype.constructor = B_FBBeakGreen;
 function B_FBTailGreen(x, y) {
  B_FBColorL1.call(this, x, y, false);
 
- this.green = 255;
+ this.green = 100;
  this.updateColor();
 }
 B_FBTailGreen.prototype = Object.create(B_FBColorL1.prototype);
@@ -31266,7 +31274,7 @@ B_FBTailGreen.prototype.constructor = B_FBTailGreen;
 function B_FBBeakBlue(x, y) {
  B_FBColorL1.call(this, x, y, true);
 
- this.blue = 255;
+ this.blue = 100;
  this.updateColor();
 }
 B_FBBeakBlue.prototype = Object.create(B_FBColorL1.prototype);
@@ -31275,7 +31283,7 @@ B_FBBeakBlue.prototype.constructor = B_FBBeakBlue;
 function B_FBTailBlue(x, y) {
  B_FBColorL1.call(this, x, y, false);
 
- this.blue = 255;
+ this.blue = 100;
  this.updateColor();
 }
 B_FBTailBlue.prototype = Object.create(B_FBColorL1.prototype);

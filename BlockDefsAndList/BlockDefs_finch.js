@@ -163,7 +163,9 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+	//Setting motors with ticks = 1 is a special stop command. Command with speed
+	// and ticks = 0 is a do nothing command.
+	device.setMotors(this.runMem.requestStatus, 0, 1, 0, 1);
 	return new ExecutionStatusRunning();
 };
 
@@ -280,6 +282,8 @@ function B_FinchSensorBase(x, y) {
 	this.deviceClass = DeviceFinch;
 	ReporterBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+	this.scalingFactor = 1
+	this.displayDecimalPlaces = 0
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -305,8 +309,9 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			const num = result.asNum().getValue();
-			var rounded = Math.round(num);
+			const num = (result.asNum().getValue()) * this.scalingFactor;
+			const fact = Math.pow(10, this.displayDecimalPlaces)
+			var rounded = Math.round(num * fact) / fact;
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -339,6 +344,7 @@ B_FinchEncoder.prototype.startAction = function() {
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.scalingFactor = 0.0919;
 
 	this.addPart(new LabelText(this, Language.getStr("Distance")));
 };
@@ -353,6 +359,7 @@ B_FinchDistance.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "distance");
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchDistance, "cm");
 
 function B_FinchLight(x, y) {
 	B_FinchSensorBase.call(this, x, y);
@@ -404,6 +411,7 @@ B_FinchLine.prototype.startAction = function() {
 
 function B_FinchBattery(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.displayDecimalPlaces = 2;
 
 	this.addPart(new LabelText(this, Language.getStr("Battery")));
 };
