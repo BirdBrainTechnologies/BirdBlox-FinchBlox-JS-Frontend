@@ -120,7 +120,7 @@ RowDialog.prototype.show = function() {
 		if (this.hasTitleBar) {
 			this.titleRect = this.createTitleRect();
 			if (FinchBlox){
-				this.icon = this.createTitleIcon(VectorPaths.stop);
+				this.icon = this.createTitleIcon(VectorPaths.mvFinch);
 			} else {
 				this.titleText = this.createTitleLabel(this.title);
 			}
@@ -232,12 +232,12 @@ RowDialog.prototype.createTitleLabel = function(title) {
 RowDialog.prototype.createTitleIcon = function(pathId) {
 	var RD = RowDialog;
 
-	const iconH = RD.titleBarH * 0.75;
+	const iconH = RD.titleBarH * 0.9;
 	const iconW = VectorIcon.computeWidth(pathId, iconH);
 	const iconX = (this.width - iconW) / 2;
 	const iconY = (RD.titleBarH - iconH) / 2;
 
-	const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
+	const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
 	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
 	return icon;
 };

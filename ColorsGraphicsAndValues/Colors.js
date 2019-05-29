@@ -11,17 +11,17 @@ function Colors() {
 
 Colors.setCommon = function() {
 	//Gray scale...
-	Colors.white = "#fff";
+	Colors.white = "#FFFFFF";//"#fff";
 	Colors.labelTextDisabled = "#e4e4e4";
   Colors.lightLightGray = "#CDCDCD";
   Colors.windowColor = "#CCC";
 	Colors.canvasGray = "#C1C1C1";
-	Colors.valueTextGrayed = "#aaa";
-	Colors.mediumLightGray = "#999";
+	Colors.valueTextGrayed = "#AAAAAA"//"#aaa";
+	Colors.mediumLightGray = "#999999"//"#999";
 	Colors.lightGray = "#7B7B7B";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
-	Colors.black = "#000";
+	Colors.black = "#000000"//"#000";
 	//Basic colors
 	Colors.red = "#FF0000";
 	Colors.green = "#00FF00";
@@ -161,7 +161,8 @@ Colors.createGradientFromColorAndMults = function(name, catId, color, multStart,
 };
 
 /**
- * Multiplies the rgb values by amt to make them darker
+ * Multiplies the rgb values by amt to make them darker. Colors must be specified
+ * with 6 characters, not 3 (eg. #FFFFFF not #FFF).
  * @param {string} color - color in hex
  * @param {number} amt - number from 0 to 1
  * @return {string} - color in hex

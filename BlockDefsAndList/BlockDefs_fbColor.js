@@ -100,7 +100,8 @@ B_FBColor.prototype.updateAction = function () {
  }
 }
 B_FBColor.prototype.updateColor = function () {
-  this.colorHex = Colors.rgbToHex(this.red, this.green, this.blue);
+  const s = 255/100;
+  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
   GuiElements.update.color(this.ledIcon, this.colorHex);
 }
 B_FBColor.prototype.updateValues = function () {

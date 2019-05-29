@@ -5,9 +5,10 @@
  * @param {string} color - Hex representation of the color to use
  * @param {string} altText - Text representation of icon is used for creating text summary
  * @param {number} height - Height of the icon. Icon will automatically center vertically
+ * @param {number} rotation - amount to rotate the icon in degrees
  * @constructor
  */
-function BlockIcon(parent, pathId, color, altText, height) {
+function BlockIcon(parent, pathId, color, altText, height, rotation) {
 	DebugOptions.validateNonNull(parent, pathId, color, altText);
 	DebugOptions.validateNumbers(height);
 	this.pathId = pathId;
@@ -18,7 +19,7 @@ function BlockIcon(parent, pathId, color, altText, height) {
 	this.x = 0;
 	this.y = 0;
 	this.parent = parent;
-	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group, false, rotation);
 	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
 	this.isSlot = false;
 }

@@ -118,7 +118,7 @@ function B_Forever(x, y) {
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category, false); //Bottom is not open.
 	if (FinchBlox) {
-		this.addPart(new BlockIcon(this, VectorPaths.blockIcons["control_forever"], Colors.white, "repeat", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faUndoAlt, Colors.white, "repeat", 40));
 	} else {
 		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 	}

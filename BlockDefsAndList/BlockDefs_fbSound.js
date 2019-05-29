@@ -7,7 +7,7 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  let blockIcon = new BlockIcon(this, VectorPaths.faMusic, Colors.white, "finchSound", 30);
+  let blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 30);
   //blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 

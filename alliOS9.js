@@ -5176,7 +5176,7 @@ DeviceManager.checkBattery = function() {
 	    } else if (worstBatteryStatus === "0"){
 	        color = Colors.stopRed;
 	    }
-      TitleBar.finchButton.icon2.setColor(color);
+      TitleBar.finchButton.battIcon.setColor(color);
     } else {
 			if (worstBatteryStatus === "2") {
 	        color = Colors.green;
@@ -7795,17 +7795,17 @@ function Colors() {
 
 Colors.setCommon = function() {
 	//Gray scale...
-	Colors.white = "#fff";
+	Colors.white = "#FFFFFF";//"#fff";
 	Colors.labelTextDisabled = "#e4e4e4";
   Colors.lightLightGray = "#CDCDCD";
   Colors.windowColor = "#CCC";
 	Colors.canvasGray = "#C1C1C1";
-	Colors.valueTextGrayed = "#aaa";
-	Colors.mediumLightGray = "#999";
+	Colors.valueTextGrayed = "#AAAAAA"//"#aaa";
+	Colors.mediumLightGray = "#999999"//"#999";
 	Colors.lightGray = "#7B7B7B";
 	Colors.darkGray = "#282828";
 	Colors.darkDarkGray = "#151515";
-	Colors.black = "#000";
+	Colors.black = "#000000"//"#000";
 	//Basic colors
 	Colors.red = "#FF0000";
 	Colors.green = "#00FF00";
@@ -7945,7 +7945,8 @@ Colors.createGradientFromColorAndMults = function(name, catId, color, multStart,
 };
 
 /**
- * Multiplies the rgb values by amt to make them darker
+ * Multiplies the rgb values by amt to make them darker. Colors must be specified
+ * with 6 characters, not 3 (eg. #FFFFFF not #FFF).
  * @param {string} color - color in hex
  * @param {number} amt - number from 0 to 1
  * @return {string} - color in hex
@@ -8061,6 +8062,11 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.mvMusicNote={};
+  VP.mvMusicNote.path="M0,-48.273C-2.845,-49.664 -4.694,-52.347 -5.707,-55.276C-6.128,-56.491 -6.418,-57.751 -6.604,-59.023C-6.686,-59.592 -6.722,-63.444 -6.758,-64.018C-6.788,-64.489 -6.746,-65.049 -6.91,-65.497C-7.222,-66.349 -9.018,-66.845 -9.856,-66.601C-10.507,-66.412 -10.511,-65.574 -10.473,-65.029C-10.416,-64.194 -10.41,-60.091 -10.413,-59.252C-10.419,-57.563 -10.425,-55.874 -10.431,-54.185C-10.438,-51.975 -10.445,-49.766 -10.453,-47.556C-10.462,-45.01 -10.471,-42.464 -10.479,-39.918C-10.488,-37.22 -10.497,-34.521 -10.507,-31.823C-10.516,-29.156 -10.524,-26.489 -10.534,-23.822C-10.542,-21.372 -10.551,-18.92 -10.559,-16.47C-10.565,-14.419 -10.573,-12.367 -10.58,-10.316C-10.585,-8.849 -10.59,-7.382 -10.595,-5.915C-10.597,-5.216 -10.6,-4.517 -10.602,-3.817C-10.602,-3.81 -10.609,-3.721 -10.603,-3.718C-14.19,-5.502 -19.674,-5.178 -24.84,-2.492C-32.017,1.24 -35.843,8.093 -33.388,12.816C-30.932,17.539 -24.725,18.572 -17.549,14.84C-11.559,11.726 -7.627,6.422 -7.654,2.029L-7.654,-41.042C1.106,-41.309 9.227,-30.709 9.227,-30.709C17.401,-16.312 4.143,-1.968 4.143,-1.968C3.265,0.752 5.061,0.178 5.061,0.178C9.749,-2.648 15.196,-11.565 15.196,-11.565C27.735,-32.517 0,-48.273 0,-48.273";
+  VP.mvMusicNote.width=37;
+  VP.mvMusicNote.height=59;
+  VP.mvMusicNote.transform="matrix(0.696729,0,0,0.696729,23.7802,46.4462)";
   VP.mvFinch={};
   VP.mvFinch.path="M84.252,64.003C84.414,64.112 84.619,64.248 84.861,64.411C88.011,65.999 97.563,70.893 103.995,75.04L103.995,75.006C105.955,76.233 108.363,76.957 110.964,76.957C111.74,76.957 112.78,76.796 113.392,76.715C113.76,76.578 114.133,76.504 114.511,76.499C116.111,76.11 117.625,75.603 119.069,74.879C132.915,67.946 161.819,53.125 173.276,53.813C173.762,53.793 174.251,53.786 174.741,53.791L174.807,53.791C175.86,53.794 176.903,53.854 177.936,53.97C213.322,57.538 232.395,112.567 232.395,112.567C232.395,112.567 232.383,112.6 232.36,112.664C232.383,112.728 232.395,112.76 232.395,112.76C232.395,112.76 213.322,167.79 177.936,171.357C176.903,171.473 175.86,171.534 174.807,171.536L174.741,171.536C174.251,171.542 173.762,171.535 173.276,171.515C161.819,172.203 132.915,157.381 119.069,150.448C117.625,149.725 116.111,149.217 114.511,148.829C114.133,148.823 113.76,148.75 113.392,148.613C112.78,148.532 111.74,148.371 110.964,148.371C108.363,148.371 105.955,149.095 103.995,150.322L103.995,150.288C97.563,154.435 88.011,159.329 84.861,160.917C84.191,161.366 83.811,161.618 83.811,161.618C83.766,161.618 83.72,161.617 83.674,161.615C83.429,161.715 83.162,161.77 82.881,161.77C82.112,161.77 81.439,161.356 81.073,160.739L80.502,159.921C77.779,156.789 74.964,148.251 74.155,126.059C74.007,122.127 73.926,117.769 73.926,112.94C73.926,112.848 73.926,112.756 73.926,112.664C73.926,112.572 73.926,112.48 73.926,112.388C73.926,107.559 74.007,103.201 74.155,99.269C74.934,77.9 77.572,69.191 80.198,65.778L81.073,64.525C81.439,63.908 82.112,63.494 82.881,63.494C83.214,63.494 83.53,63.572 83.81,63.71L83.811,63.71L83.816,63.713C83.973,63.791 84.12,63.889 84.252,64.003Z";
   VP.mvFinch.width=69;
@@ -8081,26 +8087,14 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
-	VP.faPlusCircle={};
+  VP.faTimesCircle={};
+  VP.faTimesCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z";
+  VP.faTimesCircle.width=512;
+  VP.faTimesCircle.height=512;
+  VP.faPlusCircle={};
 	VP.faPlusCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z";
 	VP.faPlusCircle.width=512;
 	VP.faPlusCircle.height=512;
-  VP.faArrowDown={};
-  VP.faArrowDown.path="M413.1 222.5l22.2 22.2c9.4 9.4 9.4 24.6 0 33.9L241 473c-9.4 9.4-24.6 9.4-33.9 0L12.7 278.6c-9.4-9.4-9.4-24.6 0-33.9l22.2-22.2c9.5-9.5 25-9.3 34.3.4L184 343.4V56c0-13.3 10.7-24 24-24h32c13.3 0 24 10.7 24 24v287.4l114.8-120.5c9.3-9.8 24.8-10 34.3-.4z";
-  VP.faArrowDown.width=448;
-  VP.faArrowDown.height=512;
-  VP.faArrowUp={};
-  VP.faArrowUp.path="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"
-  VP.faArrowUp.width=448;
-  VP.faArrowUp.height=512;
-  VP.faArrowLeft={};
-  VP.faArrowLeft.path="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z";
-  VP.faArrowLeft.width=448;
-  VP.faArrowLeft.height=512;
-  VP.faArrowRight={};
-  VP.faArrowRight.path="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z";
-  VP.faArrowRight.width=448;
-  VP.faArrowRight.height=512;
   VP.faUndoAlt={};
   VP.faUndoAlt.path="M255.545 8c-66.269.119-126.438 26.233-170.86 68.685L48.971 40.971C33.851 25.851 8 36.559 8 57.941V192c0 13.255 10.745 24 24 24h134.059c21.382 0 32.09-25.851 16.971-40.971l-41.75-41.75c30.864-28.899 70.801-44.907 113.23-45.273 92.398-.798 170.283 73.977 169.484 169.442C423.236 348.009 349.816 424 256 424c-41.127 0-79.997-14.678-110.63-41.556-4.743-4.161-11.906-3.908-16.368.553L89.34 422.659c-4.872 4.872-4.631 12.815.482 17.433C133.798 479.813 192.074 504 256 504c136.966 0 247.999-111.033 248-247.998C504.001 119.193 392.354 7.755 255.545 8z";
   VP.faUndoAlt.width=512;
@@ -8288,15 +8282,7 @@ function VectorPaths(){
 		"control_3": VP.faHandPointRight,
 		"sensor_3": VP.language
   };
-  //Also, in FinchBlox, many blocks use icons rather than text labels.
-  VP.blockIcons = {
-    "motion_right": VP.faArrowRight,
-    "motion_left": VP.faArrowLeft,
-    //"motion_forward": VP.faArrowUp,
-    "motion_forward": VP.mvArrow,
-    "motion_backward": VP.faArrowDown,
-    "control_forever": VP.faUndoAlt
-  }
+
 }
 
 /**
@@ -10476,7 +10462,7 @@ TitleBar.setGraphicsPart2 = function() {
   if (FinchBlox) {
     TB.finchBnX = 2*TB.buttonMargin;
     TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    TB.levelBnY = (TB.height/2) - (TB.buttonH/2);
+    TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
     TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
     TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
@@ -10603,7 +10589,7 @@ TitleBar.makeButtons = function() {
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
     //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
-		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
+		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.tallButtonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
   	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
@@ -10619,6 +10605,31 @@ TitleBar.makeButtons = function() {
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
 		TB.levelButton.setCallbackFunction(function() {(new LevelDialog()).show();}, true);
+
+
+    TB.updateStatus = function(status) {
+      var finchBn = TitleBar.finchButton;
+      //var color = Colors.fbGray;
+      //var outlineColor = Colors.iron;
+      var color = Colors.stopRed;
+      var outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
+      var shortName = "";
+      if (status === DeviceManager.statuses.connected) {
+        color = Colors.finchGreen;
+        outlineColor = Colors.flagGreen;
+        var sn = DeviceFinch.getManager().connectedDevices[0].shortName;
+        if (sn != null) { shortName = sn; }
+        finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
+        finchBn.xIcon.pathE.remove();
+      } else {
+        finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
+        finchBn.battIcon.pathE.remove();
+      }
+      finchBn.updateBgColor(color);
+      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 2);
+      GuiElements.update.text(finchBn.textE, shortName);
+    }
+    DeviceManager.setStatusListener(TB.updateStatus);
 
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
@@ -10639,21 +10650,7 @@ TitleBar.makeButtons = function() {
 					(new DiscoverDialog(DeviceFinch)).show();
 			}
 		}, true);
-		TB.updateStatus = function(status) {
-			var color = Colors.fbGray;
-			var outlineColor = Colors.iron;
-			var shortName = "";
-			if (status === DeviceManager.statuses.connected) {
-				color = Colors.finchGreen;
-				outlineColor = Colors.flagGreen;
-				var sn = DeviceHummingbirdBit.getManager().connectedDevices[0].shortName;
-				if (sn != null) { shortName = sn; }
-			}
-			TitleBar.finchButton.updateBgColor(color);
-			GuiElements.update.stroke(TitleBar.finchButton.icon.pathE, outlineColor, 2);
-			GuiElements.update.text(TitleBar.finchButton.textE, shortName);
-		}
-		DeviceManager.setStatusListener(TB.updateStatus);
+
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -12895,15 +12892,22 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
 Button.prototype.addFinchBnIcons = function() {
 	var finchPathId = VectorPaths.mvFinch;
 	var battPathId = VectorPaths.battery;
+  var xPathId = VectorPaths.faTimesCircle;
+  var font = Font.uiFont(20);
 
-	var finchH = TitleBar.bnIconH;
-	var battH = TitleBar.bnIconH*0.75;
+	var finchH = TitleBar.bnIconH*1.5;
+	var battH = TitleBar.bnIconH*0.6;
+  var xH = TitleBar.bnIconH*0.5;
 	var finchW = VectorIcon.computeWidth(finchPathId, finchH);
 	var battW = VectorIcon.computeWidth(battPathId, battH);
-	var finchX = (this.width - finchW - battW) / 3;
-	var battX = finchW + 2*finchX;
+  var xW = VectorIcon.computeWidth(xPathId, xH);
+	var finchX = (this.width - finchW - battW) / 2.5;
+	var battX = finchW + 1.5*finchX;
+  var xX = finchX + finchW/2;
 	var finchY = (this.height - finchH) / 2;
 	var battY = (this.height - battH) / 2;
+  var textY = (this.height + font.charHeight) / 2;
+  var xY = (this.height - xH) / 2;
 
 	this.removeContent();
 	this.hasIcon = true;
@@ -12912,13 +12916,17 @@ Button.prototype.addFinchBnIcons = function() {
 
 	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
-	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);
+	this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
+	this.textE = GuiElements.draw.text(finchX, textY, "", font, Colors.flagGreen);
 	this.group.appendChild(this.textE);
+  this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
 
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
-	TouchReceiver.addListenersBN(this.icon2.pathE, this);
+	TouchReceiver.addListenersBN(this.battIcon.pathE, this);
+  TouchReceiver.addListenersBN(this.xIcon.pathE, this);
 	TouchReceiver.addListenersBN(this.textE, this);
+
+  TitleBar.updateStatus();
 }
 
 /**
@@ -16810,7 +16818,7 @@ BlockContextMenu.prototype.close = function() {
  * @constructor
  */
 function VectorIcon(x, y, pathId, color, height, parent, mirror, rotation) {
-	this.x = x;
+  this.x = x;
 	this.y = y;
 	this.color = color;
 	this.height = height;
@@ -16850,11 +16858,7 @@ VectorIcon.prototype.draw = function() {
 	}
 
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-  if (this.rotation != null) {
-    this.group.setAttributeNS(null, "transform", "rotate(" + this.rotation + ", " + (this.x+(this.width/2)) + ", " + (this.y+(this.height/2)) + ") translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
-  } else {
-    this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
-  }
+  this.setTransform();
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
@@ -16863,6 +16867,14 @@ VectorIcon.prototype.draw = function() {
   }
 	this.group.appendChild(this.pathE);
 };
+
+VectorIcon.prototype.setTransform = function() {
+  if (this.rotation != null) {
+    this.group.setAttributeNS(null, "transform", "rotate(" + this.rotation + ", " + (this.x+(this.width/2)) + ", " + (this.y+(this.height/2)) + ") translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  } else {
+    this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  }
+}
 
 VectorIcon.prototype.update = function(x, y, height) {
   this.x = x;
@@ -16873,7 +16885,8 @@ VectorIcon.prototype.update = function(x, y, height) {
     this.scaleY = this.scaleX;
   	this.width = this.scaleY * this.pathId.width;
   }
-  this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  //this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  this.setTransform();
 }
 
 /**
@@ -16894,7 +16907,8 @@ VectorIcon.prototype.move = function(x, y) {
 	if (Language.isRTL && !this.mirror) { x += this.width; }
 	this.x = x;
 	this.y = y;
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+	//this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  this.setTransform();
 };
 
 /* Deletes the icon and removes the path from its parent group. */
@@ -19230,7 +19244,7 @@ RowDialog.prototype.show = function() {
 		if (this.hasTitleBar) {
 			this.titleRect = this.createTitleRect();
 			if (FinchBlox){
-				this.icon = this.createTitleIcon(VectorPaths.stop);
+				this.icon = this.createTitleIcon(VectorPaths.mvFinch);
 			} else {
 				this.titleText = this.createTitleLabel(this.title);
 			}
@@ -19342,12 +19356,12 @@ RowDialog.prototype.createTitleLabel = function(title) {
 RowDialog.prototype.createTitleIcon = function(pathId) {
 	var RD = RowDialog;
 
-	var iconH = RD.titleBarH * 0.75;
+	var iconH = RD.titleBarH * 0.9;
 	var iconW = VectorIcon.computeWidth(pathId, iconH);
 	var iconX = (this.width - iconW) / 2;
 	var iconY = (RD.titleBarH - iconH) / 2;
 
-	var icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group);
+	var icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
 	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
 	return icon;
 };
@@ -24621,6 +24635,7 @@ Block.prototype.stop = function() {
 	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.stop(); //Stop the next Block.
 	}
+  if (FinchBlox) { this.updateRunColor(); }
 };
 
 /**
@@ -29116,9 +29131,10 @@ LabelText.prototype.makeInactive = function() {
  * @param {string} color - Hex representation of the color to use
  * @param {string} altText - Text representation of icon is used for creating text summary
  * @param {number} height - Height of the icon. Icon will automatically center vertically
+ * @param {number} rotation - amount to rotate the icon in degrees
  * @constructor
  */
-function BlockIcon(parent, pathId, color, altText, height) {
+function BlockIcon(parent, pathId, color, altText, height, rotation) {
 	DebugOptions.validateNonNull(parent, pathId, color, altText);
 	DebugOptions.validateNumbers(height);
 	this.pathId = pathId;
@@ -29129,7 +29145,7 @@ function BlockIcon(parent, pathId, color, altText, height) {
 	this.x = 0;
 	this.y = 0;
 	this.parent = parent;
-	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group, false, rotation);
 	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
 	this.isSlot = false;
 }
@@ -31203,7 +31219,8 @@ B_FBColor.prototype.updateAction = function () {
  }
 }
 B_FBColor.prototype.updateColor = function () {
-  this.colorHex = Colors.rgbToHex(this.red, this.green, this.blue);
+  var s = 255/100;
+  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
   GuiElements.update.color(this.ledIcon, this.colorHex);
 }
 B_FBColor.prototype.updateValues = function () {
@@ -31350,8 +31367,10 @@ function B_FBMotion(x, y, direction, level) {
   this.leftDist = 0;
   CommandBlock.call(this,x,y,"motion_"+level);
 
-  var icon = VectorPaths.blockIcons["motion_" + direction];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30);
+  //var icon = VectorPaths.blockIcons["motion_" + direction];
+  var icon = VectorPaths.mvArrow;
+  var rotation = B_FBMotion.iconRotation[direction];
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30, rotation);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -31467,16 +31486,25 @@ B_FBMotion.prototype.updateValues = function () {
         GuiElements.alert("unknown direction in motion block update values");
     }
   }
-  console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
+  //console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
+B_FBMotion.iconRotation = {
+  "forward": 0,
+  "right": 90,
+  "backward": 180,
+  "left": 270
+}
+
+
+//****  Level 1 Blocks ****//
 
 function B_FBForward(x, y) {
   B_FBMotion.call(this, x, y, "forward", 1);
 
   this.leftSpeed = 50;
   this.rightSpeed = 50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = 25;
+  this.rightDist = 25;
 }
 B_FBForward.prototype = Object.create(B_FBMotion.prototype);
 B_FBForward.prototype.constructor = B_FBForward;
@@ -31485,8 +31513,8 @@ function B_FBBackward(x, y) {
 
   this.leftSpeed = -50;
   this.rightSpeed = -50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = 25;
+  this.rightDist = 25;
 }
 B_FBBackward.prototype = Object.create(B_FBMotion.prototype);
 B_FBBackward.prototype.constructor = B_FBBackward;
@@ -31511,7 +31539,9 @@ function B_FBLeft(x, y) {
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;
 
-//Level 2 motion blocks
+
+//****  Level 2 Blocks ****//
+
 function B_FBMotionL2(x, y, direction, defaultValue){
   B_FBMotion.call(this, x, y, direction, 2);
 
@@ -31541,7 +31571,9 @@ function B_FBLeftL2(x, y) {
 B_FBLeftL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 
-//Level 3 motion blocks
+
+//****  Level 3 Blocks ****//
+
 function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
   B_FBMotion.call(this, x, y, direction, 3);
 
@@ -31584,7 +31616,7 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  var blockIcon = new BlockIcon(this, VectorPaths.faMusic, Colors.white, "finchSound", 30);
+  var blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 30);
   //blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -31837,7 +31869,7 @@ function B_Forever(x, y) {
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category, false); //Bottom is not open.
 	if (FinchBlox) {
-		this.addPart(new BlockIcon(this, VectorPaths.blockIcons["control_forever"], Colors.white, "repeat", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faUndoAlt, Colors.white, "repeat", 40));
 	} else {
 		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 	}

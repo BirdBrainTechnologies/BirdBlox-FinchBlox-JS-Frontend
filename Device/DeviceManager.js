@@ -84,7 +84,7 @@ DeviceManager.checkBattery = function() {
 	    } else if (worstBatteryStatus === "0"){
 	        color = Colors.stopRed;
 	    }
-      TitleBar.finchButton.icon2.setColor(color);
+      TitleBar.finchButton.battIcon.setColor(color);
     } else {
 			if (worstBatteryStatus === "2") {
 	        color = Colors.green;

@@ -11,7 +11,7 @@
  * @constructor
  */
 function VectorIcon(x, y, pathId, color, height, parent, mirror, rotation) {
-	this.x = x;
+  this.x = x;
 	this.y = y;
 	this.color = color;
 	this.height = height;
@@ -51,11 +51,7 @@ VectorIcon.prototype.draw = function() {
 	}
 
 	this.group = GuiElements.create.group(this.x, this.y, this.parent);
-  if (this.rotation != null) {
-    this.group.setAttributeNS(null, "transform", "rotate(" + this.rotation + ", " + (this.x+(this.width/2)) + ", " + (this.y+(this.height/2)) + ") translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
-  } else {
-    this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
-  }
+  this.setTransform();
 	this.pathE = GuiElements.create.path(this.group);
 	this.pathE.setAttributeNS(null, "d", this.pathId.path);
 	this.pathE.setAttributeNS(null, "fill", this.color);
@@ -64,6 +60,14 @@ VectorIcon.prototype.draw = function() {
   }
 	this.group.appendChild(this.pathE);
 };
+
+VectorIcon.prototype.setTransform = function() {
+  if (this.rotation != null) {
+    this.group.setAttributeNS(null, "transform", "rotate(" + this.rotation + ", " + (this.x+(this.width/2)) + ", " + (this.y+(this.height/2)) + ") translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  } else {
+    this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  }
+}
 
 VectorIcon.prototype.update = function(x, y, height) {
   this.x = x;
@@ -74,7 +78,8 @@ VectorIcon.prototype.update = function(x, y, height) {
     this.scaleY = this.scaleX;
   	this.width = this.scaleY * this.pathId.width;
   }
-  this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  //this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  this.setTransform();
 }
 
 /**
@@ -95,7 +100,8 @@ VectorIcon.prototype.move = function(x, y) {
 	if (Language.isRTL && !this.mirror) { x += this.width; }
 	this.x = x;
 	this.y = y;
-	this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+	//this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  this.setTransform();
 };
 
 /* Deletes the icon and removes the path from its parent group. */

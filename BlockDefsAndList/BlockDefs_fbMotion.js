@@ -12,8 +12,10 @@ function B_FBMotion(x, y, direction, level) {
   this.leftDist = 0;
   CommandBlock.call(this,x,y,"motion_"+level);
 
-  const icon = VectorPaths.blockIcons["motion_" + direction];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30);
+  //const icon = VectorPaths.blockIcons["motion_" + direction];
+  const icon = VectorPaths.mvArrow;
+  const rotation = B_FBMotion.iconRotation[direction];
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30, rotation);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -129,16 +131,25 @@ B_FBMotion.prototype.updateValues = function () {
         GuiElements.alert("unknown direction in motion block update values");
     }
   }
-  console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
+  //console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
+B_FBMotion.iconRotation = {
+  "forward": 0,
+  "right": 90,
+  "backward": 180,
+  "left": 270
+}
+
+
+//****  Level 1 Blocks ****//
 
 function B_FBForward(x, y) {
   B_FBMotion.call(this, x, y, "forward", 1);
 
   this.leftSpeed = 50;
   this.rightSpeed = 50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = 25;
+  this.rightDist = 25;
 }
 B_FBForward.prototype = Object.create(B_FBMotion.prototype);
 B_FBForward.prototype.constructor = B_FBForward;
@@ -147,8 +158,8 @@ function B_FBBackward(x, y) {
 
   this.leftSpeed = -50;
   this.rightSpeed = -50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = 25;
+  this.rightDist = 25;
 }
 B_FBBackward.prototype = Object.create(B_FBMotion.prototype);
 B_FBBackward.prototype.constructor = B_FBBackward;
@@ -173,7 +184,9 @@ function B_FBLeft(x, y) {
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;
 
-//Level 2 motion blocks
+
+//****  Level 2 Blocks ****//
+
 function B_FBMotionL2(x, y, direction, defaultValue){
   B_FBMotion.call(this, x, y, direction, 2);
 
@@ -203,7 +216,9 @@ function B_FBLeftL2(x, y) {
 B_FBLeftL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 
-//Level 3 motion blocks
+
+//****  Level 3 Blocks ****//
+
 function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
   B_FBMotion.call(this, x, y, direction, 3);
 

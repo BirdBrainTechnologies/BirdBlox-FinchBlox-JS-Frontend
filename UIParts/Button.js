@@ -340,15 +340,22 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
 Button.prototype.addFinchBnIcons = function() {
 	const finchPathId = VectorPaths.mvFinch;
 	const battPathId = VectorPaths.battery;
+  const xPathId = VectorPaths.faTimesCircle;
+  const font = Font.uiFont(20);
 
-	const finchH = TitleBar.bnIconH;
-	const battH = TitleBar.bnIconH*0.75;
+	const finchH = TitleBar.bnIconH*1.5;
+	const battH = TitleBar.bnIconH*0.6;
+  const xH = TitleBar.bnIconH*0.5;
 	const finchW = VectorIcon.computeWidth(finchPathId, finchH);
 	const battW = VectorIcon.computeWidth(battPathId, battH);
-	const finchX = (this.width - finchW - battW) / 3;
-	const battX = finchW + 2*finchX;
+  const xW = VectorIcon.computeWidth(xPathId, xH);
+	const finchX = (this.width - finchW - battW) / 2.5;
+	const battX = finchW + 1.5*finchX;
+  const xX = finchX + finchW/2;
 	const finchY = (this.height - finchH) / 2;
 	const battY = (this.height - battH) / 2;
+  const textY = (this.height + font.charHeight) / 2;
+  const xY = (this.height - xH) / 2;
 
 	this.removeContent();
 	this.hasIcon = true;
@@ -357,13 +364,17 @@ Button.prototype.addFinchBnIcons = function() {
 
 	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
-	this.icon2 = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-	this.textE = GuiElements.draw.text(finchX, this.height/2, "", Font.uiFont(24), Colors.flagGreen);
+	this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
+	this.textE = GuiElements.draw.text(finchX, textY, "", font, Colors.flagGreen);
 	this.group.appendChild(this.textE);
+  this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
 
 	TouchReceiver.addListenersBN(this.icon.pathE, this);
-	TouchReceiver.addListenersBN(this.icon2.pathE, this);
+	TouchReceiver.addListenersBN(this.battIcon.pathE, this);
+  TouchReceiver.addListenersBN(this.xIcon.pathE, this);
 	TouchReceiver.addListenersBN(this.textE, this);
+
+  TitleBar.updateStatus();
 }
 
 /**

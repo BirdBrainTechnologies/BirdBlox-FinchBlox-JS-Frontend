@@ -253,6 +253,7 @@ Block.prototype.stop = function() {
 	if (this.bottomOpen && this.nextBlock != null) {
 		this.nextBlock.stop(); //Stop the next Block.
 	}
+  if (FinchBlox) { this.updateRunColor(); }
 };
 
 /**

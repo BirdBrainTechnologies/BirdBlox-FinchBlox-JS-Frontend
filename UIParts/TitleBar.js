@@ -76,7 +76,7 @@ TitleBar.setGraphicsPart2 = function() {
   if (FinchBlox) {
     TB.finchBnX = 2*TB.buttonMargin;
     TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    TB.levelBnY = (TB.height/2) - (TB.buttonH/2);
+    TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
     TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
     TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
@@ -203,7 +203,7 @@ TitleBar.makeButtons = function() {
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
     //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
-		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
+		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.tallButtonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
   	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
@@ -219,6 +219,31 @@ TitleBar.makeButtons = function() {
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
 		TB.levelButton.setCallbackFunction(function() {(new LevelDialog()).show();}, true);
+
+
+    TB.updateStatus = function(status) {
+      const finchBn = TitleBar.finchButton;
+      //let color = Colors.fbGray;
+      //let outlineColor = Colors.iron;
+      let color = Colors.stopRed;
+      let outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
+      let shortName = "";
+      if (status === DeviceManager.statuses.connected) {
+        color = Colors.finchGreen;
+        outlineColor = Colors.flagGreen;
+        let sn = DeviceFinch.getManager().connectedDevices[0].shortName;
+        if (sn != null) { shortName = sn; }
+        finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
+        finchBn.xIcon.pathE.remove();
+      } else {
+        finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
+        finchBn.battIcon.pathE.remove();
+      }
+      finchBn.updateBgColor(color);
+      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 2);
+      GuiElements.update.text(finchBn.textE, shortName);
+    }
+    DeviceManager.setStatusListener(TB.updateStatus);
 
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
     //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
@@ -239,21 +264,7 @@ TitleBar.makeButtons = function() {
 					(new DiscoverDialog(DeviceFinch)).show();
 			}
 		}, true);
-		TB.updateStatus = function(status) {
-			let color = Colors.fbGray;
-			let outlineColor = Colors.iron;
-			let shortName = "";
-			if (status === DeviceManager.statuses.connected) {
-				color = Colors.finchGreen;
-				outlineColor = Colors.flagGreen;
-				let sn = DeviceHummingbirdBit.getManager().connectedDevices[0].shortName;
-				if (sn != null) { shortName = sn; }
-			}
-			TitleBar.finchButton.updateBgColor(color);
-			GuiElements.update.stroke(TitleBar.finchButton.icon.pathE, outlineColor, 2);
-			GuiElements.update.text(TitleBar.finchButton.textE, shortName);
-		}
-		DeviceManager.setStatusListener(TB.updateStatus);
+
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
