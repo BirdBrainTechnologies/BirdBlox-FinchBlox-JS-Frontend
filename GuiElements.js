@@ -47,10 +47,22 @@ window.onresize = function() {
 		//GuiElements.updateDims();
 	//}
 	if (GuiElements.loaded) {
+
+		let f = function() {
+			if(FinchBlox){
+				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
+				GuiElements.zoomMultiple = window.innerWidth/800;
+				GuiElements.updateZoom();
+			} else {
+				GuiElements.updateDims();
+			}
+		}
 		if (GuiElements.isIos) {
-	    setTimeout(function() { GuiElements.updateDims(); }, 500);
+	    //setTimeout(function() { GuiElements.updateDims(); }, 500);
+			setTimeout(function() { f(); }, 500);
 		} else {
-			GuiElements.updateDims();
+			//GuiElements.updateDims();
+			f();
 		}
 	}
 };
@@ -90,6 +102,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
@@ -1155,7 +1168,7 @@ GuiElements.load.configureZoom = function(callback) {
 	const GE = GuiElements;
 	SettingsManager.loadSettings(function() {
 		const callbackFn = function() {
-			GE.zoomMultiple = SettingsManager.zoom.getValue();
+			if (!FinchBlox) { GE.zoomMultiple = SettingsManager.zoom.getValue(); }
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;

@@ -10,12 +10,13 @@ function B_FBMotion(x, y, direction, level) {
   this.leftSpeed = 0;
   this.rightDist = 0;
   this.leftDist = 0;
+  this.defaultAngle = 90;
   CommandBlock.call(this,x,y,"motion_"+level);
 
   //const icon = VectorPaths.blockIcons["motion_" + direction];
   const icon = VectorPaths.mvArrow;
   const rotation = B_FBMotion.iconRotation[direction];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30, rotation);
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 32, rotation);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -82,18 +83,18 @@ B_FBMotion.prototype.addL2Button = function(defaultValue) {
     case "right":
       this.leftSpeed = 50;
       this.rightSpeed = -50;
-      this.leftDist = 10;
-      this.rightDist = 10;
-      this.angleBN = new BlockButton(this, defaultValue);
+      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.angleBN = new BlockButton(this, this.defaultAngle);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
     case "left":
       this.leftSpeed = -50;
       this.rightSpeed = 50;
-      this.leftDist = 10;
-      this.rightDist = 10;
-      this.angleBN = new BlockButton(this, defaultValue);
+      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.angleBN = new BlockButton(this, this.defaultAngle);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
@@ -168,8 +169,8 @@ function B_FBRight(x, y) {
 
   this.leftSpeed = 50;
   this.rightSpeed = -50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
@@ -178,8 +179,8 @@ function B_FBLeft(x, y) {
 
   this.leftSpeed = -50;
   this.rightSpeed = 50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;

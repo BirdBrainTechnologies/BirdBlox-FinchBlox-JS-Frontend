@@ -19,7 +19,7 @@ function B_FBColor(x, y, level, beak) {
  this.duration = 10;
  CommandBlock.call(this,x,y,"color_"+level);
 
- const blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 30);
+ const blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 40);
  blockIcon.isEndOfLine = true;
  this.addPart(blockIcon);
 

@@ -20,7 +20,9 @@ function Font(fontFamily, fontSize, fontWeight) {
  * @return {number}
  */
 Font.prototype.lookupCharH = function(fontSize){
-	return 0.6639 * fontSize + 1.644;
+  let scale = 0.6639;
+  if (this.fontFamily == 'AvenirHeavy') { scale = 0.59; } //number determined empirically, may need adjustment
+	return scale * fontSize + 1.644;
 };
 
 /**

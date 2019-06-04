@@ -589,7 +589,7 @@ Block.prototype.updateAlign = function(x, y) {
 	}
 	if (this.nextBlock != null) {
     if (FinchBlox) { //these blocks link horizontally rather than vertically
-      this.nextBlock.updateAlign(this.x + this.width, this.y);
+      this.nextBlock.updateAlign(this.x + this.width + bG.command.fbBumpDepth, this.y);
     } else {
       this.nextBlock.updateAlign(this.x, this.y + this.height);
     }

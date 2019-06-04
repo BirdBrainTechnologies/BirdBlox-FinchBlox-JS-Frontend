@@ -35,16 +35,17 @@ BlockPalette.setGraphics = function() {
 	// Dimensions for the region with CategoryBNs
   if (FinchBlox){
     BlockPalette.width = GuiElements.width;
-    BlockPalette.height = 100;
+    BlockPalette.height = 90;//100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
     BlockPalette.bg = Colors.blockPalette;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 40;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
-    BlockPalette.blockMargin = 25;   // The horizontal spacing between Blocks
+    BlockPalette.blockMargin = 35;//25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
     BlockPalette.trashIconVP = VectorPaths.faTrash;
+    BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;

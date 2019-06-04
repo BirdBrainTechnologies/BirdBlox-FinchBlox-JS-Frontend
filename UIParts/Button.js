@@ -54,14 +54,16 @@ Button.setGraphics = function() {
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
 	Button.highlightFore = Colors.bbt;
-	Button.disabledBg = Colors.darkGray;
-	Button.disabledFore = Colors.black;
 
 	// The suggested margin between adjacent margins
   if (FinchBlox){
     Button.defaultMargin = 10;
+    Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
+    Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
   } else {
     Button.defaultMargin = 5;
+    Button.disabledBg = Colors.darkGray;
+    Button.disabledFore = Colors.black;
   }
 
 	// The suggested font for the forground of buttons
@@ -341,18 +343,23 @@ Button.prototype.addFinchBnIcons = function() {
 	const finchPathId = VectorPaths.mvFinch;
 	const battPathId = VectorPaths.battery;
   const xPathId = VectorPaths.faTimesCircle;
-  const font = Font.uiFont(20);
+  const font = Font.uiFont(18);
 
-	const finchH = TitleBar.bnIconH*1.5;
-	const battH = TitleBar.bnIconH*0.6;
-  const xH = TitleBar.bnIconH*0.5;
+	const finchH = TitleBar.bnIconH*1.65;//the long dimension of the finch since we will rotate it
+	const battH = TitleBar.bnIconH*0.75;
+  const xH = TitleBar.bnIconH*0.6;
 	const finchW = VectorIcon.computeWidth(finchPathId, finchH);
 	const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
-	const finchX = (this.width - finchW - battW) / 2.5;
-	const battX = finchW + 1.5*finchX;
-  const xX = finchX + finchW/2;
-	const finchY = (this.height - finchH) / 2;
+	this.finchX = (this.width - finchW) / 2;
+	//const battX = finchH + 1.5*finchX;
+  const m = 10; //Margin between finch icon and battery icon.
+  this.finchConnectedX = (this.width - finchW - battW - m) / 2;
+  const battX = (this.width + finchH + m - battW)/2;
+  const textX = (this.width - finchH - battW - m)/2 + m;
+
+  const xX = (this.width - xW) / 2;//finchX + finchH/2;
+	this.finchY = (this.height - finchH) / 2;
 	const battY = (this.height - battH) / 2;
   const textY = (this.height + font.charHeight) / 2;
   const xY = (this.height - xH) / 2;
@@ -362,10 +369,10 @@ Button.prototype.addFinchBnIcons = function() {
 	this.iconInverts = false;
 	this.hasText = true;
 
-	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
+	this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
 	this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-	this.textE = GuiElements.draw.text(finchX, textY, "", font, Colors.flagGreen);
+	this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
 	this.group.appendChild(this.textE);
   this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
 

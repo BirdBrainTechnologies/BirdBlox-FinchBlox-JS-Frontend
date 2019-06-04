@@ -44,11 +44,11 @@ BlockGraphics.SetCommand = function() {
 
 	// Minimum dimensions
 	if (FinchBlox) {
-		BlockGraphics.command.height = 66;//76;
-		BlockGraphics.command.width = 66;//76;
-		BlockGraphics.command.cornerRadius = 10;
+		BlockGraphics.command.height = 60;//76;
+		BlockGraphics.command.width = 50;//76;
+		BlockGraphics.command.cornerRadius = 8;//10;
 		BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
-		BlockGraphics.command.hMargin = 20;//25; // The margin to the left and right of the content
+		BlockGraphics.command.hMargin = 10;//20;//25; // The margin to the left and right of the content
 //		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out
 	} else {
 		BlockGraphics.command.height = 34;
@@ -139,7 +139,7 @@ BlockGraphics.SetHat = function() {
 	BlockGraphics.hat = {};
 
 	//Hat radius for FinchBlox
-	BlockGraphics.hat.r = 30;
+	BlockGraphics.hat.r = 24;//30;
 
 	// Radius of ellipse at top of Block
 	BlockGraphics.hat.hRadius = 60;
@@ -278,24 +278,31 @@ BlockGraphics.CalcPaths = function() {
 	let path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
-	let fbBumpOut = " 5,0 0,-3 ";
-	fbBumpOut += "a 2 2 0 0 1 2 -2 ";
-	fbBumpOut += "l 4,0 ";
-	fbBumpOut += "a 2 2 0 0 1 2 2 ";
-	fbBumpOut += "l 0,32 ";
-	fbBumpOut += "a 2 2 0 0 1 -2 2 ";
-	fbBumpOut += "l -4,0 ";
-	fbBumpOut += "a 2 2 0 0 1 -2 -2 ";
-	fbBumpOut += "l 0,-3 -5,0 ";
-	let fbBumpIn = " 5,0 0,3 ";
-	fbBumpIn += "a 2 2 0 0 0 2 2 ";
-	fbBumpIn += "l 4,0 ";
-	fbBumpIn += "a 2 2 0 0 0 2 -2 ";
-	fbBumpIn += "l 0,-32 ";
-	fbBumpIn += "a 2 2 0 0 0 -2 -2 ";
-	fbBumpIn += "l -4,0 ";
-	fbBumpIn += "a 2 2 0 0 0 -2 2 ";
-	fbBumpIn += "l 0,3 -5,0 ";
+
+	//*** FinchBlox Bumps ***//
+	let r = 2;//2; //bump corner radius
+	let d = 2;//4; //straight distance across top
+	let u = 2; //straight distance up from neck
+	let n = 3; //neck width
+	let h = 24;//32; //main straight height
+	let fbBumpOut = " "+n+",0 0,"+(-u)+" "; //line across, line up
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+(-r)+" "; //corner
+	fbBumpOut += "l "+d+",0 "; //line across
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+r+" "; //corner
+	fbBumpOut += "l 0,"+h+" "; //main vertial line
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+r+" "; //corner
+	fbBumpOut += "l "+(-d)+",0 "; //line across
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+(-r)+" "; //corner
+	fbBumpOut += "l 0,"+(-u)+" "+(-n)+",0 "; //line up, line across
+	let fbBumpIn = " "+n+",0 0,"+u+" ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+r+" ";
+	fbBumpIn += "l "+d+",0 ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+(-r)+" ";
+	fbBumpIn += "l 0,"+(-h)+" ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+(-r)+" ";
+	fbBumpIn += "l "+(-d)+",0 ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
+	fbBumpIn += "l 0,"+u+" "+(-n)+",0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
@@ -304,6 +311,8 @@ BlockGraphics.CalcPaths = function() {
 	com.path5 = path5; //top left corner
 	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
 	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
+	com.fbBumpDepth = n + 2*r + d;//  11; //total width of the bump
+	com.fbBumpNeck = (h - 2*u)/2;// 13; //half the height of the neck of the bump
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */
@@ -355,28 +364,39 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	path += BlockGraphics.command.extraHeight - height;
 	path += BlockGraphics.command.path5;
 	if (FinchBlox){
+		//The width assigned should be the width of the solid part of the block -
+		// not including the bump out or the bump in.
 		let com = BlockGraphics.command;
-		let straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		let straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+
 		path = "";
-		path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y + " l ";
-		//path += BlockGraphics.command.path1;
-		path += width - 2*BlockGraphics.command.cornerRadius;
-		path += BlockGraphics.command.path2;
-		//path += height - BlockGraphics.command.extraHeight;
+		//Start at the beginning of the top straight part
+		//path += "m " + (x + com.cornerRadius) + "," + y + " l ";
+		path += "m " + (x - com.fbBumpDepth + com.cornerRadius) + "," + y + " l ";
+		//straight line across
+		//path += width - com.fbBumpDepth - 2*com.cornerRadius;
+		path += width + com.fbBumpDepth - 2*com.cornerRadius;
+		//top right corner and down to start of bump
+		path += com.path2;
 		path += straightHeight;
-		path += BlockGraphics.command.fbBumpOut;
+		//bump
+		path += com.fbBumpOut;
+		//down
 		path += "0," + straightHeight;
-
-		path += BlockGraphics.command.path3;
-		path += 2*BlockGraphics.command.cornerRadius - width + ",0";
+		//bottom right corner
+		path += com.path3;
+		//straight line across bottom
+		path += 2*com.cornerRadius - width - com.fbBumpDepth + ",0";
+		//bottom left corner
 		path += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+		//line up to bump in
 		path += " l 0,";
-		//path += BlockGraphics.command.extraHeight - height;
 		path += -straightHeight;
-		path += BlockGraphics.command.fbBumpIn;
+		//bump
+		path += com.fbBumpIn;
+		//line up and top left corner
 		path += "0," + (-straightHeight);
-
-		path += BlockGraphics.command.path5;
+		path += com.path5;
 	}
 	return path;
 };
@@ -392,7 +412,7 @@ BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
 	if (FinchBlox) {
 		var lineLength = 5;
 		if (height != null){
-			lineLength = (height - BlockGraphics.command.extraHeight)/2 - 13;
+			lineLength = (height - BlockGraphics.command.extraHeight)/2 - BlockGraphics.command.fbBumpNeck;
 		}
 		path += "m " + x + "," + (y + BlockGraphics.command.cornerRadius);
 		path += "l 0," + lineLength;
@@ -481,13 +501,21 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
 	let hat = BlockGraphics.hat;
 	let com = BlockGraphics.command;
 	if (FinchBlox) {
-		let straightHeight = (height - com.extraHeight)/2 - 13;
-		path += "m " + (x+hat.r) + "," + y + " l ";
-		path += width - com.cornerRadius - hat.r;
+		let straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+		let s = 2/3;
+		//By using hat.r*s we allow the contents to slide partway into the hat
+		path += "m " + (x+hat.r*s) + "," + y + " l ";
+		//line across top
+		path += width - com.cornerRadius - hat.r*s;
+		//top rigth corner and line down to bump
 		path += com.path2 + straightHeight;
+		//bump
 		path += com.fbBumpOut;
+		//line down
 		path += "0," + straightHeight;
-		path += com.path3 + (com.cornerRadius + hat.r - width) + ",0";
+		//bottom right corner and line across bottom
+		path += com.path3 + (com.cornerRadius + hat.r*s - width) + ",0";
+		//Hat
 		//path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
 		path += " a " + hat.r + " " + hat.r + " 0 0 1 " + (-hat.r) + " " + (-hat.r);
 		path += " l 0," + (- height + 2*hat.r);
@@ -527,9 +555,9 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	const loop = BlockGraphics.loop;
 	const comm = BlockGraphics.command;
 	if (FinchBlox) {
-		let straightHeight = (height - comm.extraHeight)/2 - 13;
+		let straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
 		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
-		path += width - 2*comm.cornerRadius;
+		path += width - 2*comm.cornerRadius - comm.fbBumpDepth;
 		path += comm.path2;
 		if (bottomOpen) {
 			path += straightHeight;
@@ -556,7 +584,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius) + ",0";
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius + comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);

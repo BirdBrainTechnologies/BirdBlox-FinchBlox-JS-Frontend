@@ -26,13 +26,14 @@ LevelDialog.prototype.createContent = function() {
   const margin = this.width/16;
   const bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
 
-  const y = margin;
+  //const y = margin;
+  const y = (this.height - bnDim)/2;
   var x = margin;
 
   for (let i = 1; i <= LD.totalLevels; i++) {
     const button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
-    button.addText(i, Font.uiFont(100).bold(), LD.color);
+    button.addText(i, Font.uiFont(90), LD.color);
     button.setCallbackFunction(function(){LevelDialog.setLevel(i);}, false);
     button.setCallbackFunction(function(){RowDialog.currentDialog.closeDialog();}, true);
 

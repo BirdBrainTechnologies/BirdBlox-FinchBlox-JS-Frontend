@@ -26,7 +26,7 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
     if (FinchBlox) {
-      TB.height = 100;
+      TB.height = 90;//100;
     } else {
       TB.height = 54;
     }
@@ -35,18 +35,24 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.width = GuiElements.width;
 
   if (FinchBlox) {
-    TB.buttonW = TB.height * 2/3;
-    const maxBnWidth = (TB.width - 9 * TB.buttonMargin) / 12;
+    TB.buttonH = TB.height/2;
+    TB.tallButtonH = TB.buttonH * 1.25;
+    //TB.buttonW = TB.height * 2/3;
+    TB.buttonW = TB.tallButtonH * (5/4);
+    const maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
-    TB.longButtonW = 2.5 * TB.buttonW;
-    TB.finchBnW = 1.5 * TB.buttonW;
+    //TB.longButtonW = 2.5 * TB.buttonW;
+    //TB.finchBnW = 1.5 * TB.buttonW;
+    TB.longButtonW = TB.tallButtonH * (5/2);
+    const maxLongBnW = maxBnWidth * 2;
+    TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
+
   	TB.bnIconMargin = 3;
     TB.bg = Colors.easternBlue;
-    TB.buttonH = TB.height/2;
   	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
   	const maxIconHeight = maxBnWidth * 0.7;
   	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
-    TB.tallButtonH = TB.buttonH * 1.25;
+
     TB.defaultCornerRounding = 10;
   } else {
     TB.buttonW = TB.height * 64 / 54;
@@ -75,12 +81,14 @@ TitleBar.setGraphicsPart2 = function() {
 	const TB = TitleBar
   if (FinchBlox) {
     TB.finchBnX = 2*TB.buttonMargin;
-    TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
+    //TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
+    //TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
+    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
     TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
-    TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
-    TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
+    //TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
+    //TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
+    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
   } else {
     TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
     TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
@@ -194,16 +202,22 @@ TitleBar.makeButtons = function() {
 	const TB = TitleBar;
 	const TBLayer = GuiElements.layers.titlebar;
   if (FinchBlox) {
-    const r = TB.defaultCornerRounding
-  	TB.flagBn = new Button(TB.flagBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.flagGreen, r, r);
+    const r = TB.defaultCornerRounding;
+    const y = (TB.height/2) - (TB.tallButtonH/2);
+    const h = TB.tallButtonH;
+    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
+    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+
+  	TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
   	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
-    TB.stopBn = new Button(TB.stopBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.stopRed, r, r);
-  	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH);
+
+    TB.stopBn = new Button(TB.stopBnX, y, TB.longButtonW, h, TBLayer, Colors.stopRed, r, r);
+  	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
     //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
-		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.tallButtonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
+		TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
   	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
@@ -212,9 +226,9 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
-		TB.levelButton = new Button(TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW, TB.levelBnY, TB.buttonW, TB.tallButtonH, TBLayer, Colors.seance, r, r);
+		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(30), Colors.white);
+		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(35), Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
@@ -235,12 +249,14 @@ TitleBar.makeButtons = function() {
         if (sn != null) { shortName = sn; }
         finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
+        finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
+        finchBn.icon.move(finchBn.finchX, finchBn.finchY);
       }
       finchBn.updateBgColor(color);
-      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 2);
+      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
       GuiElements.update.text(finchBn.textE, shortName);
     }
     DeviceManager.setStatusListener(TB.updateStatus);

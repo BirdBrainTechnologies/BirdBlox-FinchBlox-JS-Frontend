@@ -7,9 +7,9 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  let blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 30);
-  //blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
+  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 24);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
 
   this.midiNote = 60;
   this.beats = 1;
@@ -76,7 +76,8 @@ function B_FBSoundL1(x, y, note, midiNote) {
   B_FBSound.call(this, x, y, 1);
   this.midiNote = midiNote;
 
-  this.addPart(new LabelText(this, note));
+  //this.addPart(new LabelText(this, note));
+  this.blockIcon.addText(note);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;

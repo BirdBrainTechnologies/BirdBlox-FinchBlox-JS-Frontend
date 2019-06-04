@@ -54,6 +54,9 @@ BlockIcon.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
 	this.icon.move(x, y);
+	if (this.textE != null){
+		GuiElements.move.text(this.textE, this.x + this.textXOffset, this.y + this.textYOffset);
+	}
 };
 
 /**
@@ -72,4 +75,26 @@ BlockIcon.prototype.textSummary = function() {
 BlockIcon.prototype.addSecondIcon = function(pathId, color){
 	this.icon.addSecondPath(pathId, color);
 	TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+}
+
+/**
+ * Add some text to this icon. Created for the FinchBlox level 1 music block.
+ * @param {string} text - Text to add
+ */
+BlockIcon.prototype.addText = function(text) {
+	const font = Font.uiFont(28);
+	this.textXOffset = 12;
+	this.textYOffset = 30 + font.charHeight/2;
+	const x = this.x + this.textXOffset;
+	const y = this.y + this.textYOffset;
+
+	this.textE = GuiElements.draw.text(x, y, text, font, this.color);
+	this.parent.group.appendChild(this.textE);
+	TouchReceiver.addListenersChild(this.textE, this.parent);
+
+	const textHeight = GuiElements.measure.textHeight(this.textE);
+	const textWidth = GuiElements.measure.textWidth(this.textE);
+	this.height = this.textYOffset;
+	this.width = this.textXOffset + textWidth;
+	console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }

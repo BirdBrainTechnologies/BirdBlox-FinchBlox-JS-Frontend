@@ -126,11 +126,11 @@ B_FinchTurn.prototype.startAction = function() {
 function B_FinchMotors(x, y) {
 	B_FinchCommand.call(this, x, y);
 
-	const leftSlot = new NumSlot(this, "Num_speed_l", 50, false, true);
+	const leftSlot = new NumSlot(this, "Num_speed_l", 0, false, true);
 	leftSlot.addLimits(-100, 100);
 	this.addPart(leftSlot);
 
-	const rightSlot = new NumSlot(this, "Num_speed_r", 50, false, true);
+	const rightSlot = new NumSlot(this, "Num_speed_r", 0, false, true);
 	rightSlot.addLimits(-100, 100);
 	this.addPart(rightSlot);
 
@@ -192,9 +192,9 @@ B_FinchBeak.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	let red = this.slots[1].getData().getValue();
-	let green = this.slots[2].getData().getValue();
-	let blue = this.slots[3].getData().getValue();
+	let red = this.slots[1].getData().getValueInR(0, 100, true, true);
+	let green = this.slots[2].getData().getValueInR(0, 100, true, true);
+	let blue = this.slots[3].getData().getValueInR(0, 100, true, true);
 
 	device.setBeak(this.runMem.requestStatus, red, green, blue);
 	return new ExecutionStatusRunning();
@@ -233,9 +233,9 @@ B_FinchTail.prototype.startAction = function() {
 	}
 
 	let position = this.slots[1].getData().getValue();
-	let red = this.slots[2].getData().getValue();
-	let green = this.slots[3].getData().getValue();
-	let blue = this.slots[4].getData().getValue();
+	let red = this.slots[2].getData().getValueInR(0, 100, true, true);
+	let green = this.slots[3].getData().getValueInR(0, 100, true, true);
+	let blue = this.slots[4].getData().getValueInR(0, 100, true, true);
 
 	device.setTail(this.runMem.requestStatus, position, red, green, blue);
 	return new ExecutionStatusRunning();
@@ -426,6 +426,7 @@ B_FinchBattery.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "battery");
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchBattery, "V");
 
 function B_FNMagnetometer(x, y){
   B_MicroBitMagnetometer.call(this, x, y, DeviceFinch);

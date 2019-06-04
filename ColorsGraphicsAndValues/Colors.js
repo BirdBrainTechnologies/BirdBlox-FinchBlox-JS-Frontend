@@ -200,5 +200,8 @@ Colors.getGradient = function(category) {
  * Returns the hex value for a given RGB value
  */
 Colors.rgbToHex = function(r, g, b) {
+	r = Math.round(r);
+	g = Math.round(g);
+	b = Math.round(b);
 	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }

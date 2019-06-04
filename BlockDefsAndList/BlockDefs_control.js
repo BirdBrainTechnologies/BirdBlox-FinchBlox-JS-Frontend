@@ -5,7 +5,7 @@ function B_WhenFlagTapped(x, y) {
 
 	if (FinchBlox){
 		HatBlock.call(this, x, y, "control_3");
-		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
 		this.isStartBlock = true;
 	} else {
 		HatBlock.call(this, x, y, "control");

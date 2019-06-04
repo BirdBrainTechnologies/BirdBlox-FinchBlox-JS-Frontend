@@ -4,8 +4,8 @@
  * @param {number} startingValue - The initial value to display
  */
 function BlockButton(parent, startingValue, startingValue2){
-  this.height = 25;
-  this.width = 75;
+  this.height = 2*BlockPalette.blockButtonOverhang;
+  this.width = 60;
   this.cornerRadius = this.height/2;
   this.textColor = Colors.black;
   this.font = Font.uiFont(12);
@@ -70,7 +70,9 @@ BlockButton.prototype.move = function(x, y) {
 BlockButton.prototype.updateValue = function(newValue, displayString) {
   this.value = newValue;
   if (typeof this.value == 'object' && this.value.r != null){
-    const color = Colors.rgbToHex(this.value.r, this.value.g, this.value.b);
+    const s = 255/100;
+    const color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
+    console.log("new button color: " + color);
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
@@ -96,7 +98,7 @@ BlockButton.prototype.createInputSystem = function() {
   return inputPad;
 };
 BlockButton.prototype.addSlider = function() {
-  this.widgets.push(new InputWidget.Slider(0, 100, this.value));
+  this.widgets.push(new InputWidget.Slider(0, 100, this.value, this.outlineColor));
 }
 BlockButton.prototype.addPiano = function() {
   this.widgets.push(new InputWidget.Piano());

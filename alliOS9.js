@@ -5868,6 +5868,9 @@ DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
+DeviceFinch.ticksPerCM = 51;
+DeviceFinch.cmPerDegree = 0.0436;
+
 /**
  * Issues a request to set the beak led.
  * @param {object} status - An object provided by the caller to track the progress of the request
@@ -5915,7 +5918,7 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
 DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
 
 	// Convert from distance in cm to encoder ticks.
-	var ticksPerCM = 100;
+	var ticksPerCM = DeviceFinch.ticksPerCM;//100;
 
 	//Make sure speeds do not exceed 100%
 	if (speedL > 100) { speedL = 100; }
@@ -6088,10 +6091,22 @@ window.onresize = function() {
 		//GuiElements.updateDims();
 	//}
 	if (GuiElements.loaded) {
+
+		var f = function() {
+			if(FinchBlox){
+				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
+				GuiElements.zoomMultiple = window.innerWidth/800;
+				GuiElements.updateZoom();
+			} else {
+				GuiElements.updateDims();
+			}
+		}
 		if (GuiElements.isIos) {
-	    setTimeout(function() { GuiElements.updateDims(); }, 500);
+	    //setTimeout(function() { GuiElements.updateDims(); }, 500);
+			setTimeout(function() { f(); }, 500);
 		} else {
-			GuiElements.updateDims();
+			//GuiElements.updateDims();
+			f();
 		}
 	}
 };
@@ -6131,6 +6146,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
@@ -7196,7 +7212,7 @@ GuiElements.load.configureZoom = function(callback) {
 	var GE = GuiElements;
 	SettingsManager.loadSettings(function() {
 		var callbackFn = function() {
-			GE.zoomMultiple = SettingsManager.zoom.getValue();
+			if (!FinchBlox) { GE.zoomMultiple = SettingsManager.zoom.getValue(); }
 			GE.zoomFactor = GE.computedZoom * GE.zoomMultiple;
 			if (GE.zoomFactor < GuiElements.minZoom || GE.zoomFactor > GuiElements.maxZoom || isNaN(GE.zoomFactor)) {
 				GE.zoomMultiple = 1;
@@ -7738,26 +7754,28 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 BlockList.populateItem_finch = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FinchMove");
 	collapsibleItem.addBlockByName("B_FinchTurn");
-	collapsibleItem.addBlockByName("B_FinchMotors");
-	collapsibleItem.addBlockByName("B_FinchStop");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_FinchBeak");
 	collapsibleItem.addBlockByName("B_FinchTail");
-	collapsibleItem.addBlockByName("B_FNLedArray");
-	collapsibleItem.addBlockByName("B_FNPrint");
 	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_FNBuzzer");
 	collapsibleItem.addSpace();
-	collapsibleItem.addBlockByName("B_FinchResetEncoders");
-	collapsibleItem.addBlockByName("B_FinchEncoder");
+	collapsibleItem.addBlockByName("B_FNPrint");
+	collapsibleItem.addBlockByName("B_FNLedArray");
+	collapsibleItem.addSpace();
 	collapsibleItem.addBlockByName("B_FinchDistance");
 	collapsibleItem.addBlockByName("B_FinchLight");
 	collapsibleItem.addBlockByName("B_FinchLine");
 	collapsibleItem.addBlockByName("B_FinchBattery");
 	collapsibleItem.addBlockByName("B_FNMagnetometer");
-	collapsibleItem.addBlockByName("B_FNButton");
 	collapsibleItem.addBlockByName("B_FNCompass");
+	collapsibleItem.addBlockByName("B_FNButton");
 	collapsibleItem.addBlockByName("B_FNOrientation");
+	collapsibleItem.addSpace();
+	collapsibleItem.addBlockByName("B_FinchMotors");
+	collapsibleItem.addBlockByName("B_FinchStop");
+	collapsibleItem.addBlockByName("B_FinchResetEncoders");
+	collapsibleItem.addBlockByName("B_FinchEncoder");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -7984,6 +8002,9 @@ Colors.getGradient = function(category) {
  * Returns the hex value for a given RGB value
  */
 Colors.rgbToHex = function(r, g, b) {
+	r = Math.round(r);
+	g = Math.round(g);
+	b = Math.round(b);
 	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
@@ -8009,7 +8030,9 @@ function Font(fontFamily, fontSize, fontWeight) {
  * @return {number}
  */
 Font.prototype.lookupCharH = function(fontSize){
-	return 0.6639 * fontSize + 1.644;
+  var scale = 0.6639;
+  if (this.fontFamily == 'AvenirHeavy') { scale = 0.59; } //number determined empirically, may need adjustment
+	return scale * fontSize + 1.644;
 };
 
 /**
@@ -8344,11 +8367,11 @@ BlockGraphics.SetCommand = function() {
 
 	// Minimum dimensions
 	if (FinchBlox) {
-		BlockGraphics.command.height = 66;//76;
-		BlockGraphics.command.width = 66;//76;
-		BlockGraphics.command.cornerRadius = 10;
+		BlockGraphics.command.height = 60;//76;
+		BlockGraphics.command.width = 50;//76;
+		BlockGraphics.command.cornerRadius = 8;//10;
 		BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
-		BlockGraphics.command.hMargin = 20;//25; // The margin to the left and right of the content
+		BlockGraphics.command.hMargin = 10;//20;//25; // The margin to the left and right of the content
 //		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out
 	} else {
 		BlockGraphics.command.height = 34;
@@ -8439,7 +8462,7 @@ BlockGraphics.SetHat = function() {
 	BlockGraphics.hat = {};
 
 	//Hat radius for FinchBlox
-	BlockGraphics.hat.r = 30;
+	BlockGraphics.hat.r = 24;//30;
 
 	// Radius of ellipse at top of Block
 	BlockGraphics.hat.hRadius = 60;
@@ -8578,24 +8601,31 @@ BlockGraphics.CalcPaths = function() {
 	var path5 = "";
 	path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
 	path5 += " z";
-	var fbBumpOut = " 5,0 0,-3 ";
-	fbBumpOut += "a 2 2 0 0 1 2 -2 ";
-	fbBumpOut += "l 4,0 ";
-	fbBumpOut += "a 2 2 0 0 1 2 2 ";
-	fbBumpOut += "l 0,32 ";
-	fbBumpOut += "a 2 2 0 0 1 -2 2 ";
-	fbBumpOut += "l -4,0 ";
-	fbBumpOut += "a 2 2 0 0 1 -2 -2 ";
-	fbBumpOut += "l 0,-3 -5,0 ";
-	var fbBumpIn = " 5,0 0,3 ";
-	fbBumpIn += "a 2 2 0 0 0 2 2 ";
-	fbBumpIn += "l 4,0 ";
-	fbBumpIn += "a 2 2 0 0 0 2 -2 ";
-	fbBumpIn += "l 0,-32 ";
-	fbBumpIn += "a 2 2 0 0 0 -2 -2 ";
-	fbBumpIn += "l -4,0 ";
-	fbBumpIn += "a 2 2 0 0 0 -2 2 ";
-	fbBumpIn += "l 0,3 -5,0 ";
+
+	//*** FinchBlox Bumps ***//
+	var r = 2;//2; //bump corner radius
+	var d = 2;//4; //straight distance across top
+	var u = 2; //straight distance up from neck
+	var n = 3; //neck width
+	var h = 24;//32; //main straight height
+	var fbBumpOut = " "+n+",0 0,"+(-u)+" "; //line across, line up
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+(-r)+" "; //corner
+	fbBumpOut += "l "+d+",0 "; //line across
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+r+" "; //corner
+	fbBumpOut += "l 0,"+h+" "; //main vertial line
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+r+" "; //corner
+	fbBumpOut += "l "+(-d)+",0 "; //line across
+	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+(-r)+" "; //corner
+	fbBumpOut += "l 0,"+(-u)+" "+(-n)+",0 "; //line up, line across
+	var fbBumpIn = " "+n+",0 0,"+u+" ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+r+" ";
+	fbBumpIn += "l "+d+",0 ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+(-r)+" ";
+	fbBumpIn += "l 0,"+(-h)+" ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+(-r)+" ";
+	fbBumpIn += "l "+(-d)+",0 ";
+	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
+	fbBumpIn += "l 0,"+u+" "+(-n)+",0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
@@ -8604,6 +8634,8 @@ BlockGraphics.CalcPaths = function() {
 	com.path5 = path5; //top left corner
 	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
 	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
+	com.fbBumpDepth = n + 2*r + d;//  11; //total width of the bump
+	com.fbBumpNeck = (h - 2*u)/2;// 13; //half the height of the neck of the bump
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */
@@ -8655,28 +8687,39 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	path += BlockGraphics.command.extraHeight - height;
 	path += BlockGraphics.command.path5;
 	if (FinchBlox){
+		//The width assigned should be the width of the solid part of the block -
+		// not including the bump out or the bump in.
 		var com = BlockGraphics.command;
-		var straightHeight = (height - BlockGraphics.command.extraHeight)/2 - 13;
+		var straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+
 		path = "";
-		path += "m " + (x + BlockGraphics.command.cornerRadius) + "," + y + " l ";
-		//path += BlockGraphics.command.path1;
-		path += width - 2*BlockGraphics.command.cornerRadius;
-		path += BlockGraphics.command.path2;
-		//path += height - BlockGraphics.command.extraHeight;
+		//Start at the beginning of the top straight part
+		//path += "m " + (x + com.cornerRadius) + "," + y + " l ";
+		path += "m " + (x - com.fbBumpDepth + com.cornerRadius) + "," + y + " l ";
+		//straight line across
+		//path += width - com.fbBumpDepth - 2*com.cornerRadius;
+		path += width + com.fbBumpDepth - 2*com.cornerRadius;
+		//top right corner and down to start of bump
+		path += com.path2;
 		path += straightHeight;
-		path += BlockGraphics.command.fbBumpOut;
+		//bump
+		path += com.fbBumpOut;
+		//down
 		path += "0," + straightHeight;
-
-		path += BlockGraphics.command.path3;
-		path += 2*BlockGraphics.command.cornerRadius - width + ",0";
+		//bottom right corner
+		path += com.path3;
+		//straight line across bottom
+		path += 2*com.cornerRadius - width - com.fbBumpDepth + ",0";
+		//bottom left corner
 		path += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+		//line up to bump in
 		path += " l 0,";
-		//path += BlockGraphics.command.extraHeight - height;
 		path += -straightHeight;
-		path += BlockGraphics.command.fbBumpIn;
+		//bump
+		path += com.fbBumpIn;
+		//line up and top left corner
 		path += "0," + (-straightHeight);
-
-		path += BlockGraphics.command.path5;
+		path += com.path5;
 	}
 	return path;
 };
@@ -8692,7 +8735,7 @@ BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
 	if (FinchBlox) {
 		var lineLength = 5;
 		if (height != null){
-			lineLength = (height - BlockGraphics.command.extraHeight)/2 - 13;
+			lineLength = (height - BlockGraphics.command.extraHeight)/2 - BlockGraphics.command.fbBumpNeck;
 		}
 		path += "m " + x + "," + (y + BlockGraphics.command.cornerRadius);
 		path += "l 0," + lineLength;
@@ -8781,13 +8824,21 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
 	var hat = BlockGraphics.hat;
 	var com = BlockGraphics.command;
 	if (FinchBlox) {
-		var straightHeight = (height - com.extraHeight)/2 - 13;
-		path += "m " + (x+hat.r) + "," + y + " l ";
-		path += width - com.cornerRadius - hat.r;
+		var straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+		var s = 2/3;
+		//By using hat.r*s we allow the contents to slide partway into the hat
+		path += "m " + (x+hat.r*s) + "," + y + " l ";
+		//line across top
+		path += width - com.cornerRadius - hat.r*s;
+		//top rigth corner and line down to bump
 		path += com.path2 + straightHeight;
+		//bump
 		path += com.fbBumpOut;
+		//line down
 		path += "0," + straightHeight;
-		path += com.path3 + (com.cornerRadius + hat.r - width) + ",0";
+		//bottom right corner and line across bottom
+		path += com.path3 + (com.cornerRadius + hat.r*s - width) + ",0";
+		//Hat
 		//path += " a " + hat.vRadius + " " + hat.hRadius + " 0 0 1 0 " + (-height);
 		path += " a " + hat.r + " " + hat.r + " 0 0 1 " + (-hat.r) + " " + (-hat.r);
 		path += " l 0," + (- height + 2*hat.r);
@@ -8827,9 +8878,9 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	var loop = BlockGraphics.loop;
 	var comm = BlockGraphics.command;
 	if (FinchBlox) {
-		var straightHeight = (height - comm.extraHeight)/2 - 13;
+		var straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
 		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
-		path += width - 2*comm.cornerRadius;
+		path += width - 2*comm.cornerRadius - comm.fbBumpDepth;
 		path += comm.path2;
 		if (bottomOpen) {
 			path += straightHeight;
@@ -8856,7 +8907,7 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius) + ",0";
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius + comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
@@ -10412,7 +10463,7 @@ TitleBar.setGraphicsPart1 = function() {
 		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
     if (FinchBlox) {
-      TB.height = 100;
+      TB.height = 90;//100;
     } else {
       TB.height = 54;
     }
@@ -10421,18 +10472,24 @@ TitleBar.setGraphicsPart1 = function() {
 	TB.width = GuiElements.width;
 
   if (FinchBlox) {
-    TB.buttonW = TB.height * 2/3;
-    var maxBnWidth = (TB.width - 9 * TB.buttonMargin) / 12;
+    TB.buttonH = TB.height/2;
+    TB.tallButtonH = TB.buttonH * 1.25;
+    //TB.buttonW = TB.height * 2/3;
+    TB.buttonW = TB.tallButtonH * (5/4);
+    var maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
-    TB.longButtonW = 2.5 * TB.buttonW;
-    TB.finchBnW = 1.5 * TB.buttonW;
+    //TB.longButtonW = 2.5 * TB.buttonW;
+    //TB.finchBnW = 1.5 * TB.buttonW;
+    TB.longButtonW = TB.tallButtonH * (5/2);
+    var maxLongBnW = maxBnWidth * 2;
+    TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
+
   	TB.bnIconMargin = 3;
     TB.bg = Colors.easternBlue;
-    TB.buttonH = TB.height/2;
   	TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
   	var maxIconHeight = maxBnWidth * 0.7;
   	TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
-    TB.tallButtonH = TB.buttonH * 1.25;
+
     TB.defaultCornerRounding = 10;
   } else {
     TB.buttonW = TB.height * 64 / 54;
@@ -10461,12 +10518,14 @@ TitleBar.setGraphicsPart2 = function() {
 	var TB = TitleBar
   if (FinchBlox) {
     TB.finchBnX = 2*TB.buttonMargin;
-    TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
+    //TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
+    //TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
+    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
     TB.flagBnX = (GuiElements.width - TB.buttonMargin)/2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin)/2;
-    TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
-    TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
+    //TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
+    //TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
+    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
   } else {
     TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
     TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
@@ -10580,16 +10639,22 @@ TitleBar.makeButtons = function() {
 	var TB = TitleBar;
 	var TBLayer = GuiElements.layers.titlebar;
   if (FinchBlox) {
-    var r = TB.defaultCornerRounding
-  	TB.flagBn = new Button(TB.flagBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.flagGreen, r, r);
+    var r = TB.defaultCornerRounding;
+    var y = (TB.height/2) - (TB.tallButtonH/2);
+    var h = TB.tallButtonH;
+    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
+    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+
+  	TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
   	TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
-    TB.stopBn = new Button(TB.stopBnX, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.stopRed, r, r);
-  	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH);
+
+    TB.stopBn = new Button(TB.stopBnX, y, TB.longButtonW, h, TBLayer, Colors.stopRed, r, r);
+  	TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
   	TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
     //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
-		TB.undoButton = new Button(TB.width - TB.sideWidth/2 + TB.buttonMargin/2, (TB.height/2) - (TB.tallButtonH/2), TB.buttonW, TB.tallButtonH, TBLayer, Colors.neonCarrot, r, r);
+		TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
   	TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
   	UndoManager.setUndoButton(TB.undoButton);
 
@@ -10598,9 +10663,9 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
 
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
-		TB.levelButton = new Button(TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW, TB.levelBnY, TB.buttonW, TB.tallButtonH, TBLayer, Colors.seance, r, r);
+		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(30), Colors.white);
+		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(35), Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
@@ -10621,12 +10686,14 @@ TitleBar.makeButtons = function() {
         if (sn != null) { shortName = sn; }
         finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
+        finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
+        finchBn.icon.move(finchBn.finchX, finchBn.finchY);
       }
       finchBn.updateBgColor(color);
-      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 2);
+      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
       GuiElements.update.text(finchBn.textE, shortName);
     }
     DeviceManager.setStatusListener(TB.updateStatus);
@@ -10888,16 +10955,17 @@ BlockPalette.setGraphics = function() {
 	// Dimensions for the region with CategoryBNs
   if (FinchBlox){
     BlockPalette.width = GuiElements.width;
-    BlockPalette.height = 100;
+    BlockPalette.height = 90;//100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
     BlockPalette.bg = Colors.blockPalette;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 40;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
-    BlockPalette.blockMargin = 25;   // The horizontal spacing between Blocks
+    BlockPalette.blockMargin = 35;//25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
     BlockPalette.trashIconVP = VectorPaths.faTrash;
+    BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
@@ -11729,7 +11797,7 @@ Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }
@@ -11936,7 +12004,7 @@ Category.prototype.computeWidth = function() {
     for (var i = 0; i < this.blocks.length; i++) {
   		totalW += this.blocks[i].width;
     }
-    totalW += 15; //Add for the extra bump on the last block
+    //totalW += 15; //Add for the extra bump on the last block
     totalW += 2 * BlockPalette.mainHMargin;
     this.width = totalW;
   } else {
@@ -12606,14 +12674,16 @@ Button.setGraphics = function() {
 	// "highlight" = color when pressed
 	Button.highlightBg = Colors.white;
 	Button.highlightFore = Colors.bbt;
-	Button.disabledBg = Colors.darkGray;
-	Button.disabledFore = Colors.black;
 
 	// The suggested margin between adjacent margins
   if (FinchBlox){
     Button.defaultMargin = 10;
+    Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
+    Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
   } else {
     Button.defaultMargin = 5;
+    Button.disabledBg = Colors.darkGray;
+    Button.disabledFore = Colors.black;
   }
 
 	// The suggested font for the forground of buttons
@@ -12893,18 +12963,23 @@ Button.prototype.addFinchBnIcons = function() {
 	var finchPathId = VectorPaths.mvFinch;
 	var battPathId = VectorPaths.battery;
   var xPathId = VectorPaths.faTimesCircle;
-  var font = Font.uiFont(20);
+  var font = Font.uiFont(18);
 
-	var finchH = TitleBar.bnIconH*1.5;
-	var battH = TitleBar.bnIconH*0.6;
-  var xH = TitleBar.bnIconH*0.5;
+	var finchH = TitleBar.bnIconH*1.65;//the long dimension of the finch since we will rotate it
+	var battH = TitleBar.bnIconH*0.75;
+  var xH = TitleBar.bnIconH*0.6;
 	var finchW = VectorIcon.computeWidth(finchPathId, finchH);
 	var battW = VectorIcon.computeWidth(battPathId, battH);
   var xW = VectorIcon.computeWidth(xPathId, xH);
-	var finchX = (this.width - finchW - battW) / 2.5;
-	var battX = finchW + 1.5*finchX;
-  var xX = finchX + finchW/2;
-	var finchY = (this.height - finchH) / 2;
+	this.finchX = (this.width - finchW) / 2;
+	//var battX = finchH + 1.5*finchX;
+  var m = 10; //Margin between finch icon and battery icon.
+  this.finchConnectedX = (this.width - finchW - battW - m) / 2;
+  var battX = (this.width + finchH + m - battW)/2;
+  var textX = (this.width - finchH - battW - m)/2 + m;
+
+  var xX = (this.width - xW) / 2;//finchX + finchH/2;
+	this.finchY = (this.height - finchH) / 2;
 	var battY = (this.height - battH) / 2;
   var textY = (this.height + font.charHeight) / 2;
   var xY = (this.height - xH) / 2;
@@ -12914,10 +12989,10 @@ Button.prototype.addFinchBnIcons = function() {
 	this.iconInverts = false;
 	this.hasText = true;
 
-	this.icon = new VectorIcon(finchX, finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
+	this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
 	GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
 	this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-	this.textE = GuiElements.draw.text(finchX, textY, "", font, Colors.flagGreen);
+	this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
 	this.group.appendChild(this.textE);
   this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
 
@@ -14583,7 +14658,7 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
  */
-InputWidget.Slider = function (min, max, startVal) {
+InputWidget.Slider = function (min, max, startVal, sliderColor) {
   this.min = min;
   this.max = max;
   this.range = max - min;
@@ -14593,6 +14668,7 @@ InputWidget.Slider = function (min, max, startVal) {
   } else {
     this.position = startVal;
   }
+  this.sliderColor = sliderColor;
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
@@ -14603,6 +14679,7 @@ InputWidget.Slider.setConstants = function() {
   S.height = 40;
   S.hMargin = 20;
   S.barHeight = 2;
+  S.sliderIconPath = VectorPaths.mvFinch;
 };
 
 /**
@@ -14633,8 +14710,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.barX = S.hMargin;
   this.barY = (S.height - S.barHeight)/2;
   this.barW = S.width - 2 * S.hMargin;
-  this.sliderH = S.barHeight * 5;
-  this.sliderW = 10
+  //this.sliderH = S.barHeight * 5;
+  this.sliderH = 30;//10
+  this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
   this.sliderY = (S.height - this.sliderH)/2;
   //var sliderX = this.barX + (this.barW - this.sliderW)/2;
   var sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
@@ -14647,9 +14725,13 @@ InputWidget.Slider.prototype.makeSlider = function() {
   var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, Colors.black);
   this.group.appendChild(sliderBar);
 
-  this.slider = GuiElements.draw.rect(sliderX, this.sliderY, this.sliderW, this.sliderH, Colors.easternBlue);
-  this.group.appendChild(this.slider);
-  TouchReceiver.addListenersSlider(this.slider, this);
+  //this.slider = GuiElements.draw.rect(sliderX, this.sliderY, this.sliderW, this.sliderH, Colors.easternBlue);
+  //this.group.appendChild(this.slider);
+  //TouchReceiver.addListenersSlider(this.slider, this);
+  var color = Colors.easternBlue;
+  if (this.sliderColor != null) { color = this.sliderColor; }
+  this.sliderIcon = new VectorIcon(sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+  TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
 }
 
 InputWidget.Slider.prototype.drag = function(x) {
@@ -14658,7 +14740,8 @@ InputWidget.Slider.prototype.drag = function(x) {
   if (relX > this.barX && relX < (this.barX + this.barW - this.sliderW)) {
     this.sliderX = relX;
     this.position = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.range));
-    GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
+    //GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
+    this.sliderIcon.move(this.sliderX, this.sliderY);
 
     if (typeof this.value == 'number') {
       this.value = this.position;
@@ -14666,32 +14749,38 @@ InputWidget.Slider.prototype.drag = function(x) {
       //if it is an rgb color object
       if (this.value.r != null) {
         var p = this.position / this.range;
+        //red -> yellow
         if (p < 0.17) {
-          this.value.r = 255;
-          this.value.g = Math.round(255*p/0.17);
+          this.value.r = 100;
+          this.value.g = Math.round(100*p/0.17);
           this.value.b = 0;
+        //yellow -> green
         } else if (p < 0.33) {
-          this.value.r = Math.round(255 - (255 * (p - 0.17)/0.17));
-          this.value.g = 255;
+          this.value.r = Math.round(100 - (100 * (p - 0.17)/0.17));
+          this.value.g = 100;
           this.value.b = 0;
+        //green -> cyan
         } else if (p < 0.5) {
           this.value.r = 0;
-          this.value.g = 255;
-          this.value.b = Math.round(255 * (p - 0.33)/0.17);
+          this.value.g = 100;
+          this.value.b = Math.round(100 * (p - 0.33)/0.17);
+        //cyan -> blue
         } else if (p < 0.67) {
           this.value.r = 0;
-          this.value.g = Math.round(255 - (255 * (p - 0.5)/0.17));
-          this.value.b = 255;
+          this.value.g = Math.round(100 - (100 * (p - 0.5)/0.17));
+          this.value.b = 100;
+        //blue -> magenta
         } else if (p < 0.83) {
-          this.value.r = Math.round(255 * (p - 0.67)/0.17);
+          this.value.r = Math.round(100 * (p - 0.67)/0.17);
           this.value.g = 0;
-          this.value.b = 255;
+          this.value.b = 100;
+        //magenta -> red
         } else {
-          this.value.r = 255;
+          this.value.r = 100;
           this.value.g = 0;
-          this.value.b = Math.round(255 - (255 * (p - 0.83)/0.17));
+          this.value.b = Math.round(100 - (100 * (p - 0.83)/0.17));
         }
-
+        //console.log("color updated to " + this.value.r + ", " + this.value.g + ", " + this.value.b);
       }
     }
     this.updateFn(this.value);
@@ -17012,7 +17101,7 @@ Highlighter.showShadow = function(fit, stack) {
 		var group = GuiElements.create.group(0, 0, this.shadowGroup);
 		var pathE = GuiElements.create.path(group);
 		GuiElements.update.color(pathE, color);
-		GuiElements.move.group(group, block.x, block.y);
+		GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
 		var pathD = block.path.getAttribute("d");
 		pathE.setAttributeNS(null, "d", pathD);
 		shadowW += block.width;
@@ -21653,13 +21742,14 @@ LevelDialog.prototype.createContent = function() {
   var margin = this.width/16;
   var bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
 
-  var y = margin;
+  //var y = margin;
+  var y = (this.height - bnDim)/2;
   var x = margin;
 
   for (var i = 1; i <= LD.totalLevels; i++) {
     var button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
-    button.addText(i, Font.uiFont(100).bold(), LD.color);
+    button.addText(i, Font.uiFont(90), LD.color);
     button.setCallbackFunction(function(){LevelDialog.setLevel(i);}, false);
     button.setCallbackFunction(function(){RowDialog.currentDialog.closeDialog();}, true);
 
@@ -24971,7 +25061,7 @@ Block.prototype.updateAlign = function(x, y) {
 	}
 	if (this.nextBlock != null) {
     if (FinchBlox) { //these blocks link horizontally rather than vertically
-      this.nextBlock.updateAlign(this.x + this.width, this.y);
+      this.nextBlock.updateAlign(this.x + this.width + bG.command.fbBumpDepth, this.y);
     } else {
       this.nextBlock.updateAlign(this.x, this.y + this.height);
     }
@@ -29180,6 +29270,9 @@ BlockIcon.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
 	this.icon.move(x, y);
+	if (this.textE != null){
+		GuiElements.move.text(this.textE, this.x + this.textXOffset, this.y + this.textYOffset);
+	}
 };
 
 /**
@@ -29201,13 +29294,35 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color){
 }
 
 /**
+ * Add some text to this icon. Created for the FinchBlox level 1 music block.
+ * @param {string} text - Text to add
+ */
+BlockIcon.prototype.addText = function(text) {
+	var font = Font.uiFont(28);
+	this.textXOffset = 12;
+	this.textYOffset = 30 + font.charHeight/2;
+	var x = this.x + this.textXOffset;
+	var y = this.y + this.textYOffset;
+
+	this.textE = GuiElements.draw.text(x, y, text, font, this.color);
+	this.parent.group.appendChild(this.textE);
+	TouchReceiver.addListenersChild(this.textE, this.parent);
+
+	var textHeight = GuiElements.measure.textHeight(this.textE);
+	var textWidth = GuiElements.measure.textWidth(this.textE);
+	this.height = this.textYOffset;
+	this.width = this.textXOffset + textWidth;
+	console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
+}
+
+/**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
  * @param {number} startingValue - The initial value to display
  */
 function BlockButton(parent, startingValue, startingValue2){
-  this.height = 25;
-  this.width = 75;
+  this.height = 2*BlockPalette.blockButtonOverhang;
+  this.width = 60;
   this.cornerRadius = this.height/2;
   this.textColor = Colors.black;
   this.font = Font.uiFont(12);
@@ -29272,7 +29387,9 @@ BlockButton.prototype.move = function(x, y) {
 BlockButton.prototype.updateValue = function(newValue, displayString) {
   this.value = newValue;
   if (typeof this.value == 'object' && this.value.r != null){
-    var color = Colors.rgbToHex(this.value.r, this.value.g, this.value.b);
+    var s = 255/100;
+    var color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
+    console.log("new button color: " + color);
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
@@ -29298,7 +29415,7 @@ BlockButton.prototype.createInputSystem = function() {
   return inputPad;
 };
 BlockButton.prototype.addSlider = function() {
-  this.widgets.push(new InputWidget.Slider(0, 100, this.value));
+  this.widgets.push(new InputWidget.Slider(0, 100, this.value, this.outlineColor));
 }
 BlockButton.prototype.addPiano = function() {
   this.widgets.push(new InputWidget.Piano());
@@ -30792,11 +30909,11 @@ B_FinchTurn.prototype.startAction = function() {
 function B_FinchMotors(x, y) {
 	B_FinchCommand.call(this, x, y);
 
-	var leftSlot = new NumSlot(this, "Num_speed_l", 50, false, true);
+	var leftSlot = new NumSlot(this, "Num_speed_l", 0, false, true);
 	leftSlot.addLimits(-100, 100);
 	this.addPart(leftSlot);
 
-	var rightSlot = new NumSlot(this, "Num_speed_r", 50, false, true);
+	var rightSlot = new NumSlot(this, "Num_speed_r", 0, false, true);
 	rightSlot.addLimits(-100, 100);
 	this.addPart(rightSlot);
 
@@ -30858,9 +30975,9 @@ B_FinchBeak.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	var red = this.slots[1].getData().getValue();
-	var green = this.slots[2].getData().getValue();
-	var blue = this.slots[3].getData().getValue();
+	var red = this.slots[1].getData().getValueInR(0, 100, true, true);
+	var green = this.slots[2].getData().getValueInR(0, 100, true, true);
+	var blue = this.slots[3].getData().getValueInR(0, 100, true, true);
 
 	device.setBeak(this.runMem.requestStatus, red, green, blue);
 	return new ExecutionStatusRunning();
@@ -30899,9 +31016,9 @@ B_FinchTail.prototype.startAction = function() {
 	}
 
 	var position = this.slots[1].getData().getValue();
-	var red = this.slots[2].getData().getValue();
-	var green = this.slots[3].getData().getValue();
-	var blue = this.slots[4].getData().getValue();
+	var red = this.slots[2].getData().getValueInR(0, 100, true, true);
+	var green = this.slots[3].getData().getValueInR(0, 100, true, true);
+	var blue = this.slots[4].getData().getValueInR(0, 100, true, true);
 
 	device.setTail(this.runMem.requestStatus, position, red, green, blue);
 	return new ExecutionStatusRunning();
@@ -31092,6 +31209,7 @@ B_FinchBattery.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "battery");
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchBattery, "V");
 
 function B_FNMagnetometer(x, y){
   B_MicroBitMagnetometer.call(this, x, y, DeviceFinch);
@@ -31138,7 +31256,7 @@ function B_FBColor(x, y, level, beak) {
  this.duration = 10;
  CommandBlock.call(this,x,y,"color_"+level);
 
- var blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 30);
+ var blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 40);
  blockIcon.isEndOfLine = true;
  this.addPart(blockIcon);
 
@@ -31365,12 +31483,13 @@ function B_FBMotion(x, y, direction, level) {
   this.leftSpeed = 0;
   this.rightDist = 0;
   this.leftDist = 0;
+  this.defaultAngle = 90;
   CommandBlock.call(this,x,y,"motion_"+level);
 
   //var icon = VectorPaths.blockIcons["motion_" + direction];
   var icon = VectorPaths.mvArrow;
   var rotation = B_FBMotion.iconRotation[direction];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 30, rotation);
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 32, rotation);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -31437,18 +31556,18 @@ B_FBMotion.prototype.addL2Button = function(defaultValue) {
     case "right":
       this.leftSpeed = 50;
       this.rightSpeed = -50;
-      this.leftDist = 10;
-      this.rightDist = 10;
-      this.angleBN = new BlockButton(this, defaultValue);
+      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.angleBN = new BlockButton(this, this.defaultAngle);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
     case "left":
       this.leftSpeed = -50;
       this.rightSpeed = 50;
-      this.leftDist = 10;
-      this.rightDist = 10;
-      this.angleBN = new BlockButton(this, defaultValue);
+      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.angleBN = new BlockButton(this, this.defaultAngle);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
       break;
@@ -31523,8 +31642,8 @@ function B_FBRight(x, y) {
 
   this.leftSpeed = 50;
   this.rightSpeed = -50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
@@ -31533,8 +31652,8 @@ function B_FBLeft(x, y) {
 
   this.leftSpeed = -50;
   this.rightSpeed = 50;
-  this.leftDist = 10;
-  this.rightDist = 10;
+  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;
@@ -31616,9 +31735,9 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  var blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 30);
-  //blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
+  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 24);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
 
   this.midiNote = 60;
   this.beats = 1;
@@ -31685,7 +31804,8 @@ function B_FBSoundL1(x, y, note, midiNote) {
   B_FBSound.call(this, x, y, 1);
   this.midiNote = midiNote;
 
-  this.addPart(new LabelText(this, note));
+  //this.addPart(new LabelText(this, note));
+  this.blockIcon.addText(note);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;
@@ -31756,7 +31876,7 @@ function B_WhenFlagTapped(x, y) {
 
 	if (FinchBlox){
 		HatBlock.call(this, x, y, "control_3");
-		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
 		this.isStartBlock = true;
 	} else {
 		HatBlock.call(this, x, y, "control");

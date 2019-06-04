@@ -105,7 +105,7 @@ Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }
@@ -312,7 +312,7 @@ Category.prototype.computeWidth = function() {
     for (let i = 0; i < this.blocks.length; i++) {
   		totalW += this.blocks[i].width;
     }
-    totalW += 15; //Add for the extra bump on the last block
+    //totalW += 15; //Add for the extra bump on the last block
     totalW += 2 * BlockPalette.mainHMargin;
     this.width = totalW;
   } else {

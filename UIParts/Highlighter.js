@@ -76,7 +76,7 @@ Highlighter.showShadow = function(fit, stack) {
 		let group = GuiElements.create.group(0, 0, this.shadowGroup);
 		let pathE = GuiElements.create.path(group);
 		GuiElements.update.color(pathE, color);
-		GuiElements.move.group(group, block.x, block.y);
+		GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
 		let pathD = block.path.getAttribute("d");
 		pathE.setAttributeNS(null, "d", pathD);
 		shadowW += block.width;
