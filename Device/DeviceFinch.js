@@ -12,7 +12,7 @@ Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 51;
-DeviceFinch.cmPerDegree = 0.0436;
+DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
 
 /**
  * Issues a request to set the beak led.
@@ -76,7 +76,9 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	request.addParam("ticksL", Math.round(distL * ticksPerCM));
 	request.addParam("speedR", Math.round(speedR * 127/100));
 	request.addParam("ticksR", Math.round(distR * ticksPerCM));
-	HtmlServer.sendRequest(request.toString(), status, true);
+	//Since these requests may wait for a response from the finch, the second
+	// true here keeps the request from timing out
+	HtmlServer.sendRequest(request.toString(), status, true, true);
 };
 
 /**

@@ -109,7 +109,7 @@ B_FinchTurn.prototype.startAction = function() {
 	let angle = this.slots[3].getData().getValue();
 
 	//TODO: change to convert from angle to distance
-	let distance = angle * 0.087;
+	let distance = angle * DeviceFinch.cmPerDegree;
 
 	if (direction == "right") {
 		device.setMotors(this.runMem.requestStatus, speed, distance, -speed, distance);

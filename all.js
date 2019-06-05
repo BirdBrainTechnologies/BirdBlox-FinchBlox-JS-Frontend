@@ -5870,7 +5870,7 @@ Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 51;
-DeviceFinch.cmPerDegree = 0.0436;
+DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
 
 /**
  * Issues a request to set the beak led.
@@ -5934,7 +5934,9 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	request.addParam("ticksL", Math.round(distL * ticksPerCM));
 	request.addParam("speedR", Math.round(speedR * 127/100));
 	request.addParam("ticksR", Math.round(distR * ticksPerCM));
-	HtmlServer.sendRequest(request.toString(), status, true);
+	//Since these requests may wait for a response from the finch, the second
+	// true here keeps the request from timing out
+	HtmlServer.sendRequest(request.toString(), status, true, true);
 };
 
 /**
@@ -6096,7 +6098,7 @@ window.onresize = function() {
 		let f = function() {
 			if(FinchBlox){
 				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerWidth/800;
+				GuiElements.zoomMultiple = window.innerHeight/600;
 				GuiElements.updateZoom();
 			} else {
 				GuiElements.updateDims();
@@ -6147,7 +6149,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
-	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; } //FinchBlox designed for a 800w x 600h screen
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
@@ -22833,7 +22835,7 @@ HtmlServer.encodeHtml = function(message) {
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  *                                             Used for sorting native calls on iOS
  */
-HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if (DebugOptions.shouldLogHttp()) {
@@ -22866,7 +22868,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		isPost = false;
 	}
 	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
 		return;
 	}
 	let requestType = "GET";
@@ -22914,7 +22916,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
  * @param {object} requestStatus - The status object
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
+HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock, noTimeout) {
 	if (requestStatus != null) {
 		requestStatus.error = false;
 		const callbackFn = function(response) {
@@ -22927,9 +22929,9 @@ HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
 			requestStatus.code = code;
 			requestStatus.result = result;
 		};
-		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock);
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock, noTimeout);
 	} else {
-		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock);
+		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock, noTimeout);
 	}
 };
 
@@ -22969,10 +22971,13 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @param {string|null} [postData] - The post data to send in the body of the request
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
 	GuiElements.alert("Sending: " + request + " using native");
 	if(isBluetoothBlock == null) {
 		isBluetoothBlock = false;
+	}
+	if(noTimeout == null) {
+		noTimeout = false;
 	}
 
 	let id = null;
@@ -22996,9 +23001,11 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	HtmlServer.unansweredCount++;
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
 	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
-	window.setTimeout(function() {
-		HtmlServer.responseFromIosCall(id, "0", "");
-	}, HtmlServer.requestTimeout);
+	if(!noTimeout) {
+		window.setTimeout(function() {
+			HtmlServer.responseFromIosCall(id, "0", "");
+		}, HtmlServer.requestTimeout);
+	}
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {
@@ -30893,7 +30900,7 @@ B_FinchTurn.prototype.startAction = function() {
 	let angle = this.slots[3].getData().getValue();
 
 	//TODO: change to convert from angle to distance
-	let distance = angle * 0.087;
+	let distance = angle * DeviceFinch.cmPerDegree;
 
 	if (direction == "right") {
 		device.setMotors(this.runMem.requestStatus, speed, distance, -speed, distance);
@@ -31480,11 +31487,12 @@ B_FBTailL3.prototype.constructor = B_FBTailL3;
 function B_FBMotion(x, y, direction, level) {
   this.direction = direction;
   this.level = level;
-  this.rightSpeed = 0;
-  this.leftSpeed = 0;
-  this.rightDist = 0;
-  this.leftDist = 0;
   this.defaultAngle = 90;
+  this.defaultDistance = 10;
+  this.defaultSpeed = 50;
+
+  this.setDefaults();
+
   CommandBlock.call(this,x,y,"motion_"+level);
 
   //const icon = VectorPaths.blockIcons["motion_" + direction];
@@ -31499,8 +31507,8 @@ B_FBMotion.prototype.constructor = B_FBMotion;
 
 B_FBMotion.prototype.startAction = function () {
   const mem = this.runMem;
-  mem.timerStarted = false;
-  mem.duration = 1000;
+  //mem.timerStarted = false;
+  //mem.duration = 1000;
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
@@ -31518,6 +31526,12 @@ B_FBMotion.prototype.startAction = function () {
   return new ExecutionStatusRunning();
 }
 B_FBMotion.prototype.updateAction = function () {
+  if(this.runMem.requestStatus.finished) {
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+  /*
   const mem = this.runMem;
   if (!mem.timerStarted) {
       const status = mem.requestStatus;
@@ -31532,42 +31546,54 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusDone(); // Done running
   } else {
       return new ExecutionStatusRunning(); // Still running
-  }
+  }*/
 }
-B_FBMotion.prototype.addL2Button = function(defaultValue) {
+B_FBMotion.prototype.setDefaults = function() {
   switch (this.direction) {
     case "forward":
-      this.leftSpeed = 50;
-      this.rightSpeed = 50;
-      this.leftDist = defaultValue;
-      this.rightDist = defaultValue;
-      this.distanceBN = new BlockButton(this, defaultValue);
-      this.distanceBN.addSlider();
-      this.addPart(this.distanceBN);
+      this.leftSpeed = this.defaultSpeed;
+      this.rightSpeed = this.defaultSpeed;
       break;
     case "backward":
-      this.leftSpeed = -50;
-      this.rightSpeed = -50;
-      this.leftDist = defaultValue;
-      this.rightDist = defaultValue;
-      this.distanceBN = new BlockButton(this, defaultValue);
+      this.leftSpeed = -this.defaultSpeed;
+      this.rightSpeed = -this.defaultSpeed;
+      break;
+    case "right":
+      this.leftSpeed = this.defaultSpeed;
+      this.rightSpeed = -this.defaultSpeed;
+      break;
+    case "left":
+      this.leftSpeed = -this.defaultSpeed;
+      this.rightSpeed = this.defaultSpeed;
+      break;
+    default:
+        GuiElements.alert("unknown direction in motion block set defaults");
+  }
+  switch (this.direction) {
+    case "forward":
+    case "backward":
+      this.leftDist = this.defaultDistance;
+      this.rightDist = this.defaultDistance;
+      break;
+    case "right":
+    case "left":
+      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      break;
+    default:
+        GuiElements.alert("unknown direction in motion block set defaults");
+  }
+}
+B_FBMotion.prototype.addL2Button = function() {
+  switch (this.direction) {
+    case "forward":
+    case "backward":
+      this.distanceBN = new BlockButton(this, this.defaultDistance);
       this.distanceBN.addSlider();
       this.addPart(this.distanceBN);
       break;
     case "right":
-      this.leftSpeed = 50;
-      this.rightSpeed = -50;
-      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-      this.angleBN = new BlockButton(this, this.defaultAngle);
-      this.angleBN.addSlider();
-      this.addPart(this.angleBN);
-      break;
     case "left":
-      this.leftSpeed = -50;
-      this.rightSpeed = 50;
-      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
       this.angleBN = new BlockButton(this, this.defaultAngle);
       this.angleBN.addSlider();
       this.addPart(this.angleBN);
@@ -31582,7 +31608,8 @@ B_FBMotion.prototype.updateValues = function () {
     this.rightDist = this.distanceBN.value;
   }
   if (this.angleBN != null) {
-
+    this.leftDist = this.angleBN.value * DeviceFinch.cmPerDegree;
+    this.rightDist = this.angleBN.value * DeviceFinch.cmPerDegree;
   }
   if (this.speedBN != null) {
     switch (this.direction) {
@@ -31620,41 +31647,21 @@ B_FBMotion.iconRotation = {
 
 function B_FBForward(x, y) {
   B_FBMotion.call(this, x, y, "forward", 1);
-
-  this.leftSpeed = 50;
-  this.rightSpeed = 50;
-  this.leftDist = 25;
-  this.rightDist = 25;
 }
 B_FBForward.prototype = Object.create(B_FBMotion.prototype);
 B_FBForward.prototype.constructor = B_FBForward;
 function B_FBBackward(x, y) {
   B_FBMotion.call(this, x, y, "backward", 1);
-
-  this.leftSpeed = -50;
-  this.rightSpeed = -50;
-  this.leftDist = 25;
-  this.rightDist = 25;
 }
 B_FBBackward.prototype = Object.create(B_FBMotion.prototype);
 B_FBBackward.prototype.constructor = B_FBBackward;
 function B_FBRight(x, y) {
   B_FBMotion.call(this, x, y, "right", 1);
-
-  this.leftSpeed = 50;
-  this.rightSpeed = -50;
-  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBRight.prototype = Object.create(B_FBMotion.prototype);
 B_FBRight.prototype.constructor = B_FBRight;
 function B_FBLeft(x, y) {
   B_FBMotion.call(this, x, y, "left", 1);
-
-  this.leftSpeed = -50;
-  this.rightSpeed = 50;
-  this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-  this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
 }
 B_FBLeft.prototype = Object.create(B_FBMotion.prototype);
 B_FBLeft.prototype.constructor = B_FBLeft;
@@ -31662,31 +31669,31 @@ B_FBLeft.prototype.constructor = B_FBLeft;
 
 //****  Level 2 Blocks ****//
 
-function B_FBMotionL2(x, y, direction, defaultValue){
+function B_FBMotionL2(x, y, direction){
   B_FBMotion.call(this, x, y, direction, 2);
 
-  this.addL2Button(defaultValue);
+  this.addL2Button();
 }
 B_FBMotionL2.prototype = Object.create(B_FBMotion.prototype);
 B_FBMotionL2.prototype.constructor = B_FBMotionL2;
 
 function B_FBForwardL2(x, y) {
-  B_FBMotionL2.call(this, x, y, "forward", 10);
+  B_FBMotionL2.call(this, x, y, "forward");
 }
 B_FBForwardL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBForwardL2.prototype.constructor = B_FBForwardL2;
 function B_FBBackwardL2(x, y) {
-  B_FBMotionL2.call(this, x, y, "backward", 10);
+  B_FBMotionL2.call(this, x, y, "backward");
 }
 B_FBBackwardL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBBackwardL2.prototype.constructor = B_FBBackwardL2;
 function B_FBRightL2(x, y) {
-  B_FBMotionL2.call(this, x, y, "right", 90);
+  B_FBMotionL2.call(this, x, y, "right");
 }
 B_FBRightL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBRightL2.prototype.constructor = B_FBRightL2;
 function B_FBLeftL2(x, y) {
-  B_FBMotionL2.call(this, x, y, "left", 90);
+  B_FBMotionL2.call(this, x, y, "left");
 }
 B_FBLeftL2.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBLeftL2.prototype.constructor = B_FBLeftL2;
@@ -31694,12 +31701,12 @@ B_FBLeftL2.prototype.constructor = B_FBLeftL2;
 
 //****  Level 3 Blocks ****//
 
-function B_FBMotionL3(x, y, direction, defaultValue, defaultSpeed){
+function B_FBMotionL3(x, y, direction){
   B_FBMotion.call(this, x, y, direction, 3);
 
-  this.addL2Button(defaultValue);
+  this.addL2Button();
 
-  this.speedBN = new BlockButton(this, defaultSpeed);
+  this.speedBN = new BlockButton(this, this.defaultSpeed);
   this.speedBN.addSlider();
   this.addPart(this.speedBN);
 }
@@ -31707,22 +31714,22 @@ B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;
 
 function B_FBForwardL3(x, y) {
-  B_FBMotionL3.call(this, x, y, "forward", 10, 50);
+  B_FBMotionL3.call(this, x, y, "forward");
 }
 B_FBForwardL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBForwardL3.prototype.constructor = B_FBForwardL3;
 function B_FBBackwardL3(x, y) {
-  B_FBMotionL3.call(this, x, y, "backward", 10, 50);
+  B_FBMotionL3.call(this, x, y, "backward");
 }
 B_FBBackwardL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBBackwardL3.prototype.constructor = B_FBBackwardL3;
 function B_FBRightL3(x, y) {
-  B_FBMotionL3.call(this, x, y, "right", 90, 50);
+  B_FBMotionL3.call(this, x, y, "right");
 }
 B_FBRightL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBRightL3.prototype.constructor = B_FBRightL3;
 function B_FBLeftL3(x, y) {
-  B_FBMotionL3.call(this, x, y, "left", 90, 50);
+  B_FBMotionL3.call(this, x, y, "left");
 }
 B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;

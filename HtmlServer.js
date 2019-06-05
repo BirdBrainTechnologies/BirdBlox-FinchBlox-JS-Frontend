@@ -82,7 +82,7 @@ HtmlServer.encodeHtml = function(message) {
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  *                                             Used for sorting native calls on iOS
  */
-HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
 	callbackFn = DebugOptions.safeFunc(callbackFn);
 	callbackErr = DebugOptions.safeFunc(callbackErr);
 	if (DebugOptions.shouldLogHttp()) {
@@ -115,7 +115,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 		isPost = false;
 	}
 	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock);
+		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
 		return;
 	}
 	let requestType = "GET";
@@ -163,7 +163,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
  * @param {object} requestStatus - The status object
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
+HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock, noTimeout) {
 	if (requestStatus != null) {
 		requestStatus.error = false;
 		const callbackFn = function(response) {
@@ -176,9 +176,9 @@ HtmlServer.sendRequest = function(request, requestStatus, isBluetoothBlock) {
 			requestStatus.code = code;
 			requestStatus.result = result;
 		};
-		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock);
+		HtmlServer.sendRequestWithCallback(request, callbackFn, callbackErr, false, null, isBluetoothBlock, noTimeout);
 	} else {
-		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock);
+		HtmlServer.sendRequestWithCallback(request, null, null, false, null, isBluetoothBlock, noTimeout);
 	}
 };
 
@@ -218,10 +218,13 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @param {string|null} [postData] - The post data to send in the body of the request
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock) {
+HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
 	GuiElements.alert("Sending: " + request + " using native");
 	if(isBluetoothBlock == null) {
 		isBluetoothBlock = false;
+	}
+	if(noTimeout == null) {
+		noTimeout = false;
 	}
 
 	let id = null;
@@ -245,9 +248,11 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	HtmlServer.unansweredCount++;
 	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
 	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
-	window.setTimeout(function() {
-		HtmlServer.responseFromIosCall(id, "0", "");
-	}, HtmlServer.requestTimeout);
+	if(!noTimeout) {
+		window.setTimeout(function() {
+			HtmlServer.responseFromIosCall(id, "0", "");
+		}, HtmlServer.requestTimeout);
+	}
 };
 
 HtmlServer.responseFromIosCall = function(id, status, body) {

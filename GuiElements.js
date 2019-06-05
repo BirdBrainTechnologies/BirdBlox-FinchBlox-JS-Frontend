@@ -51,7 +51,7 @@ window.onresize = function() {
 		let f = function() {
 			if(FinchBlox){
 				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerWidth/800;
+				GuiElements.zoomMultiple = window.innerHeight/600;
 				GuiElements.updateZoom();
 			} else {
 				GuiElements.updateDims();
@@ -102,7 +102,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
-	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; } //FinchBlox designed for a 800w x 600h screen
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
