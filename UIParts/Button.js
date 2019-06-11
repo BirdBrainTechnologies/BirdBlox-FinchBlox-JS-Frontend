@@ -321,6 +321,7 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = false;
+  this.iconColor = color;
 	const iconW = VectorIcon.computeWidth(pathId, height);
 	const iconX = (this.width - iconW) / 2;
 	const iconY = (this.height - height) / 2;
@@ -487,7 +488,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || this.toggled) {
+		if (!this.toggles || (this.toggled && !FinchBlox)) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {
@@ -519,7 +520,7 @@ Button.prototype.interrupt = function() {
  * Tells the button to exit the toggled state
  */
 Button.prototype.unToggle = function() {
-	if (this.enabled && this.toggled) {
+	if (this.enabled && (this.toggled || FinchBlox)) {
 		this.setColor(false);
 	}
 	this.toggled = false;
@@ -576,8 +577,15 @@ Button.prototype.move = function(x, y) {
  */
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
-    let darkColor = Colors.darkenColor(this.bg, 0.8);
-    this.bgRect.setAttributeNS(null, "fill", darkColor);
+    console.log("isPressed and FinchBlox");
+    if (this.toggles && this.hasIcon) {
+      console.log("toggles and hasIcon");
+    	this.icon.setColor(Colors.blockPaletteSound);
+    } else {
+      let darkColor = Colors.darkenColor(this.bg, 0.8);
+      this.bgRect.setAttributeNS(null, "fill", darkColor);
+    }
+
 	} else if (isPressed) {
 		this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
 		if (this.hasText && this.textInverts) {
@@ -589,9 +597,17 @@ Button.prototype.setColor = function(isPressed) {
 		if (this.hasImage) {
 			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
+
 	} else if (FinchBlox) {
     this.bgRect.setAttributeNS(null, "fill", this.bg);
-    if (this.hasIcon) { this.icon.setColor(Button.foreground); }
+    if (this.hasIcon) {
+      let color = Button.foreground;
+      if (this.iconColor != null) {
+        color = this.iconColor;
+      }
+      this.icon.setColor(color);
+    }
+
   } else {
 		this.bgRect.setAttributeNS(null, "fill", this.bg);
 		if (this.hasText && this.textInverts) {

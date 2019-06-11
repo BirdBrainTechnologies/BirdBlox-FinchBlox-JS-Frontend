@@ -47,13 +47,13 @@ function B_FinchMove(x, y) {
 	ds.addOption(new SelectionData(Language.getStr("Backward"), "backward"));
 	this.addPart(ds);
 
-	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
-	speedSlot.addLimits(0, 100);
-	this.addPart(speedSlot);
-
 	const distSlot = new NumSlot(this, "Num_dist", 10, true, true);
 	distSlot.addLimits(0, 500);
 	this.addPart(distSlot);
+
+	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
+	speedSlot.addLimits(0, 100);
+	this.addPart(speedSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_move"));
 }
@@ -66,8 +66,8 @@ B_FinchMove.prototype.startAction = function() {
 	}
 
 	let direction = this.slots[1].getData().getValue();
-	let speed = this.slots[2].getData().getValue();
-	let distance = this.slots[3].getData().getValue();
+	let distance = this.slots[2].getData().getValue();
+	let speed = this.slots[3].getData().getValue();
 
 	if (direction == "backward") { speed = -speed; }
 
@@ -86,13 +86,13 @@ function B_FinchTurn(x, y) {
 	ds.addOption(new SelectionData(Language.getStr("Left"), "left"));
 	this.addPart(ds);
 
-	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
-	speedSlot.addLimits(0, 100);
-	this.addPart(speedSlot);
-
 	const angleSlot = new NumSlot(this, "Num_dist", 90, true, true);
 	angleSlot.addLimits(0, 180);
 	this.addPart(angleSlot);
+
+	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
+	speedSlot.addLimits(0, 100);
+	this.addPart(speedSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_turn"));
 }
@@ -105,8 +105,9 @@ B_FinchTurn.prototype.startAction = function() {
 	}
 
 	let direction = this.slots[1].getData().getValue();
-	let speed = this.slots[2].getData().getValue();
-	let angle = this.slots[3].getData().getValue();
+	let angle = this.slots[2].getData().getValue();
+	let speed = this.slots[3].getData().getValue();
+
 
 	//TODO: change to convert from angle to distance
 	let distance = angle * DeviceFinch.cmPerDegree;

@@ -201,7 +201,7 @@ RowDialog.prototype.createTitleRect = function() {
 	var rect;
 	if (FinchBlox) {
 		rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
-		GuiElements.update.stroke(rect, RD.outlineColor, 2);
+		GuiElements.update.stroke(rect, RD.outlineColor, 1);
 	} else {
 		rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
 	}
@@ -238,7 +238,7 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
 	const iconY = (RD.titleBarH - iconH) / 2;
 
 	const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
-	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
+	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
 	return icon;
 };
 

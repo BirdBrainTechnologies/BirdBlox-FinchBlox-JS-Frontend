@@ -3,7 +3,7 @@
  * @constructor
  */
 InputWidget.Piano = function() {
-
+	this.keys={};
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -13,14 +13,20 @@ InputWidget.Piano.setConstants = function() {
 	//P.bnMargin = InputPad.margin;
 	P.bnMargin = 2;
 	P.firstNote = 60;
-	P.numWhiteKeys = 10;
+	P.numWhiteKeys = 14;
 	P.whiteKeyW = (InputPad.width - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
-	P.blackKeyW = P.whiteKeyW*0.75;
-	P.whiteKeyH = 60;
-	P.blackKeyH = P.whiteKeyH/2;
+	P.blackKeyW = P.whiteKeyW*0.65;
+
+	P.wkIcon = VectorPaths.mvPianoWhiteKey;
+	const wKeyRatio = P.wkIcon.height/P.wkIcon.width;
+	P.whiteKeyH = P.whiteKeyW * wKeyRatio;
+
+	P.bkIcon = VectorPaths.mvPianoBlackKey;
+	const bKeyRatio = P.bkIcon.height/P.bkIcon.width;
+	P.blackKeyH = P.blackKeyW * bKeyRatio;
 	P.font = Font.uiFont(34).bold();
 
-	P.blackKeys = [61, 63, 66, 68, 70, 73, 75];
+	P.blackKeys = [61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
 	P.noteStrings = {
 		60:"C4",
 		61:"C#4",
@@ -65,7 +71,8 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
-	this.makeBns();
+	console.log("show piano " + data);
+	this.makeBns(data);
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -96,7 +103,7 @@ InputWidget.Piano.prototype.grayOutUnlessZero = function() {
 /**
  * Generates the buttons for the NumPad
  */
-InputWidget.Piano.prototype.makeBns = function() {
+InputWidget.Piano.prototype.makeBns = function(keySelected) {
 	const P = InputWidget.Piano;
 	let currentNum = P.firstNote;
 	let xPos = 0;
@@ -122,25 +129,36 @@ InputWidget.Piano.prototype.makeBns = function() {
 	blackKeys.forEach(function(key) {
 		this.makeBlackKey(key.xPos, key.yPos, key.currentNum);
 	}.bind(this));
+
+	this.keys[keySelected].press();
+	this.keys[keySelected].release();
+
 };
 
 InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
 	const P = InputWidget.Piano;
-	this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH, Colors.white);
+	let button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
+	button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
+	GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
 }
 
 InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
 	const P = InputWidget.Piano;
 	x += P.whiteKeyW + P.bnMargin/2 - P.blackKeyW/2;
-	this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH, Colors.black);
+	let button = this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH);
+	button.addColorIcon(VectorPaths.mvPianoBlackKey, P.blackKeyH, Colors.black);
 }
 
-InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h, color) {
-	console.log("make key " + num + " at " + x);
+InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
+	//console.log("make key " + num + " at " + x);
 	const P = InputWidget.Piano;
-	let button = new Button(x, y, w, h, this.group, color);
+	let button = new Button(x, y, w, h, this.group, Colors.white);
 	button.setCallbackFunction(function(){this.keyPressed(num)}.bind(this));
+	button.setUnToggleFunction(function(){});
 	button.markAsOverlayPart(this.overlay);
+	GuiElements.update.opacity(button.bgRect, 0);
+	this.keys[num] = button;
+	return button;
 }
 
 InputWidget.Piano.prototype.isBlackKey = function(noteNum){
@@ -157,4 +175,23 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 	this.updateFn(num, InputWidget.Piano.noteStrings[num]);
 	console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
+	this.updatePressed(num);
 };
+
+InputWidget.Piano.prototype.updatePressed = function(num) {
+	if (this.pressedKey != null && num != this.pressedKey) {
+		const oldPressed = this.keys[this.pressedKey];
+		oldPressed.unToggle();
+
+		const isBlack = InputWidget.Piano.blackKeys.includes(this.pressedKey);
+		if (isBlack) {
+			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
+		} else {
+			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.iron, 1);
+		}
+	}
+	this.pressedKey = num;
+	const newPressed = this.keys[this.pressedKey];
+	GuiElements.update.stroke(newPressed.icon.pathE, Colors.fbPurpleBorder, 1);
+
+}

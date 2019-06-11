@@ -107,6 +107,7 @@ BlockList.populateCat_motion_2 = function(category) {
 BlockList.populateCat_color_2 = function(category) {
 	category.addBlockByName("B_FBBeakL2");
 	category.addBlockByName("B_FBTailL2");
+	category.addBlockByName("B_FBLedArrayL2");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -126,6 +127,7 @@ BlockList.populateCat_motion_3 = function(category) {
 BlockList.populateCat_color_3 = function(category) {
 	category.addBlockByName("B_FBBeakL3");
 	category.addBlockByName("B_FBTailL3");
+	category.addBlockByName("B_FBLedArrayL3");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -408,7 +410,7 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FinchDistance");
 	collapsibleItem.addBlockByName("B_FinchLight");
 	collapsibleItem.addBlockByName("B_FinchLine");
-	collapsibleItem.addBlockByName("B_FinchBattery");
+//	collapsibleItem.addBlockByName("B_FinchBattery");
 	collapsibleItem.addBlockByName("B_FNMagnetometer");
 	collapsibleItem.addBlockByName("B_FNCompass");
 	collapsibleItem.addBlockByName("B_FNButton");

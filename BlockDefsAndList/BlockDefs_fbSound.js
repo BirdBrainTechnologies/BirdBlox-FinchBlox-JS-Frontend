@@ -7,7 +7,9 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 24);
+  let iconH = 35;
+  if (level == 1) { iconH = 24; }
+  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -117,8 +119,8 @@ B_FBG.prototype.constructor = B_FBG;
 function B_FBSoundL2(x, y) {
   B_FBSound.call(this, x, y, 2);
 
-  this.noteButton = new BlockButton(this, this.midiNote);
-  this.noteButton.addPiano();
+  this.noteButton = new BlockButton(this);
+  this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 }
 B_FBSoundL2.prototype = Object.create(B_FBSound.prototype);
@@ -129,13 +131,13 @@ B_FBSoundL2.prototype.constructor = B_FBSoundL2;
 function B_FBSoundL3(x, y) {
   B_FBSound.call(this, x, y, 3);
 
-  this.noteButton = new BlockButton(this, this.midiNote);
-  this.noteButton.addPiano();
+  this.noteButton = new BlockButton(this);
+  this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
 
-  this.beatsButton = new BlockButton(this, this.beats);
-  this.beatsButton.addSlider();
+  this.beatsButton = new BlockButton(this);
+  this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
   this.addPart(this.beatsButton);
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);

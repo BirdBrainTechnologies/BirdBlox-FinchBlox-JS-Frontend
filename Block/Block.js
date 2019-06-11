@@ -509,7 +509,9 @@ Block.prototype.updateDim = function() {
 			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 		if (lineWidth > width) { //The block width is the width of the longest line of parts
-			width = lineWidth
+      if (!FinchBlox || currentLine == 0){ //Finchblox only pays attention to first line
+        width = lineWidth
+      }
 		}
 		if (this.parts[i].isEndOfLine){
 			//get ready to start a new line with the next block
@@ -624,7 +626,10 @@ Block.prototype.updateAlignRI = function(x, y) {
 			currentLine += 1;
 			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
 			yCoord += bG.vMargin;
-      if (FinchBlox) { yCoord -= 2.5*bG.vMargin; }
+      if (FinchBlox) {
+        xCoord = -BlockGraphics.command.fbBumpDepth;
+        yCoord -= 2*bG.vMargin;
+      }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}

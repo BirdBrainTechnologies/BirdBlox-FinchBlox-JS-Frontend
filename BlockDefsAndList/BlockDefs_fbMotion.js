@@ -107,14 +107,14 @@ B_FBMotion.prototype.addL2Button = function() {
   switch (this.direction) {
     case "forward":
     case "backward":
-      this.distanceBN = new BlockButton(this, this.defaultDistance);
-      this.distanceBN.addSlider();
+      this.distanceBN = new BlockButton(this);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [10, 20, 30, 40, 50]);
       this.addPart(this.distanceBN);
       break;
     case "right":
     case "left":
       this.angleBN = new BlockButton(this, this.defaultAngle);
-      this.angleBN.addSlider();
+      this.angleBN.addSlider("angle", this.defaultAngle, [45, 90, 135, 180]);
       this.addPart(this.angleBN);
       break;
     default:
@@ -225,8 +225,8 @@ function B_FBMotionL3(x, y, direction){
 
   this.addL2Button();
 
-  this.speedBN = new BlockButton(this, this.defaultSpeed);
-  this.speedBN.addSlider();
+  this.speedBN = new BlockButton(this);
+  this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
   this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);

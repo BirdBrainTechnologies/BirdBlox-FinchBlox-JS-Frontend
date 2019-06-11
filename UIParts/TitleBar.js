@@ -236,6 +236,7 @@ TitleBar.makeButtons = function() {
 
 
     TB.updateStatus = function(status) {
+      GuiElements.alert("TitleBar update status to " + status);
       const finchBn = TitleBar.finchButton;
       //let color = Colors.fbGray;
       //let outlineColor = Colors.iron;

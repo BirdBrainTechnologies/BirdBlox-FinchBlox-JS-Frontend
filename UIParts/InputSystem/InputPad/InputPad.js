@@ -29,7 +29,7 @@ InputPad.setConstants = function() {
   if (FinchBlox) {
     IP.background = Colors.white;
   	IP.margin = Button.defaultMargin;
-  	IP.width = GuiElements.width * 19/20;
+  	IP.width = GuiElements.width * 19/20 - 2*IP.margin;
   } else {
     IP.background = Colors.lightGray;
   	IP.margin = Button.defaultMargin;

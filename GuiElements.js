@@ -330,6 +330,32 @@ GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradien
 	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
 };
+
+GuiElements.create.spectrum = function() {
+	const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	gradient.setAttributeNS(null, "id", "gradient_spectrum"); //Set attributes.
+	gradient.setAttributeNS(null, "x1", "0%");
+	gradient.setAttributeNS(null, "x2", "100%");
+	gradient.setAttributeNS(null, "y1", "0%");
+	gradient.setAttributeNS(null, "y2", "0%");
+
+	gradient.appendChild(GuiElements.create.stop(Colors.red, 0));
+	gradient.appendChild(GuiElements.create.stop(Colors.yellow, 16.67));
+	gradient.appendChild(GuiElements.create.stop(Colors.green, 33.33));
+	gradient.appendChild(GuiElements.create.stop(Colors.cyan, 50));
+	gradient.appendChild(GuiElements.create.stop(Colors.blue, 66.67));
+	gradient.appendChild(GuiElements.create.stop(Colors.magenta, 83.33));
+	gradient.appendChild(GuiElements.create.stop(Colors.red, 100));
+
+	GuiElements.defs.appendChild(gradient);
+	//return gradient;
+}
+GuiElements.create.stop = function(color, offset) {
+	const stop = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop.
+	stop.setAttributeNS(null, "offset", offset + "%");
+	stop.setAttributeNS(null, "style", "stop-color:" + color + ";stop-opacity:1");
+	return stop;
+}
 /**
  * Creates an SVG path element and returns it.
  * @param {Element} [group] - The parent group to add the element to.
@@ -616,6 +642,31 @@ GuiElements.draw.tab = function(x, y, width, height, color, r) {
 	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
 	tab.setAttributeNS(null, "fill", color); //Set the fill.
 	return tab; //Return the finished button shape.
+};
+
+GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
+	let arrayImage = {};
+  const values = arrayString.split("");
+  let group = GuiElements.create.group(0, 0, parentGroup);
+  //const dim = 4;//25;
+  const r = dim/4; //1;//8;
+  const margin = dim/4; //1;//5;
+  const startX = 0;
+	let y = 0;
+  for (let i = 0; i < 5; i++) {
+    let x = startX;
+    for (let j = 0; j < 5; j++) {
+      let color = Colors.iron;
+      if (values[5*i+j] == "1") { color = Colors.black; }
+      let rect = GuiElements.draw.rect(x, y, dim, dim, color, r, r);
+      group.appendChild(rect);
+      x += dim + margin;
+    }
+    y += dim + margin;
+  }
+	arrayImage.group = group;
+	arrayImage.width = 5*dim + 4*margin;
+  return arrayImage;
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.

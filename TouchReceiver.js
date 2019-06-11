@@ -616,7 +616,10 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
-		}
+		} else if (TR.targetType === "slider") {
+      //TR.target.drop(TR.getX(e));
+      TR.target.drop();
+    }
 	} else {
 		TR.touchDown = false;
 	}
@@ -671,7 +674,7 @@ TouchReceiver.touchLong = function() {
 				new BlockContextMenu(TR.target, TR.startX, TR.startY);
 			}
 		}
-		if (TR.targetType === "block") {
+		if (TR.targetType === "block" && !FinchBlox) {
 			TR.longTouch = true;
 			new BlockContextMenu(TR.target, TR.startX, TR.startY);
 		}

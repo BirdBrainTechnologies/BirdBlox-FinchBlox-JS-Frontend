@@ -98,3 +98,11 @@ BlockIcon.prototype.addText = function(text) {
 	this.width = this.textXOffset + textWidth;
 	console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
+
+/**
+ * Add a white rounded rectangle background behind the icon
+ */
+BlockIcon.prototype.addBackgroundRect = function() {
+	this.icon.addBackgroundRect();
+	TouchReceiver.addListenersChild(this.icon.bgRect, this.parent);
+}

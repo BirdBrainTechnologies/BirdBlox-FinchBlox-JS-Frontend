@@ -62,6 +62,7 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 
 	// Convert from distance in cm to encoder ticks.
 	const ticksPerCM = DeviceFinch.ticksPerCM;//100;
+	const speedScaling = 45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
 	if (speedL > 100) { speedL = 100; }
@@ -72,9 +73,9 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", Math.round(speedL * 127/100));
+	request.addParam("speedL", Math.round(speedL * speedScaling));
 	request.addParam("ticksL", Math.round(distL * ticksPerCM));
-	request.addParam("speedR", Math.round(speedR * 127/100));
+	request.addParam("speedR", Math.round(speedR * speedScaling));
 	request.addParam("ticksR", Math.round(distR * ticksPerCM));
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out

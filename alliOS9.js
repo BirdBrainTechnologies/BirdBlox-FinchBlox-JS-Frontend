@@ -2436,9 +2436,9 @@ Language.en = {
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
 "block_divide":"(Slot 1) / (Slot 2)",
-"block_finch_move":"Move (Slot 1) at (Slot 2) % for (Slot 3) cm",
-"block_finch_turn":"Turn (Slot 1) at (Slot 2) % for (Slot 3) °",
-"block_finch_motors":"Move L (Slot 1) % R (Slot 2) %",
+"block_finch_move":"Move (Slot 1) (Slot 2) cm at (Slot 3) %",
+"block_finch_turn":"Turn (Slot 1) (Slot 2) ° at (Slot 3) %",
+"block_finch_motors":"Wheels L (Slot 1) % R (Slot 2) %",
 "block_finch_beak":"Beak R (Slot 1) % G (Slot 2) % B (Slot 3)%",
 "block_finch_tail":"Tail (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
 "block_finch_reset_encoders":"Reset Encoders",
@@ -5919,6 +5919,7 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 
 	// Convert from distance in cm to encoder ticks.
 	var ticksPerCM = DeviceFinch.ticksPerCM;//100;
+	var speedScaling = 45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
 	if (speedL > 100) { speedL = 100; }
@@ -5929,9 +5930,9 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	var request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", Math.round(speedL * 127/100));
+	request.addParam("speedL", Math.round(speedL * speedScaling));
 	request.addParam("ticksL", Math.round(distL * ticksPerCM));
-	request.addParam("speedR", Math.round(speedR * 127/100));
+	request.addParam("speedR", Math.round(speedR * speedScaling));
 	request.addParam("ticksR", Math.round(distR * ticksPerCM));
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out
@@ -6376,6 +6377,32 @@ GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradien
 	stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
 	gradient.appendChild(stop2);
 };
+
+GuiElements.create.spectrum = function() {
+	var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
+	gradient.setAttributeNS(null, "id", "gradient_spectrum"); //Set attributes.
+	gradient.setAttributeNS(null, "x1", "0%");
+	gradient.setAttributeNS(null, "x2", "100%");
+	gradient.setAttributeNS(null, "y1", "0%");
+	gradient.setAttributeNS(null, "y2", "0%");
+
+	gradient.appendChild(GuiElements.create.stop(Colors.red, 0));
+	gradient.appendChild(GuiElements.create.stop(Colors.yellow, 16.67));
+	gradient.appendChild(GuiElements.create.stop(Colors.green, 33.33));
+	gradient.appendChild(GuiElements.create.stop(Colors.cyan, 50));
+	gradient.appendChild(GuiElements.create.stop(Colors.blue, 66.67));
+	gradient.appendChild(GuiElements.create.stop(Colors.magenta, 83.33));
+	gradient.appendChild(GuiElements.create.stop(Colors.red, 100));
+
+	GuiElements.defs.appendChild(gradient);
+	//return gradient;
+}
+GuiElements.create.stop = function(color, offset) {
+	var stop = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop.
+	stop.setAttributeNS(null, "offset", offset + "%");
+	stop.setAttributeNS(null, "style", "stop-color:" + color + ";stop-opacity:1");
+	return stop;
+}
 /**
  * Creates an SVG path element and returns it.
  * @param {Element} [group] - The parent group to add the element to.
@@ -6662,6 +6689,31 @@ GuiElements.draw.tab = function(x, y, width, height, color, r) {
 	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
 	tab.setAttributeNS(null, "fill", color); //Set the fill.
 	return tab; //Return the finished button shape.
+};
+
+GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
+	var arrayImage = {};
+  var values = arrayString.split("");
+  var group = GuiElements.create.group(0, 0, parentGroup);
+  //var dim = 4;//25;
+  var r = dim/4; //1;//8;
+  var margin = dim/4; //1;//5;
+  var startX = 0;
+	var y = 0;
+  for (var i = 0; i < 5; i++) {
+    var x = startX;
+    for (var j = 0; j < 5; j++) {
+      var color = Colors.iron;
+      if (values[5*i+j] == "1") { color = Colors.black; }
+      var rect = GuiElements.draw.rect(x, y, dim, dim, color, r, r);
+      group.appendChild(rect);
+      x += dim + margin;
+    }
+    y += dim + margin;
+  }
+	arrayImage.group = group;
+	arrayImage.width = 5*dim + 4*margin;
+  return arrayImage;
 };
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -7467,6 +7519,7 @@ BlockList.populateCat_motion_2 = function(category) {
 BlockList.populateCat_color_2 = function(category) {
 	category.addBlockByName("B_FBBeakL2");
 	category.addBlockByName("B_FBTailL2");
+	category.addBlockByName("B_FBLedArrayL2");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -7486,6 +7539,7 @@ BlockList.populateCat_motion_3 = function(category) {
 BlockList.populateCat_color_3 = function(category) {
 	category.addBlockByName("B_FBBeakL3");
 	category.addBlockByName("B_FBTailL3");
+	category.addBlockByName("B_FBLedArrayL3");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -7768,7 +7822,7 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FinchDistance");
 	collapsibleItem.addBlockByName("B_FinchLight");
 	collapsibleItem.addBlockByName("B_FinchLine");
-	collapsibleItem.addBlockByName("B_FinchBattery");
+//	collapsibleItem.addBlockByName("B_FinchBattery");
 	collapsibleItem.addBlockByName("B_FNMagnetometer");
 	collapsibleItem.addBlockByName("B_FNCompass");
 	collapsibleItem.addBlockByName("B_FNButton");
@@ -7829,7 +7883,10 @@ Colors.setCommon = function() {
 	//Basic colors
 	Colors.red = "#FF0000";
 	Colors.green = "#00FF00";
+	Colors.blue = "#0000FF";
 	Colors.yellow = "#FFFF00";
+	Colors.cyan = "#00FFFF";
+	Colors.magenta = "#FF00FF";
 	Colors.darkRed = "#c00000";
 	//Current BBT colors
 	Colors.bbt = "#209BA9";
@@ -8087,6 +8144,20 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.microbit={};
+  VP.microbit.path="M13.465 60.088 C 11.703 60.639,9.937 62.220,9.134 63.965 L 8.704 64.900 8.554 89.700 C 8.472 103.340,8.426 117.082,8.452 120.239 L 8.500 125.977 33.700 93.069 C 47.560 74.970,58.930 60.080,58.967 59.981 C 59.082 59.669,14.468 59.774,13.465 60.088 M61.200 80.240 C 61.200 91.703,61.276 100.597,61.372 100.490 C 61.761 100.062,92.400 59.968,92.400 59.887 C 92.400 59.839,85.380 59.800,76.800 59.800 L 61.200 59.800 61.200 80.240 M97.600 67.240 C 97.600 71.425,97.675 74.597,97.773 74.490 C 97.912 74.337,102.495 68.354,108.146 60.950 L 109.023 59.800 103.312 59.800 L 97.600 59.800 97.600 67.240 M40.784 270.002 C 28.867 272.019,20.737 283.226,22.888 294.671 C 26.843 315.716,55.469 318.539,63.425 298.669 C 69.273 284.065,56.116 267.407,40.784 270.002 M117.667 270.083 C 104.726 272.552,96.991 285.226,100.935 297.500 C 106.771 315.667,131.736 317.325,140.114 300.103 C 147.416 285.092,133.881 266.989,117.667 270.083 M194.948 270.103 C 182.654 272.433,174.732 284.581,177.863 296.300 C 182.960 315.369,208.784 317.869,217.399 300.128 C 224.665 285.164,211.113 267.040,194.948 270.103 M271.748 270.103 C 260.250 272.282,252.336 283.239,254.269 294.303 C 258.239 317.034,289.899 318.327,295.602 295.991 C 299.285 281.569,286.197 267.365,271.748 270.103 M349.584 269.989 C 332.112 273.202,325.279 293.718,337.588 306.010 C 351.263 319.666,374.392 309.194,373.547 289.728 C 373.037 277.970,360.835 267.919,349.584 269.989 M15.400 319.600 L 15.400 339.600 18.000 339.600 L 20.600 339.600 20.600 319.600 L 20.600 299.600 18.000 299.600 L 15.400 299.600 15.400 319.600 M67.600 319.571 L 67.600 339.542 68.950 339.670 C 69.692 339.740,70.817 339.798,71.450 339.799 L 72.600 339.800 72.600 319.700 L 72.600 299.600 70.100 299.600 L 67.600 299.600 67.600 319.571 M75.800 319.700 L 75.800 339.800 78.300 339.800 L 80.800 339.800 80.800 319.700 L 80.800 299.600 78.300 299.600 L 75.800 299.600 75.800 319.700 M84.000 319.700 L 84.000 339.800 86.500 339.800 L 89.000 339.800 89.000 319.700 L 89.000 299.600 86.500 299.600 L 84.000 299.600 84.000 319.700 M92.000 319.700 L 92.000 339.800 94.600 339.800 L 97.200 339.800 97.200 319.700 L 97.200 299.600 94.600 299.600 L 92.000 299.600 92.000 319.700 M144.800 319.800 L 144.800 340.000 147.300 340.000 L 149.800 340.000 149.800 319.800 L 149.800 299.600 147.300 299.600 L 144.800 299.600 144.800 319.800 M152.933 299.733 C 152.860 299.807,152.800 308.897,152.800 319.933 L 152.800 340.000 155.400 340.000 L 158.000 340.000 158.000 319.800 L 158.000 299.600 155.533 299.600 C 154.177 299.600,153.007 299.660,152.933 299.733 M161.000 319.800 L 161.000 340.000 163.600 340.000 L 166.200 340.000 166.200 319.800 L 166.200 299.600 163.600 299.600 L 161.000 299.600 161.000 319.800 M169.200 319.800 L 169.200 340.000 171.800 340.000 L 174.400 340.000 174.400 319.800 L 174.400 299.600 171.800 299.600 L 169.200 299.600 169.200 319.800 M221.892 299.850 C 221.840 299.988,221.820 309.100,221.848 320.100 L 221.900 340.100 224.450 340.156 L 227.000 340.212 227.000 319.906 L 227.000 299.600 224.494 299.600 C 222.673 299.600,221.961 299.668,221.892 299.850 M230.000 319.900 L 230.000 340.200 232.600 340.200 L 235.200 340.200 235.200 319.900 L 235.200 299.600 232.600 299.600 L 230.000 299.600 230.000 319.900 M238.200 319.894 L 238.200 340.200 240.801 340.200 L 243.402 340.200 243.351 319.950 L 243.300 299.700 240.750 299.644 L 238.200 299.588 238.200 319.894 M246.400 319.900 L 246.400 340.200 248.900 340.200 L 251.400 340.200 251.400 319.900 L 251.400 299.600 248.900 299.600 L 246.400 299.600 246.400 319.900 M299.000 319.800 L 299.000 340.000 301.600 340.000 L 304.200 340.000 304.200 319.800 L 304.200 299.600 301.600 299.600 L 299.000 299.600 299.000 319.800 M307.200 319.794 L 307.200 340.000 309.801 340.000 L 312.402 340.000 312.351 319.850 L 312.300 299.700 309.750 299.644 L 307.200 299.588 307.200 319.794 M315.400 319.800 L 315.400 340.000 317.900 340.000 L 320.400 340.000 320.400 319.800 L 320.400 299.600 317.900 299.600 L 315.400 299.600 315.400 319.800 M323.600 319.800 L 323.600 340.000 326.100 340.000 L 328.600 340.000 328.600 319.800 L 328.600 299.600 326.100 299.600 L 323.600 299.600 323.600 319.800 M376.200 319.600 L 376.200 339.612 378.750 339.556 L 381.300 339.500 381.300 319.600 L 381.300 299.700 378.750 299.644 L 376.200 299.588 376.200 319.600 M22.800 322.790 L 22.800 339.600 43.600 339.600 L 64.400 339.600 64.400 322.954 L 64.400 306.309 63.771 307.104 C 53.746 319.777,34.250 319.843,23.841 307.240 L 22.800 305.979 22.800 322.790 M331.600 322.915 L 331.600 339.866 352.328 339.738 C 363.729 339.668,373.089 339.577,373.129 339.537 C 373.170 339.497,373.179 332.025,373.151 322.932 L 373.100 306.399 371.900 307.841 C 361.860 319.904,342.283 319.503,332.443 307.032 L 331.600 305.964 331.600 322.915 M100.207 322.950 L 100.200 339.800 108.550 339.800 C 113.142 339.800,122.503 339.860,129.350 339.933 L 141.800 340.066 141.800 323.115 L 141.800 306.164 141.034 307.132 C 130.944 319.890,110.886 319.775,100.838 306.900 L 100.213 306.100 100.207 322.950 M177.600 323.090 L 177.600 340.000 186.967 340.000 C 192.119 340.000,201.479 340.060,207.767 340.133 L 219.200 340.266 219.198 323.183 L 219.196 306.100 218.657 306.800 C 208.713 319.712,189.126 319.976,178.569 307.340 L 177.600 306.179 177.600 323.090 M254.400 323.222 L 254.400 340.266 268.233 340.133 C 275.841 340.060,285.201 340.000,289.033 340.000 L 296.000 340.000 295.998 323.050 L 295.996 306.100 295.466 306.800 C 285.715 319.686,265.907 319.952,255.369 307.340 L 254.400 306.179 254.400 323.222 "
+  VP.microbit.width=400;
+  VP.microbit.height=400;
+  VP.mvPianoBlackKey={};
+  VP.mvPianoBlackKey.path="M29.057,45.104L14.999,45.104L14.999,105.114C14.999,107.322 15.592,109.114 16.324,109.114L27.732,109.114C28.464,109.114 29.057,107.322 29.057,105.114L29.057,45.104Z";
+  VP.mvPianoBlackKey.width=85;
+  VP.mvPianoBlackKey.height=129;
+  VP.mvPianoBlackKey.transform="matrix(6.03992,0,0,2,-90.5927,-90.208)";
+  VP.mvPianoWhiteKey={};
+  VP.mvPianoWhiteKey.path="M0,-109.113L-17.633,-109.113C-18.345,-109.113 -18.921,-108.036 -18.921,-106.706L-18.921,-2.406C-18.921,-1.077 -18.345,0 -17.633,0L0,0C0.711,0 1.288,-1.077 1.288,-2.406L1.288,-12.022L1.288,-106.706C1.288,-108.036 0.711,-109.113 0,-109.113";
+  VP.mvPianoWhiteKey.width=127;
+  VP.mvPianoWhiteKey.height=223;
+  VP.mvPianoWhiteKey.transform="matrix(6.03992,0,0,2,116.281,220.226)";
   VP.mvMusicNote={};
   VP.mvMusicNote.path="M0,-48.273C-2.845,-49.664 -4.694,-52.347 -5.707,-55.276C-6.128,-56.491 -6.418,-57.751 -6.604,-59.023C-6.686,-59.592 -6.722,-63.444 -6.758,-64.018C-6.788,-64.489 -6.746,-65.049 -6.91,-65.497C-7.222,-66.349 -9.018,-66.845 -9.856,-66.601C-10.507,-66.412 -10.511,-65.574 -10.473,-65.029C-10.416,-64.194 -10.41,-60.091 -10.413,-59.252C-10.419,-57.563 -10.425,-55.874 -10.431,-54.185C-10.438,-51.975 -10.445,-49.766 -10.453,-47.556C-10.462,-45.01 -10.471,-42.464 -10.479,-39.918C-10.488,-37.22 -10.497,-34.521 -10.507,-31.823C-10.516,-29.156 -10.524,-26.489 -10.534,-23.822C-10.542,-21.372 -10.551,-18.92 -10.559,-16.47C-10.565,-14.419 -10.573,-12.367 -10.58,-10.316C-10.585,-8.849 -10.59,-7.382 -10.595,-5.915C-10.597,-5.216 -10.6,-4.517 -10.602,-3.817C-10.602,-3.81 -10.609,-3.721 -10.603,-3.718C-14.19,-5.502 -19.674,-5.178 -24.84,-2.492C-32.017,1.24 -35.843,8.093 -33.388,12.816C-30.932,17.539 -24.725,18.572 -17.549,14.84C-11.559,11.726 -7.627,6.422 -7.654,2.029L-7.654,-41.042C1.106,-41.309 9.227,-30.709 9.227,-30.709C17.401,-16.312 4.143,-1.968 4.143,-1.968C3.265,0.752 5.061,0.178 5.061,0.178C9.749,-2.648 15.196,-11.565 15.196,-11.565C27.735,-32.517 0,-48.273 0,-48.273";
   VP.mvMusicNote.width=37;
@@ -10134,7 +10205,10 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
-		}
+		} else if (TR.targetType === "slider") {
+      //TR.target.drop(TR.getX(e));
+      TR.target.drop();
+    }
 	} else {
 		TR.touchDown = false;
 	}
@@ -10189,7 +10263,7 @@ TouchReceiver.touchLong = function() {
 				new BlockContextMenu(TR.target, TR.startX, TR.startY);
 			}
 		}
-		if (TR.targetType === "block") {
+		if (TR.targetType === "block" && !FinchBlox) {
 			TR.longTouch = true;
 			new BlockContextMenu(TR.target, TR.startX, TR.startY);
 		}
@@ -10675,6 +10749,7 @@ TitleBar.makeButtons = function() {
 
 
     TB.updateStatus = function(status) {
+      GuiElements.alert("TitleBar update status to " + status);
       var finchBn = TitleBar.finchButton;
       //var color = Colors.fbGray;
       //var outlineColor = Colors.iron;
@@ -12943,6 +13018,7 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
 	this.removeContent();
 	this.hasIcon = true;
 	this.iconInverts = false;
+  this.iconColor = color;
 	var iconW = VectorIcon.computeWidth(pathId, height);
 	var iconX = (this.width - iconW) / 2;
 	var iconY = (this.height - height) / 2;
@@ -13109,7 +13185,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || this.toggled) {
+		if (!this.toggles || (this.toggled && !FinchBlox)) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {
@@ -13141,7 +13217,7 @@ Button.prototype.interrupt = function() {
  * Tells the button to exit the toggled state
  */
 Button.prototype.unToggle = function() {
-	if (this.enabled && this.toggled) {
+	if (this.enabled && (this.toggled || FinchBlox)) {
 		this.setColor(false);
 	}
 	this.toggled = false;
@@ -13198,8 +13274,15 @@ Button.prototype.move = function(x, y) {
  */
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
-    var darkColor = Colors.darkenColor(this.bg, 0.8);
-    this.bgRect.setAttributeNS(null, "fill", darkColor);
+    console.log("isPressed and FinchBlox");
+    if (this.toggles && this.hasIcon) {
+      console.log("toggles and hasIcon");
+    	this.icon.setColor(Colors.blockPaletteSound);
+    } else {
+      var darkColor = Colors.darkenColor(this.bg, 0.8);
+      this.bgRect.setAttributeNS(null, "fill", darkColor);
+    }
+
 	} else if (isPressed) {
 		this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
 		if (this.hasText && this.textInverts) {
@@ -13211,9 +13294,17 @@ Button.prototype.setColor = function(isPressed) {
 		if (this.hasImage) {
 			GuiElements.update.image(this.imageE, this.imageData.darkName);
 		}
+
 	} else if (FinchBlox) {
     this.bgRect.setAttributeNS(null, "fill", this.bg);
-    if (this.hasIcon) { this.icon.setColor(Button.foreground); }
+    if (this.hasIcon) {
+      var color = Button.foreground;
+      if (this.iconColor != null) {
+        color = this.iconColor;
+      }
+      this.icon.setColor(color);
+    }
+
   } else {
 		this.bgRect.setAttributeNS(null, "fill", this.bg);
 		if (this.hasText && this.textInverts) {
@@ -13885,7 +13976,7 @@ InputPad.setConstants = function() {
   if (FinchBlox) {
     IP.background = Colors.white;
   	IP.margin = Button.defaultMargin;
-  	IP.width = GuiElements.width * 19/20;
+  	IP.width = GuiElements.width * 19/20 - 2*IP.margin;
   } else {
     IP.background = Colors.lightGray;
   	IP.margin = Button.defaultMargin;
@@ -14660,17 +14751,24 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
  */
-InputWidget.Slider = function (min, max, startVal, sliderColor) {
-  this.min = min;
-  this.max = max;
-  this.range = max - min;
+InputWidget.Slider = function (type, options, startVal, sliderColor) {
+  this.type = type;
+  this.options = options;
+  //this.min = min;
+  //this.max = max;
+  //this.range = max - min;
   this.value = startVal;
-  if (typeof startVal == 'object') {
-    this.position = 5;
-  } else {
-    this.position = startVal;
-  }
+  //if (typeof startVal == 'object') {
+  //  this.position = 5;
+  //} else {
+  //  this.position = startVal;
+  //}
   this.sliderColor = sliderColor;
+
+  this.snapToOption = false;
+  if (type == "ledArray") { this.snapToOption = true; }
+  this.optionXs = [];
+  this.optionValues = [];
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
@@ -14678,10 +14776,12 @@ InputWidget.Slider.prototype.constructor = InputWidget.Slider;
 InputWidget.Slider.setConstants = function() {
   var S = InputWidget.Slider;
   S.width = InputPad.width;
-  S.height = 40;
+  S.height = 80;
   S.hMargin = 20;
-  S.barHeight = 2;
+  S.barHeight = 4;
+  S.barColor = Colors.iron;
   S.sliderIconPath = VectorPaths.mvFinch;
+  S.optionMargin = 10;//5;//distance between ticks and option display
 };
 
 /**
@@ -14691,7 +14791,13 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
   this.parentGroup = parentGroup;
+  this.value = data;
   this.makeSlider();
+
+  TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
+
+  var valueIndex = this.optionValues.indexOf(this.value);
+  if (valueIndex != -1) { this.moveToOption(valueIndex); }
 };
 
 /**
@@ -14708,25 +14814,59 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
 InputWidget.Slider.prototype.makeSlider = function() {
   var S = InputWidget.Slider;
   var font = InputWidget.Label.font;
-  var labelY = (S.height + font.charHeight)/2;
+  this.position = 0;
+  this.range = 100;
+  //var labelY = (S.height + font.charHeight)/2;
+
+
   this.barX = S.hMargin;
   this.barY = (S.height - S.barHeight)/2;
   this.barW = S.width - 2 * S.hMargin;
+  var barColor = S.barColor;
+
+
+  //var minLabel = GuiElements.draw.text(5, labelY, this.min, font, Colors.white);
+  //this.group.appendChild(minLabel);
+  //var maxLabel = GuiElements.draw.text(this.width - 20, labelY, this.max, font, Colors.white);
+  //this.group.appendChild(maxLabel);
+
+  if (this.type == 'color') {
+    barColor = Colors.white;
+    //var spectrum = GuiElements.create.spectrum();
+    //var spectrum = Colors.getGradient("tablet")
+    GuiElements.create.spectrum();
+    var spectrum = "url(#gradient_spectrum)";
+    var specH = S.barHeight * 20;
+    var specY = this.barY - specH/2 + S.barHeight/2;
+    var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
+    this.group.appendChild(colorRect);
+  }
+
+  var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, barColor);
+  this.group.appendChild(sliderBar);
+  TouchReceiver.addListenersSlider(sliderBar, this);
+
+  if (this.options != null && this.options.length != 0 ) {
+
+    var tickH = 7 * S.barHeight;//8 * S.barHeight;
+    var tickW = S.barHeight * (3/4);//S.barHeight/2;
+    var tickX = this.barX;
+    var tickY = this.barY - (tickH - S.barHeight)/2;
+    for (var i = 0; i < this.options.length; i++) {
+      var isOnEdge = (i == 0 || i == (this.options.length -1));
+      this.addOption(tickX, tickY, this.options[i], tickH, tickW, isOnEdge);
+      tickX += (this.barW - tickW) / (this.options.length - 1);
+    }
+  }
+
+
+
   //this.sliderH = S.barHeight * 5;
   this.sliderH = 30;//10
   this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
   this.sliderY = (S.height - this.sliderH)/2;
   //var sliderX = this.barX + (this.barW - this.sliderW)/2;
   var sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
-
-  var minLabel = GuiElements.draw.text(5, labelY, this.min, font, Colors.white);
-  this.group.appendChild(minLabel);
-  var maxLabel = GuiElements.draw.text(this.width - 20, labelY, this.max, font, Colors.white);
-  this.group.appendChild(maxLabel);
-
-  var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, Colors.black);
-  this.group.appendChild(sliderBar);
-
   //this.slider = GuiElements.draw.rect(sliderX, this.sliderY, this.sliderW, this.sliderH, Colors.easternBlue);
   //this.group.appendChild(this.slider);
   //TouchReceiver.addListenersSlider(this.slider, this);
@@ -14736,17 +14876,59 @@ InputWidget.Slider.prototype.makeSlider = function() {
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
 }
 
+InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
+  var S = InputWidget.Slider;
+  var font = Font.uiFont(12);//InputWidget.Label.font;
+
+  //Ticks on the edges of the slider are longer
+  var tickY = y;
+  if (isOnEdge) {
+    var extra = tickH/6;
+    tickY -= extra;
+    tickH += 2*extra;
+  }
+
+  var tick = GuiElements.draw.rect(x, tickY, tickW, tickH, S.barColor);
+  this.group.appendChild(tick);
+  TouchReceiver.addListenersSlider(tick, this);
+
+  this.optionXs.push(x + tickW/2);
+  this.optionValues.push(option);
+
+  switch (this.type) {
+    case "ledArray":
+      var image = GuiElements.draw.ledArray(this.group, option, 3);
+      var iX = x - image.width/2 + tickW/2;
+      var iY = y - image.width - S.optionMargin;
+      GuiElements.move.group(image.group, iX, iY);
+      break;
+    case "percent":
+    case "distance":
+    case "angle":
+      var width = GuiElements.measure.stringWidth(option, font);
+      var textX = x - width/2 + tickW/2;
+      var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
+      var textE = GuiElements.draw.text(textX, textY, option, font, Colors.black);
+      this.group.appendChild(textE);
+      break;
+  }
+
+
+}
+
 InputWidget.Slider.prototype.drag = function(x) {
   var relX = x - this.overlay.x - this.overlay.margin;
 
   if (relX > this.barX && relX < (this.barX + this.barW - this.sliderW)) {
-    this.sliderX = relX;
+    this.sliderX = relX - this.sliderW/2;
     this.position = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.range));
     //GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
     this.sliderIcon.move(this.sliderX, this.sliderY);
 
     if (typeof this.value == 'number') {
       this.value = this.position;
+    } else if (typeof this.value == 'string') {
+      //do nothing?
     } else {
       //if it is an rgb color object
       if (this.value.r != null) {
@@ -14790,12 +14972,41 @@ InputWidget.Slider.prototype.drag = function(x) {
   }
 }
 
+InputWidget.Slider.prototype.drop = function() {
+  var x = this.sliderX + this.sliderW/2;
+
+  if (this.snapToOption) {
+    //var relX = x - this.overlay.x - this.overlay.margin;
+    var relX = x;
+    var dist = 1000;
+    var bestFit = 0;
+
+    for (var i = 0; i < this.optionXs.length; i++) {
+      console.log("option at " + this.optionXs[i] + " relX " + relX);
+      var optionDist = Math.abs(this.optionXs[i] - relX);
+      if (optionDist < dist) {
+        dist = optionDist;
+        bestFit = i;
+      }
+    }
+
+    this.moveToOption(bestFit);
+  }
+}
+
+InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
+  this.sliderX = this.optionXs[optionIndex] - this.sliderW/2;
+  this.sliderIcon.move(this.sliderX, this.sliderY);
+  this.value = this.optionValues[optionIndex];
+  this.updateFn(this.value);
+}
+
 /**
  * Used for selecting a note to play in note blocks.
  * @constructor
  */
 InputWidget.Piano = function() {
-
+	this.keys={};
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -14805,14 +15016,20 @@ InputWidget.Piano.setConstants = function() {
 	//P.bnMargin = InputPad.margin;
 	P.bnMargin = 2;
 	P.firstNote = 60;
-	P.numWhiteKeys = 10;
+	P.numWhiteKeys = 14;
 	P.whiteKeyW = (InputPad.width - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
-	P.blackKeyW = P.whiteKeyW*0.75;
-	P.whiteKeyH = 60;
-	P.blackKeyH = P.whiteKeyH/2;
+	P.blackKeyW = P.whiteKeyW*0.65;
+
+	P.wkIcon = VectorPaths.mvPianoWhiteKey;
+	var wKeyRatio = P.wkIcon.height/P.wkIcon.width;
+	P.whiteKeyH = P.whiteKeyW * wKeyRatio;
+
+	P.bkIcon = VectorPaths.mvPianoBlackKey;
+	var bKeyRatio = P.bkIcon.height/P.bkIcon.width;
+	P.blackKeyH = P.blackKeyW * bKeyRatio;
 	P.font = Font.uiFont(34).bold();
 
-	P.blackKeys = [61, 63, 66, 68, 70, 73, 75];
+	P.blackKeys = [61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
 	P.noteStrings = {
 		60:"C4",
 		61:"C#4",
@@ -14857,7 +15074,8 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
-	this.makeBns();
+	console.log("show piano " + data);
+	this.makeBns(data);
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -14888,7 +15106,7 @@ InputWidget.Piano.prototype.grayOutUnlessZero = function() {
 /**
  * Generates the buttons for the NumPad
  */
-InputWidget.Piano.prototype.makeBns = function() {
+InputWidget.Piano.prototype.makeBns = function(keySelected) {
 	var P = InputWidget.Piano;
 	var currentNum = P.firstNote;
 	var xPos = 0;
@@ -14914,25 +15132,36 @@ InputWidget.Piano.prototype.makeBns = function() {
 	blackKeys.forEach(function(key) {
 		this.makeBlackKey(key.xPos, key.yPos, key.currentNum);
 	}.bind(this));
+
+	this.keys[keySelected].press();
+	this.keys[keySelected].release();
+
 };
 
 InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
 	var P = InputWidget.Piano;
-	this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH, Colors.white);
+	var button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
+	button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
+	GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
 }
 
 InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
 	var P = InputWidget.Piano;
 	x += P.whiteKeyW + P.bnMargin/2 - P.blackKeyW/2;
-	this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH, Colors.black);
+	var button = this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH);
+	button.addColorIcon(VectorPaths.mvPianoBlackKey, P.blackKeyH, Colors.black);
 }
 
-InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h, color) {
-	console.log("make key " + num + " at " + x);
+InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
+	//console.log("make key " + num + " at " + x);
 	var P = InputWidget.Piano;
-	var button = new Button(x, y, w, h, this.group, color);
+	var button = new Button(x, y, w, h, this.group, Colors.white);
 	button.setCallbackFunction(function(){this.keyPressed(num)}.bind(this));
+	button.setUnToggleFunction(function(){});
 	button.markAsOverlayPart(this.overlay);
+	GuiElements.update.opacity(button.bgRect, 0);
+	this.keys[num] = button;
+	return button;
 }
 
 InputWidget.Piano.prototype.isBlackKey = function(noteNum){
@@ -14949,7 +15178,26 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 	this.updateFn(num, InputWidget.Piano.noteStrings[num]);
 	console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
+	this.updatePressed(num);
 };
+
+InputWidget.Piano.prototype.updatePressed = function(num) {
+	if (this.pressedKey != null && num != this.pressedKey) {
+		var oldPressed = this.keys[this.pressedKey];
+		oldPressed.unToggle();
+
+		var isBlack = InputWidget.Piano.blackKeys.includes(this.pressedKey);
+		if (isBlack) {
+			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
+		} else {
+			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.iron, 1);
+		}
+	}
+	this.pressedKey = num;
+	var newPressed = this.keys[this.pressedKey];
+	GuiElements.update.stroke(newPressed.icon.pathE, Colors.fbPurpleBorder, 1);
+
+}
 
 /**
  * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
@@ -17026,6 +17274,21 @@ VectorIcon.prototype.addSecondPath = function(pathId, color){
 }
 
 /**
+ * Create the rounded rectangle background of the microbit icon
+ */
+VectorIcon.prototype.addBackgroundRect = function() {
+  var x = -10;
+  var y = 50;
+  var w = (this.width/this.scaleY) - (2*x);
+  var h = (this.height/this.scaleX) - (2*y);
+  var r = 20;
+  this.bgRect = GuiElements.draw.rect(x, y, w, h, Colors.white, r, r);
+	this.pathE.remove();
+	this.group.appendChild(this.bgRect);
+	this.group.appendChild(this.pathE);
+}
+
+/**
  * Static class in charge of indicating where the blocks being dragged will snap to when dropped.  It has a single
  * white (or black if Blocks are running) path element which it moves around and reshapes
  */
@@ -17085,15 +17348,20 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
  */
 Highlighter.showShadow = function(fit, stack) {
 	var myX = 0;
-	var myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+	//var myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+  var myY = 0;
 	var snapFront = false;
 	if (fit instanceof BlockStack) {
-		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myY = fit.tab.absToRelY(fit.getAbsY());
+		//myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myX = fit.tab.absToRelX(fit.getAbsX());
 		snapFront = true;
 	} else if (fit instanceof BlockSlot) {
 		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
 	} else {
-	 	myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+	 	//myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+    myY = fit.stack.tab.absToRelY(fit.getAbsY());
+    myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
 	}
 	var color = Colors.iron;
 
@@ -17106,16 +17374,17 @@ Highlighter.showShadow = function(fit, stack) {
 		GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
 		var pathD = block.path.getAttribute("d");
 		pathE.setAttributeNS(null, "d", pathD);
-		shadowW += block.width;
+		shadowW += block.width + BlockGraphics.command.fbBumpDepth;
 		block = block.nextBlock;
 	}
-	if (snapFront) { myX -= shadowW; }
+	if (snapFront) { myX -= shadowW + BlockGraphics.command.fbBumpDepth; }
 
 	GuiElements.move.group(this.shadowGroup, myX, myY);
 
 	if (!Highlighter.visible) {
 		//GuiElements.layers.highlight.appendChild(Highlighter.shadowGroup);
-		GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+		//GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+    TabManager.activeTab.mainG.appendChild(Highlighter.shadowGroup);
 		Highlighter.visible = true;
 	}
 
@@ -19416,7 +19685,7 @@ RowDialog.prototype.createTitleRect = function() {
 	var rect;
 	if (FinchBlox) {
 		rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
-		GuiElements.update.stroke(rect, RD.outlineColor, 2);
+		GuiElements.update.stroke(rect, RD.outlineColor, 1);
 	} else {
 		rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
 	}
@@ -19453,7 +19722,7 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
 	var iconY = (RD.titleBarH - iconH) / 2;
 
 	var icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
-	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 2);
+	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
 	return icon;
 };
 
@@ -21720,12 +21989,12 @@ CalibrateCompassDialog.showVideo = function(robot) {
  * A dialog for changing the difficulty level. Used in FinchBlox.
  */
 function LevelDialog() {
-  RowDialog.call(this, true, null, 5, 0, 0, 0, true);
-
+//  RowDialog.call(this, true, null, 5, 0, 0, 0, true);
+  this.visible = false;
   this.buttons = [];
 }
-LevelDialog.prototype = Object.create(RowDialog.prototype);
-LevelDialog.prototype.constructor = LevelDialog;
+//LevelDialog.prototype = Object.create(RowDialog.prototype);
+//LevelDialog.prototype.constructor = LevelDialog;
 
 LevelDialog.setGlobals = function() {
   var LD = LevelDialog;
@@ -21737,30 +22006,72 @@ LevelDialog.setGlobals = function() {
   LD.currentLevel = 1;
 }
 
+LevelDialog.prototype.show = function() {
+  if (!this.visible) {
+    this.visible = true;
+
+    // Close existing dialog if any
+		if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
+			RowDialog.currentDialog.closeDialog();
+		}
+		RowDialog.currentDialog = this;
+
+    this.width = GuiElements.width * 0.75;
+    this.height = this.width / 3;
+    this.font = Font.uiFont(this.height/2);
+    this.x = GuiElements.width / 2 - this.width / 2;
+		this.y = GuiElements.height / 2 - this.height / 2;
+    this.group = GuiElements.create.group(this.x, this.y);
+		this.bgRect = this.drawBackground();
+    this.rowGroup = this.createContent();
+  }
+
+  GuiElements.layers.overlay.appendChild(this.group);
+
+  GuiElements.blockInteraction();
+}
+
+/**
+ * Draws the gray background rectangle of the dialog
+ * @return {Element} - The SVG rect element
+ */
+LevelDialog.prototype.drawBackground = function() {
+	var RD = RowDialog;
+	var rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
+	this.group.appendChild(rect);
+	return rect;
+};
+
 LevelDialog.prototype.createContent = function() {
   var LD = LevelDialog;
   var rowGroup = GuiElements.create.group(0, 0);
 
-  var margin = this.width/16;
-  var bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
+  //var margin = this.width/16;
+  var bnMargin = this.width * 0.08; //Margin between buttons
+  var hMargin = bnMargin * 4/3; //Margin on outer edges
+  //var bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
+  var bnDim = (this.width - 2*hMargin - bnMargin*(LD.totalLevels-1))/LD.totalLevels
 
   //var y = margin;
   var y = (this.height - bnDim)/2;
-  var x = margin;
+  //var x = margin;
+  var x = hMargin
 
   for (var i = 1; i <= LD.totalLevels; i++) {
     var button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
-    button.addText(i, Font.uiFont(90), LD.color);
+    button.addText(i, this.font, LD.color);
     button.setCallbackFunction(function(){LevelDialog.setLevel(i);}, false);
     button.setCallbackFunction(function(){RowDialog.currentDialog.closeDialog();}, true);
 
     this.buttons.push(button);
-    x+= bnDim + 1.5*margin;
+    //x+= bnDim + 1.5*margin;
+    x += bnDim + bnMargin;
   }
 
   this.highlightSelected();
 
+  this.group.appendChild(rowGroup);
   return rowGroup;
 }
 
@@ -21787,7 +22098,20 @@ LevelDialog.prototype.highlightSelected = function() {
       GuiElements.update.color(bn.textE, LD.color);
     }
   }
+}
 
+  /**
+   * Removes the dialog from view and unblocks the ui behind it.
+   */
+LevelDialog.prototype.closeDialog = function() {
+	if (this.visible) {
+    this.visible = false;
+		this.group.remove();
+    if (RowDialog.currentDialog === this) {
+			RowDialog.currentDialog = null;
+		}
+		GuiElements.unblockInteraction();
+	}
 }
 
 /**
@@ -24988,7 +25312,9 @@ Block.prototype.updateDim = function() {
 			lineWidth += BlockGraphics.block.pMargin; //Add "part margin" between parts of the Block.
 		}
 		if (lineWidth > width) { //The block width is the width of the longest line of parts
-			width = lineWidth
+      if (!FinchBlox || currentLine == 0){ //Finchblox only pays attention to first line
+        width = lineWidth
+      }
 		}
 		if (this.parts[i].isEndOfLine){
 			//get ready to start a new line with the next block
@@ -25103,7 +25429,10 @@ Block.prototype.updateAlignRI = function(x, y) {
 			currentLine += 1;
 			yCoord += (this.lineHeight[currentLine] + this.lineHeight[currentLine - 1])/2
 			yCoord += bG.vMargin;
-      if (FinchBlox) { yCoord -= 2.5*bG.vMargin; }
+      if (FinchBlox) {
+        xCoord = -BlockGraphics.command.fbBumpDepth;
+        yCoord -= 2*bG.vMargin;
+      }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
 		}
@@ -29323,11 +29652,19 @@ BlockIcon.prototype.addText = function(text) {
 }
 
 /**
+ * Add a white rounded rectangle background behind the icon
+ */
+BlockIcon.prototype.addBackgroundRect = function() {
+	this.icon.addBackgroundRect();
+	TouchReceiver.addListenersChild(this.icon.bgRect, this.parent);
+}
+
+/**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
  * @param {number} startingValue - The initial value to display
  */
-function BlockButton(parent, startingValue, startingValue2){
+function BlockButton(parent){
   this.height = 2*BlockPalette.blockButtonOverhang;
   this.width = 60;
   this.cornerRadius = this.height/2;
@@ -29336,11 +29673,13 @@ function BlockButton(parent, startingValue, startingValue2){
   this.outlineStroke = 1;
 
  this.parent = parent;
- this.value = startingValue;
- this.value2 = startingValue2;
- this.x = (parent.width - this.width)/2;
- this.y = parent.height - this.height;
+ //this.value = startingValue;
+ //this.x = (parent.width - this.width)/2;
+ this.x = 0;
+ //this.y = parent.height - this.height;
+ this.y = 0;
  this.widgets = [];
+ this.displaySuffixes = [];
 
  this.outlineColor = Colors.blockOutline[parent.category];
  if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
@@ -29349,11 +29688,13 @@ function BlockButton(parent, startingValue, startingValue2){
  var me = this;
  this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
  GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
- this.updateValue(startingValue);
+ //this.updateValue(startingValue);
  this.button.setCallbackFunction(function() {
-   var inputSys = me.createInputSystem();
-   inputSys.show(null, me.updateValue.bind(me), function(){}, null, me.outlineColor, parent);
-//   GuiElements.blockInteraction();
+   if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
+     var inputSys = me.createInputSystem();
+     inputSys.show(null, me.updateValue.bind(me), function(){}, me.value, me.outlineColor, parent);
+  //   GuiElements.blockInteraction();
+   }
  }, true);
 
  this.isSlot = false;
@@ -29401,8 +29742,18 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     this.button.updateBgColor(color);
   } else if (displayString != null) {
     this.button.addText(displayString, this.font, this.textColor);
+  } else if (this.widgets[0].type == "ledArray") {
+    if (this.ledArrayImage != null) {
+      this.ledArrayImage.group.remove();
+    }
+    var image = GuiElements.draw.ledArray(this.button.group, this.value, 2);
+    var iX = this.button.width/2 - image.width/2;
+    var iY = this.button.height/2 - image.width/2;
+    GuiElements.move.group(image.group, iX, iY);
+    this.ledArrayImage = image;
   } else {
-    this.button.addText(this.value.toString(), this.font, this.textColor);
+    var text = this.value.toString() + this.displaySuffixes[0];
+    this.button.addText(text, this.font, this.textColor);
   }
 
   this.parent.updateValues();
@@ -29421,10 +29772,26 @@ BlockButton.prototype.createInputSystem = function() {
 
   return inputPad;
 };
-BlockButton.prototype.addSlider = function() {
-  this.widgets.push(new InputWidget.Slider(0, 100, this.value, this.outlineColor));
+BlockButton.prototype.addSlider = function(type, startingValue, options) {
+  this.value = startingValue;
+  this.widgets.push(new InputWidget.Slider(type, options, this.value, this.outlineColor));
+  switch (type) {
+    case "distance":
+      this.displaySuffixes[this.widgets.length - 1] = " cm";
+      break;
+    case "percent":
+      this.displaySuffixes[this.widgets.length - 1] = "%";
+      break;
+    case "angle":
+      this.displaySuffixes[this.widgets.length - 1] = "°";
+      break;
+    default:
+      this.displaySuffixes[this.widgets.length - 1] = "";
+  }
+  this.updateValue(this.value);
 }
-BlockButton.prototype.addPiano = function() {
+BlockButton.prototype.addPiano = function(startingValue) {
+  this.value = startingValue;
   this.widgets.push(new InputWidget.Piano());
   this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);
 }
@@ -30837,13 +31204,13 @@ function B_FinchMove(x, y) {
 	ds.addOption(new SelectionData(Language.getStr("Backward"), "backward"));
 	this.addPart(ds);
 
-	var speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
-	speedSlot.addLimits(0, 100);
-	this.addPart(speedSlot);
-
 	var distSlot = new NumSlot(this, "Num_dist", 10, true, true);
 	distSlot.addLimits(0, 500);
 	this.addPart(distSlot);
+
+	var speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
+	speedSlot.addLimits(0, 100);
+	this.addPart(speedSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_move"));
 }
@@ -30856,8 +31223,8 @@ B_FinchMove.prototype.startAction = function() {
 	}
 
 	var direction = this.slots[1].getData().getValue();
-	var speed = this.slots[2].getData().getValue();
-	var distance = this.slots[3].getData().getValue();
+	var distance = this.slots[2].getData().getValue();
+	var speed = this.slots[3].getData().getValue();
 
 	if (direction == "backward") { speed = -speed; }
 
@@ -30876,13 +31243,13 @@ function B_FinchTurn(x, y) {
 	ds.addOption(new SelectionData(Language.getStr("Left"), "left"));
 	this.addPart(ds);
 
-	var speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
-	speedSlot.addLimits(0, 100);
-	this.addPart(speedSlot);
-
 	var angleSlot = new NumSlot(this, "Num_dist", 90, true, true);
 	angleSlot.addLimits(0, 180);
 	this.addPart(angleSlot);
+
+	var speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
+	speedSlot.addLimits(0, 100);
+	this.addPart(speedSlot);
 
 	this.parseTranslation(Language.getStr("block_finch_turn"));
 }
@@ -30895,8 +31262,9 @@ B_FinchTurn.prototype.startAction = function() {
 	}
 
 	var direction = this.slots[1].getData().getValue();
-	var speed = this.slots[2].getData().getValue();
-	var angle = this.slots[3].getData().getValue();
+	var angle = this.slots[2].getData().getValue();
+	var speed = this.slots[3].getData().getValue();
+
 
 	//TODO: change to convert from angle to distance
 	var distance = angle * DeviceFinch.cmPerDegree;
@@ -31254,30 +31622,60 @@ B_FNOrientation.prototype.constructor = B_FNOrientation;
  * @param {number} level - Which difficulty level is the block for?
  * @param {boolean} beak - if true, set the beak color. Otherwise, tail.
  */
-function B_FBColor(x, y, level, beak) {
+function B_FBColor(x, y, level, type) {
  this.level = level;
- this.isBeak = beak;
+ this.isBeak = (type == "beak");
+ this.isTail = (type == "tail");
+ this.isLEDArray = (type == "LEDArray");
  this.red = 0;
  this.green = 0;
  this.blue = 0;
  this.duration = 10;
+ //this.ledStatusString = "1111111111111111111111111";
+ this.ledStatusString = "0000001010000001000101110"; //smiley face
+ this.ledOffString = "0000000000000000000000000";
+ this.ledArray = [];
  CommandBlock.call(this,x,y,"color_"+level);
 
- var blockIcon = new BlockIcon(this, VectorPaths.mvFinch, Colors.white, "finchColor", 40);
- blockIcon.isEndOfLine = true;
- this.addPart(blockIcon);
-
- if (beak) {
-   //this.ledIcon = GuiElements.draw.triangle(30, 30, 15, 15, Colors.white);
-   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
-   blockIcon.addSecondIcon(VectorPaths.mvFinchBeak, Colors.iron);
- } else {
-   //this.ledIcon = GuiElements.draw.rect(30, 50, 15, 5, Colors.white, 2, 2);
-   //this.ledIcon = blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
-   blockIcon.addSecondIcon(VectorPaths.mvFinchTail, Colors.iron);
+ var iconPath = VectorPaths.mvFinch;
+ var iconColor = Colors.white;
+ var iconH = 40;
+ if (this.isLEDArray) {
+   iconPath = VectorPaths.microbit;
+   iconColor = Colors.black;
+   iconH = 30;
  }
- this.ledIcon = blockIcon.icon.pathE2;
-// this.group.appendChild(this.ledIcon); //TODO: append to block icon somehow instead.
+ this.blockIcon = new BlockIcon(this, iconPath, iconColor, "finchColor", iconH);
+ this.blockIcon.isEndOfLine = true;
+ if (this.isLEDArray) { this.blockIcon.addBackgroundRect(); }
+ this.addPart(this.blockIcon);
+
+ if (this.isBeak || this.isTail) {
+   var icon2Path = VectorPaths.mvFinchTail;
+   if (this.isBeak) { icon2Path = VectorPaths.mvFinchBeak; }
+   this.blockIcon.addSecondIcon(icon2Path, Colors.iron);
+   this.ledIcon = this.blockIcon.icon.pathE2;
+ } else {
+   this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+   /*
+   var dim = 25;
+   var r = 8;
+   var margin = 5;
+   var startX = iconPath.width/2 - (5*dim + 4*margin)/2;
+   var y = 90;
+   var iGroup = blockIcon.icon.group;
+   for (var i = 0; i < 5; i++) {
+     var x = startX;
+     for (var j = 0; j < 5; j++) {
+       var rect = GuiElements.draw.rect(x, y, dim, dim, Colors.iron, r, r);
+       iGroup.appendChild(rect);
+       this.ledArray.push(rect);
+       x += dim + margin;
+     }
+     y += dim + margin;
+   }*/
+ }
+
 }
 B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;
@@ -31296,8 +31694,10 @@ B_FBColor.prototype.startAction = function () {
  if (device != null) {
    if (this.isBeak) {
      device.setBeak(mem.requestStatus, this.red, this.green, this.blue);
-   } else {
+   } else if (this.isTail) {
      device.setTail(mem.requestStatus, "all", this.red, this.green, this.blue);
+   } else if (this.isLEDArray) {
+     device.setLedArray(mem.requestStatus, this.ledStatusString);
    }
  } else {
    mem.requestStatus.finished = true;
@@ -31329,8 +31729,10 @@ B_FBColor.prototype.updateAction = function () {
       if (device != null) {
         if (this.isBeak) {
           device.setBeak(mem.requestStatus, 0, 0, 0);
-        } else {
+        } else if (this.isTail) {
           device.setTail(mem.requestStatus, "all", 0, 0, 0);
+        } else if (this.isLEDArray) {
+          device.setLedArray(mem.requestStatus, this.ledOffString);
         }
       } else {
         mem.requestStatus.finished = true;
@@ -31344,15 +31746,37 @@ B_FBColor.prototype.updateAction = function () {
  }
 }
 B_FBColor.prototype.updateColor = function () {
-  var s = 255/100;
-  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
-  GuiElements.update.color(this.ledIcon, this.colorHex);
+  if(this.isLEDArray) {
+    this.ledArrayImage.group.remove();
+    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+    console.log("updating " + this.blockIcon.icon.width + " " + this.blockIcon.icon.scaleX);
+    var iX = this.blockIcon.icon.width/(2 * this.blockIcon.icon.scaleX) - this.ledArrayImage.width/2;
+    var iY = this.blockIcon.icon.height/(2 * this.blockIcon.icon.scaleY) - this.ledArrayImage.width/2 - 35;
+    GuiElements.move.group(this.ledArrayImage.group, iX, iY);
+    /*
+    var values = this.ledStatusString.split("");
+    for (var i = 0; i < 25; i++) {
+      if (values[i] == "1") {
+        GuiElements.update.color(this.ledArray[i], Colors.black);
+      } else {
+        GuiElements.update.color(this.ledArray[i], Colors.iron);
+      }
+    }*/
+  } else {
+    var s = 255/100;
+    this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
+    GuiElements.update.color(this.ledIcon, this.colorHex);
+  }
 }
 B_FBColor.prototype.updateValues = function () {
   if (this.colorButton != null) {
-    this.red = this.colorButton.value.r;
-    this.green = this.colorButton.value.g;
-    this.blue = this.colorButton.value.b;
+    if (this.isLEDArray){
+      this.ledStatusString = this.colorButton.value;
+    } else {
+      this.red = this.colorButton.value.r;
+      this.green = this.colorButton.value.g;
+      this.blue = this.colorButton.value.b;
+    }
     this.updateColor();
   }
   if (this.durationButton != null) {
@@ -31360,24 +31784,37 @@ B_FBColor.prototype.updateValues = function () {
   }
 }
 B_FBColor.prototype.addL2Button = function () {
-  this.blue = 100;
-  var color = {r: this.red, g: this.green, b: this.blue};
-  this.colorButton = new BlockButton(this, color);
-  this.colorButton.addSlider();
+  if (this.isLEDArray) {
+    var options = [ "0000001010000001000101110", //smiley face
+                    "0000001010000000111010001", //frowny face
+                    "0000001010001000101000100", //surprise face
+                    "1010010100111101101011110", //OK
+                    "0111010101111111111110101", //alien
+                    "1111110001100011000111111", //square
+                    "0101011111111110111000100", //heart
+                    "0010001010100010101000100"] //diamond
+    this.colorButton = new BlockButton(this);
+    this.colorButton.addSlider("ledArray", options[3], options);
+  } else {
+    this.blue = 100;
+    var color = {r: this.red, g: this.green, b: this.blue};
+    this.colorButton = new BlockButton(this);
+    this.colorButton.addSlider("color", color);
+  }
   this.addPart(this.colorButton);
   this.updateColor();
 }
 
 //********* Level 1 blocks *********
 
-function B_FBColorL1(x, y, beak) {
- B_FBColor.call(this, x, y, 1, beak);
+function B_FBColorL1(x, y, type) {
+ B_FBColor.call(this, x, y, 1, type);
 }
 B_FBColorL1.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL1.prototype.constructor = B_FBColorL1;
 
 function B_FBBeakRed(x, y) {
- B_FBColorL1.call(this, x, y, true);
+ B_FBColorL1.call(this, x, y, "beak");
 
  this.red = 100;
  this.updateColor();
@@ -31386,7 +31823,7 @@ B_FBBeakRed.prototype = Object.create(B_FBColorL1.prototype);
 B_FBBeakRed.prototype.constructor = B_FBBeakRed;
 
 function B_FBTailRed(x, y) {
- B_FBColorL1.call(this, x, y, false);
+ B_FBColorL1.call(this, x, y, "tail");
 
  this.red = 100;
  this.updateColor();
@@ -31395,7 +31832,7 @@ B_FBTailRed.prototype = Object.create(B_FBColorL1.prototype);
 B_FBTailRed.prototype.constructor = B_FBTailRed;
 
 function B_FBBeakGreen(x, y) {
- B_FBColorL1.call(this, x, y, true);
+ B_FBColorL1.call(this, x, y, "beak");
 
  this.green = 100;
  this.updateColor();
@@ -31404,7 +31841,7 @@ B_FBBeakGreen.prototype = Object.create(B_FBColorL1.prototype);
 B_FBBeakGreen.prototype.constructor = B_FBBeakGreen;
 
 function B_FBTailGreen(x, y) {
- B_FBColorL1.call(this, x, y, false);
+ B_FBColorL1.call(this, x, y, "tail");
 
  this.green = 100;
  this.updateColor();
@@ -31413,7 +31850,7 @@ B_FBTailGreen.prototype = Object.create(B_FBColorL1.prototype);
 B_FBTailGreen.prototype.constructor = B_FBTailGreen;
 
 function B_FBBeakBlue(x, y) {
- B_FBColorL1.call(this, x, y, true);
+ B_FBColorL1.call(this, x, y, "beak");
 
  this.blue = 100;
  this.updateColor();
@@ -31422,7 +31859,7 @@ B_FBBeakBlue.prototype = Object.create(B_FBColorL1.prototype);
 B_FBBeakBlue.prototype.constructor = B_FBBeakBlue;
 
 function B_FBTailBlue(x, y) {
- B_FBColorL1.call(this, x, y, false);
+ B_FBColorL1.call(this, x, y, "tail");
 
  this.blue = 100;
  this.updateColor();
@@ -31432,8 +31869,8 @@ B_FBTailBlue.prototype.constructor = B_FBTailBlue;
 
 //********* Level 2 blocks *********
 
-function B_FBColorL2(x, y, beak) {
- B_FBColor.call(this, x, y, 2, beak);
+function B_FBColorL2(x, y, type) {
+ B_FBColor.call(this, x, y, 2, type);
 
  this.addL2Button();
 }
@@ -31441,42 +31878,55 @@ B_FBColorL2.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL2.prototype.constructor = B_FBColorL2;
 
 function B_FBBeakL2(x, y) {
- B_FBColorL2.call(this, x, y, true);
+ B_FBColorL2.call(this, x, y, "beak");
 }
 B_FBBeakL2.prototype = Object.create(B_FBColorL2.prototype);
 B_FBBeakL2.prototype.constructor = B_FBBeakL2;
 
 function B_FBTailL2(x, y) {
- B_FBColorL2.call(this, x, y, false);
+ B_FBColorL2.call(this, x, y, "tail");
 }
 B_FBTailL2.prototype = Object.create(B_FBColorL2.prototype);
 B_FBTailL2.prototype.constructor = B_FBTailL2;
 
+function B_FBLedArrayL2(x, y) {
+  B_FBColorL2.call(this, x, y, "LEDArray");
+}
+B_FBLedArrayL2.prototype = Object.create(B_FBColorL2.prototype);
+B_FBLedArrayL2.prototype.constructor = B_FBLedArrayL2;
+
+
 //********* Level 3 blocks *********
 
-function B_FBColorL3(x, y, beak) {
- B_FBColor.call(this, x, y, 3, beak);
+function B_FBColorL3(x, y, type) {
+ B_FBColor.call(this, x, y, 3, type);
 
  this.addL2Button();
 
- this.durationButton = new BlockButton(this, this.duration);
- this.durationButton.addSlider();
+ this.durationButton = new BlockButton(this);
+ this.durationButton.addSlider("time", this.duration, [1, 5, 10]);
  this.addPart(this.durationButton);
 }
 B_FBColorL3.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL3.prototype.constructor = B_FBColorL3;
 
 function B_FBBeakL3(x, y) {
- B_FBColorL3.call(this, x, y, true);
+ B_FBColorL3.call(this, x, y, "beak");
 }
 B_FBBeakL3.prototype = Object.create(B_FBColorL3.prototype);
 B_FBBeakL3.prototype.constructor = B_FBBeakL3;
 
 function B_FBTailL3(x, y) {
- B_FBColorL3.call(this, x, y, false);
+ B_FBColorL3.call(this, x, y, "tail");
 }
 B_FBTailL3.prototype = Object.create(B_FBColorL3.prototype);
 B_FBTailL3.prototype.constructor = B_FBTailL3;
+
+function B_FBLedArrayL3(x, y) {
+  B_FBColorL3.call(this, x, y, "LEDArray");
+}
+B_FBLedArrayL3.prototype = Object.create(B_FBColorL3.prototype);
+B_FBLedArrayL3.prototype.constructor = B_FBLedArrayL3;
 
 /**
  * This file contains the implementations for the blocks specific to the FinchBlox
@@ -31587,14 +32037,14 @@ B_FBMotion.prototype.addL2Button = function() {
   switch (this.direction) {
     case "forward":
     case "backward":
-      this.distanceBN = new BlockButton(this, this.defaultDistance);
-      this.distanceBN.addSlider();
+      this.distanceBN = new BlockButton(this);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [10, 20, 30, 40, 50]);
       this.addPart(this.distanceBN);
       break;
     case "right":
     case "left":
       this.angleBN = new BlockButton(this, this.defaultAngle);
-      this.angleBN.addSlider();
+      this.angleBN.addSlider("angle", this.defaultAngle, [45, 90, 135, 180]);
       this.addPart(this.angleBN);
       break;
     default:
@@ -31705,8 +32155,8 @@ function B_FBMotionL3(x, y, direction){
 
   this.addL2Button();
 
-  this.speedBN = new BlockButton(this, this.defaultSpeed);
-  this.speedBN.addSlider();
+  this.speedBN = new BlockButton(this);
+  this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
   this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
@@ -31742,7 +32192,9 @@ function B_FBSound(x, y, level) {
   this.level = level;
   CommandBlock.call(this,x,y,"sound_"+level);
 
-  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", 24);
+  var iconH = 35;
+  if (level == 1) { iconH = 24; }
+  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -31852,8 +32304,8 @@ B_FBG.prototype.constructor = B_FBG;
 function B_FBSoundL2(x, y) {
   B_FBSound.call(this, x, y, 2);
 
-  this.noteButton = new BlockButton(this, this.midiNote);
-  this.noteButton.addPiano();
+  this.noteButton = new BlockButton(this);
+  this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 }
 B_FBSoundL2.prototype = Object.create(B_FBSound.prototype);
@@ -31864,13 +32316,13 @@ B_FBSoundL2.prototype.constructor = B_FBSoundL2;
 function B_FBSoundL3(x, y) {
   B_FBSound.call(this, x, y, 3);
 
-  this.noteButton = new BlockButton(this, this.midiNote);
-  this.noteButton.addPiano();
+  this.noteButton = new BlockButton(this);
+  this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
 
-  this.beatsButton = new BlockButton(this, this.beats);
-  this.beatsButton.addSlider();
+  this.beatsButton = new BlockButton(this);
+  this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
   this.addPart(this.beatsButton);
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);

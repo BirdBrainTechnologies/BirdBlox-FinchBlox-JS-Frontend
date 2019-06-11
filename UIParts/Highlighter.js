@@ -58,15 +58,20 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
  */
 Highlighter.showShadow = function(fit, stack) {
 	let myX = 0;
-	let myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+	//let myY = CodeManager.dragAbsToRelX(fit.getAbsY());
+  let myY = 0;
 	let snapFront = false;
 	if (fit instanceof BlockStack) {
-		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myY = fit.tab.absToRelY(fit.getAbsY());
+		//myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myX = fit.tab.absToRelX(fit.getAbsX());
 		snapFront = true;
 	} else if (fit instanceof BlockSlot) {
 		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
 	} else {
-	 	myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+	 	//myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
+    myY = fit.stack.tab.absToRelY(fit.getAbsY());
+    myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
 	}
 	const color = Colors.iron;
 
@@ -79,16 +84,17 @@ Highlighter.showShadow = function(fit, stack) {
 		GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
 		let pathD = block.path.getAttribute("d");
 		pathE.setAttributeNS(null, "d", pathD);
-		shadowW += block.width;
+		shadowW += block.width + BlockGraphics.command.fbBumpDepth;
 		block = block.nextBlock;
 	}
-	if (snapFront) { myX -= shadowW; }
+	if (snapFront) { myX -= shadowW + BlockGraphics.command.fbBumpDepth; }
 
 	GuiElements.move.group(this.shadowGroup, myX, myY);
 
 	if (!Highlighter.visible) {
 		//GuiElements.layers.highlight.appendChild(Highlighter.shadowGroup);
-		GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+		//GuiElements.layers.activeTab.appendChild(Highlighter.shadowGroup);
+    TabManager.activeTab.mainG.appendChild(Highlighter.shadowGroup);
 		Highlighter.visible = true;
 	}
 

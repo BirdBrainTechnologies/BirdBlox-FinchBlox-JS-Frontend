@@ -25,7 +25,10 @@ Colors.setCommon = function() {
 	//Basic colors
 	Colors.red = "#FF0000";
 	Colors.green = "#00FF00";
+	Colors.blue = "#0000FF";
 	Colors.yellow = "#FFFF00";
+	Colors.cyan = "#00FFFF";
+	Colors.magenta = "#FF00FF";
 	Colors.darkRed = "#c00000";
 	//Current BBT colors
 	Colors.bbt = "#209BA9";

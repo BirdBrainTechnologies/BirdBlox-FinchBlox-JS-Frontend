@@ -126,3 +126,18 @@ VectorIcon.prototype.addSecondPath = function(pathId, color){
   }
 	this.group.appendChild(this.pathE2);
 }
+
+/**
+ * Create the rounded rectangle background of the microbit icon
+ */
+VectorIcon.prototype.addBackgroundRect = function() {
+  const x = -10;
+  const y = 50;
+  const w = (this.width/this.scaleY) - (2*x);
+  const h = (this.height/this.scaleX) - (2*y);
+  const r = 20;
+  this.bgRect = GuiElements.draw.rect(x, y, w, h, Colors.white, r, r);
+	this.pathE.remove();
+	this.group.appendChild(this.bgRect);
+	this.group.appendChild(this.pathE);
+}

@@ -3,7 +3,7 @@
  * @param {Block} parent - The Block this button is a part of
  * @param {number} startingValue - The initial value to display
  */
-function BlockButton(parent, startingValue, startingValue2){
+function BlockButton(parent){
   this.height = 2*BlockPalette.blockButtonOverhang;
   this.width = 60;
   this.cornerRadius = this.height/2;
@@ -12,11 +12,13 @@ function BlockButton(parent, startingValue, startingValue2){
   this.outlineStroke = 1;
 
  this.parent = parent;
- this.value = startingValue;
- this.value2 = startingValue2;
- this.x = (parent.width - this.width)/2;
- this.y = parent.height - this.height;
+ //this.value = startingValue;
+ //this.x = (parent.width - this.width)/2;
+ this.x = 0;
+ //this.y = parent.height - this.height;
+ this.y = 0;
  this.widgets = [];
+ this.displaySuffixes = [];
 
  this.outlineColor = Colors.blockOutline[parent.category];
  if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
@@ -25,11 +27,13 @@ function BlockButton(parent, startingValue, startingValue2){
  const me = this;
  this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
  GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
- this.updateValue(startingValue);
+ //this.updateValue(startingValue);
  this.button.setCallbackFunction(function() {
-   const inputSys = me.createInputSystem();
-   inputSys.show(null, me.updateValue.bind(me), function(){}, null, me.outlineColor, parent);
-//   GuiElements.blockInteraction();
+   if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
+     const inputSys = me.createInputSystem();
+     inputSys.show(null, me.updateValue.bind(me), function(){}, me.value, me.outlineColor, parent);
+  //   GuiElements.blockInteraction();
+   }
  }, true);
 
  this.isSlot = false;
@@ -77,8 +81,18 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     this.button.updateBgColor(color);
   } else if (displayString != null) {
     this.button.addText(displayString, this.font, this.textColor);
+  } else if (this.widgets[0].type == "ledArray") {
+    if (this.ledArrayImage != null) {
+      this.ledArrayImage.group.remove();
+    }
+    let image = GuiElements.draw.ledArray(this.button.group, this.value, 2);
+    const iX = this.button.width/2 - image.width/2;
+    const iY = this.button.height/2 - image.width/2;
+    GuiElements.move.group(image.group, iX, iY);
+    this.ledArrayImage = image;
   } else {
-    this.button.addText(this.value.toString(), this.font, this.textColor);
+    const text = this.value.toString() + this.displaySuffixes[0];
+    this.button.addText(text, this.font, this.textColor);
   }
 
   this.parent.updateValues();
@@ -97,10 +111,26 @@ BlockButton.prototype.createInputSystem = function() {
 
   return inputPad;
 };
-BlockButton.prototype.addSlider = function() {
-  this.widgets.push(new InputWidget.Slider(0, 100, this.value, this.outlineColor));
+BlockButton.prototype.addSlider = function(type, startingValue, options) {
+  this.value = startingValue;
+  this.widgets.push(new InputWidget.Slider(type, options, this.value, this.outlineColor));
+  switch (type) {
+    case "distance":
+      this.displaySuffixes[this.widgets.length - 1] = " cm";
+      break;
+    case "percent":
+      this.displaySuffixes[this.widgets.length - 1] = "%";
+      break;
+    case "angle":
+      this.displaySuffixes[this.widgets.length - 1] = "°";
+      break;
+    default:
+      this.displaySuffixes[this.widgets.length - 1] = "";
+  }
+  this.updateValue(this.value);
 }
-BlockButton.prototype.addPiano = function() {
+BlockButton.prototype.addPiano = function(startingValue) {
+  this.value = startingValue;
   this.widgets.push(new InputWidget.Piano());
   this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);
 }
