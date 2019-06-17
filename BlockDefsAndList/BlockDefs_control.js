@@ -403,3 +403,12 @@ B_When.prototype.startAction = function() {
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
+
+//FinchBlox only
+function B_StartWhenDark(x, y) {
+	HatBlock.call(this, x, y, "control_3");
+	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.flagGreen, "sun", 35);
+	this.addPart(blockIcon);
+}
+B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
+B_StartWhenDark.prototype.constructor = B_StartWhenDark;

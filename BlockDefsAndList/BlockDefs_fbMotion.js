@@ -108,13 +108,13 @@ B_FBMotion.prototype.addL2Button = function() {
     case "forward":
     case "backward":
       this.distanceBN = new BlockButton(this);
-      this.distanceBN.addSlider("distance", this.defaultDistance, [10, 20, 30, 40, 50]);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 15, 25, 35, 45, 55, 65, 75, 85, 95]);
       this.addPart(this.distanceBN);
       break;
     case "right":
     case "left":
       this.angleBN = new BlockButton(this, this.defaultAngle);
-      this.angleBN.addSlider("angle", this.defaultAngle, [45, 90, 135, 180]);
+      this.angleBN.addSlider("angle_" + this.direction, this.defaultAngle, [5, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
       this.addPart(this.angleBN);
       break;
     default:

@@ -30,10 +30,15 @@ BubbleOverlay.prototype = Object.create(Overlay.prototype);
 BubbleOverlay.prototype.constructor = BubbleOverlay;
 
 BubbleOverlay.setGraphics = function() {
-	BubbleOverlay.triangleW = 15;
-	BubbleOverlay.triangleH = 7;
+  if (FinchBlox) {
+    BubbleOverlay.triangleW = 40;
+  	BubbleOverlay.triangleH = 10;
+  } else {
+    BubbleOverlay.triangleW = 15;
+  	BubbleOverlay.triangleH = 7;
+  }
+  BubbleOverlay.overlap = 1;
 	BubbleOverlay.minW = 25;
-	BubbleOverlay.overlap = 1;
 };
 
 /**

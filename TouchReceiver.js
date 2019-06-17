@@ -334,6 +334,8 @@ TouchReceiver.touchStartSlider = function(target, e) {
 	if (TR.touchstart(e, false)) {
 		TR.targetType = "slider";
 		TR.target = target;
+    // Drag the slider of the slider widget to the touch
+    TR.target.drag(TR.getX(e));
 		e.stopPropagation();
 	}
 };

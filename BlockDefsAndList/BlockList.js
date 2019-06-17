@@ -141,6 +141,7 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Wait");
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
+	category.addBlockByName("B_StartWhenDark");
 	category.trimBottom();
 	category.centerBlocks();
 }

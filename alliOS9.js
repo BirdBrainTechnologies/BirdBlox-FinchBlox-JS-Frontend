@@ -6716,6 +6716,15 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   return arrayImage;
 };
 
+GuiElements.draw.wedge = function(x, y, r, a, color) {
+	DebugOptions.validateNonNull(color);
+	DebugOptions.validateNumbers(x, y, r, a);
+	var wedge = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.wedge(wedge, x, y, r, a); //Set its path description (points).
+	wedge.setAttributeNS(null, "fill", color); //Set the fill.
+	return wedge; //Return the finished wedge shape.
+}
+
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */
 GuiElements.update = {};
@@ -6968,6 +6977,37 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r) {
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
 
+GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
+	DebugOptions.validateNumbers(x, y, r, angle);
+	if (counterClockwise == null) { counterClockwise = false; }
+
+	//wedges start pointing up rather than to the side
+	var a = 0;
+	if (counterClockwise) {
+		a = 270 - angle;
+		if (a < 0) { a += 360; }
+	} else {
+		a = angle + 270;
+		if (a > 360) { a -= 360; }
+	}
+
+	var las = 0; //large arc sweep flag
+	var sf = 1; //sweep flag
+	if (angle > 180) { las = 1; }
+	if (counterClockwise) { sf = 0; }
+
+	var endX = x + r * Math.cos(a * Math.PI/180); //a*Math.PI/180 = angle in radians
+	var endY = y + r * Math.sin(a * Math.PI/180);
+
+	var path = "";
+	path += "m " + x + "," + y;
+	path += " l 0," + (-r);
+	path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
+	path += " z";
+
+	pathE.setAttributeNS(null, "d", path);
+}
+
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything. */
 GuiElements.move = {};
@@ -7111,6 +7151,10 @@ GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
 		var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
+		if (FinchBlox) {
+			rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
+			GuiElements.update.opacity(rect, 0.9);
+		}
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
 		TouchReceiver.addListenersDialogBlock(rect);
@@ -7553,6 +7597,7 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Wait");
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
+	category.addBlockByName("B_StartWhenDark");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -8140,14 +8185,24 @@ Font.uiFont = function(fontSize){
  * should have names starting with fa.
  *
  * Icons with names starting with mv come from Michael Verner
+ * Icons with names starting with mj come from Molly Johnson
  * @static
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.mjSun={};
+  VP.mjSun.path="M18.229044,29.7211846 C18.0843592,29.7211846 17.9750652,29.670935 17.8991544,29.5694443 L15.6151195,26.4229101 L11.9107766,27.6152989 C11.7920951,27.6664658 11.6698752,27.6494125 11.5428011,27.5655396 C11.432925,27.4795677 11.3781668,27.369882 11.3781668,27.2344224 L11.3781668,23.3519267 L7.67382389,22.1349634 C7.53878762,22.0926054 7.45408215,22.0079069 7.42010965,21.8812491 C7.37775515,21.7449605 7.39435688,21.6235662 7.47109662,21.5132772 L9.75452126,18.3679636 L7.47109662,15.2214223 C7.39435335,15.1199352 7.37775515,14.9964877 7.42010965,14.8522192 C7.45408215,14.7259883 7.53794801,14.6410535 7.67382389,14.5991188 L11.3787806,13.3821555 L11.3787806,9.49904593 C11.3787806,9.36400966 11.432925,9.25406647 11.5428011,9.16977375 C11.6698752,9.08463789 11.7925149,9.06887931 11.9107766,9.11878678 L15.6163472,10.3117895 L17.8991544,7.16524816 C17.9838705,7.05537553 18.0931681,7 18.229044,7 C18.3640838,7 18.474415,7.05453591 18.5595474,7.16524816 L20.8423582,10.3117895 L24.5473114,9.11878678 C24.6651533,9.0680397 24.788442,9.08463789 24.914673,9.16977375 C25.0249689,9.25406647 25.0793108,9.36400966 25.0793108,9.49904593 L25.0793108,13.3815416 L28.7842676,14.5991188 C28.9193039,14.641057 29.0042034,14.7259883 29.0385957,14.8522192 C29.0805303,14.9956445 29.0637134,15.1195436 28.9869913,15.2201946 L26.7035702,18.3673498 L28.9869913,21.5132772 C29.0628985,21.6235662 29.0799165,21.7449605 29.0379818,21.8812491 C29.0040093,22.0087395 28.91869,22.0926054 28.7836502,22.1349634 L25.0793108,23.3519267 L25.0793108,27.2344224 C25.0793108,27.369882 25.0241293,27.4795677 24.914673,27.5655396 C24.7876024,27.6494125 24.6645394,27.6664658 24.546694,27.6152989 L20.8417443,26.4229101 L18.5583232,29.5694443 C18.4832521,29.670935 18.3724693,29.7211846 18.229044,29.7211846 L18.229044,29.7211846 Z M18.229044,25.6746684 C19.2183492,25.6746684 20.1630846,25.4821929 21.0647387,25.0972065 C21.9647171,24.7130598 22.7424404,24.1916789 23.3979191,23.5374526 C24.054241,22.8811342 24.5743377,22.1036614 24.9589043,21.2024306 C25.3443104,20.3016126 25.5363626,19.3564293 25.5363626,18.3679636 C25.5363626,17.377406 25.3434708,16.4324731 24.9589043,15.5316551 C24.5743377,14.6308441 24.054241,13.8520837 23.3979191,13.1978573 C22.7432764,12.5415354 21.9647171,12.021862 21.0647387,11.6368792 C20.1630846,11.2518893 19.2183492,11.0600311 18.229044,11.0600311 C17.2393189,11.0600311 16.2941673,11.2518893 15.3933528,11.6368792 C14.4925348,12.021862 13.7140036,12.5415354 13.0589412,13.1978573 C12.4038752,13.8520837 11.8829142,14.6316767 11.4991872,15.5316551 C11.1142008,16.4324731 10.9204976,17.377406 10.9204976,18.3679636 C10.9204976,19.3564293 11.1142008,20.3016126 11.4991872,21.2024306 C11.8829142,22.1036614 12.4030391,22.8811342 13.0589412,23.5374526 C13.7140036,24.1916789 14.4925348,24.7130598 15.3933528,25.0972065 C16.2941673,25.4821929 17.2393189,25.6746684 18.229044,25.6746684 Z M18.2297495,24.5461677 C14.8126841,24.5461677 12.0435621,21.7768199 12.0435621,18.3605941 C12.0435621,14.9447881 14.8126841,12.1750205 18.2297495,12.1750205 C21.6459753,12.1750205 24.4147093,14.9447881 24.4147093,18.3605941 C24.4147093,21.7768199 21.6459753,24.5461677 18.2297495,24.5461677 Z";
+  VP.mjSun.width=40;
+  VP.mjSun.height=40;
   VP.microbit={};
   VP.microbit.path="M13.465 60.088 C 11.703 60.639,9.937 62.220,9.134 63.965 L 8.704 64.900 8.554 89.700 C 8.472 103.340,8.426 117.082,8.452 120.239 L 8.500 125.977 33.700 93.069 C 47.560 74.970,58.930 60.080,58.967 59.981 C 59.082 59.669,14.468 59.774,13.465 60.088 M61.200 80.240 C 61.200 91.703,61.276 100.597,61.372 100.490 C 61.761 100.062,92.400 59.968,92.400 59.887 C 92.400 59.839,85.380 59.800,76.800 59.800 L 61.200 59.800 61.200 80.240 M97.600 67.240 C 97.600 71.425,97.675 74.597,97.773 74.490 C 97.912 74.337,102.495 68.354,108.146 60.950 L 109.023 59.800 103.312 59.800 L 97.600 59.800 97.600 67.240 M40.784 270.002 C 28.867 272.019,20.737 283.226,22.888 294.671 C 26.843 315.716,55.469 318.539,63.425 298.669 C 69.273 284.065,56.116 267.407,40.784 270.002 M117.667 270.083 C 104.726 272.552,96.991 285.226,100.935 297.500 C 106.771 315.667,131.736 317.325,140.114 300.103 C 147.416 285.092,133.881 266.989,117.667 270.083 M194.948 270.103 C 182.654 272.433,174.732 284.581,177.863 296.300 C 182.960 315.369,208.784 317.869,217.399 300.128 C 224.665 285.164,211.113 267.040,194.948 270.103 M271.748 270.103 C 260.250 272.282,252.336 283.239,254.269 294.303 C 258.239 317.034,289.899 318.327,295.602 295.991 C 299.285 281.569,286.197 267.365,271.748 270.103 M349.584 269.989 C 332.112 273.202,325.279 293.718,337.588 306.010 C 351.263 319.666,374.392 309.194,373.547 289.728 C 373.037 277.970,360.835 267.919,349.584 269.989 M15.400 319.600 L 15.400 339.600 18.000 339.600 L 20.600 339.600 20.600 319.600 L 20.600 299.600 18.000 299.600 L 15.400 299.600 15.400 319.600 M67.600 319.571 L 67.600 339.542 68.950 339.670 C 69.692 339.740,70.817 339.798,71.450 339.799 L 72.600 339.800 72.600 319.700 L 72.600 299.600 70.100 299.600 L 67.600 299.600 67.600 319.571 M75.800 319.700 L 75.800 339.800 78.300 339.800 L 80.800 339.800 80.800 319.700 L 80.800 299.600 78.300 299.600 L 75.800 299.600 75.800 319.700 M84.000 319.700 L 84.000 339.800 86.500 339.800 L 89.000 339.800 89.000 319.700 L 89.000 299.600 86.500 299.600 L 84.000 299.600 84.000 319.700 M92.000 319.700 L 92.000 339.800 94.600 339.800 L 97.200 339.800 97.200 319.700 L 97.200 299.600 94.600 299.600 L 92.000 299.600 92.000 319.700 M144.800 319.800 L 144.800 340.000 147.300 340.000 L 149.800 340.000 149.800 319.800 L 149.800 299.600 147.300 299.600 L 144.800 299.600 144.800 319.800 M152.933 299.733 C 152.860 299.807,152.800 308.897,152.800 319.933 L 152.800 340.000 155.400 340.000 L 158.000 340.000 158.000 319.800 L 158.000 299.600 155.533 299.600 C 154.177 299.600,153.007 299.660,152.933 299.733 M161.000 319.800 L 161.000 340.000 163.600 340.000 L 166.200 340.000 166.200 319.800 L 166.200 299.600 163.600 299.600 L 161.000 299.600 161.000 319.800 M169.200 319.800 L 169.200 340.000 171.800 340.000 L 174.400 340.000 174.400 319.800 L 174.400 299.600 171.800 299.600 L 169.200 299.600 169.200 319.800 M221.892 299.850 C 221.840 299.988,221.820 309.100,221.848 320.100 L 221.900 340.100 224.450 340.156 L 227.000 340.212 227.000 319.906 L 227.000 299.600 224.494 299.600 C 222.673 299.600,221.961 299.668,221.892 299.850 M230.000 319.900 L 230.000 340.200 232.600 340.200 L 235.200 340.200 235.200 319.900 L 235.200 299.600 232.600 299.600 L 230.000 299.600 230.000 319.900 M238.200 319.894 L 238.200 340.200 240.801 340.200 L 243.402 340.200 243.351 319.950 L 243.300 299.700 240.750 299.644 L 238.200 299.588 238.200 319.894 M246.400 319.900 L 246.400 340.200 248.900 340.200 L 251.400 340.200 251.400 319.900 L 251.400 299.600 248.900 299.600 L 246.400 299.600 246.400 319.900 M299.000 319.800 L 299.000 340.000 301.600 340.000 L 304.200 340.000 304.200 319.800 L 304.200 299.600 301.600 299.600 L 299.000 299.600 299.000 319.800 M307.200 319.794 L 307.200 340.000 309.801 340.000 L 312.402 340.000 312.351 319.850 L 312.300 299.700 309.750 299.644 L 307.200 299.588 307.200 319.794 M315.400 319.800 L 315.400 340.000 317.900 340.000 L 320.400 340.000 320.400 319.800 L 320.400 299.600 317.900 299.600 L 315.400 299.600 315.400 319.800 M323.600 319.800 L 323.600 340.000 326.100 340.000 L 328.600 340.000 328.600 319.800 L 328.600 299.600 326.100 299.600 L 323.600 299.600 323.600 319.800 M376.200 319.600 L 376.200 339.612 378.750 339.556 L 381.300 339.500 381.300 319.600 L 381.300 299.700 378.750 299.644 L 376.200 299.588 376.200 319.600 M22.800 322.790 L 22.800 339.600 43.600 339.600 L 64.400 339.600 64.400 322.954 L 64.400 306.309 63.771 307.104 C 53.746 319.777,34.250 319.843,23.841 307.240 L 22.800 305.979 22.800 322.790 M331.600 322.915 L 331.600 339.866 352.328 339.738 C 363.729 339.668,373.089 339.577,373.129 339.537 C 373.170 339.497,373.179 332.025,373.151 322.932 L 373.100 306.399 371.900 307.841 C 361.860 319.904,342.283 319.503,332.443 307.032 L 331.600 305.964 331.600 322.915 M100.207 322.950 L 100.200 339.800 108.550 339.800 C 113.142 339.800,122.503 339.860,129.350 339.933 L 141.800 340.066 141.800 323.115 L 141.800 306.164 141.034 307.132 C 130.944 319.890,110.886 319.775,100.838 306.900 L 100.213 306.100 100.207 322.950 M177.600 323.090 L 177.600 340.000 186.967 340.000 C 192.119 340.000,201.479 340.060,207.767 340.133 L 219.200 340.266 219.198 323.183 L 219.196 306.100 218.657 306.800 C 208.713 319.712,189.126 319.976,178.569 307.340 L 177.600 306.179 177.600 323.090 M254.400 323.222 L 254.400 340.266 268.233 340.133 C 275.841 340.060,285.201 340.000,289.033 340.000 L 296.000 340.000 295.998 323.050 L 295.996 306.100 295.466 306.800 C 285.715 319.686,265.907 319.952,255.369 307.340 L 254.400 306.179 254.400 323.222 "
   VP.microbit.width=400;
   VP.microbit.height=400;
+  //VP.mvTurnArrowRight={};
+  //VP.mvTurnArrowRight.path="M92.768,55.405C72.348,25.534 38.144,7.808 1.702,8.576L1.558,1.71C40.452,0.892 76.951,19.875 98.65,51.843L104.538,48.275L102.99,66.112L86.463,59.225L92.768,55.405Z";
+  //VP.mvTurnArrowRight.width=129;
+  //VP.mvTurnArrowRight.height=132;
+  //VP.mvTurnArrowRight.transform="matrix(1.21698,0,0,1.94118,48,12)";
   VP.mvPianoBlackKey={};
   VP.mvPianoBlackKey.path="M29.057,45.104L14.999,45.104L14.999,105.114C14.999,107.322 15.592,109.114 16.324,109.114L27.732,109.114C28.464,109.114 29.057,107.322 29.057,105.114L29.057,45.104Z";
   VP.mvPianoBlackKey.width=85;
@@ -9923,6 +9978,8 @@ TouchReceiver.touchStartSlider = function(target, e) {
 	if (TR.touchstart(e, false)) {
 		TR.targetType = "slider";
 		TR.target = target;
+    // Drag the slider of the slider widget to the touch
+    TR.target.drag(TR.getX(e));
 		e.stopPropagation();
 	}
 };
@@ -11034,7 +11091,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.width = GuiElements.width;
     BlockPalette.height = 90;//100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
-    BlockPalette.bg = Colors.blockPalette;
+    BlockPalette.bg = Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 40;
@@ -11042,6 +11099,8 @@ BlockPalette.setGraphics = function() {
     BlockPalette.blockMargin = 35;//25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
     BlockPalette.trashIconVP = VectorPaths.faTrash;
+    BlockPalette.trashOpacity = 0.9;
+  	BlockPalette.trashColor = Colors.easternBlue;
     BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
@@ -11055,14 +11114,15 @@ BlockPalette.setGraphics = function() {
     BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
     BlockPalette.trashHeight = 120;
     BlockPalette.trashIconVP = VectorPaths.trash;
+    BlockPalette.trashOpacity = 0.8;
+  	BlockPalette.trashColor = Colors.black;
   }
 
 	BlockPalette.catBg = Colors.white;
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.black;
 
-	BlockPalette.trashOpacity = 0.8;
-	BlockPalette.trashColor = Colors.black;
+
 };
 
 /**
@@ -14202,6 +14262,7 @@ InputWidget.Label.prototype.updateDim = function() {
 	this.height = L.font.charHeight + 2 * L.margin;
 	this.width = L.maxWidth;
 };
+
 /**
  * Used for entering numbers into Slots.  Utilizes a DisplayNum to determine how the number changes as keys are pressed
  * @param {boolean} positive - Whether the +/- key should be disabled
@@ -14751,19 +14812,12 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
  */
-InputWidget.Slider = function (type, options, startVal, sliderColor) {
+InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix) {
   this.type = type;
   this.options = options;
-  //this.min = min;
-  //this.max = max;
-  //this.range = max - min;
   this.value = startVal;
-  //if (typeof startVal == 'object') {
-  //  this.position = 5;
-  //} else {
-  //  this.position = startVal;
-  //}
   this.sliderColor = sliderColor;
+  this.displaySuffix = displaySuffix;
 
   this.snapToOption = false;
   if (type == "ledArray") { this.snapToOption = true; }
@@ -14782,6 +14836,9 @@ InputWidget.Slider.setConstants = function() {
   S.barColor = Colors.iron;
   S.sliderIconPath = VectorPaths.mvFinch;
   S.optionMargin = 10;//5;//distance between ticks and option display
+  S.font = Font.uiFont(16);
+
+  GuiElements.create.spectrum();
 };
 
 /**
@@ -14789,6 +14846,7 @@ InputWidget.Slider.setConstants = function() {
  */
 InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+
 	this.group = GuiElements.create.group(x, y, parentGroup);
   this.parentGroup = parentGroup;
   this.value = data;
@@ -14797,7 +14855,13 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
   TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
 
   var valueIndex = this.optionValues.indexOf(this.value);
-  if (valueIndex != -1) { this.moveToOption(valueIndex); }
+  if (valueIndex != -1) {
+    this.moveToOption(valueIndex);
+  } else if (this.type == "color") {
+    this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
+  } else {
+    this.moveToValue();
+  }
 };
 
 /**
@@ -14813,41 +14877,60 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
 
 InputWidget.Slider.prototype.makeSlider = function() {
   var S = InputWidget.Slider;
-  var font = InputWidget.Label.font;
   this.position = 0;
   this.range = 100;
-  //var labelY = (S.height + font.charHeight)/2;
-
 
   this.barX = S.hMargin;
   this.barY = (S.height - S.barHeight)/2;
   this.barW = S.width - 2 * S.hMargin;
   var barColor = S.barColor;
 
+  this.sliderH = 35;//30;//10
+  this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
+  this.sliderY = (S.height - this.sliderH)/2;
+  this.sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
 
-  //var minLabel = GuiElements.draw.text(5, labelY, this.min, font, Colors.white);
-  //this.group.appendChild(minLabel);
-  //var maxLabel = GuiElements.draw.text(this.width - 20, labelY, this.max, font, Colors.white);
-  //this.group.appendChild(maxLabel);
-
+  //some slider types need extra elements
   if (this.type == 'color') {
     barColor = Colors.white;
-    //var spectrum = GuiElements.create.spectrum();
-    //var spectrum = Colors.getGradient("tablet")
-    GuiElements.create.spectrum();
     var spectrum = "url(#gradient_spectrum)";
     var specH = S.barHeight * 20;
     var specY = this.barY - specH/2 + S.barHeight/2;
     var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
     this.group.appendChild(colorRect);
+    TouchReceiver.addListenersSlider(colorRect, this);
+  } if (this.type.startsWith('angle')) {
+    this.cR = (this.height - S.hMargin/2)/2;
+    this.cX = this.width - S.hMargin - this.cR;
+    this.cY = this.height/2;
+/*
+    var arrowPath = VectorPaths.mvTurnArrowRight;
+    var arrowH = 20;
+    var arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
+    var arrowX = this.cX - arrowW/2;
+    var arrowY = this.cY - arrowH.2;
+    var arrow = new VectorIcon(arrowX, arrowY, arrowPath, Colors.black, arrowH, this.group);
+*/
+    this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
+    this.group.appendChild(this.angleWedge);
+
+    this.angleCircle = GuiElements.draw.circle(this.cX, this.cY, this.cR, "none", this.group);
+    GuiElements.update.stroke(this.angleCircle, Colors.black, 1);
+
+    var iX = this.cX - this.sliderW/2;
+    this.angleIcon = new VectorIcon(iX, this.sliderY, S.sliderIconPath, Colors.white, this.sliderH, this.group);
+    GuiElements.update.stroke(this.angleIcon.pathE, Colors.black, 6);
+
+    this.barW -= 2*this.cR + S.hMargin + InputPad.margin;
   }
 
+  //Make the bar beneath the slider
   var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, barColor);
   this.group.appendChild(sliderBar);
   TouchReceiver.addListenersSlider(sliderBar, this);
 
+  //If there is a list of options to display, add them with a tick mark at each
   if (this.options != null && this.options.length != 0 ) {
-
     var tickH = 7 * S.barHeight;//8 * S.barHeight;
     var tickW = S.barHeight * (3/4);//S.barHeight/2;
     var tickX = this.barX;
@@ -14859,21 +14942,17 @@ InputWidget.Slider.prototype.makeSlider = function() {
     }
   }
 
-
-
-  //this.sliderH = S.barHeight * 5;
-  this.sliderH = 30;//10
-  this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
-  this.sliderY = (S.height - this.sliderH)/2;
-  //var sliderX = this.barX + (this.barW - this.sliderW)/2;
-  var sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
-  //this.slider = GuiElements.draw.rect(sliderX, this.sliderY, this.sliderW, this.sliderH, Colors.easternBlue);
-  //this.group.appendChild(this.slider);
-  //TouchReceiver.addListenersSlider(this.slider, this);
+  //Make the slider
   var color = Colors.easternBlue;
   if (this.sliderColor != null) { color = this.sliderColor; }
-  this.sliderIcon = new VectorIcon(sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+  this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
+
+  if (this.type != 'color' && this.type != 'ledArray') {
+    //Add a label at the bottom to show your selection
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, Colors.black);
+  	this.group.appendChild(this.textE);
+  }
 }
 
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
@@ -14904,7 +14983,8 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       break;
     case "percent":
     case "distance":
-    case "angle":
+    case "angle_left":
+    case "angle_right":
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width/2 + tickW/2;
       var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
@@ -14912,21 +14992,42 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       this.group.appendChild(textE);
       break;
   }
-
-
 }
 
 InputWidget.Slider.prototype.drag = function(x) {
   var relX = x - this.overlay.x - this.overlay.margin;
 
-  if (relX > this.barX && relX < (this.barX + this.barW - this.sliderW)) {
+  var errorMargin = 10;
+  var barMaxX = this.barX + this.barW;
+  if (relX < this.barX && relX > this.barX - errorMargin){ relX = this.barX; }
+  if (relX > barMaxX && relX < barMaxX + errorMargin){ relX = barMaxX; }
+
+  if (relX >= this.barX && relX <= barMaxX) {
     this.sliderX = relX - this.sliderW/2;
-    this.position = Math.round(((relX - this.barX)*1.01/(this.barW - this.sliderW))*(this.range));
-    //GuiElements.update.rect(this.slider, this.sliderX, this.sliderY, this.sliderW, this.sliderH);
+    this.position = Math.round(((relX - this.barX)/(this.barW))*(this.range));
     this.sliderIcon.move(this.sliderX, this.sliderY);
 
     if (typeof this.value == 'number') {
-      this.value = this.position;
+      if (this.optionValues.length != 0) {
+
+        if (relX < this.optionXs[0]) {
+          this.value = this.optionValues[0];
+        } else if (relX > this.optionXs[this.optionXs.length - 1]) {
+          this.value = this.optionValues[this.optionValues.length -1];
+        } else {
+          var v = 0;
+          for (var i = 0; i < this.optionXs.length; i++) {
+            if (this.optionXs[i] <= relX && this.optionXs[i+1] > relX) { v = i; }
+          }
+          var xRange = this.optionXs[v+1] - this.optionXs[v];
+          var vRange = this.optionValues[v+1] - this.optionValues[v];
+          var p = (relX - this.optionXs[v])/xRange;
+          this.value = Math.round(this.optionValues[v] + p * vRange);
+        }
+
+      } else {
+        this.value = this.position;
+      }
     } else if (typeof this.value == 'string') {
       //do nothing?
     } else {
@@ -14934,42 +15035,76 @@ InputWidget.Slider.prototype.drag = function(x) {
       if (this.value.r != null) {
         var p = this.position / this.range;
         //red -> yellow
-        if (p < 0.17) {
-          this.value.r = 100;
-          this.value.g = Math.round(100*p/0.17);
-          this.value.b = 0;
-        //yellow -> green
-        } else if (p < 0.33) {
-          this.value.r = Math.round(100 - (100 * (p - 0.17)/0.17));
-          this.value.g = 100;
-          this.value.b = 0;
-        //green -> cyan
-        } else if (p < 0.5) {
-          this.value.r = 0;
-          this.value.g = 100;
-          this.value.b = Math.round(100 * (p - 0.33)/0.17);
-        //cyan -> blue
-        } else if (p < 0.67) {
-          this.value.r = 0;
-          this.value.g = Math.round(100 - (100 * (p - 0.5)/0.17));
-          this.value.b = 100;
-        //blue -> magenta
-        } else if (p < 0.83) {
-          this.value.r = Math.round(100 * (p - 0.67)/0.17);
-          this.value.g = 0;
-          this.value.b = 100;
-        //magenta -> red
-        } else {
-          this.value.r = 100;
-          this.value.g = 0;
-          this.value.b = Math.round(100 - (100 * (p - 0.83)/0.17));
-        }
+        this.value = InputWidget.Slider.percentToColor(p);
         //console.log("color updated to " + this.value.r + ", " + this.value.g + ", " + this.value.b);
       }
     }
+
+    if (this.type.startsWith("angle")) {
+      this.value = Math.round(this.value/5) * 5; //round off to the nearest 5 degrees
+      this.updateAngle();
+    }
+
+    this.updateLabel();
     this.updateFn(this.value);
     //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }
+}
+
+InputWidget.Slider.percentToColor = function(p) {
+  var color = {};
+
+  if (p < 0.17) {
+    color.r = 100;
+    color.g = Math.round(100*p/0.17);
+    color.b = 0;
+  //yellow -> green
+  } else if (p < 0.33) {
+    color.r = Math.round(100 - (100 * (p - 0.17)/0.17));
+    color.g = 100;
+    color.b = 0;
+  //green -> cyan
+  } else if (p < 0.5) {
+    color.r = 0;
+    color.g = 100;
+    color.b = Math.round(100 * (p - 0.33)/0.17);
+  //cyan -> blue
+  } else if (p < 0.67) {
+    color.r = 0;
+    color.g = Math.round(100 - (100 * (p - 0.5)/0.17));
+    color.b = 100;
+  //blue -> magenta
+  } else if (p < 0.83) {
+    color.r = Math.round(100 * (p - 0.67)/0.17);
+    color.g = 0;
+    color.b = 100;
+  //magenta -> red
+  } else {
+    color.r = 100;
+    color.g = 0;
+    color.b = Math.round(100 - (100 * (p - 0.83)/0.17));
+  }
+
+  return color;
+}
+
+InputWidget.Slider.colorToPercent = function(color) {
+  var p = 0;
+
+  if (color.r == 100 && color.b == 0) {//between red and yellow
+    p = color.g * 0.17/100;
+  } else if (color.g == 100 && color.b == 0) {//between yellow and green
+    p = 0.17 + (100 - color.r) * 0.17/100;
+  } else if (color.r == 0 && color.g == 100) {//between green and cyan
+    p = 0.33 + color.b * 0.17/100;
+  } else if (color.r == 0 && color.b == 100) {//between cyan and blue
+    p = 0.5 + (100 - color.g) * 0.17/100;
+  } else if (color.g == 0 && color.b == 100) {//between blue and magenta
+    p = 0.66 + color.r * 0.17/100;
+  } else if (color.r == 100 && color.g == 0) {//between magenta and red
+    p = 0.83 + (100 - color.b) * 0.17/100;
+  }
+  return p;
 }
 
 InputWidget.Slider.prototype.drop = function() {
@@ -14998,7 +15133,67 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.sliderX = this.optionXs[optionIndex] - this.sliderW/2;
   this.sliderIcon.move(this.sliderX, this.sliderY);
   this.value = this.optionValues[optionIndex];
+  if (this.type.startsWith("angle")) { this.updateAngle(); }
+  this.updateLabel();
   this.updateFn(this.value);
+}
+
+InputWidget.Slider.prototype.moveToPosition = function(p) {
+  this.sliderX = this.barX + p * this.barW - this.sliderW/2;
+  this.sliderIcon.move(this.sliderX, this.sliderY);
+  //todo: Update value here?
+  this.updateLabel();
+}
+
+InputWidget.Slider.prototype.moveToValue = function() {
+  if (typeof this.value == 'number') {
+    console.log("move to value " + this.value);
+    if (this.optionValues.length != 0) {
+      var v = -1;
+      for (var i = 0; i < this.optionValues.length; i++) {
+        if (this.optionValues[i] < this.value && this.optionValues[i+1] > this.value) {
+          v = i;
+        }
+      }
+      if (v != -1) {
+        var range = this.optionValues[v+1] - this.optionValues[v];
+        var xRange = this.optionXs[v+1] - this.optionXs[v];
+        var p = (this.value - this.optionValues[v])/range;
+        var x = this.optionXs[v] + xRange * p;
+        this.sliderX = x - this.sliderW/2;
+        this.sliderIcon.move(this.sliderX, this.sliderY);
+      }
+    }
+  }
+  if (this.type.startsWith("angle")) { this.updateAngle(); }
+  this.updateLabel();
+}
+
+InputWidget.Slider.prototype.updateAngle = function() {
+  var counterClockwise = (this.type.endsWith("left"));
+  if (this.angleWedge != null) {
+    GuiElements.update.wedge(this.angleWedge, this.cX, this.cY, this.cR, this.value, counterClockwise);
+    if (this.value == 360) {
+      GuiElements.update.color(this.angleCircle, Colors.easternBlue);
+    } else {
+      GuiElements.update.color(this.angleCircle, "none");
+    }
+  }
+  if (this.angleIcon != null) {
+    var rotation = this.value;
+    if (counterClockwise) { rotation = 360 - this.value;}
+    this.angleIcon.setRotation(rotation);
+  }
+}
+
+InputWidget.Slider.prototype.updateLabel = function() {
+  if (this.textE != null) {
+    GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, this.barW);
+  	var textW = GuiElements.measure.textWidth(this.textE);
+  	var textX = this.barX + this.barW / 2 - textW / 2;
+  	var textY = this.barY + InputWidget.Slider.font.charHeight + 30;
+  	GuiElements.move.text(this.textE, textX, textY);
+  }
 }
 
 /**
@@ -15156,7 +15351,14 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 	//console.log("make key " + num + " at " + x);
 	var P = InputWidget.Piano;
 	var button = new Button(x, y, w, h, this.group, Colors.white);
-	button.setCallbackFunction(function(){this.keyPressed(num)}.bind(this));
+	button.setCallbackFunction(function(){
+		var soundDuration = CodeManager.beatsToMs(0.5);
+		var request = "sound/note?note=" + num + "&duration=" + soundDuration;
+		var requestStatus = function() {};
+		HtmlServer.sendRequest(request, requestStatus);
+
+		this.keyPressed(num)
+	}.bind(this));
 	button.setUnToggleFunction(function(){});
 	button.markAsOverlayPart(this.overlay);
 	GuiElements.update.opacity(button.bgRect, 0);
@@ -15428,10 +15630,15 @@ BubbleOverlay.prototype = Object.create(Overlay.prototype);
 BubbleOverlay.prototype.constructor = BubbleOverlay;
 
 BubbleOverlay.setGraphics = function() {
-	BubbleOverlay.triangleW = 15;
-	BubbleOverlay.triangleH = 7;
+  if (FinchBlox) {
+    BubbleOverlay.triangleW = 40;
+  	BubbleOverlay.triangleH = 10;
+  } else {
+    BubbleOverlay.triangleW = 15;
+  	BubbleOverlay.triangleH = 7;
+  }
+  BubbleOverlay.overlap = 1;
 	BubbleOverlay.minW = 25;
-	BubbleOverlay.overlap = 1;
 };
 
 /**
@@ -15630,6 +15837,7 @@ function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, 
   this.outlineColor = outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
+  this.blockG = GuiElements.create.group(0,0,GuiElements.layers.overlay);
 }
 FBBubbleOverlay.prototype = Object.create(BubbleOverlay.prototype);
 FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
@@ -15640,18 +15848,24 @@ FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
 FBBubbleOverlay.prototype.makeBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, 0, this.bgColor, 10, 10);
   this.bgGroup.appendChild(this.bgRect);
-  GuiElements.update.stroke(this.bgRect, this.outlineColor, 2);
+  GuiElements.update.stroke(this.bgRect, this.outlineColor, 4);
  	this.triangle = GuiElements.create.path(this.bgGroup);
  	GuiElements.update.color(this.triangle, this.outlineColor);
 }
 
 FBBubbleOverlay.prototype.show = function () {
   if (!this.visible) {
+    var zf = TabManager.activeTab.zoomFactor;
+
     BubbleOverlay.prototype.show.call(this);
-    this.layerG.appendChild(this.block.group);
+
+    GuiElements.update.zoom(this.blockG, zf);
+    this.blockG.appendChild(this.block.group);
+    //this.layerG.appendChild(this.block.group);
+
     var absX = this.block.stack.relToAbsX(this.block.x);
     var absY = this.block.stack.relToAbsY(this.block.y);
-    GuiElements.move.group(this.block.group, absX, absY);
+    GuiElements.move.group(this.block.group, absX/zf, absY/zf);
     GuiElements.blockInteraction();
   }
 }
@@ -15669,6 +15883,7 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
 	var BO = BubbleOverlay;
 
   var height = innerHeight + 2 * this.margin;
+  var overlap = 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
 	GuiElements.move.group(this.innerGroup, this.margin, this.margin);
@@ -15681,8 +15896,8 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
   var triangleY = NaN;
   var triangleDir = 1;
   if (attemptB <= attemptT){
-    this.y = y2 + BO.triangleH;
-    triangleY = y2;
+    this.y = y2 + BO.triangleH - overlap;
+    triangleY = y2 - overlap;
   } else {
     this.y = y1 - longH;
     triangleY = y1;
@@ -17225,6 +17440,11 @@ VectorIcon.prototype.update = function(x, y, height) {
   	this.width = this.scaleY * this.pathId.width;
   }
   //this.group.setAttributeNS(null, "transform", "translate(" + this.x + "," + this.y + ") scale(" + this.scaleX + ", " + this.scaleY + ")");
+  this.setTransform();
+}
+
+VectorIcon.prototype.setRotation = function(rotation) {
+  this.rotation = rotation;
   this.setTransform();
 }
 
@@ -25424,6 +25644,12 @@ Block.prototype.updateAlignRI = function(x, y) {
 	xCoord += bG.hMargin;
 	for (var i = 0; i < this.parts.length; i++) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
+    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
+      //In this case, we will make sure the part is centered.
+      console.log("centering icon on " + this.constructor.name);
+      xCoord = (bG.width - this.parts[i].width)/2;
+      var w = this.parts[i].updateAlign(xCoord, yCoord);
+    }
 		if (this.parts[i].isEndOfLine){
 			xCoord = bG.hMargin;
 			currentLine += 1;
@@ -29737,7 +29963,7 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
   if (typeof this.value == 'object' && this.value.r != null){
     var s = 255/100;
     var color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
-    console.log("new button color: " + color);
+    //console.log("new button color: " + color);
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
@@ -29774,20 +30000,27 @@ BlockButton.prototype.createInputSystem = function() {
 };
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
   this.value = startingValue;
-  this.widgets.push(new InputWidget.Slider(type, options, this.value, this.outlineColor));
+
+  var suffix = "";
   switch (type) {
     case "distance":
-      this.displaySuffixes[this.widgets.length - 1] = " cm";
+      suffix = " cm";
       break;
     case "percent":
-      this.displaySuffixes[this.widgets.length - 1] = "%";
+      suffix = "%";
       break;
-    case "angle":
-      this.displaySuffixes[this.widgets.length - 1] = "°";
+    case "angle_left":
+    case "angle_right":
+      suffix = "°";
       break;
     default:
-      this.displaySuffixes[this.widgets.length - 1] = "";
+      suffix = "";
   }
+
+  var sliderColor = Colors.categoryColors[this.parent.category];
+  this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
+  this.displaySuffixes[this.widgets.length - 1]  = suffix;
+
   this.updateValue(this.value);
 }
 BlockButton.prototype.addPiano = function(startingValue) {
@@ -32038,13 +32271,13 @@ B_FBMotion.prototype.addL2Button = function() {
     case "forward":
     case "backward":
       this.distanceBN = new BlockButton(this);
-      this.distanceBN.addSlider("distance", this.defaultDistance, [10, 20, 30, 40, 50]);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 15, 25, 35, 45, 55, 65, 75, 85, 95]);
       this.addPart(this.distanceBN);
       break;
     case "right":
     case "left":
       this.angleBN = new BlockButton(this, this.defaultAngle);
-      this.angleBN.addSlider("angle", this.defaultAngle, [45, 90, 135, 180]);
+      this.angleBN.addSlider("angle_" + this.direction, this.defaultAngle, [5, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
       this.addPart(this.angleBN);
       break;
     default:
@@ -32733,6 +32966,15 @@ B_When.prototype.startAction = function() {
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
+
+//FinchBlox only
+function B_StartWhenDark(x, y) {
+	HatBlock.call(this, x, y, "control_3");
+	var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.flagGreen, "sun", 35);
+	this.addPart(blockIcon);
+}
+B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
+B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet

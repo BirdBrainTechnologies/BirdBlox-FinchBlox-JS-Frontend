@@ -82,6 +82,11 @@ VectorIcon.prototype.update = function(x, y, height) {
   this.setTransform();
 }
 
+VectorIcon.prototype.setRotation = function(rotation) {
+  this.rotation = rotation;
+  this.setTransform();
+}
+
 /**
  * Changes the color of the icon
  * @param {string} color - color in hex

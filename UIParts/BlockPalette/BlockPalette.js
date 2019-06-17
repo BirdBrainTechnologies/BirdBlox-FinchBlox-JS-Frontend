@@ -37,7 +37,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.width = GuiElements.width;
     BlockPalette.height = 90;//100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
-    BlockPalette.bg = Colors.blockPalette;
+    BlockPalette.bg = Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width/2 - BlockPalette.catW/2;
     BlockPalette.catH = 40;
@@ -45,6 +45,8 @@ BlockPalette.setGraphics = function() {
     BlockPalette.blockMargin = 35;//25;   // The horizontal spacing between Blocks
     BlockPalette.trashHeight = BlockPalette.height * 0.75;
     BlockPalette.trashIconVP = VectorPaths.faTrash;
+    BlockPalette.trashOpacity = 0.9;
+  	BlockPalette.trashColor = Colors.easternBlue;
     BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
@@ -58,14 +60,15 @@ BlockPalette.setGraphics = function() {
     BlockPalette.blockMargin = 5;   // The vertical spacing between Blocks
     BlockPalette.trashHeight = 120;
     BlockPalette.trashIconVP = VectorPaths.trash;
+    BlockPalette.trashOpacity = 0.8;
+  	BlockPalette.trashColor = Colors.black;
   }
 
 	BlockPalette.catBg = Colors.white;
 	BlockPalette.labelFont = Font.uiFont(13);
 	BlockPalette.labelColor = Colors.black;
 
-	BlockPalette.trashOpacity = 0.8;
-	BlockPalette.trashColor = Colors.black;
+
 };
 
 /**

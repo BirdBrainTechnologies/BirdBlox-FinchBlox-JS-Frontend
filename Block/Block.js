@@ -621,6 +621,12 @@ Block.prototype.updateAlignRI = function(x, y) {
 	xCoord += bG.hMargin;
 	for (let i = 0; i < this.parts.length; i++) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
+    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
+      //In this case, we will make sure the part is centered.
+      console.log("centering icon on " + this.constructor.name);
+      xCoord = (bG.width - this.parts[i].width)/2;
+      const w = this.parts[i].updateAlign(xCoord, yCoord);
+    }
 		if (this.parts[i].isEndOfLine){
 			xCoord = bG.hMargin;
 			currentLine += 1;

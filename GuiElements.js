@@ -669,6 +669,15 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   return arrayImage;
 };
 
+GuiElements.draw.wedge = function(x, y, r, a, color) {
+	DebugOptions.validateNonNull(color);
+	DebugOptions.validateNumbers(x, y, r, a);
+	const wedge = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+	GuiElements.update.wedge(wedge, x, y, r, a); //Set its path description (points).
+	wedge.setAttributeNS(null, "fill", color); //Set the fill.
+	return wedge; //Return the finished wedge shape.
+}
+
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */
 GuiElements.update = {};
@@ -921,6 +930,37 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r) {
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
 
+GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
+	DebugOptions.validateNumbers(x, y, r, angle);
+	if (counterClockwise == null) { counterClockwise = false; }
+
+	//wedges start pointing up rather than to the side
+	let a = 0;
+	if (counterClockwise) {
+		a = 270 - angle;
+		if (a < 0) { a += 360; }
+	} else {
+		a = angle + 270;
+		if (a > 360) { a -= 360; }
+	}
+
+	let las = 0; //large arc sweep flag
+	let sf = 1; //sweep flag
+	if (angle > 180) { las = 1; }
+	if (counterClockwise) { sf = 0; }
+
+	let endX = x + r * Math.cos(a * Math.PI/180); //a*Math.PI/180 = angle in radians
+	let endY = y + r * Math.sin(a * Math.PI/180);
+
+	let path = "";
+	path += "m " + x + "," + y;
+	path += " l 0," + (-r);
+	path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
+	path += " z";
+
+	pathE.setAttributeNS(null, "d", path);
+}
+
 /* GuiElements.move contains functions that move existing SVG elements.
  * They do not return anything. */
 GuiElements.move = {};
@@ -1062,8 +1102,12 @@ GuiElements.measure.stringWidth = function(text, font) {
  */
 GuiElements.blockInteraction = function() {
 	if (GuiElements.dialogBlock == null) {
-		const rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
+		let rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
 		GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
+		if (FinchBlox) {
+			rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
+			GuiElements.update.opacity(rect, 0.9);
+		}
 		GuiElements.layers.dialogBlock.appendChild(rect);
 		TouchReceiver.touchInterrupt();
 		TouchReceiver.addListenersDialogBlock(rect);

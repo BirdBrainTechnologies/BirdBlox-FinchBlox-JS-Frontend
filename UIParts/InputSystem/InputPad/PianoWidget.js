@@ -153,7 +153,14 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 	//console.log("make key " + num + " at " + x);
 	const P = InputWidget.Piano;
 	let button = new Button(x, y, w, h, this.group, Colors.white);
-	button.setCallbackFunction(function(){this.keyPressed(num)}.bind(this));
+	button.setCallbackFunction(function(){
+		const soundDuration = CodeManager.beatsToMs(0.5);
+		const request = "sound/note?note=" + num + "&duration=" + soundDuration;
+		var requestStatus = function() {};
+		HtmlServer.sendRequest(request, requestStatus);
+
+		this.keyPressed(num)
+	}.bind(this));
 	button.setUnToggleFunction(function(){});
 	button.markAsOverlayPart(this.overlay);
 	GuiElements.update.opacity(button.bgRect, 0);

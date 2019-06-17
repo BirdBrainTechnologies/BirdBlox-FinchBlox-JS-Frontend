@@ -76,7 +76,7 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
   if (typeof this.value == 'object' && this.value.r != null){
     const s = 255/100;
     const color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
-    console.log("new button color: " + color);
+    //console.log("new button color: " + color);
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
   } else if (displayString != null) {
@@ -113,20 +113,27 @@ BlockButton.prototype.createInputSystem = function() {
 };
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
   this.value = startingValue;
-  this.widgets.push(new InputWidget.Slider(type, options, this.value, this.outlineColor));
+
+  let suffix = "";
   switch (type) {
     case "distance":
-      this.displaySuffixes[this.widgets.length - 1] = " cm";
+      suffix = " cm";
       break;
     case "percent":
-      this.displaySuffixes[this.widgets.length - 1] = "%";
+      suffix = "%";
       break;
-    case "angle":
-      this.displaySuffixes[this.widgets.length - 1] = "°";
+    case "angle_left":
+    case "angle_right":
+      suffix = "°";
       break;
     default:
-      this.displaySuffixes[this.widgets.length - 1] = "";
+      suffix = "";
   }
+
+  const sliderColor = Colors.categoryColors[this.parent.category];
+  this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
+  this.displaySuffixes[this.widgets.length - 1]  = suffix;
+
   this.updateValue(this.value);
 }
 BlockButton.prototype.addPiano = function(startingValue) {

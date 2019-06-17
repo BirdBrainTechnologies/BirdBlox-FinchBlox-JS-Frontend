@@ -6,6 +6,7 @@ function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, 
   this.outlineColor = outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
+  this.blockG = GuiElements.create.group(0,0,GuiElements.layers.overlay);
 }
 FBBubbleOverlay.prototype = Object.create(BubbleOverlay.prototype);
 FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
@@ -16,18 +17,24 @@ FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
 FBBubbleOverlay.prototype.makeBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, 0, this.bgColor, 10, 10);
   this.bgGroup.appendChild(this.bgRect);
-  GuiElements.update.stroke(this.bgRect, this.outlineColor, 2);
+  GuiElements.update.stroke(this.bgRect, this.outlineColor, 4);
  	this.triangle = GuiElements.create.path(this.bgGroup);
  	GuiElements.update.color(this.triangle, this.outlineColor);
 }
 
 FBBubbleOverlay.prototype.show = function () {
   if (!this.visible) {
+    const zf = TabManager.activeTab.zoomFactor;
+
     BubbleOverlay.prototype.show.call(this);
-    this.layerG.appendChild(this.block.group);
+
+    GuiElements.update.zoom(this.blockG, zf);
+    this.blockG.appendChild(this.block.group);
+    //this.layerG.appendChild(this.block.group);
+
     let absX = this.block.stack.relToAbsX(this.block.x);
     let absY = this.block.stack.relToAbsY(this.block.y);
-    GuiElements.move.group(this.block.group, absX, absY);
+    GuiElements.move.group(this.block.group, absX/zf, absY/zf);
     GuiElements.blockInteraction();
   }
 }
@@ -45,6 +52,7 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
 	const BO = BubbleOverlay;
 
   const height = innerHeight + 2 * this.margin;
+  const overlap = 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
 	GuiElements.move.group(this.innerGroup, this.margin, this.margin);
@@ -57,8 +65,8 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
   let triangleY = NaN;
   let triangleDir = 1;
   if (attemptB <= attemptT){
-    this.y = y2 + BO.triangleH;
-    triangleY = y2;
+    this.y = y2 + BO.triangleH - overlap;
+    triangleY = y2 - overlap;
   } else {
     this.y = y1 - longH;
     triangleY = y1;
