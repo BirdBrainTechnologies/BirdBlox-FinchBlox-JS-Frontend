@@ -105,18 +105,19 @@ B_MicroBitPrint.prototype.startAction = function() {
   return new ExecutionStatusRunning();
 };
 /* Sends requests of 18 characters until full string is printed */
+// June 2019 - changed limit to 10 char to accomidate finch.
 B_MicroBitPrint.prototype.updateAction = function() {
   const mem = this.runMem;
   if (!mem.timerStarted) {
     const status = mem.requestStatus;
     if (!mem.requestSent) {
       const ps = mem.printString;
-      const psSubstring = ps.substring(0,18);
+      const psSubstring = ps.substring(0,10);//18);
       mem.device.readPrintBlock(mem.requestStatus, psSubstring);
       mem.blockDuration = (psSubstring.length * 600);
       mem.requestSent = true;
-      if (ps.length > 18) {
-        mem.printString = ps.substring(18);
+      if (ps.length > 10) {//18) {
+        mem.printString = ps.substring(10);//18);
       } else {
         mem.printString = null;
       }

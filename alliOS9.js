@@ -5473,13 +5473,17 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 	// Accumulate devices that are not currently connected
 	var disconnectedRobotsList = [];
 	robotList.forEach(function(robot) {
-		// Try to find the device
-		var connectedRobotIndex = this.lookupRobotIndexById(robot.id);
-		// Only include the device if we didn't find it and it isn't the excludeId robot
-		if (connectedRobotIndex === -1) {
-			// Include the device in the list
-			disconnectedRobotsList.push(robot);
-		}
+
+    if (!FinchBlox || DeviceManager.getDeviceClass(robot) == this.deviceClass) {
+      // Try to find the device
+  		var connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+  		// Only include the device if we didn't find it and it isn't the excludeId robot
+  		if (connectedRobotIndex === -1) {
+  			// Include the device in the list
+  			disconnectedRobotsList.push(robot);
+  		}
+    }
+
 	}.bind(this));
 
 	// If we're including connected devices, add them at the top
@@ -5927,13 +5931,19 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
+	var ticksL = Math.round(distL * ticksPerCM);
+	var ticksR = Math.round(distR * ticksPerCM);
+	//because all zeros is a do nothing command...
+	if (speedL == 0 && ticksL == 0) { ticksL = 1; }
+	if (speedR == 0 && ticksR == 0) { ticksR = 1; }
+
 	var request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("speedL", Math.round(speedL * speedScaling));
-	request.addParam("ticksL", Math.round(distL * ticksPerCM));
+	request.addParam("ticksL", ticksL);
 	request.addParam("speedR", Math.round(speedR * speedScaling));
-	request.addParam("ticksR", Math.round(distR * ticksPerCM));
+	request.addParam("ticksR", ticksR);
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out
 	HtmlServer.sendRequest(request.toString(), status, true, true);
@@ -6697,14 +6707,14 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   var group = GuiElements.create.group(0, 0, parentGroup);
   //var dim = 4;//25;
   var r = dim/4; //1;//8;
-  var margin = dim/4; //1;//5;
+  var margin = dim/2;//dim/4; //1;//5;
   var startX = 0;
 	var y = 0;
   for (var i = 0; i < 5; i++) {
     var x = startX;
     for (var j = 0; j < 5; j++) {
-      var color = Colors.iron;
-      if (values[5*i+j] == "1") { color = Colors.black; }
+      var color = Colors.fbGray;//Colors.iron;
+      if (values[5*i+j] == "1") { color = Colors.bbtDarkGray; }
       var rect = GuiElements.draw.rect(x, y, dim, dim, color, r, r);
       group.appendChild(rect);
       x += dim + margin;
@@ -8135,7 +8145,7 @@ function Font(fontFamily, fontSize, fontWeight) {
  */
 Font.prototype.lookupCharH = function(fontSize){
   var scale = 0.6639;
-  if (this.fontFamily == 'AvenirHeavy') { scale = 0.59; } //number determined empirically, may need adjustment
+  //if (this.fontFamily == 'AvenirHeavy') { scale = 0.63; }//0.59; } //number determined empirically, may need adjustment
 	return scale * fontSize + 1.644;
 };
 
@@ -8198,11 +8208,16 @@ function VectorPaths(){
   VP.microbit.path="M13.465 60.088 C 11.703 60.639,9.937 62.220,9.134 63.965 L 8.704 64.900 8.554 89.700 C 8.472 103.340,8.426 117.082,8.452 120.239 L 8.500 125.977 33.700 93.069 C 47.560 74.970,58.930 60.080,58.967 59.981 C 59.082 59.669,14.468 59.774,13.465 60.088 M61.200 80.240 C 61.200 91.703,61.276 100.597,61.372 100.490 C 61.761 100.062,92.400 59.968,92.400 59.887 C 92.400 59.839,85.380 59.800,76.800 59.800 L 61.200 59.800 61.200 80.240 M97.600 67.240 C 97.600 71.425,97.675 74.597,97.773 74.490 C 97.912 74.337,102.495 68.354,108.146 60.950 L 109.023 59.800 103.312 59.800 L 97.600 59.800 97.600 67.240 M40.784 270.002 C 28.867 272.019,20.737 283.226,22.888 294.671 C 26.843 315.716,55.469 318.539,63.425 298.669 C 69.273 284.065,56.116 267.407,40.784 270.002 M117.667 270.083 C 104.726 272.552,96.991 285.226,100.935 297.500 C 106.771 315.667,131.736 317.325,140.114 300.103 C 147.416 285.092,133.881 266.989,117.667 270.083 M194.948 270.103 C 182.654 272.433,174.732 284.581,177.863 296.300 C 182.960 315.369,208.784 317.869,217.399 300.128 C 224.665 285.164,211.113 267.040,194.948 270.103 M271.748 270.103 C 260.250 272.282,252.336 283.239,254.269 294.303 C 258.239 317.034,289.899 318.327,295.602 295.991 C 299.285 281.569,286.197 267.365,271.748 270.103 M349.584 269.989 C 332.112 273.202,325.279 293.718,337.588 306.010 C 351.263 319.666,374.392 309.194,373.547 289.728 C 373.037 277.970,360.835 267.919,349.584 269.989 M15.400 319.600 L 15.400 339.600 18.000 339.600 L 20.600 339.600 20.600 319.600 L 20.600 299.600 18.000 299.600 L 15.400 299.600 15.400 319.600 M67.600 319.571 L 67.600 339.542 68.950 339.670 C 69.692 339.740,70.817 339.798,71.450 339.799 L 72.600 339.800 72.600 319.700 L 72.600 299.600 70.100 299.600 L 67.600 299.600 67.600 319.571 M75.800 319.700 L 75.800 339.800 78.300 339.800 L 80.800 339.800 80.800 319.700 L 80.800 299.600 78.300 299.600 L 75.800 299.600 75.800 319.700 M84.000 319.700 L 84.000 339.800 86.500 339.800 L 89.000 339.800 89.000 319.700 L 89.000 299.600 86.500 299.600 L 84.000 299.600 84.000 319.700 M92.000 319.700 L 92.000 339.800 94.600 339.800 L 97.200 339.800 97.200 319.700 L 97.200 299.600 94.600 299.600 L 92.000 299.600 92.000 319.700 M144.800 319.800 L 144.800 340.000 147.300 340.000 L 149.800 340.000 149.800 319.800 L 149.800 299.600 147.300 299.600 L 144.800 299.600 144.800 319.800 M152.933 299.733 C 152.860 299.807,152.800 308.897,152.800 319.933 L 152.800 340.000 155.400 340.000 L 158.000 340.000 158.000 319.800 L 158.000 299.600 155.533 299.600 C 154.177 299.600,153.007 299.660,152.933 299.733 M161.000 319.800 L 161.000 340.000 163.600 340.000 L 166.200 340.000 166.200 319.800 L 166.200 299.600 163.600 299.600 L 161.000 299.600 161.000 319.800 M169.200 319.800 L 169.200 340.000 171.800 340.000 L 174.400 340.000 174.400 319.800 L 174.400 299.600 171.800 299.600 L 169.200 299.600 169.200 319.800 M221.892 299.850 C 221.840 299.988,221.820 309.100,221.848 320.100 L 221.900 340.100 224.450 340.156 L 227.000 340.212 227.000 319.906 L 227.000 299.600 224.494 299.600 C 222.673 299.600,221.961 299.668,221.892 299.850 M230.000 319.900 L 230.000 340.200 232.600 340.200 L 235.200 340.200 235.200 319.900 L 235.200 299.600 232.600 299.600 L 230.000 299.600 230.000 319.900 M238.200 319.894 L 238.200 340.200 240.801 340.200 L 243.402 340.200 243.351 319.950 L 243.300 299.700 240.750 299.644 L 238.200 299.588 238.200 319.894 M246.400 319.900 L 246.400 340.200 248.900 340.200 L 251.400 340.200 251.400 319.900 L 251.400 299.600 248.900 299.600 L 246.400 299.600 246.400 319.900 M299.000 319.800 L 299.000 340.000 301.600 340.000 L 304.200 340.000 304.200 319.800 L 304.200 299.600 301.600 299.600 L 299.000 299.600 299.000 319.800 M307.200 319.794 L 307.200 340.000 309.801 340.000 L 312.402 340.000 312.351 319.850 L 312.300 299.700 309.750 299.644 L 307.200 299.588 307.200 319.794 M315.400 319.800 L 315.400 340.000 317.900 340.000 L 320.400 340.000 320.400 319.800 L 320.400 299.600 317.900 299.600 L 315.400 299.600 315.400 319.800 M323.600 319.800 L 323.600 340.000 326.100 340.000 L 328.600 340.000 328.600 319.800 L 328.600 299.600 326.100 299.600 L 323.600 299.600 323.600 319.800 M376.200 319.600 L 376.200 339.612 378.750 339.556 L 381.300 339.500 381.300 319.600 L 381.300 299.700 378.750 299.644 L 376.200 299.588 376.200 319.600 M22.800 322.790 L 22.800 339.600 43.600 339.600 L 64.400 339.600 64.400 322.954 L 64.400 306.309 63.771 307.104 C 53.746 319.777,34.250 319.843,23.841 307.240 L 22.800 305.979 22.800 322.790 M331.600 322.915 L 331.600 339.866 352.328 339.738 C 363.729 339.668,373.089 339.577,373.129 339.537 C 373.170 339.497,373.179 332.025,373.151 322.932 L 373.100 306.399 371.900 307.841 C 361.860 319.904,342.283 319.503,332.443 307.032 L 331.600 305.964 331.600 322.915 M100.207 322.950 L 100.200 339.800 108.550 339.800 C 113.142 339.800,122.503 339.860,129.350 339.933 L 141.800 340.066 141.800 323.115 L 141.800 306.164 141.034 307.132 C 130.944 319.890,110.886 319.775,100.838 306.900 L 100.213 306.100 100.207 322.950 M177.600 323.090 L 177.600 340.000 186.967 340.000 C 192.119 340.000,201.479 340.060,207.767 340.133 L 219.200 340.266 219.198 323.183 L 219.196 306.100 218.657 306.800 C 208.713 319.712,189.126 319.976,178.569 307.340 L 177.600 306.179 177.600 323.090 M254.400 323.222 L 254.400 340.266 268.233 340.133 C 275.841 340.060,285.201 340.000,289.033 340.000 L 296.000 340.000 295.998 323.050 L 295.996 306.100 295.466 306.800 C 285.715 319.686,265.907 319.952,255.369 307.340 L 254.400 306.179 254.400 323.222 "
   VP.microbit.width=400;
   VP.microbit.height=400;
-  //VP.mvTurnArrowRight={};
-  //VP.mvTurnArrowRight.path="M92.768,55.405C72.348,25.534 38.144,7.808 1.702,8.576L1.558,1.71C40.452,0.892 76.951,19.875 98.65,51.843L104.538,48.275L102.99,66.112L86.463,59.225L92.768,55.405Z";
-  //VP.mvTurnArrowRight.width=129;
-  //VP.mvTurnArrowRight.height=132;
-  //VP.mvTurnArrowRight.transform="matrix(1.21698,0,0,1.94118,48,12)";
+  VP.mvTurnArrowLeft={};
+  VP.mvTurnArrowLeft.path="M92.768,55.405C72.348,25.534 37.98,7.808 1.538,8.576L1.538,1.71C40.432,0.892 76.951,19.875 98.65,51.843L104.538,48.275L102.99,66.112L86.463,59.225L92.768,55.405Z";
+  VP.mvTurnArrowLeft.width=103;
+  VP.mvTurnArrowLeft.height=65;
+  VP.mvTurnArrowLeft.transform="matrix(-0.999999,0,0,1,104.538,-1.6846)";
+  VP.mvTurnArrowRight={};
+  VP.mvTurnArrowRight.path="M92.768,55.405C72.348,25.534 38.144,7.808 1.702,8.576L1.558,1.71C40.452,0.892 76.951,19.875 98.65,51.843L104.538,48.275L102.99,66.112L86.463,59.225L92.768,55.405Z";
+  VP.mvTurnArrowRight.width=103;
+  VP.mvTurnArrowRight.height=65;
+  VP.mvTurnArrowRight.transform="matrix(0.999999,0,0,1,-1.53785,-1.6846)";
   VP.mvPianoBlackKey={};
   VP.mvPianoBlackKey.path="M29.057,45.104L14.999,45.104L14.999,105.114C14.999,107.322 15.592,109.114 16.324,109.114L27.732,109.114C28.464,109.114 29.057,107.322 29.057,105.114L29.057,45.104Z";
   VP.mvPianoBlackKey.width=85;
@@ -9715,7 +9730,7 @@ TouchReceiver.handleUp = function(event) {
  * @param {event} event
  */
 TouchReceiver.handleDocumentDown = function(event) {
-	if (TouchReceiver.touchstart(event)) {
+	if (TouchReceiver.touchstart(event) && !FinchBlox) {
 		Overlay.closeOverlays();   // Close any visible overlays.
 	}
 };
@@ -10059,7 +10074,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 	}
 };
 
-TouchReceiver.touchStartDialogBlock = function(e) {
+TouchReceiver.touchEndDialogBlock = function(e) {
 	GuiElements.removeVideos();
 	if (SaveManager.fileName == null && !FinchBlox)  {
 		if (OpenDialog.lastOpenFile != null) {
@@ -10076,6 +10091,7 @@ TouchReceiver.touchStartDialogBlock = function(e) {
       RowDialog.currentDialog.closeDialog();
     }
 	}
+  if (FinchBlox) { Overlay.closeOverlays(); }
 }
 
 /**
@@ -10495,7 +10511,7 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
 TouchReceiver.addListenersDialogBlock = function(element) {
 	var TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
-		TouchReceiver.touchStartDialogBlock(e);
+		TouchReceiver.touchEndDialogBlock(e);
 	}, false);
 };
 
@@ -10597,6 +10613,7 @@ TitleBar.setGraphicsPart1 = function() {
 	} else {
     if (FinchBlox) {
       TB.height = 90;//100;
+      TB.solidHeight = 5; //height that is solid blue all the way across
     } else {
       TB.height = 54;
     }
@@ -10689,7 +10706,7 @@ TitleBar.setGraphicsPart2 = function() {
 TitleBar.createBar = function() {
 	var TB = TitleBar;
   if (FinchBlox) {
-    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.buttonMargin, TB.bg);
+    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.solidHeight, TB.bg);//TB.buttonMargin, TB.bg);
   } else {
     TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
   }
@@ -10709,7 +10726,7 @@ TitleBar.createBar = function() {
 };
 TitleBar.updateShapePath = function() {
   var TB = TitleBar;
-  var r = (TB.height - TB.buttonMargin)/2;
+  var r = (TB.height - TB.solidHeight)/2;//TB.buttonMargin)/2;
   var shapeW = TB.width/2 - TB.longButtonW - 2*r;
 
   var path = " m 0,0";
@@ -11013,7 +11030,7 @@ TitleBar.updateZoomPart2 = function() {
 	if (!FinchBlox) { viewShowing = TB.viewBn.toggled; }
 	TB.setGraphicsPart2();
   if (FinchBlox) {
-     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.buttonMargin);
+     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.solidHeight);//TB.buttonMargin);
 		 TB.updateShapePath();
   } else {
 	   GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);
@@ -13023,6 +13040,7 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
  */
 Button.prototype.addDeviceInfo = function(device) {
 	var color = Colors.flagGreen;
+  var color2 = Colors.bbtDarkGray;
   var font = Button.defaultFont;
 	var pathId = VectorPaths.faPlusCircle;
 	var iconH = this.height*0.6;
@@ -13039,7 +13057,7 @@ Button.prototype.addDeviceInfo = function(device) {
 	//var shortW = GuiElements.measure.textWidth(this.textE);
 
 	var text2X = 3*this.height;
-	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, Colors.black);
+	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, color2);
 	this.group.appendChild(this.textE2);
 
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
@@ -14830,13 +14848,15 @@ InputWidget.Slider.prototype.constructor = InputWidget.Slider;
 InputWidget.Slider.setConstants = function() {
   var S = InputWidget.Slider;
   S.width = InputPad.width;
-  S.height = 80;
+  S.height = S.width/8;//80;
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
   S.sliderIconPath = VectorPaths.mvFinch;
   S.optionMargin = 10;//5;//distance between ticks and option display
-  S.font = Font.uiFont(16);
+  S.font = Font.uiFont(24);//Font.uiFont(16);
+  S.optionFont = Font.uiFont(16);//Font.uiFont(12);//InputWidget.Label.font;
+  S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
 };
@@ -14890,7 +14910,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.sliderY = (S.height - this.sliderH)/2;
   this.sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
 
-  //some slider types need extra elements
+  //Add a color spectrum behind a color slider
   if (this.type == 'color') {
     barColor = Colors.white;
     var spectrum = "url(#gradient_spectrum)";
@@ -14899,27 +14919,41 @@ InputWidget.Slider.prototype.makeSlider = function() {
     var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this);
-  } if (this.type.startsWith('angle')) {
+  } else {
+    //all other types of sliders need to make space for an additional label at the bottom
+    var spaceNeeded = this.height/11;
+    this.barY -= spaceNeeded;
+    this.sliderY -= spaceNeeded;
+  }
+
+  //Add an angle diagram for an angle slider
+  if (this.type.startsWith('angle')) {
     this.cR = (this.height - S.hMargin/2)/2;
     this.cX = this.width - S.hMargin - this.cR;
     this.cY = this.height/2;
-/*
+
     var arrowPath = VectorPaths.mvTurnArrowRight;
-    var arrowH = 20;
+    var arrowH = this.cR * 0.67;
     var arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
-    var arrowX = this.cX - arrowW/2;
-    var arrowY = this.cY - arrowH.2;
-    var arrow = new VectorIcon(arrowX, arrowY, arrowPath, Colors.black, arrowH, this.group);
-*/
+    var arrowX = this.cX;
+    var arrowY = this.cY - this.cR * 1.18;
+    if (this.type.endsWith('left')) {
+      arrowPath = VectorPaths.mvTurnArrowLeft;
+      arrowX -= arrowW
+    }
+    var arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
+
     this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
     this.group.appendChild(this.angleWedge);
 
     this.angleCircle = GuiElements.draw.circle(this.cX, this.cY, this.cR, "none", this.group);
-    GuiElements.update.stroke(this.angleCircle, Colors.black, 1);
+    GuiElements.update.stroke(this.angleCircle, S.textColor, 1);
 
-    var iX = this.cX - this.sliderW/2;
-    this.angleIcon = new VectorIcon(iX, this.sliderY, S.sliderIconPath, Colors.white, this.sliderH, this.group);
-    GuiElements.update.stroke(this.angleIcon.pathE, Colors.black, 6);
+    var iconH = 40;
+    var iconX = this.cX - this.sliderW/2;
+    var iconY = (S.height - iconH)/2;
+    this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
+    GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
 
     this.barW -= 2*this.cR + S.hMargin + InputPad.margin;
   }
@@ -14948,16 +14982,20 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
 
-  if (this.type != 'color' && this.type != 'ledArray') {
+  //The following are placeholders that will be updated in updateLabel.
+  if (this.type == 'ledArray') {
+    //Add an image at the bottom to show your selection
+    this.imageG = GuiElements.create.group(0, 0, this.group);
+  } else if (this.type != 'color') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, Colors.black);
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
   	this.group.appendChild(this.textE);
   }
 }
 
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
   var S = InputWidget.Slider;
-  var font = Font.uiFont(12);//InputWidget.Label.font;
+  var font = S.optionFont;
 
   //Ticks on the edges of the slider are longer
   var tickY = y;
@@ -14976,7 +15014,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
 
   switch (this.type) {
     case "ledArray":
-      var image = GuiElements.draw.ledArray(this.group, option, 3);
+      var image = GuiElements.draw.ledArray(this.group, option, 2.2);
       var iX = x - image.width/2 + tickW/2;
       var iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
@@ -14988,7 +15026,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width/2 + tickW/2;
       var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      var textE = GuiElements.draw.text(textX, textY, option, font, Colors.black);
+      var textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
       this.group.appendChild(textE);
       break;
   }
@@ -15188,11 +15226,21 @@ InputWidget.Slider.prototype.updateAngle = function() {
 
 InputWidget.Slider.prototype.updateLabel = function() {
   if (this.textE != null) {
+    var margin = 35; //space between slider bar and this label.
     GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, this.barW);
   	var textW = GuiElements.measure.textWidth(this.textE);
   	var textX = this.barX + this.barW / 2 - textW / 2;
-  	var textY = this.barY + InputWidget.Slider.font.charHeight + 30;
+  	var textY = this.barY + InputWidget.Slider.font.charHeight + margin;
   	GuiElements.move.text(this.textE, textX, textY);
+  }
+  if (this.imageG != null) {
+    var margin = 25; //space between slider bar and this image.
+    this.imageG.remove();
+    var image = GuiElements.draw.ledArray(this.group, this.value, 4);
+    var iX = this.barX + this.barW/2 - image.width/2;
+    var iY = this.barY + margin;
+    GuiElements.move.group(image.group, iX, iY);
+    this.imageG = image.group;
   }
 }
 
@@ -18623,7 +18671,7 @@ TabManager.setGraphics = function() {
 	/* No longer different from tabArea since tab bar was removed */
 	TM.tabSpaceX = TM.tabAreaX;
 	TM.tabSpaceY = TitleBar.height;
-  if (FinchBlox) { TM.tabSpaceY = TitleBar.buttonMargin; }
+  if (FinchBlox) { TM.tabSpaceY = TitleBar.solidHeight; }//TitleBar.buttonMargin; }
 	TM.tabSpaceWidth = GuiElements.width - TM.tabSpaceX;
 	TM.tabSpaceHeight = GuiElements.height - TM.tabSpaceY;
 	TM.spaceScrollMargin = 50;
@@ -19715,10 +19763,9 @@ RecordingManager.permissionGranted = function() {
  * @param {number} extraTop - The amount of additional space to put between the title bar and the rows (for extra ui)
  * @param {number} extraBottom - The amount of extra space to put below the rows
  * @param {number} [extendTitleBar=0] - The amount the title bar's background should be extended
- * @param {boolean} noTitleBar - Set to true for a dialog that does not have a title bar.
  * @constructor
  */
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar, noTitleBar) {
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
 	if (extendTitleBar == null) {
 		extendTitleBar = 0;
 	}
@@ -19735,9 +19782,6 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTit
 	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
 	this.hintText = "";
 	this.visible = false;
-
-	this.hasTitleBar = true;
-	if (noTitleBar) { this.hasTitleBar = false; }
 }
 
 RowDialog.setConstants = function() {
@@ -19821,14 +19865,14 @@ RowDialog.prototype.show = function() {
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
 
-		if (this.hasTitleBar) {
-			this.titleRect = this.createTitleRect();
-			if (FinchBlox){
-				this.icon = this.createTitleIcon(VectorPaths.mvFinch);
-			} else {
-				this.titleText = this.createTitleLabel(this.title);
-			}
+
+		this.titleRect = this.createTitleRect();
+		if (FinchBlox){
+			this.icon = this.createTitleIcon(VectorPaths.mvFinch);
+		} else {
+			this.titleText = this.createTitleLabel(this.title);
 		}
+
 
 		// All the rows go in this group, which is scrollable
 		this.rowGroup = this.createContent();
@@ -19852,7 +19896,7 @@ RowDialog.prototype.calcHeights = function() {
 	var centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	var nonScrollHeight = centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	if (this.hasTitleBar) { nonScrollHeight += RD.titleBarH; }
+	nonScrollHeight += RD.titleBarH;
 	var shorterDim = Math.min(GuiElements.height, GuiElements.width);
 	var minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
 	var ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
@@ -19862,13 +19906,8 @@ RowDialog.prototype.calcHeights = function() {
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	if (this.hasTitleBar){
-		this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
-		this.extraTopY = RD.titleBarH;
-	} else {
-		this.scrollBoxY = RD.bnMargin + this.extraTopSpace;
-		this.extraTopY = 0;
-	}
+	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+	this.extraTopY = RD.titleBarH;
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 
@@ -22219,7 +22258,7 @@ function LevelDialog() {
 LevelDialog.setGlobals = function() {
   var LD = LevelDialog;
   LD.color = Colors.seance;
-  LD.strokeW = 2;
+  LD.strokeW = 1.5;
   LD.bnR = 10;
 
   LD.totalLevels = 3;
@@ -22236,8 +22275,8 @@ LevelDialog.prototype.show = function() {
 		}
 		RowDialog.currentDialog = this;
 
-    this.width = GuiElements.width * 0.75;
-    this.height = this.width / 3;
+    this.width = GuiElements.width * 0.6;
+    this.height = this.width * 0.35;
     this.font = Font.uiFont(this.height/2);
     this.x = GuiElements.width / 2 - this.width / 2;
 		this.y = GuiElements.height / 2 - this.height / 2;
@@ -22267,8 +22306,8 @@ LevelDialog.prototype.createContent = function() {
   var rowGroup = GuiElements.create.group(0, 0);
 
   //var margin = this.width/16;
-  var bnMargin = this.width * 0.08; //Margin between buttons
-  var hMargin = bnMargin * 4/3; //Margin on outer edges
+  var bnMargin = this.width * 0.1//0.08; //Margin between buttons
+  var hMargin = bnMargin * 0.5;//4/3; //Margin on outer edges
   //var bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
   var bnDim = (this.width - 2*hMargin - bnMargin*(LD.totalLevels-1))/LD.totalLevels
 
@@ -23277,7 +23316,7 @@ Setting.prototype.readValue = function(callbackFn){
 function SettingsManager() {
 	var SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
-	SM.enableSnapNoise = new Setting("enableSnapNoise", "false");
+	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");//"false");
 	SM.sideBarVisible = new Setting("sideBarVisible", "true");
 }
 
@@ -29894,7 +29933,7 @@ function BlockButton(parent){
   this.height = 2*BlockPalette.blockButtonOverhang;
   this.width = 60;
   this.cornerRadius = this.height/2;
-  this.textColor = Colors.black;
+  this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
@@ -29972,7 +30011,7 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     if (this.ledArrayImage != null) {
       this.ledArrayImage.group.remove();
     }
-    var image = GuiElements.draw.ledArray(this.button.group, this.value, 2);
+    var image = GuiElements.draw.ledArray(this.button.group, this.value, 1.8);
     var iX = this.button.width/2 - image.width/2;
     var iY = this.button.height/2 - image.width/2;
     GuiElements.move.group(image.group, iX, iY);
@@ -30474,18 +30513,19 @@ B_MicroBitPrint.prototype.startAction = function() {
   return new ExecutionStatusRunning();
 };
 /* Sends requests of 18 characters until full string is printed */
+// June 2019 - changed limit to 10 char to accomidate finch.
 B_MicroBitPrint.prototype.updateAction = function() {
   var mem = this.runMem;
   if (!mem.timerStarted) {
     var status = mem.requestStatus;
     if (!mem.requestSent) {
       var ps = mem.printString;
-      var psSubstring = ps.substring(0,18);
+      var psSubstring = ps.substring(0,10);//18);
       mem.device.readPrintBlock(mem.requestStatus, psSubstring);
       mem.blockDuration = (psSubstring.length * 600);
       mem.requestSent = true;
-      if (ps.length > 18) {
-        mem.printString = ps.substring(18);
+      if (ps.length > 10) {//18) {
+        mem.printString = ps.substring(10);//18);
       } else {
         mem.printString = null;
       }
@@ -31554,9 +31594,7 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	//Setting motors with ticks = 1 is a special stop command. Command with speed
-	// and ticks = 0 is a do nothing command.
-	device.setMotors(this.runMem.requestStatus, 0, 1, 0, 1);
+	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
 	return new ExecutionStatusRunning();
 };
 
@@ -31875,7 +31913,7 @@ function B_FBColor(x, y, level, type) {
  var iconH = 40;
  if (this.isLEDArray) {
    iconPath = VectorPaths.microbit;
-   iconColor = Colors.black;
+   iconColor = Colors.bbtDarkGray;//Colors.black;
    iconH = 30;
  }
  this.blockIcon = new BlockIcon(this, iconPath, iconColor, "finchColor", iconH);
@@ -31889,7 +31927,7 @@ function B_FBColor(x, y, level, type) {
    this.blockIcon.addSecondIcon(icon2Path, Colors.iron);
    this.ledIcon = this.blockIcon.icon.pathE2;
  } else {
-   this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+   this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
    /*
    var dim = 25;
    var r = 8;
@@ -31981,7 +32019,7 @@ B_FBColor.prototype.updateAction = function () {
 B_FBColor.prototype.updateColor = function () {
   if(this.isLEDArray) {
     this.ledArrayImage.group.remove();
-    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
     console.log("updating " + this.blockIcon.icon.width + " " + this.blockIcon.icon.scaleX);
     var iX = this.blockIcon.icon.width/(2 * this.blockIcon.icon.scaleX) - this.ledArrayImage.width/2;
     var iY = this.blockIcon.icon.height/(2 * this.blockIcon.icon.scaleY) - this.ledArrayImage.width/2 - 35;
@@ -32020,7 +32058,7 @@ B_FBColor.prototype.addL2Button = function () {
   if (this.isLEDArray) {
     var options = [ "0000001010000001000101110", //smiley face
                     "0000001010000000111010001", //frowny face
-                    "0000001010001000101000100", //surprise face
+                    "0101000000001000101000100", //surprise face
                     "1010010100111101101011110", //OK
                     "0111010101111111111110101", //alien
                     "1111110001100011000111111", //square
@@ -32271,7 +32309,7 @@ B_FBMotion.prototype.addL2Button = function() {
     case "forward":
     case "backward":
       this.distanceBN = new BlockButton(this);
-      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 15, 25, 35, 45, 55, 65, 75, 85, 95]);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
       this.addPart(this.distanceBN);
       break;
     case "right":

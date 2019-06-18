@@ -164,9 +164,7 @@ B_FinchStop.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
-	//Setting motors with ticks = 1 is a special stop command. Command with speed
-	// and ticks = 0 is a do nothing command.
-	device.setMotors(this.runMem.requestStatus, 0, 1, 0, 1);
+	device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
 	return new ExecutionStatusRunning();
 };
 

@@ -33,7 +33,7 @@ TabManager.setGraphics = function() {
 	/* No longer different from tabArea since tab bar was removed */
 	TM.tabSpaceX = TM.tabAreaX;
 	TM.tabSpaceY = TitleBar.height;
-  if (FinchBlox) { TM.tabSpaceY = TitleBar.buttonMargin; }
+  if (FinchBlox) { TM.tabSpaceY = TitleBar.solidHeight; }//TitleBar.buttonMargin; }
 	TM.tabSpaceWidth = GuiElements.width - TM.tabSpaceX;
 	TM.tabSpaceHeight = GuiElements.height - TM.tabSpaceY;
 	TM.spaceScrollMargin = 50;

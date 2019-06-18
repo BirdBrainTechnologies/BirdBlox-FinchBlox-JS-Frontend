@@ -4,7 +4,7 @@
 function SettingsManager() {
 	const SM = SettingsManager;
 	SM.zoom = new Setting("zoom", 1, true, false, GuiElements.minZoomMult, GuiElements.maxZoomMult);
-	SM.enableSnapNoise = new Setting("enableSnapNoise", "false");
+	SM.enableSnapNoise = new Setting("enableSnapNoise", "true");//"false");
 	SM.sideBarVisible = new Setting("sideBarVisible", "true");
 }
 

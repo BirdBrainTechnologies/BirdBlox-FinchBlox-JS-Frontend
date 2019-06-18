@@ -7,7 +7,7 @@ function BlockButton(parent){
   this.height = 2*BlockPalette.blockButtonOverhang;
   this.width = 60;
   this.cornerRadius = this.height/2;
-  this.textColor = Colors.black;
+  this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
@@ -85,7 +85,7 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     if (this.ledArrayImage != null) {
       this.ledArrayImage.group.remove();
     }
-    let image = GuiElements.draw.ledArray(this.button.group, this.value, 2);
+    let image = GuiElements.draw.ledArray(this.button.group, this.value, 1.8);
     const iX = this.button.width/2 - image.width/2;
     const iY = this.button.height/2 - image.width/2;
     GuiElements.move.group(image.group, iX, iY);

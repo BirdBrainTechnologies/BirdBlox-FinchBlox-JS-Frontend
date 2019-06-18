@@ -70,13 +70,19 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
+	let ticksL = Math.round(distL * ticksPerCM);
+	let ticksR = Math.round(distR * ticksPerCM);
+	//because all zeros is a do nothing command...
+	if (speedL == 0 && ticksL == 0) { ticksL = 1; }
+	if (speedR == 0 && ticksR == 0) { ticksR = 1; }
+
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
 	request.addParam("speedL", Math.round(speedL * speedScaling));
-	request.addParam("ticksL", Math.round(distL * ticksPerCM));
+	request.addParam("ticksL", ticksL);
 	request.addParam("speedR", Math.round(speedR * speedScaling));
-	request.addParam("ticksR", Math.round(distR * ticksPerCM));
+	request.addParam("ticksR", ticksR);
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out
 	HtmlServer.sendRequest(request.toString(), status, true, true);

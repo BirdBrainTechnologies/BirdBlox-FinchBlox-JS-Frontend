@@ -381,13 +381,17 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 	// Accumulate devices that are not currently connected
 	let disconnectedRobotsList = [];
 	robotList.forEach(function(robot) {
-		// Try to find the device
-		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
-		// Only include the device if we didn't find it and it isn't the excludeId robot
-		if (connectedRobotIndex === -1) {
-			// Include the device in the list
-			disconnectedRobotsList.push(robot);
-		}
+
+    if (!FinchBlox || DeviceManager.getDeviceClass(robot) == this.deviceClass) {
+      // Try to find the device
+  		let connectedRobotIndex = this.lookupRobotIndexById(robot.id);
+  		// Only include the device if we didn't find it and it isn't the excludeId robot
+  		if (connectedRobotIndex === -1) {
+  			// Include the device in the list
+  			disconnectedRobotsList.push(robot);
+  		}
+    }
+
 	}.bind(this));
 
 	// If we're including connected devices, add them at the top

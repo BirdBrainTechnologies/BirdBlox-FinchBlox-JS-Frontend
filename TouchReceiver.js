@@ -71,7 +71,7 @@ TouchReceiver.handleUp = function(event) {
  * @param {event} event
  */
 TouchReceiver.handleDocumentDown = function(event) {
-	if (TouchReceiver.touchstart(event)) {
+	if (TouchReceiver.touchstart(event) && !FinchBlox) {
 		Overlay.closeOverlays();   // Close any visible overlays.
 	}
 };
@@ -415,7 +415,7 @@ TouchReceiver.touchStartCollapsibleItem = function(collapsibleItem, e) {
 	}
 };
 
-TouchReceiver.touchStartDialogBlock = function(e) {
+TouchReceiver.touchEndDialogBlock = function(e) {
 	GuiElements.removeVideos();
 	if (SaveManager.fileName == null && !FinchBlox)  {
 		if (OpenDialog.lastOpenFile != null) {
@@ -432,6 +432,7 @@ TouchReceiver.touchStartDialogBlock = function(e) {
       RowDialog.currentDialog.closeDialog();
     }
 	}
+  if (FinchBlox) { Overlay.closeOverlays(); }
 }
 
 /**
@@ -851,7 +852,7 @@ TouchReceiver.addListenersCollapsibleItem = function(element, item) {
 TouchReceiver.addListenersDialogBlock = function(element) {
 	const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerUp, function(e) {
-		TouchReceiver.touchStartDialogBlock(e);
+		TouchReceiver.touchEndDialogBlock(e);
 	}, false);
 };
 

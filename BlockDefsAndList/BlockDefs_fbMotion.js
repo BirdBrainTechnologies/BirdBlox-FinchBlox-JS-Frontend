@@ -108,7 +108,7 @@ B_FBMotion.prototype.addL2Button = function() {
     case "forward":
     case "backward":
       this.distanceBN = new BlockButton(this);
-      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 15, 25, 35, 45, 55, 65, 75, 85, 95]);
+      this.distanceBN.addSlider("distance", this.defaultDistance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
       this.addPart(this.distanceBN);
       break;
     case "right":

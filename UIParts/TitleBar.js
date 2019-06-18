@@ -27,6 +27,7 @@ TitleBar.setGraphicsPart1 = function() {
 	} else {
     if (FinchBlox) {
       TB.height = 90;//100;
+      TB.solidHeight = 5; //height that is solid blue all the way across
     } else {
       TB.height = 54;
     }
@@ -119,7 +120,7 @@ TitleBar.setGraphicsPart2 = function() {
 TitleBar.createBar = function() {
 	const TB = TitleBar;
   if (FinchBlox) {
-    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.buttonMargin, TB.bg);
+    TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.solidHeight, TB.bg);//TB.buttonMargin, TB.bg);
   } else {
     TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
   }
@@ -139,7 +140,7 @@ TitleBar.createBar = function() {
 };
 TitleBar.updateShapePath = function() {
   const TB = TitleBar;
-  const r = (TB.height - TB.buttonMargin)/2;
+  const r = (TB.height - TB.solidHeight)/2;//TB.buttonMargin)/2;
   const shapeW = TB.width/2 - TB.longButtonW - 2*r;
 
   var path = " m 0,0";
@@ -443,7 +444,7 @@ TitleBar.updateZoomPart2 = function() {
 	if (!FinchBlox) { viewShowing = TB.viewBn.toggled; }
 	TB.setGraphicsPart2();
   if (FinchBlox) {
-     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.buttonMargin);
+     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.solidHeight);//TB.buttonMargin);
 		 TB.updateShapePath();
   } else {
 	   GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.height);

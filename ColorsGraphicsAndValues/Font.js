@@ -21,7 +21,7 @@ function Font(fontFamily, fontSize, fontWeight) {
  */
 Font.prototype.lookupCharH = function(fontSize){
   let scale = 0.6639;
-  if (this.fontFamily == 'AvenirHeavy') { scale = 0.59; } //number determined empirically, may need adjustment
+  //if (this.fontFamily == 'AvenirHeavy') { scale = 0.63; }//0.59; } //number determined empirically, may need adjustment
 	return scale * fontSize + 1.644;
 };
 

@@ -23,13 +23,15 @@ InputWidget.Slider.prototype.constructor = InputWidget.Slider;
 InputWidget.Slider.setConstants = function() {
   const S = InputWidget.Slider;
   S.width = InputPad.width;
-  S.height = 80;
+  S.height = S.width/8;//80;
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
   S.sliderIconPath = VectorPaths.mvFinch;
   S.optionMargin = 10;//5;//distance between ticks and option display
-  S.font = Font.uiFont(16);
+  S.font = Font.uiFont(24);//Font.uiFont(16);
+  S.optionFont = Font.uiFont(16);//Font.uiFont(12);//InputWidget.Label.font;
+  S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
 };
@@ -83,7 +85,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.sliderY = (S.height - this.sliderH)/2;
   this.sliderX = this.barX + (this.position/(this.range)) * (this.barW - this.sliderW);
 
-  //some slider types need extra elements
+  //Add a color spectrum behind a color slider
   if (this.type == 'color') {
     barColor = Colors.white;
     const spectrum = "url(#gradient_spectrum)";
@@ -92,27 +94,41 @@ InputWidget.Slider.prototype.makeSlider = function() {
     const colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this);
-  } if (this.type.startsWith('angle')) {
+  } else {
+    //all other types of sliders need to make space for an additional label at the bottom
+    const spaceNeeded = this.height/11;
+    this.barY -= spaceNeeded;
+    this.sliderY -= spaceNeeded;
+  }
+
+  //Add an angle diagram for an angle slider
+  if (this.type.startsWith('angle')) {
     this.cR = (this.height - S.hMargin/2)/2;
     this.cX = this.width - S.hMargin - this.cR;
     this.cY = this.height/2;
-/*
-    const arrowPath = VectorPaths.mvTurnArrowRight;
-    const arrowH = 20;
+
+    let arrowPath = VectorPaths.mvTurnArrowRight;
+    const arrowH = this.cR * 0.67;
     const arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
-    const arrowX = this.cX - arrowW/2;
-    const arrowY = this.cY - arrowH.2;
-    const arrow = new VectorIcon(arrowX, arrowY, arrowPath, Colors.black, arrowH, this.group);
-*/
+    let arrowX = this.cX;
+    const arrowY = this.cY - this.cR * 1.18;
+    if (this.type.endsWith('left')) {
+      arrowPath = VectorPaths.mvTurnArrowLeft;
+      arrowX -= arrowW
+    }
+    const arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
+
     this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
     this.group.appendChild(this.angleWedge);
 
     this.angleCircle = GuiElements.draw.circle(this.cX, this.cY, this.cR, "none", this.group);
-    GuiElements.update.stroke(this.angleCircle, Colors.black, 1);
+    GuiElements.update.stroke(this.angleCircle, S.textColor, 1);
 
-    const iX = this.cX - this.sliderW/2;
-    this.angleIcon = new VectorIcon(iX, this.sliderY, S.sliderIconPath, Colors.white, this.sliderH, this.group);
-    GuiElements.update.stroke(this.angleIcon.pathE, Colors.black, 6);
+    const iconH = 40;
+    const iconX = this.cX - this.sliderW/2;
+    const iconY = (S.height - iconH)/2;
+    this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
+    GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
 
     this.barW -= 2*this.cR + S.hMargin + InputPad.margin;
   }
@@ -141,16 +157,20 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
 
-  if (this.type != 'color' && this.type != 'ledArray') {
+  //The following are placeholders that will be updated in updateLabel.
+  if (this.type == 'ledArray') {
+    //Add an image at the bottom to show your selection
+    this.imageG = GuiElements.create.group(0, 0, this.group);
+  } else if (this.type != 'color') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, Colors.black);
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
   	this.group.appendChild(this.textE);
   }
 }
 
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
   const S = InputWidget.Slider;
-  const font = Font.uiFont(12);//InputWidget.Label.font;
+  const font = S.optionFont;
 
   //Ticks on the edges of the slider are longer
   let tickY = y;
@@ -169,7 +189,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
 
   switch (this.type) {
     case "ledArray":
-      let image = GuiElements.draw.ledArray(this.group, option, 3);
+      let image = GuiElements.draw.ledArray(this.group, option, 2.2);
       const iX = x - image.width/2 + tickW/2;
       const iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
@@ -181,7 +201,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width/2 + tickW/2;
       let textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      let textE = GuiElements.draw.text(textX, textY, option, font, Colors.black);
+      let textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
       this.group.appendChild(textE);
       break;
   }
@@ -381,10 +401,20 @@ InputWidget.Slider.prototype.updateAngle = function() {
 
 InputWidget.Slider.prototype.updateLabel = function() {
   if (this.textE != null) {
+    const margin = 35; //space between slider bar and this label.
     GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, this.barW);
   	const textW = GuiElements.measure.textWidth(this.textE);
   	const textX = this.barX + this.barW / 2 - textW / 2;
-  	const textY = this.barY + InputWidget.Slider.font.charHeight + 30;
+  	const textY = this.barY + InputWidget.Slider.font.charHeight + margin;
   	GuiElements.move.text(this.textE, textX, textY);
+  }
+  if (this.imageG != null) {
+    const margin = 25; //space between slider bar and this image.
+    this.imageG.remove();
+    let image = GuiElements.draw.ledArray(this.group, this.value, 4);
+    const iX = this.barX + this.barW/2 - image.width/2;
+    const iY = this.barY + margin;
+    GuiElements.move.group(image.group, iX, iY);
+    this.imageG = image.group;
   }
 }

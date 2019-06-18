@@ -11,10 +11,9 @@
  * @param {number} extraTop - The amount of additional space to put between the title bar and the rows (for extra ui)
  * @param {number} extraBottom - The amount of extra space to put below the rows
  * @param {number} [extendTitleBar=0] - The amount the title bar's background should be extended
- * @param {boolean} noTitleBar - Set to true for a dialog that does not have a title bar.
  * @constructor
  */
-function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar, noTitleBar) {
+function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
 	if (extendTitleBar == null) {
 		extendTitleBar = 0;
 	}
@@ -31,9 +30,6 @@ function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTit
 	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
 	this.hintText = "";
 	this.visible = false;
-
-	this.hasTitleBar = true;
-	if (noTitleBar) { this.hasTitleBar = false; }
 }
 
 RowDialog.setConstants = function() {
@@ -117,14 +113,14 @@ RowDialog.prototype.show = function() {
 		this.group = GuiElements.create.group(this.x, this.y);
 		this.bgRect = this.drawBackground();
 
-		if (this.hasTitleBar) {
-			this.titleRect = this.createTitleRect();
-			if (FinchBlox){
-				this.icon = this.createTitleIcon(VectorPaths.mvFinch);
-			} else {
-				this.titleText = this.createTitleLabel(this.title);
-			}
+
+		this.titleRect = this.createTitleRect();
+		if (FinchBlox){
+			this.icon = this.createTitleIcon(VectorPaths.mvFinch);
+		} else {
+			this.titleText = this.createTitleLabel(this.title);
 		}
+
 
 		// All the rows go in this group, which is scrollable
 		this.rowGroup = this.createContent();
@@ -148,7 +144,7 @@ RowDialog.prototype.calcHeights = function() {
 	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
 	let nonScrollHeight = centeredBnHeight + RD.bnMargin;
 	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	if (this.hasTitleBar) { nonScrollHeight += RD.titleBarH; }
+	nonScrollHeight += RD.titleBarH;
 	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
 	let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
 	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
@@ -158,13 +154,8 @@ RowDialog.prototype.calcHeights = function() {
 	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
 	this.innerHeight = ScrollHeight;
 	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	if (this.hasTitleBar){
-		this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
-		this.extraTopY = RD.titleBarH;
-	} else {
-		this.scrollBoxY = RD.bnMargin + this.extraTopSpace;
-		this.extraTopY = 0;
-	}
+	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+	this.extraTopY = RD.titleBarH;
 	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 

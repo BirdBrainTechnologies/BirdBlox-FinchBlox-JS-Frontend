@@ -30,7 +30,7 @@ function B_FBColor(x, y, level, type) {
  let iconH = 40;
  if (this.isLEDArray) {
    iconPath = VectorPaths.microbit;
-   iconColor = Colors.black;
+   iconColor = Colors.bbtDarkGray;//Colors.black;
    iconH = 30;
  }
  this.blockIcon = new BlockIcon(this, iconPath, iconColor, "finchColor", iconH);
@@ -44,7 +44,7 @@ function B_FBColor(x, y, level, type) {
    this.blockIcon.addSecondIcon(icon2Path, Colors.iron);
    this.ledIcon = this.blockIcon.icon.pathE2;
  } else {
-   this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+   this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
    /*
    const dim = 25;
    const r = 8;
@@ -136,7 +136,7 @@ B_FBColor.prototype.updateAction = function () {
 B_FBColor.prototype.updateColor = function () {
   if(this.isLEDArray) {
     this.ledArrayImage.group.remove();
-    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 25);
+    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
     console.log("updating " + this.blockIcon.icon.width + " " + this.blockIcon.icon.scaleX);
     const iX = this.blockIcon.icon.width/(2 * this.blockIcon.icon.scaleX) - this.ledArrayImage.width/2;
     const iY = this.blockIcon.icon.height/(2 * this.blockIcon.icon.scaleY) - this.ledArrayImage.width/2 - 35;
@@ -175,7 +175,7 @@ B_FBColor.prototype.addL2Button = function () {
   if (this.isLEDArray) {
     let options = [ "0000001010000001000101110", //smiley face
                     "0000001010000000111010001", //frowny face
-                    "0000001010001000101000100", //surprise face
+                    "0101000000001000101000100", //surprise face
                     "1010010100111101101011110", //OK
                     "0111010101111111111110101", //alien
                     "1111110001100011000111111", //square

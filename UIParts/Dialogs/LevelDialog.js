@@ -12,7 +12,7 @@ function LevelDialog() {
 LevelDialog.setGlobals = function() {
   const LD = LevelDialog;
   LD.color = Colors.seance;
-  LD.strokeW = 2;
+  LD.strokeW = 1.5;
   LD.bnR = 10;
 
   LD.totalLevels = 3;
@@ -29,8 +29,8 @@ LevelDialog.prototype.show = function() {
 		}
 		RowDialog.currentDialog = this;
 
-    this.width = GuiElements.width * 0.75;
-    this.height = this.width / 3;
+    this.width = GuiElements.width * 0.6;
+    this.height = this.width * 0.35;
     this.font = Font.uiFont(this.height/2);
     this.x = GuiElements.width / 2 - this.width / 2;
 		this.y = GuiElements.height / 2 - this.height / 2;
@@ -60,8 +60,8 @@ LevelDialog.prototype.createContent = function() {
   const rowGroup = GuiElements.create.group(0, 0);
 
   //const margin = this.width/16;
-  const bnMargin = this.width * 0.08; //Margin between buttons
-  const hMargin = bnMargin * 4/3; //Margin on outer edges
+  const bnMargin = this.width * 0.1//0.08; //Margin between buttons
+  const hMargin = bnMargin * 0.5;//4/3; //Margin on outer edges
   //const bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
   const bnDim = (this.width - 2*hMargin - bnMargin*(LD.totalLevels-1))/LD.totalLevels
 
