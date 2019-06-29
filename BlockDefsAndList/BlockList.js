@@ -20,7 +20,6 @@ function BlockList() {
 		cat.push("Color_3");
 		cat.push("Sound_3");
 		cat.push("Control_3");
-		cat.push("Sensor_3");
 	} else {
 		cat.push("Robots");
 		cat.push("Operators");
@@ -142,11 +141,6 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.addBlockByName("B_StartWhenDark");
-	category.trimBottom();
-	category.centerBlocks();
-}
-BlockList.populateCat_sensor_3 = function(category) {
-	category.addBlockByName("B_When");
 	category.trimBottom();
 	category.centerBlocks();
 }

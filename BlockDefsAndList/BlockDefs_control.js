@@ -60,14 +60,24 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
-	// Derived from CommandBlock
-	// Category ("control") determines colors
-	let category = "control";
-	if (FinchBlox) { category = "control_3"; }
-	CommandBlock.call(this, x, y, category);
-	// Build Block out of things found in the BlockParts folder
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.parseTranslation(Language.getStr("block_wait"));
+
+	if (FinchBlox) {
+		CommandBlock.call(this, x, y, "control_3");
+		const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+		blockIcon.isEndOfLine = true;
+		this.addPart(blockIcon);
+		this.timeSelection = 3;
+		this.timeBN = new BlockButton(this);
+		this.timeBN.addSlider("time", this.timeSelection, [1, 2, 3, 4, 5]);
+		this.addPart(this.timeBN);
+	} else {
+		// Derived from CommandBlock
+		// Category ("control") determines colors
+		CommandBlock.call(this, x, y, "control");
+		// Build Block out of things found in the BlockParts folder
+		this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
+		this.parseTranslation(Language.getStr("block_wait"));
+	}
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -76,8 +86,12 @@ B_Wait.prototype.startAction = function() {
 	// Each Block has runMem to store information for that execution
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
-	// Extract a positive value from first slot
-	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+	if (FinchBlox) {
+		mem.delayTime = this.timeSelection * 1000;
+	} else {
+		// Extract a positive value from first slot
+		mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+	}
 	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
@@ -89,7 +103,11 @@ B_Wait.prototype.updateAction = function() {
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
-
+B_Wait.prototype.updateValues = function() {
+	if (this.timeBN != null) {
+		this.timeSelection = this.timeBN.value;
+	}
+}
 
 
 function B_WaitUntil(x, y) {
@@ -407,8 +425,23 @@ B_When.prototype.startAction = function() {
 //FinchBlox only
 function B_StartWhenDark(x, y) {
 	HatBlock.call(this, x, y, "control_3");
-	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.flagGreen, "sun", 35);
+	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.flagGreen);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
 	this.addPart(blockIcon);
+	//const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
 }
 B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+
+/* Triggers stack to start running. */
+B_StartWhenDark.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+};
+/* Does nothing */
+B_StartWhenDark.prototype.startAction = function() {
+	return new ExecutionStatusDone();
+};

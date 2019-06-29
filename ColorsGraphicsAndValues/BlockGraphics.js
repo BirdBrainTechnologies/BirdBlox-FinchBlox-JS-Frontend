@@ -149,7 +149,7 @@ BlockGraphics.SetHat = function() {
 	BlockGraphics.hat.topW = 80;
 
 	if (FinchBlox) {
-		BlockGraphics.hat.width = 40;
+		BlockGraphics.hat.width = 55; //40;
 	} else {
 		// Minimum width is larger than CommandBlocks to leave room for ellipse
 		BlockGraphics.hat.width = 90;

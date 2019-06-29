@@ -50,6 +50,7 @@ Colors.setCommon = function() {
 	Colors.blockPaletteColor = "#FFCE96";
 	Colors.blockPaletteSound = "#B691BB";
 	Colors.flagGreen = "#2FC00B";
+	Colors.fbDarkGreen = "#268D17";
 	Colors.stopRed = "#F03602";
 	Colors.finchGreen = "#B6E9A9";
 	Colors.fbYellow = "#F1CA07";

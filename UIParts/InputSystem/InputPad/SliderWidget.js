@@ -166,6 +166,12 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
   	this.group.appendChild(this.textE);
   }
+  if (this.type == 'time') {
+    const labelIconH = 23;
+    const labelIconP = VectorPaths.faClock;
+    this.labelIconW = VectorIcon.computeWidth(labelIconP, labelIconH);
+    this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, labelIconH, this.group);
+  }
 }
 
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
@@ -198,6 +204,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "distance":
     case "angle_left":
     case "angle_right":
+    case "time":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width/2 + tickW/2;
       let textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
@@ -404,7 +411,14 @@ InputWidget.Slider.prototype.updateLabel = function() {
     const margin = 35; //space between slider bar and this label.
     GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, this.barW);
   	const textW = GuiElements.measure.textWidth(this.textE);
-  	const textX = this.barX + this.barW / 2 - textW / 2;
+    let iconW = 0;
+    if (this.labelIcon != null) {
+      iconW = this.labelIconW;
+      const iconX = this.barX + this.barW/2 + textW/2 - iconW/2;
+      const iconY = this.barY + margin - 3;
+      this.labelIcon.move(iconX, iconY);
+    }
+  	const textX = this.barX + this.barW / 2 - (textW + iconW)/2;
   	const textY = this.barY + InputWidget.Slider.font.charHeight + margin;
   	GuiElements.move.text(this.textE, textX, textY);
   }

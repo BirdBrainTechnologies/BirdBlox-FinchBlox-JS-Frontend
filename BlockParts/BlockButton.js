@@ -126,6 +126,9 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_right":
       suffix = "°";
       break;
+    case "time":
+      suffix = " ";
+      break;
     default:
       suffix = "";
   }

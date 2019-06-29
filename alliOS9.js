@@ -7486,7 +7486,6 @@ function BlockList() {
 		cat.push("Color_3");
 		cat.push("Sound_3");
 		cat.push("Control_3");
-		cat.push("Sensor_3");
 	} else {
 		cat.push("Robots");
 		cat.push("Operators");
@@ -7608,11 +7607,6 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.addBlockByName("B_StartWhenDark");
-	category.trimBottom();
-	category.centerBlocks();
-}
-BlockList.populateCat_sensor_3 = function(category) {
-	category.addBlockByName("B_When");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -7963,6 +7957,7 @@ Colors.setCommon = function() {
 	Colors.blockPaletteColor = "#FFCE96";
 	Colors.blockPaletteSound = "#B691BB";
 	Colors.flagGreen = "#2FC00B";
+	Colors.fbDarkGreen = "#268D17";
 	Colors.stopRed = "#F03602";
 	Colors.finchGreen = "#B6E9A9";
 	Colors.fbYellow = "#F1CA07";
@@ -8204,6 +8199,12 @@ function VectorPaths(){
   VP.mjSun.path="M18.229044,29.7211846 C18.0843592,29.7211846 17.9750652,29.670935 17.8991544,29.5694443 L15.6151195,26.4229101 L11.9107766,27.6152989 C11.7920951,27.6664658 11.6698752,27.6494125 11.5428011,27.5655396 C11.432925,27.4795677 11.3781668,27.369882 11.3781668,27.2344224 L11.3781668,23.3519267 L7.67382389,22.1349634 C7.53878762,22.0926054 7.45408215,22.0079069 7.42010965,21.8812491 C7.37775515,21.7449605 7.39435688,21.6235662 7.47109662,21.5132772 L9.75452126,18.3679636 L7.47109662,15.2214223 C7.39435335,15.1199352 7.37775515,14.9964877 7.42010965,14.8522192 C7.45408215,14.7259883 7.53794801,14.6410535 7.67382389,14.5991188 L11.3787806,13.3821555 L11.3787806,9.49904593 C11.3787806,9.36400966 11.432925,9.25406647 11.5428011,9.16977375 C11.6698752,9.08463789 11.7925149,9.06887931 11.9107766,9.11878678 L15.6163472,10.3117895 L17.8991544,7.16524816 C17.9838705,7.05537553 18.0931681,7 18.229044,7 C18.3640838,7 18.474415,7.05453591 18.5595474,7.16524816 L20.8423582,10.3117895 L24.5473114,9.11878678 C24.6651533,9.0680397 24.788442,9.08463789 24.914673,9.16977375 C25.0249689,9.25406647 25.0793108,9.36400966 25.0793108,9.49904593 L25.0793108,13.3815416 L28.7842676,14.5991188 C28.9193039,14.641057 29.0042034,14.7259883 29.0385957,14.8522192 C29.0805303,14.9956445 29.0637134,15.1195436 28.9869913,15.2201946 L26.7035702,18.3673498 L28.9869913,21.5132772 C29.0628985,21.6235662 29.0799165,21.7449605 29.0379818,21.8812491 C29.0040093,22.0087395 28.91869,22.0926054 28.7836502,22.1349634 L25.0793108,23.3519267 L25.0793108,27.2344224 C25.0793108,27.369882 25.0241293,27.4795677 24.914673,27.5655396 C24.7876024,27.6494125 24.6645394,27.6664658 24.546694,27.6152989 L20.8417443,26.4229101 L18.5583232,29.5694443 C18.4832521,29.670935 18.3724693,29.7211846 18.229044,29.7211846 L18.229044,29.7211846 Z M18.229044,25.6746684 C19.2183492,25.6746684 20.1630846,25.4821929 21.0647387,25.0972065 C21.9647171,24.7130598 22.7424404,24.1916789 23.3979191,23.5374526 C24.054241,22.8811342 24.5743377,22.1036614 24.9589043,21.2024306 C25.3443104,20.3016126 25.5363626,19.3564293 25.5363626,18.3679636 C25.5363626,17.377406 25.3434708,16.4324731 24.9589043,15.5316551 C24.5743377,14.6308441 24.054241,13.8520837 23.3979191,13.1978573 C22.7432764,12.5415354 21.9647171,12.021862 21.0647387,11.6368792 C20.1630846,11.2518893 19.2183492,11.0600311 18.229044,11.0600311 C17.2393189,11.0600311 16.2941673,11.2518893 15.3933528,11.6368792 C14.4925348,12.021862 13.7140036,12.5415354 13.0589412,13.1978573 C12.4038752,13.8520837 11.8829142,14.6316767 11.4991872,15.5316551 C11.1142008,16.4324731 10.9204976,17.377406 10.9204976,18.3679636 C10.9204976,19.3564293 11.1142008,20.3016126 11.4991872,21.2024306 C11.8829142,22.1036614 12.4030391,22.8811342 13.0589412,23.5374526 C13.7140036,24.1916789 14.4925348,24.7130598 15.3933528,25.0972065 C16.2941673,25.4821929 17.2393189,25.6746684 18.229044,25.6746684 Z M18.2297495,24.5461677 C14.8126841,24.5461677 12.0435621,21.7768199 12.0435621,18.3605941 C12.0435621,14.9447881 14.8126841,12.1750205 18.2297495,12.1750205 C21.6459753,12.1750205 24.4147093,14.9447881 24.4147093,18.3605941 C24.4147093,21.7768199 21.6459753,24.5461677 18.2297495,24.5461677 Z";
   VP.mjSun.width=40;
   VP.mjSun.height=40;
+  VP.mjSun.transform="translate(2, 2)";
+  VP.mjSlash={};
+  VP.mjSlash.path="M31.3109921,5.25 L4.81099205,31.75";
+  VP.mjSlash.width=40;
+  VP.mjSlash.height=40;
+  VP.mjSlash.transform=VP.mjSun.transform;
   VP.microbit={};
   VP.microbit.path="M13.465 60.088 C 11.703 60.639,9.937 62.220,9.134 63.965 L 8.704 64.900 8.554 89.700 C 8.472 103.340,8.426 117.082,8.452 120.239 L 8.500 125.977 33.700 93.069 C 47.560 74.970,58.930 60.080,58.967 59.981 C 59.082 59.669,14.468 59.774,13.465 60.088 M61.200 80.240 C 61.200 91.703,61.276 100.597,61.372 100.490 C 61.761 100.062,92.400 59.968,92.400 59.887 C 92.400 59.839,85.380 59.800,76.800 59.800 L 61.200 59.800 61.200 80.240 M97.600 67.240 C 97.600 71.425,97.675 74.597,97.773 74.490 C 97.912 74.337,102.495 68.354,108.146 60.950 L 109.023 59.800 103.312 59.800 L 97.600 59.800 97.600 67.240 M40.784 270.002 C 28.867 272.019,20.737 283.226,22.888 294.671 C 26.843 315.716,55.469 318.539,63.425 298.669 C 69.273 284.065,56.116 267.407,40.784 270.002 M117.667 270.083 C 104.726 272.552,96.991 285.226,100.935 297.500 C 106.771 315.667,131.736 317.325,140.114 300.103 C 147.416 285.092,133.881 266.989,117.667 270.083 M194.948 270.103 C 182.654 272.433,174.732 284.581,177.863 296.300 C 182.960 315.369,208.784 317.869,217.399 300.128 C 224.665 285.164,211.113 267.040,194.948 270.103 M271.748 270.103 C 260.250 272.282,252.336 283.239,254.269 294.303 C 258.239 317.034,289.899 318.327,295.602 295.991 C 299.285 281.569,286.197 267.365,271.748 270.103 M349.584 269.989 C 332.112 273.202,325.279 293.718,337.588 306.010 C 351.263 319.666,374.392 309.194,373.547 289.728 C 373.037 277.970,360.835 267.919,349.584 269.989 M15.400 319.600 L 15.400 339.600 18.000 339.600 L 20.600 339.600 20.600 319.600 L 20.600 299.600 18.000 299.600 L 15.400 299.600 15.400 319.600 M67.600 319.571 L 67.600 339.542 68.950 339.670 C 69.692 339.740,70.817 339.798,71.450 339.799 L 72.600 339.800 72.600 319.700 L 72.600 299.600 70.100 299.600 L 67.600 299.600 67.600 319.571 M75.800 319.700 L 75.800 339.800 78.300 339.800 L 80.800 339.800 80.800 319.700 L 80.800 299.600 78.300 299.600 L 75.800 299.600 75.800 319.700 M84.000 319.700 L 84.000 339.800 86.500 339.800 L 89.000 339.800 89.000 319.700 L 89.000 299.600 86.500 299.600 L 84.000 299.600 84.000 319.700 M92.000 319.700 L 92.000 339.800 94.600 339.800 L 97.200 339.800 97.200 319.700 L 97.200 299.600 94.600 299.600 L 92.000 299.600 92.000 319.700 M144.800 319.800 L 144.800 340.000 147.300 340.000 L 149.800 340.000 149.800 319.800 L 149.800 299.600 147.300 299.600 L 144.800 299.600 144.800 319.800 M152.933 299.733 C 152.860 299.807,152.800 308.897,152.800 319.933 L 152.800 340.000 155.400 340.000 L 158.000 340.000 158.000 319.800 L 158.000 299.600 155.533 299.600 C 154.177 299.600,153.007 299.660,152.933 299.733 M161.000 319.800 L 161.000 340.000 163.600 340.000 L 166.200 340.000 166.200 319.800 L 166.200 299.600 163.600 299.600 L 161.000 299.600 161.000 319.800 M169.200 319.800 L 169.200 340.000 171.800 340.000 L 174.400 340.000 174.400 319.800 L 174.400 299.600 171.800 299.600 L 169.200 299.600 169.200 319.800 M221.892 299.850 C 221.840 299.988,221.820 309.100,221.848 320.100 L 221.900 340.100 224.450 340.156 L 227.000 340.212 227.000 319.906 L 227.000 299.600 224.494 299.600 C 222.673 299.600,221.961 299.668,221.892 299.850 M230.000 319.900 L 230.000 340.200 232.600 340.200 L 235.200 340.200 235.200 319.900 L 235.200 299.600 232.600 299.600 L 230.000 299.600 230.000 319.900 M238.200 319.894 L 238.200 340.200 240.801 340.200 L 243.402 340.200 243.351 319.950 L 243.300 299.700 240.750 299.644 L 238.200 299.588 238.200 319.894 M246.400 319.900 L 246.400 340.200 248.900 340.200 L 251.400 340.200 251.400 319.900 L 251.400 299.600 248.900 299.600 L 246.400 299.600 246.400 319.900 M299.000 319.800 L 299.000 340.000 301.600 340.000 L 304.200 340.000 304.200 319.800 L 304.200 299.600 301.600 299.600 L 299.000 299.600 299.000 319.800 M307.200 319.794 L 307.200 340.000 309.801 340.000 L 312.402 340.000 312.351 319.850 L 312.300 299.700 309.750 299.644 L 307.200 299.588 307.200 319.794 M315.400 319.800 L 315.400 340.000 317.900 340.000 L 320.400 340.000 320.400 319.800 L 320.400 299.600 317.900 299.600 L 315.400 299.600 315.400 319.800 M323.600 319.800 L 323.600 340.000 326.100 340.000 L 328.600 340.000 328.600 319.800 L 328.600 299.600 326.100 299.600 L 323.600 299.600 323.600 319.800 M376.200 319.600 L 376.200 339.612 378.750 339.556 L 381.300 339.500 381.300 319.600 L 381.300 299.700 378.750 299.644 L 376.200 299.588 376.200 319.600 M22.800 322.790 L 22.800 339.600 43.600 339.600 L 64.400 339.600 64.400 322.954 L 64.400 306.309 63.771 307.104 C 53.746 319.777,34.250 319.843,23.841 307.240 L 22.800 305.979 22.800 322.790 M331.600 322.915 L 331.600 339.866 352.328 339.738 C 363.729 339.668,373.089 339.577,373.129 339.537 C 373.170 339.497,373.179 332.025,373.151 322.932 L 373.100 306.399 371.900 307.841 C 361.860 319.904,342.283 319.503,332.443 307.032 L 331.600 305.964 331.600 322.915 M100.207 322.950 L 100.200 339.800 108.550 339.800 C 113.142 339.800,122.503 339.860,129.350 339.933 L 141.800 340.066 141.800 323.115 L 141.800 306.164 141.034 307.132 C 130.944 319.890,110.886 319.775,100.838 306.900 L 100.213 306.100 100.207 322.950 M177.600 323.090 L 177.600 340.000 186.967 340.000 C 192.119 340.000,201.479 340.060,207.767 340.133 L 219.200 340.266 219.198 323.183 L 219.196 306.100 218.657 306.800 C 208.713 319.712,189.126 319.976,178.569 307.340 L 177.600 306.179 177.600 323.090 M254.400 323.222 L 254.400 340.266 268.233 340.133 C 275.841 340.060,285.201 340.000,289.033 340.000 L 296.000 340.000 295.998 323.050 L 295.996 306.100 295.466 306.800 C 285.715 319.686,265.907 319.952,255.369 307.340 L 254.400 306.179 254.400 323.222 "
   VP.microbit.width=400;
@@ -8253,6 +8254,14 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faClock={};
+  VP.faClock.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z";
+  VP.faClock.width=512;
+  VP.faClock.height=512;
+  VP.faClockSolid={};
+  VP.faClockSolid.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm57.1 350.1L224.9 294c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h48c6.6 0 12 5.4 12 12v137.7l63.5 46.2c5.4 3.9 6.5 11.4 2.6 16.8l-28.2 38.8c-3.9 5.3-11.4 6.5-16.8 2.6z";
+  VP.faClockSolid.width=512;
+  VP.faClockSolid.height=512;
   VP.faTimesCircle={};
   VP.faTimesCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z";
   VP.faTimesCircle.width=512;
@@ -8615,7 +8624,7 @@ BlockGraphics.SetHat = function() {
 	BlockGraphics.hat.topW = 80;
 
 	if (FinchBlox) {
-		BlockGraphics.hat.width = 40;
+		BlockGraphics.hat.width = 55; //40;
 	} else {
 		// Minimum width is larger than CommandBlocks to leave room for ellipse
 		BlockGraphics.hat.width = 90;
@@ -11271,7 +11280,8 @@ BlockPalette.createCategories = function() {
       if (i == 2) {
         currentX = BlockPalette.catW/2 - 1.5*CategoryBN.width - CategoryBN.hMargin;
       } else if (i == 5) {
-        currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
+        //currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
+        currentX = BlockPalette.catW/2 - 2*CategoryBN.width - 1.5*CategoryBN.hMargin;
       } else {
         currentX += CategoryBN.width + CategoryBN.hMargin;
       }
@@ -14991,6 +15001,12 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
   	this.group.appendChild(this.textE);
   }
+  if (this.type == 'time') {
+    var labelIconH = 23;
+    var labelIconP = VectorPaths.faClock;
+    this.labelIconW = VectorIcon.computeWidth(labelIconP, labelIconH);
+    this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, labelIconH, this.group);
+  }
 }
 
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
@@ -15023,6 +15039,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "distance":
     case "angle_left":
     case "angle_right":
+    case "time":
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width/2 + tickW/2;
       var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
@@ -15229,7 +15246,14 @@ InputWidget.Slider.prototype.updateLabel = function() {
     var margin = 35; //space between slider bar and this label.
     GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, this.barW);
   	var textW = GuiElements.measure.textWidth(this.textE);
-  	var textX = this.barX + this.barW / 2 - textW / 2;
+    var iconW = 0;
+    if (this.labelIcon != null) {
+      iconW = this.labelIconW;
+      var iconX = this.barX + this.barW/2 + textW/2 - iconW/2;
+      var iconY = this.barY + margin - 3;
+      this.labelIcon.move(iconX, iconY);
+    }
+  	var textX = this.barX + this.barW / 2 - (textW + iconW)/2;
   	var textY = this.barY + InputWidget.Slider.font.charHeight + margin;
   	GuiElements.move.text(this.textE, textX, textY);
   }
@@ -29839,6 +29863,7 @@ function BlockIcon(parent, pathId, color, altText, height, rotation) {
 	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group, false, rotation);
 	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
 	this.isSlot = false;
+	this.xOffset = 0;
 }
 BlockIcon.prototype = Object.create(BlockPart.prototype);
 BlockIcon.prototype.constructor = BlockIcon;
@@ -29870,9 +29895,15 @@ BlockIcon.prototype.move = function(x, y) {
 	DebugOptions.validateNumbers(x, y);
 	this.x = x;
 	this.y = y;
-	this.icon.move(x, y);
+	this.icon.move(x + this.xOffset, y);
 	if (this.textE != null){
 		GuiElements.move.text(this.textE, this.x + this.textXOffset, this.y + this.textYOffset);
+	}
+	if (this.negateG != null){
+		GuiElements.move.group(this.negateG, this.x, this.y);
+	}
+	if (this.icon2 != null){
+		this.icon2.move(x + this.icon2xOffset, y + this.icon2yOffset);
 	}
 };
 
@@ -29888,10 +29919,28 @@ BlockIcon.prototype.textSummary = function() {
  * Adds a second icon on top of the first and returns a reference to it.
  * @param pathId - entry of VectorPaths corresponding to the icon to use
  * @param {string} color - Hex representation of the color to use
+ * @param {boolean} centerBelow - if true, center the new icon below the first.
+ * @param {number} height - height of the second icon
  */
-BlockIcon.prototype.addSecondIcon = function(pathId, color){
-	this.icon.addSecondPath(pathId, color);
-	TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height){
+	if (centerBelow == null) { centerBelow = false; }
+	if (height == null) { height = this.height; }
+	if (centerBelow) {
+    var w = VectorIcon.computeWidth(pathId, height);
+		if (w > this.width) {
+			this.xOffset = w/2 - this.width/2;
+			this.icon2xOffset = 0;
+			this.width = w;
+		} else {
+			this.icon2xOffset = this.width/2 - w/2;
+		}
+    this.icon2yOffset = this.height;
+		this.height += height;
+		this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+  } else {
+		this.icon.addSecondPath(pathId, color, centerBelow);
+		TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+	}
 }
 
 /**
@@ -29923,6 +29972,28 @@ BlockIcon.prototype.addBackgroundRect = function() {
 	this.icon.addBackgroundRect();
 	TouchReceiver.addListenersChild(this.icon.bgRect, this.parent);
 }
+
+/**
+ * Add a circle with a slash over the icon
+ * @param color - color of the circle and slash
+ */
+BlockIcon.prototype.negate = function(color) {
+	this.negateG = GuiElements.create.group(this.x, this.y, this.parent.group);
+	var cr = this.width/2;//(2*this.scaleX);
+	var cx = this.x + cr;
+	var cy = this.y + cr;
+	var circle = GuiElements.draw.circle(cx, cy, cr, "none", this.negateG);
+	GuiElements.update.stroke(circle, color, 3);
+
+	var slash = GuiElements.create.path(this.negateG);
+	var slashPath = "M " + (cx + cr*Math.cos(315 * Math.PI/180)) + ",";
+	slashPath += (cy + cr*Math.sin(315 * Math.PI/180));
+	slashPath += " L " + (cx + cr*Math.cos(135 * Math.PI/180)) + ",";
+	slashPath += (cy + cr*Math.sin(135 * Math.PI/180));
+	slash.setAttributeNS(null, "d", slashPath);
+	GuiElements.update.stroke(slash, color, 3);
+
+ }
 
 /**
  * Adds a button to the block. Used in FinchBlox.
@@ -30051,6 +30122,9 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_left":
     case "angle_right":
       suffix = "°";
+      break;
+    case "time":
+      suffix = " ";
       break;
     default:
       suffix = "";
@@ -32661,14 +32735,24 @@ B_WhenIReceive.prototype.startAction = function() {
 
 
 function B_Wait(x, y) {
-	// Derived from CommandBlock
-	// Category ("control") determines colors
-	var category = "control";
-	if (FinchBlox) { category = "control_3"; }
-	CommandBlock.call(this, x, y, category);
-	// Build Block out of things found in the BlockParts folder
-	this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-	this.parseTranslation(Language.getStr("block_wait"));
+
+	if (FinchBlox) {
+		CommandBlock.call(this, x, y, "control_3");
+		var blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+		blockIcon.isEndOfLine = true;
+		this.addPart(blockIcon);
+		this.timeSelection = 3;
+		this.timeBN = new BlockButton(this);
+		this.timeBN.addSlider("time", this.timeSelection, [1, 2, 3, 4, 5]);
+		this.addPart(this.timeBN);
+	} else {
+		// Derived from CommandBlock
+		// Category ("control") determines colors
+		CommandBlock.call(this, x, y, "control");
+		// Build Block out of things found in the BlockParts folder
+		this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
+		this.parseTranslation(Language.getStr("block_wait"));
+	}
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
@@ -32677,8 +32761,12 @@ B_Wait.prototype.startAction = function() {
 	// Each Block has runMem to store information for that execution
 	var mem = this.runMem;
 	mem.startTime = new Date().getTime();
-	// Extract a positive value from first slot
-	mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+	if (FinchBlox) {
+		mem.delayTime = this.timeSelection * 1000;
+	} else {
+		// Extract a positive value from first slot
+		mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;
+	}
 	return new ExecutionStatusRunning(); //Still running
 };
 /* Waits until current time exceeds stored time plus delay. */
@@ -32690,7 +32778,11 @@ B_Wait.prototype.updateAction = function() {
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
-
+B_Wait.prototype.updateValues = function() {
+	if (this.timeBN != null) {
+		this.timeSelection = this.timeBN.value;
+	}
+}
 
 
 function B_WaitUntil(x, y) {
@@ -33008,11 +33100,26 @@ B_When.prototype.startAction = function() {
 //FinchBlox only
 function B_StartWhenDark(x, y) {
 	HatBlock.call(this, x, y, "control_3");
-	var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.flagGreen, "sun", 35);
+	var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.flagGreen);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
 	this.addPart(blockIcon);
+	//var icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
 }
 B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+
+/* Triggers stack to start running. */
+B_StartWhenDark.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+};
+/* Does nothing */
+B_StartWhenDark.prototype.startAction = function() {
+	return new ExecutionStatusDone();
+};
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
