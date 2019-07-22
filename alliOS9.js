@@ -7586,6 +7586,8 @@ BlockList.populateCat_motion_3 = function(category) {
 	category.addBlockByName("B_FBBackwardL3");
 	category.addBlockByName("B_FBRightL3");
 	category.addBlockByName("B_FBLeftL3");
+	category.addBlockByName("B_FBForwardUntilDark");
+	category.addBlockByName("B_FBForwardUntilObstacle");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -7967,7 +7969,8 @@ Colors.setCommon = function() {
 	Colors.fbYellowBorder = "#BD9F0D";
 	Colors.fbBlueBorder = "#097F8A";
 	Colors.fbPurpleBorder = "#691675";
-	Colors.fbOrangeBorder = "#F78705"
+	Colors.fbOrangeBorder = "#F78705";
+	Colors.darkTeal = "#114F53";
 };
 
 Colors.setCategory = function() {
@@ -9023,6 +9026,7 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpen) {
+	console.log("inner dim " + innerDim);
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}
@@ -9031,42 +9035,43 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	var comm = BlockGraphics.command;
 	if (FinchBlox) {
 		var straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
-		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
-		path += width - 2*comm.cornerRadius - comm.fbBumpDepth;
-		path += comm.path2;
+		//path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
+		path += "m " + (x - comm.fbBumpDepth + comm.cornerRadius) + ",";
+		path += (y - loop.loopH) + " l ";
+		path += width - 2*comm.cornerRadius + 2*comm.fbBumpDepth; //straight top
+		path += comm.path2; //top right corner
 		if (bottomOpen) {
-			path += straightHeight;
+			path += (straightHeight + loop.loopH);
 			path += comm.fbBumpOut;
 			path += "0," + straightHeight;
 		} else {
-			path += height - 2*comm.cornerRadius;
+			path += height - 2*comm.cornerRadius + loop.loopH;
 		}
 		path += comm.path3; //bottom right corner
 
-		//path += 2*comm.cornerRadius - width + ",0";
 		//arm
 		path += (-loop.armW+2*comm.cornerRadius) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight+loop.loopH);
+		path += "0," + (-straightHeight);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 
-		path += " l " + (-innerDim+2*comm.cornerRadius) + ",0";
+		path += " l " + (-innerDim+2*comm.cornerRadius-comm.fbBumpDepth) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
-		path += " l 0," + (straightHeight-loop.loopH);
+		path += " l 0," + (straightHeight);
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius + comm.fbBumpDepth) + ",0";
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius - comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight);
+		path += "0," + (-straightHeight-loop.loopH);
 		path += comm.path5;
 
 	} else {
@@ -11127,7 +11132,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.trashIconVP = VectorPaths.faTrash;
     BlockPalette.trashOpacity = 0.9;
   	BlockPalette.trashColor = Colors.easternBlue;
-    BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
+    BlockPalette.blockButtonOverhang = 10;//12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
@@ -12873,19 +12878,7 @@ Button.prototype.buildBg = function() {
  * @param {string} color - (optional) Color for the text. Use Button.foreground if unspecified
  */
 Button.prototype.addText = function(text, font, color) {
-	DebugOptions.validateNonNull(text);
-	this.removeContent();
-	if (font == null) {
-		font = Button.defaultFont;
-	}
-  if (color == null) {
-    color = Button.foreground;
-  }
-	this.textInverts = true;
-
-	this.textE = GuiElements.draw.text(0, 0, "", font, color);
-	GuiElements.update.textLimitWidth(this.textE, text, this.width);
-	this.group.appendChild(this.textE);
+	this.textE = this.makeText(text, font, color);
 
 	// Text is centered
 	var textW = GuiElements.measure.textWidth(this.textE);
@@ -12895,6 +12888,39 @@ Button.prototype.addText = function(text, font, color) {
 	this.hasText = true;
 	TouchReceiver.addListenersBN(this.textE, this);
 };
+Button.prototype.makeText = function (text, font, color) {
+  DebugOptions.validateNonNull(text);
+	this.removeContent();
+	if (font == null) {
+		font = Button.defaultFont;
+	}
+  if (color == null) {
+    color = Button.foreground;
+  }
+	this.textInverts = true;
+
+	var textE = GuiElements.draw.text(0, 0, "", font, color);
+	GuiElements.update.textLimitWidth(textE, text, this.width);
+  this.group.appendChild(textE);
+
+  return textE;
+}
+Button.prototype.addMultiText = function (texts, font, color) {
+  if (this.textEs != null) {
+    for (var i = 0; i < this.textEs.length; i++) {
+      this.textEs[i].remove();
+    }
+  }
+  this.textEs = [];
+  for (var i = 0; i < texts.length; i++) {
+    this.textEs.push(this.makeText(texts[i], font, color));
+    var textW = GuiElements.measure.textWidth(this.textEs[i]);
+  	var textX = (this.width - textW) / 2;
+  	var textY = this.height * ((i + 1)/(texts.length + 1)) + font.charHeight/2;
+  	GuiElements.move.text(this.textEs[i], textX, textY);
+  	TouchReceiver.addListenersBN(this.textEs[i], this);
+  }
+}
 
 /**
  * Adds an icon to the button
@@ -14176,7 +14202,7 @@ InputPad.prototype.close = function() {
  */
 InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
-	this.currentData = newData;
+	if (!FinchBlox) { this.currentData = newData; }
 };
 
 /**
@@ -14184,7 +14210,7 @@ InputPad.prototype.updateEdit = function(newData, text) {
  * @param {Data} newData - The Data to save to the Slot
  */
 InputPad.prototype.finishEdit = function(newData) {
-	this.currentData = newData;
+	if (!FinchBlox) { this.currentData = newData; }
 	this.close();
 };
 
@@ -14840,12 +14866,13 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
  */
-InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix) {
+InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
   this.options = options;
   this.value = startVal;
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
+  this.index = index;
 
   this.snapToOption = false;
   if (type == "ledArray") { this.snapToOption = true; }
@@ -14877,9 +14904,18 @@ InputWidget.Slider.setConstants = function() {
 InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
-	this.group = GuiElements.create.group(x, y, parentGroup);
   this.parentGroup = parentGroup;
-  this.value = data;
+	this.group = GuiElements.create.group(x, y, parentGroup);
+  this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
+  //Normally, invisible shapes don't respond to touch events.
+  this.bgRect.setAttributeNS(null, "pointer-events", "all");
+
+	this.group.appendChild(this.bgRect);
+	TouchReceiver.addListenersSlider(this.bgRect, this);
+
+  //this.value = data;
+  console.log("show slider at index " + this.index + " with data " + data);
+  this.value = data[this.index];
   this.makeSlider();
 
   TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
@@ -15101,7 +15137,7 @@ InputWidget.Slider.prototype.drag = function(x) {
     }
 
     this.updateLabel();
-    this.updateFn(this.value);
+    this.updateFn(this.value, this.index);
     //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }
 }
@@ -15190,7 +15226,7 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.value = this.optionValues[optionIndex];
   if (this.type.startsWith("angle")) { this.updateAngle(); }
   this.updateLabel();
-  this.updateFn(this.value);
+  this.updateFn(this.value, this.index);
 }
 
 InputWidget.Slider.prototype.moveToPosition = function(p) {
@@ -15249,7 +15285,7 @@ InputWidget.Slider.prototype.updateLabel = function() {
     var iconW = 0;
     if (this.labelIcon != null) {
       iconW = this.labelIconW;
-      var iconX = this.barX + this.barW/2 + textW/2 - iconW/2;
+      var iconX = this.barX + (this.barW + textW + 10)/2 - iconW/2;
       var iconY = this.barY + margin - 3;
       this.labelIcon.move(iconX, iconY);
     }
@@ -15272,8 +15308,10 @@ InputWidget.Slider.prototype.updateLabel = function() {
  * Used for selecting a note to play in note blocks.
  * @constructor
  */
-InputWidget.Piano = function() {
+InputWidget.Piano = function(index) {
+	this.index = index;
 	this.keys={};
+	this.type = "piano";
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -15342,7 +15380,7 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
 	console.log("show piano " + data);
-	this.makeBns(data);
+	this.makeBns(data[this.index]);
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -15449,7 +15487,8 @@ InputWidget.Piano.prototype.isBlackKey = function(noteNum){
 InputWidget.Piano.prototype.keyPressed = function(num) {
 	//this.displayNum = new DisplayNum(new NumData(num));
 	//this.updateFn(this.displayNum.getData(), this.displayNum.getString());
-	this.updateFn(num, InputWidget.Piano.noteStrings[num]);
+	//this.updateFn(num, InputWidget.Piano.noteStrings[num]);
+	this.updateFn(num, this.index);
 	console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
 	this.updatePressed(num);
@@ -17649,7 +17688,8 @@ Highlighter.showShadow = function(fit, stack) {
     myX = fit.tab.absToRelX(fit.getAbsX());
 		snapFront = true;
 	} else if (fit instanceof BlockSlot) {
-		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myY = CodeManager.dragAbsToRelY(fit.getAbsY());
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
 	} else {
 	 	//myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
@@ -25666,7 +25706,7 @@ Block.prototype.updateAlign = function(x, y) {
 	this.updateAlignRI(x, y); //Update recursively within the block.
 	if (this.hasBlockSlot1) { //Then tell all susequent blocks to align.
     if (FinchBlox) {
-      this.blockSlot1.updateAlign(this.x + this.topWidth, this.y + bG.loop.loopH);
+      this.blockSlot1.updateAlign(this.x + this.topWidth + bG.command.fbBumpDepth, this.y);
     } else {
   		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
     }
@@ -25720,7 +25760,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
-        yCoord -= 2*bG.vMargin;
+        yCoord = this.height - BlockPalette.blockButtonOverhang;
       }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
@@ -25944,9 +25984,9 @@ Block.prototype.addHeights = function() {
  */
 Block.prototype.addWidths = function() {
 	if (this.nextBlock != null) {
-		return this.width + this.nextBlock.addWidths(); //Return this Block's width plus those next to it.
+		return this.width + BlockGraphics.command.fbBumpDepth + this.nextBlock.addWidths(); //Return this Block's width plus those next to it.
 	} else {
-		return this.width; //This is the last Block. Return its height.
+		return this.width; //This is the last Block. Return its width.
 	}
 };
 
@@ -29392,6 +29432,7 @@ BlockSlot.prototype.updateDim = function() {
 	} else {
 		this.height = BlockGraphics.loop.bottomH;
     this.width = BlockGraphics.loop.armW;
+    if (FinchBlox) { this.width = BlockGraphics.command.width; }
 	}
 };
 
@@ -29905,6 +29946,9 @@ BlockIcon.prototype.move = function(x, y) {
 	if (this.icon2 != null){
 		this.icon2.move(x + this.icon2xOffset, y + this.icon2yOffset);
 	}
+	if (this.obstacle != null){
+		GuiElements.move.element(this.obstacle, this.x + this.xOffset, this.y);
+	}
 };
 
 /**
@@ -29921,10 +29965,12 @@ BlockIcon.prototype.textSummary = function() {
  * @param {string} color - Hex representation of the color to use
  * @param {boolean} centerBelow - if true, center the new icon below the first.
  * @param {number} height - height of the second icon
+ * @param {number} margin - space between icons
  */
-BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height){
+BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin){
 	if (centerBelow == null) { centerBelow = false; }
 	if (height == null) { height = this.height; }
+	if (margin == null) { margin = 0; }
 	if (centerBelow) {
     var w = VectorIcon.computeWidth(pathId, height);
 		if (w > this.width) {
@@ -29934,9 +29980,10 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height)
 		} else {
 			this.icon2xOffset = this.width/2 - w/2;
 		}
-    this.icon2yOffset = this.height;
-		this.height += height;
+    this.icon2yOffset = this.height + margin;
+		this.height += height + margin;
 		this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+		TouchReceiver.addListenersChild(this.icon2.pathE, this.parent);
   } else {
 		this.icon.addSecondPath(pathId, color, centerBelow);
 		TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
@@ -29974,9 +30021,9 @@ BlockIcon.prototype.addBackgroundRect = function() {
 }
 
 /**
- * Add a circle with a slash over the icon
- * @param color - color of the circle and slash
- */
+	* Add a circle with a slash over the icon
+	* @param color - color of the circle and slash
+	*/
 BlockIcon.prototype.negate = function(color) {
 	this.negateG = GuiElements.create.group(this.x, this.y, this.parent.group);
 	var cr = this.width/2;//(2*this.scaleX);
@@ -29992,8 +30039,35 @@ BlockIcon.prototype.negate = function(color) {
 	slashPath += (cy + cr*Math.sin(135 * Math.PI/180));
 	slash.setAttributeNS(null, "d", slashPath);
 	GuiElements.update.stroke(slash, color, 3);
+}
 
- }
+/**
+	* Add a rectangular obstacle above the icon
+	* @param color - color of the rectangle
+	*/
+BlockIcon.prototype.addObstacle = function(color) {
+
+	var w = 30;//40;//60;
+	var o = 5;//10;
+	var h = 7;//11;
+	var r = 1.5;//2;
+	var margin = 5;
+	if (w > this.width) {
+		this.xOffset = 0;
+		this.icon2xOffset = w/2 - this.width/2;
+		this.width = w;
+	} else {
+		this.xOffset = this.width/2 - w/2;
+	}
+	this.xOffset -= o;
+	this.icon2yOffset = h + margin;
+	this.height += h + margin;
+	this.icon2 = this.icon;
+
+	this.obstacle = GuiElements.draw.rect((-o), 0, w+2*o, h, color, r, r);
+	this.parent.group.appendChild(this.obstacle);
+	TouchReceiver.addListenersChild(this.obstacle, this.parent);
+}
 
 /**
  * Adds a button to the block. Used in FinchBlox.
@@ -30001,9 +30075,12 @@ BlockIcon.prototype.negate = function(color) {
  * @param {number} startingValue - The initial value to display
  */
 function BlockButton(parent){
-  this.height = 2*BlockPalette.blockButtonOverhang;
+  this.buttonMargin = 2*BlockPalette.blockButtonOverhang * (1/9);
+  this.lineHeight = 2*BlockPalette.blockButtonOverhang * (8/9);
+  this.cornerRadius = BlockPalette.blockButtonOverhang;
+
+  this.height = this.blockButtonMargin + this.lineHeight;//2*BlockPalette.blockButtonOverhang;
   this.width = 60;
-  this.cornerRadius = this.height/2;
   this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
@@ -30016,27 +30093,33 @@ function BlockButton(parent){
  this.y = 0;
  this.widgets = [];
  this.displaySuffixes = [];
+ this.values = [];
 
  this.outlineColor = Colors.blockOutline[parent.category];
  if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
  if (this.outlineColor == null) { this.outlineColor = Colors.iron; }
 
  var me = this;
- this.button = new Button(this.x, this.y, this.width, this.height, parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
- GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
- //this.updateValue(startingValue);
- this.button.setCallbackFunction(function() {
+ this.callbackFunction = function() {
    if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
      var inputSys = me.createInputSystem();
-     inputSys.show(null, me.updateValue.bind(me), function(){}, me.value, me.outlineColor, parent);
-  //   GuiElements.blockInteraction();
+     inputSys.show(null, me.updateValue.bind(me), function(){}, me.values, me.outlineColor, parent);
    }
- }, true);
+ }
+
+// this.draw();
 
  this.isSlot = false;
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
+
+BlockButton.prototype.draw = function() {
+  if (this.button != null) { this.button.remove(); }
+  this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
+  GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
+  this.button.setCallbackFunction(this.callbackFunction, true);
+}
 
 /**
 * @param {number} x - The x coord the icon should have relative to the Block it is in
@@ -30068,16 +30151,69 @@ BlockButton.prototype.move = function(x, y) {
 	this.button.move(x, y);
 };
 
-BlockButton.prototype.updateValue = function(newValue, displayString) {
-  this.value = newValue;
+BlockButton.prototype.updateValue = function(newValue, index) {//, displayString) {
+  //this.value = newValue;
+  this.values[index] = newValue;
+  var text = [];
+  for (var i = 0; i < this.widgets.length; i++) {
+    text[i] = "";
+    if (typeof this.values[i] == 'object' && this.values[i].r != null){
+      var s = 255/100;
+      var color = Colors.rgbToHex(this.values[i].r * s, this.values[i].g * s, this.values[i].b * s);
+      //console.log("new button color: " + color);
+      //GuiElements.update.color(this.button.bgRect, color);
+
+      if (this.widgets.length == 1) {
+        this.button.updateBgColor(color);
+      } else {
+        if (this.colorLabel != null) {
+          this.colorLabel.remove();
+        }
+        var clW = this.button.width;
+        var clH = this.button.height/this.widgets.length;
+        var clX = 0;
+        var clY = i * clH;
+        var clR = this.cornerRadius;
+        this.colorLabel = GuiElements.draw.tab(clX, clY, clW, clH, color, clR);
+        this.button.group.appendChild(this.colorLabel);
+        TouchReceiver.addListenersBN(this.colorLabel, this.button);
+
+        this.button.bgRect.remove();
+        GuiElements.update.color(this.button.bgRect, "none");
+        this.button.group.appendChild(this.button.bgRect);
+      }
+
+
+    //} else if (displayString != null) {
+    //  this.button.addText(displayString, this.font, this.textColor);
+    } else if (this.widgets[i].type == "piano") {
+      text[i] = InputWidget.Piano.noteStrings[this.values[i]];
+    } else if (this.widgets[i].type == "ledArray") {
+      if (this.ledArrayImage != null) {
+        this.ledArrayImage.group.remove();
+      }
+      var image = GuiElements.draw.ledArray(this.button.group, this.values[i], 1.8);
+      var iX = this.button.width/2 - image.width/2;
+      //var iY = this.button.height/2 - image.width/2;
+      var iY = (i+1) * this.button.height/(this.widgets.length + 1) - image.width/2;
+      GuiElements.move.group(image.group, iX, iY);
+      this.ledArrayImage = image;
+    } else {
+      text[i] = this.values[i].toString() + this.displaySuffixes[i];
+    }
+  }
+  this.button.addMultiText(text, this.font, this.textColor);
+  /*
   if (typeof this.value == 'object' && this.value.r != null){
     var s = 255/100;
     var color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
     //console.log("new button color: " + color);
     //GuiElements.update.color(this.button.bgRect, color);
     this.button.updateBgColor(color);
-  } else if (displayString != null) {
-    this.button.addText(displayString, this.font, this.textColor);
+  //} else if (displayString != null) {
+  //  this.button.addText(displayString, this.font, this.textColor);
+  } else if (this.widgets[0].type == "piano") {
+    this.button.addText(InputWidget.Piano.noteStrings[this.value], this.font, this.textColor);
   } else if (this.widgets[0].type == "ledArray") {
     if (this.ledArrayImage != null) {
       this.ledArrayImage.group.remove();
@@ -30091,7 +30227,7 @@ BlockButton.prototype.updateValue = function(newValue, displayString) {
     var text = this.value.toString() + this.displaySuffixes[0];
     this.button.addText(text, this.font, this.textColor);
   }
-
+*/
   this.parent.updateValues();
 };
 
@@ -30109,7 +30245,8 @@ BlockButton.prototype.createInputSystem = function() {
   return inputPad;
 };
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
-  this.value = startingValue;
+  //this.value = startingValue;
+  //this.values.push(startingValue);
 
   var suffix = "";
   switch (type) {
@@ -30123,25 +30260,46 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_right":
       suffix = "°";
       break;
-    case "time":
-      suffix = " ";
-      break;
+  //  case "time":
+  //    suffix = " ";
+  //    break;
     default:
       suffix = "";
   }
 
   var sliderColor = Colors.categoryColors[this.parent.category];
-  this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
-  this.displaySuffixes[this.widgets.length - 1]  = suffix;
+  //this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
+  var slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
+  this.addWidget(slider, suffix, startingValue); //null, suffix);
+  //his.displaySuffixes[this.widgets.length - 1]  = suffix;
 
-  this.updateValue(this.value);
+/*
+  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
+  this.draw();
+  this.updateValue(this.value);*/
 }
 BlockButton.prototype.addPiano = function(startingValue) {
-  this.value = startingValue;
+  //this.value = startingValue;
+  //this.values.push(startingValue);
+  //this.addWidget(new InputWidget.Piano(), InputWidget.Piano.noteStrings[startingValue]);
+  this.addWidget(new InputWidget.Piano(this.widgets.length), "", startingValue);
+  /*
   this.widgets.push(new InputWidget.Piano());
-  this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);
-}
 
+  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
+  this.draw();
+  this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);*/
+}
+BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
+  this.widgets.push(widget);
+  this.displaySuffixes.push(suffix);
+  this.values.push(startingValue);
+  //this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
+  this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
+  this.draw();
+  var index = this.widgets.length - 1;
+  this.updateValue(this.values[index], index); //, displayString);
+}
 
 // These functions convert between screen (absolute) coordinates and local (relative) coordinates.
 //TODO: These functions are copied from Slot. Move to BlockPart?
@@ -31824,6 +31982,9 @@ B_FinchSensorBase.prototype.updateAction = function(){
 function B_FinchEncoder(x, y) {
 	B_FinchSensorBase.call(this, x, y);
 
+	//800 ticks per rotation
+	this.scalingFactor = 1/800;
+
 	var ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Left"), "left"));
@@ -31844,6 +32005,7 @@ B_FinchEncoder.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "encoder", encoder);
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchEncoder, "rotations");
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);
@@ -32094,7 +32256,6 @@ B_FBColor.prototype.updateColor = function () {
   if(this.isLEDArray) {
     this.ledArrayImage.group.remove();
     this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
-    console.log("updating " + this.blockIcon.icon.width + " " + this.blockIcon.icon.scaleX);
     var iX = this.blockIcon.icon.width/(2 * this.blockIcon.icon.scaleX) - this.ledArrayImage.width/2;
     var iY = this.blockIcon.icon.height/(2 * this.blockIcon.icon.scaleY) - this.ledArrayImage.width/2 - 35;
     GuiElements.move.group(this.ledArrayImage.group, iX, iY);
@@ -32116,16 +32277,16 @@ B_FBColor.prototype.updateColor = function () {
 B_FBColor.prototype.updateValues = function () {
   if (this.colorButton != null) {
     if (this.isLEDArray){
-      this.ledStatusString = this.colorButton.value;
+      this.ledStatusString = this.colorButton.values[0];
     } else {
-      this.red = this.colorButton.value.r;
-      this.green = this.colorButton.value.g;
-      this.blue = this.colorButton.value.b;
+      this.red = this.colorButton.values[0].r;
+      this.green = this.colorButton.values[0].g;
+      this.blue = this.colorButton.values[0].b;
     }
     this.updateColor();
   }
   if (this.durationButton != null) {
-    this.duration = this.durationButton.value;
+    this.duration = this.durationButton.values[0];
   }
 }
 B_FBColor.prototype.addL2Button = function () {
@@ -32248,9 +32409,11 @@ function B_FBColorL3(x, y, type) {
 
  this.addL2Button();
 
+ this.colorButton.addSlider("time", this.duration, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+/*
  this.durationButton = new BlockButton(this);
  this.durationButton.addSlider("time", this.duration, [1, 5, 10]);
- this.addPart(this.durationButton);
+ this.addPart(this.durationButton);*/
 }
 B_FBColorL3.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL3.prototype.constructor = B_FBColorL3;
@@ -32398,30 +32561,30 @@ B_FBMotion.prototype.addL2Button = function() {
 }
 B_FBMotion.prototype.updateValues = function () {
   if (this.distanceBN != null) {
-    this.leftDist = this.distanceBN.value;
-    this.rightDist = this.distanceBN.value;
+    this.leftDist = this.distanceBN.values[0];
+    this.rightDist = this.distanceBN.values[0];
   }
   if (this.angleBN != null) {
-    this.leftDist = this.angleBN.value * DeviceFinch.cmPerDegree;
-    this.rightDist = this.angleBN.value * DeviceFinch.cmPerDegree;
+    this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
   }
   if (this.speedBN != null) {
     switch (this.direction) {
       case "forward":
-        this.leftSpeed = this.speedBN.value;
-        this.rightSpeed = this.speedBN.value;
+        this.leftSpeed = this.speedBN.values[0];
+        this.rightSpeed = this.speedBN.values[0];
         break;
       case "backward":
-        this.leftSpeed = -this.speedBN.value;
-        this.rightSpeed = -this.speedBN.value;
+        this.leftSpeed = -this.speedBN.values[0];
+        this.rightSpeed = -this.speedBN.values[0];
         break;
       case "right":
-        this.leftSpeed = this.speedBN.value;
-        this.rightSpeed = -this.speedBN.value;
+        this.leftSpeed = this.speedBN.values[0];
+        this.rightSpeed = -this.speedBN.values[0];
         break;
       case "left":
-        this.leftSpeed = -this.speedBN.value;
-        this.rightSpeed = this.speedBN.value;
+        this.leftSpeed = -this.speedBN.values[0];
+        this.rightSpeed = this.speedBN.values[0];
         break;
       default:
         GuiElements.alert("unknown direction in motion block update values");
@@ -32500,9 +32663,16 @@ function B_FBMotionL3(x, y, direction){
 
   this.addL2Button();
 
-  this.speedBN = new BlockButton(this);
-  this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
-  this.addPart(this.speedBN);
+  if (this.distanceBN != null) {
+    this.distanceBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  }
+  if (this.angleBN != null) {
+    this.angleBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  }
+
+  //this.speedBN = new BlockButton(this);
+  //this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
+  //this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;
@@ -32527,6 +32697,79 @@ function B_FBLeftL3(x, y) {
 }
 B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;
+
+
+
+// Sensor Blocks
+
+function B_FBSensorBlock(x, y, sensor) {
+  this.sensor = sensor;
+  this.speed = 50;
+
+  CommandBlock.call(this,x,y,"motion_3");
+}
+B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
+B_FBSensorBlock.prototype.constructor = B_FBSensorBlock;
+
+B_FBSensorBlock.prototype.startAction = function () {
+  var mem = this.runMem;
+
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+
+  var device = DeviceFinch.getManager().getDevice(0);
+  if (device != null) {
+    device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
+  } else {
+    mem.requestStatus.finished = true;
+    mem.duration = 0;
+    TitleBar.flashFinchButton();
+  }
+
+  return new ExecutionStatusRunning();
+}
+B_FBSensorBlock.prototype.updateAction = function () {
+  if(this.runMem.requestStatus.finished) {
+    //check for dark here
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+}
+
+function B_FBForwardUntilDark(x, y) {
+  //B_FBMotion.call(this, x, y, "forward", 3);
+  //CommandBlock.call(this,x,y,"motion_3");
+  B_FBSensorBlock.call(this, x, y, "dark");
+
+  var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.darkTeal, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.darkTeal);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
+	this.addPart(blockIcon);
+}
+B_FBForwardUntilDark.prototype = Object.create(B_FBSensorBlock.prototype);
+B_FBForwardUntilDark.prototype.constructor = B_FBForwardUntilDark;
+
+
+
+
+function B_FBForwardUntilObstacle(x, y) {
+  //B_FBMotion.call(this, x, y, "forward", 3);
+  //CommandBlock.call(this,x,y,"motion_3");
+  B_FBSensorBlock.call(this, x, y, "obstacle");
+
+  var blockIcon = new BlockIcon(this, VectorPaths.mvArrow, Colors.white, "obstacle", 25);
+  blockIcon.addObstacle(Colors.darkTeal);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+}
+B_FBForwardUntilObstacle.prototype = Object.create(B_FBSensorBlock.prototype);
+B_FBForwardUntilObstacle.prototype.constructor = B_FBForwardUntilObstacle;
 
 /**
  * This file contains the implementations for the blocks specific to the FinchBlox
@@ -32593,13 +32836,11 @@ B_FBSound.prototype.updateAction = function () {
 }
 B_FBSound.prototype.updateValues = function () {
   if (this.noteButton != null) {
-    this.midiNote = this.noteButton.value;
+    this.midiNote = this.noteButton.values[0];
   }
   if (this.beatsButton != null) {
-    this.beats = this.beatsButton.value;
+    this.beats = this.beatsButton.values[0];
   }
-
-  console.log("Update sound values " + this.midiNote + " " + this.beats);
 }
 
 //********* Level 1 blocks *********
@@ -32665,10 +32906,12 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
+  this.noteButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
 
+/*
   this.beatsButton = new BlockButton(this);
   this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
-  this.addPart(this.beatsButton);
+  this.addPart(this.beatsButton);*/
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL3.prototype.constructor = B_FBSoundL3;
@@ -33119,6 +33362,7 @@ B_StartWhenDark.prototype.eventFlagClicked = function() {
 /* Does nothing */
 B_StartWhenDark.prototype.startAction = function() {
 	return new ExecutionStatusDone();
+	//return new ExecutionStatusRunning();
 };
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category

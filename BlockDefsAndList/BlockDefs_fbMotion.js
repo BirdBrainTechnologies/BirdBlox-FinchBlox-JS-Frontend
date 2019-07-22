@@ -123,30 +123,30 @@ B_FBMotion.prototype.addL2Button = function() {
 }
 B_FBMotion.prototype.updateValues = function () {
   if (this.distanceBN != null) {
-    this.leftDist = this.distanceBN.value;
-    this.rightDist = this.distanceBN.value;
+    this.leftDist = this.distanceBN.values[0];
+    this.rightDist = this.distanceBN.values[0];
   }
   if (this.angleBN != null) {
-    this.leftDist = this.angleBN.value * DeviceFinch.cmPerDegree;
-    this.rightDist = this.angleBN.value * DeviceFinch.cmPerDegree;
+    this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
   }
   if (this.speedBN != null) {
     switch (this.direction) {
       case "forward":
-        this.leftSpeed = this.speedBN.value;
-        this.rightSpeed = this.speedBN.value;
+        this.leftSpeed = this.speedBN.values[0];
+        this.rightSpeed = this.speedBN.values[0];
         break;
       case "backward":
-        this.leftSpeed = -this.speedBN.value;
-        this.rightSpeed = -this.speedBN.value;
+        this.leftSpeed = -this.speedBN.values[0];
+        this.rightSpeed = -this.speedBN.values[0];
         break;
       case "right":
-        this.leftSpeed = this.speedBN.value;
-        this.rightSpeed = -this.speedBN.value;
+        this.leftSpeed = this.speedBN.values[0];
+        this.rightSpeed = -this.speedBN.values[0];
         break;
       case "left":
-        this.leftSpeed = -this.speedBN.value;
-        this.rightSpeed = this.speedBN.value;
+        this.leftSpeed = -this.speedBN.values[0];
+        this.rightSpeed = this.speedBN.values[0];
         break;
       default:
         GuiElements.alert("unknown direction in motion block update values");
@@ -225,9 +225,16 @@ function B_FBMotionL3(x, y, direction){
 
   this.addL2Button();
 
-  this.speedBN = new BlockButton(this);
-  this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
-  this.addPart(this.speedBN);
+  if (this.distanceBN != null) {
+    this.distanceBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  }
+  if (this.angleBN != null) {
+    this.angleBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  }
+
+  //this.speedBN = new BlockButton(this);
+  //this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
+  //this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;
@@ -252,3 +259,76 @@ function B_FBLeftL3(x, y) {
 }
 B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;
+
+
+
+// Sensor Blocks
+
+function B_FBSensorBlock(x, y, sensor) {
+  this.sensor = sensor;
+  this.speed = 50;
+
+  CommandBlock.call(this,x,y,"motion_3");
+}
+B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
+B_FBSensorBlock.prototype.constructor = B_FBSensorBlock;
+
+B_FBSensorBlock.prototype.startAction = function () {
+  const mem = this.runMem;
+
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+
+  let device = DeviceFinch.getManager().getDevice(0);
+  if (device != null) {
+    device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
+  } else {
+    mem.requestStatus.finished = true;
+    mem.duration = 0;
+    TitleBar.flashFinchButton();
+  }
+
+  return new ExecutionStatusRunning();
+}
+B_FBSensorBlock.prototype.updateAction = function () {
+  if(this.runMem.requestStatus.finished) {
+    //check for dark here
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+}
+
+function B_FBForwardUntilDark(x, y) {
+  //B_FBMotion.call(this, x, y, "forward", 3);
+  //CommandBlock.call(this,x,y,"motion_3");
+  B_FBSensorBlock.call(this, x, y, "dark");
+
+  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.darkTeal, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.darkTeal);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
+	this.addPart(blockIcon);
+}
+B_FBForwardUntilDark.prototype = Object.create(B_FBSensorBlock.prototype);
+B_FBForwardUntilDark.prototype.constructor = B_FBForwardUntilDark;
+
+
+
+
+function B_FBForwardUntilObstacle(x, y) {
+  //B_FBMotion.call(this, x, y, "forward", 3);
+  //CommandBlock.call(this,x,y,"motion_3");
+  B_FBSensorBlock.call(this, x, y, "obstacle");
+
+  const blockIcon = new BlockIcon(this, VectorPaths.mvArrow, Colors.white, "obstacle", 25);
+  blockIcon.addObstacle(Colors.darkTeal);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+}
+B_FBForwardUntilObstacle.prototype = Object.create(B_FBSensorBlock.prototype);
+B_FBForwardUntilObstacle.prototype.constructor = B_FBForwardUntilObstacle;

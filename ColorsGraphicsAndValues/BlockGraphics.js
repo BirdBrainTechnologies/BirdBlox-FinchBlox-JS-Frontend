@@ -548,6 +548,7 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpen) {
+	console.log("inner dim " + innerDim);
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}
@@ -556,42 +557,43 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	const comm = BlockGraphics.command;
 	if (FinchBlox) {
 		let straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
-		path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
-		path += width - 2*comm.cornerRadius - comm.fbBumpDepth;
-		path += comm.path2;
+		//path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
+		path += "m " + (x - comm.fbBumpDepth + comm.cornerRadius) + ",";
+		path += (y - loop.loopH) + " l ";
+		path += width - 2*comm.cornerRadius + 2*comm.fbBumpDepth; //straight top
+		path += comm.path2; //top right corner
 		if (bottomOpen) {
-			path += straightHeight;
+			path += (straightHeight + loop.loopH);
 			path += comm.fbBumpOut;
 			path += "0," + straightHeight;
 		} else {
-			path += height - 2*comm.cornerRadius;
+			path += height - 2*comm.cornerRadius + loop.loopH;
 		}
 		path += comm.path3; //bottom right corner
 
-		//path += 2*comm.cornerRadius - width + ",0";
 		//arm
 		path += (-loop.armW+2*comm.cornerRadius) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight+loop.loopH);
+		path += "0," + (-straightHeight);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 
-		path += " l " + (-innerDim+2*comm.cornerRadius) + ",0";
+		path += " l " + (-innerDim+2*comm.cornerRadius-comm.fbBumpDepth) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
-		path += " l 0," + (straightHeight-loop.loopH);
+		path += " l 0," + (straightHeight);
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius + comm.fbBumpDepth) + ",0";
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius - comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight);
+		path += "0," + (-straightHeight-loop.loopH);
 		path += comm.path5;
 
 	} else {

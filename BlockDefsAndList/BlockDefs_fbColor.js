@@ -137,7 +137,6 @@ B_FBColor.prototype.updateColor = function () {
   if(this.isLEDArray) {
     this.ledArrayImage.group.remove();
     this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
-    console.log("updating " + this.blockIcon.icon.width + " " + this.blockIcon.icon.scaleX);
     const iX = this.blockIcon.icon.width/(2 * this.blockIcon.icon.scaleX) - this.ledArrayImage.width/2;
     const iY = this.blockIcon.icon.height/(2 * this.blockIcon.icon.scaleY) - this.ledArrayImage.width/2 - 35;
     GuiElements.move.group(this.ledArrayImage.group, iX, iY);
@@ -159,16 +158,16 @@ B_FBColor.prototype.updateColor = function () {
 B_FBColor.prototype.updateValues = function () {
   if (this.colorButton != null) {
     if (this.isLEDArray){
-      this.ledStatusString = this.colorButton.value;
+      this.ledStatusString = this.colorButton.values[0];
     } else {
-      this.red = this.colorButton.value.r;
-      this.green = this.colorButton.value.g;
-      this.blue = this.colorButton.value.b;
+      this.red = this.colorButton.values[0].r;
+      this.green = this.colorButton.values[0].g;
+      this.blue = this.colorButton.values[0].b;
     }
     this.updateColor();
   }
   if (this.durationButton != null) {
-    this.duration = this.durationButton.value;
+    this.duration = this.durationButton.values[0];
   }
 }
 B_FBColor.prototype.addL2Button = function () {
@@ -291,9 +290,11 @@ function B_FBColorL3(x, y, type) {
 
  this.addL2Button();
 
+ this.colorButton.addSlider("time", this.duration, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+/*
  this.durationButton = new BlockButton(this);
  this.durationButton.addSlider("time", this.duration, [1, 5, 10]);
- this.addPart(this.durationButton);
+ this.addPart(this.durationButton);*/
 }
 B_FBColorL3.prototype = Object.create(B_FBColor.prototype);
 B_FBColorL3.prototype.constructor = B_FBColorL3;

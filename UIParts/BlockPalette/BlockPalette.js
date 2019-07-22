@@ -47,7 +47,7 @@ BlockPalette.setGraphics = function() {
     BlockPalette.trashIconVP = VectorPaths.faTrash;
     BlockPalette.trashOpacity = 0.9;
   	BlockPalette.trashColor = Colors.easternBlue;
-    BlockPalette.blockButtonOverhang = 12; //How much block buttons are allowd to hang over the bottom of the block
+    BlockPalette.blockButtonOverhang = 10;//12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;

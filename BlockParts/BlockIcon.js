@@ -64,6 +64,9 @@ BlockIcon.prototype.move = function(x, y) {
 	if (this.icon2 != null){
 		this.icon2.move(x + this.icon2xOffset, y + this.icon2yOffset);
 	}
+	if (this.obstacle != null){
+		GuiElements.move.element(this.obstacle, this.x + this.xOffset, this.y);
+	}
 };
 
 /**
@@ -80,10 +83,12 @@ BlockIcon.prototype.textSummary = function() {
  * @param {string} color - Hex representation of the color to use
  * @param {boolean} centerBelow - if true, center the new icon below the first.
  * @param {number} height - height of the second icon
+ * @param {number} margin - space between icons
  */
-BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height){
+BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin){
 	if (centerBelow == null) { centerBelow = false; }
 	if (height == null) { height = this.height; }
+	if (margin == null) { margin = 0; }
 	if (centerBelow) {
     const w = VectorIcon.computeWidth(pathId, height);
 		if (w > this.width) {
@@ -93,9 +98,10 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height)
 		} else {
 			this.icon2xOffset = this.width/2 - w/2;
 		}
-    this.icon2yOffset = this.height;
-		this.height += height;
+    this.icon2yOffset = this.height + margin;
+		this.height += height + margin;
 		this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+		TouchReceiver.addListenersChild(this.icon2.pathE, this.parent);
   } else {
 		this.icon.addSecondPath(pathId, color, centerBelow);
 		TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
@@ -133,9 +139,9 @@ BlockIcon.prototype.addBackgroundRect = function() {
 }
 
 /**
- * Add a circle with a slash over the icon
- * @param color - color of the circle and slash
- */
+	* Add a circle with a slash over the icon
+	* @param color - color of the circle and slash
+	*/
 BlockIcon.prototype.negate = function(color) {
 	this.negateG = GuiElements.create.group(this.x, this.y, this.parent.group);
 	const cr = this.width/2;//(2*this.scaleX);
@@ -151,5 +157,32 @@ BlockIcon.prototype.negate = function(color) {
 	slashPath += (cy + cr*Math.sin(135 * Math.PI/180));
 	slash.setAttributeNS(null, "d", slashPath);
 	GuiElements.update.stroke(slash, color, 3);
+}
 
- }
+/**
+	* Add a rectangular obstacle above the icon
+	* @param color - color of the rectangle
+	*/
+BlockIcon.prototype.addObstacle = function(color) {
+
+	const w = 30;//40;//60;
+	const o = 5;//10;
+	const h = 7;//11;
+	const r = 1.5;//2;
+	const margin = 5;
+	if (w > this.width) {
+		this.xOffset = 0;
+		this.icon2xOffset = w/2 - this.width/2;
+		this.width = w;
+	} else {
+		this.xOffset = this.width/2 - w/2;
+	}
+	this.xOffset -= o;
+	this.icon2yOffset = h + margin;
+	this.height += h + margin;
+	this.icon2 = this.icon;
+
+	this.obstacle = GuiElements.draw.rect((-o), 0, w+2*o, h, color, r, r);
+	this.parent.group.appendChild(this.obstacle);
+	TouchReceiver.addListenersChild(this.obstacle, this.parent);
+}

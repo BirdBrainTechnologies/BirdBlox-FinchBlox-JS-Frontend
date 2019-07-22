@@ -89,19 +89,7 @@ Button.prototype.buildBg = function() {
  * @param {string} color - (optional) Color for the text. Use Button.foreground if unspecified
  */
 Button.prototype.addText = function(text, font, color) {
-	DebugOptions.validateNonNull(text);
-	this.removeContent();
-	if (font == null) {
-		font = Button.defaultFont;
-	}
-  if (color == null) {
-    color = Button.foreground;
-  }
-	this.textInverts = true;
-
-	this.textE = GuiElements.draw.text(0, 0, "", font, color);
-	GuiElements.update.textLimitWidth(this.textE, text, this.width);
-	this.group.appendChild(this.textE);
+	this.textE = this.makeText(text, font, color);
 
 	// Text is centered
 	const textW = GuiElements.measure.textWidth(this.textE);
@@ -111,6 +99,39 @@ Button.prototype.addText = function(text, font, color) {
 	this.hasText = true;
 	TouchReceiver.addListenersBN(this.textE, this);
 };
+Button.prototype.makeText = function (text, font, color) {
+  DebugOptions.validateNonNull(text);
+	this.removeContent();
+	if (font == null) {
+		font = Button.defaultFont;
+	}
+  if (color == null) {
+    color = Button.foreground;
+  }
+	this.textInverts = true;
+
+	const textE = GuiElements.draw.text(0, 0, "", font, color);
+	GuiElements.update.textLimitWidth(textE, text, this.width);
+  this.group.appendChild(textE);
+
+  return textE;
+}
+Button.prototype.addMultiText = function (texts, font, color) {
+  if (this.textEs != null) {
+    for (let i = 0; i < this.textEs.length; i++) {
+      this.textEs[i].remove();
+    }
+  }
+  this.textEs = [];
+  for (let i = 0; i < texts.length; i++) {
+    this.textEs.push(this.makeText(texts[i], font, color));
+    const textW = GuiElements.measure.textWidth(this.textEs[i]);
+  	const textX = (this.width - textW) / 2;
+  	const textY = this.height * ((i + 1)/(texts.length + 1)) + font.charHeight/2;
+  	GuiElements.move.text(this.textEs[i], textX, textY);
+  	TouchReceiver.addListenersBN(this.textEs[i], this);
+  }
+}
 
 /**
  * Adds an icon to the button

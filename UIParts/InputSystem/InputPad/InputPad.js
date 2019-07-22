@@ -141,7 +141,7 @@ InputPad.prototype.close = function() {
  */
 InputPad.prototype.updateEdit = function(newData, text) {
 	this.updateFn(newData, text);
-	this.currentData = newData;
+	if (!FinchBlox) { this.currentData = newData; }
 };
 
 /**
@@ -149,6 +149,6 @@ InputPad.prototype.updateEdit = function(newData, text) {
  * @param {Data} newData - The Data to save to the Slot
  */
 InputPad.prototype.finishEdit = function(newData) {
-	this.currentData = newData;
+	if (!FinchBlox) { this.currentData = newData; }
 	this.close();
 };

@@ -580,7 +580,7 @@ Block.prototype.updateAlign = function(x, y) {
 	this.updateAlignRI(x, y); //Update recursively within the block.
 	if (this.hasBlockSlot1) { //Then tell all susequent blocks to align.
     if (FinchBlox) {
-      this.blockSlot1.updateAlign(this.x + this.topWidth, this.y + bG.loop.loopH);
+      this.blockSlot1.updateAlign(this.x + this.topWidth + bG.command.fbBumpDepth, this.y);
     } else {
   		this.blockSlot1.updateAlign(this.x + bG.loop.side, this.y + this.topHeight);
     }
@@ -634,7 +634,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
-        yCoord -= 2*bG.vMargin;
+        yCoord = this.height - BlockPalette.blockButtonOverhang;
       }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
@@ -858,9 +858,9 @@ Block.prototype.addHeights = function() {
  */
 Block.prototype.addWidths = function() {
 	if (this.nextBlock != null) {
-		return this.width + this.nextBlock.addWidths(); //Return this Block's width plus those next to it.
+		return this.width + BlockGraphics.command.fbBumpDepth + this.nextBlock.addWidths(); //Return this Block's width plus those next to it.
 	} else {
-		return this.width; //This is the last Block. Return its height.
+		return this.width; //This is the last Block. Return its width.
 	}
 };
 

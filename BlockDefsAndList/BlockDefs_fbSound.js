@@ -63,13 +63,11 @@ B_FBSound.prototype.updateAction = function () {
 }
 B_FBSound.prototype.updateValues = function () {
   if (this.noteButton != null) {
-    this.midiNote = this.noteButton.value;
+    this.midiNote = this.noteButton.values[0];
   }
   if (this.beatsButton != null) {
-    this.beats = this.beatsButton.value;
+    this.beats = this.beatsButton.values[0];
   }
-
-  console.log("Update sound values " + this.midiNote + " " + this.beats);
 }
 
 //********* Level 1 blocks *********
@@ -135,10 +133,12 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
+  this.noteButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
 
+/*
   this.beatsButton = new BlockButton(this);
   this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
-  this.addPart(this.beatsButton);
+  this.addPart(this.beatsButton);*/
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL3.prototype.constructor = B_FBSoundL3;

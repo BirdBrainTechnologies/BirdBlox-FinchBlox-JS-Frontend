@@ -60,7 +60,8 @@ Colors.setCommon = function() {
 	Colors.fbYellowBorder = "#BD9F0D";
 	Colors.fbBlueBorder = "#097F8A";
 	Colors.fbPurpleBorder = "#691675";
-	Colors.fbOrangeBorder = "#F78705"
+	Colors.fbOrangeBorder = "#F78705";
+	Colors.darkTeal = "#114F53";
 };
 
 Colors.setCategory = function() {

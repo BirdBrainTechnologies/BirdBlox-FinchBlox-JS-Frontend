@@ -67,7 +67,8 @@ Highlighter.showShadow = function(fit, stack) {
     myX = fit.tab.absToRelX(fit.getAbsX());
 		snapFront = true;
 	} else if (fit instanceof BlockSlot) {
-		myX = CodeManager.dragAbsToRelX(fit.getAbsX());
+    myY = CodeManager.dragAbsToRelY(fit.getAbsY());
+		myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
 	} else {
 	 	//myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());

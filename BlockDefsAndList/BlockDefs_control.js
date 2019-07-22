@@ -444,4 +444,5 @@ B_StartWhenDark.prototype.eventFlagClicked = function() {
 /* Does nothing */
 B_StartWhenDark.prototype.startAction = function() {
 	return new ExecutionStatusDone();
+	//return new ExecutionStatusRunning();
 };

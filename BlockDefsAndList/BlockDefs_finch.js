@@ -320,6 +320,9 @@ B_FinchSensorBase.prototype.updateAction = function(){
 function B_FinchEncoder(x, y) {
 	B_FinchSensorBase.call(this, x, y);
 
+	//800 ticks per rotation
+	this.scalingFactor = 1/800;
+
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Left"), "left"));
@@ -340,6 +343,7 @@ B_FinchEncoder.prototype.startAction = function() {
 	device.readSensor(this.runMem.requestStatus, "encoder", encoder);
 	return new ExecutionStatusRunning();
 }
+Block.setDisplaySuffix(B_FinchEncoder, "rotations");
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);

@@ -5,12 +5,13 @@
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
  */
-InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix) {
+InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
   this.options = options;
   this.value = startVal;
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
+  this.index = index;
 
   this.snapToOption = false;
   if (type == "ledArray") { this.snapToOption = true; }
@@ -42,9 +43,18 @@ InputWidget.Slider.setConstants = function() {
 InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
-	this.group = GuiElements.create.group(x, y, parentGroup);
   this.parentGroup = parentGroup;
-  this.value = data;
+	this.group = GuiElements.create.group(x, y, parentGroup);
+  this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
+  //Normally, invisible shapes don't respond to touch events.
+  this.bgRect.setAttributeNS(null, "pointer-events", "all");
+
+	this.group.appendChild(this.bgRect);
+	TouchReceiver.addListenersSlider(this.bgRect, this);
+
+  //this.value = data;
+  console.log("show slider at index " + this.index + " with data " + data);
+  this.value = data[this.index];
   this.makeSlider();
 
   TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
@@ -266,7 +276,7 @@ InputWidget.Slider.prototype.drag = function(x) {
     }
 
     this.updateLabel();
-    this.updateFn(this.value);
+    this.updateFn(this.value, this.index);
     //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }
 }
@@ -355,7 +365,7 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.value = this.optionValues[optionIndex];
   if (this.type.startsWith("angle")) { this.updateAngle(); }
   this.updateLabel();
-  this.updateFn(this.value);
+  this.updateFn(this.value, this.index);
 }
 
 InputWidget.Slider.prototype.moveToPosition = function(p) {
@@ -414,7 +424,7 @@ InputWidget.Slider.prototype.updateLabel = function() {
     let iconW = 0;
     if (this.labelIcon != null) {
       iconW = this.labelIconW;
-      const iconX = this.barX + this.barW/2 + textW/2 - iconW/2;
+      const iconX = this.barX + (this.barW + textW + 10)/2 - iconW/2;
       const iconY = this.barY + margin - 3;
       this.labelIcon.move(iconX, iconY);
     }

@@ -2,8 +2,10 @@
  * Used for selecting a note to play in note blocks.
  * @constructor
  */
-InputWidget.Piano = function() {
+InputWidget.Piano = function(index) {
+	this.index = index;
 	this.keys={};
+	this.type = "piano";
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -72,7 +74,7 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
 	console.log("show piano " + data);
-	this.makeBns(data);
+	this.makeBns(data[this.index]);
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -179,7 +181,8 @@ InputWidget.Piano.prototype.isBlackKey = function(noteNum){
 InputWidget.Piano.prototype.keyPressed = function(num) {
 	//this.displayNum = new DisplayNum(new NumData(num));
 	//this.updateFn(this.displayNum.getData(), this.displayNum.getString());
-	this.updateFn(num, InputWidget.Piano.noteStrings[num]);
+	//this.updateFn(num, InputWidget.Piano.noteStrings[num]);
+	this.updateFn(num, this.index);
 	console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
 	this.updatePressed(num);

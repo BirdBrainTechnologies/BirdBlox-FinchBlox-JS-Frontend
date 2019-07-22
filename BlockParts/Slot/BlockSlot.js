@@ -42,6 +42,7 @@ BlockSlot.prototype.updateDim = function() {
 	} else {
 		this.height = BlockGraphics.loop.bottomH;
     this.width = BlockGraphics.loop.armW;
+    if (FinchBlox) { this.width = BlockGraphics.command.width; }
 	}
 };
 
