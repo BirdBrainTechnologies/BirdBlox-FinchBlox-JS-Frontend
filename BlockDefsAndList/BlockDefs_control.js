@@ -441,8 +441,50 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 B_StartWhenDark.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
-/* Does nothing */
+
 B_StartWhenDark.prototype.startAction = function() {
-	return new ExecutionStatusDone();
+	//return new ExecutionStatusDone();
 	//return new ExecutionStatusRunning();
+	const stopWaiting = this.slots[0].getData().getValue();
+	if (stopWaiting) {
+		return new ExecutionStatusDone(); //Done running
+	} else {
+		this.running = 0; //startAction will be run next time, giving Slots ability to recalculate.
+		this.clearMem(); //runMem and previous values of Slots will be removed.
+		return new ExecutionStatusRunning(); //Still running
+	}
+
+	this.blankRequestStatus = {};
+	this.blankRequestStatus.finished = false;
+	this.blankRequestStatus.error = false;
+	this.blankRequestStatus.result = null;
+	this.blankRequestStatus.requestSent = false;
+
+	this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+
+	return new ExecutionStatusRunning();
 };
+
+B_StartWhenDark.prototype.updateAction = function() {
+	const status = this.runMem.requestStatus;
+	if (status.requestSent) {
+		if (status.finished) {
+			if (status.error) { return new ExecutionStatusError(); }
+			const result = new StringData(status.result);
+			const num = (result.asNum().getValue());
+			const threshold = 10;
+			if (num < threshold) {
+				return new ExecutionStatusDone();
+			} else {
+				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			}
+		}
+	} else {
+		let device = DeviceFinch.getManager().getDevice(0);
+	  if (device != null) {
+			device.readSensor(status, "light", "left");
+			status.requestSent = true;
+		}
+	}
+	return new ExecutionStatusRunning();
+}

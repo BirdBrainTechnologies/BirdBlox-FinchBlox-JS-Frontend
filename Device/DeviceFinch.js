@@ -72,9 +72,6 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 
 	let ticksL = Math.round(distL * ticksPerCM);
 	let ticksR = Math.round(distR * ticksPerCM);
-	//because all zeros is a do nothing command...
-	if (speedL == 0 && ticksL == 0) { ticksL = 1; }
-	if (speedR == 0 && ticksR == 0) { ticksR = 1; }
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());

@@ -89,6 +89,12 @@ Button.prototype.buildBg = function() {
  * @param {string} color - (optional) Color for the text. Use Button.foreground if unspecified
  */
 Button.prototype.addText = function(text, font, color) {
+  if (font == null) {
+		font = Button.defaultFont;
+	}
+  if (color == null) {
+    color = Button.foreground;
+  }
 	this.textE = this.makeText(text, font, color);
 
 	// Text is centered
@@ -102,12 +108,6 @@ Button.prototype.addText = function(text, font, color) {
 Button.prototype.makeText = function (text, font, color) {
   DebugOptions.validateNonNull(text);
 	this.removeContent();
-	if (font == null) {
-		font = Button.defaultFont;
-	}
-  if (color == null) {
-    color = Button.foreground;
-  }
 	this.textInverts = true;
 
 	const textE = GuiElements.draw.text(0, 0, "", font, color);

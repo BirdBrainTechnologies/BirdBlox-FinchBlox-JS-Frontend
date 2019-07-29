@@ -5933,9 +5933,6 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 
 	var ticksL = Math.round(distL * ticksPerCM);
 	var ticksR = Math.round(distR * ticksPerCM);
-	//because all zeros is a do nothing command...
-	if (speedL == 0 && ticksL == 0) { ticksL = 1; }
-	if (speedR == 0 && ticksR == 0) { ticksR = 1; }
 
 	var request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
@@ -11966,7 +11963,7 @@ Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang;// + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }
@@ -12878,6 +12875,12 @@ Button.prototype.buildBg = function() {
  * @param {string} color - (optional) Color for the text. Use Button.foreground if unspecified
  */
 Button.prototype.addText = function(text, font, color) {
+  if (font == null) {
+		font = Button.defaultFont;
+	}
+  if (color == null) {
+    color = Button.foreground;
+  }
 	this.textE = this.makeText(text, font, color);
 
 	// Text is centered
@@ -12891,12 +12894,6 @@ Button.prototype.addText = function(text, font, color) {
 Button.prototype.makeText = function (text, font, color) {
   DebugOptions.validateNonNull(text);
 	this.removeContent();
-	if (font == null) {
-		font = Button.defaultFont;
-	}
-  if (color == null) {
-    color = Button.foreground;
-  }
 	this.textInverts = true;
 
 	var textE = GuiElements.draw.text(0, 0, "", font, color);
@@ -33359,11 +33356,53 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 B_StartWhenDark.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
-/* Does nothing */
+
 B_StartWhenDark.prototype.startAction = function() {
-	return new ExecutionStatusDone();
+	//return new ExecutionStatusDone();
 	//return new ExecutionStatusRunning();
+	var stopWaiting = this.slots[0].getData().getValue();
+	if (stopWaiting) {
+		return new ExecutionStatusDone(); //Done running
+	} else {
+		this.running = 0; //startAction will be run next time, giving Slots ability to recalculate.
+		this.clearMem(); //runMem and previous values of Slots will be removed.
+		return new ExecutionStatusRunning(); //Still running
+	}
+
+	this.blankRequestStatus = {};
+	this.blankRequestStatus.finished = false;
+	this.blankRequestStatus.error = false;
+	this.blankRequestStatus.result = null;
+	this.blankRequestStatus.requestSent = false;
+
+	this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+
+	return new ExecutionStatusRunning();
 };
+
+B_StartWhenDark.prototype.updateAction = function() {
+	var status = this.runMem.requestStatus;
+	if (status.requestSent) {
+		if (status.finished) {
+			if (status.error) { return new ExecutionStatusError(); }
+			var result = new StringData(status.result);
+			var num = (result.asNum().getValue());
+			var threshold = 10;
+			if (num < threshold) {
+				return new ExecutionStatusDone();
+			} else {
+				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			}
+		}
+	} else {
+		var device = DeviceFinch.getManager().getDevice(0);
+	  if (device != null) {
+			device.readSensor(status, "light", "left");
+			status.requestSent = true;
+		}
+	}
+	return new ExecutionStatusRunning();
+}
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
