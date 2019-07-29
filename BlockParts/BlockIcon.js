@@ -127,7 +127,7 @@ BlockIcon.prototype.addText = function(text) {
 	const textWidth = GuiElements.measure.textWidth(this.textE);
 	this.height = this.textYOffset;
 	this.width = this.textXOffset + textWidth;
-	console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
+	//console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
 
 /**

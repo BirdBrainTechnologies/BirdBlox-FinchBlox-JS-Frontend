@@ -105,7 +105,7 @@ Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang;// + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + BlockPalette.mainVMargin;;// + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }

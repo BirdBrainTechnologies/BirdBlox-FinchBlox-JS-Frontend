@@ -9,6 +9,7 @@
  * @constructor
  */
 function DisplayStack(firstBlock, group, category) {
+  this.isDisplayStack = true;
 	this.firstBlock = firstBlock;
   this.returnType = firstBlock.returnType; // The DisplayStack returns the same type of value as its Block.
 	// Location determined by first Block
@@ -27,7 +28,6 @@ function DisplayStack(firstBlock, group, category) {
 	this.updateDim();
 	this.isRunning = false;
 	//this.currentBlock = null;
-	this.isDisplayStack = true;
 	this.move(this.x, this.y);
 
   this.updateTimer = null;

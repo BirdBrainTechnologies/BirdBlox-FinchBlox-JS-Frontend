@@ -11459,6 +11459,7 @@ BlockPalette.setLevel = function() {
  * @constructor
  */
 function DisplayStack(firstBlock, group, category) {
+  this.isDisplayStack = true;
 	this.firstBlock = firstBlock;
   this.returnType = firstBlock.returnType; // The DisplayStack returns the same type of value as its Block.
 	// Location determined by first Block
@@ -11477,7 +11478,6 @@ function DisplayStack(firstBlock, group, category) {
 	this.updateDim();
 	this.isRunning = false;
 	//this.currentBlock = null;
-	this.isDisplayStack = true;
 	this.move(this.x, this.y);
 
   this.updateTimer = null;
@@ -11964,7 +11964,7 @@ Category.prototype.finalize = function() {
 	DebugOptions.assert(!this.finalized);
 	this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang;// + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + BlockPalette.mainVMargin;;// + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }
@@ -30007,7 +30007,7 @@ BlockIcon.prototype.addText = function(text) {
 	const textWidth = GuiElements.measure.textWidth(this.textE);
 	this.height = this.textYOffset;
 	this.width = this.textXOffset + textWidth;
-	console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
+	//console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
 
 /**
@@ -30127,6 +30127,14 @@ BlockButton.prototype.draw = function() {
 BlockButton.prototype.updateAlign = function(x, y) {
 	DebugOptions.validateNumbers(x, y);
 	this.move(x, y);
+  //Hide the button while the block is in the blockPalette
+  if (this.parent.stack === null || this.parent.stack.isDisplayStack) {
+    this.button.hide();
+    this.isHidden = true;
+  } else if (this.isHidden) {
+    this.button.show();
+    this.isHidden = false;
+  }
 	return this.width;
 };
 

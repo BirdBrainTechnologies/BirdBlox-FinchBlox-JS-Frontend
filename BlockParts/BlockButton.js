@@ -58,6 +58,14 @@ BlockButton.prototype.draw = function() {
 BlockButton.prototype.updateAlign = function(x, y) {
 	DebugOptions.validateNumbers(x, y);
 	this.move(x, y);
+  //Hide the button while the block is in the blockPalette
+  if (this.parent.stack === null || this.parent.stack.isDisplayStack) {
+    this.button.hide();
+    this.isHidden = true;
+  } else if (this.isHidden) {
+    this.button.show();
+    this.isHidden = false;
+  }
 	return this.width;
 };
 
