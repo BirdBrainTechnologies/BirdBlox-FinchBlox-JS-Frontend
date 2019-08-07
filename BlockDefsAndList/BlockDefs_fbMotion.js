@@ -267,49 +267,88 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
   this.speed = 50;
-
+  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 20cm
+  if (sensor == "dark") { this.threshold = 5; }
   CommandBlock.call(this,x,y,"motion_3");
 }
 B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
 B_FBSensorBlock.prototype.constructor = B_FBSensorBlock;
 
 B_FBSensorBlock.prototype.startAction = function () {
-  const mem = this.runMem;
+  this.blankRequestStatus = {};
+	this.blankRequestStatus.finished = false;
+	this.blankRequestStatus.error = false;
+	this.blankRequestStatus.result = null;
+	this.blankRequestStatus.requestSent = false;
 
-  mem.requestStatus = {};
-  mem.requestStatus.finished = false;
-  mem.requestStatus.error = false;
-  mem.requestStatus.result = null;
+	this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+  this.runMem.motorRequestFinished = false;
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
   } else {
-    mem.requestStatus.finished = true;
-    mem.duration = 0;
     TitleBar.flashFinchButton();
+    return new ExecutionStatusDone();
   }
 
   return new ExecutionStatusRunning();
 }
 B_FBSensorBlock.prototype.updateAction = function () {
+  const status = this.runMem.requestStatus;
+	if (status.requestSent) {
+		if (status.finished) {
+			if (status.error) { return new ExecutionStatusError(); }
+      if (!this.runMem.motorRequestFinished) {
+        this.runMem.motorRequestFinished = true;
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        return new ExecutionStatusRunning();
+      }
+			const result = new StringData(status.result);
+			const num = (result.asNum().getValue());
+			if (num < this.threshold) {
+        let device = DeviceFinch.getManager().getDevice(0);
+        if (device != null) {
+          device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+        }
+				return new ExecutionStatusDone();
+			} else {
+				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			}
+		}
+	} else {
+		let device = DeviceFinch.getManager().getDevice(0);
+	  if (device != null) {
+      if (this.sensor == "dark") {
+        device.readSensor(status, "light", "left");
+      } else {
+        device.readSensor(status, "distance");
+      }
+			status.requestSent = true;
+		} else {
+      return new ExecutionStatusDone();
+    }
+	}
+	return new ExecutionStatusRunning();
+  /*
   if(this.runMem.requestStatus.finished) {
     //check for dark here
 		return new ExecutionStatusDone();
 	} else {
 		return new ExecutionStatusRunning();
-	}
+	}*/
 }
 
 function B_FBForwardUntilDark(x, y) {
   //B_FBMotion.call(this, x, y, "forward", 3);
   //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "dark");
+  this.colorTopHalf(Colors.darkTeal);
 
-  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.darkTeal, "sun", 25);
+  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.black, "sun", 25);
 	blockIcon.icon.setRotation(-8);
 	//blockIcon.icon.negate(Colors.flagGreen);
-	blockIcon.negate(Colors.darkTeal);
+	blockIcon.negate(Colors.black);
 	blockIcon.isEndOfLine = true;
 	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
 	this.addPart(blockIcon);

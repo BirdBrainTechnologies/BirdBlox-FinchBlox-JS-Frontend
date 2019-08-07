@@ -49,6 +49,7 @@ Colors.setCommon = function() {
 	Colors.blockPaletteMotion = "#B4D9DD";
 	Colors.blockPaletteColor = "#FFCE96";
 	Colors.blockPaletteSound = "#B691BB";
+	Colors.blockPaletteControl = "#F4E9A4"; //tmp
 	Colors.flagGreen = "#2FC00B";
 	Colors.fbDarkGreen = "#268D17";
 	Colors.stopRed = "#F03602";
@@ -102,7 +103,7 @@ Colors.setCategory = function() {
 		"motion_3": Colors.blockPaletteMotion,
 		"color_3": Colors.blockPaletteColor,
 		"sound_3": Colors.blockPaletteSound,
-		"control_3": Colors.fbYellow,
+		"control_3": Colors.blockPaletteControl,
 		"sensor_3": Colors.finchGreen
 	};
 	//In FinchBlox, each block is outlined with a darker color

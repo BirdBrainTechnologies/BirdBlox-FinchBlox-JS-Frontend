@@ -27,6 +27,7 @@ function DisplayStack(firstBlock, group, category) {
 	this.dim.rh = 0;
 	this.updateDim();
 	this.isRunning = false;
+  this.zoom = 1; //FinchBlox zooms some blocks to fit in block palette
 	//this.currentBlock = null;
 	this.move(this.x, this.y);
 
@@ -119,7 +120,14 @@ DisplayStack.prototype.getAbsY = function() {
 DisplayStack.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
-	GuiElements.move.group(this.group, x, y);
+  if (FinchBlox && (this.firstBlock.type == 5)) {
+    //The loop blocks appear smaller in the blockPalette so that they fit in the space.
+    this.zoom = 0.85;
+    const zY = y + (this.firstBlock.height * (1-this.zoom));
+    GuiElements.move.group(this.group, x, zY, this.zoom);
+  } else {
+    GuiElements.move.group(this.group, x, y);
+  }
 };
 
 /**

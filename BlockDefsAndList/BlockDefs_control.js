@@ -105,7 +105,7 @@ B_Wait.prototype.updateAction = function() {
 };
 B_Wait.prototype.updateValues = function() {
 	if (this.timeBN != null) {
-		this.timeSelection = this.timeBN.value;
+		this.timeSelection = this.timeBN.values[0];
 	}
 }
 
@@ -136,7 +136,7 @@ function B_Forever(x, y) {
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category, false); //Bottom is not open.
 	if (FinchBlox) {
-		this.addPart(new BlockIcon(this, VectorPaths.faUndoAlt, Colors.white, "repeat", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30));
 	} else {
 		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 	}
@@ -167,18 +167,33 @@ function B_Repeat(x, y) {
 	let category = "control";
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category);
-	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
-	this.parseTranslation(Language.getStr("block_repeat"));
+
+	if (FinchBlox) {
+		const blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+		blockIcon.isEndOfLine = true;
+		this.addPart(blockIcon);
+		this.countSelection=10;
+		this.countBN = new BlockButton(this);
+		this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+		this.addPart(this.countBN);
+	} else {
+		this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
+		this.parseTranslation(Language.getStr("block_repeat"));
+	}
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
 	const mem = this.runMem;
-	mem.timesD = this.slots[0].getData();
-	mem.times = mem.timesD.getValueWithC(true, true);
+	if (FinchBlox) {
+		mem.times = this.countSelection;
+	} else {
+		mem.timesD = this.slots[0].getData();
+		mem.times = mem.timesD.getValueWithC(true, true);
+	}
 	mem.count = 0;
-	if (mem.times > 0 && mem.timesD.isValid) {
+	if (mem.times > 0 && (FinchBlox || mem.timesD.isValid)) {
 		this.blockSlot1.startRun();
 		return new ExecutionStatusRunning(); //Still running
 	} else {
@@ -203,6 +218,11 @@ B_Repeat.prototype.updateAction = function() {
 	}
 	return new ExecutionStatusRunning(); //Still running
 };
+B_Repeat.prototype.updateValues = function() {
+	if (this.countBN != null) {
+		this.countSelection = this.countBN.values[0];
+	}
+}
 
 
 
@@ -424,7 +444,7 @@ B_When.prototype.startAction = function() {
 
 //FinchBlox only
 function B_StartWhenDark(x, y) {
-	HatBlock.call(this, x, y, "control_3");
+	HatBlock.call(this, x, y, "control_3", true);
 	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
 	blockIcon.icon.setRotation(-8);
 	//blockIcon.icon.negate(Colors.flagGreen);
@@ -443,16 +463,6 @@ B_StartWhenDark.prototype.eventFlagClicked = function() {
 };
 
 B_StartWhenDark.prototype.startAction = function() {
-	//return new ExecutionStatusDone();
-	//return new ExecutionStatusRunning();
-	const stopWaiting = this.slots[0].getData().getValue();
-	if (stopWaiting) {
-		return new ExecutionStatusDone(); //Done running
-	} else {
-		this.running = 0; //startAction will be run next time, giving Slots ability to recalculate.
-		this.clearMem(); //runMem and previous values of Slots will be removed.
-		return new ExecutionStatusRunning(); //Still running
-	}
 
 	this.blankRequestStatus = {};
 	this.blankRequestStatus.finished = false;
@@ -472,7 +482,7 @@ B_StartWhenDark.prototype.updateAction = function() {
 			if (status.error) { return new ExecutionStatusError(); }
 			const result = new StringData(status.result);
 			const num = (result.asNum().getValue());
-			const threshold = 10;
+			const threshold = 5;
 			if (num < threshold) {
 				return new ExecutionStatusDone();
 			} else {

@@ -308,8 +308,10 @@ Block.prototype.updateRun = function() {
 Block.prototype.updateRunColor = function() {
 	if (this.running === 1 || this.running === 2) {
 		GuiElements.update.color(this.path, Colors.flagGreen);
+    if (this.topPath != null) { GuiElements.update.color(this.topPath, Colors.fbDarkGreen); }
 	} else {
 		GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+    if (this.topPath != null) { GuiElements.update.color(this.topPath, this.topPathColor); }
 	}
 }
 
@@ -537,7 +539,10 @@ Block.prototype.updateDim = function() {
 		this.blockSlot1.updateDim(); //Update the BlockSlot.
     if (FinchBlox) {
   		width += this.blockSlot1.width;
-      width += BlockGraphics.loop.armW;
+      width += BlockGraphics.loop.armW + BlockGraphics.command.fbBumpDepth;
+      console.log("Setting the width and height of " + this.blockTypeName + " h=" + this.height + " bsh=" + this.blockSlot1.height);
+      if (height < this.blockSlot1.height) { height += (this.blockSlot1.height - height); }
+      height += BlockGraphics.loop.loopH
     } else {
       height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
   		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
@@ -613,7 +618,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 	}
 	let currentLine = 0;
 	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
-  if (FinchBlox) { yCoord = this.height / 2; }
+  if (FinchBlox) { yCoord = BlockGraphics.command.height/2; }//this.height / 2; }
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
     if (!FinchBlox) { yCoord = this.topHeight / 2; } //Internal parts measure their y coords from the center of the block.
@@ -634,7 +639,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
-        yCoord = this.height - BlockPalette.blockButtonOverhang;
+        yCoord = BlockGraphics.command.height - BlockPalette.blockButtonOverhang;//this.height - BlockPalette.blockButtonOverhang;
       }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
@@ -669,6 +674,7 @@ Block.prototype.resize = function(width, height) {
 	}
 	//Tell BlockGraphics to change the path description to match the new properties.
 	BG.update.path(this.path, 0, 0, width, height, this.type, false, innerHeight1, innerHeight2, midHeight, this.bottomOpen);
+  if (this.topPath != null) { BG.update.topPath(this.topPath, this.width, this.height); }
 };
 
 /**
@@ -850,6 +856,19 @@ Block.prototype.addHeights = function() {
 		return this.height; //This is the last Block. Return its height.
 	}
 };
+
+/**
+ * Recursively compairs this Block to all subsequent Blocks and returns the max
+ * height. Used by FinchBlox BlockSlots to determine height.
+ * @return {number} - The maximum height between this Block and all subsequent Blocks.
+ */
+Block.prototype.getMaxHeight = function() {
+  if (this.nextBlock != null) {
+    return Math.max(this.height, this.nextBlock.getMaxHeight());
+  } else {
+    return this.height;
+  }
+}
 
 /**
  * Recursively returns the width of this Block and all subsequent Blocks. Used
@@ -1400,6 +1419,17 @@ Block.prototype.displayValue = function(message, error) {
 Block.prototype.displayError = function(message) {
 	this.displayValue(message, true);
 };
+
+/**
+ * Color the top half of the block differently.
+ *  Currently only works for FinchBlox command blocks.
+ */
+Block.prototype.colorTopHalf = function(color) {
+  this.topPathColor = color;
+  this.topPath = GuiElements.create.path(this.group);
+  GuiElements.update.color(this.topPath, this.topPathColor);
+  TouchReceiver.addListenersChild(this.topPath, this);
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to include a suffix (used to display sensor units)

@@ -188,7 +188,7 @@ DebugOptions.validateNumbers = function() {
 	if (!DebugOptions.shouldLogErrors()) return;
 	for (let i = 0; i < arguments.length; i++) {
 		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
-			throw new UserException("Invalid Number");
+			throw new UserException("Invalid Number " + i + ": " + arguments[i]);
 		}
 	}
 };

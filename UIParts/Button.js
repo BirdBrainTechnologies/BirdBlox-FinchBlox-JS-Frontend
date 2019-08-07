@@ -599,7 +599,6 @@ Button.prototype.move = function(x, y) {
  */
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
-    console.log("isPressed and FinchBlox");
     if (this.toggles && this.hasIcon) {
       console.log("toggles and hasIcon");
     	this.icon.setColor(Colors.blockPaletteSound);

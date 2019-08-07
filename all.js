@@ -192,7 +192,7 @@ DebugOptions.validateNumbers = function() {
 	if (!DebugOptions.shouldLogErrors()) return;
 	for (let i = 0; i < arguments.length; i++) {
 		if (isNaN(arguments[i]) || !isFinite(arguments[i])) {
-			throw new UserException("Invalid Number");
+			throw new UserException("Invalid Number " + i + ": " + arguments[i]);
 		}
 	}
 };
@@ -5875,6 +5875,7 @@ DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 51;
 DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
+DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance to cm.
 
 /**
  * Issues a request to set the beak led.
@@ -6106,7 +6107,7 @@ window.onresize = function() {
 		let f = function() {
 			if(FinchBlox){
 				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerHeight/600;
+				GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
 				GuiElements.updateZoom();
 			} else {
 				GuiElements.updateDims();
@@ -6157,7 +6158,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
-	if (FinchBlox) { GuiElements.zoomMultiple = window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; }//window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
@@ -7333,12 +7334,18 @@ GuiElements.load.configureZoom = function(callback) {
 			}
 			callback();
 		};
-		HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
-			GE.computedZoom = GE.computeZoomFromDims(response);
-			callbackFn();
-		}, function() {
-			callbackFn();
-		});
+		if (FinchBlox) {
+			//FinchBlox bases its zoom factor simply on the pixel width available.
+			// layout will scale with screen size and should remain proportional.
+				callbackFn();
+		} else {
+			HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
+				GE.computedZoom = GE.computeZoomFromDims(response);
+				callbackFn();
+			}, function() {
+				callbackFn();
+			});
+		}
 	});
 };
 /**
@@ -7434,7 +7441,9 @@ GuiElements.showPaletteLayers = function(skipUpdate) {
  */
 GuiElements.checkSmallMode = function() {
 	let GE = GuiElements;
-	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
+	if (!FinchBlox) { //No small mode for FinchBlox
+		GE.smallMode = GE.width < GE.relToAbsX(GE.smallModeThreshold);
+	}
 	if (!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
 	}
@@ -7956,6 +7965,7 @@ Colors.setCommon = function() {
 	Colors.blockPaletteMotion = "#B4D9DD";
 	Colors.blockPaletteColor = "#FFCE96";
 	Colors.blockPaletteSound = "#B691BB";
+	Colors.blockPaletteControl = "#F4E9A4"; //tmp
 	Colors.flagGreen = "#2FC00B";
 	Colors.fbDarkGreen = "#268D17";
 	Colors.stopRed = "#F03602";
@@ -8009,7 +8019,7 @@ Colors.setCategory = function() {
 		"motion_3": Colors.blockPaletteMotion,
 		"color_3": Colors.blockPaletteColor,
 		"sound_3": Colors.blockPaletteSound,
-		"control_3": Colors.fbYellow,
+		"control_3": Colors.blockPaletteControl,
 		"sensor_3": Colors.finchGreen
 	};
 	//In FinchBlox, each block is outlined with a darker color
@@ -8255,6 +8265,10 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faSyncAlt={};
+  VP.faSyncAlt.path="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z";
+  VP.faSyncAlt.width=512;
+  VP.faSyncAlt.height=512;
   VP.faClock={};
   VP.faClock.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z";
   VP.faClock.width=512;
@@ -8770,6 +8784,11 @@ BlockGraphics.CalcPaths = function() {
 	fbBumpOut += "l "+(-d)+",0 "; //line across
 	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+(-r)+" "; //corner
 	fbBumpOut += "l 0,"+(-u)+" "+(-n)+",0 "; //line up, line across
+	let fbHalfBumpOut = " "+n+",0 0,"+(-u)+" "; //line across, line up
+	fbHalfBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+(-r)+" "; //corner
+	fbHalfBumpOut += "l "+d+",0 "; //line across
+	fbHalfBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+r+" "; //corner
+	fbHalfBumpOut += "l 0,"+(h/2)+" "; //main vertial line
 	let fbBumpIn = " "+n+",0 0,"+u+" ";
 	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+r+" ";
 	fbBumpIn += "l "+d+",0 ";
@@ -8779,6 +8798,11 @@ BlockGraphics.CalcPaths = function() {
 	fbBumpIn += "l "+(-d)+",0 ";
 	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
 	fbBumpIn += "l 0,"+u+" "+(-n)+",0 ";
+	let fbHalfBumpIn = "l 0,"+(-h/2)+" ";
+	fbHalfBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+(-r)+" ";
+	fbHalfBumpIn += "l "+(-d)+",0 ";
+	fbHalfBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
+	fbHalfBumpIn += "l 0,"+u+" "+(-n)+",0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
@@ -8787,6 +8811,8 @@ BlockGraphics.CalcPaths = function() {
 	com.path5 = path5; //top left corner
 	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
 	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
+	com.fbHalfBumpOut = fbHalfBumpOut;
+	com.fbHalfBumpIn = fbHalfBumpIn;
 	com.fbBumpDepth = n + 2*r + d;//  11; //total width of the bump
 	com.fbBumpNeck = (h - 2*u)/2;// 13; //half the height of the neck of the bump
 };
@@ -8876,6 +8902,42 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	}
 	return path;
 };
+
+/**
+ * FinchBlox only. Creates a path for the top half of a block. Used in the
+ * move when dark block.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
+	let com = BlockGraphics.command;
+	let straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+
+	let path = "";
+	//Start at the beginning of the top straight part
+	//path += "m " + (x + com.cornerRadius) + "," + y + " l ";
+	path += "m " + (x - com.fbBumpDepth + com.cornerRadius) + "," + y + " l ";
+	//straight line across
+	//path += width - com.fbBumpDepth - 2*com.cornerRadius;
+	path += width + com.fbBumpDepth - 2*com.cornerRadius;
+	//top right corner and down to start of bump
+	path += com.path2;
+	path += straightHeight;
+	//bump
+	path += com.fbHalfBumpOut;
+	//cut through the middle of the block
+	path += (-width - com.fbBumpDepth)+ ",0";
+	//bump
+	path += com.fbHalfBumpIn;
+	//line up and top left corner
+	path += "0," + (-straightHeight);
+	path += com.path5;
+
+	return path;
+}
 
 /**
  * Creates the path of a highlight between two CommandBlocks
@@ -9032,18 +9094,19 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	const loop = BlockGraphics.loop;
 	const comm = BlockGraphics.command;
 	if (FinchBlox) {
-		let straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
+		let overHeight = height - comm.height;
+		let straightHeight = (comm.height - comm.extraHeight)/2 - comm.fbBumpNeck;
 		//path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
 		path += "m " + (x - comm.fbBumpDepth + comm.cornerRadius) + ",";
-		path += (y - loop.loopH) + " l ";
-		path += width - 2*comm.cornerRadius + 2*comm.fbBumpDepth; //straight top
+		path += (y - overHeight) + " l ";
+		path += width - 2*comm.cornerRadius + comm.fbBumpDepth;//2*comm.fbBumpDepth; //straight top
 		path += comm.path2; //top right corner
 		if (bottomOpen) {
-			path += (straightHeight + loop.loopH);
+			path += (straightHeight + overHeight);
 			path += comm.fbBumpOut;
 			path += "0," + straightHeight;
 		} else {
-			path += height - 2*comm.cornerRadius + loop.loopH;
+			path += height - 2*comm.cornerRadius; //+ loop.loopH;
 		}
 		path += comm.path3; //bottom right corner
 
@@ -9056,20 +9119,24 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 		path += "0," + (-straightHeight);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 
+		//back across the inner blockslot
 		path += " l " + (-innerDim+2*comm.cornerRadius-comm.fbBumpDepth) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		//inner bumpout
 		path += " l 0," + (straightHeight);
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
+		//inner corner
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius - comm.fbBumpDepth) + ",0";
+		//across the bottom
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius) + ",0"; //- comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight-loop.loopH);
+		path += "0," + (-straightHeight-overHeight);
 		path += comm.path5;
 
 	} else {
@@ -9285,6 +9352,11 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
 	path.setAttributeNS(null, "d", pathD);
 	return path;
 };
+
+BlockGraphics.update.topPath = function (path, width, height) {
+	let pathD = BlockGraphics.buildPath.commandTopHalf(0, 0, width, height);
+  path.setAttributeNS(null, "d", pathD);
+}
 
 /**
  * Moves text to location
@@ -10620,7 +10692,6 @@ TitleBar.setGraphicsPart1 = function() {
 	const TB = TitleBar;
 	if (GuiElements.smallMode) {
 		TB.height = 35;
-    //TODO: Add FinchBlox option here
 		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
     if (FinchBlox) {
@@ -11477,6 +11548,7 @@ function DisplayStack(firstBlock, group, category) {
 	this.dim.rh = 0;
 	this.updateDim();
 	this.isRunning = false;
+  this.zoom = 1; //FinchBlox zooms some blocks to fit in block palette
 	//this.currentBlock = null;
 	this.move(this.x, this.y);
 
@@ -11569,7 +11641,14 @@ DisplayStack.prototype.getAbsY = function() {
 DisplayStack.prototype.move = function(x, y) {
 	this.x = x;
 	this.y = y;
-	GuiElements.move.group(this.group, x, y);
+  if (FinchBlox && (this.firstBlock.type == 5)) {
+    //The loop blocks appear smaller in the blockPalette so that they fit in the space.
+    this.zoom = 0.85;
+    const zY = y + (this.firstBlock.height * (1-this.zoom));
+    GuiElements.move.group(this.group, x, zY, this.zoom);
+  } else {
+    GuiElements.move.group(this.group, x, y);
+  }
 };
 
 /**
@@ -12023,7 +12102,7 @@ Category.prototype.addBlock = function(block) {
 	this.displayStacks.push(displayStack);
 	// Update the coords for the next Block
   if (FinchBlox){
-    this.currentBlockX += displayStack.firstBlock.width;
+    this.currentBlockX += displayStack.firstBlock.width * displayStack.zoom;
     this.currentBlockX += BlockPalette.blockMargin;
     if (this.maxBlockHeight == null ||
       this.maxBlockHeight < displayStack.firstBlock.height) {
@@ -13386,7 +13465,6 @@ Button.prototype.move = function(x, y) {
  */
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
-    console.log("isPressed and FinchBlox");
     if (this.toggles && this.hasIcon) {
       console.log("toggles and hasIcon");
     	this.icon.setColor(Colors.blockPaletteSound);
@@ -25432,8 +25510,10 @@ Block.prototype.updateRun = function() {
 Block.prototype.updateRunColor = function() {
 	if (this.running === 1 || this.running === 2) {
 		GuiElements.update.color(this.path, Colors.flagGreen);
+    if (this.topPath != null) { GuiElements.update.color(this.topPath, Colors.fbDarkGreen); }
 	} else {
 		GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+    if (this.topPath != null) { GuiElements.update.color(this.topPath, this.topPathColor); }
 	}
 }
 
@@ -25661,7 +25741,10 @@ Block.prototype.updateDim = function() {
 		this.blockSlot1.updateDim(); //Update the BlockSlot.
     if (FinchBlox) {
   		width += this.blockSlot1.width;
-      width += BlockGraphics.loop.armW;
+      width += BlockGraphics.loop.armW + BlockGraphics.command.fbBumpDepth;
+      console.log("Setting the width and height of " + this.blockTypeName + " h=" + this.height + " bsh=" + this.blockSlot1.height);
+      if (height < this.blockSlot1.height) { height += (this.blockSlot1.height - height); }
+      height += BlockGraphics.loop.loopH
     } else {
       height += this.blockSlot1.height; //The total height, however, includes the BlockSlot.
   		height += BlockGraphics.loop.bottomH; //It also includes the bottom part of the loop.
@@ -25737,7 +25820,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 	}
 	let currentLine = 0;
 	let yCoord = (this.lineHeight[currentLine] + (2 * bG.vMargin)) / 2; //Compute coords for internal parts.
-  if (FinchBlox) { yCoord = this.height / 2; }
+  if (FinchBlox) { yCoord = BlockGraphics.command.height/2; }//this.height / 2; }
 	let xCoord = 0;
 	if (this.hasBlockSlot1) {
     if (!FinchBlox) { yCoord = this.topHeight / 2; } //Internal parts measure their y coords from the center of the block.
@@ -25758,7 +25841,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 			yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
-        yCoord = this.height - BlockPalette.blockButtonOverhang;
+        yCoord = BlockGraphics.command.height - BlockPalette.blockButtonOverhang;//this.height - BlockPalette.blockButtonOverhang;
       }
 		} else if (i < this.parts.length - 1) {
 			xCoord += BlockGraphics.block.pMargin;
@@ -25793,6 +25876,7 @@ Block.prototype.resize = function(width, height) {
 	}
 	//Tell BlockGraphics to change the path description to match the new properties.
 	BG.update.path(this.path, 0, 0, width, height, this.type, false, innerHeight1, innerHeight2, midHeight, this.bottomOpen);
+  if (this.topPath != null) { BG.update.topPath(this.topPath, this.width, this.height); }
 };
 
 /**
@@ -25974,6 +26058,19 @@ Block.prototype.addHeights = function() {
 		return this.height; //This is the last Block. Return its height.
 	}
 };
+
+/**
+ * Recursively compairs this Block to all subsequent Blocks and returns the max
+ * height. Used by FinchBlox BlockSlots to determine height.
+ * @return {number} - The maximum height between this Block and all subsequent Blocks.
+ */
+Block.prototype.getMaxHeight = function() {
+  if (this.nextBlock != null) {
+    return Math.max(this.height, this.nextBlock.getMaxHeight());
+  } else {
+    return this.height;
+  }
+}
 
 /**
  * Recursively returns the width of this Block and all subsequent Blocks. Used
@@ -26524,6 +26621,17 @@ Block.prototype.displayValue = function(message, error) {
 Block.prototype.displayError = function(message) {
 	this.displayValue(message, true);
 };
+
+/**
+ * Color the top half of the block differently.
+ *  Currently only works for FinchBlox command blocks.
+ */
+Block.prototype.colorTopHalf = function(color) {
+  this.topPathColor = color;
+  this.topPath = GuiElements.create.path(this.group);
+  GuiElements.update.color(this.topPath, this.topPathColor);
+  TouchReceiver.addListenersChild(this.topPath, this);
+}
 
 /**
  * Takes a subclass of Block and modifies its display function to include a suffix (used to display sensor units)
@@ -29426,6 +29534,9 @@ BlockSlot.prototype.updateDim = function() {
 	if (this.hasChild) {
 		this.child.updateDim();
 		this.height = this.child.addHeights();
+    if (FinchBlox) {
+      this.height = this.child.getMaxHeight();
+    }
     this.width = this.child.addWidths();
 	} else {
 		this.height = BlockGraphics.loop.bottomH;
@@ -32015,7 +32126,7 @@ Block.setDisplaySuffix(B_FinchEncoder, "rotations");
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);
-	this.scalingFactor = 0.0919;
+	this.scalingFactor = DeviceFinch.cmPerDistance;
 
 	this.addPart(new LabelText(this, Language.getStr("Distance")));
 };
@@ -32711,49 +32822,88 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
   this.speed = 50;
-
+  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 20cm
+  if (sensor == "dark") { this.threshold = 5; }
   CommandBlock.call(this,x,y,"motion_3");
 }
 B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
 B_FBSensorBlock.prototype.constructor = B_FBSensorBlock;
 
 B_FBSensorBlock.prototype.startAction = function () {
-  const mem = this.runMem;
+  this.blankRequestStatus = {};
+	this.blankRequestStatus.finished = false;
+	this.blankRequestStatus.error = false;
+	this.blankRequestStatus.result = null;
+	this.blankRequestStatus.requestSent = false;
 
-  mem.requestStatus = {};
-  mem.requestStatus.finished = false;
-  mem.requestStatus.error = false;
-  mem.requestStatus.result = null;
+	this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+  this.runMem.motorRequestFinished = false;
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
   } else {
-    mem.requestStatus.finished = true;
-    mem.duration = 0;
     TitleBar.flashFinchButton();
+    return new ExecutionStatusDone();
   }
 
   return new ExecutionStatusRunning();
 }
 B_FBSensorBlock.prototype.updateAction = function () {
+  const status = this.runMem.requestStatus;
+	if (status.requestSent) {
+		if (status.finished) {
+			if (status.error) { return new ExecutionStatusError(); }
+      if (!this.runMem.motorRequestFinished) {
+        this.runMem.motorRequestFinished = true;
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        return new ExecutionStatusRunning();
+      }
+			const result = new StringData(status.result);
+			const num = (result.asNum().getValue());
+			if (num < this.threshold) {
+        let device = DeviceFinch.getManager().getDevice(0);
+        if (device != null) {
+          device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+        }
+				return new ExecutionStatusDone();
+			} else {
+				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			}
+		}
+	} else {
+		let device = DeviceFinch.getManager().getDevice(0);
+	  if (device != null) {
+      if (this.sensor == "dark") {
+        device.readSensor(status, "light", "left");
+      } else {
+        device.readSensor(status, "distance");
+      }
+			status.requestSent = true;
+		} else {
+      return new ExecutionStatusDone();
+    }
+	}
+	return new ExecutionStatusRunning();
+  /*
   if(this.runMem.requestStatus.finished) {
     //check for dark here
 		return new ExecutionStatusDone();
 	} else {
 		return new ExecutionStatusRunning();
-	}
+	}*/
 }
 
 function B_FBForwardUntilDark(x, y) {
   //B_FBMotion.call(this, x, y, "forward", 3);
   //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "dark");
+  this.colorTopHalf(Colors.darkTeal);
 
-  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.darkTeal, "sun", 25);
+  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.black, "sun", 25);
 	blockIcon.icon.setRotation(-8);
 	//blockIcon.icon.negate(Colors.flagGreen);
-	blockIcon.negate(Colors.darkTeal);
+	blockIcon.negate(Colors.black);
 	blockIcon.isEndOfLine = true;
 	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
 	this.addPart(blockIcon);
@@ -33029,7 +33179,7 @@ B_Wait.prototype.updateAction = function() {
 };
 B_Wait.prototype.updateValues = function() {
 	if (this.timeBN != null) {
-		this.timeSelection = this.timeBN.value;
+		this.timeSelection = this.timeBN.values[0];
 	}
 }
 
@@ -33060,7 +33210,7 @@ function B_Forever(x, y) {
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category, false); //Bottom is not open.
 	if (FinchBlox) {
-		this.addPart(new BlockIcon(this, VectorPaths.faUndoAlt, Colors.white, "repeat", 40));
+		this.addPart(new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30));
 	} else {
 		this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
 	}
@@ -33091,18 +33241,33 @@ function B_Repeat(x, y) {
 	let category = "control";
 	if (FinchBlox) { category = "control_3"; }
 	LoopBlock.call(this, x, y, category);
-	this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
-	this.parseTranslation(Language.getStr("block_repeat"));
+
+	if (FinchBlox) {
+		const blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+		blockIcon.isEndOfLine = true;
+		this.addPart(blockIcon);
+		this.countSelection=10;
+		this.countBN = new BlockButton(this);
+		this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+		this.addPart(this.countBN);
+	} else {
+		this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
+		this.parseTranslation(Language.getStr("block_repeat"));
+	}
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
 	const mem = this.runMem;
-	mem.timesD = this.slots[0].getData();
-	mem.times = mem.timesD.getValueWithC(true, true);
+	if (FinchBlox) {
+		mem.times = this.countSelection;
+	} else {
+		mem.timesD = this.slots[0].getData();
+		mem.times = mem.timesD.getValueWithC(true, true);
+	}
 	mem.count = 0;
-	if (mem.times > 0 && mem.timesD.isValid) {
+	if (mem.times > 0 && (FinchBlox || mem.timesD.isValid)) {
 		this.blockSlot1.startRun();
 		return new ExecutionStatusRunning(); //Still running
 	} else {
@@ -33127,6 +33292,11 @@ B_Repeat.prototype.updateAction = function() {
 	}
 	return new ExecutionStatusRunning(); //Still running
 };
+B_Repeat.prototype.updateValues = function() {
+	if (this.countBN != null) {
+		this.countSelection = this.countBN.values[0];
+	}
+}
 
 
 
@@ -33348,7 +33518,7 @@ B_When.prototype.startAction = function() {
 
 //FinchBlox only
 function B_StartWhenDark(x, y) {
-	HatBlock.call(this, x, y, "control_3");
+	HatBlock.call(this, x, y, "control_3", true);
 	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
 	blockIcon.icon.setRotation(-8);
 	//blockIcon.icon.negate(Colors.flagGreen);
@@ -33367,16 +33537,6 @@ B_StartWhenDark.prototype.eventFlagClicked = function() {
 };
 
 B_StartWhenDark.prototype.startAction = function() {
-	//return new ExecutionStatusDone();
-	//return new ExecutionStatusRunning();
-	const stopWaiting = this.slots[0].getData().getValue();
-	if (stopWaiting) {
-		return new ExecutionStatusDone(); //Done running
-	} else {
-		this.running = 0; //startAction will be run next time, giving Slots ability to recalculate.
-		this.clearMem(); //runMem and previous values of Slots will be removed.
-		return new ExecutionStatusRunning(); //Still running
-	}
 
 	this.blankRequestStatus = {};
 	this.blankRequestStatus.finished = false;
@@ -33396,7 +33556,7 @@ B_StartWhenDark.prototype.updateAction = function() {
 			if (status.error) { return new ExecutionStatusError(); }
 			const result = new StringData(status.result);
 			const num = (result.asNum().getValue());
-			const threshold = 10;
+			const threshold = 5;
 			if (num < threshold) {
 				return new ExecutionStatusDone();
 			} else {

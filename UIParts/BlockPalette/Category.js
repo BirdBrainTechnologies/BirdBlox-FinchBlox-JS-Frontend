@@ -164,7 +164,7 @@ Category.prototype.addBlock = function(block) {
 	this.displayStacks.push(displayStack);
 	// Update the coords for the next Block
   if (FinchBlox){
-    this.currentBlockX += displayStack.firstBlock.width;
+    this.currentBlockX += displayStack.firstBlock.width * displayStack.zoom;
     this.currentBlockX += BlockPalette.blockMargin;
     if (this.maxBlockHeight == null ||
       this.maxBlockHeight < displayStack.firstBlock.height) {

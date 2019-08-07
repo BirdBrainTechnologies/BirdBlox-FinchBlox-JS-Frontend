@@ -51,7 +51,7 @@ window.onresize = function() {
 		let f = function() {
 			if(FinchBlox){
 				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerHeight/600;
+				GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
 				GuiElements.updateZoom();
 			} else {
 				GuiElements.updateDims();
@@ -102,7 +102,7 @@ GuiElements.setGuiConstants = function() {
 
 	GuiElements.computedZoom = GuiElements.defaultZoomMultiple; //The computed default zoom amount for the device
 	GuiElements.zoomMultiple = 1; //GuiElements.zoomFactor = zoomMultiple * computedZoom
-	if (FinchBlox) { GuiElements.zoomMultiple = window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
+	if (FinchBlox) { GuiElements.zoomMultiple = window.innerWidth/800; }//window.innerHeight/600; } //FinchBlox designed for a 800w x 600h screen
 	GuiElements.zoomFactor = GuiElements.defaultZoomMultiple;
 
 	GuiElements.width = window.innerWidth / GuiElements.zoomFactor;
@@ -1278,12 +1278,18 @@ GuiElements.load.configureZoom = function(callback) {
 			}
 			callback();
 		};
-		HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
-			GE.computedZoom = GE.computeZoomFromDims(response);
-			callbackFn();
-		}, function() {
-			callbackFn();
-		});
+		if (FinchBlox) {
+			//FinchBlox bases its zoom factor simply on the pixel width available.
+			// layout will scale with screen size and should remain proportional.
+				callbackFn();
+		} else {
+			HtmlServer.sendRequestWithCallback("properties/dims", function(response) {
+				GE.computedZoom = GE.computeZoomFromDims(response);
+				callbackFn();
+			}, function() {
+				callbackFn();
+			});
+		}
 	});
 };
 /**
@@ -1379,7 +1385,9 @@ GuiElements.showPaletteLayers = function(skipUpdate) {
  */
 GuiElements.checkSmallMode = function() {
 	let GE = GuiElements;
-	GuiElements.smallMode = GuiElements.width < GuiElements.relToAbsX(GuiElements.smallModeThreshold);
+	if (!FinchBlox) { //No small mode for FinchBlox
+		GE.smallMode = GE.width < GE.relToAbsX(GE.smallModeThreshold);
+	}
 	if (!GE.smallMode && !GE.paletteLayersVisible) {
 		GE.showPaletteLayers(true);
 	}

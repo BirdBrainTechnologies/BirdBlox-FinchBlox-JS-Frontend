@@ -38,6 +38,9 @@ BlockSlot.prototype.updateDim = function() {
 	if (this.hasChild) {
 		this.child.updateDim();
 		this.height = this.child.addHeights();
+    if (FinchBlox) {
+      this.height = this.child.getMaxHeight();
+    }
     this.width = this.child.addWidths();
 	} else {
 		this.height = BlockGraphics.loop.bottomH;

@@ -347,7 +347,7 @@ Block.setDisplaySuffix(B_FinchEncoder, "rotations");
 
 function B_FinchDistance(x, y) {
 	B_FinchSensorBase.call(this, x, y);
-	this.scalingFactor = 0.0919;
+	this.scalingFactor = DeviceFinch.cmPerDistance;
 
 	this.addPart(new LabelText(this, Language.getStr("Distance")));
 };

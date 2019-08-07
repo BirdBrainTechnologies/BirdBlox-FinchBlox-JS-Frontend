@@ -294,6 +294,11 @@ BlockGraphics.CalcPaths = function() {
 	fbBumpOut += "l "+(-d)+",0 "; //line across
 	fbBumpOut += "a "+r+" "+r+" 0 0 1 "+(-r)+" "+(-r)+" "; //corner
 	fbBumpOut += "l 0,"+(-u)+" "+(-n)+",0 "; //line up, line across
+	let fbHalfBumpOut = " "+n+",0 0,"+(-u)+" "; //line across, line up
+	fbHalfBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+(-r)+" "; //corner
+	fbHalfBumpOut += "l "+d+",0 "; //line across
+	fbHalfBumpOut += "a "+r+" "+r+" 0 0 1 "+r+" "+r+" "; //corner
+	fbHalfBumpOut += "l 0,"+(h/2)+" "; //main vertial line
 	let fbBumpIn = " "+n+",0 0,"+u+" ";
 	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+r+" "+r+" ";
 	fbBumpIn += "l "+d+",0 ";
@@ -303,6 +308,11 @@ BlockGraphics.CalcPaths = function() {
 	fbBumpIn += "l "+(-d)+",0 ";
 	fbBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
 	fbBumpIn += "l 0,"+u+" "+(-n)+",0 ";
+	let fbHalfBumpIn = "l 0,"+(-h/2)+" ";
+	fbHalfBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+(-r)+" ";
+	fbHalfBumpIn += "l "+(-d)+",0 ";
+	fbHalfBumpIn += "a "+r+" "+r+" 0 0 0 "+(-r)+" "+r+" ";
+	fbHalfBumpIn += "l 0,"+u+" "+(-n)+",0 ";
 	com.path1 = path1; //Top edge
 	com.path2 = path2; //top right corner
 	com.path3 = path3; //bottom right corner
@@ -311,6 +321,8 @@ BlockGraphics.CalcPaths = function() {
 	com.path5 = path5; //top left corner
 	com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
 	com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
+	com.fbHalfBumpOut = fbHalfBumpOut;
+	com.fbHalfBumpIn = fbHalfBumpIn;
 	com.fbBumpDepth = n + 2*r + d;//  11; //total width of the bump
 	com.fbBumpNeck = (h - 2*u)/2;// 13; //half the height of the neck of the bump
 };
@@ -400,6 +412,42 @@ BlockGraphics.buildPath.command = function(x, y, width, height) {
 	}
 	return path;
 };
+
+/**
+ * FinchBlox only. Creates a path for the top half of a block. Used in the
+ * move when dark block.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
+	let com = BlockGraphics.command;
+	let straightHeight = (height - com.extraHeight)/2 - com.fbBumpNeck;
+
+	let path = "";
+	//Start at the beginning of the top straight part
+	//path += "m " + (x + com.cornerRadius) + "," + y + " l ";
+	path += "m " + (x - com.fbBumpDepth + com.cornerRadius) + "," + y + " l ";
+	//straight line across
+	//path += width - com.fbBumpDepth - 2*com.cornerRadius;
+	path += width + com.fbBumpDepth - 2*com.cornerRadius;
+	//top right corner and down to start of bump
+	path += com.path2;
+	path += straightHeight;
+	//bump
+	path += com.fbHalfBumpOut;
+	//cut through the middle of the block
+	path += (-width - com.fbBumpDepth)+ ",0";
+	//bump
+	path += com.fbHalfBumpIn;
+	//line up and top left corner
+	path += "0," + (-straightHeight);
+	path += com.path5;
+
+	return path;
+}
 
 /**
  * Creates the path of a highlight between two CommandBlocks
@@ -556,18 +604,19 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 	const loop = BlockGraphics.loop;
 	const comm = BlockGraphics.command;
 	if (FinchBlox) {
-		let straightHeight = (height - comm.extraHeight)/2 - comm.fbBumpNeck;
+		let overHeight = height - comm.height;
+		let straightHeight = (comm.height - comm.extraHeight)/2 - comm.fbBumpNeck;
 		//path += "m " + (x + comm.cornerRadius) + "," + y + " l ";
 		path += "m " + (x - comm.fbBumpDepth + comm.cornerRadius) + ",";
-		path += (y - loop.loopH) + " l ";
-		path += width - 2*comm.cornerRadius + 2*comm.fbBumpDepth; //straight top
+		path += (y - overHeight) + " l ";
+		path += width - 2*comm.cornerRadius + comm.fbBumpDepth;//2*comm.fbBumpDepth; //straight top
 		path += comm.path2; //top right corner
 		if (bottomOpen) {
-			path += (straightHeight + loop.loopH);
+			path += (straightHeight + overHeight);
 			path += comm.fbBumpOut;
 			path += "0," + straightHeight;
 		} else {
-			path += height - 2*comm.cornerRadius + loop.loopH;
+			path += height - 2*comm.cornerRadius; //+ loop.loopH;
 		}
 		path += comm.path3; //bottom right corner
 
@@ -580,20 +629,24 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
 		path += "0," + (-straightHeight);
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 
+		//back across the inner blockslot
 		path += " l " + (-innerDim+2*comm.cornerRadius-comm.fbBumpDepth) + ",0";
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
+		//inner bumpout
 		path += " l 0," + (straightHeight);
 		path += comm.fbBumpOut;
 		path += "0," + straightHeight;
+		//inner corner
 		path += comm.path3;
-		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius - comm.fbBumpDepth) + ",0";
+		//across the bottom
+		path += (-width + innerDim + loop.armW + 2*comm.cornerRadius) + ",0"; //- comm.fbBumpDepth) + ",0";
 
 		//bottom left corner
 		path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 1 " + (0 - comm.cornerRadius) + " " + (0 - comm.cornerRadius);
 		path += " l 0,";
 		path += -straightHeight;
 		path += comm.fbBumpIn;
-		path += "0," + (-straightHeight-loop.loopH);
+		path += "0," + (-straightHeight-overHeight);
 		path += comm.path5;
 
 	} else {
@@ -809,6 +862,11 @@ BlockGraphics.update.path = function(path, x, y, width, height, type, isSlot, in
 	path.setAttributeNS(null, "d", pathD);
 	return path;
 };
+
+BlockGraphics.update.topPath = function (path, width, height) {
+	let pathD = BlockGraphics.buildPath.commandTopHalf(0, 0, width, height);
+  path.setAttributeNS(null, "d", pathD);
+}
 
 /**
  * Moves text to location

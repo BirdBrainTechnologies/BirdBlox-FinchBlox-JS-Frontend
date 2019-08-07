@@ -13,6 +13,7 @@ DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 51;
 DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
+DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance to cm.
 
 /**
  * Issues a request to set the beak led.

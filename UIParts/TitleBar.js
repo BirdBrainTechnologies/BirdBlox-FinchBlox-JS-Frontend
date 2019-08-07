@@ -22,7 +22,6 @@ TitleBar.setGraphicsPart1 = function() {
 	const TB = TitleBar;
 	if (GuiElements.smallMode) {
 		TB.height = 35;
-    //TODO: Add FinchBlox option here
 		TB.buttonMargin = Button.defaultMargin / 2;
 	} else {
     if (FinchBlox) {
