@@ -306,6 +306,7 @@ Block.prototype.updateRun = function() {
  * In FinchBlox, update the color of the block to green while running.
  */
 Block.prototype.updateRunColor = function() {
+  if (this.autoExecute) { return; }
 	if (this.running === 1 || this.running === 2) {
 		GuiElements.update.color(this.path, Colors.flagGreen);
     if (this.topPath != null) { GuiElements.update.color(this.topPath, Colors.fbDarkGreen); }
@@ -540,7 +541,6 @@ Block.prototype.updateDim = function() {
     if (FinchBlox) {
   		width += this.blockSlot1.width;
       width += BlockGraphics.loop.armW + BlockGraphics.command.fbBumpDepth;
-      console.log("Setting the width and height of " + this.blockTypeName + " h=" + this.height + " bsh=" + this.blockSlot1.height);
       if (height < this.blockSlot1.height) { height += (this.blockSlot1.height - height); }
       height += BlockGraphics.loop.loopH
     } else {
@@ -628,7 +628,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
     if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
       //In this case, we will make sure the part is centered.
-      console.log("centering icon on " + this.constructor.name);
+      //console.log("centering icon on " + this.constructor.name);
       xCoord = (bG.width - this.parts[i].width)/2;
       const w = this.parts[i].updateAlign(xCoord, yCoord);
     }

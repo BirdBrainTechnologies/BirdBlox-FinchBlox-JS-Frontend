@@ -6689,13 +6689,14 @@ GuiElements.draw.video = function(videoName, robotId) {
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
  * @param {number} r - Corner radius for top left and right corners.
+ * @param {boolean} isDown - True if the tab should point downward
  * @return {Element} - The path which was created.
  */
-GuiElements.draw.tab = function(x, y, width, height, color, r) {
+GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
 	const tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
+	GuiElements.update.tab(tab, x, y, width, height, r, isDown); //Set its path description (points).
 	tab.setAttributeNS(null, "fill", color); //Set the fill.
 	return tab; //Return the finished button shape.
 };
@@ -6972,16 +6973,26 @@ GuiElements.update.makeClickThrough = function(svgE) {
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
  * @param {number} r - Corner radius for top corners.
+ * @param {boolean} isDown - True if the tab should point downward
  */
-GuiElements.update.tab = function(pathE, x, y, width, height, r) {
+GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
 	DebugOptions.validateNumbers(x, y, width, height, r);
 	let path = "";
-	path += "m " + (x + r) + "," + y;
-	path += " l " + (width - 2*r) + ",0";
-	path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-	path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
-	path += (r - height);
-	path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
+	if (isDown) {
+		path += "m " + x + "," + y;
+		path += " l " + width + ",0 0," + (height - r);
+		path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+		path += " l " + (2*r - width) + ",0 ";
+		path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+		path += " l 0," + (r - height);
+	} else {
+		path += "m " + (x + r) + "," + y;
+		path += " l " + (width - 2*r) + ",0";
+		path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+		path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+		path += (r - height);
+		path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
+	}
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
@@ -9086,7 +9097,6 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpen) {
-	console.log("inner dim " + innerDim);
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}
@@ -17764,8 +17774,10 @@ Highlighter.showShadow = function(fit, stack) {
     myX = fit.tab.absToRelX(fit.getAbsX());
 		snapFront = true;
 	} else if (fit instanceof BlockSlot) {
-    myY = CodeManager.dragAbsToRelY(fit.getAbsY());
-		myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
+    //myY = CodeManager.dragAbsToRelY(fit.getAbsY());
+    myY = fit.parent.stack.tab.absToRelY(fit.getAbsY());
+		//myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
+    myX = fit.parent.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
 	} else {
 	 	//myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
@@ -25508,6 +25520,7 @@ Block.prototype.updateRun = function() {
  * In FinchBlox, update the color of the block to green while running.
  */
 Block.prototype.updateRunColor = function() {
+  if (this.autoExecute) { return; }
 	if (this.running === 1 || this.running === 2) {
 		GuiElements.update.color(this.path, Colors.flagGreen);
     if (this.topPath != null) { GuiElements.update.color(this.topPath, Colors.fbDarkGreen); }
@@ -25742,7 +25755,6 @@ Block.prototype.updateDim = function() {
     if (FinchBlox) {
   		width += this.blockSlot1.width;
       width += BlockGraphics.loop.armW + BlockGraphics.command.fbBumpDepth;
-      console.log("Setting the width and height of " + this.blockTypeName + " h=" + this.height + " bsh=" + this.blockSlot1.height);
       if (height < this.blockSlot1.height) { height += (this.blockSlot1.height - height); }
       height += BlockGraphics.loop.loopH
     } else {
@@ -25830,7 +25842,7 @@ Block.prototype.updateAlignRI = function(x, y) {
 		xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
     if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
       //In this case, we will make sure the part is centered.
-      console.log("centering icon on " + this.constructor.name);
+      //console.log("centering icon on " + this.constructor.name);
       xCoord = (bG.width - this.parts[i].width)/2;
       const w = this.parts[i].updateAlign(xCoord, yCoord);
     }
@@ -30295,6 +30307,15 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         this.button.group.appendChild(this.colorLabel);
         TouchReceiver.addListenersBN(this.colorLabel, this.button);
 
+        for (let j = 0; j < this.widgets.length; j++) {
+          if (j != i && (j == 0 || j == this.widgets.length-1)) {
+            const bgY = j * clH;
+            const bg = GuiElements.draw.tab(clX, bgY, clW, clH, Colors.white, clR, true);
+            this.button.group.appendChild(bg);
+            TouchReceiver.addListenersBN(bg, this.button);
+          }
+        }
+
         this.button.bgRect.remove();
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);
@@ -32401,9 +32422,10 @@ B_FBColor.prototype.updateValues = function () {
       this.blue = this.colorButton.values[0].b;
     }
     this.updateColor();
-  }
-  if (this.durationButton != null) {
-    this.duration = this.durationButton.values[0];
+
+    if (this.colorButton.widgets.length == 2) {
+      this.duration = this.colorButton.values[1];
+    }
   }
 }
 B_FBColor.prototype.addL2Button = function () {
@@ -32677,31 +32699,34 @@ B_FBMotion.prototype.addL2Button = function() {
     }
 }
 B_FBMotion.prototype.updateValues = function () {
+  let speed;
   if (this.distanceBN != null) {
     this.leftDist = this.distanceBN.values[0];
     this.rightDist = this.distanceBN.values[0];
+    speed = this.distanceBN.values[1];
   }
   if (this.angleBN != null) {
     this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
     this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    speed = this.angleBN.values[1];
   }
-  if (this.speedBN != null) {
+  if (speed != null) {
     switch (this.direction) {
       case "forward":
-        this.leftSpeed = this.speedBN.values[0];
-        this.rightSpeed = this.speedBN.values[0];
+        this.leftSpeed = speed;
+        this.rightSpeed = speed;
         break;
       case "backward":
-        this.leftSpeed = -this.speedBN.values[0];
-        this.rightSpeed = -this.speedBN.values[0];
+        this.leftSpeed = -speed;
+        this.rightSpeed = -speed;
         break;
       case "right":
-        this.leftSpeed = this.speedBN.values[0];
-        this.rightSpeed = -this.speedBN.values[0];
+        this.leftSpeed = speed;
+        this.rightSpeed = -speed;
         break;
       case "left":
-        this.leftSpeed = -this.speedBN.values[0];
-        this.rightSpeed = this.speedBN.values[0];
+        this.leftSpeed = -speed;
+        this.rightSpeed = speed;
         break;
       default:
         GuiElements.alert("unknown direction in motion block update values");
@@ -32993,9 +33018,10 @@ B_FBSound.prototype.updateAction = function () {
 B_FBSound.prototype.updateValues = function () {
   if (this.noteButton != null) {
     this.midiNote = this.noteButton.values[0];
-  }
-  if (this.beatsButton != null) {
-    this.beats = this.beatsButton.values[0];
+
+    if (this.noteButton.widgets.length == 2) {
+      this.beats = this.noteButton.values[1];
+    }
   }
 }
 

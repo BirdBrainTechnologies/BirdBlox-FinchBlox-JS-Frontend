@@ -165,9 +165,10 @@ B_FBColor.prototype.updateValues = function () {
       this.blue = this.colorButton.values[0].b;
     }
     this.updateColor();
-  }
-  if (this.durationButton != null) {
-    this.duration = this.durationButton.values[0];
+
+    if (this.colorButton.widgets.length == 2) {
+      this.duration = this.colorButton.values[1];
+    }
   }
 }
 B_FBColor.prototype.addL2Button = function () {

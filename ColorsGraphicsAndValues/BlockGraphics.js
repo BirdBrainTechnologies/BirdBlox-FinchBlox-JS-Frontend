@@ -596,7 +596,6 @@ BlockGraphics.buildPath.hat = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpen) {
-	console.log("inner dim " + innerDim);
 	if (bottomOpen == null) {
 		bottomOpen = true;
 	}

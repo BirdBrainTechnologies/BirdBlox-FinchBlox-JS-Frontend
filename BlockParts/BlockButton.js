@@ -115,6 +115,15 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         this.button.group.appendChild(this.colorLabel);
         TouchReceiver.addListenersBN(this.colorLabel, this.button);
 
+        for (let j = 0; j < this.widgets.length; j++) {
+          if (j != i && (j == 0 || j == this.widgets.length-1)) {
+            const bgY = j * clH;
+            const bg = GuiElements.draw.tab(clX, bgY, clW, clH, Colors.white, clR, true);
+            this.button.group.appendChild(bg);
+            TouchReceiver.addListenersBN(bg, this.button);
+          }
+        }
+
         this.button.bgRect.remove();
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);

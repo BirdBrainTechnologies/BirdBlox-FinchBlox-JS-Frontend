@@ -633,13 +633,14 @@ GuiElements.draw.video = function(videoName, robotId) {
  * @param {number} height - The path's height. (negative will make it point down)
  * @param {string} color - The path's fill color in the form "#fff".
  * @param {number} r - Corner radius for top left and right corners.
+ * @param {boolean} isDown - True if the tab should point downward
  * @return {Element} - The path which was created.
  */
-GuiElements.draw.tab = function(x, y, width, height, color, r) {
+GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
 	DebugOptions.validateNonNull(color);
 	DebugOptions.validateNumbers(x, y, width, height);
 	const tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-	GuiElements.update.tab(tab, x, y, width, height, r); //Set its path description (points).
+	GuiElements.update.tab(tab, x, y, width, height, r, isDown); //Set its path description (points).
 	tab.setAttributeNS(null, "fill", color); //Set the fill.
 	return tab; //Return the finished button shape.
 };
@@ -916,16 +917,26 @@ GuiElements.update.makeClickThrough = function(svgE) {
  * @param {number} width - The path's new width. (it is an isosceles triangle)
  * @param {number} height - The path's new height. (negative will make it point down)
  * @param {number} r - Corner radius for top corners.
+ * @param {boolean} isDown - True if the tab should point downward
  */
-GuiElements.update.tab = function(pathE, x, y, width, height, r) {
+GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
 	DebugOptions.validateNumbers(x, y, width, height, r);
 	let path = "";
-	path += "m " + (x + r) + "," + y;
-	path += " l " + (width - 2*r) + ",0";
-	path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-	path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
-	path += (r - height);
-	path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
+	if (isDown) {
+		path += "m " + x + "," + y;
+		path += " l " + width + ",0 0," + (height - r);
+		path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+		path += " l " + (2*r - width) + ",0 ";
+		path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+		path += " l 0," + (r - height);
+	} else {
+		path += "m " + (x + r) + "," + y;
+		path += " l " + (width - 2*r) + ",0";
+		path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
+		path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+		path += (r - height);
+		path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
+	}
 	path += " z"; //Closes path.
 	pathE.setAttributeNS(null, "d", path); //Sets path description.
 };

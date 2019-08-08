@@ -64,9 +64,10 @@ B_FBSound.prototype.updateAction = function () {
 B_FBSound.prototype.updateValues = function () {
   if (this.noteButton != null) {
     this.midiNote = this.noteButton.values[0];
-  }
-  if (this.beatsButton != null) {
-    this.beats = this.beatsButton.values[0];
+
+    if (this.noteButton.widgets.length == 2) {
+      this.beats = this.noteButton.values[1];
+    }
   }
 }
 

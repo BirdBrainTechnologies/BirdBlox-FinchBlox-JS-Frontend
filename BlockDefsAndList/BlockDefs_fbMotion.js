@@ -122,31 +122,34 @@ B_FBMotion.prototype.addL2Button = function() {
     }
 }
 B_FBMotion.prototype.updateValues = function () {
+  let speed;
   if (this.distanceBN != null) {
     this.leftDist = this.distanceBN.values[0];
     this.rightDist = this.distanceBN.values[0];
+    speed = this.distanceBN.values[1];
   }
   if (this.angleBN != null) {
     this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
     this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    speed = this.angleBN.values[1];
   }
-  if (this.speedBN != null) {
+  if (speed != null) {
     switch (this.direction) {
       case "forward":
-        this.leftSpeed = this.speedBN.values[0];
-        this.rightSpeed = this.speedBN.values[0];
+        this.leftSpeed = speed;
+        this.rightSpeed = speed;
         break;
       case "backward":
-        this.leftSpeed = -this.speedBN.values[0];
-        this.rightSpeed = -this.speedBN.values[0];
+        this.leftSpeed = -speed;
+        this.rightSpeed = -speed;
         break;
       case "right":
-        this.leftSpeed = this.speedBN.values[0];
-        this.rightSpeed = -this.speedBN.values[0];
+        this.leftSpeed = speed;
+        this.rightSpeed = -speed;
         break;
       case "left":
-        this.leftSpeed = -this.speedBN.values[0];
-        this.rightSpeed = this.speedBN.values[0];
+        this.leftSpeed = -speed;
+        this.rightSpeed = speed;
         break;
       default:
         GuiElements.alert("unknown direction in motion block update values");
