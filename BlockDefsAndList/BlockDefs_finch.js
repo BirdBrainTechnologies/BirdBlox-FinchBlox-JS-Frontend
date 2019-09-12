@@ -320,6 +320,7 @@ B_FinchSensorBase.prototype.updateAction = function(){
 function B_FinchEncoder(x, y) {
 	B_FinchSensorBase.call(this, x, y);
 
+	this.displayDecimalPlaces = 2;
 	//800 ticks per rotation
 	this.scalingFactor = 1/800;
 

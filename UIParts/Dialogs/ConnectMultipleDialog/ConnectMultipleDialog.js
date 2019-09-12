@@ -28,7 +28,11 @@ ConnectMultipleDialog.setConstants = function() {
     let CMD = ConnectMultipleDialog;
     CMD.currentDialog = null;
     if (CMD.deviceLimit === undefined) {
+      if (GuiElements.isKindle) {
+        CMD.deviceLimit = 2;
+      } else {
         CMD.deviceLimit = 3;
+      }
     }
     CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
     CMD.tabRowHeight = 0;
