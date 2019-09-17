@@ -18499,7 +18499,11 @@ ConnectMultipleDialog.setConstants = function() {
     var CMD = ConnectMultipleDialog;
     CMD.currentDialog = null;
     if (CMD.deviceLimit === undefined) {
-        CMD.deviceLimit = 3;
+      if (GuiElements.isKindle) {
+	      CMD.deviceLimit = 2;
+	    } else {
+	      CMD.deviceLimit = 3;
+	    }
     }
     CMD.extraBottomSpace = RowDialog.bnHeight + RowDialog.bnMargin;
     CMD.tabRowHeight = 0;
