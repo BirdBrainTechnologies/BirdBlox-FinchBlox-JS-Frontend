@@ -23495,7 +23495,7 @@ SettingsManager.loadSettings = function(callbackFn) {
 function HtmlServer() {
 	HtmlServer.port = 22179;
 	HtmlServer.requestTimeout = 5000;
-	HtmlServer.iosRequests = {};
+	HtmlServer.nativeRequests = {};
 	HtmlServer.iosHandler = HtmlServer.getIosHandler();
 	HtmlServer.unansweredCount = 0; // Tracks pending requests
 	/* Maximum safe number of unanswered requests. After this number is hit, some Blocks
@@ -23605,8 +23605,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (isPost == null) {
 		isPost = false;
 	}
-	if (HtmlServer.iosHandler != null) {
-		HtmlServer.sendNativeIosCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
+	if (HtmlServer.iosHandler != null || window.AndroidInterface) {
+		HtmlServer.sendNativeCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
 		return;
 	}
 	let requestType = "GET";
@@ -23701,7 +23701,8 @@ HtmlServer.sendFinishedLoadingRequest = function() {
 };
 
 /**
- * Sends a command through the system iOS provides for allowing JS to call swift functions
+ * Sends a command through the system iOS provides for allowing JS to call swift functions,
+ * or to the Android javascriptInterface
  * @param {string} request - The request to send
  * @param {function|null} [callbackFn] - type (string) -> (), called with the response from the backend
  * @param {function|null} [callbackErr] - type ([number], [string]) -> (), called with the error status code and message
@@ -23709,7 +23710,7 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @param {string|null} [postData] - The post data to send in the body of the request
  * @param {boolean} [isBluetoothBlock=false] - Whether the command is a bluetooth command issued by a Block.
  */
-HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
+HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout) {
 	GuiElements.alert("Sending: " + request + " using native");
 	if(isBluetoothBlock == null) {
 		isBluetoothBlock = false;
@@ -23719,7 +23720,7 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	}
 
 	let id = null;
-	while (id == null || HtmlServer.iosRequests[id] != null) {
+	while (id == null || HtmlServer.nativeRequests[id] != null) {
 		id = "requestId" + Math.random();
 	}
 	const requestObject = {};
@@ -23731,25 +23732,34 @@ HtmlServer.sendNativeIosCall = function(request, callbackFn, callbackErr, isPost
 	}
 	requestObject.id = id;
 	requestObject.inBackground = isBluetoothBlock? "true" : "false";
-	HtmlServer.iosRequests[id] = {
+	HtmlServer.nativeRequests[id] = {
 		callbackFn: callbackFn,
 		callbackErr: callbackErr
 	};
 	GuiElements.alert("Making request: " + request + " using native");
 	HtmlServer.unansweredCount++;
-	window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
-	GuiElements.alert("Made request: " + request + " using native, inBackground=" + requestObject.inBackground);
+	if (HtmlServer.iosHandler != null) {
+		window.webkit.messageHandlers.serverSubstitute.postMessage(requestObject);
+		GuiElements.alert("Made request: " + request + " using iOS native, inBackground=" + requestObject.inBackground);
+	} else if (window.AndroidInterface) {
+		const jsonObjString = JSON.stringify(requestObject);
+		AndroidInterface.sendAndroidRequest(jsonObjString);
+		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
+	} else {
+		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
+	}
+
 	if(!noTimeout) {
 		window.setTimeout(function() {
-			HtmlServer.responseFromIosCall(id, "0", "");
+			HtmlServer.responseFromNativeCall(id, "0", "");
 		}, HtmlServer.requestTimeout);
 	}
 };
 
-HtmlServer.responseFromIosCall = function(id, status, body) {
+HtmlServer.responseFromNativeCall = function(id, status, body) {
 	//GuiElements.alert("got resp from native");
-	const callbackObj = HtmlServer.iosRequests[id];
-	HtmlServer.iosRequests[id] = undefined;
+	const callbackObj = HtmlServer.nativeRequests[id];
+	HtmlServer.nativeRequests[id] = undefined;
 	if (callbackObj == null) {
 		return;
 	}
@@ -24301,7 +24311,7 @@ CallbackManager.httpResponse = function(id, status, body) {
 	if (body != null) {
 		body = HtmlServer.decodeHtml(body);
 	}
-	HtmlServer.responseFromIosCall(id, status, body);
+	HtmlServer.responseFromNativeCall(id, status, body);
 };
 
 /**

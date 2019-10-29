@@ -337,7 +337,7 @@ CallbackManager.httpResponse = function(id, status, body) {
 	if (body != null) {
 		body = HtmlServer.decodeHtml(body);
 	}
-	HtmlServer.responseFromIosCall(id, status, body);
+	HtmlServer.responseFromNativeCall(id, status, body);
 };
 
 /**
