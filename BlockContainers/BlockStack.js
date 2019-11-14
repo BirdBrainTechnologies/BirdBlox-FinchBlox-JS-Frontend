@@ -42,9 +42,15 @@ function BlockStack(firstBlock, tab) {
 	this.flying = false; // BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 	this.tab.updateArrows();
 
-	if (this.firstBlock.autoExecute) {
-		this.startRun();
-	}
+	this.startRunIfAutoExec();
+}
+
+/**
+ * If the first block is set to autoExecute, start the stack.
+ * Used when a new stack is created or when a stack is stopped.
+ */
+BlockStack.prototype.startRunIfAutoExec = function() {
+  if (this.firstBlock.autoExecute) { this.startRun(); }
 }
 
 /**

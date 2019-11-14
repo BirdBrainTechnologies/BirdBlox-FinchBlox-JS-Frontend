@@ -22,7 +22,8 @@ B_FBSound.prototype.constructor = B_FBSound;
 B_FBSound.prototype.startAction = function () {
   const mem = this.runMem;
   mem.timerStarted = false;
-  mem.duration = CodeManager.beatsToMs(this.beats);
+  //mem.duration = CodeManager.beatsToMs(this.beats);
+  mem.duration = 100 * this.beats; //FinchBlox does not use the tempo setting. Each beat is 0.1 seconds.
   mem.requestStatus = {};
   mem.requestStatus.finished = true; //change when sending actual request
   mem.requestStatus.error = false;
@@ -78,7 +79,8 @@ function B_FBSoundL1(x, y, note, midiNote) {
   this.midiNote = midiNote;
 
   //this.addPart(new LabelText(this, note));
-  this.blockIcon.addText(note);
+  //this.blockIcon.addText(note);
+  this.blockIcon.addText(note, 12, 30);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;
@@ -134,7 +136,7 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
-  this.noteButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
+  this.noteButton.addSlider("time", this.beats, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 /*
   this.beatsButton = new BlockButton(this);

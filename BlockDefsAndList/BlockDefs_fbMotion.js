@@ -14,10 +14,8 @@ function B_FBMotion(x, y, direction, level) {
 
   CommandBlock.call(this,x,y,"motion_"+level);
 
-  //const icon = VectorPaths.blockIcons["motion_" + direction];
-  const icon = VectorPaths.mvArrow;
-  const rotation = B_FBMotion.iconRotation[direction];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 32, rotation);
+  const icon =  VectorPaths[B_FBMotion.iconPaths[direction]];
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -26,8 +24,6 @@ B_FBMotion.prototype.constructor = B_FBMotion;
 
 B_FBMotion.prototype.startAction = function () {
   const mem = this.runMem;
-  //mem.timerStarted = false;
-  //mem.duration = 1000;
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
@@ -50,22 +46,6 @@ B_FBMotion.prototype.updateAction = function () {
 	} else {
 		return new ExecutionStatusRunning();
 	}
-  /*
-  const mem = this.runMem;
-  if (!mem.timerStarted) {
-      const status = mem.requestStatus;
-      if (status.finished === true) {
-          mem.startTime = new Date().getTime();
-          mem.timerStarted = true;
-      } else {
-          return new ExecutionStatusRunning(); // Still running
-      }
-  }
-  if (new Date().getTime() >= mem.startTime + mem.duration) {
-      return new ExecutionStatusDone(); // Done running
-  } else {
-      return new ExecutionStatusRunning(); // Still running
-  }*/
 }
 B_FBMotion.prototype.setDefaults = function() {
   switch (this.direction) {
@@ -155,15 +135,13 @@ B_FBMotion.prototype.updateValues = function () {
         GuiElements.alert("unknown direction in motion block update values");
     }
   }
-  //console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
-B_FBMotion.iconRotation = {
-  "forward": 0,
-  "right": 90,
-  "backward": 180,
-  "left": 270
+B_FBMotion.iconPaths= {
+  "forward": "mjForward",
+  "right": "mjTurnRight",
+  "backward": "mjBack",
+  "left": "mjTurnLeft"
 }
-
 
 //****  Level 1 Blocks ****//
 
@@ -234,10 +212,6 @@ function B_FBMotionL3(x, y, direction){
   if (this.angleBN != null) {
     this.angleBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   }
-
-  //this.speedBN = new BlockButton(this);
-  //this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
-  //this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;
@@ -333,27 +307,17 @@ B_FBSensorBlock.prototype.updateAction = function () {
     }
 	}
 	return new ExecutionStatusRunning();
-  /*
-  if(this.runMem.requestStatus.finished) {
-    //check for dark here
-		return new ExecutionStatusDone();
-	} else {
-		return new ExecutionStatusRunning();
-	}*/
 }
 
 function B_FBForwardUntilDark(x, y) {
-  //B_FBMotion.call(this, x, y, "forward", 3);
-  //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "dark");
   this.colorTopHalf(Colors.darkTeal);
 
   const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.black, "sun", 25);
 	blockIcon.icon.setRotation(-8);
-	//blockIcon.icon.negate(Colors.flagGreen);
 	blockIcon.negate(Colors.black);
 	blockIcon.isEndOfLine = true;
-	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
+  blockIcon.addSecondIcon(VectorPaths[B_FBMotion.iconPaths["forward"]], Colors.white, true, null, 5);
 	this.addPart(blockIcon);
 }
 B_FBForwardUntilDark.prototype = Object.create(B_FBSensorBlock.prototype);
@@ -363,11 +327,9 @@ B_FBForwardUntilDark.prototype.constructor = B_FBForwardUntilDark;
 
 
 function B_FBForwardUntilObstacle(x, y) {
-  //B_FBMotion.call(this, x, y, "forward", 3);
-  //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "obstacle");
 
-  const blockIcon = new BlockIcon(this, VectorPaths.mvArrow, Colors.white, "obstacle", 25);
+  const blockIcon = new BlockIcon(this, VectorPaths[B_FBMotion.iconPaths["forward"]], Colors.white, "obstacle", 25);
   blockIcon.addObstacle(Colors.darkTeal);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);

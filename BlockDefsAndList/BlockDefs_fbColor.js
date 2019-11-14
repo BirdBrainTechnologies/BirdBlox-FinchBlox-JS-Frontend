@@ -45,23 +45,6 @@ function B_FBColor(x, y, level, type) {
    this.ledIcon = this.blockIcon.icon.pathE2;
  } else {
    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
-   /*
-   const dim = 25;
-   const r = 8;
-   const margin = 5;
-   const startX = iconPath.width/2 - (5*dim + 4*margin)/2;
-   let y = 90;
-   let iGroup = blockIcon.icon.group;
-   for (let i = 0; i < 5; i++) {
-     let x = startX;
-     for (let j = 0; j < 5; j++) {
-       let rect = GuiElements.draw.rect(x, y, dim, dim, Colors.iron, r, r);
-       iGroup.appendChild(rect);
-       this.ledArray.push(rect);
-       x += dim + margin;
-     }
-     y += dim + margin;
-   }*/
  }
 
 }

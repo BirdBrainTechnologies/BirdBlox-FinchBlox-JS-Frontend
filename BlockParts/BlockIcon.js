@@ -110,12 +110,19 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
 
 /**
  * Add some text to this icon. Created for the FinchBlox level 1 music block.
+ * Also used for FinchBlox level 3 repeat block.
  * @param {string} text - Text to add
  */
-BlockIcon.prototype.addText = function(text) {
+BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
+	if (this.textE != null) {
+		this.parent.group.removeChild(this.textE);
+	}
+	
 	const font = Font.uiFont(28);
-	this.textXOffset = 12;
-	this.textYOffset = 30 + font.charHeight/2;
+	//this.textXOffset = 12;
+	//this.textYOffset = 30 + font.charHeight/2;
+	this.textXOffset = xOffset;
+	this.textYOffset = yOffset + font.charHeight/2;
 	const x = this.x + this.textXOffset;
 	const y = this.y + this.textYOffset;
 

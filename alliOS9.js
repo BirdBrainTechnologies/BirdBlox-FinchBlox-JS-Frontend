@@ -8216,6 +8216,22 @@ Font.uiFont = function(fontSize){
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.mjBack={};
+  VP.mjBack.path="M47.588 0H22.176v33.778H5.801a5 5 0 0 0-3.592 8.478L31.301 72.3a5 5 0 0 0 7.174.01l29.259-30.045a5 5 0 0 0-3.582-8.488H47.588V0z";
+  VP.mjBack.width=70;
+  VP.mjBack.height=74;
+  VP.mjForward={};
+  VP.mjForward.path="M47.588 74H22.176V40.222H5.801a5 5 0 0 1-3.592-8.478L31.301 1.7a5 5 0 0 1 7.174-.01l29.259 30.045a5 5 0 0 1-3.582 8.488H47.588V74z";
+  VP.mjForward.width=70;
+  VP.mjForward.height=74;
+  VP.mjTurnLeft={};
+  VP.mjTurnLeft.path="M33.536 38.777c17.65 2.2 31.625 18.776 31.625 39.223h21.375c0-32.094-23.228-58.654-53-60.853V5.88a5 5 0 0 0-8.256-3.795L1.744 22.284a5 5 0 0 0-.183 7.424l23.536 22.297a5 5 0 0 0 8.44-3.63v-9.598z";
+  VP.mjTurnLeft.width=87;
+  VP.mjTurnLeft.height=78;
+  VP.mjTurnRight={};
+  VP.mjTurnRight.path="M53 36.42C35.35 38.584 21.375 54.888 21.375 75H0c0-31.568 23.229-57.692 53-59.855V5.318a5 5 0 0 1 8.098-3.925l23.331 18.42a5 5 0 0 1 .312 7.58l-23.33 21.762A5 5 0 0 1 53 45.5V36.42z";
+  VP.mjTurnRight.width=87;
+  VP.mjTurnRight.height=75;
   VP.mjSun={};
   VP.mjSun.path="M18.229044,29.7211846 C18.0843592,29.7211846 17.9750652,29.670935 17.8991544,29.5694443 L15.6151195,26.4229101 L11.9107766,27.6152989 C11.7920951,27.6664658 11.6698752,27.6494125 11.5428011,27.5655396 C11.432925,27.4795677 11.3781668,27.369882 11.3781668,27.2344224 L11.3781668,23.3519267 L7.67382389,22.1349634 C7.53878762,22.0926054 7.45408215,22.0079069 7.42010965,21.8812491 C7.37775515,21.7449605 7.39435688,21.6235662 7.47109662,21.5132772 L9.75452126,18.3679636 L7.47109662,15.2214223 C7.39435335,15.1199352 7.37775515,14.9964877 7.42010965,14.8522192 C7.45408215,14.7259883 7.53794801,14.6410535 7.67382389,14.5991188 L11.3787806,13.3821555 L11.3787806,9.49904593 C11.3787806,9.36400966 11.432925,9.25406647 11.5428011,9.16977375 C11.6698752,9.08463789 11.7925149,9.06887931 11.9107766,9.11878678 L15.6163472,10.3117895 L17.8991544,7.16524816 C17.9838705,7.05537553 18.0931681,7 18.229044,7 C18.3640838,7 18.474415,7.05453591 18.5595474,7.16524816 L20.8423582,10.3117895 L24.5473114,9.11878678 C24.6651533,9.0680397 24.788442,9.08463789 24.914673,9.16977375 C25.0249689,9.25406647 25.0793108,9.36400966 25.0793108,9.49904593 L25.0793108,13.3815416 L28.7842676,14.5991188 C28.9193039,14.641057 29.0042034,14.7259883 29.0385957,14.8522192 C29.0805303,14.9956445 29.0637134,15.1195436 28.9869913,15.2201946 L26.7035702,18.3673498 L28.9869913,21.5132772 C29.0628985,21.6235662 29.0799165,21.7449605 29.0379818,21.8812491 C29.0040093,22.0087395 28.91869,22.0926054 28.7836502,22.1349634 L25.0793108,23.3519267 L25.0793108,27.2344224 C25.0793108,27.369882 25.0241293,27.4795677 24.914673,27.5655396 C24.7876024,27.6494125 24.6645394,27.6664658 24.546694,27.6152989 L20.8417443,26.4229101 L18.5583232,29.5694443 C18.4832521,29.670935 18.3724693,29.7211846 18.229044,29.7211846 L18.229044,29.7211846 Z M18.229044,25.6746684 C19.2183492,25.6746684 20.1630846,25.4821929 21.0647387,25.0972065 C21.9647171,24.7130598 22.7424404,24.1916789 23.3979191,23.5374526 C24.054241,22.8811342 24.5743377,22.1036614 24.9589043,21.2024306 C25.3443104,20.3016126 25.5363626,19.3564293 25.5363626,18.3679636 C25.5363626,17.377406 25.3434708,16.4324731 24.9589043,15.5316551 C24.5743377,14.6308441 24.054241,13.8520837 23.3979191,13.1978573 C22.7432764,12.5415354 21.9647171,12.021862 21.0647387,11.6368792 C20.1630846,11.2518893 19.2183492,11.0600311 18.229044,11.0600311 C17.2393189,11.0600311 16.2941673,11.2518893 15.3933528,11.6368792 C14.4925348,12.021862 13.7140036,12.5415354 13.0589412,13.1978573 C12.4038752,13.8520837 11.8829142,14.6316767 11.4991872,15.5316551 C11.1142008,16.4324731 10.9204976,17.377406 10.9204976,18.3679636 C10.9204976,19.3564293 11.1142008,20.3016126 11.4991872,21.2024306 C11.8829142,22.1036614 12.4030391,22.8811342 13.0589412,23.5374526 C13.7140036,24.1916789 14.4925348,24.7130598 15.3933528,25.0972065 C16.2941673,25.4821929 17.2393189,25.6746684 18.229044,25.6746684 Z M18.2297495,24.5461677 C14.8126841,24.5461677 12.0435621,21.7768199 12.0435621,18.3605941 C12.0435621,14.9447881 14.8126841,12.1750205 18.2297495,12.1750205 C21.6459753,12.1750205 24.4147093,14.9447881 24.4147093,18.3605941 C24.4147093,21.7768199 21.6459753,24.5461677 18.2297495,24.5461677 Z";
   VP.mjSun.width=40;
@@ -18252,6 +18268,9 @@ CodeManager.stop = function() {
 	Sound.stopAllSounds() // Stops all sounds and tones
 	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
+
+  //If an autoExecute block is on the active tab, restart it.
+  TabManager.activeTab.passRecursively("startRunIfAutoExec")
 };
 
 /**
@@ -22699,9 +22718,15 @@ function BlockStack(firstBlock, tab) {
 	this.flying = false; // BlockStacks being moved enter flying mode so they are above other BlockStacks and Tabs.
 	this.tab.updateArrows();
 
-	if (this.firstBlock.autoExecute) {
-		this.startRun();
-	}
+	this.startRunIfAutoExec();
+}
+
+/**
+ * If the first block is set to autoExecute, start the stack.
+ * Used when a new stack is created or when a stack is stopped.
+ */
+BlockStack.prototype.startRunIfAutoExec = function() {
+  if (this.firstBlock.autoExecute) { this.startRun(); }
 }
 
 /**
@@ -30126,12 +30151,19 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
 
 /**
  * Add some text to this icon. Created for the FinchBlox level 1 music block.
+ * Also used for FinchBlox level 3 repeat block.
  * @param {string} text - Text to add
  */
-BlockIcon.prototype.addText = function(text) {
+BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
+	if (this.textE != null) {
+		this.parent.group.removeChild(this.textE);
+	}
+	
 	var font = Font.uiFont(28);
-	this.textXOffset = 12;
-	this.textYOffset = 30 + font.charHeight/2;
+	//this.textXOffset = 12;
+	//this.textYOffset = 30 + font.charHeight/2;
+	this.textXOffset = xOffset;
+	this.textYOffset = yOffset + font.charHeight/2;
 	var x = this.x + this.textXOffset;
 	var y = this.y + this.textYOffset;
 
@@ -32316,23 +32348,6 @@ function B_FBColor(x, y, level, type) {
    this.ledIcon = this.blockIcon.icon.pathE2;
  } else {
    this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
-   /*
-   var dim = 25;
-   var r = 8;
-   var margin = 5;
-   var startX = iconPath.width/2 - (5*dim + 4*margin)/2;
-   var y = 90;
-   var iGroup = blockIcon.icon.group;
-   for (var i = 0; i < 5; i++) {
-     var x = startX;
-     for (var j = 0; j < 5; j++) {
-       var rect = GuiElements.draw.rect(x, y, dim, dim, Colors.iron, r, r);
-       iGroup.appendChild(rect);
-       this.ledArray.push(rect);
-       x += dim + margin;
-     }
-     y += dim + margin;
-   }*/
  }
 
 }
@@ -32605,10 +32620,8 @@ function B_FBMotion(x, y, direction, level) {
 
   CommandBlock.call(this,x,y,"motion_"+level);
 
-  //var icon = VectorPaths.blockIcons["motion_" + direction];
-  var icon = VectorPaths.mvArrow;
-  var rotation = B_FBMotion.iconRotation[direction];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 32, rotation);
+  var icon =  VectorPaths[B_FBMotion.iconPaths[direction]];
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 }
@@ -32617,8 +32630,6 @@ B_FBMotion.prototype.constructor = B_FBMotion;
 
 B_FBMotion.prototype.startAction = function () {
   var mem = this.runMem;
-  //mem.timerStarted = false;
-  //mem.duration = 1000;
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
   mem.requestStatus.error = false;
@@ -32641,22 +32652,6 @@ B_FBMotion.prototype.updateAction = function () {
 	} else {
 		return new ExecutionStatusRunning();
 	}
-  /*
-  var mem = this.runMem;
-  if (!mem.timerStarted) {
-      var status = mem.requestStatus;
-      if (status.finished === true) {
-          mem.startTime = new Date().getTime();
-          mem.timerStarted = true;
-      } else {
-          return new ExecutionStatusRunning(); // Still running
-      }
-  }
-  if (new Date().getTime() >= mem.startTime + mem.duration) {
-      return new ExecutionStatusDone(); // Done running
-  } else {
-      return new ExecutionStatusRunning(); // Still running
-  }*/
 }
 B_FBMotion.prototype.setDefaults = function() {
   switch (this.direction) {
@@ -32746,15 +32741,13 @@ B_FBMotion.prototype.updateValues = function () {
         GuiElements.alert("unknown direction in motion block update values");
     }
   }
-  //console.log("Move " + this.direction + " block update values: " + this.rightSpeed + ", " + this.leftSpeed + ", " + this.rightDist + ", " + this.leftDist);
 }
-B_FBMotion.iconRotation = {
-  "forward": 0,
-  "right": 90,
-  "backward": 180,
-  "left": 270
+B_FBMotion.iconPaths= {
+  "forward": "mjForward",
+  "right": "mjTurnRight",
+  "backward": "mjBack",
+  "left": "mjTurnLeft"
 }
-
 
 //****  Level 1 Blocks ****//
 
@@ -32825,10 +32818,6 @@ function B_FBMotionL3(x, y, direction){
   if (this.angleBN != null) {
     this.angleBN.addSlider("percent", this.defaultSpeed, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   }
-
-  //this.speedBN = new BlockButton(this);
-  //this.speedBN.addSlider("percent", this.defaultSpeed, [25, 50, 75, 100]);
-  //this.addPart(this.speedBN);
 }
 B_FBMotionL3.prototype = Object.create(B_FBMotionL2.prototype);
 B_FBMotionL3.prototype.constructor = B_FBMotionL3;
@@ -32924,27 +32913,17 @@ B_FBSensorBlock.prototype.updateAction = function () {
     }
 	}
 	return new ExecutionStatusRunning();
-  /*
-  if(this.runMem.requestStatus.finished) {
-    //check for dark here
-		return new ExecutionStatusDone();
-	} else {
-		return new ExecutionStatusRunning();
-	}*/
 }
 
 function B_FBForwardUntilDark(x, y) {
-  //B_FBMotion.call(this, x, y, "forward", 3);
-  //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "dark");
   this.colorTopHalf(Colors.darkTeal);
 
   var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.black, "sun", 25);
 	blockIcon.icon.setRotation(-8);
-	//blockIcon.icon.negate(Colors.flagGreen);
 	blockIcon.negate(Colors.black);
 	blockIcon.isEndOfLine = true;
-	blockIcon.addSecondIcon(VectorPaths.mvArrow, Colors.white, true, null, 5);
+  blockIcon.addSecondIcon(VectorPaths[B_FBMotion.iconPaths["forward"]], Colors.white, true, null, 5);
 	this.addPart(blockIcon);
 }
 B_FBForwardUntilDark.prototype = Object.create(B_FBSensorBlock.prototype);
@@ -32954,11 +32933,9 @@ B_FBForwardUntilDark.prototype.constructor = B_FBForwardUntilDark;
 
 
 function B_FBForwardUntilObstacle(x, y) {
-  //B_FBMotion.call(this, x, y, "forward", 3);
-  //CommandBlock.call(this,x,y,"motion_3");
   B_FBSensorBlock.call(this, x, y, "obstacle");
 
-  var blockIcon = new BlockIcon(this, VectorPaths.mvArrow, Colors.white, "obstacle", 25);
+  var blockIcon = new BlockIcon(this, VectorPaths[B_FBMotion.iconPaths["forward"]], Colors.white, "obstacle", 25);
   blockIcon.addObstacle(Colors.darkTeal);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
@@ -32990,7 +32967,8 @@ B_FBSound.prototype.constructor = B_FBSound;
 B_FBSound.prototype.startAction = function () {
   var mem = this.runMem;
   mem.timerStarted = false;
-  mem.duration = CodeManager.beatsToMs(this.beats);
+  //mem.duration = CodeManager.beatsToMs(this.beats);
+  mem.duration = 100 * this.beats; //FinchBlox does not use the tempo setting. Each beat is 0.1 seconds.
   mem.requestStatus = {};
   mem.requestStatus.finished = true; //change when sending actual request
   mem.requestStatus.error = false;
@@ -33046,7 +33024,8 @@ function B_FBSoundL1(x, y, note, midiNote) {
   this.midiNote = midiNote;
 
   //this.addPart(new LabelText(this, note));
-  this.blockIcon.addText(note);
+  //this.blockIcon.addText(note);
+  this.blockIcon.addText(note, 12, 30);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;
@@ -33102,7 +33081,7 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
-  this.noteButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
+  this.noteButton.addSlider("time", this.beats, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 /*
   this.beatsButton = new BlockButton(this);
@@ -33283,13 +33262,14 @@ function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, category);
 
 	if (FinchBlox) {
-		var blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
-		blockIcon.isEndOfLine = true;
-		this.addPart(blockIcon);
 		this.countSelection=10;
+		this.blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+		this.blockIcon.isEndOfLine = true;
+		this.addPart(this.blockIcon);
 		this.countBN = new BlockButton(this);
 		this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 		this.addPart(this.countBN);
+		this.updateValues();
 	} else {
 		this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
 		this.parseTranslation(Language.getStr("block_repeat"));
@@ -33335,6 +33315,7 @@ B_Repeat.prototype.updateAction = function() {
 B_Repeat.prototype.updateValues = function() {
 	if (this.countBN != null) {
 		this.countSelection = this.countBN.values[0];
+		this.blockIcon.addText(this.countSelection, 30, 28);
 	}
 }
 

@@ -262,6 +262,9 @@ CodeManager.stop = function() {
 	Sound.stopAllSounds() // Stops all sounds and tones
 	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
+
+  //If an autoExecute block is on the active tab, restart it.
+  TabManager.activeTab.passRecursively("startRunIfAutoExec")
 };
 
 /**

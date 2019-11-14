@@ -169,13 +169,14 @@ function B_Repeat(x, y) {
 	LoopBlock.call(this, x, y, category);
 
 	if (FinchBlox) {
-		const blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
-		blockIcon.isEndOfLine = true;
-		this.addPart(blockIcon);
 		this.countSelection=10;
+		this.blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+		this.blockIcon.isEndOfLine = true;
+		this.addPart(this.blockIcon);
 		this.countBN = new BlockButton(this);
 		this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 		this.addPart(this.countBN);
+		this.updateValues();
 	} else {
 		this.addPart(new NumSlot(this, "NumS_count", 10, true, true)); //Positive integer.
 		this.parseTranslation(Language.getStr("block_repeat"));
@@ -221,6 +222,7 @@ B_Repeat.prototype.updateAction = function() {
 B_Repeat.prototype.updateValues = function() {
 	if (this.countBN != null) {
 		this.countSelection = this.countBN.values[0];
+		this.blockIcon.addText(this.countSelection, 30, 28);
 	}
 }
 
