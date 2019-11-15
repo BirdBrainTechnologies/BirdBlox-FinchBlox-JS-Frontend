@@ -533,15 +533,24 @@ BlockStack.prototype.updateTabDim = function() {
 /**
  * Writes the BlockStack to XML
  * @param {Document} xmlDoc - The document to write to
+ * @param {boolean} skipFirstBlock - do not record the first block if true (FinchBlox)
  * @return {Node} - The XML node representing the BlockStack
  */
-BlockStack.prototype.createXml = function(xmlDoc) {
+BlockStack.prototype.createXml = function(xmlDoc, skipFirstBlock) {
 	const stack = XmlWriter.createElement(xmlDoc, "stack");
 	XmlWriter.setAttribute(stack, "x", this.x);
 	XmlWriter.setAttribute(stack, "y", this.y);
 	// Create a tag for Blocks and recursively write the Blocks to it.
 	const blocks = XmlWriter.createElement(xmlDoc, "blocks");
-	this.firstBlock.writeToXml(xmlDoc, blocks);
+  if (skipFirstBlock) {
+    if (this.firstBlock.nextBlock != null) {
+      this.firstBlock.nextBlock.writeToXml(xmlDoc, blocks);
+    } else {
+      return null;
+    }
+  } else {
+  	this.firstBlock.writeToXml(xmlDoc, blocks);
+  }
 	stack.appendChild(blocks);
 	return stack;
 };

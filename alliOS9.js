@@ -6258,7 +6258,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-	if (!FinchBlox){
+	if (FinchBlox){
+		GuiElements.blockInteraction();
+		LevelDialog.loadLevelSavePoint();
+	} else {
 		GuiElements.blockInteraction();
 		OpenDialog.showDialog();
 	}
@@ -10732,8 +10735,8 @@ TitleBar.setGraphicsPart1 = function() {
   if (FinchBlox) {
     TB.buttonH = TB.height/2;
     TB.tallButtonH = TB.buttonH * 1.25;
-    //TB.buttonW = TB.height * 2/3;
-    TB.buttonW = TB.tallButtonH * (5/4);
+    //TB.buttonW = TB.tallButtonH * (5/4);
+    TB.buttonW = TB.tallButtonH * (3/4);
     var maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
     //TB.longButtonW = 2.5 * TB.buttonW;
@@ -10900,8 +10903,11 @@ TitleBar.makeButtons = function() {
     var r = TB.defaultCornerRounding;
     var y = (TB.height/2) - (TB.tallButtonH/2);
     var h = TB.tallButtonH;
-    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
-    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
+    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
+    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
+    TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
 
   	TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
@@ -10917,8 +10923,10 @@ TitleBar.makeButtons = function() {
   	UndoManager.setUndoButton(TB.undoButton);
 
     //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
-    //TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
+    TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
+    TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
+    TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
@@ -18722,7 +18730,7 @@ CodeManager.importXml = function(projectNode) {
 			List.importXml(listNodes[i]);
 		}
 	}
-	BlockPalette.getCategory("variables").refreshGroup();
+  if (!FinchBlox) { BlockPalette.getCategory("variables").refreshGroup(); }
 	var tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
 	TabManager.importXml(tabsNode);
 	BlockPalette.refresh();
@@ -19251,7 +19259,16 @@ function Tab() {
 Tab.prototype.activate = function() {
 	GuiElements.layers.activeTab.appendChild(this.mainG);
 	this.overFlowArr.show();
-  if (FinchBlox) { this.addStartBlock(); }
+  if (FinchBlox) {
+    var stacks = this.stackList;
+    var startBlockFound = false;
+    for (var i = 0; i < stacks.length; i++) {
+      if (stacks[i].firstBlock.isStartBlock) {
+        startBlockFound = true;
+      }
+    }
+    if (!startBlockFound) { this.addStartBlock(); }
+  }
 };
 
 /**
@@ -19277,7 +19294,7 @@ Tab.prototype.removeStack = function(stack) {
 Tab.prototype.clear = function() {
   var oldList = this.stackList.slice();
   oldList.forEach(function(stack) { stack.remove(); });
-  this.addStartBlock();
+  //this.addStartBlock();
 };
 
 /**
@@ -19570,9 +19587,10 @@ Tab.prototype.updateTabDim = function() {
 /**
  * Writes the contents of the Tab to xml
  * @param {Document} xmlDoc - The XML document to write to
+ * @param {boolean} skipStartBlock - do not include start block in the xml if true
  * @return {Node} - The XML Node for this Tab
  */
-Tab.prototype.createXml = function(xmlDoc) {
+Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
 	var tab = XmlWriter.createElement(xmlDoc, "tab");
 	//XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab, "x", this.scrollX);
@@ -19580,7 +19598,13 @@ Tab.prototype.createXml = function(xmlDoc) {
 	XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
 	var stacks = XmlWriter.createElement(xmlDoc, "stacks");
 	for (var i = 0; i < this.stackList.length; i++) {
-		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
+    var stack;
+    if (skipStartBlock && this.stackList[i].firstBlock.isStartBlock) {
+      stack = this.stackList[i].createXml(xmlDoc, true);
+    } else {
+      stack = this.stackList[i].createXml(xmlDoc);
+    }
+		if (stack != null) { stacks.appendChild(stack); }
 	}
 	tab.appendChild(stacks);
 	return tab;
@@ -19625,6 +19649,11 @@ Tab.prototype.delete = function() {
  * @return {boolean} - Whether the stack was created (false if the XML is invalid)
  */
 Tab.prototype.undoDelete = function(stackNode) {
+  //if the node is really a tab node, undo delete of each stack within
+  if (stackNode.nodeName === "tab") {
+    return this.undoDeleteTab(stackNode);
+  }
+
 	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
 	var xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 	var yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
@@ -19640,6 +19669,24 @@ Tab.prototype.undoDelete = function(stackNode) {
 	this.updateArrows();
 	return true;
 };
+
+/**
+ * In FinchBlox, one can delete the entire contents of the tab with a button.
+ * If it is a tab deletion we are undoing, we must restore each stack within.
+ */
+Tab.prototype.undoDeleteTab = function(tabNode) {
+  var success = false;
+  var stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
+	if (stacksNode != null) {
+		var stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+    if (stackNodes.length != 0) { success = true; }
+		for (var i = 0; i < stackNodes.length; i++) {
+			var result = this.undoDelete(stackNodes[i]);
+      success = success && result;
+		}
+	}
+  return success;
+}
 
 /**
  * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device
@@ -22437,6 +22484,16 @@ LevelDialog.setGlobals = function() {
 
   LD.totalLevels = 3;
   LD.currentLevel = 1;
+
+  LD.savePointFileNames = {
+    1 : "FinchBloxSavePoint_Level_1",
+    2 : "FinchBloxSavePoint_Level_2",
+    3 : "FinchBloxSavePoint_Level_3"
+  }
+  //LD.filesMissing = 0;
+  LD.fileListRetreived = false;
+  LD.filesSavedLocally = [];
+  LD.checkSavedFiles();
 }
 
 LevelDialog.prototype.show = function() {
@@ -22513,8 +22570,10 @@ LevelDialog.setLevel = function(level) {
   if (LD.currentLevel != level) {
     LD.currentLevel = level;
     BlockPalette.setLevel();
-    TabManager.activeTab.clear();
+    //TabManager.activeTab.clear();
     TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
+    GuiElements.blockInteraction();
+    LD.loadLevelSavePoint();
   }
   RowDialog.currentDialog.highlightSelected();
 }
@@ -22545,6 +22604,61 @@ LevelDialog.prototype.closeDialog = function() {
 		}
 		GuiElements.unblockInteraction();
 	}
+}
+
+/**
+ * Checks what files are available in the backend
+ */
+LevelDialog.checkSavedFiles = function() {
+  HtmlServer.sendRequestWithCallback("data/files", function(response) {
+    console.log("getSavedFiles response: " + response);
+		var fileList = new FileList(response);
+    LevelDialog.filesSavedLocally = fileList.localFiles;
+    LevelDialog.fileListRetreived = true;
+		//LevelDialog.savedFiles = fileList.localFiles;
+    //console.log("got saved files from backend... " + LevelDialog.savedFiles);
+    /*for (var i = 1; i <= LevelDialog.totalLevels; i++) {
+      var levelFileName = LevelDialog.savePointFileNames[i];
+      console.log("checking for level " + i + " file " + levelFileName);
+      if (!fileList.localFiles.includes(levelFileName)) {
+        console.log("file '" + levelFileName + "' not found. Must create...");
+        LevelDialog.filesMissing++;
+        var request = new HttpRequestBuilder("data/new");
+      	request.addParam("filename", levelFileName);
+        HtmlServer.sendRequestWithCallback(request.toString(), function() { LevelDialog.filesMissing--; }, null, true, SaveManager.emptyProgData);
+      }
+    }*/
+	}, function() {
+    GuiElements.alert("Error retrieving saved files");
+  });
+}
+
+LevelDialog.loadLevelSavePoint = function() {
+  var LD = LevelDialog;
+  console.log("loadLevelSavePoint for level " + LD.currentLevel);
+  var levelFileName = LD.savePointFileNames[LD.currentLevel];
+  if (!LD.fileListRetreived) {
+    setTimeout(function(){ LevelDialog.loadLevelSavePoint(); }, 200);
+    return;
+  }
+  if (!LD.filesSavedLocally.includes(levelFileName)) {
+    console.log("file '" + levelFileName + "' not found. Must create...");
+    var request = new HttpRequestBuilder("data/new");
+    request.addParam("filename", levelFileName);
+    HtmlServer.sendRequestWithCallback(request.toString(), function() {
+      LevelDialog.filesSavedLocally.push(levelFileName);
+      console.log("file " + levelFileName + " added to list");
+      SaveManager.userOpenFile(levelFileName);
+    }, null, true, SaveManager.emptyProgData);
+  } else {
+    SaveManager.userOpenFile(levelFileName);
+  }
+  /*if (LD.filesMissing == 0) {
+    SaveManager.userOpenFile(LD.savePointFileNames[LD.currentLevel]);
+  } else {
+    console.log("files missing = " + LD.filesMissing);
+  }*/
+
 }
 
 /**
@@ -23209,15 +23323,24 @@ BlockStack.prototype.updateTabDim = function() {
 /**
  * Writes the BlockStack to XML
  * @param {Document} xmlDoc - The document to write to
+ * @param {boolean} skipFirstBlock - do not record the first block if true (FinchBlox)
  * @return {Node} - The XML node representing the BlockStack
  */
-BlockStack.prototype.createXml = function(xmlDoc) {
+BlockStack.prototype.createXml = function(xmlDoc, skipFirstBlock) {
 	var stack = XmlWriter.createElement(xmlDoc, "stack");
 	XmlWriter.setAttribute(stack, "x", this.x);
 	XmlWriter.setAttribute(stack, "y", this.y);
 	// Create a tag for Blocks and recursively write the Blocks to it.
 	var blocks = XmlWriter.createElement(xmlDoc, "blocks");
-	this.firstBlock.writeToXml(xmlDoc, blocks);
+  if (skipFirstBlock) {
+    if (this.firstBlock.nextBlock != null) {
+      this.firstBlock.nextBlock.writeToXml(xmlDoc, blocks);
+    } else {
+      return null;
+    }
+  } else {
+  	this.firstBlock.writeToXml(xmlDoc, blocks);
+  }
 	stack.appendChild(blocks);
 	return stack;
 };
@@ -24805,7 +24928,7 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-
+		if (FinchBlox) { GuiElements.unblockInteraction(); }
 	}, function() {
 		CodeManager.cancelLoading();
 	});
@@ -25195,23 +25318,50 @@ UndoManager.setUndoButton = function(button) {
  */
 UndoManager.deleteStack = function(stack) {
 	var UM = UndoManager;
-	var doc = XmlWriter.newDoc("undoData");
-	var stackData = stack.createXml(doc);
+  var doc = XmlWriter.newDoc("undoData");
+  var stackData;
+  if(FinchBlox && (LevelDialog.currentLevel != 3) && stack.firstBlock.isStartBlock){
+		TabManager.activeTab.addStartBlock();
+    if (stack.firstBlock.nextBlock != null) {
+      stackData = stack.createXml(doc, true);
+    } else {
+      stack.remove();
+      return;
+    }
+	} else {
+    stackData = stack.createXml(doc);
+  }
 	stack.remove();
 	UM.undoStack.push(stackData);
 	while(UM.undoStack.length > UM.undoLimit) {
 		UM.undoStack.shift();
 	}
 	UM.updateButtonEnabled();
-
-	if(FinchBlox){
-		if(LevelDialog.currentLevel != 3){
-			if(stack.firstBlock.isStartBlock){
-				TabManager.activeTab.addStartBlock();
-			}
-		}
-	}
 };
+
+/**
+ * Deletes the entire contents of the active tab
+ * Used in FinchBlox for the trash button.
+ */
+UndoManager.deleteTab = function() {
+  var UM = UndoManager;
+  var tab = TabManager.activeTab;
+  var doc = XmlWriter.newDoc("undoData");
+  var tabData;
+  if(FinchBlox && (LevelDialog.currentLevel != 3)){
+    tabData = tab.createXml(doc, true);
+    tab.clear();
+    TabManager.activeTab.addStartBlock();
+	} else {
+    tabData = tab.createXml(doc);
+    tab.clear();
+  }
+	UM.undoStack.push(tabData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+}
 
 /**
  * Pops an item from the stack and rebuilds it, placing it in the corner of the canvas

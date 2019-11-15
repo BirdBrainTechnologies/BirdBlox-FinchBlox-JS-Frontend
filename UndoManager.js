@@ -29,23 +29,50 @@ UndoManager.setUndoButton = function(button) {
  */
 UndoManager.deleteStack = function(stack) {
 	const UM = UndoManager;
-	const doc = XmlWriter.newDoc("undoData");
-	const stackData = stack.createXml(doc);
+  const doc = XmlWriter.newDoc("undoData");
+  var stackData;
+  if(FinchBlox && (LevelDialog.currentLevel != 3) && stack.firstBlock.isStartBlock){
+		TabManager.activeTab.addStartBlock();
+    if (stack.firstBlock.nextBlock != null) {
+      stackData = stack.createXml(doc, true);
+    } else {
+      stack.remove();
+      return;
+    }
+	} else {
+    stackData = stack.createXml(doc);
+  }
 	stack.remove();
 	UM.undoStack.push(stackData);
 	while(UM.undoStack.length > UM.undoLimit) {
 		UM.undoStack.shift();
 	}
 	UM.updateButtonEnabled();
-
-	if(FinchBlox){
-		if(LevelDialog.currentLevel != 3){
-			if(stack.firstBlock.isStartBlock){
-				TabManager.activeTab.addStartBlock();
-			}
-		}
-	}
 };
+
+/**
+ * Deletes the entire contents of the active tab
+ * Used in FinchBlox for the trash button.
+ */
+UndoManager.deleteTab = function() {
+  const UM = UndoManager;
+  const tab = TabManager.activeTab;
+  const doc = XmlWriter.newDoc("undoData");
+  var tabData;
+  if(FinchBlox && (LevelDialog.currentLevel != 3)){
+    tabData = tab.createXml(doc, true);
+    tab.clear();
+    TabManager.activeTab.addStartBlock();
+	} else {
+    tabData = tab.createXml(doc);
+    tab.clear();
+  }
+	UM.undoStack.push(tabData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+}
 
 /**
  * Pops an item from the stack and rebuilds it, placing it in the corner of the canvas

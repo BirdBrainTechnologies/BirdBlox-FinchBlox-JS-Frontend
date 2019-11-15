@@ -37,8 +37,8 @@ TitleBar.setGraphicsPart1 = function() {
   if (FinchBlox) {
     TB.buttonH = TB.height/2;
     TB.tallButtonH = TB.buttonH * 1.25;
-    //TB.buttonW = TB.height * 2/3;
-    TB.buttonW = TB.tallButtonH * (5/4);
+    //TB.buttonW = TB.tallButtonH * (5/4);
+    TB.buttonW = TB.tallButtonH * (3/4);
     const maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
     //TB.longButtonW = 2.5 * TB.buttonW;
@@ -205,8 +205,11 @@ TitleBar.makeButtons = function() {
     const r = TB.defaultCornerRounding;
     const y = (TB.height/2) - (TB.tallButtonH/2);
     const h = TB.tallButtonH;
-    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
-    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
+    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
+    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
+    TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
 
   	TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
@@ -222,8 +225,10 @@ TitleBar.makeButtons = function() {
   	UndoManager.setUndoButton(TB.undoButton);
 
     //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
-    //TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
+    TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
+    TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
+    TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);

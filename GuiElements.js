@@ -203,7 +203,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
-	if (!FinchBlox){
+	if (FinchBlox){
+		GuiElements.blockInteraction();
+		LevelDialog.loadLevelSavePoint();
+	} else {
 		GuiElements.blockInteraction();
 		OpenDialog.showDialog();
 	}

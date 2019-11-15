@@ -199,7 +199,7 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-
+		if (FinchBlox) { GuiElements.unblockInteraction(); }
 	}, function() {
 		CodeManager.cancelLoading();
 	});

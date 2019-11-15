@@ -47,7 +47,16 @@ function Tab() {
 Tab.prototype.activate = function() {
 	GuiElements.layers.activeTab.appendChild(this.mainG);
 	this.overFlowArr.show();
-  if (FinchBlox) { this.addStartBlock(); }
+  if (FinchBlox) {
+    const stacks = this.stackList;
+    var startBlockFound = false;
+    for (let i = 0; i < stacks.length; i++) {
+      if (stacks[i].firstBlock.isStartBlock) {
+        startBlockFound = true;
+      }
+    }
+    if (!startBlockFound) { this.addStartBlock(); }
+  }
 };
 
 /**
@@ -73,7 +82,7 @@ Tab.prototype.removeStack = function(stack) {
 Tab.prototype.clear = function() {
   let oldList = this.stackList.slice();
   oldList.forEach(function(stack) { stack.remove(); });
-  this.addStartBlock();
+  //this.addStartBlock();
 };
 
 /**
@@ -366,9 +375,10 @@ Tab.prototype.updateTabDim = function() {
 /**
  * Writes the contents of the Tab to xml
  * @param {Document} xmlDoc - The XML document to write to
+ * @param {boolean} skipStartBlock - do not include start block in the xml if true
  * @return {Node} - The XML Node for this Tab
  */
-Tab.prototype.createXml = function(xmlDoc) {
+Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
 	const tab = XmlWriter.createElement(xmlDoc, "tab");
 	//XmlWriter.setAttribute(tab,"name",this.name);
 	XmlWriter.setAttribute(tab, "x", this.scrollX);
@@ -376,7 +386,13 @@ Tab.prototype.createXml = function(xmlDoc) {
 	XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
 	const stacks = XmlWriter.createElement(xmlDoc, "stacks");
 	for (let i = 0; i < this.stackList.length; i++) {
-		stacks.appendChild(this.stackList[i].createXml(xmlDoc));
+    var stack;
+    if (skipStartBlock && this.stackList[i].firstBlock.isStartBlock) {
+      stack = this.stackList[i].createXml(xmlDoc, true);
+    } else {
+      stack = this.stackList[i].createXml(xmlDoc);
+    }
+		if (stack != null) { stacks.appendChild(stack); }
 	}
 	tab.appendChild(stacks);
 	return tab;
@@ -421,6 +437,11 @@ Tab.prototype.delete = function() {
  * @return {boolean} - Whether the stack was created (false if the XML is invalid)
  */
 Tab.prototype.undoDelete = function(stackNode) {
+  //if the node is really a tab node, undo delete of each stack within
+  if (stackNode.nodeName === "tab") {
+    return this.undoDeleteTab(stackNode);
+  }
+
 	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
 	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
@@ -436,6 +457,24 @@ Tab.prototype.undoDelete = function(stackNode) {
 	this.updateArrows();
 	return true;
 };
+
+/**
+ * In FinchBlox, one can delete the entire contents of the tab with a button.
+ * If it is a tab deletion we are undoing, we must restore each stack within.
+ */
+Tab.prototype.undoDeleteTab = function(tabNode) {
+  var success = false;
+  const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
+	if (stacksNode != null) {
+		const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+    if (stackNodes.length != 0) { success = true; }
+		for (let i = 0; i < stackNodes.length; i++) {
+			const result = this.undoDelete(stackNodes[i]);
+      success = success && result;
+		}
+	}
+  return success;
+}
 
 /**
  * Returns the maximum selected value of all the DeviceDropSlots for a certain type of device

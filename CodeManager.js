@@ -716,7 +716,7 @@ CodeManager.importXml = function(projectNode) {
 			List.importXml(listNodes[i]);
 		}
 	}
-	BlockPalette.getCategory("variables").refreshGroup();
+  if (!FinchBlox) { BlockPalette.getCategory("variables").refreshGroup(); }
 	const tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
 	TabManager.importXml(tabsNode);
 	BlockPalette.refresh();

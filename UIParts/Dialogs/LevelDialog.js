@@ -17,6 +17,16 @@ LevelDialog.setGlobals = function() {
 
   LD.totalLevels = 3;
   LD.currentLevel = 1;
+
+  LD.savePointFileNames = {
+    1 : "FinchBloxSavePoint_Level_1",
+    2 : "FinchBloxSavePoint_Level_2",
+    3 : "FinchBloxSavePoint_Level_3"
+  }
+  //LD.filesMissing = 0;
+  LD.fileListRetreived = false;
+  LD.filesSavedLocally = [];
+  LD.checkSavedFiles();
 }
 
 LevelDialog.prototype.show = function() {
@@ -93,8 +103,10 @@ LevelDialog.setLevel = function(level) {
   if (LD.currentLevel != level) {
     LD.currentLevel = level;
     BlockPalette.setLevel();
-    TabManager.activeTab.clear();
+    //TabManager.activeTab.clear();
     TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
+    GuiElements.blockInteraction();
+    LD.loadLevelSavePoint();
   }
   RowDialog.currentDialog.highlightSelected();
 }
@@ -125,4 +137,59 @@ LevelDialog.prototype.closeDialog = function() {
 		}
 		GuiElements.unblockInteraction();
 	}
+}
+
+/**
+ * Checks what files are available in the backend
+ */
+LevelDialog.checkSavedFiles = function() {
+  HtmlServer.sendRequestWithCallback("data/files", function(response) {
+    console.log("getSavedFiles response: " + response);
+		const fileList = new FileList(response);
+    LevelDialog.filesSavedLocally = fileList.localFiles;
+    LevelDialog.fileListRetreived = true;
+		//LevelDialog.savedFiles = fileList.localFiles;
+    //console.log("got saved files from backend... " + LevelDialog.savedFiles);
+    /*for (var i = 1; i <= LevelDialog.totalLevels; i++) {
+      const levelFileName = LevelDialog.savePointFileNames[i];
+      console.log("checking for level " + i + " file " + levelFileName);
+      if (!fileList.localFiles.includes(levelFileName)) {
+        console.log("file '" + levelFileName + "' not found. Must create...");
+        LevelDialog.filesMissing++;
+        const request = new HttpRequestBuilder("data/new");
+      	request.addParam("filename", levelFileName);
+        HtmlServer.sendRequestWithCallback(request.toString(), function() { LevelDialog.filesMissing--; }, null, true, SaveManager.emptyProgData);
+      }
+    }*/
+	}, function() {
+    GuiElements.alert("Error retrieving saved files");
+  });
+}
+
+LevelDialog.loadLevelSavePoint = function() {
+  const LD = LevelDialog;
+  console.log("loadLevelSavePoint for level " + LD.currentLevel);
+  const levelFileName = LD.savePointFileNames[LD.currentLevel];
+  if (!LD.fileListRetreived) {
+    setTimeout(function(){ LevelDialog.loadLevelSavePoint(); }, 200);
+    return;
+  }
+  if (!LD.filesSavedLocally.includes(levelFileName)) {
+    console.log("file '" + levelFileName + "' not found. Must create...");
+    const request = new HttpRequestBuilder("data/new");
+    request.addParam("filename", levelFileName);
+    HtmlServer.sendRequestWithCallback(request.toString(), function() {
+      LevelDialog.filesSavedLocally.push(levelFileName);
+      console.log("file " + levelFileName + " added to list");
+      SaveManager.userOpenFile(levelFileName);
+    }, null, true, SaveManager.emptyProgData);
+  } else {
+    SaveManager.userOpenFile(levelFileName);
+  }
+  /*if (LD.filesMissing == 0) {
+    SaveManager.userOpenFile(LD.savePointFileNames[LD.currentLevel]);
+  } else {
+    console.log("files missing = " + LD.filesMissing);
+  }*/
+
 }
