@@ -25,7 +25,7 @@ function TouchReceiver() {
 	TR.moveThreshold = 10;   // The minimum threshold before we consider the user to be dragging the screen
 	TR.interactionEnabeled = true;   // Whether touches should be responded to
 	TR.interactionTimeOut = null;
-	let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
+	/*let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
 	let handlerUp = "touchend";
 	let handlerDown = "touchstart";
 	if (TR.mouse) {
@@ -35,7 +35,10 @@ function TouchReceiver() {
 	}
 	TR.handlerMove = handlerMove;
 	TR.handlerUp = handlerUp;
-	TR.handlerDown = handlerDown;
+	TR.handlerDown = handlerDown;*/
+  TR.handlerMove = ["touchmove", "mousemove"];
+	TR.handlerUp = ["touchend", "mouseup"];
+	TR.handlerDown = ["touchstart", "mousedown"];
 	// Add event handlers for handlerMove and handlerUp events to the whole document.
 	TR.addListeners();
 	// TR.test=true;
@@ -106,7 +109,8 @@ TouchReceiver.enableInteraction = function() {
  * @return {number} - x coord.
  */
 TouchReceiver.getX = function(e) {
-	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+	//if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+  if (e.type.startsWith("mouse")) {
 		var x = e.clientX / GuiElements.zoomFactor;
 	} else {
 		var x = e.touches[0].pageX / GuiElements.zoomFactor;
@@ -125,7 +129,8 @@ TouchReceiver.getX = function(e) {
  * @return {number} - y coord.
  */
 TouchReceiver.getY = function(e) {
-	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+	//if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+  if (e.type.startsWith("mouse")) {
 		return e.clientY / GuiElements.zoomFactor;
 	}
 	return e.touches[0].pageY / GuiElements.zoomFactor;
@@ -198,7 +203,8 @@ TouchReceiver.touchstart = function(e, preventD) {
  */
 TouchReceiver.checkStartZoom = function(e) {
 	const TR = TouchReceiver;   // shorthand
-	if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
+	//if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
+  if (!TR.zooming && !e.type.startsWith("mouse") && e.touches.length >= 2) {
 		// There must be 2 touches in touch mode and not already be zooming
 		// We know the current touch is on the canvas
 		if ((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling) {
@@ -860,11 +866,13 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * Makes the element call the function when the right type of listener is triggered.  The function is made safe by
  * DebugOptions so errors can be caught
  * @param {Element} element - The element to add the listeners to
- * @param {string} type - The listener to add
+ * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
  */
-TouchReceiver.addEventListenerSafe = function(element, type, func) {
-	element.addEventListener(type, DebugOptions.safeFunc(func), false);
+TouchReceiver.addEventListenerSafe = function(element, types, func) {
+  for (var i = 0; i < types.length; i++) {
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+  }
 };
 
 /**

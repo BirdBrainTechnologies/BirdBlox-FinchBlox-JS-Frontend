@@ -102,10 +102,11 @@ LevelDialog.setLevel = function(level) {
   const LD = LevelDialog;
   if (LD.currentLevel != level) {
     LD.currentLevel = level;
+    GuiElements.blockInteraction();
+    SaveManager.userClose(); //necessary? maybe add callback?
     BlockPalette.setLevel();
     //TabManager.activeTab.clear();
     TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
-    GuiElements.blockInteraction();
     LD.loadLevelSavePoint();
   }
   RowDialog.currentDialog.highlightSelected();

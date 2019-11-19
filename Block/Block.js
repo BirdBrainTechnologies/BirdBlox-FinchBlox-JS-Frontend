@@ -62,6 +62,8 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
 	if (autoExecute === true) {
 		this.autoExecute = true;
 	}
+  //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
+  this.blockButton = null;
 }
 
 /**
@@ -1141,6 +1143,10 @@ Block.prototype.createXml = function(xmlDoc) {
 		}
 		block.appendChild(blockSlots);
 	}
+  //FinchBlox. Only one blockButton currently allowed.
+  if (this.blockButton != null) {
+    block.appendChild(this.blockButton.createXml(xmlDoc));
+  }
 	return block;
 };
 
@@ -1194,6 +1200,12 @@ Block.prototype.copyFromXml = function(blockNode) {
 	if (this.blockSlot2 != null && blockSlotNodes.length >= 2) {
 		this.blockSlot2.importXml(blockSlotNodes[1]);
 	}
+
+  //For FinchBlox. Only one blockButton currently allowed.
+  let blockButtonNodes = XmlWriter.findSubElements(blockNode, "blockButton");
+  if (this.blockButton != null) {
+    this.blockButton.importXml(blockButtonNodes[0]);
+  }
 };
 
 /**

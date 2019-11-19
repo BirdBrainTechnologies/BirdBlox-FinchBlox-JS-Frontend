@@ -1,9 +1,12 @@
 /**
  * Displays a slider for selecting values
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
+ * @param {string} type - Type of value this slider will be used to select
+ * @param {Array} options - (optional) list of discrete values to present in the slider
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
+ * @param {string} sliderColor - Color hex value. Determined by the category of the parent block.
+ * @param {string} displaySuffix - Suffix for the displayed value (eg. "cm")
+ * @param {number} index - Position of this slider in the InputSystem.
  */
 InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
@@ -80,6 +83,9 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   this.width = S.width;
 }
 
+/**
+ * Draws the slider on the screen. Called by show().
+ */
 InputWidget.Slider.prototype.makeSlider = function() {
   const S = InputWidget.Slider;
   this.position = 0;
@@ -184,6 +190,16 @@ InputWidget.Slider.prototype.makeSlider = function() {
   }
 }
 
+/**
+ * Adds one option to the slider display. Called by makeSlider when there are
+ * specified options to display.
+ * @param {number} x - x position of the option
+ * @param {number} y - y position of the option
+ * @param {string} option - String representation of the option
+ * @param {number} tickH - Hight of the tickmark to display for this option
+ * @param {number} tickW - Width of the tickmark to display for this option
+ * @param {boolean} isOnEdge - true if this is the first or last option on the slider.
+ */
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
   const S = InputWidget.Slider;
   const font = S.optionFont;
@@ -224,6 +240,10 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
   }
 }
 
+/**
+ * Moves the slider as the user drags their finger.
+ * @param {number} x - x position of the touch event
+ */
 InputWidget.Slider.prototype.drag = function(x) {
   let relX = x - this.overlay.x - this.overlay.margin;
 
@@ -264,9 +284,7 @@ InputWidget.Slider.prototype.drag = function(x) {
       //if it is an rgb color object
       if (this.value.r != null) {
         const p = this.position / this.range;
-        //red -> yellow
         this.value = InputWidget.Slider.percentToColor(p);
-        //console.log("color updated to " + this.value.r + ", " + this.value.g + ", " + this.value.b);
       }
     }
 
@@ -277,10 +295,15 @@ InputWidget.Slider.prototype.drag = function(x) {
 
     this.updateLabel();
     this.updateFn(this.value, this.index);
-    //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }
 }
 
+/**
+ * For color sliders, the position of the slider must be translated into a color
+ * value.
+ * @param {number} p - Decimal percentage (ie proportion) of the way across the slider that the current position lies.
+ * @return {Object} Color represented by the given slider position.
+ */
 InputWidget.Slider.percentToColor = function(p) {
   let color = {};
 
@@ -318,6 +341,13 @@ InputWidget.Slider.percentToColor = function(p) {
   return color;
 }
 
+/**
+ * The reverse of percentToColor. Takes the current color value and turns it into
+ * a decimal percent (proportion) so that the slider can be loaded in the correct
+ * position.
+ * @param {Object} color - Color value to convert
+ * @return {number} Relative position of this color on the slider
+ */
 InputWidget.Slider.colorToPercent = function(color) {
   let p = 0;
 
@@ -337,6 +367,9 @@ InputWidget.Slider.colorToPercent = function(color) {
   return p;
 }
 
+/**
+ * Called when the slider is released (no longer being dragged).
+ */
 InputWidget.Slider.prototype.drop = function() {
   const x = this.sliderX + this.sliderW/2;
 
@@ -359,6 +392,10 @@ InputWidget.Slider.prototype.drop = function() {
   }
 }
 
+/**
+ * Moves the slider to the specified option in the option list.
+ * @param {number} optionIndex - Option to move the slider to
+ */
 InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.sliderX = this.optionXs[optionIndex] - this.sliderW/2;
   this.sliderIcon.move(this.sliderX, this.sliderY);
@@ -368,6 +405,10 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.updateFn(this.value, this.index);
 }
 
+/**
+ * Moves the slider to the given position.
+ * @param {number} p - Position to move the slider to (given as a decimal percent of the slider).
+ */
 InputWidget.Slider.prototype.moveToPosition = function(p) {
   this.sliderX = this.barX + p * this.barW - this.sliderW/2;
   this.sliderIcon.move(this.sliderX, this.sliderY);
@@ -375,6 +416,9 @@ InputWidget.Slider.prototype.moveToPosition = function(p) {
   this.updateLabel();
 }
 
+/**
+ * Moves the slider to the current value.
+ */
 InputWidget.Slider.prototype.moveToValue = function() {
   if (typeof this.value == 'number') {
     console.log("move to value " + this.value);
@@ -399,6 +443,9 @@ InputWidget.Slider.prototype.moveToValue = function() {
   this.updateLabel();
 }
 
+/**
+ * For angle sliders only. Updates the angle graphic to represent the current slider value.
+ */
 InputWidget.Slider.prototype.updateAngle = function() {
   const counterClockwise = (this.type.endsWith("left"));
   if (this.angleWedge != null) {
@@ -416,6 +463,9 @@ InputWidget.Slider.prototype.updateAngle = function() {
   }
 }
 
+/**
+ * Updates the label under the slider to the current value.
+ */
 InputWidget.Slider.prototype.updateLabel = function() {
   if (this.textE != null) {
     const margin = 35; //space between slider bar and this label.

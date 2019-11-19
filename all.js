@@ -9797,7 +9797,7 @@ function TouchReceiver() {
 	TR.moveThreshold = 10;   // The minimum threshold before we consider the user to be dragging the screen
 	TR.interactionEnabeled = true;   // Whether touches should be responded to
 	TR.interactionTimeOut = null;
-	let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
+	/*let handlerMove = "touchmove";   // Handlers are different for touchscreens and mice.
 	let handlerUp = "touchend";
 	let handlerDown = "touchstart";
 	if (TR.mouse) {
@@ -9807,7 +9807,10 @@ function TouchReceiver() {
 	}
 	TR.handlerMove = handlerMove;
 	TR.handlerUp = handlerUp;
-	TR.handlerDown = handlerDown;
+	TR.handlerDown = handlerDown;*/
+  TR.handlerMove = ["touchmove", "mousemove"];
+	TR.handlerUp = ["touchend", "mouseup"];
+	TR.handlerDown = ["touchstart", "mousedown"];
 	// Add event handlers for handlerMove and handlerUp events to the whole document.
 	TR.addListeners();
 	// TR.test=true;
@@ -9878,7 +9881,8 @@ TouchReceiver.enableInteraction = function() {
  * @return {number} - x coord.
  */
 TouchReceiver.getX = function(e) {
-	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+	//if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+  if (e.type.startsWith("mouse")) {
 		var x = e.clientX / GuiElements.zoomFactor;
 	} else {
 		var x = e.touches[0].pageX / GuiElements.zoomFactor;
@@ -9897,7 +9901,8 @@ TouchReceiver.getX = function(e) {
  * @return {number} - y coord.
  */
 TouchReceiver.getY = function(e) {
-	if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+	//if (TouchReceiver.mouse) {   // Depends on if a desktop or touchscreen is being used.
+  if (e.type.startsWith("mouse")) {
 		return e.clientY / GuiElements.zoomFactor;
 	}
 	return e.touches[0].pageY / GuiElements.zoomFactor;
@@ -9970,7 +9975,8 @@ TouchReceiver.touchstart = function(e, preventD) {
  */
 TouchReceiver.checkStartZoom = function(e) {
 	const TR = TouchReceiver;   // shorthand
-	if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
+	//if (!TR.zooming && !TR.mouse && e.touches.length >= 2) {
+  if (!TR.zooming && !e.type.startsWith("mouse") && e.touches.length >= 2) {
 		// There must be 2 touches in touch mode and not already be zooming
 		// We know the current touch is on the canvas
 		if ((!TR.dragging && TR.targetIsInTabSpace()) || TabManager.scrolling) {
@@ -10632,11 +10638,13 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * Makes the element call the function when the right type of listener is triggered.  The function is made safe by
  * DebugOptions so errors can be caught
  * @param {Element} element - The element to add the listeners to
- * @param {string} type - The listener to add
+ * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
  */
-TouchReceiver.addEventListenerSafe = function(element, type, func) {
-	element.addEventListener(type, DebugOptions.safeFunc(func), false);
+TouchReceiver.addEventListenerSafe = function(element, types, func) {
+  for (var i = 0; i < types.length; i++) {
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+  }
 };
 
 /**
@@ -14971,10 +14979,13 @@ InputWidget.SelectPad.prototype.getAbsY = function(){
 };
 /**
  * Displays a slider for selecting values
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
+ * @param {string} type - Type of value this slider will be used to select
+ * @param {Array} options - (optional) list of discrete values to present in the slider
  * @param {number | object} startVal - Value to start the slider at. May be an
  *                                     object in the case of an rgb slider.
+ * @param {string} sliderColor - Color hex value. Determined by the category of the parent block.
+ * @param {string} displaySuffix - Suffix for the displayed value (eg. "cm")
+ * @param {number} index - Position of this slider in the InputSystem.
  */
 InputWidget.Slider = function (type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
@@ -15051,6 +15062,9 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   this.width = S.width;
 }
 
+/**
+ * Draws the slider on the screen. Called by show().
+ */
 InputWidget.Slider.prototype.makeSlider = function() {
   const S = InputWidget.Slider;
   this.position = 0;
@@ -15155,6 +15169,16 @@ InputWidget.Slider.prototype.makeSlider = function() {
   }
 }
 
+/**
+ * Adds one option to the slider display. Called by makeSlider when there are
+ * specified options to display.
+ * @param {number} x - x position of the option
+ * @param {number} y - y position of the option
+ * @param {string} option - String representation of the option
+ * @param {number} tickH - Hight of the tickmark to display for this option
+ * @param {number} tickW - Width of the tickmark to display for this option
+ * @param {boolean} isOnEdge - true if this is the first or last option on the slider.
+ */
 InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
   const S = InputWidget.Slider;
   const font = S.optionFont;
@@ -15195,6 +15219,10 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
   }
 }
 
+/**
+ * Moves the slider as the user drags their finger.
+ * @param {number} x - x position of the touch event
+ */
 InputWidget.Slider.prototype.drag = function(x) {
   let relX = x - this.overlay.x - this.overlay.margin;
 
@@ -15235,9 +15263,7 @@ InputWidget.Slider.prototype.drag = function(x) {
       //if it is an rgb color object
       if (this.value.r != null) {
         const p = this.position / this.range;
-        //red -> yellow
         this.value = InputWidget.Slider.percentToColor(p);
-        //console.log("color updated to " + this.value.r + ", " + this.value.g + ", " + this.value.b);
       }
     }
 
@@ -15248,10 +15274,15 @@ InputWidget.Slider.prototype.drag = function(x) {
 
     this.updateLabel();
     this.updateFn(this.value, this.index);
-    //console.log("slider val " + this.value + " " + relX + " " + this.barX + " " + this.barW );
   }
 }
 
+/**
+ * For color sliders, the position of the slider must be translated into a color
+ * value.
+ * @param {number} p - Decimal percentage (ie proportion) of the way across the slider that the current position lies.
+ * @return {Object} Color represented by the given slider position.
+ */
 InputWidget.Slider.percentToColor = function(p) {
   let color = {};
 
@@ -15289,6 +15320,13 @@ InputWidget.Slider.percentToColor = function(p) {
   return color;
 }
 
+/**
+ * The reverse of percentToColor. Takes the current color value and turns it into
+ * a decimal percent (proportion) so that the slider can be loaded in the correct
+ * position.
+ * @param {Object} color - Color value to convert
+ * @return {number} Relative position of this color on the slider
+ */
 InputWidget.Slider.colorToPercent = function(color) {
   let p = 0;
 
@@ -15308,6 +15346,9 @@ InputWidget.Slider.colorToPercent = function(color) {
   return p;
 }
 
+/**
+ * Called when the slider is released (no longer being dragged).
+ */
 InputWidget.Slider.prototype.drop = function() {
   const x = this.sliderX + this.sliderW/2;
 
@@ -15330,6 +15371,10 @@ InputWidget.Slider.prototype.drop = function() {
   }
 }
 
+/**
+ * Moves the slider to the specified option in the option list.
+ * @param {number} optionIndex - Option to move the slider to
+ */
 InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.sliderX = this.optionXs[optionIndex] - this.sliderW/2;
   this.sliderIcon.move(this.sliderX, this.sliderY);
@@ -15339,6 +15384,10 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   this.updateFn(this.value, this.index);
 }
 
+/**
+ * Moves the slider to the given position.
+ * @param {number} p - Position to move the slider to (given as a decimal percent of the slider).
+ */
 InputWidget.Slider.prototype.moveToPosition = function(p) {
   this.sliderX = this.barX + p * this.barW - this.sliderW/2;
   this.sliderIcon.move(this.sliderX, this.sliderY);
@@ -15346,6 +15395,9 @@ InputWidget.Slider.prototype.moveToPosition = function(p) {
   this.updateLabel();
 }
 
+/**
+ * Moves the slider to the current value.
+ */
 InputWidget.Slider.prototype.moveToValue = function() {
   if (typeof this.value == 'number') {
     console.log("move to value " + this.value);
@@ -15370,6 +15422,9 @@ InputWidget.Slider.prototype.moveToValue = function() {
   this.updateLabel();
 }
 
+/**
+ * For angle sliders only. Updates the angle graphic to represent the current slider value.
+ */
 InputWidget.Slider.prototype.updateAngle = function() {
   const counterClockwise = (this.type.endsWith("left"));
   if (this.angleWedge != null) {
@@ -15387,6 +15442,9 @@ InputWidget.Slider.prototype.updateAngle = function() {
   }
 }
 
+/**
+ * Updates the label under the slider to the current value.
+ */
 InputWidget.Slider.prototype.updateLabel = function() {
   if (this.textE != null) {
     const margin = 35; //space between slider bar and this label.
@@ -22570,10 +22628,11 @@ LevelDialog.setLevel = function(level) {
   const LD = LevelDialog;
   if (LD.currentLevel != level) {
     LD.currentLevel = level;
+    GuiElements.blockInteraction();
+    SaveManager.userClose(); //necessary? maybe add callback?
     BlockPalette.setLevel();
     //TabManager.activeTab.clear();
     TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
-    GuiElements.blockInteraction();
     LD.loadLevelSavePoint();
   }
   RowDialog.currentDialog.highlightSelected();
@@ -25465,6 +25524,8 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
 	if (autoExecute === true) {
 		this.autoExecute = true;
 	}
+  //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
+  this.blockButton = null;
 }
 
 /**
@@ -26544,6 +26605,10 @@ Block.prototype.createXml = function(xmlDoc) {
 		}
 		block.appendChild(blockSlots);
 	}
+  //FinchBlox. Only one blockButton currently allowed.
+  if (this.blockButton != null) {
+    block.appendChild(this.blockButton.createXml(xmlDoc));
+  }
 	return block;
 };
 
@@ -26597,6 +26662,12 @@ Block.prototype.copyFromXml = function(blockNode) {
 	if (this.blockSlot2 != null && blockSlotNodes.length >= 2) {
 		this.blockSlot2.importXml(blockSlotNodes[1]);
 	}
+
+  //For FinchBlox. Only one blockButton currently allowed.
+  let blockButtonNodes = XmlWriter.findSubElements(blockNode, "blockButton");
+  if (this.blockButton != null) {
+    this.blockButton.importXml(blockButtonNodes[0]);
+  }
 };
 
 /**
@@ -30389,24 +30460,20 @@ BlockIcon.prototype.addObstacle = function(color) {
 /**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
- * @param {number} startingValue - The initial value to display
  */
 function BlockButton(parent){
   this.buttonMargin = 2*BlockPalette.blockButtonOverhang * (1/9);
   this.lineHeight = 2*BlockPalette.blockButtonOverhang * (8/9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
 
-  this.height = this.blockButtonMargin + this.lineHeight;//2*BlockPalette.blockButtonOverhang;
+  this.height = this.blockButtonMargin + this.lineHeight;
   this.width = 60;
   this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
  this.parent = parent;
- //this.value = startingValue;
- //this.x = (parent.width - this.width)/2;
  this.x = 0;
- //this.y = parent.height - this.height;
  this.y = 0;
  this.widgets = [];
  this.displaySuffixes = [];
@@ -30420,17 +30487,21 @@ function BlockButton(parent){
  this.callbackFunction = function() {
    if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
      const inputSys = me.createInputSystem();
-     inputSys.show(null, me.updateValue.bind(me), function(){}, me.values, me.outlineColor, parent);
+     inputSys.show(null, me.updateValue.bind(me), function(){
+       SaveManager.markEdited();
+     }, me.values, me.outlineColor, parent);
    }
  }
 
-// this.draw();
-
  this.isSlot = false;
+ parent.blockButton = this;
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
 
+/**
+ * Creates or recreates the button and sets its callback function.
+ */
 BlockButton.prototype.draw = function() {
   if (this.button != null) { this.button.remove(); }
   this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
@@ -30476,8 +30547,12 @@ BlockButton.prototype.move = function(x, y) {
 	this.button.move(x, y);
 };
 
+/**
+ * Update the value at the specified index.
+ * @param newValue - the new value to use.
+ * @param {number} index - the index at which to place the new value.
+ */
 BlockButton.prototype.updateValue = function(newValue, index) {//, displayString) {
-  //this.value = newValue;
   this.values[index] = newValue;
   let text = [];
   for (let i = 0; i < this.widgets.length; i++) {
@@ -30516,10 +30591,6 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);
       }
-
-
-    //} else if (displayString != null) {
-    //  this.button.addText(displayString, this.font, this.textColor);
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
     } else if (this.widgets[i].type == "ledArray") {
@@ -30537,34 +30608,12 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
     }
   }
   this.button.addMultiText(text, this.font, this.textColor);
-  /*
-  if (typeof this.value == 'object' && this.value.r != null){
-    const s = 255/100;
-    const color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
-    //console.log("new button color: " + color);
-    //GuiElements.update.color(this.button.bgRect, color);
-    this.button.updateBgColor(color);
-  //} else if (displayString != null) {
-  //  this.button.addText(displayString, this.font, this.textColor);
-  } else if (this.widgets[0].type == "piano") {
-    this.button.addText(InputWidget.Piano.noteStrings[this.value], this.font, this.textColor);
-  } else if (this.widgets[0].type == "ledArray") {
-    if (this.ledArrayImage != null) {
-      this.ledArrayImage.group.remove();
-    }
-    let image = GuiElements.draw.ledArray(this.button.group, this.value, 1.8);
-    const iX = this.button.width/2 - image.width/2;
-    const iY = this.button.height/2 - image.width/2;
-    GuiElements.move.group(image.group, iX, iY);
-    this.ledArrayImage = image;
-  } else {
-    const text = this.value.toString() + this.displaySuffixes[0];
-    this.button.addText(text, this.font, this.textColor);
-  }
-*/
   this.parent.updateValues();
 };
 
+/**
+ * Creates the input pad for this button. Adds the necessary widgets.
+ */
 BlockButton.prototype.createInputSystem = function() {
   const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
@@ -30578,9 +30627,14 @@ BlockButton.prototype.createInputSystem = function() {
 
   return inputPad;
 };
+
+/**
+ * Add a value with slider input to this button.
+ * @param {string} type - Type of value to add (determines the way the slider is displayed)
+ * @param startingValue - Initial value
+ * @param {Array} options - (Optional) list of discrete options to display on the slider
+ */
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
-  //this.value = startingValue;
-  //this.values.push(startingValue);
 
   let suffix = "";
   switch (type) {
@@ -30594,45 +30648,37 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_right":
       suffix = "°";
       break;
-  //  case "time":
-  //    suffix = " ";
-  //    break;
     default:
       suffix = "";
   }
 
   const sliderColor = Colors.categoryColors[this.parent.category];
-  //this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
   const slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
-  this.addWidget(slider, suffix, startingValue); //null, suffix);
-  //his.displaySuffixes[this.widgets.length - 1]  = suffix;
-
-/*
-  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
-  this.draw();
-  this.updateValue(this.value);*/
+  this.addWidget(slider, suffix, startingValue);
 }
+
+/**
+ * Adds a new value with piano input to this button
+ * @param {string} startingValue - the initial value
+ */
 BlockButton.prototype.addPiano = function(startingValue) {
-  //this.value = startingValue;
-  //this.values.push(startingValue);
-  //this.addWidget(new InputWidget.Piano(), InputWidget.Piano.noteStrings[startingValue]);
   this.addWidget(new InputWidget.Piano(this.widgets.length), "", startingValue);
-  /*
-  this.widgets.push(new InputWidget.Piano());
-
-  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
-  this.draw();
-  this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);*/
 }
+
+/**
+ * Adds a new widget for this button
+ * @param {Widget} widget - The widget to add
+ * @param {string} suffix - Suffix to use for value display
+ * @param startingValue - Initial value
+ */
 BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
   this.widgets.push(widget);
   this.displaySuffixes.push(suffix);
   this.values.push(startingValue);
-  //this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
   this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
   this.draw();
   const index = this.widgets.length - 1;
-  this.updateValue(this.values[index], index); //, displayString);
+  this.updateValue(this.values[index], index);
 }
 
 // These functions convert between screen (absolute) coordinates and local (relative) coordinates.
@@ -30691,6 +30737,49 @@ BlockButton.prototype.getAbsWidth = function(){
 BlockButton.prototype.getAbsHeight = function(){
 	return this.relToAbsY(this.height) - this.getAbsY();
 };
+
+/**
+ * Create an xml node for this button.
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node}
+ */
+BlockButton.prototype.createXml = function(xmlDoc) {
+  const blockButton = XmlWriter.createElement(xmlDoc, "blockButton");
+  for (var i = 0; i < this.values.length; i++) {
+    if (this.widgets[i].type == "color") {
+      const valueString = "colorData_" + this.values[i].r + "_" + this.values[i].g + "_" + this.values[i].b;
+      XmlWriter.setAttribute(blockButton, "value_" + i, valueString);
+    } else {
+      XmlWriter.setAttribute(blockButton, "value_" + i, this.values[i]);
+    }
+  }
+  return blockButton;
+}
+
+/**
+ * Import values for this button from xml.
+ * @param {Node} blockButtonNode - The node to copy the data from
+ */
+BlockButton.prototype.importXml = function(blockButtonNode) {
+  var i = 0;
+  var valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
+  while (valueString != null) {
+    if (valueString.startsWith("colorData")) {
+      const colorVals = valueString.split("_");
+      const colorObj = {};
+      colorObj.r = colorVals[1];
+      colorObj.g = colorVals[2];
+      colorObj.b = colorVals[3];
+      this.updateValue(colorObj, i);
+    } else if (typeof this.values[i] === 'number') {
+      this.updateValue(parseFloat(valueString), i);
+    } else {
+      this.updateValue(valueString, i);
+    }
+    i++;
+    valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
+  }
+}
 
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
  * of the defined Blocks are just subclasses of the Blocks here.

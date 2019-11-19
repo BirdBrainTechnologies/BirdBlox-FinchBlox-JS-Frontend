@@ -1,24 +1,20 @@
 /**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
- * @param {number} startingValue - The initial value to display
  */
 function BlockButton(parent){
   this.buttonMargin = 2*BlockPalette.blockButtonOverhang * (1/9);
   this.lineHeight = 2*BlockPalette.blockButtonOverhang * (8/9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
 
-  this.height = this.blockButtonMargin + this.lineHeight;//2*BlockPalette.blockButtonOverhang;
+  this.height = this.blockButtonMargin + this.lineHeight;
   this.width = 60;
   this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
  this.parent = parent;
- //this.value = startingValue;
- //this.x = (parent.width - this.width)/2;
  this.x = 0;
- //this.y = parent.height - this.height;
  this.y = 0;
  this.widgets = [];
  this.displaySuffixes = [];
@@ -32,17 +28,21 @@ function BlockButton(parent){
  this.callbackFunction = function() {
    if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
      const inputSys = me.createInputSystem();
-     inputSys.show(null, me.updateValue.bind(me), function(){}, me.values, me.outlineColor, parent);
+     inputSys.show(null, me.updateValue.bind(me), function(){
+       SaveManager.markEdited();
+     }, me.values, me.outlineColor, parent);
    }
  }
 
-// this.draw();
-
  this.isSlot = false;
+ parent.blockButton = this;
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
 
+/**
+ * Creates or recreates the button and sets its callback function.
+ */
 BlockButton.prototype.draw = function() {
   if (this.button != null) { this.button.remove(); }
   this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
@@ -88,8 +88,12 @@ BlockButton.prototype.move = function(x, y) {
 	this.button.move(x, y);
 };
 
+/**
+ * Update the value at the specified index.
+ * @param newValue - the new value to use.
+ * @param {number} index - the index at which to place the new value.
+ */
 BlockButton.prototype.updateValue = function(newValue, index) {//, displayString) {
-  //this.value = newValue;
   this.values[index] = newValue;
   let text = [];
   for (let i = 0; i < this.widgets.length; i++) {
@@ -128,10 +132,6 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);
       }
-
-
-    //} else if (displayString != null) {
-    //  this.button.addText(displayString, this.font, this.textColor);
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
     } else if (this.widgets[i].type == "ledArray") {
@@ -149,34 +149,12 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
     }
   }
   this.button.addMultiText(text, this.font, this.textColor);
-  /*
-  if (typeof this.value == 'object' && this.value.r != null){
-    const s = 255/100;
-    const color = Colors.rgbToHex(this.value.r * s, this.value.g * s, this.value.b * s);
-    //console.log("new button color: " + color);
-    //GuiElements.update.color(this.button.bgRect, color);
-    this.button.updateBgColor(color);
-  //} else if (displayString != null) {
-  //  this.button.addText(displayString, this.font, this.textColor);
-  } else if (this.widgets[0].type == "piano") {
-    this.button.addText(InputWidget.Piano.noteStrings[this.value], this.font, this.textColor);
-  } else if (this.widgets[0].type == "ledArray") {
-    if (this.ledArrayImage != null) {
-      this.ledArrayImage.group.remove();
-    }
-    let image = GuiElements.draw.ledArray(this.button.group, this.value, 1.8);
-    const iX = this.button.width/2 - image.width/2;
-    const iY = this.button.height/2 - image.width/2;
-    GuiElements.move.group(image.group, iX, iY);
-    this.ledArrayImage = image;
-  } else {
-    const text = this.value.toString() + this.displaySuffixes[0];
-    this.button.addText(text, this.font, this.textColor);
-  }
-*/
   this.parent.updateValues();
 };
 
+/**
+ * Creates the input pad for this button. Adds the necessary widgets.
+ */
 BlockButton.prototype.createInputSystem = function() {
   const x1 = this.getAbsX();
 	const y1 = this.getAbsY();
@@ -190,9 +168,14 @@ BlockButton.prototype.createInputSystem = function() {
 
   return inputPad;
 };
+
+/**
+ * Add a value with slider input to this button.
+ * @param {string} type - Type of value to add (determines the way the slider is displayed)
+ * @param startingValue - Initial value
+ * @param {Array} options - (Optional) list of discrete options to display on the slider
+ */
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
-  //this.value = startingValue;
-  //this.values.push(startingValue);
 
   let suffix = "";
   switch (type) {
@@ -206,45 +189,37 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_right":
       suffix = "°";
       break;
-  //  case "time":
-  //    suffix = " ";
-  //    break;
     default:
       suffix = "";
   }
 
   const sliderColor = Colors.categoryColors[this.parent.category];
-  //this.widgets.push(new InputWidget.Slider(type, options, this.value, sliderColor, suffix));
   const slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
-  this.addWidget(slider, suffix, startingValue); //null, suffix);
-  //his.displaySuffixes[this.widgets.length - 1]  = suffix;
-
-/*
-  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
-  this.draw();
-  this.updateValue(this.value);*/
+  this.addWidget(slider, suffix, startingValue);
 }
+
+/**
+ * Adds a new value with piano input to this button
+ * @param {string} startingValue - the initial value
+ */
 BlockButton.prototype.addPiano = function(startingValue) {
-  //this.value = startingValue;
-  //this.values.push(startingValue);
-  //this.addWidget(new InputWidget.Piano(), InputWidget.Piano.noteStrings[startingValue]);
   this.addWidget(new InputWidget.Piano(this.widgets.length), "", startingValue);
-  /*
-  this.widgets.push(new InputWidget.Piano());
-
-  this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
-  this.draw();
-  this.updateValue(this.value, InputWidget.Piano.noteStrings[this.value]);*/
 }
+
+/**
+ * Adds a new widget for this button
+ * @param {Widget} widget - The widget to add
+ * @param {string} suffix - Suffix to use for value display
+ * @param startingValue - Initial value
+ */
 BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
   this.widgets.push(widget);
   this.displaySuffixes.push(suffix);
   this.values.push(startingValue);
-  //this.height = 2*BlockPalette.blockButtonOverhang*this.widgets.length;
   this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
   this.draw();
   const index = this.widgets.length - 1;
-  this.updateValue(this.values[index], index); //, displayString);
+  this.updateValue(this.values[index], index);
 }
 
 // These functions convert between screen (absolute) coordinates and local (relative) coordinates.
@@ -303,3 +278,46 @@ BlockButton.prototype.getAbsWidth = function(){
 BlockButton.prototype.getAbsHeight = function(){
 	return this.relToAbsY(this.height) - this.getAbsY();
 };
+
+/**
+ * Create an xml node for this button.
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node}
+ */
+BlockButton.prototype.createXml = function(xmlDoc) {
+  const blockButton = XmlWriter.createElement(xmlDoc, "blockButton");
+  for (var i = 0; i < this.values.length; i++) {
+    if (this.widgets[i].type == "color") {
+      const valueString = "colorData_" + this.values[i].r + "_" + this.values[i].g + "_" + this.values[i].b;
+      XmlWriter.setAttribute(blockButton, "value_" + i, valueString);
+    } else {
+      XmlWriter.setAttribute(blockButton, "value_" + i, this.values[i]);
+    }
+  }
+  return blockButton;
+}
+
+/**
+ * Import values for this button from xml.
+ * @param {Node} blockButtonNode - The node to copy the data from
+ */
+BlockButton.prototype.importXml = function(blockButtonNode) {
+  var i = 0;
+  var valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
+  while (valueString != null) {
+    if (valueString.startsWith("colorData")) {
+      const colorVals = valueString.split("_");
+      const colorObj = {};
+      colorObj.r = colorVals[1];
+      colorObj.g = colorVals[2];
+      colorObj.b = colorVals[3];
+      this.updateValue(colorObj, i);
+    } else if (typeof this.values[i] === 'number') {
+      this.updateValue(parseFloat(valueString), i);
+    } else {
+      this.updateValue(valueString, i);
+    }
+    i++;
+    valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
+  }
+}
